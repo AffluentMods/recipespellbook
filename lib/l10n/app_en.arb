@@ -1,0 +1,1350 @@
+{
+  "@@locale": "en",
+  "@@last_modified": "2026-01-28",
+  "appTitle": "Recipe Spellbook",
+  "navHome": "Home",
+  "navCookbooks": "Cookbooks",
+  "navPlanner": "Planner",
+  "navShopping": "Shopping",
+  "navSettings": "Settings",
+  "homeGreeting": "Welcome back!",
+  "homeQuickAccess": "Quick Access",
+  "homeMealPlan": "Today's Meals",
+  "homePinnedRecipes": "Pinned Recipes",
+  "homeRecentRecipes": "Recently Viewed",
+  "homeNoMealsPlanned": "No meals planned for today",
+  "homeNoPinnedRecipes": "No pinned recipes yet",
+  "homeNoRecentRecipes": "No recent recipes",
+  "recipesTitle": "Recipes",
+  "recipesEmpty": "No recipes yet",
+  "recipesEmptySubtitle": "Add your first recipe to get started",
+  "recipeAdd": "Add Recipe",
+  "recipeEdit": "Edit Recipe",
+  "recipeDelete": "Delete Recipe",
+  "recipeDeleteConfirm": "Are you sure you want to delete this recipe?",
+  "recipeFavorite": "Add to favorites",
+  "recipeUnfavorite": "Remove from favorites",
+  "recipePin": "Pin recipe",
+  "recipeUnpin": "Unpin recipe",
+  "recipeShare": "Share recipe",
+  "recipePrint": "Print recipe",
+  "recipeDuplicate": "Duplicate recipe",
+  "recipeAddToMealPlan": "Add to meal plan",
+  "recipeAddToShoppingList": "Add to shopping list",
+  "recipeStartCooking": "Start Cooking",
+  "recipeFieldTitle": "Title",
+  "recipeFieldDescription": "Description",
+  "recipeFieldIngredients": "Ingredients",
+  "recipeFieldInstructions": "Instructions",
+  "recipeFieldNotes": "Notes",
+  "notesTitle": "Notes",
+  "recipeFieldServings": "Servings",
+  "recipeFieldPrepTime": "Prep Time",
+  "recipeFieldCookTime": "Cook Time",
+  "recipeFieldTotalTime": "Total Time",
+  "recipeFieldSource": "Source",
+  "recipeFieldCourse": "Course",
+  "recipeFieldCategory": "Category",
+  "recipeFieldTags": "Tags",
+  "recipeFieldRating": "Rating",
+  "ratingCommon": "Common",
+  "ratingUncommon": "Uncommon",
+  "ratingRare": "Rare",
+  "ratingEpic": "Epic",
+  "ratingLegendary": "Legendary",
+  "ratingUnrated": "Unrated",
+  "minutesAbbrev": "min",
+  "hoursAbbrev": "hr",
+  "servingsUnit": "servings",
+  "ingredientsTitle": "Ingredients",
+  "ingredientsEmpty": "No ingredients added",
+  "ingredientAdd": "Add ingredient",
+  "ingredientPlaceholder": "e.g., 2 cups flour",
+  "instructionsTitle": "Instructions",
+  "instructionsEmpty": "No instructions added",
+  "instructionAdd": "Add step",
+  "instructionPlaceholder": "Describe this step...",
+  "stepNumber": "Step {number}",
+  "@stepNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbooksTitle": "Cookbooks",
+  "cookbooksEmpty": "No cookbooks yet",
+  "cookbookAdd": "New Cookbook",
+  "cookbookEdit": "Edit Cookbook",
+  "cookbookDelete": "Delete Cookbook",
+  "cookbookDeleteConfirm": "Delete this cookbook and all its recipes?",
+  "cookbookRecipeCount": "{count, plural, =0{No recipes} =1{1 recipe} other{{count} recipes}}",
+  "@cookbookRecipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "plannerTitle": "Meal Planner",
+  "plannerEmpty": "No meals planned",
+  "plannerEmptySubtitle": "Tap + to add a meal for this day",
+  "plannerAddMeal": "Add Meal",
+  "plannerToday": "Today",
+  "plannerThisWeek": "This Week",
+  "plannerBreakfast": "Breakfast",
+  "plannerLunch": "Lunch",
+  "plannerDinner": "Dinner",
+  "plannerSnack": "Snack",
+  "shoppingTitle": "Shopping List",
+  "shoppingEmpty": "Your list is empty",
+  "shoppingEmptySubtitle": "Add items or import from recipes",
+  "shoppingAddItem": "Add item...",
+  "shoppingCheckedItems": "Checked Items",
+  "shoppingClearChecked": "Clear checked items",
+  "shoppingClearAll": "Clear all items",
+  "shoppingCategories": "Shopping Categories",
+  "shoppingUncategorized": "Uncategorized",
+  "shoppingItemCount": "{count, plural, =0{No items} =1{1 item} other{{count} items}}",
+  "@shoppingItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsTitle": "Settings",
+  "settingsAppearance": "Appearance",
+  "settingsTheme": "Theme",
+  "settingsThemeMode": "Theme Mode",
+  "settingsThemeModeSystem": "System",
+  "settingsThemeModeLight": "Light",
+  "settingsThemeModeDark": "Dark",
+  "settingsLanguage": "Language",
+  "settingsMeasurements": "Measurements",
+  "settingsMeasurementsUS": "US (cups, oz)",
+  "settingsMeasurementsMetric": "Metric (ml, g)",
+  "settingsRPGMode": "RPG Mode",
+  "settingsRPGModeSubtitle": "Enable fantasy-style text & images",
+  "settingsRecipes": "Recipes",
+  "settingsManageCourses": "Manage Courses",
+  "settingsManageCategories": "Manage Categories",
+  "settingsManageTags": "Manage Tags",
+  "settingsData": "Data",
+  "settingsExport": "Export Data",
+  "settingsExportSubtitle": "Backup your recipes",
+  "settingsImport": "Import Data",
+  "settingsImportSubtitle": "Restore from backup",
+  "settingsImportFromApps": "Import from Other Apps",
+  "settingsImportFromAppsSubtitle": "Paprika, Crouton, Mela & more",
+  "settingsAbout": "About",
+  "settingsVersion": "Version {version}",
+  "@settingsVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsPrivacy": "Privacy Policy",
+  "settingsTerms": "Terms of Service",
+  "settingsFeedback": "Send Feedback",
+  "importTitle": "Import",
+  "importCreate": "Create",
+  "importCreateSubtitle": "Write your own recipe",
+  "importSubtitle": "From URL, image, or file",
+  "importChooseMethod": "How would you like to add your recipe?",
+  "importProgress": "Importing recipe...",
+  "importFromURL": "From URL",
+  "importFromImage": "From Image",
+  "importFromFile": "From File",
+  "importFromText": "Import from Text",
+  "importProcessing": "Processing...",
+  "importSuccess": "Recipe imported successfully",
+  "importError": "Failed to import recipe",
+  "importBulkTitle": "Import Recipes",
+  "importBulkFound": "Found {count} recipes",
+  "@importBulkFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importBulkImportAll": "Import All",
+  "importBulkImportFirst": "Import First",
+  "searchTitle": "Search",
+  "searchHint": "Search recipes...",
+  "searchNoResults": "No recipes found",
+  "searchFilters": "Filters",
+  "actionSave": "Save",
+  "actionCancel": "Cancel",
+  "actionDelete": "Delete",
+  "actionEdit": "Edit",
+  "actionAdd": "Add",
+  "actionDone": "Done",
+  "actionClose": "Close",
+  "actionConfirm": "Confirm",
+  "actionUndo": "Undo",
+  "actionRetry": "Retry",
+  "actionCopy": "Copy",
+  "actionPaste": "Paste",
+  "actionOk": "OK",
+  "actionShare": "Share",
+  "actionClear": "Clear",
+  "errorGeneric": "Something went wrong",
+  "errorNetwork": "Network error. Please check your connection.",
+  "errorNotFound": "Not found",
+  "errorInvalidURL": "Invalid URL",
+  "successSaved": "Saved successfully",
+  "successDeleted": "Deleted successfully",
+  "successCopied": "Copied to clipboard",
+  "confirmDeleteTitle": "Confirm Delete",
+  "confirmDeleteMessage": "This action cannot be undone.",
+  "emptyStateTitle": "Nothing here yet",
+  "emptyStateSubtitle": "Get started by adding your first item",
+  "dateToday": "Today",
+  "dateYesterday": "Yesterday",
+  "dateTomorrow": "Tomorrow",
+  "timeMinutes": "{count} {count, plural, =1{minute} other{minutes}}",
+  "@timeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHours": "{count} {count, plural, =1{hour} other{hours}}",
+  "@timeHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trashTitle": "Trash",
+  "trashEmpty": "Trash is empty",
+  "trashEmptySubtitle": "Deleted recipes will appear here for 30 days",
+  "trashRestore": "Restore",
+  "trashRestored": "restored",
+  "trashDeletePermanently": "Delete permanently",
+  "trashEmptyTrash": "Empty trash",
+  "trashEmptyConfirm": "This will permanently delete all recipes in the trash. This action cannot be undone.",
+  "trashEmptied": "Trash emptied",
+  "trashDeleted": "Deleted",
+  "trashDeletedToday": "Deleted today",
+  "trashDeletedYesterday": "Deleted yesterday",
+  "trashDeletedDaysAgo": "Deleted {days} days ago",
+  "@trashDeletedDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "trashExpiresToday": "Expires today",
+  "trashDaysLeft": "{days} days left",
+  "@trashDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "cookingModeTitle": "Cooking Mode",
+  "cookingSetTimer": "Set Timer",
+  "cookingTimerDone": "Timer Done!",
+  "cookingTimerFinished": "Your timer has finished.",
+  "cookingExitTitle": "Exit Cooking Mode?",
+  "cookingExitMessage": "Your progress will be lost.",
+  "cookingExit": "Exit",
+  "cookingFinish": "Finish",
+  "taxonomyAddCourse": "Add Course",
+  "taxonomyEditCourse": "Edit Course",
+  "taxonomyDeleteCourse": "Delete Course?",
+  "taxonomyAddCategory": "Add Category",
+  "taxonomyEditCategory": "Edit Category",
+  "taxonomyDeleteCategory": "Delete Category?",
+  "taxonomyBuiltIn": "Built-in",
+  "taxonomyCustom": "Custom",
+  "taxonomyRestoreDefaults": "Restore Defaults",
+  "taxonomyDefaultsRestored": "Custom items deleted, defaults restored",
+  "taxonomyCourseName": "Course Name",
+  "taxonomyCourseNameHint": "e.g., Brunch, Appetizer",
+  "taxonomyCategoryName": "Category Name",
+  "taxonomyCategoryNameHint": "e.g., Gluten-Free, Low-Carb",
+  "taxonomyEmojiHint": "Tap the emoji field to change it",
+  "taxonomyDeleteCourseMessage": "Delete \"{name}\"? Recipes using this course will become uncategorized.",
+  "@taxonomyDeleteCourseMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "taxonomyDeleteCategoryMessage": "Delete \"{name}\"? Recipes using this category will become uncategorized.",
+  "@taxonomyDeleteCategoryMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsQuickAccess": "Quick Access",
+  "settingsPlaceholders": "Image Placeholders",
+  "actionView": "View",
+  "browseViewAll": "View All Recipes",
+  "browseRecipesTotal": "{count} recipes total",
+  "@browseRecipesTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "browseCourses": "Courses",
+  "browseCategories": "Categories",
+  "browseNoCourse": "No Course",
+  "browseUncategorized": "Uncategorized",
+  "favoritesTitle": "Favorites",
+  "favoritesEmpty": "No favorite recipes yet",
+  "favoritesEmptySubtitle": "Tap the star on any recipe to add it here",
+  "favoritesRemoved": "Removed from favorites",
+  "recentTitle": "Recently Viewed",
+  "recentEmpty": "No recently viewed recipes",
+  "recentEmptySubtitle": "Recipes you view will appear here",
+  "recentJustNow": "Just now",
+  "recentMinutesAgo": "{count} min ago",
+  "@recentMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recentHoursAgo": "{count} hours ago",
+  "@recentHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recentYesterday": "Yesterday",
+  "recentDaysAgo": "{count} days ago",
+  "@recentDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importFromUrl": "Import from URL",
+  "importUrlHint": "Recipe URL",
+  "importUrlPlaceholder": "https://example.com/recipe",
+  "importFetch": "Fetch Recipe",
+  "importFetching": "Fetching...",
+  "importPreview": "Preview",
+  "importRecipeFound": "Recipe found!",
+  "importReviewSave": "Review & Save",
+  "importEditBeforeSave": "You can edit the recipe before saving",
+  "importSupportedSites": "Supported Sites",
+  "importSupportedSitesInfo": "Works with most recipe sites including AllRecipes, Food Network, Tasty, BBC Good Food, Epicurious, Serious Eats, Bon Appétit, and many more!",
+  "importFromScan": "Scan Recipe",
+  "importFromPdf": "Import from PDF",
+  "cookbookNew": "New Cookbook",
+  "cookbookNameLabel": "Cookbook Name",
+  "cookbookNameHint": "e.g., Family Favorites",
+  "cookbookDescLabel": "Description",
+  "cookbookDescHint": "A collection of recipes...",
+  "cookbookAddCover": "Add Cover",
+  "cookbookTapToAdd": "Tap to add cover image",
+  "cookbookDeleteTitle": "Delete Cookbook?",
+  "cookbookDeleteMessage": "This cookbook contains {count} recipes. They will be moved to trash.",
+  "@cookbookDeleteMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbookCannotDelete": "Cannot delete your only cookbook",
+  "fontSizeTitle": "Text Size",
+  "fontSizeReset": "Reset to Default",
+  "fontSizeSmaller": "Smaller text",
+  "fontSizeLarger": "Larger text",
+  "defaultCookbookName": "My Recipes",
+  "defaultCookbookDescription": "Your personal recipe collection",
+  "defaultShoppingListName": "Shopping List",
+  "courseBreakfast": "Breakfast",
+  "courseLunch": "Lunch",
+  "courseDinner": "Dinner",
+  "courseAppetizer": "Appetizer",
+  "courseSoup": "Soup",
+  "courseSalad": "Salad",
+  "courseMain": "Main Course",
+  "courseSide": "Side Dish",
+  "courseDessert": "Dessert",
+  "courseSnack": "Snack",
+  "courseBeverage": "Beverage",
+  "categoryQuick": "Quick & Easy",
+  "categoryHealthy": "Healthy",
+  "categoryComfort": "Comfort Food",
+  "categoryVegetarian": "Vegetarian",
+  "categoryVegan": "Vegan",
+  "categoryGlutenFree": "Gluten-Free",
+  "categoryDairyFree": "Dairy-Free",
+  "categoryLowCarb": "Low Carb",
+  "categorySpicy": "Spicy",
+  "categoryFamilyFriendly": "Family Friendly",
+  "categoryParty": "Party",
+  "categoryHoliday": "Holiday",
+  "categoryBbq": "BBQ & Grill",
+  "categoryBaking": "Baking",
+  "shoppingProduce": "Produce",
+  "shoppingDairy": "Dairy & Eggs",
+  "shoppingMeat": "Meat & Poultry",
+  "shoppingSeafood": "Seafood",
+  "shoppingBakery": "Bakery",
+  "shoppingFrozen": "Frozen",
+  "shoppingPantry": "Pantry",
+  "shoppingSpices": "Spices & Seasonings",
+  "shoppingBeverages": "Beverages",
+  "shoppingSnacks": "Snacks",
+  "shoppingInternational": "International",
+  "shoppingOther": "Other",
+  "unitCup": "cup",
+  "unitCups": "cups",
+  "unitTablespoon": "tablespoon",
+  "unitTablespoonAbbrev": "tbsp",
+  "unitTeaspoon": "teaspoon",
+  "unitTeaspoonAbbrev": "tsp",
+  "unitFluidOunce": "fluid ounce",
+  "unitFluidOunceAbbrev": "fl oz",
+  "unitPint": "pint",
+  "unitQuart": "quart",
+  "unitGallon": "gallon",
+  "unitMilliliter": "milliliter",
+  "unitMilliliterAbbrev": "ml",
+  "unitLiter": "liter",
+  "unitLiterAbbrev": "L",
+  "unitOunce": "ounce",
+  "unitOunceAbbrev": "oz",
+  "unitPound": "pound",
+  "unitPoundAbbrev": "lb",
+  "unitGram": "gram",
+  "unitGramAbbrev": "g",
+  "unitKilogram": "kilogram",
+  "unitKilogramAbbrev": "kg",
+  "unitPinch": "pinch",
+  "unitDash": "dash",
+  "unitClove": "clove",
+  "unitCloves": "cloves",
+  "unitHead": "head",
+  "unitBunch": "bunch",
+  "unitCan": "can",
+  "unitPackage": "package",
+  "unitSlice": "slice",
+  "unitSlices": "slices",
+  "unitPiece": "piece",
+  "unitPieces": "pieces",
+  "unitWhole": "whole",
+  "unitLarge": "large",
+  "unitMedium": "medium",
+  "unitSmall": "small",
+  "unitFahrenheit": "°F",
+  "unitCelsius": "°C",
+  "settingsRecipeLayout": "Recipe Layout",
+  "settingsRecipeLayoutDescription": "Choose how ingredients and instructions are displayed",
+  "settingsRecipeDisplay": "Recipe Display",
+  "layoutStacked": "Stacked",
+  "layoutStackedDescription": "Show all content in a scrollable list",
+  "layoutTabbed": "Tabbed",
+  "layoutTabbedDescription": "Swipe between ingredients and instructions",
+  "recipeSwipeHint": "Swipe to switch sections",
+  "recipeIngredients": "Ingredients",
+  "recipeInstructions": "Instructions",
+  "dateNextWeek": "Next week",
+  "timeJustNow": "Just now",
+  "timeMinutesAgo": "{count, plural, =1{1 minute ago} other{{count} minutes ago}}",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHoursAgo": "{count, plural, =1{1 hour ago} other{{count} hours ago}}",
+  "@timeHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeDaysAgo": "{count, plural, =1{1 day ago} other{{count} days ago}}",
+  "@timeDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeWeeksAgo": "{count, plural, =1{1 week ago} other{{count} weeks ago}}",
+  "@timeWeeksAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeMonthsAgo": "{count, plural, =1{1 month ago} other{{count} months ago}}",
+  "@timeMonthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeYearsAgo": "{count, plural, =1{1 year ago} other{{count} years ago}}",
+  "@timeYearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeInMinutes": "in {count, plural, =1{1 minute} other{{count} minutes}}",
+  "@timeInMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeInHours": "in {count, plural, =1{1 hour} other{{count} hours}}",
+  "@timeInHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationMinutes": "{count} min",
+  "@durationMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHours": "{count, plural, =1{1 hr} other{{count} hrs}}",
+  "@durationHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHoursMinutes": "{hours} hr {minutes} min",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipes": "{count, plural, =0{No recipes} =1{1 recipe} other{{count} recipes}}",
+  "@countRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countIngredients": "{count, plural, =0{No ingredients} =1{1 ingredient} other{{count} ingredients}}",
+  "@countIngredients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countSteps": "{count, plural, =0{No steps} =1{1 step} other{{count} steps}}",
+  "@countSteps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countItems": "{count, plural, =0{No items} =1{1 item} other{{count} items}}",
+  "@countItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countSelected": "{count} selected",
+  "@countSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorGenericTitle": "Error",
+  "errorGenericMessage": "Something went wrong. Please try again.",
+  "errorNetworkTitle": "Connection Error",
+  "errorNetworkMessage": "Please check your internet connection and try again.",
+  "errorNotFoundTitle": "Not Found",
+  "errorNotFoundMessage": "The requested content could not be found.",
+  "errorInvalidUrlTitle": "Invalid URL",
+  "errorInvalidUrlMessage": "Please enter a valid URL starting with http:// or https://",
+  "errorPermissionDenied": "Permission denied",
+  "errorStorageFull": "Storage is full",
+  "errorFileNotFound": "File not found",
+  "errorUnsupportedFormat": "Unsupported file format",
+  "errorParsingFailed": "Failed to parse content",
+  "errorSaveFailed": "Failed to save",
+  "errorLoadFailed": "Failed to load",
+  "errorDeleteFailed": "Failed to delete",
+  "errorImportFailed": "Failed to import",
+  "errorExportFailed": "Failed to export",
+  "errorCameraAccess": "Cannot access camera",
+  "errorGalleryAccess": "Cannot access photo library",
+  "errorTimeout": "Request timed out",
+  "errorServerError": "Server error. Please try again later.",
+  "errorNoRecipeFound": "No recipe data found on this page",
+  "errorInvalidRecipe": "Invalid recipe data",
+  "errorDuplicateRecipe": "This recipe already exists",
+  "validationRequired": "This field is required",
+  "validationTooShort": "Must be at least {min} characters",
+  "@validationTooShort": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "validationTooLong": "Must be less than {max} characters",
+  "@validationTooLong": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "validationInvalidEmail": "Please enter a valid email",
+  "validationInvalidUrl": "Please enter a valid URL",
+  "validationInvalidNumber": "Please enter a valid number",
+  "validationMinValue": "Must be at least {min}",
+  "@validationMinValue": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "validationMaxValue": "Must be at most {max}",
+  "@validationMaxValue": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "photoTakePhoto": "Take Photo",
+  "photoChooseFromGallery": "Choose from Gallery",
+  "photoRemoveImage": "Remove Image",
+  "shareAsText": "Text",
+  "shareAsImage": "Image",
+  "shareAsFile": "Share as File",
+  "shareQrCode": "Recipe QR Code",
+  "languageSystem": "System Default",
+  "languageEnglish": "English",
+  "languageSpanish": "Español",
+  "languageGerman": "Deutsch",
+  "scalingOriginal": "Original",
+  "scalingHalf": "Half",
+  "scalingDouble": "Double",
+  "scalingTriple": "Triple",
+  "scalingCustom": "Custom",
+  "scalingServings": "{count, plural, =1{1 serving} other{{count} servings}}",
+  "@scalingServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importRecipe": "Import Recipe",
+  "importFile": "File",
+  "importImage": "Image",
+  "importPaste": "Paste",
+  "importPasteUrl": "Paste recipe URL",
+  "importOr": "OR",
+  "importSupportsFormats": "Supports Paprika, Mela, JSON, ZIP exports",
+  "importFromSocialMedia": "Import your recipes from any social media platform or website.",
+  "tagsTitle": "Tags",
+  "tagsSelect": "Select Tags",
+  "tagsNoTags": "No tags yet",
+  "tagsCreate": "Create Tag",
+  "tagsCreateNew": "Create new tag",
+  "tagsEnterName": "Enter tag name",
+  "tagsSearch": "Search tags...",
+  "tagsSuggested": "Suggested Tags",
+  "tagsRecent": "Recently Used",
+  "tagsAll": "All Tags",
+  "tagVegetarian": "Vegetarian",
+  "tagVegan": "Vegan",
+  "tagGlutenFree": "Gluten-Free",
+  "tagDairyFree": "Dairy-Free",
+  "tagNutFree": "Nut-Free",
+  "tagLowCarb": "Low Carb",
+  "tagKeto": "Keto",
+  "tagPaleo": "Paleo",
+  "tagWhole30": "Whole30",
+  "tagQuick": "Quick",
+  "tagEasy": "Easy",
+  "tagHealthy": "Healthy",
+  "tagComfortFood": "Comfort Food",
+  "tagFamilyFriendly": "Family Friendly",
+  "tagKidFriendly": "Kid Friendly",
+  "tagMealPrep": "Meal Prep",
+  "tagOnePot": "One Pot",
+  "tagInstantPot": "Instant Pot",
+  "tagSlowCooker": "Slow Cooker",
+  "tagAirFryer": "Air Fryer",
+  "tagGrill": "Grill",
+  "tagBBQ": "BBQ",
+  "tagHoliday": "Holiday",
+  "tagParty": "Party",
+  "tagBudget": "Budget",
+  "tagSpicy": "Spicy",
+  "tagSweet": "Sweet",
+  "tagSavory": "Savory",
+  "tagLight": "Light",
+  "tagHearty": "Hearty",
+  "tagSummer": "Summer",
+  "tagWinter": "Winter",
+  "tagFall": "Fall",
+  "tagSpring": "Spring",
+  "settingsImagePlaceholders": "Image Placeholders",
+  "settingsImagePlaceholdersSubtitle": "Choose what shows when images are missing",
+  "settingsQuickAccessSubtitle": "Configure what appears in Quick Access",
+  "settingsManageCoursesSubtitle": "Add, edit, or remove courses",
+  "settingsManageCategoriesSubtitle": "Add, edit, or remove categories",
+  "settingsShoppingCategories": "Shopping Categories",
+  "settingsShoppingCategoriesSubtitle": "Organize items by aisle",
+  "shoppingIngredientMappings": "Ingredient Mappings",
+  "shoppingPriority": "Priority: {priority}",
+  "shoppingAddCategory": "Add Category",
+  "shoppingEditCategory": "Edit Category",
+  "shoppingDeleteCategory": "Delete Category?",
+  "shoppingDeleteCategoryMessage": "Delete \"{name}\"? Items in this category will become uncategorized.",
+  "@shoppingDeleteCategoryMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingCategoryName": "Name",
+  "shoppingSearchIngredients": "Search ingredients...",
+  "shoppingMappingsInfo": "Tap the category to change where an ingredient goes. ({count} mappings)",
+  "@shoppingMappingsInfo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingCategoryFor": "Category for \"{ingredient}\"",
+  "@shoppingCategoryFor": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingMovedTo": "\"{ingredient}\" moved to {category}",
+  "@shoppingMovedTo": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingResetToDefault": "\"{ingredient}\" reset to default",
+  "@shoppingResetToDefault": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "actionReset": "Reset",
+  "@shoppingPriority": {
+    "placeholders": {
+      "priority": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingMappingMoved": "\"{ingredient}\" moved to {category}",
+  "@shoppingMappingMoved": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingMappingReset": "\"{ingredient}\" reset to default",
+  "@shoppingMappingReset": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "addPhoto": "Add Photo",
+  "addPhotoSubtitle": "Tap to select from gallery or camera",
+  "viewAllRecipes": "View All Recipes",
+  "recipesTotal": "{count} recipes total",
+  "@recipesTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "coursesTitle": "Courses",
+  "categoriesTitle": "Categories",
+  "courseBrunch": "Brunch",
+  "courseMainDish": "Main Dish",
+  "courseSideDish": "Side Dish",
+  "courseSauce": "Sauce",
+  "courseBread": "Bread",
+  "categoryBean": "Bean",
+  "categoryBread": "Bread",
+  "categoryBurritoTaco": "Burrito/Taco",
+  "categoryCasserole": "Casserole",
+  "categoryChickenSteakMeat": "Chicken/Steak/Meat",
+  "categoryDessert": "Dessert",
+  "categoryFish": "Fish",
+  "categoryFruit": "Fruit",
+  "categoryPasta": "Pasta",
+  "categoryPizza": "Pizza",
+  "categoryPork": "Pork",
+  "categoryRice": "Rice",
+  "categorySandwich": "Sandwich",
+  "categorySeafood": "Seafood",
+  "categorySoup": "Soup",
+  "categoryVegetable": "Vegetable",
+  "or": "or",
+  "and": "and",
+  "wordOf": "of",
+  "items": "items",
+  "more": "more",
+  "less": "less",
+  "all": "All",
+  "none": "None",
+  "other": "Other",
+  "custom": "Custom",
+  "defaultValue": "Default",
+  "required": "Required",
+  "optional": "Optional",
+  "photoChooseGallery": "Choose from Gallery",
+  "importFirstRecipe": "Import First",
+  "importAllRecipes": "Import All",
+  "parseRecipe": "Parse Recipe",
+  "shareRecipe": "Share Recipe",
+  "shareExport": "Export",
+  "shareServings": "Servings: {count}",
+  "@shareServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharePrep": "Prep: {minutes} min",
+  "@sharePrep": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shareCook": "Cook: {minutes} min",
+  "@shareCook": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shareFromApp": "Shared from Recipe Spellbook ✨",
+  "shareCreatingCard": "Creating recipe card...",
+  "shareCheckRecipe": "Check out this recipe: {title}",
+  "@shareCheckRecipe": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "shareErrorImage": "Error creating image: {error}",
+  "@shareErrorImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "editItem": "Edit Item",
+  "selectAll": "Select All",
+  "selectNone": "Select None",
+  "viewPlanner": "View Planner",
+  "planNow": "Plan Now",
+  "loadingText": "Loading...",
+  "errorText": "Error",
+  "errorLoadingMeals": "Error loading meals",
+  "readingImage": "Reading image...",
+  "parsingRecipe": "Parsing recipe...",
+  "noTextInImage": "No text found in image",
+  "failedProcessImage": "Failed to process image: {error}",
+  "@failedProcessImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cookingModeExit": "Exit Cooking Mode",
+  "cookingModeStep": "Step {current} of {total}",
+  "@cookingModeStep": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cookingModePrevious": "Previous",
+  "cookingModeNext": "Next",
+  "cookingModeFinish": "Finish",
+  "cookingModeCompleted": "Recipe Completed!",
+  "cookingModeGreatJob": "Great job! Enjoy your meal.",
+  "mealPlanBreakfast": "Breakfast",
+  "mealPlanLunch": "Lunch",
+  "mealPlanDinner": "Dinner",
+  "mealPlanSnack": "Snack",
+  "mealPlanAddMeal": "Add Meal",
+  "mealPlanRemove": "Remove from Plan",
+  "mealPlanNoMeals": "No meals planned",
+  "mealPlanTapToAdd": "Tap + to add a meal",
+  "thisWeek": "This Week",
+  "itemName": "Item name",
+  "addToShoppingList": "Add to Shopping List",
+  "addToList": "Add to list",
+  "addedItemsToList": "Added {count} items to shopping list",
+  "@addedItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scanToImport": "Scan to import recipe",
+  "xOfY": "{current} of {total}",
+  "@xOfY": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "addItems": "Add {count} Items",
+  "@addItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToParse": "Failed to parse: {error}",
+  "@failedToParse": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToImport": "Failed to import: {error}",
+  "groupBy": "Group by",
+  "@failedToImport": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cookbookHint": "Tap to select • Long press to edit",
+  "rename": "Rename",
+  "renameCookbook": "Rename Cookbook",
+  "seeAll": "See all",
+  "imagePlaceholders": "Image Placeholders",
+  "imagePlaceholdersSubtitle": "Choose what shows when images are missing",
+  "homeScreenSection": "Home Screen",
+  "quickAccessSubtitle": "Configure what appears in Quick Access",
+  "manageCoursesSubtitle": "Add, edit, or remove courses",
+  "manageCategoriesSubtitle": "Add, edit, or remove categories",
+  "shoppingCategoriesSubtitle": "Organize items by aisle",
+  "syncSection": "Sync",
+  "cloudSync": "Cloud Sync",
+  "comingSoon": "Coming soon",
+  "resetApp": "Reset App",
+  "resetAppSubtitle": "Delete all data permanently",
+  "trashSubtitle": "Deleted recipes (30-day retention)",
+  "importRecipeTitle": "Import Recipe",
+  "importSocialMedia": "Import your recipes from any social media platform or website.",
+  "pasteRecipeUrl": "Paste recipe URL",
+  "orDivider": "OR",
+  "fileOption": "File",
+  "imageOption": "Image",
+  "pasteOption": "Paste",
+  "supportedFormats": "Supports Paprika, Mela, JSON, ZIP exports",
+  "pasteRecipeTitle": "Paste Recipe",
+  "pasteRecipeHint": "Paste your recipe here...",
+  "quickAccessHelpIntro": "These badges indicate why recipes appear here:",
+  "quickAccessHelpMealPlan": "Scheduled for today",
+  "quickAccessHelpPinned": "You've pinned this recipe",
+  "quickAccessHelpRecent": "Recently viewed",
+  "openCalendar": "Open calendar",
+  "editNotes": "Edit notes",
+  "addNotesHint": "Add notes...",
+  "moveToAnotherDay": "Move to another day",
+  "addToPlan": "Add to Plan",
+  "importBulkQuestion": "Would you like to import all {count} recipes or select individually?",
+  "@importBulkQuestion": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importingRecipes": "Importing {count} recipes...",
+  "@importingRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importedRecipesCount": "Imported {count} recipes",
+  "@importedRecipesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "extractingArchive": "Extracting archive...",
+  "themeSpellbook": "Spellbook",
+  "themeForest": "Forest",
+  "themeOcean": "Ocean",
+  "themeSunset": "Sunset",
+  "themeMidnight": "Midnight",
+  "themeRose": "Rose",
+  "colorTheme": "Color Theme",
+  "colorThemeSubtitle": "Choose your app's color palette",
+  "preview": "Preview",
+  "previewPrimary": "Primary",
+  "previewSecondary": "Secondary",
+  "previewTertiary": "Tertiary",
+  "previewError": "Error",
+  "placeholderDescription": "Choose what to display when recipes or cookbooks don't have images.",
+  "recipePlaceholders": "Recipe Placeholders",
+  "cookbookPlaceholders": "Cookbook Placeholders",
+  "defaultImages": "Default Images",
+  "defaultImagesDescription": "App artwork that changes with RPG mode",
+  "themeBased": "Theme-based",
+  "themeBasedDescription": "Gradient with logo based on your color theme",
+  "placeholderRpgInfo": "Default images change between normal and RPG variants when RPG Mode is enabled.",
+  "groupBySection": "By Section",
+  "groupByRecipe": "By Recipe",
+  "groupByUngrouped": "Ungrouped",
+  "copyAsText": "Copy as Text",
+  "printList": "Print List",
+  "manageLists": "Manage Lists",
+  "newList": "New",
+  "newShoppingList": "New Shopping List",
+  "listNameHint": "List name",
+  "recipeLayoutSetting": "Recipe Layout",
+  "recipeLayoutSettingSubtitle": "Choose how recipe details are displayed",
+  "layoutTabbedOption": "Tabbed View",
+  "layoutStackedOption": "Stacked View",
+  "nutrientsTitle": "Nutrition",
+  "nutrientsSubtitle": "Nutritional information per serving",
+  "addNutrients": "Add Nutrition Info",
+  "calculateNutrients": "Calculate from Ingredients",
+  "nutrientsDisclaimer": "Nutritional values are estimates. Accuracy depends on ingredient measurements. Using a food scale with gram measurements provides the best accuracy.",
+  "calories": "Calories",
+  "protein": "Protein",
+  "carbohydrates": "Carbs",
+  "fat": "Fat",
+  "fiber": "Fiber",
+  "sugar": "Sugar",
+  "sodium": "Sodium",
+  "cholesterol": "Cholesterol",
+  "saturatedFat": "Saturated Fat",
+  "transFat": "Trans Fat",
+  "servingSize": "Serving Size",
+  "perServing": "Per Serving",
+  "calculatingNutrients": "Calculating nutrition...",
+  "nutrientsCalculated": "Nutrition calculated",
+  "nutrientsFailed": "Could not calculate nutrition: {error}",
+  "@nutrientsFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "premiumFeature": "Premium Feature",
+  "premiumNutrientsDescription": "Automatic nutrition calculation requires a premium subscription",
+  "exportCurrentCookbook": "Export Current Cookbook",
+  "exporting": "Exporting...",
+  "exportAllCookbooks": "Export All Cookbooks",
+  "importing": "Importing...",
+  "importFromJson": "Import from JSON",
+  "importFromJsonSubtitle": "Select a backup file",
+  "aboutDescription": "Your magical recipe companion for organizing, planning, and cooking delicious meals.",
+  "madeWithLove": "Made with ❤️ for home cooks everywhere",
+  "resetAppWarning": "This will permanently delete all your recipes, meal plans, shopping lists, and settings. This cannot be undone.",
+  "actionContinue": "Continue",
+  "finalConfirmation": "Final Confirmation",
+  "typeDeleteToConfirm": "Type DELETE to confirm",
+  "typeDeleteHint": "DELETE",
+  "resetEverything": "Reset Everything",
+  "resettingApp": "Resetting app...",
+  "appResetSuccess": "App reset successfully",
+  "resetFailed": "Reset failed",
+  "successAdded": "Added successfully",
+  "selectToday": "Select Today",
+  "selectTomorrow": "Select Tomorrow",
+  "addedManually": "Added Manually",
+  "unknownRecipe": "Unknown Recipe",
+  "shoppingListEmpty": "Your shopping list is empty",
+  "shoppingListEmptyHint": "Add items or import from recipes",
+  "settingsRPGModeActive": "Conjuring magical text...",
+  "groupBy": "Group by",
+  "shoppingCheckAll": "Check All",
+  "shoppingUncheckAll": "Uncheck All",
+  "shoppingClearChecked": "Clear Checked",
+  "shoppingManageLists": "Manage Lists",
+  "shoppingNewList": "New Shopping List",
+  "shoppingListName": "List name",
+  "shoppingLists": "Shopping Lists",
+  "shoppingRenameList": "Rename List",
+  "shoppingDeleteList": "Delete List?",
+  "shoppingClearAll": "Clear All",
+  "categoryProduce": "Produce",
+  "categoryDairy": "Dairy",
+  "categoryMeat": "Meat",
+  "categoryBakery": "Bakery",
+  "categoryFrozen": "Frozen",
+  "categoryBeverages": "Beverages",
+  "categoryPantry": "Pantry",
+  "categorySpices": "Spices",
+  "categoryInternational": "International",
+  "categorySnacks": "Snacks",
+  "categoryOther": "Other",
+  "from": "from",
+  "deleted": "deleted",
+  "currently": "Currently in",
+  "autoDetect": "Auto-detect",
+  "category": "Category",
+  "actionNew": "New",
+  "actionCreate": "Create",
+  "tagsAdd": "Add Tag",
+  "tagsSearchOrCreate": "Search or create tag...",
+  "tagsNoResults": "No matching tags found",
+  "color": "Color",
+  "icon": "Icon",
+  "nutritionTitle": "Nutrition",
+  "nutritionEmpty": "No nutrition data",
+  "nutritionEmptyHint": "Edit this recipe and calculate nutrition from ingredients",
+  "scaled": "scaled",
+  "nutritionCalculate": "Calculate Nutrition",
+  "nutritionCalculating": "Calculating nutrition...",
+  "nutritionMatchingIngredients": "Matching ingredients to USDA database",
+  "nutritionCalculationFailed": "Could not calculate nutrition",
+  "nutritionDisclaimer": "Nutrition values are estimates based on USDA data. Actual values may vary depending on specific products, preparation methods, and portion sizes.",
+  "nutritionPerServing": "Per Serving",
+  "nutritionServings": "{count} servings",
+  "@nutritionServings": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "nutritionIngredientBreakdown": "Ingredient Breakdown",
+  "nutritionIngredientsMatched": "Ingredients Matched",
+  "nutritionMatchedCount": "{matched} of {total} matched",
+  "@nutritionMatchedCount": {
+    "placeholders": {
+      "matched": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "nutritionUncertainCount": "{count} need review",
+  "@nutritionUncertainCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "nutritionUncertain": "verify match",
+  "nutritionNotFound": "No match found - tap to search",
+  "nutritionRecalculate": "Recalculate",
+  "nutritionOverwriteTitle": "Overwrite Nutrition Data?",
+  "nutritionOverwriteMessage": "This recipe already has nutrition data. Do you want to recalculate and replace it with new values?",
+  "nutritionCalculated": "Nutrition calculated successfully",
+  "nutritionSave": "Save Nutrition",
+  "nutritionSelectFood": "Select USDA Food",
+  "nutritionSearchFood": "Search foods...",
+  "nutritionNoResults": "No results found",
+  "nutritionCalories": "Calories",
+  "nutritionProtein": "Protein",
+  "nutritionCarbs": "Carbohydrates",
+  "nutritionFat": "Total Fat",
+  "nutritionSaturatedFat": "Saturated Fat",
+  "nutritionTransFat": "Trans Fat",
+  "nutritionFiber": "Dietary Fiber",
+  "nutritionSugar": "Sugars",
+  "nutritionCholesterol": "Cholesterol",
+  "nutritionSodium": "Sodium",
+  "nutritionPotassium": "Potassium",
+  "nutritionCalcium": "Calcium",
+  "nutritionIron": "Iron",
+  "nutritionVitaminA": "Vitamin A",
+  "nutritionVitaminC": "Vitamin C",
+  "nutritionVitaminD": "Vitamin D",
+  "layoutInfoText": "Nutrition data (if calculated) will appear in both layouts. Tabbed layout allows swiping between sections.",
+  "settingsManageTagsSubtitle": "Create and organize recipe tags",
+  "nutritionTotal": "Total",
+  "nutritionAutoCalculate": "Auto-Calculate",
+  "nutritionManualEntry": "Enter Manually",
+  "nutritionManualEntryTitle": "Enter Known Values",
+  "nutritionManualEntryDescription": "If you know the exact nutrition values (from packaging, website, etc.), enter them here.",
+  "nutritionMainNutrients": "Main Nutrients",
+  "nutritionOtherNutrients": "Other Nutrients",
+  "nutritionEnterAtLeastOne": "Enter at least calories or one macro nutrient",
+  "nutritionHowToFix": "How to fix",
+  "nutritionHowToImproveAccuracy": "How to Improve Accuracy",
+  "nutritionEditIngredient": "Edit Ingredient",
+  "nutritionSearchUsda": "Search USDA",
+  "nutritionEnterManually": "Enter Manually",
+  "nutritionManualIngredientHint": "Enter the nutrition values for this ingredient amount. Check the package label or a nutrition database.",
+  "nutritionApplyManual": "Apply Manual Values",
+  "nutritionTotalRecipe": "Total Recipe Nutrition",
+  "nutritionMatchRate": "Match Rate",
+  "allergySettingsTitle": "Allergy Settings",
+  "allergyInfoText": "Select your allergens below. Recipe Spellbook will warn you when recipes contain ingredients you're allergic to.",
+  "allergySelectedCount": "{count} allergens selected",
+  "@allergySelectedCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "allergySelectAll": "Select All",
+  "allergyClearAll": "Clear All",
+  "allergyMajorTitle": "Major Allergens",
+  "allergyMajorSubtitle": "FDA-recognized major food allergens",
+  "allergyAdditionalTitle": "Additional Allergens",
+  "allergyAdditionalSubtitle": "Other common food sensitivities",
+  "allergyWillWarn": "You'll be warned about this allergen",
+  "allergyWarningTitle": "⚠️ Allergy Warning",
+  "allergyWarningTitlePossible": "⚠️ Possible Allergens",
+  "allergyContains": "Contains:",
+  "allergyMayContain": "May contain:",
+  "allergyContainsAllergens": "Contains allergens",
+  "allergyManageSettings": "Manage allergy settings",
+  "allergyDetailsTitle": "Allergen Details",
+  "settingsAllergies": "Allergies",
+  "settingsAllergiesSubtitle": "Set up allergen warnings",
+
+  "allergenMilk": "Milk/Dairy",
+  "allergenEggs": "Eggs",
+  "allergenFish": "Fish",
+  "allergenShellfish": "Shellfish",
+  "allergenTreeNuts": "Tree Nuts",
+  "allergenPeanuts": "Peanuts",
+  "allergenWheat": "Wheat/Gluten",
+  "allergenSoy": "Soy",
+  "allergenSesame": "Sesame",
+  "allergenMustard": "Mustard",
+  "allergenCelery": "Celery",
+  "allergenLupin": "Lupin",
+  "allergenMollusks": "Mollusks",
+  "allergenSulfites": "Sulfites",
+  "allergenCorn": "Corn",
+  "allergenNightshades": "Nightshades",
+  "nutritionCopyFromAuto": "Copy from Auto-Calculate",
+  "nutritionEstimatedDisclaimer": "Values are estimated based on USDA data",
+  "actionDiscard": "Discard",
+  "unsavedChangesTitle": "Unsaved Changes",
+  "unsavedChangesMessage": "You have unsaved changes. Do you want to save them?",
+  "tagsEmptyTitle": "No Tags Yet",
+  "tagsEmptySubtitle": "Create tags to organize your recipes by dietary needs, meal type, and more.",
+  "tagsLoadDefaults": "Load Default Tags",
+  "tagsAddNew": "Add Tag",
+  "tagsEdit": "Edit Tag",
+  "tagsDelete": "Delete Tag",
+  "tagsDeleteConfirm": "Are you sure you want to delete \"{name}\"?",
+  "@tagsDeleteConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "tagsNameLabel": "Tag Name",
+  "tagsIconLabel": "Icon (emoji)",
+  "tagsColorLabel": "Color",
+  "settingsRpgAnimations": "Rarity Animations",
+  "settingsRpgAnimationsSubtitle": "Glowing effects for epic and legendary recipes",
+  "settingsRpgSounds": "Sound Effects",
+  "settingsRpgSoundsSubtitle": "Play sounds for achievements and level ups",
+  "settingsRpgAchievements": "Achievements",
+  "settingsRpgAchievementsSubtitle": "View your unlocked achievements",
+  "settingsRpgStats": "Cooking Stats",
+  "settingsRpgStatsSubtitle": "View your cooking statistics",
+  "settingsRpgModeEnabled": "Transform your cooking into an adventure!",
+  "settingsRecipeLayoutSubtitle": "Customize how recipes are displayed",
+
+  "rarityCommon": "Common",
+  "rarityCommonDesc": "A simple everyday recipe",
+  "rarityUncommon": "Uncommon",
+  "rarityUncommonDesc": "A tasty recipe with a twist",
+  "rarityRare": "Rare",
+  "rarityRareDesc": "A special recipe worth mastering",
+  "rarityEpic": "Epic",
+  "rarityEpicDesc": "An epic recipe of great power!",
+  "rarityLegendary": "Legendary",
+  "rarityLegendaryDesc": "A legendary recipe worthy of the gods!"
+}

@@ -1,0 +1,217 @@
+import 'package:drift/drift.dart' as drift;
+import 'dart:convert';
+import 'dart:io';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
+import '../database/database.dart';
+import 'package:drift/drift.dart';
+
+class ShoppingListService {
+  final AppDatabase db;
+
+  ShoppingListService(this.db);
+
+  /// Get all items in a list grouped by category
+  Future<Map<String?, List<ShoppingListItem>>> getItemsGroupedByCategory(String listId) async {
+    final items = await (db.select(db.shoppingListItems)
+      ..where((t) => t.listId.equals(listId))
+      ..orderBy([
+            (t) => OrderingTerm(expression: t.shoppingCategoryId),
+            (t) => OrderingTerm(expression: t.name),
+      ]))
+        .get();
+
+    final grouped = <String?, List<ShoppingListItem>>{};
+    for (final item in items) {
+      grouped.putIfAbsent(item.shoppingCategoryId, () => []).add(item);
+    }
+    return grouped;
+  }
+
+  /// Export list as plain text
+  Future<String> exportAsText(String listId) async {
+    final list = await (db.select(db.shoppingLists)
+      ..where((t) => t.id.equals(listId)))
+        .getSingle();
+
+    final items = await (db.select(db.shoppingListItems)
+      ..where((t) => t.listId.equals(listId))
+      ..where((t) => t.isChecked.equals(false))
+      ..orderBy([(t) => OrderingTerm(expression: t.name)]))
+        .get();
+
+    final buffer = StringBuffer();
+    buffer.writeln('📝 ${list.name}');
+    buffer.writeln('─' * 30);
+    buffer.writeln();
+
+    for (final item in items) {
+      final qty = item.quantity != null ? '${item.quantity} ' : '';
+      buffer.writeln('☐ $qty${item.name}');
+    }
+
+    buffer.writeln();
+    buffer.writeln('Created with recipespellbook');
+
+    return buffer.toString();
+  }
+
+  /// Export list as JSON
+  Future<Map<String, dynamic>> exportAsJson(String listId) async {
+    final list = await (db.select(db.shoppingLists)
+      ..where((t) => t.id.equals(listId)))
+        .getSingle();
+
+    final items = await (db.select(db.shoppingListItems)
+      ..where((t) => t.listId.equals(listId))
+      ..orderBy([(t) => OrderingTerm(expression: t.name)]))
+        .get();
+
+    return {
+      'version': 1,
+      'type': 'shopping_list',
+      'exportedAt': DateTime.now().toIso8601String(),
+      'list': {
+        'name': list.name,
+        'items': items.map((item) => {
+          'name': item.name,
+          'quantity': item.quantity,
+          'unit': item.unit,
+          'isChecked': item.isChecked,
+          'note': item.note,
+        }).toList(),
+      },
+    };
+  }
+
+  /// Export as markdown
+  Future<String> exportAsMarkdown(String listId) async {
+    final list = await (db.select(db.shoppingLists)
+      ..where((t) => t.id.equals(listId)))
+        .getSingle();
+
+    final items = await (db.select(db.shoppingListItems)
+      ..where((t) => t.listId.equals(listId))
+      ..orderBy([(t) => OrderingTerm(expression: t.name)]))
+        .get();
+
+    final buffer = StringBuffer();
+    buffer.writeln('# ${list.name}');
+    buffer.writeln();
+
+    final unchecked = items.where((i) => !i.isChecked).toList();
+    final checked = items.where((i) => i.isChecked).toList();
+
+    if (unchecked.isNotEmpty) {
+      for (final item in unchecked) {
+        final qty = item.quantity != null ? '${item.quantity} ' : '';
+        buffer.writeln('- [ ] $qty${item.name}');
+      }
+    }
+
+    if (checked.isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln('### Completed');
+      for (final item in checked) {
+        final qty = item.quantity != null ? '${item.quantity} ' : '';
+        buffer.writeln('- [x] $qty${item.name}');
+      }
+    }
+
+    return buffer.toString();
+  }
+
+  /// Generate shareable link data (base64 encoded)
+  Future<String> generateShareableLink(String listId) async {
+    final json = await exportAsJson(listId);
+    final encoded = base64Url.encode(utf8.encode(jsonEncode(json)));
+    // In production, you'd use a proper URL shortener or deep link
+    return 'recipespellbook://import-list?data=$encoded';
+  }
+
+  /// Share list as text
+  Future<void> shareAsText(String listId) async {
+    final text = await exportAsText(listId);
+    await Share.share(text, subject: 'Shopping List');
+  }
+
+  /// Share list as file
+  Future<void> shareAsFile(String listId, {String format = 'json'}) async {
+    final dir = await getTemporaryDirectory();
+
+    String content;
+    String filename;
+
+    switch (format) {
+      case 'md':
+        content = await exportAsMarkdown(listId);
+        filename = 'shopping_list.md';
+        break;
+      case 'txt':
+        content = await exportAsText(listId);
+        filename = 'shopping_list.txt';
+        break;
+      case 'json':
+      default:
+        content = const JsonEncoder.withIndent('  ').convert(await exportAsJson(listId));
+        filename = 'shopping_list.json';
+    }
+
+    final file = File(p.join(dir.path, filename));
+    await file.writeAsString(content);
+
+    await Share.shareXFiles(
+      [XFile(file.path)],
+      subject: 'Shopping List',
+    );
+  }
+
+  /// Import list from JSON
+  Future<ImportListResult> importFromJson(Map<String, dynamic> data) async {
+    try {
+      if (data['type'] != 'shopping_list') {
+        return ImportListResult(success: false, message: 'Invalid file type');
+      }
+
+      final listData = data['list'] as Map<String, dynamic>;
+      final items = listData['items'] as List;
+
+      final newListId = 'imported_${DateTime.now().millisecondsSinceEpoch}';
+
+      await db.into(db.shoppingLists).insert(ShoppingListsCompanion.insert(
+        id: newListId,
+        name: '${listData['name']} (imported)',
+      ));
+
+      for (var i = 0; i < items.length; i++) {
+        final item = items[i] as Map<String, dynamic>;
+        await db.into(db.shoppingListItems).insert(ShoppingListItemsCompanion.insert(
+          id: '${newListId}_item_$i',
+          listId: newListId,
+          name: item['name'] as String,
+          quantity: drift.Value(item['quantity'] as String?),
+          unit: drift.Value(item['unit'] as String?),
+          isChecked: drift.Value(item['isChecked'] as bool? ?? false),
+          note: drift.Value(item['note'] as String?),
+        ));
+      }
+
+      return ImportListResult(
+        success: true,
+        message: 'Imported ${items.length} items',
+        listId: newListId,
+      );
+    } catch (e) {
+      return ImportListResult(success: false, message: 'Import failed: $e');
+    }
+  }
+}
+
+class ImportListResult {
+  final bool success;
+  final String message;
+  final String? listId;
+
+  ImportListResult({required this.success, required this.message, this.listId});
+}

@@ -1,0 +1,88 @@
+name: recipespellbook
+description: "An advanced recipe app for all uses."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Database
+  drift: ^2.19.0
+  sqlite3_flutter_libs: ^0.5.24
+  path_provider: ^2.1.4
+  path: ^1.9.0
+
+  # State Management
+  flutter_riverpod: ^2.6.1
+
+  # Navigation
+  go_router: ^14.8.1
+
+  # UI
+  photo_view: ^0.14.0
+
+  # Utilities
+  intl: ^0.20.2
+  uuid: ^4.5.1
+  shared_preferences: ^2.2.2
+
+  # Import features
+  http: ^1.2.0
+  html: ^0.15.4
+  file_picker: ^8.0.7
+  share_plus: ^9.0.0
+  google_mlkit_text_recognition: ^0.13.1
+  image_picker: ^1.0.7
+  pdfx: ^2.6.0
+  pdf: ^3.10.8
+  printing: ^5.12.0
+  google_fonts: ^6.1.0
+  archive: ^3.4.9
+  qr_flutter: ^4.1.0
+  url_launcher: ^6.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  drift_dev: ^2.19.0
+  build_runner: ^2.4.13
+  flutter_native_splash: ^2.3.8
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/logo.png"
+
+flutter_native_splash:
+  color: "#F5F3EE"
+  image: assets/images/splash_logo.png
+  android: true
+  ios: true
+  android_12:
+    color: "#F5F3EE"
+    image: assets/images/splash_logo.png
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/data/common_ingredients.json
+    - assets/images/
+    - assets/images/logo.png
+    - assets/images/splash_logo.png
+    - assets/images/cookbook_placeholder_normal.png
+    - assets/images/cookbook_placeholder_rpg.png
+    - assets/images/recipe_placeholder_normal.png
+    - assets/images/recipe_placeholder_rpg.png
