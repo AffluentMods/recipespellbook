@@ -486,7 +486,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get actionRetry => 'Reintentar';
 
   @override
-  String get actionCopy => 'Copiar como texto';
+  String get actionCopy => 'Copiar';
 
   @override
   String get actionPaste => 'Pegar';
@@ -501,7 +501,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get actionClear => 'Limpiar';
 
   @override
-  String get errorGeneric => 'Ocurrió un error';
+  String get errorGeneric => 'Algo salió mal';
 
   @override
   String get errorNetwork => 'Error de red. Por favor verifica tu conexión.';
@@ -1863,7 +1863,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get editItem => 'Editar artículo';
+  String get editItem => 'Editar Artículo';
 
   @override
   String get selectAll => 'Seleccionar Todo';
@@ -2186,7 +2186,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get groupByRecipe => 'Por Receta';
 
   @override
-  String get groupByUngrouped => 'Sin agrupar';
+  String get groupByUngrouped => 'Sin Agrupar';
 
   @override
   String get copyAsText => 'Copiar como Texto';
@@ -2793,4 +2793,64 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tagsColorLabel => 'Color';
+
+  @override
+  String get settingsRpgAnimations => 'Animaciones de rareza';
+
+  @override
+  String get settingsRpgAnimationsSubtitle => 'Efectos brillantes para recetas épicas y legendarias';
+
+  @override
+  String get settingsRpgSounds => 'Efectos de sonido';
+
+  @override
+  String get settingsRpgSoundsSubtitle => 'Reproducir sonidos para logros y subidas de nivel';
+
+  @override
+  String get settingsRpgAchievements => 'Logros';
+
+  @override
+  String get settingsRpgAchievementsSubtitle => 'Ver tus logros desbloqueados';
+
+  @override
+  String get settingsRpgStats => 'Estadísticas de cocina';
+
+  @override
+  String get settingsRpgStatsSubtitle => 'Ver tus estadísticas de cocina';
+
+  @override
+  String get settingsRpgModeEnabled => '¡Transforma tu cocina en una aventura!';
+
+  @override
+  String get settingsRecipeLayoutSubtitle => 'Personalizar cómo se muestran las recetas';
+
+  @override
+  String get rarityCommon => 'Común';
+
+  @override
+  String get rarityCommonDesc => 'Una receta simple del día a día';
+
+  @override
+  String get rarityUncommon => 'Poco común';
+
+  @override
+  String get rarityUncommonDesc => 'Una receta sabrosa con un toque especial';
+
+  @override
+  String get rarityRare => 'Rara';
+
+  @override
+  String get rarityRareDesc => 'Una receta especial que vale la pena dominar';
+
+  @override
+  String get rarityEpic => 'Épica';
+
+  @override
+  String get rarityEpicDesc => '¡Una receta épica de gran poder!';
+
+  @override
+  String get rarityLegendary => 'Legendaria';
+
+  @override
+  String get rarityLegendaryDesc => '¡Una receta legendaria digna de los dioses!';
 }

@@ -51,3 +51,18 @@ final userIngredientMappingsDaoProvider = Provider<UserIngredientMappingsDao>((r
   final db = ref.watch(databaseProvider);
   return UserIngredientMappingsDao(db);
 });
+
+// ============ USER INGREDIENT MAPPINGS ============
+
+/// Provider for user ingredient mappings as a Map
+/// Use this for synchronous lookups in getShoppingCategory()
+final userIngredientMappingsProvider = FutureProvider<Map<String, String>>((ref) async {
+  final shoppingDao = ref.watch(shoppingDaoProvider);
+  return shoppingDao.getUserIngredientMappings();
+});
+
+/// Stream provider for watching user ingredient mappings changes
+final userIngredientMappingsStreamProvider = StreamProvider<Map<String, String>>((ref) {
+  final shoppingDao = ref.watch(shoppingDaoProvider);
+  return shoppingDao.watchUserIngredientMappings();
+});

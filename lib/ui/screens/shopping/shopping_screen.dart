@@ -22,6 +22,19 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   String _currentListId = 'list_default';
   ShoppingGroupMode _groupMode = ShoppingGroupMode.section;
   final TextEditingController _addController = TextEditingController();
+  Map<String, String> _userMappings = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserMappings();
+  }
+
+  Future<void> _loadUserMappings() async {
+    final shoppingDao = ref.read(shoppingDaoProvider);
+    final mappings = await shoppingDao.getUserIngredientMappings();
+    if (mounted) setState(() => _userMappings = mappings);
+  }
 
   @override
   void dispose() {
@@ -34,6 +47,16 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.watch(shoppingDaoProvider);
+
+    // Watch for user mapping changes
+    ref.listen(
+      userIngredientMappingsStreamProvider,
+          (previous, next) {
+        next.whenData((mappings) {
+          if (mounted) setState(() => _userMappings = mappings);
+        });
+      },
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -270,11 +293,26 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     Widget mainList;
     switch (_groupMode) {
       case ShoppingGroupMode.section:
-        mainList = _SectionGroupedList(items: unchecked, listId: _currentListId, checkedItems: checked);
+        mainList = _SectionGroupedList(
+          items: unchecked,
+          listId: _currentListId,
+          checkedItems: checked,
+          userMappings: _userMappings,
+        );
       case ShoppingGroupMode.recipe:
-        mainList = _RecipeGroupedList(items: unchecked, listId: _currentListId, checkedItems: checked);
+        mainList = _RecipeGroupedList(
+          items: unchecked,
+          listId: _currentListId,
+          checkedItems: checked,
+          userMappings: _userMappings,
+        );
       case ShoppingGroupMode.ungrouped:
-        mainList = _UngroupedList(items: unchecked, listId: _currentListId, checkedItems: checked);
+        mainList = _UngroupedList(
+          items: unchecked,
+          listId: _currentListId,
+          checkedItems: checked,
+          userMappings: _userMappings,
+        );
     }
     return mainList;
   }
@@ -304,7 +342,8 @@ class _CombinedItem {
   String get id => sources.first.id;
 
   /// Get the effective shopping category for this item
-  String get detectedCategory {
+  /// [userMappings] - Optional map of user's custom ingredient->category mappings
+  String getDetectedCategory({Map<String, String>? userMappings}) {
     final savedCategoryId = sources.firstWhere(
           (s) => s.shoppingCategoryId != null && s.shoppingCategoryId!.isNotEmpty,
       orElse: () => sources.first,
@@ -317,8 +356,13 @@ class _CombinedItem {
       return savedCategoryId;
     }
 
-    return getShoppingCategory(baseName);
+    // Pass user mappings to getShoppingCategory
+    return getShoppingCategory(baseName, userMappings: userMappings);
   }
+
+  /// Legacy getter for backward compatibility
+  @Deprecated('Use getDetectedCategory(userMappings: ...) instead')
+  String get detectedCategory => getDetectedCategory();
 
   /// Get combined display name with total quantity
   String get displayName {
@@ -529,14 +573,20 @@ class _ListSelector extends ConsumerWidget {
   }
 }
 
-// ============ SECTION GROUPED LIST (FIXED: Uses database priorities) ============
+// ============ SECTION GROUPED LIST ============
 
 class _SectionGroupedList extends ConsumerWidget {
   final List<_CombinedItem> items;
   final List<_CombinedItem> checkedItems;
   final String listId;
+  final Map<String, String> userMappings;
 
-  const _SectionGroupedList({required this.items, required this.listId, this.checkedItems = const []});
+  const _SectionGroupedList({
+    required this.items,
+    required this.listId,
+    this.checkedItems = const [],
+    this.userMappings = const {},
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -549,12 +599,10 @@ class _SectionGroupedList extends ConsumerWidget {
       future: shoppingDao.getAllShoppingCategories(),
       builder: (context, categorySnapshot) {
         // Build priority map from database categories
-        // Map MULTIPLE keys to the same sortOrder for combined categories like "Meat & Seafood"
         final categoryPriorities = <String, int>{};
         if (categorySnapshot.hasData) {
           for (final cat in categorySnapshot.data!) {
             final lower = cat.name.toLowerCase();
-            // Handle combined categories by mapping all relevant keys
             if (lower.contains('meat')) categoryPriorities['meat'] = cat.sortOrder;
             if (lower.contains('seafood') || lower.contains('fish')) categoryPriorities['seafood'] = cat.sortOrder;
             if (lower.contains('produce') || lower.contains('vegetable') || lower.contains('fruit')) categoryPriorities['produce'] = cat.sortOrder;
@@ -570,10 +618,10 @@ class _SectionGroupedList extends ConsumerWidget {
           }
         }
 
-        // Group items by section
+        // Group items by section using user mappings
         final grouped = <String, List<_CombinedItem>>{};
         for (final item in items) {
-          final section = item.detectedCategory;
+          final section = item.getDetectedCategory(userMappings: userMappings);
           grouped.putIfAbsent(section, () => []).add(item);
         }
 
@@ -582,7 +630,7 @@ class _SectionGroupedList extends ConsumerWidget {
           final aPriority = categoryPriorities[a] ?? 999;
           final bPriority = categoryPriorities[b] ?? 999;
           if (aPriority != bPriority) return aPriority.compareTo(bPriority);
-          return a.compareTo(b); // Alphabetical fallback
+          return a.compareTo(b);
         });
 
         return ListView(
@@ -611,13 +659,17 @@ class _SectionGroupedList extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  ...sectionItems.map((item) => _ShoppingItemTile(item: item, listId: listId)),
+                  ...sectionItems.map((item) => _ShoppingItemTile(
+                    item: item,
+                    listId: listId,
+                    userMappings: userMappings,
+                  )),
                 ],
               );
             }),
             if (checkedItems.isNotEmpty) ...[
               const Divider(height: 32),
-              _CheckedItemsSection(items: checkedItems, listId: listId),
+              _CheckedItemsSection(items: checkedItems, listId: listId, userMappings: userMappings),
             ],
           ],
         );
@@ -667,8 +719,14 @@ class _RecipeGroupedList extends ConsumerWidget {
   final List<_CombinedItem> items;
   final List<_CombinedItem> checkedItems;
   final String listId;
+  final Map<String, String> userMappings;
 
-  const _RecipeGroupedList({required this.items, required this.listId, this.checkedItems = const []});
+  const _RecipeGroupedList({
+    required this.items,
+    required this.listId,
+    this.checkedItems = const [],
+    this.userMappings = const {},
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -711,7 +769,11 @@ class _RecipeGroupedList extends ConsumerWidget {
                     ],
                   ),
                 ),
-                ...recipeItems.map((item) => _ShoppingItemTile(item: item, listId: listId)),
+                ...recipeItems.map((item) => _ShoppingItemTile(
+                  item: item,
+                  listId: listId,
+                  userMappings: userMappings,
+                )),
               ],
             );
           }
@@ -723,7 +785,6 @@ class _RecipeGroupedList extends ConsumerWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Clickable recipe header
                   InkWell(
                     onTap: recipe != null ? () => context.push('/recipe/$recipeId') : null,
                     child: Container(
@@ -748,7 +809,11 @@ class _RecipeGroupedList extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  ...recipeItems.map((item) => _ShoppingItemTile(item: item, listId: listId)),
+                  ...recipeItems.map((item) => _ShoppingItemTile(
+                    item: item,
+                    listId: listId,
+                    userMappings: userMappings,
+                  )),
                 ],
               );
             },
@@ -756,7 +821,7 @@ class _RecipeGroupedList extends ConsumerWidget {
         }),
         if (checkedItems.isNotEmpty) ...[
           const Divider(height: 32),
-          _CheckedItemsSection(items: checkedItems, listId: listId),
+          _CheckedItemsSection(items: checkedItems, listId: listId, userMappings: userMappings),
         ],
       ],
     );
@@ -769,18 +834,28 @@ class _UngroupedList extends StatelessWidget {
   final List<_CombinedItem> items;
   final List<_CombinedItem> checkedItems;
   final String listId;
+  final Map<String, String> userMappings;
 
-  const _UngroupedList({required this.items, required this.listId, this.checkedItems = const []});
+  const _UngroupedList({
+    required this.items,
+    required this.listId,
+    this.checkedItems = const [],
+    this.userMappings = const {},
+  });
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.only(bottom: 80),
       children: [
-        ...items.map((item) => _ShoppingItemTile(item: item, listId: listId)),
+        ...items.map((item) => _ShoppingItemTile(
+          item: item,
+          listId: listId,
+          userMappings: userMappings,
+        )),
         if (checkedItems.isNotEmpty) ...[
           const Divider(height: 32),
-          _CheckedItemsSection(items: checkedItems, listId: listId),
+          _CheckedItemsSection(items: checkedItems, listId: listId, userMappings: userMappings),
         ],
       ],
     );
@@ -792,8 +867,13 @@ class _UngroupedList extends StatelessWidget {
 class _ShoppingItemTile extends ConsumerWidget {
   final _CombinedItem item;
   final String listId;
+  final Map<String, String> userMappings;
 
-  const _ShoppingItemTile({required this.item, required this.listId});
+  const _ShoppingItemTile({
+    required this.item,
+    required this.listId,
+    this.userMappings = const {},
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -878,7 +958,6 @@ class _ShoppingItemTile extends ConsumerWidget {
                               color: item.isChecked ? theme.colorScheme.outline : null,
                             ),
                           ),
-                          // Show breakdown per recipe if multiple sources
                           if (hasMultipleSources)
                             Padding(
                               padding: const EdgeInsets.only(top: 4),
@@ -923,7 +1002,6 @@ class _ShoppingItemTile extends ConsumerWidget {
                                 }).toList(),
                               ),
                             )
-                          // Show single source recipe link
                           else if (item.sources.first.recipeId != null)
                             FutureBuilder<Recipe?>(
                               future: ref.read(recipeDaoProvider).getRecipeById(item.sources.first.recipeId!),
@@ -970,7 +1048,8 @@ class _ShoppingItemTile extends ConsumerWidget {
     final shoppingDao = ref.read(shoppingDaoProvider);
 
     String? savedCategoryId = item.sources.first.shoppingCategoryId;
-    final detectedCategoryName = _capitalizeFirst(item.detectedCategory);
+    final originalCategoryId = savedCategoryId;
+    final detectedCategoryName = _capitalizeFirst(item.getDetectedCategory(userMappings: userMappings));
 
     showDialog(
       context: context,
@@ -1035,6 +1114,25 @@ class _ShoppingItemTile extends ConsumerWidget {
             FilledButton(
               onPressed: () {
                 if (controller.text.trim().isNotEmpty) {
+                  // Save to user mappings if category was manually changed
+                  if (savedCategoryId != null && savedCategoryId != originalCategoryId) {
+                    // Extract base ingredient name
+                    final baseName = normalizeIngredientName(parseIngredient(item.baseName).name);
+
+                    // Convert category ID to category key (remove 'shop_' prefix if present)
+                    final categoryKey = savedCategoryId!.startsWith('shop_')
+                        ? savedCategoryId!.substring(5)
+                        : savedCategoryId!;
+
+                    // Save the mapping for future auto-detection
+                    shoppingDao.setUserIngredientMapping(baseName, categoryKey);
+                  } else if (savedCategoryId == null && originalCategoryId != null) {
+                    // User chose auto-detect - remove any saved mapping
+                    final baseName = normalizeIngredientName(parseIngredient(item.baseName).name);
+                    shoppingDao.removeUserIngredientMapping(baseName);
+                  }
+
+                  // Update the item
                   for (final source in item.sources) {
                     shoppingDao.updateItem(
                       source.id,
@@ -1244,8 +1342,13 @@ class _EmptyState extends StatelessWidget {
 class _CheckedItemsSection extends ConsumerWidget {
   final List<_CombinedItem> items;
   final String listId;
+  final Map<String, String> userMappings;
 
-  const _CheckedItemsSection({required this.items, required this.listId});
+  const _CheckedItemsSection({
+    required this.items,
+    required this.listId,
+    this.userMappings = const {},
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1279,7 +1382,11 @@ class _CheckedItemsSection extends ConsumerWidget {
             ],
           ),
         ),
-        ...items.map((item) => _ShoppingItemTile(item: item, listId: listId)),
+        ...items.map((item) => _ShoppingItemTile(
+          item: item,
+          listId: listId,
+          userMappings: userMappings,
+        )),
       ],
     );
   }

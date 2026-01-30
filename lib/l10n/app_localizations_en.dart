@@ -486,7 +486,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionRetry => 'Retry';
 
   @override
-  String get actionCopy => 'Copy as Text';
+  String get actionCopy => 'Copy';
 
   @override
   String get actionPaste => 'Paste';
@@ -501,7 +501,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionClear => 'Clear';
 
   @override
-  String get errorGeneric => 'An error occurred';
+  String get errorGeneric => 'Something went wrong';
 
   @override
   String get errorNetwork => 'Network error. Please check your connection.';
@@ -2497,7 +2497,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String nutritionMatchedCount(int matched, int total) {
-    return '$matched of $total ingredients matched';
+    return '$matched of $total matched';
   }
 
   @override
@@ -2793,4 +2793,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tagsColorLabel => 'Color';
+
+  @override
+  String get settingsRpgAnimations => 'Rarity Animations';
+
+  @override
+  String get settingsRpgAnimationsSubtitle => 'Glowing effects for epic and legendary recipes';
+
+  @override
+  String get settingsRpgSounds => 'Sound Effects';
+
+  @override
+  String get settingsRpgSoundsSubtitle => 'Play sounds for achievements and level ups';
+
+  @override
+  String get settingsRpgAchievements => 'Achievements';
+
+  @override
+  String get settingsRpgAchievementsSubtitle => 'View your unlocked achievements';
+
+  @override
+  String get settingsRpgStats => 'Cooking Stats';
+
+  @override
+  String get settingsRpgStatsSubtitle => 'View your cooking statistics';
+
+  @override
+  String get settingsRpgModeEnabled => 'Transform your cooking into an adventure!';
+
+  @override
+  String get settingsRecipeLayoutSubtitle => 'Customize how recipes are displayed';
+
+  @override
+  String get rarityCommon => 'Common';
+
+  @override
+  String get rarityCommonDesc => 'A simple everyday recipe';
+
+  @override
+  String get rarityUncommon => 'Uncommon';
+
+  @override
+  String get rarityUncommonDesc => 'A tasty recipe with a twist';
+
+  @override
+  String get rarityRare => 'Rare';
+
+  @override
+  String get rarityRareDesc => 'A special recipe worth mastering';
+
+  @override
+  String get rarityEpic => 'Epic';
+
+  @override
+  String get rarityEpicDesc => 'An epic recipe of great power!';
+
+  @override
+  String get rarityLegendary => 'Legendary';
+
+  @override
+  String get rarityLegendaryDesc => 'A legendary recipe worthy of the gods!';
 }

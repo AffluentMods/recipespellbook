@@ -9,4 +9,6 @@ mixin _$ShoppingDaoMixin on DatabaseAccessor<AppDatabase> {
       attachedDatabase.shoppingListItems;
   $ShoppingCategoriesTable get shoppingCategories =>
       attachedDatabase.shoppingCategories;
+  $UserIngredientMappingsTable get userIngredientMappings =>
+      attachedDatabase.userIngredientMappings;
 }

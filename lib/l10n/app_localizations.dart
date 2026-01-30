@@ -1006,7 +1006,7 @@ abstract class AppLocalizations {
   /// No description provided for @actionCopy.
   ///
   /// In en, this message translates to:
-  /// **'Copy as Text'**
+  /// **'Copy'**
   String get actionCopy;
 
   /// No description provided for @actionPaste.
@@ -1036,7 +1036,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorGeneric.
   ///
   /// In en, this message translates to:
-  /// **'An error occurred'**
+  /// **'Something went wrong'**
   String get errorGeneric;
 
   /// No description provided for @errorNetwork.
@@ -4594,7 +4594,7 @@ abstract class AppLocalizations {
   /// No description provided for @nutritionMatchedCount.
   ///
   /// In en, this message translates to:
-  /// **'{matched} of {total} ingredients matched'**
+  /// **'{matched} of {total} matched'**
   String nutritionMatchedCount(int matched, int total);
 
   /// No description provided for @nutritionUncertainCount.
@@ -5172,6 +5172,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Color'**
   String get tagsColorLabel;
+
+  /// No description provided for @settingsRpgAnimations.
+  ///
+  /// In en, this message translates to:
+  /// **'Rarity Animations'**
+  String get settingsRpgAnimations;
+
+  /// No description provided for @settingsRpgAnimationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Glowing effects for epic and legendary recipes'**
+  String get settingsRpgAnimationsSubtitle;
+
+  /// No description provided for @settingsRpgSounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound Effects'**
+  String get settingsRpgSounds;
+
+  /// No description provided for @settingsRpgSoundsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Play sounds for achievements and level ups'**
+  String get settingsRpgSoundsSubtitle;
+
+  /// No description provided for @settingsRpgAchievements.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements'**
+  String get settingsRpgAchievements;
+
+  /// No description provided for @settingsRpgAchievementsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View your unlocked achievements'**
+  String get settingsRpgAchievementsSubtitle;
+
+  /// No description provided for @settingsRpgStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking Stats'**
+  String get settingsRpgStats;
+
+  /// No description provided for @settingsRpgStatsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View your cooking statistics'**
+  String get settingsRpgStatsSubtitle;
+
+  /// No description provided for @settingsRpgModeEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Transform your cooking into an adventure!'**
+  String get settingsRpgModeEnabled;
+
+  /// No description provided for @settingsRecipeLayoutSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize how recipes are displayed'**
+  String get settingsRecipeLayoutSubtitle;
+
+  /// No description provided for @rarityCommon.
+  ///
+  /// In en, this message translates to:
+  /// **'Common'**
+  String get rarityCommon;
+
+  /// No description provided for @rarityCommonDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A simple everyday recipe'**
+  String get rarityCommonDesc;
+
+  /// No description provided for @rarityUncommon.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncommon'**
+  String get rarityUncommon;
+
+  /// No description provided for @rarityUncommonDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A tasty recipe with a twist'**
+  String get rarityUncommonDesc;
+
+  /// No description provided for @rarityRare.
+  ///
+  /// In en, this message translates to:
+  /// **'Rare'**
+  String get rarityRare;
+
+  /// No description provided for @rarityRareDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A special recipe worth mastering'**
+  String get rarityRareDesc;
+
+  /// No description provided for @rarityEpic.
+  ///
+  /// In en, this message translates to:
+  /// **'Epic'**
+  String get rarityEpic;
+
+  /// No description provided for @rarityEpicDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'An epic recipe of great power!'**
+  String get rarityEpicDesc;
+
+  /// No description provided for @rarityLegendary.
+  ///
+  /// In en, this message translates to:
+  /// **'Legendary'**
+  String get rarityLegendary;
+
+  /// No description provided for @rarityLegendaryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A legendary recipe worthy of the gods!'**
+  String get rarityLegendaryDesc;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
