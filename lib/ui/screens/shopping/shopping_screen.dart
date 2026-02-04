@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:drift/drift.dart' as drift;
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/ingredient_utils.dart';
+import '../../../data/ingredient_images.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../widgets/rpg/rpg_navigation_shell.dart';
 
-// ============ SHOPPING LIST SCREEN ============
+/// Provider to track shopping list item count (for nav badge)
+final shoppingItemCountProvider = StreamProvider<int>((ref) {
+  final shoppingDao = ref.watch(shoppingDaoProvider);
+  return shoppingDao.watchItemsInList('list_default').map((items) =>
+  items.where((i) => !i.isChecked).length
+  );
+});
+
+// ============ MAIN SCREEN ============
 
 class ShoppingScreen extends ConsumerStatefulWidget {
   const ShoppingScreen({super.key});
@@ -20,26 +31,33 @@ class ShoppingScreen extends ConsumerStatefulWidget {
 
 class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   String _currentListId = 'list_default';
+  String _currentListName = 'Shopping List';
   ShoppingGroupMode _groupMode = ShoppingGroupMode.section;
-  final TextEditingController _addController = TextEditingController();
   Map<String, String> _userMappings = {};
 
   @override
   void initState() {
     super.initState();
     _loadUserMappings();
+    _loadCurrentListName();
   }
 
   Future<void> _loadUserMappings() async {
-    final shoppingDao = ref.read(shoppingDaoProvider);
-    final mappings = await shoppingDao.getUserIngredientMappings();
-    if (mounted) setState(() => _userMappings = mappings);
+    final dao = ref.read(userIngredientMappingsDaoProvider);
+    final mappings = await dao.getAllMappings();
+    if (mounted) {
+      setState(() {
+        _userMappings = {for (var m in mappings) m.ingredient: m.shoppingCategoryId};
+      });
+    }
   }
 
-  @override
-  void dispose() {
-    _addController.dispose();
-    super.dispose();
+  Future<void> _loadCurrentListName() async {
+    final shoppingDao = ref.read(shoppingDaoProvider);
+    final list = await shoppingDao.getListById(_currentListId);
+    if (mounted && list != null) {
+      setState(() => _currentListName = list.name);
+    }
   }
 
   @override
@@ -47,274 +65,1281 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.watch(shoppingDaoProvider);
-
-    // Watch for user mapping changes
-    ref.listen(
-      userIngredientMappingsStreamProvider,
-          (previous, next) {
-        next.whenData((mappings) {
-          if (mounted) setState(() => _userMappings = mappings);
-        });
-      },
-    );
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.shoppingTitle),
-        actions: [
-          // Group mode
-          PopupMenuButton<ShoppingGroupMode>(
-            icon: const Icon(Icons.sort),
-            tooltip: l10n.groupBy,
-            onSelected: (mode) => setState(() => _groupMode = mode),
-            itemBuilder: (ctx) => ShoppingGroupMode.values.map((mode) {
-              return PopupMenuItem(
-                value: mode,
-                child: Row(
-                  children: [
-                    Icon(mode.icon, color: _groupMode == mode ? theme.colorScheme.primary : null),
-                    const SizedBox(width: 12),
-                    Text(_getGroupModeLabel(context, mode)),
-                  ],
-                ),
-              );
-            }).toList(),
-          ),
-          // More options (3 dots)
-          PopupMenuButton<String>(
-            onSelected: (action) => _handleAction(action),
-            itemBuilder: (ctx) => [
-              PopupMenuItem(value: 'check_all', child: Row(children: [const Icon(Icons.check_box), const SizedBox(width: 12), Text(l10n.shoppingCheckAll)])),
-              PopupMenuItem(value: 'uncheck_all', child: Row(children: [const Icon(Icons.check_box_outline_blank), const SizedBox(width: 12), Text(l10n.shoppingUncheckAll)])),
-              PopupMenuItem(value: 'clear_checked', child: Row(children: [const Icon(Icons.delete_sweep), const SizedBox(width: 12), Text(l10n.shoppingClearChecked)])),
-              const PopupMenuDivider(),
-              PopupMenuItem(value: 'share', child: Row(children: [const Icon(Icons.share), const SizedBox(width: 12), Text(l10n.actionShare)])),
-              PopupMenuItem(value: 'copy', child: Row(children: [const Icon(Icons.copy), const SizedBox(width: 12), Text(l10n.actionCopy)])),
-              const PopupMenuDivider(),
-              PopupMenuItem(value: 'manage_lists', child: Row(children: [const Icon(Icons.list_alt), const SizedBox(width: 12), Text(l10n.shoppingManageLists)])),
-              PopupMenuItem(value: 'categories', child: Row(children: [const Icon(Icons.category), const SizedBox(width: 12), Text(l10n.settingsShoppingCategories)])),
-            ],
-          ),
-          // Settings (far right)
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: l10n.settingsTitle,
-            onPressed: () => context.push('/settings'),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // List selector
-          _ListSelector(
-            currentListId: _currentListId,
-            onListChanged: (id) => setState(() => _currentListId = id),
-          ),
+      backgroundColor: isDark ? theme.colorScheme.surface : const Color(0xFFFAF8F5),
+      body: SafeArea(
+        child: StreamBuilder<List<ShoppingListItem>>(
+          stream: shoppingDao.watchItemsInList(_currentListId),
+          builder: (context, snapshot) {
+            final items = snapshot.data ?? [];
+            final uncheckedItems = items.where((i) => !i.isChecked).toList();
+            final checkedItems = items.where((i) => i.isChecked).toList();
 
-          // Add item bar
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
+            return Column(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _addController,
-                    decoration: InputDecoration(
-                      hintText: l10n.shoppingAddItem,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      isDense: true,
-                    ),
-                    onSubmitted: (_) => _addItem(),
-                  ),
+                // Header with list switcher
+                _ModernHeader(
+                  listName: _currentListName,
+                  itemCount: uncheckedItems.length,
+                  groupMode: _groupMode,
+                  onGroupModeChanged: (mode) => setState(() => _groupMode = mode),
+                  onShare: () => _shareList(items),
+                  onMoreOptions: () => _showMoreOptions(context),
+                  onListTap: () => _showListSwitcher(context),
                 ),
-                const SizedBox(width: 8),
-                IconButton.filled(
-                  onPressed: _addItem,
-                  icon: const Icon(Icons.add),
+
+                // Order Online Button
+                if (uncheckedItems.isNotEmpty)
+                  _OrderOnlineButton(items: uncheckedItems),
+
+                // Items List
+                Expanded(
+                  child: items.isEmpty
+                      ? _EmptyState()
+                      : _buildGroupedList(uncheckedItems, checkedItems),
                 ),
               ],
-            ),
-          ),
-
-          // Items list
-          Expanded(
-            child: StreamBuilder<List<ShoppingListItem>>(
-              stream: shoppingDao.watchItemsInList(_currentListId),
-              builder: (context, snapshot) {
-                final items = snapshot.data ?? [];
-
-                if (items.isEmpty) {
-                  return _EmptyState();
-                }
-
-                // Combine similar ingredients
-                final combinedItems = _combineItems(items);
-
-                // Group items
-                return _buildGroupedList(combinedItems);
-              },
-            ),
-          ),
-        ],
+            );
+          },
+        ),
       ),
+      floatingActionButton: _ModernFAB(onTap: () => _showAddItemSheet(context)),
     );
   }
 
-  String _getGroupModeLabel(BuildContext context, ShoppingGroupMode mode) {
-    final l10n = AppLocalizations.of(context)!;
-    switch (mode) {
+  Widget _buildGroupedList(List<ShoppingListItem> unchecked, List<ShoppingListItem> checked) {
+    switch (_groupMode) {
       case ShoppingGroupMode.section:
-        return l10n.groupBySection;
+        return _SectionGroupedList(
+          items: unchecked,
+          checkedItems: checked,
+          listId: _currentListId,
+          userMappings: _userMappings,
+          onCategoryChanged: _onItemCategoryChanged,
+          onRefreshMappings: _loadUserMappings,
+        );
       case ShoppingGroupMode.recipe:
-        return l10n.groupByRecipe;
+        return _RecipeGroupedList(
+          items: unchecked,
+          checkedItems: checked,
+          listId: _currentListId,
+          userMappings: _userMappings,
+          onCategoryChanged: _onItemCategoryChanged,
+        );
       case ShoppingGroupMode.ungrouped:
-        return l10n.groupByUngrouped;
+        return _UngroupedList(
+          items: unchecked,
+          checkedItems: checked,
+          listId: _currentListId,
+          userMappings: _userMappings,
+          onCategoryChanged: _onItemCategoryChanged,
+        );
     }
   }
 
-  void _addItem() {
-    final text = _addController.text.trim();
-    if (text.isEmpty) return;
-
+  /// When user changes an item's category, save it to user mappings
+  void _onItemCategoryChanged(String itemId, String ingredientName, String newCategoryId) async {
     final shoppingDao = ref.read(shoppingDaoProvider);
-    final id = 'item_${DateTime.now().millisecondsSinceEpoch}';
+    final mappingsDao = ref.read(userIngredientMappingsDaoProvider);
 
-    shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
-      id: id,
-      listId: _currentListId,
-      name: text,
-      sortOrder: drift.Value(0),
-    ));
+    // Update the item's category
+    await shoppingDao.updateItem(itemId, shoppingCategoryId: newCategoryId);
 
-    _addController.clear();
+    // Save to user mappings for future use
+    final normalized = normalizeIngredientName(ingredientName);
+    await mappingsDao.setMapping(normalized, newCategoryId);
+
+    // Refresh local cache
+    _loadUserMappings();
   }
 
-  void _handleAction(String action) {
-    final shoppingDao = ref.read(shoppingDaoProvider);
+  Future<void> _shareList(List<ShoppingListItem> items) async {
     final l10n = AppLocalizations.of(context)!;
-
-    switch (action) {
-      case 'check_all':
-        shoppingDao.checkAllItems(_currentListId);
-        break;
-      case 'uncheck_all':
-        shoppingDao.uncheckAllItems(_currentListId);
-        break;
-      case 'clear_checked':
-        shoppingDao.deleteCheckedItems(_currentListId);
-        break;
-      case 'share':
-        _shareList();
-        break;
-      case 'copy':
-        _copyToClipboard();
-        break;
-      case 'manage_lists':
-        _showManageListsSheet();
-        break;
-      case 'categories':
-        context.push('/settings/shopping-categories');
-        break;
-    }
-  }
-
-  Future<void> _shareList() async {
-    final l10n = AppLocalizations.of(context)!;
-    final items = await ref.read(shoppingDaoProvider).watchItemsInList(_currentListId).first;
-    final text = _formatListAsText(items, l10n);
-    await Share.share(text, subject: l10n.shoppingTitle);
-  }
-
-  Future<void> _copyToClipboard() async {
-    final l10n = AppLocalizations.of(context)!;
-    final items = await ref.read(shoppingDaoProvider).watchItemsInList(_currentListId).first;
-    final text = _formatListAsText(items, l10n);
-    await Clipboard.setData(ClipboardData(text: text));
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.successCopied), duration: const Duration(seconds: 2)),
-      );
-    }
-  }
-
-  String _formatListAsText(List<ShoppingListItem> items, AppLocalizations l10n) {
-    final buffer = StringBuffer('${l10n.shoppingTitle}\n');
+    final buffer = StringBuffer('$_currentListName\n');
     buffer.writeln('─' * 20);
     for (final item in items) {
       final check = item.isChecked ? '☑' : '☐';
       buffer.writeln('$check ${item.name}');
     }
-    return buffer.toString();
+    await Share.share(buffer.toString(), subject: _currentListName);
   }
 
-  void _showManageListsSheet() {
+  void _showListSwitcher(BuildContext context) {
+    final shoppingDao = ref.read(shoppingDaoProvider);
+
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (ctx) => _ManageListsSheet(
-        currentListId: _currentListId,
-        onListSelected: (id) {
-          setState(() => _currentListId = id);
-          Navigator.pop(ctx);
-        },
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Text('Shopping Lists', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  const Spacer(),
+                  TextButton.icon(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      _createNewList(context);
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('New'),
+                  ),
+                ],
+              ),
+            ),
+            StreamBuilder<List<ShoppingList>>(
+              stream: shoppingDao.watchAllLists(),
+              builder: (context, snapshot) {
+                final lists = snapshot.data ?? [];
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: lists.length,
+                  itemBuilder: (context, index) {
+                    final list = lists[index];
+                    final isSelected = list.id == _currentListId;
+                    return ListTile(
+                      leading: Icon(
+                        isSelected ? Icons.check_circle : Icons.circle_outlined,
+                        color: isSelected ? Theme.of(context).colorScheme.primary : null,
+                      ),
+                      title: Text(list.name),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, size: 20),
+                            onPressed: () => _renameList(context, list),
+                          ),
+                          if (!list.isDefault)
+                            IconButton(
+                              icon: const Icon(Icons.delete, size: 20),
+                              onPressed: () => _deleteList(context, list),
+                            ),
+                        ],
+                      ),
+                      onTap: () {
+                        setState(() {
+                          _currentListId = list.id;
+                          _currentListName = list.name;
+                        });
+                        Navigator.pop(ctx);
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
 
-  // Combine items with same ingredient from different recipes using ingredient_utils
-  List<_CombinedItem> _combineItems(List<ShoppingListItem> items) {
-    final Map<String, _CombinedItem> combined = {};
+  void _createNewList(BuildContext context) {
+    final controller = TextEditingController();
+    final shoppingDao = ref.read(shoppingDaoProvider);
 
-    for (final item in items) {
-      // Parse the ingredient to get normalized name
-      final parsed = parseIngredient(item.name);
-      final baseName = normalizeIngredientName(parsed.name);
-
-      if (combined.containsKey(baseName)) {
-        combined[baseName]!.sources.add(item);
-      } else {
-        combined[baseName] = _CombinedItem(
-          baseName: baseName,
-          sources: [item],
-        );
-      }
-    }
-
-    return combined.values.toList();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('New List'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(hintText: 'List name'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              if (controller.text.trim().isNotEmpty) {
+                final id = 'list_${DateTime.now().millisecondsSinceEpoch}';
+                shoppingDao.insertList(ShoppingListsCompanion.insert(
+                  id: id,
+                  name: controller.text.trim(),
+                ));
+                setState(() {
+                  _currentListId = id;
+                  _currentListName = controller.text.trim();
+                });
+                Navigator.pop(ctx);
+              }
+            },
+            child: const Text('Create'),
+          ),
+        ],
+      ),
+    );
   }
 
-  Widget _buildGroupedList(List<_CombinedItem> items) {
-    // Separate checked and unchecked items
-    final unchecked = items.where((i) => !i.isChecked).toList();
-    final checked = items.where((i) => i.isChecked).toList();
+  void _renameList(BuildContext context, ShoppingList list) {
+    final controller = TextEditingController(text: list.name);
+    final shoppingDao = ref.read(shoppingDaoProvider);
 
-    Widget mainList;
-    switch (_groupMode) {
-      case ShoppingGroupMode.section:
-        mainList = _SectionGroupedList(
-          items: unchecked,
-          listId: _currentListId,
-          checkedItems: checked,
-          userMappings: _userMappings,
-        );
-      case ShoppingGroupMode.recipe:
-        mainList = _RecipeGroupedList(
-          items: unchecked,
-          listId: _currentListId,
-          checkedItems: checked,
-          userMappings: _userMappings,
-        );
-      case ShoppingGroupMode.ungrouped:
-        mainList = _UngroupedList(
-          items: unchecked,
-          listId: _currentListId,
-          checkedItems: checked,
-          userMappings: _userMappings,
-        );
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Rename List'),
+        content: TextField(controller: controller, autofocus: true),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              if (controller.text.trim().isNotEmpty) {
+                shoppingDao.updateListName(list.id, controller.text.trim());
+                if (list.id == _currentListId) {
+                  setState(() => _currentListName = controller.text.trim());
+                }
+                Navigator.pop(ctx);
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteList(BuildContext context, ShoppingList list) {
+    final shoppingDao = ref.read(shoppingDaoProvider);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete List?'),
+        content: Text('Are you sure you want to delete "${list.name}"?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              shoppingDao.deleteList(list.id);
+              if (list.id == _currentListId) {
+                setState(() {
+                  _currentListId = 'list_default';
+                  _loadCurrentListName();
+                });
+              }
+              Navigator.pop(ctx);
+            },
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMoreOptions(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final shoppingDao = ref.read(shoppingDaoProvider);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.check_box),
+                title: Text(l10n.shoppingCheckAll),
+                onTap: () { Navigator.pop(ctx); shoppingDao.checkAllItems(_currentListId); },
+              ),
+              ListTile(
+                leading: const Icon(Icons.check_box_outline_blank),
+                title: Text(l10n.shoppingUncheckAll),
+                onTap: () { Navigator.pop(ctx); shoppingDao.uncheckAllItems(_currentListId); },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete_sweep),
+                title: Text(l10n.shoppingClearChecked),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  shoppingDao.deleteCheckedItems(_currentListId);
+                  RpgIntegration.onShoppingListCompleted(ref);
+                },
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.copy),
+                title: Text(l10n.actionCopy),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  final items = await shoppingDao.getItemsForList(_currentListId);
+                  final buffer = StringBuffer('$_currentListName\n');
+                  for (final item in items) buffer.writeln('${item.isChecked ? '☑' : '☐'} ${item.name}');
+                  await Clipboard.setData(ClipboardData(text: buffer.toString()));
+                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.successCopied)));
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.category),
+                title: Text(l10n.settingsShoppingCategories),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  context.push('/settings/shopping-categories');
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAddItemSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _AddItemSheet(
+        listId: _currentListId,
+        userMappings: _userMappings,
+        onItemAdded: _loadUserMappings,
+      ),
+    );
+  }
+}
+
+// ============ MODERN HEADER ============
+
+class _ModernHeader extends StatelessWidget {
+  final String listName;
+  final int itemCount;
+  final ShoppingGroupMode groupMode;
+  final ValueChanged<ShoppingGroupMode> onGroupModeChanged;
+  final VoidCallback onShare;
+  final VoidCallback onMoreOptions;
+  final VoidCallback onListTap;
+
+  const _ModernHeader({
+    required this.listName,
+    required this.itemCount,
+    required this.groupMode,
+    required this.onGroupModeChanged,
+    required this.onShare,
+    required this.onMoreOptions,
+    required this.onListTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 12, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              // Tappable list name with dropdown indicator
+              GestureDetector(
+                onTap: onListTap,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      listName,
+                      style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.arrow_drop_down, color: theme.colorScheme.outline),
+                  ],
+                ),
+              ),
+              const Spacer(),
+              IconButton(icon: const Icon(Icons.share_outlined), onPressed: onShare),
+              IconButton(icon: const Icon(Icons.more_vert), onPressed: onMoreOptions),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Text(
+                '$itemCount ${itemCount == 1 ? 'item' : 'items'}',
+                style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  border: Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: PopupMenuButton<ShoppingGroupMode>(
+                  offset: const Offset(0, 40),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(_getGroupModeLabel(groupMode), style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+                      const SizedBox(width: 4),
+                      Icon(Icons.arrow_drop_down, size: 20, color: theme.colorScheme.onSurface),
+                    ],
+                  ),
+                  onSelected: onGroupModeChanged,
+                  itemBuilder: (ctx) => ShoppingGroupMode.values.map((mode) {
+                    return PopupMenuItem(
+                      value: mode,
+                      child: Row(
+                        children: [
+                          Icon(mode.icon, size: 20, color: groupMode == mode ? theme.colorScheme.primary : null),
+                          const SizedBox(width: 12),
+                          Text(_getGroupModeLabel(mode)),
+                          if (groupMode == mode) ...[const Spacer(), Icon(Icons.check, size: 18, color: theme.colorScheme.primary)],
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getGroupModeLabel(ShoppingGroupMode mode) {
+    switch (mode) {
+      case ShoppingGroupMode.section: return 'By Section';
+      case ShoppingGroupMode.recipe: return 'By Recipe';
+      case ShoppingGroupMode.ungrouped: return 'Ungrouped';
     }
-    return mainList;
+  }
+}
+
+// ============ ORDER ONLINE BUTTON ============
+
+class _OrderOnlineButton extends StatelessWidget {
+  final List<ShoppingListItem> items;
+  const _OrderOnlineButton({required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showOrderOptions(context),
+          borderRadius: BorderRadius.circular(30),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              border: Border.all(color: isDark ? Colors.grey.shade600 : Colors.grey.shade300, width: 1.5),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.shopping_cart_outlined, color: const Color(0xFFE88B00), size: 22),
+                const SizedBox(width: 10),
+                Text('Order online', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showOrderOptions(BuildContext context) {
+    // Get item names (just the base name, not quantities)
+    final itemNames = items.map((i) {
+      final parsed = parseIngredient(i.name);
+      return parsed.name;
+    }).toList();
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+                const SizedBox(height: 24),
+                Text('Order Online', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                Text('${items.length} items', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey)),
+                const SizedBox(height: 24),
+                _OrderOptionTile(
+                  emoji: '🥕',
+                  name: 'Instacart',
+                  color: const Color(0xFF43B02A),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    // Instacart doesn't have a direct search URL that works well
+                    // Best approach is to open their app or website
+                    final url = Uri.parse('https://www.instacart.com/');
+                    if (await canLaunchUrl(url)) {
+                      launchUrl(url, mode: LaunchMode.externalApplication);
+                    }
+                    // Show a tip
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Tip: Copy your list and paste items in Instacart'),
+                        duration: Duration(seconds: 4),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                _OrderOptionTile(
+                  emoji: '🏪',
+                  name: 'Walmart',
+                  color: const Color(0xFF0071CE),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    // Walmart grocery pickup/delivery
+                    final url = Uri.parse('https://www.walmart.com/grocery');
+                    if (await canLaunchUrl(url)) {
+                      launchUrl(url, mode: LaunchMode.externalApplication);
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+                _OrderOptionTile(
+                  emoji: '📦',
+                  name: 'Amazon Fresh',
+                  color: const Color(0xFFFF9900),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    // Open Amazon Fresh for each item (limited to first item for now)
+                    if (itemNames.isNotEmpty) {
+                      final query = Uri.encodeComponent(itemNames.first);
+                      final url = Uri.parse('https://www.amazon.com/s?k=$query&i=amazonfresh');
+                      if (await canLaunchUrl(url)) {
+                        launchUrl(url, mode: LaunchMode.externalApplication);
+                      }
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OrderOptionTile extends StatelessWidget {
+  final String emoji, name;
+  final Color color;
+  final VoidCallback onTap;
+  const _OrderOptionTile({required this.emoji, required this.name, required this.color, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: color.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(children: [
+            Text(emoji, style: const TextStyle(fontSize: 28)),
+            const SizedBox(width: 16),
+            Text(name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+            const Spacer(),
+            Icon(Icons.open_in_new, color: color),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+// ============ MODERN FAB ============
+
+class _ModernFAB extends StatelessWidget {
+  final VoidCallback onTap;
+  const _ModernFAB({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 60, height: 60,
+        decoration: BoxDecoration(
+          color: const Color(0xFFE8A860),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: const Color(0xFFE8A860).withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 4))],
+        ),
+        child: const Icon(Icons.add, color: Colors.white, size: 32),
+      ),
+    );
+  }
+}
+
+// ============ ADD ITEM SHEET ============
+
+class _AddItemSheet extends ConsumerStatefulWidget {
+  final String listId;
+  final Map<String, String> userMappings;
+  final VoidCallback onItemAdded;
+
+  const _AddItemSheet({required this.listId, required this.userMappings, required this.onItemAdded});
+
+  @override
+  ConsumerState<_AddItemSheet> createState() => _AddItemSheetState();
+}
+
+class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
+  final _controller = TextEditingController();
+  final _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    // Auto-focus the text field
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  void _addItem() {
+    if (_controller.text.trim().isEmpty) return;
+
+    final shoppingDao = ref.read(shoppingDaoProvider);
+    final mappingsDao = ref.read(userIngredientMappingsDaoProvider);
+    final text = _controller.text.trim();
+    final normalized = normalizeIngredientName(text);
+
+    // Detect category using user mappings
+    final categoryId = getShoppingCategory(text, userMappings: widget.userMappings);
+
+    final id = 'item_${DateTime.now().millisecondsSinceEpoch}';
+    shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
+      id: id,
+      listId: widget.listId,
+      name: text,
+      sortOrder: const drift.Value(0),
+      shoppingCategoryId: drift.Value(categoryId),
+    ));
+
+    // Save mapping for future (if it's a new ingredient)
+    if (!widget.userMappings.containsKey(normalized)) {
+      mappingsDao.setMapping(normalized, categoryId);
+      widget.onItemAdded();
+    }
+
+    // Clear and keep focus for next item
+    _controller.clear();
+    _focusNode.requestFocus();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)))),
+            const SizedBox(height: 20),
+            Text('Add Item', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _controller,
+              focusNode: _focusNode,
+              decoration: InputDecoration(
+                hintText: 'e.g., 2 cups flour',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                prefixIcon: const Icon(Icons.add_shopping_cart),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: _addItem,
+                ),
+              ),
+              onSubmitted: (_) => _addItem(),
+              textInputAction: TextInputAction.send,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Press Enter or tap send to add, then type the next item',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============ SECTION GROUPED LIST ============
+
+class _SectionGroupedList extends ConsumerWidget {
+  final List<ShoppingListItem> items;
+  final List<ShoppingListItem> checkedItems;
+  final String listId;
+  final Map<String, String> userMappings;
+  final Function(String, String, String) onCategoryChanged;
+  final VoidCallback onRefreshMappings;
+
+  const _SectionGroupedList({
+    required this.items,
+    required this.checkedItems,
+    required this.listId,
+    required this.userMappings,
+    required this.onCategoryChanged,
+    required this.onRefreshMappings,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    // Group items by category
+    final grouped = <String, List<ShoppingListItem>>{};
+    for (final item in items) {
+      // Use saved category or detect
+      String category = item.shoppingCategoryId ?? '';
+      if (category.isEmpty) {
+        final normalized = normalizeIngredientName(item.name);
+        category = getShoppingCategory(item.name, userMappings: userMappings);
+      }
+      grouped.putIfAbsent(category, () => []).add(item);
+    }
+
+    // Sort categories
+    final sortedKeys = grouped.keys.toList()..sort((a, b) {
+      final order = ['produce', 'dairy', 'meat', 'seafood', 'bakery', 'deli', 'frozen',
+        'breakfast', 'canned', 'pasta', 'grains', 'baking', 'condiments',
+        'oil', 'spices', 'snacks', 'beverages', 'alcohol', 'baby',
+        'beauty', 'household', 'pet', 'international', 'other'];
+      final aIdx = order.indexOf(a);
+      final bIdx = order.indexOf(b);
+      return (aIdx == -1 ? 999 : aIdx).compareTo(bIdx == -1 ? 999 : bIdx);
+    });
+
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 100),
+      children: [
+        for (final category in sortedKeys) ...[
+          // Section header
+          Container(
+            width: double.infinity,
+            color: isDark ? Colors.grey.shade800 : const Color(0xFFF5F0E8),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Text(
+              getShoppingCategoryDisplayName(category).toUpperCase(),
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          // Items
+          for (final item in grouped[category]!)
+            _ShoppingItemTile(
+              item: item,
+              listId: listId,
+              userMappings: userMappings,
+              onCategoryChanged: onCategoryChanged,
+            ),
+        ],
+        // Checked items
+        if (checkedItems.isNotEmpty)
+          _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged),
+      ],
+    );
+  }
+}
+
+// ============ RECIPE GROUPED LIST ============
+
+class _RecipeGroupedList extends ConsumerWidget {
+  final List<ShoppingListItem> items;
+  final List<ShoppingListItem> checkedItems;
+  final String listId;
+  final Map<String, String> userMappings;
+  final Function(String, String, String) onCategoryChanged;
+
+  const _RecipeGroupedList({
+    required this.items,
+    required this.checkedItems,
+    required this.listId,
+    required this.userMappings,
+    required this.onCategoryChanged,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final recipeDao = ref.watch(recipeDaoProvider);
+
+    // Group by recipe
+    final grouped = <String?, List<ShoppingListItem>>{};
+    for (final item in items) {
+      grouped.putIfAbsent(item.recipeId, () => []).add(item);
+    }
+
+    // Sort: recipes first, then manual items (null recipeId)
+    final sortedKeys = grouped.keys.toList()..sort((a, b) {
+      if (a == null && b == null) return 0;
+      if (a == null) return 1;
+      if (b == null) return -1;
+      return 0;
+    });
+
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 100),
+      children: [
+        for (final recipeId in sortedKeys) ...[
+          // Recipe header
+          FutureBuilder<Recipe?>(
+            future: recipeId != null ? recipeDao.getRecipeById(recipeId) : Future.value(null),
+            builder: (context, snapshot) {
+              final recipe = snapshot.data;
+              final title = recipe?.title ?? 'Added manually';
+
+              return Container(
+                width: double.infinity,
+                color: isDark ? Colors.grey.shade800 : const Color(0xFFF5F0E8),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title.toUpperCase(),
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    // Link to recipe
+                    if (recipe != null)
+                      GestureDetector(
+                        onTap: () => context.push('/recipe/${recipe.id}'),
+                        child: Icon(Icons.open_in_new, size: 18, color: theme.colorScheme.primary),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+          // Items
+          for (final item in grouped[recipeId]!)
+            _ShoppingItemTile(
+              item: item,
+              listId: listId,
+              userMappings: userMappings,
+              onCategoryChanged: onCategoryChanged,
+              showRecipeLink: false,
+            ),
+        ],
+        if (checkedItems.isNotEmpty)
+          _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged),
+      ],
+    );
+  }
+}
+
+// ============ UNGROUPED LIST ============
+
+class _UngroupedList extends StatelessWidget {
+  final List<ShoppingListItem> items;
+  final List<ShoppingListItem> checkedItems;
+  final String listId;
+  final Map<String, String> userMappings;
+  final Function(String, String, String) onCategoryChanged;
+
+  const _UngroupedList({
+    required this.items,
+    required this.checkedItems,
+    required this.listId,
+    required this.userMappings,
+    required this.onCategoryChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 100),
+      children: [
+        for (final item in items)
+          _ShoppingItemTile(item: item, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged),
+        if (checkedItems.isNotEmpty)
+          _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged),
+      ],
+    );
+  }
+}
+
+// ============ SHOPPING ITEM TILE ============
+
+class _ShoppingItemTile extends ConsumerWidget {
+  final ShoppingListItem item;
+  final String listId;
+  final Map<String, String> userMappings;
+  final Function(String, String, String) onCategoryChanged;
+  final bool showRecipeLink;
+
+  const _ShoppingItemTile({
+    required this.item,
+    required this.listId,
+    required this.userMappings,
+    required this.onCategoryChanged,
+    this.showRecipeLink = true,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final shoppingDao = ref.read(shoppingDaoProvider);
+    final isDark = theme.brightness == Brightness.dark;
+    final recipeDao = ref.watch(recipeDaoProvider);
+
+    // Get emoji
+    final parsed = parseIngredient(item.name);
+    final emoji = IngredientImages.getEmoji(parsed.name);
+
+    return Dismissible(
+      key: Key(item.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        color: theme.colorScheme.error,
+        child: Icon(Icons.delete, color: theme.colorScheme.onError),
+      ),
+      onDismissed: (_) => shoppingDao.deleteItem(item.id),
+      child: Container(
+        color: isDark ? theme.colorScheme.surface : Colors.white,
+        child: InkWell(
+          onTap: () => _showItemOptions(context, ref),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Row(
+              children: [
+                // Emoji circle
+                Container(
+                  width: 48, height: 48,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey.shade800 : const Color(0xFFF5F0E8),
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(emoji, style: const TextStyle(fontSize: 24)),
+                ),
+                const SizedBox(width: 16),
+                // Item info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.name,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          decoration: item.isChecked ? TextDecoration.lineThrough : null,
+                          color: item.isChecked ? theme.colorScheme.outline : null,
+                        ),
+                      ),
+                      // Recipe link
+                      if (showRecipeLink && item.recipeId != null)
+                        FutureBuilder<Recipe?>(
+                          future: recipeDao.getRecipeById(item.recipeId!),
+                          builder: (context, snapshot) {
+                            final recipe = snapshot.data;
+                            if (recipe == null) return const SizedBox.shrink();
+                            return GestureDetector(
+                              onTap: () => context.push('/recipe/${recipe.id}'),
+                              child: Text(
+                                recipe.title,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+                // Checkbox
+                Transform.scale(
+                  scale: 1.2,
+                  child: Checkbox(
+                    value: item.isChecked,
+                    onChanged: (_) => shoppingDao.toggleItemChecked(item.id, !item.isChecked),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    side: BorderSide(color: isDark ? Colors.grey.shade600 : Colors.grey.shade400, width: 2),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showItemOptions(BuildContext context, WidgetRef ref) {
+    final shoppingDao = ref.read(shoppingDaoProvider);
+    final controller = TextEditingController(text: item.name);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)))),
+              const SizedBox(height: 20),
+              Text('Edit Item', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+
+              // Name field
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  labelText: 'Item name',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Category dropdown
+              _CategoryDropdown(
+                currentCategoryId: item.shoppingCategoryId ?? getShoppingCategory(item.name, userMappings: userMappings),
+                onChanged: (newCategoryId) {
+                  onCategoryChanged(item.id, item.name, newCategoryId);
+                  Navigator.pop(ctx);
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Actions
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        shoppingDao.deleteItem(item.id);
+                        Navigator.pop(ctx);
+                      },
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      label: const Text('Delete', style: TextStyle(color: Colors.red)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () {
+                        if (controller.text.trim().isNotEmpty) {
+                          shoppingDao.updateItem(item.id, name: controller.text.trim());
+                        }
+                        Navigator.pop(ctx);
+                      },
+                      child: const Text('Save'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============ CATEGORY DROPDOWN ============
+
+class _CategoryDropdown extends ConsumerWidget {
+  final String currentCategoryId;
+  final ValueChanged<String> onChanged;
+
+  const _CategoryDropdown({required this.currentCategoryId, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final shoppingDao = ref.watch(shoppingDaoProvider);
+
+    return StreamBuilder<List<ShoppingCategory>>(
+      stream: shoppingDao.watchAllShoppingCategories(),
+      builder: (context, snapshot) {
+        final categories = snapshot.data ?? [];
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: currentCategoryId.isNotEmpty ? currentCategoryId : null,
+              hint: const Text('Select category'),
+              items: [
+                ...categories.map((cat) => DropdownMenuItem(
+                  value: cat.id,
+                  child: Text(cat.name),
+                )),
+                const DropdownMenuItem(value: 'other', child: Text('Other')),
+              ],
+              onChanged: (value) {
+                if (value != null) onChanged(value);
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ============ CHECKED SECTION ============
+
+class _CheckedSection extends ConsumerWidget {
+  final List<ShoppingListItem> items;
+  final String listId;
+  final Map<String, String> userMappings;
+  final Function(String, String, String) onCategoryChanged;
+
+  const _CheckedSection({
+    required this.items,
+    required this.listId,
+    required this.userMappings,
+    required this.onCategoryChanged,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final shoppingDao = ref.read(shoppingDaoProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Row(
+            children: [
+              Icon(Icons.check_circle, size: 20, color: theme.colorScheme.outline),
+              const SizedBox(width: 8),
+              Text(
+                'Checked items (${items.length})',
+                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.outline),
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: () {
+                  shoppingDao.deleteCheckedItems(listId);
+                  RpgIntegration.onShoppingListCompleted(ref);
+                },
+                child: const Text('Clear all'),
+              ),
+            ],
+          ),
+        ),
+        for (final item in items)
+          _ShoppingItemTile(item: item, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged),
+      ],
+    );
+  }
+}
+
+// ============ EMPTY STATE ============
+
+class _EmptyState extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.shopping_cart_outlined, size: 80, color: theme.colorScheme.outline.withOpacity(0.5)),
+            const SizedBox(height: 24),
+            Text('Your list is empty', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            Text(
+              'Tap + to add items or add ingredients from your recipes',
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -326,1068 +1351,5 @@ enum ShoppingGroupMode {
   ungrouped(Icons.list);
 
   final IconData icon;
-
   const ShoppingGroupMode(this.icon);
-}
-
-// ============ COMBINED ITEM MODEL ============
-
-class _CombinedItem {
-  final String baseName;
-  final List<ShoppingListItem> sources;
-
-  _CombinedItem({required this.baseName, required this.sources});
-
-  bool get isChecked => sources.every((s) => s.isChecked);
-  String get id => sources.first.id;
-
-  /// Get the effective shopping category for this item
-  /// [userMappings] - Optional map of user's custom ingredient->category mappings
-  String getDetectedCategory({Map<String, String>? userMappings}) {
-    final savedCategoryId = sources.firstWhere(
-          (s) => s.shoppingCategoryId != null && s.shoppingCategoryId!.isNotEmpty,
-      orElse: () => sources.first,
-    ).shoppingCategoryId;
-
-    if (savedCategoryId != null && savedCategoryId.isNotEmpty) {
-      if (savedCategoryId.startsWith('shop_')) {
-        return savedCategoryId.substring(5);
-      }
-      return savedCategoryId;
-    }
-
-    // Pass user mappings to getShoppingCategory
-    return getShoppingCategory(baseName, userMappings: userMappings);
-  }
-
-  /// Legacy getter for backward compatibility
-  @Deprecated('Use getDetectedCategory(userMappings: ...) instead')
-  String get detectedCategory => getDetectedCategory();
-
-  /// Get combined display name with total quantity
-  String get displayName {
-    if (sources.length == 1) {
-      return sources.first.name;
-    }
-
-    double totalAmount = 0;
-    String? commonUnit;
-    bool canCombine = true;
-
-    for (final source in sources) {
-      final parsed = parseIngredient(source.name);
-      if (parsed.amount != null) {
-        if (commonUnit == null) {
-          commonUnit = parsed.unit;
-          totalAmount = parsed.amount!;
-        } else if (areUnitsCompatible(commonUnit, parsed.unit)) {
-          final (combined, unit) = combineAmounts(totalAmount, commonUnit, parsed.amount!, parsed.unit);
-          totalAmount = combined;
-          commonUnit = unit;
-        } else {
-          canCombine = false;
-          break;
-        }
-      } else {
-        if (commonUnit == null) {
-          totalAmount = 1;
-        } else {
-          canCombine = false;
-          break;
-        }
-      }
-    }
-
-    if (canCombine && totalAmount > 0) {
-      final formattedAmount = _formatAmount(totalAmount);
-      if (commonUnit != null) {
-        return '$formattedAmount $commonUnit $baseName';
-      } else {
-        final totalCount = sources.fold<double>(0, (sum, s) {
-          final parsed = parseIngredient(s.name);
-          return sum + (parsed.amount ?? 1);
-        });
-        return '${_formatAmount(totalCount)} $baseName';
-      }
-    }
-
-    return baseName.isNotEmpty ? baseName[0].toUpperCase() + baseName.substring(1) : baseName;
-  }
-
-  List<_SourceBreakdown> get sourceBreakdown {
-    return sources.map((source) {
-      final parsed = parseIngredient(source.name);
-      String quantityText;
-      if (parsed.amount != null) {
-        quantityText = parsed.unit != null
-            ? '${_formatAmount(parsed.amount!)} ${parsed.unit}'
-            : _formatAmount(parsed.amount!);
-      } else {
-        quantityText = '1';
-      }
-      return _SourceBreakdown(
-        recipeId: source.recipeId,
-        quantity: quantityText,
-        originalText: source.name,
-      );
-    }).toList();
-  }
-
-  static String _formatAmount(double amt) {
-    if (amt == amt.roundToDouble()) {
-      return amt.round().toString();
-    }
-    final fractions = {
-      0.25: '¼', 0.33: '⅓', 0.5: '½', 0.66: '⅔', 0.75: '¾',
-      0.125: '⅛', 0.375: '⅜', 0.625: '⅝', 0.875: '⅞',
-    };
-
-    final whole = amt.floor();
-    final frac = amt - whole;
-
-    for (final entry in fractions.entries) {
-      if ((frac - entry.key).abs() < 0.05) {
-        return whole > 0 ? '$whole ${entry.value}' : entry.value;
-      }
-    }
-
-    return amt.toStringAsFixed(1);
-  }
-}
-
-class _SourceBreakdown {
-  final String? recipeId;
-  final String quantity;
-  final String originalText;
-
-  _SourceBreakdown({this.recipeId, required this.quantity, required this.originalText});
-}
-
-// ============ LIST SELECTOR ============
-
-class _ListSelector extends ConsumerWidget {
-  final String currentListId;
-  final ValueChanged<String> onListChanged;
-
-  const _ListSelector({required this.currentListId, required this.onListChanged});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final shoppingDao = ref.watch(shoppingDaoProvider);
-
-    return StreamBuilder<List<ShoppingList>>(
-      stream: shoppingDao.watchAllLists(),
-      builder: (context, snapshot) {
-        final lists = snapshot.data ?? [];
-
-        if (lists.isEmpty) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                const Icon(Icons.shopping_cart, size: 20),
-                const SizedBox(width: 8),
-                Text(l10n.shoppingTitle),
-                const Spacer(),
-                TextButton.icon(
-                  onPressed: () => _createNewList(context, ref),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: Text(l10n.actionNew),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return Container(
-          height: 50,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: lists.length + 1,
-            itemBuilder: (context, index) {
-              if (index == lists.length) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                  child: ActionChip(
-                    avatar: const Icon(Icons.add, size: 16),
-                    label: Text(l10n.actionNew),
-                    onPressed: () => _createNewList(context, ref),
-                  ),
-                );
-              }
-
-              final list = lists[index];
-              final isSelected = list.id == currentListId;
-
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                child: ChoiceChip(
-                  label: Text(list.name),
-                  selected: isSelected,
-                  onSelected: (_) => onListChanged(list.id),
-                ),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  void _createNewList(BuildContext context, WidgetRef ref) {
-    final controller = TextEditingController();
-    final l10n = AppLocalizations.of(context)!;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.shoppingNewList),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(hintText: l10n.shoppingListName),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
-          FilledButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                final dao = ref.read(shoppingDaoProvider);
-                final id = 'list_${DateTime.now().millisecondsSinceEpoch}';
-                dao.insertList(ShoppingListsCompanion.insert(
-                  id: id,
-                  name: controller.text.trim(),
-                ));
-                onListChanged(id);
-                Navigator.pop(ctx);
-              }
-            },
-            child: Text(l10n.actionCreate),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ============ SECTION GROUPED LIST ============
-
-class _SectionGroupedList extends ConsumerWidget {
-  final List<_CombinedItem> items;
-  final List<_CombinedItem> checkedItems;
-  final String listId;
-  final Map<String, String> userMappings;
-
-  const _SectionGroupedList({
-    required this.items,
-    required this.listId,
-    this.checkedItems = const [],
-    this.userMappings = const {},
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final shoppingDao = ref.watch(shoppingDaoProvider);
-
-    // Load categories from database to get their sortOrder
-    return FutureBuilder<List<ShoppingCategory>>(
-      future: shoppingDao.getAllShoppingCategories(),
-      builder: (context, categorySnapshot) {
-        // Build priority map from database categories
-        final categoryPriorities = <String, int>{};
-        if (categorySnapshot.hasData) {
-          for (final cat in categorySnapshot.data!) {
-            final lower = cat.name.toLowerCase();
-            if (lower.contains('meat')) categoryPriorities['meat'] = cat.sortOrder;
-            if (lower.contains('seafood') || lower.contains('fish')) categoryPriorities['seafood'] = cat.sortOrder;
-            if (lower.contains('produce') || lower.contains('vegetable') || lower.contains('fruit')) categoryPriorities['produce'] = cat.sortOrder;
-            if (lower.contains('dairy') || lower.contains('egg')) categoryPriorities['dairy'] = cat.sortOrder;
-            if (lower.contains('bakery') || lower.contains('bread')) categoryPriorities['bakery'] = cat.sortOrder;
-            if (lower.contains('frozen')) categoryPriorities['frozen'] = cat.sortOrder;
-            if (lower.contains('beverage') || lower.contains('drink')) categoryPriorities['beverages'] = cat.sortOrder;
-            if (lower.contains('pantry') || lower.contains('canned') || lower.contains('dry good')) categoryPriorities['pantry'] = cat.sortOrder;
-            if (lower.contains('spice') || lower.contains('seasoning')) categoryPriorities['spices'] = cat.sortOrder;
-            if (lower.contains('snack')) categoryPriorities['snacks'] = cat.sortOrder;
-            if (lower.contains('international') || lower.contains('ethnic')) categoryPriorities['international'] = cat.sortOrder;
-            if (lower.contains('other')) categoryPriorities['other'] = cat.sortOrder;
-          }
-        }
-
-        // Group items by section using user mappings
-        final grouped = <String, List<_CombinedItem>>{};
-        for (final item in items) {
-          final section = item.getDetectedCategory(userMappings: userMappings);
-          grouped.putIfAbsent(section, () => []).add(item);
-        }
-
-        // Sort sections by database priority (sortOrder)
-        final sortedKeys = grouped.keys.toList()..sort((a, b) {
-          final aPriority = categoryPriorities[a] ?? 999;
-          final bPriority = categoryPriorities[b] ?? 999;
-          if (aPriority != bPriority) return aPriority.compareTo(bPriority);
-          return a.compareTo(b);
-        });
-
-        return ListView(
-          padding: const EdgeInsets.only(bottom: 80),
-          children: [
-            ...sortedKeys.map((section) {
-              final sectionItems = grouped[section]!;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                    child: Row(
-                      children: [
-                        Text(_getSectionEmoji(section), style: const TextStyle(fontSize: 18)),
-                        const SizedBox(width: 8),
-                        Text(
-                          _getLocalizedSectionName(context, section),
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text('(${sectionItems.length})', style: theme.textTheme.bodySmall),
-                      ],
-                    ),
-                  ),
-                  ...sectionItems.map((item) => _ShoppingItemTile(
-                    item: item,
-                    listId: listId,
-                    userMappings: userMappings,
-                  )),
-                ],
-              );
-            }),
-            if (checkedItems.isNotEmpty) ...[
-              const Divider(height: 32),
-              _CheckedItemsSection(items: checkedItems, listId: listId, userMappings: userMappings),
-            ],
-          ],
-        );
-      },
-    );
-  }
-
-  String _getLocalizedSectionName(BuildContext context, String section) {
-    final l10n = AppLocalizations.of(context)!;
-    switch (section) {
-      case 'produce': return l10n.categoryProduce;
-      case 'dairy': return l10n.categoryDairy;
-      case 'meat': return l10n.categoryMeat;
-      case 'seafood': return l10n.categorySeafood;
-      case 'bakery': return l10n.categoryBakery;
-      case 'frozen': return l10n.categoryFrozen;
-      case 'beverages': return l10n.categoryBeverages;
-      case 'pantry': return l10n.categoryPantry;
-      case 'spices': return l10n.categorySpices;
-      case 'international': return l10n.categoryInternational;
-      case 'snacks': return l10n.categorySnacks;
-      default: return l10n.categoryOther;
-    }
-  }
-
-  String _getSectionEmoji(String section) {
-    switch (section) {
-      case 'produce': return '🥬';
-      case 'dairy': return '🥛';
-      case 'meat': return '🥩';
-      case 'seafood': return '🐟';
-      case 'bakery': return '🍞';
-      case 'frozen': return '🧊';
-      case 'beverages': return '🥤';
-      case 'pantry': return '🥫';
-      case 'spices': return '🧂';
-      case 'international': return '🌍';
-      case 'snacks': return '🍿';
-      default: return '📦';
-    }
-  }
-}
-
-// ============ RECIPE GROUPED LIST ============
-
-class _RecipeGroupedList extends ConsumerWidget {
-  final List<_CombinedItem> items;
-  final List<_CombinedItem> checkedItems;
-  final String listId;
-  final Map<String, String> userMappings;
-
-  const _RecipeGroupedList({
-    required this.items,
-    required this.listId,
-    this.checkedItems = const [],
-    this.userMappings = const {},
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final recipeDao = ref.watch(recipeDaoProvider);
-
-    // Group by recipe
-    final grouped = <String?, List<_CombinedItem>>{};
-    for (final item in items) {
-      final recipeId = item.sources.first.recipeId;
-      grouped.putIfAbsent(recipeId, () => []).add(item);
-    }
-
-    // Sort: recipes first, then manual items
-    final sortedKeys = grouped.keys.toList()..sort((a, b) {
-      if (a == null && b == null) return 0;
-      if (a == null) return 1;
-      if (b == null) return -1;
-      return 0;
-    });
-
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 80),
-      children: [
-        ...sortedKeys.map((recipeId) {
-          final recipeItems = grouped[recipeId]!;
-
-          if (recipeId == null) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit, size: 18, color: theme.colorScheme.primary),
-                      const SizedBox(width: 8),
-                      Text(l10n.addedManually, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
-                    ],
-                  ),
-                ),
-                ...recipeItems.map((item) => _ShoppingItemTile(
-                  item: item,
-                  listId: listId,
-                  userMappings: userMappings,
-                )),
-              ],
-            );
-          }
-
-          return FutureBuilder<Recipe?>(
-            future: recipeDao.getRecipeById(recipeId),
-            builder: (context, snapshot) {
-              final recipe = snapshot.data;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  InkWell(
-                    onTap: recipe != null ? () => context.push('/recipe/$recipeId') : null,
-                    child: Container(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                      child: Row(
-                        children: [
-                          Icon(Icons.restaurant_menu, size: 18, color: theme.colorScheme.primary),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              recipe?.title ?? l10n.unknownRecipe,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.primary,
-                                decoration: recipe != null ? TextDecoration.underline : null,
-                              ),
-                            ),
-                          ),
-                          Text('(${recipeItems.length})', style: theme.textTheme.bodySmall),
-                          if (recipe != null) const Icon(Icons.chevron_right, size: 18),
-                        ],
-                      ),
-                    ),
-                  ),
-                  ...recipeItems.map((item) => _ShoppingItemTile(
-                    item: item,
-                    listId: listId,
-                    userMappings: userMappings,
-                  )),
-                ],
-              );
-            },
-          );
-        }),
-        if (checkedItems.isNotEmpty) ...[
-          const Divider(height: 32),
-          _CheckedItemsSection(items: checkedItems, listId: listId, userMappings: userMappings),
-        ],
-      ],
-    );
-  }
-}
-
-// ============ UNGROUPED LIST ============
-
-class _UngroupedList extends StatelessWidget {
-  final List<_CombinedItem> items;
-  final List<_CombinedItem> checkedItems;
-  final String listId;
-  final Map<String, String> userMappings;
-
-  const _UngroupedList({
-    required this.items,
-    required this.listId,
-    this.checkedItems = const [],
-    this.userMappings = const {},
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 80),
-      children: [
-        ...items.map((item) => _ShoppingItemTile(
-          item: item,
-          listId: listId,
-          userMappings: userMappings,
-        )),
-        if (checkedItems.isNotEmpty) ...[
-          const Divider(height: 32),
-          _CheckedItemsSection(items: checkedItems, listId: listId, userMappings: userMappings),
-        ],
-      ],
-    );
-  }
-}
-
-// ============ SHOPPING ITEM TILE ============
-
-class _ShoppingItemTile extends ConsumerWidget {
-  final _CombinedItem item;
-  final String listId;
-  final Map<String, String> userMappings;
-
-  const _ShoppingItemTile({
-    required this.item,
-    required this.listId,
-    this.userMappings = const {},
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final shoppingDao = ref.read(shoppingDaoProvider);
-    final hasMultipleSources = item.sources.length > 1;
-
-    return Dismissible(
-      key: Key(item.id),
-      direction: DismissDirection.endToStart,
-      confirmDismiss: (_) async {
-        final deletedItems = List<ShoppingListItem>.from(item.sources);
-
-        for (final source in item.sources) {
-          await shoppingDao.deleteItem(source.id);
-        }
-
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${item.baseName} ${l10n.deleted}'),
-              action: SnackBarAction(
-                label: l10n.actionUndo,
-                onPressed: () {
-                  for (final deletedItem in deletedItems) {
-                    shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
-                      id: deletedItem.id,
-                      listId: deletedItem.listId,
-                      name: deletedItem.name,
-                      quantity: drift.Value(deletedItem.quantity),
-                      unit: drift.Value(deletedItem.unit),
-                      isChecked: drift.Value(deletedItem.isChecked),
-                      sortOrder: drift.Value(deletedItem.sortOrder),
-                      recipeId: drift.Value(deletedItem.recipeId),
-                      shoppingCategoryId: drift.Value(deletedItem.shoppingCategoryId),
-                    ));
-                  }
-                },
-              ),
-              duration: const Duration(seconds: 2),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-        return false;
-      },
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 16),
-        color: theme.colorScheme.error,
-        child: Icon(Icons.delete, color: theme.colorScheme.onError),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            child: Row(
-              children: [
-                Checkbox(
-                  value: item.isChecked,
-                  onChanged: (_) {
-                    for (final source in item.sources) {
-                      shoppingDao.toggleItemChecked(source.id, !item.isChecked);
-                    }
-                  },
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => _showEditDialog(context, ref),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.displayName,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: hasMultipleSources ? FontWeight.w600 : FontWeight.normal,
-                              decoration: item.isChecked ? TextDecoration.lineThrough : null,
-                              color: item.isChecked ? theme.colorScheme.outline : null,
-                            ),
-                          ),
-                          if (hasMultipleSources)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: item.sourceBreakdown.map((breakdown) {
-                                  return FutureBuilder<Recipe?>(
-                                    future: breakdown.recipeId != null
-                                        ? ref.read(recipeDaoProvider).getRecipeById(breakdown.recipeId!)
-                                        : Future.value(null),
-                                    builder: (context, snapshot) {
-                                      final recipe = snapshot.data;
-                                      final recipeName = recipe?.title ?? l10n.addedManually;
-                                      return Padding(
-                                        padding: const EdgeInsets.only(left: 8, top: 2),
-                                        child: GestureDetector(
-                                          onTap: recipe != null ? () => context.push('/recipe/${recipe.id}') : null,
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                '• ${breakdown.quantity} ${l10n.from} ',
-                                                style: theme.textTheme.bodySmall?.copyWith(
-                                                  color: theme.colorScheme.outline,
-                                                ),
-                                              ),
-                                              Flexible(
-                                                child: Text(
-                                                  recipeName,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: theme.textTheme.bodySmall?.copyWith(
-                                                    color: recipe != null ? theme.colorScheme.primary : theme.colorScheme.outline,
-                                                    decoration: recipe != null ? TextDecoration.underline : null,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                }).toList(),
-                              ),
-                            )
-                          else if (item.sources.first.recipeId != null)
-                            FutureBuilder<Recipe?>(
-                              future: ref.read(recipeDaoProvider).getRecipeById(item.sources.first.recipeId!),
-                              builder: (context, snapshot) {
-                                final recipe = snapshot.data;
-                                if (recipe == null) return const SizedBox.shrink();
-                                return Padding(
-                                  padding: const EdgeInsets.only(top: 2),
-                                  child: GestureDetector(
-                                    onTap: () => context.push('/recipe/${recipe.id}'),
-                                    child: Text(
-                                      '${l10n.from} ${recipe.title}',
-                                      overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.colorScheme.primary,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined, size: 20),
-                  onPressed: () => _showEditDialog(context, ref),
-                  color: theme.colorScheme.outline,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditDialog(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController(text: item.sources.first.name);
-    final shoppingDao = ref.read(shoppingDaoProvider);
-
-    String? savedCategoryId = item.sources.first.shoppingCategoryId;
-    final originalCategoryId = savedCategoryId;
-    final detectedCategoryName = _capitalizeFirst(item.getDetectedCategory(userMappings: userMappings));
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text(l10n.editItem),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: controller,
-                autofocus: true,
-                decoration: InputDecoration(labelText: l10n.itemName),
-              ),
-              const SizedBox(height: 16),
-              FutureBuilder<List<ShoppingCategory>>(
-                future: shoppingDao.getAllShoppingCategories(),
-                builder: (context, snapshot) {
-                  final categories = snapshot.data ?? [];
-
-                  final currentCategoryName = savedCategoryId != null
-                      ? categories.where((c) => c.id == savedCategoryId).firstOrNull?.name ?? detectedCategoryName
-                      : detectedCategoryName;
-
-                  return DropdownButtonFormField<String?>(
-                    value: savedCategoryId,
-                    decoration: InputDecoration(
-                      labelText: l10n.category,
-                      border: const OutlineInputBorder(),
-                      helperText: '${l10n.currently}: $currentCategoryName',
-                    ),
-                    items: [
-                      DropdownMenuItem(
-                        value: null,
-                        child: Text('${l10n.autoDetect} ($detectedCategoryName)'),
-                      ),
-                      ...categories.map((cat) => DropdownMenuItem(
-                        value: cat.id,
-                        child: Text(cat.name),
-                      )),
-                    ],
-                    onChanged: (value) {
-                      setDialogState(() => savedCategoryId = value);
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                for (final source in item.sources) {
-                  shoppingDao.deleteItem(source.id);
-                }
-                Navigator.pop(ctx);
-              },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: Text(l10n.actionDelete),
-            ),
-            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
-            FilledButton(
-              onPressed: () {
-                if (controller.text.trim().isNotEmpty) {
-                  // Save to user mappings if category was manually changed
-                  if (savedCategoryId != null && savedCategoryId != originalCategoryId) {
-                    // Extract base ingredient name
-                    final baseName = normalizeIngredientName(parseIngredient(item.baseName).name);
-
-                    // Convert category ID to category key (remove 'shop_' prefix if present)
-                    final categoryKey = savedCategoryId!.startsWith('shop_')
-                        ? savedCategoryId!.substring(5)
-                        : savedCategoryId!;
-
-                    // Save the mapping for future auto-detection
-                    shoppingDao.setUserIngredientMapping(baseName, categoryKey);
-                  } else if (savedCategoryId == null && originalCategoryId != null) {
-                    // User chose auto-detect - remove any saved mapping
-                    final baseName = normalizeIngredientName(parseIngredient(item.baseName).name);
-                    shoppingDao.removeUserIngredientMapping(baseName);
-                  }
-
-                  // Update the item
-                  for (final source in item.sources) {
-                    shoppingDao.updateItem(
-                      source.id,
-                      name: controller.text.trim(),
-                      shoppingCategoryId: savedCategoryId,
-                    );
-                  }
-                  Navigator.pop(ctx);
-                }
-              },
-              child: Text(l10n.actionSave),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _capitalizeFirst(String s) {
-    if (s.isEmpty) return s;
-    return s[0].toUpperCase() + s.substring(1);
-  }
-}
-
-// ============ MANAGE LISTS SHEET ============
-
-class _ManageListsSheet extends ConsumerWidget {
-  final String currentListId;
-  final ValueChanged<String> onListSelected;
-
-  const _ManageListsSheet({required this.currentListId, required this.onListSelected});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final shoppingDao = ref.watch(shoppingDaoProvider);
-
-    return DraggableScrollableSheet(
-      initialChildSize: 0.5,
-      minChildSize: 0.3,
-      maxChildSize: 0.8,
-      expand: false,
-      builder: (context, scrollController) {
-        return Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(color: theme.colorScheme.outline.withOpacity(0.3), borderRadius: BorderRadius.circular(2)),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Text(l10n.shoppingLists, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                  const Spacer(),
-                  TextButton.icon(
-                    onPressed: () => _createList(context, ref),
-                    icon: const Icon(Icons.add),
-                    label: Text(l10n.actionNew),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: StreamBuilder<List<ShoppingList>>(
-                stream: shoppingDao.watchAllLists(),
-                builder: (context, snapshot) {
-                  final lists = snapshot.data ?? [];
-
-                  return ListView.builder(
-                    controller: scrollController,
-                    itemCount: lists.length,
-                    itemBuilder: (context, index) {
-                      final list = lists[index];
-                      final isSelected = list.id == currentListId;
-
-                      return ListTile(
-                        leading: Icon(isSelected ? Icons.check_circle : Icons.circle_outlined, color: isSelected ? theme.colorScheme.primary : null),
-                        title: Text(list.name),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(icon: const Icon(Icons.edit), onPressed: () => _renameList(context, ref, list)),
-                            IconButton(icon: const Icon(Icons.delete), onPressed: () => _deleteList(context, ref, list)),
-                          ],
-                        ),
-                        onTap: () => onListSelected(list.id),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _createList(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.shoppingNewList),
-        content: TextField(controller: controller, autofocus: true, decoration: InputDecoration(hintText: l10n.shoppingListName)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
-          FilledButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                final dao = ref.read(shoppingDaoProvider);
-                final id = 'list_${DateTime.now().millisecondsSinceEpoch}';
-                dao.insertList(ShoppingListsCompanion.insert(id: id, name: controller.text.trim()));
-                Navigator.pop(ctx);
-              }
-            },
-            child: Text(l10n.actionCreate),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _renameList(BuildContext context, WidgetRef ref, ShoppingList list) {
-    final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController(text: list.name);
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.shoppingRenameList),
-        content: TextField(controller: controller, autofocus: true),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
-          FilledButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                ref.read(shoppingDaoProvider).updateListName(list.id, controller.text.trim());
-                Navigator.pop(ctx);
-              }
-            },
-            child: Text(l10n.actionSave),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _deleteList(BuildContext context, WidgetRef ref, ShoppingList list) {
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.shoppingDeleteList),
-        content: Text('${l10n.confirmDeleteMessage} "${list.name}"?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
-          FilledButton(
-            onPressed: () {
-              ref.read(shoppingDaoProvider).deleteList(list.id);
-              Navigator.pop(ctx);
-            },
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(l10n.actionDelete),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ============ EMPTY STATE ============
-
-class _EmptyState extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.shopping_cart_outlined, size: 64, color: theme.colorScheme.outline),
-            const SizedBox(height: 16),
-            Text(l10n.shoppingEmpty, style: theme.textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text(
-              l10n.shoppingEmptySubtitle,
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ============ CHECKED ITEMS SECTION ============
-
-class _CheckedItemsSection extends ConsumerWidget {
-  final List<_CombinedItem> items;
-  final String listId;
-  final Map<String, String> userMappings;
-
-  const _CheckedItemsSection({
-    required this.items,
-    required this.listId,
-    this.userMappings = const {},
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final shoppingDao = ref.read(shoppingDaoProvider);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Row(
-            children: [
-              Icon(Icons.check_circle, size: 18, color: theme.colorScheme.outline),
-              const SizedBox(width: 8),
-              Text(
-                l10n.shoppingCheckedItems,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.outline,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text('(${items.length})', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
-              const Spacer(),
-              TextButton(
-                onPressed: () => shoppingDao.deleteCheckedItems(listId),
-                child: Text(l10n.shoppingClearAll),
-              ),
-            ],
-          ),
-        ),
-        ...items.map((item) => _ShoppingItemTile(
-          item: item,
-          listId: listId,
-          userMappings: userMappings,
-        )),
-      ],
-    );
-  }
 }

@@ -278,10 +278,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shoppingCheckedItems => 'Checked Items';
 
   @override
-  String get shoppingClearChecked => 'Clear Checked';
+  String get shoppingClearChecked => 'Clear checked items';
 
   @override
-  String get shoppingClearAll => 'Clear All';
+  String get shoppingClearAll => 'Clear all items';
 
   @override
   String get shoppingCategories => 'Shopping Categories';
@@ -2853,4 +2853,437 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rarityLegendaryDesc => 'A legendary recipe worthy of the gods!';
+
+  @override
+  String get shareLink => 'Link';
+
+  @override
+  String get shareDocument => 'PDF';
+
+  @override
+  String get sharePrint => 'Print';
+
+  @override
+  String get shareLinkDescription => 'Share a link that others can use to view this recipe.';
+
+  @override
+  String get shareLinkNote => 'Recipients need the Recipe Spellbook app or can view on web.';
+
+  @override
+  String get shareCreatingDocument => 'Creating document...';
+
+  @override
+  String get editLayoutTitle => 'Edit Layout';
+
+  @override
+  String get editLayoutStacked => 'Stacked';
+
+  @override
+  String get editLayoutTabbed => 'Tabbed';
+
+  @override
+  String get editLayoutStackedDesc => 'All sections in one scrollable view';
+
+  @override
+  String get editLayoutTabbedDesc => 'Separate tabs for details, ingredients, instructions';
+
+  @override
+  String get tabDetails => 'Details';
+
+  @override
+  String get tabIngredients => 'Ingredients';
+
+  @override
+  String get tabInstructions => 'Instructions';
+
+  @override
+  String get stepImageAdd => 'Add Image';
+
+  @override
+  String get stepImageChange => 'Change Image';
+
+  @override
+  String get stepImageRemove => 'Remove Image';
+
+  @override
+  String get stepTimer => 'Timer';
+
+  @override
+  String stepTimerMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String get recipeAddToCookbook => 'Add to Cookbook';
+
+  @override
+  String get recipeMoveToTrash => 'Move to Trash';
+
+  @override
+  String get tagsEmpty => 'No tags';
+
+  @override
+  String get nutritionPerServingLabel => 'Per Serving';
+
+  @override
+  String get nutritionTotalLabel => 'Total Recipe';
+
+  @override
+  String get trendingRecipes => 'Trending recipes';
+
+  @override
+  String get addShortcut => 'Add the Recipe Spellbook shortcut';
+
+  @override
+  String get addShortcutSubtitle => 'Import recipes with one tap';
+
+  @override
+  String get importGuides => 'Read our import guides';
+
+  @override
+  String get useOnDesktop => 'Use Recipe Spellbook on desktop';
+
+  @override
+  String get inviteFriends => 'Invite friends';
+
+  @override
+  String get inviteFriendsTitle => 'Share Recipe Spellbook';
+
+  @override
+  String get inviteFriendsSubtitle => 'Invite your friends and family to start cooking together!';
+
+  @override
+  String get shareApp => 'Share App';
+
+  @override
+  String get maybeLater => 'Maybe later';
+
+  @override
+  String get createAccount => 'Create account';
+
+  @override
+  String get upgradeToPremium => 'Upgrade to Premium';
+
+  @override
+  String get premiumSubtitle => 'Unlock sync, unlimited recipes & more';
+
+  @override
+  String get rpgMode => 'RPG Mode';
+
+  @override
+  String get leaderboards => 'Leaderboards';
+
+  @override
+  String get achievements => 'Achievements';
+
+  @override
+  String get cookingStats => 'Cooking Stats';
+
+  @override
+  String get stepByStepGuides => 'Step-by-step guides';
+
+  @override
+  String get importGuidesSubtitle => 'Learn how to import recipes from your favorite apps and websites';
+
+  @override
+  String get importFromOtherApps => 'Import from other apps';
+
+  @override
+  String get orderOnline => 'Order online';
+
+  @override
+  String get helpTitle => 'Help';
+
+  @override
+  String get navMenu => 'Menu';
+
+  @override
+  String get mealPlanTitle => 'My Meal Plan';
+
+  @override
+  String get noRecipesYet => 'No recipes yet';
+
+  @override
+  String get breakfast => 'Breakfast';
+
+  @override
+  String get lunch => 'Lunch';
+
+  @override
+  String get dinner => 'Dinner';
+
+  @override
+  String get snack => 'Snack';
+
+  @override
+  String get allergenGluten => 'Gluten';
+
+  @override
+  String get allergenChocolate => 'Chocolate & Cocoa';
+
+  @override
+  String get allergenCaffeine => 'Caffeine';
+
+  @override
+  String get allergenAlcohol => 'Alcohol';
+
+  @override
+  String get allergenCitrus => 'Citrus';
+
+  @override
+  String get allergenStoneFruits => 'Stone Fruits';
+
+  @override
+  String get allergenCoconut => 'Coconut';
+
+  @override
+  String get allergenGarlic => 'Garlic';
+
+  @override
+  String get allergenOnion => 'Onion';
+
+  @override
+  String get allergenMushrooms => 'Mushrooms';
+
+  @override
+  String get allergenAvocado => 'Avocado';
+
+  @override
+  String get allergenBanana => 'Banana';
+
+  @override
+  String get allergenKiwi => 'Kiwi';
+
+  @override
+  String get allergenLatexFoods => 'Latex Cross-Reactive';
+
+  @override
+  String get allergenFodmap => 'High FODMAP';
+
+  @override
+  String get allergenHistamine => 'High Histamine';
+
+  @override
+  String get allergenSalicylates => 'Salicylates';
+
+  @override
+  String get allergenMsg => 'MSG';
+
+  @override
+  String get allergenRedMeat => 'Red Meat (Alpha-gal)';
+
+  @override
+  String get allergenGelatin => 'Gelatin';
+
+  @override
+  String get allergyWarningContains => 'May contain:';
+
+  @override
+  String get allergyDismissForRecipe => 'Dismiss for this recipe';
+
+  @override
+  String get allergyDismissUndo => 'Undo';
+
+  @override
+  String get allergyWarningDismissed => 'Warning dismissed for this recipe';
+
+  @override
+  String get scaleCustom => 'Custom';
+
+  @override
+  String get scaleCustomTitle => 'Custom Scale';
+
+  @override
+  String get scaleCustomHint => 'Enter any number (e.g., 0.75 for 3/4, 2.5 for 2½)';
+
+  @override
+  String get scaleApply => 'Apply';
+
+  @override
+  String get addStep => 'Add step';
+
+  @override
+  String get noInstructionsYet => 'No instructions yet';
+
+  @override
+  String get addFirstStep => 'Add first step';
+
+  @override
+  String get enterInstruction => 'Enter instruction...';
+
+  @override
+  String get addStepImage => 'Add step image';
+
+  @override
+  String get removeStep => 'Remove step';
+
+  @override
+  String get plannerNoMeals => 'No meals planned';
+
+  @override
+  String get plannerAddMealHint => 'Tap + to add a meal for this day';
+
+  @override
+  String plannerMealAdded(String recipe, String mealType) {
+    return '$recipe added to $mealType';
+  }
+
+  @override
+  String get plannerShareMealPlan => 'Share meal plan';
+
+  @override
+  String get plannerAddWeekToShopping => 'Add week to shopping list';
+
+  @override
+  String get plannerClearWeek => 'Clear this week';
+
+  @override
+  String get plannerClearWeekConfirm => 'This will remove all meals planned for this week. This cannot be undone.';
+
+  @override
+  String get plannerWeekCleared => 'Week cleared';
+
+  @override
+  String get plannerGoToToday => 'Go to today';
+
+  @override
+  String get plannerAddAnother => 'Add another meal';
+
+  @override
+  String get plannerSearchRecipes => 'Search recipes...';
+
+  @override
+  String get mealTypeBreakfast => 'Breakfast';
+
+  @override
+  String get mealTypeLunch => 'Lunch';
+
+  @override
+  String get mealTypeDinner => 'Dinner';
+
+  @override
+  String get mealTypeSnack => 'Snack';
+
+  @override
+  String shoppingItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'items',
+      one: 'item',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String get shoppingBySection => 'By Section';
+
+  @override
+  String get shoppingByRecipe => 'By Recipe';
+
+  @override
+  String get shoppingUngrouped => 'Ungrouped';
+
+  @override
+  String get shoppingOrderOnline => 'Order online';
+
+  @override
+  String get shoppingEditItem => 'Edit Item';
+
+  @override
+  String get shoppingItemName => 'Item name';
+
+  @override
+  String get shoppingSelectCategory => 'Select category';
+
+  @override
+  String get shoppingAddedManually => 'Added manually';
+
+  @override
+  String get shoppingEmptyList => 'Your list is empty';
+
+  @override
+  String get shoppingEmptyHint => 'Tap + to add items or add ingredients from your recipes';
+
+  @override
+  String get shoppingAddHint => 'Press Enter or tap send to add, then type the next item';
+
+  @override
+  String get categoryDeli => 'Deli';
+
+  @override
+  String get categoryBreakfast => 'Breakfast & Cereal';
+
+  @override
+  String get categoryCanned => 'Canned Goods & Soups';
+
+  @override
+  String get categoryCondiments => 'Condiments, Sauces & Spices';
+
+  @override
+  String get categoryAlcohol => 'Beer, Wine & Spirits';
+
+  @override
+  String get categoryBaby => 'Baby';
+
+  @override
+  String get categoryBeauty => 'Beauty & Personal Care';
+
+  @override
+  String get categoryHousehold => 'Housewares';
+
+  @override
+  String get categoryPet => 'Pet';
+
+  @override
+  String importFromPlatform(String platform) {
+    return 'Import from $platform';
+  }
+
+  @override
+  String importFromApp(String app) {
+    return 'Import from $app';
+  }
+
+  @override
+  String get helpAddingRecipes => 'Adding Recipes';
+
+  @override
+  String get helpAddingRecipesDesc => 'Tap the + button in any cookbook to add a recipe. You can import from URLs, take photos, or enter manually.';
+
+  @override
+  String get helpImporting => 'Importing from Apps';
+
+  @override
+  String get helpImportingDesc => 'Share a recipe from Instagram, TikTok, or any website directly to Recipe Spellbook.';
+
+  @override
+  String get helpMealPlanning => 'Meal Planning';
+
+  @override
+  String get helpMealPlanningDesc => 'Tap the Meal Plan tab to plan your meals for the week. Tap + on any day to add recipes.';
+
+  @override
+  String get helpShopping => 'Shopping Lists';
+
+  @override
+  String get helpShoppingDesc => 'Add ingredients from recipes to your shopping list. Items are organized by store section.';
+
+  @override
+  String get helpSyncing => 'Syncing';
+
+  @override
+  String get helpSyncingDesc => 'Cloud sync is coming soon! Your recipes will sync across all your devices.';
+
+  @override
+  String get helpContactUs => 'Contact Us';
+
+  @override
+  String get helpContactUsDesc => 'Have questions or feedback? Email us at support@recipespellbook.com';
+
+  @override
+  String get navCommunity => 'Community';
+
+  @override
+  String get navComingSoon => 'Coming soon';
 }

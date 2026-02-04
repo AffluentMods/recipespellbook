@@ -2,26 +2,49 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/database_provider.dart';
+import '../widgets/app_menu_drawer.dart';
+import '../widgets/rpg/rpg_navigation_shell.dart';
 
 /// Provider to track current navigation index
 final currentNavIndexProvider = StateProvider<int>((ref) => 0);
 
-class AppShell extends ConsumerWidget {
+/// Provider for shopping item count (for badge)
+final shoppingBadgeCountProvider = StreamProvider<int>((ref) {
+  final shoppingDao = ref.watch(shoppingDaoProvider);
+  return shoppingDao.watchItemsInList('list_default').map((items) =>
+  items.where((i) => !i.isChecked).length
+  );
+});
+
+class AppShell extends ConsumerStatefulWidget {
   final Widget child;
 
   const AppShell({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<AppShell> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final currentIndex = ref.watch(currentNavIndexProvider);
+    final shoppingCountAsync = ref.watch(shoppingBadgeCountProvider);
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      body: child,
-      bottomNavigationBar: Container(
+    return RpgNavigationShell(
+        child: Scaffold(
+          key: _scaffoldKey,
+          body: widget.child,
+          endDrawer: const AppMenuDrawer(),
+          bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest,
+          color: isDark ? theme.colorScheme.surface : Colors.white,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -36,6 +59,7 @@ class AppShell extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
+                // Home
                 _NavItem(
                   icon: Icons.home_outlined,
                   selectedIcon: Icons.home_rounded,
@@ -46,34 +70,42 @@ class AppShell extends ConsumerWidget {
                     context.go('/');
                   },
                 ),
+                // Meal Plan
+                _NavItem(
+                  icon: Icons.calendar_today_outlined,
+                  selectedIcon: Icons.calendar_today_rounded,
+                  label: l10n.navPlanner,
+                  isSelected: currentIndex == 1,
+                  selectedColor: const Color(0xFFE8A860),
+                  onTap: () {
+                    ref.read(currentNavIndexProvider.notifier).state = 1;
+                    context.go('/planner');
+                  },
+                ),
+                // Groceries with badge
                 _NavItem(
                   icon: Icons.shopping_cart_outlined,
                   selectedIcon: Icons.shopping_cart_rounded,
                   label: l10n.navShopping,
-                  isSelected: currentIndex == 1,
+                  isSelected: currentIndex == 2,
+                  badge: shoppingCountAsync.when(
+                    data: (count) => count > 0 ? count : null,
+                    loading: () => null,
+                    error: (_, __) => null,
+                  ),
                   onTap: () {
-                    ref.read(currentNavIndexProvider.notifier).state = 1;
+                    ref.read(currentNavIndexProvider.notifier).state = 2;
                     context.go('/shopping');
                   },
                 ),
+                // More (Menu)
                 _NavItem(
-                  icon: Icons.menu_book_outlined,
-                  selectedIcon: Icons.menu_book_rounded,
-                  label: l10n.navCookbooks,
-                  isSelected: currentIndex == 2,
+                  icon: Icons.menu_rounded,
+                  selectedIcon: Icons.menu_rounded,
+                  label: l10n.navMenu,
+                  isSelected: false,
                   onTap: () {
-                    ref.read(currentNavIndexProvider.notifier).state = 2;
-                    context.go('/cookbooks');
-                  },
-                ),
-                _NavItem(
-                  icon: Icons.calendar_month_outlined,
-                  selectedIcon: Icons.calendar_month_rounded,
-                  label: l10n.navPlanner,
-                  isSelected: currentIndex == 3,
-                  onTap: () {
-                    ref.read(currentNavIndexProvider.notifier).state = 3;
-                    context.go('/planner');
+                    _scaffoldKey.currentState?.openEndDrawer();
                   },
                 ),
               ],
@@ -81,6 +113,7 @@ class AppShell extends ConsumerWidget {
           ),
         ),
       ),
+        )
     );
   }
 }
@@ -90,6 +123,8 @@ class _NavItem extends StatelessWidget {
   final IconData selectedIcon;
   final String label;
   final bool isSelected;
+  final Color? selectedColor;
+  final int? badge;
   final VoidCallback onTap;
 
   const _NavItem({
@@ -97,13 +132,15 @@ class _NavItem extends StatelessWidget {
     required this.selectedIcon,
     required this.label,
     required this.isSelected,
+    this.selectedColor,
+    this.badge,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final primaryColor = theme.colorScheme.primary;
+    final color = selectedColor ?? theme.colorScheme.primary;
 
     return GestureDetector(
       onTap: onTap,
@@ -111,27 +148,55 @@ class _NavItem extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 20 : 16,
+          horizontal: isSelected ? 16 : 12,
           vertical: 10,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? primaryColor.withOpacity(0.15) : Colors.transparent,
+          color: isSelected ? color.withOpacity(0.15) : Colors.transparent,
           borderRadius: BorderRadius.circular(24),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              isSelected ? selectedIcon : icon,
-              color: isSelected ? primaryColor : theme.colorScheme.outline,
-              size: 24,
+            // Icon with optional badge
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  isSelected ? selectedIcon : icon,
+                  color: isSelected ? color : theme.colorScheme.outline,
+                  size: 24,
+                ),
+                if (badge != null && badge! > 0)
+                  Positioned(
+                    right: -8,
+                    top: -6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8A860),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                      child: Text(
+                        badge! > 99 ? '99+' : badge.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             if (isSelected) ...[
               const SizedBox(width: 8),
               Text(
                 label,
                 style: TextStyle(
-                  color: primaryColor,
+                  color: color,
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
                 ),

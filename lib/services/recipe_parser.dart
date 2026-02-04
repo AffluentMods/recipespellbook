@@ -352,13 +352,13 @@ class RecipeParser {
 
   static String _cleanMarkdown(String text) {
     return text
-        .replaceAll(RegExp(r'\*\*([^*]+)\*\*'), r'$1')
-        .replaceAll(RegExp(r'\*([^*]+)\*'), r'$1')
-        .replaceAll(RegExp(r'__([^_]+)__'), r'$1')
-        .replaceAll(RegExp(r'_([^_]+)_'), r'$1')
-        .replaceAll(RegExp(r'\[\[([^\]|]+)(?:\|[^\]]+)?\]\]'), r'$1')
-        .replaceAll(RegExp(r'\[([^\]]+)\]\([^)]+\)'), r'$1')
-        .replaceAll(RegExp(r'`([^`]+)`'), r'$1')
+        .replaceAllMapped(RegExp(r'\*\*([^*]+)\*\*'), (m) => m.group(1) ?? '')
+        .replaceAllMapped(RegExp(r'\*([^*]+)\*'), (m) => m.group(1) ?? '')
+        .replaceAllMapped(RegExp(r'__([^_]+)__'), (m) => m.group(1) ?? '')
+        .replaceAllMapped(RegExp(r'_([^_]+)_'), (m) => m.group(1) ?? '')
+        .replaceAllMapped(RegExp(r'\[\[([^\]|]+)(?:\|[^\]]+)?\]\]'), (m) => m.group(1) ?? '')
+        .replaceAllMapped(RegExp(r'\[([^\]]+)\]\([^)]+\)'), (m) => m.group(1) ?? '')
+        .replaceAllMapped(RegExp(r'`([^`]+)`'), (m) => m.group(1) ?? '')
         .trim();
   }
 

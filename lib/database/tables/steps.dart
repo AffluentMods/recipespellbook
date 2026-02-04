@@ -15,6 +15,9 @@ class Steps extends Table {
   // Optional duration for this step in minutes
   IntColumn get durationMinutes => integer().nullable()();
 
+  // Optional image path for this step
+  TextColumn get imagePath => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

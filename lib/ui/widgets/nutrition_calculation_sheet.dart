@@ -60,6 +60,9 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
   late TabController _tabController;
   bool _isManualMode = false;
 
+  // Track if we've done initial calculation
+  bool _hasInitializedCalculation = false;
+
   // Manual nutrition values
   final _caloriesController = TextEditingController();
   final _proteinController = TextEditingController();
@@ -89,7 +92,17 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
       _sodiumController.text = n.sodium?.round().toString() ?? '';
     }
 
-    _calculateNutrition();
+// NOTE: _calculateNutrition() moved to didChangeDependencies
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Only calculate once on first build - context is now ready
+    if (!_hasInitializedCalculation) {
+      _hasInitializedCalculation = true;
+      _calculateNutrition();
+    }
   }
 
   /// When switching to manual tab, pre-fill with auto-calculated values
@@ -286,38 +299,43 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
   }
 
   Widget _buildErrorState(ThemeData theme, AppLocalizations l10n) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: theme.colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.nutritionCalculationFailed,
-              style: theme.textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _error ?? '',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.outline,
+    return SingleChildScrollView(  // Add this wrapper
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,  // Add this
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 64,
+                color: theme.colorScheme.error,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: _calculateNutrition,
-              icon: const Icon(Icons.refresh),
-              label: Text(l10n.actionRetry),
-            ),
-          ],
+              const SizedBox(height: 16),
+              Text(
+                l10n.nutritionCalculationFailed,
+                style: theme.textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _error ?? '',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 5,  // Add this to limit error text
+                overflow: TextOverflow.ellipsis,  // Add this
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: _calculateNutrition,
+                icon: const Icon(Icons.refresh),
+                label: Text(l10n.actionRetry),
+              ),
+            ],
+          ),
         ),
       ),
     );

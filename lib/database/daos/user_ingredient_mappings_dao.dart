@@ -7,56 +7,76 @@ part 'user_ingredient_mappings_dao.g.dart';
 @DriftAccessor(tables: [UserIngredientMappings])
 class UserIngredientMappingsDao extends DatabaseAccessor<AppDatabase>
     with _$UserIngredientMappingsDaoMixin {
-  UserIngredientMappingsDao(AppDatabase db) : super(db);
+  UserIngredientMappingsDao(super.db);
 
-  /// Get all user ingredient mappings
+  /// Get all user mappings
   Future<List<UserIngredientMapping>> getAllMappings() {
     return select(userIngredientMappings).get();
   }
 
-  /// Watch all mappings
+  /// Watch all user mappings
   Stream<List<UserIngredientMapping>> watchAllMappings() {
     return select(userIngredientMappings).watch();
   }
 
-  /// Get mapping for a specific ingredient
+  /// Get mapping for specific ingredient
   Future<UserIngredientMapping?> getMapping(String ingredient) {
+    final normalized = ingredient.toLowerCase().trim();
     return (select(userIngredientMappings)
-      ..where((m) => m.ingredient.equals(ingredient.toLowerCase())))
+      ..where((t) => t.ingredient.equals(normalized)))
         .getSingleOrNull();
   }
 
   /// Set or update a mapping
-  Future<void> setMapping(String ingredient, String shoppingCategoryId) async {
-    await into(userIngredientMappings).insertOnConflictUpdate(
+  Future<void> setMapping(String ingredient, String shoppingCategoryId) {
+    final normalized = ingredient.toLowerCase().trim();
+    return into(userIngredientMappings).insertOnConflictUpdate(
       UserIngredientMappingsCompanion.insert(
-        ingredient: ingredient.toLowerCase(),
+        ingredient: normalized,
         shoppingCategoryId: shoppingCategoryId,
       ),
     );
   }
 
-  /// Delete a mapping (reset to default)
-  Future<void> deleteMapping(String ingredient) async {
-    await (delete(userIngredientMappings)
-      ..where((m) => m.ingredient.equals(ingredient.toLowerCase())))
+  /// Remove a mapping
+  Future<void> removeMapping(String ingredient) {
+    final normalized = ingredient.toLowerCase().trim();
+    return (delete(userIngredientMappings)
+      ..where((t) => t.ingredient.equals(normalized)))
         .go();
   }
 
-  /// Delete all mappings
-  Future<void> deleteAllMappings() async {
-    await delete(userIngredientMappings).go();
+  /// Get mappings as a Map<String, String>
+  Future<Map<String, String>> getMappingsAsMap() async {
+    final mappings = await getAllMappings();
+    return {for (var m in mappings) m.ingredient: m.shoppingCategoryId};
   }
 
-  /// Check if ingredient has a custom mapping
-  Future<bool> hasCustomMapping(String ingredient) async {
-    final mapping = await getMapping(ingredient);
-    return mapping != null;
+  /// Watch mappings as a Map<String, String>
+  Stream<Map<String, String>> watchMappingsAsMap() {
+    return watchAllMappings().map((mappings) =>
+    {for (var m in mappings) m.ingredient: m.shoppingCategoryId}
+    );
   }
 
-  /// Get category for ingredient (returns null if no custom mapping)
-  Future<String?> getCategoryForIngredient(String ingredient) async {
-    final mapping = await getMapping(ingredient);
-    return mapping?.shoppingCategoryId;
+  /// Bulk import mappings (for migration or restore)
+  Future<void> importMappings(Map<String, String> mappings) async {
+    await batch((batch) {
+      for (final entry in mappings.entries) {
+        batch.insert(
+          userIngredientMappings,
+          UserIngredientMappingsCompanion.insert(
+            ingredient: entry.key.toLowerCase().trim(),
+            shoppingCategoryId: entry.value,
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+      }
+    });
+  }
+
+  /// Clear all mappings
+  Future<void> clearAllMappings() {
+    return delete(userIngredientMappings).go();
   }
 }

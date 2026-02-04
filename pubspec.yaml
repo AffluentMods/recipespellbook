@@ -47,6 +47,9 @@ dependencies:
   archive: ^3.4.9
   qr_flutter: ^4.1.0
   url_launcher: ^6.2.1
+  app_links: ^3.4.0
+  share_handler: ^0.0.21
+  mobile_scanner: ^4.0.0
 
 dev_dependencies:
   flutter_test:
@@ -80,6 +83,9 @@ flutter:
   assets:
     - assets/data/common_ingredients.json
     - assets/images/
+    - assets/rpg/avatars/
+    - assets/rpg/frames/
+    - assets/rpg/pets/
     - assets/images/logo.png
     - assets/images/splash_logo.png
     - assets/images/cookbook_placeholder_normal.png

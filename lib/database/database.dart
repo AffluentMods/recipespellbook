@@ -75,7 +75,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 8; // Bumped for USDA tables
+  int get schemaVersion => 9; // Bumped for USDA tables
 
   // Accessors for DAOs
   CookbookDao get cookbookDao => CookbookDao(this);
@@ -126,6 +126,10 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 8) {
           await m.addColumn(recipes, recipes.nutritionJson);
+        }
+        if (from < 9) {
+          // Add imagePath column to steps table
+          await m.addColumn(steps, steps.imagePath);
         }
       },
     );

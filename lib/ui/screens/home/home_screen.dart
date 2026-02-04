@@ -11,6 +11,7 @@ import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../widgets/new_recipe_dialog.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../../utils/taxonomy_translator.dart';
+import '../../widgets/rpg/rpg_navigation_shell.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -62,6 +63,13 @@ class HomeScreen extends ConsumerWidget {
                   stream: recipeDao.watchAllRecipes(cookbookId),
                   builder: (context, snapshot) {
                     final recipes = snapshot.data ?? [];
+
+                    // Update RPG achievement progress for recipe count
+                    if (recipes.isNotEmpty) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        RpgIntegration.updateRecipeCount(ref, recipes.length);
+                      });
+                    }
 
                     if (recipes.isEmpty) {
                       return _EmptyCookbookState(cookbookId: cookbookId);

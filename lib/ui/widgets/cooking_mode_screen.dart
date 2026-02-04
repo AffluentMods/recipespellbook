@@ -6,7 +6,8 @@ import 'package:recipespellbook/database/database.dart';
 import 'package:recipespellbook/providers/database_provider.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:recipespellbook/data/nutrition_data.dart';
-import 'package:recipespellbook/ui/widgets/nutrition_widgets.dart';
+import '../../../ui/widgets/nutrition_widgets.dart';
+import 'rpg/rpg_navigation_shell.dart';
 
 /// Launches cooking mode for a recipe
 void launchCookingMode(BuildContext context, String recipeId) {
@@ -173,6 +174,12 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
     );
   }
 
+  void _finishCooking() {
+    // Award XP for completing cooking mode
+    RpgIntegration.onRecipeCooked(ref);
+    Navigator.pop(context);
+  }
+
   void _confirmExit() {
     final l10n = AppLocalizations.of(context)!;
     showDialog(
@@ -255,7 +262,7 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
               onPrevious: _currentStepIndex > 0 ? _previousStep : null,
               onNext: _currentStepIndex < _steps.length - 1 ? _nextStep : null,
               onTimer: _showTimerPicker,
-              onFinish: _currentStepIndex == _steps.length - 1 ? () => Navigator.pop(context) : null,
+              onFinish: _currentStepIndex == _steps.length - 1 ? _finishCooking : null,
             ),
           ],
         ),

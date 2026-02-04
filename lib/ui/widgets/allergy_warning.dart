@@ -238,7 +238,7 @@ class AllergyWarningBanner extends ConsumerWidget {
         required bool isDefinite,
       }) {
     final color = isDefinite ? Colors.red : Colors.orange;
-    final name = _getLocalizedAllergenName(allergen, l10n);
+    final name = allergen.getLocalizedName(l10n);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -262,43 +262,6 @@ class AllergyWarningBanner extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  String _getLocalizedAllergenName(Allergen allergen, AppLocalizations l10n) {
-    switch (allergen) {
-      case Allergen.milk:
-        return l10n.allergenMilk;
-      case Allergen.eggs:
-        return l10n.allergenEggs;
-      case Allergen.fish:
-        return l10n.allergenFish;
-      case Allergen.shellfish:
-        return l10n.allergenShellfish;
-      case Allergen.treeNuts:
-        return l10n.allergenTreeNuts;
-      case Allergen.peanuts:
-        return l10n.allergenPeanuts;
-      case Allergen.wheat:
-        return l10n.allergenWheat;
-      case Allergen.soy:
-        return l10n.allergenSoy;
-      case Allergen.sesame:
-        return l10n.allergenSesame;
-      case Allergen.mustard:
-        return l10n.allergenMustard;
-      case Allergen.celery:
-        return l10n.allergenCelery;
-      case Allergen.lupin:
-        return l10n.allergenLupin;
-      case Allergen.mollusks:
-        return l10n.allergenMollusks;
-      case Allergen.sulfites:
-        return l10n.allergenSulfites;
-      case Allergen.corn:
-        return l10n.allergenCorn;
-      case Allergen.nightshades:
-        return l10n.allergenNightshades;
-    }
   }
 }
 

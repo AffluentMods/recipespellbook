@@ -18,7 +18,8 @@ import '../../../data/nutrition_data.dart';
 import '../../widgets/taxonomy_picker.dart';
 import '../../widgets/tag_picker.dart';
 import '../../widgets/nutrition_calculation_sheet.dart';
-import '../../widgets/rpg_rarity_picker.dart';
+import '../../widgets/rpg/rpg_rarity_picker.dart';
+import '../../widgets/rpg/rpg_navigation_shell.dart';
 
 class RecipeEditScreen extends ConsumerStatefulWidget {
   final String? recipeId;
@@ -36,7 +37,7 @@ class RecipeEditScreen extends ConsumerStatefulWidget {
   ConsumerState<RecipeEditScreen> createState() => _RecipeEditScreenState();
 }
 
-class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
+class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
 
@@ -46,7 +47,6 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
   final _prepTimeController = TextEditingController();
   final _cookTimeController = TextEditingController();
   final _sourceUrlController = TextEditingController();
-  final _instructionsController = TextEditingController();
   final _notesController = TextEditingController();
 
   String? _imagePath;
@@ -64,13 +64,32 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
   bool _isSaving = false;
 
   final List<_SimpleIngredient> _ingredients = [];
+  final List<_EditableStep> _steps = [];
+
+  // Tab controller for tabbed layout
+  late TabController _tabController;
 
   bool get _isEditing => widget.recipeId != null;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
     _loadRecipe();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _servingsController.dispose();
+    _prepTimeController.dispose();
+    _cookTimeController.dispose();
+    _sourceUrlController.dispose();
+    _notesController.dispose();
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadRecipe() async {
@@ -81,6 +100,8 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
     }
 
     if (!_isEditing) {
+      // Add one empty step for new recipes
+      _steps.add(_EditableStep(id: 'step_${DateTime.now().millisecondsSinceEpoch}'));
       setState(() => _isLoading = false);
       return;
     }
@@ -104,6 +125,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
     _rating = recipe.rating ?? 0;
     _selectedCourseId = recipe.courseId;
     _selectedCategoryId = recipe.categoryId;
+    _notesController.text = recipe.notes ?? '';
 
     // Load existing nutrition
     if (recipe.nutritionJson != null && recipe.nutritionJson!.isNotEmpty) {
@@ -130,10 +152,21 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
       _ingredients.add(_SimpleIngredient(id: ing.id, text: parts.join(' ')));
     }
 
-    // Load instructions
+    // Load steps with images
     final steps = await recipeDao.getStepsForRecipe(widget.recipeId!);
-    _instructionsController.text = steps.map((s) => s.instruction).join('\n\n');
-    _notesController.text = recipe.notes ?? '';
+    for (final step in steps) {
+      _steps.add(_EditableStep(
+        id: step.id,
+        instruction: step.instruction,
+        imagePath: step.imagePath,
+        durationMinutes: step.durationMinutes,
+      ));
+    }
+
+    // Add empty step if none exist
+    if (_steps.isEmpty) {
+      _steps.add(_EditableStep(id: 'step_${DateTime.now().millisecondsSinceEpoch}'));
+    }
 
     setState(() => _isLoading = false);
   }
@@ -157,24 +190,30 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
     }
 
     if (data['instructions'] is List) {
-      _instructionsController.text = (data['instructions'] as List).join('\n\n');
+      for (var i = 0; i < (data['instructions'] as List).length; i++) {
+        final instruction = data['instructions'][i];
+        _steps.add(_EditableStep(
+          id: 'step_${DateTime.now().millisecondsSinceEpoch}_$i',
+          instruction: instruction.toString(),
+        ));
+      }
     } else if (data['instructions'] is String) {
-      _instructionsController.text = data['instructions'];
+      // Split by double newlines
+      final instructionList = (data['instructions'] as String).split(RegExp(r'\n\n+'));
+      for (var i = 0; i < instructionList.length; i++) {
+        if (instructionList[i].trim().isNotEmpty) {
+          _steps.add(_EditableStep(
+            id: 'step_${DateTime.now().millisecondsSinceEpoch}_$i',
+            instruction: instructionList[i].trim(),
+          ));
+        }
+      }
     }
-  }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _titleController.dispose();
-    _descriptionController.dispose();
-    _servingsController.dispose();
-    _prepTimeController.dispose();
-    _cookTimeController.dispose();
-    _sourceUrlController.dispose();
-    _instructionsController.dispose();
-    _notesController.dispose();
-    super.dispose();
+    // Add empty step if none parsed
+    if (_steps.isEmpty) {
+      _steps.add(_EditableStep(id: 'step_${DateTime.now().millisecondsSinceEpoch}'));
+    }
   }
 
   @override
@@ -183,6 +222,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
     final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider);
     final isRpgMode = settings.nerdMode;
+    final useTabbed = settings.recipeEditLayoutMode == RecipeEditLayoutMode.tabbed;
 
     if (_isLoading) {
       return Scaffold(
@@ -195,6 +235,15 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
       appBar: AppBar(
         title: Text(_isEditing ? l10n.recipeEdit : l10n.recipeAdd),
         actions: [
+          // Layout toggle
+          IconButton(
+            icon: Icon(useTabbed ? Icons.view_agenda : Icons.tab),
+            onPressed: () {
+              final newMode = useTabbed ? RecipeEditLayoutMode.stacked : RecipeEditLayoutMode.tabbed;
+              ref.read(settingsProvider.notifier).setRecipeEditLayout(newMode);
+            },
+            tooltip: useTabbed ? l10n.editLayoutStacked : l10n.editLayoutTabbed,
+          ),
           FilledButton(
             onPressed: _isSaving ? null : _saveRecipe,
             child: _isSaving
@@ -203,59 +252,193 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
           ),
           const SizedBox(width: 8),
         ],
+        bottom: useTabbed ? TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(icon: const Icon(Icons.info_outline, size: 20), text: l10n.tabDetails),
+            Tab(icon: const Icon(Icons.checklist, size: 20), text: l10n.ingredientsTitle),
+            Tab(icon: const Icon(Icons.format_list_numbered, size: 20), text: l10n.instructionsTitle),
+          ],
+        ) : null,
       ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+      body: useTabbed
+          ? _buildTabbedLayout(theme, l10n, isRpgMode, settings)
+          : _buildStackedLayout(theme, l10n, isRpgMode, settings),
+    );
+  }
+
+  Widget _buildStackedLayout(ThemeData theme, AppLocalizations l10n, bool isRpgMode, AppSettings settings) {
+    return Form(
+      key: _formKey,
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _PhotoPicker(imagePath: _imagePath, onImageSelected: (path) => setState(() => _imagePath = path)),
+            const SizedBox(height: 24),
+            TextFormField(
+              controller: _titleController,
+              decoration: InputDecoration(labelText: l10n.recipeFieldTitle, hintText: 'e.g., Grandma\'s Apple Pie'),
+              textCapitalization: TextCapitalization.words,
+              validator: (value) => (value == null || value.trim().isEmpty) ? l10n.errorGeneric : null,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _descriptionController,
+              decoration: InputDecoration(labelText: l10n.recipeFieldDescription, hintText: 'A brief description of the recipe'),
+              maxLines: 2,
+              textCapitalization: TextCapitalization.sentences,
+            ),
+            const SizedBox(height: 20),
+            CoursePicker(selectedCourseId: _selectedCourseId, onChanged: (id) => setState(() => _selectedCourseId = id)),
+            const SizedBox(height: 16),
+            CategoryPicker(selectedCategoryId: _selectedCategoryId, onChanged: (id) => setState(() => _selectedCategoryId = id)),
+            const SizedBox(height: 20),
+            TagPicker(recipeId: widget.recipeId ?? '', initialTagIds: _selectedTagIds, onTagsChanged: (tagIds) => setState(() => _selectedTagIds = tagIds)),
+            const SizedBox(height: 20),
+            // Show RPG rarity picker or standard star rating based on settings
+            if (isRpgMode)
+              RpgRarityPicker(
+                initialRating: _rating == 0 ? 1 : _rating,
+                onChanged: (r) => setState(() => _rating = r),
+                enableAnimations: settings.rpgAnimationsEnabled,
+              )
+            else
+              _RatingSelector(rating: _rating, onChanged: (r) => setState(() => _rating = r)),
+            const SizedBox(height: 20),
+            Row(children: [
+              Expanded(child: TextFormField(controller: _servingsController, decoration: InputDecoration(labelText: l10n.recipeFieldServings, hintText: 'e.g., 4'))),
+              const SizedBox(width: 12),
+              Expanded(child: TextFormField(controller: _prepTimeController, decoration: const InputDecoration(labelText: 'Prep (min)'), keyboardType: TextInputType.number)),
+              const SizedBox(width: 12),
+              Expanded(child: TextFormField(controller: _cookTimeController, decoration: const InputDecoration(labelText: 'Cook (min)'), keyboardType: TextInputType.number)),
+            ]),
+            const SizedBox(height: 16),
+            TextFormField(controller: _sourceUrlController, decoration: InputDecoration(labelText: l10n.recipeFieldSource, hintText: 'https://...', prefixIcon: const Icon(Icons.link)), keyboardType: TextInputType.url),
+            const SizedBox(height: 32),
+            _SectionTitle(title: l10n.ingredientsTitle),
+            const SizedBox(height: 12),
+            ..._ingredients.asMap().entries.map((entry) => _IngredientRow(
+              key: ValueKey(entry.value.id),
+              ingredient: entry.value,
+              onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
+              onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
+            )),
+            _AddIngredientButton(onTap: _addIngredient),
+            const SizedBox(height: 32),
+            _SectionTitle(title: l10n.instructionsTitle),
+            const SizedBox(height: 12),
+            ..._steps.asMap().entries.map((entry) => _StepCard(
+              key: ValueKey(entry.value.id),
+              stepNumber: entry.key + 1,
+              step: entry.value,
+              onInstructionChanged: (text) => setState(() => _steps[entry.key].instruction = text),
+              onImageChanged: (path) => setState(() => _steps[entry.key].imagePath = path),
+              onDurationChanged: (mins) => setState(() => _steps[entry.key].durationMinutes = mins),
+              onDelete: _steps.length > 1 ? () => setState(() => _steps.removeAt(entry.key)) : null,
+              onMoveUp: entry.key > 0 ? () => _moveStep(entry.key, -1) : null,
+              onMoveDown: entry.key < _steps.length - 1 ? () => _moveStep(entry.key, 1) : null,
+            )),
+            _AddStepButton(onTap: _addStep),
+            const SizedBox(height: 32),
+            _SectionTitle(title: l10n.recipeFieldNotes),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _notesController,
+              decoration: InputDecoration(hintText: 'Tips, variations, storage instructions...', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), alignLabelWithHint: true),
+              maxLines: 5,
+              minLines: 3,
+              textCapitalization: TextCapitalization.sentences,
+            ),
+            const SizedBox(height: 32),
+            _SectionTitle(title: l10n.nutritionTitle),
+            const SizedBox(height: 12),
+            _NutritionSection(nutrition: _nutrition, isCalculating: _isCalculatingNutrition, onCalculate: _calculateNutrition, onClear: () => setState(() => _nutrition = null)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabbedLayout(ThemeData theme, AppLocalizations l10n, bool isRpgMode, AppSettings settings) {
+    return TabBarView(
+      controller: _tabController,
+      children: [
+        // Tab 1: Details
+        Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _PhotoPicker(imagePath: _imagePath, onImageSelected: (path) => setState(() => _imagePath = path)),
+                const SizedBox(height: 24),
+                TextFormField(
+                  controller: _titleController,
+                  decoration: InputDecoration(labelText: l10n.recipeFieldTitle, hintText: 'e.g., Grandma\'s Apple Pie'),
+                  textCapitalization: TextCapitalization.words,
+                  validator: (value) => (value == null || value.trim().isEmpty) ? l10n.errorGeneric : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: InputDecoration(labelText: l10n.recipeFieldDescription, hintText: 'A brief description of the recipe'),
+                  maxLines: 2,
+                  textCapitalization: TextCapitalization.sentences,
+                ),
+                const SizedBox(height: 20),
+                CoursePicker(selectedCourseId: _selectedCourseId, onChanged: (id) => setState(() => _selectedCourseId = id)),
+                const SizedBox(height: 16),
+                CategoryPicker(selectedCategoryId: _selectedCategoryId, onChanged: (id) => setState(() => _selectedCategoryId = id)),
+                const SizedBox(height: 20),
+                TagPicker(recipeId: widget.recipeId ?? '', initialTagIds: _selectedTagIds, onTagsChanged: (tagIds) => setState(() => _selectedTagIds = tagIds)),
+                const SizedBox(height: 20),
+                if (isRpgMode)
+                  RpgRarityPicker(
+                    initialRating: _rating == 0 ? 1 : _rating,
+                    onChanged: (r) => setState(() => _rating = r),
+                    enableAnimations: settings.rpgAnimationsEnabled,
+                  )
+                else
+                  _RatingSelector(rating: _rating, onChanged: (r) => setState(() => _rating = r)),
+                const SizedBox(height: 20),
+                Row(children: [
+                  Expanded(child: TextFormField(controller: _servingsController, decoration: InputDecoration(labelText: l10n.recipeFieldServings, hintText: 'e.g., 4'))),
+                  const SizedBox(width: 12),
+                  Expanded(child: TextFormField(controller: _prepTimeController, decoration: const InputDecoration(labelText: 'Prep (min)'), keyboardType: TextInputType.number)),
+                  const SizedBox(width: 12),
+                  Expanded(child: TextFormField(controller: _cookTimeController, decoration: const InputDecoration(labelText: 'Cook (min)'), keyboardType: TextInputType.number)),
+                ]),
+                const SizedBox(height: 16),
+                TextFormField(controller: _sourceUrlController, decoration: InputDecoration(labelText: l10n.recipeFieldSource, hintText: 'https://...', prefixIcon: const Icon(Icons.link)), keyboardType: TextInputType.url),
+                const SizedBox(height: 32),
+                _SectionTitle(title: l10n.recipeFieldNotes),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _notesController,
+                  decoration: InputDecoration(hintText: 'Tips, variations, storage instructions...', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), alignLabelWithHint: true),
+                  maxLines: 5,
+                  minLines: 3,
+                  textCapitalization: TextCapitalization.sentences,
+                ),
+                const SizedBox(height: 32),
+                _SectionTitle(title: l10n.nutritionTitle),
+                const SizedBox(height: 12),
+                _NutritionSection(nutrition: _nutrition, isCalculating: _isCalculatingNutrition, onCalculate: _calculateNutrition, onClear: () => setState(() => _nutrition = null)),
+                const SizedBox(height: 100),
+              ],
+            ),
+          ),
+        ),
+        // Tab 2: Ingredients
+        SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _PhotoPicker(imagePath: _imagePath, onImageSelected: (path) => setState(() => _imagePath = path)),
-              const SizedBox(height: 24),
-              TextFormField(
-                controller: _titleController,
-                decoration: InputDecoration(labelText: l10n.recipeFieldTitle, hintText: 'e.g., Grandma\'s Apple Pie'),
-                textCapitalization: TextCapitalization.words,
-                validator: (value) => (value == null || value.trim().isEmpty) ? l10n.errorGeneric : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: InputDecoration(labelText: l10n.recipeFieldDescription, hintText: 'A brief description of the recipe'),
-                maxLines: 2,
-                textCapitalization: TextCapitalization.sentences,
-              ),
-              const SizedBox(height: 20),
-              CoursePicker(selectedCourseId: _selectedCourseId, onChanged: (id) => setState(() => _selectedCourseId = id)),
-              const SizedBox(height: 16),
-              CategoryPicker(selectedCategoryId: _selectedCategoryId, onChanged: (id) => setState(() => _selectedCategoryId = id)),
-              const SizedBox(height: 20),
-              TagPicker(recipeId: widget.recipeId ?? '', initialTagIds: _selectedTagIds, onTagsChanged: (tagIds) => setState(() => _selectedTagIds = tagIds)),
-              const SizedBox(height: 20),
-              // Show RPG rarity picker or standard star rating based on settings
-              if (isRpgMode)
-                RpgRarityPicker(
-                  initialRating: _rating == 0 ? 1 : _rating,
-                  onChanged: (r) => setState(() => _rating = r),
-                  enableAnimations: settings.rpgAnimationsEnabled,
-                )
-              else
-                _RatingSelector(rating: _rating, onChanged: (r) => setState(() => _rating = r)),
-              const SizedBox(height: 20),
-              Row(children: [
-                Expanded(child: TextFormField(controller: _servingsController, decoration: InputDecoration(labelText: l10n.recipeFieldServings, hintText: 'e.g., 4'))),
-                const SizedBox(width: 12),
-                Expanded(child: TextFormField(controller: _prepTimeController, decoration: const InputDecoration(labelText: 'Prep (min)'), keyboardType: TextInputType.number)),
-                const SizedBox(width: 12),
-                Expanded(child: TextFormField(controller: _cookTimeController, decoration: const InputDecoration(labelText: 'Cook (min)'), keyboardType: TextInputType.number)),
-              ]),
-              const SizedBox(height: 16),
-              TextFormField(controller: _sourceUrlController, decoration: InputDecoration(labelText: l10n.recipeFieldSource, hintText: 'https://...', prefixIcon: const Icon(Icons.link)), keyboardType: TextInputType.url),
-              const SizedBox(height: 32),
-              _SectionTitle(title: l10n.ingredientsTitle),
-              const SizedBox(height: 12),
               ..._ingredients.asMap().entries.map((entry) => _IngredientRow(
                 key: ValueKey(entry.value.id),
                 ingredient: entry.value,
@@ -263,34 +446,33 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
                 onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
               )),
               _AddIngredientButton(onTap: _addIngredient),
-              const SizedBox(height: 32),
-              _SectionTitle(title: l10n.instructionsTitle),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _instructionsController,
-                decoration: InputDecoration(hintText: 'Write your instructions here...\n\n1. First step\n2. Second step', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), alignLabelWithHint: true),
-                maxLines: 10,
-                minLines: 5,
-                textCapitalization: TextCapitalization.sentences,
-              ),
-              const SizedBox(height: 32),
-              _SectionTitle(title: l10n.recipeFieldNotes),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _notesController,
-                decoration: InputDecoration(hintText: 'Tips, variations, storage instructions...', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), alignLabelWithHint: true),
-                maxLines: 5,
-                minLines: 3,
-                textCapitalization: TextCapitalization.sentences,
-              ),
-              const SizedBox(height: 32),
-              _SectionTitle(title: l10n.nutritionTitle),
-              const SizedBox(height: 12),
-              _NutritionSection(nutrition: _nutrition, isCalculating: _isCalculatingNutrition, onCalculate: _calculateNutrition, onClear: () => setState(() => _nutrition = null)),
+              const SizedBox(height: 100),
             ],
           ),
         ),
-      ),
+        // Tab 3: Instructions
+        SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ..._steps.asMap().entries.map((entry) => _StepCard(
+                key: ValueKey(entry.value.id),
+                stepNumber: entry.key + 1,
+                step: entry.value,
+                onInstructionChanged: (text) => setState(() => _steps[entry.key].instruction = text),
+                onImageChanged: (path) => setState(() => _steps[entry.key].imagePath = path),
+                onDurationChanged: (mins) => setState(() => _steps[entry.key].durationMinutes = mins),
+                onDelete: _steps.length > 1 ? () => setState(() => _steps.removeAt(entry.key)) : null,
+                onMoveUp: entry.key > 0 ? () => _moveStep(entry.key, -1) : null,
+                onMoveDown: entry.key < _steps.length - 1 ? () => _moveStep(entry.key, 1) : null,
+              )),
+              _AddStepButton(onTap: _addStep),
+              const SizedBox(height: 100),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -298,6 +480,19 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
     setState(() => _ingredients.add(_SimpleIngredient(id: DateTime.now().millisecondsSinceEpoch.toString(), text: '')));
     Future.delayed(const Duration(milliseconds: 100), () {
       _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+    });
+  }
+
+  void _addStep() {
+    setState(() {
+      _steps.add(_EditableStep(id: 'step_${DateTime.now().millisecondsSinceEpoch}'));
+    });
+  }
+
+  void _moveStep(int index, int direction) {
+    setState(() {
+      final step = _steps.removeAt(index);
+      _steps.insert(index + direction, step);
     });
   }
 
@@ -391,6 +586,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
         );
         await recipeDao.updateRecipeFields(widget.recipeId!, recipe);
 
+        // Save ingredients
         await recipeDao.deleteIngredientsForRecipe(widget.recipeId!);
         for (var i = 0; i < _ingredients.length; i++) {
           if (_ingredients[i].text.trim().isNotEmpty) {
@@ -399,11 +595,24 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
           }
         }
 
+        // Save steps with images
         await recipeDao.deleteStepsForRecipe(widget.recipeId!);
-        final steps = _instructionsController.text.trim().split(RegExp(r'\n\n+'));
-        for (var i = 0; i < steps.length; i++) {
-          if (steps[i].trim().isNotEmpty) {
-            await recipeDao.insertStep(StepsCompanion.insert(id: '${widget.recipeId}_step_$i', recipeId: widget.recipeId!, sortOrder: i, instruction: steps[i].trim()));
+        for (var i = 0; i < _steps.length; i++) {
+          final step = _steps[i];
+          if (step.instruction.trim().isNotEmpty) {
+            // Copy step image to permanent location if it's a temp file
+            String? stepImagePath = step.imagePath;
+            if (stepImagePath != null && !stepImagePath.contains('images/steps')) {
+              stepImagePath = await _copyStepImage(stepImagePath, widget.recipeId!, i);
+            }
+            await recipeDao.insertStep(StepsCompanion.insert(
+              id: '${widget.recipeId}_step_$i',
+              recipeId: widget.recipeId!,
+              sortOrder: i,
+              instruction: step.instruction.trim(),
+              durationMinutes: drift.Value(step.durationMinutes),
+              imagePath: drift.Value(stepImagePath),
+            ));
           }
         }
       } else {
@@ -427,6 +636,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
           nutritionJson: drift.Value(nutritionJson),
         ));
 
+        // Save ingredients
         for (var i = 0; i < _ingredients.length; i++) {
           if (_ingredients[i].text.trim().isNotEmpty) {
             final parsed = _parseIngredient(_ingredients[i].text);
@@ -434,10 +644,23 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
           }
         }
 
-        final steps = _instructionsController.text.trim().split(RegExp(r'\n\n+'));
-        for (var i = 0; i < steps.length; i++) {
-          if (steps[i].trim().isNotEmpty) {
-            await recipeDao.insertStep(StepsCompanion.insert(id: '${recipeId}_step_$i', recipeId: recipeId, sortOrder: i, instruction: steps[i].trim()));
+        // Save steps with images
+        for (var i = 0; i < _steps.length; i++) {
+          final step = _steps[i];
+          if (step.instruction.trim().isNotEmpty) {
+            // Copy step image to permanent location
+            String? stepImagePath = step.imagePath;
+            if (stepImagePath != null) {
+              stepImagePath = await _copyStepImage(stepImagePath, recipeId, i);
+            }
+            await recipeDao.insertStep(StepsCompanion.insert(
+              id: '${recipeId}_step_$i',
+              recipeId: recipeId,
+              sortOrder: i,
+              instruction: step.instruction.trim(),
+              durationMinutes: drift.Value(step.durationMinutes),
+              imagePath: drift.Value(stepImagePath),
+            ));
           }
         }
       }
@@ -446,6 +669,27 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_isEditing ? 'Recipe updated!' : l10n.successSaved)));
+
+        // RPG XP - only for new recipes
+        if (!_isEditing) {
+          final isImported = widget.importedData != null;
+          if (isImported) {
+            RpgIntegration.onRecipeImported(ref);
+          } else {
+            RpgIntegration.onRecipeCreated(
+              ref,
+              stepCount: _steps.where((s) => s.instruction.trim().isNotEmpty).length,
+              ingredientCount: _ingredients.where((i) => i.text.trim().isNotEmpty).length,
+            );
+          }
+          if (finalImagePath != null) {
+            RpgIntegration.onPhotoAdded(ref);
+          }
+          if (_nutrition != null && !_nutrition!.isEmpty) {
+            RpgIntegration.onNutritionAdded(ref);
+          }
+        }
+
         context.pop(true);
       }
     } catch (e) {
@@ -469,6 +713,21 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
     } catch (e) { return null; }
   }
 
+  Future<String?> _copyStepImage(String sourcePath, String recipeId, int stepIndex) async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final ext = p.extension(sourcePath);
+      final filename = 'step_${recipeId}_$stepIndex$ext';
+      final destPath = p.join(dir.path, 'images', 'steps', filename);
+      final destFile = File(destPath);
+      await destFile.parent.create(recursive: true);
+      await File(sourcePath).copy(destPath);
+      return destPath;
+    } catch (e) {
+      return sourcePath; // Return original path if copy fails
+    }
+  }
+
   _ParsedIngredient _parseIngredient(String text) {
     final trimmed = text.trim();
     const units = ['tablespoons?', 'teaspoons?', 'fluid\\s*ounces?', 'milliliters?', 'kilograms?', 'gallons?', 'liters?', 'litres?', 'quarts?', 'pints?', 'cups?', 'ounces?', 'pounds?', 'grams?', 'tbsps?', 'tbsp', 'tsps?', 'fl\\.?\\s*oz', 'lbs?', 'kgs?', 'pkg', 'oz', 'ml', 'kg', 'tbs', 'tsp', 'lb', 'qt', 'pt', 'c', 'g', 'l', 'pinche?s?', 'dashe?s?', 'cloves?', 'slices?', 'pieces?', 'cans?', 'packages?', 'bunche?s?', 'stalks?', 'sprigs?', 'heads?', 'sticks?', 'large', 'medium', 'small', 'whole'];
@@ -486,6 +745,261 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> {
     return _ParsedIngredient(name: trimmed);
   }
 }
+
+// ============ DATA MODELS ============
+
+class _SimpleIngredient {
+  final String id;
+  String text;
+  _SimpleIngredient({required this.id, this.text = ''});
+}
+
+class _EditableStep {
+  final String id;
+  String instruction;
+  String? imagePath;
+  int? durationMinutes;
+
+  _EditableStep({
+    required this.id,
+    this.instruction = '',
+    this.imagePath,
+    this.durationMinutes,
+  });
+}
+
+class _ParsedIngredient {
+  final String? amount;
+  final String? unit;
+  final String name;
+  final String? notes;
+  _ParsedIngredient({this.amount, this.unit, required this.name, this.notes});
+}
+
+// ============ STEP CARD ============
+
+class _StepCard extends StatelessWidget {
+  final int stepNumber;
+  final _EditableStep step;
+  final ValueChanged<String> onInstructionChanged;
+  final ValueChanged<String?> onImageChanged;
+  final ValueChanged<int?> onDurationChanged;
+  final VoidCallback? onDelete;
+  final VoidCallback? onMoveUp;
+  final VoidCallback? onMoveDown;
+
+  const _StepCard({
+    super.key,
+    required this.stepNumber,
+    required this.step,
+    required this.onInstructionChanged,
+    required this.onImageChanged,
+    required this.onDurationChanged,
+    this.onDelete,
+    this.onMoveUp,
+    this.onMoveDown,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final hasImage = step.imagePath != null && File(step.imagePath!).existsSync();
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with step number and actions
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    '$stepNumber',
+                    style: TextStyle(
+                      color: theme.colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Step $stepNumber',
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const Spacer(),
+              // Reorder buttons
+              if (onMoveUp != null)
+                IconButton(
+                  icon: const Icon(Icons.arrow_upward, size: 20),
+                  onPressed: onMoveUp,
+                  visualDensity: VisualDensity.compact,
+                  tooltip: 'Move up',
+                ),
+              if (onMoveDown != null)
+                IconButton(
+                  icon: const Icon(Icons.arrow_downward, size: 20),
+                  onPressed: onMoveDown,
+                  visualDensity: VisualDensity.compact,
+                  tooltip: 'Move down',
+                ),
+              if (onDelete != null)
+                IconButton(
+                  icon: Icon(Icons.delete_outline, size: 20, color: theme.colorScheme.error),
+                  onPressed: onDelete,
+                  visualDensity: VisualDensity.compact,
+                  tooltip: l10n.actionDelete,
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Instruction text
+          TextFormField(
+            initialValue: step.instruction,
+            decoration: InputDecoration(
+              hintText: 'Describe this step...',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            maxLines: 3,
+            minLines: 2,
+            textCapitalization: TextCapitalization.sentences,
+            onChanged: onInstructionChanged,
+          ),
+          const SizedBox(height: 12),
+
+          // Step image
+          if (hasImage) ...[
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(
+                    File(step.imagePath!),
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Row(
+                    children: [
+                      _ImageActionButton(
+                        icon: Icons.edit,
+                        onTap: () => _pickStepImage(context),
+                      ),
+                      const SizedBox(width: 8),
+                      _ImageActionButton(
+                        icon: Icons.close,
+                        onTap: () => onImageChanged(null),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ] else ...[
+            // Add image button
+            OutlinedButton.icon(
+              onPressed: () => _pickStepImage(context),
+              icon: const Icon(Icons.add_photo_alternate, size: 18),
+              label: Text(l10n.stepImageAdd),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 44),
+              ),
+            ),
+          ],
+
+          // Timer option
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Icon(Icons.timer, size: 18, color: theme.colorScheme.outline),
+              const SizedBox(width: 8),
+              Text(l10n.stepTimer, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+              const Spacer(),
+              SizedBox(
+                width: 80,
+                child: TextFormField(
+                  initialValue: step.durationMinutes?.toString() ?? '',
+                  decoration: InputDecoration(
+                    hintText: 'min',
+                    isDense: true,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) => onDurationChanged(int.tryParse(value)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _pickStepImage(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from gallery'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take a photo'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(
+      source: source,
+      maxWidth: 1200,
+      maxHeight: 1200,
+      imageQuality: 85,
+    );
+    if (image != null) {
+      onImageChanged(image.path);
+    }
+  }
+}
+
+// ============ HELPER WIDGETS ============
 
 class _NutritionSection extends StatelessWidget {
   final NutritionData? nutrition;
@@ -587,9 +1101,6 @@ class _CalculateNutritionCard extends StatelessWidget {
   }
 }
 
-class _SimpleIngredient { final String id; String text; _SimpleIngredient({required this.id, this.text = ''}); }
-class _ParsedIngredient { final String? amount; final String? unit; final String name; final String? notes; _ParsedIngredient({this.amount, this.unit, required this.name, this.notes}); }
-
 class _PhotoPicker extends StatelessWidget {
   final String? imagePath; final ValueChanged<String?> onImageSelected;
   const _PhotoPicker({required this.imagePath, required this.onImageSelected});
@@ -677,6 +1188,19 @@ class _AddIngredientButton extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(border: Border.all(color: theme.colorScheme.outlineVariant), borderRadius: BorderRadius.circular(12)),
       child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.add, color: theme.colorScheme.primary, size: 20), const SizedBox(width: 8), Text('Add Ingredient', style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.primary))]),
+    ));
+  }
+}
+
+class _AddStepButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _AddStepButton({required this.onTap});
+  @override Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return GestureDetector(onTap: onTap, child: Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(border: Border.all(color: theme.colorScheme.outlineVariant), borderRadius: BorderRadius.circular(12)),
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.add, color: theme.colorScheme.primary, size: 20), const SizedBox(width: 8), Text('Add Step', style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.primary))]),
     ));
   }
 }

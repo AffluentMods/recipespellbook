@@ -278,7 +278,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get shoppingCheckedItems => 'Abgehakte Artikel';
 
   @override
-  String get shoppingClearChecked => 'Abgehakte löschen';
+  String get shoppingClearChecked => 'Markierte löschen';
 
   @override
   String get shoppingClearAll => 'Alle löschen';
@@ -2853,4 +2853,437 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get rarityLegendaryDesc => 'Ein legendäres Rezept, würdig der Götter!';
+
+  @override
+  String get shareLink => 'Link';
+
+  @override
+  String get shareDocument => 'Dokument';
+
+  @override
+  String get sharePrint => 'Drucken';
+
+  @override
+  String get shareLinkDescription => 'Teile einen Link, über den andere dieses Rezept ansehen können.';
+
+  @override
+  String get shareLinkNote => 'Empfänger benötigen die Recipe Spellbook App oder können im Web ansehen.';
+
+  @override
+  String get shareCreatingDocument => 'Dokument wird erstellt...';
+
+  @override
+  String get editLayoutTitle => 'Bearbeitungslayout';
+
+  @override
+  String get editLayoutStacked => 'Gestapelt';
+
+  @override
+  String get editLayoutTabbed => 'Tabs';
+
+  @override
+  String get editLayoutStackedDesc => 'Alle Abschnitte in einer scrollbaren Ansicht';
+
+  @override
+  String get editLayoutTabbedDesc => 'Separate Tabs für Details, Zutaten, Anleitung';
+
+  @override
+  String get tabDetails => 'Details';
+
+  @override
+  String get tabIngredients => 'Zutaten';
+
+  @override
+  String get tabInstructions => 'Anleitung';
+
+  @override
+  String get stepImageAdd => 'Bild hinzufügen';
+
+  @override
+  String get stepImageChange => 'Bild ändern';
+
+  @override
+  String get stepImageRemove => 'Bild entfernen';
+
+  @override
+  String get stepTimer => 'Timer';
+
+  @override
+  String stepTimerMinutes(int minutes) {
+    return '$minutes Min';
+  }
+
+  @override
+  String get recipeAddToCookbook => 'Zum Kochbuch hinzufügen';
+
+  @override
+  String get recipeMoveToTrash => 'In Papierkorb verschieben';
+
+  @override
+  String get tagsEmpty => 'Keine Tags';
+
+  @override
+  String get nutritionPerServingLabel => 'Pro Portion';
+
+  @override
+  String get nutritionTotalLabel => 'Gesamtes Rezept';
+
+  @override
+  String get trendingRecipes => 'Beliebte Rezepte';
+
+  @override
+  String get addShortcut => 'Recipe Spellbook Verknüpfung hinzufügen';
+
+  @override
+  String get addShortcutSubtitle => 'Rezepte mit einem Tipp importieren';
+
+  @override
+  String get importGuides => 'Unsere Import-Anleitungen lesen';
+
+  @override
+  String get useOnDesktop => 'Recipe Spellbook auf dem Desktop verwenden';
+
+  @override
+  String get inviteFriends => 'Freunde einladen';
+
+  @override
+  String get inviteFriendsTitle => 'Recipe Spellbook teilen';
+
+  @override
+  String get inviteFriendsSubtitle => 'Lade deine Freunde und Familie ein, gemeinsam zu kochen!';
+
+  @override
+  String get shareApp => 'App teilen';
+
+  @override
+  String get maybeLater => 'Vielleicht später';
+
+  @override
+  String get createAccount => 'Konto erstellen';
+
+  @override
+  String get upgradeToPremium => 'Auf Premium upgraden';
+
+  @override
+  String get premiumSubtitle => 'Synchronisierung, unbegrenzte Rezepte & mehr';
+
+  @override
+  String get rpgMode => 'RPG-Modus';
+
+  @override
+  String get leaderboards => 'Bestenlisten';
+
+  @override
+  String get achievements => 'Erfolge';
+
+  @override
+  String get cookingStats => 'Koch-Statistiken';
+
+  @override
+  String get stepByStepGuides => 'Schritt-für-Schritt Anleitungen';
+
+  @override
+  String get importGuidesSubtitle => 'Erfahre, wie du Rezepte aus deinen Lieblings-Apps und Websites importierst';
+
+  @override
+  String get importFromOtherApps => 'Aus anderen Apps importieren';
+
+  @override
+  String get orderOnline => 'Online bestellen';
+
+  @override
+  String get helpTitle => 'Hilfe';
+
+  @override
+  String get navMenu => 'Menü';
+
+  @override
+  String get mealPlanTitle => 'Mein Essensplan';
+
+  @override
+  String get noRecipesYet => 'Noch keine Rezepte';
+
+  @override
+  String get breakfast => 'Frühstück';
+
+  @override
+  String get lunch => 'Mittagessen';
+
+  @override
+  String get dinner => 'Abendessen';
+
+  @override
+  String get snack => 'Snack';
+
+  @override
+  String get allergenGluten => 'Gluten';
+
+  @override
+  String get allergenChocolate => 'Schokolade & Kakao';
+
+  @override
+  String get allergenCaffeine => 'Koffein';
+
+  @override
+  String get allergenAlcohol => 'Alkohol';
+
+  @override
+  String get allergenCitrus => 'Zitrusfrüchte';
+
+  @override
+  String get allergenStoneFruits => 'Steinobst';
+
+  @override
+  String get allergenCoconut => 'Kokosnuss';
+
+  @override
+  String get allergenGarlic => 'Knoblauch';
+
+  @override
+  String get allergenOnion => 'Zwiebel';
+
+  @override
+  String get allergenMushrooms => 'Pilze';
+
+  @override
+  String get allergenAvocado => 'Avocado';
+
+  @override
+  String get allergenBanana => 'Banane';
+
+  @override
+  String get allergenKiwi => 'Kiwi';
+
+  @override
+  String get allergenLatexFoods => 'Latex-Kreuzreaktiv';
+
+  @override
+  String get allergenFodmap => 'Hoher FODMAP-Gehalt';
+
+  @override
+  String get allergenHistamine => 'Hoher Histamingehalt';
+
+  @override
+  String get allergenSalicylates => 'Salicylate';
+
+  @override
+  String get allergenMsg => 'Glutamat';
+
+  @override
+  String get allergenRedMeat => 'Rotes Fleisch (Alpha-Gal)';
+
+  @override
+  String get allergenGelatin => 'Gelatine';
+
+  @override
+  String get allergyWarningContains => 'Kann enthalten:';
+
+  @override
+  String get allergyDismissForRecipe => 'Für dieses Rezept ausblenden';
+
+  @override
+  String get allergyDismissUndo => 'Rückgängig';
+
+  @override
+  String get allergyWarningDismissed => 'Warnung für dieses Rezept ausgeblendet';
+
+  @override
+  String get scaleCustom => 'Benutzerdefiniert';
+
+  @override
+  String get scaleCustomTitle => 'Benutzerdefinierte Skalierung';
+
+  @override
+  String get scaleCustomHint => 'Beliebige Zahl eingeben (z.B. 0,75 für ¾, 2,5 für 2½)';
+
+  @override
+  String get scaleApply => 'Anwenden';
+
+  @override
+  String get addStep => 'Schritt hinzufügen';
+
+  @override
+  String get noInstructionsYet => 'Noch keine Anleitung';
+
+  @override
+  String get addFirstStep => 'Ersten Schritt hinzufügen';
+
+  @override
+  String get enterInstruction => 'Anleitung eingeben...';
+
+  @override
+  String get addStepImage => 'Schrittbild hinzufügen';
+
+  @override
+  String get removeStep => 'Schritt entfernen';
+
+  @override
+  String get plannerNoMeals => 'Keine Mahlzeiten geplant';
+
+  @override
+  String get plannerAddMealHint => 'Tippe auf + um eine Mahlzeit für diesen Tag hinzuzufügen';
+
+  @override
+  String plannerMealAdded(String recipe, String mealType) {
+    return '$recipe zu $mealType hinzugefügt';
+  }
+
+  @override
+  String get plannerShareMealPlan => 'Mahlzeitenplan teilen';
+
+  @override
+  String get plannerAddWeekToShopping => 'Woche zur Einkaufsliste hinzufügen';
+
+  @override
+  String get plannerClearWeek => 'Diese Woche löschen';
+
+  @override
+  String get plannerClearWeekConfirm => 'Dies entfernt alle geplanten Mahlzeiten für diese Woche. Dies kann nicht rückgängig gemacht werden.';
+
+  @override
+  String get plannerWeekCleared => 'Woche gelöscht';
+
+  @override
+  String get plannerGoToToday => 'Zu heute gehen';
+
+  @override
+  String get plannerAddAnother => 'Weitere Mahlzeit hinzufügen';
+
+  @override
+  String get plannerSearchRecipes => 'Rezepte suchen...';
+
+  @override
+  String get mealTypeBreakfast => 'Frühstück';
+
+  @override
+  String get mealTypeLunch => 'Mittagessen';
+
+  @override
+  String get mealTypeDinner => 'Abendessen';
+
+  @override
+  String get mealTypeSnack => 'Snack';
+
+  @override
+  String shoppingItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Artikel',
+      one: 'Artikel',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String get shoppingBySection => 'Nach Abteilung';
+
+  @override
+  String get shoppingByRecipe => 'Nach Rezept';
+
+  @override
+  String get shoppingUngrouped => 'Ungruppiert';
+
+  @override
+  String get shoppingOrderOnline => 'Online bestellen';
+
+  @override
+  String get shoppingEditItem => 'Artikel bearbeiten';
+
+  @override
+  String get shoppingItemName => 'Artikelname';
+
+  @override
+  String get shoppingSelectCategory => 'Kategorie wählen';
+
+  @override
+  String get shoppingAddedManually => 'Manuell hinzugefügt';
+
+  @override
+  String get shoppingEmptyList => 'Deine Liste ist leer';
+
+  @override
+  String get shoppingEmptyHint => 'Tippe auf + um Artikel hinzuzufügen oder füge Zutaten aus deinen Rezepten hinzu';
+
+  @override
+  String get shoppingAddHint => 'Drücke Enter oder tippe auf Senden zum Hinzufügen, dann gib den nächsten Artikel ein';
+
+  @override
+  String get categoryDeli => 'Feinkost';
+
+  @override
+  String get categoryBreakfast => 'Frühstück & Müsli';
+
+  @override
+  String get categoryCanned => 'Konserven & Suppen';
+
+  @override
+  String get categoryCondiments => 'Gewürze, Soßen & Kräuter';
+
+  @override
+  String get categoryAlcohol => 'Bier, Wein & Spirituosen';
+
+  @override
+  String get categoryBaby => 'Baby';
+
+  @override
+  String get categoryBeauty => 'Kosmetik & Körperpflege';
+
+  @override
+  String get categoryHousehold => 'Haushaltswaren';
+
+  @override
+  String get categoryPet => 'Tierbedarf';
+
+  @override
+  String importFromPlatform(String platform) {
+    return 'Importieren von $platform';
+  }
+
+  @override
+  String importFromApp(String app) {
+    return 'Importieren von $app';
+  }
+
+  @override
+  String get helpAddingRecipes => 'Rezepte hinzufügen';
+
+  @override
+  String get helpAddingRecipesDesc => 'Tippe auf die + Taste in einem Kochbuch um ein Rezept hinzuzufügen. Du kannst von URLs importieren, Fotos machen oder manuell eingeben.';
+
+  @override
+  String get helpImporting => 'Aus Apps importieren';
+
+  @override
+  String get helpImportingDesc => 'Teile ein Rezept von Instagram, TikTok oder einer Website direkt mit Recipe Spellbook.';
+
+  @override
+  String get helpMealPlanning => 'Mahlzeitenplanung';
+
+  @override
+  String get helpMealPlanningDesc => 'Tippe auf den Mahlzeitenplan-Tab um deine Mahlzeiten für die Woche zu planen. Tippe auf + an einem Tag um Rezepte hinzuzufügen.';
+
+  @override
+  String get helpShopping => 'Einkaufslisten';
+
+  @override
+  String get helpShoppingDesc => 'Füge Zutaten aus Rezepten zu deiner Einkaufsliste hinzu. Artikel werden nach Abteilung sortiert.';
+
+  @override
+  String get helpSyncing => 'Synchronisierung';
+
+  @override
+  String get helpSyncingDesc => 'Cloud-Sync kommt bald! Deine Rezepte werden auf allen deinen Geräten synchronisiert.';
+
+  @override
+  String get helpContactUs => 'Kontakt';
+
+  @override
+  String get helpContactUsDesc => 'Hast du Fragen oder Feedback? Schreib uns an support@recipespellbook.com';
+
+  @override
+  String get navCommunity => 'Community';
+
+  @override
+  String get navComingSoon => 'Demnächst';
 }

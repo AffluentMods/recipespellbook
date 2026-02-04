@@ -505,7 +505,7 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
   Future<void> _resetToDefault(_IngredientMapping mapping) async {
     // Remove from database
     final mappingsDao = ref.read(userIngredientMappingsDaoProvider);
-    await mappingsDao.deleteMapping(mapping.ingredient.toLowerCase());
+    await mappingsDao.removeMapping(mapping.ingredient.toLowerCase());
 
     // Update local cache
     _userOverrides.remove(mapping.ingredient.toLowerCase());

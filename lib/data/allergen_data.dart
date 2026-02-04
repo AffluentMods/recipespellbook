@@ -1,33 +1,54 @@
-/// Allergen data for Recipe Spellbook
-/// Based on FDA FALCPA major allergens plus additional common allergens
-library allergen_data;
+import '../l10n/app_localizations.dart';
 
-/// The 9 major allergens recognized by FDA (FALCPA + FASTER Act)
-/// Plus additional common allergens
+/// Allergen enum - Big 9 + EU allergens + Extended
 enum Allergen {
-  milk('Milk/Dairy', 'milk', '🥛'),
-  eggs('Eggs', 'eggs', '🥚'),
-  fish('Fish', 'fish', '🐟'),
-  shellfish('Shellfish', 'shellfish', '🦐'),
-  treeNuts('Tree Nuts', 'tree_nuts', '🌰'),
-  peanuts('Peanuts', 'peanuts', '🥜'),
-  wheat('Wheat/Gluten', 'wheat', '🌾'),
-  soy('Soy', 'soy', '🫘'),
-  sesame('Sesame', 'sesame', '🫓'),
-  // Additional common allergens
-  mustard('Mustard', 'mustard', '🟡'),
-  celery('Celery', 'celery', '🥬'),
-  lupin('Lupin', 'lupin', '🌸'),
-  mollusks('Mollusks', 'mollusks', '🦪'),
-  sulfites('Sulfites', 'sulfites', '🍷'),
-  corn('Corn', 'corn', '🌽'),
-  nightshades('Nightshades', 'nightshades', '🍅');
+  // Big 9 (US FDA)
+  milk('milk', '🥛', 'Milk & Dairy'),
+  eggs('eggs', '🥚', 'Eggs'),
+  fish('fish', '🐟', 'Fish'),
+  shellfish('shellfish', '🦐', 'Shellfish'),
+  treeNuts('tree_nuts', '🌰', 'Tree Nuts'),
+  peanuts('peanuts', '🥜', 'Peanuts'),
+  wheat('wheat', '🌾', 'Wheat'),
+  soy('soy', '🫘', 'Soy'),
+  sesame('sesame', '⚪', 'Sesame'),
 
-  final String displayName;
+  // EU Additional
+  mustard('mustard', '🟡', 'Mustard'),
+  celery('celery', '🥬', 'Celery'),
+  lupin('lupin', '🌸', 'Lupin'),
+  mollusks('mollusks', '🦪', 'Mollusks'),
+  sulfites('sulfites', '🍷', 'Sulfites'),
+
+  // Extended
+  gluten('gluten', '🍞', 'Gluten'),
+  corn('corn', '🌽', 'Corn'),
+  nightshades('nightshades', '🍅', 'Nightshades'),
+  chocolate('chocolate', '🍫', 'Chocolate & Cocoa'),
+  caffeine('caffeine', '☕', 'Caffeine'),
+  alcohol('alcohol', '🍺', 'Alcohol'),
+  citrus('citrus', '🍊', 'Citrus'),
+  stoneFruits('stone_fruits', '🍑', 'Stone Fruits'),
+  coconut('coconut', '🥥', 'Coconut'),
+  garlic('garlic', '🧄', 'Garlic'),
+  onion('onion', '🧅', 'Onion'),
+  mushrooms('mushrooms', '🍄', 'Mushrooms'),
+  avocado('avocado', '🥑', 'Avocado'),
+  banana('banana', '🍌', 'Banana'),
+  kiwi('kiwi', '🥝', 'Kiwi'),
+  latexFoods('latex_foods', '🧤', 'Latex Cross-Reactive'),
+  fodmap('fodmap', '🫃', 'High FODMAP'),
+  histamine('histamine', '🔴', 'High Histamine'),
+  salicylates('salicylates', '💊', 'Salicylates'),
+  msg('msg', '🧂', 'MSG'),
+  redMeat('red_meat', '🥩', 'Red Meat (Alpha-gal)'),
+  gelatin('gelatin', '🍮', 'Gelatin');
+
   final String key;
   final String emoji;
+  final String displayName;
 
-  const Allergen(this.displayName, this.key, this.emoji);
+  const Allergen(this.key, this.emoji, this.displayName);
 
   /// Get allergen from key string
   static Allergen? fromKey(String key) {
@@ -37,65 +58,151 @@ enum Allergen {
       return null;
     }
   }
+
+  /// Get localized name
+  String getLocalizedName(AppLocalizations l10n) {
+    switch (this) {
+      case Allergen.milk: return l10n.allergenMilk;
+      case Allergen.eggs: return l10n.allergenEggs;
+      case Allergen.fish: return l10n.allergenFish;
+      case Allergen.shellfish: return l10n.allergenShellfish;
+      case Allergen.treeNuts: return l10n.allergenTreeNuts;
+      case Allergen.peanuts: return l10n.allergenPeanuts;
+      case Allergen.wheat: return l10n.allergenWheat;
+      case Allergen.soy: return l10n.allergenSoy;
+      case Allergen.sesame: return l10n.allergenSesame;
+      case Allergen.mustard: return l10n.allergenMustard;
+      case Allergen.celery: return l10n.allergenCelery;
+      case Allergen.lupin: return l10n.allergenLupin;
+      case Allergen.mollusks: return l10n.allergenMollusks;
+      case Allergen.sulfites: return l10n.allergenSulfites;
+      case Allergen.gluten: return l10n.allergenGluten;
+      case Allergen.corn: return l10n.allergenCorn;
+      case Allergen.nightshades: return l10n.allergenNightshades;
+      case Allergen.chocolate: return l10n.allergenChocolate;
+      case Allergen.caffeine: return l10n.allergenCaffeine;
+      case Allergen.alcohol: return l10n.allergenAlcohol;
+      case Allergen.citrus: return l10n.allergenCitrus;
+      case Allergen.stoneFruits: return l10n.allergenStoneFruits;
+      case Allergen.coconut: return l10n.allergenCoconut;
+      case Allergen.garlic: return l10n.allergenGarlic;
+      case Allergen.onion: return l10n.allergenOnion;
+      case Allergen.mushrooms: return l10n.allergenMushrooms;
+      case Allergen.avocado: return l10n.allergenAvocado;
+      case Allergen.banana: return l10n.allergenBanana;
+      case Allergen.kiwi: return l10n.allergenKiwi;
+      case Allergen.latexFoods: return l10n.allergenLatexFoods;
+      case Allergen.fodmap: return l10n.allergenFodmap;
+      case Allergen.histamine: return l10n.allergenHistamine;
+      case Allergen.salicylates: return l10n.allergenSalicylates;
+      case Allergen.msg: return l10n.allergenMsg;
+      case Allergen.redMeat: return l10n.allergenRedMeat;
+      case Allergen.gelatin: return l10n.allergenGelatin;
+    }
+  }
+
+  /// Get description
+  String get description {
+    switch (this) {
+      case Allergen.milk: return 'Includes all dairy products like cheese, yogurt, butter, and cream';
+      case Allergen.eggs: return 'Includes whole eggs and any products containing eggs';
+      case Allergen.fish: return 'Includes all fin fish like salmon, tuna, cod, and fish-based sauces';
+      case Allergen.shellfish: return 'Includes crustaceans (shrimp, crab, lobster) and mollusks';
+      case Allergen.treeNuts: return 'Includes almonds, cashews, walnuts, pecans, and other tree nuts';
+      case Allergen.peanuts: return 'Includes peanuts and peanut-derived products';
+      case Allergen.wheat: return 'Includes wheat flour and wheat-based products';
+      case Allergen.soy: return 'Includes soybeans and soy-derived products like tofu and soy sauce';
+      case Allergen.sesame: return 'Includes sesame seeds, tahini, and sesame oil';
+      case Allergen.mustard: return 'Includes mustard seeds, powder, and prepared mustard';
+      case Allergen.celery: return 'Includes celery stalks, leaves, seeds, and celeriac';
+      case Allergen.lupin: return 'Includes lupin seeds and lupin flour';
+      case Allergen.mollusks: return 'Includes squid, octopus, snails, clams, mussels, oysters';
+      case Allergen.sulfites: return 'Includes sulfur dioxide and sulfite preservatives';
+      case Allergen.gluten: return 'Includes wheat, barley, rye, and related grains';
+      case Allergen.corn: return 'Includes corn and corn-derived products like corn syrup';
+      case Allergen.nightshades: return 'Includes tomatoes, potatoes, peppers, and eggplant';
+      case Allergen.chocolate: return 'Includes cocoa, cacao, and all chocolate products';
+      case Allergen.caffeine: return 'Includes coffee, tea, and caffeinated beverages';
+      case Allergen.alcohol: return 'Includes wine, beer, spirits, and cooking alcohol';
+      case Allergen.citrus: return 'Includes lemons, limes, oranges, and other citrus fruits';
+      case Allergen.stoneFruits: return 'Includes peaches, plums, cherries, and apricots';
+      case Allergen.coconut: return 'Includes coconut meat, milk, oil, and flour';
+      case Allergen.garlic: return 'Includes fresh garlic and garlic powder';
+      case Allergen.onion: return 'Includes onions, shallots, leeks, and related alliums';
+      case Allergen.mushrooms: return 'Includes all types of edible fungi';
+      case Allergen.avocado: return 'Includes avocado and guacamole';
+      case Allergen.banana: return 'Includes bananas and plantains';
+      case Allergen.kiwi: return 'Includes kiwifruit';
+      case Allergen.latexFoods: return 'Foods that cross-react with latex allergy';
+      case Allergen.fodmap: return 'High FODMAP foods that may cause digestive issues';
+      case Allergen.histamine: return 'Foods high in histamine or that trigger histamine release';
+      case Allergen.salicylates: return 'Foods high in salicylates';
+      case Allergen.msg: return 'Monosodium glutamate and related glutamates';
+      case Allergen.redMeat: return 'For alpha-gal syndrome: beef, pork, lamb, and mammalian meat';
+      case Allergen.gelatin: return 'Animal-derived gelatin in foods and supplements';
+    }
+  }
 }
 
-/// Result of checking an ingredient for allergens
-class AllergenMatch {
-  final String ingredientName;
-  final Allergen allergen;
-  final AllergenMatchType matchType;
+/// Match type for allergen detection
+enum AllergenMatchType {
+  definite, // Direct match (e.g., "milk" in ingredients)
+  possible, // Indirect match (e.g., "may contain" or derivative)
+}
 
-  const AllergenMatch({
-    required this.ingredientName,
+/// Represents a detected allergen match
+class AllergenMatch {
+  final Allergen allergen;
+  final String ingredientName;
+  final AllergenMatchType matchType;
+  final String? matchedKeyword;
+
+  AllergenMatch({
     required this.allergen,
+    required this.ingredientName,
     required this.matchType,
+    this.matchedKeyword,
   });
 }
 
-enum AllergenMatchType {
-  /// Definite match (e.g., "milk" contains dairy)
-  definite,
-  /// Possible match (e.g., "chocolate" may contain dairy)
-  possible,
-}
-
-/// Service for detecting allergens in ingredients
+/// Allergen detection service
 class AllergenDetector {
   /// Check a single ingredient for allergens
-  /// Returns list of matching allergens for the user's allergen list
   static List<AllergenMatch> checkIngredient(
       String ingredientText,
       List<Allergen> userAllergens,
       ) {
-    if (userAllergens.isEmpty) return [];
-
+    final text = ingredientText.toLowerCase();
     final matches = <AllergenMatch>[];
-    final lowerText = ingredientText.toLowerCase().trim();
 
     for (final allergen in userAllergens) {
-      // Check definite matches
-      final definiteIngredients = _definiteAllergenMap[allergen] ?? [];
-      for (final ingredient in definiteIngredients) {
-        if (_containsWord(lowerText, ingredient)) {
+      final keywords = _allergenKeywords[allergen] ?? [];
+
+      for (final keyword in keywords) {
+        if (text.contains(keyword)) {
           matches.add(AllergenMatch(
-            ingredientName: ingredientText,
             allergen: allergen,
+            ingredientName: ingredientText,
             matchType: AllergenMatchType.definite,
+            matchedKeyword: keyword,
           ));
           break; // Only add once per allergen
         }
       }
 
-      // Check possible matches (only if not already definite)
-      if (!matches.any((m) => m.allergen == allergen)) {
-        final possibleIngredients = _possibleAllergenMap[allergen] ?? [];
-        for (final ingredient in possibleIngredients) {
-          if (_containsWord(lowerText, ingredient)) {
-            matches.add(AllergenMatch(
-              ingredientName: ingredientText,
-              allergen: allergen,
-              matchType: AllergenMatchType.possible,
-            ));
+      // Check for "may contain" warnings
+      if (text.contains('may contain') || text.contains('traces of')) {
+        for (final keyword in keywords) {
+          if (text.contains(keyword)) {
+            // Check if not already added as definite
+            if (!matches.any((m) => m.allergen == allergen)) {
+              matches.add(AllergenMatch(
+                allergen: allergen,
+                ingredientName: ingredientText,
+                matchType: AllergenMatchType.possible,
+                matchedKeyword: keyword,
+              ));
+            }
             break;
           }
         }
@@ -105,57 +212,26 @@ class AllergenDetector {
     return matches;
   }
 
-  /// Check all ingredients in a recipe
-  /// Returns map of ingredient index -> list of allergen matches
-  static Map<int, List<AllergenMatch>> checkRecipeIngredients(
-      List<String> ingredients,
-      List<Allergen> userAllergens,
-      ) {
-    final results = <int, List<AllergenMatch>>{};
-
-    for (var i = 0; i < ingredients.length; i++) {
-      final matches = checkIngredient(ingredients[i], userAllergens);
-      if (matches.isNotEmpty) {
-        results[i] = matches;
-      }
-    }
-
-    return results;
-  }
-
-  /// Get a summary of all allergens found in a recipe
+  /// Get allergen summary for all ingredients in a recipe
   static List<AllergenMatch> getRecipeAllergenSummary(
       List<String> ingredients,
       List<Allergen> userAllergens,
       ) {
     final allMatches = <AllergenMatch>[];
-    final seenAllergens = <Allergen, AllergenMatchType>{};
+    final seenAllergens = <Allergen>{};
 
     for (final ingredient in ingredients) {
       final matches = checkIngredient(ingredient, userAllergens);
       for (final match in matches) {
-        // Keep track of highest severity per allergen
-        final existing = seenAllergens[match.allergen];
-        if (existing == null ||
-            (match.matchType == AllergenMatchType.definite &&
-                existing == AllergenMatchType.possible)) {
-          seenAllergens[match.allergen] = match.matchType;
-          // Remove old possible match if we found definite
-          allMatches.removeWhere((m) =>
-          m.allergen == match.allergen &&
-              m.matchType == AllergenMatchType.possible &&
-              match.matchType == AllergenMatchType.definite
-          );
-          if (!allMatches.any((m) =>
-          m.allergen == match.allergen &&
-              m.matchType == match.matchType)) {
-            allMatches.add(match);
-          }
+        // Only add each allergen once (keep the first/most definite match)
+        if (!seenAllergens.contains(match.allergen)) {
+          allMatches.add(match);
+          seenAllergens.add(match.allergen);
         }
       }
     }
 
-    // Sort: definite first, then by allergen name
+    // Sort: definite matches first, then by allergen name
     allMatches.sort((a, b) {
       if (a.matchType != b.matchType) {
         return a.matchType == AllergenMatchType.definite ? -1 : 1;
@@ -166,199 +242,211 @@ class AllergenDetector {
     return allMatches;
   }
 
-  /// Check if text contains a word (not just substring)
-  static bool _containsWord(String text, String word) {
-    // Simple word boundary check
-    final pattern = RegExp(r'\b' + RegExp.escape(word) + r'\b', caseSensitive: false);
-    return pattern.hasMatch(text);
+  /// Simple check if ingredient contains any of user's allergens
+  static bool containsAllergen(String ingredientText, List<Allergen> userAllergens) {
+    return checkIngredient(ingredientText, userAllergens).isNotEmpty;
   }
+
+  /// Keyword mappings for allergen detection
+  static const _allergenKeywords = <Allergen, List<String>>{
+    Allergen.milk: [
+      'milk', 'cream', 'butter', 'cheese', 'yogurt', 'yoghurt', 'ghee',
+      'whey', 'casein', 'lactose', 'lactalbumin', 'custard', 'curds',
+      'kefir', 'quark', 'mascarpone', 'ricotta', 'mozzarella', 'cheddar',
+      'parmesan', 'brie', 'camembert', 'feta', 'gouda', 'swiss',
+      'provolone', 'gruyere', 'manchego', 'cottage cheese', 'cream cheese',
+      'sour cream', 'half and half', 'evaporated milk', 'condensed milk',
+      'buttermilk', 'ice cream', 'gelato',
+    ],
+    Allergen.eggs: [
+      'egg', 'yolk', 'albumin', 'meringue', 'mayonnaise', 'mayo',
+      'aioli', 'hollandaise', 'custard', 'eggnog',
+      'ovalbumin', 'ovomucin', 'ovomucoid', 'lysozyme',
+    ],
+    Allergen.fish: [
+      'fish', 'salmon', 'tuna', 'cod', 'halibut', 'tilapia', 'trout',
+      'bass', 'snapper', 'mahi', 'swordfish', 'mackerel', 'herring',
+      'sardine', 'anchovy', 'anchovies', 'caviar', 'roe', 'fish sauce',
+      'worcestershire', 'caesar dressing',
+    ],
+    Allergen.shellfish: [
+      'shrimp', 'prawn', 'crab', 'lobster', 'crayfish', 'crawfish',
+      'scallop', 'clam', 'mussel', 'oyster', 'squid', 'calamari',
+      'octopus', 'abalone', 'conch', 'langoustine', 'shellfish', 'crustacean',
+    ],
+    Allergen.treeNuts: [
+      'almond', 'cashew', 'walnut', 'pecan', 'pistachio', 'macadamia',
+      'hazelnut', 'filbert', 'brazil nut', 'chestnut', 'pine nut',
+      'praline', 'marzipan', 'nougat', 'gianduja', 'frangipane',
+      'nut butter', 'nut milk', 'nut flour', 'almond milk', 'cashew milk',
+    ],
+    Allergen.peanuts: [
+      'peanut', 'groundnut', 'arachis', 'monkey nut',
+      'peanut butter', 'peanut oil', 'peanut flour', 'peanut sauce', 'satay',
+    ],
+    Allergen.wheat: [
+      'wheat', 'flour', 'bread', 'pasta', 'noodle', 'cracker', 'cookie',
+      'cake', 'pastry', 'pie crust', 'tortilla', 'pita', 'naan',
+      'couscous', 'bulgur', 'farro', 'spelt', 'semolina', 'durum',
+      'seitan', 'vital wheat gluten', 'breadcrumb', 'panko',
+    ],
+    Allergen.soy: [
+      'soy', 'soya', 'soybean', 'tofu', 'tempeh', 'edamame', 'miso',
+      'soy sauce', 'tamari', 'soy milk', 'soy protein', 'soy lecithin',
+      'textured vegetable protein', 'tvp',
+    ],
+    Allergen.sesame: [
+      'sesame', 'tahini', 'hummus', 'halvah', 'halva', 'sesame oil',
+      'sesame seed', 'gomashio', 'zaatar',
+    ],
+    Allergen.mustard: [
+      'mustard', 'dijon', 'honey mustard', 'mustard seed', 'mustard powder',
+    ],
+    Allergen.celery: [
+      'celery', 'celeriac', 'celery salt', 'celery seed',
+    ],
+    Allergen.lupin: [
+      'lupin', 'lupine', 'lupini', 'lupin flour',
+    ],
+    Allergen.mollusks: [
+      'snail', 'escargot', 'squid', 'calamari', 'octopus', 'cuttlefish',
+      'clam', 'mussel', 'oyster', 'scallop', 'abalone',
+    ],
+    Allergen.sulfites: [
+      'sulfite', 'sulphite', 'sulfur dioxide', 'metabisulfite',
+      'sodium sulfite', 'wine', 'dried fruit',
+    ],
+    Allergen.gluten: [
+      'gluten', 'wheat', 'barley', 'rye', 'oat', 'spelt', 'kamut',
+      'triticale', 'farina', 'semolina', 'durum',
+    ],
+    Allergen.corn: [
+      'corn', 'maize', 'cornmeal', 'cornstarch', 'corn syrup', 'popcorn',
+      'polenta', 'grits', 'hominy', 'corn flour', 'corn oil',
+      'high fructose corn syrup', 'hfcs', 'dextrose', 'maltodextrin',
+    ],
+    Allergen.nightshades: [
+      'tomato', 'potato', 'eggplant', 'bell pepper', 'pepper', 'paprika',
+      'cayenne', 'chili', 'chile', 'jalapeño', 'habanero', 'serrano',
+      'chipotle', 'capsicum', 'pimento',
+    ],
+    Allergen.chocolate: [
+      'chocolate', 'cocoa', 'cacao', 'dark chocolate', 'milk chocolate',
+      'white chocolate', 'cocoa powder', 'cocoa butter', 'chocolate chip',
+      'brownie', 'fudge', 'ganache', 'truffle', 'mocha', 'nutella',
+    ],
+    Allergen.caffeine: [
+      'coffee', 'espresso', 'caffeine', 'tea', 'green tea', 'black tea',
+      'matcha', 'yerba mate', 'guarana', 'cola', 'energy drink',
+    ],
+    Allergen.alcohol: [
+      'alcohol', 'wine', 'beer', 'vodka', 'whiskey', 'rum', 'gin',
+      'tequila', 'brandy', 'cognac', 'liqueur', 'champagne', 'sake',
+      'mirin', 'cooking wine', 'sherry', 'port', 'vermouth', 'bourbon',
+    ],
+    Allergen.citrus: [
+      'lemon', 'lime', 'orange', 'grapefruit', 'tangerine', 'mandarin',
+      'clementine', 'kumquat', 'citrus', 'yuzu', 'bergamot', 'pomelo',
+    ],
+    Allergen.stoneFruits: [
+      'peach', 'nectarine', 'plum', 'cherry', 'apricot', 'mango', 'lychee',
+    ],
+    Allergen.coconut: [
+      'coconut', 'coconut milk', 'coconut cream', 'coconut oil',
+      'coconut flour', 'coconut water', 'desiccated coconut',
+    ],
+    Allergen.garlic: [
+      'garlic', 'garlic powder', 'garlic salt', 'roasted garlic',
+    ],
+    Allergen.onion: [
+      'onion', 'shallot', 'leek', 'scallion', 'green onion', 'chive',
+      'spring onion', 'red onion', 'white onion', 'yellow onion',
+    ],
+    Allergen.mushrooms: [
+      'mushroom', 'shiitake', 'portobello', 'cremini', 'oyster mushroom',
+      'porcini', 'chanterelle', 'morel', 'truffle', 'enoki', 'maitake',
+    ],
+    Allergen.avocado: [
+      'avocado', 'guacamole',
+    ],
+    Allergen.banana: [
+      'banana', 'plantain',
+    ],
+    Allergen.kiwi: [
+      'kiwi', 'kiwifruit',
+    ],
+    Allergen.latexFoods: [
+      'avocado', 'banana', 'chestnut', 'kiwi', 'papaya', 'passion fruit',
+      'fig', 'mango', 'pineapple', 'strawberry',
+    ],
+    Allergen.fodmap: [
+      'garlic', 'onion', 'wheat', 'apple', 'pear', 'watermelon', 'mango',
+      'honey', 'agave', 'beans', 'lentils', 'chickpeas', 'cauliflower',
+    ],
+    Allergen.histamine: [
+      'aged cheese', 'wine', 'beer', 'champagne', 'cured meat', 'salami',
+      'pepperoni', 'bacon', 'sausage', 'smoked fish', 'sardine', 'anchovy',
+      'fermented', 'sauerkraut', 'kimchi', 'soy sauce', 'vinegar', 'pickled',
+    ],
+    Allergen.salicylates: [
+      'berry', 'berries', 'grape', 'orange', 'pineapple', 'plum',
+      'cucumber', 'pepper', 'tomato', 'radish', 'zucchini',
+      'mint', 'thyme', 'rosemary', 'oregano', 'curry', 'paprika', 'turmeric',
+    ],
+    Allergen.msg: [
+      'msg', 'monosodium glutamate', 'glutamate', 'hydrolyzed',
+      'autolyzed yeast', 'yeast extract',
+    ],
+    Allergen.redMeat: [
+      'beef', 'pork', 'lamb', 'venison', 'bison', 'goat', 'veal',
+      'bacon', 'ham', 'sausage', 'hot dog', 'pepperoni', 'salami',
+      'steak', 'ground beef', 'pork chop', 'ribs', 'brisket',
+    ],
+    Allergen.gelatin: [
+      'gelatin', 'gelatine', 'jello', 'gummy', 'marshmallow',
+    ],
+  };
 }
 
-/// Definite allergen matches - these ingredients DEFINITELY contain the allergen
-const _definiteAllergenMap = <Allergen, List<String>>{
-  Allergen.milk: [
-    'milk', 'butter', 'cream', 'cheese', 'yogurt', 'yoghurt', 'ghee',
-    'whey', 'casein', 'lactose', 'curds', 'kefir', 'paneer',
-    'half and half', 'half-and-half', 'sour cream', 'cream cheese',
-    'cottage cheese', 'ricotta', 'mozzarella', 'parmesan', 'cheddar',
-    'brie', 'camembert', 'feta', 'gouda', 'swiss cheese', 'provolone',
-    'mascarpone', 'burrata', 'halloumi', 'queso', 'crema',
-    'buttermilk', 'condensed milk', 'evaporated milk', 'powdered milk',
-    'ice cream', 'gelato', 'custard', 'pudding',
-    'whipped cream', 'heavy cream', 'light cream', 'double cream',
-    'crème fraîche', 'creme fraiche', 'clotted cream',
-  ],
+/// Legacy static class for backward compatibility
+class AllergenData {
+  static String getEmoji(String allergenId) {
+    final allergen = Allergen.fromKey(allergenId);
+    return allergen?.emoji ?? '⚠️';
+  }
 
-  Allergen.eggs: [
-    'egg', 'eggs', 'egg white', 'egg yolk', 'yolk', 'albumen',
-    'meringue', 'mayonnaise', 'mayo', 'aioli', 'hollandaise',
-    'custard', 'quiche', 'frittata', 'omelette', 'omelet',
-    'eggnog', 'egg noodles',
-  ],
+  static String getLocalizedName(String allergenId, AppLocalizations l10n) {
+    final allergen = Allergen.fromKey(allergenId);
+    return allergen?.getLocalizedName(l10n) ?? allergenId;
+  }
 
-  Allergen.fish: [
-    'fish', 'salmon', 'tuna', 'cod', 'halibut', 'tilapia', 'trout',
-    'bass', 'snapper', 'mahi', 'swordfish', 'sardine', 'sardines',
-    'anchovy', 'anchovies', 'herring', 'mackerel', 'catfish',
-    'flounder', 'sole', 'haddock', 'perch', 'pike', 'carp',
-    'caviar', 'roe', 'fish sauce', 'worcestershire',
-    'caesar dressing', // contains anchovies
-  ],
+  static String getDescription(String allergenId) {
+    final allergen = Allergen.fromKey(allergenId);
+    return allergen?.description ?? 'May cause allergic reactions';
+  }
 
-  Allergen.shellfish: [
-    'shrimp', 'prawn', 'prawns', 'crab', 'lobster', 'crayfish', 'crawfish',
-    'scallop', 'scallops', 'clam', 'clams', 'mussel', 'mussels',
-    'oyster', 'oysters', 'squid', 'calamari', 'octopus',
-    'shellfish', 'seafood',
-  ],
+  static List<String> detectAllergens(String ingredientText) {
+    final text = ingredientText.toLowerCase();
+    final detected = <String>[];
 
-  Allergen.treeNuts: [
-    'almond', 'almonds', 'cashew', 'cashews', 'walnut', 'walnuts',
-    'pecan', 'pecans', 'pistachio', 'pistachios', 'hazelnut', 'hazelnuts',
-    'macadamia', 'brazil nut', 'brazil nuts', 'pine nut', 'pine nuts',
-    'chestnut', 'chestnuts', 'praline', 'marzipan', 'almond paste',
-    'almond flour', 'almond milk', 'almond butter', 'cashew butter',
-    'walnut oil', 'hazelnut oil', 'amaretto', 'frangelico',
-    'nutella', // contains hazelnuts
-  ],
+    for (final allergen in Allergen.values) {
+      final keywords = AllergenDetector._allergenKeywords[allergen] ?? [];
+      for (final keyword in keywords) {
+        if (text.contains(keyword)) {
+          if (!detected.contains(allergen.key)) {
+            detected.add(allergen.key);
+          }
+          break;
+        }
+      }
+    }
 
-  Allergen.peanuts: [
-    'peanut', 'peanuts', 'peanut butter', 'peanut oil', 'groundnut',
-    'groundnuts', 'monkey nuts', 'arachis oil', 'goober',
-  ],
+    return detected;
+  }
 
-  Allergen.wheat: [
-    'wheat', 'flour', 'bread', 'pasta', 'noodles', 'spaghetti',
-    'macaroni', 'fettuccine', 'linguine', 'penne', 'rigatoni',
-    'couscous', 'bulgur', 'semolina', 'durum', 'spelt', 'kamut',
-    'farro', 'einkorn', 'emmer', 'triticale',
-    'breadcrumbs', 'panko', 'croutons', 'stuffing',
-    'tortilla', 'pita', 'naan', 'roti', 'chapati', 'paratha',
-    'croissant', 'bagel', 'muffin', 'biscuit', 'scone',
-    'cake', 'cookie', 'cookies', 'cracker', 'crackers',
-    'pie crust', 'pastry', 'phyllo', 'filo', 'puff pastry',
-    'seitan', 'vital wheat gluten', 'gluten',
-    'soy sauce', // most contain wheat
-    'teriyaki', 'hoisin',
-  ],
-
-  Allergen.soy: [
-    'soy', 'soya', 'soybean', 'soybeans', 'edamame', 'tofu',
-    'tempeh', 'miso', 'natto', 'soy sauce', 'tamari', 'shoyu',
-    'soy milk', 'soy protein', 'textured vegetable protein', 'tvp',
-    'soy lecithin', 'soybean oil',
-  ],
-
-  Allergen.sesame: [
-    'sesame', 'sesame seed', 'sesame seeds', 'sesame oil',
-    'tahini', 'halvah', 'halva', 'hummus', 'baba ganoush',
-    'gomashio', 'furikake',
-  ],
-
-  Allergen.mustard: [
-    'mustard', 'mustard seed', 'mustard powder', 'dijon',
-    'whole grain mustard', 'yellow mustard', 'english mustard',
-  ],
-
-  Allergen.celery: [
-    'celery', 'celery seed', 'celery salt', 'celeriac',
-    'celery root',
-  ],
-
-  Allergen.lupin: [
-    'lupin', 'lupine', 'lupini', 'lupini beans',
-  ],
-
-  Allergen.mollusks: [
-    'snail', 'snails', 'escargot', 'slug',
-    // Note: squid, octopus, clams, mussels, oysters, scallops
-    // are in shellfish but also mollusks
-  ],
-
-  Allergen.sulfites: [
-    'sulfite', 'sulfites', 'sulphite', 'sulphites',
-    'sodium sulfite', 'sodium bisulfite', 'sodium metabisulfite',
-    'potassium bisulfite', 'potassium metabisulfite',
-  ],
-
-  Allergen.corn: [
-    'corn', 'maize', 'cornmeal', 'cornstarch', 'corn starch',
-    'corn flour', 'corn syrup', 'high fructose corn syrup', 'hfcs',
-    'corn oil', 'popcorn', 'polenta', 'grits', 'hominy',
-    'corn tortilla', 'tortilla chips', 'corn chips',
-    'dextrose', 'maltodextrin',
-  ],
-
-  Allergen.nightshades: [
-    'tomato', 'tomatoes', 'potato', 'potatoes', 'pepper', 'peppers',
-    'bell pepper', 'chili', 'chilli', 'chile', 'jalapeno', 'jalapeño',
-    'habanero', 'serrano', 'cayenne', 'paprika', 'pimento', 'pimiento',
-    'eggplant', 'aubergine', 'goji', 'goji berries',
-    'tomatillo', 'ground cherry', 'cape gooseberry',
-  ],
-};
-
-/// Possible allergen matches - these ingredients MAY contain the allergen
-const _possibleAllergenMap = <Allergen, List<String>>{
-  Allergen.milk: [
-    'chocolate', 'caramel', 'toffee', 'fudge', 'nougat',
-    'ranch', 'caesar', // dressings often contain dairy
-    'creamy', 'alfredo', 'carbonara', 'béchamel', 'bechamel',
-    'au gratin', 'scalloped',
-  ],
-
-  Allergen.eggs: [
-    'pasta', 'noodles', // some contain eggs
-    'brioche', 'challah', // usually contain eggs
-    'cake', 'cookie', 'muffin', 'brownie', 'pancake', 'waffle',
-    'breaded', 'battered', 'tempura',
-    'meatball', 'meatloaf', 'burger patty',
-  ],
-
-  Allergen.fish: [
-    'asian sauce', 'thai', 'vietnamese', 'pad thai',
-    // May contain fish sauce
-  ],
-
-  Allergen.treeNuts: [
-    'pesto', // usually contains pine nuts
-    'baklava', // contains various nuts
-    'granola', 'trail mix', 'energy bar',
-    'chocolate', // may contain tree nuts
-  ],
-
-  Allergen.peanuts: [
-    'thai', 'pad thai', 'satay', 'peanut sauce',
-    'asian', 'chinese', 'vietnamese',
-    'candy bar', 'chocolate bar',
-  ],
-
-  Allergen.wheat: [
-    'oats', 'oatmeal', // often cross-contaminated
-    'beer', 'ale', 'lager', // contain gluten
-    'gravy', 'sauce', // often thickened with flour
-    'soup', // may be thickened with flour
-    'breaded', 'battered', 'crusted',
-    'fried', // may be coated in flour
-  ],
-
-  Allergen.soy: [
-    'asian', 'chinese', 'japanese', 'korean', 'thai',
-    'stir fry', 'stir-fry',
-    'vegetarian', 'vegan', // often use soy products
-    'protein bar', 'energy bar',
-    'bread', // may contain soy lecithin
-  ],
-
-  Allergen.sesame: [
-    'asian', 'middle eastern', 'mediterranean',
-    'bagel', 'bun', 'bread', // may have sesame seeds
-    'stir fry', 'stir-fry',
-  ],
-
-  Allergen.sulfites: [
-    'wine', 'dried fruit', 'dried apricot', 'raisins',
-    'vinegar', 'pickled', 'preserved',
-    'juice', 'concentrate',
-  ],
-};
+  static bool containsAllergen(String ingredientText, String allergenId) {
+    final allergen = Allergen.fromKey(allergenId);
+    if (allergen == null) return false;
+    return AllergenDetector.containsAllergen(ingredientText, [allergen]);
+  }
+}

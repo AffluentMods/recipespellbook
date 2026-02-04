@@ -9,6 +9,7 @@ import 'package:path/path.dart' as p;
 import 'package:drift/drift.dart' as drift;
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
+import '../../widgets/rpg/rpg_navigation_shell.dart';
 
 class CookbookEditScreen extends ConsumerStatefulWidget {
   final String? cookbookId; // null for new cookbook
@@ -130,6 +131,8 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
           description: drift.Value(_descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim()),
           imagePath: drift.Value(_imagePath),
         ));
+        // RPG XP for new cookbook
+        RpgIntegration.onCookbookCreated(ref);
       }
 
       if (mounted) {

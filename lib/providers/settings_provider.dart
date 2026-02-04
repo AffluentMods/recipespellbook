@@ -11,6 +11,9 @@ enum RecipeLayoutMode {
   tabbed,   // Swipe between ingredients and instructions tabs
 }
 
+/// Recipe edit layout mode
+enum RecipeEditLayoutMode { stacked, tabbed }
+
 // ============ SETTINGS STATE ============
 
 class AppSettings {
@@ -40,6 +43,8 @@ class AppSettings {
   final bool rpgAnimationsEnabled;
   final bool rpgSoundsEnabled;
 
+  final RecipeEditLayoutMode recipeEditLayoutMode;
+
   AppSettings({
     this.appTheme = AppColorTheme.spellbook,
     this.themeMode = ThemeMode.system,
@@ -57,6 +62,7 @@ class AppSettings {
     this.allergens = const [],
     this.rpgAnimationsEnabled = true,
     this.rpgSoundsEnabled = false,
+    this.recipeEditLayoutMode = RecipeEditLayoutMode.stacked,
   }) : seedColor = appTheme.seedColor;
 
   AppSettings copyWith({
@@ -76,6 +82,7 @@ class AppSettings {
     List<Allergen>? allergens,
     bool? rpgAnimationsEnabled,
     bool? rpgSoundsEnabled,
+    RecipeEditLayoutMode? recipeEditLayoutMode,
   }) {
     return AppSettings(
       appTheme: appTheme ?? this.appTheme,
@@ -94,6 +101,7 @@ class AppSettings {
       allergens: allergens ?? this.allergens,
       rpgAnimationsEnabled: rpgAnimationsEnabled ?? this.rpgAnimationsEnabled,
       rpgSoundsEnabled: rpgSoundsEnabled ?? this.rpgSoundsEnabled,
+      recipeEditLayoutMode: recipeEditLayoutMode ?? this.recipeEditLayoutMode,
     );
   }
 }
@@ -158,6 +166,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
   static const _allergensKey = 'allergens';
   static const _rpgAnimationsKey = 'rpg_animations_enabled';
   static const _rpgSoundsKey = 'rpg_sounds_enabled';
+  static const _recipeEditLayoutKey = 'recipe_edit_layout';
 
   @override
   AppSettings build() {
@@ -234,6 +243,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
     final rpgAnimationsEnabled = prefs.getBool(_rpgAnimationsKey) ?? true;
     final rpgSoundsEnabled = prefs.getBool(_rpgSoundsKey) ?? false;
 
+    final editLayoutIndex = prefs.getInt(_recipeEditLayoutKey) ?? 0;
     state = AppSettings(
       appTheme: appTheme,
       themeMode: themeMode,
@@ -251,6 +261,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
       allergens: allergens,
       rpgAnimationsEnabled: rpgAnimationsEnabled,
       rpgSoundsEnabled: rpgSoundsEnabled,
+      recipeEditLayoutMode: RecipeEditLayoutMode.values[editLayoutIndex],
     );
   }
 
@@ -374,6 +385,12 @@ class SettingsNotifier extends Notifier<AppSettings> {
     final dg = (a.g * 255).round() - (b.g * 255).round();
     final db = (a.b * 255).round() - (b.b * 255).round();
     return (dr * dr + dg * dg + db * db).toDouble();
+  }
+
+  Future<void> setRecipeEditLayout(RecipeEditLayoutMode mode) async {
+    state = state.copyWith(recipeEditLayoutMode: mode);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_recipeEditLayoutKey, mode.index);
   }
 
   Future<void> resetToDefaults() async {

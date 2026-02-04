@@ -616,13 +616,13 @@ abstract class AppLocalizations {
   /// No description provided for @shoppingClearChecked.
   ///
   /// In en, this message translates to:
-  /// **'Clear Checked'**
+  /// **'Clear checked items'**
   String get shoppingClearChecked;
 
   /// No description provided for @shoppingClearAll.
   ///
   /// In en, this message translates to:
-  /// **'Clear All'**
+  /// **'Clear all items'**
   String get shoppingClearAll;
 
   /// No description provided for @shoppingCategories.
@@ -5292,6 +5292,840 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A legendary recipe worthy of the gods!'**
   String get rarityLegendaryDesc;
+
+  /// No description provided for @shareLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get shareLink;
+
+  /// No description provided for @shareDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF'**
+  String get shareDocument;
+
+  /// No description provided for @sharePrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get sharePrint;
+
+  /// No description provided for @shareLinkDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Share a link that others can use to view this recipe.'**
+  String get shareLinkDescription;
+
+  /// No description provided for @shareLinkNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipients need the Recipe Spellbook app or can view on web.'**
+  String get shareLinkNote;
+
+  /// No description provided for @shareCreatingDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating document...'**
+  String get shareCreatingDocument;
+
+  /// No description provided for @editLayoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Layout'**
+  String get editLayoutTitle;
+
+  /// No description provided for @editLayoutStacked.
+  ///
+  /// In en, this message translates to:
+  /// **'Stacked'**
+  String get editLayoutStacked;
+
+  /// No description provided for @editLayoutTabbed.
+  ///
+  /// In en, this message translates to:
+  /// **'Tabbed'**
+  String get editLayoutTabbed;
+
+  /// No description provided for @editLayoutStackedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'All sections in one scrollable view'**
+  String get editLayoutStackedDesc;
+
+  /// No description provided for @editLayoutTabbedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Separate tabs for details, ingredients, instructions'**
+  String get editLayoutTabbedDesc;
+
+  /// No description provided for @tabDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get tabDetails;
+
+  /// No description provided for @tabIngredients.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients'**
+  String get tabIngredients;
+
+  /// No description provided for @tabInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get tabInstructions;
+
+  /// No description provided for @stepImageAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Image'**
+  String get stepImageAdd;
+
+  /// No description provided for @stepImageChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Image'**
+  String get stepImageChange;
+
+  /// No description provided for @stepImageRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Image'**
+  String get stepImageRemove;
+
+  /// No description provided for @stepTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer'**
+  String get stepTimer;
+
+  /// No description provided for @stepTimerMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String stepTimerMinutes(int minutes);
+
+  /// No description provided for @recipeAddToCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Cookbook'**
+  String get recipeAddToCookbook;
+
+  /// No description provided for @recipeMoveToTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to Trash'**
+  String get recipeMoveToTrash;
+
+  /// No description provided for @tagsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No tags'**
+  String get tagsEmpty;
+
+  /// No description provided for @nutritionPerServingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Per Serving'**
+  String get nutritionPerServingLabel;
+
+  /// No description provided for @nutritionTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Recipe'**
+  String get nutritionTotalLabel;
+
+  /// No description provided for @trendingRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Trending recipes'**
+  String get trendingRecipes;
+
+  /// No description provided for @addShortcut.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the Recipe Spellbook shortcut'**
+  String get addShortcut;
+
+  /// No description provided for @addShortcutSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import recipes with one tap'**
+  String get addShortcutSubtitle;
+
+  /// No description provided for @importGuides.
+  ///
+  /// In en, this message translates to:
+  /// **'Read our import guides'**
+  String get importGuides;
+
+  /// No description provided for @useOnDesktop.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Recipe Spellbook on desktop'**
+  String get useOnDesktop;
+
+  /// No description provided for @inviteFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite friends'**
+  String get inviteFriends;
+
+  /// No description provided for @inviteFriendsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Recipe Spellbook'**
+  String get inviteFriendsTitle;
+
+  /// No description provided for @inviteFriendsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite your friends and family to start cooking together!'**
+  String get inviteFriendsSubtitle;
+
+  /// No description provided for @shareApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Share App'**
+  String get shareApp;
+
+  /// No description provided for @maybeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get maybeLater;
+
+  /// No description provided for @createAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get createAccount;
+
+  /// No description provided for @upgradeToPremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Premium'**
+  String get upgradeToPremium;
+
+  /// No description provided for @premiumSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock sync, unlimited recipes & more'**
+  String get premiumSubtitle;
+
+  /// No description provided for @rpgMode.
+  ///
+  /// In en, this message translates to:
+  /// **'RPG Mode'**
+  String get rpgMode;
+
+  /// No description provided for @leaderboards.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaderboards'**
+  String get leaderboards;
+
+  /// No description provided for @achievements.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements'**
+  String get achievements;
+
+  /// No description provided for @cookingStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking Stats'**
+  String get cookingStats;
+
+  /// No description provided for @stepByStepGuides.
+  ///
+  /// In en, this message translates to:
+  /// **'Step-by-step guides'**
+  String get stepByStepGuides;
+
+  /// No description provided for @importGuidesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn how to import recipes from your favorite apps and websites'**
+  String get importGuidesSubtitle;
+
+  /// No description provided for @importFromOtherApps.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from other apps'**
+  String get importFromOtherApps;
+
+  /// No description provided for @orderOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Order online'**
+  String get orderOnline;
+
+  /// No description provided for @helpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get helpTitle;
+
+  /// No description provided for @navMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu'**
+  String get navMenu;
+
+  /// No description provided for @mealPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Meal Plan'**
+  String get mealPlanTitle;
+
+  /// No description provided for @noRecipesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes yet'**
+  String get noRecipesYet;
+
+  /// No description provided for @breakfast.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakfast'**
+  String get breakfast;
+
+  /// No description provided for @lunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Lunch'**
+  String get lunch;
+
+  /// No description provided for @dinner.
+  ///
+  /// In en, this message translates to:
+  /// **'Dinner'**
+  String get dinner;
+
+  /// No description provided for @snack.
+  ///
+  /// In en, this message translates to:
+  /// **'Snack'**
+  String get snack;
+
+  /// No description provided for @allergenGluten.
+  ///
+  /// In en, this message translates to:
+  /// **'Gluten'**
+  String get allergenGluten;
+
+  /// No description provided for @allergenChocolate.
+  ///
+  /// In en, this message translates to:
+  /// **'Chocolate & Cocoa'**
+  String get allergenChocolate;
+
+  /// No description provided for @allergenCaffeine.
+  ///
+  /// In en, this message translates to:
+  /// **'Caffeine'**
+  String get allergenCaffeine;
+
+  /// No description provided for @allergenAlcohol.
+  ///
+  /// In en, this message translates to:
+  /// **'Alcohol'**
+  String get allergenAlcohol;
+
+  /// No description provided for @allergenCitrus.
+  ///
+  /// In en, this message translates to:
+  /// **'Citrus'**
+  String get allergenCitrus;
+
+  /// No description provided for @allergenStoneFruits.
+  ///
+  /// In en, this message translates to:
+  /// **'Stone Fruits'**
+  String get allergenStoneFruits;
+
+  /// No description provided for @allergenCoconut.
+  ///
+  /// In en, this message translates to:
+  /// **'Coconut'**
+  String get allergenCoconut;
+
+  /// No description provided for @allergenGarlic.
+  ///
+  /// In en, this message translates to:
+  /// **'Garlic'**
+  String get allergenGarlic;
+
+  /// No description provided for @allergenOnion.
+  ///
+  /// In en, this message translates to:
+  /// **'Onion'**
+  String get allergenOnion;
+
+  /// No description provided for @allergenMushrooms.
+  ///
+  /// In en, this message translates to:
+  /// **'Mushrooms'**
+  String get allergenMushrooms;
+
+  /// No description provided for @allergenAvocado.
+  ///
+  /// In en, this message translates to:
+  /// **'Avocado'**
+  String get allergenAvocado;
+
+  /// No description provided for @allergenBanana.
+  ///
+  /// In en, this message translates to:
+  /// **'Banana'**
+  String get allergenBanana;
+
+  /// No description provided for @allergenKiwi.
+  ///
+  /// In en, this message translates to:
+  /// **'Kiwi'**
+  String get allergenKiwi;
+
+  /// No description provided for @allergenLatexFoods.
+  ///
+  /// In en, this message translates to:
+  /// **'Latex Cross-Reactive'**
+  String get allergenLatexFoods;
+
+  /// No description provided for @allergenFodmap.
+  ///
+  /// In en, this message translates to:
+  /// **'High FODMAP'**
+  String get allergenFodmap;
+
+  /// No description provided for @allergenHistamine.
+  ///
+  /// In en, this message translates to:
+  /// **'High Histamine'**
+  String get allergenHistamine;
+
+  /// No description provided for @allergenSalicylates.
+  ///
+  /// In en, this message translates to:
+  /// **'Salicylates'**
+  String get allergenSalicylates;
+
+  /// No description provided for @allergenMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'MSG'**
+  String get allergenMsg;
+
+  /// No description provided for @allergenRedMeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Red Meat (Alpha-gal)'**
+  String get allergenRedMeat;
+
+  /// No description provided for @allergenGelatin.
+  ///
+  /// In en, this message translates to:
+  /// **'Gelatin'**
+  String get allergenGelatin;
+
+  /// No description provided for @allergyWarningContains.
+  ///
+  /// In en, this message translates to:
+  /// **'May contain:'**
+  String get allergyWarningContains;
+
+  /// No description provided for @allergyDismissForRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss for this recipe'**
+  String get allergyDismissForRecipe;
+
+  /// No description provided for @allergyDismissUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get allergyDismissUndo;
+
+  /// No description provided for @allergyWarningDismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning dismissed for this recipe'**
+  String get allergyWarningDismissed;
+
+  /// No description provided for @scaleCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get scaleCustom;
+
+  /// No description provided for @scaleCustomTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Scale'**
+  String get scaleCustomTitle;
+
+  /// No description provided for @scaleCustomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter any number (e.g., 0.75 for 3/4, 2.5 for 2½)'**
+  String get scaleCustomHint;
+
+  /// No description provided for @scaleApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get scaleApply;
+
+  /// No description provided for @addStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Add step'**
+  String get addStep;
+
+  /// No description provided for @noInstructionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No instructions yet'**
+  String get noInstructionsYet;
+
+  /// No description provided for @addFirstStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Add first step'**
+  String get addFirstStep;
+
+  /// No description provided for @enterInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter instruction...'**
+  String get enterInstruction;
+
+  /// No description provided for @addStepImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add step image'**
+  String get addStepImage;
+
+  /// No description provided for @removeStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove step'**
+  String get removeStep;
+
+  /// No description provided for @plannerNoMeals.
+  ///
+  /// In en, this message translates to:
+  /// **'No meals planned'**
+  String get plannerNoMeals;
+
+  /// No description provided for @plannerAddMealHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to add a meal for this day'**
+  String get plannerAddMealHint;
+
+  /// No description provided for @plannerMealAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{recipe} added to {mealType}'**
+  String plannerMealAdded(String recipe, String mealType);
+
+  /// No description provided for @plannerShareMealPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Share meal plan'**
+  String get plannerShareMealPlan;
+
+  /// No description provided for @plannerAddWeekToShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Add week to shopping list'**
+  String get plannerAddWeekToShopping;
+
+  /// No description provided for @plannerClearWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear this week'**
+  String get plannerClearWeek;
+
+  /// No description provided for @plannerClearWeekConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove all meals planned for this week. This cannot be undone.'**
+  String get plannerClearWeekConfirm;
+
+  /// No description provided for @plannerWeekCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Week cleared'**
+  String get plannerWeekCleared;
+
+  /// No description provided for @plannerGoToToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to today'**
+  String get plannerGoToToday;
+
+  /// No description provided for @plannerAddAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Add another meal'**
+  String get plannerAddAnother;
+
+  /// No description provided for @plannerSearchRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Search recipes...'**
+  String get plannerSearchRecipes;
+
+  /// No description provided for @mealTypeBreakfast.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakfast'**
+  String get mealTypeBreakfast;
+
+  /// No description provided for @mealTypeLunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Lunch'**
+  String get mealTypeLunch;
+
+  /// No description provided for @mealTypeDinner.
+  ///
+  /// In en, this message translates to:
+  /// **'Dinner'**
+  String get mealTypeDinner;
+
+  /// No description provided for @mealTypeSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Snack'**
+  String get mealTypeSnack;
+
+  /// No description provided for @shoppingItems.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {count, plural, =1{item} other{items}}'**
+  String shoppingItems(int count);
+
+  /// No description provided for @shoppingBySection.
+  ///
+  /// In en, this message translates to:
+  /// **'By Section'**
+  String get shoppingBySection;
+
+  /// No description provided for @shoppingByRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'By Recipe'**
+  String get shoppingByRecipe;
+
+  /// No description provided for @shoppingUngrouped.
+  ///
+  /// In en, this message translates to:
+  /// **'Ungrouped'**
+  String get shoppingUngrouped;
+
+  /// No description provided for @shoppingOrderOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Order online'**
+  String get shoppingOrderOnline;
+
+  /// No description provided for @shoppingEditItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Item'**
+  String get shoppingEditItem;
+
+  /// No description provided for @shoppingItemName.
+  ///
+  /// In en, this message translates to:
+  /// **'Item name'**
+  String get shoppingItemName;
+
+  /// No description provided for @shoppingSelectCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Select category'**
+  String get shoppingSelectCategory;
+
+  /// No description provided for @shoppingAddedManually.
+  ///
+  /// In en, this message translates to:
+  /// **'Added manually'**
+  String get shoppingAddedManually;
+
+  /// No description provided for @shoppingEmptyList.
+  ///
+  /// In en, this message translates to:
+  /// **'Your list is empty'**
+  String get shoppingEmptyList;
+
+  /// No description provided for @shoppingEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to add items or add ingredients from your recipes'**
+  String get shoppingEmptyHint;
+
+  /// No description provided for @shoppingAddHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Press Enter or tap send to add, then type the next item'**
+  String get shoppingAddHint;
+
+  /// No description provided for @categoryDeli.
+  ///
+  /// In en, this message translates to:
+  /// **'Deli'**
+  String get categoryDeli;
+
+  /// No description provided for @categoryBreakfast.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakfast & Cereal'**
+  String get categoryBreakfast;
+
+  /// No description provided for @categoryCanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Canned Goods & Soups'**
+  String get categoryCanned;
+
+  /// No description provided for @categoryCondiments.
+  ///
+  /// In en, this message translates to:
+  /// **'Condiments, Sauces & Spices'**
+  String get categoryCondiments;
+
+  /// No description provided for @categoryAlcohol.
+  ///
+  /// In en, this message translates to:
+  /// **'Beer, Wine & Spirits'**
+  String get categoryAlcohol;
+
+  /// No description provided for @categoryBaby.
+  ///
+  /// In en, this message translates to:
+  /// **'Baby'**
+  String get categoryBaby;
+
+  /// No description provided for @categoryBeauty.
+  ///
+  /// In en, this message translates to:
+  /// **'Beauty & Personal Care'**
+  String get categoryBeauty;
+
+  /// No description provided for @categoryHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Housewares'**
+  String get categoryHousehold;
+
+  /// No description provided for @categoryPet.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet'**
+  String get categoryPet;
+
+  /// No description provided for @importFromPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from {platform}'**
+  String importFromPlatform(String platform);
+
+  /// No description provided for @importFromApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from {app}'**
+  String importFromApp(String app);
+
+  /// No description provided for @helpAddingRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding Recipes'**
+  String get helpAddingRecipes;
+
+  /// No description provided for @helpAddingRecipesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the + button in any cookbook to add a recipe. You can import from URLs, take photos, or enter manually.'**
+  String get helpAddingRecipesDesc;
+
+  /// No description provided for @helpImporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing from Apps'**
+  String get helpImporting;
+
+  /// No description provided for @helpImportingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Share a recipe from Instagram, TikTok, or any website directly to Recipe Spellbook.'**
+  String get helpImportingDesc;
+
+  /// No description provided for @helpMealPlanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal Planning'**
+  String get helpMealPlanning;
+
+  /// No description provided for @helpMealPlanningDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the Meal Plan tab to plan your meals for the week. Tap + on any day to add recipes.'**
+  String get helpMealPlanningDesc;
+
+  /// No description provided for @helpShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping Lists'**
+  String get helpShopping;
+
+  /// No description provided for @helpShoppingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Add ingredients from recipes to your shopping list. Items are organized by store section.'**
+  String get helpShoppingDesc;
+
+  /// No description provided for @helpSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing'**
+  String get helpSyncing;
+
+  /// No description provided for @helpSyncingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync is coming soon! Your recipes will sync across all your devices.'**
+  String get helpSyncingDesc;
+
+  /// No description provided for @helpContactUs.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Us'**
+  String get helpContactUs;
+
+  /// No description provided for @helpContactUsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Have questions or feedback? Email us at support@recipespellbook.com'**
+  String get helpContactUsDesc;
+
+  /// No description provided for @navCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Community'**
+  String get navCommunity;
+
+  /// No description provided for @navComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get navComingSoon;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
