@@ -165,7 +165,6 @@ class RpgNotifier extends Notifier<RpgState> {
 
   /// Award XP for an action
   Future<void> awardXp(XpActionType action, {int multiplier = 1, String? description}) async {
-    if (!state.isEnabled) return;
 
     final profile = state.profile;
     final baseXp = action.baseXp * multiplier;
@@ -234,7 +233,6 @@ class RpgNotifier extends Notifier<RpgState> {
 
   /// Award daily login XP (called once per day)
   Future<void> awardDailyLoginXp() async {
-    if (!state.isEnabled) return;
 
     final profile = state.profile;
 
@@ -279,7 +277,6 @@ class RpgNotifier extends Notifier<RpgState> {
 
   /// Spend gold on a cosmetic
   Future<bool> purchaseWithGold(CosmeticItem item) async {
-    if (!state.isEnabled) return false;
     if (item.currency != CurrencyType.gold) return false;
     if (item.price == null || state.profile.gold < item.price!) return false;
 
@@ -328,7 +325,6 @@ class RpgNotifier extends Notifier<RpgState> {
 
   /// Spend gems on a pet or lottery
   Future<bool> purchaseWithGems(CosmeticItem item) async {
-    if (!state.isEnabled) return false;
     if (item.currency != CurrencyType.gems) return false;
     if (item.price == null || state.profile.gems < item.price!) return false;
 
@@ -355,9 +351,6 @@ class RpgNotifier extends Notifier<RpgState> {
 
   /// Spin the gem lottery (costs gems)
   Future<LotteryResult> spinLottery({int cost = 10}) async {
-    if (!state.isEnabled) {
-      return LotteryResult(type: LotteryRewardType.nothing, amount: 0);
-    }
     if (state.profile.gems < cost) {
       return LotteryResult(type: LotteryRewardType.nothing, amount: 0);
     }
@@ -444,7 +437,9 @@ class RpgNotifier extends Notifier<RpgState> {
   /// Attack result record
   /// Spend mana to attack a boss - returns ({int damage, bool isCrit, bool success})
   Future<({int damage, bool isCrit, bool success})> attackBoss({int manaCost = 10}) async {
-    if (!state.isEnabled) return (damage: 0, isCrit: false, success: false);
+    // Note: isEnabled check removed - the boss screen is only accessible when RPG mode is on.
+    // The old guard caused attacks to silently fail when settings.nerdMode and rpgProvider.isEnabled
+    // fell out of sync.
     if (state.profile.mana < manaCost) return (damage: 0, isCrit: false, success: false);
 
     final profile = state.profile;
@@ -478,8 +473,6 @@ class RpgNotifier extends Notifier<RpgState> {
 
   /// Regenerate mana (called on XP-earning actions and periodically)
   Future<void> regenerateMana({int amount = 5}) async {
-    if (!state.isEnabled) return;
-
     final profile = state.profile;
     final maxMana = PlayerProfile.maxManaForLevel(profile.level);
     final newMana = (profile.mana + amount).clamp(0, maxMana);
@@ -537,7 +530,6 @@ class RpgNotifier extends Notifier<RpgState> {
   // ============ CLASS SYSTEM ============
 
   Future<void> changeClass(PlayerClass newClass) async {
-    if (!state.isEnabled) return;
     if (newClass == state.profile.playerClass) return;
 
     state = state.copyWith(
@@ -691,13 +683,11 @@ class RpgNotifier extends Notifier<RpgState> {
 
   /// Called from external sources to update achievement progress
   Future<void> updateProgress(String achievementId, int value) async {
-    if (!state.isEnabled) return;
     await _updateAchievementProgress(achievementId, value);
   }
 
   /// Set absolute progress (for count-based achievements like recipe count)
   Future<void> setProgress(String achievementId, int value) async {
-    if (!state.isEnabled) return;
 
     final achievement = RpgAchievements.getById(achievementId);
     if (achievement == null) return;

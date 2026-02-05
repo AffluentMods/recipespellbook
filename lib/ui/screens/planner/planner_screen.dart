@@ -701,10 +701,7 @@ class _MealTile extends ConsumerWidget {
               height: 56,
               child: recipe?.imagePath != null && File(recipe!.imagePath!).existsSync()
                   ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
-                  : Container(
-                color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-                child: const Icon(Icons.restaurant, color: Colors.grey),
-              ),
+                  : const RecipePlaceholderImage(),
             ),
           ),
           title: Text(
@@ -994,10 +991,7 @@ class _RecipeSelectTile extends StatelessWidget {
           height: 56,
           child: recipe.imagePath != null && File(recipe.imagePath!).existsSync()
               ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
-              : Container(
-            color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-            child: const Icon(Icons.restaurant, color: Colors.grey),
-          ),
+              : const RecipePlaceholderImage(),
         ),
       ),
       title: Text(recipe.title, maxLines: 1, overflow: TextOverflow.ellipsis),

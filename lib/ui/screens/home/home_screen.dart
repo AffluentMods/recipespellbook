@@ -32,16 +32,9 @@ class HomeScreen extends ConsumerWidget {
               // App bar
               SliverAppBar(
                 floating: true,
-                title: Row(
-                  children: [
-                    const Text('✨ ', style: TextStyle(fontSize: 24)),
-                    Expanded(
-                      child: Text(
-                        cookbook?.name ?? l10n.appTitle,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+                title: _CookbookDropdown(
+                  currentCookbook: cookbook,
+                  appTitle: l10n.appTitle,
                 ),
                 actions: [
                   IconButton(
@@ -791,6 +784,176 @@ class _EmptyCookbookState extends StatelessWidget {
               label: Text(l10n.recipeAdd),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============ COOKBOOK DROPDOWN ============
+
+class _CookbookDropdown extends ConsumerWidget {
+  final Cookbook? currentCookbook;
+  final String appTitle;
+
+  const _CookbookDropdown({
+    required this.currentCookbook,
+    required this.appTitle,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cookbooksAsync = ref.watch(cookbooksProvider);
+    final theme = Theme.of(context);
+
+    return cookbooksAsync.when(
+      data: (cookbooks) {
+        // Always show as dropdown — even with 1 cookbook, user can manage/add
+        return GestureDetector(
+          onTap: () => _showCookbookPicker(context, ref, cookbooks),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('✨ ', style: TextStyle(fontSize: 24)),
+              Flexible(
+                child: Text(
+                  currentCookbook?.name ?? appTitle,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: theme.colorScheme.onSurface,
+                size: 22,
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => Text(currentCookbook?.name ?? appTitle),
+      error: (_, __) => Text(currentCookbook?.name ?? appTitle),
+    );
+  }
+
+  void _showCookbookPicker(BuildContext context, WidgetRef ref, List<Cookbook> cookbooks) {
+    final theme = Theme.of(context);
+    final selectedId = ref.read(selectedCookbookIdProvider);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    Text(
+                      'Switch Cookbook',
+                      style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        context.go('/cookbooks');
+                      },
+                      child: const Text('Manage'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              ...cookbooks.map((cookbook) {
+                final isSelected = cookbook.id == selectedId;
+                return ListTile(
+                  leading: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: isSelected
+                          ? Border.all(color: theme.colorScheme.primary, width: 2)
+                          : null,
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: cookbook.imagePath != null
+                        ? Image.file(File(cookbook.imagePath!), fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const CookbookPlaceholderImage())
+                        : const CookbookPlaceholderImage(),
+                  ),
+                  title: Text(
+                    cookbook.name,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isSelected)
+                        Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
+                      const SizedBox(width: 4),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(ctx);
+                          context.push('/cookbook/${cookbook.id}/edit');
+                        },
+                        child: Icon(Icons.edit_outlined, size: 18, color: theme.colorScheme.outline),
+                      ),
+                    ],
+                  ),
+                  onTap: () {
+                    ref.read(selectedCookbookIdProvider.notifier).state = cookbook.id;
+                    Navigator.pop(ctx);
+                  },
+                );
+              }),
+              const Divider(height: 1),
+              ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: theme.colorScheme.primaryContainer,
+                  ),
+                  child: Icon(Icons.add, color: theme.colorScheme.primary),
+                ),
+                title: Text(
+                  'New Cookbook',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  context.push('/cookbook/new/edit');
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
     );

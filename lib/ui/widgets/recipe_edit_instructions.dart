@@ -358,70 +358,84 @@ class _StepCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 4),
       child: GestureDetector(
         onLongPress: onLongPress,
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
           decoration: BoxDecoration(
             color: isSelected
-                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.4)
-                : (isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.outline.withValues(alpha: 0.15),
-              width: isSelected ? 2 : 1,
-            ),
+                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: isSelected
+                ? Border.all(color: theme.colorScheme.primary, width: 1.5)
+                : null,
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Left side: step number or selection checkbox
-              Padding(
-                padding: const EdgeInsets.only(left: 12, top: 14),
-                child: isSelectionMode
-                    ? AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: isSelected ? theme.colorScheme.primary : Colors.transparent,
-                    border: Border.all(
-                      color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
-                      width: 2,
+              // Drag handle on left (two horizontal bars)
+              if (!isSelectionMode)
+                ReorderableDragStartListener(
+                  index: index,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: Icon(
+                      Icons.drag_indicator,
+                      color: theme.colorScheme.outline.withValues(alpha: 0.35),
+                      size: 18,
                     ),
-                    shape: BoxShape.circle,
                   ),
-                  child: isSelected
-                      ? const Icon(Icons.check, size: 16, color: Colors.white)
-                      : null,
-                )
-                    : Container(
-                  width: 28,
-                  height: 28,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFE8A860),
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '${index + 1}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
+                ),
+
+              // Selection checkbox
+              if (isSelectionMode)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+                      border: Border.all(
+                        color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
+                        width: 1.5,
+                      ),
+                      shape: BoxShape.circle,
                     ),
+                    child: isSelected
+                        ? const Icon(Icons.check, size: 14, color: Colors.white)
+                        : null,
+                  ),
+                ),
+
+              // Step number
+              Container(
+                width: 24,
+                height: 24,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE8A860),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '${index + 1}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
                   ),
                 ),
               ),
 
-              // Center: text field
+              // Text field
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 4, 4, 4),
+                  padding: const EdgeInsets.only(left: 8),
                   child: AbsorbPointer(
                     absorbing: isSelectionMode,
                     child: TextField(
@@ -436,7 +450,7 @@ class _StepCard extends StatelessWidget {
                           color: theme.colorScheme.outline.withValues(alpha: 0.4),
                         ),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
                         isDense: true,
                       ),
                       style: theme.textTheme.bodyMedium,
@@ -445,20 +459,6 @@ class _StepCard extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // Right side: drag handle (only when not selecting)
-              if (!isSelectionMode)
-                ReorderableDragStartListener(
-                  index: index,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 10, right: 8, left: 4),
-                    child: Icon(
-                      Icons.drag_indicator,
-                      color: theme.colorScheme.outline.withValues(alpha: 0.4),
-                      size: 20,
-                    ),
-                  ),
-                ),
             ],
           ),
         ),

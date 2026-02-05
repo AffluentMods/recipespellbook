@@ -15,6 +15,7 @@ import '../ui/screens/recipe/recent_recipes_screen.dart';
 import '../ui/screens/recipe/favorite_recipes_screen.dart';
 import '../ui/screens/recipe/quick_access_screen.dart';
 import '../ui/screens/search/search_screen.dart';
+import '../ui/screens/import/import_guides_screen.dart';
 import '../ui/screens/import/import_url_screen.dart';
 import '../ui/screens/import/import_text_screen.dart';
 import '../ui/screens/import/import_scan_screen.dart';
@@ -250,6 +251,11 @@ final router = GoRouter(
     ),
 
     // Import routes
+    GoRoute(
+      path: '/import-guides',
+      name: 'import-guides',
+      builder: (context, state) => const ImportGuidesScreen(),
+    ),
     GoRoute(
       path: '/import/url',
       name: 'import-url',

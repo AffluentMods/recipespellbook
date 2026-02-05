@@ -5,6 +5,7 @@ import 'package:drift/drift.dart' as drift;
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/ingredient_utils.dart';
+import '../../../data/localized_defaults.dart';
 
 class ManageShoppingCategoriesScreen extends ConsumerStatefulWidget {
   const ManageShoppingCategoriesScreen({super.key});
@@ -55,6 +56,91 @@ class _ManageShoppingCategoriesScreenState extends ConsumerState<ManageShoppingC
   }
 }
 
+// ============ HELPER: FORMAT CATEGORY DISPLAY NAME ============
+
+/// Converts camelCase or ALL_CAPS IDs to readable names
+/// "cookingAndBaking" → "Cooking & Baking"
+/// "COOKINGANDBAKING" → "Cooking And Baking"
+/// "produce" → "Produce"
+String formatCategoryDisplayName(String raw, AppLocalizations l10n) {
+  // First try localized name from defaults
+  final defaults = LocalizedDefaults(l10n);
+  final localized = defaults.getShoppingCategoryDisplayName(raw);
+  if (localized != raw) return localized;
+
+  // Fallback: humanize the raw ID
+  final spaced = raw.replaceAllMapped(
+    RegExp(r'([a-z])([A-Z])'),
+        (m) => '${m[1]} ${m[2]}',
+  );
+  final words = spaced.replaceAll('_', ' ').split(' ');
+  return words.map((w) {
+    if (w.isEmpty) return w;
+    return w[0].toUpperCase() + w.substring(1).toLowerCase();
+  }).join(' ').replaceAll(' And ', ' & ');
+}
+
+// ============ HELPER: GET CATEGORY EMOJI ============
+
+String getCategoryEmoji(String categoryId) {
+  for (final cat in LocalizedDefaults.shoppingCategories) {
+    if (cat.id == categoryId) return cat.emoji;
+  }
+  final lower = categoryId.toLowerCase();
+  if (lower.contains('produce') || lower.contains('vegetable') || lower.contains('fruit')) return '🥬';
+  if (lower.contains('dairy') || lower.contains('egg')) return '🥛';
+  if (lower.contains('meat') || lower.contains('poultry')) return '🥩';
+  if (lower.contains('seafood') || lower.contains('fish')) return '🐟';
+  if (lower.contains('bakery') || lower.contains('bread')) return '🍞';
+  if (lower.contains('deli')) return '🥓';
+  if (lower.contains('frozen')) return '🧊';
+  if (lower.contains('beverage') || lower.contains('drink')) return '🥤';
+  if (lower.contains('beer') || lower.contains('wine') || lower.contains('spirit')) return '🍷';
+  if (lower.contains('pantry') || lower.contains('canned')) return '🥫';
+  if (lower.contains('condiment') || lower.contains('sauce')) return '🍯';
+  if (lower.contains('spice') || lower.contains('seasoning')) return '🧂';
+  if (lower.contains('grain') || lower.contains('pasta') || lower.contains('rice')) return '🌾';
+  if (lower.contains('cooking') || lower.contains('baking')) return '🧈';
+  if (lower.contains('breakfast') || lower.contains('cereal')) return '🥣';
+  if (lower.contains('snack') || lower.contains('candy')) return '🍿';
+  if (lower.contains('international')) return '🌍';
+  if (lower.contains('baby')) return '👶';
+  if (lower.contains('pet')) return '🐕';
+  if (lower.contains('household')) return '🧹';
+  if (lower.contains('personal') || lower.contains('care')) return '🧴';
+  return '📦';
+}
+
+// ============ HELPER: CATEGORY COLORS ============
+
+Color getCategoryColor(String categoryId) {
+  final lower = categoryId.toLowerCase();
+  if (lower.contains('produce')) return Colors.green;
+  if (lower.contains('dairy')) return Colors.blue;
+  if (lower.contains('meat')) return Colors.red;
+  if (lower.contains('seafood')) return Colors.cyan;
+  if (lower.contains('bakery')) return Colors.orange;
+  if (lower.contains('deli')) return Colors.deepOrange;
+  if (lower.contains('frozen')) return Colors.lightBlue;
+  if (lower.contains('beverage')) return Colors.purple;
+  if (lower.contains('beer') || lower.contains('wine')) return Colors.deepPurple;
+  if (lower.contains('pantry') || lower.contains('canned')) return Colors.brown;
+  if (lower.contains('condiment')) return Colors.amber.shade700;
+  if (lower.contains('spice') || lower.contains('seasoning')) return Colors.amber;
+  if (lower.contains('grain') || lower.contains('pasta')) return Colors.lime.shade700;
+  if (lower.contains('cooking') || lower.contains('baking')) return Colors.orange.shade800;
+  if (lower.contains('breakfast') || lower.contains('cereal')) return Colors.yellow.shade800;
+  if (lower.contains('snack')) return Colors.pink;
+  if (lower.contains('international')) return Colors.teal;
+  if (lower.contains('baby')) return Colors.pink.shade200;
+  if (lower.contains('pet')) return Colors.brown.shade400;
+  if (lower.contains('household')) return Colors.blueGrey;
+  if (lower.contains('personal') || lower.contains('care')) return Colors.indigo;
+  return Colors.grey;
+}
+
+// ============ CATEGORIES TAB ============
+
 class _CategoriesTab extends ConsumerStatefulWidget {
   @override
   ConsumerState<_CategoriesTab> createState() => _CategoriesTabState();
@@ -73,7 +159,6 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
   Future<void> _loadCategories() async {
     final shoppingDao = ref.read(shoppingDaoProvider);
     final categories = await shoppingDao.getAllShoppingCategories();
-    // Sort by sortOrder
     categories.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
     setState(() {
       _categories = categories;
@@ -83,12 +168,9 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
 
   Future<void> _reorderCategories(int oldIndex, int newIndex) async {
     if (newIndex > oldIndex) newIndex--;
-
-    // Reorder in local list
     final item = _categories.removeAt(oldIndex);
     _categories.insert(newIndex, item);
 
-    // Update all sortOrders to match new positions
     final shoppingDao = ref.read(shoppingDaoProvider);
     for (int i = 0; i < _categories.length; i++) {
       final cat = _categories[i];
@@ -96,8 +178,6 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
         await shoppingDao.updateShoppingCategorySortOrder(cat.id, i);
       }
     }
-
-    // Reload to get fresh data
     await _loadCategories();
   }
 
@@ -106,9 +186,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    if (_isLoading) return const Center(child: CircularProgressIndicator());
 
     return Column(
       children: [
@@ -119,31 +197,49 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
             onReorder: _reorderCategories,
             itemBuilder: (context, index) {
               final cat = _categories[index];
-              return ListTile(
+              final displayName = formatCategoryDisplayName(cat.name, l10n);
+              final emoji = getCategoryEmoji(cat.id.isNotEmpty ? cat.id : cat.name);
+              final color = getCategoryColor(cat.id.isNotEmpty ? cat.id : cat.name);
+
+              // Tap anywhere on the row to edit — no pencil icon needed
+              return InkWell(
                 key: ValueKey(cat.id),
-                leading: CircleAvatar(
-                  backgroundColor: theme.colorScheme.primaryContainer,
-                  child: Text(
-                    _getCategoryEmoji(cat.name),
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                ),
-                title: Text(cat.name),
-                subtitle: Text(l10n.shoppingPriority(index + 1)),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () => _editCategory(cat),
-                    ),
-                    if (!cat.isDefault)
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () => _deleteCategory(cat),
+                onTap: () => _editCategory(cat),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      Icon(Icons.drag_handle, color: theme.colorScheme.outline.withValues(alpha: 0.4), size: 20),
+                      const SizedBox(width: 12),
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(child: Text(emoji, style: const TextStyle(fontSize: 18))),
                       ),
-                    const Icon(Icons.drag_handle),
-                  ],
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(displayName, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500)),
+                            Text(
+                              l10n.shoppingPriority(index + 1),
+                              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (!cat.isDefault)
+                        IconButton(
+                          icon: Icon(Icons.delete_outline, size: 20, color: theme.colorScheme.error.withValues(alpha: 0.6)),
+                          onPressed: () => _deleteCategory(cat),
+                        ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -159,22 +255,6 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
         ),
       ],
     );
-  }
-
-  String _getCategoryEmoji(String name) {
-    final lower = name.toLowerCase();
-    if (lower.contains('produce') || lower.contains('vegetable') || lower.contains('fruit')) return '🥬';
-    if (lower.contains('dairy') || lower.contains('egg')) return '🥛';
-    if (lower.contains('meat') || lower.contains('beef') || lower.contains('pork') || lower.contains('chicken')) return '🥩';
-    if (lower.contains('seafood') || lower.contains('fish')) return '🐟';
-    if (lower.contains('bakery') || lower.contains('bread')) return '🍞';
-    if (lower.contains('frozen')) return '🧊';
-    if (lower.contains('beverage') || lower.contains('drink')) return '🥤';
-    if (lower.contains('pantry') || lower.contains('canned')) return '🥫';
-    if (lower.contains('spice') || lower.contains('seasoning')) return '🧂';
-    if (lower.contains('snack')) return '🍿';
-    if (lower.contains('international')) return '🌍';
-    return '📦';
   }
 
   void _addCategory() {
@@ -194,15 +274,11 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.actionCancel),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
           FilledButton(
             onPressed: () async {
               if (nameController.text.trim().isNotEmpty) {
                 final dao = ref.read(shoppingDaoProvider);
-                // Add at the end with sortOrder = current length
                 await dao.insertShoppingCategory(ShoppingCategoriesCompanion.insert(
                   id: 'shop_${DateTime.now().millisecondsSinceEpoch}',
                   name: nameController.text.trim(),
@@ -237,10 +313,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.actionCancel),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
           FilledButton(
             onPressed: () async {
               if (nameController.text.trim().isNotEmpty) {
@@ -266,10 +339,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
         title: Text(l10n.shoppingDeleteCategory),
         content: Text(l10n.shoppingDeleteCategoryMessage(cat.name)),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.actionCancel),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
           FilledButton(
             onPressed: () async {
               await ref.read(shoppingDaoProvider).deleteShoppingCategory(cat.id);
@@ -284,6 +354,8 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
     );
   }
 }
+
+// ============ MAPPINGS TAB ============
 
 class _MappingsTab extends ConsumerStatefulWidget {
   @override
@@ -303,7 +375,6 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
   }
 
   Future<void> _loadUserOverrides() async {
-    // Load user's custom ingredient->category mappings from database
     final mappingsDao = ref.read(userIngredientMappingsDaoProvider);
     final userMappings = await mappingsDao.getAllMappings();
 
@@ -316,6 +387,8 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
 
   void _loadMappings() {
     final mappings = <_IngredientMapping>[];
+
+    // Built-in mappings
     for (final entry in shoppingCategoryKeywords.entries) {
       final category = entry.key;
       final keywords = entry.value;
@@ -323,11 +396,24 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
         final override = _userOverrides[keyword.toLowerCase()];
         mappings.add(_IngredientMapping(
           ingredient: keyword,
-          categoryName: override ?? category,
+          categoryId: override ?? category,
           isBuiltIn: override == null,
         ));
       }
     }
+
+    // User-only custom ingredients (not in built-in list)
+    final builtInKeys = mappings.map((m) => m.ingredient.toLowerCase()).toSet();
+    for (final entry in _userOverrides.entries) {
+      if (!builtInKeys.contains(entry.key)) {
+        mappings.add(_IngredientMapping(
+          ingredient: entry.key,
+          categoryId: entry.value,
+          isBuiltIn: false,
+        ));
+      }
+    }
+
     mappings.sort((a, b) => a.ingredient.compareTo(b.ingredient));
     setState(() {
       _mappings = mappings;
@@ -342,7 +428,7 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
       setState(() {
         _filteredMappings = _mappings
             .where((m) => m.ingredient.toLowerCase().contains(query.toLowerCase()) ||
-            m.categoryName.toLowerCase().contains(query.toLowerCase()))
+            m.categoryId.toLowerCase().contains(query.toLowerCase()))
             .toList();
       });
     }
@@ -378,10 +464,20 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            l10n.shoppingMappingsInfo(_filteredMappings.length),
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-            textAlign: TextAlign.center,
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.shoppingMappingsInfo(_filteredMappings.length),
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                ),
+              ),
+              TextButton.icon(
+                onPressed: _addCustomIngredient,
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Add Ingredient'),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 8),
@@ -390,31 +486,32 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
             itemCount: _filteredMappings.length,
             itemBuilder: (context, index) {
               final mapping = _filteredMappings[index];
+              final displayCat = formatCategoryDisplayName(mapping.categoryId, l10n);
+              final emoji = getCategoryEmoji(mapping.categoryId);
+              final color = getCategoryColor(mapping.categoryId);
+
               return ListTile(
+                leading: Text(emoji, style: const TextStyle(fontSize: 20)),
                 title: Text(mapping.ingredient),
+                subtitle: !mapping.isBuiltIn
+                    ? Text('Custom', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary))
+                    : null,
                 trailing: InkWell(
                   onTap: () => _showCategoryPicker(mapping),
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: _getCategoryColor(mapping.categoryName).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: _getCategoryColor(mapping.categoryName).withValues(alpha: 0.5)),
+                      color: color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: color.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          mapping.categoryName.toUpperCase(),
-                          style: TextStyle(
-                            color: _getCategoryColor(mapping.categoryName),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 11,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.arrow_drop_down, size: 16, color: _getCategoryColor(mapping.categoryName)),
+                        Text(displayCat, style: TextStyle(color: color, fontWeight: FontWeight.w500, fontSize: 12)),
+                        const SizedBox(width: 2),
+                        Icon(Icons.arrow_drop_down, size: 16, color: color),
                       ],
                     ),
                   ),
@@ -424,6 +521,92 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
           ),
         ),
       ],
+    );
+  }
+
+  void _addCustomIngredient() {
+    final l10n = AppLocalizations.of(context)!;
+    final nameController = TextEditingController();
+    String selectedCategory = 'other';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Add Ingredient'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'Ingredient Name',
+                  hintText: 'e.g. turmeric, tahini, miso',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              InkWell(
+                onTap: () async {
+                  final categories = shoppingCategoryKeywords.keys.toList();
+                  final result = await showModalBottomSheet<String>(
+                    context: ctx,
+                    builder: (bCtx) => SafeArea(
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text('Select Category', style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                          ),
+                          ...categories.map((cat) => ListTile(
+                            leading: Text(getCategoryEmoji(cat), style: const TextStyle(fontSize: 20)),
+                            title: Text(formatCategoryDisplayName(cat, l10n)),
+                            onTap: () => Navigator.pop(bCtx, cat),
+                          )),
+                        ],
+                      ),
+                    ),
+                  );
+                  if (result != null) {
+                    setDialogState(() => selectedCategory = result);
+                  }
+                },
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'Category',
+                    border: OutlineInputBorder(),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(getCategoryEmoji(selectedCategory)),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(formatCategoryDisplayName(selectedCategory, l10n))),
+                      const Icon(Icons.arrow_drop_down),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
+            FilledButton(
+              onPressed: () async {
+                if (nameController.text.trim().isNotEmpty) {
+                  final mappingsDao = ref.read(userIngredientMappingsDaoProvider);
+                  await mappingsDao.setMapping(nameController.text.trim().toLowerCase(), selectedCategory);
+                  _userOverrides[nameController.text.trim().toLowerCase()] = selectedCategory;
+                  _loadMappings();
+                  if (ctx.mounted) Navigator.pop(ctx);
+                }
+              },
+              child: Text(l10n.actionAdd),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -466,13 +649,13 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
                   final cat = categories[index];
-                  final isSelected = cat == mapping.categoryName;
+                  final isSelected = cat == mapping.categoryId;
                   return ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: _getCategoryColor(cat).withValues(alpha: 0.2),
-                      child: Text(_getCategoryEmoji(cat)),
+                      backgroundColor: getCategoryColor(cat).withValues(alpha: 0.15),
+                      child: Text(getCategoryEmoji(cat)),
                     ),
-                    title: Text(cat),
+                    title: Text(formatCategoryDisplayName(cat, l10n)),
                     trailing: isSelected ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary) : null,
                     onTap: () {
                       Navigator.pop(ctx);
@@ -490,71 +673,28 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
   }
 
   Future<void> _updateMapping(_IngredientMapping mapping, String newCategory) async {
-    // Save to database
     final mappingsDao = ref.read(userIngredientMappingsDaoProvider);
-    await mappingsDao.setMapping(
-      mapping.ingredient.toLowerCase(),
-      newCategory,
-    );
-
-    // Update local cache
+    await mappingsDao.setMapping(mapping.ingredient.toLowerCase(), newCategory);
     _userOverrides[mapping.ingredient.toLowerCase()] = newCategory;
     _loadMappings();
   }
 
   Future<void> _resetToDefault(_IngredientMapping mapping) async {
-    // Remove from database
     final mappingsDao = ref.read(userIngredientMappingsDaoProvider);
     await mappingsDao.removeMapping(mapping.ingredient.toLowerCase());
-
-    // Update local cache
     _userOverrides.remove(mapping.ingredient.toLowerCase());
     _loadMappings();
-  }
-
-  String _getCategoryEmoji(String category) {
-    switch (category.toLowerCase()) {
-      case 'produce': return '🥬';
-      case 'dairy': return '🥛';
-      case 'meat': return '🥩';
-      case 'seafood': return '🐟';
-      case 'bakery': return '🍞';
-      case 'frozen': return '🧊';
-      case 'beverages': return '🥤';
-      case 'pantry': return '🥫';
-      case 'spices': return '🧂';
-      case 'snacks': return '🍿';
-      case 'international': return '🌍';
-      default: return '📦';
-    }
-  }
-
-  Color _getCategoryColor(String category) {
-    switch (category.toLowerCase()) {
-      case 'produce': return Colors.green;
-      case 'dairy': return Colors.blue;
-      case 'meat': return Colors.red;
-      case 'seafood': return Colors.cyan;
-      case 'bakery': return Colors.orange;
-      case 'frozen': return Colors.lightBlue;
-      case 'beverages': return Colors.purple;
-      case 'pantry': return Colors.brown;
-      case 'spices': return Colors.amber;
-      case 'snacks': return Colors.pink;
-      case 'international': return Colors.teal;
-      default: return Colors.grey;
-    }
   }
 }
 
 class _IngredientMapping {
   final String ingredient;
-  final String categoryName;
+  final String categoryId;
   final bool isBuiltIn;
 
   _IngredientMapping({
     required this.ingredient,
-    required this.categoryName,
+    required this.categoryId,
     required this.isBuiltIn,
   });
 }

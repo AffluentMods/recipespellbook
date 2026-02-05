@@ -16,48 +16,12 @@ import '../../widgets/recipe_tags_display.dart';
 import '../../widgets/add_to_meal_plan_dialogue.dart';
 import '../../widgets/add_to_shopping_list_sheet.dart';
 import '../../widgets/recipe_share_sheet.dart';
+import '../settings/allergy_settings_screen.dart';
 
 // ============ DISMISSED ALLERGY WARNINGS PROVIDER ============
 
-final dismissedAllergyWarningsProvider = StateNotifierProvider<DismissedAllergyWarningsNotifier, Set<String>>((ref) {
-  return DismissedAllergyWarningsNotifier();
-});
-
-class DismissedAllergyWarningsNotifier extends StateNotifier<Set<String>> {
-  DismissedAllergyWarningsNotifier() : super({}) {
-    _load();
-  }
-
-  static const _prefsKey = 'dismissed_allergy_warnings';
-
-  Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final list = prefs.getStringList(_prefsKey) ?? [];
-    state = list.toSet();
-  }
-
-  Future<void> dismiss(String recipeId) async {
-    state = {...state, recipeId};
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_prefsKey, state.toList());
-  }
-
-  Future<void> restore(String recipeId) async {
-    state = {...state}..remove(recipeId);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_prefsKey, state.toList());
-  }
-
-  bool isDismissed(String recipeId) => state.contains(recipeId);
-
-  List<String> get allDismissedRecipes => state.toList();
-
-  Future<void> restoreMultiple(List<String> recipeIds) async {
-    state = {...state}..removeAll(recipeIds);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_prefsKey, state.toList());
-  }
-}
+// Use the canonical dismissed warnings provider from allergy_settings_screen
+// (removes duplicate that was incompatible with the settings disabled tab)
 
 // ============ SESSION DISMISSED WARNINGS (temporary) ============
 
@@ -115,6 +79,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   bool _isLoading = true;
   double _scaleFactor = 1.0;
   bool _showNutritionPerServing = true;
+  bool _isMetric = false; // false = original units, true = converted
 
   late TabController _tabController;
 
@@ -290,9 +255,9 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   currentScale: _scaleFactor,
                   servings: _recipe!.servings,
                   onScaleChanged: (scale) => setState(() => _scaleFactor = scale),
+                  isMetric: _isMetric,
+                  onConvert: () => setState(() => _isMetric = !_isMetric),
                 ),
-
-                // Dismissible Allergy warning banner with improved UX
                 const SizedBox(height: 16),
                 _ImprovedAllergyWarning(
                   recipeId: widget.recipeId,
@@ -302,7 +267,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 const SizedBox(height: 24),
                 _SectionHeader(title: l10n.ingredientsTitle, trailing: _scaleFactor != 1.0 ? Text('${_scaleFactor}x', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary)) : null),
                 const SizedBox(height: 12),
-                ..._ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: _scaleFactor)),
+                ..._ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: _scaleFactor, recipeId: widget.recipeId)),
 
                 // NEW: Large "Add to Shopping List" button at bottom of ingredients
                 const SizedBox(height: 16),
@@ -403,6 +368,8 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   currentScale: _scaleFactor,
                   servings: _recipe!.servings,
                   onScaleChanged: (scale) => setState(() => _scaleFactor = scale),
+                  isMetric: _isMetric,
+                  onConvert: () => setState(() => _isMetric = !_isMetric),
                 ),
                 const SizedBox(height: 16),
                 _ImprovedAllergyWarning(
@@ -585,11 +552,15 @@ class _ModernScaleConvertButtons extends StatelessWidget {
   final double currentScale;
   final String? servings;
   final ValueChanged<double> onScaleChanged;
+  final bool isMetric;
+  final VoidCallback onConvert;
 
   const _ModernScaleConvertButtons({
     required this.currentScale,
     this.servings,
     required this.onScaleChanged,
+    required this.isMetric,
+    required this.onConvert,
   });
 
   @override
@@ -621,13 +592,20 @@ class _ModernScaleConvertButtons extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: () => _showConvertDialog(context),
+            onPressed: onConvert,
             icon: const Icon(Icons.swap_horiz, size: 18),
-            label: Text(l10n.convertUnitsButton),
+            label: Text(isMetric ? 'Metric' : 'Imperial'),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              side: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+              side: BorderSide(
+                color: isMetric
+                    ? const Color(0xFFE8A860)
+                    : theme.colorScheme.outline.withValues(alpha: 0.5),
+              ),
+              foregroundColor: isMetric
+                  ? const Color(0xFFE8A860)
+                  : theme.colorScheme.onSurface,
             ),
           ),
         ),
@@ -699,57 +677,6 @@ class _ModernScaleConvertButtons extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  void _showConvertDialog(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text('Convert Units', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: const Icon(Icons.straighten),
-              title: const Text('Metric → Imperial'),
-              subtitle: const Text('ml to cups, g to oz'),
-              onTap: () {
-                Navigator.pop(ctx);
-                // TODO: Implement conversion
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.square_foot),
-              title: const Text('Imperial → Metric'),
-              subtitle: const Text('cups to ml, oz to g'),
-              onTap: () {
-                Navigator.pop(ctx);
-                // TODO: Implement conversion
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
         ),
       ),
     );
@@ -837,6 +764,7 @@ class _ImprovedAllergyWarning extends ConsumerStatefulWidget {
 class _ImprovedAllergyWarningState extends ConsumerState<_ImprovedAllergyWarning> {
   bool _showDisablePrompt = false;
   bool _sessionDismissed = false;
+  List<String> _detectedAllergens = [];
 
   @override
   Widget build(BuildContext context) {
@@ -849,8 +777,8 @@ class _ImprovedAllergyWarningState extends ConsumerState<_ImprovedAllergyWarning
     final userAllergies = settings.allergens;
     if (userAllergies.isEmpty) return const SizedBox.shrink();
 
-    // Check if permanently dismissed
-    if (dismissedWarnings.contains(widget.recipeId)) return const SizedBox.shrink();
+    // Check if permanently dismissed (Map<String, Set<Allergen>> from allergy_settings_screen)
+    if (dismissedWarnings.containsKey(widget.recipeId)) return const SizedBox.shrink();
 
     // Check if session dismissed
     if (_sessionDismissed) {
@@ -861,17 +789,22 @@ class _ImprovedAllergyWarningState extends ConsumerState<_ImprovedAllergyWarning
     }
 
     // Check ingredients for allergens
+    // AllergenData.detectAllergens returns List<String> (allergen IDs)
+    // userAllergies is List<Allergen> - need to compare by name
+    final userAllergenNames = userAllergies.map((a) => a.name.toLowerCase()).toSet();
     final detectedAllergens = <String>[];
     for (final ingredientText in widget.ingredientTexts) {
       final allergens = AllergenData.detectAllergens(ingredientText);
       for (final allergen in allergens) {
-        if (userAllergies.contains(allergen) && !detectedAllergens.contains(allergen)) {
+        final allergenLower = allergen.toLowerCase();
+        if (userAllergenNames.contains(allergenLower) && !detectedAllergens.contains(allergen)) {
           detectedAllergens.add(allergen);
         }
       }
     }
 
     if (detectedAllergens.isEmpty) return const SizedBox.shrink();
+    _detectedAllergens = detectedAllergens;
 
     // Get localized allergen names
     final allergenNames = detectedAllergens.map((a) => AllergenData.getLocalizedName(a, l10n)).toList();
@@ -880,74 +813,87 @@ class _ImprovedAllergyWarningState extends ConsumerState<_ImprovedAllergyWarning
       duration: const Duration(milliseconds: 300),
       child: Container(
         key: const ValueKey('warning'),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.red.shade50,
+          color: theme.colorScheme.errorContainer.withValues(alpha: 0.35),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.red.shade200),
+          border: Border.all(color: theme.colorScheme.error.withValues(alpha: 0.2)),
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-              child: Row(
-                children: [
-                  Icon(Icons.warning_amber_rounded, color: Colors.red.shade700, size: 24),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.allergyWarningTitle,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red.shade700,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${l10n.allergyWarningContains} ${allergenNames.join(", ")}',
-                          style: theme.textTheme.bodySmall?.copyWith(color: Colors.red.shade900),
-                        ),
-                      ],
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.error.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(Icons.warning_amber_rounded,
+                      color: theme.colorScheme.error, size: 18),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    l10n.allergyWarningTitle,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.error,
                     ),
                   ),
-                  // X button on RIGHT
-                  IconButton(
-                    icon: Icon(Icons.close, color: Colors.red.shade700, size: 20),
-                    tooltip: l10n.allergyDismissTooltip,
-                    onPressed: () {
+                ),
+                // Dismiss button
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () {
                       setState(() {
                         _sessionDismissed = true;
                         _showDisablePrompt = true;
                       });
                     },
-                  ),
-                ],
-              ),
-            ),
-            // Manage allergies link
-            InkWell(
-              onTap: () => context.push('/settings/allergies'),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade100,
-                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(11)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.settings, size: 16, color: Colors.red.shade700),
-                    const SizedBox(width: 8),
-                    Text(
-                      l10n.allergyManageSettings,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: Colors.red.shade700,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Icon(Icons.close, size: 18,
+                          color: theme.colorScheme.error.withValues(alpha: 0.6)),
                     ),
-                  ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Allergen chips
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: allergenNames.map((name) => Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.error.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: theme.colorScheme.error.withValues(alpha: 0.2)),
+                ),
+                child: Text(
+                  name,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.error,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              )).toList(),
+            ),
+            const SizedBox(height: 8),
+            // Manage link
+            GestureDetector(
+              onTap: () => context.push('/settings/allergies'),
+              child: Text(
+                l10n.allergyManageSettings,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.error.withValues(alpha: 0.7),
+                  decoration: TextDecoration.underline,
                 ),
               ),
             ),
@@ -987,7 +933,18 @@ class _ImprovedAllergyWarningState extends ConsumerState<_ImprovedAllergyWarning
             ),
             FilledButton(
               onPressed: () {
-                ref.read(dismissedAllergyWarningsProvider.notifier).dismiss(widget.recipeId);
+                // Convert detected allergen strings to Allergen enum values
+                final allergenEnums = _detectedAllergens.map((a) {
+                  try {
+                    return Allergen.values.firstWhere(
+                          (e) => e.name.toLowerCase() == a.toLowerCase(),
+                    );
+                  } catch (_) {
+                    return null;
+                  }
+                }).whereType<Allergen>().toSet();
+                ref.read(dismissedAllergyWarningsProvider.notifier)
+                    .dismissForRecipe(widget.recipeId, allergenEnums);
                 setState(() => _showDisablePrompt = false);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(l10n.allergyDisabledForRecipe)),
@@ -1525,12 +1482,14 @@ class _IngredientsTab extends ConsumerWidget {
   final double scaleFactor;
   final AppLocalizations l10n;
   final VoidCallback onAddToShopping;
+  final String? recipeId;
 
   const _IngredientsTab({
     required this.ingredients,
     required this.scaleFactor,
     required this.l10n,
     required this.onAddToShopping,
+    this.recipeId,
   });
 
   @override
@@ -1540,7 +1499,7 @@ class _IngredientsTab extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        ...ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: scaleFactor)),
+        ...ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: scaleFactor, recipeId: recipeId)),
         const SizedBox(height: 16),
         _LargeAddToShoppingButton(onTap: onAddToShopping),
         const SizedBox(height: 32),
@@ -1629,36 +1588,25 @@ class _RecipeAppBar extends StatelessWidget {
                 ),
               ),
             ),
-            // Rarity glow border effect (subtle inner glow)
-            if (rarityColor != null)
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: rarityColor.withValues(alpha: 0.6), width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: rarityColor.withValues(alpha: 0.3),
-                      blurRadius: 16,
-                      spreadRadius: -2,
-                    ),
-                  ],
-                ),
-              ),
-            // Rarity glow vignette at edges
+            // Rarity glow border effect — border glow only, no overlay
             if (rarityColor != null)
               IgnorePointer(
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        rarityColor.withValues(alpha: 0.15),
-                        Colors.transparent,
-                        Colors.transparent,
-                        rarityColor.withValues(alpha: 0.2),
-                      ],
-                      stops: const [0.0, 0.15, 0.85, 1.0],
-                    ),
+                    border: Border.all(color: rarityColor.withValues(alpha: 0.7), width: 2.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: rarityColor.withValues(alpha: 0.4),
+                        blurRadius: 20,
+                        spreadRadius: 0,
+                      ),
+                      BoxShadow(
+                        color: rarityColor.withValues(alpha: 0.2),
+                        blurRadius: 6,
+                        spreadRadius: -1,
+                        blurStyle: BlurStyle.inner,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -1792,12 +1740,14 @@ class _SectionHeader extends StatelessWidget {
 class _IngredientItemWithAllergen extends ConsumerWidget {
   final Ingredient ingredient;
   final double scaleFactor;
-  const _IngredientItemWithAllergen({required this.ingredient, required this.scaleFactor});
+  final String? recipeId;
+  const _IngredientItemWithAllergen({required this.ingredient, required this.scaleFactor, this.recipeId});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final settings = ref.watch(settingsProvider);
     final userAllergies = settings.allergens;
+    final dismissedWarnings = ref.watch(dismissedAllergyWarningsProvider);
 
     String amount = ingredient.amount ?? '';
     if (scaleFactor != 1.0 && amount.isNotEmpty) {
@@ -1808,9 +1758,16 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
       }
     }
 
-    // Check for allergens
-    final detectedAllergens = AllergenData.detectAllergens(ingredient.name);
-    final matchingAllergens = detectedAllergens.where((a) => userAllergies.contains(a)).toList();
+    // If warning is dismissed for this recipe, don't show allergen indicators
+    final isDismissed = recipeId != null && dismissedWarnings.containsKey(recipeId);
+
+    // Check for allergens - compare by name (detectAllergens returns strings)
+    List<String> matchingAllergens = [];
+    if (!isDismissed) {
+      final userAllergenNames = userAllergies.map((a) => a.name.toLowerCase()).toSet();
+      final detectedAllergens = AllergenData.detectAllergens(ingredient.name);
+      matchingAllergens = detectedAllergens.where((a) => userAllergenNames.contains(a.toLowerCase())).toList();
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),

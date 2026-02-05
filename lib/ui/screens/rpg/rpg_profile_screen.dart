@@ -104,12 +104,15 @@ class RpgProfileScreen extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Avatar with frame
-              RpgAvatarWidget(
-                avatarId: profile.avatarId,
-                frameId: profile.frameId,
-                size: 100,
-                level: profile.level,
+              // Avatar with frame - tap to go to cosmetics
+              GestureDetector(
+                onTap: () => context.push('/rpg/cosmetics'),
+                child: RpgAvatarWidget(
+                  avatarId: profile.avatarId,
+                  frameId: profile.frameId,
+                  size: 100,
+                  level: profile.level,
+                ),
               ),
               const SizedBox(height: 12),
 

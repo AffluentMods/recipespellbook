@@ -176,10 +176,11 @@ class _CookbookGrid extends ConsumerWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.edit),
-              title: Text(l10n.rename),
+              title: Text(l10n.actionEdit),
+              subtitle: const Text('Change name, image, description'),
               onTap: () {
                 Navigator.pop(ctx);
-                _showRenameDialog(context, ref, cookbook);
+                context.push('/cookbook/${cookbook.id}/edit');
               },
             ),
             ListTile(
@@ -338,6 +339,22 @@ class _CookbookCard extends StatelessWidget {
                   child: const Icon(Icons.check, color: Colors.white, size: 16),
                 ),
               ),
+            // Edit button (top-left)
+            Positioned(
+              top: 8,
+              left: 8,
+              child: GestureDetector(
+                onTap: () => context.push('/cookbook/${cookbook.id}/edit'),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.4),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.edit, color: Colors.white, size: 14),
+                ),
+              ),
+            ),
           ],
         ),
       ),

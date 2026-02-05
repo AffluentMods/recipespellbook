@@ -16,7 +16,7 @@ class AppMenuDrawer extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
 
     // Check if RPG mode is ACTUALLY enabled
-    final isRpgEnabled = settings.rpgAnimationsEnabled || settings.rpgSoundsEnabled;
+    final isRpgEnabled = settings.nerdMode;
 
     return Drawer(
       backgroundColor: theme.colorScheme.surface,
