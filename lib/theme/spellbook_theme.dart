@@ -72,7 +72,7 @@ class SpellbookTheme {
         foregroundColor: inkDark,
         elevation: 0,
         scrolledUnderElevation: 1,
-        surfaceTintColor: primaryPurple.withOpacity(0.1),
+        surfaceTintColor: primaryPurple.withValues(alpha: 0.1),
         titleTextStyle: GoogleFonts.playfairDisplay(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -84,7 +84,7 @@ class SpellbookTheme {
       cardTheme: CardThemeData(
         color: Colors.white,
         elevation: 1,
-        shadowColor: inkDark.withOpacity(0.1),
+        shadowColor: inkDark.withValues(alpha: 0.1),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -155,11 +155,11 @@ class SpellbookTheme {
         fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: inkLight.withOpacity(0.3)),
+          borderSide: BorderSide(color: inkLight.withValues(alpha: 0.3)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: inkLight.withOpacity(0.3)),
+          borderSide: BorderSide(color: inkLight.withValues(alpha: 0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -184,12 +184,12 @@ class SpellbookTheme {
         backgroundColor: parchmentLight,
         selectedIconTheme: const IconThemeData(color: primaryPurple),
         unselectedIconTheme: IconThemeData(color: inkLight),
-        indicatorColor: primaryPurple.withOpacity(0.1),
+        indicatorColor: primaryPurple.withValues(alpha: 0.1),
       ),
 
       // Dividers
       dividerTheme: DividerThemeData(
-        color: inkLight.withOpacity(0.2),
+        color: inkLight.withValues(alpha: 0.2),
         thickness: 1,
       ),
 
@@ -262,7 +262,7 @@ class SpellbookTheme {
           if (states.contains(WidgetState.selected)) {
             return primaryPurple;
           }
-          return inkLight.withOpacity(0.3);
+          return inkLight.withValues(alpha: 0.3);
         }),
       ),
     );
@@ -301,7 +301,7 @@ class SpellbookTheme {
         foregroundColor: parchmentLight,
         elevation: 0,
         scrolledUnderElevation: 1,
-        surfaceTintColor: primaryPurpleLight.withOpacity(0.1),
+        surfaceTintColor: primaryPurpleLight.withValues(alpha: 0.1),
         titleTextStyle: GoogleFonts.playfairDisplay(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -313,7 +313,7 @@ class SpellbookTheme {
       cardTheme: CardThemeData(
         color: darkCard,
         elevation: 2,
-        shadowColor: Colors.black.withOpacity(0.3),
+        shadowColor: Colors.black.withValues(alpha: 0.3),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -384,11 +384,11 @@ class SpellbookTheme {
         fillColor: darkCard,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: inkLight.withOpacity(0.3)),
+          borderSide: BorderSide(color: inkLight.withValues(alpha: 0.3)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: inkLight.withOpacity(0.3)),
+          borderSide: BorderSide(color: inkLight.withValues(alpha: 0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -413,12 +413,12 @@ class SpellbookTheme {
         backgroundColor: darkSurface,
         selectedIconTheme: const IconThemeData(color: primaryPurpleLight),
         unselectedIconTheme: IconThemeData(color: inkLight),
-        indicatorColor: primaryPurpleLight.withOpacity(0.2),
+        indicatorColor: primaryPurpleLight.withValues(alpha: 0.2),
       ),
 
       // Dividers
       dividerTheme: DividerThemeData(
-        color: inkLight.withOpacity(0.2),
+        color: inkLight.withValues(alpha: 0.2),
         thickness: 1,
       ),
 
@@ -492,7 +492,7 @@ class SpellbookTheme {
           if (states.contains(WidgetState.selected)) {
             return primaryPurpleLight;
           }
-          return inkLight.withOpacity(0.3);
+          return inkLight.withValues(alpha: 0.3);
         }),
       ),
     );

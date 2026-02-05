@@ -205,15 +205,22 @@ class MeasurementConverter {
     final whole = amount.floor();
 
     String fractionStr = '';
-    if ((fraction - 0.25).abs() < 0.05) fractionStr = '¼';
-    else if ((fraction - 0.33).abs() < 0.05) fractionStr = '⅓';
-    else if ((fraction - 0.5).abs() < 0.05) fractionStr = '½';
-    else if ((fraction - 0.67).abs() < 0.05) fractionStr = '⅔';
-    else if ((fraction - 0.75).abs() < 0.05) fractionStr = '¾';
-    else fractionStr = fraction.toStringAsFixed(1).substring(1); // Just decimal part
-
-    if (whole == 0) return fractionStr;
-    return '$whole $fractionStr'.trim();
+    if ((fraction - 0.25).abs() < 0.05) {
+      fractionStr = '¼';
+    } else if ((fraction - 0.33).abs() < 0.05) {
+      fractionStr = '⅓';
+    } else if ((fraction - 0.5).abs() < 0.05) {
+      fractionStr = '½';
+    } else if ((fraction - 0.67).abs() < 0.05) {
+      fractionStr = '⅔';
+    } else if ((fraction - 0.75).abs() < 0.05) {
+      fractionStr = '¾';
+    } else {
+      fractionStr = fraction.toStringAsFixed(1).substring(1);
+    }
+    // Just decimal part
+      if (whole == 0) return fractionStr;
+      return '$whole $fractionStr'.trim();
   }
 }
 

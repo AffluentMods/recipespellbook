@@ -5,6 +5,7 @@ import 'package:drift/drift.dart' as drift;
 import '../../database/database.dart';
 import '../../providers/database_provider.dart';
 import 'rpg/rpg_navigation_shell.dart';
+import '../widgets/add_to_meal_plan_dialogue.dart';
 
 /// Shows a bottom sheet to add a recipe to meal plan
 /// Call this from recipe_screen.dart like:

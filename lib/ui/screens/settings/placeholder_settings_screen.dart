@@ -96,7 +96,7 @@ class PlaceholderSettingsScreen extends ConsumerWidget {
 
           // Info card
           Card(
-            color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -271,7 +271,7 @@ class _ForceThemeRecipePlaceholder extends ConsumerWidget {
         child: Icon(
           settings.nerdMode ? Icons.auto_awesome : Icons.restaurant,
           size: height * 0.4,
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha: 0.9),
         ),
       ),
     );
@@ -318,7 +318,7 @@ class _ForceThemeCookbookPlaceholder extends ConsumerWidget {
         child: Icon(
           settings.nerdMode ? Icons.auto_stories : Icons.menu_book,
           size: height * 0.4,
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha: 0.9),
         ),
       ),
     );

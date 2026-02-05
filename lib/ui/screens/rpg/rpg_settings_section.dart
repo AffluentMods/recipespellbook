@@ -49,7 +49,7 @@ class RpgSettingsSection extends ConsumerWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: rpgEnabled
-                  ? profile.playerClass.color.withOpacity(0.2)
+                  ? profile.playerClass.color.withValues(alpha: 0.2)
                   : theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(12),
             ),

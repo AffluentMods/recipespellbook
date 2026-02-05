@@ -46,17 +46,22 @@ class DatabaseInitializationService {
 
   static const _firstRunKey = 'database_initialized';
   static const _dbVersionKey = 'database_version';
-  static const _currentDbVersion = 1;
+  static const _currentDbVersion = 2; // Bumped: v2 adds expanded shopping categories
 
   /// Check if this is first run and initialize if needed
   /// Call this from your app's initialization with a valid BuildContext
   Future<void> initializeIfNeeded(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     final isInitialized = prefs.getBool(_firstRunKey) ?? false;
+    final dbVersion = prefs.getInt(_dbVersionKey) ?? 0;
 
     if (!isInitialized) {
       await _initializeDefaults(context);
       await prefs.setBool(_firstRunKey, true);
+      await prefs.setInt(_dbVersionKey, _currentDbVersion);
+    } else if (dbVersion < _currentDbVersion) {
+      // Run migrations for existing users
+      await _runMigrations(context, dbVersion);
       await prefs.setInt(_dbVersionKey, _currentDbVersion);
     }
   }
@@ -65,7 +70,20 @@ class DatabaseInitializationService {
   Future<void> resetAndReinitialize(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_firstRunKey, false);
+    await prefs.setInt(_dbVersionKey, 0);
     await initializeIfNeeded(context);
+  }
+
+  /// Run migrations for existing users upgrading to a new version
+  Future<void> _runMigrations(BuildContext context, int fromVersion) async {
+    final l10n = AppLocalizations.of(context)!;
+    final defaults = LocalizedDefaults(l10n);
+
+    if (fromVersion < 2) {
+      // v2: Add expanded shopping categories
+      await _seedShoppingCategories(defaults);
+      debugPrint('📦 Migrated to v2: expanded shopping categories');
+    }
   }
 
   Future<void> _initializeDefaults(BuildContext context) async {
@@ -84,6 +102,9 @@ class DatabaseInitializationService {
 
     // 3. Create default shopping list
     await _createDefaultShoppingList(defaults);
+
+    // 4. Seed shopping categories
+    await _seedShoppingCategories(defaults);
 
     debugPrint('✅ Database initialized with ${locale.languageCode} defaults');
   }
@@ -135,6 +156,33 @@ class DatabaseInitializationService {
 
       debugPrint('📝 Created default shopping list: ${defaults.defaultShoppingListName}');
     }
+  }
+
+  Future<void> _seedShoppingCategories(LocalizedDefaults defaults) async {
+    final shoppingDao = ref.read(shoppingDaoProvider);
+    final existing = await shoppingDao.getAllShoppingCategories();
+
+    // Only seed categories that don't exist yet
+    // This also handles upgrading from older versions with fewer categories
+    final existingIds = existing.map((c) => c.id).toSet();
+
+    for (final cat in LocalizedDefaults.shoppingCategories) {
+      if (!existingIds.contains(cat.id)) {
+        try {
+          await shoppingDao.insertShoppingCategory(
+            ShoppingCategoriesCompanion(
+              id: Value(cat.id),
+              name: Value(defaults.getShoppingCategoryDisplayName(cat.id)),
+              sortOrder: Value(cat.sortOrder),
+            ),
+          );
+        } catch (e) {
+          debugPrint('Could not insert category ${cat.id}: $e');
+        }
+      }
+    }
+
+    debugPrint('🛒 Seeded shopping categories (${LocalizedDefaults.shoppingCategories.length} total)');
   }
 
   /// Update all localized content when user changes language

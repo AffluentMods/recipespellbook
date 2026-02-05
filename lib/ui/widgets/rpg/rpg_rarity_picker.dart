@@ -140,10 +140,10 @@ class _RpgRarityPickerState extends State<RpgRarityPicker>
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: isSelected ? rarity.color.withOpacity(0.3) : Colors.transparent,
+                color: isSelected ? rarity.color.withValues(alpha: 0.3) : Colors.transparent,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? rarity.color : theme.colorScheme.outline.withOpacity(0.3),
+                  color: isSelected ? rarity.color : theme.colorScheme.outline.withValues(alpha: 0.3),
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -186,8 +186,8 @@ class _RpgRarityPickerState extends State<RpgRarityPicker>
                       decoration: BoxDecoration(
                         gradient: isSelected ? LinearGradient(
                           colors: [
-                            rarity.color.withOpacity(0.3),
-                            rarity.color.withOpacity(0.1),
+                            rarity.color.withValues(alpha: 0.3),
+                            rarity.color.withValues(alpha: 0.1),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -288,12 +288,12 @@ class RarityBadge extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            rarity.color.withOpacity(0.3),
-            rarity.color.withOpacity(0.1),
+            rarity.color.withValues(alpha: 0.3),
+            rarity.color.withValues(alpha: 0.1),
           ],
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: rarity.color.withOpacity(0.5)),
+        border: Border.all(color: rarity.color.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

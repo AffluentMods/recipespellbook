@@ -251,7 +251,7 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
                     color: theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: theme.colorScheme.outline.withOpacity(0.3),
+                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
                       width: 2,
                       strokeAlign: BorderSide.strokeAlignInside,
                     ),
@@ -272,7 +272,7 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.surface.withOpacity(0.9),
+                            color: theme.colorScheme.surface.withValues(alpha: 0.9),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(Icons.edit, size: 20, color: theme.colorScheme.primary),

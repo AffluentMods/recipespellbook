@@ -74,27 +74,48 @@ class AppMenuDrawer extends ConsumerWidget {
                     const Divider(height: 1),
                     _SectionHeader(title: 'RPG MODE', color: theme.colorScheme.primary),
                     _MenuItem(
-                      icon: Icons.leaderboard_rounded,
-                      label: 'Leaderboards',
+                      icon: Icons.person_rounded,
+                      label: 'Profile',
+                      subtitle: 'View your stats and progress',
                       onTap: () {
                         Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Coming soon!')));
+                        context.push('/rpg/profile');
                       },
                     ),
                     _MenuItem(
                       icon: Icons.emoji_events_rounded,
                       label: 'Achievements',
+                      subtitle: 'Unlock rewards',
                       onTap: () {
                         Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Coming soon!')));
+                        context.push('/rpg/achievements');
                       },
                     ),
                     _MenuItem(
-                      icon: Icons.bar_chart_rounded,
-                      label: 'Cooking Stats',
+                      icon: Icons.checkroom_rounded,
+                      label: 'Cosmetics',
+                      subtitle: 'Customize your look',
                       onTap: () {
                         Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Coming soon!')));
+                        context.push('/rpg/cosmetics');
+                      },
+                    ),
+                    _MenuItem(
+                      icon: Icons.leaderboard_rounded,
+                      label: 'Leaderboards',
+                      subtitle: 'Compete with others',
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.push('/rpg/leaderboard');
+                      },
+                    ),
+                    _MenuItem(
+                      icon: Icons.whatshot_rounded,
+                      label: 'Boss Battles',
+                      subtitle: 'Epic cooking challenges',
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.push('/rpg/boss');
                       },
                     ),
                   ],
@@ -316,7 +337,7 @@ class _MenuItem extends StatelessWidget {
     final theme = Theme.of(context);
     return ListTile(
       enabled: enabled,
-      leading: Container(width: 40, height: 40, decoration: BoxDecoration(color: enabled ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.surfaceContainerHighest.withOpacity(0.5), borderRadius: BorderRadius.circular(10)), child: Icon(icon, size: 20, color: enabled ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.outline)),
+      leading: Container(width: 40, height: 40, decoration: BoxDecoration(color: enabled ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(10)), child: Icon(icon, size: 20, color: enabled ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.outline)),
       title: Text(label, style: TextStyle(color: enabled ? null : theme.colorScheme.outline)),
       subtitle: subtitle != null ? Text(subtitle!, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)) : null,
       trailing: trailing,

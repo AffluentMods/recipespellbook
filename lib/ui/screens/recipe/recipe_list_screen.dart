@@ -319,7 +319,7 @@ class _TagFilterBar extends ConsumerWidget {
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
         border: Border(
-          bottom: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
+          bottom: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
         ),
       ),
       child: Column(
@@ -387,7 +387,7 @@ class _TagFilterBar extends ConsumerWidget {
                         label: Text(tag.name),
                         selected: isSelected,
                         onSelected: (selected) => onTagToggled(tag.id, selected),
-                        selectedColor: color.withOpacity(0.2),
+                        selectedColor: color.withValues(alpha: 0.2),
                         checkmarkColor: color,
                         labelStyle: TextStyle(
                           color: isSelected ? color : null,
@@ -730,7 +730,7 @@ class _LargeCard extends StatelessWidget {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.7),
+                      Colors.black.withValues(alpha: 0.7),
                     ],
                     stops: const [0.4, 1.0],
                   ),
@@ -907,7 +907,7 @@ class _CompactTagChips extends StatelessWidget {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: lightMode ? Colors.white.withOpacity(0.2) : color.withOpacity(0.15),
+              color: lightMode ? Colors.white.withValues(alpha: 0.2) : color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Row(
@@ -933,7 +933,7 @@ class _CompactTagChips extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: lightMode ? Colors.white.withOpacity(0.2) : theme.colorScheme.surfaceContainerHighest,
+              color: lightMode ? Colors.white.withValues(alpha: 0.2) : theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -976,7 +976,7 @@ class _RecipeThumbnail extends StatelessWidget {
         child: Icon(
           Icons.restaurant_menu,
           size: size * 0.5,
-          color: theme.colorScheme.onPrimaryContainer.withOpacity(0.5),
+          color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
         ),
       ),
     );

@@ -9,6 +9,7 @@ import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/ingredient_utils.dart';
 import '../../../data/ingredient_images.dart';
+import '../../../database/daos/shopping_dao.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../widgets/rpg/rpg_navigation_shell.dart';
 
@@ -486,7 +487,7 @@ class _ModernHeader extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  border: Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
+                  border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: PopupMenuButton<ShoppingGroupMode>(
@@ -667,7 +668,7 @@ class _OrderOptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: color.withOpacity(0.1),
+      color: color.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -702,7 +703,7 @@ class _ModernFAB extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFFE8A860),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: const Color(0xFFE8A860).withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 4))],
+          boxShadow: [BoxShadow(color: const Color(0xFFE8A860).withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))],
         ),
         child: const Icon(Icons.add, color: Colors.white, size: 32),
       ),
@@ -880,7 +881,7 @@ class _SectionGroupedList extends ConsumerWidget {
               getShoppingCategoryDisplayName(category).toUpperCase(),
               style: theme.textTheme.labelLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 letterSpacing: 0.5,
               ),
             ),
@@ -961,7 +962,7 @@ class _RecipeGroupedList extends ConsumerWidget {
                         title.toUpperCase(),
                         style: theme.textTheme.labelLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -1053,6 +1054,10 @@ class _ShoppingItemTile extends ConsumerWidget {
     final parsed = parseIngredient(item.name);
     final emoji = IngredientImages.getEmoji(parsed.name);
 
+    // Check for source tracking (smart stacking)
+    final sources = ShoppingSourceTracker.getSourceBreakdown(item.note);
+    final hasMultipleSources = sources.length > 1;
+
     return Dismissible(
       key: Key(item.id),
       direction: DismissDirection.endToStart,
@@ -1071,15 +1076,37 @@ class _ShoppingItemTile extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Row(
               children: [
-                // Emoji circle
-                Container(
-                  width: 48, height: 48,
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey.shade800 : const Color(0xFFF5F0E8),
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(emoji, style: const TextStyle(fontSize: 24)),
+                // Emoji circle — show stacked indicator for combined items
+                Stack(
+                  children: [
+                    Container(
+                      width: 48, height: 48,
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.grey.shade800 : const Color(0xFFF5F0E8),
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(emoji, style: const TextStyle(fontSize: 24)),
+                    ),
+                    if (hasMultipleSources)
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          width: 20, height: 20,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE8A860),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: isDark ? theme.colorScheme.surface : Colors.white, width: 2),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${sources.length}',
+                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(width: 16),
                 // Item info
@@ -1094,8 +1121,48 @@ class _ShoppingItemTile extends ConsumerWidget {
                           color: item.isChecked ? theme.colorScheme.outline : null,
                         ),
                       ),
-                      // Recipe link
-                      if (showRecipeLink && item.recipeId != null)
+                      // Source recipe breakdown
+                      if (showRecipeLink && hasMultipleSources && !item.isChecked)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Wrap(
+                            spacing: 4,
+                            runSpacing: 2,
+                            children: sources.map((source) {
+                              final detail = source.detail.isNotEmpty ? ' (${source.detail})' : '';
+                              return GestureDetector(
+                                onTap: source.recipeId.isNotEmpty
+                                    ? () => context.push('/recipe/${source.recipeId}')
+                                    : null,
+                                child: Text(
+                                  '${source.recipeName}$detail',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: source.recipeId.isNotEmpty
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.outline,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      // Single recipe link (legacy or single source)
+                      if (showRecipeLink && !hasMultipleSources && sources.length == 1 && !item.isChecked)
+                        GestureDetector(
+                          onTap: sources.first.recipeId.isNotEmpty
+                              ? () => context.push('/recipe/${sources.first.recipeId}')
+                              : null,
+                          child: Text(
+                            sources.first.recipeName,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      // Legacy recipe link (no source tracking)
+                      if (showRecipeLink && sources.isEmpty && item.recipeId != null && !item.isChecked)
                         FutureBuilder<Recipe?>(
                           future: recipeDao.getRecipeById(item.recipeId!),
                           builder: (context, snapshot) {
@@ -1233,23 +1300,61 @@ class _CategoryDropdown extends ConsumerWidget {
       builder: (context, snapshot) {
         final categories = snapshot.data ?? [];
 
+        // Build the complete list of valid category IDs
+        final validIds = <String>{
+          ...categories.map((c) => c.id),
+          'other', // Always include 'other' as fallback
+        };
+
+        // FIX: Only set value if it exists in the items list, otherwise null
+        // This prevents the assertion error "There should be exactly one item with [DropdownButton]'s value"
+        final String? safeValue = currentCategoryId.isNotEmpty && validIds.contains(currentCategoryId)
+            ? currentCategoryId
+            : null;
+
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+            border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
             borderRadius: BorderRadius.circular(12),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               isExpanded: true,
-              value: currentCategoryId.isNotEmpty ? currentCategoryId : null,
-              hint: const Text('Select category'),
+              value: safeValue,
+              hint: Text(
+                // If we have a category ID but it's not valid, show it in the hint
+                currentCategoryId.isNotEmpty && !validIds.contains(currentCategoryId)
+                    ? _formatCategoryName(currentCategoryId)
+                    : 'Select category',
+              ),
               items: [
+                // If current category isn't in list, add it as first item
+                if (currentCategoryId.isNotEmpty && !validIds.contains(currentCategoryId))
+                  DropdownMenuItem(
+                    value: currentCategoryId,
+                    child: Text(_formatCategoryName(currentCategoryId)),
+                  ),
                 ...categories.map((cat) => DropdownMenuItem(
                   value: cat.id,
-                  child: Text(cat.name),
+                  child: Row(
+                    children: [
+                      Text(_getCategoryEmoji(cat.id)),
+                      const SizedBox(width: 8),
+                      Text(cat.name),
+                    ],
+                  ),
                 )),
-                const DropdownMenuItem(value: 'other', child: Text('Other')),
+                const DropdownMenuItem(
+                  value: 'other',
+                  child: Row(
+                    children: [
+                      Text('📦'),
+                      SizedBox(width: 8),
+                      Text('Other'),
+                    ],
+                  ),
+                ),
               ],
               onChanged: (value) {
                 if (value != null) onChanged(value);
@@ -1259,6 +1364,41 @@ class _CategoryDropdown extends ConsumerWidget {
         );
       },
     );
+  }
+
+  String _formatCategoryName(String categoryId) {
+    // Convert category ID to display name
+    return categoryId
+        .replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m.group(1)} ${m.group(2)}')
+        .replaceFirst(categoryId[0], categoryId[0].toUpperCase());
+  }
+
+  String _getCategoryEmoji(String categoryId) {
+    switch (categoryId) {
+      case 'produce': return '🥬';
+      case 'dairy': return '🥛';
+      case 'meat': return '🥩';
+      case 'seafood': return '🐟';
+      case 'bakery': return '🍞';
+      case 'frozen': return '🧊';
+      case 'pantry': return '🥫';
+      case 'spices': return '🧂';
+      case 'beverages': return '🥤';
+      case 'snacks': return '🍿';
+      case 'international': return '🌍';
+      case 'deli': return '🥓';
+      case 'breakfast': return '🥣';
+      case 'canned': return '🥫';
+      case 'condiments': return '🍯';
+      case 'grains': return '🌾';
+      case 'baking': return '🧁';
+      case 'baby': return '👶';
+      case 'pet': return '🐕';
+      case 'household': return '🧹';
+      case 'personal': return '🧴';
+      case 'alcohol': return '🍷';
+      default: return '📦';
+    }
   }
 }
 
@@ -1327,7 +1467,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.shopping_cart_outlined, size: 80, color: theme.colorScheme.outline.withOpacity(0.5)),
+            Icon(Icons.shopping_cart_outlined, size: 80, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
             const SizedBox(height: 24),
             Text('Your list is empty', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),

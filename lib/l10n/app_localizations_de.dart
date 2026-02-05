@@ -233,6 +233,39 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get shoppingDeli => 'Feinkost';
+
+  @override
+  String get shoppingCannedGoods => 'Konserven & Suppen';
+
+  @override
+  String get shoppingCondiments => 'Gewürze & Saucen';
+
+  @override
+  String get shoppingGrainsAndPasta => 'Getreide, Pasta & Reis';
+
+  @override
+  String get shoppingCookingAndBaking => 'Kochen & Backen';
+
+  @override
+  String get shoppingBreakfastCereal => 'Frühstück & Müsli';
+
+  @override
+  String get shoppingBeerWineSpirits => 'Bier, Wein & Spirituosen';
+
+  @override
+  String get shoppingBaby => 'Baby';
+
+  @override
+  String get shoppingPet => 'Haustier';
+
+  @override
+  String get shoppingHousehold => 'Haushalt';
+
+  @override
+  String get shoppingPersonalCare => 'Körperpflege';
+
+  @override
   String get plannerTitle => 'Mahlzeitenplaner';
 
   @override
@@ -3286,4 +3319,100 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get navComingSoon => 'Demnächst';
+
+  @override
+  String get mealPlanButton => 'Essensplan';
+
+  @override
+  String get groceriesButton => 'Einkaufen';
+
+  @override
+  String get shareButton => 'Teilen';
+
+  @override
+  String get scaleRecipeButton => 'Skalieren';
+
+  @override
+  String get convertUnitsButton => 'Umrechnen';
+
+  @override
+  String get allergyDismissTooltip => 'Warnung schließen';
+
+  @override
+  String get allergyDisablePrompt => 'Diese Warnung dauerhaft für dieses Rezept deaktivieren?';
+
+  @override
+  String get allergyDisabledForRecipe => 'Warnung für dieses Rezept deaktiviert';
+
+  @override
+  String get allergyRestoreWarnings => 'Warnungen wiederherstellen';
+
+  @override
+  String get recipeDuplicated => 'Rezept dupliziert';
+
+  @override
+  String get recipeDeleted => 'Rezept in den Papierkorb verschoben';
+
+  @override
+  String get deleteRecipeTitle => 'Rezept löschen';
+
+  @override
+  String get deleteRecipeConfirm => 'Möchten Sie dieses Rezept wirklich löschen? Es wird in den Papierkorb verschoben.';
+
+  @override
+  String get addToShoppingListTitle => 'Zur Einkaufsliste hinzufügen';
+
+  @override
+  String get viewList => 'Liste anzeigen';
+
+  @override
+  String get selectItems => 'Artikel auswählen';
+
+  @override
+  String addToListCount(int count) {
+    return '$count Artikel hinzufügen';
+  }
+
+  @override
+  String get yes => 'Ja';
+
+  @override
+  String get no => 'Nein';
+
+  @override
+  String get cancel => 'Abbrechen';
+
+  @override
+  String get delete => 'Löschen';
+
+  @override
+  String get save => 'Speichern';
+
+  @override
+  String get restore => 'Wiederherstellen';
+
+  @override
+  String get unselectAll => 'Auswahl aufheben';
+
+  @override
+  String get deleteStep => 'Schritt löschen';
+
+  @override
+  String get deleteSteps => 'Schritte löschen';
+
+  @override
+  String get deleteStepConfirm => 'Diesen Schritt löschen?';
+
+  @override
+  String deleteStepsConfirm(int count) {
+    return '$count Schritte löschen?';
+  }
+
+  @override
+  String stepSelected(int count) {
+    return '$count ausgewählt';
+  }
+
+  @override
+  String get selectAllSteps => 'Alle auswählen';
 }

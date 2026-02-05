@@ -523,6 +523,72 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{No recipes} =1{1 recipe} other{{count} recipes}}'**
   String cookbookRecipeCount(int count);
 
+  /// No description provided for @shoppingDeli.
+  ///
+  /// In en, this message translates to:
+  /// **'Deli'**
+  String get shoppingDeli;
+
+  /// No description provided for @shoppingCannedGoods.
+  ///
+  /// In en, this message translates to:
+  /// **'Canned Goods & Soups'**
+  String get shoppingCannedGoods;
+
+  /// No description provided for @shoppingCondiments.
+  ///
+  /// In en, this message translates to:
+  /// **'Condiments & Sauces'**
+  String get shoppingCondiments;
+
+  /// No description provided for @shoppingGrainsAndPasta.
+  ///
+  /// In en, this message translates to:
+  /// **'Grains, Pasta & Rice'**
+  String get shoppingGrainsAndPasta;
+
+  /// No description provided for @shoppingCookingAndBaking.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking & Baking'**
+  String get shoppingCookingAndBaking;
+
+  /// No description provided for @shoppingBreakfastCereal.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakfast & Cereal'**
+  String get shoppingBreakfastCereal;
+
+  /// No description provided for @shoppingBeerWineSpirits.
+  ///
+  /// In en, this message translates to:
+  /// **'Beer, Wine & Spirits'**
+  String get shoppingBeerWineSpirits;
+
+  /// No description provided for @shoppingBaby.
+  ///
+  /// In en, this message translates to:
+  /// **'Baby'**
+  String get shoppingBaby;
+
+  /// No description provided for @shoppingPet.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet'**
+  String get shoppingPet;
+
+  /// No description provided for @shoppingHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Household'**
+  String get shoppingHousehold;
+
+  /// No description provided for @shoppingPersonalCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Care'**
+  String get shoppingPersonalCare;
+
   /// No description provided for @plannerTitle.
   ///
   /// In en, this message translates to:
@@ -6126,6 +6192,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Coming soon'**
   String get navComingSoon;
+
+  /// No description provided for @mealPlanButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal Plan'**
+  String get mealPlanButton;
+
+  /// No description provided for @groceriesButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Groceries'**
+  String get groceriesButton;
+
+  /// No description provided for @shareButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareButton;
+
+  /// No description provided for @scaleRecipeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Scale'**
+  String get scaleRecipeButton;
+
+  /// No description provided for @convertUnitsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert'**
+  String get convertUnitsButton;
+
+  /// No description provided for @allergyDismissTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss warning'**
+  String get allergyDismissTooltip;
+
+  /// No description provided for @allergyDisablePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable this warning permanently for this recipe?'**
+  String get allergyDisablePrompt;
+
+  /// No description provided for @allergyDisabledForRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning disabled for this recipe'**
+  String get allergyDisabledForRecipe;
+
+  /// No description provided for @allergyRestoreWarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore warnings'**
+  String get allergyRestoreWarnings;
+
+  /// No description provided for @recipeDuplicated.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe duplicated'**
+  String get recipeDuplicated;
+
+  /// No description provided for @recipeDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe moved to trash'**
+  String get recipeDeleted;
+
+  /// No description provided for @deleteRecipeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Recipe'**
+  String get deleteRecipeTitle;
+
+  /// No description provided for @deleteRecipeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this recipe? It will be moved to trash.'**
+  String get deleteRecipeConfirm;
+
+  /// No description provided for @addToShoppingListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Shopping List'**
+  String get addToShoppingListTitle;
+
+  /// No description provided for @viewList.
+  ///
+  /// In en, this message translates to:
+  /// **'View List'**
+  String get viewList;
+
+  /// No description provided for @selectItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Select items'**
+  String get selectItems;
+
+  /// No description provided for @addToListCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {count} items'**
+  String addToListCount(int count);
+
+  /// No description provided for @yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yes;
+
+  /// No description provided for @no.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get no;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @restore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get restore;
+
+  /// No description provided for @unselectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Unselect All'**
+  String get unselectAll;
+
+  /// No description provided for @deleteStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Step'**
+  String get deleteStep;
+
+  /// No description provided for @deleteSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Steps'**
+  String get deleteSteps;
+
+  /// No description provided for @deleteStepConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this step?'**
+  String get deleteStepConfirm;
+
+  /// No description provided for @deleteStepsConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count} steps?'**
+  String deleteStepsConfirm(int count);
+
+  /// No description provided for @stepSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String stepSelected(int count);
+
+  /// No description provided for @selectAllSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get selectAllSteps;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

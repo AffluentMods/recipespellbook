@@ -64,17 +64,17 @@ class _FloatingRpgButton extends ConsumerWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withOpacity(0.95),
+            color: theme.colorScheme.surface.withValues(alpha: 0.95),
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: profile.playerClass.color.withOpacity(0.3),
+                color: profile.playerClass.color.withValues(alpha: 0.3),
                 blurRadius: 8,
                 spreadRadius: 1,
               ),
             ],
             border: Border.all(
-              color: profile.playerClass.color.withOpacity(0.5),
+              color: profile.playerClass.color.withValues(alpha: 0.5),
               width: 1,
             ),
           ),
@@ -87,7 +87,7 @@ class _FloatingRpgButton extends ConsumerWidget {
                 height: 28,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: profile.playerClass.color.withOpacity(0.2),
+                  color: profile.playerClass.color.withValues(alpha: 0.2),
                   border: Border.all(
                     color: profile.playerClass.color,
                     width: 2,

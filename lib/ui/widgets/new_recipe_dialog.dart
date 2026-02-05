@@ -62,7 +62,7 @@ class _AddRecipeChooser extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withOpacity(0.3),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -144,7 +144,7 @@ class _OptionCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Material(
-      color: color.withOpacity(0.1),
+      color: color.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
@@ -157,7 +157,7 @@ class _OptionCard extends StatelessWidget {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
+                  color: color.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, size: 32, color: color),
@@ -704,7 +704,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.outline.withOpacity(0.3),
+                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -747,7 +747,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.5)),
+                        borderSide: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -778,12 +778,12 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                   // "OR" divider
                   Row(
                     children: [
-                      Expanded(child: Divider(color: theme.colorScheme.outline.withOpacity(0.3))),
+                      Expanded(child: Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3))),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(l10n.orDivider, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
                       ),
-                      Expanded(child: Divider(color: theme.colorScheme.outline.withOpacity(0.3))),
+                      Expanded(child: Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3))),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -815,7 +815,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surface.withOpacity(0.95),
+                  color: theme.colorScheme.surface.withValues(alpha: 0.95),
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
                 ),
                 child: Column(
@@ -847,7 +847,7 @@ class _PlatformIcon extends StatelessWidget {
       width: 44,
       height: 44,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Icon(icon, color: color, size: 24),
@@ -953,7 +953,7 @@ class _TextInputSheetState extends State<_TextInputSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Center(
-              child: Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withOpacity(0.3), borderRadius: BorderRadius.circular(2))),
+              child: Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
             ),
             const SizedBox(height: 20),
             Row(

@@ -14,6 +14,17 @@ enum RecipeLayoutMode {
 /// Recipe edit layout mode
 enum RecipeEditLayoutMode { stacked, tabbed }
 
+enum NutritionDisplayMode {
+  perServing,
+  total,
+}
+
+enum NutritionChartStyle {
+  donut,
+  bars,
+  numbers,
+}
+
 // ============ SETTINGS STATE ============
 
 class AppSettings {
@@ -45,6 +56,11 @@ class AppSettings {
 
   final RecipeEditLayoutMode recipeEditLayoutMode;
 
+  // Nutrition display settings
+  final NutritionDisplayMode defaultNutritionView;
+  final NutritionChartStyle nutritionChartStyle;
+  final bool showExpandedNutrition;
+
   AppSettings({
     this.appTheme = AppColorTheme.spellbook,
     this.themeMode = ThemeMode.system,
@@ -63,8 +79,10 @@ class AppSettings {
     this.rpgAnimationsEnabled = true,
     this.rpgSoundsEnabled = false,
     this.recipeEditLayoutMode = RecipeEditLayoutMode.stacked,
+    this.defaultNutritionView = NutritionDisplayMode.perServing,
+    this.nutritionChartStyle = NutritionChartStyle.donut,
+    this.showExpandedNutrition = false,
   }) : seedColor = appTheme.seedColor;
-
   AppSettings copyWith({
     AppColorTheme? appTheme,
     ThemeMode? themeMode,
@@ -83,6 +101,9 @@ class AppSettings {
     bool? rpgAnimationsEnabled,
     bool? rpgSoundsEnabled,
     RecipeEditLayoutMode? recipeEditLayoutMode,
+    NutritionDisplayMode? defaultNutritionView,
+    NutritionChartStyle? nutritionChartStyle,
+    bool? showExpandedNutrition,
   }) {
     return AppSettings(
       appTheme: appTheme ?? this.appTheme,
@@ -102,6 +123,9 @@ class AppSettings {
       rpgAnimationsEnabled: rpgAnimationsEnabled ?? this.rpgAnimationsEnabled,
       rpgSoundsEnabled: rpgSoundsEnabled ?? this.rpgSoundsEnabled,
       recipeEditLayoutMode: recipeEditLayoutMode ?? this.recipeEditLayoutMode,
+      defaultNutritionView: defaultNutritionView ?? this.defaultNutritionView,
+      nutritionChartStyle: nutritionChartStyle ?? this.nutritionChartStyle,
+      showExpandedNutrition: showExpandedNutrition ?? this.showExpandedNutrition,
     );
   }
 }
@@ -184,6 +208,20 @@ class SettingsNotifier extends Notifier<AppSettings> {
       orElse: () => AppColorTheme.spellbook,
     );
 
+    final nutritionViewString = prefs.getString('defaultNutritionView') ?? 'perServing';
+    final nutritionView = NutritionDisplayMode.values.firstWhere(
+          (e) => e.name == nutritionViewString,
+      orElse: () => NutritionDisplayMode.perServing,
+    );
+
+    final chartStyleString = prefs.getString('nutritionChartStyle') ?? 'donut';
+    final chartStyle = NutritionChartStyle.values.firstWhere(
+          (e) => e.name == chartStyleString,
+      orElse: () => NutritionChartStyle.donut,
+    );
+
+    final showExpandedNutrition = prefs.getBool('showExpandedNutrition') ?? false;
+
     // Load theme mode
     final modeString = prefs.getString(_themeModeKey);
     final themeMode = ThemeMode.values.firstWhere(
@@ -262,7 +300,28 @@ class SettingsNotifier extends Notifier<AppSettings> {
       rpgAnimationsEnabled: rpgAnimationsEnabled,
       rpgSoundsEnabled: rpgSoundsEnabled,
       recipeEditLayoutMode: RecipeEditLayoutMode.values[editLayoutIndex],
+      defaultNutritionView: nutritionView,
+      nutritionChartStyle: chartStyle,
+      showExpandedNutrition: showExpandedNutrition,
     );
+  }
+
+  Future<void> setDefaultNutritionView(NutritionDisplayMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('defaultNutritionView', mode.name);
+    state = state.copyWith(defaultNutritionView: mode);
+  }
+
+  Future<void> setNutritionChartStyle(NutritionChartStyle style) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('nutritionChartStyle', style.name);
+    state = state.copyWith(nutritionChartStyle: style);
+  }
+
+  Future<void> setShowExpandedNutrition(bool show) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('showExpandedNutrition', show);
+    state = state.copyWith(showExpandedNutrition: show);
   }
 
   Future<void> setAppTheme(AppColorTheme theme) async {

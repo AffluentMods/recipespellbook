@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../providers/settings_provider.dart';
 
 /// Step data model for editing
 class EditableStep {
@@ -18,12 +18,15 @@ class EditableStep {
   });
 }
 
-/// Simplified instructions editor with drag-to-reorder
-/// No timer per step, cleaner UI
+/// Simplified instructions editor with:
+/// - Drag handle on RIGHT side
+/// - Long-press to select (multi-select support)
+/// - No visible delete button
+/// - Confirm dialog before deleting
 class InstructionsEditor extends ConsumerStatefulWidget {
   final List<EditableStep> steps;
   final ValueChanged<List<EditableStep>> onStepsChanged;
-  final bool isPremium; // For step images feature
+  final bool isPremium;
 
   const InstructionsEditor({
     super.key,
@@ -39,6 +42,8 @@ class InstructionsEditor extends ConsumerStatefulWidget {
 class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
   late List<EditableStep> _steps;
   final _focusNodes = <String, FocusNode>{};
+  final Set<String> _selectedStepIds = {};
+  bool _isSelectionMode = false;
 
   @override
   void initState() {
@@ -51,6 +56,9 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
     super.didUpdateWidget(oldWidget);
     if (widget.steps != oldWidget.steps) {
       _steps = List.from(widget.steps);
+      // Clear selection if steps changed externally
+      _selectedStepIds.clear();
+      _isSelectionMode = false;
     }
   }
 
@@ -76,19 +84,54 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
     });
     widget.onStepsChanged(_steps);
 
-    // Focus the new step after frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getFocusNode(newStep.id).requestFocus();
     });
   }
 
-  void _removeStep(int index) {
-    final removedId = _steps[index].id;
-    setState(() {
-      _steps.removeAt(index);
-    });
-    widget.onStepsChanged(_steps);
-    _focusNodes.remove(removedId)?.dispose();
+  void _removeSteps(List<String> stepIds) async {
+    if (stepIds.isEmpty) return;
+
+    final count = stepIds.length;
+    final l10n = AppLocalizations.of(context)!;
+
+    // Confirm dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(count == 1 ? 'Delete Step?' : 'Delete $count Steps?'),
+        content: Text(
+          count == 1
+              ? 'This step will be permanently removed.'
+              : 'These $count steps will be permanently removed.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      setState(() {
+        _steps.removeWhere((s) => stepIds.contains(s.id));
+        for (final id in stepIds) {
+          _focusNodes.remove(id)?.dispose();
+          _selectedStepIds.remove(id);
+        }
+        _isSelectionMode = _selectedStepIds.isNotEmpty;
+      });
+      widget.onStepsChanged(_steps);
+    }
   }
 
   void _updateStep(int index, String text) {
@@ -97,40 +140,70 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
   }
 
   void _onReorder(int oldIndex, int newIndex) {
+    // Can't reorder while in selection mode
+    if (_isSelectionMode) return;
+
     setState(() {
       if (newIndex > oldIndex) newIndex--;
       final item = _steps.removeAt(oldIndex);
       _steps.insert(newIndex, item);
     });
     widget.onStepsChanged(_steps);
+    HapticFeedback.mediumImpact();
+  }
+
+  void _toggleSelection(String stepId) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      if (_selectedStepIds.contains(stepId)) {
+        _selectedStepIds.remove(stepId);
+        if (_selectedStepIds.isEmpty) {
+          _isSelectionMode = false;
+        }
+      } else {
+        _selectedStepIds.add(stepId);
+        _isSelectionMode = true;
+      }
+    });
+  }
+
+  void _onLongPress(String stepId) {
+    if (!_isSelectionMode) {
+      HapticFeedback.mediumImpact();
+      setState(() {
+        _selectedStepIds.add(stepId);
+        _isSelectionMode = true;
+      });
+    }
+  }
+
+  void _clearSelection() {
+    setState(() {
+      _selectedStepIds.clear();
+      _isSelectionMode = false;
+    });
+  }
+
+  void _selectAll() {
+    setState(() {
+      _selectedStepIds.addAll(_steps.map((s) => s.id));
+      _isSelectionMode = true;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header
-        Row(
-          children: [
-            Text(
-              l10n.instructionsTitle,
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const Spacer(),
-            Text(
-              '${_steps.length} ${_steps.length == 1 ? 'step' : 'steps'}',
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-            ),
-          ],
-        ),
+        // Header with selection controls
+        _buildHeader(theme, l10n),
         const SizedBox(height: 12),
 
-        // Steps list with drag-to-reorder
+        // Steps list
         if (_steps.isEmpty)
           _EmptyStepsState(onAdd: _addStep)
         else
@@ -144,8 +217,9 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
               return AnimatedBuilder(
                 animation: animation,
                 builder: (context, child) => Material(
-                  elevation: animation.value * 4,
+                  elevation: animation.value * 6,
                   borderRadius: BorderRadius.circular(12),
+                  shadowColor: theme.colorScheme.primary.withValues(alpha: 0.3),
                   child: child,
                 ),
                 child: child,
@@ -153,12 +227,16 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
             },
             itemBuilder: (context, index) {
               final step = _steps[index];
+              final isSelected = _selectedStepIds.contains(step.id);
+
               return _StepCard(
                 key: ValueKey(step.id),
                 index: index,
                 step: step,
                 focusNode: _getFocusNode(step.id),
                 isPremium: widget.isPremium,
+                isSelected: isSelected,
+                isSelectionMode: _isSelectionMode,
                 onTextChanged: (text) => _updateStep(index, text),
                 onImageChanged: (path) {
                   setState(() {
@@ -166,24 +244,80 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
                   });
                   widget.onStepsChanged(_steps);
                 },
-                onDelete: () => _removeStep(index),
-                isLast: index == _steps.length - 1,
+                onLongPress: () => _onLongPress(step.id),
+                onTap: _isSelectionMode ? () => _toggleSelection(step.id) : null,
               );
             },
           ),
 
         const SizedBox(height: 12),
 
-        // Add step button
-        Center(
-          child: OutlinedButton.icon(
-            onPressed: _addStep,
-            icon: const Icon(Icons.add),
-            label: Text(l10n.addStep),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        // Add step button (hidden during selection mode)
+        if (!_isSelectionMode)
+          Center(
+            child: OutlinedButton.icon(
+              onPressed: _addStep,
+              icon: const Icon(Icons.add),
+              label: Text(l10n.addStep),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
             ),
           ),
+
+        // Selection action bar
+        if (_isSelectionMode)
+          _SelectionActionBar(
+            selectedCount: _selectedStepIds.length,
+            totalCount: _steps.length,
+            onDelete: () => _removeSteps(_selectedStepIds.toList()),
+            onSelectAll: _selectAll,
+            onClear: _clearSelection,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildHeader(ThemeData theme, AppLocalizations l10n) {
+    if (_isSelectionMode) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: _clearSelection,
+              visualDensity: VisualDensity.compact,
+            ),
+            Text(
+              '${_selectedStepIds.length} selected',
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const Spacer(),
+            if (_selectedStepIds.length < _steps.length)
+              TextButton(
+                onPressed: _selectAll,
+                child: const Text('Select All'),
+              ),
+          ],
+        ),
+      );
+    }
+
+    return Row(
+      children: [
+        Text(
+          l10n.instructionsTitle,
+          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const Spacer(),
+        Text(
+          '${_steps.length} ${_steps.length == 1 ? 'step' : 'steps'}',
+          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
         ),
       ],
     );
@@ -197,10 +331,12 @@ class _StepCard extends StatelessWidget {
   final EditableStep step;
   final FocusNode focusNode;
   final bool isPremium;
+  final bool isSelected;
+  final bool isSelectionMode;
   final ValueChanged<String> onTextChanged;
   final ValueChanged<String?> onImageChanged;
-  final VoidCallback onDelete;
-  final bool isLast;
+  final VoidCallback onLongPress;
+  final VoidCallback? onTap;
 
   const _StepCard({
     super.key,
@@ -208,10 +344,12 @@ class _StepCard extends StatelessWidget {
     required this.step,
     required this.focusNode,
     required this.isPremium,
+    required this.isSelected,
+    required this.isSelectionMode,
     required this.onTextChanged,
     required this.onImageChanged,
-    required this.onDelete,
-    required this.isLast,
+    required this.onLongPress,
+    this.onTap,
   });
 
   @override
@@ -220,116 +358,156 @@ class _StepCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
-        ),
-        child: Column(
-          children: [
-            // Header with step number, drag handle, delete
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: isDark ? theme.colorScheme.surfaceContainerHighest : const Color(0xFFF5F0E8),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
-              ),
-              child: Row(
-                children: [
-                  // Drag handle
-                  ReorderableDragStartListener(
-                    index: index,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      child: Icon(Icons.drag_indicator, color: theme.colorScheme.outline, size: 20),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-
-                  // Step number badge
-                  Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8A860),
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      '${index + 1}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-
-                  Text(
-                    'Step ${index + 1}',
-                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-
-                  const Spacer(),
-
-                  // Delete button
-                  IconButton(
-                    icon: Icon(Icons.close, size: 18, color: theme.colorScheme.error),
-                    onPressed: onDelete,
-                    visualDensity: VisualDensity.compact,
-                    tooltip: 'Remove step',
-                  ),
-                ],
-              ),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: GestureDetector(
+        onLongPress: onLongPress,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.4)
+                : (isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.outline.withValues(alpha: 0.15),
+              width: isSelected ? 2 : 1,
             ),
-
-            // Instruction text field
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: TextField(
-                focusNode: focusNode,
-                controller: TextEditingController(text: step.instruction)
-                  ..selection = TextSelection.collapsed(offset: step.instruction.length),
-                maxLines: null,
-                minLines: 2,
-                decoration: InputDecoration(
-                  hintText: 'Enter instruction...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.3)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Left side: step number or selection checkbox
+              Padding(
+                padding: const EdgeInsets.only(left: 12, top: 14),
+                child: isSelectionMode
+                    ? AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+                    border: Border.all(
+                      color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
+                      width: 2,
+                    ),
+                    shape: BoxShape.circle,
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: const Color(0xFFE8A860)),
-                  ),
-                  filled: true,
-                  fillColor: isDark ? theme.colorScheme.surface : Colors.grey.shade50,
-                  contentPadding: const EdgeInsets.all(12),
-                ),
-                onChanged: onTextChanged,
-              ),
-            ),
-
-            // Step image (premium feature)
-            if (isPremium) ...[
-              if (step.imagePath != null && File(step.imagePath!).existsSync())
-                _StepImagePreview(
-                  imagePath: step.imagePath!,
-                  onRemove: () => onImageChanged(null),
+                  child: isSelected
+                      ? const Icon(Icons.check, size: 16, color: Colors.white)
+                      : null,
                 )
-              else
-                _AddStepImageButton(onImageSelected: onImageChanged),
-              const SizedBox(height: 8),
+                    : Container(
+                  width: 28,
+                  height: 28,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE8A860),
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '${index + 1}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ),
+
+              // Center: text field
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 4, 4, 4),
+                  child: AbsorbPointer(
+                    absorbing: isSelectionMode,
+                    child: TextField(
+                      focusNode: focusNode,
+                      controller: TextEditingController(text: step.instruction)
+                        ..selection = TextSelection.collapsed(offset: step.instruction.length),
+                      maxLines: null,
+                      minLines: 1,
+                      decoration: InputDecoration(
+                        hintText: 'Enter instruction...',
+                        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.outline.withValues(alpha: 0.4),
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                        isDense: true,
+                      ),
+                      style: theme.textTheme.bodyMedium,
+                      onChanged: onTextChanged,
+                    ),
+                  ),
+                ),
+              ),
+
+              // Right side: drag handle (only when not selecting)
+              if (!isSelectionMode)
+                ReorderableDragStartListener(
+                  index: index,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 10, right: 8, left: 4),
+                    child: Icon(
+                      Icons.drag_indicator,
+                      color: theme.colorScheme.outline.withValues(alpha: 0.4),
+                      size: 20,
+                    ),
+                  ),
+                ),
             ],
-          ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+// ============ SELECTION ACTION BAR ============
+
+class _SelectionActionBar extends StatelessWidget {
+  final int selectedCount;
+  final int totalCount;
+  final VoidCallback onDelete;
+  final VoidCallback onSelectAll;
+  final VoidCallback onClear;
+
+  const _SelectionActionBar({
+    required this.selectedCount,
+    required this.totalCount,
+    required this.onDelete,
+    required this.onSelectAll,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.errorContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FilledButton.tonalIcon(
+            onPressed: onDelete,
+            icon: const Icon(Icons.delete_outline),
+            label: Text('Delete $selectedCount'),
+            style: FilledButton.styleFrom(
+              backgroundColor: theme.colorScheme.error,
+              foregroundColor: theme.colorScheme.onError,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -399,7 +577,7 @@ class _AddStepImageButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+            border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
@@ -465,12 +643,12 @@ class _EmptyStepsState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
-          Icon(Icons.format_list_numbered, size: 48, color: theme.colorScheme.outline.withOpacity(0.5)),
+          Icon(Icons.format_list_numbered, size: 48, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
           const SizedBox(height: 12),
           Text(
             'No instructions yet',
@@ -545,7 +723,6 @@ class _IngredientsEditorState extends State<IngredientsEditor> {
     final l10n = AppLocalizations.of(context)!;
     final isDark = theme.brightness == Brightness.dark;
 
-    // Count non-empty lines
     final count = _controller.text
         .split('\n')
         .where((s) => s.trim().isNotEmpty)
@@ -572,7 +749,7 @@ class _IngredientsEditorState extends State<IngredientsEditor> {
           decoration: BoxDecoration(
             color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+            border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
           ),
           child: TextField(
             controller: _controller,
@@ -584,7 +761,7 @@ class _IngredientsEditorState extends State<IngredientsEditor> {
               border: InputBorder.none,
               contentPadding: const EdgeInsets.all(16),
               hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.outline.withOpacity(0.5),
+                color: theme.colorScheme.outline.withValues(alpha: 0.5),
               ),
             ),
             style: theme.textTheme.bodyMedium?.copyWith(height: 1.8),

@@ -407,7 +407,7 @@ class _CountBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer.withOpacity(0.5),
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
@@ -468,7 +468,7 @@ class _IngredientItemState extends State<_IngredientItem> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Material(
         color: _isChecked
-            ? theme.colorScheme.surfaceContainerHighest.withOpacity(0.5)
+            ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
             : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
@@ -565,7 +565,7 @@ class _StepItemState extends State<_StepItem> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Material(
         color: _isCompleted
-            ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
             : theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(

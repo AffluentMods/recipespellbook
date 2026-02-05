@@ -234,6 +234,14 @@ class PlayerProfile {
     return needed > 0 ? currentXp / needed : 0.0;
   }
 
+  /// Max mana scales with level: 100 + (level-1) * 50
+  static int maxManaForLevel(int level) => 100 + (level - 1) * 50;
+
+  /// Damage multiplier by level (double so you can scale smoothly)
+  /// Example: +5% per level
+  static double damageMultiplier(int level) => 1.0 + (level - 1) * 0.05;
+
+
   /// Calculate total XP needed for a specific level
   /// Uses a gentle curve: 100 * level * (level + 1) / 2
   static int calculateXpForLevel(int level) {
@@ -256,6 +264,14 @@ class PlayerProfile {
     }
     return playerClass.displayName;
   }
+
+  /// Max mana scales with level: 100 + (level-1) * 50
+  /// L1=100, L2=150, L3=200, L10=550, L50=2550
+  int get calculatedMaxMana => 100 + (level - 1) * 50;
+
+  /// Base damage scales linearly with level: 10 * level
+  /// L1=10, L2=20, L5=50, L10=100, L50=500
+  int get baseDamage => 10 * level;
 
   PlayerProfile copyWith({
     String? id,

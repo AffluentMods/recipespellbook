@@ -472,7 +472,7 @@ class _WeekStrip extends StatelessWidget {
                             margin: const EdgeInsets.symmetric(horizontal: 1),
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? Colors.white.withOpacity(0.8)
+                                  ? Colors.white.withValues(alpha: 0.8)
                                   : const Color(0xFFE8A860),
                               shape: BoxShape.circle,
                             ),
@@ -657,7 +657,7 @@ class _MealTypeHeader extends StatelessWidget {
             style: theme.textTheme.labelLarge?.copyWith(
               fontWeight: FontWeight.bold,
               letterSpacing: 0.5,
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -753,7 +753,7 @@ class _EmptyDayState extends StatelessWidget {
             Icon(
               Icons.restaurant_menu,
               size: 64,
-              color: theme.colorScheme.outline.withOpacity(0.5),
+              color: theme.colorScheme.outline.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(

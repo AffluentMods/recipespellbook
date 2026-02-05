@@ -346,7 +346,7 @@ class _TimerBar extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: isLow ? Colors.red.withOpacity(0.3) : Colors.white.withOpacity(0.1),
+      color: isLow ? Colors.red.withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.1),
       child: Row(
         children: [
           Icon(Icons.timer, color: isLow ? Colors.red : Colors.white),
@@ -356,7 +356,7 @@ class _TimerBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(_formatTime(seconds), style: TextStyle(color: isLow ? Colors.red : Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                LinearProgressIndicator(value: progress, backgroundColor: Colors.white.withOpacity(0.2), valueColor: AlwaysStoppedAnimation(isLow ? Colors.red : Colors.green)),
+                LinearProgressIndicator(value: progress, backgroundColor: Colors.white.withValues(alpha: 0.2), valueColor: AlwaysStoppedAnimation(isLow ? Colors.red : Colors.green)),
               ],
             ),
           ),
@@ -388,7 +388,7 @@ class _StepView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('${l10n.stepNumber(stepNumber)} / $totalSteps', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 16)),
+          Text('${l10n.stepNumber(stepNumber)} / $totalSteps', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 16)),
           const SizedBox(height: 32),
           Text(step.instruction, style: const TextStyle(color: Colors.white, fontSize: 28, height: 1.4), textAlign: TextAlign.center),
         ],
@@ -421,12 +421,12 @@ class _IngredientsView extends StatelessWidget {
             decoration: BoxDecoration(color: Colors.white.withOpacity(isChecked ? 0.05 : 0.1), borderRadius: BorderRadius.circular(8)),
             child: Row(
               children: [
-                Icon(isChecked ? Icons.check_circle : Icons.circle_outlined, color: isChecked ? Colors.green : Colors.white.withOpacity(0.5)),
+                Icon(isChecked ? Icons.check_circle : Icons.circle_outlined, color: isChecked ? Colors.green : Colors.white.withValues(alpha: 0.5)),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     [if (ing.amount != null) ing.amount!, if (ing.unit != null) ing.unit!, ing.name].join(' '),
-                    style: TextStyle(color: isChecked ? Colors.white.withOpacity(0.5) : Colors.white, fontSize: 18, decoration: isChecked ? TextDecoration.lineThrough : null),
+                    style: TextStyle(color: isChecked ? Colors.white.withValues(alpha: 0.5) : Colors.white, fontSize: 18, decoration: isChecked ? TextDecoration.lineThrough : null),
                   ),
                 ),
               ],
@@ -456,12 +456,12 @@ class _BottomBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          IconButton(icon: const Icon(Icons.arrow_back, size: 32), color: onPrevious != null ? Colors.white : Colors.white.withOpacity(0.3), onPressed: onPrevious),
+          IconButton(icon: const Icon(Icons.arrow_back, size: 32), color: onPrevious != null ? Colors.white : Colors.white.withValues(alpha: 0.3), onPressed: onPrevious),
           IconButton(icon: const Icon(Icons.timer, size: 32), color: Colors.white, onPressed: onTimer),
           if (onFinish != null)
             FilledButton.icon(onPressed: onFinish, icon: const Icon(Icons.check), label: Text(l10n.cookingFinish), style: FilledButton.styleFrom(backgroundColor: Colors.green, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)))
           else
-            IconButton(icon: const Icon(Icons.arrow_forward, size: 32), color: onNext != null ? Colors.white : Colors.white.withOpacity(0.3), onPressed: onNext),
+            IconButton(icon: const Icon(Icons.arrow_forward, size: 32), color: onNext != null ? Colors.white : Colors.white.withValues(alpha: 0.3), onPressed: onNext),
         ],
       ),
     );

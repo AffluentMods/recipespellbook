@@ -1,6 +1,6 @@
 /// Ingredient translations for USDA nutrition lookup
 /// Maps ingredient names from various languages to English for USDA matching
-library ingredient_translations;
+library;
 
 /// Translates an ingredient name to English for USDA lookup
 /// Returns the original name if no translation found

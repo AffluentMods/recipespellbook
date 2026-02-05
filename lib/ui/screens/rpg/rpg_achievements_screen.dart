@@ -168,7 +168,7 @@ class _AchievementCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       color: isCompleted
-          ? achievement.tier.color.withOpacity(0.1)
+          ? achievement.tier.color.withValues(alpha: 0.1)
           : null,
       child: InkWell(
         onTap: () => _showDetails(context),
@@ -184,12 +184,12 @@ class _AchievementCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isCompleted
-                      ? achievement.tier.color.withOpacity(0.3)
+                      ? achievement.tier.color.withValues(alpha: 0.3)
                       : theme.colorScheme.surfaceContainerHighest,
                   border: Border.all(
                     color: isCompleted
                         ? achievement.tier.color
-                        : theme.colorScheme.outline.withOpacity(0.3),
+                        : theme.colorScheme.outline.withValues(alpha: 0.3),
                     width: 2,
                   ),
                 ),
@@ -334,7 +334,7 @@ class _AchievementCard extends StatelessWidget {
               height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: achievement.tier.color.withOpacity(0.2),
+                color: achievement.tier.color.withValues(alpha: 0.2),
                 border: Border.all(
                   color: achievement.tier.color,
                   width: 3,
@@ -422,7 +422,7 @@ class _TierBadge extends StatelessWidget {
         vertical: large ? 4 : 2,
       ),
       decoration: BoxDecoration(
-        color: tier.color.withOpacity(0.2),
+        color: tier.color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: tier.color),
       ),
@@ -457,7 +457,7 @@ class _RewardChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(

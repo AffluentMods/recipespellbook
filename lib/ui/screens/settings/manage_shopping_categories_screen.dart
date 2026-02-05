@@ -398,9 +398,9 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: _getCategoryColor(mapping.categoryName).withOpacity(0.2),
+                      color: _getCategoryColor(mapping.categoryName).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: _getCategoryColor(mapping.categoryName).withOpacity(0.5)),
+                      border: Border.all(color: _getCategoryColor(mapping.categoryName).withValues(alpha: 0.5)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -469,7 +469,7 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
                   final isSelected = cat == mapping.categoryName;
                   return ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: _getCategoryColor(cat).withOpacity(0.2),
+                      backgroundColor: _getCategoryColor(cat).withValues(alpha: 0.2),
                       child: Text(_getCategoryEmoji(cat)),
                     ),
                     title: Text(cat),

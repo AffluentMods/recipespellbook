@@ -233,6 +233,39 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get shoppingDeli => 'Deli';
+
+  @override
+  String get shoppingCannedGoods => 'Canned Goods & Soups';
+
+  @override
+  String get shoppingCondiments => 'Condiments & Sauces';
+
+  @override
+  String get shoppingGrainsAndPasta => 'Grains, Pasta & Rice';
+
+  @override
+  String get shoppingCookingAndBaking => 'Cooking & Baking';
+
+  @override
+  String get shoppingBreakfastCereal => 'Breakfast & Cereal';
+
+  @override
+  String get shoppingBeerWineSpirits => 'Beer, Wine & Spirits';
+
+  @override
+  String get shoppingBaby => 'Baby';
+
+  @override
+  String get shoppingPet => 'Pet';
+
+  @override
+  String get shoppingHousehold => 'Household';
+
+  @override
+  String get shoppingPersonalCare => 'Personal Care';
+
+  @override
   String get plannerTitle => 'Meal Planner';
 
   @override
@@ -3286,4 +3319,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navComingSoon => 'Coming soon';
+
+  @override
+  String get mealPlanButton => 'Meal Plan';
+
+  @override
+  String get groceriesButton => 'Groceries';
+
+  @override
+  String get shareButton => 'Share';
+
+  @override
+  String get scaleRecipeButton => 'Scale';
+
+  @override
+  String get convertUnitsButton => 'Convert';
+
+  @override
+  String get allergyDismissTooltip => 'Dismiss warning';
+
+  @override
+  String get allergyDisablePrompt => 'Disable this warning permanently for this recipe?';
+
+  @override
+  String get allergyDisabledForRecipe => 'Warning disabled for this recipe';
+
+  @override
+  String get allergyRestoreWarnings => 'Restore warnings';
+
+  @override
+  String get recipeDuplicated => 'Recipe duplicated';
+
+  @override
+  String get recipeDeleted => 'Recipe moved to trash';
+
+  @override
+  String get deleteRecipeTitle => 'Delete Recipe';
+
+  @override
+  String get deleteRecipeConfirm => 'Are you sure you want to delete this recipe? It will be moved to trash.';
+
+  @override
+  String get addToShoppingListTitle => 'Add to Shopping List';
+
+  @override
+  String get viewList => 'View List';
+
+  @override
+  String get selectItems => 'Select items';
+
+  @override
+  String addToListCount(int count) {
+    return 'Add $count items';
+  }
+
+  @override
+  String get yes => 'Yes';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get restore => 'Restore';
+
+  @override
+  String get unselectAll => 'Unselect All';
+
+  @override
+  String get deleteStep => 'Delete Step';
+
+  @override
+  String get deleteSteps => 'Delete Steps';
+
+  @override
+  String get deleteStepConfirm => 'Delete this step?';
+
+  @override
+  String deleteStepsConfirm(int count) {
+    return 'Delete $count steps?';
+  }
+
+  @override
+  String stepSelected(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get selectAllSteps => 'Select All';
 }

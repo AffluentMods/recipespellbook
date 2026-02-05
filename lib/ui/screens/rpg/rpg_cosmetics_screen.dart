@@ -90,7 +90,7 @@ class _RpgCosmeticsScreenState extends ConsumerState<RpgCosmeticsScreen>
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            profile.playerClass.color.withOpacity(0.3),
+            profile.playerClass.color.withValues(alpha: 0.3),
             theme.colorScheme.surface,
           ],
         ),
@@ -342,7 +342,7 @@ class _RpgCosmeticsScreenState extends ConsumerState<RpgCosmeticsScreen>
               height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: item.rarity.color.withOpacity(0.2),
+                color: item.rarity.color.withValues(alpha: 0.2),
                 border: Border.all(color: item.rarity.color, width: 2),
               ),
               child: ClipOval(
@@ -366,7 +366,7 @@ class _RpgCosmeticsScreenState extends ConsumerState<RpgCosmeticsScreen>
                 vertical: 6,
               ),
               decoration: BoxDecoration(
-                color: item.rarity.color.withOpacity(0.2),
+                color: item.rarity.color.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -506,7 +506,7 @@ class _CosmeticCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       color: isEquipped
-          ? item.rarity.color.withOpacity(0.2)
+          ? item.rarity.color.withValues(alpha: 0.2)
           : null,
       child: InkWell(
         onTap: onTap,
@@ -546,7 +546,7 @@ class _CosmeticCard extends StatelessWidget {
                             _getIcon(),
                             size: 40,
                             color: theme.colorScheme.outline
-                                .withOpacity(0.5),
+                                .withValues(alpha: 0.5),
                           ),
                         ),
                         if (!item.isPurchasable)
@@ -633,7 +633,7 @@ class _CosmeticCard extends StatelessWidget {
                   color: item.rarity.color,
                   boxShadow: [
                     BoxShadow(
-                      color: item.rarity.color.withOpacity(0.5),
+                      color: item.rarity.color.withValues(alpha: 0.5),
                       blurRadius: 4,
                     ),
                   ],
@@ -699,7 +699,7 @@ class _TitleCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      color: isEquipped ? title.rarity.color.withOpacity(0.2) : null,
+      color: isEquipped ? title.rarity.color.withValues(alpha: 0.2) : null,
       child: ListTile(
         enabled: isOwned,
         onTap: onTap,
@@ -708,7 +708,7 @@ class _TitleCard extends StatelessWidget {
           height: 48,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: title.rarity.color.withOpacity(0.2),
+            color: title.rarity.color.withValues(alpha: 0.2),
             border: Border.all(
               color: isOwned ? title.rarity.color : Colors.grey,
               width: 2,
@@ -736,7 +736,7 @@ class _TitleCard extends StatelessWidget {
         trailing: isEquipped
             ? Chip(
           label: const Text('Equipped'),
-          backgroundColor: title.rarity.color.withOpacity(0.3),
+          backgroundColor: title.rarity.color.withValues(alpha: 0.3),
         )
             : isLocked
             ? const Icon(Icons.emoji_events, color: Colors.amber)

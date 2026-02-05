@@ -111,7 +111,7 @@ class _RecipeListTile extends StatelessWidget {
               : Center(
             child: Icon(
               Icons.restaurant_menu,
-              color: theme.colorScheme.onPrimaryContainer.withOpacity(0.5),
+              color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
             ),
           ),
         ),

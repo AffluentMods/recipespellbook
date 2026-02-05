@@ -87,7 +87,7 @@ class _TagPickerState extends ConsumerState<TagPicker> {
                     color: theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: theme.colorScheme.outline.withOpacity(0.3),
+                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
                       style: BorderStyle.solid,
                     ),
                   ),
@@ -124,8 +124,8 @@ class _TagPickerState extends ConsumerState<TagPicker> {
                       ? Text(tag.icon!, style: const TextStyle(fontSize: 14))
                       : null,
                   label: Text(tag.name),
-                  backgroundColor: color.withOpacity(0.15),
-                  side: BorderSide(color: color.withOpacity(0.5)),
+                  backgroundColor: color.withValues(alpha: 0.15),
+                  side: BorderSide(color: color.withValues(alpha: 0.5)),
                   labelStyle: TextStyle(color: color, fontWeight: FontWeight.w500),
                   deleteIcon: Icon(Icons.close, size: 18, color: color),
                   onDeleted: () => _removeTag(tag.id),
@@ -265,7 +265,7 @@ class _TagSelectorSheetState extends ConsumerState<_TagSelectorSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withOpacity(0.3),
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -539,7 +539,7 @@ class _TagSelectorSheetState extends ConsumerState<_TagSelectorSheet> {
                         height: 44,
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? selectedColor.withOpacity(0.2)
+                              ? selectedColor.withValues(alpha: 0.2)
                               : Theme.of(context).colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(8),
                           border: isSelected
@@ -623,7 +623,7 @@ class TagChips extends StatelessWidget {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(

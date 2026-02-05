@@ -93,7 +93,7 @@ class RpgProfileScreen extends ConsumerWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            profile.playerClass.color.withOpacity(0.8),
+            profile.playerClass.color.withValues(alpha: 0.8),
             theme.colorScheme.primaryContainer,
           ],
         ),
@@ -121,7 +121,7 @@ class RpgProfileScreen extends ConsumerWidget {
                   color: Colors.white,
                   shadows: [
                     Shadow(
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.black.withValues(alpha: 0.5),
                       blurRadius: 4,
                     ),
                   ],
@@ -130,7 +130,7 @@ class RpgProfileScreen extends ConsumerWidget {
               Text(
                 '${profile.playerClass.icon} ${profile.displayTitle}',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                 ),
               ),
               const SizedBox(height: 16),
@@ -175,7 +175,7 @@ class RpgProfileScreen extends ConsumerWidget {
             icon: Icons.auto_awesome,
             iconColor: Colors.blue,
             label: 'Mana',
-            value: '${profile.mana}/${profile.maxMana}',
+            value: '${profile.mana}/${profile.calculatedMaxMana}',
           ),
         ),
       ],
@@ -309,7 +309,7 @@ class RpgProfileScreen extends ConsumerWidget {
               trailing: event.multiplier > 1.0
                   ? Chip(
                 label: Text('${event.multiplier}x'),
-                backgroundColor: Colors.amber.withOpacity(0.2),
+                backgroundColor: Colors.amber.withValues(alpha: 0.2),
                 labelStyle: const TextStyle(fontSize: 10),
                 padding: EdgeInsets.zero,
               )
@@ -383,7 +383,7 @@ class RpgProfileScreen extends ConsumerWidget {
                   return Chip(
                     avatar: Text(achievement.icon),
                     label: Text(achievement.name),
-                    backgroundColor: achievement.tier.color.withOpacity(0.2),
+                    backgroundColor: achievement.tier.color.withValues(alpha: 0.2),
                   );
                 }).toList(),
               ),
@@ -504,7 +504,7 @@ class _QuickActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
-      color: color.withOpacity(0.1),
+      color: color.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -687,14 +687,14 @@ class _ClassSelectorSheet extends ConsumerWidget {
           final isSelected = playerClass == currentClass;
           return Card(
             color: isSelected
-                ? playerClass.color.withOpacity(0.2)
+                ? playerClass.color.withValues(alpha: 0.2)
                 : null,
             child: ListTile(
               leading: Container(
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: playerClass.color.withOpacity(0.2),
+                  color: playerClass.color.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
@@ -826,7 +826,7 @@ class _LotteryDialogState extends ConsumerState<_LotteryDialog>
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.purple.withOpacity(0.5),
+                          color: Colors.purple.withValues(alpha: 0.5),
                           blurRadius: 20,
                           spreadRadius: 2,
                         ),

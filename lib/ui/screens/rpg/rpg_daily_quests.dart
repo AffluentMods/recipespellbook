@@ -155,7 +155,7 @@ class RpgDailyQuestsCard extends ConsumerWidget {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: hasUnclaimed
-                      ? Colors.amber.withOpacity(0.2)
+                      ? Colors.amber.withValues(alpha: 0.2)
                       : theme.colorScheme.primaryContainer,
                   shape: BoxShape.circle,
                 ),
@@ -304,9 +304,9 @@ class _QuestTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       color: quest.isClaimed
-          ? theme.colorScheme.surfaceContainerHighest.withOpacity(0.5)
+          ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
           : canClaim
-          ? Colors.amber.withOpacity(0.1)
+          ? Colors.amber.withValues(alpha: 0.1)
           : null,
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -318,8 +318,8 @@ class _QuestTile extends StatelessWidget {
               height: 44,
               decoration: BoxDecoration(
                 color: quest.isClaimed
-                    ? Colors.green.withOpacity(0.2)
-                    : quest.type.color.withOpacity(0.2),
+                    ? Colors.green.withValues(alpha: 0.2)
+                    : quest.type.color.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -346,7 +346,7 @@ class _QuestTile extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: quest.difficulty.color.withOpacity(0.2),
+                          color: quest.difficulty.color.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -465,12 +465,12 @@ class _WeeklyChallengeCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.purple.withOpacity(0.2),
-            Colors.blue.withOpacity(0.2),
+            Colors.purple.withValues(alpha: 0.2),
+            Colors.blue.withValues(alpha: 0.2),
           ],
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.purple.withOpacity(0.3)),
+        border: Border.all(color: Colors.purple.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -604,7 +604,7 @@ class RpgDailyQuestsSheet extends ConsumerWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withOpacity(0.3),
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),

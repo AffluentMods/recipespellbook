@@ -87,7 +87,7 @@ class _ManageTagsScreenState extends ConsumerState<ManageTagsScreen> {
       child: ListTile(
         leading: Container(
           width: 40, height: 40,
-          decoration: BoxDecoration(color: color.withOpacity(0.2), borderRadius: BorderRadius.circular(8)),
+          decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
           child: Center(child: tag.icon != null ? Text(tag.icon!, style: const TextStyle(fontSize: 20)) : Icon(Icons.label, color: color)),
         ),
         title: Text(tag.name),

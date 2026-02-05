@@ -87,6 +87,15 @@ class RpgNotifier extends Notifier<RpgState> {
     // Check for daily login
     profile = await _checkDailyLogin(profile);
 
+    // Ensure maxMana matches level (in case of upgrade from old version)
+    final correctMaxMana = PlayerProfile.maxManaForLevel(profile.level);
+    if (profile.maxMana != correctMaxMana) {
+      profile = profile.copyWith(
+        maxMana: correctMaxMana,
+        mana: profile.mana.clamp(0, correctMaxMana),
+      );
+    }
+
     state = state.copyWith(
       profile: profile,
       isEnabled: isEnabled,
@@ -187,8 +196,11 @@ class RpgNotifier extends Notifier<RpgState> {
     LevelUpEvent? levelUpEvent;
     if (newLevel > previousLevel) {
       final goldReward = LevelUpEvent.calculateGoldReward(newLevel);
+      final newMaxMana = PlayerProfile.maxManaForLevel(newLevel);
       updatedProfile = updatedProfile.copyWith(
         gold: updatedProfile.gold + goldReward,
+        maxMana: newMaxMana,
+        mana: newMaxMana, // Full mana refill on level up!
       );
 
       levelUpEvent = LevelUpEvent(
@@ -208,6 +220,13 @@ class RpgNotifier extends Notifier<RpgState> {
     );
 
     await _saveProfile();
+
+    // Regenerate some mana when doing recipe actions (not from daily login/streak)
+    if (action != XpActionType.dailyLogin &&
+        action != XpActionType.streakBonus &&
+        action != XpActionType.achievementUnlocked) {
+      await regenerateMana(amount: 10);
+    }
 
     // Check achievements
     await _checkAchievements();
@@ -422,36 +441,48 @@ class RpgNotifier extends Notifier<RpgState> {
 
   // ============ MANA SYSTEM (Boss Attacks) ============
 
-  /// Spend mana to attack a boss
-  Future<int> attackBoss({int manaCost = 10}) async {
-    if (!state.isEnabled) return 0;
-    if (state.profile.mana < manaCost) return 0;
+  /// Attack result record
+  /// Spend mana to attack a boss - returns ({int damage, bool isCrit, bool success})
+  Future<({int damage, bool isCrit, bool success})> attackBoss({int manaCost = 10}) async {
+    if (!state.isEnabled) return (damage: 0, isCrit: false, success: false);
+    if (state.profile.mana < manaCost) return (damage: 0, isCrit: false, success: false);
 
+    final profile = state.profile;
     final random = Random();
-    final damage = 10 + random.nextInt(state.profile.level * 5);
 
+    // Base damage: 10-25 random, multiplied by level
+    final baseDamage = 10 + random.nextInt(16); // 10-25
+    final levelMultiplier = PlayerProfile.damageMultiplier(profile.level); // double
+    final isCrit = random.nextDouble() < 0.15;
+    final critMultiplier = isCrit ? 2 : 1;
+
+    final totalDamage =
+    (baseDamage * levelMultiplier * critMultiplier).round(); // int ✅
+
+    // Deduct mana IMMEDIATELY and update state
     state = state.copyWith(
-      profile: state.profile.copyWith(
-        mana: state.profile.mana - manaCost,
+      profile: profile.copyWith(
+        mana: profile.mana - manaCost,
       ),
     );
 
     await _saveProfile();
 
     // Track damage for achievements
-    await _updateAchievementProgress('ach_damage_100', damage);
-    await _updateAchievementProgress('ach_damage_1000', damage);
-    await _updateAchievementProgress('ach_damage_10000', damage);
+    await _updateAchievementProgress('ach_damage_100', totalDamage);
+    await _updateAchievementProgress('ach_damage_1000', totalDamage);
+    await _updateAchievementProgress('ach_damage_10000', totalDamage);
 
-    return damage;
+    return (damage: totalDamage, isCrit: isCrit, success: true);
   }
 
-  /// Regenerate mana (called periodically or on actions)
+  /// Regenerate mana (called on XP-earning actions and periodically)
   Future<void> regenerateMana({int amount = 5}) async {
     if (!state.isEnabled) return;
 
     final profile = state.profile;
-    final newMana = (profile.mana + amount).clamp(0, profile.maxMana);
+    final maxMana = PlayerProfile.maxManaForLevel(profile.level);
+    final newMana = (profile.mana + amount).clamp(0, maxMana);
 
     if (newMana != profile.mana) {
       state = state.copyWith(

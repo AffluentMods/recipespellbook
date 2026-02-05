@@ -55,7 +55,7 @@ class RecipeNutritionCard extends ConsumerWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
+        side: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -557,7 +557,7 @@ class _ScaleChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFE8A860) : theme.colorScheme.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(20),
-          border: isSelected ? null : Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
+          border: isSelected ? null : Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
         ),
         child: Text(
           label,

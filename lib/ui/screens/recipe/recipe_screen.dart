@@ -13,6 +13,9 @@ import '../../widgets/placeholder_image.dart';
 import '../../../data/nutrition_data.dart';
 import '../../../data/allergen_data.dart';
 import '../../widgets/recipe_tags_display.dart';
+import '../../widgets/add_to_meal_plan_dialogue.dart';
+import '../../widgets/add_to_shopping_list_sheet.dart';
+import '../../widgets/recipe_share_sheet.dart';
 
 // ============ DISMISSED ALLERGY WARNINGS PROVIDER ============
 
@@ -46,6 +49,51 @@ class DismissedAllergyWarningsNotifier extends StateNotifier<Set<String>> {
   }
 
   bool isDismissed(String recipeId) => state.contains(recipeId);
+
+  List<String> get allDismissedRecipes => state.toList();
+
+  Future<void> restoreMultiple(List<String> recipeIds) async {
+    state = {...state}..removeAll(recipeIds);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_prefsKey, state.toList());
+  }
+}
+
+// ============ SESSION DISMISSED WARNINGS (temporary) ============
+
+final sessionDismissedWarningsProvider = StateProvider<Set<String>>((ref) => {});
+
+// ============ RPG RARITY COLORS ============
+
+class RarityColors {
+  static const Color common = Color(0xFF9E9E9E);
+  static const Color uncommon = Color(0xFF4CAF50);
+  static const Color rare = Color(0xFF2196F3);
+  static const Color epic = Color(0xFF9C27B0);
+  static const Color legendary = Color(0xFFFF9800);
+
+  static Color getColor(int rating) {
+    switch (rating) {
+      case 1: return common;
+      case 2: return uncommon;
+      case 3: return rare;
+      case 4: return epic;
+      case 5: return legendary;
+      default: return common;
+    }
+  }
+
+  static Color getTitleColor(int rating) {
+    // For title text - subtle gradient from white to golden
+    switch (rating) {
+      case 1: return Colors.white;
+      case 2: return const Color(0xFFE8F5E9); // Light green tint
+      case 3: return const Color(0xFFE3F2FD); // Light blue tint
+      case 4: return const Color(0xFFF3E5F5); // Light purple tint
+      case 5: return const Color(0xFFFFE0B2); // Golden/orange tint
+      default: return Colors.white;
+    }
+  }
 }
 
 // ============ MAIN SCREEN ============
@@ -126,6 +174,34 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     }
   }
 
+  void _showAddToMealPlanSheet() {
+    showAddToMealPlanSheet(context, ref, widget.recipeId, _recipe?.title ?? '');
+  }
+
+  void _showAddToShoppingSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => AddIngredientsToShoppingSheet(
+        ingredients: _ingredients,
+        recipeName: _recipe?.title ?? '',
+        recipeId: widget.recipeId,
+        scaleFactor: _scaleFactor,
+      ),
+    );
+  }
+
+  void _showShareSheet() {
+    showRecipeShareSheet(context, ref, _recipe!);
+  }
+
+  Future<void> _toggleFavorite() async {
+    if (_recipe == null) return;
+    await ref.read(recipeDaoProvider).toggleFavorite(_recipe!.id, !_recipe!.isFavorite);
+    _loadRecipe();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -156,6 +232,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           ref: ref,
           onEdit: _navigateToEdit,
           onReload: _loadRecipe,
+          isNerdMode: isNerdMode,
         ),
         SliverToBoxAdapter(
           child: Padding(
@@ -163,17 +240,28 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Title with RPG rarity color
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(child: Text(_recipe!.title, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold))),
+                    Expanded(
+                      child: Text(
+                        _recipe!.title,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: isNerdMode && _recipe!.rating != null && _recipe!.rating! > 0
+                              ? RarityColors.getColor(_recipe!.rating!)
+                              : null,
+                        ),
+                      ),
+                    ),
                     _FavoriteButton(isFavorite: _recipe!.isFavorite, onToggle: _toggleFavorite),
                   ],
                 ),
-                // Rating/Rarity badge
-                if (_recipe!.rating != null && _recipe!.rating! > 0) ...[
+                // Rating/Rarity badge - only show in non-nerd mode (nerd mode uses title color)
+                if (_recipe!.rating != null && _recipe!.rating! > 0 && !isNerdMode) ...[
                   const SizedBox(height: 8),
-                  RecipeRating(rating: _recipe!.rating!, nerdMode: isNerdMode),
+                  RecipeRating(rating: _recipe!.rating!, nerdMode: false),
                 ],
                 // Tags display
                 const SizedBox(height: 12),
@@ -184,19 +272,29 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   Text(_recipe!.description!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
                 const SizedBox(height: 16),
-                _QuickActionsRow(onAddToMealPlan: _showAddToMealPlanSheet, onAddToShopping: _showAddToShoppingSheet),
+
+                // NEW: 3 Simple Action Buttons (Meal Plan, Groceries, Share)
+                _ModernQuickActionsRow(
+                  onAddToMealPlan: _showAddToMealPlanSheet,
+                  onAddToShopping: _showAddToShoppingSheet,
+                  onShare: _showShareSheet,
+                ),
                 const SizedBox(height: 20),
 
-                // Recipe meta info with custom scale picker
-                _RecipeMetaInfoWithScale(
-                  recipe: _recipe!,
-                  scaleFactor: _scaleFactor,
+                // Recipe meta info (times, servings) WITHOUT scale buttons
+                _RecipeMetaInfoCard(recipe: _recipe!),
+
+                // NEW: Separate Scale & Convert buttons
+                const SizedBox(height: 16),
+                _ModernScaleConvertButtons(
+                  currentScale: _scaleFactor,
+                  servings: _recipe!.servings,
                   onScaleChanged: (scale) => setState(() => _scaleFactor = scale),
                 ),
 
-                // Dismissible Allergy warning banner
+                // Dismissible Allergy warning banner with improved UX
                 const SizedBox(height: 16),
-                _DismissibleAllergyWarning(
+                _ImprovedAllergyWarning(
                   recipeId: widget.recipeId,
                   ingredientTexts: _ingredients.map((i) => i.name).toList(),
                 ),
@@ -205,6 +303,11 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 _SectionHeader(title: l10n.ingredientsTitle, trailing: _scaleFactor != 1.0 ? Text('${_scaleFactor}x', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary)) : null),
                 const SizedBox(height: 12),
                 ..._ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: _scaleFactor)),
+
+                // NEW: Large "Add to Shopping List" button at bottom of ingredients
+                const SizedBox(height: 16),
+                _LargeAddToShoppingButton(onTap: _showAddToShoppingSheet),
+
                 const SizedBox(height: 32),
                 _SectionHeader(title: l10n.instructionsTitle),
                 const SizedBox(height: 12),
@@ -222,7 +325,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                     child: Text(_recipe!.notes!, style: theme.textTheme.bodyMedium),
                   ),
                 ],
-                // Nutrition section - using proper nutritionJson data
+                // Nutrition section
                 const SizedBox(height: 32),
                 _SectionHeader(title: l10n.nutritionTitle),
                 const SizedBox(height: 12),
@@ -233,6 +336,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   servings: _recipe!.servings,
                   showPerServing: _showNutritionPerServing,
                   onTogglePerServing: (value) => setState(() => _showNutritionPerServing = value),
+                  isNerdMode: isNerdMode,
                 ),
                 const SizedBox(height: 100),
               ],
@@ -251,6 +355,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           ref: ref,
           onEdit: _navigateToEdit,
           onReload: _loadRecipe,
+          isNerdMode: isNerdMode,
         ),
         SliverToBoxAdapter(
           child: Padding(
@@ -261,32 +366,46 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(child: Text(_recipe!.title, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold))),
+                    Expanded(
+                      child: Text(
+                        _recipe!.title,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: isNerdMode && _recipe!.rating != null && _recipe!.rating! > 0
+                              ? RarityColors.getColor(_recipe!.rating!)
+                              : null,
+                        ),
+                      ),
+                    ),
                     _FavoriteButton(isFavorite: _recipe!.isFavorite, onToggle: _toggleFavorite),
                   ],
                 ),
-                if (_recipe!.rating != null && _recipe!.rating! > 0) ...[
+                if (_recipe!.rating != null && _recipe!.rating! > 0 && !isNerdMode) ...[
                   const SizedBox(height: 8),
-                  RecipeRating(rating: _recipe!.rating!, nerdMode: isNerdMode),
+                  RecipeRating(rating: _recipe!.rating!, nerdMode: false),
                 ],
                 const SizedBox(height: 12),
                 RecipeTagsDisplay(recipeId: widget.recipeId),
-
                 if (_recipe!.description != null && _recipe!.description!.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   Text(_recipe!.description!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
                 const SizedBox(height: 16),
-                _QuickActionsRow(onAddToMealPlan: _showAddToMealPlanSheet, onAddToShopping: _showAddToShoppingSheet),
+                _ModernQuickActionsRow(
+                  onAddToMealPlan: _showAddToMealPlanSheet,
+                  onAddToShopping: _showAddToShoppingSheet,
+                  onShare: _showShareSheet,
+                ),
                 const SizedBox(height: 20),
-                _RecipeMetaInfoWithScale(
-                  recipe: _recipe!,
-                  scaleFactor: _scaleFactor,
+                _RecipeMetaInfoCard(recipe: _recipe!),
+                const SizedBox(height: 16),
+                _ModernScaleConvertButtons(
+                  currentScale: _scaleFactor,
+                  servings: _recipe!.servings,
                   onScaleChanged: (scale) => setState(() => _scaleFactor = scale),
                 ),
-
                 const SizedBox(height: 16),
-                _DismissibleAllergyWarning(
+                _ImprovedAllergyWarning(
                   recipeId: widget.recipeId,
                   ingredientTexts: _ingredients.map((i) => i.name).toList(),
                 ),
@@ -299,13 +418,10 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           delegate: _SliverTabBarDelegate(
             TabBar(
               controller: _tabController,
-              labelColor: theme.colorScheme.primary,
-              unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
-              indicatorColor: theme.colorScheme.primary,
               tabs: [
-                Tab(icon: Icon(Icons.local_fire_department, size: 20), text: l10n.nutritionTitle),
-                Tab(icon: Icon(Icons.checklist, size: 20), text: l10n.ingredientsTitle),
-                Tab(icon: Icon(Icons.format_list_numbered, size: 20), text: l10n.instructionsTitle),
+                Tab(text: l10n.nutritionTitle),
+                Tab(text: l10n.ingredientsTitle),
+                Tab(text: l10n.instructionsTitle),
               ],
             ),
             theme.colorScheme.surface,
@@ -315,183 +431,26 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
       body: TabBarView(
         controller: _tabController,
         children: [
-          _NutritionTab(
-            nutrition: _nutrition,
-            scaleFactor: _scaleFactor,
-            l10n: l10n,
-            servings: _recipe!.servings,
-            showPerServing: _showNutritionPerServing,
-            onTogglePerServing: (value) => setState(() => _showNutritionPerServing = value),
-          ),
-          _IngredientsTab(ingredients: _ingredients, scaleFactor: _scaleFactor, l10n: l10n),
+          _NutritionTab(nutrition: _nutrition, scaleFactor: _scaleFactor, l10n: l10n, servings: _recipe!.servings, showPerServing: _showNutritionPerServing, onTogglePerServing: (v) => setState(() => _showNutritionPerServing = v), isNerdMode: isNerdMode),
+          _IngredientsTab(ingredients: _ingredients, scaleFactor: _scaleFactor, l10n: l10n, onAddToShopping: _showAddToShoppingSheet),
           _InstructionsTab(steps: _steps, notes: _recipe!.notes, l10n: l10n),
         ],
       ),
     );
   }
-
-  void _showAddToMealPlanSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (ctx) => _AddToMealPlanSheet(recipeId: widget.recipeId, recipeTitle: _recipe!.title, ref: ref),
-    );
-  }
-
-  void _showAddToShoppingSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (ctx) => _AddToShoppingSheet(ingredients: _ingredients, recipeId: widget.recipeId, recipeTitle: _recipe!.title, scaleFactor: _scaleFactor, ref: ref),
-    );
-  }
-
-  void _toggleFavorite() async {
-    await ref.read(recipeDaoProvider).toggleFavorite(widget.recipeId, !_recipe!.isFavorite);
-    await _loadRecipe();
-  }
 }
 
-// ============ DISMISSIBLE ALLERGY WARNING ============
+// ============ MODERN 3-BUTTON QUICK ACTIONS ============
 
-class _DismissibleAllergyWarning extends ConsumerWidget {
-  final String recipeId;
-  final List<String> ingredientTexts;
+class _ModernQuickActionsRow extends StatelessWidget {
+  final VoidCallback onAddToMealPlan;
+  final VoidCallback onAddToShopping;
+  final VoidCallback onShare;
 
-  const _DismissibleAllergyWarning({
-    required this.recipeId,
-    required this.ingredientTexts,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final settings = ref.watch(settingsProvider);
-    final dismissedWarnings = ref.watch(dismissedAllergyWarningsProvider);
-
-    // Check if user has any allergies set
-    final userAllergies = settings.allergens;
-    if (userAllergies.isEmpty) return const SizedBox.shrink();
-
-    // Check if this recipe's warning was dismissed
-    if (dismissedWarnings.contains(recipeId)) return const SizedBox.shrink();
-
-    // Check ingredients for allergens
-    final detectedAllergens = <String>[];
-    for (final ingredientText in ingredientTexts) {
-      final allergens = AllergenData.detectAllergens(ingredientText);
-      for (final allergen in allergens) {
-        if (userAllergies.contains(allergen) && !detectedAllergens.contains(allergen)) {
-          detectedAllergens.add(allergen);
-        }
-      }
-    }
-
-    if (detectedAllergens.isEmpty) return const SizedBox.shrink();
-
-    // Get localized allergen names
-    final allergenNames = detectedAllergens.map((a) => AllergenData.getLocalizedName(a, l10n)).toList();
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.red.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.red.shade200),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-            child: Row(
-              children: [
-                Icon(Icons.warning_amber_rounded, color: Colors.red.shade700, size: 24),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.allergyWarningTitle,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red.shade700,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${l10n.allergyWarningContains} ${allergenNames.join(", ")}',
-                        style: theme.textTheme.bodySmall?.copyWith(color: Colors.red.shade900),
-                      ),
-                    ],
-                  ),
-                ),
-                // Dismiss button
-                IconButton(
-                  icon: Icon(Icons.close, color: Colors.red.shade700, size: 20),
-                  tooltip: 'Dismiss for this recipe',
-                  onPressed: () {
-                    ref.read(dismissedAllergyWarningsProvider.notifier).dismiss(recipeId);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Warning dismissed for this recipe'),
-                        action: SnackBarAction(
-                          label: 'Undo',
-                          onPressed: () {
-                            ref.read(dismissedAllergyWarningsProvider.notifier).restore(recipeId);
-                          },
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-          // Manage allergies link
-          InkWell(
-            onTap: () => context.push('/settings/allergies'),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.red.shade100,
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(11)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.settings, size: 16, color: Colors.red.shade700),
-                  const SizedBox(width: 8),
-                  Text(
-                    l10n.allergyManageSettings,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: Colors.red.shade700,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ============ RECIPE META INFO WITH CUSTOM SCALE ============
-
-class _RecipeMetaInfoWithScale extends StatelessWidget {
-  final Recipe recipe;
-  final double scaleFactor;
-  final ValueChanged<double> onScaleChanged;
-
-  const _RecipeMetaInfoWithScale({
-    required this.recipe,
-    required this.scaleFactor,
-    required this.onScaleChanged,
+  const _ModernQuickActionsRow({
+    required this.onAddToMealPlan,
+    required this.onAddToShopping,
+    required this.onShare,
   });
 
   @override
@@ -499,66 +458,135 @@ class _RecipeMetaInfoWithScale extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
+    return Row(
+      children: [
+        Expanded(
+          child: _ModernActionButton(
+            icon: Icons.calendar_month_outlined,
+            label: l10n.mealPlanButton,
+            onTap: onAddToMealPlan,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _ModernActionButton(
+            icon: Icons.add_shopping_cart_rounded,
+            label: l10n.groceriesButton,
+            onTap: onAddToShopping,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _ModernActionButton(
+            icon: Icons.share_outlined,
+            label: l10n.actionShare,
+            onTap: onShare,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ModernActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ModernActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 22, color: theme.colorScheme.primary),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============ RECIPE META INFO CARD (without scale) ============
+
+class _RecipeMetaInfoCard extends StatelessWidget {
+  final Recipe recipe;
+
+  const _RecipeMetaInfoCard({required this.recipe});
+
+  String _formatMinutes(int? minutes) {
+    if (minutes == null || minutes <= 0) return '';
+    if (minutes < 60) return '$minutes min';
+    final hours = minutes ~/ 60;
+    final mins = minutes % 60;
+    if (mins == 0) return '${hours}h';
+    return '${hours}h ${mins}m';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    final prepTimeStr = _formatMinutes(recipe.prepTimeMinutes);
+    final cookTimeStr = _formatMinutes(recipe.cookTimeMinutes);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
       ),
-      child: Column(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          // Time and servings row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              if (recipe.prepTimeMinutes != null)
-                _MetaItem(icon: Icons.timer_outlined, label: l10n.recipeFieldPrepTime, value: '${recipe.prepTimeMinutes} ${l10n.minutesAbbrev}'),
-              if (recipe.cookTimeMinutes != null)
-                _MetaItem(icon: Icons.local_fire_department, label: l10n.recipeFieldCookTime, value: '${recipe.cookTimeMinutes} ${l10n.minutesAbbrev}'),
-              if (recipe.servings != null)
-                _MetaItem(
-                  icon: Icons.restaurant,
-                  label: l10n.recipeFieldServings,
-                  value: _getScaledServings(),
-                  highlight: scaleFactor != 1.0,
-                ),
-            ],
-          ),
-
-          // Scale picker
-          if (recipe.servings != null) ...[
-            const SizedBox(height: 16),
-            const Divider(height: 1),
-            const SizedBox(height: 12),
-            _CustomScalePicker(
-              currentScale: scaleFactor,
-              servings: recipe.servings,
-              onScaleChanged: onScaleChanged,
-            ),
-          ],
+          if (prepTimeStr.isNotEmpty)
+            _MetaItem(icon: Icons.timer_outlined, label: l10n.recipeFieldPrepTime, value: prepTimeStr),
+          if (cookTimeStr.isNotEmpty)
+            _MetaItem(icon: Icons.local_fire_department_outlined, label: l10n.recipeFieldCookTime, value: cookTimeStr),
+          if (recipe.servings != null && recipe.servings!.isNotEmpty)
+            _MetaItem(icon: Icons.people_outline, label: l10n.recipeFieldServings, value: recipe.servings!),
         ],
       ),
     );
   }
-
-  String _getScaledServings() {
-    if (recipe.servings == null) return '-';
-    final match = RegExp(r'\d+').firstMatch(recipe.servings!);
-    if (match == null) return recipe.servings!;
-    final original = int.tryParse(match.group(0)!) ?? 0;
-    if (scaleFactor == 1.0) return recipe.servings!;
-    return (original * scaleFactor).round().toString();
-  }
 }
 
-// ============ CUSTOM SCALE PICKER ============
+// ============ MODERN SCALE & CONVERT BUTTONS ============
 
-class _CustomScalePicker extends StatelessWidget {
+class _ModernScaleConvertButtons extends StatelessWidget {
   final double currentScale;
   final String? servings;
   final ValueChanged<double> onScaleChanged;
 
-  const _CustomScalePicker({
+  const _ModernScaleConvertButtons({
     required this.currentScale,
     this.servings,
     required this.onScaleChanged,
@@ -567,84 +595,162 @@ class _CustomScalePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final presets = [0.5, 1.0, 1.5, 2.0, 3.0, 4.0];
+    final l10n = AppLocalizations.of(context)!;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
-        Text('Scale recipe', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.outline)),
-        const SizedBox(height: 8),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              for (final preset in presets)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: _ScaleChip(
-                    label: preset == 1.0 ? '1x' : '${preset}x',
-                    isSelected: currentScale == preset,
-                    onTap: () => onScaleChanged(preset),
-                  ),
-                ),
-              // Custom button
-              _ScaleChip(
-                label: 'Custom',
-                isSelected: !presets.contains(currentScale),
-                onTap: () => _showCustomDialog(context),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => _showScaleDialog(context),
+            icon: const Icon(Icons.scale, size: 18),
+            label: Text(currentScale == 1.0 ? l10n.scaleRecipeButton : '${currentScale}x'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              side: BorderSide(
+                color: currentScale != 1.0
+                    ? const Color(0xFFE8A860)
+                    : theme.colorScheme.outline.withValues(alpha: 0.5),
               ),
-            ],
+              foregroundColor: currentScale != 1.0
+                  ? const Color(0xFFE8A860)
+                  : theme.colorScheme.onSurface,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => _showConvertDialog(context),
+            icon: const Icon(Icons.swap_horiz, size: 18),
+            label: Text(l10n.convertUnitsButton),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              side: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+            ),
           ),
         ),
       ],
     );
   }
 
-  void _showCustomDialog(BuildContext context) {
-    final controller = TextEditingController(text: currentScale.toString());
+  void _showScaleDialog(BuildContext context) {
+    final theme = Theme.of(context);
+    final presets = [0.5, 1.0, 1.5, 2.0, 3.0, 4.0];
+    final controller = TextEditingController();
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Custom Scale'),
-        content: Column(
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Scale Recipe', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text(
+                servings != null ? 'Original: $servings' : 'Adjust ingredient quantities',
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+              ),
+              const SizedBox(height: 20),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: presets.map((preset) => _ScaleChip(
+                  label: preset == 1.0 ? '1x (Original)' : '${preset}x',
+                  isSelected: currentScale == preset,
+                  onTap: () {
+                    onScaleChanged(preset);
+                    Navigator.pop(ctx);
+                  },
+                )).toList(),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: 'Custom scale',
+                  hintText: 'e.g., 2.5',
+                  suffixText: 'x',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onSubmitted: (value) {
+                  final scale = double.tryParse(value);
+                  if (scale != null && scale > 0 && scale <= 100) {
+                    onScaleChanged(scale);
+                    Navigator.pop(ctx);
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Cancel'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showConvertDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
-              controller: controller,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
-                labelText: 'Scale factor',
-                hintText: 'e.g., 2.5',
-                suffixText: 'x',
-              ),
-              autofocus: true,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Enter any number (e.g., 0.75 for ¾, 2.5 for 2½)',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
+            const SizedBox(height: 20),
+            Text('Convert Units', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.straighten),
+              title: const Text('Metric → Imperial'),
+              subtitle: const Text('ml to cups, g to oz'),
+              onTap: () {
+                Navigator.pop(ctx);
+                // TODO: Implement conversion
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.square_foot),
+              title: const Text('Imperial → Metric'),
+              subtitle: const Text('cups to ml, oz to g'),
+              onTap: () {
+                Navigator.pop(ctx);
+                // TODO: Implement conversion
+              },
+            ),
+            const SizedBox(height: 16),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              final value = double.tryParse(controller.text);
-              if (value != null && value > 0 && value <= 100) {
-                onScaleChanged(value);
-                Navigator.pop(ctx);
-              }
-            },
-            child: const Text('Apply'),
-          ),
-        ],
       ),
     );
   }
@@ -665,18 +771,18 @@ class _ScaleChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFE8A860) : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
-          border: isSelected ? null : Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
+          border: isSelected ? null : Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
         ),
         child: Text(
           label,
           style: TextStyle(
             color: isSelected ? Colors.white : theme.colorScheme.onSurface,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            fontSize: 13,
+            fontSize: 14,
           ),
         ),
       ),
@@ -684,19 +790,219 @@ class _ScaleChip extends StatelessWidget {
   }
 }
 
-// ============ SLIVER TAB BAR ============
+// ============ LARGE ADD TO SHOPPING BUTTON ============
 
-class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
-  final TabBar _tabBar;
-  final Color _backgroundColor;
-  _SliverTabBarDelegate(this._tabBar, this._backgroundColor);
-  @override double get minExtent => _tabBar.preferredSize.height;
-  @override double get maxExtent => _tabBar.preferredSize.height;
-  @override Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => Container(color: _backgroundColor, child: _tabBar);
-  @override bool shouldRebuild(_SliverTabBarDelegate oldDelegate) => false;
+class _LargeAddToShoppingButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _LargeAddToShoppingButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: onTap,
+        icon: const Icon(Icons.add_shopping_cart),
+        label: Text(l10n.recipeAddToShoppingList),
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          backgroundColor: const Color(0xFFE8A860),
+          foregroundColor: Colors.white,
+        ),
+      ),
+    );
+  }
 }
 
-// ============ MODERN NUTRITION CARD ============
+// ============ IMPROVED ALLERGY WARNING ============
+
+class _ImprovedAllergyWarning extends ConsumerStatefulWidget {
+  final String recipeId;
+  final List<String> ingredientTexts;
+
+  const _ImprovedAllergyWarning({
+    required this.recipeId,
+    required this.ingredientTexts,
+  });
+
+  @override
+  ConsumerState<_ImprovedAllergyWarning> createState() => _ImprovedAllergyWarningState();
+}
+
+class _ImprovedAllergyWarningState extends ConsumerState<_ImprovedAllergyWarning> {
+  bool _showDisablePrompt = false;
+  bool _sessionDismissed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final settings = ref.watch(settingsProvider);
+    final dismissedWarnings = ref.watch(dismissedAllergyWarningsProvider);
+
+    // Check if user has any allergies set
+    final userAllergies = settings.allergens;
+    if (userAllergies.isEmpty) return const SizedBox.shrink();
+
+    // Check if permanently dismissed
+    if (dismissedWarnings.contains(widget.recipeId)) return const SizedBox.shrink();
+
+    // Check if session dismissed
+    if (_sessionDismissed) {
+      if (_showDisablePrompt) {
+        return _buildDisablePrompt(theme, l10n);
+      }
+      return const SizedBox.shrink();
+    }
+
+    // Check ingredients for allergens
+    final detectedAllergens = <String>[];
+    for (final ingredientText in widget.ingredientTexts) {
+      final allergens = AllergenData.detectAllergens(ingredientText);
+      for (final allergen in allergens) {
+        if (userAllergies.contains(allergen) && !detectedAllergens.contains(allergen)) {
+          detectedAllergens.add(allergen);
+        }
+      }
+    }
+
+    if (detectedAllergens.isEmpty) return const SizedBox.shrink();
+
+    // Get localized allergen names
+    final allergenNames = detectedAllergens.map((a) => AllergenData.getLocalizedName(a, l10n)).toList();
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: Container(
+        key: const ValueKey('warning'),
+        decoration: BoxDecoration(
+          color: Colors.red.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.red.shade200),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.red.shade700, size: 24),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.allergyWarningTitle,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red.shade700,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${l10n.allergyWarningContains} ${allergenNames.join(", ")}',
+                          style: theme.textTheme.bodySmall?.copyWith(color: Colors.red.shade900),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // X button on RIGHT
+                  IconButton(
+                    icon: Icon(Icons.close, color: Colors.red.shade700, size: 20),
+                    tooltip: l10n.allergyDismissTooltip,
+                    onPressed: () {
+                      setState(() {
+                        _sessionDismissed = true;
+                        _showDisablePrompt = true;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+            // Manage allergies link
+            InkWell(
+              onTap: () => context.push('/settings/allergies'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade100,
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(11)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.settings, size: 16, color: Colors.red.shade700),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.allergyManageSettings,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: Colors.red.shade700,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDisablePrompt(ThemeData theme, AppLocalizations l10n) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: Container(
+        key: const ValueKey('prompt'),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.notifications_off_outlined, color: theme.colorScheme.outline),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                l10n.allergyDisablePrompt,
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              ),
+            ),
+            const SizedBox(width: 8),
+            TextButton(
+              onPressed: () {
+                setState(() => _showDisablePrompt = false);
+              },
+              child: Text(l10n.no),
+            ),
+            FilledButton(
+              onPressed: () {
+                ref.read(dismissedAllergyWarningsProvider.notifier).dismiss(widget.recipeId);
+                setState(() => _showDisablePrompt = false);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.allergyDisabledForRecipe)),
+                );
+              },
+              child: Text(l10n.yes),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============ NUTRITION CARD WITH BUG FIX ============
 
 class _DailyValues {
   static const double fat = 78;
@@ -722,6 +1028,7 @@ class _ModernNutritionCard extends StatelessWidget {
   final String? servings;
   final bool showPerServing;
   final ValueChanged<bool>? onTogglePerServing;
+  final bool isNerdMode;
 
   const _ModernNutritionCard({
     this.nutrition,
@@ -730,6 +1037,7 @@ class _ModernNutritionCard extends StatelessWidget {
     this.servings,
     this.showPerServing = true,
     this.onTogglePerServing,
+    this.isNerdMode = false,
   });
 
   int? _parseServings() {
@@ -747,9 +1055,9 @@ class _ModernNutritionCard extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+          border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
         ),
         child: Row(
           children: [
@@ -777,21 +1085,40 @@ class _ModernNutritionCard extends StatelessWidget {
       );
     }
 
-    // Calculate display nutrition
-    var displayNutrition = scaleFactor != 1.0 ? nutrition!.scaled(scaleFactor) : nutrition!;
+    // BUG FIX: Nutrition data is stored as PER SERVING values
+    // When showPerServing is true, show data as-is (no division)
+    // When showPerServing is false (showing total), MULTIPLY by servings
+    var displayNutrition = nutrition!;
     final servingsCount = _parseServings();
     final canShowPerServing = servingsCount != null && servingsCount > 0;
 
-    if (showPerServing && canShowPerServing) {
-      displayNutrition = displayNutrition.scaled(1.0 / servingsCount);
+    // Apply scale factor first
+    if (scaleFactor != 1.0) {
+      displayNutrition = displayNutrition.scaled(scaleFactor);
     }
+
+    // If showing TOTAL (not per serving), multiply by servings count
+    if (!showPerServing && canShowPerServing) {
+      displayNutrition = displayNutrition.scaled(servingsCount.toDouble());
+    }
+
+    // Use RPG stat cards style if nerd mode is enabled
+    if (isNerdMode) {
+      return _buildRpgNutritionCard(context, displayNutrition, canShowPerServing, servingsCount);
+    }
+
+    return _buildStandardNutritionCard(context, displayNutrition, canShowPerServing, servingsCount);
+  }
+
+  Widget _buildStandardNutritionCard(BuildContext context, NutritionData displayNutrition, bool canShowPerServing, int? servingsCount) {
+    final theme = Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -859,84 +1186,298 @@ class _ModernNutritionCard extends StatelessWidget {
           ],
 
           const SizedBox(height: 16),
-          const Divider(height: 1),
-          const SizedBox(height: 16),
+          const Divider(),
+          const SizedBox(height: 12),
 
-          // Macros grid
+          // Macros
+          _NutritionRow(label: l10n.nutritionFat, value: displayNutrition.fat, unit: 'g', dailyValue: _DailyValues.fat),
+          if (displayNutrition.saturatedFat != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 16),
+              child: _NutritionRow(label: l10n.nutritionSaturatedFat, value: displayNutrition.saturatedFat, unit: 'g', dailyValue: _DailyValues.saturatedFat, isSubItem: true),
+            ),
+          _NutritionRow(label: l10n.nutritionCarbs, value: displayNutrition.carbohydrates, unit: 'g', dailyValue: _DailyValues.carbohydrates),
+          if (displayNutrition.fiber != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 16),
+              child: _NutritionRow(label: l10n.nutritionFiber, value: displayNutrition.fiber, unit: 'g', dailyValue: _DailyValues.fiber, isSubItem: true),
+            ),
+          if (displayNutrition.sugar != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 16),
+              child: _NutritionRow(label: l10n.nutritionSugar, value: displayNutrition.sugar, unit: 'g', dailyValue: _DailyValues.sugar, isSubItem: true),
+            ),
+          _NutritionRow(label: l10n.nutritionProtein, value: displayNutrition.protein, unit: 'g', dailyValue: _DailyValues.protein),
+
+          if (displayNutrition.sodium != null || displayNutrition.cholesterol != null) ...[
+            const SizedBox(height: 8),
+            const Divider(),
+            const SizedBox(height: 8),
+            if (displayNutrition.sodium != null)
+              _NutritionRow(label: l10n.nutritionSodium, value: displayNutrition.sodium, unit: 'mg', dailyValue: _DailyValues.sodium),
+            if (displayNutrition.cholesterol != null)
+              _NutritionRow(label: l10n.nutritionCholesterol, value: displayNutrition.cholesterol, unit: 'mg', dailyValue: _DailyValues.cholesterol),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRpgNutritionCard(BuildContext context, NutritionData displayNutrition, bool canShowPerServing, int? servingsCount) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E2C),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE8A860).withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFE8A860).withValues(alpha: 0.1),
+            blurRadius: 12,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Header with toggle
           Row(
             children: [
-              Expanded(child: _MacroTile(label: l10n.nutritionProtein, value: displayNutrition.protein, unit: 'g', color: Colors.red.shade400)),
-              Expanded(child: _MacroTile(label: l10n.nutritionCarbs, value: displayNutrition.carbohydrates, unit: 'g', color: Colors.amber.shade600)),
-              Expanded(child: _MacroTile(label: l10n.nutritionFat, value: displayNutrition.fat, unit: 'g', color: Colors.blue.shade400)),
+              const Icon(Icons.local_fire_department, color: Color(0xFFE8A860)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  showPerServing && canShowPerServing ? l10n.nutritionPerServing : l10n.nutritionTotalRecipe,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              if (canShowPerServing && onTogglePerServing != null)
+                GestureDetector(
+                  onTap: () => onTogglePerServing!(!showPerServing),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8A860).withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE8A860).withValues(alpha: 0.5)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          showPerServing ? '1 serving' : '$servingsCount servings',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: const Color(0xFFE8A860),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.swap_vert, size: 14, color: Color(0xFFE8A860)),
+                      ],
+                    ),
+                  ),
+                ),
             ],
           ),
 
-          // Additional nutrients
-          if (displayNutrition.fiber != null || displayNutrition.sugar != null || displayNutrition.sodium != null) ...[
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 16,
-              runSpacing: 8,
-              children: [
-                if (displayNutrition.fiber != null)
-                  _SmallNutrient(label: 'Fiber', value: displayNutrition.fiber!, unit: 'g'),
-                if (displayNutrition.sugar != null)
-                  _SmallNutrient(label: 'Sugar', value: displayNutrition.sugar!, unit: 'g'),
-                if (displayNutrition.sodium != null)
-                  _SmallNutrient(label: 'Sodium', value: displayNutrition.sodium!, unit: 'mg'),
-                if (displayNutrition.cholesterol != null)
-                  _SmallNutrient(label: 'Cholesterol', value: displayNutrition.cholesterol!, unit: 'mg'),
-              ],
+          const SizedBox(height: 20),
+
+          // RPG Stat Cards
+          Row(
+            children: [
+              Expanded(
+                child: _RpgStatCard(
+                  label: 'STR',
+                  sublabel: l10n.nutritionProtein,
+                  value: displayNutrition.protein != null ? '${displayNutrition.protein!.round()}g' : '-',
+                  icon: Icons.fitness_center,
+                  glowColor: Colors.redAccent,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _RpgStatCard(
+                  label: 'STA',
+                  sublabel: l10n.nutritionCarbs,
+                  value: displayNutrition.carbohydrates != null ? '${displayNutrition.carbohydrates!.round()}g' : '-',
+                  icon: Icons.bolt,
+                  glowColor: Colors.blueAccent,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _RpgStatCard(
+                  label: 'CON',
+                  sublabel: l10n.nutritionFat,
+                  value: displayNutrition.fat != null ? '${displayNutrition.fat!.round()}g' : '-',
+                  icon: Icons.shield,
+                  glowColor: Colors.amber,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // Calories center
+          if (displayNutrition.calories != null)
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2A2A3C),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE8A860).withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.whatshot, color: Color(0xFFE8A860), size: 28),
+                  const SizedBox(width: 12),
+                  Column(
+                    children: [
+                      Text(
+                        '${displayNutrition.calories!.round()}',
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFFE8A860),
+                        ),
+                      ),
+                      Text(
+                        'ENERGY',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: Colors.grey,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
         ],
       ),
     );
   }
 }
 
-class _MacroTile extends StatelessWidget {
+class _RpgStatCard extends StatelessWidget {
   final String label;
-  final double? value;
-  final String unit;
-  final Color color;
+  final String sublabel;
+  final String value;
+  final IconData icon;
+  final Color glowColor;
 
-  const _MacroTile({required this.label, this.value, required this.unit, required this.color});
+  const _RpgStatCard({
+    required this.label,
+    required this.sublabel,
+    required this.value,
+    required this.icon,
+    required this.glowColor,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    if (value == null) return const SizedBox.shrink();
-
-    return Column(
-      children: [
-        Text(
-          '${value!.round()}$unit',
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: color),
-        ),
-        const SizedBox(height: 2),
-        Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
-      ],
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2A2A3C),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: glowColor.withValues(alpha: 0.4)),
+        boxShadow: [
+          BoxShadow(color: glowColor.withValues(alpha: 0.15), blurRadius: 8, spreadRadius: 1),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: glowColor, size: 24),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey.shade500,
+              fontSize: 10,
+              letterSpacing: 1.5,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _SmallNutrient extends StatelessWidget {
+class _NutritionRow extends StatelessWidget {
   final String label;
-  final double value;
+  final double? value;
   final String unit;
+  final double? dailyValue;
+  final bool isSubItem;
 
-  const _SmallNutrient({required this.label, required this.value, required this.unit});
+  const _NutritionRow({
+    required this.label,
+    this.value,
+    required this.unit,
+    this.dailyValue,
+    this.isSubItem = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    if (value == null) return const SizedBox.shrink();
+
     final theme = Theme.of(context);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text('$label: ', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
-        Text('${value.round()}$unit', style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
-      ],
+    final percentage = dailyValue != null && dailyValue! > 0 ? (value! / dailyValue! * 100).round() : null;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: isSubItem ? FontWeight.normal : FontWeight.w500,
+              color: isSubItem ? theme.colorScheme.outline : null,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            '${value!.round()}$unit',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          if (percentage != null) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                '$percentage%',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -950,6 +1491,7 @@ class _NutritionTab extends StatelessWidget {
   final String? servings;
   final bool showPerServing;
   final ValueChanged<bool>? onTogglePerServing;
+  final bool isNerdMode;
 
   const _NutritionTab({
     required this.nutrition,
@@ -958,6 +1500,7 @@ class _NutritionTab extends StatelessWidget {
     this.servings,
     this.showPerServing = true,
     this.onTogglePerServing,
+    this.isNerdMode = false,
   });
 
   @override
@@ -970,6 +1513,7 @@ class _NutritionTab extends StatelessWidget {
         servings: servings,
         showPerServing: showPerServing,
         onTogglePerServing: onTogglePerServing,
+        isNerdMode: isNerdMode,
       ),
       const SizedBox(height: 32),
     ]);
@@ -980,15 +1524,27 @@ class _IngredientsTab extends ConsumerWidget {
   final List<Ingredient> ingredients;
   final double scaleFactor;
   final AppLocalizations l10n;
-  const _IngredientsTab({required this.ingredients, required this.scaleFactor, required this.l10n});
+  final VoidCallback onAddToShopping;
+
+  const _IngredientsTab({
+    required this.ingredients,
+    required this.scaleFactor,
+    required this.l10n,
+    required this.onAddToShopping,
+  });
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     if (ingredients.isEmpty) return Center(child: Text(l10n.ingredientsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)));
-    return ListView.builder(
+    return ListView(
       padding: const EdgeInsets.all(16),
-      itemCount: ingredients.length,
-      itemBuilder: (context, index) => _IngredientItemWithAllergen(ingredient: ingredients[index], scaleFactor: scaleFactor),
+      children: [
+        ...ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: scaleFactor)),
+        const SizedBox(height: 16),
+        _LargeAddToShoppingButton(onTap: onAddToShopping),
+        const SizedBox(height: 32),
+      ],
     );
   }
 }
@@ -1015,52 +1571,113 @@ class _InstructionsTab extends StatelessWidget {
   }
 }
 
-// ============ APP BAR ============
+// ============ APP BAR WITH RPG RARITY GLOW BORDER ============
 
 class _RecipeAppBar extends StatelessWidget {
   final Recipe recipe;
   final WidgetRef ref;
   final VoidCallback onEdit;
   final VoidCallback onReload;
+  final bool isNerdMode;
 
-  const _RecipeAppBar({required this.recipe, required this.ref, required this.onEdit, required this.onReload});
+  const _RecipeAppBar({
+    required this.recipe,
+    required this.ref,
+    required this.onEdit,
+    required this.onReload,
+    this.isNerdMode = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final hasImage = recipe.imagePath != null && File(recipe.imagePath!).existsSync();
 
+    // Get rarity color for border glow
+    final rarityColor = isNerdMode && recipe.rating != null && recipe.rating! > 0
+        ? RarityColors.getColor(recipe.rating!)
+        : null;
+
     return SliverAppBar(
       expandedHeight: 300,
       pinned: true,
       leading: Container(
         margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: Colors.black.withOpacity(0.3), shape: BoxShape.circle),
+        decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
         child: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.of(context).pop()),
       ),
       flexibleSpace: FlexibleSpaceBar(
-        background: hasImage
-            ? Stack(fit: StackFit.expand, children: [
-          Image.file(File(recipe.imagePath!), fit: BoxFit.cover),
-          Container(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.black.withOpacity(0.5), Colors.transparent, Colors.black.withOpacity(0.5)]))),
-        ])
-            : const RecipePlaceholderImage(height: 300, width: double.infinity),
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Image with optional rarity glow border
+            if (hasImage)
+              Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
+            else
+              const RecipePlaceholderImage(height: 300, width: double.infinity),
+            // Gradient overlay
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.5),
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.5),
+                  ],
+                ),
+              ),
+            ),
+            // Rarity glow border effect (subtle inner glow)
+            if (rarityColor != null)
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: rarityColor.withValues(alpha: 0.6), width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: rarityColor.withValues(alpha: 0.3),
+                      blurRadius: 16,
+                      spreadRadius: -2,
+                    ),
+                  ],
+                ),
+              ),
+            // Rarity glow vignette at edges
+            if (rarityColor != null)
+              IgnorePointer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        rarityColor.withValues(alpha: 0.15),
+                        Colors.transparent,
+                        Colors.transparent,
+                        rarityColor.withValues(alpha: 0.2),
+                      ],
+                      stops: const [0.0, 0.15, 0.85, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
       actions: [
         Container(
           margin: const EdgeInsets.all(4),
-          decoration: BoxDecoration(color: Colors.black.withOpacity(0.3), shape: BoxShape.circle),
+          decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
           child: IconButton(icon: const Icon(Icons.edit, color: Colors.white), onPressed: onEdit, tooltip: l10n.actionEdit),
         ),
         Container(
           margin: const EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(color: Colors.black.withOpacity(0.3), shape: BoxShape.circle),
+          decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
           child: PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.white),
             onSelected: (value) => _handleMenuAction(context, value),
             itemBuilder: (context) => [
-              PopupMenuItem(value: 'share', child: Row(children: [const Icon(Icons.share), const SizedBox(width: 12), Text(l10n.actionShare)])),
-              const PopupMenuDivider(),
               PopupMenuItem(value: 'pin', child: Row(children: [Icon(recipe.isPinned ? Icons.push_pin : Icons.push_pin_outlined), const SizedBox(width: 12), Text(recipe.isPinned ? l10n.recipeUnpin : l10n.recipePin)])),
               PopupMenuItem(value: 'duplicate', child: Row(children: [const Icon(Icons.copy), const SizedBox(width: 12), Text(l10n.recipeDuplicate)])),
               const PopupMenuDivider(),
@@ -1075,9 +1692,6 @@ class _RecipeAppBar extends StatelessWidget {
   void _handleMenuAction(BuildContext context, String action) async {
     final l10n = AppLocalizations.of(context)!;
     switch (action) {
-      case 'share':
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${l10n.actionShare} - Coming soon!')));
-        break;
       case 'pin':
         await ref.read(recipeDaoProvider).togglePin(recipe.id, !recipe.isPinned);
         onReload();
@@ -1098,56 +1712,15 @@ class _RecipeAppBar extends StatelessWidget {
     final newId = 'recipe_${DateTime.now().millisecondsSinceEpoch}';
 
     try {
-      await recipeDao.insertRecipe(RecipesCompanion.insert(
-        id: newId,
-        cookbookId: recipe.cookbookId,
-        title: '${recipe.title} (Copy)',
-        description: drift.Value(recipe.description),
-        servings: drift.Value(recipe.servings),
-        prepTimeMinutes: drift.Value(recipe.prepTimeMinutes),
-        cookTimeMinutes: drift.Value(recipe.cookTimeMinutes),
-        sourceUrl: drift.Value(recipe.sourceUrl),
-        imagePath: drift.Value(recipe.imagePath),
-        courseId: drift.Value(recipe.courseId),
-        categoryId: drift.Value(recipe.categoryId),
-        rating: drift.Value(recipe.rating),
-        notes: drift.Value(recipe.notes),
-        nutritionJson: drift.Value(recipe.nutritionJson),
-      ));
-
-      final ingredients = await recipeDao.getIngredientsForRecipe(recipe.id);
-      for (var i = 0; i < ingredients.length; i++) {
-        final ing = ingredients[i];
-        await recipeDao.insertIngredient(IngredientsCompanion.insert(
-          id: '${newId}_ing_$i',
-          recipeId: newId,
-          name: ing.name,
-          amount: drift.Value(ing.amount),
-          unit: drift.Value(ing.unit),
-          notes: drift.Value(ing.notes),
-          sortOrder: ing.sortOrder,
-        ));
-      }
-
-      final steps = await recipeDao.getStepsForRecipe(recipe.id);
-      for (var i = 0; i < steps.length; i++) {
-        final step = steps[i];
-        await recipeDao.insertStep(StepsCompanion.insert(
-          id: '${newId}_step_$i',
-          recipeId: newId,
-          instruction: step.instruction,
-          sortOrder: step.sortOrder,
-        ));
-      }
-
+      await recipeDao.duplicateRecipe(recipe.id, newId);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.successSaved),
-          action: SnackBarAction(label: 'View', onPressed: () => context.push('/recipe/$newId')),
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.recipeDuplicated)));
+        context.push('/recipe/$newId');
       }
     } catch (e) {
-      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${l10n.errorGeneric}: $e')));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
     }
   }
 
@@ -1156,20 +1729,20 @@ class _RecipeAppBar extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.recipeDelete),
-        content: Text(l10n.confirmDeleteMessage),
+        title: Text(l10n.deleteRecipeTitle),
+        content: Text(l10n.deleteRecipeConfirm),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
           FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () async {
-              Navigator.pop(ctx);
-              await ref.read(recipeDaoProvider).softDeleteRecipe(recipe.id);
+              await ref.read(recipeDaoProvider).moveToTrash(recipe.id);
+              if (ctx.mounted) Navigator.pop(ctx);
               if (context.mounted) {
                 context.pop();
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.successDeleted)));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.recipeDeleted)));
               }
             },
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: Text(l10n.actionDelete),
           ),
         ],
@@ -1179,21 +1752,6 @@ class _RecipeAppBar extends StatelessWidget {
 }
 
 // ============ HELPER WIDGETS ============
-
-class _QuickActionsRow extends StatelessWidget {
-  final VoidCallback onAddToMealPlan;
-  final VoidCallback onAddToShopping;
-  const _QuickActionsRow({required this.onAddToMealPlan, required this.onAddToShopping});
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
-      ActionChip(avatar: const Icon(Icons.calendar_month, size: 18), label: Text(l10n.plannerTitle), onPressed: onAddToMealPlan),
-      const SizedBox(width: 8),
-      ActionChip(avatar: const Icon(Icons.shopping_cart, size: 18), label: Text(l10n.shoppingTitle), onPressed: onAddToShopping),
-    ]));
-  }
-}
 
 class _FavoriteButton extends StatelessWidget {
   final bool isFavorite;
@@ -1207,29 +1765,9 @@ class RecipeRating extends StatelessWidget {
   final bool nerdMode;
   const RecipeRating({super.key, required this.rating, this.nerdMode = false});
   @override Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    if (nerdMode) return _RpgRating(rating: rating, l10n: l10n);
+    // In nerd mode, we use title color instead of badges
+    if (nerdMode) return const SizedBox.shrink();
     return Row(children: List.generate(5, (index) => Icon(index < rating ? Icons.star_rounded : Icons.star_outline_rounded, color: Colors.amber, size: 20)));
-  }
-}
-
-class _RpgRating extends StatelessWidget {
-  final int rating;
-  final AppLocalizations l10n;
-  const _RpgRating({required this.rating, required this.l10n});
-  @override Widget build(BuildContext context) {
-    final (label, color, icon) = _getRarityInfo(rating);
-    return Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(12), border: Border.all(color: color.withOpacity(0.5))), child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(icon, size: 16, color: color), const SizedBox(width: 6), Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13))]));
-  }
-  (String, Color, IconData) _getRarityInfo(int rating) {
-    switch (rating) {
-      case 1: return (l10n.ratingCommon, const Color(0xFF9E9E9E), Icons.circle_outlined);
-      case 2: return (l10n.ratingUncommon, const Color(0xFF4CAF50), Icons.eco);
-      case 3: return (l10n.ratingRare, const Color(0xFF2196F3), Icons.diamond_outlined);
-      case 4: return (l10n.ratingEpic, const Color(0xFF9C27B0), Icons.auto_awesome);
-      case 5: return (l10n.ratingLegendary, const Color(0xFFFF9800), Icons.local_fire_department);
-      default: return (l10n.ratingUnrated, Colors.grey, Icons.help_outline);
-    }
   }
 }
 
@@ -1279,13 +1817,22 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Container(margin: const EdgeInsets.only(top: 6), width: 8, height: 8, decoration: BoxDecoration(color: matchingAllergens.isNotEmpty ? Colors.red : theme.colorScheme.primary, shape: BoxShape.circle)),
         const SizedBox(width: 12),
-        if (amount.isNotEmpty) ...[Text(amount, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)), const SizedBox(width: 4)],
-        if (ingredient.unit != null && ingredient.unit!.isNotEmpty) ...[Text(ingredient.unit!, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)), const SizedBox(width: 4)],
-        Expanded(child: Text(ingredient.name, style: theme.textTheme.bodyLarge?.copyWith(color: matchingAllergens.isNotEmpty ? Colors.red.shade700 : null))),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: theme.textTheme.bodyLarge,
+              children: [
+                if (amount.isNotEmpty) TextSpan(text: '$amount ', style: const TextStyle(fontWeight: FontWeight.w600)),
+                if (ingredient.unit != null && ingredient.unit!.isNotEmpty) TextSpan(text: '${ingredient.unit} '),
+                TextSpan(text: ingredient.name),
+              ],
+            ),
+          ),
+        ),
         if (matchingAllergens.isNotEmpty)
           Tooltip(
-            message: matchingAllergens.map((a) => AllergenData.getEmoji(a)).join(' '),
-            child: Icon(Icons.warning_amber, size: 18, color: Colors.red.shade600),
+            message: 'Contains: ${matchingAllergens.join(", ")}',
+            child: Icon(Icons.warning_amber_rounded, size: 18, color: Colors.red.shade700),
           ),
       ]),
     );
@@ -1299,140 +1846,30 @@ class _InstructionStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasImage = step.imagePath != null && File(step.imagePath!).existsSync();
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(width: 28, height: 28, decoration: BoxDecoration(color: const Color(0xFFE8A860), shape: BoxShape.circle), child: Center(child: Text('$stepNumber', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
-            const SizedBox(width: 12),
-            Expanded(child: Text(step.instruction, style: theme.textTheme.bodyLarge)),
-          ]),
-          if (hasImage) ...[
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.only(left: 40),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(File(step.imagePath!), height: 150, width: double.infinity, fit: BoxFit.cover),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-// ============ ADD TO SHOPPING SHEET ============
-
-class _AddToShoppingSheet extends StatefulWidget {
-  final List<Ingredient> ingredients;
-  final String recipeId;
-  final String recipeTitle;
-  final double scaleFactor;
-  final WidgetRef ref;
-  const _AddToShoppingSheet({required this.ingredients, required this.recipeId, required this.recipeTitle, required this.scaleFactor, required this.ref});
-  @override State<_AddToShoppingSheet> createState() => _AddToShoppingSheetState();
-}
-
-class _AddToShoppingSheetState extends State<_AddToShoppingSheet> {
-  late Set<String> _selectedIds;
-  bool _isAdding = false;
-  @override void initState() { super.initState(); _selectedIds = widget.ingredients.map((i) => i.id).toSet(); }
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Container(padding: const EdgeInsets.all(20), child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Row(children: [Icon(Icons.shopping_cart, color: theme.colorScheme.primary), const SizedBox(width: 12), Expanded(child: Text(l10n.recipeAddToShoppingList, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold))), IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context))]),
-        const SizedBox(height: 16),
-        Text('${_selectedIds.length} / ${widget.ingredients.length} ${l10n.ingredientsTitle.toLowerCase()}'),
-        const SizedBox(height: 16),
-        SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: _isAdding ? null : _addToList, icon: _isAdding ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.add), label: Text(l10n.recipeAddToShoppingList))),
-      ])),
-    );
-  }
-  Future<void> _addToList() async {
-    final l10n = AppLocalizations.of(context)!;
-    setState(() => _isAdding = true);
-    try {
-      final shoppingDao = widget.ref.read(shoppingDaoProvider);
-      final selectedIngredients = widget.ingredients.where((i) => _selectedIds.contains(i.id)).map((i) {
-        final parts = <String>[];
-        if (i.amount != null && i.amount!.isNotEmpty) parts.add(i.amount!);
-        if (i.unit != null && i.unit!.isNotEmpty) parts.add(i.unit!);
-        parts.add(i.name);
-        return parts.join(' ');
-      }).toList();
-      await shoppingDao.addItemsFromRecipe(listId: 'list_default', recipeId: widget.recipeId, ingredients: selectedIngredients);
-      if (mounted) { Navigator.pop(context); ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.successAdded))); }
-    } catch (e) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${l10n.errorGeneric}: $e'))); }
-    finally { if (mounted) setState(() => _isAdding = false); }
-  }
-}
-
-// ============ ADD TO MEAL PLAN SHEET ============
-
-class _AddToMealPlanSheet extends StatefulWidget {
-  final String recipeId;
-  final String recipeTitle;
-  final WidgetRef ref;
-  const _AddToMealPlanSheet({required this.recipeId, required this.recipeTitle, required this.ref});
-  @override State<_AddToMealPlanSheet> createState() => _AddToMealPlanSheetState();
-}
-
-class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
-  DateTime _selectedDate = DateTime.now();
-  String _selectedMealType = 'Dinner';
-  bool _isSaving = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Container(padding: const EdgeInsets.all(20), child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Row(children: [Icon(Icons.calendar_month, color: theme.colorScheme.primary), const SizedBox(width: 12), Expanded(child: Text(l10n.recipeAddToMealPlan, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold))), IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context))]),
-        const SizedBox(height: 16),
-        // Meal type selector
-        Wrap(
-          spacing: 8,
-          children: ['Breakfast', 'Lunch', 'Dinner', 'Snack'].map((type) {
-            final isSelected = _selectedMealType == type;
-            return ChoiceChip(
-              label: Text(type),
-              selected: isSelected,
-              onSelected: (_) => setState(() => _selectedMealType = type),
-            );
-          }).toList(),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(color: const Color(0xFFE8A860), borderRadius: BorderRadius.circular(8)),
+          child: Center(child: Text('$stepNumber', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14))),
         ),
-        const SizedBox(height: 24),
-        SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: _isSaving ? null : _addToMealPlan, icon: _isSaving ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.add), label: Text(l10n.recipeAddToMealPlan))),
-      ])),
+        const SizedBox(width: 12),
+        Expanded(child: Padding(padding: const EdgeInsets.only(top: 4), child: Text(step.instruction, style: theme.textTheme.bodyLarge))),
+      ]),
     );
   }
-  Future<void> _addToMealPlan() async {
-    final l10n = AppLocalizations.of(context)!;
-    setState(() => _isSaving = true);
-    try {
-      final mealPlanDao = widget.ref.read(mealPlanDaoProvider);
-      final id = 'meal_${DateTime.now().millisecondsSinceEpoch}';
-      final date = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
-      await mealPlanDao.insertMealPlan(MealPlansCompanion.insert(
-        id: id,
-        date: date,
-        mealType: drift.Value(_selectedMealType),
-        recipeId: drift.Value(widget.recipeId),
-      ));
-      if (mounted) { Navigator.pop(context); ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${widget.recipeTitle} added to $_selectedMealType'))); }
-    } catch (e) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${l10n.errorGeneric}: $e'))); }
-    finally { if (mounted) setState(() => _isSaving = false); }
-  }
+}
+
+// ============ SLIVER TAB BAR ============
+
+class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
+  final TabBar _tabBar;
+  final Color _backgroundColor;
+  _SliverTabBarDelegate(this._tabBar, this._backgroundColor);
+  @override double get minExtent => _tabBar.preferredSize.height;
+  @override double get maxExtent => _tabBar.preferredSize.height;
+  @override Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => Container(color: _backgroundColor, child: _tabBar);
+  @override bool shouldRebuild(_SliverTabBarDelegate oldDelegate) => false;
 }

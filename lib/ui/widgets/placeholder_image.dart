@@ -155,7 +155,7 @@ class _ThemeGradientPlaceholder extends StatelessWidget {
         child: Icon(
           icon,
           size: 48,
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha: 0.9),
         ),
       ),
     );
@@ -270,7 +270,7 @@ class SimpleRecipePlaceholder extends StatelessWidget {
         child: Icon(
           Icons.restaurant,
           size: 48,
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha: 0.9),
         ),
       ),
     );

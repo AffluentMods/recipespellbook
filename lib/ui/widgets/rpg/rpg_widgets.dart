@@ -54,7 +54,7 @@ class RpgAvatarWidget extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: frame.rarity.color.withOpacity(0.5),
+                      color: frame.rarity.color.withValues(alpha: 0.5),
                       blurRadius: 8,
                       spreadRadius: 2,
                     ),
@@ -100,7 +100,7 @@ class RpgAvatarWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 4,
                     ),
                   ],
@@ -199,7 +199,7 @@ class RpgXpBar extends StatelessWidget {
                 Text(
                   '$currentXp / $maxXp XP',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                   ),
                 ),
               ],
@@ -221,13 +221,13 @@ class RpgXpBar extends StatelessWidget {
                     gradient: LinearGradient(
                       colors: [
                         effectiveBarColor,
-                        effectiveBarColor.withOpacity(0.8),
+                        effectiveBarColor.withValues(alpha: 0.8),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(height / 2),
                     boxShadow: [
                       BoxShadow(
-                        color: effectiveBarColor.withOpacity(0.5),
+                        color: effectiveBarColor.withValues(alpha: 0.5),
                         blurRadius: 4,
                       ),
                     ],
@@ -243,7 +243,7 @@ class RpgXpBar extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.white.withOpacity(0.2),
+                        Colors.white.withValues(alpha: 0.2),
                         Colors.transparent,
                       ],
                     ),
@@ -339,7 +339,7 @@ class RpgXpGainToast extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: theme.colorScheme.primary.withOpacity(0.3),
+              color: theme.colorScheme.primary.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -434,7 +434,7 @@ class RpgLevelUpDialog extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.amber.withOpacity(0.5),
+              color: Colors.amber.withValues(alpha: 0.5),
               blurRadius: 20,
               spreadRadius: 5,
             ),
@@ -578,7 +578,7 @@ class RpgAchievementUnlockDialog extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: achievement.tier.color.withOpacity(0.5),
+              color: achievement.tier.color.withValues(alpha: 0.5),
               blurRadius: 20,
               spreadRadius: 5,
             ),
@@ -600,7 +600,7 @@ class RpgAchievementUnlockDialog extends StatelessWidget {
               height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: achievement.tier.color.withOpacity(0.2),
+                color: achievement.tier.color.withValues(alpha: 0.2),
                 border: Border.all(
                   color: achievement.tier.color,
                   width: 3,
@@ -842,7 +842,7 @@ class RpgManaBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(height / 2),
             boxShadow: [
               BoxShadow(
-                color: Colors.blue.withOpacity(0.5),
+                color: Colors.blue.withValues(alpha: 0.5),
                 blurRadius: 4,
               ),
             ],

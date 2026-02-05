@@ -85,9 +85,9 @@ class _RpgRarityRating extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: rarity.color.withOpacity(0.2),
+              color: rarity.color.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: rarity.color.withOpacity(0.5)),
+              border: Border.all(color: rarity.color.withValues(alpha: 0.5)),
             ),
             child: Text(
               rarity.displayName,
@@ -202,12 +202,12 @@ class _RarityLabel extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            rarity.color.withOpacity(0.3),
-            rarity.color.withOpacity(0.1),
+            rarity.color.withValues(alpha: 0.3),
+            rarity.color.withValues(alpha: 0.1),
           ],
         ),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: rarity.color.withOpacity(0.5)),
+        border: Border.all(color: rarity.color.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -245,7 +245,7 @@ class CompactRecipeRating extends ConsumerWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         decoration: BoxDecoration(
-          color: rarity.color.withOpacity(0.2),
+          color: rarity.color.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(4),
         ),
         child: Row(

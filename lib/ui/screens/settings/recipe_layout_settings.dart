@@ -107,13 +107,13 @@ class _LayoutOption extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isSelected
-              ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
               : theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? theme.colorScheme.primary
-                : theme.colorScheme.outline.withOpacity(0.3),
+                : theme.colorScheme.outline.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -192,7 +192,7 @@ class _StackedPreview extends StatelessWidget {
                 width: 50,
                 height: 6,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.3),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
@@ -216,7 +216,7 @@ class _StackedPreview extends StatelessWidget {
                   child: Container(
                     height: 4,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.outline.withOpacity(0.3),
+                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -235,7 +235,7 @@ class _StackedPreview extends StatelessWidget {
                 width: 50,
                 height: 6,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.3),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
@@ -265,7 +265,7 @@ class _StackedPreview extends StatelessWidget {
                   child: Container(
                     height: 4,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.outline.withOpacity(0.3),
+                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -316,7 +316,7 @@ class _TabbedPreview extends StatelessWidget {
                           width: 20,
                           height: 4,
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.onPrimaryContainer.withOpacity(0.5),
+                            color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -336,7 +336,7 @@ class _TabbedPreview extends StatelessWidget {
                           width: 20,
                           height: 4,
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.outline.withOpacity(0.3),
+                            color: theme.colorScheme.outline.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -360,7 +360,7 @@ class _TabbedPreview extends StatelessWidget {
                 width: 30,
                 height: 3,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withOpacity(0.3),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -374,7 +374,7 @@ class _TabbedPreview extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: theme.colorScheme.outline.withOpacity(0.2),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.2),
                   width: 1,
                 ),
                 borderRadius: BorderRadius.circular(6),
@@ -398,7 +398,7 @@ class _TabbedPreview extends StatelessWidget {
                         child: Container(
                           height: 4,
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.outline.withOpacity(0.3),
+                            color: theme.colorScheme.outline.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),

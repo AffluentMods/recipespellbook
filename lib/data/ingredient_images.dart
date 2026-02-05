@@ -1,6 +1,3 @@
-/// Ingredient image/icon data for visual display throughout the app
-/// Uses emoji as fallback, with option to add real images later
-
 class IngredientImages {
   static const Map<String, IngredientVisual> _ingredients = {
     // DAIRY, EGGS & FRIDGE

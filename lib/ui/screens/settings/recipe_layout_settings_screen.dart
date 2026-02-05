@@ -58,10 +58,10 @@ class RecipeLayoutSettingsScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+              color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: theme.colorScheme.primary.withOpacity(0.3),
+                color: theme.colorScheme.primary.withValues(alpha: 0.3),
               ),
             ),
             child: Row(
@@ -114,13 +114,13 @@ class _LayoutOptionCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
               : theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? theme.colorScheme.primary
-                : theme.colorScheme.outline.withOpacity(0.3),
+                : theme.colorScheme.outline.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -172,7 +172,7 @@ class _LayoutOptionCard extends StatelessWidget {
                 color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: theme.colorScheme.outline.withOpacity(0.2),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.2),
                 ),
               ),
               child: ClipRRect(
@@ -232,7 +232,7 @@ class _StackedPreview extends StatelessWidget {
                       child: Container(
                         height: 6,
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.outline.withOpacity(0.3),
+                          color: theme.colorScheme.outline.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(3),
                         ),
                       ),
@@ -273,7 +273,7 @@ class _StackedPreview extends StatelessWidget {
                       child: Container(
                         height: 6,
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.outline.withOpacity(0.3),
+                          color: theme.colorScheme.outline.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(3),
                         ),
                       ),
@@ -442,7 +442,7 @@ class _TabbedPreviewState extends State<_TabbedPreview> with SingleTickerProvide
                 decoration: BoxDecoration(
                   color: index == _currentPage
                       ? theme.colorScheme.primary
-                      : theme.colorScheme.outline.withOpacity(0.3),
+                      : theme.colorScheme.outline.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(3),
                 ),
               );
@@ -476,7 +476,7 @@ class _TabContent extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.2),
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
         ),
         borderRadius: BorderRadius.circular(8),
       ),
@@ -512,7 +512,7 @@ class _PreviewSection extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
@@ -597,7 +597,7 @@ class _MacroChipPreview extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Column(
@@ -646,7 +646,7 @@ class _IngredientsPreviewContent extends StatelessWidget {
               child: Container(
                 height: 8,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withOpacity(0.25),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -695,7 +695,7 @@ class _InstructionsPreviewContent extends StatelessWidget {
                   Container(
                     height: 8,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.outline.withOpacity(0.25),
+                      color: theme.colorScheme.outline.withValues(alpha: 0.25),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -704,7 +704,7 @@ class _InstructionsPreviewContent extends StatelessWidget {
                     height: 8,
                     width: 80,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.outline.withOpacity(0.15),
+                      color: theme.colorScheme.outline.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),

@@ -113,6 +113,9 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
 
+          // ============ NUTRITION DISPLAY (NEW!) ============
+          _NutritionSettingsSection(settings: settings, ref: ref),
+
           // ============ SHOPPING ============
           _SettingsSection(
             title: l10n.shoppingTitle,
@@ -487,6 +490,154 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
+// ============ NUTRITION SETTINGS SECTION (NEW!) ============
+
+class _NutritionSettingsSection extends StatelessWidget {
+  final AppSettings settings;
+  final WidgetRef ref;
+
+  const _NutritionSettingsSection({required this.settings, required this.ref});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return _SettingsSection(
+      title: 'Nutrition Display',
+      children: [
+        // Default View Toggle
+        ListTile(
+          leading: const Icon(Icons.visibility),
+          title: const Text('Default nutrition view'),
+          subtitle: Text(settings.defaultNutritionView == NutritionDisplayMode.perServing
+              ? 'Per serving'
+              : 'Total'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => _showViewPicker(context),
+        ),
+
+        const Divider(height: 1),
+
+        // Chart Style
+        ListTile(
+          leading: Icon(_getIconForStyle(settings.nutritionChartStyle)),
+          title: const Text('Chart style'),
+          subtitle: Text(_getNameForStyle(settings.nutritionChartStyle)),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => _showStylePicker(context),
+        ),
+
+        const Divider(height: 1),
+
+        // Show Expanded by Default
+        SwitchListTile(
+          value: settings.showExpandedNutrition,
+          onChanged: (value) {
+            ref.read(settingsProvider.notifier).setShowExpandedNutrition(value);
+          },
+          title: const Text('Show expanded nutrition'),
+          subtitle: const Text('Show all nutrition details by default'),
+          secondary: const Icon(Icons.unfold_more),
+        ),
+      ],
+    );
+  }
+
+  IconData _getIconForStyle(NutritionChartStyle style) {
+    switch (style) {
+      case NutritionChartStyle.donut:
+        return Icons.donut_large;
+      case NutritionChartStyle.bars:
+        return Icons.bar_chart;
+      case NutritionChartStyle.numbers:
+        return Icons.numbers;
+    }
+  }
+
+  String _getNameForStyle(NutritionChartStyle style) {
+    switch (style) {
+      case NutritionChartStyle.donut:
+        return 'Donut chart';
+      case NutritionChartStyle.bars:
+        return 'Bar chart';
+      case NutritionChartStyle.numbers:
+        return 'Numbers only';
+    }
+  }
+
+  void _showViewPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Default Nutrition View',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            RadioListTile<NutritionDisplayMode>(
+              value: NutritionDisplayMode.perServing,
+              groupValue: settings.defaultNutritionView,
+              onChanged: (value) {
+                ref.read(settingsProvider.notifier).setDefaultNutritionView(value!);
+                Navigator.pop(ctx);
+              },
+              title: const Text('Per serving'),
+              subtitle: const Text('Show nutrition values per serving'),
+            ),
+            RadioListTile<NutritionDisplayMode>(
+              value: NutritionDisplayMode.total,
+              groupValue: settings.defaultNutritionView,
+              onChanged: (value) {
+                ref.read(settingsProvider.notifier).setDefaultNutritionView(value!);
+                Navigator.pop(ctx);
+              },
+              title: const Text('Total'),
+              subtitle: const Text('Show total nutrition for entire recipe'),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showStylePicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Chart Style',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            ...NutritionChartStyle.values.map((style) => RadioListTile<NutritionChartStyle>(
+              value: style,
+              groupValue: settings.nutritionChartStyle,
+              onChanged: (value) {
+                ref.read(settingsProvider.notifier).setNutritionChartStyle(value!);
+                Navigator.pop(ctx);
+              },
+              title: Text(_getNameForStyle(style)),
+              secondary: Icon(_getIconForStyle(style)),
+            )),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ============ HELPER WIDGETS ============
 
 class _SettingsSection extends StatelessWidget {
@@ -601,7 +752,6 @@ class _RpgModeTileState extends State<_RpgModeTile> with SingleTickerProviderSta
 
   void _handleToggle(bool value) {
     if (value) {
-      // Turning ON - play magic animation
       setState(() => _showMagicEffect = true);
       _controller.forward(from: 0.0).then((_) {
         setState(() => _showMagicEffect = false);
@@ -621,7 +771,6 @@ class _RpgModeTileState extends State<_RpgModeTile> with SingleTickerProviderSta
         return Stack(
           clipBehavior: Clip.none,
           children: [
-            // Glow effect behind the tile
             if (_showMagicEffect)
               Positioned.fill(
                 child: AnimatedOpacity(
@@ -648,7 +797,6 @@ class _RpgModeTileState extends State<_RpgModeTile> with SingleTickerProviderSta
                 ),
               ),
 
-            // Main tile with transform
             Transform.scale(
               scale: _scaleAnimation.value,
               child: Transform.rotate(
@@ -672,7 +820,7 @@ class _RpgModeTileState extends State<_RpgModeTile> with SingleTickerProviderSta
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: widget.isEnabled
-                            ? Colors.purple.withOpacity(0.2)
+                            ? Colors.purple.withValues(alpha: 0.2)
                             : theme.colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -721,10 +869,8 @@ class _RpgModeTileState extends State<_RpgModeTile> with SingleTickerProviderSta
               ),
             ),
 
-            // Sparkle particles
             if (_showMagicEffect)
               ...List.generate(8, (index) {
-                final angle = (index / 8) * 3.14159 * 2;
                 final radius = 40 + (index % 3) * 20.0;
                 return Positioned(
                   left: MediaQuery.of(context).size.width / 2 +

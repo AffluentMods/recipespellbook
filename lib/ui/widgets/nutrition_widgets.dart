@@ -179,7 +179,7 @@ class _MacroChip extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 2),
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -194,7 +194,7 @@ class _MacroChip extends StatelessWidget {
           Text(
             unit,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: color.withOpacity(0.7),
+              color: color.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(height: 2),
@@ -255,7 +255,7 @@ class NutritionBanner extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Colors.white.withOpacity(0.1),
+      color: Colors.white.withValues(alpha: 0.1),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -295,7 +295,7 @@ class _NutrientPill extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             fontSize: 10,
           ),
         ),
@@ -391,7 +391,7 @@ class _NutritionEditSheetState extends State<NutritionEditSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withOpacity(0.3),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -423,7 +423,7 @@ class _NutritionEditSheetState extends State<NutritionEditSheet> {
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.tertiaryContainer.withOpacity(0.3),
+                  color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -463,12 +463,12 @@ class _NutritionEditSheetState extends State<NutritionEditSheet> {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          Expanded(child: Divider(color: theme.colorScheme.outline.withOpacity(0.3))),
+                          Expanded(child: Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3))),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(l10n.orDivider, style: theme.textTheme.bodySmall),
                           ),
-                          Expanded(child: Divider(color: theme.colorScheme.outline.withOpacity(0.3))),
+                          Expanded(child: Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3))),
                         ],
                       ),
                       const SizedBox(height: 16),

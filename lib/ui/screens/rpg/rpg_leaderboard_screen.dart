@@ -337,7 +337,7 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
                 color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: theme.colorScheme.outline.withOpacity(0.3),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
                 ),
               ),
               child: Column(
@@ -400,13 +400,13 @@ class _PlayerCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            profile.playerClass.color.withOpacity(0.3),
+            profile.playerClass.color.withValues(alpha: 0.3),
             theme.colorScheme.surface,
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: profile.playerClass.color.withOpacity(0.5),
+          color: profile.playerClass.color.withValues(alpha: 0.5),
         ),
       ),
       child: Row(
@@ -417,7 +417,7 @@ class _PlayerCard extends StatelessWidget {
             height: 80,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: profile.playerClass.color.withOpacity(0.2),
+              color: profile.playerClass.color.withValues(alpha: 0.2),
               border: Border.all(
                 color: profile.playerClass.color,
                 width: 3,
@@ -502,9 +502,9 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -562,7 +562,7 @@ class _MilestoneCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isCompleted
-            ? color.withOpacity(0.1)
+            ? color.withValues(alpha: 0.1)
             : theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
         border: isCompleted
@@ -574,7 +574,7 @@ class _MilestoneCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: isCompleted ? color : color.withOpacity(0.2),
+              color: isCompleted ? color : color.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -667,8 +667,8 @@ class _ComparisonRow extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
               color: isAboveAvg
-                  ? Colors.green.withOpacity(0.2)
-                  : Colors.red.withOpacity(0.2),
+                  ? Colors.green.withValues(alpha: 0.2)
+                  : Colors.red.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(

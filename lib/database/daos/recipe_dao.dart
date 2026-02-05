@@ -382,9 +382,68 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
         .get();
   }
 
+  Future<void> duplicateRecipe(String recipeId, String newId) async {
+    // Get the original recipe
+    final recipe = await getRecipeById(recipeId);
+    if (recipe == null) throw Exception('Recipe not found');
+
+    // Insert the duplicated recipe
+    await insertRecipe(RecipesCompanion.insert(
+      id: newId,
+      cookbookId: recipe.cookbookId,
+      title: '${recipe.title} (Copy)',
+      description: Value(recipe.description),
+      servings: Value(recipe.servings),
+      prepTimeMinutes: Value(recipe.prepTimeMinutes),
+      cookTimeMinutes: Value(recipe.cookTimeMinutes),
+      sourceUrl: Value(recipe.sourceUrl),
+      imagePath: Value(recipe.imagePath),
+      courseId: Value(recipe.courseId),
+      categoryId: Value(recipe.categoryId),
+      rating: Value(recipe.rating),
+      notes: Value(recipe.notes),
+      nutritionJson: Value(recipe.nutritionJson),
+      isFavorite: const Value(false),
+      isPinned: const Value(false),
+    ));
+
+    // Copy ingredients
+    final ings = await getIngredientsForRecipe(recipeId);
+    for (var i = 0; i < ings.length; i++) {
+      final ing = ings[i];
+      await insertIngredient(IngredientsCompanion.insert(
+        id: '${newId}_ing_$i',
+        recipeId: newId,
+        sortOrder: ing.sortOrder,
+        name: ing.name,
+        amount: Value(ing.amount),
+        unit: Value(ing.unit),
+        notes: Value(ing.notes),
+      ));
+    }
+
+    // Copy steps
+    final stps = await getStepsForRecipe(recipeId);
+    for (var i = 0; i < stps.length; i++) {
+      final stp = stps[i];
+      await insertStep(StepsCompanion.insert(
+        id: '${newId}_step_$i',
+        recipeId: newId,
+        sortOrder: stp.sortOrder,
+        instruction: stp.instruction,
+        durationMinutes: Value(stp.durationMinutes),
+        imagePath: Value(stp.imagePath),
+      ));
+    }
+  }
+
   /// Toggle pin status (takes recipeId and new pin state)
   Future<void> togglePin(String recipeId, bool pinned) async {
     await (update(recipes)..where((r) => r.id.equals(recipeId)))
         .write(RecipesCompanion(isPinned: Value(pinned)));
+  }
+
+  Future<void> moveToTrash(String recipeId) async {
+    await softDeleteRecipe(recipeId);
   }
 }

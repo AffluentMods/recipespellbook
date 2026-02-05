@@ -67,20 +67,53 @@ class LocalizedDefaults {
   }
 
   // ============ SHOPPING CATEGORY DISPLAY NAMES ============
+  // Expanded to 19+ categories matching Recipe Keeper / Instacart layout
 
   String getShoppingCategoryDisplayName(String categoryId) {
     switch (categoryId) {
+    // Produce & Fresh
       case 'produce': return l10n.shoppingProduce;
+
+    // Proteins
       case 'dairy': return l10n.shoppingDairy;
       case 'meat': return l10n.shoppingMeat;
       case 'seafood': return l10n.shoppingSeafood;
+      case 'deli': return l10n.shoppingDeli;
+
+    // Bakery & Bread
       case 'bakery': return l10n.shoppingBakery;
+
+    // Frozen
       case 'frozen': return l10n.shoppingFrozen;
+
+    // Pantry items (expanded)
       case 'pantry': return l10n.shoppingPantry;
+      case 'cannedGoods': return l10n.shoppingCannedGoods;
+      case 'condiments': return l10n.shoppingCondiments;
       case 'spices': return l10n.shoppingSpices;
-      case 'beverages': return l10n.shoppingBeverages;
+      case 'grainsAndPasta': return l10n.shoppingGrainsAndPasta;
+      case 'cookingAndBaking': return l10n.shoppingCookingAndBaking;
+
+    // Breakfast & Cereal
+      case 'breakfastCereal': return l10n.shoppingBreakfastCereal;
+
+    // Snacks & Sweets
       case 'snacks': return l10n.shoppingSnacks;
+
+    // Beverages (expanded)
+      case 'beverages': return l10n.shoppingBeverages;
+      case 'beerWineSpirits': return l10n.shoppingBeerWineSpirits;
+
+    // International
       case 'international': return l10n.shoppingInternational;
+
+    // Non-food categories
+      case 'baby': return l10n.shoppingBaby;
+      case 'pet': return l10n.shoppingPet;
+      case 'household': return l10n.shoppingHousehold;
+      case 'personalCare': return l10n.shoppingPersonalCare;
+
+    // Fallback
       case 'other': return l10n.shoppingOther;
       default: return categoryId;
     }
@@ -122,21 +155,86 @@ class LocalizedDefaults {
   ];
 
   // ============ ALL SHOPPING CATEGORY DATA ============
+  // Expanded from 12 to 22 categories matching Recipe Keeper / grocery store layout
+  // Order follows typical grocery store aisle flow
 
   static const List<ShoppingCategoryData> shoppingCategories = [
-    ShoppingCategoryData(id: 'produce', emoji: '🥬'),
-    ShoppingCategoryData(id: 'dairy', emoji: '🥛'),
-    ShoppingCategoryData(id: 'meat', emoji: '🥩'),
-    ShoppingCategoryData(id: 'seafood', emoji: '🐟'),
-    ShoppingCategoryData(id: 'bakery', emoji: '🍞'),
-    ShoppingCategoryData(id: 'frozen', emoji: '🧊'),
-    ShoppingCategoryData(id: 'pantry', emoji: '🥫'),
-    ShoppingCategoryData(id: 'spices', emoji: '🧂'),
-    ShoppingCategoryData(id: 'beverages', emoji: '🥤'),
-    ShoppingCategoryData(id: 'snacks', emoji: '🍿'),
-    ShoppingCategoryData(id: 'international', emoji: '🌍'),
-    ShoppingCategoryData(id: 'other', emoji: '📦'),
+    // Fresh produce first (usually near entrance)
+    ShoppingCategoryData(id: 'produce', emoji: '🥬', sortOrder: 1),
+
+    // Bakery (often near produce)
+    ShoppingCategoryData(id: 'bakery', emoji: '🍞', sortOrder: 2),
+
+    // Deli & prepared foods
+    ShoppingCategoryData(id: 'deli', emoji: '🥓', sortOrder: 3),
+
+    // Dairy & eggs (usually in back)
+    ShoppingCategoryData(id: 'dairy', emoji: '🥛', sortOrder: 4),
+
+    // Meat & poultry
+    ShoppingCategoryData(id: 'meat', emoji: '🥩', sortOrder: 5),
+
+    // Seafood
+    ShoppingCategoryData(id: 'seafood', emoji: '🐟', sortOrder: 6),
+
+    // Frozen foods
+    ShoppingCategoryData(id: 'frozen', emoji: '🧊', sortOrder: 7),
+
+    // Breakfast & Cereal
+    ShoppingCategoryData(id: 'breakfastCereal', emoji: '🥣', sortOrder: 8),
+
+    // Grains, pasta & rice
+    ShoppingCategoryData(id: 'grainsAndPasta', emoji: '🌾', sortOrder: 9),
+
+    // Canned goods & soups
+    ShoppingCategoryData(id: 'cannedGoods', emoji: '🥫', sortOrder: 10),
+
+    // Condiments, sauces & dressings
+    ShoppingCategoryData(id: 'condiments', emoji: '🍯', sortOrder: 11),
+
+    // Spices & seasonings
+    ShoppingCategoryData(id: 'spices', emoji: '🧂', sortOrder: 12),
+
+    // Cooking & baking supplies
+    ShoppingCategoryData(id: 'cookingAndBaking', emoji: '🧁', sortOrder: 13),
+
+    // Snacks, cookies & candy
+    ShoppingCategoryData(id: 'snacks', emoji: '🍿', sortOrder: 14),
+
+    // Beverages (non-alcoholic)
+    ShoppingCategoryData(id: 'beverages', emoji: '🥤', sortOrder: 15),
+
+    // Beer, wine & spirits
+    ShoppingCategoryData(id: 'beerWineSpirits', emoji: '🍷', sortOrder: 16),
+
+    // International foods
+    ShoppingCategoryData(id: 'international', emoji: '🌍', sortOrder: 17),
+
+    // Baby products
+    ShoppingCategoryData(id: 'baby', emoji: '👶', sortOrder: 18),
+
+    // Pet supplies
+    ShoppingCategoryData(id: 'pet', emoji: '🐕', sortOrder: 19),
+
+    // Household items
+    ShoppingCategoryData(id: 'household', emoji: '🧹', sortOrder: 20),
+
+    // Personal care & beauty
+    ShoppingCategoryData(id: 'personalCare', emoji: '🧴', sortOrder: 21),
+
+    // Legacy pantry (for backwards compatibility)
+    ShoppingCategoryData(id: 'pantry', emoji: '🥫', sortOrder: 22),
+
+    // Other (always last)
+    ShoppingCategoryData(id: 'other', emoji: '📦', sortOrder: 99),
   ];
+
+  // Helper to get categories sorted by store layout
+  static List<ShoppingCategoryData> get sortedShoppingCategories {
+    final sorted = List<ShoppingCategoryData>.from(shoppingCategories);
+    sorted.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    return sorted;
+  }
 }
 
 class CourseData {
@@ -156,6 +254,11 @@ class CategoryData {
 class ShoppingCategoryData {
   final String id;
   final String emoji;
+  final int sortOrder;
 
-  const ShoppingCategoryData({required this.id, required this.emoji});
+  const ShoppingCategoryData({
+    required this.id,
+    required this.emoji,
+    this.sortOrder = 50,
+  });
 }

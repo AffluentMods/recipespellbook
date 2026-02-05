@@ -233,6 +233,39 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get shoppingDeli => 'Fiambrería';
+
+  @override
+  String get shoppingCannedGoods => 'Enlatados y Sopas';
+
+  @override
+  String get shoppingCondiments => 'Condimentos y Salsas';
+
+  @override
+  String get shoppingGrainsAndPasta => 'Granos, Pasta y Arroz';
+
+  @override
+  String get shoppingCookingAndBaking => 'Cocina y Repostería';
+
+  @override
+  String get shoppingBreakfastCereal => 'Desayuno y Cereales';
+
+  @override
+  String get shoppingBeerWineSpirits => 'Cerveza, Vino y Licores';
+
+  @override
+  String get shoppingBaby => 'Bebé';
+
+  @override
+  String get shoppingPet => 'Mascotas';
+
+  @override
+  String get shoppingHousehold => 'Hogar';
+
+  @override
+  String get shoppingPersonalCare => 'Cuidado Personal';
+
+  @override
   String get plannerTitle => 'Planificador de Comidas';
 
   @override
@@ -3286,4 +3319,100 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get navComingSoon => 'Próximamente';
+
+  @override
+  String get mealPlanButton => 'Plan de Comidas';
+
+  @override
+  String get groceriesButton => 'Compras';
+
+  @override
+  String get shareButton => 'Compartir';
+
+  @override
+  String get scaleRecipeButton => 'Escalar';
+
+  @override
+  String get convertUnitsButton => 'Convertir';
+
+  @override
+  String get allergyDismissTooltip => 'Cerrar aviso';
+
+  @override
+  String get allergyDisablePrompt => '¿Desactivar esta advertencia permanentemente para esta receta?';
+
+  @override
+  String get allergyDisabledForRecipe => 'Advertencia desactivada para esta receta';
+
+  @override
+  String get allergyRestoreWarnings => 'Restaurar advertencias';
+
+  @override
+  String get recipeDuplicated => 'Receta duplicada';
+
+  @override
+  String get recipeDeleted => 'Receta movida a la papelera';
+
+  @override
+  String get deleteRecipeTitle => 'Eliminar Receta';
+
+  @override
+  String get deleteRecipeConfirm => '¿Estás seguro de que quieres eliminar esta receta? Se moverá a la papelera.';
+
+  @override
+  String get addToShoppingListTitle => 'Agregar a Lista de Compras';
+
+  @override
+  String get viewList => 'Ver Lista';
+
+  @override
+  String get selectItems => 'Seleccionar artículos';
+
+  @override
+  String addToListCount(int count) {
+    return 'Agregar $count artículos';
+  }
+
+  @override
+  String get yes => 'Sí';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get delete => 'Eliminar';
+
+  @override
+  String get save => 'Guardar';
+
+  @override
+  String get restore => 'Restaurar';
+
+  @override
+  String get unselectAll => 'Deseleccionar Todo';
+
+  @override
+  String get deleteStep => 'Eliminar Paso';
+
+  @override
+  String get deleteSteps => 'Eliminar Pasos';
+
+  @override
+  String get deleteStepConfirm => '¿Eliminar este paso?';
+
+  @override
+  String deleteStepsConfirm(int count) {
+    return '¿Eliminar $count pasos?';
+  }
+
+  @override
+  String stepSelected(int count) {
+    return '$count seleccionados';
+  }
+
+  @override
+  String get selectAllSteps => 'Seleccionar Todos';
 }

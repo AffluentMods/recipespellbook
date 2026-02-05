@@ -379,7 +379,7 @@ class _MediumCard extends StatelessWidget {
                       child: Icon(
                         Icons.restaurant_menu,
                         size: 40,
-                        color: theme.colorScheme.onPrimaryContainer.withOpacity(0.5),
+                        color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -397,7 +397,7 @@ class _MediumCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.favorite, color: Colors.red, size: 16),
@@ -502,7 +502,7 @@ class _LargeCard extends StatelessWidget {
                         child: Icon(
                           Icons.restaurant_menu,
                           size: 40,
-                          color: theme.colorScheme.onPrimaryContainer.withOpacity(0.5),
+                          color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
                         ),
                       ),
                     ),
@@ -638,7 +638,7 @@ class _SourceIcon extends StatelessWidget {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         shape: BoxShape.circle,
       ),
       child: Icon(icon, size: 20, color: color),

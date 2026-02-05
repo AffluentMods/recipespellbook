@@ -309,13 +309,13 @@ class _TaxonomyPickerSheetState extends ConsumerState<_TaxonomyPickerSheet> {
                       child: Row(children: [
                         Container(
                           width: 36, height: 36,
-                          decoration: BoxDecoration(color: theme.colorScheme.primary.withOpacity(0.2), borderRadius: BorderRadius.circular(8)),
+                          decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
                           child: Icon(Icons.add, color: theme.colorScheme.primary, size: 20),
                         ),
                         const SizedBox(width: 12),
                         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Text('Create "${getSuggestedEmoji(query)} $query"', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: theme.colorScheme.onPrimaryContainer)),
-                          Text('Add as new ${widget.type == _TaxonomyType.course ? 'course' : 'category'}', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimaryContainer.withOpacity(0.7))),
+                          Text('Add as new ${widget.type == _TaxonomyType.course ? 'course' : 'category'}', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7))),
                         ])),
                       ]),
                     ),
@@ -348,7 +348,7 @@ class _TaxonomyPickerSheetState extends ConsumerState<_TaxonomyPickerSheet> {
                             Expanded(child: Text(item.name, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal))),
                             if (item.isCustom) Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(color: theme.colorScheme.outline.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
+                              decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
                               child: Text('Custom', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline)),
                             ),
                             if (isSelected) Padding(padding: const EdgeInsets.only(left: 8), child: Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20)),

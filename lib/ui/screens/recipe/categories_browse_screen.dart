@@ -113,7 +113,7 @@ class CategoriesBrowseScreen extends ConsumerWidget {
                               children: [
                                 Text(l10n.viewAllRecipes, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 4),
-                                Text(l10n.recipesTotal(recipes.length), style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimaryContainer.withOpacity(0.7))),
+                                Text(l10n.recipesTotal(recipes.length), style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7))),
                               ],
                             ),
                           ),

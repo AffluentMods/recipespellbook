@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../providers/rpg_provider.dart';
 
 /// Helper class for RPG-style ratings
 class RpgRatingHelper {
@@ -95,7 +96,8 @@ class RecipeRatingDisplay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
-    final nerdMode = settings.nerdMode;
+    final rpgEnabled = ref.watch(rpgEnabledProvider);
+    final nerdMode = settings.nerdMode && rpgEnabled; // RPG ratings only when BOTH are on
     final theme = Theme.of(context);
 
     if (rating == null || rating == 0) {
@@ -115,9 +117,9 @@ class RecipeRatingDisplay extends ConsumerWidget {
           vertical: compact ? 2 : 4,
         ),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
+          color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(compact ? 4 : 8),
-          border: Border.all(color: color.withOpacity(0.5)),
+          border: Border.all(color: color.withValues(alpha: 0.5)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -181,7 +183,8 @@ class RecipeRatingPicker extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
-    final nerdMode = settings.nerdMode;
+    final rpgEnabled = ref.watch(rpgEnabledProvider);
+    final nerdMode = settings.nerdMode && rpgEnabled;
     final l10n = AppLocalizations.of(context)!;
 
     if (nerdMode) {
@@ -285,10 +288,10 @@ class _RpgRatingChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.2) : Colors.transparent,
+          color: isSelected ? color.withValues(alpha: 0.2) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? color : color.withOpacity(0.5),
+            color: isSelected ? color : color.withValues(alpha: 0.5),
             width: isSelected ? 2 : 1,
           ),
         ),

@@ -126,7 +126,7 @@ class _ManageTagsSheetState extends ConsumerState<_ManageTagsSheet> {
           width: 40,
           height: 4,
           decoration: BoxDecoration(
-            color: theme.colorScheme.outline.withOpacity(0.3),
+            color: theme.colorScheme.outline.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -263,7 +263,7 @@ class _ManageTagsSheetState extends ConsumerState<_ManageTagsSheet> {
                         height: 44,
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? selectedColor.withOpacity(0.2)
+                              ? selectedColor.withValues(alpha: 0.2)
                               : Theme.of(context).colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(8),
                           border: isSelected
@@ -355,7 +355,7 @@ class _TagListItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: isSelected ? tag.color.withOpacity(0.15) : theme.colorScheme.surfaceContainerHighest,
+        color: isSelected ? tag.color.withValues(alpha: 0.15) : theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           onTap: onToggle,
@@ -368,7 +368,7 @@ class _TagListItem extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: tag.color.withOpacity(0.2),
+                    color: tag.color.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(tag.icon, color: tag.color, size: 22),
@@ -438,7 +438,7 @@ class RecipeTagsRow extends StatelessWidget {
             vertical: compact ? 2 : 4,
           ),
           decoration: BoxDecoration(
-            color: tag.color.withOpacity(0.15),
+            color: tag.color.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(compact ? 4 : 8),
           ),
           child: Row(
