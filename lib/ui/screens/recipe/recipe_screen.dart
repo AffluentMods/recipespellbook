@@ -15,6 +15,7 @@ import '../../widgets/recipe_tags_display.dart';
 import '../../widgets/add_to_meal_plan_dialogue.dart';
 import '../../widgets/add_to_shopping_list_sheet.dart';
 import '../../widgets/recipe_share_sheet.dart';
+import '../../../data/rpg/rpg_text.dart';
 
 // ============ DISMISSED ALLERGY WARNINGS ============
 // Canonical provider is in allergy_settings_screen.dart — imported via:
@@ -57,6 +58,68 @@ class RarityColors {
   }
 }
 
+// ============ UNIT CONVERSION ============
+
+enum _UnitConversion { none, toImperial, toMetric }
+
+class _UnitConverter {
+  static const Map<String, _ConversionRule> _metricToImperial = {
+    'ml': _ConversionRule('fl oz', 0.033814),
+    'l': _ConversionRule('qt', 1.05669),
+    'g': _ConversionRule('oz', 0.035274),
+    'kg': _ConversionRule('lb', 2.20462),
+    'cm': _ConversionRule('in', 0.393701),
+    'mm': _ConversionRule('in', 0.0393701),
+  };
+  static const Map<String, _ConversionRule> _imperialToMetric = {
+    'oz': _ConversionRule('g', 28.3495),
+    'lb': _ConversionRule('kg', 0.453592),
+    'cup': _ConversionRule('ml', 236.588),
+    'cups': _ConversionRule('ml', 236.588),
+    'fl oz': _ConversionRule('ml', 29.5735),
+    'qt': _ConversionRule('l', 0.946353),
+    'gal': _ConversionRule('l', 3.78541),
+    'gallon': _ConversionRule('l', 3.78541),
+    'tsp': _ConversionRule('ml', 4.92892),
+    'tbsp': _ConversionRule('ml', 14.7868),
+    'in': _ConversionRule('cm', 2.54),
+    'pt': _ConversionRule('ml', 473.176),
+    'pint': _ConversionRule('ml', 473.176),
+  };
+
+  static ({String amount, String unit}) convert(
+      String amount, String unit, _UnitConversion mode,
+      ) {
+    if (mode == _UnitConversion.none || unit.isEmpty) {
+      return (amount: amount, unit: unit);
+    }
+
+    final rules = mode == _UnitConversion.toImperial
+        ? _metricToImperial
+        : _imperialToMetric;
+
+    final unitLower = unit.toLowerCase().trim();
+    final rule = rules[unitLower];
+    if (rule == null) return (amount: amount, unit: unit);
+
+    final numVal = double.tryParse(amount.replaceAll(RegExp(r'[^\d.]'), ''));
+    if (numVal == null) return (amount: amount, unit: unit);
+
+    final converted = numVal * rule.factor;
+    final displayAmount = converted < 10
+        ? converted.toStringAsFixed(1)
+        : converted.round().toString();
+
+    return (amount: displayAmount, unit: rule.targetUnit);
+  }
+}
+
+class _ConversionRule {
+  final String targetUnit;
+  final double factor;
+  const _ConversionRule(this.targetUnit, this.factor);
+}
+
 // ============ MAIN SCREEN ============
 
 class RecipeScreen extends ConsumerStatefulWidget {
@@ -76,6 +139,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   bool _isLoading = true;
   double _scaleFactor = 1.0;
   bool _showNutritionPerServing = true;
+  _UnitConversion _unitConversion = _UnitConversion.none;
 
   late TabController _tabController;
 
@@ -169,6 +233,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     final theme = Theme.of(context);
     final settings = ref.watch(settingsProvider);
     final isNerdMode = settings.nerdMode;
+    final rpg = RpgText.of(l10n, isNerdMode);
     final useTabbed = settings.recipeLayoutMode == RecipeLayoutMode.tabbed;
 
     if (_isLoading || _recipe == null) {
@@ -180,12 +245,12 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
 
     return Scaffold(
       body: useTabbed
-          ? _buildTabbedLayout(theme, l10n, isNerdMode)
-          : _buildStackedLayout(theme, l10n, isNerdMode),
+          ? _buildTabbedLayout(theme, l10n, isNerdMode, rpg)
+          : _buildStackedLayout(theme, l10n, isNerdMode, rpg),
     );
   }
 
-  Widget _buildStackedLayout(ThemeData theme, AppLocalizations l10n, bool isNerdMode) {
+  Widget _buildStackedLayout(ThemeData theme, AppLocalizations l10n, bool isNerdMode, RpgText rpg) {
     return CustomScrollView(
       slivers: [
         _RecipeAppBar(
@@ -239,11 +304,12 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   onAddToMealPlan: _showAddToMealPlanSheet,
                   onAddToShopping: _showAddToShoppingSheet,
                   onShare: _showShareSheet,
+                  nerdMode: isNerdMode,
                 ),
                 const SizedBox(height: 20),
 
                 // Recipe meta info (times, servings) WITHOUT scale buttons
-                _RecipeMetaInfoCard(recipe: _recipe!),
+                _RecipeMetaInfoCard(recipe: _recipe!, nerdMode: isNerdMode),
 
                 // NEW: Separate Scale & Convert buttons
                 const SizedBox(height: 16),
@@ -251,6 +317,9 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   currentScale: _scaleFactor,
                   servings: _recipe!.servings,
                   onScaleChanged: (scale) => setState(() => _scaleFactor = scale),
+                  nerdMode: isNerdMode,
+                  unitConversion: _unitConversion,
+                  onConversionChanged: (mode) => setState(() => _unitConversion = mode),
                 ),
 
                 // Dismissible Allergy warning banner with improved UX
@@ -263,14 +332,14 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 const SizedBox(height: 24),
                 _SectionHeader(title: l10n.ingredientsTitle, trailing: _scaleFactor != 1.0 ? Text('${_scaleFactor}x', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary)) : null),
                 const SizedBox(height: 12),
-                ..._ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: _scaleFactor)),
+                ..._ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: _scaleFactor, unitConversion: _unitConversion)),
 
                 // NEW: Large "Add to Shopping List" button at bottom of ingredients
                 const SizedBox(height: 16),
                 _LargeAddToShoppingButton(onTap: _showAddToShoppingSheet),
 
                 const SizedBox(height: 32),
-                _SectionHeader(title: l10n.instructionsTitle),
+                _SectionHeader(title: rpg.instructionsTitle),
                 const SizedBox(height: 12),
                 ..._steps.asMap().entries.map((entry) => _InstructionStep(
                   stepNumber: entry.key + 1,
@@ -278,7 +347,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 )),
                 if (_recipe!.notes != null && _recipe!.notes!.isNotEmpty) ...[
                   const SizedBox(height: 32),
-                  _SectionHeader(title: l10n.recipeFieldNotes),
+                  _SectionHeader(title: rpg.recipeFieldNotes),
                   const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.all(16),
@@ -288,7 +357,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 ],
                 // Nutrition section
                 const SizedBox(height: 32),
-                _SectionHeader(title: l10n.nutritionTitle),
+                _SectionHeader(title: rpg.nutritionTitle),
                 const SizedBox(height: 12),
                 _ModernNutritionCard(
                   nutrition: _nutrition,
@@ -308,7 +377,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     );
   }
 
-  Widget _buildTabbedLayout(ThemeData theme, AppLocalizations l10n, bool isNerdMode) {
+  Widget _buildTabbedLayout(ThemeData theme, AppLocalizations l10n, bool isNerdMode, RpgText rpg) {
     return NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         _RecipeAppBar(
@@ -356,14 +425,18 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   onAddToMealPlan: _showAddToMealPlanSheet,
                   onAddToShopping: _showAddToShoppingSheet,
                   onShare: _showShareSheet,
+                  nerdMode: isNerdMode,
                 ),
                 const SizedBox(height: 20),
-                _RecipeMetaInfoCard(recipe: _recipe!),
+                _RecipeMetaInfoCard(recipe: _recipe!, nerdMode: isNerdMode),
                 const SizedBox(height: 16),
                 _ModernScaleConvertButtons(
                   currentScale: _scaleFactor,
                   servings: _recipe!.servings,
                   onScaleChanged: (scale) => setState(() => _scaleFactor = scale),
+                  nerdMode: isNerdMode,
+                  unitConversion: _unitConversion,
+                  onConversionChanged: (mode) => setState(() => _unitConversion = mode),
                 ),
                 const SizedBox(height: 16),
                 _ImprovedAllergyWarning(
@@ -380,9 +453,9 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
             TabBar(
               controller: _tabController,
               tabs: [
-                Tab(text: l10n.nutritionTitle),
+                Tab(text: rpg.nutritionTitle),
                 Tab(text: l10n.ingredientsTitle),
-                Tab(text: l10n.instructionsTitle),
+                Tab(text: rpg.instructionsTitle),
               ],
             ),
             theme.colorScheme.surface,
@@ -393,8 +466,8 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
         controller: _tabController,
         children: [
           _NutritionTab(nutrition: _nutrition, scaleFactor: _scaleFactor, l10n: l10n, servings: _recipe!.servings, showPerServing: _showNutritionPerServing, onTogglePerServing: (v) => setState(() => _showNutritionPerServing = v), isNerdMode: isNerdMode),
-          _IngredientsTab(ingredients: _ingredients, scaleFactor: _scaleFactor, l10n: l10n, onAddToShopping: _showAddToShoppingSheet),
-          _InstructionsTab(steps: _steps, notes: _recipe!.notes, l10n: l10n),
+          _IngredientsTab(ingredients: _ingredients, scaleFactor: _scaleFactor, l10n: l10n, onAddToShopping: _showAddToShoppingSheet, unitConversion: _unitConversion),
+          _InstructionsTab(steps: _steps, notes: _recipe!.notes, l10n: l10n, nerdMode: isNerdMode),
         ],
       ),
     );
@@ -407,16 +480,19 @@ class _ModernQuickActionsRow extends StatelessWidget {
   final VoidCallback onAddToMealPlan;
   final VoidCallback onAddToShopping;
   final VoidCallback onShare;
+  final bool nerdMode;
 
   const _ModernQuickActionsRow({
     required this.onAddToMealPlan,
     required this.onAddToShopping,
     required this.onShare,
+    this.nerdMode = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final rpg = RpgText.of(l10n, nerdMode);
     final theme = Theme.of(context);
 
     return Row(
@@ -424,7 +500,7 @@ class _ModernQuickActionsRow extends StatelessWidget {
         Expanded(
           child: _ModernActionButton(
             icon: Icons.calendar_month_outlined,
-            label: l10n.mealPlanButton,
+            label: rpg.mealPlanButton,
             onTap: onAddToMealPlan,
           ),
         ),
@@ -432,7 +508,7 @@ class _ModernQuickActionsRow extends StatelessWidget {
         Expanded(
           child: _ModernActionButton(
             icon: Icons.add_shopping_cart_rounded,
-            label: l10n.groceriesButton,
+            label: rpg.groceriesButton,
             onTap: onAddToShopping,
           ),
         ),
@@ -498,8 +574,9 @@ class _ModernActionButton extends StatelessWidget {
 
 class _RecipeMetaInfoCard extends StatelessWidget {
   final Recipe recipe;
+  final bool nerdMode;
 
-  const _RecipeMetaInfoCard({required this.recipe});
+  const _RecipeMetaInfoCard({required this.recipe, this.nerdMode = false});
 
   String _formatMinutes(int? minutes) {
     if (minutes == null || minutes <= 0) return '';
@@ -514,6 +591,7 @@ class _RecipeMetaInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    final rpg = RpgText.of(l10n, nerdMode);
 
     final prepTimeStr = _formatMinutes(recipe.prepTimeMinutes);
     final cookTimeStr = _formatMinutes(recipe.cookTimeMinutes);
@@ -529,11 +607,11 @@ class _RecipeMetaInfoCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           if (prepTimeStr.isNotEmpty)
-            _MetaItem(icon: Icons.timer_outlined, label: l10n.recipeFieldPrepTime, value: prepTimeStr),
+            _MetaItem(icon: Icons.timer_outlined, label: rpg.recipeFieldPrepTime, value: prepTimeStr),
           if (cookTimeStr.isNotEmpty)
-            _MetaItem(icon: Icons.local_fire_department_outlined, label: l10n.recipeFieldCookTime, value: cookTimeStr),
+            _MetaItem(icon: Icons.local_fire_department_outlined, label: rpg.recipeFieldCookTime, value: cookTimeStr),
           if (recipe.servings != null && recipe.servings!.isNotEmpty)
-            _MetaItem(icon: Icons.people_outline, label: l10n.recipeFieldServings, value: recipe.servings!),
+            _MetaItem(icon: Icons.people_outline, label: rpg.recipeFieldServings, value: recipe.servings!),
         ],
       ),
     );
@@ -546,17 +624,24 @@ class _ModernScaleConvertButtons extends StatelessWidget {
   final double currentScale;
   final String? servings;
   final ValueChanged<double> onScaleChanged;
+  final bool nerdMode;
+  final _UnitConversion unitConversion;
+  final ValueChanged<_UnitConversion> onConversionChanged;
 
   const _ModernScaleConvertButtons({
     required this.currentScale,
     this.servings,
     required this.onScaleChanged,
+    this.nerdMode = false,
+    this.unitConversion = _UnitConversion.none,
+    required this.onConversionChanged,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    final rpg = RpgText.of(l10n, nerdMode);
 
     return Row(
       children: [
@@ -564,7 +649,7 @@ class _ModernScaleConvertButtons extends StatelessWidget {
           child: OutlinedButton.icon(
             onPressed: () => _showScaleDialog(context),
             icon: const Icon(Icons.scale, size: 18),
-            label: Text(currentScale == 1.0 ? l10n.scaleRecipeButton : '${currentScale}x'),
+            label: Text(currentScale == 1.0 ? rpg.scaleRecipeButton : '${currentScale}x'),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -584,7 +669,7 @@ class _ModernScaleConvertButtons extends StatelessWidget {
           child: OutlinedButton.icon(
             onPressed: () => _showConvertDialog(context),
             icon: const Icon(Icons.swap_horiz, size: 18),
-            label: Text(l10n.convertUnitsButton),
+            label: Text(rpg.convertUnitsButton),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -692,23 +777,36 @@ class _ModernScaleConvertButtons extends StatelessWidget {
             Text('Convert Units', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             ListTile(
-              leading: const Icon(Icons.straighten),
+              leading: Icon(Icons.straighten, color: unitConversion == _UnitConversion.toImperial ? const Color(0xFFE8A860) : null),
               title: const Text('Metric → Imperial'),
-              subtitle: const Text('ml to cups, g to oz'),
+              subtitle: const Text('ml→fl oz, g→oz, kg→lb'),
+              trailing: unitConversion == _UnitConversion.toImperial ? const Icon(Icons.check_circle, color: Color(0xFFE8A860)) : null,
               onTap: () {
                 Navigator.pop(ctx);
-                // TODO: Implement conversion
+                onConversionChanged(unitConversion == _UnitConversion.toImperial ? _UnitConversion.none : _UnitConversion.toImperial);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.square_foot),
+              leading: Icon(Icons.square_foot, color: unitConversion == _UnitConversion.toMetric ? const Color(0xFFE8A860) : null),
               title: const Text('Imperial → Metric'),
-              subtitle: const Text('cups to ml, oz to g'),
+              subtitle: const Text('cups→ml, oz→g, tsp→ml'),
+              trailing: unitConversion == _UnitConversion.toMetric ? const Icon(Icons.check_circle, color: Color(0xFFE8A860)) : null,
               onTap: () {
                 Navigator.pop(ctx);
-                // TODO: Implement conversion
+                onConversionChanged(unitConversion == _UnitConversion.toMetric ? _UnitConversion.none : _UnitConversion.toMetric);
               },
             ),
+            if (unitConversion != _UnitConversion.none)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    onConversionChanged(_UnitConversion.none);
+                  },
+                  child: const Text('Reset to Original'),
+                ),
+              ),
             const SizedBox(height: 16),
           ],
         ),
@@ -1490,12 +1588,14 @@ class _IngredientsTab extends ConsumerWidget {
   final double scaleFactor;
   final AppLocalizations l10n;
   final VoidCallback onAddToShopping;
+  final _UnitConversion unitConversion;
 
   const _IngredientsTab({
     required this.ingredients,
     required this.scaleFactor,
     required this.l10n,
     required this.onAddToShopping,
+    this.unitConversion = _UnitConversion.none,
   });
 
   @override
@@ -1505,7 +1605,7 @@ class _IngredientsTab extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        ...ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: scaleFactor)),
+        ...ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: scaleFactor, unitConversion: unitConversion)),
         const SizedBox(height: 16),
         _LargeAddToShoppingButton(onTap: onAddToShopping),
         const SizedBox(height: 32),
@@ -1518,16 +1618,18 @@ class _InstructionsTab extends StatelessWidget {
   final List<Step> steps;
   final String? notes;
   final AppLocalizations l10n;
-  const _InstructionsTab({required this.steps, this.notes, required this.l10n});
+  final bool nerdMode;
+  const _InstructionsTab({required this.steps, this.notes, required this.l10n, this.nerdMode = false});
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final rpg = RpgText.of(l10n, nerdMode);
     if (steps.isEmpty) return Center(child: Text(l10n.instructionsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)));
     return ListView(padding: const EdgeInsets.all(16), children: [
       ...steps.asMap().entries.map((entry) => _InstructionStep(stepNumber: entry.key + 1, step: entry.value)),
       if (notes != null && notes!.isNotEmpty) ...[
         const SizedBox(height: 24),
-        _SectionHeader(title: l10n.recipeFieldNotes),
+        _SectionHeader(title: rpg.recipeFieldNotes),
         const SizedBox(height: 12),
         Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)), child: Text(notes!, style: theme.textTheme.bodyMedium)),
       ],
@@ -1757,7 +1859,8 @@ class _SectionHeader extends StatelessWidget {
 class _IngredientItemWithAllergen extends ConsumerWidget {
   final Ingredient ingredient;
   final double scaleFactor;
-  const _IngredientItemWithAllergen({required this.ingredient, required this.scaleFactor});
+  final _UnitConversion unitConversion;
+  const _IngredientItemWithAllergen({required this.ingredient, required this.scaleFactor, this.unitConversion = _UnitConversion.none});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -1765,12 +1868,22 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
     final userAllergies = settings.allergens;
 
     String amount = ingredient.amount ?? '';
+    String unit = ingredient.unit ?? '';
+
+    // Apply scaling first
     if (scaleFactor != 1.0 && amount.isNotEmpty) {
       final num = double.tryParse(amount.replaceAll(RegExp(r'[^\d.]'), ''));
       if (num != null) {
         final scaled = num * scaleFactor;
         amount = scaled == scaled.roundToDouble() ? scaled.round().toString() : scaled.toStringAsFixed(1);
       }
+    }
+
+    // Apply unit conversion
+    if (unitConversion != _UnitConversion.none && unit.isNotEmpty) {
+      final converted = _UnitConverter.convert(amount, unit, unitConversion);
+      amount = converted.amount;
+      unit = converted.unit;
     }
 
     // Check for allergens
@@ -1789,7 +1902,7 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
               style: theme.textTheme.bodyLarge,
               children: [
                 if (amount.isNotEmpty) TextSpan(text: '$amount ', style: const TextStyle(fontWeight: FontWeight.w600)),
-                if (ingredient.unit != null && ingredient.unit!.isNotEmpty) TextSpan(text: '${ingredient.unit} '),
+                if (unit.isNotEmpty) TextSpan(text: '$unit '),
                 TextSpan(text: ingredient.name),
               ],
             ),

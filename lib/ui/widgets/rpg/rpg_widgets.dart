@@ -35,27 +35,26 @@ class RpgAvatarWidget extends StatelessWidget {
     final avatar = avatarId != null ? RpgAvatars.getById(avatarId!) : null;
     final frame = frameId != null ? RpgFrames.getById(frameId!) : null;
     final pet = petId != null ? RpgPets.getById(petId!) : null;
+    final isDefaultFrame = frameId == null || frameId == 'frame_default';
+
+    final totalSize = size + 16;
 
     return SizedBox(
-      width: size + 16,
-      height: size + 16,
+      width: totalSize,
+      height: totalSize,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Frame (behind avatar)
-          if (frame != null)
+          // 1) Glow effect behind everything (non-default frames only)
+          if (!isDefaultFrame && frame != null)
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: frame.rarity.color,
-                    width: 3,
-                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: frame.rarity.color.withValues(alpha: 0.5),
-                      blurRadius: 8,
+                      color: frame.rarity.color.withValues(alpha: 0.35),
+                      blurRadius: 10,
                       spreadRadius: 2,
                     ),
                   ],
@@ -63,35 +62,68 @@ class RpgAvatarWidget extends StatelessWidget {
               ),
             ),
 
-          // Avatar
+          // 2) Avatar image (base layer, fills circle with inset for frame space)
           Positioned.fill(
-            child: Container(
-              margin: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: theme.colorScheme.surfaceContainerHighest,
-              ),
+            child: Padding(
+              padding: const EdgeInsets.all(3),
               child: ClipOval(
-                child: avatar != null
-                    ? Image.asset(
-                  avatar.assetPath,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Icon(
+                child: Container(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  child: avatar != null
+                      ? Image.asset(
+                    avatar.assetPath,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Icon(
+                      Icons.person,
+                      size: size * 0.5,
+                      color: theme.colorScheme.outline,
+                    ),
+                  )
+                      : Icon(
                     Icons.person,
                     size: size * 0.5,
                     color: theme.colorScheme.outline,
                   ),
-                )
-                    : Icon(
-                  Icons.person,
-                  size: size * 0.5,
-                  color: theme.colorScheme.outline,
                 ),
               ),
             ),
           ),
 
-          // Level badge
+          // 3) Frame overlay ON TOP of avatar
+          if (isDefaultFrame)
+          // Default: simple grey circular border
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.4),
+                    width: 2.5,
+                  ),
+                ),
+              ),
+            )
+          else if (frame != null)
+          // Custom frame: load PNG overlay (ring with transparent center)
+            Positioned.fill(
+              child: ClipOval(
+                child: Image.asset(
+                  frame.assetPath,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: frame.rarity.color,
+                        width: 3,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          // 4) Level badge (bottom-right)
           if (showLevel && level != null)
             Positioned(
               bottom: 0,
@@ -119,14 +151,14 @@ class RpgAvatarWidget extends StatelessWidget {
               ),
             ),
 
-          // Pet (offset to the side)
+          // 5) Pet companion (top-right, outside the circle)
           if (pet != null)
             Positioned(
-              right: -8,
-              top: 0,
+              right: -10,
+              top: -4,
               child: Container(
-                width: size * 0.4,
-                height: size * 0.4,
+                width: size * 0.38,
+                height: size * 0.38,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: theme.colorScheme.surface,
@@ -134,14 +166,22 @@ class RpgAvatarWidget extends StatelessWidget {
                     color: pet.rarity.color,
                     width: 2,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: pet.rarity.color.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                    ),
+                  ],
                 ),
                 child: ClipOval(
                   child: Image.asset(
                     pet.assetPath,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Text(
-                      '🐾',
-                      style: TextStyle(fontSize: size * 0.2),
+                    errorBuilder: (_, __, ___) => Center(
+                      child: Text(
+                        '🐾',
+                        style: TextStyle(fontSize: size * 0.15),
+                      ),
                     ),
                   ),
                 ),

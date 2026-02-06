@@ -24,7 +24,7 @@ class RpgState {
 
   const RpgState({
     required this.profile,
-    this.isEnabled = false,
+    this.isEnabled = true,
     this.recentXpGains = const [],
     this.pendingLevelUp,
     this.pendingAchievement,
@@ -70,7 +70,7 @@ class RpgNotifier extends Notifier<RpgState> {
   Future<void> _loadState() async {
     final prefs = await SharedPreferences.getInstance();
 
-    final isEnabled = prefs.getBool(_enabledKey) ?? false;
+    final isEnabled = prefs.getBool(_enabledKey) ?? true;
     final profileJson = prefs.getString(_profileKey);
 
     PlayerProfile profile;
@@ -87,12 +87,32 @@ class RpgNotifier extends Notifier<RpgState> {
     // Check for daily login
     profile = await _checkDailyLogin(profile);
 
+    // Passive mana regeneration: +10% every 6 minutes (full in 1 hour)
+    profile = _applyPassiveManaRegen(profile);
+
+    // Recalculate currentXp from totalXp (fixes negative XP from old formula)
+    final correctLevel = PlayerProfile.calculateLevelFromXp(profile.totalXp);
+    final correctCurrentXp = profile.totalXp - PlayerProfile.calculateXpForLevel(correctLevel);
+    if (profile.level != correctLevel || profile.currentXp != correctCurrentXp) {
+      profile = profile.copyWith(
+        level: correctLevel,
+        currentXp: correctCurrentXp,
+      );
+    }
+
     // Ensure maxMana matches level (in case of upgrade from old version)
     final correctMaxMana = PlayerProfile.maxManaForLevel(profile.level);
     if (profile.maxMana != correctMaxMana) {
       profile = profile.copyWith(
         maxMana: correctMaxMana,
         mana: profile.mana.clamp(0, correctMaxMana),
+      );
+    }
+
+    // Migration: ensure frame_wooden is unlocked for all existing users
+    if (!profile.unlockedFrames.contains('frame_wooden')) {
+      profile = profile.copyWith(
+        unlockedFrames: [...profile.unlockedFrames, 'frame_wooden'],
       );
     }
 
@@ -165,7 +185,7 @@ class RpgNotifier extends Notifier<RpgState> {
 
   /// Award XP for an action
   Future<void> awardXp(XpActionType action, {int multiplier = 1, String? description}) async {
-    if (!state.isEnabled) return;
+    // UI controls RPG access via nerdMode
 
     final profile = state.profile;
     final baseXp = action.baseXp * multiplier;
@@ -184,9 +204,7 @@ class RpgNotifier extends Notifier<RpgState> {
     final newLevel = PlayerProfile.calculateLevelFromXp(newTotalXp);
     final previousLevel = profile.level;
 
-    // Level 1 starts at 0 XP; higher levels start at their cumulative threshold
-    final xpThreshold = newLevel <= 1 ? 0 : PlayerProfile.calculateXpForLevel(newLevel);
-    final newCurrentXp = newTotalXp - xpThreshold;
+    final newCurrentXp = newTotalXp - PlayerProfile.calculateXpForLevel(newLevel);
 
     var updatedProfile = profile.copyWith(
       totalXp: newTotalXp,
@@ -236,7 +254,7 @@ class RpgNotifier extends Notifier<RpgState> {
 
   /// Award daily login XP (called once per day)
   Future<void> awardDailyLoginXp() async {
-    if (!state.isEnabled) return;
+    // UI controls RPG access via nerdMode
 
     final profile = state.profile;
 
@@ -257,7 +275,7 @@ class RpgNotifier extends Notifier<RpgState> {
 
   /// Award gold
   Future<void> awardGold(int amount, {String? reason}) async {
-    if (!state.isEnabled || amount <= 0) return;
+    if (amount <= 0) return;
 
     state = state.copyWith(
       profile: state.profile.copyWith(
@@ -269,7 +287,7 @@ class RpgNotifier extends Notifier<RpgState> {
 
   /// Award gems (from achievements)
   Future<void> awardGems(int amount, {String? reason}) async {
-    if (!state.isEnabled || amount <= 0) return;
+    if (amount <= 0) return;
 
     state = state.copyWith(
       profile: state.profile.copyWith(
@@ -281,7 +299,7 @@ class RpgNotifier extends Notifier<RpgState> {
 
   /// Spend gold on a cosmetic
   Future<bool> purchaseWithGold(CosmeticItem item) async {
-    if (!state.isEnabled) return false;
+    // UI controls RPG access via nerdMode
     if (item.currency != CurrencyType.gold) return false;
     if (item.price == null || state.profile.gold < item.price!) return false;
 
@@ -330,7 +348,7 @@ class RpgNotifier extends Notifier<RpgState> {
 
   /// Spend gems on a pet or lottery
   Future<bool> purchaseWithGems(CosmeticItem item) async {
-    if (!state.isEnabled) return false;
+    // UI controls RPG access via nerdMode
     if (item.currency != CurrencyType.gems) return false;
     if (item.price == null || state.profile.gems < item.price!) return false;
 
@@ -357,9 +375,6 @@ class RpgNotifier extends Notifier<RpgState> {
 
   /// Spin the gem lottery (costs gems)
   Future<LotteryResult> spinLottery({int cost = 10}) async {
-    if (!state.isEnabled) {
-      return LotteryResult(type: LotteryRewardType.nothing, amount: 0);
-    }
     if (state.profile.gems < cost) {
       return LotteryResult(type: LotteryRewardType.nothing, amount: 0);
     }
@@ -446,7 +461,6 @@ class RpgNotifier extends Notifier<RpgState> {
   /// Attack result record
   /// Spend mana to attack a boss - returns ({int damage, bool isCrit, bool success})
   Future<({int damage, bool isCrit, bool success})> attackBoss({int manaCost = 10}) async {
-    if (!state.isEnabled) return (damage: 0, isCrit: false, success: false);
     if (state.profile.mana < manaCost) return (damage: 0, isCrit: false, success: false);
 
     final profile = state.profile;
@@ -478,9 +492,35 @@ class RpgNotifier extends Notifier<RpgState> {
     return (damage: totalDamage, isCrit: isCrit, success: true);
   }
 
+  /// Apply passive mana regeneration based on elapsed time
+  /// +10% of maxMana every 6 minutes (full regen in ~1 hour)
+  PlayerProfile _applyPassiveManaRegen(PlayerProfile profile) {
+    final maxMana = PlayerProfile.maxManaForLevel(profile.level);
+    if (profile.mana >= maxMana) {
+      // Already full, just update timestamp
+      return profile.copyWith(lastManaRegenTime: DateTime.now());
+    }
+
+    final lastRegen = profile.lastManaRegenTime ?? profile.createdAt;
+    final elapsed = DateTime.now().difference(lastRegen);
+    final intervalMinutes = 6; // +10% every 6 minutes
+    final ticks = elapsed.inMinutes ~/ intervalMinutes;
+
+    if (ticks <= 0) return profile;
+
+    final regenPerTick = (maxMana * 0.1).round().clamp(1, maxMana);
+    final totalRegen = regenPerTick * ticks;
+    final newMana = (profile.mana + totalRegen).clamp(0, maxMana);
+
+    return profile.copyWith(
+      mana: newMana,
+      lastManaRegenTime: DateTime.now(),
+    );
+  }
+
   /// Regenerate mana (called on XP-earning actions and periodically)
   Future<void> regenerateMana({int amount = 5}) async {
-    if (!state.isEnabled) return;
+    // UI controls RPG access via nerdMode
 
     final profile = state.profile;
     final maxMana = PlayerProfile.maxManaForLevel(profile.level);
@@ -488,7 +528,7 @@ class RpgNotifier extends Notifier<RpgState> {
 
     if (newMana != profile.mana) {
       state = state.copyWith(
-        profile: profile.copyWith(mana: newMana),
+        profile: profile.copyWith(mana: newMana, lastManaRegenTime: DateTime.now()),
       );
       await _saveProfile();
     }
@@ -539,7 +579,7 @@ class RpgNotifier extends Notifier<RpgState> {
   // ============ CLASS SYSTEM ============
 
   Future<void> changeClass(PlayerClass newClass) async {
-    if (!state.isEnabled) return;
+    // UI controls RPG access via nerdMode
     if (newClass == state.profile.playerClass) return;
 
     state = state.copyWith(
@@ -693,13 +733,13 @@ class RpgNotifier extends Notifier<RpgState> {
 
   /// Called from external sources to update achievement progress
   Future<void> updateProgress(String achievementId, int value) async {
-    if (!state.isEnabled) return;
+    // UI controls RPG access via nerdMode
     await _updateAchievementProgress(achievementId, value);
   }
 
   /// Set absolute progress (for count-based achievements like recipe count)
   Future<void> setProgress(String achievementId, int value) async {
-    if (!state.isEnabled) return;
+    // UI controls RPG access via nerdMode
 
     final achievement = RpgAchievements.getById(achievementId);
     if (achievement == null) return;

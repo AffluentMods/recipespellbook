@@ -152,14 +152,26 @@ class RpgAvatars {
 
 class RpgFrames {
   static const List<CosmeticItem> all = [
-    // === FREE/DEFAULT ===
+    // === FREE/DEFAULT — plain thin circle, no asset needed ===
     CosmeticItem(
       id: 'frame_default',
-      name: 'Simple Frame',
-      description: 'A clean, simple frame',
+      name: 'Plain Frame',
+      description: 'A clean, minimal border',
+      type: CosmeticType.frame,
+      rarity: CosmeticRarity.common,
+      assetPath: '', // No asset — rendered as simple grey circle in code
+    ),
+
+    // === BASIC PURCHASABLE ===
+    CosmeticItem(
+      id: 'frame_wooden',
+      name: 'Wooden Frame',
+      description: 'A rustic wooden border',
       type: CosmeticType.frame,
       rarity: CosmeticRarity.common,
       assetPath: 'assets/rpg/frames/frame_default.png',
+      currency: CurrencyType.gold,
+      price: 1,
     ),
 
     // === GOLD PURCHASABLE ===

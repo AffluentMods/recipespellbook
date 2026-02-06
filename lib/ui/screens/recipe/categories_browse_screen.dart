@@ -3,6 +3,7 @@ import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../data/course_category_data.dart' as taxonomy;
+import '../../../data/rpg/rpg_text.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../database/database.dart';
@@ -21,12 +22,13 @@ class CategoriesBrowseScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final translator = TaxonomyTranslator.of(context);
     final settings = ref.watch(settingsProvider);
+    final rpg = RpgText.of(l10n, settings.nerdMode);
     final cookbookId = settings.currentCookbookId ?? 'starter';
     final recipeDao = ref.watch(recipeDaoProvider);
 
     final isCourses = mode == BrowseMode.courses;
-    final primaryLabel = isCourses ? l10n.coursesTitle : l10n.categoriesTitle;
-    final secondaryLabel = isCourses ? l10n.categoriesTitle : l10n.coursesTitle;
+    final primaryLabel = isCourses ? rpg.coursesTitle : rpg.categoriesTitle;
+    final secondaryLabel = isCourses ? rpg.categoriesTitle : rpg.coursesTitle;
 
     return Scaffold(
       appBar: AppBar(
@@ -130,44 +132,38 @@ class CategoriesBrowseScreen extends ConsumerWidget {
                 _SectionHeader(title: primaryLabel, icon: isCourses ? Icons.restaurant_menu : Icons.category),
                 const SizedBox(height: 12),
 
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final width = constraints.maxWidth;
-                    final crossAxisCount = width > 600 ? 4 : width > 400 ? 3 : 2;
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        childAspectRatio: 1.0,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                      ),
-                      itemCount: isCourses ? sortedCourses.length : sortedCategories.length,
-                      itemBuilder: (context, index) {
-                        if (isCourses) {
-                          final course = sortedCourses[index];
-                          final count = courseCounts[course.id] ?? 0;
-                          final displayName = translator.translateCourse(course.name);
-                          return _BrowseCardStatic(
-                            emoji: course.emoji,
-                            name: displayName,
-                            count: count,
-                            onTap: () => context.push('/recipes?cookbook=$cookbookId&course=${course.id}&title=${Uri.encodeComponent(displayName)}'),
-                          );
-                        } else {
-                          final category = sortedCategories[index];
-                          final count = categoryCounts[category.id] ?? 0;
-                          final displayName = translator.translateCategory(category.name);
-                          return _BrowseCardStatic(
-                            emoji: category.emoji,
-                            name: displayName,
-                            count: count,
-                            onTap: () => context.push('/recipes?cookbook=$cookbookId&category=${category.id}&title=${Uri.encodeComponent(displayName)}'),
-                          );
-                        }
-                      },
-                    );
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 1.5,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                  ),
+                  itemCount: isCourses ? sortedCourses.length : sortedCategories.length,
+                  itemBuilder: (context, index) {
+                    if (isCourses) {
+                      final course = sortedCourses[index];
+                      final count = courseCounts[course.id] ?? 0;
+                      final displayName = translator.translateCourse(course.name);
+                      return _BrowseCardStatic(
+                        emoji: course.emoji,
+                        name: displayName,
+                        count: count,
+                        onTap: () => context.push('/recipes?cookbook=$cookbookId&course=${course.id}&title=${Uri.encodeComponent(displayName)}'),
+                      );
+                    } else {
+                      final category = sortedCategories[index];
+                      final count = categoryCounts[category.id] ?? 0;
+                      final displayName = translator.translateCategory(category.name);
+                      return _BrowseCardStatic(
+                        emoji: category.emoji,
+                        name: displayName,
+                        count: count,
+                        onTap: () => context.push('/recipes?cookbook=$cookbookId&category=${category.id}&title=${Uri.encodeComponent(displayName)}'),
+                      );
+                    }
                   },
                 ),
 
@@ -183,44 +179,38 @@ class CategoriesBrowseScreen extends ConsumerWidget {
                 _SectionHeader(title: secondaryLabel, icon: isCourses ? Icons.category : Icons.restaurant_menu),
                 const SizedBox(height: 12),
 
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final width = constraints.maxWidth;
-                    final crossAxisCount = width > 600 ? 4 : width > 400 ? 3 : 2;
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        childAspectRatio: 1.0,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                      ),
-                      itemCount: isCourses ? sortedCategories.length : sortedCourses.length,
-                      itemBuilder: (context, index) {
-                        if (isCourses) {
-                          final category = sortedCategories[index];
-                          final count = categoryCounts[category.id] ?? 0;
-                          final displayName = translator.translateCategory(category.name);
-                          return _BrowseCardStatic(
-                            emoji: category.emoji,
-                            name: displayName,
-                            count: count,
-                            onTap: () => context.push('/recipes?cookbook=$cookbookId&category=${category.id}&title=${Uri.encodeComponent(displayName)}'),
-                          );
-                        } else {
-                          final course = sortedCourses[index];
-                          final count = courseCounts[course.id] ?? 0;
-                          final displayName = translator.translateCourse(course.name);
-                          return _BrowseCardStatic(
-                            emoji: course.emoji,
-                            name: displayName,
-                            count: count,
-                            onTap: () => context.push('/recipes?cookbook=$cookbookId&course=${course.id}&title=${Uri.encodeComponent(displayName)}'),
-                          );
-                        }
-                      },
-                    );
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 1.5,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                  ),
+                  itemCount: isCourses ? sortedCategories.length : sortedCourses.length,
+                  itemBuilder: (context, index) {
+                    if (isCourses) {
+                      final category = sortedCategories[index];
+                      final count = categoryCounts[category.id] ?? 0;
+                      final displayName = translator.translateCategory(category.name);
+                      return _BrowseCardStatic(
+                        emoji: category.emoji,
+                        name: displayName,
+                        count: count,
+                        onTap: () => context.push('/recipes?cookbook=$cookbookId&category=${category.id}&title=${Uri.encodeComponent(displayName)}'),
+                      );
+                    } else {
+                      final course = sortedCourses[index];
+                      final count = courseCounts[course.id] ?? 0;
+                      final displayName = translator.translateCourse(course.name);
+                      return _BrowseCardStatic(
+                        emoji: course.emoji,
+                        name: displayName,
+                        count: count,
+                        onTap: () => context.push('/recipes?cookbook=$cookbookId&course=${course.id}&title=${Uri.encodeComponent(displayName)}'),
+                      );
+                    }
                   },
                 ),
 

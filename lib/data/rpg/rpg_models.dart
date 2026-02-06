@@ -114,8 +114,8 @@ enum XpActionType {
   // Achievements
   achievementUnlocked, // Varies
 
-  // Boss Battles
-  defeatEnemy,         // 25 XP base, multiplied per enemy tier
+  // Boss battles
+  defeatEnemy,         // Varies based on enemy
 }
 
 extension XpActionTypeExtension on XpActionType {
@@ -140,7 +140,7 @@ extension XpActionTypeExtension on XpActionType {
       case XpActionType.dailyLogin: return 10;
       case XpActionType.streakBonus: return 5;
       case XpActionType.achievementUnlocked: return 0; // Varies
-      case XpActionType.defeatEnemy: return 25;
+      case XpActionType.defeatEnemy: return 25; // Varies by multiplier
     }
   }
 
@@ -165,7 +165,7 @@ extension XpActionTypeExtension on XpActionType {
       case XpActionType.dailyLogin: return 'Daily Login';
       case XpActionType.streakBonus: return 'Streak Bonus';
       case XpActionType.achievementUnlocked: return 'Achievement!';
-      case XpActionType.defeatEnemy: return 'Enemy Defeated!';
+      case XpActionType.defeatEnemy: return 'Boss Defeated!';
     }
   }
 }
@@ -198,6 +198,7 @@ class PlayerProfile {
   final List<String> unlockedTitles;
   final List<String> completedAchievements;
   final Map<String, int> achievementProgress;  // Achievement ID -> progress
+  final DateTime? lastManaRegenTime;  // For passive mana regeneration
 
   const PlayerProfile({
     required this.id,
@@ -220,18 +221,19 @@ class PlayerProfile {
     this.lastLoginDate,
     required this.createdAt,
     this.unlockedAvatars = const ['avatar_default'],
-    this.unlockedFrames = const ['frame_default'],
+    this.unlockedFrames = const ['frame_default', 'frame_wooden'],
     this.unlockedPets = const [],
     this.unlockedTitles = const ['title_apprentice'],
     this.completedAchievements = const [],
     this.achievementProgress = const {},
+    this.lastManaRegenTime,
   });
 
   /// XP needed to reach next level
   int get xpForNextLevel => calculateXpForLevel(level + 1);
 
-  /// XP needed for current level (from previous)
-  int get xpForCurrentLevel => level == 1 ? 0 : calculateXpForLevel(level);
+  /// XP needed for current level (cumulative)
+  int get xpForCurrentLevel => calculateXpForLevel(level);
 
   /// Progress to next level (0.0 - 1.0)
   double get levelProgress {
@@ -248,9 +250,11 @@ class PlayerProfile {
 
 
   /// Calculate total XP needed for a specific level
-  /// Uses a gentle curve: 100 * level * (level + 1) / 2
+  /// Level 1 = 0 (starting level), Level 2 = 100, Level 3 = 300, Level 4 = 600...
+  /// Uses a gentle curve: 100 * (level-1) * level / 2
   static int calculateXpForLevel(int level) {
-    return 100 * level * (level + 1) ~/ 2;
+    if (level <= 1) return 0;
+    return 100 * (level - 1) * level ~/ 2;
   }
 
   /// Calculate level from total XP
@@ -304,6 +308,7 @@ class PlayerProfile {
     List<String>? unlockedTitles,
     List<String>? completedAchievements,
     Map<String, int>? achievementProgress,
+    DateTime? lastManaRegenTime,
   }) {
     return PlayerProfile(
       id: id ?? this.id,
@@ -331,6 +336,7 @@ class PlayerProfile {
       unlockedTitles: unlockedTitles ?? this.unlockedTitles,
       completedAchievements: completedAchievements ?? this.completedAchievements,
       achievementProgress: achievementProgress ?? this.achievementProgress,
+      lastManaRegenTime: lastManaRegenTime ?? this.lastManaRegenTime,
     );
   }
 
@@ -361,6 +367,7 @@ class PlayerProfile {
       'unlockedTitles': unlockedTitles,
       'completedAchievements': completedAchievements,
       'achievementProgress': achievementProgress,
+      'lastManaRegenTime': lastManaRegenTime?.toIso8601String(),
     };
   }
 
@@ -397,7 +404,7 @@ class PlayerProfile {
           ['avatar_default'],
       unlockedFrames: (json['unlockedFrames'] as List<dynamic>?)
           ?.cast<String>() ??
-          ['frame_default'],
+          ['frame_default', 'frame_wooden'],
       unlockedPets: (json['unlockedPets'] as List<dynamic>?)?.cast<String>() ??
           [],
       unlockedTitles: (json['unlockedTitles'] as List<dynamic>?)
@@ -410,6 +417,9 @@ class PlayerProfile {
       (json['achievementProgress'] as Map<String, dynamic>?)
           ?.map((k, v) => MapEntry(k, v as int)) ??
           {},
+      lastManaRegenTime: json['lastManaRegenTime'] != null
+          ? DateTime.parse(json['lastManaRegenTime'] as String)
+          : null,
     );
   }
 

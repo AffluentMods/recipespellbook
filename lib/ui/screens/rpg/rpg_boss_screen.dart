@@ -783,7 +783,7 @@ class _EnemySelector extends StatelessWidget {
     final theme = Theme.of(context);
 
     return SizedBox(
-      height: 80,
+      height: 88,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -799,7 +799,7 @@ class _EnemySelector extends StatelessWidget {
               onTap: () => onSelect(enemy),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                width: 64,
+                width: 72,
                 decoration: BoxDecoration(
                   color: isSelected
                       ? enemy.color.withValues(alpha: 0.2)
@@ -815,7 +815,7 @@ class _EnemySelector extends StatelessWidget {
                   children: [
                     Opacity(
                       opacity: isLocked ? 0.3 : 1.0,
-                      child: Text(enemy.emoji, style: const TextStyle(fontSize: 28)),
+                      child: Text(enemy.emoji, style: const TextStyle(fontSize: 36)),
                     ),
                     if (enemy.isBoss)
                       Positioned(

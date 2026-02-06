@@ -6,6 +6,8 @@ import 'package:drift/drift.dart' as drift;
 import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
+import '../../../providers/settings_provider.dart';
+import '../../../data/rpg/rpg_text.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../shell/app_shell.dart';
 import '../../widgets/placeholder_image.dart';
@@ -18,10 +20,12 @@ class CookbooksScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final cookbooksAsync = ref.watch(cookbooksProvider);
     final selectedId = ref.watch(selectedCookbookIdProvider);
+    final nerdMode = ref.watch(settingsProvider).nerdMode;
+    final rpg = RpgText.of(l10n, nerdMode);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.cookbooksTitle),
+        title: Text(rpg.cookbooksTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
@@ -176,11 +180,10 @@ class _CookbookGrid extends ConsumerWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.edit),
-              title: Text(l10n.actionEdit),
-              subtitle: const Text('Change name, image, description'),
+              title: Text(l10n.rename),
               onTap: () {
                 Navigator.pop(ctx);
-                context.push('/cookbook/${cookbook.id}/edit');
+                _showRenameDialog(context, ref, cookbook);
               },
             ),
             ListTile(

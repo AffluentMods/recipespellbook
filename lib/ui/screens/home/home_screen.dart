@@ -7,6 +7,7 @@ import '../../../providers/database_provider.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../data/course_category_data.dart';
+import '../../../data/rpg/rpg_text.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../widgets/new_recipe_dialog.dart';
 import '../../widgets/placeholder_image.dart';
@@ -120,6 +121,7 @@ class _QuickRecipesWidget extends ConsumerWidget {
     final recipeDao = ref.watch(recipeDaoProvider);
     final mealPlanDao = ref.watch(mealPlanDaoProvider);
     final settings = ref.watch(settingsProvider);
+    final rpg = RpgText.of(l10n, settings.nerdMode);
 
     return FutureBuilder<List<_QuickRecipeItem>>(
       future: _loadItems(recipeDao, mealPlanDao, settings),
@@ -149,7 +151,7 @@ class _QuickRecipesWidget extends ConsumerWidget {
                   const SizedBox(width: 8),
                   // Help button
                   GestureDetector(
-                    onTap: () => _showHelpDialog(context),
+                    onTap: () => _showHelpDialog(context, settings.nerdMode),
                     child: Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
@@ -191,8 +193,9 @@ class _QuickRecipesWidget extends ConsumerWidget {
     );
   }
 
-  void _showHelpDialog(BuildContext context) {
+  void _showHelpDialog(BuildContext context, bool nerdMode) {
     final l10n = AppLocalizations.of(context)!;
+    final rpg = RpgText.of(l10n, nerdMode);
     final theme = Theme.of(context);
 
     showDialog(
@@ -220,14 +223,14 @@ class _QuickRecipesWidget extends ConsumerWidget {
             _HelpBadgeRow(
               color: Colors.orange,
               icon: Icons.push_pin,
-              label: l10n.homePinnedRecipes,
+              label: rpg.homePinnedRecipes,
               description: l10n.quickAccessHelpPinned,
             ),
             const SizedBox(height: 12),
             _HelpBadgeRow(
               color: Colors.grey,
               icon: Icons.history,
-              label: l10n.homeRecentRecipes,
+              label: rpg.homeRecentRecipes,
               description: l10n.quickAccessHelpRecent,
             ),
           ],
