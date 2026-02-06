@@ -22,6 +22,90 @@ import '../../widgets/nutrition_calculation_sheet.dart';
 import '../../widgets/rpg/rpg_rarity_picker.dart';
 import '../../widgets/rpg/rpg_navigation_shell.dart';
 
+// ============ IMAGE PREVIEW/CONFIRM HELPER ============
+
+/// Shows a full-screen preview of a picked image with Accept/Retake options.
+/// Returns the image path if accepted, or null if rejected.
+Future<String?> showImagePreviewDialog(BuildContext context, String imagePath) async {
+  return showDialog<String?>(
+    context: context,
+    barrierDismissible: false,
+    builder: (ctx) {
+      final theme = Theme.of(ctx);
+      return Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+          title: const Text('Preview Photo'),
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.pop(ctx, null),
+          ),
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Center(
+                  child: Image.file(
+                    File(imagePath),
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
+            // Crop region indicator
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                'Pinch to zoom · This is how your photo will look',
+                style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            // Action buttons
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => Navigator.pop(ctx, null),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Retake'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white54),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: () => Navigator.pop(ctx, imagePath),
+                        icon: const Icon(Icons.check),
+                        label: const Text('Use Photo'),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 class RecipeEditScreen extends ConsumerStatefulWidget {
   final String? recipeId;
   final String? cookbookId;
@@ -945,7 +1029,7 @@ class _StepCard extends StatelessWidget {
   void _pickStepImage(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => SafeArea(
+      builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -953,16 +1037,16 @@ class _StepCard extends StatelessWidget {
               leading: const Icon(Icons.photo_library),
               title: const Text('Choose from gallery'),
               onTap: () {
-                Navigator.pop(context);
-                _pickImage(ImageSource.gallery);
+                Navigator.pop(ctx);
+                _pickImageWithPreview(context, ImageSource.gallery);
               },
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt),
               title: const Text('Take a photo'),
               onTap: () {
-                Navigator.pop(context);
-                _pickImage(ImageSource.camera);
+                Navigator.pop(ctx);
+                _pickImageWithPreview(context, ImageSource.camera);
               },
             ),
           ],
@@ -971,7 +1055,7 @@ class _StepCard extends StatelessWidget {
     );
   }
 
-  Future<void> _pickImage(ImageSource source) async {
+  Future<void> _pickImageWithPreview(BuildContext context, ImageSource source) async {
     final picker = ImagePicker();
     final image = await picker.pickImage(
       source: source,
@@ -979,8 +1063,11 @@ class _StepCard extends StatelessWidget {
       maxHeight: 1200,
       imageQuality: 85,
     );
-    if (image != null) {
-      onImageChanged(image.path);
+    if (image != null && context.mounted) {
+      final confirmed = await showImagePreviewDialog(context, image.path);
+      if (confirmed != null) {
+        onImageChanged(confirmed);
+      }
     }
   }
 }
@@ -1815,15 +1902,18 @@ class _PhotoPicker extends StatelessWidget {
     );
   }
   void _showImageOptions(BuildContext context) {
-    showModalBottomSheet(context: context, builder: (context) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-      ListTile(leading: const Icon(Icons.photo_library), title: const Text('Choose from gallery'), onTap: () { Navigator.pop(context); _pickImage(ImageSource.gallery); }),
-      ListTile(leading: const Icon(Icons.camera_alt), title: const Text('Take a photo'), onTap: () { Navigator.pop(context); _pickImage(ImageSource.camera); }),
+    showModalBottomSheet(context: context, builder: (ctx) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+      ListTile(leading: const Icon(Icons.photo_library), title: const Text('Choose from gallery'), onTap: () { Navigator.pop(ctx); _pickImageWithPreview(context, ImageSource.gallery); }),
+      ListTile(leading: const Icon(Icons.camera_alt), title: const Text('Take a photo'), onTap: () { Navigator.pop(ctx); _pickImageWithPreview(context, ImageSource.camera); }),
     ])));
   }
-  Future<void> _pickImage(ImageSource source) async {
+  Future<void> _pickImageWithPreview(BuildContext context, ImageSource source) async {
     final picker = ImagePicker();
     final image = await picker.pickImage(source: source, maxWidth: 1200, maxHeight: 1200, imageQuality: 85);
-    if (image != null) onImageSelected(image.path);
+    if (image != null && context.mounted) {
+      final confirmed = await showImagePreviewDialog(context, image.path);
+      if (confirmed != null) onImageSelected(confirmed);
+    }
   }
 }
 

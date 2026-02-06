@@ -15,7 +15,6 @@ import '../ui/screens/recipe/recent_recipes_screen.dart';
 import '../ui/screens/recipe/favorite_recipes_screen.dart';
 import '../ui/screens/recipe/quick_access_screen.dart';
 import '../ui/screens/search/search_screen.dart';
-import '../ui/screens/import/import_guides_screen.dart';
 import '../ui/screens/import/import_url_screen.dart';
 import '../ui/screens/import/import_text_screen.dart';
 import '../ui/screens/import/import_scan_screen.dart';
@@ -60,8 +59,9 @@ final router = GoRouter(
         final courseId = state.uri.queryParameters['course'];
         final categoryId = state.uri.queryParameters['category'];
         final cookbookId = state.uri.queryParameters['cookbook'] ?? 'starter';
+        final title = state.uri.queryParameters['title'];
         return RecipeListScreen(
-          title: 'Recipes',
+          title: title ?? 'Recipes',
           cookbookId: cookbookId,
           courseId: courseId,
           categoryId: categoryId,
@@ -81,6 +81,19 @@ final router = GoRouter(
       path: '/courses',
       name: 'courses',
       builder: (context, state) => const CategoriesBrowseScreen(mode: BrowseMode.courses),
+    ),
+
+    // All recipes for a cookbook (View All from categories/courses browse)
+    GoRoute(
+      path: '/recipes/all',
+      name: 'all-recipes',
+      builder: (context, state) {
+        final cookbookId = state.uri.queryParameters['cookbook'] ?? 'starter';
+        return RecipeListScreen(
+          title: 'All Recipes',
+          cookbookId: cookbookId,
+        );
+      },
     ),
 
     // Uncategorized recipes
@@ -251,11 +264,6 @@ final router = GoRouter(
     ),
 
     // Import routes
-    GoRoute(
-      path: '/import-guides',
-      name: 'import-guides',
-      builder: (context, state) => const ImportGuidesScreen(),
-    ),
     GoRoute(
       path: '/import/url',
       name: 'import-url',

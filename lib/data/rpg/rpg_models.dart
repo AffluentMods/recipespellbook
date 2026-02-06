@@ -113,6 +113,9 @@ enum XpActionType {
 
   // Achievements
   achievementUnlocked, // Varies
+
+  // Boss Battles
+  defeatEnemy,         // 25 XP base, multiplied per enemy tier
 }
 
 extension XpActionTypeExtension on XpActionType {
@@ -137,6 +140,7 @@ extension XpActionTypeExtension on XpActionType {
       case XpActionType.dailyLogin: return 10;
       case XpActionType.streakBonus: return 5;
       case XpActionType.achievementUnlocked: return 0; // Varies
+      case XpActionType.defeatEnemy: return 25;
     }
   }
 
@@ -161,6 +165,7 @@ extension XpActionTypeExtension on XpActionType {
       case XpActionType.dailyLogin: return 'Daily Login';
       case XpActionType.streakBonus: return 'Streak Bonus';
       case XpActionType.achievementUnlocked: return 'Achievement!';
+      case XpActionType.defeatEnemy: return 'Enemy Defeated!';
     }
   }
 }

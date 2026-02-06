@@ -105,8 +105,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFF5F3EE),
-              Color(0xFFEDE9E0),
+              Color(0xFF0D1117),
+              Color(0xFF161B22),
+              Color(0xFF1A1F2B),
             ],
           ),
         ),
@@ -149,7 +150,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF3D4F5F),
+                          color: Color(0xFFCBA135),
                           letterSpacing: 2,
                         ),
                         textAlign: TextAlign.center,
@@ -169,7 +170,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             key: ValueKey(_currentMessage),
                             style: TextStyle(
                               fontSize: 16,
-                              color: const Color(0xFF6B7280),
+                              color: const Color(0xFF8B949E),
                               fontStyle: isNerdMode
                                   ? FontStyle.italic
                                   : FontStyle.normal,
@@ -189,7 +190,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                              color: const Color(0xFF3D4F5F),
+                              color: const Color(0xFFCBA135).withValues(alpha: 0.5),
                               width: 2,
                             ),
                           ),
@@ -227,8 +228,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   Widget _buildFallbackLogo(bool isNerdMode) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF3D4F5F),
-        borderRadius: BorderRadius.circular(20),
+        color: const Color(0xFF1E2A3A),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFCBA135).withValues(alpha: 0.3)),
       ),
       child: Center(
         child: Column(

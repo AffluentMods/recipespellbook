@@ -177,10 +177,10 @@ String getShoppingCategory(String ingredientName, {Map<String, String>? userMapp
   // 1. Check user mappings first (highest priority)
   if (userMappings != null) {
     if (userMappings.containsKey(normalized)) {
-      return userMappings[normalized]!;
+      return canonicalCategoryId(userMappings[normalized]!);
     }
     if (userMappings.containsKey(lower)) {
-      return userMappings[lower]!;
+      return canonicalCategoryId(userMappings[lower]!);
     }
   }
 
@@ -193,7 +193,7 @@ String getShoppingCategory(String ingredientName, {Map<String, String>? userMapp
   for (final entry in _exactMatchKeywords.entries) {
     for (final keyword in entry.value) {
       if (lower == keyword || normalized == keyword) {
-        return entry.key;
+        return canonicalCategoryId(entry.key);
       }
     }
   }
@@ -202,7 +202,7 @@ String getShoppingCategory(String ingredientName, {Map<String, String>? userMapp
   for (final entry in _phraseKeywords.entries) {
     for (final phrase in entry.value) {
       if (lower.contains(phrase)) {
-        return entry.key;
+        return canonicalCategoryId(entry.key);
       }
     }
   }
@@ -213,16 +213,42 @@ String getShoppingCategory(String ingredientName, {Map<String, String>? userMapp
     for (final keyword in entry.value) {
       // Check if any word matches exactly
       if (words.contains(keyword)) {
-        return entry.key;
+        return canonicalCategoryId(entry.key);
       }
       // Check if the ingredient contains the keyword
       if (lower.contains(keyword) && keyword.length >= 4) {
-        return entry.key;
+        return canonicalCategoryId(entry.key);
       }
     }
   }
 
   return 'other';
+}
+
+/// Normalize legacy/alias category IDs to canonical IDs matching LocalizedDefaults
+String canonicalCategoryId(String id) {
+  const aliases = {
+    // Legacy shop_ prefix (from old database seed)
+    'shop_produce': 'produce',
+    'shop_dairy': 'dairy',
+    'shop_meat': 'meat',
+    'shop_frozen': 'frozen',
+    'shop_pantry': 'pantry',
+    'shop_bakery': 'bakery',
+    'shop_beverages': 'beverages',
+    'shop_snacks': 'snacks',
+    'shop_other': 'other',
+    // Short aliases used in keyword maps
+    'breakfast': 'breakfastCereal',
+    'canned': 'cannedGoods',
+    'pasta': 'grainsAndPasta',
+    'grains': 'grainsAndPasta',
+    'oil': 'cookingAndBaking',
+    'baking': 'cookingAndBaking',
+    'alcohol': 'beerWineSpirits',
+    'beauty': 'personalCare',
+  };
+  return aliases[id] ?? id;
 }
 
 /// Exact match keywords (highest priority after user mappings)
@@ -645,31 +671,32 @@ const shoppingCategoryKeywords = <String, List<String>>{
 
 /// Get display name for category (for UI)
 String getShoppingCategoryDisplayName(String categoryId) {
+  // Canonicalize first to handle aliases
+  final canonical = canonicalCategoryId(categoryId);
   const displayNames = {
     'produce': 'Produce',
-    'dairy': 'Dairy',
-    'meat': 'Meat',
-    'seafood': 'Seafood',
     'bakery': 'Bakery',
     'deli': 'Deli',
-    'frozen': 'Frozen Food',
-    'breakfast': 'Breakfast & Cereal',
-    'canned': 'Canned Goods & Soups',
-    'pasta': 'Grains, Pasta & Rice',
-    'grains': 'Grains, Pasta & Rice',
-    'baking': 'Cooking & Baking',
-    'condiments': 'Condiments, Sauces & Spices',
-    'oil': 'Cooking & Baking',
-    'spices': 'Condiments, Sauces & Spices',
-    'snacks': 'Cookies, Snacks & Candy',
+    'dairy': 'Dairy & Eggs',
+    'meat': 'Meat & Poultry',
+    'seafood': 'Seafood',
+    'frozen': 'Frozen',
+    'breakfastCereal': 'Breakfast & Cereal',
+    'grainsAndPasta': 'Grains, Pasta & Rice',
+    'cannedGoods': 'Canned Goods',
+    'condiments': 'Condiments & Sauces',
+    'spices': 'Spices & Seasonings',
+    'cookingAndBaking': 'Cooking & Baking',
+    'snacks': 'Snacks',
     'beverages': 'Beverages',
-    'alcohol': 'Beer, Wine & Spirits',
-    'baby': 'Baby',
-    'beauty': 'Beauty & Personal Care',
-    'household': 'Housewares',
-    'pet': 'Pet',
+    'beerWineSpirits': 'Beer, Wine & Spirits',
     'international': 'International',
+    'baby': 'Baby',
+    'pet': 'Pet Supplies',
+    'household': 'Household',
+    'personalCare': 'Personal Care',
+    'pantry': 'Pantry',
     'other': 'Other',
   };
-  return displayNames[categoryId] ?? categoryId;
+  return displayNames[canonical] ?? canonical;
 }

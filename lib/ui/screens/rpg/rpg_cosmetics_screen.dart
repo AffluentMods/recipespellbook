@@ -1,6 +1,7 @@
 // lib/ui/screens/rpg/rpg_cosmetics_screen.dart
 // Cosmetics shop and customization for Recipe Spellbook RPG System
 
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -83,42 +84,58 @@ class _RpgCosmeticsScreenState extends ConsumerState<RpgCosmeticsScreen>
       PlayerProfile profile,
       ThemeData theme,
       ) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            profile.playerClass.color.withValues(alpha: 0.3),
-            theme.colorScheme.surface,
-          ],
+    final themeColor = theme.colorScheme.primary;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: CustomPaint(
+          painter: _StarfieldPainter(baseColor: themeColor),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: RadialGradient(
+                center: Alignment.center,
+                radius: 0.9,
+                colors: [
+                  themeColor.withValues(alpha: 0.18),
+                  themeColor.withValues(alpha: 0.08),
+                  theme.colorScheme.surface.withValues(alpha: 0.02),
+                ],
+              ),
+            ),
+            child: Column(
+              children: [
+                // Avatar with frame
+                RpgAvatarWidget(
+                  avatarId: profile.avatarId ?? 'avatar_default',
+                  frameId: profile.frameId ?? 'frame_default',
+                  petId: profile.petId,
+                  size: 100,
+                  level: profile.level,
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  profile.displayName,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  profile.displayTitle,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: themeColor.withValues(alpha: 0.85),
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          // Avatar preview
-          RpgAvatarWidget(
-            avatarId: profile.avatarId ?? 'avatar_default',
-            frameId: profile.frameId ?? 'frame_default',
-            petId: profile.petId,
-            size: 100,
-            level: profile.level,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            profile.displayName,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            profile.displayTitle,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.outline,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -529,34 +546,39 @@ class _CosmeticCard extends StatelessWidget {
                       )
                           : null,
                     ),
-                    child: isOwned
-                        ? Image.asset(
-                      item.assetPath,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Icon(
-                        _getIcon(),
-                        size: 40,
-                        color: item.rarity.color,
-                      ),
-                    )
-                        : Stack(
+                    child: Stack(
+                      fit: StackFit.expand,
                       children: [
-                        Center(
-                          child: Icon(
-                            _getIcon(),
-                            size: 40,
-                            color: theme.colorScheme.outline
-                                .withValues(alpha: 0.5),
-                          ),
-                        ),
-                        if (!item.isPurchasable)
-                          Center(
+                        // Always try to show the actual image
+                        Image.asset(
+                          item.assetPath,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Center(
                             child: Icon(
-                              Icons.lock,
-                              size: 24,
-                              color: theme.colorScheme.outline,
+                              _getIcon(),
+                              size: 40,
+                              color: isOwned ? item.rarity.color : theme.colorScheme.outline.withValues(alpha: 0.5),
                             ),
                           ),
+                        ),
+                        // Dark overlay + lock for items not yet owned
+                        if (!isOwned) ...[
+                          Container(color: Colors.black.withValues(alpha: 0.5)),
+                          Center(
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.6),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.lock_outline,
+                                size: 20,
+                                color: Colors.white.withValues(alpha: 0.8),
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -746,4 +768,41 @@ class _TitleCard extends StatelessWidget {
       ),
     );
   }
+}
+
+// ============ STARFIELD BACKGROUND PAINTER ============
+
+class _StarfieldPainter extends CustomPainter {
+  final Color baseColor;
+  _StarfieldPainter({required this.baseColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rng = Random(42); // Fixed seed for consistent stars
+    final paint = Paint();
+
+    for (int i = 0; i < 40; i++) {
+      final x = rng.nextDouble() * size.width;
+      final y = rng.nextDouble() * size.height;
+      final radius = 0.5 + rng.nextDouble() * 2.0;
+      final opacity = 0.15 + rng.nextDouble() * 0.35;
+
+      // Alternate between white and theme-colored stars
+      final isColored = rng.nextDouble() > 0.45;
+      paint.color = isColored
+          ? baseColor.withValues(alpha: opacity)
+          : Colors.white.withValues(alpha: opacity * 0.6);
+
+      canvas.drawCircle(Offset(x, y), radius, paint);
+
+      // Occasional larger glow
+      if (rng.nextDouble() > 0.82) {
+        paint.color = baseColor.withValues(alpha: opacity * 0.25);
+        canvas.drawCircle(Offset(x, y), radius * 3.5, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

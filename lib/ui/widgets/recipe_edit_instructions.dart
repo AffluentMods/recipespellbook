@@ -358,84 +358,70 @@ class _StepCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: 8),
       child: GestureDetector(
         onLongPress: onLongPress,
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
           decoration: BoxDecoration(
             color: isSelected
-                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            border: isSelected
-                ? Border.all(color: theme.colorScheme.primary, width: 1.5)
-                : null,
+                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.4)
+                : (isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.outline.withValues(alpha: 0.15),
+              width: isSelected ? 2 : 1,
+            ),
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Drag handle on left (two horizontal bars)
-              if (!isSelectionMode)
-                ReorderableDragStartListener(
-                  index: index,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: Icon(
-                      Icons.drag_indicator,
-                      color: theme.colorScheme.outline.withValues(alpha: 0.35),
-                      size: 18,
+              // Left side: step number or selection checkbox
+              Padding(
+                padding: const EdgeInsets.only(left: 12, top: 14),
+                child: isSelectionMode
+                    ? AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+                    border: Border.all(
+                      color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
+                      width: 2,
                     ),
+                    shape: BoxShape.circle,
                   ),
-                ),
-
-              // Selection checkbox
-              if (isSelectionMode)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 22,
-                    height: 22,
-                    decoration: BoxDecoration(
-                      color: isSelected ? theme.colorScheme.primary : Colors.transparent,
-                      border: Border.all(
-                        color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
-                        width: 1.5,
-                      ),
-                      shape: BoxShape.circle,
+                  child: isSelected
+                      ? const Icon(Icons.check, size: 16, color: Colors.white)
+                      : null,
+                )
+                    : Container(
+                  width: 28,
+                  height: 28,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE8A860),
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '${index + 1}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
                     ),
-                    child: isSelected
-                        ? const Icon(Icons.check, size: 14, color: Colors.white)
-                        : null,
-                  ),
-                ),
-
-              // Step number
-              Container(
-                width: 24,
-                height: 24,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE8A860),
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  '${index + 1}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
                   ),
                 ),
               ),
 
-              // Text field
+              // Center: text field
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 8),
+                  padding: const EdgeInsets.fromLTRB(10, 4, 4, 4),
                   child: AbsorbPointer(
                     absorbing: isSelectionMode,
                     child: TextField(
@@ -450,7 +436,7 @@ class _StepCard extends StatelessWidget {
                           color: theme.colorScheme.outline.withValues(alpha: 0.4),
                         ),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
                         isDense: true,
                       ),
                       style: theme.textTheme.bodyMedium,
@@ -459,6 +445,20 @@ class _StepCard extends StatelessWidget {
                   ),
                 ),
               ),
+
+              // Right side: drag handle (only when not selecting)
+              if (!isSelectionMode)
+                ReorderableDragStartListener(
+                  index: index,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 10, right: 8, left: 4),
+                    child: Icon(
+                      Icons.drag_indicator,
+                      color: theme.colorScheme.outline.withValues(alpha: 0.4),
+                      size: 20,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -610,7 +610,10 @@ class _AddStepImageButton extends StatelessWidget {
               onTap: () async {
                 Navigator.pop(ctx);
                 final image = await picker.pickImage(source: ImageSource.camera);
-                if (image != null) onImageSelected(image.path);
+                if (image != null && context.mounted) {
+                  final confirmed = await _showImageConfirm(context, image.path);
+                  if (confirmed != null) onImageSelected(confirmed);
+                }
               },
             ),
             ListTile(
@@ -619,8 +622,84 @@ class _AddStepImageButton extends StatelessWidget {
               onTap: () async {
                 Navigator.pop(ctx);
                 final image = await picker.pickImage(source: ImageSource.gallery);
-                if (image != null) onImageSelected(image.path);
+                if (image != null && context.mounted) {
+                  final confirmed = await _showImageConfirm(context, image.path);
+                  if (confirmed != null) onImageSelected(confirmed);
+                }
               },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<String?> _showImageConfirm(BuildContext context, String imagePath) {
+    final theme = Theme.of(context);
+    return showDialog<String?>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+          title: const Text('Preview Photo'),
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.pop(ctx, null),
+          ),
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Center(
+                  child: Image.file(File(imagePath), fit: BoxFit.contain),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                'Pinch to zoom · This is how your photo will look',
+                style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => Navigator.pop(ctx, null),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Retake'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white54),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: () => Navigator.pop(ctx, imagePath),
+                        icon: const Icon(Icons.check),
+                        label: const Text('Use Photo'),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

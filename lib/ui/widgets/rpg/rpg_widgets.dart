@@ -70,21 +70,24 @@ class RpgAvatarWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: theme.colorScheme.surfaceContainerHighest,
-                image: avatar != null
-                    ? DecorationImage(
-                  image: AssetImage(avatar.assetPath),
-                  fit: BoxFit.cover,
-                  onError: (_, __) {},
-                )
-                    : null,
               ),
-              child: avatar == null
-                  ? Icon(
-                Icons.person,
-                size: size * 0.5,
-                color: theme.colorScheme.outline,
-              )
-                  : null,
+              child: ClipOval(
+                child: avatar != null
+                    ? Image.asset(
+                  avatar.assetPath,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Icon(
+                    Icons.person,
+                    size: size * 0.5,
+                    color: theme.colorScheme.outline,
+                  ),
+                )
+                    : Icon(
+                  Icons.person,
+                  size: size * 0.5,
+                  color: theme.colorScheme.outline,
+                ),
+              ),
             ),
           ),
 

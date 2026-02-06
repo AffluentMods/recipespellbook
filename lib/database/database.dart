@@ -75,7 +75,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 9; // Bumped for USDA tables
+  int get schemaVersion => 10; // Bumped for shopping category ID fix
 
   // Accessors for DAOs
   CookbookDao get cookbookDao => CookbookDao(this);
@@ -131,8 +131,132 @@ class AppDatabase extends _$AppDatabase {
           // Add imagePath column to steps table
           await m.addColumn(steps, steps.imagePath);
         }
+        if (from < 10) {
+          // Fix shopping category IDs: rename shop_* prefix to canonical IDs
+          // and add all missing categories from the full canonical set
+          await _migrateShoppingCategories();
+        }
       },
     );
+  }
+
+  /// Migration: rename shop_* categories to canonical IDs used by ingredient_utils
+  Future<void> _migrateShoppingCategories() async {
+    // Map old shop_* IDs to canonical IDs
+    final idRenames = {
+      'shop_produce': 'produce',
+      'shop_dairy': 'dairy',
+      'shop_meat': 'meat',
+      'shop_frozen': 'frozen',
+      'shop_pantry': 'pantry',
+      'shop_bakery': 'bakery',
+      'shop_beverages': 'beverages',
+      'shop_snacks': 'snacks',
+      'shop_other': 'other',
+    };
+
+    for (final entry in idRenames.entries) {
+      final oldId = entry.key;
+      final newId = entry.value;
+
+      // Check if old category exists
+      final existing = await customSelect(
+        'SELECT id FROM shopping_categories WHERE id = ?',
+        variables: [Variable.withString(oldId)],
+      ).get();
+
+      if (existing.isNotEmpty) {
+        // Check if new ID already exists (from ingredient_utils auto-creation)
+        final newExists = await customSelect(
+          'SELECT id FROM shopping_categories WHERE id = ?',
+          variables: [Variable.withString(newId)],
+        ).get();
+
+        if (newExists.isEmpty) {
+          // Rename the category
+          await customStatement(
+            "UPDATE shopping_categories SET id = ? WHERE id = ?",
+            [newId, oldId],
+          );
+        } else {
+          // Both exist — delete the old shop_* one
+          await customStatement(
+            "DELETE FROM shopping_categories WHERE id = ?",
+            [oldId],
+          );
+        }
+
+        // Update all items referencing the old ID
+        await customStatement(
+          "UPDATE shopping_list_items SET shopping_category_id = ? WHERE shopping_category_id = ?",
+          [newId, oldId],
+        );
+      }
+    }
+
+    // Also fix legacy alias IDs that ingredient_utils might have created
+    final aliasRenames = {
+      'breakfast': 'breakfastCereal',
+      'canned': 'cannedGoods',
+      'pasta': 'grainsAndPasta',
+      'oil': 'cookingAndBaking',
+      'baking': 'cookingAndBaking',
+      'alcohol': 'beerWineSpirits',
+      'beauty': 'personalCare',
+      'grains': 'grainsAndPasta',
+    };
+
+    for (final entry in aliasRenames.entries) {
+      await customStatement(
+        "UPDATE shopping_list_items SET shopping_category_id = ? WHERE shopping_category_id = ?",
+        [entry.value, entry.key],
+      );
+      // Remove orphaned alias categories
+      await customStatement(
+        "DELETE FROM shopping_categories WHERE id = ?",
+        [entry.key],
+      );
+    }
+
+    // Insert all canonical categories that don't exist yet
+    final canonicalCategories = [
+      ('produce', 'Produce', 1),
+      ('bakery', 'Bakery', 2),
+      ('deli', 'Deli', 3),
+      ('dairy', 'Dairy & Eggs', 4),
+      ('meat', 'Meat & Poultry', 5),
+      ('seafood', 'Seafood', 6),
+      ('frozen', 'Frozen', 7),
+      ('breakfastCereal', 'Breakfast & Cereal', 8),
+      ('grainsAndPasta', 'Grains, Pasta & Rice', 9),
+      ('cannedGoods', 'Canned Goods', 10),
+      ('condiments', 'Condiments & Sauces', 11),
+      ('spices', 'Spices & Seasonings', 12),
+      ('cookingAndBaking', 'Cooking & Baking', 13),
+      ('snacks', 'Snacks', 14),
+      ('beverages', 'Beverages', 15),
+      ('beerWineSpirits', 'Beer, Wine & Spirits', 16),
+      ('international', 'International', 17),
+      ('baby', 'Baby', 18),
+      ('pet', 'Pet Supplies', 19),
+      ('household', 'Household', 20),
+      ('personalCare', 'Personal Care', 21),
+      ('pantry', 'Pantry', 22),
+      ('other', 'Other', 99),
+    ];
+
+    for (final cat in canonicalCategories) {
+      final exists = await customSelect(
+        'SELECT id FROM shopping_categories WHERE id = ?',
+        variables: [Variable.withString(cat.$1)],
+      ).get();
+      if (exists.isEmpty) {
+        await customStatement(
+          "INSERT INTO shopping_categories (id, name, sort_order, is_default) VALUES (?, ?, ?, 1)",
+          [cat.$1, cat.$2, cat.$3],
+        );
+      }
+    }
   }
 
   Future<void> _seedDefaultData() async {
@@ -163,17 +287,31 @@ class AppDatabase extends _$AppDatabase {
       ));
     }
 
-    // Default shopping categories
+    // Default shopping categories — IDs match ingredient_utils & LocalizedDefaults
     final defaultShoppingCategories = [
-      ('shop_produce', 'Produce', 0),
-      ('shop_dairy', 'Dairy & Eggs', 1),
-      ('shop_meat', 'Meat & Seafood', 2),
-      ('shop_frozen', 'Frozen', 3),
-      ('shop_pantry', 'Pantry', 4),
-      ('shop_bakery', 'Bakery', 5),
-      ('shop_beverages', 'Beverages', 6),
-      ('shop_snacks', 'Snacks', 7),
-      ('shop_other', 'Other', 8),
+      ('produce', 'Produce', 1),
+      ('bakery', 'Bakery', 2),
+      ('deli', 'Deli', 3),
+      ('dairy', 'Dairy & Eggs', 4),
+      ('meat', 'Meat & Poultry', 5),
+      ('seafood', 'Seafood', 6),
+      ('frozen', 'Frozen', 7),
+      ('breakfastCereal', 'Breakfast & Cereal', 8),
+      ('grainsAndPasta', 'Grains, Pasta & Rice', 9),
+      ('cannedGoods', 'Canned Goods', 10),
+      ('condiments', 'Condiments & Sauces', 11),
+      ('spices', 'Spices & Seasonings', 12),
+      ('cookingAndBaking', 'Cooking & Baking', 13),
+      ('snacks', 'Snacks', 14),
+      ('beverages', 'Beverages', 15),
+      ('beerWineSpirits', 'Beer, Wine & Spirits', 16),
+      ('international', 'International', 17),
+      ('baby', 'Baby', 18),
+      ('pet', 'Pet Supplies', 19),
+      ('household', 'Household', 20),
+      ('personalCare', 'Personal Care', 21),
+      ('pantry', 'Pantry', 22),
+      ('other', 'Other', 99),
     ];
 
     for (final cat in defaultShoppingCategories) {

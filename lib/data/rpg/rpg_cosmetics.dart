@@ -4,6 +4,7 @@
 import 'rpg_models.dart';
 
 // ============ AVATARS ============
+// Files located in assets/rpg/avatars/
 
 class RpgAvatars {
   static const List<CosmeticItem> all = [
@@ -18,16 +19,6 @@ class RpgAvatars {
     ),
 
     // === GOLD PURCHASABLE ===
-    CosmeticItem(
-      id: 'avatar_chef_hat',
-      name: 'Classic Chef',
-      description: 'The traditional chef look with a white toque',
-      type: CosmeticType.avatar,
-      rarity: CosmeticRarity.common,
-      assetPath: 'assets/rpg/avatars/chef_hat.png',
-      currency: CurrencyType.gold,
-      price: 100,
-    ),
     CosmeticItem(
       id: 'avatar_sous_chef',
       name: 'Sous Chef',
@@ -54,7 +45,7 @@ class RpgAvatars {
       description: 'Expert in the art of Japanese cuisine',
       type: CosmeticType.avatar,
       rarity: CosmeticRarity.uncommon,
-      assetPath: 'assets/rpg/avatars/avatar_sushi_chef.png',
+      assetPath: 'assets/rpg/avatars/avatar_sushi_master.png',
       currency: CurrencyType.gold,
       price: 400,
     ),
@@ -67,16 +58,6 @@ class RpgAvatars {
       assetPath: 'assets/rpg/avatars/avatar_grill_master.png',
       currency: CurrencyType.gold,
       price: 400,
-    ),
-    CosmeticItem(
-      id: 'avatar_pastry_chef',
-      name: 'Pastry Chef',
-      description: 'Creates sweet masterpieces',
-      type: CosmeticType.avatar,
-      rarity: CosmeticRarity.rare,
-      assetPath: 'assets/rpg/avatars/avatar_pastry_chef.png',
-      currency: CurrencyType.gold,
-      price: 750,
     ),
     CosmeticItem(
       id: 'avatar_wizard_chef',
@@ -167,6 +148,7 @@ class RpgAvatars {
 }
 
 // ============ FRAMES ============
+// Files located in assets/rpg/frames/
 
 class RpgFrames {
   static const List<CosmeticItem> all = [
@@ -182,22 +164,12 @@ class RpgFrames {
 
     // === GOLD PURCHASABLE ===
     CosmeticItem(
-      id: 'frame_wooden',
-      name: 'Wooden Frame',
-      description: 'Rustic wooden cutting board style',
+      id: 'frame_bronze',
+      name: 'Bronze Frame',
+      description: 'Warm bronze finish',
       type: CosmeticType.frame,
       rarity: CosmeticRarity.common,
-      assetPath: 'assets/rpg/frames/frame_wooden.png',
-      currency: CurrencyType.gold,
-      price: 75,
-    ),
-    CosmeticItem(
-      id: 'frame_copper',
-      name: 'Copper Frame',
-      description: 'Warm copper pot finish',
-      type: CosmeticType.frame,
-      rarity: CosmeticRarity.common,
-      assetPath: 'assets/rpg/frames/frame_copper.png',
+      assetPath: 'assets/rpg/frames/frame_bronze.png',
       currency: CurrencyType.gold,
       price: 100,
     ),
@@ -283,6 +255,7 @@ class RpgFrames {
 }
 
 // ============ PETS ============
+// Files located in assets/rpg/pets/
 
 class RpgPets {
   static const List<CosmeticItem> all = [

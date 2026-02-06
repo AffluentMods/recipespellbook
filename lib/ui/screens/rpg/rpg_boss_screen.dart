@@ -315,10 +315,10 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
     final goldReward = _currentEnemy.goldReward;
     final xpReward = _currentEnemy.xpReward;
 
-    // Award rewards
+    // Award rewards - defeatEnemy gives base 25 XP * multiplier
     ref.read(rpgProvider.notifier).awardGold(goldReward);
     ref.read(rpgProvider.notifier).awardXp(
-      XpActionType.achievementUnlocked,
+      XpActionType.defeatEnemy,
       multiplier: (xpReward / 25).ceil().clamp(1, 100),
       description: 'Defeated ${_currentEnemy.name}!',
     );

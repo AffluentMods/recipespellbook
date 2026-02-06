@@ -130,38 +130,44 @@ class CategoriesBrowseScreen extends ConsumerWidget {
                 _SectionHeader(title: primaryLabel, icon: isCourses ? Icons.restaurant_menu : Icons.category),
                 const SizedBox(height: 12),
 
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 1.5,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemCount: isCourses ? sortedCourses.length : sortedCategories.length,
-                  itemBuilder: (context, index) {
-                    if (isCourses) {
-                      final course = sortedCourses[index];
-                      final count = courseCounts[course.id] ?? 0;
-                      final displayName = translator.translateCourse(course.name);
-                      return _BrowseCardStatic(
-                        emoji: course.emoji,
-                        name: displayName,
-                        count: count,
-                        onTap: () => context.push('/recipes?cookbook=$cookbookId&course=${course.id}&title=${Uri.encodeComponent(displayName)}'),
-                      );
-                    } else {
-                      final category = sortedCategories[index];
-                      final count = categoryCounts[category.id] ?? 0;
-                      final displayName = translator.translateCategory(category.name);
-                      return _BrowseCardStatic(
-                        emoji: category.emoji,
-                        name: displayName,
-                        count: count,
-                        onTap: () => context.push('/recipes?cookbook=$cookbookId&category=${category.id}&title=${Uri.encodeComponent(displayName)}'),
-                      );
-                    }
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final width = constraints.maxWidth;
+                    final crossAxisCount = width > 600 ? 4 : width > 400 ? 3 : 2;
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        childAspectRatio: 1.0,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                      ),
+                      itemCount: isCourses ? sortedCourses.length : sortedCategories.length,
+                      itemBuilder: (context, index) {
+                        if (isCourses) {
+                          final course = sortedCourses[index];
+                          final count = courseCounts[course.id] ?? 0;
+                          final displayName = translator.translateCourse(course.name);
+                          return _BrowseCardStatic(
+                            emoji: course.emoji,
+                            name: displayName,
+                            count: count,
+                            onTap: () => context.push('/recipes?cookbook=$cookbookId&course=${course.id}&title=${Uri.encodeComponent(displayName)}'),
+                          );
+                        } else {
+                          final category = sortedCategories[index];
+                          final count = categoryCounts[category.id] ?? 0;
+                          final displayName = translator.translateCategory(category.name);
+                          return _BrowseCardStatic(
+                            emoji: category.emoji,
+                            name: displayName,
+                            count: count,
+                            onTap: () => context.push('/recipes?cookbook=$cookbookId&category=${category.id}&title=${Uri.encodeComponent(displayName)}'),
+                          );
+                        }
+                      },
+                    );
                   },
                 ),
 
@@ -177,38 +183,44 @@ class CategoriesBrowseScreen extends ConsumerWidget {
                 _SectionHeader(title: secondaryLabel, icon: isCourses ? Icons.category : Icons.restaurant_menu),
                 const SizedBox(height: 12),
 
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 1.5,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemCount: isCourses ? sortedCategories.length : sortedCourses.length,
-                  itemBuilder: (context, index) {
-                    if (isCourses) {
-                      final category = sortedCategories[index];
-                      final count = categoryCounts[category.id] ?? 0;
-                      final displayName = translator.translateCategory(category.name);
-                      return _BrowseCardStatic(
-                        emoji: category.emoji,
-                        name: displayName,
-                        count: count,
-                        onTap: () => context.push('/recipes?cookbook=$cookbookId&category=${category.id}&title=${Uri.encodeComponent(displayName)}'),
-                      );
-                    } else {
-                      final course = sortedCourses[index];
-                      final count = courseCounts[course.id] ?? 0;
-                      final displayName = translator.translateCourse(course.name);
-                      return _BrowseCardStatic(
-                        emoji: course.emoji,
-                        name: displayName,
-                        count: count,
-                        onTap: () => context.push('/recipes?cookbook=$cookbookId&course=${course.id}&title=${Uri.encodeComponent(displayName)}'),
-                      );
-                    }
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final width = constraints.maxWidth;
+                    final crossAxisCount = width > 600 ? 4 : width > 400 ? 3 : 2;
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        childAspectRatio: 1.0,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                      ),
+                      itemCount: isCourses ? sortedCategories.length : sortedCourses.length,
+                      itemBuilder: (context, index) {
+                        if (isCourses) {
+                          final category = sortedCategories[index];
+                          final count = categoryCounts[category.id] ?? 0;
+                          final displayName = translator.translateCategory(category.name);
+                          return _BrowseCardStatic(
+                            emoji: category.emoji,
+                            name: displayName,
+                            count: count,
+                            onTap: () => context.push('/recipes?cookbook=$cookbookId&category=${category.id}&title=${Uri.encodeComponent(displayName)}'),
+                          );
+                        } else {
+                          final course = sortedCourses[index];
+                          final count = courseCounts[course.id] ?? 0;
+                          final displayName = translator.translateCourse(course.name);
+                          return _BrowseCardStatic(
+                            emoji: course.emoji,
+                            name: displayName,
+                            count: count,
+                            onTap: () => context.push('/recipes?cookbook=$cookbookId&course=${course.id}&title=${Uri.encodeComponent(displayName)}'),
+                          );
+                        }
+                      },
+                    );
                   },
                 ),
 

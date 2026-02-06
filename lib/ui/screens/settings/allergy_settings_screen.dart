@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../data/allergen_data.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../providers/database_provider.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../widgets/placeholder_image.dart';
 
 /// Provider for dismissed allergy warnings
 /// Stores recipe IDs where user has permanently dismissed warnings
@@ -617,7 +620,7 @@ class _DisabledWarningsTab extends ConsumerWidget {
   }
 }
 
-class _DisabledRecipeTile extends StatelessWidget {
+class _DisabledRecipeTile extends ConsumerWidget {
   final String recipeId;
   final Set<Allergen> dismissedAllergens;
   final VoidCallback onRestore;
@@ -629,40 +632,123 @@ class _DisabledRecipeTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final dao = ref.watch(recipeDaoProvider);
 
-    return ListTile(
-      leading: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
-          child: Text(
-            dismissedAllergens.map((a) => a.emoji).take(3).join(),
-            style: const TextStyle(fontSize: 16),
+    return FutureBuilder(
+      future: dao.getRecipeById(recipeId),
+      builder: (context, snapshot) {
+        final recipe = snapshot.data;
+        final recipeName = recipe?.title ?? recipeId;
+        final hasImage = recipe?.imagePath != null &&
+            File(recipe!.imagePath!).existsSync();
+
+        // Allergen names list
+        final allergenNames = dismissedAllergens
+            .map((a) => a.getLocalizedName(l10n))
+            .toList();
+
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.1),
+            ),
           ),
-        ),
-      ),
-      title: Text(
-        'Recipe ID: ${recipeId.substring(0, 8)}...',
-        style: theme.textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      subtitle: Text(
-        '${dismissedAllergens.length} warning${dismissedAllergens.length != 1 ? 's' : ''} disabled',
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.outline,
-        ),
-      ),
-      trailing: TextButton(
-        onPressed: onRestore,
-        child: const Text('Restore'),
-      ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                // Recipe image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: SizedBox(
+                    width: 56,
+                    height: 56,
+                    child: hasImage
+                        ? Image.file(
+                      File(recipe!.imagePath!),
+                      fit: BoxFit.cover,
+                    )
+                        : const RecipePlaceholderImage(
+                      height: 56,
+                      width: 56,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // Recipe info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        recipeName,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      // Allergen chips
+                      Wrap(
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: dismissedAllergens.take(4).map((allergen) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.errorContainer
+                                  .withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  allergen.emoji,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  allergen.getLocalizedName(l10n),
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.error,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Restore button
+                IconButton(
+                  onPressed: onRestore,
+                  icon: Icon(
+                    Icons.restore,
+                    color: theme.colorScheme.primary,
+                  ),
+                  tooltip: 'Restore warnings',
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

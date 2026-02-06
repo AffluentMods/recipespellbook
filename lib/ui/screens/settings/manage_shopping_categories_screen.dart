@@ -201,7 +201,6 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
               final emoji = getCategoryEmoji(cat.id.isNotEmpty ? cat.id : cat.name);
               final color = getCategoryColor(cat.id.isNotEmpty ? cat.id : cat.name);
 
-              // Tap anywhere on the row to edit — no pencil icon needed
               return InkWell(
                 key: ValueKey(cat.id),
                 onTap: () => _editCategory(cat),
@@ -209,8 +208,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
                     children: [
-                      Icon(Icons.drag_handle, color: theme.colorScheme.outline.withValues(alpha: 0.4), size: 20),
-                      const SizedBox(width: 12),
+                      // Emoji icon on the left
                       Container(
                         width: 40,
                         height: 40,
@@ -221,6 +219,7 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                         child: Center(child: Text(emoji, style: const TextStyle(fontSize: 18))),
                       ),
                       const SizedBox(width: 12),
+                      // Name + priority
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,11 +232,20 @@ class _CategoriesTabState extends ConsumerState<_CategoriesTab> {
                           ],
                         ),
                       ),
+                      // Delete button (custom categories only)
                       if (!cat.isDefault)
                         IconButton(
                           icon: Icon(Icons.delete_outline, size: 20, color: theme.colorScheme.error.withValues(alpha: 0.6)),
                           onPressed: () => _deleteCategory(cat),
                         ),
+                      // Drag handle on the RIGHT
+                      ReorderableDragStartListener(
+                        index: index,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                          child: Icon(Icons.drag_handle, color: theme.colorScheme.outline.withValues(alpha: 0.4), size: 20),
+                        ),
+                      ),
                     ],
                   ),
                 ),

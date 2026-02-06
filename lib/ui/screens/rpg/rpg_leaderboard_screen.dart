@@ -322,7 +322,7 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'Compete with other chefs worldwide.\nSee who has the most recipes, highest level, and longest streaks!',
+              'Compete with other avatars worldwide.\nSee who has the most recipes, highest level, and longest streaks!',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.outline,

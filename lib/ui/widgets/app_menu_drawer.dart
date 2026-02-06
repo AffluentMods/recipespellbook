@@ -16,7 +16,7 @@ class AppMenuDrawer extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
 
     // Check if RPG mode is ACTUALLY enabled
-    final isRpgEnabled = settings.nerdMode;
+    final isRpgEnabled = settings.rpgAnimationsEnabled || settings.rpgSoundsEnabled;
 
     return Drawer(
       backgroundColor: theme.colorScheme.surface,
@@ -29,10 +29,10 @@ class AppMenuDrawer extends ConsumerWidget {
               child: ListView(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 children: [
-                  _SectionHeader(title: 'NAVIGATION'),
+                  _SectionHeader(title: isRpgEnabled ? 'QUEST LOG' : 'NAVIGATION'),
                   _MenuItem(
                     icon: Icons.menu_book_rounded,
-                    label: l10n.navCookbooks,
+                    label: isRpgEnabled ? 'Spellbooks' : l10n.navCookbooks,
                     onTap: () {
                       Navigator.pop(context);
                       context.go('/cookbooks');
@@ -48,7 +48,7 @@ class AppMenuDrawer extends ConsumerWidget {
 
                   const SizedBox(height: 8),
                   const Divider(height: 1),
-                  _SectionHeader(title: 'IMPORT'),
+                  _SectionHeader(title: isRpgEnabled ? 'DISCOVER' : 'IMPORT'),
                   _MenuItem(
                     icon: Icons.download_rounded,
                     label: l10n.importGuides,
@@ -74,55 +74,19 @@ class AppMenuDrawer extends ConsumerWidget {
                     const Divider(height: 1),
                     _SectionHeader(title: 'RPG MODE', color: theme.colorScheme.primary),
                     _MenuItem(
-                      icon: Icons.person_rounded,
-                      label: 'Profile',
-                      subtitle: 'View your stats and progress',
+                      icon: Icons.shield_rounded,
+                      label: 'Adventurer Profile',
+                      subtitle: 'Stats, quests, cosmetics & more',
                       onTap: () {
                         Navigator.pop(context);
                         context.push('/rpg/profile');
-                      },
-                    ),
-                    _MenuItem(
-                      icon: Icons.emoji_events_rounded,
-                      label: 'Achievements',
-                      subtitle: 'Unlock rewards',
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.push('/rpg/achievements');
-                      },
-                    ),
-                    _MenuItem(
-                      icon: Icons.checkroom_rounded,
-                      label: 'Cosmetics',
-                      subtitle: 'Customize your look',
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.push('/rpg/cosmetics');
-                      },
-                    ),
-                    _MenuItem(
-                      icon: Icons.leaderboard_rounded,
-                      label: 'Leaderboards',
-                      subtitle: 'Compete with others',
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.push('/rpg/leaderboard');
-                      },
-                    ),
-                    _MenuItem(
-                      icon: Icons.whatshot_rounded,
-                      label: 'Boss Battles',
-                      subtitle: 'Epic cooking challenges',
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.push('/rpg/boss');
                       },
                     ),
                   ],
 
                   const SizedBox(height: 8),
                   const Divider(height: 1),
-                  _SectionHeader(title: 'SOCIAL'),
+                  _SectionHeader(title: isRpgEnabled ? 'GUILD' : 'SOCIAL'),
                   _MenuItem(
                     icon: Icons.person_add_rounded,
                     label: 'Invite friends',

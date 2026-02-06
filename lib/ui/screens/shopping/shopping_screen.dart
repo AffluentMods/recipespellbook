@@ -12,7 +12,18 @@ import '../../../data/ingredient_images.dart';
 import '../../../database/daos/shopping_dao.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../widgets/rpg/rpg_navigation_shell.dart';
-import '../settings/manage_shopping_categories_screen.dart' show getCategoryEmoji, formatCategoryDisplayName, getCategoryColor;
+
+/// Provider for shopping category sort order (respects user reordering)
+final shoppingCategoryOrderProvider = FutureProvider<Map<String, int>>((ref) async {
+  final shoppingDao = ref.watch(shoppingDaoProvider);
+  final categories = await shoppingDao.getAllShoppingCategories();
+  final order = <String, int>{};
+  for (final cat in categories) {
+    order[cat.id] = cat.sortOrder;
+    order[cat.name.toLowerCase()] = cat.sortOrder;
+  }
+  return order;
+});
 
 /// Provider to track shopping list item count (for nav badge)
 final shoppingItemCountProvider = StreamProvider<int>((ref) {
@@ -728,33 +739,22 @@ class _AddItemSheet extends ConsumerStatefulWidget {
 class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
-  List<String> _allIngredients = [];
 
   @override
   void initState() {
     super.initState();
-    _loadIngredients();
+    // Auto-focus the text field
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
   }
 
-  void _loadIngredients() {
-    // Combine built-in ingredients + user custom mappings for autocomplete
-    final builtIn = <String>{};
-    for (final keywords in shoppingCategoryKeywords.values) {
-      builtIn.addAll(keywords);
-    }
-    builtIn.addAll(widget.userMappings.keys);
-    _allIngredients = builtIn.toList()..sort();
-  }
-
-  void _addItem([String? overrideText]) {
-    final text = (overrideText ?? _controller.text).trim();
-    if (text.isEmpty) return;
+  void _addItem() {
+    if (_controller.text.trim().isEmpty) return;
 
     final shoppingDao = ref.read(shoppingDaoProvider);
     final mappingsDao = ref.read(userIngredientMappingsDaoProvider);
+    final text = _controller.text.trim();
     final normalized = normalizeIngredientName(text);
 
     // Detect category using user mappings
@@ -805,61 +805,20 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
             const SizedBox(height: 20),
             Text('Add Item', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            RawAutocomplete<String>(
-              textEditingController: _controller,
+            TextField(
+              controller: _controller,
               focusNode: _focusNode,
-              optionsBuilder: (TextEditingValue value) {
-                if (value.text.trim().isEmpty) return const Iterable<String>.empty();
-                final query = value.text.toLowerCase();
-                return _allIngredients.where((i) => i.toLowerCase().contains(query)).take(6);
-              },
-              fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-                return TextField(
-                  controller: controller,
-                  focusNode: focusNode,
-                  decoration: InputDecoration(
-                    hintText: 'e.g., 2 cups flour',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    prefixIcon: const Icon(Icons.add_shopping_cart),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.send),
-                      onPressed: _addItem,
-                    ),
-                  ),
-                  onSubmitted: (_) => _addItem(),
-                  textInputAction: TextInputAction.send,
-                );
-              },
-              optionsViewBuilder: (context, onSelected, options) {
-                return Align(
-                  alignment: Alignment.topLeft,
-                  child: Material(
-                    elevation: 4,
-                    borderRadius: BorderRadius.circular(12),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 200, maxWidth: 340),
-                      child: ListView.builder(
-                        padding: EdgeInsets.zero,
-                        shrinkWrap: true,
-                        itemCount: options.length,
-                        itemBuilder: (context, index) {
-                          final option = options.elementAt(index);
-                          final catId = getShoppingCategory(option, userMappings: widget.userMappings);
-                          return ListTile(
-                            dense: true,
-                            leading: Text(getCategoryEmoji(catId), style: const TextStyle(fontSize: 16)),
-                            title: Text(option),
-                            onTap: () => onSelected(option),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                );
-              },
-              onSelected: (String selection) {
-                _controller.text = selection;
-              },
+              decoration: InputDecoration(
+                hintText: 'e.g., 2 cups flour',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                prefixIcon: const Icon(Icons.add_shopping_cart),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: _addItem,
+                ),
+              ),
+              onSubmitted: (_) => _addItem(),
+              textInputAction: TextInputAction.send,
             ),
             const SizedBox(height: 8),
             Text(
@@ -910,15 +869,12 @@ class _SectionGroupedList extends ConsumerWidget {
       grouped.putIfAbsent(category, () => []).add(item);
     }
 
-    // Sort categories
+    // Sort categories by DB sortOrder (respects user's priority reordering)
+    final categoryOrder = ref.watch(shoppingCategoryOrderProvider).valueOrNull ?? {};
     final sortedKeys = grouped.keys.toList()..sort((a, b) {
-      final order = ['produce', 'dairy', 'meat', 'seafood', 'bakery', 'deli', 'frozen',
-        'breakfast', 'canned', 'pasta', 'grains', 'baking', 'condiments',
-        'oil', 'spices', 'snacks', 'beverages', 'alcohol', 'baby',
-        'beauty', 'household', 'pet', 'international', 'other'];
-      final aIdx = order.indexOf(a);
-      final bIdx = order.indexOf(b);
-      return (aIdx == -1 ? 999 : aIdx).compareTo(bIdx == -1 ? 999 : bIdx);
+      final aOrder = categoryOrder[a] ?? categoryOrder[a.toLowerCase()] ?? 999;
+      final bOrder = categoryOrder[b] ?? categoryOrder[b.toLowerCase()] ?? 999;
+      return aOrder.compareTo(bOrder);
     });
 
     return ListView(
@@ -930,19 +886,13 @@ class _SectionGroupedList extends ConsumerWidget {
             width: double.infinity,
             color: isDark ? Colors.grey.shade800 : const Color(0xFFF5F0E8),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: Row(
-              children: [
-                Text(getCategoryEmoji(category), style: const TextStyle(fontSize: 16)),
-                const SizedBox(width: 8),
-                Text(
-                  formatCategoryDisplayName(getShoppingCategoryDisplayName(category), AppLocalizations.of(context)!),
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                    letterSpacing: 0.3,
-                  ),
-                ),
-              ],
+            child: Text(
+              getShoppingCategoryDisplayName(category).toUpperCase(),
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                letterSpacing: 0.5,
+              ),
             ),
           ),
           // Items
@@ -1018,11 +968,11 @@ class _RecipeGroupedList extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        title,
+                        title.toUpperCase(),
                         style: theme.textTheme.labelLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                          letterSpacing: 0.3,
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ),
