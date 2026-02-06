@@ -21,6 +21,7 @@ import '../../widgets/tag_picker.dart';
 import '../../widgets/nutrition_calculation_sheet.dart';
 import '../../widgets/rpg/rpg_rarity_picker.dart';
 import '../../widgets/rpg/rpg_navigation_shell.dart';
+import '../../widgets/recipe_edit_instructions.dart';
 
 // ============ IMAGE PREVIEW/CONFIRM HELPER ============
 
@@ -149,7 +150,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   bool _isSaving = false;
 
   final List<_SimpleIngredient> _ingredients = [];
-  final List<_EditableStep> _steps = [];
+  final List<EditableStep> _steps = [];
 
   // Tab controller for tabbed layout
   late TabController _tabController;
@@ -186,7 +187,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
 
     if (!_isEditing) {
       // Add one empty step for new recipes
-      _steps.add(_EditableStep(id: 'step_${DateTime.now().millisecondsSinceEpoch}'));
+      _steps.add(EditableStep(id: 'step_${DateTime.now().millisecondsSinceEpoch}', instruction: ''));
       setState(() => _isLoading = false);
       return;
     }
@@ -240,17 +241,16 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     // Load steps with images
     final steps = await recipeDao.getStepsForRecipe(widget.recipeId!);
     for (final step in steps) {
-      _steps.add(_EditableStep(
+      _steps.add(EditableStep(
         id: step.id,
         instruction: step.instruction,
         imagePath: step.imagePath,
-        durationMinutes: step.durationMinutes,
       ));
     }
 
     // Add empty step if none exist
     if (_steps.isEmpty) {
-      _steps.add(_EditableStep(id: 'step_${DateTime.now().millisecondsSinceEpoch}'));
+      _steps.add(EditableStep(id: 'step_${DateTime.now().millisecondsSinceEpoch}', instruction: ''));
     }
 
     setState(() => _isLoading = false);
@@ -277,7 +277,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     if (data['instructions'] is List) {
       for (var i = 0; i < (data['instructions'] as List).length; i++) {
         final instruction = data['instructions'][i];
-        _steps.add(_EditableStep(
+        _steps.add(EditableStep(
           id: 'step_${DateTime.now().millisecondsSinceEpoch}_$i',
           instruction: instruction.toString(),
         ));
@@ -287,7 +287,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       final instructionList = (data['instructions'] as String).split(RegExp(r'\n\n+'));
       for (var i = 0; i < instructionList.length; i++) {
         if (instructionList[i].trim().isNotEmpty) {
-          _steps.add(_EditableStep(
+          _steps.add(EditableStep(
             id: 'step_${DateTime.now().millisecondsSinceEpoch}_$i',
             instruction: instructionList[i].trim(),
           ));
@@ -297,7 +297,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
 
     // Add empty step if none parsed
     if (_steps.isEmpty) {
-      _steps.add(_EditableStep(id: 'step_${DateTime.now().millisecondsSinceEpoch}'));
+      _steps.add(EditableStep(id: 'step_${DateTime.now().millisecondsSinceEpoch}', instruction: ''));
     }
   }
 
@@ -413,20 +413,13 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
             )),
             _AddIngredientButton(onTap: _addIngredient),
             const SizedBox(height: 32),
-            _SectionTitle(title: l10n.instructionsTitle),
-            const SizedBox(height: 12),
-            ..._steps.asMap().entries.map((entry) => _StepCard(
-              key: ValueKey(entry.value.id),
-              stepNumber: entry.key + 1,
-              step: entry.value,
-              onInstructionChanged: (text) => setState(() => _steps[entry.key].instruction = text),
-              onImageChanged: (path) => setState(() => _steps[entry.key].imagePath = path),
-              onDurationChanged: (mins) => setState(() => _steps[entry.key].durationMinutes = mins),
-              onDelete: _steps.length > 1 ? () => setState(() => _steps.removeAt(entry.key)) : null,
-              onMoveUp: entry.key > 0 ? () => _moveStep(entry.key, -1) : null,
-              onMoveDown: entry.key < _steps.length - 1 ? () => _moveStep(entry.key, 1) : null,
-            )),
-            _AddStepButton(onTap: _addStep),
+            InstructionsEditor(
+              steps: _steps,
+              onStepsChanged: (steps) => setState(() {
+                _steps.clear();
+                _steps.addAll(steps);
+              }),
+            ),
             const SizedBox(height: 32),
             _SectionTitle(title: l10n.recipeFieldNotes),
             const SizedBox(height: 12),
@@ -541,18 +534,13 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ..._steps.asMap().entries.map((entry) => _StepCard(
-                key: ValueKey(entry.value.id),
-                stepNumber: entry.key + 1,
-                step: entry.value,
-                onInstructionChanged: (text) => setState(() => _steps[entry.key].instruction = text),
-                onImageChanged: (path) => setState(() => _steps[entry.key].imagePath = path),
-                onDurationChanged: (mins) => setState(() => _steps[entry.key].durationMinutes = mins),
-                onDelete: _steps.length > 1 ? () => setState(() => _steps.removeAt(entry.key)) : null,
-                onMoveUp: entry.key > 0 ? () => _moveStep(entry.key, -1) : null,
-                onMoveDown: entry.key < _steps.length - 1 ? () => _moveStep(entry.key, 1) : null,
-              )),
-              _AddStepButton(onTap: _addStep),
+              InstructionsEditor(
+                steps: _steps,
+                onStepsChanged: (steps) => setState(() {
+                  _steps.clear();
+                  _steps.addAll(steps);
+                }),
+              ),
               const SizedBox(height: 100),
             ],
           ),
@@ -565,19 +553,6 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     setState(() => _ingredients.add(_SimpleIngredient(id: DateTime.now().millisecondsSinceEpoch.toString(), text: '')));
     Future.delayed(const Duration(milliseconds: 100), () {
       _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
-    });
-  }
-
-  void _addStep() {
-    setState(() {
-      _steps.add(_EditableStep(id: 'step_${DateTime.now().millisecondsSinceEpoch}'));
-    });
-  }
-
-  void _moveStep(int index, int direction) {
-    setState(() {
-      final step = _steps.removeAt(index);
-      _steps.insert(index + direction, step);
     });
   }
 
@@ -680,7 +655,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
               recipeId: widget.recipeId!,
               sortOrder: i,
               instruction: step.instruction.trim(),
-              durationMinutes: drift.Value(step.durationMinutes),
+              durationMinutes: const drift.Value(null),
               imagePath: drift.Value(stepImagePath),
             ));
           }
@@ -728,7 +703,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
               recipeId: recipeId,
               sortOrder: i,
               instruction: step.instruction.trim(),
-              durationMinutes: drift.Value(step.durationMinutes),
+              durationMinutes: const drift.Value(null),
               imagePath: drift.Value(stepImagePath),
             ));
           }
@@ -824,252 +799,12 @@ class _SimpleIngredient {
   _SimpleIngredient({required this.id, this.text = ''});
 }
 
-class _EditableStep {
-  final String id;
-  String instruction;
-  String? imagePath;
-  int? durationMinutes;
-
-  _EditableStep({
-    required this.id,
-    this.instruction = '',
-    this.imagePath,
-    this.durationMinutes,
-  });
-}
-
 class _ParsedIngredient {
   final String? amount;
   final String? unit;
   final String name;
   final String? notes;
   _ParsedIngredient({this.amount, this.unit, required this.name, this.notes});
-}
-
-// ============ STEP CARD ============
-
-class _StepCard extends StatelessWidget {
-  final int stepNumber;
-  final _EditableStep step;
-  final ValueChanged<String> onInstructionChanged;
-  final ValueChanged<String?> onImageChanged;
-  final ValueChanged<int?> onDurationChanged;
-  final VoidCallback? onDelete;
-  final VoidCallback? onMoveUp;
-  final VoidCallback? onMoveDown;
-
-  const _StepCard({
-    super.key,
-    required this.stepNumber,
-    required this.step,
-    required this.onInstructionChanged,
-    required this.onImageChanged,
-    required this.onDurationChanged,
-    this.onDelete,
-    this.onMoveUp,
-    this.onMoveDown,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final hasImage = step.imagePath != null && File(step.imagePath!).existsSync();
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with step number and actions
-          Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    '$stepNumber',
-                    style: TextStyle(
-                      color: theme.colorScheme.onPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'Step $stepNumber',
-                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const Spacer(),
-              // Reorder buttons
-              if (onMoveUp != null)
-                IconButton(
-                  icon: const Icon(Icons.arrow_upward, size: 20),
-                  onPressed: onMoveUp,
-                  visualDensity: VisualDensity.compact,
-                  tooltip: 'Move up',
-                ),
-              if (onMoveDown != null)
-                IconButton(
-                  icon: const Icon(Icons.arrow_downward, size: 20),
-                  onPressed: onMoveDown,
-                  visualDensity: VisualDensity.compact,
-                  tooltip: 'Move down',
-                ),
-              if (onDelete != null)
-                IconButton(
-                  icon: Icon(Icons.delete_outline, size: 20, color: theme.colorScheme.error),
-                  onPressed: onDelete,
-                  visualDensity: VisualDensity.compact,
-                  tooltip: l10n.actionDelete,
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          // Instruction text
-          TextFormField(
-            initialValue: step.instruction,
-            decoration: InputDecoration(
-              hintText: 'Describe this step...',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            maxLines: 3,
-            minLines: 2,
-            textCapitalization: TextCapitalization.sentences,
-            onChanged: onInstructionChanged,
-          ),
-          const SizedBox(height: 12),
-
-          // Step image
-          if (hasImage) ...[
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.file(
-                    File(step.imagePath!),
-                    height: 120,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Row(
-                    children: [
-                      _ImageActionButton(
-                        icon: Icons.edit,
-                        onTap: () => _pickStepImage(context),
-                      ),
-                      const SizedBox(width: 8),
-                      _ImageActionButton(
-                        icon: Icons.close,
-                        onTap: () => onImageChanged(null),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ] else ...[
-            // Add image button
-            OutlinedButton.icon(
-              onPressed: () => _pickStepImage(context),
-              icon: const Icon(Icons.add_photo_alternate, size: 18),
-              label: Text(l10n.stepImageAdd),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 44),
-              ),
-            ),
-          ],
-
-          // Timer option
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Icon(Icons.timer, size: 18, color: theme.colorScheme.outline),
-              const SizedBox(width: 8),
-              Text(l10n.stepTimer, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
-              const Spacer(),
-              SizedBox(
-                width: 80,
-                child: TextFormField(
-                  initialValue: step.durationMinutes?.toString() ?? '',
-                  decoration: InputDecoration(
-                    hintText: 'min',
-                    isDense: true,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  ),
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) => onDurationChanged(int.tryParse(value)),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _pickStepImage(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Choose from gallery'),
-              onTap: () {
-                Navigator.pop(ctx);
-                _pickImageWithPreview(context, ImageSource.gallery);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Take a photo'),
-              onTap: () {
-                Navigator.pop(ctx);
-                _pickImageWithPreview(context, ImageSource.camera);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _pickImageWithPreview(BuildContext context, ImageSource source) async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(
-      source: source,
-      maxWidth: 1200,
-      maxHeight: 1200,
-      imageQuality: 85,
-    );
-    if (image != null && context.mounted) {
-      final confirmed = await showImagePreviewDialog(context, image.path);
-      if (confirmed != null) {
-        onImageChanged(confirmed);
-      }
-    }
-  }
 }
 
 // ============ HELPER WIDGETS ============
@@ -1973,20 +1708,6 @@ class _AddIngredientButton extends StatelessWidget {
   }
 }
 
-class _AddStepButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const _AddStepButton({required this.onTap});
-  @override Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return GestureDetector(onTap: onTap, child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(border: Border.all(color: theme.colorScheme.outlineVariant), borderRadius: BorderRadius.circular(12)),
-      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.add, color: theme.colorScheme.primary, size: 20), const SizedBox(width: 8), Text('Add Step', style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.primary))]),
-    ));
-  }
-}
-
-// ============ NUTRITION SECTION ============
 
 class _NutritionSection extends StatelessWidget {
   final NutritionData? nutrition;

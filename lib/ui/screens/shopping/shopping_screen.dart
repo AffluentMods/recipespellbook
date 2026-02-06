@@ -11,19 +11,8 @@ import '../../../utils/ingredient_utils.dart';
 import '../../../data/ingredient_images.dart';
 import '../../../database/daos/shopping_dao.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../services/ingredient_suggestion_service.dart';
 import '../../widgets/rpg/rpg_navigation_shell.dart';
-
-/// Provider for shopping category sort order (respects user reordering)
-final shoppingCategoryOrderProvider = FutureProvider<Map<String, int>>((ref) async {
-  final shoppingDao = ref.watch(shoppingDaoProvider);
-  final categories = await shoppingDao.getAllShoppingCategories();
-  final order = <String, int>{};
-  for (final cat in categories) {
-    order[cat.id] = cat.sortOrder;
-    order[cat.name.toLowerCase()] = cat.sortOrder;
-  }
-  return order;
-});
 
 /// Provider to track shopping list item count (for nav badge)
 final shoppingItemCountProvider = StreamProvider<int>((ref) {
@@ -423,14 +412,14 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   }
 
   void _showAddItemSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => _AddItemSheet(
-        listId: _currentListId,
-        userMappings: _userMappings,
-        onItemAdded: _loadUserMappings,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => _AddItemFullScreen(
+          listId: _currentListId,
+          userMappings: _userMappings,
+          onItemAdded: _loadUserMappings,
+        ),
       ),
     );
   }
@@ -723,42 +712,81 @@ class _ModernFAB extends StatelessWidget {
   }
 }
 
-// ============ ADD ITEM SHEET ============
+// ============ ADD ITEM – FULL SCREEN WITH AUTOCOMPLETE ============
 
-class _AddItemSheet extends ConsumerStatefulWidget {
+class _AddItemFullScreen extends ConsumerStatefulWidget {
   final String listId;
   final Map<String, String> userMappings;
   final VoidCallback onItemAdded;
 
-  const _AddItemSheet({required this.listId, required this.userMappings, required this.onItemAdded});
+  const _AddItemFullScreen({
+    required this.listId,
+    required this.userMappings,
+    required this.onItemAdded,
+  });
 
   @override
-  ConsumerState<_AddItemSheet> createState() => _AddItemSheetState();
+  ConsumerState<_AddItemFullScreen> createState() => _AddItemFullScreenState();
 }
 
-class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
+class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
+    with WidgetsBindingObserver {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
+  List<IngredientResult> _suggestions = [];
+  final List<String> _recentlyAdded = [];
+  bool _serviceReady = false;
 
   @override
   void initState() {
     super.initState();
-    // Auto-focus the text field
+    WidgetsBinding.instance.addObserver(this);
+    _controller.addListener(_onTextChanged);
+    // Load suggestion database + auto-focus
+    _initService();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
   }
 
-  void _addItem() {
-    if (_controller.text.trim().isEmpty) return;
+  Future<void> _initService() async {
+    await IngredientSuggestionService.instance.load();
+    if (mounted) setState(() => _serviceReady = true);
+  }
+
+  /// Re-request focus when returning from another app so the keyboard stays up.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      // Small delay to let the OS settle before requesting focus
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (mounted && !_focusNode.hasFocus) {
+          _focusNode.requestFocus();
+        }
+      });
+    }
+  }
+
+  void _onTextChanged() {
+    final query = _controller.text;
+    if (query.trim().isEmpty) {
+      setState(() => _suggestions = []);
+      return;
+    }
+    final results = IngredientSuggestionService.instance.search(query, limit: 20);
+    if (mounted) setState(() => _suggestions = results);
+  }
+
+  void _addItem([String? overrideName]) {
+    final text = (overrideName ?? _controller.text).trim();
+    if (text.isEmpty) return;
 
     final shoppingDao = ref.read(shoppingDaoProvider);
     final mappingsDao = ref.read(userIngredientMappingsDaoProvider);
-    final text = _controller.text.trim();
     final normalized = normalizeIngredientName(text);
 
-    // Detect category using user mappings
-    final categoryId = getShoppingCategory(text, userMappings: widget.userMappings);
+    final categoryId =
+    getShoppingCategory(text, userMappings: widget.userMappings);
 
     final id = 'item_${DateTime.now().millisecondsSinceEpoch}';
     shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
@@ -769,19 +797,43 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
       shoppingCategoryId: drift.Value(categoryId),
     ));
 
-    // Save mapping for future (if it's a new ingredient)
     if (!widget.userMappings.containsKey(normalized)) {
       mappingsDao.setMapping(normalized, categoryId);
       widget.onItemAdded();
     }
 
-    // Clear and keep focus for next item
+    setState(() {
+      _recentlyAdded.insert(0, text);
+      if (_recentlyAdded.length > 10) _recentlyAdded.removeLast();
+    });
+
     _controller.clear();
+    // Keep focus so user can immediately type the next item
     _focusNode.requestFocus();
+  }
+
+  /// User tapped a suggestion – insert name into field (preserving any quantity
+  /// prefix the user already typed) then add immediately.
+  void _onSuggestionTap(String suggestion) {
+    final currentText = _controller.text;
+    // Try to detect if user already typed a quantity prefix like "2 cups "
+    final prefixMatch = RegExp(
+      r'^((?:[½¼¾⅓⅔⅛⅜⅝⅞]|\d+\s*[½¼¾⅓⅔⅛⅜⅝⅞]?|\d+\s+\d+/\d+|\d+\.\d+|\d+/\d+|\d+)'
+      r'\s*'
+      r'(?:cups?|tbsp|tsp|tablespoons?|teaspoons?|oz|ounces?|lbs?|pounds?|kg|g|grams?|ml|liters?|l|quarts?|qt|pints?|pt|gallons?|gal|pinch(?:es)?|bunch(?:es)?|cloves?|cans?|sticks?|slices?|pieces?|heads?|stalks?|sprigs?|handfuls?|dashes?|drops?|packages?|pkgs?|bags?|boxes?|bottles?|jars?|containers?)?'
+      r'\s*(?:of\s+)?)',
+      caseSensitive: false,
+    ).firstMatch(currentText);
+
+    final prefix = prefixMatch?.group(0) ?? '';
+    final fullText = '$prefix$suggestion'.trim();
+    _addItem(fullText);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _controller.removeListener(_onTextChanged);
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -789,47 +841,667 @@ class _AddItemSheetState extends ConsumerState<_AddItemSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      appBar: AppBar(
+        backgroundColor: theme.colorScheme.surface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.pop(context),
         ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)))),
-            const SizedBox(height: 20),
-            Text('Add Item', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _controller,
-              focusNode: _focusNode,
-              decoration: InputDecoration(
-                hintText: 'e.g., 2 cups flour',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                prefixIcon: const Icon(Icons.add_shopping_cart),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: _addItem,
+        title: Text(
+          'Add Items',
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: false,
+        actions: [
+          if (_recentlyAdded.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${_recentlyAdded.length} added',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
-              onSubmitted: (_) => _addItem(),
-              textInputAction: TextInputAction.send,
             ),
-            const SizedBox(height: 8),
+        ],
+      ),
+      body: Column(
+        children: [
+          // ---- Input area ----
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              border: Border(
+                bottom: BorderSide(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.12),
+                ),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  autofocus: true,
+                  style: theme.textTheme.bodyLarge,
+                  decoration: InputDecoration(
+                    hintText: 'e.g. 2 cups flour, chicken breast...',
+                    hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                    ),
+                    filled: true,
+                    fillColor: isDark
+                        ? theme.colorScheme.surfaceContainerHighest
+                        : theme.colorScheme.surfaceContainerLow,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.add_shopping_cart_outlined,
+                      color: theme.colorScheme.outline,
+                    ),
+                    suffixIcon: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_controller.text.isNotEmpty)
+                          IconButton(
+                            icon: Icon(Icons.clear,
+                                size: 20, color: theme.colorScheme.outline),
+                            onPressed: () {
+                              _controller.clear();
+                              _focusNode.requestFocus();
+                            },
+                          ),
+                        Container(
+                          margin: const EdgeInsets.only(right: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE8A860),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_upward,
+                                color: Colors.white, size: 20),
+                            constraints: const BoxConstraints(
+                              minWidth: 36,
+                              minHeight: 36,
+                            ),
+                            padding: EdgeInsets.zero,
+                            onPressed:
+                            _controller.text.trim().isNotEmpty ? _addItem : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  onSubmitted: (_) => _addItem(),
+                  textInputAction: TextInputAction.send,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Tap send or press Enter — keyboard stays open for the next item',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ---- Content area (suggestions / recently added) ----
+          Expanded(
+            child: _buildContentArea(theme, isDark),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContentArea(ThemeData theme, bool isDark) {
+    // Show suggestions while typing
+    if (_controller.text.trim().isNotEmpty && _suggestions.isNotEmpty) {
+      return _buildSuggestionsList(theme, isDark);
+    }
+
+    // Show recently added items
+    if (_recentlyAdded.isNotEmpty) {
+      return _buildRecentlyAdded(theme, isDark);
+    }
+
+    // Empty state
+    return _buildEmptyHint(theme);
+  }
+
+  Widget _buildSuggestionsList(ThemeData theme, bool isDark) {
+    return ListView.builder(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      itemCount: _suggestions.length,
+      itemBuilder: (context, index) {
+        final result = _suggestions[index];
+        final query = _controller.text.trim().toLowerCase();
+        // Strip quantity/unit for highlight matching
+        final strippedQuery = IngredientSuggestionService.instance
+            .isLoaded
+            ? _stripForHighlight(query)
+            : query;
+
+        return _SuggestionTile(
+          name: result.name,
+          usdaCategory: result.category,
+          query: strippedQuery,
+          isDark: isDark,
+          onTap: () => _onSuggestionTap(result.name),
+          onAdd: () => _onSuggestionTap(result.name),
+        );
+      },
+    );
+  }
+
+  String _stripForHighlight(String input) {
+    final pattern = RegExp(
+      r'^(?:[½¼¾⅓⅔⅛⅜⅝⅞]|\d+\s*[½¼¾⅓⅔⅛⅜⅝⅞]?|\d+\s+\d+/\d+|\d+\.\d+|\d+/\d+|\d+)'
+      r'\s*'
+      r'(?:cups?|tbsp|tsp|tablespoons?|teaspoons?|oz|ounces?|lbs?|pounds?|kg|g|grams?|ml|liters?|l|quarts?|qt|pints?|pt|gallons?|gal|pinch(?:es)?|bunch(?:es)?|cloves?|cans?|sticks?|slices?|pieces?|heads?|stalks?|sprigs?|handfuls?|dashes?|drops?|packages?|pkgs?|bags?|boxes?|bottles?|jars?|containers?)?'
+      r'\s*(?:of\s+)?',
+      caseSensitive: false,
+    );
+    return input.replaceFirst(pattern, '').trim();
+  }
+
+  Widget _buildRecentlyAdded(ThemeData theme, bool isDark) {
+    return ListView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
+      padding: const EdgeInsets.all(16),
+      children: [
+        Row(
+          children: [
+            Icon(Icons.check_circle_outline,
+                size: 18, color: theme.colorScheme.primary),
+            const SizedBox(width: 8),
             Text(
-              'Press Enter or tap send to add, then type the next item',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+              'Just added',
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ..._recentlyAdded.map((item) => Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Container(
+            padding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? theme.colorScheme.surfaceContainerHighest
+                  .withValues(alpha: 0.5)
+                  : theme.colorScheme.primaryContainer
+                  .withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.check,
+                    size: 16, color: theme.colorScheme.primary),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(item, style: theme.textTheme.bodyMedium),
+                ),
+              ],
+            ),
+          ),
+        )),
+      ],
+    );
+  }
+
+  Widget _buildEmptyHint(ThemeData theme) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.search,
+              size: 48,
+              color: theme.colorScheme.outline.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
+            Text(
+              'Start typing to see suggestions',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.outline.withValues(alpha: 0.6),
+              ),
+            ),
+            if (_serviceReady) ...[
+              const SizedBox(height: 4),
+              Text(
+                '${IngredientSuggestionService.instance.count} ingredients available',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.4),
+                ),
+              ),
+            ],
           ],
         ),
       ),
     );
+  }
+}
+
+// ---- Suggestion tile with highlighted match ----
+
+class _SuggestionTile extends StatelessWidget {
+  final String name;
+  final String usdaCategory;
+  final String query;
+  final bool isDark;
+  final VoidCallback onTap;
+  final VoidCallback onAdd;
+
+  const _SuggestionTile({
+    required this.name,
+    this.usdaCategory = '',
+    required this.query,
+    required this.isDark,
+    required this.onTap,
+    required this.onAdd,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final categoryIcon = _categoryIconFromUsda(usdaCategory, name);
+
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          children: [
+            // Category icon
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? theme.colorScheme.surfaceContainerHighest
+                    : theme.colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(categoryIcon, style: const TextStyle(fontSize: 18)),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Name with highlighted match + category subtitle
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHighlightedName(theme),
+                  if (usdaCategory.isNotEmpty)
+                    Text(
+                      usdaCategory,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.6),
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+            // Quick add button
+            IconButton(
+              icon: Icon(Icons.add_circle_outline,
+                  color: theme.colorScheme.primary, size: 22),
+              visualDensity: VisualDensity.compact,
+              onPressed: onAdd,
+              tooltip: 'Add to list',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHighlightedName(ThemeData theme) {
+    if (query.isEmpty) {
+      return Text(name, style: theme.textTheme.bodyLarge);
+    }
+
+    final lower = name.toLowerCase();
+    final matchStart = lower.indexOf(query.toLowerCase());
+
+    if (matchStart < 0) {
+      return Text(name, style: theme.textTheme.bodyLarge);
+    }
+
+    final before = name.substring(0, matchStart);
+    final match = name.substring(matchStart, matchStart + query.length);
+    final after = name.substring(matchStart + query.length);
+
+    return Text.rich(
+      TextSpan(children: [
+        if (before.isNotEmpty)
+          TextSpan(
+            text: before,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+        TextSpan(
+          text: match,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        if (after.isNotEmpty)
+          TextSpan(
+            text: after,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+      ]),
+    );
+  }
+
+  /// Map an ingredient to a descriptive emoji.
+  /// Priority: ingredient name keywords → USDA foodCategory → generic fallback.
+  String _categoryIconFromUsda(String usdaCategory, String ingredientName) {
+    final n = ingredientName.toLowerCase();
+
+    // ── Name-based matching (most specific → least specific) ──
+
+    // Dairy & Eggs
+    if (n.contains('egg')) return '🥚';
+    if (n.contains('butter') && !n.contains('peanut') && !n.contains('almond') && !n.contains('butternut')) return '🧈';
+    if (n.contains('cheese') || n.contains('cheddar') || n.contains('mozzarella') ||
+        n.contains('parmesan') || n.contains('gouda') || n.contains('brie') ||
+        n.contains('feta') || n.contains('ricotta') || n.contains('gruyere')) return '🧀';
+    if (n.contains('yogurt') || n.contains('kefir')) return '🫙';
+    if (n.contains('milk') || n.contains('cream') || n.contains('half and half') ||
+        n.contains('buttermilk') || n.contains('whey')) return '🥛';
+    if (n.contains('ice cream') || n.contains('gelato') || n.contains('sorbet') ||
+        n.contains('sherbet') || n.contains('frozen yogurt')) return '🍨';
+
+    // Fruits
+    if (n.contains('apple') && !n.contains('pineapple')) return '🍎';
+    if (n.contains('banana') || n.contains('plantain')) return '🍌';
+    if (n.contains('orange') && !n.contains('chicken')) return '🍊';
+    if (n.contains('lemon')) return '🍋';
+    if (n.contains('lime') && !n.contains('limestone')) return '🍋';
+    if (n.contains('grape') && !n.contains('grapefruit')) return '🍇';
+    if (n.contains('grapefruit')) return '🍊';
+    if (n.contains('strawberr')) return '🍓';
+    if (n.contains('blueberr') || n.contains('blackberr') || n.contains('raspberr') ||
+        n.contains('cranberr') || n.contains('boysenberr') || n.contains('berr')) return '🫐';
+    if (n.contains('cherry') || n.contains('cherries')) return '🍒';
+    if (n.contains('peach') || n.contains('nectarine') || n.contains('apricot')) return '🍑';
+    if (n.contains('pear')) return '🍐';
+    if (n.contains('pineapple')) return '🍍';
+    if (n.contains('watermelon') || n.contains('melon') || n.contains('cantaloupe') ||
+        n.contains('honeydew')) return '🍈';
+    if (n.contains('mango') || n.contains('papaya') || n.contains('guava') ||
+        n.contains('passion fruit') || n.contains('dragon fruit') || n.contains('lychee') ||
+        n.contains('kiwi') || n.contains('fig') || n.contains('date') ||
+        n.contains('persimmon') || n.contains('pomegranate')) return '🥭';
+    if (n.contains('coconut')) return '🥥';
+    if (n.contains('avocado')) return '🥑';
+
+    // Vegetables
+    if (n.contains('tomato')) return '🍅';
+    if (n.contains('potato') && !n.contains('sweet potato')) return '🥔';
+    if (n.contains('sweet potato') || n.contains('yam')) return '🍠';
+    if (n.contains('corn') && !n.contains('corned') && !n.contains('cornish') &&
+        !n.contains('acorn')) return '🌽';
+    if (n.contains('carrot')) return '🥕';
+    if (n.contains('broccoli')) return '🥦';
+    if (n.contains('lettuce') || n.contains('salad') || n.contains('greens') ||
+        n.contains('arugula') || n.contains('spinach') || n.contains('kale') ||
+        n.contains('chard') || n.contains('romaine')) return '🥬';
+    if (n.contains('cucumber') || n.contains('pickle') || n.contains('gherkin')) return '🥒';
+    if (n.contains('pepper') && !n.contains('peppercorn') && !n.contains('dr pepper')) return '🌶️';
+    if (n.contains('onion') || n.contains('shallot') || n.contains('scallion') ||
+        n.contains('leek') || n.contains('chive')) return '🧅';
+    if (n.contains('garlic')) return '🧄';
+    if (n.contains('mushroom')) return '🍄';
+    if (n.contains('eggplant') || n.contains('aubergine')) return '🍆';
+    if (n.contains('pumpkin') || n.contains('squash') || n.contains('zucchini') ||
+        n.contains('gourd')) return '🎃';
+    if (n.contains('bean') || n.contains('lentil') || n.contains('chickpea') ||
+        n.contains('pea') && !n.contains('peach') && !n.contains('peanut') && !n.contains('pear')) return '🫘';
+    if (n.contains('cabbage') || n.contains('coleslaw') || n.contains('sauerkraut')) return '🥬';
+    if (n.contains('celery') || n.contains('asparagus') || n.contains('artichoke') ||
+        n.contains('beet') || n.contains('turnip') || n.contains('radish') ||
+        n.contains('parsnip') || n.contains('fennel') || n.contains('jicama')) return '🥬';
+
+    // Meat
+    if (n.contains('steak') || n.contains('ribeye') || n.contains('sirloin') ||
+        n.contains('filet') || n.contains('tenderloin') || n.contains('brisket') ||
+        n.contains('t-bone') || n.contains('porterhouse')) return '🥩';
+    if (n.contains('bacon') || n.contains('pancetta')) return '🥓';
+    if (n.contains('sausage') || n.contains('bratwurst') || n.contains('kielbasa') ||
+        n.contains('frankfurter') || n.contains('hot dog') || n.contains('chorizo') ||
+        n.contains('andouille') || n.contains('salami') || n.contains('pepperoni')) return '🌭';
+    if (n.contains('ham') && !n.contains('hamburger') && !n.contains('chamomile')) return '🍖';
+    if (n.contains('rib') && !n.contains('ribbon')) return '🍖';
+    if (n.contains('chicken') || n.contains('poultry')) return '🍗';
+    if (n.contains('turkey')) return '🦃';
+    if (n.contains('duck')) return '🦆';
+    if (n.contains('beef') || n.contains('ground beef') || n.contains('hamburger') ||
+        n.contains('veal') || n.contains('venison') || n.contains('bison') ||
+        n.contains('lamb') || n.contains('goat meat') || n.contains('caribou') ||
+        n.contains('moose') || n.contains('elk')) return '🥩';
+    if (n.contains('pork') || n.contains('pulled pork') || n.contains('carnitas')) return '🥩';
+
+    // Seafood
+    if (n.contains('salmon')) return '🐟';
+    if (n.contains('tuna')) return '🐟';
+    if (n.contains('shrimp') || n.contains('prawn')) return '🦐';
+    if (n.contains('crab')) return '🦀';
+    if (n.contains('lobster')) return '🦞';
+    if (n.contains('oyster') || n.contains('mussel') || n.contains('clam') ||
+        n.contains('scallop')) return '🦪';
+    if (n.contains('squid') || n.contains('calamari') || n.contains('octopus')) return '🦑';
+    if (n.contains('fish') || n.contains('cod') || n.contains('tilapia') ||
+        n.contains('halibut') || n.contains('bass') || n.contains('trout') ||
+        n.contains('catfish') || n.contains('mahi') || n.contains('swordfish') ||
+        n.contains('anchov') || n.contains('sardine') || n.contains('herring') ||
+        n.contains('mackerel')) return '🐟';
+
+    // Bread & Baked
+    if (n.contains('bread') || n.contains('toast') || n.contains('baguette') ||
+        n.contains('ciabatta') || n.contains('sourdough') || n.contains('brioche') ||
+        n.contains('naan') || n.contains('pita') || n.contains('focaccia') ||
+        n.contains('tortilla') || n.contains('flatbread')) return '🍞';
+    if (n.contains('croissant') || n.contains('pastry') || n.contains('danish')) return '🥐';
+    if (n.contains('bagel')) return '🥯';
+    if (n.contains('pretzel')) return '🥨';
+    if (n.contains('waffle') || n.contains('pancake')) return '🧇';
+    if (n.contains('muffin') || n.contains('cupcake')) return '🧁';
+    if (n.contains('cake') && !n.contains('pancake')) return '🎂';
+    if (n.contains('cookie') || n.contains('biscuit')) return '🍪';
+    if (n.contains('pie') && !n.contains('spice')) return '🥧';
+    if (n.contains('donut') || n.contains('doughnut')) return '🍩';
+
+    // Grains & Pasta
+    if (n.contains('rice') && !n.contains('price') && !n.contains('licorice')) return '🍚';
+    if (n.contains('pasta') || n.contains('spaghetti') || n.contains('noodle') ||
+        n.contains('macaroni') || n.contains('penne') || n.contains('fettuccine') ||
+        n.contains('linguine') || n.contains('ravioli') || n.contains('lasagna') ||
+        n.contains('ramen') || n.contains('udon') || n.contains('orzo')) return '🍝';
+    if (n.contains('flour') || n.contains('wheat') || n.contains('oat') ||
+        n.contains('barley') || n.contains('quinoa') || n.contains('couscous') ||
+        n.contains('bulgur') || n.contains('millet') || n.contains('farro') ||
+        n.contains('cornmeal') || n.contains('polenta') || n.contains('grits')) return '🌾';
+    if (n.contains('cereal') || n.contains('granola')) return '🥣';
+
+    // Nuts & Seeds
+    if (n.contains('peanut')) return '🥜';
+    if (n.contains('almond') || n.contains('walnut') || n.contains('pecan') ||
+        n.contains('cashew') || n.contains('pistachio') || n.contains('hazelnut') ||
+        n.contains('macadamia') || n.contains('chestnut') || n.contains('brazil nut') ||
+        n.contains('pine nut')) return '🌰';
+    if (n.contains('seed') || n.contains('sesame') || n.contains('sunflower') ||
+        n.contains('flax') || n.contains('chia') || n.contains('hemp seed') ||
+        n.contains('poppy')) return '🌻';
+
+    // Spices & Seasonings
+    if (n.contains('salt') && !n.contains('malt')) return '🧂';
+    if (n.contains('cinnamon') || n.contains('nutmeg') || n.contains('clove') ||
+        n.contains('allspice') || n.contains('cardamom') || n.contains('ginger') &&
+        !n.contains('ginger ale')) return '🫚';
+    if (n.contains('vanilla')) return '🌸';
+    if (n.contains('herb') || n.contains('basil') || n.contains('oregano') ||
+        n.contains('thyme') || n.contains('rosemary') || n.contains('sage') ||
+        n.contains('cilantro') || n.contains('parsley') || n.contains('dill') ||
+        n.contains('mint') || n.contains('tarragon') || n.contains('bay leaf') ||
+        n.contains('marjoram') || n.contains('chervil')) return '🌿';
+    if (n.contains('spice') || n.contains('cumin') || n.contains('turmeric') ||
+        n.contains('paprika') || n.contains('curry') || n.contains('chili powder') ||
+        n.contains('cayenne') || n.contains('saffron') || n.contains('coriander') ||
+        n.contains('adobo') || n.contains('seasoning') || n.contains('rub') ||
+        n.contains('five spice') || n.contains('garam masala') || n.contains('za\'atar')) return '✨';
+    if (n.contains('pepper') && (n.contains('black') || n.contains('white') ||
+        n.contains('peppercorn') || n.contains('ground pepper'))) return '🫙';
+
+    // Sauces & Condiments
+    if (n.contains('ketchup') || n.contains('catsup')) return '🍅';
+    if (n.contains('mustard')) return '🟡';
+    if (n.contains('mayonnaise') || n.contains('mayo')) return '🫙';
+    if (n.contains('hot sauce') || n.contains('sriracha') || n.contains('tabasco') ||
+        n.contains('buffalo sauce')) return '🌶️';
+    if (n.contains('soy sauce') || n.contains('tamari') || n.contains('teriyaki') ||
+        n.contains('fish sauce') || n.contains('oyster sauce') || n.contains('hoisin') ||
+        n.contains('worcestershire')) return '🫗';
+    if (n.contains('bbq') || n.contains('barbecue')) return '🔥';
+    if (n.contains('salsa') || n.contains('pico')) return '🫙';
+    if (n.contains('sauce') || n.contains('a1') || n.contains('steak sauce') ||
+        n.contains('marinara') || n.contains('alfredo') || n.contains('pesto') ||
+        n.contains('gravy') || n.contains('dressing') || n.contains('vinaigrette')) return '🫗';
+
+    // Oils & Vinegars
+    if (n.contains('olive oil') || n.contains('oil') && !n.contains('foil')) return '🫒';
+    if (n.contains('vinegar') || n.contains('balsamic')) return '🍶';
+
+    // Sweeteners & Baking
+    if (n.contains('sugar') || n.contains('sweetener') || n.contains('stevia') ||
+        n.contains('splenda')) return '🍬';
+    if (n.contains('honey')) return '🍯';
+    if (n.contains('maple') || n.contains('syrup') || n.contains('molasses') ||
+        n.contains('agave')) return '🍁';
+    if (n.contains('chocolate') || n.contains('cocoa') || n.contains('cacao')) return '🍫';
+    if (n.contains('candy') || n.contains('caramel') || n.contains('toffee') ||
+        n.contains('marshmallow') || n.contains('gummy')) return '🍬';
+    if (n.contains('jam') || n.contains('jelly') || n.contains('preserves') ||
+        n.contains('marmalade')) return '🍇';
+    if (n.contains('baking powder') || n.contains('baking soda') ||
+        n.contains('yeast') || n.contains('cornstarch') || n.contains('gelatin') ||
+        n.contains('pectin')) return '🧁';
+
+    // Beverages
+    if (n.contains('coffee') || n.contains('espresso') || n.contains('cappuccino') ||
+        n.contains('latte')) return '☕';
+    if (n.contains('tea') && !n.contains('steak') && !n.contains('steam')) return '🍵';
+    if (n.contains('juice')) return '🧃';
+    if (n.contains('soda') || n.contains('cola') || n.contains('sprite') ||
+        n.contains('pop') || n.contains('carbonated') || n.contains('tonic')) return '🥤';
+    if (n.contains('beer') || n.contains('ale') || n.contains('lager') ||
+        n.contains('stout') || n.contains('ipa') || n.contains('porter')) return '🍺';
+    if (n.contains('wine') || n.contains('merlot') || n.contains('cabernet') ||
+        n.contains('chardonnay') || n.contains('pinot') || n.contains('champagne') ||
+        n.contains('prosecco')) return '🍷';
+    if (n.contains('whiskey') || n.contains('bourbon') || n.contains('scotch') ||
+        n.contains('rum') || n.contains('vodka') || n.contains('gin') ||
+        n.contains('tequila') || n.contains('brandy') || n.contains('cognac') ||
+        n.contains('liqueur') || n.contains('liquor')) return '🥃';
+    if (n.contains('water') || n.contains('sparkling') || n.contains('seltzer')) return '💧';
+    if (n.contains('smoothie') || n.contains('shake') || n.contains('milkshake')) return '🥤';
+
+    // Canned / Preserved
+    if (n.contains('canned') || n.contains('can of') || n.contains('condensed')) return '🥫';
+    if (n.contains('broth') || n.contains('stock') || n.contains('bouillon')) return '🍲';
+    if (n.contains('soup')) return '🥣';
+
+    // Tofu & Plant proteins
+    if (n.contains('tofu') || n.contains('tempeh') || n.contains('seitan') ||
+        n.contains('edamame')) return '🫛';
+
+    // Prepared / Fast food
+    if (n.contains('pizza')) return '🍕';
+    if (n.contains('burger') || n.contains('hamburger')) return '🍔';
+    if (n.contains('taco')) return '🌮';
+    if (n.contains('burrito') || n.contains('wrap')) return '🌯';
+    if (n.contains('sandwich') || n.contains('sub ')) return '🥪';
+    if (n.contains('sushi') || n.contains('sashimi')) return '🍣';
+    if (n.contains('dumpling') || n.contains('gyoza') || n.contains('wonton') ||
+        n.contains('pierogi')) return '🥟';
+    if (n.contains('fries') || n.contains('french fry')) return '🍟';
+
+    // Baby food
+    if (n.contains('baby food') || n.contains('infant formula')) return '🍼';
+
+    // ── USDA category fallback ──
+    final cat = usdaCategory.toLowerCase();
+
+    if (cat.contains('fruit')) return '🍎';
+    if (cat.contains('vegetable') || cat.contains('legume')) return '🥬';
+    if (cat.contains('dairy') || cat.contains('egg')) return '🥛';
+    if (cat.contains('beef')) return '🥩';
+    if (cat.contains('pork')) return '🥩';
+    if (cat.contains('lamb') || cat.contains('veal') || cat.contains('game')) return '🥩';
+    if (cat.contains('poultry')) return '🍗';
+    if (cat.contains('finfish') || cat.contains('shellfish')) return '🐟';
+    if (cat.contains('cereal') && cat.contains('pasta')) return '🌾';
+    if (cat.contains('cereal') || cat.contains('breakfast')) return '🥣';
+    if (cat.contains('baked')) return '🍞';
+    if (cat.contains('nut') || cat.contains('seed')) return '🌰';
+    if (cat.contains('fat') || cat.contains('oil')) return '🫒';
+    if (cat.contains('spice') || cat.contains('herb')) return '✨';
+    if (cat.contains('soup') || cat.contains('sauce') || cat.contains('gravy')) return '🫗';
+    if (cat.contains('beverage')) return '🥤';
+    if (cat.contains('sweet') || cat.contains('candy') || cat.contains('sugar')) return '🍬';
+    if (cat.contains('snack')) return '🍿';
+    if (cat.contains('baby')) return '🍼';
+    if (cat.contains('sausage') || cat.contains('lunch')) return '🌭';
+    if (cat.contains('meal') || cat.contains('entree') || cat.contains('side')) return '🍽️';
+    if (cat.contains('fast food') || cat.contains('restaurant')) return '🍔';
+    if (cat.contains('native') || cat.contains('indian')) return '🌍';
+
+    return '🛒';
   }
 }
 
@@ -869,12 +1541,15 @@ class _SectionGroupedList extends ConsumerWidget {
       grouped.putIfAbsent(category, () => []).add(item);
     }
 
-    // Sort categories by DB sortOrder (respects user's priority reordering)
-    final categoryOrder = ref.watch(shoppingCategoryOrderProvider).valueOrNull ?? {};
+    // Sort categories
     final sortedKeys = grouped.keys.toList()..sort((a, b) {
-      final aOrder = categoryOrder[a] ?? categoryOrder[a.toLowerCase()] ?? 999;
-      final bOrder = categoryOrder[b] ?? categoryOrder[b.toLowerCase()] ?? 999;
-      return aOrder.compareTo(bOrder);
+      final order = ['produce', 'dairy', 'meat', 'seafood', 'bakery', 'deli', 'frozen',
+        'breakfast', 'canned', 'pasta', 'grains', 'baking', 'condiments',
+        'oil', 'spices', 'snacks', 'beverages', 'alcohol', 'baby',
+        'beauty', 'household', 'pet', 'international', 'other'];
+      final aIdx = order.indexOf(a);
+      final bIdx = order.indexOf(b);
+      return (aIdx == -1 ? 999 : aIdx).compareTo(bIdx == -1 ? 999 : bIdx);
     });
 
     return ListView(
