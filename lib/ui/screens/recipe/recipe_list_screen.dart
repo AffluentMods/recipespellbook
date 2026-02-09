@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:recipespellbook/l10n/app_localizations.dart';
-import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +9,7 @@ import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../widgets/new_recipe_dialog.dart';
 import '../../widgets/placeholder_image.dart';
+import '../../../utils/default_recipe_images.dart';
 
 /// Generic recipe list screen with filtering by course/category/tags
 /// Supports view size, sorting, search, and tag filtering
@@ -544,6 +544,7 @@ class _MediumCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hasImage = recipe.imagePath != null && File(recipe.imagePath!).existsSync();
+    final defaultAsset = defaultRecipeImageAsset(recipe.id);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -562,6 +563,8 @@ class _MediumCard extends StatelessWidget {
                     color: theme.colorScheme.primaryContainer,
                     child: hasImage
                         ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
+                        : defaultAsset != null
+                        ? Image.asset(defaultAsset, fit: BoxFit.cover)
                         : const RecipePlaceholderImage(height: double.infinity, width: double.infinity),
                   ),
                   // Badges
@@ -703,6 +706,7 @@ class _LargeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hasImage = recipe.imagePath != null && File(recipe.imagePath!).existsSync();
+    final defaultAsset = defaultRecipeImageAsset(recipe.id);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -722,6 +726,8 @@ class _LargeCard extends StatelessWidget {
                   File(recipe.imagePath!),
                   fit: BoxFit.cover,
                 )
+                    : defaultAsset != null
+                    ? Image.asset(defaultAsset, fit: BoxFit.cover)
                     : const RecipePlaceholderImage(height: 200, width: double.infinity),
               ),
               // Gradient overlay
@@ -963,6 +969,7 @@ class _RecipeThumbnail extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hasImage = recipe.imagePath != null && File(recipe.imagePath!).existsSync();
+    final defaultAsset = defaultRecipeImageAsset(recipe.id);
 
     return Container(
       width: size,
@@ -974,6 +981,8 @@ class _RecipeThumbnail extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: hasImage
           ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
+          : defaultAsset != null
+          ? Image.asset(defaultAsset, fit: BoxFit.cover)
           : Center(
         child: Icon(
           Icons.restaurant_menu,

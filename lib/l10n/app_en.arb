@@ -1569,5 +1569,7 @@
       "count": {"type": "int"}
     }
   },
-  "selectAllSteps": "Select All"
+  "selectAllSteps": "Select All",
+  "gradientBased": "Gradient-Based",
+  "gradientBasedDescription": "Color gradient based on your theme"
 }

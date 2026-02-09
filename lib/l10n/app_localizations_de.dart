@@ -3415,4 +3415,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get selectAllSteps => 'Alle auswählen';
+
+  @override
+  String get gradientBased => 'Farbverlauf';
+
+  @override
+  String get gradientBasedDescription => 'Farbverlauf basierend auf deinem Theme';
 }

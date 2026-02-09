@@ -22,6 +22,7 @@ import '../settings/ingredient_substitutions_screen.dart';
 // ============ DISMISSED ALLERGY WARNINGS ============
 // Canonical provider is in allergy_settings_screen.dart — imported via:
 import '../settings/allergy_settings_screen.dart' show dismissedAllergyWarningsProvider;
+import '../../../utils/default_recipe_images.dart';
 
 // ============ SESSION DISMISSED WARNINGS (temporary) ============
 
@@ -346,7 +347,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   _LinkedRecipesSection(
                     linkedRecipes: _linkedRecipes,
                     onTap: (id) => context.push('/recipe/$id'),
-                    onRemove: _unlinkRecipe,
+
                   ),
                 ],
 
@@ -363,7 +364,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
 
                 // Recipe meta info (times, servings) — hidden if all empty
                 if (_hasMetaInfo(_recipe!))
-                  _RecipeMetaInfoCard(recipe: _recipe!, nerdMode: isNerdMode),
+                  _RecipeMetaInfoCard(recipe: _recipe!, nerdMode: isNerdMode, scaleFactor: _scaleFactor),
 
                 // NEW: Separate Scale & Convert buttons
                 const SizedBox(height: 16),
@@ -481,7 +482,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   _LinkedRecipesSection(
                     linkedRecipes: _linkedRecipes,
                     onTap: (id) => context.push('/recipe/$id'),
-                    onRemove: _unlinkRecipe,
+
                   ),
                 ],
 
@@ -494,7 +495,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 ),
                 const SizedBox(height: 20),
                 if (_hasMetaInfo(_recipe!))
-                  _RecipeMetaInfoCard(recipe: _recipe!, nerdMode: isNerdMode),
+                  _RecipeMetaInfoCard(recipe: _recipe!, nerdMode: isNerdMode, scaleFactor: _scaleFactor),
                 const SizedBox(height: 16),
                 _ModernScaleConvertButtons(
                   currentScale: _scaleFactor,
@@ -652,8 +653,9 @@ class _ModernActionButton extends StatelessWidget {
 class _RecipeMetaInfoCard extends StatelessWidget {
   final Recipe recipe;
   final bool nerdMode;
+  final double scaleFactor;
 
-  const _RecipeMetaInfoCard({required this.recipe, this.nerdMode = false});
+  const _RecipeMetaInfoCard({required this.recipe, this.nerdMode = false, this.scaleFactor = 1.0});
 
   String _formatMinutes(int? minutes) {
     if (minutes == null || minutes <= 0) return '';
@@ -688,10 +690,36 @@ class _RecipeMetaInfoCard extends StatelessWidget {
           if (cookTimeStr.isNotEmpty)
             _MetaItem(icon: Icons.local_fire_department_outlined, label: rpg.recipeFieldCookTime, value: cookTimeStr),
           if (recipe.servings != null && recipe.servings!.isNotEmpty)
-            _MetaItem(icon: Icons.people_outline, label: rpg.recipeFieldServings, value: recipe.servings!),
+            _MetaItem(icon: Icons.people_outline, label: rpg.recipeFieldServings, value: _scaleServings(recipe.servings!, scaleFactor)),
         ],
       ),
     );
+  }
+
+  /// Scale servings string by the given factor
+  /// Handles formats like "4", "3-4", "6-8", "1 pizza", "~1 cup"
+  String _scaleServings(String servings, double scale) {
+    if (scale == 1.0) return servings;
+
+    // Try to find and scale numbers in the servings string
+    final numberPattern = RegExp(r'(\d+\.?\d*)');
+    final matches = numberPattern.allMatches(servings);
+
+    if (matches.isEmpty) return servings;
+
+    String result = servings;
+    // Process matches in reverse to preserve string indices
+    for (final match in matches.toList().reversed) {
+      final original = double.tryParse(match.group(0)!);
+      if (original != null) {
+        final scaled = original * scale;
+        final scaledStr = scaled == scaled.roundToDouble()
+            ? scaled.round().toString()
+            : scaled.toStringAsFixed(1);
+        result = result.replaceRange(match.start, match.end, scaledStr);
+      }
+    }
+    return result;
   }
 }
 
@@ -732,11 +760,11 @@ class _ModernScaleConvertButtons extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               side: BorderSide(
                 color: currentScale != 1.0
-                    ? const Color(0xFFE8A860)
+                    ? theme.colorScheme.tertiary
                     : theme.colorScheme.outline.withValues(alpha: 0.5),
               ),
               foregroundColor: currentScale != 1.0
-                  ? const Color(0xFFE8A860)
+                  ? theme.colorScheme.tertiary
                   : theme.colorScheme.onSurface,
             ),
           ),
@@ -828,12 +856,13 @@ class _ModernScaleConvertButtons extends StatelessWidget {
   }
 
   void _showConvertDialog(BuildContext context) {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: theme.colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: const EdgeInsets.all(20),
@@ -851,23 +880,23 @@ class _ModernScaleConvertButtons extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Text('Convert Units', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            Text('Convert Units', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             ListTile(
-              leading: Icon(Icons.straighten, color: unitConversion == _UnitConversion.toImperial ? const Color(0xFFE8A860) : null),
+              leading: Icon(Icons.straighten, color: unitConversion == _UnitConversion.toImperial ? theme.colorScheme.tertiary : null),
               title: const Text('Metric → Imperial'),
               subtitle: const Text('ml→fl oz, g→oz, kg→lb'),
-              trailing: unitConversion == _UnitConversion.toImperial ? const Icon(Icons.check_circle, color: Color(0xFFE8A860)) : null,
+              trailing: unitConversion == _UnitConversion.toImperial ? Icon(Icons.check_circle, color: theme.colorScheme.tertiary) : null,
               onTap: () {
                 Navigator.pop(ctx);
                 onConversionChanged(unitConversion == _UnitConversion.toImperial ? _UnitConversion.none : _UnitConversion.toImperial);
               },
             ),
             ListTile(
-              leading: Icon(Icons.square_foot, color: unitConversion == _UnitConversion.toMetric ? const Color(0xFFE8A860) : null),
+              leading: Icon(Icons.square_foot, color: unitConversion == _UnitConversion.toMetric ? theme.colorScheme.tertiary : null),
               title: const Text('Imperial → Metric'),
               subtitle: const Text('cups→ml, oz→g, tsp→ml'),
-              trailing: unitConversion == _UnitConversion.toMetric ? const Icon(Icons.check_circle, color: Color(0xFFE8A860)) : null,
+              trailing: unitConversion == _UnitConversion.toMetric ? Icon(Icons.check_circle, color: theme.colorScheme.tertiary) : null,
               onTap: () {
                 Navigator.pop(ctx);
                 onConversionChanged(unitConversion == _UnitConversion.toMetric ? _UnitConversion.none : _UnitConversion.toMetric);
@@ -909,14 +938,14 @@ class _ScaleChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFE8A860) : theme.colorScheme.surface,
+          color: isSelected ? theme.colorScheme.tertiary : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
           border: isSelected ? null : Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : theme.colorScheme.onSurface,
+            color: isSelected ? theme.colorScheme.onTertiary : theme.colorScheme.onSurface,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             fontSize: 14,
           ),
@@ -947,8 +976,8 @@ class _LargeAddToShoppingButton extends StatelessWidget {
         style: FilledButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          backgroundColor: const Color(0xFFE8A860),
-          foregroundColor: Colors.white,
+          backgroundColor: theme.colorScheme.tertiary,
+          foregroundColor: theme.colorScheme.onTertiary,
         ),
       ),
     );
@@ -1222,6 +1251,7 @@ class _RecipeAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final hasImage = recipe.imagePath != null && File(recipe.imagePath!).existsSync();
+    final defaultAsset = defaultRecipeImageAsset(recipe.id);
 
     // Get rarity color for border glow
     final rarityColor = isNerdMode && recipe.rating != null && recipe.rating! > 0
@@ -1243,6 +1273,9 @@ class _RecipeAppBar extends StatelessWidget {
             // Image with optional rarity glow border
             if (hasImage)
               Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
+            else if (defaultAsset != null)
+              Image.asset(defaultAsset, fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const RecipePlaceholderImage(height: 300, width: double.infinity))
             else
               const RecipePlaceholderImage(height: 300, width: double.infinity),
             // Gradient overlay
@@ -1410,7 +1443,7 @@ class _MetaItem extends StatelessWidget {
   const _MetaItem({required this.icon, required this.label, required this.value, this.highlight = false});
   @override Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(children: [Icon(icon, color: highlight ? const Color(0xFFE8A860) : theme.colorScheme.onSurfaceVariant), const SizedBox(height: 4), Text(value, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: highlight ? const Color(0xFFE8A860) : null)), Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline))]);
+    return Column(children: [Icon(icon, color: highlight ? theme.colorScheme.tertiary : theme.colorScheme.onSurfaceVariant), const SizedBox(height: 4), Text(value, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: highlight ? theme.colorScheme.tertiary : null)), Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline))]);
   }
 }
 
@@ -1509,12 +1542,12 @@ class _InstructionStep extends StatelessWidget {
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                  color: const Color(0xFFE8A860),
+                  color: theme.colorScheme.tertiary,
                   borderRadius: BorderRadius.circular(8)),
               child: Center(
                   child: Text('$stepNumber',
-                      style: const TextStyle(
-                          color: Colors.white,
+                      style: TextStyle(
+                          color: theme.colorScheme.onTertiary,
                           fontWeight: FontWeight.bold,
                           fontSize: 14))),
             ),
@@ -1563,12 +1596,12 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
 class _LinkedRecipesSection extends StatelessWidget {
   final List<Recipe> linkedRecipes;
   final ValueChanged<String> onTap;
-  final ValueChanged<String> onRemove;
+  final ValueChanged<String>? onRemove;
 
   const _LinkedRecipesSection({
     required this.linkedRecipes,
     required this.onTap,
-    required this.onRemove,
+    this.onRemove,
   });
 
   @override
@@ -1598,7 +1631,7 @@ class _LinkedRecipesSection extends StatelessWidget {
           children: linkedRecipes.map((recipe) => _LinkedRecipeChip(
             recipe: recipe,
             onTap: () => onTap(recipe.id),
-            onRemove: () => onRemove(recipe.id),
+            onRemove: onRemove != null ? () => onRemove!(recipe.id) : null,
           )).toList(),
         ),
       ],
@@ -1609,12 +1642,12 @@ class _LinkedRecipesSection extends StatelessWidget {
 class _LinkedRecipeChip extends StatelessWidget {
   final Recipe recipe;
   final VoidCallback onTap;
-  final VoidCallback onRemove;
+  final VoidCallback? onRemove;
 
   const _LinkedRecipeChip({
     required this.recipe,
     required this.onTap,
-    required this.onRemove,
+    this.onRemove,
   });
 
   @override
@@ -1628,7 +1661,7 @@ class _LinkedRecipeChip extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
         child: Padding(
-          padding: const EdgeInsets.only(left: 12, top: 6, bottom: 6, right: 4),
+          padding: EdgeInsets.only(left: 12, top: 6, bottom: 6, right: onRemove != null ? 4 : 12),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1642,11 +1675,13 @@ class _LinkedRecipeChip extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 2),
-              GestureDetector(
-                onTap: onRemove,
-                child: Icon(Icons.close, size: 16, color: theme.colorScheme.outline),
-              ),
+              if (onRemove != null) ...[
+                const SizedBox(width: 2),
+                GestureDetector(
+                  onTap: onRemove,
+                  child: Icon(Icons.close, size: 16, color: theme.colorScheme.outline),
+                ),
+              ],
             ],
           ),
         ),

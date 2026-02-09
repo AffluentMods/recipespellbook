@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../utils/default_recipe_images.dart';
 
 class UncategorizedRecipesScreen extends ConsumerWidget {
   const UncategorizedRecipesScreen({super.key});
@@ -94,6 +95,7 @@ class _RecipeListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hasImage = recipe.imagePath != null && File(recipe.imagePath!).existsSync();
+    final defaultAsset = defaultRecipeImageAsset(recipe.id);
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -108,6 +110,8 @@ class _RecipeListTile extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: hasImage
               ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
+              : defaultAsset != null
+              ? Image.asset(defaultAsset, fit: BoxFit.cover)
               : Center(
             child: Icon(
               Icons.restaurant_menu,

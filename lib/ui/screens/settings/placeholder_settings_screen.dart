@@ -39,18 +39,7 @@ class PlaceholderSettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
 
-          // Theme-based option (primary option)
-          _PlaceholderOptionCard(
-            title: l10n.themeBased,
-            description: l10n.themeBasedDescription,
-            isSelected: settings.recipePlaceholderMode == PlaceholderImageMode.theme,
-            onTap: () => ref.read(settingsProvider.notifier)
-                .setRecipePlaceholderMode(PlaceholderImageMode.theme),
-            preview: _ThemePreview(isRecipe: true),
-          ),
-          const SizedBox(height: 8),
-
-          // Custom option (for future use)
+          // Default Images (artwork, changes with RPG mode)
           _PlaceholderOptionCard(
             title: l10n.defaultImages,
             description: l10n.defaultImagesDescription,
@@ -58,6 +47,28 @@ class PlaceholderSettingsScreen extends ConsumerWidget {
             onTap: () => ref.read(settingsProvider.notifier)
                 .setRecipePlaceholderMode(PlaceholderImageMode.custom),
             preview: _DefaultImagePreview(isRecipe: true, nerdMode: settings.nerdMode),
+          ),
+          const SizedBox(height: 8),
+
+          // Theme-Based (banner artwork)
+          _PlaceholderOptionCard(
+            title: l10n.themeBased,
+            description: l10n.themeBasedDescription,
+            isSelected: settings.recipePlaceholderMode == PlaceholderImageMode.theme,
+            onTap: () => ref.read(settingsProvider.notifier)
+                .setRecipePlaceholderMode(PlaceholderImageMode.theme),
+            preview: _ThemeBannerPreview(isRecipe: true),
+          ),
+          const SizedBox(height: 8),
+
+          // Gradient-Based (color gradient)
+          _PlaceholderOptionCard(
+            title: l10n.gradientBased,
+            description: l10n.gradientBasedDescription,
+            isSelected: settings.recipePlaceholderMode == PlaceholderImageMode.gradient,
+            onTap: () => ref.read(settingsProvider.notifier)
+                .setRecipePlaceholderMode(PlaceholderImageMode.gradient),
+            preview: _GradientPreview(isRecipe: true),
           ),
 
           const SizedBox(height: 32),
@@ -71,18 +82,7 @@ class PlaceholderSettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
 
-          // Theme-based option
-          _PlaceholderOptionCard(
-            title: l10n.themeBased,
-            description: l10n.themeBasedDescription,
-            isSelected: settings.cookbookPlaceholderMode == PlaceholderImageMode.theme,
-            onTap: () => ref.read(settingsProvider.notifier)
-                .setCookbookPlaceholderMode(PlaceholderImageMode.theme),
-            preview: _ThemePreview(isRecipe: false),
-          ),
-          const SizedBox(height: 8),
-
-          // Custom option
+          // Default Images
           _PlaceholderOptionCard(
             title: l10n.defaultImages,
             description: l10n.defaultImagesDescription,
@@ -90,6 +90,28 @@ class PlaceholderSettingsScreen extends ConsumerWidget {
             onTap: () => ref.read(settingsProvider.notifier)
                 .setCookbookPlaceholderMode(PlaceholderImageMode.custom),
             preview: _DefaultImagePreview(isRecipe: false, nerdMode: settings.nerdMode),
+          ),
+          const SizedBox(height: 8),
+
+          // Theme-Based
+          _PlaceholderOptionCard(
+            title: l10n.themeBased,
+            description: l10n.themeBasedDescription,
+            isSelected: settings.cookbookPlaceholderMode == PlaceholderImageMode.theme,
+            onTap: () => ref.read(settingsProvider.notifier)
+                .setCookbookPlaceholderMode(PlaceholderImageMode.theme),
+            preview: _ThemeBannerPreview(isRecipe: false),
+          ),
+          const SizedBox(height: 8),
+
+          // Gradient-Based
+          _PlaceholderOptionCard(
+            title: l10n.gradientBased,
+            description: l10n.gradientBasedDescription,
+            isSelected: settings.cookbookPlaceholderMode == PlaceholderImageMode.gradient,
+            onTap: () => ref.read(settingsProvider.notifier)
+                .setCookbookPlaceholderMode(PlaceholderImageMode.gradient),
+            preview: _GradientPreview(isRecipe: false),
           ),
 
           const SizedBox(height: 32),
@@ -226,134 +248,90 @@ class _DefaultImagePreview extends StatelessWidget {
       imagePath,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
-        // Show theme-based as fallback
-        return _ThemePreview(isRecipe: isRecipe);
+        return _GradientPreview(isRecipe: isRecipe);
       },
     );
   }
 }
 
-class _ThemePreview extends StatelessWidget {
+/// Preview showing the theme banner artwork
+class _ThemeBannerPreview extends ConsumerWidget {
   final bool isRecipe;
 
-  const _ThemePreview({required this.isRecipe});
-
-  @override
-  Widget build(BuildContext context) {
-    if (isRecipe) {
-      return const _ForceThemeRecipePlaceholder(height: 60);
-    } else {
-      return const _ForceThemeCookbookPlaceholder(height: 60);
-    }
-  }
-}
-
-class _ForceThemeRecipePlaceholder extends ConsumerWidget {
-  final double height;
-
-  const _ForceThemeRecipePlaceholder({required this.height});
+  const _ThemeBannerPreview({required this.isRecipe});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final colorTheme = settings.appTheme;
 
-    return Container(
-      height: height,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: _getColorsForTheme(colorTheme),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Image.asset(
+          colorTheme.bannerAsset,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _GradientPreview(isRecipe: isRecipe);
+          },
         ),
-      ),
-      child: Center(
-        child: Icon(
-          settings.nerdMode ? Icons.auto_awesome : Icons.restaurant,
-          size: height * 0.4,
-          color: Colors.white.withValues(alpha: 0.9),
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withValues(alpha: 0.0),
+                Colors.black.withValues(alpha: 0.2),
+              ],
+            ),
+          ),
         ),
-      ),
+        Center(
+          child: Icon(
+            isRecipe
+                ? (settings.nerdMode ? Icons.auto_awesome : Icons.restaurant)
+                : (settings.nerdMode ? Icons.auto_stories : Icons.menu_book),
+            size: 24,
+            color: Colors.white.withValues(alpha: 0.9),
+          ),
+        ),
+      ],
     );
-  }
-
-  List<Color> _getColorsForTheme(AppColorTheme theme) {
-    switch (theme) {
-      case AppColorTheme.spellbook:
-        return [const Color(0xFF6D4C2B), const Color(0xFFD4A055)];
-      case AppColorTheme.forest:
-        return [const Color(0xFF2E5E2C), const Color(0xFF6B9E3C)];
-      case AppColorTheme.ocean:
-        return [const Color(0xFF00695C), const Color(0xFF0097A7)];
-      case AppColorTheme.sunset:
-        return [const Color(0xFFC65100), const Color(0xFFE8871E)];
-      case AppColorTheme.midnight:
-        return [const Color(0xFF283593), const Color(0xFF5C6BC0)];
-      case AppColorTheme.rose:
-        return [const Color(0xFFAD5068), const Color(0xFFD4618C)];
-      case AppColorTheme.frost:
-        return [const Color(0xFF546E8A), const Color(0xFF78A8CC)];
-      case AppColorTheme.ember:
-        return [const Color(0xFF8E2C0C), const Color(0xFFD84315)];
-      case AppColorTheme.spring:
-        return [const Color(0xFF5A8C5E), const Color(0xFF81C784)];
-      case AppColorTheme.alchemist:
-        return [const Color(0xFF5E4080), const Color(0xFF2E8B57)];
-    }
   }
 }
 
-class _ForceThemeCookbookPlaceholder extends ConsumerWidget {
-  final double height;
+/// Preview showing just the gradient colors
+class _GradientPreview extends ConsumerWidget {
+  final bool isRecipe;
 
-  const _ForceThemeCookbookPlaceholder({required this.height});
+  const _GradientPreview({required this.isRecipe});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final colorTheme = settings.appTheme;
+    final palette = Theme.of(context).brightness == Brightness.dark
+        ? colorTheme.dark
+        : colorTheme.light;
 
     return Container(
-      height: height,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: _getColorsForTheme(colorTheme),
+          colors: [palette.primary, palette.secondary],
         ),
       ),
       child: Center(
         child: Icon(
-          settings.nerdMode ? Icons.auto_stories : Icons.menu_book,
-          size: height * 0.4,
+          isRecipe
+              ? (settings.nerdMode ? Icons.auto_awesome : Icons.restaurant)
+              : (settings.nerdMode ? Icons.auto_stories : Icons.menu_book),
+          size: 24,
           color: Colors.white.withValues(alpha: 0.9),
         ),
       ),
     );
-  }
-
-  List<Color> _getColorsForTheme(AppColorTheme theme) {
-    switch (theme) {
-      case AppColorTheme.spellbook:
-        return [const Color(0xFF4A3520), const Color(0xFF6D4C2B)];
-      case AppColorTheme.forest:
-        return [const Color(0xFF1B5E20), const Color(0xFF2E5E2C)];
-      case AppColorTheme.ocean:
-        return [const Color(0xFF004D40), const Color(0xFF00695C)];
-      case AppColorTheme.sunset:
-        return [const Color(0xFFBF360C), const Color(0xFFC65100)];
-      case AppColorTheme.midnight:
-        return [const Color(0xFF1A237E), const Color(0xFF303F9F)];
-      case AppColorTheme.rose:
-        return [const Color(0xFF880E4F), const Color(0xFFAD5068)];
-      case AppColorTheme.frost:
-        return [const Color(0xFF37474F), const Color(0xFF546E8A)];
-      case AppColorTheme.ember:
-        return [const Color(0xFF6E2008), const Color(0xFF8E2C0C)];
-      case AppColorTheme.spring:
-        return [const Color(0xFF2E4A2E), const Color(0xFF5A8C5E)];
-      case AppColorTheme.alchemist:
-        return [const Color(0xFF3A2858), const Color(0xFF5E4080)];
-    }
   }
 }

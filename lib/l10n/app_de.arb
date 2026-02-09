@@ -1498,5 +1498,7 @@
   "shoppingBaby": "Baby",
   "shoppingPet": "Haustier",
   "shoppingHousehold": "Haushalt",
-  "shoppingPersonalCare": "Körperpflege"
+  "shoppingPersonalCare": "Körperpflege",
+  "gradientBased": "Farbverlauf",
+  "gradientBasedDescription": "Farbverlauf basierend auf deinem Theme"
 }

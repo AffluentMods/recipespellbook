@@ -103,11 +103,10 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: l10n.settingsManageCategoriesSubtitle,
                 onTap: () => context.push('/settings/categories'),
               ),
-              ListTile(
-                leading: Icon(settings.rpgAnimationsEnabled ? Icons.flash_on : Icons.warning_amber),
-                title: Text(settings.rpgAnimationsEnabled ? 'Weaknesses' : l10n.settingsAllergies),
-                subtitle: Text(settings.rpgAnimationsEnabled ? 'Set your dietary vulnerabilities' : l10n.settingsAllergiesSubtitle),
-                trailing: const Icon(Icons.chevron_right),
+              _SettingsTile(
+                icon: settings.nerdMode ? Icons.flash_on : Icons.warning_amber,
+                title: settings.nerdMode ? 'Weaknesses' : l10n.settingsAllergies,
+                subtitle: settings.nerdMode ? 'Set your dietary vulnerabilities' : l10n.settingsAllergiesSubtitle,
                 onTap: () => context.push('/settings/allergies'),
               ),
             ],
@@ -505,19 +504,6 @@ class _NutritionSettingsSection extends StatelessWidget {
     return _SettingsSection(
       title: 'Nutrition Display',
       children: [
-        // Default View Toggle
-        ListTile(
-          leading: const Icon(Icons.visibility),
-          title: const Text('Default nutrition view'),
-          subtitle: Text(settings.defaultNutritionView == NutritionDisplayMode.perServing
-              ? 'Per serving'
-              : 'Total'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => _showViewPicker(context),
-        ),
-
-        const Divider(height: 1),
-
         // Chart Style
         ListTile(
           leading: Icon(_getIconForStyle(settings.nutritionChartStyle)),
@@ -563,47 +549,6 @@ class _NutritionSettingsSection extends StatelessWidget {
       case NutritionChartStyle.numbers:
         return 'Numbers only';
     }
-  }
-
-  void _showViewPicker(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Default Nutrition View',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            RadioListTile<NutritionDisplayMode>(
-              value: NutritionDisplayMode.perServing,
-              groupValue: settings.defaultNutritionView,
-              onChanged: (value) {
-                ref.read(settingsProvider.notifier).setDefaultNutritionView(value!);
-                Navigator.pop(ctx);
-              },
-              title: const Text('Per serving'),
-              subtitle: const Text('Show nutrition values per serving'),
-            ),
-            RadioListTile<NutritionDisplayMode>(
-              value: NutritionDisplayMode.total,
-              groupValue: settings.defaultNutritionView,
-              onChanged: (value) {
-                ref.read(settingsProvider.notifier).setDefaultNutritionView(value!);
-                Navigator.pop(ctx);
-              },
-              title: const Text('Total'),
-              subtitle: const Text('Show total nutrition for entire recipe'),
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
   }
 
   void _showStylePicker(BuildContext context) {

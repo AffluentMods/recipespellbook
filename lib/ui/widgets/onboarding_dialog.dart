@@ -70,7 +70,7 @@ class _OnboardingDialogState extends State<_OnboardingDialog> {
           // Description
           Text(
             'Want to start with 10 handpicked recipes from around the world? '
-                'Korean beef bowls, butter chicken, birria tacos, carbonara, and more.',
+                'Korean beef bowls, butter chicken, stuffed peppers, carbonara, and more.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -104,7 +104,7 @@ class _OnboardingDialogState extends State<_OnboardingDialog> {
               _RecipeChip('🍤 Tuscan Shrimp'),
               _RecipeChip('🥣 Chicken Gnocchi'),
               _RecipeChip('🌮 Street Tacos'),
-              _RecipeChip('🫕 Birria Tacos'),
+              _RecipeChip('🌶️ Stuffed Peppers'),
             ],
           ),
           const SizedBox(height: 8),

@@ -90,14 +90,12 @@ class OnboardingService {
 
     // No tags — keep starter recipes clean
 
-    // Link related recipes
+    // Link related recipes (one-directional)
+    // Pizza links TO its sauce and dough (pizza always uses these)
+    // But sauce/dough do NOT link back (they're generic, usable with many recipes)
     try {
-      // Link Pizza Sauce and Pizza Dough to White Pizza
       await dao.addRecipeLink('default_white_pizza', 'default_white_pizza_sauce');
       await dao.addRecipeLink('default_white_pizza', 'default_pizza_dough');
-      // Reverse links so they show on all recipe pages
-      await dao.addRecipeLink('default_white_pizza_sauce', 'default_white_pizza');
-      await dao.addRecipeLink('default_pizza_dough', 'default_white_pizza');
     } catch (_) {
       // Links are best-effort
     }

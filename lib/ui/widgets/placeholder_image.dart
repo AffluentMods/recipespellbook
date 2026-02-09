@@ -4,7 +4,10 @@ import '../../providers/settings_provider.dart';
 import '../../data/app_enums.dart';
 
 /// Recipe placeholder image widget
-/// Shows either theme-based banner or custom image based on settings
+/// Shows one of three styles based on settings:
+///   custom   → Default artwork images (changes with RPG mode)
+///   theme    → Theme banner artwork
+///   gradient → Color gradient based on theme
 class RecipePlaceholderImage extends ConsumerWidget {
   final double? height;
   final double? width;
@@ -28,18 +31,25 @@ class RecipePlaceholderImage extends ConsumerWidget {
 
     Widget placeholder;
 
-    if (mode == PlaceholderImageMode.theme) {
-      placeholder = _ThemeBannerPlaceholder(
-        colorTheme: colorTheme,
-        nerdMode: nerdMode,
-        isRecipe: true,
-      );
-    } else {
-      placeholder = _CustomImagePlaceholder(
-        nerdMode: nerdMode,
-        isRecipe: true,
-        colorTheme: colorTheme,
-      );
+    switch (mode) {
+      case PlaceholderImageMode.custom:
+        placeholder = _CustomImagePlaceholder(
+          nerdMode: nerdMode,
+          isRecipe: true,
+          colorTheme: colorTheme,
+        );
+      case PlaceholderImageMode.theme:
+        placeholder = _ThemeBannerPlaceholder(
+          colorTheme: colorTheme,
+          nerdMode: nerdMode,
+          isRecipe: true,
+        );
+      case PlaceholderImageMode.gradient:
+        placeholder = _GradientPlaceholder(
+          colorTheme: colorTheme,
+          nerdMode: nerdMode,
+          isRecipe: true,
+        );
     }
 
     Widget result = Container(
@@ -83,18 +93,25 @@ class CookbookPlaceholderImage extends ConsumerWidget {
 
     Widget placeholder;
 
-    if (mode == PlaceholderImageMode.theme) {
-      placeholder = _ThemeBannerPlaceholder(
-        colorTheme: colorTheme,
-        nerdMode: nerdMode,
-        isRecipe: false,
-      );
-    } else {
-      placeholder = _CustomImagePlaceholder(
-        nerdMode: nerdMode,
-        isRecipe: false,
-        colorTheme: colorTheme,
-      );
+    switch (mode) {
+      case PlaceholderImageMode.custom:
+        placeholder = _CustomImagePlaceholder(
+          nerdMode: nerdMode,
+          isRecipe: false,
+          colorTheme: colorTheme,
+        );
+      case PlaceholderImageMode.theme:
+        placeholder = _ThemeBannerPlaceholder(
+          colorTheme: colorTheme,
+          nerdMode: nerdMode,
+          isRecipe: false,
+        );
+      case PlaceholderImageMode.gradient:
+        placeholder = _GradientPlaceholder(
+          colorTheme: colorTheme,
+          nerdMode: nerdMode,
+          isRecipe: false,
+        );
     }
 
     Widget result = Container(
@@ -114,8 +131,48 @@ class CookbookPlaceholderImage extends ConsumerWidget {
   }
 }
 
-/// Theme-based banner image placeholder
-/// Uses the theme's unique spellbook banner art
+// ============ MODE 1: DEFAULT IMAGES (custom) ============
+
+/// Custom artwork images that change with RPG mode
+class _CustomImagePlaceholder extends StatelessWidget {
+  final bool nerdMode;
+  final bool isRecipe;
+  final AppColorTheme colorTheme;
+
+  const _CustomImagePlaceholder({
+    required this.nerdMode,
+    required this.isRecipe,
+    required this.colorTheme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final imagePath = isRecipe
+        ? (nerdMode
+        ? 'assets/images/recipe_placeholder_rpg.png'
+        : 'assets/images/recipe_placeholder_normal.png')
+        : (nerdMode
+        ? 'assets/images/cookbook_placeholder_rpg.png'
+        : 'assets/images/cookbook_placeholder_normal.png');
+
+    return Image.asset(
+      imagePath,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        // Fall back to gradient if artwork missing
+        return _GradientPlaceholder(
+          colorTheme: colorTheme,
+          nerdMode: nerdMode,
+          isRecipe: isRecipe,
+        );
+      },
+    );
+  }
+}
+
+// ============ MODE 2: THEME-BASED (banner art) ============
+
+/// Theme banner artwork placeholder
 class _ThemeBannerPlaceholder extends StatelessWidget {
   final AppColorTheme colorTheme;
   final bool nerdMode;
@@ -137,7 +194,11 @@ class _ThemeBannerPlaceholder extends StatelessWidget {
           colorTheme.bannerAsset,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            return _GradientFallback(colorTheme: colorTheme);
+            return _GradientPlaceholder(
+              colorTheme: colorTheme,
+              nerdMode: nerdMode,
+              isRecipe: isRecipe,
+            );
           },
         ),
 
@@ -177,11 +238,19 @@ class _ThemeBannerPlaceholder extends StatelessWidget {
   }
 }
 
-/// Gradient fallback when banner image is not available
-class _GradientFallback extends StatelessWidget {
-  final AppColorTheme colorTheme;
+// ============ MODE 3: GRADIENT-BASED ============
 
-  const _GradientFallback({required this.colorTheme});
+/// Simple color gradient based on theme
+class _GradientPlaceholder extends StatelessWidget {
+  final AppColorTheme colorTheme;
+  final bool nerdMode;
+  final bool isRecipe;
+
+  const _GradientPlaceholder({
+    required this.colorTheme,
+    required this.nerdMode,
+    required this.isRecipe,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -198,48 +267,21 @@ class _GradientFallback extends StatelessWidget {
         ),
       ),
       child: Center(
-        child: Icon(
-          Icons.restaurant,
-          size: 48,
-          color: Colors.white.withValues(alpha: 0.9),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.15),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            isRecipe
+                ? (nerdMode ? Icons.auto_awesome : Icons.restaurant)
+                : (nerdMode ? Icons.auto_stories : Icons.menu_book),
+            size: 32,
+            color: Colors.white.withValues(alpha: 0.9),
+          ),
         ),
       ),
-    );
-  }
-}
-
-/// Custom image placeholder with RPG support
-class _CustomImagePlaceholder extends StatelessWidget {
-  final bool nerdMode;
-  final bool isRecipe;
-  final AppColorTheme colorTheme;
-
-  const _CustomImagePlaceholder({
-    required this.nerdMode,
-    required this.isRecipe,
-    required this.colorTheme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final imagePath = isRecipe
-        ? (nerdMode
-        ? 'assets/images/recipe_placeholder_rpg.png'
-        : 'assets/images/recipe_placeholder_normal.png')
-        : (nerdMode
-        ? 'assets/images/cookbook_placeholder_rpg.png'
-        : 'assets/images/cookbook_placeholder_normal.png');
-
-    return Image.asset(
-      imagePath,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        return _ThemeBannerPlaceholder(
-          colorTheme: colorTheme,
-          nerdMode: nerdMode,
-          isRecipe: isRecipe,
-        );
-      },
     );
   }
 }

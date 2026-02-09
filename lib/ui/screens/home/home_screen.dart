@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/cookbook_provider.dart';
@@ -13,9 +14,13 @@ import '../../widgets/new_recipe_dialog.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/rpg/rpg_navigation_shell.dart';
+import '../../widgets/onboarding_dialog.dart';
+import '../../../utils/default_recipe_images.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
+
+  static bool _onboardingChecked = false;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,6 +31,17 @@ class HomeScreen extends ConsumerWidget {
     return cookbookAsync.when(
       data: (cookbook) {
         final cookbookId = cookbook?.id ?? 'starter';
+
+        // Trigger onboarding dialog on first launch (once per app session)
+        if (!_onboardingChecked) {
+          _onboardingChecked = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            FlutterNativeSplash.remove();
+            if (context.mounted) {
+              showOnboardingDialog(context, ref);
+            }
+          });
+        }
 
         return Scaffold(
           body: CustomScrollView(
@@ -108,8 +124,15 @@ class HomeScreen extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (e, _) => Scaffold(body: Center(child: Text('${AppLocalizations.of(context)!.errorGeneric}: $e'))),
+      loading: () {
+        // Remove splash during loading so user sees the spinner if it takes long
+        FlutterNativeSplash.remove();
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      },
+      error: (e, _) {
+        FlutterNativeSplash.remove();
+        return Scaffold(body: Center(child: Text('${AppLocalizations.of(context)!.errorGeneric}: $e')));
+      },
     );
   }
 }
@@ -379,6 +402,7 @@ class _QuickRecipeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hasImage = item.recipe.imagePath != null && File(item.recipe.imagePath!).existsSync();
+    final defaultAsset = defaultRecipeImageAsset(item.recipe.id);
 
     return GestureDetector(
       onTap: () => context.push('/recipe/${item.recipe.id}'),
@@ -398,6 +422,8 @@ class _QuickRecipeCard extends StatelessWidget {
                     width: double.infinity,
                     child: hasImage
                         ? Image.file(File(item.recipe.imagePath!), fit: BoxFit.cover)
+                        : defaultAsset != null
+                        ? Image.asset(defaultAsset, fit: BoxFit.cover)
                         : const RecipePlaceholderImage(height: 90),
                   ),
                   // Title

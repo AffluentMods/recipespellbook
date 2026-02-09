@@ -6372,6 +6372,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select All'**
   String get selectAllSteps;
+
+  /// No description provided for @gradientBased.
+  ///
+  /// In en, this message translates to:
+  /// **'Gradient-Based'**
+  String get gradientBased;
+
+  /// No description provided for @gradientBasedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Color gradient based on your theme'**
+  String get gradientBasedDescription;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -27,7 +27,7 @@ dependencies:
   go_router: ^14.8.1
 
   # UI
-  photo_view: ^0.14.0
+  photo_view: 0.14.0
 
   # Utilities
   intl: ^0.20.2
@@ -44,7 +44,7 @@ dependencies:
   pdfx: ^2.6.0
   pdf: ^3.10.8
   printing: ^5.12.0
-  google_fonts: ^6.1.0
+  google_fonts: ^8.0.1
   archive: ^3.4.9
   qr_flutter: ^4.1.0
   url_launcher: ^6.2.1
@@ -71,12 +71,14 @@ flutter_launcher_icons:
 flutter_native_splash:
   color: "#FFF8F0"
   image: assets/images/splash_logo.png
+  branding: assets/images/splash_branding.png
   android: true
   ios: true
   android_12:
     color: "#FFF8F0"
-    image: assets/images/splash_logo.png
-    fullscreen: true
+    image: assets/images/splash_icon_android12.png
+    icon_background_color: "#FFF8F0"
+    branding: assets/images/splash_branding.png
 
 flutter:
   uses-material-design: true

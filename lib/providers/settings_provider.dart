@@ -78,8 +78,8 @@ class AppSettings {
     this.quickAccessHistoryCount = 10,
     this.quickAccessShowMealPlan = true,
     this.quickAccessShowPinned = true,
-    this.recipePlaceholderMode = PlaceholderImageMode.theme,
-    this.cookbookPlaceholderMode = PlaceholderImageMode.theme,
+    this.recipePlaceholderMode = PlaceholderImageMode.custom,
+    this.cookbookPlaceholderMode = PlaceholderImageMode.custom,
     this.recipeLayoutMode = RecipeLayoutMode.stacked,
     this.allergens = const [],
     this.rpgAnimationsEnabled = true,
@@ -142,15 +142,17 @@ class AppSettings {
 
 // Placeholder image mode options
 enum PlaceholderImageMode {
-  theme,  // Use theme-based placeholder
-  custom, // Use custom image (future feature)
+  custom,   // Default artwork images (changes with RPG mode)
+  theme,    // Theme-based artwork (banner images)
+  gradient, // Gradient colors based on theme
 }
 
 extension PlaceholderImageModeExtension on PlaceholderImageMode {
   String get displayName {
     switch (this) {
-      case PlaceholderImageMode.theme: return 'Theme-based';
-      case PlaceholderImageMode.custom: return 'Custom Image';
+      case PlaceholderImageMode.custom: return 'Default Images';
+      case PlaceholderImageMode.theme: return 'Theme-Based';
+      case PlaceholderImageMode.gradient: return 'Gradient-Based';
     }
   }
 }
@@ -265,12 +267,12 @@ class SettingsNotifier extends Notifier<AppSettings> {
     final recipePlaceholderString = prefs.getString(_recipePlaceholderKey);
     final recipePlaceholderMode = PlaceholderImageMode.values.firstWhere(
           (m) => m.name == recipePlaceholderString,
-      orElse: () => PlaceholderImageMode.theme,
+      orElse: () => PlaceholderImageMode.custom,
     );
     final cookbookPlaceholderString = prefs.getString(_cookbookPlaceholderKey);
     final cookbookPlaceholderMode = PlaceholderImageMode.values.firstWhere(
           (m) => m.name == cookbookPlaceholderString,
-      orElse: () => PlaceholderImageMode.theme,
+      orElse: () => PlaceholderImageMode.custom,
     );
 
     // Load recipe layout mode

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'router/router.dart';
 import 'theme/app_theme.dart';
 import 'providers/settings_provider.dart';
@@ -11,7 +12,8 @@ import 'services/ingredient_suggestion_service.dart';
 final sharedRecipeProvider = StateProvider<Map<String, dynamic>?>((ref) => null);
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   IngredientSuggestionService.instance.preload();
   runApp(const ProviderScope(child: RecipeSpellbookApp()));
 }

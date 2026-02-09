@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/cookbook_provider.dart';
+import '../../widgets/placeholder_image.dart';
+import '../../../utils/default_recipe_images.dart';
 
 /// Screen showing all quick access recipes (meal plan + pinned + recent)
 /// with filtering, sorting, and view size options
@@ -357,6 +359,7 @@ class _MediumCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hasImage = item.recipe.imagePath != null && File(item.recipe.imagePath!).existsSync();
+    final defaultAsset = defaultRecipeImageAsset(item.recipe.id);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -375,13 +378,9 @@ class _MediumCard extends StatelessWidget {
                     color: theme.colorScheme.primaryContainer,
                     child: hasImage
                         ? Image.file(File(item.recipe.imagePath!), fit: BoxFit.cover)
-                        : Center(
-                      child: Icon(
-                        Icons.restaurant_menu,
-                        size: 40,
-                        color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
-                      ),
-                    ),
+                        : defaultAsset != null
+                        ? Image.asset(defaultAsset, fit: BoxFit.cover)
+                        : const RecipePlaceholderImage(height: double.infinity, width: double.infinity),
                   ),
                   // Source badge
                   Positioned(
@@ -478,6 +477,7 @@ class _LargeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hasImage = item.recipe.imagePath != null && File(item.recipe.imagePath!).existsSync();
+    final defaultAsset = defaultRecipeImageAsset(item.recipe.id);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -498,13 +498,9 @@ class _LargeCard extends StatelessWidget {
                       color: theme.colorScheme.primaryContainer,
                       child: hasImage
                           ? Image.file(File(item.recipe.imagePath!), fit: BoxFit.cover)
-                          : Center(
-                        child: Icon(
-                          Icons.restaurant_menu,
-                          size: 40,
-                          color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
-                        ),
-                      ),
+                          : defaultAsset != null
+                          ? Image.asset(defaultAsset, fit: BoxFit.cover)
+                          : const RecipePlaceholderImage(height: double.infinity, width: double.infinity),
                     ),
                     // Source badge
                     Positioned(

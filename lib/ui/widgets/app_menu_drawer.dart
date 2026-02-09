@@ -9,26 +9,14 @@ import '../../providers/settings_provider.dart';
 class AppMenuDrawer extends ConsumerWidget {
   const AppMenuDrawer({super.key});
 
-  /// Close drawer and pop any underlying full-screen modals, then navigate
-  void _closeAndNavigate(BuildContext context, String path, {bool useGo = false}) {
-    Navigator.pop(context); // close drawer
-    // Pop any remaining full-screen modals on the current tab
-    Navigator.of(context).popUntil((route) => route.isFirst);
-    if (useGo) {
-      context.go(path);
-    } else {
-      context.push(path);
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider);
 
-    // Check if RPG mode is ACTUALLY enabled
-    final isRpgEnabled = settings.rpgAnimationsEnabled || settings.rpgSoundsEnabled;
+    // Check if RPG mode is ACTUALLY enabled (requires nerd mode master toggle)
+    final isRpgEnabled = settings.nerdMode;
 
     return Drawer(
       backgroundColor: theme.colorScheme.surface,
@@ -45,7 +33,10 @@ class AppMenuDrawer extends ConsumerWidget {
                   _MenuItem(
                     icon: Icons.menu_book_rounded,
                     label: l10n.navCookbooks,
-                    onTap: () => _closeAndNavigate(context, '/cookbooks', useGo: true),
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go('/cookbooks');
+                    },
                   ),
                   _MenuItem(
                     icon: Icons.people_rounded,
@@ -62,7 +53,10 @@ class AppMenuDrawer extends ConsumerWidget {
                     icon: Icons.download_rounded,
                     label: l10n.importGuides,
                     subtitle: 'Instagram, TikTok, websites...',
-                    onTap: () => _closeAndNavigate(context, '/import-guides'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push('/import-guides');
+                    },
                   ),
                   _MenuItem(
                     icon: Icons.computer_rounded,
@@ -70,21 +64,7 @@ class AppMenuDrawer extends ConsumerWidget {
                     subtitle: 'Sync across devices',
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.of(context).popUntil((route) => route.isFirst);
                       _showDesktopInfo(context);
-                    },
-                  ),
-
-                  const SizedBox(height: 8),
-                  const Divider(height: 1),
-                  _SectionHeader(title: 'TOOLS'),
-                  _MenuItem(
-                    icon: Icons.swap_horiz_rounded,
-                    label: 'Ingredient Substitutions',
-                    subtitle: 'Find alternatives for any ingredient',
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push('/substitutions');
                     },
                   ),
 
@@ -97,43 +77,48 @@ class AppMenuDrawer extends ConsumerWidget {
                       icon: Icons.person_rounded,
                       label: 'Profile',
                       subtitle: 'View your stats and progress',
-                      onTap: () => _closeAndNavigate(context, '/rpg/profile'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.push('/rpg/profile');
+                      },
                     ),
                     _MenuItem(
                       icon: Icons.emoji_events_rounded,
                       label: 'Achievements',
                       subtitle: 'Unlock rewards',
-                      onTap: () => _closeAndNavigate(context, '/rpg/achievements'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.push('/rpg/achievements');
+                      },
                     ),
                     _MenuItem(
                       icon: Icons.checkroom_rounded,
                       label: 'Cosmetics',
                       subtitle: 'Customize your look',
-                      onTap: () => _closeAndNavigate(context, '/rpg/cosmetics'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.push('/rpg/cosmetics');
+                      },
                     ),
                     _MenuItem(
                       icon: Icons.leaderboard_rounded,
                       label: 'Leaderboards',
                       subtitle: 'Compete with others',
-                      onTap: () => _closeAndNavigate(context, '/rpg/leaderboard'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.push('/rpg/leaderboard');
+                      },
                     ),
                     _MenuItem(
                       icon: Icons.whatshot_rounded,
                       label: 'Boss Battles',
                       subtitle: 'Epic cooking challenges',
-                      onTap: () => _closeAndNavigate(context, '/rpg/boss'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.push('/rpg/boss');
+                      },
                     ),
                   ],
-
-                  const SizedBox(height: 8),
-                  const Divider(height: 1),
-                  _SectionHeader(title: 'TOOLS'),
-                  _MenuItem(
-                    icon: Icons.swap_horiz_rounded,
-                    label: 'Ingredient Substitutions',
-                    subtitle: 'Find alternatives for any ingredient',
-                    onTap: () => _closeAndNavigate(context, '/substitutions'),
-                  ),
 
                   const SizedBox(height: 8),
                   const Divider(height: 1),
@@ -161,7 +146,10 @@ class AppMenuDrawer extends ConsumerWidget {
                   _MenuItem(
                     icon: Icons.settings_outlined,
                     label: l10n.settingsTitle,
-                    onTap: () => _closeAndNavigate(context, '/settings'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push('/settings');
+                    },
                   ),
                 ],
               ),
@@ -318,7 +306,7 @@ class _ProfileSection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Row(children: [
-        Container(width: 56, height: 56, decoration: const BoxDecoration(gradient: LinearGradient(colors: [Color(0xFFE8A860), Color(0xFFD4854A)], begin: Alignment.topLeft, end: Alignment.bottomRight), shape: BoxShape.circle), child: const Icon(Icons.auto_fix_high, size: 28, color: Colors.white)),
+        Container(width: 56, height: 56, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.colorScheme.tertiary, theme.colorScheme.primary], begin: Alignment.topLeft, end: Alignment.bottomRight), shape: BoxShape.circle), child: Icon(Icons.auto_fix_high, size: 28, color: theme.colorScheme.onPrimary)),
         const SizedBox(width: 16),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
