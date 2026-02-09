@@ -13,7 +13,7 @@ class EditableStep {
 
   EditableStep({
     required this.id,
-    required this.instruction,
+    this.instruction = '',
     this.imagePath,
   });
 }
@@ -356,6 +356,9 @@ class _StepCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final hasImage = step.imagePath != null &&
+        step.imagePath!.isNotEmpty &&
+        File(step.imagePath!).existsSync();
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -376,52 +379,92 @@ class _StepCard extends StatelessWidget {
               width: isSelected ? 2 : 1,
             ),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Left side: step number or selection checkbox
-              Padding(
-                padding: const EdgeInsets.only(left: 12, top: 14),
-                child: isSelectionMode
-                    ? AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: isSelected ? theme.colorScheme.primary : Colors.transparent,
-                    border: Border.all(
-                      color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
-                      width: 2,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Left side: checkbox (selection mode) OR camera + number
+                if (isSelectionMode)
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+                      border: Border.all(
+                        color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
+                        width: 2,
+                      ),
+                      shape: BoxShape.circle,
                     ),
-                    shape: BoxShape.circle,
-                  ),
-                  child: isSelected
-                      ? const Icon(Icons.check, size: 16, color: Colors.white)
-                      : null,
-                )
-                    : Container(
-                  width: 28,
-                  height: 28,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFE8A860),
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '${index + 1}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
+                    child: isSelected
+                        ? const Icon(Icons.check, size: 16, color: Colors.white)
+                        : null,
+                  )
+                else ...[
+                  // Camera icon / image thumbnail
+                  GestureDetector(
+                    onTap: () => _showImagePicker(context),
+                    child: Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: hasImage
+                            ? Colors.transparent
+                            : (isDark
+                            ? theme.colorScheme.surfaceContainerHighest
+                            : theme.colorScheme.surfaceContainerLow),
+                        borderRadius: BorderRadius.circular(10),
+                        border: hasImage
+                            ? null
+                            : Border.all(
+                          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: hasImage
+                          ? Image.file(
+                        File(step.imagePath!),
+                        fit: BoxFit.cover,
+                      )
+                          : Icon(
+                        Icons.camera_alt_outlined,
+                        size: 18,
+                        color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                      ),
                     ),
                   ),
-                ),
-              ),
+                  const SizedBox(width: 10),
 
-              // Center: text field
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 4, 4, 4),
+                  // Step number badge — themed rounded square
+                  Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? theme.colorScheme.primary.withValues(alpha: 0.25)
+                          : theme.colorScheme.primary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '${index + 1}',
+                      style: TextStyle(
+                        color: isDark
+                            ? Colors.white
+                            : theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+
+                const SizedBox(width: 10),
+
+                // Center: text field
+                Expanded(
                   child: AbsorbPointer(
                     absorbing: isSelectionMode,
                     child: TextField(
@@ -436,7 +479,7 @@ class _StepCard extends StatelessWidget {
                           color: theme.colorScheme.outline.withValues(alpha: 0.4),
                         ),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 4),
                         isDense: true,
                       ),
                       style: theme.textTheme.bodyMedium,
@@ -444,23 +487,68 @@ class _StepCard extends StatelessWidget {
                     ),
                   ),
                 ),
-              ),
 
-              // Right side: drag handle (only when not selecting)
-              if (!isSelectionMode)
-                ReorderableDragStartListener(
-                  index: index,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 10, right: 8, left: 4),
-                    child: Icon(
-                      Icons.drag_indicator,
-                      color: theme.colorScheme.outline.withValues(alpha: 0.4),
-                      size: 20,
+                // Right side: drag handle — 2-bar style
+                if (!isSelectionMode)
+                  ReorderableDragStartListener(
+                    index: index,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 4),
+                      child: Icon(
+                        Icons.drag_handle,
+                        color: theme.colorScheme.outline.withValues(alpha: 0.4),
+                        size: 22,
+                      ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showImagePicker(BuildContext context) {
+    final picker = ImagePicker();
+
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            if (step.imagePath != null && step.imagePath!.isNotEmpty)
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: Colors.red),
+                title: const Text('Remove image'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onImageChanged(null);
+                },
+              ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take photo'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final image = await picker.pickImage(source: ImageSource.camera);
+                if (image != null && context.mounted) {
+                  onImageChanged(image.path);
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from gallery'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final image = await picker.pickImage(source: ImageSource.gallery);
+                if (image != null && context.mounted) {
+                  onImageChanged(image.path);
+                }
+              },
+            ),
+          ],
         ),
       ),
     );

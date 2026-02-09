@@ -4,7 +4,7 @@ import '../../providers/settings_provider.dart';
 import '../../data/app_enums.dart';
 
 /// Recipe placeholder image widget
-/// Shows either theme-based gradient or custom image based on settings
+/// Shows either theme-based banner or custom image based on settings
 class RecipePlaceholderImage extends ConsumerWidget {
   final double? height;
   final double? width;
@@ -28,16 +28,13 @@ class RecipePlaceholderImage extends ConsumerWidget {
 
     Widget placeholder;
 
-    // FIXED: Correct logic - theme mode shows gradient, custom mode shows images
     if (mode == PlaceholderImageMode.theme) {
-      // Theme-based gradient placeholder
-      placeholder = _ThemeGradientPlaceholder(
+      placeholder = _ThemeBannerPlaceholder(
         colorTheme: colorTheme,
         nerdMode: nerdMode,
         isRecipe: true,
       );
     } else {
-      // Custom/default image placeholder
       placeholder = _CustomImagePlaceholder(
         nerdMode: nerdMode,
         isRecipe: true,
@@ -63,7 +60,6 @@ class RecipePlaceholderImage extends ConsumerWidget {
 }
 
 /// Cookbook placeholder image widget
-/// Shows either theme-based gradient or custom image based on settings
 class CookbookPlaceholderImage extends ConsumerWidget {
   final double? height;
   final double? width;
@@ -87,16 +83,13 @@ class CookbookPlaceholderImage extends ConsumerWidget {
 
     Widget placeholder;
 
-    // FIXED: Correct logic - theme mode shows gradient, custom mode shows images
     if (mode == PlaceholderImageMode.theme) {
-      // Theme-based gradient placeholder
-      placeholder = _ThemeGradientPlaceholder(
+      placeholder = _ThemeBannerPlaceholder(
         colorTheme: colorTheme,
         nerdMode: nerdMode,
         isRecipe: false,
       );
     } else {
-      // Custom/default image placeholder
       placeholder = _CustomImagePlaceholder(
         nerdMode: nerdMode,
         isRecipe: false,
@@ -121,13 +114,14 @@ class CookbookPlaceholderImage extends ConsumerWidget {
   }
 }
 
-/// Theme-based gradient placeholder
-class _ThemeGradientPlaceholder extends StatelessWidget {
+/// Theme-based banner image placeholder
+/// Uses the theme's unique spellbook banner art
+class _ThemeBannerPlaceholder extends StatelessWidget {
   final AppColorTheme colorTheme;
   final bool nerdMode;
   final bool isRecipe;
 
-  const _ThemeGradientPlaceholder({
+  const _ThemeBannerPlaceholder({
     required this.colorTheme,
     required this.nerdMode,
     required this.isRecipe,
@@ -135,64 +129,82 @@ class _ThemeGradientPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = isRecipe
-        ? _getRecipeColorsForTheme(colorTheme)
-        : _getCookbookColorsForTheme(colorTheme);
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Banner image
+        Image.asset(
+          colorTheme.bannerAsset,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _GradientFallback(colorTheme: colorTheme);
+          },
+        ),
 
-    final icon = isRecipe
-        ? (nerdMode ? Icons.auto_awesome : Icons.restaurant)
-        : (nerdMode ? Icons.auto_stories : Icons.menu_book);
+        // Subtle darkening overlay for icon readability
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withValues(alpha: 0.0),
+                Colors.black.withValues(alpha: 0.25),
+              ],
+            ),
+          ),
+        ),
+
+        // Centered icon
+        Center(
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.25),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isRecipe
+                  ? (nerdMode ? Icons.auto_awesome : Icons.restaurant)
+                  : (nerdMode ? Icons.auto_stories : Icons.menu_book),
+              size: 32,
+              color: Colors.white.withValues(alpha: 0.9),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Gradient fallback when banner image is not available
+class _GradientFallback extends StatelessWidget {
+  final AppColorTheme colorTheme;
+
+  const _GradientFallback({required this.colorTheme});
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = Theme.of(context).brightness == Brightness.dark
+        ? colorTheme.dark
+        : colorTheme.light;
 
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: colors,
+          colors: [palette.primary, palette.secondary],
         ),
       ),
       child: Center(
         child: Icon(
-          icon,
+          Icons.restaurant,
           size: 48,
           color: Colors.white.withValues(alpha: 0.9),
         ),
       ),
     );
-  }
-
-  List<Color> _getRecipeColorsForTheme(AppColorTheme theme) {
-    switch (theme) {
-      case AppColorTheme.spellbook:
-        return [const Color(0xFF5E35B1), const Color(0xFF7E57C2)];
-      case AppColorTheme.forest:
-        return [const Color(0xFF2E7D32), const Color(0xFF4CAF50)];
-      case AppColorTheme.ocean:
-        return [const Color(0xFF0277BD), const Color(0xFF03A9F4)];
-      case AppColorTheme.sunset:
-        return [const Color(0xFFE64A19), const Color(0xFFFF7043)];
-      case AppColorTheme.midnight:
-        return [const Color(0xFF283593), const Color(0xFF5C6BC0)];
-      case AppColorTheme.rose:
-        return [const Color(0xFFC2185B), const Color(0xFFEC407A)];
-    }
-  }
-
-  List<Color> _getCookbookColorsForTheme(AppColorTheme theme) {
-    switch (theme) {
-      case AppColorTheme.spellbook:
-        return [const Color(0xFF7B1FA2), const Color(0xFF9C27B0)];
-      case AppColorTheme.forest:
-        return [const Color(0xFF1B5E20), const Color(0xFF388E3C)];
-      case AppColorTheme.ocean:
-        return [const Color(0xFF01579B), const Color(0xFF0288D1)];
-      case AppColorTheme.sunset:
-        return [const Color(0xFFBF360C), const Color(0xFFE64A19)];
-      case AppColorTheme.midnight:
-        return [const Color(0xFF1A237E), const Color(0xFF303F9F)];
-      case AppColorTheme.rose:
-        return [const Color(0xFF880E4F), const Color(0xFFAD1457)];
-    }
   }
 }
 
@@ -210,7 +222,6 @@ class _CustomImagePlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // FIXED: Use correct asset paths with RPG support for both recipe AND cookbook
     final imagePath = isRecipe
         ? (nerdMode
         ? 'assets/images/recipe_placeholder_rpg.png'
@@ -223,8 +234,7 @@ class _CustomImagePlaceholder extends StatelessWidget {
       imagePath,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
-        // Fallback to theme-based gradient if image not found
-        return _ThemeGradientPlaceholder(
+        return _ThemeBannerPlaceholder(
           colorTheme: colorTheme,
           nerdMode: nerdMode,
           isRecipe: isRecipe,
@@ -235,7 +245,6 @@ class _CustomImagePlaceholder extends StatelessWidget {
 }
 
 /// Simplified recipe placeholder for use when WidgetRef is not available
-/// Defaults to showing a simple gradient
 class SimpleRecipePlaceholder extends StatelessWidget {
   final double? height;
   final double? width;

@@ -60,6 +60,12 @@ class AppSettings {
   final NutritionDisplayMode defaultNutritionView;
   final NutritionChartStyle nutritionChartStyle;
   final bool showExpandedNutrition;
+  final Set<String> enabledNutrients;
+
+  /// Default nutrients shown in the nutrition widget
+  static const Set<String> defaultEnabledNutrients = {
+    'calories', 'protein', 'carbs', 'fat', 'fiber', 'sugar', 'sodium',
+  };
 
   AppSettings({
     this.appTheme = AppColorTheme.spellbook,
@@ -82,7 +88,9 @@ class AppSettings {
     this.defaultNutritionView = NutritionDisplayMode.perServing,
     this.nutritionChartStyle = NutritionChartStyle.donut,
     this.showExpandedNutrition = false,
-  }) : seedColor = appTheme.seedColor;
+    Set<String>? enabledNutrients,
+  }) : seedColor = appTheme.seedColor,
+        enabledNutrients = enabledNutrients ?? defaultEnabledNutrients;
   AppSettings copyWith({
     AppColorTheme? appTheme,
     ThemeMode? themeMode,
@@ -104,6 +112,7 @@ class AppSettings {
     NutritionDisplayMode? defaultNutritionView,
     NutritionChartStyle? nutritionChartStyle,
     bool? showExpandedNutrition,
+    Set<String>? enabledNutrients,
   }) {
     return AppSettings(
       appTheme: appTheme ?? this.appTheme,
@@ -126,6 +135,7 @@ class AppSettings {
       defaultNutritionView: defaultNutritionView ?? this.defaultNutritionView,
       nutritionChartStyle: nutritionChartStyle ?? this.nutritionChartStyle,
       showExpandedNutrition: showExpandedNutrition ?? this.showExpandedNutrition,
+      enabledNutrients: enabledNutrients ?? this.enabledNutrients,
     );
   }
 }
@@ -282,6 +292,13 @@ class SettingsNotifier extends Notifier<AppSettings> {
     final rpgSoundsEnabled = prefs.getBool(_rpgSoundsKey) ?? false;
 
     final editLayoutIndex = prefs.getInt(_recipeEditLayoutKey) ?? 0;
+
+    // Load enabled nutrients
+    final enabledNutrientsStrings = prefs.getStringList('enabledNutrients');
+    final enabledNutrients = enabledNutrientsStrings != null
+        ? enabledNutrientsStrings.toSet()
+        : AppSettings.defaultEnabledNutrients;
+
     state = AppSettings(
       appTheme: appTheme,
       themeMode: themeMode,
@@ -303,6 +320,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
       defaultNutritionView: nutritionView,
       nutritionChartStyle: chartStyle,
       showExpandedNutrition: showExpandedNutrition,
+      enabledNutrients: enabledNutrients,
     );
   }
 
@@ -322,6 +340,22 @@ class SettingsNotifier extends Notifier<AppSettings> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('showExpandedNutrition', show);
     state = state.copyWith(showExpandedNutrition: show);
+  }
+
+  Future<void> setEnabledNutrients(Set<String> nutrients) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('enabledNutrients', nutrients.toList());
+    state = state.copyWith(enabledNutrients: nutrients);
+  }
+
+  Future<void> toggleNutrient(String nutrient) async {
+    final current = Set<String>.from(state.enabledNutrients);
+    if (current.contains(nutrient)) {
+      current.remove(nutrient);
+    } else {
+      current.add(nutrient);
+    }
+    await setEnabledNutrients(current);
   }
 
   Future<void> setAppTheme(AppColorTheme theme) async {
@@ -502,4 +536,17 @@ class SettingsNotifier extends Notifier<AppSettings> {
 
 final settingsProvider = NotifierProvider<SettingsNotifier, AppSettings>(() {
   return SettingsNotifier();
+});
+
+// ============ CONVENIENCE PROVIDERS ============
+// Used by main.dart for MaterialApp theme/darkTheme/themeMode
+
+/// Provides just the AppColorTheme for building ThemeData
+final appColorThemeProvider = Provider<AppColorTheme>((ref) {
+  return ref.watch(settingsProvider.select((s) => s.appTheme));
+});
+
+/// Provides just the ThemeMode for MaterialApp
+final themeModeProvider = Provider<ThemeMode>((ref) {
+  return ref.watch(settingsProvider.select((s) => s.themeMode));
 });

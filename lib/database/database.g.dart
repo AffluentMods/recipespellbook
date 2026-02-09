@@ -5665,6 +5665,300 @@ class RecipeTagsCompanion extends UpdateCompanion<RecipeTag> {
   }
 }
 
+class $RecipeLinksTable extends RecipeLinks
+    with TableInfo<$RecipeLinksTable, RecipeLink> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RecipeLinksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _sourceRecipeIdMeta =
+      const VerificationMeta('sourceRecipeId');
+  @override
+  late final GeneratedColumn<String> sourceRecipeId = GeneratedColumn<String>(
+      'source_recipe_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES recipes (id)'));
+  static const VerificationMeta _linkedRecipeIdMeta =
+      const VerificationMeta('linkedRecipeId');
+  @override
+  late final GeneratedColumn<String> linkedRecipeId = GeneratedColumn<String>(
+      'linked_recipe_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES recipes (id)'));
+  static const VerificationMeta _sortOrderMeta =
+      const VerificationMeta('sortOrder');
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+      'sort_order', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [sourceRecipeId, linkedRecipeId, sortOrder, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'recipe_links';
+  @override
+  VerificationContext validateIntegrity(Insertable<RecipeLink> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('source_recipe_id')) {
+      context.handle(
+          _sourceRecipeIdMeta,
+          sourceRecipeId.isAcceptableOrUnknown(
+              data['source_recipe_id']!, _sourceRecipeIdMeta));
+    } else if (isInserting) {
+      context.missing(_sourceRecipeIdMeta);
+    }
+    if (data.containsKey('linked_recipe_id')) {
+      context.handle(
+          _linkedRecipeIdMeta,
+          linkedRecipeId.isAcceptableOrUnknown(
+              data['linked_recipe_id']!, _linkedRecipeIdMeta));
+    } else if (isInserting) {
+      context.missing(_linkedRecipeIdMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(_sortOrderMeta,
+          sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {sourceRecipeId, linkedRecipeId};
+  @override
+  RecipeLink map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RecipeLink(
+      sourceRecipeId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}source_recipe_id'])!,
+      linkedRecipeId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}linked_recipe_id'])!,
+      sortOrder: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sort_order'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $RecipeLinksTable createAlias(String alias) {
+    return $RecipeLinksTable(attachedDatabase, alias);
+  }
+}
+
+class RecipeLink extends DataClass implements Insertable<RecipeLink> {
+  /// The recipe that contains the link
+  final String sourceRecipeId;
+
+  /// The recipe being linked to
+  final String linkedRecipeId;
+
+  /// Display order
+  final int sortOrder;
+
+  /// When the link was created
+  final DateTime createdAt;
+  const RecipeLink(
+      {required this.sourceRecipeId,
+      required this.linkedRecipeId,
+      required this.sortOrder,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['source_recipe_id'] = Variable<String>(sourceRecipeId);
+    map['linked_recipe_id'] = Variable<String>(linkedRecipeId);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  RecipeLinksCompanion toCompanion(bool nullToAbsent) {
+    return RecipeLinksCompanion(
+      sourceRecipeId: Value(sourceRecipeId),
+      linkedRecipeId: Value(linkedRecipeId),
+      sortOrder: Value(sortOrder),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory RecipeLink.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RecipeLink(
+      sourceRecipeId: serializer.fromJson<String>(json['sourceRecipeId']),
+      linkedRecipeId: serializer.fromJson<String>(json['linkedRecipeId']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'sourceRecipeId': serializer.toJson<String>(sourceRecipeId),
+      'linkedRecipeId': serializer.toJson<String>(linkedRecipeId),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  RecipeLink copyWith(
+          {String? sourceRecipeId,
+          String? linkedRecipeId,
+          int? sortOrder,
+          DateTime? createdAt}) =>
+      RecipeLink(
+        sourceRecipeId: sourceRecipeId ?? this.sourceRecipeId,
+        linkedRecipeId: linkedRecipeId ?? this.linkedRecipeId,
+        sortOrder: sortOrder ?? this.sortOrder,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  RecipeLink copyWithCompanion(RecipeLinksCompanion data) {
+    return RecipeLink(
+      sourceRecipeId: data.sourceRecipeId.present
+          ? data.sourceRecipeId.value
+          : this.sourceRecipeId,
+      linkedRecipeId: data.linkedRecipeId.present
+          ? data.linkedRecipeId.value
+          : this.linkedRecipeId,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecipeLink(')
+          ..write('sourceRecipeId: $sourceRecipeId, ')
+          ..write('linkedRecipeId: $linkedRecipeId, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(sourceRecipeId, linkedRecipeId, sortOrder, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RecipeLink &&
+          other.sourceRecipeId == this.sourceRecipeId &&
+          other.linkedRecipeId == this.linkedRecipeId &&
+          other.sortOrder == this.sortOrder &&
+          other.createdAt == this.createdAt);
+}
+
+class RecipeLinksCompanion extends UpdateCompanion<RecipeLink> {
+  final Value<String> sourceRecipeId;
+  final Value<String> linkedRecipeId;
+  final Value<int> sortOrder;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const RecipeLinksCompanion({
+    this.sourceRecipeId = const Value.absent(),
+    this.linkedRecipeId = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RecipeLinksCompanion.insert({
+    required String sourceRecipeId,
+    required String linkedRecipeId,
+    this.sortOrder = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : sourceRecipeId = Value(sourceRecipeId),
+        linkedRecipeId = Value(linkedRecipeId);
+  static Insertable<RecipeLink> custom({
+    Expression<String>? sourceRecipeId,
+    Expression<String>? linkedRecipeId,
+    Expression<int>? sortOrder,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (sourceRecipeId != null) 'source_recipe_id': sourceRecipeId,
+      if (linkedRecipeId != null) 'linked_recipe_id': linkedRecipeId,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RecipeLinksCompanion copyWith(
+      {Value<String>? sourceRecipeId,
+      Value<String>? linkedRecipeId,
+      Value<int>? sortOrder,
+      Value<DateTime>? createdAt,
+      Value<int>? rowid}) {
+    return RecipeLinksCompanion(
+      sourceRecipeId: sourceRecipeId ?? this.sourceRecipeId,
+      linkedRecipeId: linkedRecipeId ?? this.linkedRecipeId,
+      sortOrder: sortOrder ?? this.sortOrder,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (sourceRecipeId.present) {
+      map['source_recipe_id'] = Variable<String>(sourceRecipeId.value);
+    }
+    if (linkedRecipeId.present) {
+      map['linked_recipe_id'] = Variable<String>(linkedRecipeId.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecipeLinksCompanion(')
+          ..write('sourceRecipeId: $sourceRecipeId, ')
+          ..write('linkedRecipeId: $linkedRecipeId, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $UserIngredientMappingsTable extends UserIngredientMappings
     with TableInfo<$UserIngredientMappingsTable, UserIngredientMapping> {
   @override
@@ -7049,6 +7343,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $MealPlansTable mealPlans = $MealPlansTable(this);
   late final $TagsTable tags = $TagsTable(this);
   late final $RecipeTagsTable recipeTags = $RecipeTagsTable(this);
+  late final $RecipeLinksTable recipeLinks = $RecipeLinksTable(this);
   late final $UserIngredientMappingsTable userIngredientMappings =
       $UserIngredientMappingsTable(this);
   late final $UsdaFoodsTable usdaFoods = $UsdaFoodsTable(this);
@@ -7083,6 +7378,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         mealPlans,
         tags,
         recipeTags,
+        recipeLinks,
         userIngredientMappings,
         usdaFoods,
         ingredientUsdaMappings
@@ -9409,6 +9705,146 @@ class $$RecipeTagsTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
+typedef $$RecipeLinksTableCreateCompanionBuilder = RecipeLinksCompanion
+    Function({
+  required String sourceRecipeId,
+  required String linkedRecipeId,
+  Value<int> sortOrder,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+typedef $$RecipeLinksTableUpdateCompanionBuilder = RecipeLinksCompanion
+    Function({
+  Value<String> sourceRecipeId,
+  Value<String> linkedRecipeId,
+  Value<int> sortOrder,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+class $$RecipeLinksTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $RecipeLinksTable,
+    RecipeLink,
+    $$RecipeLinksTableFilterComposer,
+    $$RecipeLinksTableOrderingComposer,
+    $$RecipeLinksTableCreateCompanionBuilder,
+    $$RecipeLinksTableUpdateCompanionBuilder> {
+  $$RecipeLinksTableTableManager(_$AppDatabase db, $RecipeLinksTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $$RecipeLinksTableFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $$RecipeLinksTableOrderingComposer(ComposerState(db, table)),
+          updateCompanionCallback: ({
+            Value<String> sourceRecipeId = const Value.absent(),
+            Value<String> linkedRecipeId = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RecipeLinksCompanion(
+            sourceRecipeId: sourceRecipeId,
+            linkedRecipeId: linkedRecipeId,
+            sortOrder: sortOrder,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String sourceRecipeId,
+            required String linkedRecipeId,
+            Value<int> sortOrder = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RecipeLinksCompanion.insert(
+            sourceRecipeId: sourceRecipeId,
+            linkedRecipeId: linkedRecipeId,
+            sortOrder: sortOrder,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $$RecipeLinksTableFilterComposer
+    extends FilterComposer<_$AppDatabase, $RecipeLinksTable> {
+  $$RecipeLinksTableFilterComposer(super.$state);
+  ColumnFilters<int> get sortOrder => $state.composableBuilder(
+      column: $state.table.sortOrder,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<DateTime> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  $$RecipesTableFilterComposer get sourceRecipeId {
+    final $$RecipesTableFilterComposer composer = $state.composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.sourceRecipeId,
+        referencedTable: $state.db.recipes,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder, parentComposers) => $$RecipesTableFilterComposer(
+            ComposerState(
+                $state.db, $state.db.recipes, joinBuilder, parentComposers)));
+    return composer;
+  }
+
+  $$RecipesTableFilterComposer get linkedRecipeId {
+    final $$RecipesTableFilterComposer composer = $state.composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.linkedRecipeId,
+        referencedTable: $state.db.recipes,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder, parentComposers) => $$RecipesTableFilterComposer(
+            ComposerState(
+                $state.db, $state.db.recipes, joinBuilder, parentComposers)));
+    return composer;
+  }
+}
+
+class $$RecipeLinksTableOrderingComposer
+    extends OrderingComposer<_$AppDatabase, $RecipeLinksTable> {
+  $$RecipeLinksTableOrderingComposer(super.$state);
+  ColumnOrderings<int> get sortOrder => $state.composableBuilder(
+      column: $state.table.sortOrder,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<DateTime> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  $$RecipesTableOrderingComposer get sourceRecipeId {
+    final $$RecipesTableOrderingComposer composer = $state.composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.sourceRecipeId,
+        referencedTable: $state.db.recipes,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder, parentComposers) =>
+            $$RecipesTableOrderingComposer(ComposerState(
+                $state.db, $state.db.recipes, joinBuilder, parentComposers)));
+    return composer;
+  }
+
+  $$RecipesTableOrderingComposer get linkedRecipeId {
+    final $$RecipesTableOrderingComposer composer = $state.composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.linkedRecipeId,
+        referencedTable: $state.db.recipes,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder, parentComposers) =>
+            $$RecipesTableOrderingComposer(ComposerState(
+                $state.db, $state.db.recipes, joinBuilder, parentComposers)));
+    return composer;
+  }
+}
+
 typedef $$UserIngredientMappingsTableCreateCompanionBuilder
     = UserIngredientMappingsCompanion Function({
   required String ingredient,
@@ -9943,6 +10379,8 @@ class $AppDatabaseManager {
   $$TagsTableTableManager get tags => $$TagsTableTableManager(_db, _db.tags);
   $$RecipeTagsTableTableManager get recipeTags =>
       $$RecipeTagsTableTableManager(_db, _db.recipeTags);
+  $$RecipeLinksTableTableManager get recipeLinks =>
+      $$RecipeLinksTableTableManager(_db, _db.recipeLinks);
   $$UserIngredientMappingsTableTableManager get userIngredientMappings =>
       $$UserIngredientMappingsTableTableManager(
           _db, _db.userIngredientMappings);

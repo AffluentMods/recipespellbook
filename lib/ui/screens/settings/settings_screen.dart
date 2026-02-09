@@ -900,7 +900,7 @@ class _ThemeSelectionTile extends StatelessWidget {
 
   const _ThemeSelectionTile({required this.currentTheme, required this.onThemeSelected});
 
-  String _getLocalizedThemeName(BuildContext context, AppColorTheme theme) {
+  String _getThemeName(BuildContext context, AppColorTheme theme) {
     final l10n = AppLocalizations.of(context)!;
     switch (theme) {
       case AppColorTheme.spellbook:
@@ -915,6 +915,14 @@ class _ThemeSelectionTile extends StatelessWidget {
         return l10n.themeMidnight;
       case AppColorTheme.rose:
         return l10n.themeRose;
+      case AppColorTheme.frost:
+        return 'Frost';
+      case AppColorTheme.ember:
+        return 'Ember';
+      case AppColorTheme.spring:
+        return 'Spring';
+      case AppColorTheme.alchemist:
+        return 'Alchemist';
     }
   }
 
@@ -924,7 +932,7 @@ class _ThemeSelectionTile extends StatelessWidget {
     return ListTile(
       leading: const Icon(Icons.palette_outlined),
       title: Text(l10n.settingsTheme),
-      subtitle: Text('${currentTheme.emoji} ${_getLocalizedThemeName(context, currentTheme)}'),
+      subtitle: Text('${currentTheme.emoji} ${_getThemeName(context, currentTheme)}'),
       trailing: const Icon(Icons.chevron_right),
       onTap: () => _showThemePicker(context),
     );
@@ -934,27 +942,146 @@ class _ThemeSelectionTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(l10n.settingsTheme, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            ),
-            ...AppColorTheme.values.map((appTheme) => ListTile(
-              leading: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(color: appTheme.seedColor, borderRadius: BorderRadius.circular(8)),
-                child: Center(child: Text(appTheme.emoji, style: const TextStyle(fontSize: 18))),
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.7,
+        maxChildSize: 0.9,
+        minChildSize: 0.4,
+        builder: (context, scrollController) => SafeArea(
+          child: Column(
+            children: [
+              // Handle
+              const SizedBox(height: 8),
+              Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-              title: Text(_getLocalizedThemeName(context, appTheme)),
-              trailing: currentTheme == appTheme ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary) : null,
-              onTap: () { onThemeSelected(appTheme); Navigator.pop(context); },
-            )),
-            const SizedBox(height: 16),
-          ],
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(l10n.settingsTheme, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              Expanded(
+                child: GridView.builder(
+                  controller: scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 1.5,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                  ),
+                  itemCount: AppColorTheme.values.length,
+                  itemBuilder: (context, index) {
+                    final appTheme = AppColorTheme.values[index];
+                    final isSelected = currentTheme == appTheme;
+                    return _ThemeCard(
+                      theme: appTheme,
+                      label: _getThemeName(context, appTheme),
+                      isSelected: isSelected,
+                      onTap: () {
+                        onThemeSelected(appTheme);
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ThemeCard extends StatelessWidget {
+  final AppColorTheme theme;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ThemeCard({
+    required this.theme,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final uiTheme = Theme.of(context);
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? uiTheme.colorScheme.primary : Colors.transparent,
+            width: isSelected ? 3 : 0,
+          ),
+          boxShadow: isSelected
+              ? [BoxShadow(color: uiTheme.colorScheme.primary.withValues(alpha: 0.3), blurRadius: 8)]
+              : [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 4)],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(isSelected ? 11 : 14),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Banner image
+              Image.asset(
+                theme.bannerAsset,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  color: theme.seedColor.withValues(alpha: 0.3),
+                ),
+              ),
+
+              // Bottom label bar
+              Positioned(
+                left: 0, right: 0, bottom: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.0),
+                        Colors.black.withValues(alpha: 0.65),
+                      ],
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(theme.emoji, style: const TextStyle(fontSize: 14)),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          label,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            shadows: [Shadow(blurRadius: 4, color: Colors.black)],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (isSelected)
+                        const Icon(Icons.check_circle, color: Colors.white, size: 18),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

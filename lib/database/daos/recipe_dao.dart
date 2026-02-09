@@ -3,11 +3,12 @@ import '../database.dart';
 import '../tables/recipes.dart';
 import '../tables/ingredients.dart';
 import '../tables/steps.dart';
+import '../tables/recipe_links.dart';
 import 'package:drift/drift.dart' as drift;
 
 part 'recipe_dao.g.dart';
 
-@DriftAccessor(tables: [Recipes, Ingredients, Steps])
+@DriftAccessor(tables: [Recipes, Ingredients, Steps, RecipeLinks])
 class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
   RecipeDao(AppDatabase db) : super(db);
 
@@ -22,40 +23,40 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
         .watch();
   }
 
-  /// Watch recipes by category (excludes deleted)
+  /// Watch recipes by category (excludes deleted, case-insensitive match)
   Stream<List<Recipe>> watchRecipesByCategory(String cookbookId, String? categoryId) {
     final query = select(recipes)
       ..where((t) => t.cookbookId.equals(cookbookId))
       ..where((t) => t.deletedAt.isNull());
     if (categoryId != null) {
-      query.where((t) => t.categoryId.equals(categoryId));
+      query.where((t) => t.categoryId.lower().equals(categoryId.toLowerCase()));
     }
     query.orderBy([(t) => OrderingTerm(expression: t.title)]);
     return query.watch();
   }
 
-  /// Watch recipes by course (excludes deleted)
+  /// Watch recipes by course (excludes deleted, case-insensitive match)
   Stream<List<Recipe>> watchRecipesByCourse(String cookbookId, String? courseId) {
     final query = select(recipes)
       ..where((t) => t.cookbookId.equals(cookbookId))
       ..where((t) => t.deletedAt.isNull());
     if (courseId != null) {
-      query.where((t) => t.courseId.equals(courseId));
+      query.where((t) => t.courseId.lower().equals(courseId.toLowerCase()));
     }
     query.orderBy([(t) => OrderingTerm(expression: t.title)]);
     return query.watch();
   }
 
-  /// Watch recipes filtered by both course and category (excludes deleted)
+  /// Watch recipes filtered by both course and category (excludes deleted, case-insensitive match)
   Stream<List<Recipe>> watchRecipesFiltered(String cookbookId, {String? courseId, String? categoryId}) {
     final query = select(recipes)
       ..where((t) => t.cookbookId.equals(cookbookId))
       ..where((t) => t.deletedAt.isNull());
     if (courseId != null) {
-      query.where((t) => t.courseId.equals(courseId));
+      query.where((t) => t.courseId.lower().equals(courseId.toLowerCase()));
     }
     if (categoryId != null) {
-      query.where((t) => t.categoryId.equals(categoryId));
+      query.where((t) => t.categoryId.lower().equals(categoryId.toLowerCase()));
     }
     query.orderBy([(t) => OrderingTerm(expression: t.title)]);
     return query.watch();
@@ -82,14 +83,16 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
     return into(recipes).insert(recipe);
   }
 
-  /// Update a recipe (full replace)
+  /// Update a recipe (full replace) — auto-stamps updatedAt
   Future<bool> updateRecipe(Recipe recipe) {
-    return update(recipes).replace(recipe);
+    final withTimestamp = recipe.copyWith(updatedAt: DateTime.now());
+    return update(recipes).replace(withTimestamp);
   }
 
-  /// Update specific fields of a recipe
+  /// Update specific fields of a recipe — auto-stamps updatedAt
   Future<int> updateRecipeFields(String recipeId, RecipesCompanion data) {
-    return (update(recipes)..where((t) => t.id.equals(recipeId))).write(data);
+    final stamped = data.copyWith(updatedAt: drift.Value(DateTime.now()));
+    return (update(recipes)..where((t) => t.id.equals(recipeId))).write(stamped);
   }
 
   /// Update last viewed timestamp
@@ -101,29 +104,35 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
   /// Toggle favorite status
   Future<int> toggleFavorite(String recipeId, bool isFavorite) {
     return (update(recipes)..where((t) => t.id.equals(recipeId)))
-        .write(RecipesCompanion(isFavorite: Value(isFavorite)));
+        .write(RecipesCompanion(
+      isFavorite: Value(isFavorite),
+      updatedAt: Value(DateTime.now()),
+    ));
   }
 
   /// Update rating
   Future<int> updateRating(String recipeId, int? rating) {
     return (update(recipes)..where((t) => t.id.equals(recipeId)))
-        .write(RecipesCompanion(rating: Value(rating)));
+        .write(RecipesCompanion(
+      rating: Value(rating),
+      updatedAt: Value(DateTime.now()),
+    ));
   }
 
-  /// Get recipe count by course
+  /// Get recipe count by course (case-insensitive)
   Future<int> getRecipeCountByCourse(String cookbookId, String courseId) {
     final query = select(recipes)
       ..where((t) => t.cookbookId.equals(cookbookId))
-      ..where((t) => t.courseId.equals(courseId))
+      ..where((t) => t.courseId.lower().equals(courseId.toLowerCase()))
       ..where((t) => t.deletedAt.isNull());
     return query.get().then((list) => list.length);
   }
 
-  /// Get recipe count by category
+  /// Get recipe count by category (case-insensitive)
   Future<int> getRecipeCountByCategory(String cookbookId, String categoryId) {
     final query = select(recipes)
       ..where((t) => t.cookbookId.equals(cookbookId))
-      ..where((t) => t.categoryId.equals(categoryId))
+      ..where((t) => t.categoryId.lower().equals(categoryId.toLowerCase()))
       ..where((t) => t.deletedAt.isNull());
     return query.get().then((list) => list.length);
   }
@@ -257,13 +266,19 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
   /// Soft delete a recipe (move to trash)
   Future<int> softDeleteRecipe(String recipeId) {
     return (update(recipes)..where((r) => r.id.equals(recipeId)))
-        .write(RecipesCompanion(deletedAt: Value(DateTime.now())));
+        .write(RecipesCompanion(
+      deletedAt: Value(DateTime.now()),
+      updatedAt: Value(DateTime.now()),
+    ));
   }
 
   /// Restore a recipe from trash
   Future<int> restoreRecipe(String recipeId) {
     return (update(recipes)..where((r) => r.id.equals(recipeId)))
-        .write(const RecipesCompanion(deletedAt: Value(null)));
+        .write(RecipesCompanion(
+      deletedAt: const Value(null),
+      updatedAt: Value(DateTime.now()),
+    ));
   }
 
   /// Permanently delete a recipe and all related data
@@ -364,13 +379,19 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
   /// Pin a recipe
   Future<int> pinRecipe(String recipeId) {
     return (update(recipes)..where((r) => r.id.equals(recipeId)))
-        .write(const RecipesCompanion(isPinned: Value(true)));
+        .write(RecipesCompanion(
+      isPinned: const Value(true),
+      updatedAt: Value(DateTime.now()),
+    ));
   }
 
   /// Unpin a recipe
   Future<int> unpinRecipe(String recipeId) {
     return (update(recipes)..where((r) => r.id.equals(recipeId)))
-        .write(const RecipesCompanion(isPinned: Value(false)));
+        .write(RecipesCompanion(
+      isPinned: const Value(false),
+      updatedAt: Value(DateTime.now()),
+    ));
   }
 
   /// Get pinned recipes for a cookbook (requires cookbookId parameter)
@@ -440,10 +461,70 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
   /// Toggle pin status (takes recipeId and new pin state)
   Future<void> togglePin(String recipeId, bool pinned) async {
     await (update(recipes)..where((r) => r.id.equals(recipeId)))
-        .write(RecipesCompanion(isPinned: Value(pinned)));
+        .write(RecipesCompanion(
+      isPinned: Value(pinned),
+      updatedAt: Value(DateTime.now()),
+    ));
   }
 
   Future<void> moveToTrash(String recipeId) async {
     await softDeleteRecipe(recipeId);
+  }
+
+  // ============ RECIPE LINKS ============
+
+  /// Add a link from one recipe to another
+  Future<void> addRecipeLink(String sourceId, String linkedId) async {
+    // Get current max sort order
+    final existing = await (select(recipeLinks)
+      ..where((l) => l.sourceRecipeId.equals(sourceId))
+      ..orderBy([(l) => OrderingTerm.desc(l.sortOrder)])
+      ..limit(1))
+        .get();
+    final nextOrder = existing.isEmpty ? 0 : existing.first.sortOrder + 1;
+
+    await into(recipeLinks).insertOnConflictUpdate(RecipeLinksCompanion.insert(
+      sourceRecipeId: sourceId,
+      linkedRecipeId: linkedId,
+      sortOrder: drift.Value(nextOrder),
+    ));
+
+    // Also stamp updatedAt on the source recipe
+    await (update(recipes)..where((r) => r.id.equals(sourceId)))
+        .write(RecipesCompanion(updatedAt: drift.Value(DateTime.now())));
+  }
+
+  /// Remove a link
+  Future<void> removeRecipeLink(String sourceId, String linkedId) async {
+    await (delete(recipeLinks)
+      ..where((l) => l.sourceRecipeId.equals(sourceId))
+      ..where((l) => l.linkedRecipeId.equals(linkedId)))
+        .go();
+  }
+
+  /// Watch all linked recipes for a source recipe (returns full Recipe objects)
+  Stream<List<Recipe>> watchLinkedRecipes(String sourceId) {
+    final query = select(recipeLinks).join([
+      innerJoin(recipes, recipes.id.equalsExp(recipeLinks.linkedRecipeId)),
+    ])
+      ..where(recipeLinks.sourceRecipeId.equals(sourceId))
+      ..where(recipes.deletedAt.isNull())
+      ..orderBy([OrderingTerm.asc(recipeLinks.sortOrder)]);
+
+    return query.watch().map((rows) =>
+        rows.map((row) => row.readTable(recipes)).toList());
+  }
+
+  /// Get all linked recipes (non-stream)
+  Future<List<Recipe>> getLinkedRecipes(String sourceId) async {
+    final query = select(recipeLinks).join([
+      innerJoin(recipes, recipes.id.equalsExp(recipeLinks.linkedRecipeId)),
+    ])
+      ..where(recipeLinks.sourceRecipeId.equals(sourceId))
+      ..where(recipes.deletedAt.isNull())
+      ..orderBy([OrderingTerm.asc(recipeLinks.sortOrder)]);
+
+    final rows = await query.get();
+    return rows.map((row) => row.readTable(recipes)).toList();
   }
 }

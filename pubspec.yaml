@@ -21,6 +21,7 @@ dependencies:
 
   # State Management
   flutter_riverpod: ^2.6.1
+  flutter_secure_storage: ^9.0.0
 
   # Navigation
   go_router: ^14.8.1
@@ -68,13 +69,14 @@ flutter_launcher_icons:
   adaptive_icon_foreground: "assets/images/logo.png"
 
 flutter_native_splash:
-  color: "#F5F3EE"
+  color: "#FFF8F0"
   image: assets/images/splash_logo.png
   android: true
   ios: true
   android_12:
-    color: "#F5F3EE"
+    color: "#FFF8F0"
     image: assets/images/splash_logo.png
+    fullscreen: true
 
 flutter:
   uses-material-design: true
@@ -83,6 +85,8 @@ flutter:
   assets:
     - assets/data/common_ingredients.json
     - assets/images/
+    - assets/images/default_recipes/
+    - assets/images/themes/
     - assets/rpg/avatars/
     - assets/rpg/frames/
     - assets/rpg/pets/

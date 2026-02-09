@@ -5,12 +5,14 @@ import 'router/router.dart';
 import 'theme/app_theme.dart';
 import 'providers/settings_provider.dart';
 import 'l10n/app_localizations.dart';
+import 'services/ingredient_suggestion_service.dart';
 
 // Provider to hold shared recipe data (for future share intent)
 final sharedRecipeProvider = StateProvider<Map<String, dynamic>?>((ref) => null);
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  IngredientSuggestionService.instance.preload();
   runApp(const ProviderScope(child: RecipeSpellbookApp()));
 }
 

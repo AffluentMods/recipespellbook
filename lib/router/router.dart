@@ -29,6 +29,8 @@ import '../ui/screens/cookbooks/cookbook_edit_screen.dart';
 import '../ui/screens/settings/appearance_screen.dart';
 import '../ui/screens/settings/recipe_layout_settings_screen.dart';
 import '../ui/screens/settings/allergy_settings_screen.dart';
+import '../ui/screens/settings/nutrition_settings_screen.dart';
+import '../ui/screens/settings/ingredient_substitutions_screen.dart';
 import '../ui/screens/settings/manage_tags_screen.dart';
 // RPG imports
 import '../ui/screens/rpg/rpg_profile_screen.dart';
@@ -61,7 +63,7 @@ final router = GoRouter(
         final cookbookId = state.uri.queryParameters['cookbook'] ?? 'starter';
         final title = state.uri.queryParameters['title'];
         return RecipeListScreen(
-          title: title ?? 'Recipes',
+          title: 'Recipes',
           cookbookId: cookbookId,
           courseId: courseId,
           categoryId: categoryId,
@@ -141,6 +143,20 @@ final router = GoRouter(
       path: '/settings/recipe-layout',
       name: 'recipe-layout',
       builder: (context, state) => const RecipeLayoutSettingsScreen(),
+    ),
+
+    GoRoute(
+      path: '/settings/nutrition',
+      name: 'nutrition-settings',
+      builder: (context, state) => const NutritionSettingsScreen(),
+    ),
+
+    GoRoute(
+      path: '/substitutions',
+      name: 'substitutions',
+      builder: (context, state) => IngredientSubstitutionsScreen(
+        initialSearch: state.uri.queryParameters['q'],
+      ),
     ),
 
     GoRoute(

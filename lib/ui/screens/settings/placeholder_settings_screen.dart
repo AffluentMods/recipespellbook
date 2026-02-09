@@ -280,17 +280,25 @@ class _ForceThemeRecipePlaceholder extends ConsumerWidget {
   List<Color> _getColorsForTheme(AppColorTheme theme) {
     switch (theme) {
       case AppColorTheme.spellbook:
-        return [const Color(0xFF5E35B1), const Color(0xFF7E57C2)];
+        return [const Color(0xFF6D4C2B), const Color(0xFFD4A055)];
       case AppColorTheme.forest:
-        return [const Color(0xFF2E7D32), const Color(0xFF4CAF50)];
+        return [const Color(0xFF2E5E2C), const Color(0xFF6B9E3C)];
       case AppColorTheme.ocean:
-        return [const Color(0xFF0277BD), const Color(0xFF03A9F4)];
+        return [const Color(0xFF00695C), const Color(0xFF0097A7)];
       case AppColorTheme.sunset:
-        return [const Color(0xFFE64A19), const Color(0xFFFF7043)];
+        return [const Color(0xFFC65100), const Color(0xFFE8871E)];
       case AppColorTheme.midnight:
         return [const Color(0xFF283593), const Color(0xFF5C6BC0)];
       case AppColorTheme.rose:
-        return [const Color(0xFFC2185B), const Color(0xFFEC407A)];
+        return [const Color(0xFFAD5068), const Color(0xFFD4618C)];
+      case AppColorTheme.frost:
+        return [const Color(0xFF546E8A), const Color(0xFF78A8CC)];
+      case AppColorTheme.ember:
+        return [const Color(0xFF8E2C0C), const Color(0xFFD84315)];
+      case AppColorTheme.spring:
+        return [const Color(0xFF5A8C5E), const Color(0xFF81C784)];
+      case AppColorTheme.alchemist:
+        return [const Color(0xFF5E4080), const Color(0xFF2E8B57)];
     }
   }
 }
@@ -327,17 +335,25 @@ class _ForceThemeCookbookPlaceholder extends ConsumerWidget {
   List<Color> _getColorsForTheme(AppColorTheme theme) {
     switch (theme) {
       case AppColorTheme.spellbook:
-        return [const Color(0xFF7B1FA2), const Color(0xFF9C27B0)];
+        return [const Color(0xFF4A3520), const Color(0xFF6D4C2B)];
       case AppColorTheme.forest:
-        return [const Color(0xFF1B5E20), const Color(0xFF388E3C)];
+        return [const Color(0xFF1B5E20), const Color(0xFF2E5E2C)];
       case AppColorTheme.ocean:
-        return [const Color(0xFF01579B), const Color(0xFF0288D1)];
+        return [const Color(0xFF004D40), const Color(0xFF00695C)];
       case AppColorTheme.sunset:
-        return [const Color(0xFFBF360C), const Color(0xFFE64A19)];
+        return [const Color(0xFFBF360C), const Color(0xFFC65100)];
       case AppColorTheme.midnight:
         return [const Color(0xFF1A237E), const Color(0xFF303F9F)];
       case AppColorTheme.rose:
-        return [const Color(0xFF880E4F), const Color(0xFFAD1457)];
+        return [const Color(0xFF880E4F), const Color(0xFFAD5068)];
+      case AppColorTheme.frost:
+        return [const Color(0xFF37474F), const Color(0xFF546E8A)];
+      case AppColorTheme.ember:
+        return [const Color(0xFF6E2008), const Color(0xFF8E2C0C)];
+      case AppColorTheme.spring:
+        return [const Color(0xFF2E4A2E), const Color(0xFF5A8C5E)];
+      case AppColorTheme.alchemist:
+        return [const Color(0xFF3A2858), const Color(0xFF5E4080)];
     }
   }
 }

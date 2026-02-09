@@ -16,6 +16,8 @@ import '../../widgets/add_to_meal_plan_dialogue.dart';
 import '../../widgets/add_to_shopping_list_sheet.dart';
 import '../../widgets/recipe_share_sheet.dart';
 import '../../../data/rpg/rpg_text.dart';
+import '../settings/nutrition_settings_screen.dart';
+import '../settings/ingredient_substitutions_screen.dart';
 
 // ============ DISMISSED ALLERGY WARNINGS ============
 // Canonical provider is in allergy_settings_screen.dart — imported via:
@@ -136,9 +138,9 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   List<Ingredient> _ingredients = [];
   List<Step> _steps = [];
   NutritionData? _nutrition;
+  List<Recipe> _linkedRecipes = [];
   bool _isLoading = true;
   double _scaleFactor = 1.0;
-  bool _showNutritionPerServing = true;
   _UnitConversion _unitConversion = _UnitConversion.none;
 
   late TabController _tabController;
@@ -167,6 +169,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
 
     final ingredients = await dao.getIngredientsForRecipe(widget.recipeId);
     final steps = await dao.getStepsForRecipe(widget.recipeId);
+    final linkedRecipes = await dao.getLinkedRecipes(widget.recipeId);
 
     // Parse nutrition from nutritionJson field
     NutritionData? nutrition;
@@ -184,6 +187,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
       _ingredients = ingredients;
       _steps = steps;
       _nutrition = nutrition;
+      _linkedRecipes = linkedRecipes;
       _isLoading = false;
     });
   }
@@ -227,6 +231,43 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     _loadRecipe();
   }
 
+  void _showLinkRecipePicker() async {
+    final dao = ref.read(recipeDaoProvider);
+    final allRecipes = await dao.getAllRecipes();
+    // Filter out current recipe and already-linked recipes
+    final linkedIds = _linkedRecipes.map((r) => r.id).toSet();
+    final available = allRecipes
+        .where((r) => r.id != widget.recipeId && !linkedIds.contains(r.id))
+        .toList();
+
+    if (!mounted) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _RecipeLinkPicker(
+        recipes: available,
+        onSelected: (selectedId) async {
+          Navigator.pop(ctx);
+          await dao.addRecipeLink(widget.recipeId, selectedId);
+          _loadRecipe();
+        },
+      ),
+    );
+  }
+
+  Future<void> _unlinkRecipe(String linkedId) async {
+    await ref.read(recipeDaoProvider).removeRecipeLink(widget.recipeId, linkedId);
+    _loadRecipe();
+  }
+
+  bool _hasMetaInfo(Recipe recipe) {
+    final hasPrepTime = recipe.prepTimeMinutes != null && recipe.prepTimeMinutes! > 0;
+    final hasCookTime = recipe.cookTimeMinutes != null && recipe.cookTimeMinutes! > 0;
+    final hasServings = recipe.servings != null && recipe.servings!.isNotEmpty;
+    return hasPrepTime || hasCookTime || hasServings;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -258,6 +299,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           ref: ref,
           onEdit: _navigateToEdit,
           onReload: _loadRecipe,
+          onLinkRecipe: _showLinkRecipePicker,
           isNerdMode: isNerdMode,
         ),
         SliverToBoxAdapter(
@@ -297,6 +339,17 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   const SizedBox(height: 12),
                   Text(_recipe!.description!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
+
+                // Linked recipes
+                if (_linkedRecipes.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  _LinkedRecipesSection(
+                    linkedRecipes: _linkedRecipes,
+                    onTap: (id) => context.push('/recipe/$id'),
+                    onRemove: _unlinkRecipe,
+                  ),
+                ],
+
                 const SizedBox(height: 16),
 
                 // NEW: 3 Simple Action Buttons (Meal Plan, Groceries, Share)
@@ -308,8 +361,9 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 ),
                 const SizedBox(height: 20),
 
-                // Recipe meta info (times, servings) WITHOUT scale buttons
-                _RecipeMetaInfoCard(recipe: _recipe!, nerdMode: isNerdMode),
+                // Recipe meta info (times, servings) — hidden if all empty
+                if (_hasMetaInfo(_recipe!))
+                  _RecipeMetaInfoCard(recipe: _recipe!, nerdMode: isNerdMode),
 
                 // NEW: Separate Scale & Convert buttons
                 const SizedBox(height: 16),
@@ -359,13 +413,12 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 const SizedBox(height: 32),
                 _SectionHeader(title: rpg.nutritionTitle),
                 const SizedBox(height: 12),
-                _ModernNutritionCard(
+                NutritionWidget(
                   nutrition: _nutrition,
                   scaleFactor: _scaleFactor,
-                  l10n: l10n,
                   servings: _recipe!.servings,
-                  showPerServing: _showNutritionPerServing,
-                  onTogglePerServing: (value) => setState(() => _showNutritionPerServing = value),
+                  chartStyle: ref.watch(settingsProvider).nutritionChartStyle,
+                  enabledNutrients: ref.watch(settingsProvider).enabledNutrients,
                   isNerdMode: isNerdMode,
                 ),
                 const SizedBox(height: 100),
@@ -385,6 +438,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           ref: ref,
           onEdit: _navigateToEdit,
           onReload: _loadRecipe,
+          onLinkRecipe: _showLinkRecipePicker,
           isNerdMode: isNerdMode,
         ),
         SliverToBoxAdapter(
@@ -420,6 +474,17 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   const SizedBox(height: 12),
                   Text(_recipe!.description!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
+
+                // Linked recipes
+                if (_linkedRecipes.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  _LinkedRecipesSection(
+                    linkedRecipes: _linkedRecipes,
+                    onTap: (id) => context.push('/recipe/$id'),
+                    onRemove: _unlinkRecipe,
+                  ),
+                ],
+
                 const SizedBox(height: 16),
                 _ModernQuickActionsRow(
                   onAddToMealPlan: _showAddToMealPlanSheet,
@@ -428,7 +493,8 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   nerdMode: isNerdMode,
                 ),
                 const SizedBox(height: 20),
-                _RecipeMetaInfoCard(recipe: _recipe!, nerdMode: isNerdMode),
+                if (_hasMetaInfo(_recipe!))
+                  _RecipeMetaInfoCard(recipe: _recipe!, nerdMode: isNerdMode),
                 const SizedBox(height: 16),
                 _ModernScaleConvertButtons(
                   currentScale: _scaleFactor,
@@ -453,9 +519,9 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
             TabBar(
               controller: _tabController,
               tabs: [
-                Tab(text: rpg.nutritionTitle),
                 Tab(text: l10n.ingredientsTitle),
                 Tab(text: rpg.instructionsTitle),
+                Tab(text: rpg.nutritionTitle),
               ],
             ),
             theme.colorScheme.surface,
@@ -465,9 +531,20 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
       body: TabBarView(
         controller: _tabController,
         children: [
-          _NutritionTab(nutrition: _nutrition, scaleFactor: _scaleFactor, l10n: l10n, servings: _recipe!.servings, showPerServing: _showNutritionPerServing, onTogglePerServing: (v) => setState(() => _showNutritionPerServing = v), isNerdMode: isNerdMode),
           _IngredientsTab(ingredients: _ingredients, scaleFactor: _scaleFactor, l10n: l10n, onAddToShopping: _showAddToShoppingSheet, unitConversion: _unitConversion),
           _InstructionsTab(steps: _steps, notes: _recipe!.notes, l10n: l10n, nerdMode: isNerdMode),
+          // Nutrition tab — uses the unified widget
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: NutritionWidget(
+              nutrition: _nutrition,
+              scaleFactor: _scaleFactor,
+              servings: _recipe!.servings,
+              chartStyle: ref.watch(settingsProvider).nutritionChartStyle,
+              enabledNutrients: ref.watch(settingsProvider).enabledNutrients,
+              isNerdMode: isNerdMode,
+            ),
+          ),
         ],
       ),
     );
@@ -1067,522 +1144,6 @@ class _ImprovedAllergyWarningState extends ConsumerState<_ImprovedAllergyWarning
 
 // ============ NUTRITION CARD WITH BUG FIX ============
 
-class _DailyValues {
-  static const double fat = 78;
-  static const double saturatedFat = 20;
-  static const double carbohydrates = 275;
-  static const double fiber = 28;
-  static const double sugar = 50;
-  static const double protein = 50;
-  static const double sodium = 2300;
-  static const double cholesterol = 300;
-  static const double potassium = 4700;
-  static const double calcium = 1300;
-  static const double iron = 18;
-  static const double vitaminA = 900;
-  static const double vitaminC = 90;
-  static const double vitaminD = 20;
-}
-
-class _ModernNutritionCard extends StatelessWidget {
-  final NutritionData? nutrition;
-  final double scaleFactor;
-  final AppLocalizations l10n;
-  final String? servings;
-  final bool showPerServing;
-  final ValueChanged<bool>? onTogglePerServing;
-  final bool isNerdMode;
-
-  const _ModernNutritionCard({
-    this.nutrition,
-    this.scaleFactor = 1.0,
-    required this.l10n,
-    this.servings,
-    this.showPerServing = true,
-    this.onTogglePerServing,
-    this.isNerdMode = false,
-  });
-
-  int? _parseServings() {
-    if (servings == null || servings!.isEmpty) return null;
-    final match = RegExp(r'(\d+)').firstMatch(servings!);
-    return match != null ? int.tryParse(match.group(1)!) : null;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    // Empty state
-    if (nutrition == null || nutrition!.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(Icons.local_fire_department_outlined, size: 28, color: theme.colorScheme.outline),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.nutritionEmpty, style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.outline)),
-                  const SizedBox(height: 4),
-                  Text(l10n.nutritionEmptyHint, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // BUG FIX: Nutrition data is stored as PER SERVING values
-    // When showPerServing is true, show data as-is (no division)
-    // When showPerServing is false (showing total), MULTIPLY by servings
-    var displayNutrition = nutrition!;
-    final servingsCount = _parseServings();
-    final canShowPerServing = servingsCount != null && servingsCount > 0;
-
-    // Apply scale factor first
-    if (scaleFactor != 1.0) {
-      displayNutrition = displayNutrition.scaled(scaleFactor);
-    }
-
-    // If showing TOTAL (not per serving), multiply by servings count
-    if (!showPerServing && canShowPerServing) {
-      displayNutrition = displayNutrition.scaled(servingsCount.toDouble());
-    }
-
-    // Use RPG stat cards style if nerd mode is enabled
-    if (isNerdMode) {
-      return _buildRpgNutritionCard(context, displayNutrition, canShowPerServing, servingsCount);
-    }
-
-    return _buildStandardNutritionCard(context, displayNutrition, canShowPerServing, servingsCount);
-  }
-
-  Widget _buildStandardNutritionCard(BuildContext context, NutritionData displayNutrition, bool canShowPerServing, int? servingsCount) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with toggle
-          Row(
-            children: [
-              Icon(Icons.local_fire_department, color: const Color(0xFFE8A860)),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  showPerServing && canShowPerServing ? l10n.nutritionPerServing : l10n.nutritionTotalRecipe,
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-              // Toggle button
-              if (canShowPerServing && onTogglePerServing != null)
-                GestureDetector(
-                  onTap: () => onTogglePerServing!(!showPerServing),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          showPerServing ? '1 serving' : '$servingsCount servings',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.swap_vert, size: 14, color: theme.colorScheme.onPrimaryContainer),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
-          ),
-
-          // Calories - big display
-          if (displayNutrition.calories != null) ...[
-            const SizedBox(height: 16),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(l10n.nutritionCalories, style: theme.textTheme.bodyLarge),
-                const Spacer(),
-                Text(
-                  '${displayNutrition.calories!.round()}',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFFE8A860),
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Text('kcal', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
-              ],
-            ),
-          ],
-
-          const SizedBox(height: 16),
-          const Divider(),
-          const SizedBox(height: 12),
-
-          // Macros
-          _NutritionRow(label: l10n.nutritionFat, value: displayNutrition.fat, unit: 'g', dailyValue: _DailyValues.fat),
-          if (displayNutrition.saturatedFat != null)
-            Padding(
-              padding: const EdgeInsets.only(left: 16),
-              child: _NutritionRow(label: l10n.nutritionSaturatedFat, value: displayNutrition.saturatedFat, unit: 'g', dailyValue: _DailyValues.saturatedFat, isSubItem: true),
-            ),
-          _NutritionRow(label: l10n.nutritionCarbs, value: displayNutrition.carbohydrates, unit: 'g', dailyValue: _DailyValues.carbohydrates),
-          if (displayNutrition.fiber != null)
-            Padding(
-              padding: const EdgeInsets.only(left: 16),
-              child: _NutritionRow(label: l10n.nutritionFiber, value: displayNutrition.fiber, unit: 'g', dailyValue: _DailyValues.fiber, isSubItem: true),
-            ),
-          if (displayNutrition.sugar != null)
-            Padding(
-              padding: const EdgeInsets.only(left: 16),
-              child: _NutritionRow(label: l10n.nutritionSugar, value: displayNutrition.sugar, unit: 'g', dailyValue: _DailyValues.sugar, isSubItem: true),
-            ),
-          _NutritionRow(label: l10n.nutritionProtein, value: displayNutrition.protein, unit: 'g', dailyValue: _DailyValues.protein),
-
-          if (displayNutrition.sodium != null || displayNutrition.cholesterol != null) ...[
-            const SizedBox(height: 8),
-            const Divider(),
-            const SizedBox(height: 8),
-            if (displayNutrition.sodium != null)
-              _NutritionRow(label: l10n.nutritionSodium, value: displayNutrition.sodium, unit: 'mg', dailyValue: _DailyValues.sodium),
-            if (displayNutrition.cholesterol != null)
-              _NutritionRow(label: l10n.nutritionCholesterol, value: displayNutrition.cholesterol, unit: 'mg', dailyValue: _DailyValues.cholesterol),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRpgNutritionCard(BuildContext context, NutritionData displayNutrition, bool canShowPerServing, int? servingsCount) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1E2C),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE8A860).withValues(alpha: 0.3)),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFE8A860).withValues(alpha: 0.1),
-            blurRadius: 12,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Header with toggle
-          Row(
-            children: [
-              const Icon(Icons.local_fire_department, color: Color(0xFFE8A860)),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  showPerServing && canShowPerServing ? l10n.nutritionPerServing : l10n.nutritionTotalRecipe,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              if (canShowPerServing && onTogglePerServing != null)
-                GestureDetector(
-                  onTap: () => onTogglePerServing!(!showPerServing),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8A860).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE8A860).withValues(alpha: 0.5)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          showPerServing ? '1 serving' : '$servingsCount servings',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: const Color(0xFFE8A860),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.swap_vert, size: 14, color: Color(0xFFE8A860)),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
-          ),
-
-          const SizedBox(height: 20),
-
-          // RPG Stat Cards
-          Row(
-            children: [
-              Expanded(
-                child: _RpgStatCard(
-                  label: 'STR',
-                  sublabel: l10n.nutritionProtein,
-                  value: displayNutrition.protein != null ? '${displayNutrition.protein!.round()}g' : '-',
-                  icon: Icons.fitness_center,
-                  glowColor: Colors.redAccent,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _RpgStatCard(
-                  label: 'STA',
-                  sublabel: l10n.nutritionCarbs,
-                  value: displayNutrition.carbohydrates != null ? '${displayNutrition.carbohydrates!.round()}g' : '-',
-                  icon: Icons.bolt,
-                  glowColor: Colors.blueAccent,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _RpgStatCard(
-                  label: 'CON',
-                  sublabel: l10n.nutritionFat,
-                  value: displayNutrition.fat != null ? '${displayNutrition.fat!.round()}g' : '-',
-                  icon: Icons.shield,
-                  glowColor: Colors.amber,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // Calories center
-          if (displayNutrition.calories != null)
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2A2A3C),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE8A860).withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.whatshot, color: Color(0xFFE8A860), size: 28),
-                  const SizedBox(width: 12),
-                  Column(
-                    children: [
-                      Text(
-                        '${displayNutrition.calories!.round()}',
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFFE8A860),
-                        ),
-                      ),
-                      Text(
-                        'ENERGY',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: Colors.grey,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RpgStatCard extends StatelessWidget {
-  final String label;
-  final String sublabel;
-  final String value;
-  final IconData icon;
-  final Color glowColor;
-
-  const _RpgStatCard({
-    required this.label,
-    required this.sublabel,
-    required this.value,
-    required this.icon,
-    required this.glowColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2A2A3C),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: glowColor.withValues(alpha: 0.4)),
-        boxShadow: [
-          BoxShadow(color: glowColor.withValues(alpha: 0.15), blurRadius: 8, spreadRadius: 1),
-        ],
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: glowColor, size: 24),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.grey.shade500,
-              fontSize: 10,
-              letterSpacing: 1.5,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NutritionRow extends StatelessWidget {
-  final String label;
-  final double? value;
-  final String unit;
-  final double? dailyValue;
-  final bool isSubItem;
-
-  const _NutritionRow({
-    required this.label,
-    this.value,
-    required this.unit,
-    this.dailyValue,
-    this.isSubItem = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (value == null) return const SizedBox.shrink();
-
-    final theme = Theme.of(context);
-    final percentage = dailyValue != null && dailyValue! > 0 ? (value! / dailyValue! * 100).round() : null;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Text(
-            label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: isSubItem ? FontWeight.normal : FontWeight.w500,
-              color: isSubItem ? theme.colorScheme.outline : null,
-            ),
-          ),
-          const Spacer(),
-          Text(
-            '${value!.round()}$unit',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          if (percentage != null) ...[
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                '$percentage%',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.onPrimaryContainer,
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-// ============ TABS ============
-
-class _NutritionTab extends StatelessWidget {
-  final NutritionData? nutrition;
-  final double scaleFactor;
-  final AppLocalizations l10n;
-  final String? servings;
-  final bool showPerServing;
-  final ValueChanged<bool>? onTogglePerServing;
-  final bool isNerdMode;
-
-  const _NutritionTab({
-    required this.nutrition,
-    required this.scaleFactor,
-    required this.l10n,
-    this.servings,
-    this.showPerServing = true,
-    this.onTogglePerServing,
-    this.isNerdMode = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(padding: const EdgeInsets.all(16), children: [
-      _ModernNutritionCard(
-        nutrition: nutrition,
-        scaleFactor: scaleFactor,
-        l10n: l10n,
-        servings: servings,
-        showPerServing: showPerServing,
-        onTogglePerServing: onTogglePerServing,
-        isNerdMode: isNerdMode,
-      ),
-      const SizedBox(height: 32),
-    ]);
-  }
-}
-
 class _IngredientsTab extends ConsumerWidget {
   final List<Ingredient> ingredients;
   final double scaleFactor;
@@ -1645,6 +1206,7 @@ class _RecipeAppBar extends StatelessWidget {
   final WidgetRef ref;
   final VoidCallback onEdit;
   final VoidCallback onReload;
+  final VoidCallback? onLinkRecipe;
   final bool isNerdMode;
 
   const _RecipeAppBar({
@@ -1652,6 +1214,7 @@ class _RecipeAppBar extends StatelessWidget {
     required this.ref,
     required this.onEdit,
     required this.onReload,
+    this.onLinkRecipe,
     this.isNerdMode = false,
   });
 
@@ -1747,6 +1310,7 @@ class _RecipeAppBar extends StatelessWidget {
             itemBuilder: (context) => [
               PopupMenuItem(value: 'pin', child: Row(children: [Icon(recipe.isPinned ? Icons.push_pin : Icons.push_pin_outlined), const SizedBox(width: 12), Text(recipe.isPinned ? l10n.recipeUnpin : l10n.recipePin)])),
               PopupMenuItem(value: 'duplicate', child: Row(children: [const Icon(Icons.copy), const SizedBox(width: 12), Text(l10n.recipeDuplicate)])),
+              const PopupMenuItem(value: 'link', child: Row(children: [Icon(Icons.link), SizedBox(width: 12), Text('Link Recipe')])),
               const PopupMenuDivider(),
               PopupMenuItem(value: 'delete', child: Row(children: [const Icon(Icons.delete, color: Colors.red), const SizedBox(width: 12), Text(l10n.actionDelete, style: const TextStyle(color: Colors.red))])),
             ],
@@ -1766,6 +1330,9 @@ class _RecipeAppBar extends StatelessWidget {
         break;
       case 'duplicate':
         _duplicateRecipe(context);
+        break;
+      case 'link':
+        onLinkRecipe?.call();
         break;
       case 'delete':
         _confirmDelete(context);
@@ -1891,29 +1458,32 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
     final userAllergyKeys = userAllergies.map((a) => a.key).toSet();
     final matchingAllergens = detectedAllergens.where((a) => userAllergyKeys.contains(a)).toList();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(margin: const EdgeInsets.only(top: 6), width: 8, height: 8, decoration: BoxDecoration(color: matchingAllergens.isNotEmpty ? Colors.red : theme.colorScheme.primary, shape: BoxShape.circle)),
-        const SizedBox(width: 12),
-        Expanded(
-          child: RichText(
-            text: TextSpan(
-              style: theme.textTheme.bodyLarge,
-              children: [
-                if (amount.isNotEmpty) TextSpan(text: '$amount ', style: const TextStyle(fontWeight: FontWeight.w600)),
-                if (unit.isNotEmpty) TextSpan(text: '$unit '),
-                TextSpan(text: ingredient.name),
-              ],
+    return GestureDetector(
+      onLongPress: () => showIngredientSubsSheet(context, ingredient.name),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(margin: const EdgeInsets.only(top: 6), width: 8, height: 8, decoration: BoxDecoration(color: matchingAllergens.isNotEmpty ? Colors.red : theme.colorScheme.primary, shape: BoxShape.circle)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: theme.textTheme.bodyLarge,
+                children: [
+                  if (amount.isNotEmpty) TextSpan(text: '$amount ', style: const TextStyle(fontWeight: FontWeight.w600)),
+                  if (unit.isNotEmpty) TextSpan(text: '$unit '),
+                  TextSpan(text: ingredient.name),
+                ],
+              ),
             ),
           ),
-        ),
-        if (matchingAllergens.isNotEmpty)
-          Tooltip(
-            message: 'Contains: ${matchingAllergens.join(", ")}',
-            child: Icon(Icons.warning_amber_rounded, size: 18, color: Colors.red.shade700),
-          ),
-      ]),
+          if (matchingAllergens.isNotEmpty)
+            Tooltip(
+              message: 'Contains: ${matchingAllergens.join(", ")}',
+              child: Icon(Icons.warning_amber_rounded, size: 18, color: Colors.red.shade700),
+            ),
+        ]),
+      ),
     );
   }
 }
@@ -1986,4 +1556,244 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
   @override double get maxExtent => _tabBar.preferredSize.height;
   @override Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => Container(color: _backgroundColor, child: _tabBar);
   @override bool shouldRebuild(_SliverTabBarDelegate oldDelegate) => false;
+}
+
+// ============ LINKED RECIPES SECTION ============
+
+class _LinkedRecipesSection extends StatelessWidget {
+  final List<Recipe> linkedRecipes;
+  final ValueChanged<String> onTap;
+  final ValueChanged<String> onRemove;
+
+  const _LinkedRecipesSection({
+    required this.linkedRecipes,
+    required this.onTap,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.link, size: 16, color: theme.colorScheme.primary),
+            const SizedBox(width: 6),
+            Text(
+              'Linked Recipes',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: linkedRecipes.map((recipe) => _LinkedRecipeChip(
+            recipe: recipe,
+            onTap: () => onTap(recipe.id),
+            onRemove: () => onRemove(recipe.id),
+          )).toList(),
+        ),
+      ],
+    );
+  }
+}
+
+class _LinkedRecipeChip extends StatelessWidget {
+  final Recipe recipe;
+  final VoidCallback onTap;
+  final VoidCallback onRemove;
+
+  const _LinkedRecipeChip({
+    required this.recipe,
+    required this.onTap,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 12, top: 6, bottom: 6, right: 4),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.restaurant_menu, size: 14, color: theme.colorScheme.primary),
+              const SizedBox(width: 6),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 180),
+                child: Text(
+                  recipe.title,
+                  style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 2),
+              GestureDetector(
+                onTap: onRemove,
+                child: Icon(Icons.close, size: 16, color: theme.colorScheme.outline),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============ RECIPE LINK PICKER ============
+
+class _RecipeLinkPicker extends StatefulWidget {
+  final List<Recipe> recipes;
+  final ValueChanged<String> onSelected;
+
+  const _RecipeLinkPicker({required this.recipes, required this.onSelected});
+
+  @override
+  State<_RecipeLinkPicker> createState() => _RecipeLinkPickerState();
+}
+
+class _RecipeLinkPickerState extends State<_RecipeLinkPicker> {
+  final _searchController = TextEditingController();
+  late List<Recipe> _filtered;
+
+  @override
+  void initState() {
+    super.initState();
+    _filtered = widget.recipes;
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearch(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filtered = widget.recipes;
+      } else {
+        final lower = query.toLowerCase();
+        _filtered = widget.recipes.where((r) => r.title.toLowerCase().contains(lower)).toList();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.7,
+      maxChildSize: 0.9,
+      minChildSize: 0.4,
+      builder: (_, controller) => Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            // Handle
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            // Title
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Row(
+                children: [
+                  Icon(Icons.link, color: theme.colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Link a Recipe',
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+            // Search
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: TextField(
+                controller: _searchController,
+                onChanged: _onSearch,
+                decoration: InputDecoration(
+                  hintText: 'Search recipes...',
+                  prefixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: theme.colorScheme.surfaceContainerHighest,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                ),
+              ),
+            ),
+            const Divider(),
+            // Recipe list
+            Expanded(
+              child: _filtered.isEmpty
+                  ? Center(
+                child: Text(
+                  'No recipes found',
+                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+                ),
+              )
+                  : ListView.builder(
+                controller: controller,
+                itemCount: _filtered.length,
+                itemBuilder: (context, index) {
+                  final recipe = _filtered[index];
+                  return ListTile(
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: recipe.imagePath != null && File(recipe.imagePath!).existsSync()
+                          ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(File(recipe.imagePath!), fit: BoxFit.cover),
+                      )
+                          : Icon(Icons.restaurant_menu, color: theme.colorScheme.onPrimaryContainer, size: 20),
+                    ),
+                    title: Text(recipe.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    subtitle: recipe.description != null
+                        ? Text(recipe.description!, maxLines: 1, overflow: TextOverflow.ellipsis)
+                        : null,
+                    onTap: () => widget.onSelected(recipe.id),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

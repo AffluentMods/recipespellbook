@@ -37,7 +37,7 @@ class RecipeNutritionCard extends ConsumerWidget {
     final isRpg = settings.nerdMode;
     final showRpgNames = isRpg && ref.watch(showRpgNutritionNamesProvider);
     final chartStyle = settings.nutritionChartStyle;
-    final showExpanded = settings.showExpandedNutrition;
+    final showExpanded = settings.enabledNutrients.length > 9;
 
     // Parse nutrition from nutritionJson field
     final nutrition = _parseNutrition(recipe.nutritionJson);

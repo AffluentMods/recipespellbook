@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
-import '../../providers/settings_provider.dart';
-import '../../data/rpg/rpg_text.dart';
 import '../widgets/app_menu_drawer.dart';
 import '../widgets/rpg/rpg_navigation_shell.dart';
 
@@ -31,13 +29,20 @@ class AppShell extends ConsumerStatefulWidget {
 class _AppShellState extends ConsumerState<AppShell> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  /// Dismiss any open modals/bottom sheets/full-screen overlays before navigating tabs
+  void _navigateTo(String path, int index) {
+    // Pop everything back to root (catches MaterialPageRoute modals too, not just PopupRoute)
+    Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+
+    ref.read(currentNavIndexProvider.notifier).state = index;
+    context.go(path);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final currentIndex = ref.watch(currentNavIndexProvider);
     final shoppingCountAsync = ref.watch(shoppingBadgeCountProvider);
-    final nerdMode = ref.watch(settingsProvider).nerdMode;
-    final rpg = RpgText.of(l10n, nerdMode);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -67,48 +72,41 @@ class _AppShellState extends ConsumerState<AppShell> {
                     _NavItem(
                       icon: Icons.home_outlined,
                       selectedIcon: Icons.home_rounded,
-                      label: rpg.navHome,
+                      label: l10n.navHome,
                       isSelected: currentIndex == 0,
-                      onTap: () {
-                        ref.read(currentNavIndexProvider.notifier).state = 0;
-                        context.go('/');
-                      },
+                      onTap: () => _navigateTo('/', 0),
                     ),
                     // Meal Plan
                     _NavItem(
                       icon: Icons.calendar_today_outlined,
                       selectedIcon: Icons.calendar_today_rounded,
-                      label: rpg.navPlanner,
+                      label: l10n.navPlanner,
                       isSelected: currentIndex == 1,
                       selectedColor: const Color(0xFFE8A860),
-                      onTap: () {
-                        ref.read(currentNavIndexProvider.notifier).state = 1;
-                        context.go('/planner');
-                      },
+                      onTap: () => _navigateTo('/planner', 1),
                     ),
                     // Groceries with badge
                     _NavItem(
                       icon: Icons.shopping_cart_outlined,
                       selectedIcon: Icons.shopping_cart_rounded,
-                      label: rpg.navShopping,
+                      label: l10n.navShopping,
                       isSelected: currentIndex == 2,
                       badge: shoppingCountAsync.when(
                         data: (count) => count > 0 ? count : null,
                         loading: () => null,
                         error: (_, __) => null,
                       ),
-                      onTap: () {
-                        ref.read(currentNavIndexProvider.notifier).state = 2;
-                        context.go('/shopping');
-                      },
+                      onTap: () => _navigateTo('/shopping', 2),
                     ),
                     // More (Menu)
                     _NavItem(
                       icon: Icons.menu_rounded,
                       selectedIcon: Icons.menu_rounded,
-                      label: rpg.navMenu,
+                      label: l10n.navMenu,
                       isSelected: false,
                       onTap: () {
+                        // Pop everything (full-screen modals, sheets, dialogs) before opening drawer
+                        Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
                         _scaffoldKey.currentState?.openEndDrawer();
                       },
                     ),

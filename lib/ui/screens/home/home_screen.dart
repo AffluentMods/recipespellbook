@@ -33,9 +33,16 @@ class HomeScreen extends ConsumerWidget {
               // App bar
               SliverAppBar(
                 floating: true,
-                title: _CookbookDropdown(
-                  currentCookbook: cookbook,
-                  appTitle: l10n.appTitle,
+                title: Row(
+                  children: [
+                    const Text('✨ ', style: TextStyle(fontSize: 24)),
+                    Expanded(
+                      child: Text(
+                        cookbook?.name ?? l10n.appTitle,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
                 actions: [
                   IconButton(
@@ -469,10 +476,22 @@ class _CoursesSection extends StatelessWidget {
     final theme = Theme.of(context);
     final translator = TaxonomyTranslator(l10n);
 
-    final courseCounts = <String, int>{};
+    // Build counts with case-insensitive ID matching
+    final courseCounts = <String, int>{}; // keyed by CourseData.id (lowercase)
     for (final recipe in recipes) {
       if (recipe.courseId != null) {
-        courseCounts[recipe.courseId!] = (courseCounts[recipe.courseId!] ?? 0) + 1;
+        final normalizedId = recipe.courseId!.toLowerCase();
+        // Match against known course IDs or names
+        String? matchedId;
+        for (final c in CourseData.courses) {
+          if (c.id == normalizedId || c.name.toLowerCase() == normalizedId) {
+            matchedId = c.id;
+            break;
+          }
+        }
+        if (matchedId != null) {
+          courseCounts[matchedId] = (courseCounts[matchedId] ?? 0) + 1;
+        }
       }
     }
 
@@ -535,10 +554,21 @@ class _CategoriesSection extends StatelessWidget {
     final theme = Theme.of(context);
     final translator = TaxonomyTranslator(l10n);
 
-    final categoryCounts = <String, int>{};
+    // Build counts with case-insensitive ID matching
+    final categoryCounts = <String, int>{}; // keyed by CategoryData.id (lowercase)
     for (final recipe in recipes) {
       if (recipe.categoryId != null) {
-        categoryCounts[recipe.categoryId!] = (categoryCounts[recipe.categoryId!] ?? 0) + 1;
+        final normalizedId = recipe.categoryId!.toLowerCase();
+        String? matchedId;
+        for (final c in CategoryData.categories) {
+          if (c.id == normalizedId || c.name.toLowerCase() == normalizedId) {
+            matchedId = c.id;
+            break;
+          }
+        }
+        if (matchedId != null) {
+          categoryCounts[matchedId] = (categoryCounts[matchedId] ?? 0) + 1;
+        }
       }
     }
 
@@ -600,8 +630,25 @@ class _UncategorizedSection extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
-    // Count uncategorized recipes (no course AND no category)
-    final uncategorized = recipes.where((r) => r.courseId == null && r.categoryId == null).toList();
+    // "Uncategorized" = no course/category OR course/category that doesn't match any known entry
+    final knownCourseIds = CourseData.courses.map((c) => c.id).toSet();
+    final knownCourseNames = CourseData.courses.map((c) => c.name.toLowerCase()).toSet();
+    final knownCategoryIds = CategoryData.categories.map((c) => c.id).toSet();
+    final knownCategoryNames = CategoryData.categories.map((c) => c.name.toLowerCase()).toSet();
+
+    bool _matchesCourse(String? courseId) {
+      if (courseId == null) return false;
+      final lower = courseId.toLowerCase();
+      return knownCourseIds.contains(lower) || knownCourseNames.contains(lower);
+    }
+
+    bool _matchesCategory(String? categoryId) {
+      if (categoryId == null) return false;
+      final lower = categoryId.toLowerCase();
+      return knownCategoryIds.contains(lower) || knownCategoryNames.contains(lower);
+    }
+
+    final uncategorized = recipes.where((r) => !_matchesCourse(r.courseId) && !_matchesCategory(r.categoryId)).toList();
 
     if (uncategorized.isEmpty) return const SizedBox.shrink();
 

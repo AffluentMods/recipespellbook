@@ -4,22 +4,31 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/settings_provider.dart';
-import '../../data/rpg/rpg_text.dart';
 
 /// Modern sidebar menu drawer
 class AppMenuDrawer extends ConsumerWidget {
   const AppMenuDrawer({super.key});
+
+  /// Close drawer and pop any underlying full-screen modals, then navigate
+  void _closeAndNavigate(BuildContext context, String path, {bool useGo = false}) {
+    Navigator.pop(context); // close drawer
+    // Pop any remaining full-screen modals on the current tab
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    if (useGo) {
+      context.go(path);
+    } else {
+      context.push(path);
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider);
-    final nerdMode = settings.nerdMode;
-    final rpg = RpgText.of(l10n, nerdMode);
 
-    // RPG section only shows when nerd mode is ON
-    final isRpgEnabled = nerdMode;
+    // Check if RPG mode is ACTUALLY enabled
+    final isRpgEnabled = settings.rpgAnimationsEnabled || settings.rpgSoundsEnabled;
 
     return Drawer(
       backgroundColor: theme.colorScheme.surface,
@@ -32,18 +41,15 @@ class AppMenuDrawer extends ConsumerWidget {
               child: ListView(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 children: [
-                  _SectionHeader(title: rpg.sectionNavigation),
+                  _SectionHeader(title: 'NAVIGATION'),
                   _MenuItem(
                     icon: Icons.menu_book_rounded,
-                    label: rpg.navCookbooks,
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.go('/cookbooks');
-                    },
+                    label: l10n.navCookbooks,
+                    onTap: () => _closeAndNavigate(context, '/cookbooks', useGo: true),
                   ),
                   _MenuItem(
                     icon: Icons.people_rounded,
-                    label: rpg.community,
+                    label: 'Community',
                     subtitle: 'Coming soon',
                     enabled: false,
                     onTap: () {},
@@ -51,23 +57,34 @@ class AppMenuDrawer extends ConsumerWidget {
 
                   const SizedBox(height: 8),
                   const Divider(height: 1),
-                  _SectionHeader(title: rpg.sectionImport),
+                  _SectionHeader(title: 'IMPORT'),
                   _MenuItem(
                     icon: Icons.download_rounded,
-                    label: rpg.importGuides,
+                    label: l10n.importGuides,
                     subtitle: 'Instagram, TikTok, websites...',
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push('/import-guides');
-                    },
+                    onTap: () => _closeAndNavigate(context, '/import-guides'),
                   ),
                   _MenuItem(
                     icon: Icons.computer_rounded,
-                    label: rpg.useOnDesktop,
+                    label: 'Use on desktop',
                     subtitle: 'Sync across devices',
                     onTap: () {
                       Navigator.pop(context);
+                      Navigator.of(context).popUntil((route) => route.isFirst);
                       _showDesktopInfo(context);
+                    },
+                  ),
+
+                  const SizedBox(height: 8),
+                  const Divider(height: 1),
+                  _SectionHeader(title: 'TOOLS'),
+                  _MenuItem(
+                    icon: Icons.swap_horiz_rounded,
+                    label: 'Ingredient Substitutions',
+                    subtitle: 'Find alternatives for any ingredient',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push('/substitutions');
                     },
                   ),
 
@@ -75,33 +92,64 @@ class AppMenuDrawer extends ConsumerWidget {
                   if (isRpgEnabled) ...[
                     const SizedBox(height: 8),
                     const Divider(height: 1),
-                    _SectionHeader(title: rpg.sectionRpg, color: theme.colorScheme.primary),
+                    _SectionHeader(title: 'RPG MODE', color: theme.colorScheme.primary),
                     _MenuItem(
                       icon: Icons.person_rounded,
-                      label: rpg.profile,
+                      label: 'Profile',
                       subtitle: 'View your stats and progress',
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.push('/rpg/profile');
-                      },
+                      onTap: () => _closeAndNavigate(context, '/rpg/profile'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.emoji_events_rounded,
+                      label: 'Achievements',
+                      subtitle: 'Unlock rewards',
+                      onTap: () => _closeAndNavigate(context, '/rpg/achievements'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.checkroom_rounded,
+                      label: 'Cosmetics',
+                      subtitle: 'Customize your look',
+                      onTap: () => _closeAndNavigate(context, '/rpg/cosmetics'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.leaderboard_rounded,
+                      label: 'Leaderboards',
+                      subtitle: 'Compete with others',
+                      onTap: () => _closeAndNavigate(context, '/rpg/leaderboard'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.whatshot_rounded,
+                      label: 'Boss Battles',
+                      subtitle: 'Epic cooking challenges',
+                      onTap: () => _closeAndNavigate(context, '/rpg/boss'),
                     ),
                   ],
 
                   const SizedBox(height: 8),
                   const Divider(height: 1),
-                  _SectionHeader(title: rpg.sectionSocial),
+                  _SectionHeader(title: 'TOOLS'),
+                  _MenuItem(
+                    icon: Icons.swap_horiz_rounded,
+                    label: 'Ingredient Substitutions',
+                    subtitle: 'Find alternatives for any ingredient',
+                    onTap: () => _closeAndNavigate(context, '/substitutions'),
+                  ),
+
+                  const SizedBox(height: 8),
+                  const Divider(height: 1),
+                  _SectionHeader(title: 'SOCIAL'),
                   _MenuItem(
                     icon: Icons.person_add_rounded,
-                    label: rpg.inviteFriends,
+                    label: 'Invite friends',
                     onTap: () {
                       Navigator.pop(context);
-                      _showInviteSheet(context, nerdMode);
+                      _showInviteSheet(context);
                     },
                   ),
 
                   const SizedBox(height: 8),
                   const Divider(height: 1),
-                  _SectionHeader(title: rpg.sectionApp),
+                  _SectionHeader(title: 'APP'),
                   _MenuItem(
                     icon: Icons.help_outline_rounded,
                     label: l10n.helpTitle,
@@ -113,10 +161,7 @@ class AppMenuDrawer extends ConsumerWidget {
                   _MenuItem(
                     icon: Icons.settings_outlined,
                     label: l10n.settingsTitle,
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push('/settings');
-                    },
+                    onTap: () => _closeAndNavigate(context, '/settings'),
                   ),
                 ],
               ),
@@ -200,18 +245,7 @@ class AppMenuDrawer extends ConsumerWidget {
     );
   }
 
-  void _showInviteSheet(BuildContext context, bool nerdMode) {
-    final icon = nerdMode ? Icons.local_fire_department : Icons.favorite;
-    final iconColor = nerdMode ? const Color(0xFFE8A860) : Colors.pink;
-    final title = nerdMode ? 'Summon Allies' : 'Share Recipe Spellbook';
-    final subtitle = nerdMode
-        ? 'Rally your fellow adventurers to join the quest!'
-        : 'Invite your friends and family to start cooking together!';
-    final shareLabel = nerdMode ? 'Send Scroll' : 'Share';
-    final shareText = nerdMode
-        ? '⚔️ Join me on Recipe Spellbook - the ultimate culinary adventure! https://recipespellbook.com'
-        : 'Check out Recipe Spellbook - the best recipe app! https://recipespellbook.com';
-
+  void _showInviteSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -223,16 +257,16 @@ class AppMenuDrawer extends ConsumerWidget {
           children: [
             Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 24),
-            Icon(icon, size: 48, color: iconColor),
+            const Icon(Icons.favorite, size: 48, color: Colors.pink),
             const SizedBox(height: 16),
-            Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            Text('Share Recipe Spellbook', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text(subtitle, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey), textAlign: TextAlign.center),
+            Text('Invite your friends and family to start cooking together!', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey), textAlign: TextAlign.center),
             const SizedBox(height: 24),
             Row(children: [
               Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx), child: const Text('Maybe later'))),
               const SizedBox(width: 12),
-              Expanded(child: FilledButton.icon(onPressed: () { Navigator.pop(ctx); Share.share(shareText, subject: 'Recipe Spellbook'); }, icon: const Icon(Icons.share), label: Text(shareLabel))),
+              Expanded(child: FilledButton.icon(onPressed: () { Navigator.pop(ctx); Share.share('Check out Recipe Spellbook - the best recipe app! https://recipespellbook.com', subject: 'Recipe Spellbook'); }, icon: const Icon(Icons.share), label: const Text('Share'))),
             ]),
             const SizedBox(height: 16),
           ],

@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:drift/drift.dart' as drift;
@@ -12,6 +15,7 @@ import '../../../data/ingredient_images.dart';
 import '../../../database/daos/shopping_dao.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/ingredient_suggestion_service.dart';
+import '../../../services/grocery_service.dart';
 import '../../widgets/rpg/rpg_navigation_shell.dart';
 
 /// Provider to track shopping list item count (for nav badge)
@@ -36,6 +40,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   String _currentListName = 'Shopping List';
   ShoppingGroupMode _groupMode = ShoppingGroupMode.section;
   Map<String, String> _userMappings = {};
+  final Set<String> _recentlyCheckedIds = {};
 
   @override
   void initState() {
@@ -76,8 +81,10 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           stream: shoppingDao.watchItemsInList(_currentListId),
           builder: (context, snapshot) {
             final items = snapshot.data ?? [];
-            final uncheckedItems = items.where((i) => !i.isChecked).toList();
-            final checkedItems = items.where((i) => i.isChecked).toList();
+            final uncheckedItems = items.where((i) =>
+            !i.isChecked || _recentlyCheckedIds.contains(i.id)).toList();
+            final checkedItems = items.where((i) =>
+            i.isChecked && !_recentlyCheckedIds.contains(i.id)).toList();
 
             return Column(
               children: [
@@ -121,6 +128,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           userMappings: _userMappings,
           onCategoryChanged: _onItemCategoryChanged,
           onRefreshMappings: _loadUserMappings,
+          onItemChecked: _onItemChecked,
+          onItemUnchecked: _onItemUnchecked,
         );
       case ShoppingGroupMode.recipe:
         return _RecipeGroupedList(
@@ -129,6 +138,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           listId: _currentListId,
           userMappings: _userMappings,
           onCategoryChanged: _onItemCategoryChanged,
+          onItemChecked: _onItemChecked,
+          onItemUnchecked: _onItemUnchecked,
         );
       case ShoppingGroupMode.ungrouped:
         return _UngroupedList(
@@ -137,6 +148,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           listId: _currentListId,
           userMappings: _userMappings,
           onCategoryChanged: _onItemCategoryChanged,
+          onItemChecked: _onItemChecked,
+          onItemUnchecked: _onItemUnchecked,
         );
     }
   }
@@ -423,6 +436,23 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       ),
     );
   }
+
+  /// Delayed check: item stays in place for 1.5s before moving to "checked"
+  void _onItemChecked(String itemId) {
+    final shoppingDao = ref.read(shoppingDaoProvider);
+    shoppingDao.toggleItemChecked(itemId, true);
+    setState(() => _recentlyCheckedIds.add(itemId));
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted) setState(() => _recentlyCheckedIds.remove(itemId));
+    });
+  }
+
+  /// Instant uncheck — no delay needed
+  void _onItemUnchecked(String itemId) {
+    final shoppingDao = ref.read(shoppingDaoProvider);
+    shoppingDao.toggleItemChecked(itemId, false);
+    setState(() => _recentlyCheckedIds.remove(itemId));
+  }
 }
 
 // ============ MODERN HEADER ============
@@ -534,7 +564,7 @@ class _ModernHeader extends StatelessWidget {
   }
 }
 
-// ============ ORDER ONLINE BUTTON ============
+// ============ ORDER ONLINE BUTTON (Grocery API Integration) ============
 
 class _OrderOnlineButton extends StatelessWidget {
   final List<ShoppingListItem> items;
@@ -555,15 +585,21 @@ class _OrderOnlineButton extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 14),
             decoration: BoxDecoration(
-              border: Border.all(color: isDark ? Colors.grey.shade600 : Colors.grey.shade300, width: 1.5),
+              border: Border.all(
+                color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
+                width: 1.5,
+              ),
               borderRadius: BorderRadius.circular(30),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.shopping_cart_outlined, color: const Color(0xFFE88B00), size: 22),
+                Icon(Icons.shopping_cart_outlined,
+                    color: const Color(0xFFE88B00), size: 22),
                 const SizedBox(width: 10),
-                Text('Order online', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                Text('Order online',
+                    style: theme.textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w600)),
               ],
             ),
           ),
@@ -573,7 +609,6 @@ class _OrderOnlineButton extends StatelessWidget {
   }
 
   void _showOrderOptions(BuildContext context) {
-    // Get item names (just the base name, not quantities)
     final itemNames = items.map((i) {
       final parsed = parseIngredient(i.name);
       return parsed.name;
@@ -582,77 +617,378 @@ class _OrderOnlineButton extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      isScrollControlled: true,
+      builder: (ctx) => _OrderOnlineSheet(
+        itemNames: itemNames,
+        itemCount: items.length,
+      ),
+    );
+  }
+}
+
+/// Bottom sheet with grocery provider options — two-tier layout:
+/// Full API (Instacart, Kroger) + Deep link fallback (Amazon Fresh, Walmart)
+class _OrderOnlineSheet extends StatefulWidget {
+  final List<String> itemNames;
+  final int itemCount;
+  const _OrderOnlineSheet({required this.itemNames, required this.itemCount});
+
+  @override
+  State<_OrderOnlineSheet> createState() => _OrderOnlineSheetState();
+}
+
+class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
+  final Map<GroceryProvider, bool> _configured = {};
+  bool _loading = true;
+
+  static const _providerData = <GroceryProvider, _ProviderDisplay>{
+    GroceryProvider.instacart: _ProviderDisplay(
+      emoji: '🥕',
+      name: 'Instacart',
+      color: Color(0xFF43B02A),
+      subtitle: 'Costco, Publix, Safeway, Aldi, Sprouts & 1,500+ retailers',
+    ),
+    GroceryProvider.kroger: _ProviderDisplay(
+      emoji: '🏪',
+      name: 'Kroger',
+      color: Color(0xFF0056A4),
+      subtitle: 'Kroger, Fred Meyer, Ralphs, Harris Teeter & more',
+    ),
+    GroceryProvider.amazonFresh: _ProviderDisplay(
+      emoji: '📦',
+      name: 'Amazon Fresh',
+      color: Color(0xFFFF9900),
+      subtitle: 'Opens Amazon Fresh in browser',
+    ),
+    GroceryProvider.walmart: _ProviderDisplay(
+      emoji: '🔵',
+      name: 'Walmart',
+      color: Color(0xFF0071CE),
+      subtitle: 'Opens Walmart Grocery in browser',
+    ),
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _checkConfigurations();
+  }
+
+  Future<void> _checkConfigurations() async {
+    for (final p in GroceryProvider.values) {
+      _configured[p] = await GroceryService.isConfigured(p);
+    }
+    if (mounted) setState(() => _loading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Title
+              Text('Send to store',
+                  style: theme.textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text('${widget.itemCount} items',
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(color: Colors.grey)),
+              const SizedBox(height: 20),
+
+              // Full API providers
+              _SectionLabel(
+                icon: Icons.bolt,
+                label: 'Direct cart integration',
+                color: const Color(0xFFE88B00),
+              ),
+              const SizedBox(height: 8),
+              _ProviderTile(
+                display: _providerData[GroceryProvider.instacart]!,
+                isApi: true,
+                isConfigured: _configured[GroceryProvider.instacart] ?? false,
+                isLoading: _loading,
+                onTap: () => _handleProvider(GroceryProvider.instacart),
+              ),
+              const SizedBox(height: 8),
+              _ProviderTile(
+                display: _providerData[GroceryProvider.kroger]!,
+                isApi: true,
+                isConfigured: _configured[GroceryProvider.kroger] ?? false,
+                isLoading: _loading,
+                onTap: () => _handleProvider(GroceryProvider.kroger),
+              ),
+              const SizedBox(height: 16),
+
+              // Deep link providers
+              _SectionLabel(
+                icon: Icons.open_in_new,
+                label: 'Open in browser',
+                color: Colors.grey,
+              ),
+              const SizedBox(height: 8),
+              _ProviderTile(
+                display: _providerData[GroceryProvider.amazonFresh]!,
+                isApi: false,
+                isConfigured: false,
+                isLoading: false,
+                onTap: () => _handleProvider(GroceryProvider.amazonFresh),
+              ),
+              const SizedBox(height: 8),
+              _ProviderTile(
+                display: _providerData[GroceryProvider.walmart]!,
+                isApi: false,
+                isConfigured: false,
+                isLoading: false,
+                onTap: () => _handleProvider(GroceryProvider.walmart),
+              ),
+              const SizedBox(height: 16),
+
+              // Copy list
+              InkWell(
+                onTap: _copyToClipboard,
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding:
+                  const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.copy, size: 18, color: Colors.grey.shade600),
+                      const SizedBox(width: 8),
+                      Text('Copy list to clipboard',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: Colors.grey.shade600)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
-                const SizedBox(height: 24),
-                Text('Order Online', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                Text('${items.length} items', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey)),
-                const SizedBox(height: 24),
-                _OrderOptionTile(
-                  emoji: '🥕',
-                  name: 'Instacart',
-                  color: const Color(0xFF43B02A),
-                  onTap: () async {
-                    Navigator.pop(ctx);
-                    // Instacart doesn't have a direct search URL that works well
-                    // Best approach is to open their app or website
-                    final url = Uri.parse('https://www.instacart.com/');
-                    if (await canLaunchUrl(url)) {
-                      launchUrl(url, mode: LaunchMode.externalApplication);
-                    }
-                    // Show a tip
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Tip: Copy your list and paste items in Instacart'),
-                        duration: Duration(seconds: 4),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-                _OrderOptionTile(
-                  emoji: '🏪',
-                  name: 'Walmart',
-                  color: const Color(0xFF0071CE),
-                  onTap: () async {
-                    Navigator.pop(ctx);
-                    // Walmart grocery pickup/delivery
-                    final url = Uri.parse('https://www.walmart.com/grocery');
-                    if (await canLaunchUrl(url)) {
-                      launchUrl(url, mode: LaunchMode.externalApplication);
-                    }
-                  },
-                ),
-                const SizedBox(height: 12),
-                _OrderOptionTile(
-                  emoji: '📦',
-                  name: 'Amazon Fresh',
-                  color: const Color(0xFFFF9900),
-                  onTap: () async {
-                    Navigator.pop(ctx);
-                    // Open Amazon Fresh for each item (limited to first item for now)
-                    if (itemNames.isNotEmpty) {
-                      final query = Uri.encodeComponent(itemNames.first);
-                      final url = Uri.parse('https://www.amazon.com/s?k=$query&i=amazonfresh');
-                      if (await canLaunchUrl(url)) {
-                        launchUrl(url, mode: LaunchMode.externalApplication);
-                      }
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-              ],
+      ),
+    );
+  }
+
+  Future<void> _handleProvider(GroceryProvider provider) async {
+    Navigator.pop(context);
+
+    final isApi = GroceryService.integrationTypeFor(provider) ==
+        IntegrationType.fullApi;
+    final configured = _configured[provider] ?? false;
+
+    if (isApi && configured) {
+      _showSendingProgress(provider);
+    } else if (isApi && !configured) {
+      await Clipboard.setData(
+        ClipboardData(
+          text: GroceryService.formatForClipboard(widget.itemNames),
+        ),
+      );
+      await GroceryService.openStore(provider);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'List copied! Paste items into ${_providerData[provider]?.name ?? "store"}',
             ),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } else {
+      await Clipboard.setData(
+        ClipboardData(
+          text: GroceryService.formatForClipboard(widget.itemNames),
+        ),
+      );
+      if (widget.itemNames.isNotEmpty) {
+        await GroceryService.openDeepLink(provider, widget.itemNames.first);
+      } else {
+        await GroceryService.openStore(provider);
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('List copied to clipboard!'),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showSendingProgress(GroceryProvider provider) {
+    final name = _providerData[provider]?.name ?? 'store';
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => _SendingProgressDialog(
+        providerName: name,
+        itemNames: widget.itemNames,
+        provider: provider,
+      ),
+    );
+  }
+
+  void _copyToClipboard() {
+    Navigator.pop(context);
+    Clipboard.setData(
+      ClipboardData(
+        text: GroceryService.formatForClipboard(widget.itemNames),
+      ),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${widget.itemCount} items copied to clipboard'),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+}
+
+/// Section header (e.g. "Direct cart integration", "Open in browser")
+class _SectionLabel extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  const _SectionLabel(
+      {required this.icon, required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: color,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Provider display metadata
+class _ProviderDisplay {
+  final String emoji;
+  final String name;
+  final Color color;
+  final String subtitle;
+  const _ProviderDisplay({
+    required this.emoji,
+    required this.name,
+    required this.color,
+    required this.subtitle,
+  });
+}
+
+/// A single provider row in the bottom sheet
+class _ProviderTile extends StatelessWidget {
+  final _ProviderDisplay display;
+  final bool isApi;
+  final bool isConfigured;
+  final bool isLoading;
+  final VoidCallback onTap;
+
+  const _ProviderTile({
+    required this.display,
+    required this.isApi,
+    required this.isConfigured,
+    required this.isLoading,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: display.color.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Text(display.emoji, style: const TextStyle(fontSize: 26)),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(display.name,
+                            style: theme.textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.w600)),
+                        if (isApi && isConfigured) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF43B02A).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'Connected',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: const Color(0xFF43B02A),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      display.subtitle,
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: Colors.grey.shade600, fontSize: 11),
+                    ),
+                  ],
+                ),
+              ),
+              if (isApi && isConfigured)
+                Icon(Icons.add_shopping_cart, color: display.color, size: 20)
+              else
+                Icon(Icons.open_in_new,
+                    color: Colors.grey.shade400, size: 18),
+            ],
           ),
         ),
       ),
@@ -660,30 +996,171 @@ class _OrderOnlineButton extends StatelessWidget {
   }
 }
 
-class _OrderOptionTile extends StatelessWidget {
-  final String emoji, name;
-  final Color color;
-  final VoidCallback onTap;
-  const _OrderOptionTile({required this.emoji, required this.name, required this.color, required this.onTap});
+/// Progress dialog shown when sending items via API
+class _SendingProgressDialog extends StatefulWidget {
+  final String providerName;
+  final List<String> itemNames;
+  final GroceryProvider provider;
+
+  const _SendingProgressDialog({
+    required this.providerName,
+    required this.itemNames,
+    required this.provider,
+  });
+
+  @override
+  State<_SendingProgressDialog> createState() => _SendingProgressDialogState();
+}
+
+class _SendingProgressDialogState extends State<_SendingProgressDialog> {
+  int _current = 0;
+  int _total = 0;
+  String _currentItem = '';
+  bool _done = false;
+  CartAddResult? _result;
+
+  @override
+  void initState() {
+    super.initState();
+    _total = widget.itemNames.length;
+    _sendItems();
+  }
+
+  Future<void> _sendItems() async {
+    final result = await GroceryService.sendToStore(
+      provider: widget.provider,
+      ingredientNames: widget.itemNames,
+      onProgress: (current, total, item) {
+        if (mounted) {
+          setState(() {
+            _current = current;
+            _total = total;
+            _currentItem = item;
+          });
+        }
+      },
+    );
+    if (mounted) {
+      setState(() {
+        _done = true;
+        _result = result;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: color.withValues(alpha: 0.1),
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Row(children: [
-            Text(emoji, style: const TextStyle(fontSize: 28)),
-            const SizedBox(width: 16),
-            Text(name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-            const Spacer(),
-            Icon(Icons.open_in_new, color: color),
-          ]),
-        ),
+    final theme = Theme.of(context);
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!_done) ...[
+            const SizedBox(height: 8),
+            SizedBox(
+              width: 48,
+              height: 48,
+              child: CircularProgressIndicator(
+                value: _total > 0 ? _current / _total : null,
+                strokeWidth: 3,
+                color: const Color(0xFFE88B00),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Adding to ${widget.providerName}…',
+              style: theme.textTheme.titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '$_current of $_total items',
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+            ),
+            if (_currentItem.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                _currentItem,
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: Colors.grey.shade500, fontSize: 11),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ] else ...[
+            Icon(
+              _result?.success == true
+                  ? Icons.check_circle
+                  : Icons.warning_amber_rounded,
+              color: _result?.success == true
+                  ? const Color(0xFF43B02A)
+                  : const Color(0xFFE88B00),
+              size: 48,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _result?.success == true ? 'Items added!' : 'Partially added',
+              style: theme.textTheme.titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _result?.success == true
+                  ? '${_result!.itemsAdded} items in your ${widget.providerName} cart'
+                  : '${_result?.itemsAdded ?? 0} added, ${_result?.itemsFailed ?? 0} not found',
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+            if (_result?.failedItems.isNotEmpty == true) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                constraints: const BoxConstraints(maxHeight: 100),
+                child: SingleChildScrollView(
+                  child: Text(
+                    'Not found: ${_result!.failedItems.join(", ")}',
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(fontSize: 11, color: Colors.orange.shade700),
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (_result?.checkoutUrl != null)
+                  FilledButton.icon(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      final url = Uri.parse(_result!.checkoutUrl!);
+                      if (await canLaunchUrl(url)) {
+                        launchUrl(url, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    icon: const Icon(Icons.shopping_cart_checkout, size: 18),
+                    label: const Text('Go to cart'),
+                  )
+                else
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Done'),
+                  ),
+                if (_result?.checkoutUrl != null) ...[
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Close'),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -742,7 +1219,6 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _controller.addListener(_onTextChanged);
-    // Load suggestion database + auto-focus
     _initService();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
@@ -754,15 +1230,25 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     if (mounted) setState(() => _serviceReady = true);
   }
 
-  /// Re-request focus when returning from another app so the keyboard stays up.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && mounted) {
-      // Small delay to let the OS settle before requesting focus
-      Future.delayed(const Duration(milliseconds: 200), () {
-        if (mounted && !_focusNode.hasFocus) {
-          _focusNode.requestFocus();
-        }
+      _ensureKeyboardVisible();
+    }
+  }
+
+  /// Aggressively re-request focus and force the soft keyboard open.
+  /// Uses multiple retries with increasing delays because Android/iOS
+  /// don't always honour a single requestFocus after returning from
+  /// another app or the task switcher.
+  void _ensureKeyboardVisible() {
+    const delays = [100, 250, 500];
+    for (final ms in delays) {
+      Future.delayed(Duration(milliseconds: ms), () {
+        if (!mounted) return;
+        _focusNode.requestFocus();
+        // Explicitly tell the platform to show the soft keyboard
+        SystemChannels.textInput.invokeMethod('TextInput.show');
       });
     }
   }
@@ -808,15 +1294,11 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     });
 
     _controller.clear();
-    // Keep focus so user can immediately type the next item
-    _focusNode.requestFocus();
+    _ensureKeyboardVisible();
   }
 
-  /// User tapped a suggestion – insert name into field (preserving any quantity
-  /// prefix the user already typed) then add immediately.
   void _onSuggestionTap(String suggestion) {
     final currentText = _controller.text;
-    // Try to detect if user already typed a quantity prefix like "2 cups "
     final prefixMatch = RegExp(
       r'^((?:[½¼¾⅓⅔⅛⅜⅝⅞]|\d+\s*[½¼¾⅓⅔⅛⅜⅝⅞]?|\d+\s+\d+/\d+|\d+\.\d+|\d+/\d+|\d+)'
       r'\s*'
@@ -863,17 +1345,17 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
         actions: [
           if (_recentlyAdded.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.only(right: 4),
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     '${_recentlyAdded.length} added',
-                    style: theme.textTheme.labelMedium?.copyWith(
+                    style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.w600,
                     ),
@@ -881,11 +1363,19 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                 ),
               ),
             ),
+          TextButton.icon(
+            onPressed: () => _showImportOptions(context),
+            icon: const Icon(Icons.download_outlined, size: 20),
+            label: const Text('Import'),
+            style: TextButton.styleFrom(
+              foregroundColor: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(width: 4),
         ],
       ),
       body: Column(
         children: [
-          // ---- Input area ----
           Container(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
             decoration: BoxDecoration(
@@ -934,18 +1424,18 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                                 size: 20, color: theme.colorScheme.outline),
                             onPressed: () {
                               _controller.clear();
-                              _focusNode.requestFocus();
+                              _ensureKeyboardVisible();
                             },
                           ),
                         Container(
                           margin: const EdgeInsets.only(right: 6),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE8A860),
+                            color: theme.colorScheme.primary,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: IconButton(
-                            icon: const Icon(Icons.arrow_upward,
-                                color: Colors.white, size: 20),
+                            icon: Icon(Icons.arrow_upward,
+                                color: theme.colorScheme.onPrimary, size: 20),
                             constraints: const BoxConstraints(
                               minWidth: 36,
                               minHeight: 36,
@@ -971,8 +1461,6 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
               ],
             ),
           ),
-
-          // ---- Content area (suggestions / recently added) ----
           Expanded(
             child: _buildContentArea(theme, isDark),
           ),
@@ -982,17 +1470,12 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
   }
 
   Widget _buildContentArea(ThemeData theme, bool isDark) {
-    // Show suggestions while typing
     if (_controller.text.trim().isNotEmpty && _suggestions.isNotEmpty) {
       return _buildSuggestionsList(theme, isDark);
     }
-
-    // Show recently added items
     if (_recentlyAdded.isNotEmpty) {
       return _buildRecentlyAdded(theme, isDark);
     }
-
-    // Empty state
     return _buildEmptyHint(theme);
   }
 
@@ -1004,7 +1487,6 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
       itemBuilder: (context, index) {
         final result = _suggestions[index];
         final query = _controller.text.trim().toLowerCase();
-        // Strip quantity/unit for highlight matching
         final strippedQuery = IngredientSuggestionService.instance
             .isLoaded
             ? _stripForHighlight(query)
@@ -1053,33 +1535,497 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
           ],
         ),
         const SizedBox(height: 12),
-        ..._recentlyAdded.map((item) => Padding(
-          padding: const EdgeInsets.only(bottom: 6),
-          child: Container(
-            padding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
+        ..._recentlyAdded.asMap().entries.map((entry) {
+          final idx = entry.key;
+          final item = entry.value;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Material(
               color: isDark
                   ? theme.colorScheme.surfaceContainerHighest
                   .withValues(alpha: 0.5)
                   : theme.colorScheme.primaryContainer
                   .withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.check,
-                    size: 16, color: theme.colorScheme.primary),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(item, style: theme.textTheme.bodyMedium),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () => _editRecentItem(idx, item),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4, right: 4),
+                  child: Row(
+                    children: [
+                      Icon(Icons.check,
+                          size: 16, color: theme.colorScheme.primary),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(item, style: theme.textTheme.bodyMedium),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close, size: 18,
+                            color: theme.colorScheme.outline),
+                        visualDensity: VisualDensity.compact,
+                        tooltip: 'Remove from list',
+                        onPressed: () => _removeRecentItem(idx, item),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
+              ),
             ),
-          ),
-        )),
+          );
+        }),
       ],
     );
+  }
+
+  /// Edit a recently-added item's name
+  void _editRecentItem(int index, String currentName) {
+    final editController = TextEditingController(text: currentName);
+    final theme = Theme.of(context);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Edit item'),
+        content: TextField(
+          controller: editController,
+          autofocus: true,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          onSubmitted: (_) {
+            _applyRecentEdit(ctx, index, currentName, editController.text.trim());
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => _applyRecentEdit(
+                ctx, index, currentName, editController.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    _ensureKeyboardVisible();
+  }
+
+  void _applyRecentEdit(BuildContext ctx, int index, String oldName, String newName) {
+    if (newName.isEmpty) {
+      Navigator.pop(ctx);
+      return;
+    }
+    final shoppingDao = ref.read(shoppingDaoProvider);
+
+    // Update item in database by finding it by name
+    shoppingDao.getItemsForList(widget.listId).then((items) {
+      final match = items.where((i) => i.name == oldName).firstOrNull;
+      if (match != null) {
+        shoppingDao.updateItem(match.id, name: newName);
+      }
+    });
+
+    setState(() {
+      _recentlyAdded[index] = newName;
+    });
+    Navigator.pop(ctx);
+    _ensureKeyboardVisible();
+  }
+
+  /// Remove item from shopping list and from recently-added
+  void _removeRecentItem(int index, String itemName) {
+    final shoppingDao = ref.read(shoppingDaoProvider);
+
+    // Delete from database by finding the matching item
+    shoppingDao.getItemsForList(widget.listId).then((items) {
+      final match = items.where((i) => i.name == itemName).firstOrNull;
+      if (match != null) shoppingDao.deleteItem(match.id);
+    });
+
+    setState(() {
+      _recentlyAdded.removeAt(index);
+    });
+    _ensureKeyboardVisible();
+  }
+
+  // ---- Import methods ----
+
+  void _showImportOptions(BuildContext context) {
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'Import items',
+                  style: theme.textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: Container(
+                  width: 44, height: 44,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Icons.text_snippet_outlined,
+                      color: theme.colorScheme.primary),
+                ),
+                title: const Text('From text'),
+                subtitle: const Text('Paste or type a list of items'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _importFromText();
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  width: 44, height: 44,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Icons.camera_alt_outlined,
+                      color: theme.colorScheme.primary),
+                ),
+                title: const Text('From photo'),
+                subtitle: const Text('Take a photo or pick from gallery'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showPhotoSourcePicker();
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _importFromText() {
+    final textController = TextEditingController();
+    final theme = Theme.of(context);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Import from text'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'One item per line',
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: theme.colorScheme.outline),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: textController,
+                autofocus: true,
+                maxLines: 8,
+                minLines: 4,
+                decoration: InputDecoration(
+                  hintText: '2 cups flour\nchicken breast\n1 lb ground beef\nmilk\n...',
+                  hintStyle: TextStyle(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.4),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _processImportedLines(textController.text);
+            },
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Add items'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPhotoSourcePicker() {
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Take photo'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _importFromPhoto(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from gallery'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _importFromPhoto(ImageSource.gallery);
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _importFromPhoto(ImageSource source) async {
+    final picker = ImagePicker();
+    final XFile? image;
+    try {
+      image = await picker.pickImage(source: source, imageQuality: 85);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not access ${source == ImageSource.camera ? "camera" : "gallery"}')),
+        );
+      }
+      return;
+    }
+    if (image == null) return;
+
+    // Show a loading indicator
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    try {
+      final inputImage = InputImage.fromFilePath(image.path);
+      final recognizer = TextRecognizer();
+      final recognized = await recognizer.processImage(inputImage);
+      await recognizer.close();
+
+      if (mounted) Navigator.pop(context); // dismiss loading
+
+      final text = recognized.text;
+      if (text.trim().isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No text found in image')),
+          );
+        }
+        return;
+      }
+
+      _showOcrPreview(text);
+    } catch (e) {
+      if (mounted) Navigator.pop(context); // dismiss loading
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error reading image: $e')),
+        );
+      }
+    }
+  }
+
+  /// Show OCR results for review before adding
+  void _showOcrPreview(String rawText) {
+    final lines = _parseTextToLines(rawText);
+    final selected = List<bool>.filled(lines.length, true);
+    final theme = Theme.of(context);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: Row(
+            children: [
+              const Expanded(child: Text('Review items')),
+              TextButton(
+                onPressed: () {
+                  final allSelected = selected.every((s) => s);
+                  setDialogState(() {
+                    for (int i = 0; i < selected.length; i++) {
+                      selected[i] = !allSelected;
+                    }
+                  });
+                },
+                child: Text(selected.every((s) => s) ? 'Deselect all' : 'Select all'),
+              ),
+            ],
+          ),
+          content: SizedBox(
+            width: double.maxFinite,
+            height: 350,
+            child: lines.isEmpty
+                ? Center(
+              child: Text('No items detected',
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(color: theme.colorScheme.outline)),
+            )
+                : ListView.builder(
+              itemCount: lines.length,
+              itemBuilder: (_, i) => CheckboxListTile(
+                value: selected[i],
+                onChanged: (v) =>
+                    setDialogState(() => selected[i] = v ?? false),
+                title: Text(lines[i]),
+                controlAffinity: ListTileControlAffinity.leading,
+                dense: true,
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.pop(ctx);
+                final selectedItems = <String>[];
+                for (int i = 0; i < lines.length; i++) {
+                  if (selected[i]) selectedItems.add(lines[i]);
+                }
+                _bulkAddItems(selectedItems);
+              },
+              icon: const Icon(Icons.add, size: 18),
+              label: Text(
+                'Add ${selected.where((s) => s).length} items',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Parse raw text into individual ingredient lines
+  List<String> _parseTextToLines(String rawText) {
+    return rawText
+        .split(RegExp(r'[\n\r]+'))
+        .map((line) => line.trim())
+    // Remove common list prefixes: bullets, numbers, dashes
+        .map((line) => line.replaceFirst(RegExp(r'^[\-\•\*\→\>]\s*'), ''))
+        .map((line) => line.replaceFirst(RegExp(r'^\d+[\.\)]\s*'), ''))
+        .map((line) => line.replaceFirst(RegExp(r'^[☐☑✓✔]\s*'), ''))
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty && line.length > 1)
+        .toList();
+  }
+
+  /// Process text import (from paste dialog)
+  void _processImportedLines(String rawText) {
+    final lines = _parseTextToLines(rawText);
+    if (lines.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No items found in text')),
+      );
+      return;
+    }
+    _showOcrPreview(rawText);
+  }
+
+  /// Bulk-add items to the shopping list
+  void _bulkAddItems(List<String> items) {
+    if (items.isEmpty) return;
+
+    final shoppingDao = ref.read(shoppingDaoProvider);
+    final mappingsDao = ref.read(userIngredientMappingsDaoProvider);
+
+    for (final text in items) {
+      final normalized = normalizeIngredientName(text);
+      final categoryId =
+      getShoppingCategory(text, userMappings: widget.userMappings);
+
+      final id = 'item_${DateTime.now().millisecondsSinceEpoch}_${text.hashCode.abs()}';
+      shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
+        id: id,
+        listId: widget.listId,
+        name: text,
+        sortOrder: const drift.Value(0),
+        shoppingCategoryId: drift.Value(categoryId),
+      ));
+
+      if (!widget.userMappings.containsKey(normalized)) {
+        mappingsDao.setMapping(normalized, categoryId);
+      }
+    }
+
+    widget.onItemAdded();
+
+    setState(() {
+      for (final text in items.reversed) {
+        _recentlyAdded.insert(0, text);
+      }
+      while (_recentlyAdded.length > 30) _recentlyAdded.removeLast();
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${items.length} items added'),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+    _ensureKeyboardVisible();
   }
 
   Widget _buildEmptyHint(ThemeData theme) {
@@ -1147,7 +2093,6 @@ class _SuggestionTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
           children: [
-            // Category icon
             Container(
               width: 36,
               height: 36,
@@ -1162,7 +2107,6 @@ class _SuggestionTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            // Name with highlighted match + category subtitle
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1181,7 +2125,6 @@ class _SuggestionTile extends StatelessWidget {
                 ],
               ),
             ),
-            // Quick add button
             IconButton(
               icon: Icon(Icons.add_circle_outline,
                   color: theme.colorScheme.primary, size: 22),
@@ -1238,26 +2181,14 @@ class _SuggestionTile extends StatelessWidget {
     );
   }
 
-  /// Map an ingredient to a descriptive emoji.
-  /// Priority: ingredient name keywords → USDA foodCategory → generic fallback.
   String _categoryIconFromUsda(String usdaCategory, String ingredientName) {
     final n = ingredientName.toLowerCase();
-
-    // ── Name-based matching (most specific → least specific) ──
-
-    // Dairy & Eggs
     if (n.contains('egg')) return '🥚';
     if (n.contains('butter') && !n.contains('peanut') && !n.contains('almond') && !n.contains('butternut')) return '🧈';
-    if (n.contains('cheese') || n.contains('cheddar') || n.contains('mozzarella') ||
-        n.contains('parmesan') || n.contains('gouda') || n.contains('brie') ||
-        n.contains('feta') || n.contains('ricotta') || n.contains('gruyere')) return '🧀';
+    if (n.contains('cheese') || n.contains('cheddar') || n.contains('mozzarella') || n.contains('parmesan') || n.contains('gouda') || n.contains('brie') || n.contains('feta') || n.contains('ricotta') || n.contains('gruyere')) return '🧀';
     if (n.contains('yogurt') || n.contains('kefir')) return '🫙';
-    if (n.contains('milk') || n.contains('cream') || n.contains('half and half') ||
-        n.contains('buttermilk') || n.contains('whey')) return '🥛';
-    if (n.contains('ice cream') || n.contains('gelato') || n.contains('sorbet') ||
-        n.contains('sherbet') || n.contains('frozen yogurt')) return '🍨';
-
-    // Fruits
+    if (n.contains('milk') || n.contains('cream') || n.contains('half and half') || n.contains('buttermilk') || n.contains('whey')) return '🥛';
+    if (n.contains('ice cream') || n.contains('gelato') || n.contains('sorbet') || n.contains('sherbet') || n.contains('frozen yogurt')) return '🍨';
     if (n.contains('apple') && !n.contains('pineapple')) return '🍎';
     if (n.contains('banana') || n.contains('plantain')) return '🍌';
     if (n.contains('orange') && !n.contains('chicken')) return '🍊';
@@ -1266,87 +2197,51 @@ class _SuggestionTile extends StatelessWidget {
     if (n.contains('grape') && !n.contains('grapefruit')) return '🍇';
     if (n.contains('grapefruit')) return '🍊';
     if (n.contains('strawberr')) return '🍓';
-    if (n.contains('blueberr') || n.contains('blackberr') || n.contains('raspberr') ||
-        n.contains('cranberr') || n.contains('boysenberr') || n.contains('berr')) return '🫐';
+    if (n.contains('blueberr') || n.contains('blackberr') || n.contains('raspberr') || n.contains('cranberr') || n.contains('boysenberr') || n.contains('berr')) return '🫐';
     if (n.contains('cherry') || n.contains('cherries')) return '🍒';
     if (n.contains('peach') || n.contains('nectarine') || n.contains('apricot')) return '🍑';
     if (n.contains('pear')) return '🍐';
     if (n.contains('pineapple')) return '🍍';
-    if (n.contains('watermelon') || n.contains('melon') || n.contains('cantaloupe') ||
-        n.contains('honeydew')) return '🍈';
-    if (n.contains('mango') || n.contains('papaya') || n.contains('guava') ||
-        n.contains('passion fruit') || n.contains('dragon fruit') || n.contains('lychee') ||
-        n.contains('kiwi') || n.contains('fig') || n.contains('date') ||
-        n.contains('persimmon') || n.contains('pomegranate')) return '🥭';
+    if (n.contains('watermelon') || n.contains('melon') || n.contains('cantaloupe') || n.contains('honeydew')) return '🍈';
+    if (n.contains('mango') || n.contains('papaya') || n.contains('guava') || n.contains('passion fruit') || n.contains('dragon fruit') || n.contains('lychee') || n.contains('kiwi') || n.contains('fig') || n.contains('date') || n.contains('persimmon') || n.contains('pomegranate')) return '🥭';
     if (n.contains('coconut')) return '🥥';
     if (n.contains('avocado')) return '🥑';
-
-    // Vegetables
     if (n.contains('tomato')) return '🍅';
     if (n.contains('potato') && !n.contains('sweet potato')) return '🥔';
     if (n.contains('sweet potato') || n.contains('yam')) return '🍠';
-    if (n.contains('corn') && !n.contains('corned') && !n.contains('cornish') &&
-        !n.contains('acorn')) return '🌽';
+    if (n.contains('corn') && !n.contains('corned') && !n.contains('cornish') && !n.contains('acorn')) return '🌽';
     if (n.contains('carrot')) return '🥕';
     if (n.contains('broccoli')) return '🥦';
-    if (n.contains('lettuce') || n.contains('salad') || n.contains('greens') ||
-        n.contains('arugula') || n.contains('spinach') || n.contains('kale') ||
-        n.contains('chard') || n.contains('romaine')) return '🥬';
+    if (n.contains('lettuce') || n.contains('salad') || n.contains('greens') || n.contains('arugula') || n.contains('spinach') || n.contains('kale') || n.contains('chard') || n.contains('romaine')) return '🥬';
     if (n.contains('cucumber') || n.contains('pickle') || n.contains('gherkin')) return '🥒';
     if (n.contains('pepper') && !n.contains('peppercorn') && !n.contains('dr pepper')) return '🌶️';
-    if (n.contains('onion') || n.contains('shallot') || n.contains('scallion') ||
-        n.contains('leek') || n.contains('chive')) return '🧅';
+    if (n.contains('onion') || n.contains('shallot') || n.contains('scallion') || n.contains('leek') || n.contains('chive')) return '🧅';
     if (n.contains('garlic')) return '🧄';
     if (n.contains('mushroom')) return '🍄';
     if (n.contains('eggplant') || n.contains('aubergine')) return '🍆';
-    if (n.contains('pumpkin') || n.contains('squash') || n.contains('zucchini') ||
-        n.contains('gourd')) return '🎃';
-    if (n.contains('bean') || n.contains('lentil') || n.contains('chickpea') ||
-        n.contains('pea') && !n.contains('peach') && !n.contains('peanut') && !n.contains('pear')) return '🫘';
+    if (n.contains('pumpkin') || n.contains('squash') || n.contains('zucchini') || n.contains('gourd')) return '🎃';
+    if (n.contains('bean') || n.contains('lentil') || n.contains('chickpea') || n.contains('pea') && !n.contains('peach') && !n.contains('peanut') && !n.contains('pear')) return '🫘';
     if (n.contains('cabbage') || n.contains('coleslaw') || n.contains('sauerkraut')) return '🥬';
-    if (n.contains('celery') || n.contains('asparagus') || n.contains('artichoke') ||
-        n.contains('beet') || n.contains('turnip') || n.contains('radish') ||
-        n.contains('parsnip') || n.contains('fennel') || n.contains('jicama')) return '🥬';
-
-    // Meat
-    if (n.contains('steak') || n.contains('ribeye') || n.contains('sirloin') ||
-        n.contains('filet') || n.contains('tenderloin') || n.contains('brisket') ||
-        n.contains('t-bone') || n.contains('porterhouse')) return '🥩';
+    if (n.contains('celery') || n.contains('asparagus') || n.contains('artichoke') || n.contains('beet') || n.contains('turnip') || n.contains('radish') || n.contains('parsnip') || n.contains('fennel') || n.contains('jicama')) return '🥬';
+    if (n.contains('steak') || n.contains('ribeye') || n.contains('sirloin') || n.contains('filet') || n.contains('tenderloin') || n.contains('brisket') || n.contains('t-bone') || n.contains('porterhouse')) return '🥩';
     if (n.contains('bacon') || n.contains('pancetta')) return '🥓';
-    if (n.contains('sausage') || n.contains('bratwurst') || n.contains('kielbasa') ||
-        n.contains('frankfurter') || n.contains('hot dog') || n.contains('chorizo') ||
-        n.contains('andouille') || n.contains('salami') || n.contains('pepperoni')) return '🌭';
+    if (n.contains('sausage') || n.contains('bratwurst') || n.contains('kielbasa') || n.contains('frankfurter') || n.contains('hot dog') || n.contains('chorizo') || n.contains('andouille') || n.contains('salami') || n.contains('pepperoni')) return '🌭';
     if (n.contains('ham') && !n.contains('hamburger') && !n.contains('chamomile')) return '🍖';
     if (n.contains('rib') && !n.contains('ribbon')) return '🍖';
     if (n.contains('chicken') || n.contains('poultry')) return '🍗';
     if (n.contains('turkey')) return '🦃';
     if (n.contains('duck')) return '🦆';
-    if (n.contains('beef') || n.contains('ground beef') || n.contains('hamburger') ||
-        n.contains('veal') || n.contains('venison') || n.contains('bison') ||
-        n.contains('lamb') || n.contains('goat meat') || n.contains('caribou') ||
-        n.contains('moose') || n.contains('elk')) return '🥩';
+    if (n.contains('beef') || n.contains('ground beef') || n.contains('hamburger') || n.contains('veal') || n.contains('venison') || n.contains('bison') || n.contains('lamb') || n.contains('goat meat') || n.contains('caribou') || n.contains('moose') || n.contains('elk')) return '🥩';
     if (n.contains('pork') || n.contains('pulled pork') || n.contains('carnitas')) return '🥩';
-
-    // Seafood
     if (n.contains('salmon')) return '🐟';
     if (n.contains('tuna')) return '🐟';
     if (n.contains('shrimp') || n.contains('prawn')) return '🦐';
     if (n.contains('crab')) return '🦀';
     if (n.contains('lobster')) return '🦞';
-    if (n.contains('oyster') || n.contains('mussel') || n.contains('clam') ||
-        n.contains('scallop')) return '🦪';
+    if (n.contains('oyster') || n.contains('mussel') || n.contains('clam') || n.contains('scallop')) return '🦪';
     if (n.contains('squid') || n.contains('calamari') || n.contains('octopus')) return '🦑';
-    if (n.contains('fish') || n.contains('cod') || n.contains('tilapia') ||
-        n.contains('halibut') || n.contains('bass') || n.contains('trout') ||
-        n.contains('catfish') || n.contains('mahi') || n.contains('swordfish') ||
-        n.contains('anchov') || n.contains('sardine') || n.contains('herring') ||
-        n.contains('mackerel')) return '🐟';
-
-    // Bread & Baked
-    if (n.contains('bread') || n.contains('toast') || n.contains('baguette') ||
-        n.contains('ciabatta') || n.contains('sourdough') || n.contains('brioche') ||
-        n.contains('naan') || n.contains('pita') || n.contains('focaccia') ||
-        n.contains('tortilla') || n.contains('flatbread')) return '🍞';
+    if (n.contains('fish') || n.contains('cod') || n.contains('tilapia') || n.contains('halibut') || n.contains('bass') || n.contains('trout') || n.contains('catfish') || n.contains('mahi') || n.contains('swordfish') || n.contains('anchov') || n.contains('sardine') || n.contains('herring') || n.contains('mackerel')) return '🐟';
+    if (n.contains('bread') || n.contains('toast') || n.contains('baguette') || n.contains('ciabatta') || n.contains('sourdough') || n.contains('brioche') || n.contains('naan') || n.contains('pita') || n.contains('focaccia') || n.contains('tortilla') || n.contains('flatbread')) return '🍞';
     if (n.contains('croissant') || n.contains('pastry') || n.contains('danish')) return '🥐';
     if (n.contains('bagel')) return '🥯';
     if (n.contains('pretzel')) return '🥨';
@@ -1356,127 +2251,59 @@ class _SuggestionTile extends StatelessWidget {
     if (n.contains('cookie') || n.contains('biscuit')) return '🍪';
     if (n.contains('pie') && !n.contains('spice')) return '🥧';
     if (n.contains('donut') || n.contains('doughnut')) return '🍩';
-
-    // Grains & Pasta
     if (n.contains('rice') && !n.contains('price') && !n.contains('licorice')) return '🍚';
-    if (n.contains('pasta') || n.contains('spaghetti') || n.contains('noodle') ||
-        n.contains('macaroni') || n.contains('penne') || n.contains('fettuccine') ||
-        n.contains('linguine') || n.contains('ravioli') || n.contains('lasagna') ||
-        n.contains('ramen') || n.contains('udon') || n.contains('orzo')) return '🍝';
-    if (n.contains('flour') || n.contains('wheat') || n.contains('oat') ||
-        n.contains('barley') || n.contains('quinoa') || n.contains('couscous') ||
-        n.contains('bulgur') || n.contains('millet') || n.contains('farro') ||
-        n.contains('cornmeal') || n.contains('polenta') || n.contains('grits')) return '🌾';
+    if (n.contains('pasta') || n.contains('spaghetti') || n.contains('noodle') || n.contains('macaroni') || n.contains('penne') || n.contains('fettuccine') || n.contains('linguine') || n.contains('ravioli') || n.contains('lasagna') || n.contains('ramen') || n.contains('udon') || n.contains('orzo')) return '🍝';
+    if (n.contains('flour') || n.contains('wheat') || n.contains('oat') || n.contains('barley') || n.contains('quinoa') || n.contains('couscous') || n.contains('bulgur') || n.contains('millet') || n.contains('farro') || n.contains('cornmeal') || n.contains('polenta') || n.contains('grits')) return '🌾';
     if (n.contains('cereal') || n.contains('granola')) return '🥣';
-
-    // Nuts & Seeds
     if (n.contains('peanut')) return '🥜';
-    if (n.contains('almond') || n.contains('walnut') || n.contains('pecan') ||
-        n.contains('cashew') || n.contains('pistachio') || n.contains('hazelnut') ||
-        n.contains('macadamia') || n.contains('chestnut') || n.contains('brazil nut') ||
-        n.contains('pine nut')) return '🌰';
-    if (n.contains('seed') || n.contains('sesame') || n.contains('sunflower') ||
-        n.contains('flax') || n.contains('chia') || n.contains('hemp seed') ||
-        n.contains('poppy')) return '🌻';
-
-    // Spices & Seasonings
+    if (n.contains('almond') || n.contains('walnut') || n.contains('pecan') || n.contains('cashew') || n.contains('pistachio') || n.contains('hazelnut') || n.contains('macadamia') || n.contains('chestnut') || n.contains('brazil nut') || n.contains('pine nut')) return '🌰';
+    if (n.contains('seed') || n.contains('sesame') || n.contains('sunflower') || n.contains('flax') || n.contains('chia') || n.contains('hemp seed') || n.contains('poppy')) return '🌻';
     if (n.contains('salt') && !n.contains('malt')) return '🧂';
-    if (n.contains('cinnamon') || n.contains('nutmeg') || n.contains('clove') ||
-        n.contains('allspice') || n.contains('cardamom') || n.contains('ginger') &&
-        !n.contains('ginger ale')) return '🫚';
+    if (n.contains('cinnamon') || n.contains('nutmeg') || n.contains('clove') || n.contains('allspice') || n.contains('cardamom') || n.contains('ginger') && !n.contains('ginger ale')) return '🫚';
     if (n.contains('vanilla')) return '🌸';
-    if (n.contains('herb') || n.contains('basil') || n.contains('oregano') ||
-        n.contains('thyme') || n.contains('rosemary') || n.contains('sage') ||
-        n.contains('cilantro') || n.contains('parsley') || n.contains('dill') ||
-        n.contains('mint') || n.contains('tarragon') || n.contains('bay leaf') ||
-        n.contains('marjoram') || n.contains('chervil')) return '🌿';
-    if (n.contains('spice') || n.contains('cumin') || n.contains('turmeric') ||
-        n.contains('paprika') || n.contains('curry') || n.contains('chili powder') ||
-        n.contains('cayenne') || n.contains('saffron') || n.contains('coriander') ||
-        n.contains('adobo') || n.contains('seasoning') || n.contains('rub') ||
-        n.contains('five spice') || n.contains('garam masala') || n.contains('za\'atar')) return '✨';
-    if (n.contains('pepper') && (n.contains('black') || n.contains('white') ||
-        n.contains('peppercorn') || n.contains('ground pepper'))) return '🫙';
-
-    // Sauces & Condiments
+    if (n.contains('herb') || n.contains('basil') || n.contains('oregano') || n.contains('thyme') || n.contains('rosemary') || n.contains('sage') || n.contains('cilantro') || n.contains('parsley') || n.contains('dill') || n.contains('mint') || n.contains('tarragon') || n.contains('bay leaf') || n.contains('marjoram') || n.contains('chervil')) return '🌿';
+    if (n.contains('spice') || n.contains('cumin') || n.contains('turmeric') || n.contains('paprika') || n.contains('curry') || n.contains('chili powder') || n.contains('cayenne') || n.contains('saffron') || n.contains('coriander') || n.contains('adobo') || n.contains('seasoning') || n.contains('rub') || n.contains('five spice') || n.contains('garam masala')) return '✨';
+    if (n.contains('pepper') && (n.contains('black') || n.contains('white') || n.contains('peppercorn') || n.contains('ground pepper'))) return '🫙';
     if (n.contains('ketchup') || n.contains('catsup')) return '🍅';
     if (n.contains('mustard')) return '🟡';
     if (n.contains('mayonnaise') || n.contains('mayo')) return '🫙';
-    if (n.contains('hot sauce') || n.contains('sriracha') || n.contains('tabasco') ||
-        n.contains('buffalo sauce')) return '🌶️';
-    if (n.contains('soy sauce') || n.contains('tamari') || n.contains('teriyaki') ||
-        n.contains('fish sauce') || n.contains('oyster sauce') || n.contains('hoisin') ||
-        n.contains('worcestershire')) return '🫗';
+    if (n.contains('hot sauce') || n.contains('sriracha') || n.contains('tabasco') || n.contains('buffalo sauce')) return '🌶️';
+    if (n.contains('soy sauce') || n.contains('tamari') || n.contains('teriyaki') || n.contains('fish sauce') || n.contains('oyster sauce') || n.contains('hoisin') || n.contains('worcestershire')) return '🫗';
     if (n.contains('bbq') || n.contains('barbecue')) return '🔥';
     if (n.contains('salsa') || n.contains('pico')) return '🫙';
-    if (n.contains('sauce') || n.contains('a1') || n.contains('steak sauce') ||
-        n.contains('marinara') || n.contains('alfredo') || n.contains('pesto') ||
-        n.contains('gravy') || n.contains('dressing') || n.contains('vinaigrette')) return '🫗';
-
-    // Oils & Vinegars
+    if (n.contains('sauce') || n.contains('a1') || n.contains('steak sauce') || n.contains('marinara') || n.contains('alfredo') || n.contains('pesto') || n.contains('gravy') || n.contains('dressing') || n.contains('vinaigrette')) return '🫗';
     if (n.contains('olive oil') || n.contains('oil') && !n.contains('foil')) return '🫒';
     if (n.contains('vinegar') || n.contains('balsamic')) return '🍶';
-
-    // Sweeteners & Baking
-    if (n.contains('sugar') || n.contains('sweetener') || n.contains('stevia') ||
-        n.contains('splenda')) return '🍬';
+    if (n.contains('sugar') || n.contains('sweetener') || n.contains('stevia') || n.contains('splenda')) return '🍬';
     if (n.contains('honey')) return '🍯';
-    if (n.contains('maple') || n.contains('syrup') || n.contains('molasses') ||
-        n.contains('agave')) return '🍁';
+    if (n.contains('maple') || n.contains('syrup') || n.contains('molasses') || n.contains('agave')) return '🍁';
     if (n.contains('chocolate') || n.contains('cocoa') || n.contains('cacao')) return '🍫';
-    if (n.contains('candy') || n.contains('caramel') || n.contains('toffee') ||
-        n.contains('marshmallow') || n.contains('gummy')) return '🍬';
-    if (n.contains('jam') || n.contains('jelly') || n.contains('preserves') ||
-        n.contains('marmalade')) return '🍇';
-    if (n.contains('baking powder') || n.contains('baking soda') ||
-        n.contains('yeast') || n.contains('cornstarch') || n.contains('gelatin') ||
-        n.contains('pectin')) return '🧁';
-
-    // Beverages
-    if (n.contains('coffee') || n.contains('espresso') || n.contains('cappuccino') ||
-        n.contains('latte')) return '☕';
+    if (n.contains('candy') || n.contains('caramel') || n.contains('toffee') || n.contains('marshmallow') || n.contains('gummy')) return '🍬';
+    if (n.contains('jam') || n.contains('jelly') || n.contains('preserves') || n.contains('marmalade')) return '🍇';
+    if (n.contains('baking powder') || n.contains('baking soda') || n.contains('yeast') || n.contains('cornstarch') || n.contains('gelatin') || n.contains('pectin')) return '🧁';
+    if (n.contains('coffee') || n.contains('espresso') || n.contains('cappuccino') || n.contains('latte')) return '☕';
     if (n.contains('tea') && !n.contains('steak') && !n.contains('steam')) return '🍵';
     if (n.contains('juice')) return '🧃';
-    if (n.contains('soda') || n.contains('cola') || n.contains('sprite') ||
-        n.contains('pop') || n.contains('carbonated') || n.contains('tonic')) return '🥤';
-    if (n.contains('beer') || n.contains('ale') || n.contains('lager') ||
-        n.contains('stout') || n.contains('ipa') || n.contains('porter')) return '🍺';
-    if (n.contains('wine') || n.contains('merlot') || n.contains('cabernet') ||
-        n.contains('chardonnay') || n.contains('pinot') || n.contains('champagne') ||
-        n.contains('prosecco')) return '🍷';
-    if (n.contains('whiskey') || n.contains('bourbon') || n.contains('scotch') ||
-        n.contains('rum') || n.contains('vodka') || n.contains('gin') ||
-        n.contains('tequila') || n.contains('brandy') || n.contains('cognac') ||
-        n.contains('liqueur') || n.contains('liquor')) return '🥃';
+    if (n.contains('soda') || n.contains('cola') || n.contains('sprite') || n.contains('pop') || n.contains('carbonated') || n.contains('tonic')) return '🥤';
+    if (n.contains('beer') || n.contains('ale') || n.contains('lager') || n.contains('stout') || n.contains('ipa') || n.contains('porter')) return '🍺';
+    if (n.contains('wine') || n.contains('merlot') || n.contains('cabernet') || n.contains('chardonnay') || n.contains('pinot') || n.contains('champagne') || n.contains('prosecco')) return '🍷';
+    if (n.contains('whiskey') || n.contains('bourbon') || n.contains('scotch') || n.contains('rum') || n.contains('vodka') || n.contains('gin') || n.contains('tequila') || n.contains('brandy') || n.contains('cognac') || n.contains('liqueur') || n.contains('liquor')) return '🥃';
     if (n.contains('water') || n.contains('sparkling') || n.contains('seltzer')) return '💧';
     if (n.contains('smoothie') || n.contains('shake') || n.contains('milkshake')) return '🥤';
-
-    // Canned / Preserved
     if (n.contains('canned') || n.contains('can of') || n.contains('condensed')) return '🥫';
     if (n.contains('broth') || n.contains('stock') || n.contains('bouillon')) return '🍲';
     if (n.contains('soup')) return '🥣';
-
-    // Tofu & Plant proteins
-    if (n.contains('tofu') || n.contains('tempeh') || n.contains('seitan') ||
-        n.contains('edamame')) return '🫛';
-
-    // Prepared / Fast food
+    if (n.contains('tofu') || n.contains('tempeh') || n.contains('seitan') || n.contains('edamame')) return '🫛';
     if (n.contains('pizza')) return '🍕';
     if (n.contains('burger') || n.contains('hamburger')) return '🍔';
     if (n.contains('taco')) return '🌮';
     if (n.contains('burrito') || n.contains('wrap')) return '🌯';
     if (n.contains('sandwich') || n.contains('sub ')) return '🥪';
     if (n.contains('sushi') || n.contains('sashimi')) return '🍣';
-    if (n.contains('dumpling') || n.contains('gyoza') || n.contains('wonton') ||
-        n.contains('pierogi')) return '🥟';
+    if (n.contains('dumpling') || n.contains('gyoza') || n.contains('wonton') || n.contains('pierogi')) return '🥟';
     if (n.contains('fries') || n.contains('french fry')) return '🍟';
-
-    // Baby food
     if (n.contains('baby food') || n.contains('infant formula')) return '🍼';
-
-    // ── USDA category fallback ──
     final cat = usdaCategory.toLowerCase();
-
     if (cat.contains('fruit')) return '🍎';
     if (cat.contains('vegetable') || cat.contains('legume')) return '🥬';
     if (cat.contains('dairy') || cat.contains('egg')) return '🥛';
@@ -1500,7 +2327,6 @@ class _SuggestionTile extends StatelessWidget {
     if (cat.contains('meal') || cat.contains('entree') || cat.contains('side')) return '🍽️';
     if (cat.contains('fast food') || cat.contains('restaurant')) return '🍔';
     if (cat.contains('native') || cat.contains('indian')) return '🌍';
-
     return '🛒';
   }
 }
@@ -1514,6 +2340,8 @@ class _SectionGroupedList extends ConsumerWidget {
   final Map<String, String> userMappings;
   final Function(String, String, String) onCategoryChanged;
   final VoidCallback onRefreshMappings;
+  final ValueChanged<String> onItemChecked;
+  final ValueChanged<String> onItemUnchecked;
 
   const _SectionGroupedList({
     required this.items,
@@ -1522,6 +2350,8 @@ class _SectionGroupedList extends ConsumerWidget {
     required this.userMappings,
     required this.onCategoryChanged,
     required this.onRefreshMappings,
+    required this.onItemChecked,
+    required this.onItemUnchecked,
   });
 
   @override
@@ -1577,11 +2407,13 @@ class _SectionGroupedList extends ConsumerWidget {
               listId: listId,
               userMappings: userMappings,
               onCategoryChanged: onCategoryChanged,
+              onItemChecked: onItemChecked,
+              onItemUnchecked: onItemUnchecked,
             ),
         ],
         // Checked items
         if (checkedItems.isNotEmpty)
-          _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged),
+          _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemUnchecked: onItemUnchecked),
       ],
     );
   }
@@ -1595,6 +2427,8 @@ class _RecipeGroupedList extends ConsumerWidget {
   final String listId;
   final Map<String, String> userMappings;
   final Function(String, String, String) onCategoryChanged;
+  final ValueChanged<String> onItemChecked;
+  final ValueChanged<String> onItemUnchecked;
 
   const _RecipeGroupedList({
     required this.items,
@@ -1602,6 +2436,8 @@ class _RecipeGroupedList extends ConsumerWidget {
     required this.listId,
     required this.userMappings,
     required this.onCategoryChanged,
+    required this.onItemChecked,
+    required this.onItemUnchecked,
   });
 
   @override
@@ -1669,11 +2505,13 @@ class _RecipeGroupedList extends ConsumerWidget {
               listId: listId,
               userMappings: userMappings,
               onCategoryChanged: onCategoryChanged,
+              onItemChecked: onItemChecked,
+              onItemUnchecked: onItemUnchecked,
               showRecipeLink: false,
             ),
         ],
         if (checkedItems.isNotEmpty)
-          _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged),
+          _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemUnchecked: onItemUnchecked),
       ],
     );
   }
@@ -1687,6 +2525,8 @@ class _UngroupedList extends StatelessWidget {
   final String listId;
   final Map<String, String> userMappings;
   final Function(String, String, String) onCategoryChanged;
+  final ValueChanged<String> onItemChecked;
+  final ValueChanged<String> onItemUnchecked;
 
   const _UngroupedList({
     required this.items,
@@ -1694,6 +2534,8 @@ class _UngroupedList extends StatelessWidget {
     required this.listId,
     required this.userMappings,
     required this.onCategoryChanged,
+    required this.onItemChecked,
+    required this.onItemUnchecked,
   });
 
   @override
@@ -1702,9 +2544,9 @@ class _UngroupedList extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 100),
       children: [
         for (final item in items)
-          _ShoppingItemTile(item: item, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged),
+          _ShoppingItemTile(item: item, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemChecked: onItemChecked, onItemUnchecked: onItemUnchecked),
         if (checkedItems.isNotEmpty)
-          _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged),
+          _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemUnchecked: onItemUnchecked),
       ],
     );
   }
@@ -1717,6 +2559,8 @@ class _ShoppingItemTile extends ConsumerWidget {
   final String listId;
   final Map<String, String> userMappings;
   final Function(String, String, String) onCategoryChanged;
+  final ValueChanged<String>? onItemChecked;
+  final ValueChanged<String>? onItemUnchecked;
   final bool showRecipeLink;
 
   const _ShoppingItemTile({
@@ -1724,6 +2568,8 @@ class _ShoppingItemTile extends ConsumerWidget {
     required this.listId,
     required this.userMappings,
     required this.onCategoryChanged,
+    this.onItemChecked,
+    this.onItemUnchecked,
     this.showRecipeLink = true,
   });
 
@@ -1872,7 +2718,13 @@ class _ShoppingItemTile extends ConsumerWidget {
                   scale: 1.2,
                   child: Checkbox(
                     value: item.isChecked,
-                    onChanged: (_) => shoppingDao.toggleItemChecked(item.id, !item.isChecked),
+                    onChanged: (_) {
+                      if (item.isChecked) {
+                        (onItemUnchecked ?? (_) => shoppingDao.toggleItemChecked(item.id, false))(item.id);
+                      } else {
+                        (onItemChecked ?? (_) => shoppingDao.toggleItemChecked(item.id, true))(item.id);
+                      }
+                    },
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                     side: BorderSide(color: isDark ? Colors.grey.shade600 : Colors.grey.shade400, width: 2),
                   ),
@@ -2093,12 +2945,14 @@ class _CheckedSection extends ConsumerWidget {
   final String listId;
   final Map<String, String> userMappings;
   final Function(String, String, String) onCategoryChanged;
+  final ValueChanged<String>? onItemUnchecked;
 
   const _CheckedSection({
     required this.items,
     required this.listId,
     required this.userMappings,
     required this.onCategoryChanged,
+    this.onItemUnchecked,
   });
 
   @override
@@ -2132,7 +2986,7 @@ class _CheckedSection extends ConsumerWidget {
           ),
         ),
         for (final item in items)
-          _ShoppingItemTile(item: item, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged),
+          _ShoppingItemTile(item: item, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemUnchecked: onItemUnchecked),
       ],
     );
   }

@@ -190,8 +190,8 @@ class _ColorThemeGrid extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 1.0,
+        crossAxisCount: 2,
+        childAspectRatio: 1.5,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
       ),
@@ -222,18 +222,17 @@ class _ColorThemeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = _getThemeColors(colorTheme);
-    final displayName = _getLocalizedThemeName(context, colorTheme);
+    final displayName = _getThemeName(context, colorTheme);
 
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected ? theme.colorScheme.primary : Colors.transparent,
-            width: 3,
+            width: isSelected ? 3 : 0,
           ),
           boxShadow: isSelected
               ? [
@@ -243,49 +242,92 @@ class _ColorThemeCard extends StatelessWidget {
               spreadRadius: 1,
             ),
           ]
-              : null,
+              : [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 4,
+            ),
+          ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(13),
-          child: Column(
+          borderRadius: BorderRadius.circular(isSelected ? 11 : 14),
+          child: Stack(
+            fit: StackFit.expand,
             children: [
-              // Top color band (primary)
-              Expanded(
-                flex: 2,
-                child: Container(
-                  color: colors[0],
-                  child: Center(
-                    child: isSelected
-                        ? const Icon(
-                      Icons.check_circle,
+              // Banner image
+              Image.asset(
+                colorTheme.bannerAsset,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) {
+                  // Fallback to color gradient
+                  final palette = theme.brightness == Brightness.dark
+                      ? colorTheme.dark
+                      : colorTheme.light;
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [palette.primary, palette.secondary],
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              // Selected check
+              if (isSelected)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: const BoxDecoration(
                       color: Colors.white,
-                      size: 28,
-                    )
-                        : null,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.check_circle,
+                      color: theme.colorScheme.primary,
+                      size: 22,
+                    ),
                   ),
                 ),
-              ),
-              // Bottom accent colors
-              Expanded(
-                flex: 1,
-                child: Row(
-                  children: [
-                    Expanded(child: Container(color: colors[1])),
-                    Expanded(child: Container(color: colors[2])),
-                  ],
-                ),
-              ),
-              // Theme name
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                color: theme.colorScheme.surfaceContainerHighest,
-                child: Text(
-                  displayName,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: isSelected ? FontWeight.bold : null,
-                    color: isSelected ? theme.colorScheme.primary : null,
+
+              // Bottom label bar
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.0),
+                        Colors.black.withValues(alpha: 0.65),
+                      ],
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(colorTheme.emoji, style: const TextStyle(fontSize: 14)),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          displayName,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            shadows: [Shadow(blurRadius: 4, color: Colors.black)],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -296,8 +338,7 @@ class _ColorThemeCard extends StatelessWidget {
     );
   }
 
-  /// Get localized theme name
-  String _getLocalizedThemeName(BuildContext context, AppColorTheme theme) {
+  String _getThemeName(BuildContext context, AppColorTheme theme) {
     final l10n = AppLocalizations.of(context)!;
     switch (theme) {
       case AppColorTheme.spellbook:
@@ -312,23 +353,14 @@ class _ColorThemeCard extends StatelessWidget {
         return l10n.themeMidnight;
       case AppColorTheme.rose:
         return l10n.themeRose;
-    }
-  }
-
-  List<Color> _getThemeColors(AppColorTheme colorTheme) {
-    switch (colorTheme) {
-      case AppColorTheme.spellbook:
-        return [const Color(0xFF6750A4), const Color(0xFF9A82DB), const Color(0xFFE8DEF8)];
-      case AppColorTheme.forest:
-        return [const Color(0xFF2E7D32), const Color(0xFF66BB6A), const Color(0xFFC8E6C9)];
-      case AppColorTheme.ocean:
-        return [const Color(0xFF0288D1), const Color(0xFF4FC3F7), const Color(0xFFB3E5FC)];
-      case AppColorTheme.sunset:
-        return [const Color(0xFFE64A19), const Color(0xFFFF8A65), const Color(0xFFFFCCBC)];
-      case AppColorTheme.midnight:
-        return [const Color(0xFF1A237E), const Color(0xFF5C6BC0), const Color(0xFFC5CAE9)];
-      case AppColorTheme.rose:
-        return [const Color(0xFFAD1457), const Color(0xFFEC407A), const Color(0xFFF8BBD9)];
+      case AppColorTheme.frost:
+        return 'Frost';
+      case AppColorTheme.ember:
+        return 'Ember';
+      case AppColorTheme.spring:
+        return 'Spring';
+      case AppColorTheme.alchemist:
+        return 'Alchemist';
     }
   }
 }
