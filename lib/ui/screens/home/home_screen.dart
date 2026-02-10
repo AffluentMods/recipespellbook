@@ -410,6 +410,7 @@ class _QuickRecipeCard extends StatelessWidget {
         width: 130,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         child: Card(
+          margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAlias,
           child: Stack(
             children: [
@@ -738,6 +739,7 @@ class _UncategorizedRecipeChip extends StatelessWidget {
         width: 120,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         child: Card(
+          margin: EdgeInsets.zero,
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Column(
@@ -784,6 +786,7 @@ class _CourseChip extends StatelessWidget {
         width: 85,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         child: Card(
+          margin: EdgeInsets.zero,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
             child: Column(

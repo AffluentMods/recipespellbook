@@ -142,17 +142,17 @@ class AppSettings {
 
 // Placeholder image mode options
 enum PlaceholderImageMode {
-  custom,   // Default artwork images (changes with RPG mode)
-  theme,    // Theme-based artwork (banner images)
-  gradient, // Gradient colors based on theme
+  theme,    // Use theme-specific banner art
+  custom,   // Use default app artwork
+  gradient, // Use gradient with theme colors + icon
 }
 
 extension PlaceholderImageModeExtension on PlaceholderImageMode {
   String get displayName {
     switch (this) {
-      case PlaceholderImageMode.custom: return 'Default Images';
-      case PlaceholderImageMode.theme: return 'Theme-Based';
-      case PlaceholderImageMode.gradient: return 'Gradient-Based';
+      case PlaceholderImageMode.theme: return 'Theme-based';
+      case PlaceholderImageMode.custom: return 'Default images';
+      case PlaceholderImageMode.gradient: return 'Gradient-based';
     }
   }
 }
@@ -436,6 +436,14 @@ class SettingsNotifier extends Notifier<AppSettings> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_cookbookPlaceholderKey, mode.name);
     state = state.copyWith(cookbookPlaceholderMode: mode);
+  }
+
+  /// Sets both recipe and cookbook placeholder mode at once
+  Future<void> setPlaceholderMode(PlaceholderImageMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_recipePlaceholderKey, mode.name);
+    await prefs.setString(_cookbookPlaceholderKey, mode.name);
+    state = state.copyWith(recipePlaceholderMode: mode, cookbookPlaceholderMode: mode);
   }
 
   // Recipe layout setting

@@ -38,7 +38,7 @@ class UsdaService {
   Future<void> _loadBundledData() async {
     try {
       debugPrint('Loading bundled USDA data...');
-      final jsonString = await rootBundle.loadString('assets/data/common_ingredients.json');
+      final jsonString = await rootBundle.loadString('assets/data/common_ingredients-old.json');
       final List<dynamic> data = jsonDecode(jsonString);
 
       final foods = data.map((item) {
@@ -67,19 +67,67 @@ class UsdaService {
 
   // ============ SEARCH ============
 
-  /// Search for foods, checking local cache first then server
+  /// Search for foods, combining local cache and server results
   Future<List<UsdaFoodResult>> searchFoods(String query, {int limit = 20}) async {
     await initialize();
 
-    // First check local cache
+    // Get local results
     final localResults = await _usdaDao.searchLocalFoods(query, limit: limit);
+    final localFoods = localResults.map((f) => UsdaFoodResult.fromDatabase(f)).toList();
 
-    if (localResults.isNotEmpty) {
-      return localResults.map((f) => UsdaFoodResult.fromDatabase(f)).toList();
+    // Always try server too for better results, unless we have good local matches
+    // The bundled data often has obscure items (sheep milk, chicken spread) that
+    // rank above common items — server results are usually better ordered
+    if (localFoods.length >= limit && _hasGoodLocalMatch(query, localFoods)) {
+      return localFoods;
     }
 
-    // If no local results, query server
-    return _searchServer(query, limit: limit);
+    // Try server for additional/better results
+    try {
+      final serverResults = await _searchServer(query, limit: limit);
+      if (serverResults.isNotEmpty) {
+        // Merge: deduplicate by fdcId, server results first (better relevance)
+        final seenIds = <int>{};
+        final merged = <UsdaFoodResult>[];
+
+        // Add server results first (better relevance ranking)
+        for (final result in serverResults) {
+          if (seenIds.add(result.fdcId)) {
+            merged.add(result);
+          }
+        }
+
+        // Add local results that weren't in server results
+        for (final result in localFoods) {
+          if (seenIds.add(result.fdcId)) {
+            merged.add(result);
+          }
+        }
+
+        return merged.take(limit).toList();
+      }
+    } catch (e) {
+      debugPrint('Server search failed, using local only: $e');
+    }
+
+    // Fallback to local-only if server failed
+    return localFoods;
+  }
+
+  /// Check if local results contain a reasonably good match for the query
+  bool _hasGoodLocalMatch(String query, List<UsdaFoodResult> results) {
+    final normalizedQuery = query.toLowerCase().trim();
+    for (final result in results.take(3)) {
+      final desc = result.description.toLowerCase();
+      final primaryName = desc.split(',').first.trim();
+      // Good match: primary name starts with or equals query
+      if (primaryName == normalizedQuery ||
+          primaryName.startsWith(normalizedQuery) ||
+          normalizedQuery.startsWith(primaryName)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /// Search the server (your USDA proxy)
@@ -174,23 +222,202 @@ class UsdaService {
     }
 
     // Try to find a match in local cache / server
-    final results = await searchFoods(ingredientName, limit: 5);
+    final results = await searchFoods(ingredientName, limit: 10);
 
     if (results.isEmpty) return null;
 
-    // Use first result if it's a very close match
-    final normalizedIngredient = ingredientName.toLowerCase().trim();
-    final firstResult = results.first;
-    final normalizedDescription = firstResult.description.toLowerCase();
+    // Score all results and pick the best one
+    final normalizedQuery = ingredientName.toLowerCase().trim();
+    final queryWords = normalizedQuery.split(RegExp(r'\s+')).where((w) => w.length > 1).toSet();
 
-    // Check if ingredient name is contained in the description
-    if (normalizedDescription.contains(normalizedIngredient) ||
-        normalizedIngredient.contains(normalizedDescription.split(',').first)) {
-      return firstResult;
+    UsdaFoodResult? bestResult;
+    double bestScore = -1;
+
+    for (final result in results) {
+      final score = _scoreMatch(normalizedQuery, queryWords, result);
+      if (score > bestScore) {
+        bestScore = score;
+        bestResult = result;
+      }
     }
 
-    // Return first result but mark as uncertain
-    return firstResult.copyWith(isUncertainMatch: true);
+    if (bestResult == null) return null;
+
+    // Require a minimum score to avoid garbage matches
+    if (bestScore < 0.15) {
+      debugPrint('USDA: No good match for "$ingredientName" (best: "${bestResult.description}" score: ${bestScore.toStringAsFixed(2)})');
+      return bestResult.copyWith(isUncertainMatch: true);
+    }
+
+    // Mark as uncertain if score is mediocre
+    if (bestScore < 0.4) {
+      return bestResult.copyWith(isUncertainMatch: true);
+    }
+
+    return bestResult;
+  }
+
+  /// Score how well a USDA result matches an ingredient query.
+  /// Returns 0.0 (no match) to 1.0+ (perfect match).
+  double _scoreMatch(String query, Set<String> queryWords, UsdaFoodResult result) {
+    final desc = result.description.toLowerCase();
+    // Split on commas first to get the primary name vs modifiers
+    final descParts = desc.split(',').map((s) => s.trim()).toList();
+    final primaryDesc = descParts.first;
+    final descWords = desc.split(RegExp(r'[\s,]+'))
+        .where((w) => w.length > 1)
+        .toSet();
+
+    double score = 0;
+
+    // ── Exact match bonus ──
+    if (desc == query || primaryDesc == query) {
+      score += 1.0;
+    }
+    // Primary description contains the full query
+    else if (primaryDesc.contains(query)) {
+      score += 0.8;
+    }
+    // Full description contains the full query
+    else if (desc.contains(query)) {
+      score += 0.6;
+    }
+    // Query contains the primary description (e.g., query "chicken broth" contains "chicken")
+    else if (query.contains(primaryDesc)) {
+      score += 0.5;
+    }
+
+    // ── Word overlap scoring ──
+    // What fraction of query words appear in the description?
+    int matchedWords = 0;
+    for (final qWord in queryWords) {
+      if (descWords.any((dWord) => dWord.contains(qWord) || qWord.contains(dWord))) {
+        matchedWords++;
+      }
+    }
+    if (queryWords.isNotEmpty) {
+      score += 0.3 * (matchedWords / queryWords.length);
+    }
+
+    // ── Data type preference ──
+    // Prefer standard reference data over branded/survey
+    final dataType = (result.dataType ?? '').toLowerCase();
+    if (dataType.contains('sr legacy') || dataType.contains('foundation')) {
+      score += 0.15;
+    } else if (dataType.contains('survey')) {
+      score += 0.05;
+    } else if (dataType.contains('branded')) {
+      score -= 0.1; // Branded items are often specific products, less useful as defaults
+    }
+
+    // ── Penalty: description has many extra irrelevant words ──
+    // If the result has lots of words the query doesn't mention, penalize
+    final extraWords = descWords.difference(queryWords);
+    // Don't penalize common USDA descriptor words
+    const ignoredDescWords = {'raw', 'cooked', 'fresh', 'plain', 'regular',
+      'ns', 'as', 'to', 'or', 'with', 'without', 'and', 'in', 'of', 'the',
+      'nfs', 'upc', 'gtin'};
+    final meaningfulExtra = extraWords.where((w) => !ignoredDescWords.contains(w) && w.length > 2).length;
+    if (meaningfulExtra > 4) {
+      score -= 0.1 * (meaningfulExtra - 4) / 5;
+    }
+
+    // ── Category penalty: reject known bad categories ──
+    score += _categoryBonus(query, result);
+
+    return score;
+  }
+
+  /// Apply category-based bonuses/penalties to avoid systematic mismatches
+  double _categoryBonus(String query, UsdaFoodResult result) {
+    final desc = result.description.toLowerCase();
+    final cat = (result.foodCategory ?? '').toLowerCase();
+    double bonus = 0;
+
+    // Broth/stock queries should match broth/stock results
+    if (query.contains('broth') || query.contains('stock')) {
+      if (desc.contains('broth') || desc.contains('stock') || desc.contains('soup')) {
+        bonus += 0.2;
+      } else {
+        bonus -= 0.5; // Heavy penalty for matching "chicken" when looking for "chicken broth"
+      }
+    }
+
+    // Milk queries (without qualifier) should prefer cow's milk
+    if (query.contains('milk') && !query.contains('coconut') &&
+        !query.contains('almond') && !query.contains('oat') &&
+        !query.contains('soy') && !query.contains('sheep') &&
+        !query.contains('goat')) {
+      if (desc.contains('sheep') || desc.contains('goat') ||
+          desc.contains('buffalo') || desc.contains('camel')) {
+        bonus -= 0.6;
+      }
+      if (desc.contains('cow') || cat.contains('dairy') ||
+          (!desc.contains('sheep') && !desc.contains('goat') && desc.contains('milk'))) {
+        bonus += 0.1;
+      }
+    }
+
+    // Pepper as spice vs vegetable
+    if ((query == 'pepper' || query == 'black pepper' || query == 'ground pepper' ||
+        query.contains('pepper') && query.contains('spice')) &&
+        !query.contains('bell') && !query.contains('chili') && !query.contains('hot')) {
+      if (desc.contains('peppermint') || desc.contains('bell pepper') ||
+          desc.contains('sweet pepper')) {
+        bonus -= 0.5;
+      }
+      if (desc.contains('spice') || desc.contains('black pepper') || desc.contains('ground')) {
+        bonus += 0.2;
+      }
+    }
+
+    // Chicken/beef/pork — avoid processed products when looking for whole meat
+    if ((query == 'chicken' || query == 'shredded chicken' || query == 'cooked chicken' ||
+        query == 'chicken breast') &&
+        !query.contains('spread') && !query.contains('nugget') && !query.contains('patty')) {
+      if (desc.contains('spread') || desc.contains('nugget') || desc.contains('patty') ||
+          desc.contains('frankfurter') || desc.contains('lunch meat') || desc.contains('deli')) {
+        bonus -= 0.4;
+      }
+      if (desc.contains('breast') || desc.contains('thigh') || desc.contains('meat') ||
+          desc.contains('roasted') || desc.contains('grilled')) {
+        bonus += 0.15;
+      }
+    }
+
+    // Cream — avoid ice cream, cream soda, etc.
+    if (query.contains('cream') && !query.contains('ice')) {
+      if (desc.contains('ice cream') || desc.contains('soda') || desc.contains('candy') ||
+          desc.contains('cookie') || desc.contains('pie')) {
+        bonus -= 0.5;
+      }
+    }
+
+    // Oil — result should actually be an oil
+    if (query.endsWith('oil') || query.contains('oil ')) {
+      if (!desc.contains('oil')) {
+        bonus -= 0.4;
+      }
+    }
+
+    // Flour — result should be flour
+    if (query.contains('flour')) {
+      if (!desc.contains('flour')) {
+        bonus -= 0.3;
+      }
+    }
+
+    // Sugar — prefer granulated, avoid sugary products
+    if (query == 'sugar' || query == 'white sugar' || query == 'granulated sugar') {
+      if (desc.contains('granulated') || desc.contains('white sugar')) {
+        bonus += 0.2;
+      }
+      if (desc.contains('candy') || desc.contains('cereal') || desc.contains('beverage')) {
+        bonus -= 0.3;
+      }
+    }
+
+    return bonus;
   }
 
   /// Save a user's ingredient to USDA mapping

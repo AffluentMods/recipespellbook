@@ -64,20 +64,20 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/logo.png"
+  image_path: "assets/images/icon.png"
   adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/images/logo.png"
+  adaptive_icon_foreground: "assets/images/icon.png"
 
 flutter_native_splash:
-  color: "#FFF8F0"
-  image: assets/images/splash_logo.png
+  color: "#EEBE8D"
+  image: assets/images/icon.png
   branding: assets/images/splash_branding.png
   android: true
   ios: true
   android_12:
-    color: "#FFF8F0"
+    color: "#EEBE8D"
     image: assets/images/splash_icon_android12.png
-    icon_background_color: "#FFF8F0"
+    icon_background_color: "#EEBE8D"
     branding: assets/images/splash_branding.png
 
 flutter:
@@ -85,14 +85,14 @@ flutter:
   generate: true
 
   assets:
-    - assets/data/common_ingredients.json
+    - assets/data/common_ingredients-old.json
     - assets/images/
     - assets/images/default_recipes/
     - assets/images/themes/
     - assets/rpg/avatars/
     - assets/rpg/frames/
     - assets/rpg/pets/
-    - assets/images/logo.png
+    - assets/images/icon.png
     - assets/images/splash_logo.png
     - assets/images/cookbook_placeholder_normal.png
     - assets/images/cookbook_placeholder_rpg.png

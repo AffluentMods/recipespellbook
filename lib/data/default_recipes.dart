@@ -91,7 +91,7 @@ const defaultRecipes = <DefaultRecipeData>[
     cookTimeMinutes: 15,
     course: 'Main',
     category: 'Meat',
-    notes: 'Use a very hot pan for proper searing. Tomatoes should keep their structure — don\'t overcook them.',
+    notes: 'Use a very hot pan for proper searing. Tomatoes should keep their structure — don\'t overcook them. See linked recipes for a béarnaise sauce that pairs perfectly.',
     ingredients: [
       DefaultIngredient('flank steak, cut into ½" strips', amount: '1.5', unit: 'lbs'),
       DefaultIngredient('red onion, cut into wedges', amount: '1'),
@@ -434,6 +434,7 @@ const defaultRecipes = <DefaultRecipeData>[
     prepTimeMinutes: 5,
     cookTimeMinutes: 10,
     course: 'Sauce',
+    category: 'Sauce',
     notes: 'Thick, creamy, and smooth — not runny. Slightly stretchy from melted Parmesan. Perfect for chicken Alfredo pizza, white veggie pizza, spinach + bacon pizza, or any pizza with mozzarella, ricotta, or roasted veggies.',
     ingredients: [
       DefaultIngredient('butter', amount: '2', unit: 'tbsp'),
@@ -485,6 +486,40 @@ const defaultRecipes = <DefaultRecipeData>[
       'Neapolitan: Bake on stone at 500°F (260°C) for 7-8 minutes.',
       'Pan: Oil a cast iron skillet, press dough in, rise 20 min, top, and bake 15 min at 450°F.',
       'Cool: Rest 5 minutes before slicing.',
+    ],
+  ),
+
+  // ============================================================
+  // 13. Easy Béarnaise Sauce (linked to Lomo Saltado)
+  // ============================================================
+  DefaultRecipeData(
+    id: 'default_bearnaise_sauce',
+    title: 'Easy Béarnaise Sauce',
+    description: 'A smooth, buttery French sauce with bright notes of tarragon, parsley, and lemon — like hollandaise with more personality. Pairs perfectly with steak, roasted chicken, or asparagus.',
+    servings: '4',
+    prepTimeMinutes: 5,
+    cookTimeMinutes: 5,
+    course: 'Sauce',
+    category: 'Sauce',
+    notes: 'Storage: Keep warm in a water bath up to 1 hour; do not refrigerate (it will split). Flavor boost: Add a splash of dry white wine or shallot reduction before whisking for a more authentic restaurant Béarnaise. Pairings: Great with ribeye, salmon, asparagus, or crispy potatoes.',
+    ingredients: [
+      DefaultIngredient('unsalted butter', amount: '0.5', unit: 'cup'),
+      DefaultIngredient('large egg yolks, beaten', amount: '4'),
+      DefaultIngredient('heavy cream', amount: '4', unit: 'tbsp'),
+      DefaultIngredient('white wine vinegar', amount: '2', unit: 'tbsp'),
+      DefaultIngredient('lemon juice', amount: '1', unit: 'tbsp'),
+      DefaultIngredient('minced onion', amount: '2', unit: 'tsp'),
+      DefaultIngredient('dried tarragon', amount: '2', unit: 'tsp'),
+      DefaultIngredient('chopped fresh parsley', amount: '2', unit: 'tsp'),
+      DefaultIngredient('salt', amount: '1', unit: 'tsp'),
+      DefaultIngredient('dry mustard', amount: '2', unit: 'pinch'),
+      DefaultIngredient('cayenne pepper', amount: '2', unit: 'pinch'),
+    ],
+    instructions: [
+      'Melt butter in a microwave-safe bowl on high for about 30 seconds until just melted.',
+      'Whisk in egg yolks, heavy cream, vinegar, lemon juice, and onion. Add tarragon, parsley, salt, mustard, and cayenne; whisk until smooth.',
+      'Microwave on high, stirring every 20–30 seconds, until sauce thickens slightly — about 1½ minutes total. Do not overheat or it may curdle.',
+      'Serve immediately — spoon over grilled steak, roasted vegetables, or poached eggs.',
     ],
   ),
 ];

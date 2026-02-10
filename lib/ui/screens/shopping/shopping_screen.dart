@@ -75,7 +75,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? theme.colorScheme.surface : const Color(0xFFFAF8F5),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: StreamBuilder<List<ShoppingListItem>>(
           stream: shoppingDao.watchItemsInList(_currentListId),
@@ -2387,15 +2387,13 @@ class _SectionGroupedList extends ConsumerWidget {
       children: [
         for (final category in sortedKeys) ...[
           // Section header
-          Container(
-            width: double.infinity,
-            color: isDark ? Colors.grey.shade800 : const Color(0xFFF5F0E8),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 16, 4),
             child: Text(
               getShoppingCategoryDisplayName(category).toUpperCase(),
               style: theme.textTheme.labelLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                color: theme.colorScheme.primary,
                 letterSpacing: 0.5,
               ),
             ),
@@ -2471,10 +2469,8 @@ class _RecipeGroupedList extends ConsumerWidget {
               final recipe = snapshot.data;
               final title = recipe?.title ?? 'Added manually';
 
-              return Container(
-                width: double.infinity,
-                color: isDark ? Colors.grey.shade800 : const Color(0xFFF5F0E8),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 16, 4),
                 child: Row(
                   children: [
                     Expanded(
@@ -2482,7 +2478,7 @@ class _RecipeGroupedList extends ConsumerWidget {
                         title.toUpperCase(),
                         style: theme.textTheme.labelLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                          color: theme.colorScheme.primary,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -2588,148 +2584,158 @@ class _ShoppingItemTile extends ConsumerWidget {
     final sources = ShoppingSourceTracker.getSourceBreakdown(item.note);
     final hasMultipleSources = sources.length > 1;
 
-    return Dismissible(
-      key: Key(item.id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        color: theme.colorScheme.error,
-        child: Icon(Icons.delete, color: theme.colorScheme.onError),
-      ),
-      onDismissed: (_) => shoppingDao.deleteItem(item.id),
-      child: Container(
-        color: isDark ? theme.colorScheme.surface : Colors.white,
-        child: InkWell(
-          onTap: () => _showItemOptions(context, ref),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: Row(
-              children: [
-                // Emoji circle — show stacked indicator for combined items
-                Stack(
-                  children: [
-                    Container(
-                      width: 48, height: 48,
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.grey.shade800 : const Color(0xFFF5F0E8),
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(emoji, style: const TextStyle(fontSize: 24)),
-                    ),
-                    if (hasMultipleSources)
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: Container(
-                          width: 20, height: 20,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE8A860),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: isDark ? theme.colorScheme.surface : Colors.white, width: 2),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            '${sources.length}',
-                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(width: 16),
-                // Item info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      child: Dismissible(
+        key: Key(item.id),
+        direction: DismissDirection.endToStart,
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.error,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(Icons.delete, color: theme.colorScheme.onError),
+        ),
+        onDismissed: (_) => shoppingDao.deleteItem(item.id),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () => _showItemOptions(context, ref),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  // Emoji circle — show stacked indicator for combined items
+                  Stack(
                     children: [
-                      Text(
-                        item.name,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          decoration: item.isChecked ? TextDecoration.lineThrough : null,
-                          color: item.isChecked ? theme.colorScheme.outline : null,
+                      Container(
+                        width: 48, height: 48,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHigh,
+                          shape: BoxShape.circle,
                         ),
+                        alignment: Alignment.center,
+                        child: Text(emoji, style: const TextStyle(fontSize: 24)),
                       ),
-                      // Source recipe breakdown
-                      if (showRecipeLink && hasMultipleSources && !item.isChecked)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Wrap(
-                            spacing: 4,
-                            runSpacing: 2,
-                            children: sources.map((source) {
-                              final detail = source.detail.isNotEmpty ? ' (${source.detail})' : '';
-                              return GestureDetector(
-                                onTap: source.recipeId.isNotEmpty
-                                    ? () => context.push('/recipe/${source.recipeId}')
-                                    : null,
-                                child: Text(
-                                  '${source.recipeName}$detail',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: source.recipeId.isNotEmpty
-                                        ? theme.colorScheme.primary
-                                        : theme.colorScheme.outline,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      // Single recipe link (legacy or single source)
-                      if (showRecipeLink && !hasMultipleSources && sources.length == 1 && !item.isChecked)
-                        GestureDetector(
-                          onTap: sources.first.recipeId.isNotEmpty
-                              ? () => context.push('/recipe/${sources.first.recipeId}')
-                              : null,
-                          child: Text(
-                            sources.first.recipeName,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.primary,
-                              decoration: TextDecoration.underline,
+                      if (hasMultipleSources)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            width: 20, height: 20,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE8A860),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: isDark ? theme.colorScheme.surface : Colors.white, width: 2),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              '${sources.length}',
+                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
                           ),
                         ),
-                      // Legacy recipe link (no source tracking)
-                      if (showRecipeLink && sources.isEmpty && item.recipeId != null && !item.isChecked)
-                        FutureBuilder<Recipe?>(
-                          future: recipeDao.getRecipeById(item.recipeId!),
-                          builder: (context, snapshot) {
-                            final recipe = snapshot.data;
-                            if (recipe == null) return const SizedBox.shrink();
-                            return GestureDetector(
-                              onTap: () => context.push('/recipe/${recipe.id}'),
-                              child: Text(
-                                recipe.title,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
                     ],
                   ),
-                ),
-                // Checkbox
-                Transform.scale(
-                  scale: 1.2,
-                  child: Checkbox(
-                    value: item.isChecked,
-                    onChanged: (_) {
-                      if (item.isChecked) {
-                        (onItemUnchecked ?? (_) => shoppingDao.toggleItemChecked(item.id, false))(item.id);
-                      } else {
-                        (onItemChecked ?? (_) => shoppingDao.toggleItemChecked(item.id, true))(item.id);
-                      }
-                    },
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                    side: BorderSide(color: isDark ? Colors.grey.shade600 : Colors.grey.shade400, width: 2),
+                  const SizedBox(width: 16),
+                  // Item info
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.name,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            decoration: item.isChecked ? TextDecoration.lineThrough : null,
+                            color: item.isChecked ? theme.colorScheme.outline : null,
+                          ),
+                        ),
+                        // Source recipe breakdown
+                        if (showRecipeLink && hasMultipleSources && !item.isChecked)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Wrap(
+                              spacing: 4,
+                              runSpacing: 2,
+                              children: sources.map((source) {
+                                final detail = source.detail.isNotEmpty ? ' (${source.detail})' : '';
+                                return GestureDetector(
+                                  onTap: source.recipeId.isNotEmpty
+                                      ? () => context.push('/recipe/${source.recipeId}')
+                                      : null,
+                                  child: Text(
+                                    '${source.recipeName}$detail',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: source.recipeId.isNotEmpty
+                                          ? theme.colorScheme.primary
+                                          : theme.colorScheme.outline,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        // Single recipe link (legacy or single source)
+                        if (showRecipeLink && !hasMultipleSources && sources.length == 1 && !item.isChecked)
+                          GestureDetector(
+                            onTap: sources.first.recipeId.isNotEmpty
+                                ? () => context.push('/recipe/${sources.first.recipeId}')
+                                : null,
+                            child: Text(
+                              sources.first.recipeName,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                        // Legacy recipe link (no source tracking)
+                        if (showRecipeLink && sources.isEmpty && item.recipeId != null && !item.isChecked)
+                          FutureBuilder<Recipe?>(
+                            future: recipeDao.getRecipeById(item.recipeId!),
+                            builder: (context, snapshot) {
+                              final recipe = snapshot.data;
+                              if (recipe == null) return const SizedBox.shrink();
+                              return GestureDetector(
+                                onTap: () => context.push('/recipe/${recipe.id}'),
+                                child: Text(
+                                  recipe.title,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.primary,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  // Checkbox
+                  Transform.scale(
+                    scale: 1.2,
+                    child: Checkbox(
+                      value: item.isChecked,
+                      onChanged: (_) {
+                        if (item.isChecked) {
+                          (onItemUnchecked ?? (_) => shoppingDao.toggleItemChecked(item.id, false))(item.id);
+                        } else {
+                          (onItemChecked ?? (_) => shoppingDao.toggleItemChecked(item.id, true))(item.id);
+                        }
+                      },
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      side: BorderSide(color: isDark ? theme.colorScheme.outlineVariant : theme.colorScheme.outlineVariant, width: 2),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -2965,7 +2971,7 @@ class _CheckedSection extends ConsumerWidget {
       children: [
         const SizedBox(height: 16),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          padding: const EdgeInsets.fromLTRB(20, 0, 8, 4),
           child: Row(
             children: [
               Icon(Icons.check_circle, size: 20, color: theme.colorScheme.outline),

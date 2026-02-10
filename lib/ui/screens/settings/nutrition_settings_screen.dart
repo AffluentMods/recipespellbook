@@ -279,6 +279,7 @@ class NutritionWidget extends StatefulWidget {
   final Set<String> enabledNutrients;
   final bool showSettingsLink;
   final bool isNerdMode;
+  final VoidCallback? onEmptyTap;
 
   const NutritionWidget({
     super.key,
@@ -289,6 +290,7 @@ class NutritionWidget extends StatefulWidget {
     required this.enabledNutrients,
     this.showSettingsLink = true,
     this.isNerdMode = false,
+    this.onEmptyTap,
   });
 
   @override
@@ -306,11 +308,28 @@ class _NutritionWidgetState extends State<NutritionWidget> {
 
   NutritionData _getDisplayNutrition() {
     var n = widget.nutrition!;
-    if (widget.scaleFactor != 1.0) n = n.scaled(widget.scaleFactor);
-    final servings = _parseServings();
-    if (!_showPerServing && servings != null && servings > 0) {
-      n = n.scaled(servings.toDouble());
+    final currentServings = _parseServings() ?? 1;
+    final calcServings = n.calculatedServings;
+
+    if (calcServings != null) {
+      // New format: stored values are TOTAL for the whole recipe
+      if (_showPerServing && currentServings > 1) {
+        // Divide total by current servings for per-serving view
+        n = n.scaled(1.0 / currentServings);
+      }
+      // If !_showPerServing, values are already total — show as-is
+    } else {
+      // Legacy format: stored values are per-serving
+      if (!_showPerServing && currentServings > 1) {
+        // Multiply per-serving by servings for total view
+        n = n.scaled(currentServings.toDouble());
+      }
+      // If _showPerServing, values are already per-serving — show as-is
     }
+
+    // Apply scale factor (from recipe scaling slider)
+    if (widget.scaleFactor != 1.0) n = n.scaled(widget.scaleFactor);
+
     return n;
   }
 
@@ -365,7 +384,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
 
     final displayNutrition = _getDisplayNutrition();
     final servings = _parseServings();
-    final canToggle = servings != null && servings > 0;
+    final canToggle = servings != null && servings > 1;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -414,7 +433,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
   }
 
   Widget _buildEmptyState(ThemeData theme) {
-    return Container(
+    final child = Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
@@ -438,13 +457,25 @@ class _NutritionWidgetState extends State<NutritionWidget> {
               children: [
                 Text('No nutrition data', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.outline)),
                 const SizedBox(height: 4),
-                Text('Calculate nutrition from ingredients', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+                Text(
+                  widget.onEmptyTap != null
+                      ? 'Tap to calculate nutrition from ingredients'
+                      : 'Calculate nutrition from the edit screen',
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                ),
               ],
             ),
           ),
+          if (widget.onEmptyTap != null)
+            Icon(Icons.chevron_right, color: theme.colorScheme.outline),
         ],
       ),
     );
+
+    if (widget.onEmptyTap != null) {
+      return GestureDetector(onTap: widget.onEmptyTap, child: child);
+    }
+    return child;
   }
 
   // ─── HEADER with per-serving toggle ───

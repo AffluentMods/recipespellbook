@@ -3,6 +3,7 @@ import '../data/nutrition_data.dart';
 import '../data/ingredient_translations.dart';
 import '../database/database.dart';
 import '../services/usda_service.dart';
+import '../ui/widgets/nutrition_system.dart' as local_db;
 
 /// Calculates nutrition for a recipe based on its ingredients
 class NutritionCalculator {
@@ -73,6 +74,92 @@ class NutritionCalculator {
     );
   }
 
+  /// Refine a cleaned ingredient name into a better USDA search query.
+  /// Adds specificity keywords to reduce mismatches.
+  /// e.g., "milk" → "cow milk whole", "pepper" → "black pepper ground spice"
+  String _refineSearchQuery(String cleanedName) {
+    final lower = cleanedName.toLowerCase().trim();
+
+    // ── Exact rewrites for commonly mismatched ingredients ──
+    // These map vague or short ingredient names to more specific USDA terms
+    const exactRewrites = <String, String>{
+      'milk': 'milk whole cow',
+      'pepper': 'pepper black ground spice',
+      'cream': 'cream heavy whipping',
+      'cheese': 'cheese cheddar',
+      'flour': 'flour wheat all-purpose',
+      'oil': 'oil vegetable',
+      'sugar': 'sugar granulated white',
+      'broth': 'broth chicken ready-to-serve',
+      'stock': 'stock chicken ready-to-serve',
+      'wine': 'wine table red',
+      'beer': 'beer regular',
+      'vinegar': 'vinegar distilled',
+      'mustard': 'mustard prepared yellow',
+      'yogurt': 'yogurt whole milk plain',
+      'rice': 'rice white long-grain cooked',
+      'pasta': 'pasta cooked enriched',
+      'noodle': 'noodle egg cooked',
+      'bread': 'bread white commercial',
+      'tortilla': 'tortilla flour',
+      'chocolate': 'chocolate dark',
+      'cocoa': 'cocoa powder unsweetened',
+      'coconut': 'coconut meat raw',
+      'oat': 'oats rolled regular',
+      'honey': 'honey',
+      'salt': 'salt table',
+      'yeast': 'yeast bakers dry',
+    };
+
+    if (exactRewrites.containsKey(lower)) {
+      return exactRewrites[lower]!;
+    }
+
+    // ── Suffix-based refinements ──
+    // Add specificity when the name contains a keyword but needs clarification
+
+    // Broths & stocks — prevent matching whole chicken/beef
+    if (lower.contains('broth') && !lower.contains('ready')) {
+      return '$lower ready-to-serve';
+    }
+    if (lower.contains('stock') && !lower.contains('ready')) {
+      return '$lower ready-to-serve';
+    }
+
+    // Milk types — ensure cow milk
+    if (lower.contains('milk') && !lower.contains('coconut') &&
+        !lower.contains('almond') && !lower.contains('oat') &&
+        !lower.contains('soy') && !lower.contains('sheep') &&
+        !lower.contains('goat')) {
+      if (!lower.contains('cow')) {
+        return '$lower cow';
+      }
+    }
+
+    // Pepper — distinguish spice from vegetable
+    if (lower == 'pepper' || lower == 'ground pepper' || lower == 'cracked pepper') {
+      return 'pepper black ground spice';
+    }
+
+    // Chicken — add "meat" to avoid canned/spread products
+    if (lower == 'chicken' || lower == 'shredded chicken' || lower == 'cooked chicken') {
+      return '$lower breast meat cooked';
+    }
+
+    // Cream types
+    if (lower == 'heavy cream' || lower == 'whipping cream') {
+      return 'cream fluid heavy whipping';
+    }
+    if (lower == 'sour cream') {
+      return 'sour cream cultured';
+    }
+    if (lower == 'cream cheese') {
+      return 'cream cheese regular';
+    }
+
+    return cleanedName;
+  }
+
   /// Calculate nutrition for a single ingredient
   /// [languageCode] - Used to translate ingredient name to English for USDA lookup
   Future<IngredientNutritionResult> _calculateForIngredient(
@@ -80,14 +167,46 @@ class NutritionCalculator {
       String languageCode,
       ) async {
     try {
+      // ── Step 1: Try local NutritionDatabase first ──
+      // This has ~300 curated entries with correct values for common ingredients.
+      // Much more reliable than USDA search for staples like milk, pepper, broth.
+      final localEstimate = local_db.NutritionDatabase.estimateForIngredient(ingredient);
+      if (localEstimate != null) {
+        debugPrint('Local match for "${ingredient.name}": ${localEstimate.calories.toStringAsFixed(0)} cal');
+        // Convert local_db.NutritionData → full NutritionData
+        final nutrition = NutritionData(
+          calories: localEstimate.calories,
+          protein: localEstimate.protein,
+          fat: localEstimate.fat,
+          carbohydrates: localEstimate.carbs,
+          fiber: localEstimate.fiber,
+          sugar: localEstimate.sugar,
+          sodium: localEstimate.sodium,
+        );
+        return IngredientNutritionResult(
+          ingredient: ingredient,
+          isMatched: true,
+          nutrition: nutrition,
+          matchStatus: MatchStatus.matched,
+          matchDescription: ingredient.name,
+        );
+      }
+
+      // ── Step 2: Fall back to USDA search ──
       // Translate ingredient name to English for USDA lookup
       final translatedName = translateIngredientToEnglish(
         ingredient.name,
         languageCode,
       );
 
-      // Try to match the ingredient to USDA using translated name
-      final match = await _usdaService.autoMatchIngredient(translatedName);
+      // Strip cooking modifiers (sliced, diced, minced, etc.) before USDA lookup
+      final cleanedName = local_db.stripCookingModifiers(translatedName);
+
+      // Refine the query for better USDA matches
+      final searchQuery = _refineSearchQuery(cleanedName);
+
+      // Try to match the ingredient to USDA using refined query
+      final match = await _usdaService.autoMatchIngredient(searchQuery);
 
       if (match == null) {
         return IngredientNutritionResult(
@@ -98,35 +217,25 @@ class NutritionCalculator {
         );
       }
 
-      // Parse the amount and convert to grams
-      final grams = _parseAmountToGrams(
-        amount: ingredient.amount,
-        unit: ingredient.unit,
-        ingredientName: ingredient.name,
-        usdaFood: match,
-      );
-
-      if (grams == null || grams <= 0) {
+      // Validate the match — reject obviously wrong results
+      if (_isLikelyBadMatch(cleanedName, match)) {
+        debugPrint('Rejected likely bad USDA match: "$cleanedName" → "${match.description}"');
+        // Retry with the original cleaned name if the refined query gave bad results
+        if (searchQuery != cleanedName) {
+          final retryMatch = await _usdaService.autoMatchIngredient(cleanedName);
+          if (retryMatch != null && !_isLikelyBadMatch(cleanedName, retryMatch)) {
+            return _buildResultFromMatch(ingredient, retryMatch);
+          }
+        }
         return IngredientNutritionResult(
           ingredient: ingredient,
-          isMatched: true,
-          usdaFood: match,
-          matchStatus: match.isUncertainMatch ? MatchStatus.uncertain : MatchStatus.matched,
-          errorMessage: 'Could not parse amount to grams',
+          isMatched: false,
+          matchStatus: MatchStatus.uncertain,
+          errorMessage: 'USDA match may be inaccurate: "${match.description}"',
         );
       }
 
-      // Calculate nutrition
-      final nutrition = _usdaService.calculateNutrition(match.nutrients, grams);
-
-      return IngredientNutritionResult(
-        ingredient: ingredient,
-        isMatched: true,
-        usdaFood: match,
-        nutrition: nutrition,
-        gramsUsed: grams,
-        matchStatus: match.isUncertainMatch ? MatchStatus.uncertain : MatchStatus.matched,
-      );
+      return _buildResultFromMatch(ingredient, match);
     } catch (e) {
       debugPrint('Error calculating nutrition for ${ingredient.name}: $e');
       return IngredientNutritionResult(
@@ -136,6 +245,93 @@ class NutritionCalculator {
         errorMessage: e.toString(),
       );
     }
+  }
+
+  /// Build a nutrition result from a USDA match
+  IngredientNutritionResult _buildResultFromMatch(
+      Ingredient ingredient, UsdaFoodResult match) {
+    // Parse the amount and convert to grams
+    final grams = _parseAmountToGrams(
+      amount: ingredient.amount,
+      unit: ingredient.unit,
+      ingredientName: ingredient.name,
+      usdaFood: match,
+    );
+
+    if (grams == null || grams <= 0) {
+      return IngredientNutritionResult(
+        ingredient: ingredient,
+        isMatched: true,
+        usdaFood: match,
+        matchStatus: match.isUncertainMatch ? MatchStatus.uncertain : MatchStatus.matched,
+        errorMessage: 'Could not parse amount to grams',
+      );
+    }
+
+    // Calculate nutrition
+    final nutrition = _usdaService.calculateNutrition(match.nutrients, grams);
+
+    return IngredientNutritionResult(
+      ingredient: ingredient,
+      isMatched: true,
+      usdaFood: match,
+      nutrition: nutrition,
+      gramsUsed: grams,
+      matchStatus: match.isUncertainMatch ? MatchStatus.uncertain : MatchStatus.matched,
+    );
+  }
+
+  /// Check if a USDA match is likely wrong based on simple heuristics
+  bool _isLikelyBadMatch(String ingredientName, UsdaFoodResult match) {
+    final query = ingredientName.toLowerCase();
+    final result = match.description.toLowerCase();
+
+    // ── Category mismatches ──
+
+    // Looking for broth/stock but got whole meat
+    if ((query.contains('broth') || query.contains('stock')) &&
+        !result.contains('broth') && !result.contains('stock') && !result.contains('soup')) {
+      return true;
+    }
+
+    // Looking for milk but got animal milk that isn't cow
+    if (query.contains('milk') && !query.contains('sheep') && !query.contains('goat') &&
+        !query.contains('coconut') && !query.contains('almond') && !query.contains('oat') &&
+        !query.contains('soy')) {
+      if (result.contains('sheep') || result.contains('goat') || result.contains('buffalo') ||
+          result.contains('donkey') || result.contains('camel')) {
+        return true;
+      }
+    }
+
+    // Looking for pepper (spice) but got peppermint or bell pepper
+    if ((query == 'pepper' || query == 'black pepper' || query == 'ground pepper') &&
+        (result.contains('peppermint') || result.contains('bell'))) {
+      return true;
+    }
+
+    // Looking for chicken (meat) but got chicken spread, chicken soup, etc.
+    if (query.contains('chicken') && !query.contains('broth') && !query.contains('soup') &&
+        !query.contains('stock') && !query.contains('spread')) {
+      if (result.contains('spread') || result.contains('soup') ||
+          result.contains('nugget') || result.contains('patties')) {
+        return true;
+      }
+    }
+
+    // Looking for cream (dairy) but got ice cream or cream soda
+    if (query.contains('cream') && !query.contains('ice')) {
+      if (result.contains('ice cream') || result.contains('soda') || result.contains('candy')) {
+        return true;
+      }
+    }
+
+    // Looking for oil but got something that's not oil
+    if (query.endsWith('oil') && !result.contains('oil')) {
+      return true;
+    }
+
+    return false;
   }
 
   /// Parse an amount string and unit to grams
@@ -260,6 +456,16 @@ class NutritionCalculator {
       densityFactor = 1.4;
     } else if (lowerIngredient.contains('rice') || lowerIngredient.contains('oat')) {
       densityFactor = 0.8;
+    } else if (lowerIngredient.contains('cream cheese') || lowerIngredient.contains('sour cream')) {
+      densityFactor = 1.0;
+    } else if (lowerIngredient.contains('cream')) {
+      densityFactor = 0.97; // Heavy cream is slightly less dense than water
+    } else if (lowerIngredient.contains('milk')) {
+      densityFactor = 1.03;
+    } else if (lowerIngredient.contains('broth') || lowerIngredient.contains('stock')) {
+      densityFactor = 1.0; // Broth is basically water density
+    } else if (lowerIngredient.contains('parmesan') || lowerIngredient.contains('cheese')) {
+      densityFactor = 0.45; // Grated cheese is airy
     }
 
     // ml to grams (then adjust for density)
@@ -292,6 +498,10 @@ class NutritionCalculator {
       'gallon': 3785.41,
       'gallons': 3785.41,
       'gal': 3785.41,
+      'pinch': 0.36,
+      'pinches': 0.36,
+      'dash': 0.62,
+      'dashes': 0.62,
     };
 
     final mlFactor = volumeToMl[unit];
@@ -329,6 +539,10 @@ class NutritionCalculator {
       'pepper': 150.0,
       'avocado': 200.0,
       'cucumber': 200.0,
+      'jalapeno': 14.0, // per pepper
+      'habanero': 8.0,
+      'serrano': 6.0,
+      'shallot': 30.0,
 
       // Meats
       'chicken breast': 170.0,
@@ -357,6 +571,25 @@ class NutritionCalculator {
     // Special handling for "clove" of garlic
     if (lowerUnit.contains('clove') && lowerIngredient.contains('garlic')) {
       return count * 3.0;
+    }
+
+    // Special handling for "sprig" of herbs
+    if (lowerUnit.contains('sprig')) {
+      return count * 2.0; // ~2g per sprig of herbs
+    }
+
+    // Special handling for "bunch"
+    if (lowerUnit.contains('bunch')) {
+      return count * 50.0; // ~50g per small bunch of herbs
+    }
+
+    // Special handling for "head" of garlic/lettuce
+    if (lowerUnit.contains('head')) {
+      if (lowerIngredient.contains('garlic')) return count * 40.0;
+      if (lowerIngredient.contains('lettuce') || lowerIngredient.contains('cabbage')) {
+        return count * 500.0;
+      }
+      return count * 200.0;
     }
 
     // Generic pieces/items - rough estimate
@@ -456,6 +689,8 @@ class IngredientNutritionResult {
   final MatchStatus matchStatus;
   final String? errorMessage;
   final bool isManualOverride;
+  /// Description of the match source (e.g., "Chicken broth" from local DB)
+  final String? matchDescription;
 
   IngredientNutritionResult({
     required this.ingredient,
@@ -466,6 +701,7 @@ class IngredientNutritionResult {
     required this.matchStatus,
     this.errorMessage,
     this.isManualOverride = false,
+    this.matchDescription,
   });
 
   /// Display string for the ingredient

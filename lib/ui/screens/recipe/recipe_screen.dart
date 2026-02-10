@@ -18,6 +18,7 @@ import '../../widgets/recipe_share_sheet.dart';
 import '../../../data/rpg/rpg_text.dart';
 import '../settings/nutrition_settings_screen.dart';
 import '../settings/ingredient_substitutions_screen.dart';
+import '../../widgets/nutrition_calculation_sheet.dart';
 
 // ============ DISMISSED ALLERGY WARNINGS ============
 // Canonical provider is in allergy_settings_screen.dart — imported via:
@@ -262,6 +263,27 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     _loadRecipe();
   }
 
+  Future<void> _showNutritionCalculation() async {
+    if (_recipe == null || _ingredients.isEmpty) return;
+
+    final result = await NutritionCalculationSheet.show(
+      context: context,
+      ingredients: _ingredients,
+      servings: _recipe!.servings ?? '1',
+      existingNutrition: _nutrition,
+    );
+
+    if (result != null && mounted) {
+      // Save nutrition directly to database
+      final nutritionJson = jsonEncode(result.toJson());
+      final dao = ref.read(recipeDaoProvider);
+      await dao.updateRecipeFields(widget.recipeId, RecipesCompanion(
+        nutritionJson: drift.Value(nutritionJson),
+      ));
+      setState(() => _nutrition = result);
+    }
+  }
+
   bool _hasMetaInfo(Recipe recipe) {
     final hasPrepTime = recipe.prepTimeMinutes != null && recipe.prepTimeMinutes! > 0;
     final hasCookTime = recipe.cookTimeMinutes != null && recipe.cookTimeMinutes! > 0;
@@ -341,16 +363,6 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   Text(_recipe!.description!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
 
-                // Linked recipes
-                if (_linkedRecipes.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _LinkedRecipesSection(
-                    linkedRecipes: _linkedRecipes,
-                    onTap: (id) => context.push('/recipe/$id'),
-
-                  ),
-                ],
-
                 const SizedBox(height: 16),
 
                 // NEW: 3 Simple Action Buttons (Meal Plan, Groceries, Share)
@@ -387,7 +399,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 const SizedBox(height: 24),
                 _SectionHeader(title: l10n.ingredientsTitle, trailing: _scaleFactor != 1.0 ? Text('${_scaleFactor}x', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary)) : null),
                 const SizedBox(height: 12),
-                ..._ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: _scaleFactor, unitConversion: _unitConversion)),
+                ..._ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: _scaleFactor, unitConversion: _unitConversion, linkedRecipes: _linkedRecipes)),
 
                 // NEW: Large "Add to Shopping List" button at bottom of ingredients
                 const SizedBox(height: 16),
@@ -421,6 +433,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   chartStyle: ref.watch(settingsProvider).nutritionChartStyle,
                   enabledNutrients: ref.watch(settingsProvider).enabledNutrients,
                   isNerdMode: isNerdMode,
+                  onEmptyTap: _showNutritionCalculation,
                 ),
                 const SizedBox(height: 100),
               ],
@@ -477,15 +490,6 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 ],
 
                 // Linked recipes
-                if (_linkedRecipes.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _LinkedRecipesSection(
-                    linkedRecipes: _linkedRecipes,
-                    onTap: (id) => context.push('/recipe/$id'),
-
-                  ),
-                ],
-
                 const SizedBox(height: 16),
                 _ModernQuickActionsRow(
                   onAddToMealPlan: _showAddToMealPlanSheet,
@@ -532,7 +536,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
       body: TabBarView(
         controller: _tabController,
         children: [
-          _IngredientsTab(ingredients: _ingredients, scaleFactor: _scaleFactor, l10n: l10n, onAddToShopping: _showAddToShoppingSheet, unitConversion: _unitConversion),
+          _IngredientsTab(ingredients: _ingredients, scaleFactor: _scaleFactor, l10n: l10n, onAddToShopping: _showAddToShoppingSheet, unitConversion: _unitConversion, linkedRecipes: _linkedRecipes),
           _InstructionsTab(steps: _steps, notes: _recipe!.notes, l10n: l10n, nerdMode: isNerdMode),
           // Nutrition tab — uses the unified widget
           SingleChildScrollView(
@@ -544,6 +548,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
               chartStyle: ref.watch(settingsProvider).nutritionChartStyle,
               enabledNutrients: ref.watch(settingsProvider).enabledNutrients,
               isNerdMode: isNerdMode,
+              onEmptyTap: _showNutritionCalculation,
             ),
           ),
         ],
@@ -1179,6 +1184,7 @@ class _IngredientsTab extends ConsumerWidget {
   final AppLocalizations l10n;
   final VoidCallback onAddToShopping;
   final _UnitConversion unitConversion;
+  final List<Recipe> linkedRecipes;
 
   const _IngredientsTab({
     required this.ingredients,
@@ -1186,6 +1192,7 @@ class _IngredientsTab extends ConsumerWidget {
     required this.l10n,
     required this.onAddToShopping,
     this.unitConversion = _UnitConversion.none,
+    this.linkedRecipes = const [],
   });
 
   @override
@@ -1195,7 +1202,7 @@ class _IngredientsTab extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        ...ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: scaleFactor, unitConversion: unitConversion)),
+        ...ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: scaleFactor, unitConversion: unitConversion, linkedRecipes: linkedRecipes)),
         const SizedBox(height: 16),
         _LargeAddToShoppingButton(onTap: onAddToShopping),
         const SizedBox(height: 32),
@@ -1272,7 +1279,17 @@ class _RecipeAppBar extends StatelessWidget {
           children: [
             // Image with optional rarity glow border
             if (hasImage)
-              Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
+              GestureDetector(
+                onTap: () => _FullScreenImageViewer.show(
+                  context,
+                  imageProvider: FileImage(File(recipe.imagePath!)),
+                  heroTag: 'recipe_image_${recipe.id}',
+                ),
+                child: Hero(
+                  tag: 'recipe_image_${recipe.id}',
+                  child: Image.file(File(recipe.imagePath!), fit: BoxFit.cover),
+                ),
+              )
             else if (defaultAsset != null)
               Image.asset(defaultAsset, fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => const RecipePlaceholderImage(height: 300, width: double.infinity))
@@ -1460,7 +1477,25 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
   final Ingredient ingredient;
   final double scaleFactor;
   final _UnitConversion unitConversion;
-  const _IngredientItemWithAllergen({required this.ingredient, required this.scaleFactor, this.unitConversion = _UnitConversion.none});
+  final List<Recipe> linkedRecipes;
+  const _IngredientItemWithAllergen({required this.ingredient, required this.scaleFactor, this.unitConversion = _UnitConversion.none, this.linkedRecipes = const []});
+
+  /// Try to find a linked recipe that matches this ingredient name
+  Recipe? _findLinkedRecipe() {
+    if (linkedRecipes.isEmpty) return null;
+    final ingName = ingredient.name.toLowerCase().trim();
+    for (final recipe in linkedRecipes) {
+      final recipeName = recipe.title.toLowerCase().trim();
+      // Exact match or ingredient contains recipe name or vice versa
+      if (ingName == recipeName ||
+          ingName.contains(recipeName) ||
+          recipeName.contains(ingName)) {
+        return recipe;
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -1491,31 +1526,68 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
     final userAllergyKeys = userAllergies.map((a) => a.key).toSet();
     final matchingAllergens = detectedAllergens.where((a) => userAllergyKeys.contains(a)).toList();
 
+    // Check for linked recipe
+    final linkedRecipe = _findLinkedRecipe();
+
     return GestureDetector(
       onLongPress: () => showIngredientSubsSheet(context, ingredient.name),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(margin: const EdgeInsets.only(top: 6), width: 8, height: 8, decoration: BoxDecoration(color: matchingAllergens.isNotEmpty ? Colors.red : theme.colorScheme.primary, shape: BoxShape.circle)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: theme.textTheme.bodyLarge,
-                children: [
-                  if (amount.isNotEmpty) TextSpan(text: '$amount ', style: const TextStyle(fontWeight: FontWeight.w600)),
-                  if (unit.isNotEmpty) TextSpan(text: '$unit '),
-                  TextSpan(text: ingredient.name),
-                ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Container(margin: const EdgeInsets.only(top: 6), width: 8, height: 8, decoration: BoxDecoration(color: matchingAllergens.isNotEmpty ? Colors.red : theme.colorScheme.primary, shape: BoxShape.circle)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: RichText(
+                  text: TextSpan(
+                    style: theme.textTheme.bodyLarge,
+                    children: [
+                      if (amount.isNotEmpty) TextSpan(text: '$amount ', style: const TextStyle(fontWeight: FontWeight.w600)),
+                      if (unit.isNotEmpty) TextSpan(text: '$unit '),
+                      TextSpan(text: ingredient.name),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-          if (matchingAllergens.isNotEmpty)
-            Tooltip(
-              message: 'Contains: ${matchingAllergens.join(", ")}',
-              child: Icon(Icons.warning_amber_rounded, size: 18, color: Colors.red.shade700),
-            ),
-        ]),
+              if (matchingAllergens.isNotEmpty)
+                Tooltip(
+                  message: 'Contains: ${matchingAllergens.join(", ")}',
+                  child: Icon(Icons.warning_amber_rounded, size: 18, color: Colors.red.shade700),
+                ),
+            ]),
+            // Linked recipe link
+            if (linkedRecipe != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 20, top: 2),
+                child: GestureDetector(
+                  onTap: () => context.push('/recipe/${linkedRecipe.id}'),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.subdirectory_arrow_right, size: 14, color: theme.colorScheme.primary),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          linkedRecipe.title,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            decorationColor: theme.colorScheme.primary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.open_in_new, size: 12, color: theme.colorScheme.primary),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -1562,13 +1634,23 @@ class _InstructionStep extends StatelessWidget {
             const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.only(left: 40),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.file(
-                  File(step.imagePath!),
-                  width: double.infinity,
-                  height: 180,
-                  fit: BoxFit.cover,
+              child: GestureDetector(
+                onTap: () => _FullScreenImageViewer.show(
+                  context,
+                  imageProvider: FileImage(File(step.imagePath!)),
+                  heroTag: 'step_image_${step.imagePath}',
+                ),
+                child: Hero(
+                  tag: 'step_image_${step.imagePath}',
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.file(
+                      File(step.imagePath!),
+                      width: double.infinity,
+                      height: 180,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -1824,6 +1906,72 @@ class _RecipeLinkPickerState extends State<_RecipeLinkPicker> {
                     onTap: () => widget.onSelected(recipe.id),
                   );
                 },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============ FULL-SCREEN IMAGE VIEWER ============
+
+class _FullScreenImageViewer extends StatelessWidget {
+  final ImageProvider imageProvider;
+  final String? heroTag;
+
+  const _FullScreenImageViewer({required this.imageProvider, this.heroTag});
+
+  static void show(BuildContext context, {required ImageProvider imageProvider, String? heroTag}) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierColor: Colors.black87,
+        barrierDismissible: true,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return _FullScreenImageViewer(imageProvider: imageProvider, heroTag: heroTag);
+        },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final imageWidget = InteractiveViewer(
+      minScale: 0.5,
+      maxScale: 4.0,
+      child: Center(
+        child: Image(image: imageProvider, fit: BoxFit.contain),
+      ),
+    );
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: GestureDetector(
+        onTap: () => Navigator.pop(context),
+        child: Stack(
+          children: [
+            // Image
+            heroTag != null
+                ? Hero(tag: heroTag!, child: imageWidget)
+                : imageWidget,
+            // Close button
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 8,
+              right: 16,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
               ),
             ),
           ],

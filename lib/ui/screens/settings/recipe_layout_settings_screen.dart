@@ -187,7 +187,7 @@ class _LayoutOptionCard extends StatelessWidget {
   }
 }
 
-/// Interactive stacked layout preview showing Nutrition → Ingredients → Instructions vertically
+/// Interactive stacked layout preview showing Ingredients → Instructions → Nutrition vertically
 class _StackedPreview extends StatelessWidget {
   const _StackedPreview();
 
@@ -200,15 +200,6 @@ class _StackedPreview extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Nutrition Section
-          _PreviewSection(
-            icon: Icons.local_fire_department,
-            title: 'Nutrition',
-            color: Colors.orange,
-            child: _NutritionPreviewContent(),
-          ),
-          const SizedBox(height: 12),
-
           // Ingredients Section
           _PreviewSection(
             icon: Icons.checklist,
@@ -282,6 +273,15 @@ class _StackedPreview extends StatelessWidget {
                 ),
               )),
             ),
+          ),
+          const SizedBox(height: 12),
+
+          // Nutrition Section
+          _PreviewSection(
+            icon: Icons.local_fire_department,
+            title: 'Nutrition',
+            color: Colors.orange,
+            child: _NutritionPreviewContent(),
           ),
         ],
       ),

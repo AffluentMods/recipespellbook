@@ -4,10 +4,7 @@ import '../../providers/settings_provider.dart';
 import '../../data/app_enums.dart';
 
 /// Recipe placeholder image widget
-/// Shows one of three styles based on settings:
-///   custom   → Default artwork images (changes with RPG mode)
-///   theme    → Theme banner artwork
-///   gradient → Color gradient based on theme
+/// Shows either default artwork, theme banner, or gradient based on settings
 class RecipePlaceholderImage extends ConsumerWidget {
   final double? height;
   final double? width;
@@ -33,23 +30,24 @@ class RecipePlaceholderImage extends ConsumerWidget {
 
     switch (mode) {
       case PlaceholderImageMode.custom:
-        placeholder = _CustomImagePlaceholder(
+        placeholder = _DefaultImagePlaceholder(
           nerdMode: nerdMode,
           isRecipe: true,
           colorTheme: colorTheme,
         );
+        break;
       case PlaceholderImageMode.theme:
         placeholder = _ThemeBannerPlaceholder(
           colorTheme: colorTheme,
-          nerdMode: nerdMode,
           isRecipe: true,
         );
+        break;
       case PlaceholderImageMode.gradient:
         placeholder = _GradientPlaceholder(
           colorTheme: colorTheme,
-          nerdMode: nerdMode,
           isRecipe: true,
         );
+        break;
     }
 
     Widget result = Container(
@@ -95,23 +93,24 @@ class CookbookPlaceholderImage extends ConsumerWidget {
 
     switch (mode) {
       case PlaceholderImageMode.custom:
-        placeholder = _CustomImagePlaceholder(
+        placeholder = _DefaultImagePlaceholder(
           nerdMode: nerdMode,
           isRecipe: false,
           colorTheme: colorTheme,
         );
+        break;
       case PlaceholderImageMode.theme:
         placeholder = _ThemeBannerPlaceholder(
           colorTheme: colorTheme,
-          nerdMode: nerdMode,
           isRecipe: false,
         );
+        break;
       case PlaceholderImageMode.gradient:
         placeholder = _GradientPlaceholder(
           colorTheme: colorTheme,
-          nerdMode: nerdMode,
           isRecipe: false,
         );
+        break;
     }
 
     Widget result = Container(
@@ -131,15 +130,75 @@ class CookbookPlaceholderImage extends ConsumerWidget {
   }
 }
 
-// ============ MODE 1: DEFAULT IMAGES (custom) ============
+/// Theme-based banner image placeholder
+/// Uses the theme's unique banner art (changes per color theme)
+class _ThemeBannerPlaceholder extends StatelessWidget {
+  final AppColorTheme colorTheme;
+  final bool isRecipe;
 
-/// Custom artwork images that change with RPG mode
-class _CustomImagePlaceholder extends StatelessWidget {
+  const _ThemeBannerPlaceholder({
+    required this.colorTheme,
+    required this.isRecipe,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      colorTheme.bannerAsset,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        // Fallback to gradient if banner image missing
+        return _GradientPlaceholder(
+          colorTheme: colorTheme,
+          isRecipe: isRecipe,
+        );
+      },
+    );
+  }
+}
+
+/// Gradient placeholder with theme colors + icon
+class _GradientPlaceholder extends StatelessWidget {
+  final AppColorTheme colorTheme;
+  final bool isRecipe;
+
+  const _GradientPlaceholder({
+    required this.colorTheme,
+    required this.isRecipe,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = Theme.of(context).brightness == Brightness.dark
+        ? colorTheme.dark
+        : colorTheme.light;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [palette.primary, palette.secondary],
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          isRecipe ? Icons.restaurant : Icons.menu_book,
+          size: 48,
+          color: Colors.white.withValues(alpha: 0.9),
+        ),
+      ),
+    );
+  }
+}
+
+/// Default app artwork placeholder
+class _DefaultImagePlaceholder extends StatelessWidget {
   final bool nerdMode;
   final bool isRecipe;
   final AppColorTheme colorTheme;
 
-  const _CustomImagePlaceholder({
+  const _DefaultImagePlaceholder({
     required this.nerdMode,
     required this.isRecipe,
     required this.colorTheme,
@@ -159,129 +218,11 @@ class _CustomImagePlaceholder extends StatelessWidget {
       imagePath,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
-        // Fall back to gradient if artwork missing
-        return _GradientPlaceholder(
+        return _ThemeBannerPlaceholder(
           colorTheme: colorTheme,
-          nerdMode: nerdMode,
           isRecipe: isRecipe,
         );
       },
-    );
-  }
-}
-
-// ============ MODE 2: THEME-BASED (banner art) ============
-
-/// Theme banner artwork placeholder
-class _ThemeBannerPlaceholder extends StatelessWidget {
-  final AppColorTheme colorTheme;
-  final bool nerdMode;
-  final bool isRecipe;
-
-  const _ThemeBannerPlaceholder({
-    required this.colorTheme,
-    required this.nerdMode,
-    required this.isRecipe,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // Banner image
-        Image.asset(
-          colorTheme.bannerAsset,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _GradientPlaceholder(
-              colorTheme: colorTheme,
-              nerdMode: nerdMode,
-              isRecipe: isRecipe,
-            );
-          },
-        ),
-
-        // Subtle darkening overlay for icon readability
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withValues(alpha: 0.0),
-                Colors.black.withValues(alpha: 0.25),
-              ],
-            ),
-          ),
-        ),
-
-        // Centered icon
-        Center(
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.25),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              isRecipe
-                  ? (nerdMode ? Icons.auto_awesome : Icons.restaurant)
-                  : (nerdMode ? Icons.auto_stories : Icons.menu_book),
-              size: 32,
-              color: Colors.white.withValues(alpha: 0.9),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ============ MODE 3: GRADIENT-BASED ============
-
-/// Simple color gradient based on theme
-class _GradientPlaceholder extends StatelessWidget {
-  final AppColorTheme colorTheme;
-  final bool nerdMode;
-  final bool isRecipe;
-
-  const _GradientPlaceholder({
-    required this.colorTheme,
-    required this.nerdMode,
-    required this.isRecipe,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = Theme.of(context).brightness == Brightness.dark
-        ? colorTheme.dark
-        : colorTheme.light;
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [palette.primary, palette.secondary],
-        ),
-      ),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.15),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            isRecipe
-                ? (nerdMode ? Icons.auto_awesome : Icons.restaurant)
-                : (nerdMode ? Icons.auto_stories : Icons.menu_book),
-            size: 32,
-            color: Colors.white.withValues(alpha: 0.9),
-          ),
-        ),
-      ),
     );
   }
 }

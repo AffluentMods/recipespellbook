@@ -51,6 +51,7 @@ class NutritionData {
   final DateTime? calculatedAt; // When nutrition was last calculated
   final int? matchedIngredients; // How many ingredients were matched to USDA
   final int? totalIngredients; // Total ingredients in recipe
+  final int? calculatedServings; // Servings count when nutrition was calculated (values are TOTAL when set)
 
   const NutritionData({
     this.calories,
@@ -93,6 +94,7 @@ class NutritionData {
     this.calculatedAt,
     this.matchedIngredients,
     this.totalIngredients,
+    this.calculatedServings,
   });
 
   bool get hasAnyData =>
@@ -188,6 +190,7 @@ class NutritionData {
           : null,
       matchedIngredients: json['matchedIngredients'] as int?,
       totalIngredients: json['totalIngredients'] as int?,
+      calculatedServings: json['calculatedServings'] as int?,
     );
   }
 
@@ -239,6 +242,7 @@ class NutritionData {
       if (calculatedAt != null) 'calculatedAt': calculatedAt!.toIso8601String(),
       if (matchedIngredients != null) 'matchedIngredients': matchedIngredients,
       if (totalIngredients != null) 'totalIngredients': totalIngredients,
+      if (calculatedServings != null) 'calculatedServings': calculatedServings,
     };
   }
 
@@ -284,6 +288,7 @@ class NutritionData {
     DateTime? calculatedAt,
     int? matchedIngredients,
     int? totalIngredients,
+    int? calculatedServings,
   }) {
     return NutritionData(
       calories: calories ?? this.calories,
@@ -326,6 +331,7 @@ class NutritionData {
       calculatedAt: calculatedAt ?? this.calculatedAt,
       matchedIngredients: matchedIngredients ?? this.matchedIngredients,
       totalIngredients: totalIngredients ?? this.totalIngredients,
+      calculatedServings: calculatedServings ?? this.calculatedServings,
     );
   }
 
@@ -378,6 +384,7 @@ class NutritionData {
       calculatedAt: calculatedAt,
       matchedIngredients: matchedIngredients,
       totalIngredients: totalIngredients,
+      calculatedServings: calculatedServings,
     );
   }
 

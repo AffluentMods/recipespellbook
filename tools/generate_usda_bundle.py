@@ -13,7 +13,7 @@ SETUP:
 3. Run this script pointing to those files
 
 Usage:
-    python generate_usda_bundle.py --foundation foundationDownload.json --sr-legacy FoodData_Central_sr_legacy_food_json_2018-04.json --output common_ingredients.json
+    python generate_usda_bundle.py --foundation foundationDownload.json --sr-legacy FoodData_Central_sr_legacy_food_json_2018-04.json --output common_ingredients-old.json
 
 Requirements:
     pip install tqdm
@@ -212,7 +212,7 @@ def main():
     parser = argparse.ArgumentParser(description="Generate USDA common ingredients bundle from downloaded files")
     parser.add_argument("--foundation", type=Path, help="Path to Foundation Foods JSON file")
     parser.add_argument("--sr-legacy", type=Path, help="Path to SR Legacy JSON file")
-    parser.add_argument("--output", type=Path, default=Path("common_ingredients.json"), help="Output file path")
+    parser.add_argument("--output", type=Path, default=Path("common_ingredients-old.json"), help="Output file path")
     parser.add_argument("--max-foods", type=int, default=2500, help="Maximum foods to include")
     parser.add_argument("--all", action="store_true", help="Include all foods, not just common ingredients")
     args = parser.parse_args()

@@ -729,12 +729,12 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
         case MatchStatus.matched:
           icon = Icons.check_circle;
           color = Colors.green;
-          statusText = item.usdaFood?.description ?? '';
+          statusText = item.usdaFood?.description ?? item.matchDescription ?? '';
           break;
         case MatchStatus.uncertain:
           icon = Icons.help;
           color = Colors.orange;
-          statusText = '${item.usdaFood?.description ?? ''} (${l10n.nutritionUncertain})';
+          statusText = '${item.usdaFood?.description ?? item.matchDescription ?? ''} (${l10n.nutritionUncertain})';
           break;
         case MatchStatus.notFound:
           icon = Icons.cancel;
@@ -1033,7 +1033,15 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
                       );
                     }
                   } else if (_result != null) {
-                    Navigator.pop(context, _result!.perServingNutrition);
+                    // Store TOTAL nutrition with calculatedServings metadata
+                    // so display can correctly scale when servings change
+                    final servingsCount = int.tryParse(
+                      RegExp(r'(\d+)').firstMatch(widget.servings)?.group(1) ?? '',
+                    ) ?? 1;
+                    final total = _result!.totalNutrition.copyWith(
+                      calculatedServings: servingsCount,
+                    );
+                    Navigator.pop(context, total);
                   }
                 },
                 child: Text(l10n.nutritionSave),
@@ -1110,6 +1118,16 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
           ingredientName: item.ingredient.name,
           fdcId: result.usdaFood!.fdcId,
         );
+
+        // Also calculate nutrition from USDA food and store as override
+        // so the recalculation actually uses this selection
+        final grams = item.gramsUsed ?? 100.0;
+        final nutrition = usdaService.calculateNutrition(
+          result.usdaFood!.nutrients,
+          grams,
+        );
+        _manualOverrides[item.ingredient.name] = nutrition;
+        _editedIngredients.add(item.ingredient.name);
       }
 
       // Recalculate nutrition

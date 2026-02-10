@@ -14,149 +14,185 @@ class AppMenuDrawer extends ConsumerWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider);
+    final isDark = theme.brightness == Brightness.dark;
 
     // Check if RPG mode is ACTUALLY enabled (requires nerd mode master toggle)
     final isRpgEnabled = settings.nerdMode;
 
     return Drawer(
-      backgroundColor: theme.colorScheme.surface,
       child: SafeArea(
         child: Column(
           children: [
+            // Profile header
             _ProfileSection(),
-            const Divider(height: 1),
+            const SizedBox(height: 8),
+
+            // Scrollable menu
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 children: [
-                  _SectionHeader(title: 'NAVIGATION'),
-                  _MenuItem(
-                    icon: Icons.menu_book_rounded,
-                    label: l10n.navCookbooks,
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.go('/cookbooks');
-                    },
-                  ),
-                  _MenuItem(
-                    icon: Icons.people_rounded,
-                    label: 'Community',
-                    subtitle: 'Coming soon',
-                    enabled: false,
-                    onTap: () {},
+                  // ── NAVIGATION ──
+                  _DrawerSection(
+                    title: 'NAVIGATION',
+                    children: [
+                      _MenuItem(
+                        icon: Icons.menu_book_rounded,
+                        label: l10n.navCookbooks,
+                        onTap: () {
+                          Navigator.pop(context);
+                          context.go('/cookbooks');
+                        },
+                      ),
+                      _MenuItem(
+                        icon: Icons.people_rounded,
+                        label: 'Community',
+                        subtitle: 'Coming soon',
+                        enabled: false,
+                        onTap: () {},
+                      ),
+                    ],
                   ),
 
-                  const SizedBox(height: 8),
-                  const Divider(height: 1),
-                  _SectionHeader(title: 'IMPORT'),
-                  _MenuItem(
-                    icon: Icons.download_rounded,
-                    label: l10n.importGuides,
-                    subtitle: 'Instagram, TikTok, websites...',
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push('/import-guides');
-                    },
-                  ),
-                  _MenuItem(
-                    icon: Icons.computer_rounded,
-                    label: 'Use on desktop',
-                    subtitle: 'Sync across devices',
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showDesktopInfo(context);
-                    },
+                  const SizedBox(height: 12),
+
+                  // ── IMPORT ──
+                  _DrawerSection(
+                    title: 'IMPORT',
+                    children: [
+                      _MenuItem(
+                        icon: Icons.download_rounded,
+                        label: l10n.importGuides,
+                        subtitle: 'Instagram, TikTok, websites...',
+                        onTap: () {
+                          Navigator.pop(context);
+                          context.push('/import-guides');
+                        },
+                      ),
+                      _MenuItem(
+                        icon: Icons.computer_rounded,
+                        label: 'Use on desktop',
+                        subtitle: 'Sync across devices',
+                        onTap: () {
+                          Navigator.pop(context);
+                          _showDesktopInfo(context);
+                        },
+                      ),
+                    ],
                   ),
 
                   // === RPG MODE - ONLY IF ENABLED ===
                   if (isRpgEnabled) ...[
-                    const SizedBox(height: 8),
-                    const Divider(height: 1),
-                    _SectionHeader(title: 'RPG MODE', color: theme.colorScheme.primary),
-                    _MenuItem(
-                      icon: Icons.person_rounded,
-                      label: 'Profile',
-                      subtitle: 'View your stats and progress',
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.push('/rpg/profile');
-                      },
-                    ),
-                    _MenuItem(
-                      icon: Icons.emoji_events_rounded,
-                      label: 'Achievements',
-                      subtitle: 'Unlock rewards',
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.push('/rpg/achievements');
-                      },
-                    ),
-                    _MenuItem(
-                      icon: Icons.checkroom_rounded,
-                      label: 'Cosmetics',
-                      subtitle: 'Customize your look',
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.push('/rpg/cosmetics');
-                      },
-                    ),
-                    _MenuItem(
-                      icon: Icons.leaderboard_rounded,
-                      label: 'Leaderboards',
-                      subtitle: 'Compete with others',
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.push('/rpg/leaderboard');
-                      },
-                    ),
-                    _MenuItem(
-                      icon: Icons.whatshot_rounded,
-                      label: 'Boss Battles',
-                      subtitle: 'Epic cooking challenges',
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.push('/rpg/boss');
-                      },
+                    const SizedBox(height: 12),
+                    _DrawerSection(
+                      title: 'RPG MODE',
+                      titleColor: theme.colorScheme.primary,
+                      children: [
+                        _MenuItem(
+                          icon: Icons.person_rounded,
+                          label: 'Profile',
+                          subtitle: 'View your stats and progress',
+                          onTap: () {
+                            Navigator.pop(context);
+                            context.push('/rpg/profile');
+                          },
+                        ),
+                        _MenuItem(
+                          icon: Icons.emoji_events_rounded,
+                          label: 'Achievements',
+                          subtitle: 'Unlock rewards',
+                          onTap: () {
+                            Navigator.pop(context);
+                            context.push('/rpg/achievements');
+                          },
+                        ),
+                        _MenuItem(
+                          icon: Icons.checkroom_rounded,
+                          label: 'Cosmetics',
+                          subtitle: 'Customize your look',
+                          onTap: () {
+                            Navigator.pop(context);
+                            context.push('/rpg/cosmetics');
+                          },
+                        ),
+                        _MenuItem(
+                          icon: Icons.leaderboard_rounded,
+                          label: 'Leaderboards',
+                          subtitle: 'Compete with others',
+                          onTap: () {
+                            Navigator.pop(context);
+                            context.push('/rpg/leaderboard');
+                          },
+                        ),
+                        _MenuItem(
+                          icon: Icons.whatshot_rounded,
+                          label: 'Boss Battles',
+                          subtitle: 'Epic cooking challenges',
+                          onTap: () {
+                            Navigator.pop(context);
+                            context.push('/rpg/boss');
+                          },
+                        ),
+                      ],
                     ),
                   ],
 
-                  const SizedBox(height: 8),
-                  const Divider(height: 1),
-                  _SectionHeader(title: 'SOCIAL'),
-                  _MenuItem(
-                    icon: Icons.person_add_rounded,
-                    label: 'Invite friends',
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showInviteSheet(context);
-                    },
+                  const SizedBox(height: 12),
+
+                  // ── SOCIAL ──
+                  _DrawerSection(
+                    title: 'SOCIAL',
+                    children: [
+                      _MenuItem(
+                        icon: Icons.person_add_rounded,
+                        label: 'Invite friends',
+                        onTap: () {
+                          Navigator.pop(context);
+                          _showInviteSheet(context);
+                        },
+                      ),
+                    ],
                   ),
 
-                  const SizedBox(height: 8),
-                  const Divider(height: 1),
-                  _SectionHeader(title: 'APP'),
-                  _MenuItem(
-                    icon: Icons.help_outline_rounded,
-                    label: l10n.helpTitle,
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showHelpSheet(context);
-                    },
+                  const SizedBox(height: 12),
+
+                  // ── APP ──
+                  _DrawerSection(
+                    title: 'APP',
+                    children: [
+                      _MenuItem(
+                        icon: Icons.help_outline_rounded,
+                        label: l10n.helpTitle,
+                        onTap: () {
+                          Navigator.pop(context);
+                          _showHelpSheet(context);
+                        },
+                      ),
+                      _MenuItem(
+                        icon: Icons.settings_outlined,
+                        label: l10n.settingsTitle,
+                        onTap: () {
+                          Navigator.pop(context);
+                          context.push('/settings');
+                        },
+                      ),
+                    ],
                   ),
-                  _MenuItem(
-                    icon: Icons.settings_outlined,
-                    label: l10n.settingsTitle,
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push('/settings');
-                    },
-                  ),
+
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
+
+            // Version footer
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text('Recipe Spellbook v1.0.0', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+              child: Text(
+                'Recipe Spellbook v1.0.0',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+              ),
             ),
           ],
         ),
@@ -165,24 +201,42 @@ class AppMenuDrawer extends ConsumerWidget {
   }
 
   void _showDesktopInfo(BuildContext context) {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface, borderRadius: const BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.outlineVariant,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
             const SizedBox(height: 24),
-            const Icon(Icons.computer, size: 48, color: Colors.blue),
+            Icon(Icons.computer, size: 48, color: theme.colorScheme.primary),
             const SizedBox(height: 16),
-            Text('Use on Desktop', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              'Use on Desktop',
+              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
-            Text('Desktop sync coming soon! Your recipes will automatically sync across all your devices.', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey), textAlign: TextAlign.center),
+            Text(
+              'Desktop sync coming soon! Your recipes will automatically sync across all your devices.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 24),
-            FilledButton(onPressed: () => Navigator.pop(ctx), child: const Text('Got it')),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Got it'),
+            ),
             const SizedBox(height: 16),
           ],
         ),
@@ -194,39 +248,85 @@ class AppMenuDrawer extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) => DraggableScrollableSheet(
         initialChildSize: 0.7,
         minChildSize: 0.5,
         maxChildSize: 0.95,
+        expand: false,
         builder: (context, scrollController) {
-          return Container(
-            decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface, borderRadius: const BorderRadius.vertical(top: Radius.circular(20))),
-            child: Column(
-              children: [
-                const SizedBox(height: 12),
-                Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
-                Padding(
+          final theme = Theme.of(context);
+          return Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    const Icon(Icons.help_outline, size: 28),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Help & Support',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(height: 1, color: theme.colorScheme.outlineVariant),
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
                   padding: const EdgeInsets.all(20),
-                  child: Row(children: [const Icon(Icons.help_outline, size: 28), const SizedBox(width: 12), Text('Help & Support', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold))]),
+                  children: const [
+                    _HelpItem(
+                      icon: Icons.add_circle_outline,
+                      title: 'Adding Recipes',
+                      description:
+                      'Tap the + button in any cookbook to add a recipe. You can import from URLs, take photos, or enter manually.',
+                    ),
+                    _HelpItem(
+                      icon: Icons.share,
+                      title: 'Importing from Apps',
+                      description:
+                      'Share a recipe from Instagram, TikTok, or any website directly to Recipe Spellbook.',
+                    ),
+                    _HelpItem(
+                      icon: Icons.calendar_today,
+                      title: 'Meal Planning',
+                      description:
+                      'Tap the Meal Plan tab to plan your meals for the week. Tap + on any day to add recipes.',
+                    ),
+                    _HelpItem(
+                      icon: Icons.shopping_cart,
+                      title: 'Shopping Lists',
+                      description:
+                      'Add ingredients from recipes to your shopping list. Items are organized by store section.',
+                    ),
+                    _HelpItem(
+                      icon: Icons.sync,
+                      title: 'Syncing',
+                      description:
+                      'Cloud sync is coming soon! Your recipes will sync across all your devices.',
+                    ),
+                    _HelpItem(
+                      icon: Icons.mail_outline,
+                      title: 'Contact Us',
+                      description:
+                      'Have questions or feedback? Email us at support@recipespellbook.app',
+                    ),
+                  ],
                 ),
-                const Divider(height: 1),
-                Expanded(
-                  child: ListView(
-                    controller: scrollController,
-                    padding: const EdgeInsets.all(20),
-                    children: const [
-                      _HelpItem(icon: Icons.add_circle_outline, title: 'Adding Recipes', description: 'Tap the + button in any cookbook to add a recipe. You can import from URLs, take photos, or enter manually.'),
-                      _HelpItem(icon: Icons.share, title: 'Importing from Apps', description: 'Share a recipe from Instagram, TikTok, or any website directly to Recipe Spellbook.'),
-                      _HelpItem(icon: Icons.calendar_today, title: 'Meal Planning', description: 'Tap the Meal Plan tab to plan your meals for the week. Tap + on any day to add recipes.'),
-                      _HelpItem(icon: Icons.shopping_cart, title: 'Shopping Lists', description: 'Add ingredients from recipes to your shopping list. Items are organized by store section.'),
-                      _HelpItem(icon: Icons.sync, title: 'Syncing', description: 'Cloud sync is coming soon! Your recipes will sync across all your devices.'),
-                      _HelpItem(icon: Icons.mail_outline, title: 'Contact Us', description: 'Have questions or feedback? Email us at support@recipespellbook.com'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           );
         },
       ),
@@ -234,28 +334,64 @@ class AppMenuDrawer extends ConsumerWidget {
   }
 
   void _showInviteSheet(BuildContext context) {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface, borderRadius: const BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.outlineVariant,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
             const SizedBox(height: 24),
             const Icon(Icons.favorite, size: 48, color: Colors.pink),
             const SizedBox(height: 16),
-            Text('Share Recipe Spellbook', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              'Share Recipe Spellbook',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text('Invite your friends and family to start cooking together!', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey), textAlign: TextAlign.center),
+            Text(
+              'Invite your friends and family to start cooking together!',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 24),
-            Row(children: [
-              Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx), child: const Text('Maybe later'))),
-              const SizedBox(width: 12),
-              Expanded(child: FilledButton.icon(onPressed: () { Navigator.pop(ctx); Share.share('Check out Recipe Spellbook - the best recipe app! https://recipespellbook.com', subject: 'Recipe Spellbook'); }, icon: const Icon(Icons.share), label: const Text('Share'))),
-            ]),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Maybe later'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      Share.share(
+                        'Check out Recipe Spellbook - the best recipe app! https://recipespellbook.app',
+                        subject: 'Recipe Spellbook',
+                      );
+                    },
+                    icon: const Icon(Icons.share),
+                    label: const Text('Share'),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
           ],
         ),
@@ -264,11 +400,19 @@ class AppMenuDrawer extends ConsumerWidget {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// Helper widgets
+// ═══════════════════════════════════════════════════════════════════
+
 class _HelpItem extends StatelessWidget {
   final IconData icon;
   final String title;
   final String description;
-  const _HelpItem({required this.icon, required this.title, required this.description});
+  const _HelpItem({
+    required this.icon,
+    required this.title,
+    required this.description,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -278,24 +422,78 @@ class _HelpItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(width: 40, height: 40, decoration: BoxDecoration(color: theme.colorScheme.primaryContainer, borderRadius: BorderRadius.circular(10)), child: Icon(icon, size: 20, color: theme.colorScheme.primary)),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 20, color: theme.colorScheme.primary),
+          ),
           const SizedBox(width: 16),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)), const SizedBox(height: 4), Text(description, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline))])),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _SectionHeader extends StatelessWidget {
+/// Section with individually separated items
+class _DrawerSection extends StatelessWidget {
   final String title;
-  final Color? color;
-  const _SectionHeader({required this.title, this.color});
+  final Color? titleColor;
+  final List<Widget> children;
+
+  const _DrawerSection({
+    required this.title,
+    this.titleColor,
+    required this.children,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 8), child: Text(title, style: theme.textTheme.labelSmall?.copyWith(color: color ?? theme.colorScheme.outline, fontWeight: FontWeight.bold, letterSpacing: 1.2)));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 8, 4, 6),
+          child: Text(
+            title,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: titleColor ?? theme.colorScheme.primary,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ),
+        for (final child in children) ...[
+          child,
+          const SizedBox(height: 4),
+        ],
+      ],
+    );
   }
 }
 
@@ -304,21 +502,60 @@ class _ProfileSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Row(children: [
-        Container(width: 56, height: 56, decoration: BoxDecoration(gradient: LinearGradient(colors: [theme.colorScheme.tertiary, theme.colorScheme.primary], begin: Alignment.topLeft, end: Alignment.bottomRight), shape: BoxShape.circle), child: Icon(Icons.auto_fix_high, size: 28, color: theme.colorScheme.onPrimary)),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Recipe Spellbook', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 4),
-            GestureDetector(
-              onTap: () { Navigator.pop(context); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Account system coming soon!'))); },
-              child: Text('Create account', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary, decoration: TextDecoration.underline)),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      child: Row(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [theme.colorScheme.tertiary, theme.colorScheme.primary],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              shape: BoxShape.circle,
             ),
-          ]),
-        ),
-      ]),
+            child: Icon(
+              Icons.auto_fix_high,
+              size: 28,
+              color: theme.colorScheme.onPrimary,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Recipe Spellbook',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Account system coming soon!'),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    'Create account',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.primary,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -330,18 +567,81 @@ class _MenuItem extends StatelessWidget {
   final Widget? trailing;
   final bool enabled;
   final VoidCallback onTap;
-  const _MenuItem({required this.icon, required this.label, this.subtitle, this.trailing, this.enabled = true, required this.onTap});
+
+  const _MenuItem({
+    required this.icon,
+    required this.label,
+    this.subtitle,
+    this.trailing,
+    this.enabled = true,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ListTile(
-      enabled: enabled,
-      leading: Container(width: 40, height: 40, decoration: BoxDecoration(color: enabled ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(10)), child: Icon(icon, size: 20, color: enabled ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.outline)),
-      title: Text(label, style: TextStyle(color: enabled ? null : theme.colorScheme.outline)),
-      subtitle: subtitle != null ? Text(subtitle!, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)) : null,
-      trailing: trailing,
-      onTap: enabled ? onTap : null,
+    final isDark = theme.brightness == Brightness.dark;
+
+    // Icon container color
+    final iconBg = isDark
+        ? theme.colorScheme.surfaceContainerHighest
+        : theme.colorScheme.surfaceContainerHigh;
+
+    // Item background — slightly elevated from scaffold
+    final itemBg = isDark
+        ? theme.colorScheme.surfaceContainerHigh
+        : theme.colorScheme.surfaceContainerLowest;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: itemBg,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        enabled: enabled,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+        leading: Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: enabled ? iconBg : iconBg.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            icon,
+            size: 22,
+            color: enabled
+                ? theme.colorScheme.onSurfaceVariant
+                : theme.colorScheme.outline,
+          ),
+        ),
+        title: Text(
+          label,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            color: enabled ? null : theme.colorScheme.outline,
+          ),
+        ),
+        subtitle: subtitle != null
+            ? Text(
+          subtitle!,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.outline,
+          ),
+        )
+            : null,
+        trailing: trailing ??
+            (enabled
+                ? Icon(
+              Icons.chevron_right,
+              size: 20,
+              color: theme.colorScheme.outline,
+            )
+                : null),
+        onTap: enabled ? onTap : null,
+      ),
     );
   }
 }

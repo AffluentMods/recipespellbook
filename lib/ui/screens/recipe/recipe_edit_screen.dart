@@ -415,6 +415,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
               ingredient: entry.value,
               onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
               onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
+              onLinkRecipe: _isEditing ? _showLinkRecipePicker : null,
             )),
             _AddIngredientButton(onTap: _addIngredient),
             const SizedBox(height: 32),
@@ -543,6 +544,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
                 ingredient: entry.value,
                 onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
                 onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
+                onLinkRecipe: _isEditing ? _showLinkRecipePicker : null,
               )),
               _AddIngredientButton(onTap: _addIngredient),
               const SizedBox(height: 100),
@@ -1800,15 +1802,58 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _IngredientRow extends StatelessWidget {
-  final _SimpleIngredient ingredient; final ValueChanged<String> onChanged; final VoidCallback onDelete;
-  const _IngredientRow({super.key, required this.ingredient, required this.onChanged, required this.onDelete});
+  final _SimpleIngredient ingredient;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onDelete;
+  final VoidCallback? onLinkRecipe;
+
+  const _IngredientRow({
+    super.key,
+    required this.ingredient,
+    required this.onChanged,
+    required this.onDelete,
+    this.onLinkRecipe,
+  });
+
   @override Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [
       Container(width: 8, height: 8, decoration: BoxDecoration(color: theme.colorScheme.primary, shape: BoxShape.circle)),
       const SizedBox(width: 12),
       Expanded(child: TextFormField(initialValue: ingredient.text, decoration: const InputDecoration(hintText: 'e.g., 2 cups flour', isDense: true, border: OutlineInputBorder()), textCapitalization: TextCapitalization.sentences, onChanged: onChanged)),
-      IconButton(icon: Icon(Icons.close, size: 20, color: theme.colorScheme.outline), onPressed: onDelete, visualDensity: VisualDensity.compact),
+      PopupMenuButton<String>(
+        icon: Icon(Icons.more_vert, size: 20, color: theme.colorScheme.outline),
+        padding: EdgeInsets.zero,
+        onSelected: (value) {
+          switch (value) {
+            case 'delete':
+              onDelete();
+              break;
+            case 'link_recipe':
+              onLinkRecipe?.call();
+              break;
+          }
+        },
+        itemBuilder: (context) => [
+          if (onLinkRecipe != null)
+            PopupMenuItem(
+              value: 'link_recipe',
+              child: Row(children: [
+                Icon(Icons.link, size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                const Text('Link Recipe'),
+              ]),
+            ),
+          PopupMenuItem(
+            value: 'delete',
+            child: Row(children: [
+              Icon(Icons.delete_outline, size: 18, color: theme.colorScheme.error),
+              const SizedBox(width: 8),
+              const Text('Delete'),
+            ]),
+          ),
+        ],
+      ),
     ]));
   }
 }

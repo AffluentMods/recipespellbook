@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart' hide Step;
 import '../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:drift/drift.dart' as drift;
 import '../../database/database.dart';
 import '../../providers/database_provider.dart';
+import 'placeholder_image.dart';
 
 /// Shows a sheet to manage linked recipes
 void showLinkedRecipesSheet(
@@ -211,8 +213,12 @@ class _LinkedRecipesSheetState extends ConsumerState<_LinkedRecipesSheet> {
                 child: Text('Search Results', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.outline)),
               ),
               ..._searchResults.map((r) => ListTile(
-                leading: const Icon(Icons.restaurant_menu),
+                leading: _RecipeThumb(imagePath: r.imagePath, size: 40),
                 title: Text(r.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                subtitle: r.description != null
+                    ? Text(r.description!, maxLines: 1, overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline))
+                    : null,
                 trailing: IconButton(icon: const Icon(Icons.add_link), onPressed: () => _linkRecipe(r)),
               )),
             ]),
@@ -243,6 +249,37 @@ class _LinkedRecipesSheetState extends ConsumerState<_LinkedRecipesSheet> {
   }
 }
 
+// ============ RECIPE THUMBNAIL ============
+
+class _RecipeThumb extends StatelessWidget {
+  final String? imagePath;
+  final double size;
+
+  const _RecipeThumb({this.imagePath, this.size = 48});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasImage = imagePath != null && imagePath!.isNotEmpty && File(imagePath!).existsSync();
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: hasImage
+            ? Image.file(
+          File(imagePath!),
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => const RecipePlaceholderImage(),
+        )
+            : const RecipePlaceholderImage(),
+      ),
+    );
+  }
+}
+
+// ============ LINKED RECIPE CARD (in bottom sheet) ============
+
 class _LinkedRecipeCard extends StatelessWidget {
   final Recipe recipe;
   final VoidCallback onTap;
@@ -253,22 +290,30 @@ class _LinkedRecipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
       margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(14),
+        border: isDark ? null : Border.all(color: theme.colorScheme.outlineVariant, width: 0.5),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: ListTile(
         onTap: onTap,
-        leading: Container(
-          width: 48, height: 48,
-          decoration: BoxDecoration(color: theme.colorScheme.primaryContainer, borderRadius: BorderRadius.circular(8)),
-          child: Icon(Icons.restaurant_menu, color: theme.colorScheme.onPrimaryContainer),
-        ),
+        leading: _RecipeThumb(imagePath: recipe.imagePath, size: 48),
         title: Text(recipe.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-        subtitle: recipe.description != null ? Text(recipe.description!, maxLines: 1, overflow: TextOverflow.ellipsis) : null,
+        subtitle: recipe.description != null
+            ? Text(recipe.description!, maxLines: 1, overflow: TextOverflow.ellipsis)
+            : null,
         trailing: IconButton(icon: const Icon(Icons.link_off), onPressed: onUnlink, tooltip: 'Unlink'),
       ),
     );
   }
 }
+
+// ============ EMPTY STATE ============
 
 class _EmptyLinkedState extends StatelessWidget {
   @override
@@ -289,6 +334,8 @@ class _EmptyLinkedState extends StatelessWidget {
     );
   }
 }
+
+// ============ INLINE SECTION (shown in recipe view) ============
 
 class LinkedRecipesSection extends ConsumerWidget {
   final String recipeId;
@@ -326,17 +373,30 @@ class _LinkedRecipePreview extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return FutureBuilder<Recipe?>(
       future: ref.read(recipeDaoProvider).getRecipeById(recipeId),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data == null) return const SizedBox.shrink();
         final recipe = snapshot.data!;
-        return Card(
+
+        return Container(
           margin: const EdgeInsets.only(bottom: 8),
+          decoration: BoxDecoration(
+            color: isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(14),
+            border: isDark ? null : Border.all(color: theme.colorScheme.outlineVariant, width: 0.5),
+          ),
+          clipBehavior: Clip.antiAlias,
           child: ListTile(
             onTap: () => context.push('/recipe/${recipe.id}'),
-            leading: Icon(Icons.restaurant_menu, color: theme.colorScheme.primary),
+            leading: _RecipeThumb(imagePath: recipe.imagePath, size: 44),
             title: Text(recipe.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+            subtitle: recipe.description != null
+                ? Text(recipe.description!, maxLines: 1, overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline))
+                : null,
             trailing: const Icon(Icons.chevron_right),
           ),
         );

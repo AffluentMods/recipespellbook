@@ -18,6 +18,7 @@ const _defaultRecipeImages = <String, String>{
   'default_stuffed_peppers': 'assets/images/default_recipes/stuffed_peppers.png',
   'default_white_pizza_sauce': 'assets/images/default_recipes/white_pizza_sauce.png',
   'default_pizza_dough': 'assets/images/default_recipes/pizza_dough.png',
+  'default_bearnaise_sauce' : 'assets/images/default_recipes/'
 };
 
 /// Returns the bundled asset path for a default recipe, or null if not a default recipe.

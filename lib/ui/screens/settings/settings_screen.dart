@@ -7,6 +7,7 @@ import '../../../providers/cookbook_provider.dart';
 import '../../../services/export_import_service.dart';
 import '../../../data/app_enums.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
+import 'nutrition_settings_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -173,7 +174,6 @@ class SettingsScreen extends ConsumerWidget {
               ),
               // Show additional RPG options when enabled
               if (settings.nerdMode) ...[
-                const Divider(height: 1),
                 SwitchListTile(
                   secondary: const Icon(Icons.animation),
                   title: Text(l10n.settingsRpgAnimations),
@@ -499,86 +499,19 @@ class _NutritionSettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return _SettingsSection(
       title: 'Nutrition Display',
       children: [
-        // Chart Style
         ListTile(
-          leading: Icon(_getIconForStyle(settings.nutritionChartStyle)),
-          title: const Text('Chart style'),
-          subtitle: Text(_getNameForStyle(settings.nutritionChartStyle)),
+          leading: const Icon(Icons.tune),
+          title: const Text('Nutrition Display'),
+          subtitle: const Text('Chart style, visible nutrients'),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () => _showStylePicker(context),
-        ),
-
-        const Divider(height: 1),
-
-        // Show Expanded by Default
-        SwitchListTile(
-          value: settings.showExpandedNutrition,
-          onChanged: (value) {
-            ref.read(settingsProvider.notifier).setShowExpandedNutrition(value);
-          },
-          title: const Text('Show expanded nutrition'),
-          subtitle: const Text('Show all nutrition details by default'),
-          secondary: const Icon(Icons.unfold_more),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const NutritionSettingsScreen()),
+          ),
         ),
       ],
-    );
-  }
-
-  IconData _getIconForStyle(NutritionChartStyle style) {
-    switch (style) {
-      case NutritionChartStyle.donut:
-        return Icons.donut_large;
-      case NutritionChartStyle.bars:
-        return Icons.bar_chart;
-      case NutritionChartStyle.numbers:
-        return Icons.numbers;
-    }
-  }
-
-  String _getNameForStyle(NutritionChartStyle style) {
-    switch (style) {
-      case NutritionChartStyle.donut:
-        return 'Donut chart';
-      case NutritionChartStyle.bars:
-        return 'Bar chart';
-      case NutritionChartStyle.numbers:
-        return 'Numbers only';
-    }
-  }
-
-  void _showStylePicker(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Chart Style',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            ...NutritionChartStyle.values.map((style) => RadioListTile<NutritionChartStyle>(
-              value: style,
-              groupValue: settings.nutritionChartStyle,
-              onChanged: (value) {
-                ref.read(settingsProvider.notifier).setNutritionChartStyle(value!);
-                Navigator.pop(ctx);
-              },
-              title: Text(_getNameForStyle(style)),
-              secondary: Icon(_getIconForStyle(style)),
-            )),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -594,6 +527,12 @@ class _SettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final itemBg = isDark
+        ? theme.colorScheme.surfaceContainerHigh
+        : theme.colorScheme.surfaceContainerLowest;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -607,7 +546,24 @@ class _SettingsSection extends StatelessWidget {
             ),
           ),
         ),
-        ...children,
+        for (final child in children) ...[
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: itemBg,
+              borderRadius: BorderRadius.circular(14),
+              border: isDark
+                  ? null
+                  : Border.all(
+                color: theme.colorScheme.outlineVariant,
+                width: 0.5,
+              ),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: child,
+          ),
+          const SizedBox(height: 4),
+        ],
       ],
     );
   }

@@ -31,8 +31,26 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   /// Dismiss any open modals/bottom sheets/full-screen overlays before navigating tabs
   void _navigateTo(String path, int index) {
-    // Pop everything back to root (catches MaterialPageRoute modals too, not just PopupRoute)
-    Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+    // Close the end drawer if open
+    if (_scaffoldKey.currentState?.isEndDrawerOpen ?? false) {
+      _scaffoldKey.currentState?.closeEndDrawer();
+    }
+
+    // Pop nested navigator first (catches bottom sheets shown from child screens)
+    try {
+      final nestedNav = Navigator.of(context);
+      if (nestedNav.canPop()) {
+        nestedNav.popUntil((route) => route.isFirst);
+      }
+    } catch (_) {}
+
+    // Then pop root navigator (catches full-screen modals)
+    try {
+      final rootNav = Navigator.of(context, rootNavigator: true);
+      if (rootNav.canPop()) {
+        rootNav.popUntil((route) => route.isFirst);
+      }
+    } catch (_) {}
 
     ref.read(currentNavIndexProvider.notifier).state = index;
     context.go(path);
@@ -53,7 +71,9 @@ class _AppShellState extends ConsumerState<AppShell> {
           endDrawer: const AppMenuDrawer(),
           bottomNavigationBar: Container(
             decoration: BoxDecoration(
-              color: isDark ? theme.colorScheme.surface : Colors.white,
+              color: isDark
+                  ? theme.scaffoldBackgroundColor
+                  : Colors.white,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
@@ -105,8 +125,19 @@ class _AppShellState extends ConsumerState<AppShell> {
                       label: l10n.navMenu,
                       isSelected: false,
                       onTap: () {
-                        // Pop everything (full-screen modals, sheets, dialogs) before opening drawer
-                        Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+                        // Close any open sheets/modals
+                        try {
+                          final nestedNav = Navigator.of(context);
+                          if (nestedNav.canPop()) {
+                            nestedNav.popUntil((route) => route.isFirst);
+                          }
+                        } catch (_) {}
+                        try {
+                          final rootNav = Navigator.of(context, rootNavigator: true);
+                          if (rootNav.canPop()) {
+                            rootNav.popUntil((route) => route.isFirst);
+                          }
+                        } catch (_) {}
                         _scaffoldKey.currentState?.openEndDrawer();
                       },
                     ),

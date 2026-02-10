@@ -79,10 +79,9 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
     final selectedDate = ref.watch(selectedPlannerDateProvider);
     final mealPlansAsync = ref.watch(mealPlansForDateProvider(selectedDate));
     final mealCountsAsync = ref.watch(mealCountsForWeekProvider(_weekStart));
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? theme.colorScheme.surface : const Color(0xFFFAF8F5),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -163,7 +162,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 12),
-                Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+                Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
@@ -220,7 +219,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 8),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(Icons.share),
@@ -431,7 +430,7 @@ class _WeekStrip extends StatelessWidget {
                   color: isSelected
                       ? const Color(0xFFE8A860)
                       : isToday
-                      ? (isDark ? Colors.grey.shade800 : Colors.grey.shade200)
+                      ? (isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surfaceContainerHighest)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -445,7 +444,7 @@ class _WeekStrip extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: isSelected
                             ? Colors.white
-                            : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+                            : theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -603,8 +602,15 @@ class _MealsList extends ConsumerWidget {
       children: [
         for (final mealType in sortedKeys) ...[
           _MealTypeHeader(mealType: mealType),
-          for (final plan in grouped[mealType]!)
-            _MealTile(plan: plan),
+          const SizedBox(height: 4),
+          for (final plan in grouped[mealType]!) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: _MealTile(plan: plan),
+            ),
+            const SizedBox(height: 4),
+          ],
+          const SizedBox(height: 8),
         ],
         // Add meal button
         Padding(
@@ -643,11 +649,9 @@ class _MealTypeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      color: isDark ? Colors.grey.shade800 : const Color(0xFFF5F0E8),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 16, 4),
       child: Row(
         children: [
           Text(_emoji, style: const TextStyle(fontSize: 18)),
@@ -657,7 +661,7 @@ class _MealTypeHeader extends StatelessWidget {
             style: theme.textTheme.labelLarge?.copyWith(
               fontWeight: FontWeight.bold,
               letterSpacing: 0.5,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              color: theme.colorScheme.primary,
             ),
           ),
         ],
@@ -676,7 +680,6 @@ class _MealTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final recipe = plan.recipe;
     final mealPlanDao = ref.read(mealPlanDaoProvider);
 
@@ -691,7 +694,11 @@ class _MealTile extends ConsumerWidget {
       ),
       onDismissed: (_) => mealPlanDao.deleteMealPlan(plan.mealPlan.id),
       child: Container(
-        color: isDark ? theme.colorScheme.surface : Colors.white,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        clipBehavior: Clip.antiAlias,
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           leading: ClipRRect(
@@ -815,7 +822,7 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
           child: Column(
             children: [
               const SizedBox(height: 12),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
 
               // Header
               Padding(
@@ -980,7 +987,6 @@ class _RecipeSelectTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),

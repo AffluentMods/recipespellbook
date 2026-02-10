@@ -12,133 +12,63 @@ class PlaceholderSettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final isDark = theme.brightness == Brightness.dark;
+
+    // Use recipe mode as the unified mode (both are always in sync)
+    final currentMode = settings.recipePlaceholderMode;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.imagePlaceholders),
+        title: const Text('Image Placeholders'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // Description
           Text(
-            l10n.placeholderDescription,
+            'Choose what to display for recipes and cookbooks that don\'t have images.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.outline,
             ),
           ),
           const SizedBox(height: 24),
 
-          // ============ RECIPE PLACEHOLDERS ============
-          Text(
-            l10n.recipePlaceholders,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Default Images (artwork, changes with RPG mode)
+          // ============ DEFAULT IMAGES ============
           _PlaceholderOptionCard(
-            title: l10n.defaultImages,
-            description: l10n.defaultImagesDescription,
-            isSelected: settings.recipePlaceholderMode == PlaceholderImageMode.custom,
+            title: 'Default images',
+            description: 'Displays default app artwork',
+            isSelected: currentMode == PlaceholderImageMode.custom,
             onTap: () => ref.read(settingsProvider.notifier)
-                .setRecipePlaceholderMode(PlaceholderImageMode.custom),
-            preview: _DefaultImagePreview(isRecipe: true, nerdMode: settings.nerdMode),
+                .setPlaceholderMode(PlaceholderImageMode.custom),
+            preview: _DefaultImagePreview(nerdMode: settings.nerdMode),
+            isDark: isDark,
+            theme: theme,
           ),
           const SizedBox(height: 8),
 
-          // Theme-Based (banner artwork)
+          // ============ THEME-BASED ============
           _PlaceholderOptionCard(
-            title: l10n.themeBased,
-            description: l10n.themeBasedDescription,
-            isSelected: settings.recipePlaceholderMode == PlaceholderImageMode.theme,
+            title: 'Theme-based',
+            description: 'Art that changes with your color theme',
+            isSelected: currentMode == PlaceholderImageMode.theme,
             onTap: () => ref.read(settingsProvider.notifier)
-                .setRecipePlaceholderMode(PlaceholderImageMode.theme),
-            preview: _ThemeBannerPreview(isRecipe: true),
+                .setPlaceholderMode(PlaceholderImageMode.theme),
+            preview: _ThemeBannerPreview(colorTheme: settings.appTheme),
+            isDark: isDark,
+            theme: theme,
           ),
           const SizedBox(height: 8),
 
-          // Gradient-Based (color gradient)
+          // ============ GRADIENT-BASED ============
           _PlaceholderOptionCard(
-            title: l10n.gradientBased,
-            description: l10n.gradientBasedDescription,
-            isSelected: settings.recipePlaceholderMode == PlaceholderImageMode.gradient,
+            title: 'Gradient-based',
+            description: 'Color gradient based on your theme',
+            isSelected: currentMode == PlaceholderImageMode.gradient,
             onTap: () => ref.read(settingsProvider.notifier)
-                .setRecipePlaceholderMode(PlaceholderImageMode.gradient),
-            preview: _GradientPreview(isRecipe: true),
-          ),
-
-          const SizedBox(height: 32),
-
-          // ============ COOKBOOK PLACEHOLDERS ============
-          Text(
-            l10n.cookbookPlaceholders,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Default Images
-          _PlaceholderOptionCard(
-            title: l10n.defaultImages,
-            description: l10n.defaultImagesDescription,
-            isSelected: settings.cookbookPlaceholderMode == PlaceholderImageMode.custom,
-            onTap: () => ref.read(settingsProvider.notifier)
-                .setCookbookPlaceholderMode(PlaceholderImageMode.custom),
-            preview: _DefaultImagePreview(isRecipe: false, nerdMode: settings.nerdMode),
-          ),
-          const SizedBox(height: 8),
-
-          // Theme-Based
-          _PlaceholderOptionCard(
-            title: l10n.themeBased,
-            description: l10n.themeBasedDescription,
-            isSelected: settings.cookbookPlaceholderMode == PlaceholderImageMode.theme,
-            onTap: () => ref.read(settingsProvider.notifier)
-                .setCookbookPlaceholderMode(PlaceholderImageMode.theme),
-            preview: _ThemeBannerPreview(isRecipe: false),
-          ),
-          const SizedBox(height: 8),
-
-          // Gradient-Based
-          _PlaceholderOptionCard(
-            title: l10n.gradientBased,
-            description: l10n.gradientBasedDescription,
-            isSelected: settings.cookbookPlaceholderMode == PlaceholderImageMode.gradient,
-            onTap: () => ref.read(settingsProvider.notifier)
-                .setCookbookPlaceholderMode(PlaceholderImageMode.gradient),
-            preview: _GradientPreview(isRecipe: false),
-          ),
-
-          const SizedBox(height: 32),
-
-          // Info card
-          Card(
-            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: theme.colorScheme.primary,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      l10n.placeholderRpgInfo,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                .setPlaceholderMode(PlaceholderImageMode.gradient),
+            preview: _GradientPreview(colorTheme: settings.appTheme),
+            isDark: isDark,
+            theme: theme,
           ),
         ],
       ),
@@ -152,6 +82,8 @@ class _PlaceholderOptionCard extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
   final Widget preview;
+  final bool isDark;
+  final ThemeData theme;
 
   const _PlaceholderOptionCard({
     required this.title,
@@ -159,158 +91,125 @@ class _PlaceholderOptionCard extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     required this.preview,
+    required this.isDark,
+    required this.theme,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: isSelected
-            ? BorderSide(color: theme.colorScheme.primary, width: 2)
-            : BorderSide(color: theme.colorScheme.outlineVariant),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Preview image
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: SizedBox(
-                  width: 80,
-                  height: 60,
-                  child: preview,
-                ),
-              ),
-              const SizedBox(width: 16),
-              // Text content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: isSelected ? theme.colorScheme.primary : null,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      description,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.outline,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Checkmark
-              if (isSelected)
-                Icon(
-                  Icons.check_circle,
-                  color: theme.colorScheme.primary,
-                ),
-            ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark
+              ? theme.colorScheme.surfaceContainerHigh
+              : theme.colorScheme.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.outlineVariant,
+            width: isSelected ? 2 : 0.5,
           ),
+        ),
+        child: Row(
+          children: [
+            // Preview image
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: SizedBox(
+                width: 80,
+                height: 60,
+                child: preview,
+              ),
+            ),
+            const SizedBox(width: 16),
+            // Text content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isSelected ? theme.colorScheme.primary : null,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    description,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Checkmark
+            if (isSelected)
+              Icon(
+                Icons.check_circle,
+                color: theme.colorScheme.primary,
+              ),
+          ],
         ),
       ),
     );
   }
 }
 
+/// Preview: default app artwork
 class _DefaultImagePreview extends StatelessWidget {
-  final bool isRecipe;
   final bool nerdMode;
 
-  const _DefaultImagePreview({
-    required this.isRecipe,
-    required this.nerdMode,
-  });
+  const _DefaultImagePreview({required this.nerdMode});
 
   @override
   Widget build(BuildContext context) {
-    final imagePath = isRecipe
-        ? (nerdMode
+    final imagePath = nerdMode
         ? 'assets/images/recipe_placeholder_rpg.png'
-        : 'assets/images/recipe_placeholder_normal.png')
-        : (nerdMode
-        ? 'assets/images/cookbook_placeholder_rpg.png'
-        : 'assets/images/cookbook_placeholder_normal.png');
+        : 'assets/images/recipe_placeholder_normal.png';
 
     return Image.asset(
       imagePath,
       fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        return _GradientPreview(isRecipe: isRecipe);
-      },
+      errorBuilder: (_, __, ___) => Container(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: const Center(child: Icon(Icons.image, size: 24)),
+      ),
     );
   }
 }
 
-/// Preview showing the theme banner artwork
-class _ThemeBannerPreview extends ConsumerWidget {
-  final bool isRecipe;
+/// Preview: theme banner art (actual banner image, no gradient overlay)
+class _ThemeBannerPreview extends StatelessWidget {
+  final AppColorTheme colorTheme;
 
-  const _ThemeBannerPreview({required this.isRecipe});
+  const _ThemeBannerPreview({required this.colorTheme});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(settingsProvider);
-    final colorTheme = settings.appTheme;
-
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Image.asset(
-          colorTheme.bannerAsset,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _GradientPreview(isRecipe: isRecipe);
-          },
-        ),
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withValues(alpha: 0.0),
-                Colors.black.withValues(alpha: 0.2),
-              ],
-            ),
-          ),
-        ),
-        Center(
-          child: Icon(
-            isRecipe
-                ? (settings.nerdMode ? Icons.auto_awesome : Icons.restaurant)
-                : (settings.nerdMode ? Icons.auto_stories : Icons.menu_book),
-            size: 24,
-            color: Colors.white.withValues(alpha: 0.9),
-          ),
-        ),
-      ],
+  Widget build(BuildContext context) {
+    return Image.asset(
+      colorTheme.bannerAsset,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Container(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: const Center(child: Icon(Icons.palette, size: 24)),
+      ),
     );
   }
 }
 
-/// Preview showing just the gradient colors
+/// Preview: gradient with theme colors + icon
 class _GradientPreview extends ConsumerWidget {
-  final bool isRecipe;
+  final AppColorTheme colorTheme;
 
-  const _GradientPreview({required this.isRecipe});
+  const _GradientPreview({required this.colorTheme});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(settingsProvider);
-    final colorTheme = settings.appTheme;
     final palette = Theme.of(context).brightness == Brightness.dark
         ? colorTheme.dark
         : colorTheme.light;
@@ -325,9 +224,7 @@ class _GradientPreview extends ConsumerWidget {
       ),
       child: Center(
         child: Icon(
-          isRecipe
-              ? (settings.nerdMode ? Icons.auto_awesome : Icons.restaurant)
-              : (settings.nerdMode ? Icons.auto_stories : Icons.menu_book),
+          Icons.restaurant,
           size: 24,
           color: Colors.white.withValues(alpha: 0.9),
         ),
