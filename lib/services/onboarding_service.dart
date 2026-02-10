@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../database/database.dart';
@@ -42,6 +43,25 @@ class OnboardingService {
 
     for (final recipe in defaultRecipes) {
       try {
+        // Build pre-computed nutrition JSON (per-serving values)
+        String? nutritionJson;
+        if (recipe.nutrition != null) {
+          final n = recipe.nutrition!;
+          nutritionJson = jsonEncode({
+            'calories': n.calories,
+            'protein': n.protein,
+            'fat': n.fat,
+            'carbohydrates': n.carbohydrates,
+            'fiber': n.fiber,
+            'sugar': n.sugar,
+            'sodium': n.sodium,
+            'isEstimated': true,
+            'servingSize': '1 serving',
+            'matchedIngredients': recipe.ingredients.length,
+            'totalIngredients': recipe.ingredients.length,
+          });
+        }
+
         // Insert recipe with proper lowercase IDs matching CourseData/CategoryData
         await dao.insertRecipe(RecipesCompanion.insert(
           id: recipe.id,
@@ -56,6 +76,7 @@ class OnboardingService {
           notes: Value(recipe.notes),
           isFavorite: const Value(false),
           isPinned: const Value(false),
+          nutritionJson: Value(nutritionJson),
         ));
 
         // Insert ingredients
@@ -90,12 +111,17 @@ class OnboardingService {
 
     // No tags — keep starter recipes clean
 
-    // Link related recipes (one-directional)
-    // Pizza links TO its sauce and dough (pizza always uses these)
-    // But sauce/dough do NOT link back (they're generic, usable with many recipes)
+    // Link related recipes
     try {
+      // Link Pizza Sauce and Pizza Dough to White Pizza
       await dao.addRecipeLink('default_white_pizza', 'default_white_pizza_sauce');
       await dao.addRecipeLink('default_white_pizza', 'default_pizza_dough');
+      // Reverse links so they show on all recipe pages
+      await dao.addRecipeLink('default_white_pizza_sauce', 'default_white_pizza');
+      await dao.addRecipeLink('default_pizza_dough', 'default_white_pizza');
+      // Link Béarnaise Sauce to Lomo Saltado
+      await dao.addRecipeLink('default_lomo_saltado', 'default_bearnaise_sauce');
+      await dao.addRecipeLink('default_bearnaise_sauce', 'default_lomo_saltado');
     } catch (_) {
       // Links are best-effort
     }

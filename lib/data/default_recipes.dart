@@ -13,6 +13,7 @@ class DefaultRecipeData {
   final String? notes;
   final List<DefaultIngredient> ingredients;
   final List<String> instructions;
+  final DefaultNutritionData? nutrition;
 
   const DefaultRecipeData({
     required this.id,
@@ -26,6 +27,7 @@ class DefaultRecipeData {
     this.notes,
     required this.ingredients,
     required this.instructions,
+    this.nutrition,
   });
 }
 
@@ -35,6 +37,28 @@ class DefaultIngredient {
   final String? unit;
 
   const DefaultIngredient(this.name, {this.amount, this.unit});
+}
+
+/// Pre-computed nutrition data (per serving) for default recipes.
+/// Calculated from USDA SR Legacy database using NutritionCalculator logic.
+class DefaultNutritionData {
+  final double calories;
+  final double protein;
+  final double fat;
+  final double carbohydrates;
+  final double fiber;
+  final double sugar;
+  final double sodium;
+
+  const DefaultNutritionData({
+    required this.calories,
+    required this.protein,
+    required this.fat,
+    required this.carbohydrates,
+    this.fiber = 0,
+    this.sugar = 0,
+    this.sodium = 0,
+  });
 }
 
 const defaultRecipes = <DefaultRecipeData>[
@@ -51,23 +75,28 @@ const defaultRecipes = <DefaultRecipeData>[
     course: 'Main',
     category: 'Meat',
     notes: 'Meal prep tip: Keeps 4 days in fridge. Use ground turkey or chicken for a leaner version. Add gochugaru or chili crisp for extra heat.',
+    nutrition: DefaultNutritionData(
+      calories: 825, protein: 58, fat: 37, carbohydrates: 61,
+      fiber: 3, sugar: 6, sodium: 1392,
+    ),
     ingredients: [
       DefaultIngredient('ground beef', amount: '1.5', unit: 'lbs'),
-      DefaultIngredient('garlic cloves, minced', amount: '4'),
+      DefaultIngredient('garlic cloves, minced', amount: '4', unit: 'cloves'),
       DefaultIngredient('fresh ginger, grated', amount: '1', unit: 'piece'),
       DefaultIngredient('soy sauce', amount: '0.25', unit: 'cup'),
       DefaultIngredient('brown sugar', amount: '2', unit: 'tbsp'),
       DefaultIngredient('gochujang or sriracha', amount: '1', unit: 'tbsp'),
       DefaultIngredient('rice vinegar', amount: '1', unit: 'tbsp'),
       DefaultIngredient('sesame oil', amount: '1', unit: 'tbsp'),
-      DefaultIngredient('salt & pepper'),
+      DefaultIngredient('salt', amount: '1', unit: 'tsp'),
+      DefaultIngredient('black pepper', amount: '0.5', unit: 'tsp'),
       DefaultIngredient('cucumber, thinly sliced', amount: '1'),
       DefaultIngredient('carrots, shredded', amount: '2'),
       DefaultIngredient('red onion, thinly sliced', amount: '1'),
       DefaultIngredient('eggs', amount: '4'),
       DefaultIngredient('cooked rice', amount: '3', unit: 'cups'),
-      DefaultIngredient('green onions'),
-      DefaultIngredient('sesame seeds'),
+      DefaultIngredient('green onions', amount: '2'),
+      DefaultIngredient('sesame seeds', amount: '1', unit: 'tbsp'),
     ],
     instructions: [
       'Make quick pickled onions: combine ½ cup vinegar, ½ cup hot water, 1 tsp sugar, and ½ tsp salt in a jar. Add sliced red onion and let sit at least 30 minutes.',
@@ -92,6 +121,10 @@ const defaultRecipes = <DefaultRecipeData>[
     course: 'Main',
     category: 'Meat',
     notes: 'Use a very hot pan for proper searing. Tomatoes should keep their structure — don\'t overcook them. See linked recipes for a béarnaise sauce that pairs perfectly.',
+    nutrition: DefaultNutritionData(
+      calories: 427, protein: 48, fat: 22, carbohydrates: 8,
+      fiber: 1, sugar: 1, sodium: 995,
+    ),
     ingredients: [
       DefaultIngredient('flank steak, cut into ½" strips', amount: '1.5', unit: 'lbs'),
       DefaultIngredient('red onion, cut into wedges', amount: '1'),
@@ -101,11 +134,13 @@ const defaultRecipes = <DefaultRecipeData>[
       DefaultIngredient('oyster sauce', amount: '1', unit: 'tbsp'),
       DefaultIngredient('red wine vinegar', amount: '1', unit: 'tbsp'),
       DefaultIngredient('sugar', amount: '1', unit: 'tsp'),
-      DefaultIngredient('garlic cloves, minced', amount: '2'),
+      DefaultIngredient('garlic cloves, minced', amount: '2', unit: 'cloves'),
       DefaultIngredient('fresh cilantro', amount: '1', unit: 'handful'),
       DefaultIngredient('French fries, hot & crispy'),
       DefaultIngredient('cooked rice'),
-      DefaultIngredient('oil, salt, black pepper'),
+      DefaultIngredient('vegetable oil', amount: '2', unit: 'tbsp'),
+      DefaultIngredient('salt', amount: '1', unit: 'tsp'),
+      DefaultIngredient('black pepper', amount: '0.5', unit: 'tsp'),
     ],
     instructions: [
       'Sear steak in a very hot pan in batches — don\'t crowd. Season with salt and pepper. Remove and set aside.',
@@ -129,6 +164,10 @@ const defaultRecipes = <DefaultRecipeData>[
     course: 'Main',
     category: 'Meat',
     notes: 'Char chicken over flame for smoky flavor. Use cashew cream for dairy-free. Marinate overnight for best results. Keeps 3-4 days in fridge or 1 month frozen.',
+    nutrition: DefaultNutritionData(
+      calories: 731, protein: 51, fat: 48, carbohydrates: 26,
+      fiber: 7, sugar: 0, sodium: 858,
+    ),
     ingredients: [
       DefaultIngredient('boneless skinless chicken thighs', amount: '1.5', unit: 'lbs'),
       DefaultIngredient('plain Greek yogurt', amount: '0.75', unit: 'cup'),
@@ -141,7 +180,7 @@ const defaultRecipes = <DefaultRecipeData>[
       DefaultIngredient('salt', amount: '1.5', unit: 'tsp'),
       DefaultIngredient('butter or ghee', amount: '3', unit: 'tbsp'),
       DefaultIngredient('onion, finely diced', amount: '1'),
-      DefaultIngredient('garlic cloves, minced', amount: '3'),
+      DefaultIngredient('garlic cloves, minced', amount: '3', unit: 'cloves'),
       DefaultIngredient('fresh ginger, grated', amount: '1', unit: 'tbsp'),
       DefaultIngredient('green chilies, slit', amount: '2'),
       DefaultIngredient('ground coriander', amount: '1', unit: 'tsp'),
@@ -174,6 +213,10 @@ const defaultRecipes = <DefaultRecipeData>[
     course: 'Main',
     category: 'Meat',
     notes: 'Swap turkey for ground chicken, pork, or beef. Skip rice for low-carb or serve in lettuce cups. Refrigerates 4-5 days — great for meal prep.',
+    nutrition: DefaultNutritionData(
+      calories: 484, protein: 54, fat: 22, carbohydrates: 20,
+      fiber: 7, sugar: 1, sodium: 784,
+    ),
     ingredients: [
       DefaultIngredient('ground turkey', amount: '2', unit: 'lbs'),
       DefaultIngredient('coleslaw mix (shredded cabbage & carrots)', amount: '2', unit: 'bags'),
@@ -215,6 +258,10 @@ const defaultRecipes = <DefaultRecipeData>[
     course: 'Main',
     category: 'Pasta',
     notes: 'No cream, garlic, or peas — ever. Use Pecorino Romano for authenticity. Work off heat when mixing sauce to avoid scrambled eggs. Get real guanciale from an Italian deli.',
+    nutrition: DefaultNutritionData(
+      calories: 1258, protein: 45, fat: 84, carbohydrates: 79,
+      fiber: 4, sugar: 3, sodium: 18,
+    ),
     ingredients: [
       DefaultIngredient('guanciale, cut into ¼-inch batons', amount: '6', unit: 'oz'),
       DefaultIngredient('spaghetti', amount: '7', unit: 'oz'),
@@ -246,10 +293,14 @@ const defaultRecipes = <DefaultRecipeData>[
     course: 'Main',
     category: 'Bread',
     notes: 'Optional: add spinach or artichokes. Bake at the highest your oven goes for best crust. See linked recipes for pizza dough and white sauce.',
+    nutrition: DefaultNutritionData(
+      calories: 2195, protein: 116, fat: 109, carbohydrates: 189,
+      fiber: 14, sugar: 5, sodium: 2187,
+    ),
     ingredients: [
       DefaultIngredient('pizza dough ball', amount: '1'),
       DefaultIngredient('butter', amount: '2', unit: 'tbsp'),
-      DefaultIngredient('garlic cloves, minced', amount: '3'),
+      DefaultIngredient('garlic cloves, minced', amount: '3', unit: 'cloves'),
       DefaultIngredient('crimini mushrooms, sliced', amount: '2'),
       DefaultIngredient('banana peppers'),
       DefaultIngredient('olives'),
@@ -283,6 +334,10 @@ const defaultRecipes = <DefaultRecipeData>[
     course: 'Main',
     category: 'Seafood',
     notes: 'Skip potatoes for low-carb. Add zoodles at the very end to prevent sogginess. Serve with crusty bread, rice, or pasta.',
+    nutrition: DefaultNutritionData(
+      calories: 818, protein: 70, fat: 42, carbohydrates: 42,
+      fiber: 7, sugar: 0, sodium: 478,
+    ),
     ingredients: [
       DefaultIngredient('bacon, diced', amount: '4', unit: 'slices'),
       DefaultIngredient('raw peeled shrimp', amount: '1.5', unit: 'lbs'),
@@ -290,13 +345,14 @@ const defaultRecipes = <DefaultRecipeData>[
       DefaultIngredient('zucchini, julienned into noodles', amount: '2'),
       DefaultIngredient('baby spinach', amount: '5', unit: 'oz'),
       DefaultIngredient('grape tomatoes, halved', amount: '1', unit: 'pint'),
-      DefaultIngredient('garlic cloves, minced', amount: '4'),
+      DefaultIngredient('garlic cloves, minced', amount: '4', unit: 'cloves'),
       DefaultIngredient('fresh basil, thinly sliced', amount: '1', unit: 'bunch'),
       DefaultIngredient('heavy cream', amount: '8', unit: 'fl oz'),
       DefaultIngredient('Parmesan, finely grated', amount: '4', unit: 'oz'),
       DefaultIngredient('Italian seasoning', amount: '1', unit: 'tsp'),
       DefaultIngredient('red pepper flakes', amount: '0.25', unit: 'tsp'),
-      DefaultIngredient('kosher salt & black pepper'),
+      DefaultIngredient('kosher salt', amount: '1', unit: 'tsp'),
+      DefaultIngredient('black pepper', amount: '0.5', unit: 'tsp'),
     ],
     instructions: [
       'Cook diced bacon in a large skillet over medium heat for 4-5 min until crisp. Remove bacon; leave drippings in the pan.',
@@ -321,6 +377,10 @@ const defaultRecipes = <DefaultRecipeData>[
     course: 'Main',
     category: 'Soup',
     notes: 'Thicker: simmer uncovered longer. Thinner: add broth or milk. Add 1 tsp Dijon or splash of wine for flavor depth. Keeps 3 days refrigerated.',
+    nutrition: DefaultNutritionData(
+      calories: 515, protein: 22, fat: 32, carbohydrates: 37,
+      fiber: 4, sugar: 5, sodium: 484,
+    ),
     ingredients: [
       DefaultIngredient('butter', amount: '4', unit: 'tbsp'),
       DefaultIngredient('olive oil', amount: '2', unit: 'tbsp'),
@@ -363,11 +423,15 @@ const defaultRecipes = <DefaultRecipeData>[
     course: 'Main',
     category: 'Tacos',
     notes: 'Optional toppings: avocado, pickled onions, cotija cheese, chipotle crema. Double the marinade for chicken or shrimp. Leftover steak keeps 3 days refrigerated.',
+    nutrition: DefaultNutritionData(
+      calories: 498, protein: 36, fat: 22, carbohydrates: 38,
+      fiber: 4, sugar: 0, sodium: 278,
+    ),
     ingredients: [
       DefaultIngredient('reduced-sodium soy sauce', amount: '2', unit: 'tbsp'),
       DefaultIngredient('fresh lime juice', amount: '2', unit: 'tbsp'),
       DefaultIngredient('canola oil', amount: '2', unit: 'tbsp'),
-      DefaultIngredient('garlic cloves, minced', amount: '3'),
+      DefaultIngredient('garlic cloves, minced', amount: '3', unit: 'cloves'),
       DefaultIngredient('chili powder', amount: '2', unit: 'tsp'),
       DefaultIngredient('ground cumin', amount: '1', unit: 'tsp'),
       DefaultIngredient('dried oregano', amount: '1', unit: 'tsp'),
@@ -398,6 +462,10 @@ const defaultRecipes = <DefaultRecipeData>[
     course: 'Appetizer',
     category: 'Vegetable',
     notes: 'Pepper swaps: banana peppers or Cubanelle peppers work if you can\'t find Hungarian wax peppers. Cheese & sausage are flexible — try chorizo + manchego. The chive oil and fresh ciabatta are the non-negotiables. Chive oil keeps about two weeks refrigerated and tastes better after sitting overnight. Pairs well with beer or white wine.',
+    nutrition: DefaultNutritionData(
+      calories: 1102, protein: 32, fat: 100, carbohydrates: 23,
+      fiber: 4, sugar: 0, sodium: 358,
+    ),
     ingredients: [
       DefaultIngredient('Hungarian wax peppers', amount: '12'),
       DefaultIngredient('Italian sausage, casings removed', amount: '1', unit: 'lbs'),
@@ -436,6 +504,10 @@ const defaultRecipes = <DefaultRecipeData>[
     course: 'Sauce',
     category: 'Sauce',
     notes: 'Thick, creamy, and smooth — not runny. Slightly stretchy from melted Parmesan. Perfect for chicken Alfredo pizza, white veggie pizza, spinach + bacon pizza, or any pizza with mozzarella, ricotta, or roasted veggies.',
+    nutrition: DefaultNutritionData(
+      calories: 591, protein: 30, fat: 39, carbohydrates: 31,
+      fiber: 1, sugar: 12, sodium: 955,
+    ),
     ingredients: [
       DefaultIngredient('butter', amount: '2', unit: 'tbsp'),
       DefaultIngredient('flour', amount: '2', unit: 'tbsp'),
@@ -470,6 +542,10 @@ const defaultRecipes = <DefaultRecipeData>[
     course: 'Side',
     category: 'Bread',
     notes: 'Add 1 tsp honey for faster browning. Refrigerated dough improves flavor and texture dramatically. Cold ferment 12-48 hours for best results.',
+    nutrition: DefaultNutritionData(
+      calories: 876, protein: 28, fat: 11, carbohydrates: 162,
+      fiber: 7, sugar: 2, sodium: 1194,
+    ),
     ingredients: [
       DefaultIngredient('00 flour or bread flour', amount: '3.5', unit: 'cups'),
       DefaultIngredient('salt', amount: '1.25', unit: 'tsp'),
@@ -502,6 +578,10 @@ const defaultRecipes = <DefaultRecipeData>[
     course: 'Sauce',
     category: 'Sauce',
     notes: 'Storage: Keep warm in a water bath up to 1 hour; do not refrigerate (it will split). Flavor boost: Add a splash of dry white wine or shallot reduction before whisking for a more authentic restaurant Béarnaise. Pairings: Great with ribeye, salmon, asparagus, or crispy potatoes.',
+    nutrition: DefaultNutritionData(
+      calories: 311, protein: 4, fat: 32, carbohydrates: 3,
+      fiber: 0, sugar: 0, sodium: 486,
+    ),
     ingredients: [
       DefaultIngredient('unsalted butter', amount: '0.5', unit: 'cup'),
       DefaultIngredient('large egg yolks, beaten', amount: '4'),

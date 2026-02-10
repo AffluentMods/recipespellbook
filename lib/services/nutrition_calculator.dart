@@ -168,28 +168,63 @@ class NutritionCalculator {
       ) async {
     try {
       // ── Step 1: Try local NutritionDatabase first ──
-      // This has ~300 curated entries with correct values for common ingredients.
+      // This has ~300 curated entries with correct per-100g values for common ingredients.
       // Much more reliable than USDA search for staples like milk, pepper, broth.
-      final localEstimate = local_db.NutritionDatabase.estimateForIngredient(ingredient);
-      if (localEstimate != null) {
-        debugPrint('Local match for "${ingredient.name}": ${localEstimate.calories.toStringAsFixed(0)} cal');
-        // Convert local_db.NutritionData → full NutritionData
-        final nutrition = NutritionData(
-          calories: localEstimate.calories,
-          protein: localEstimate.protein,
-          fat: localEstimate.fat,
-          carbohydrates: localEstimate.carbs,
-          fiber: localEstimate.fiber,
-          sugar: localEstimate.sugar,
-          sodium: localEstimate.sodium,
+      // We use findMatch() for NAME matching only, then use _parseAmountToGrams()
+      // for proper amount→grams conversion (handles slices, cloves, fl oz, pints, etc.)
+      final localMatch = local_db.NutritionDatabase.findMatch(ingredient.name);
+      if (localMatch != null) {
+        final per100g = localMatch.value; // NutritionData per 100g
+        final matchedKey = localMatch.key;
+
+        // Use the same grams parser as USDA path (handles all units correctly)
+        final grams = _parseAmountToGrams(
+          amount: ingredient.amount,
+          unit: ingredient.unit,
+          ingredientName: ingredient.name,
         );
-        return IngredientNutritionResult(
-          ingredient: ingredient,
-          isMatched: true,
-          nutrition: nutrition,
-          matchStatus: MatchStatus.matched,
-          matchDescription: ingredient.name,
-        );
+
+        if (grams != null && grams > 0) {
+          final scale = grams / 100.0;
+          final nutrition = NutritionData(
+            calories: per100g.calories * scale,
+            protein: per100g.protein * scale,
+            fat: per100g.fat * scale,
+            carbohydrates: per100g.carbs * scale,
+            fiber: (per100g.fiber ?? 0) * scale,
+            sugar: (per100g.sugar ?? 0) * scale,
+            sodium: (per100g.sodium ?? 0) * scale,
+          );
+          debugPrint('Local match for "${ingredient.name}" → "$matchedKey": ${grams.toStringAsFixed(0)}g → ${(nutrition.calories ?? 0).toStringAsFixed(0)} cal');
+          return IngredientNutritionResult(
+            ingredient: ingredient,
+            isMatched: true,
+            nutrition: nutrition,
+            gramsUsed: grams,
+            matchStatus: MatchStatus.matched,
+            matchDescription: matchedKey,
+          );
+        } else {
+          // Name matched but couldn't parse amount — return per-100g as fallback
+          debugPrint('Local match for "${ingredient.name}" → "$matchedKey" (amount unparseable, using per-100g)');
+          final nutrition = NutritionData(
+            calories: per100g.calories,
+            protein: per100g.protein,
+            fat: per100g.fat,
+            carbohydrates: per100g.carbs,
+            fiber: per100g.fiber,
+            sugar: per100g.sugar,
+            sodium: per100g.sodium,
+          );
+          return IngredientNutritionResult(
+            ingredient: ingredient,
+            isMatched: true,
+            nutrition: nutrition,
+            matchStatus: MatchStatus.uncertain,
+            matchDescription: matchedKey,
+            errorMessage: 'Could not parse amount, showing per 100g',
+          );
+        }
       }
 
       // ── Step 2: Fall back to USDA search ──
@@ -255,7 +290,6 @@ class NutritionCalculator {
       amount: ingredient.amount,
       unit: ingredient.unit,
       ingredientName: ingredient.name,
-      usdaFood: match,
     );
 
     if (grams == null || grams <= 0) {
@@ -339,7 +373,6 @@ class NutritionCalculator {
     required String? amount,
     required String? unit,
     required String ingredientName,
-    required UsdaFoodResult usdaFood,
   }) {
     if (amount == null || amount.isEmpty) {
       // No amount specified - can't calculate
@@ -517,88 +550,196 @@ class NutritionCalculator {
     final lowerIngredient = ingredient.toLowerCase();
     final lowerUnit = unit.toLowerCase();
 
-    // Common ingredient weights
-    final Map<String, double> commonWeights = {
+    // ── Special unit handling (checked FIRST, before generic weights) ──
+
+    // "clove" of garlic
+    if (lowerUnit.contains('clove')) {
+      if (lowerIngredient.contains('garlic')) return count * 3.0;
+      return count * 3.0; // assume garlic clove if unit is "clove"
+    }
+
+    // "sprig" of herbs
+    if (lowerUnit.contains('sprig')) {
+      return count * 2.0;
+    }
+
+    // "bunch" of herbs/greens
+    if (lowerUnit.contains('bunch')) {
+      if (lowerIngredient.contains('parsley') || lowerIngredient.contains('cilantro') ||
+          lowerIngredient.contains('basil') || lowerIngredient.contains('mint') ||
+          lowerIngredient.contains('dill') || lowerIngredient.contains('chive')) {
+        return count * 30.0; // herb bunch ~30g
+      }
+      if (lowerIngredient.contains('kale') || lowerIngredient.contains('spinach') ||
+          lowerIngredient.contains('chard') || lowerIngredient.contains('collard')) {
+        return count * 340.0; // large greens bunch
+      }
+      return count * 50.0; // generic bunch
+    }
+
+    // "head" of garlic/lettuce/cauliflower
+    if (lowerUnit.contains('head')) {
+      if (lowerIngredient.contains('garlic')) return count * 40.0;
+      if (lowerIngredient.contains('lettuce')) return count * 500.0;
+      if (lowerIngredient.contains('cabbage')) return count * 900.0;
+      if (lowerIngredient.contains('cauliflower')) return count * 600.0;
+      if (lowerIngredient.contains('broccoli')) return count * 400.0;
+      return count * 300.0;
+    }
+
+    // "can" / "tin" — standard 15oz can
+    if (lowerUnit == 'can' || lowerUnit == 'cans' || lowerUnit == 'tin' || lowerUnit == 'tins') {
+      return count * 425.0; // 15oz can
+    }
+
+    // "stalk" of celery
+    if (lowerUnit.contains('stalk') || lowerUnit.contains('rib')) {
+      if (lowerIngredient.contains('celery')) return count * 40.0;
+      if (lowerIngredient.contains('rhubarb')) return count * 51.0;
+      if (lowerIngredient.contains('lemongrass') || lowerIngredient.contains('lemon grass')) return count * 20.0;
+      return count * 40.0;
+    }
+
+    // "ear" of corn
+    if (lowerUnit.contains('ear')) {
+      return count * 90.0; // kernels from one ear
+    }
+
+    // "link" of sausage
+    if (lowerUnit.contains('link')) {
+      return count * 68.0;
+    }
+
+    // "strip" / "rasher" of bacon
+    if (lowerUnit.contains('strip') || lowerUnit.contains('rasher')) {
+      return count * 28.0; // raw bacon strip
+    }
+
+    // ── Slice handling — weight depends on what's being sliced ──
+    if (lowerUnit.contains('slice')) {
+      if (lowerIngredient.contains('bacon')) return count * 28.0; // raw bacon slice
+      if (lowerIngredient.contains('bread') || lowerIngredient.contains('toast')) return count * 30.0;
+      if (lowerIngredient.contains('cheese')) return count * 21.0; // deli cheese slice
+      if (lowerIngredient.contains('ham') || lowerIngredient.contains('turkey') ||
+          lowerIngredient.contains('salami') || lowerIngredient.contains('deli')) return count * 28.0;
+      if (lowerIngredient.contains('tomato')) return count * 27.0;
+      if (lowerIngredient.contains('onion')) return count * 14.0;
+      if (lowerIngredient.contains('lemon') || lowerIngredient.contains('lime')) return count * 8.0;
+      if (lowerIngredient.contains('pizza')) return count * 107.0; // pizza slice
+      if (lowerIngredient.contains('cake')) return count * 80.0;
+      if (lowerIngredient.contains('pie')) return count * 125.0;
+      return count * 30.0; // generic slice
+    }
+
+    // "stick" of butter, celery, etc.
+    if (lowerUnit.contains('stick')) {
+      if (lowerIngredient.contains('butter')) return count * 113.0;
+      if (lowerIngredient.contains('celery')) return count * 40.0;
+      if (lowerIngredient.contains('cinnamon')) return count * 7.0;
+      return count * 113.0; // default to butter stick
+    }
+
+    // "fillet" / "filet" of fish/meat
+    if (lowerUnit.contains('fillet') || lowerUnit.contains('filet')) {
+      if (lowerIngredient.contains('salmon')) return count * 178.0;
+      if (lowerIngredient.contains('chicken')) return count * 170.0;
+      return count * 170.0;
+    }
+
+    // ── Ingredient-specific weights (for count-based: "3 potatoes", "2 zucchini") ──
+    // Sorted LONGEST KEY FIRST to prevent partial matches
+    // e.g., "chicken breast" must match before "chicken"
+    final ingredientWeights = <MapEntry<String, double>>[
+      // Multi-word (must be first)
+      MapEntry('chicken breast', 170.0),
+      MapEntry('chicken thigh', 110.0),
+      MapEntry('chicken drumstick', 130.0),
+      MapEntry('chicken leg', 130.0),
+      MapEntry('chicken wing', 45.0),
+      MapEntry('bell pepper', 150.0),
+      MapEntry('sweet potato', 130.0),
+      MapEntry('russet potato', 213.0), // large russet
+      MapEntry('green onion', 15.0),
+      MapEntry('cherry tomato', 17.0),
+      MapEntry('grape tomato', 8.0),
+      MapEntry('roma tomato', 62.0),
+      MapEntry('plum tomato', 62.0),
+      MapEntry('brussels sprout', 21.0),
+
+      // Single-word produce
+      MapEntry('potato', 170.0),
+      MapEntry('tomato', 150.0),
+      MapEntry('onion', 150.0),
+      MapEntry('zucchini', 200.0),
+      MapEntry('cucumber', 200.0),
+      MapEntry('carrot', 60.0),
+      MapEntry('celery', 40.0),
+      MapEntry('avocado', 200.0),
+      MapEntry('apple', 180.0),
+      MapEntry('banana', 120.0),
+      MapEntry('orange', 130.0),
+      MapEntry('lemon', 60.0),
+      MapEntry('lime', 45.0),
+      MapEntry('peach', 150.0),
+      MapEntry('pear', 178.0),
+      MapEntry('plum', 66.0),
+      MapEntry('apricot', 35.0),
+      MapEntry('mango', 200.0),
+      MapEntry('kiwi', 76.0),
+      MapEntry('fig', 40.0),
+      MapEntry('clementine', 74.0),
+      MapEntry('tangerine', 88.0),
+      MapEntry('nectarine', 142.0),
+      MapEntry('grapefruit', 230.0),
+      MapEntry('pomegranate', 282.0),
+      MapEntry('coconut', 400.0),
+      MapEntry('shallot', 30.0),
+      MapEntry('garlic', 3.0),
+      MapEntry('eggplant', 458.0),
+      MapEntry('squash', 340.0),
+      MapEntry('beet', 82.0),
+      MapEntry('turnip', 122.0),
+      MapEntry('radish', 5.0),
+      MapEntry('artichoke', 128.0),
+      MapEntry('mushroom', 18.0),
+      MapEntry('jalapeno', 14.0),
+      MapEntry('habanero', 8.0),
+      MapEntry('serrano', 6.0),
+      MapEntry('poblano', 65.0),
+      MapEntry('broccoli', 150.0), // 1 crown/head-like piece
+      MapEntry('cauliflower', 100.0), // floret cluster
+
       // Eggs
-      'egg': 50.0, // large egg
-      'eggs': 50.0,
+      MapEntry('egg', 50.0),
 
-      // Produce
-      'apple': 180.0,
-      'banana': 120.0,
-      'orange': 130.0,
-      'lemon': 60.0,
-      'lime': 45.0,
-      'onion': 150.0, // medium
-      'garlic': 3.0, // per clove
-      'tomato': 150.0,
-      'potato': 170.0, // medium
-      'carrot': 60.0, // medium
-      'celery': 40.0, // stalk
-      'bell pepper': 150.0,
-      'pepper': 150.0,
-      'avocado': 200.0,
-      'cucumber': 200.0,
-      'jalapeno': 14.0, // per pepper
-      'habanero': 8.0,
-      'serrano': 6.0,
-      'shallot': 30.0,
+      // Bread / tortilla
+      MapEntry('tortilla', 45.0),
+      MapEntry('pita', 60.0),
+      MapEntry('bagel', 105.0),
+      MapEntry('muffin', 57.0),
+      MapEntry('croissant', 67.0),
+      MapEntry('roll', 43.0),
+      MapEntry('biscuit', 45.0),
+      MapEntry('waffle', 75.0),
+      MapEntry('pancake', 38.0),
+    ];
 
-      // Meats
-      'chicken breast': 170.0,
-      'chicken thigh': 110.0,
-      'chicken leg': 130.0,
-      'chicken wing': 45.0,
-
-      // Bread/Baked
-      'slice': 30.0, // bread slice
-      'slices': 30.0,
-      'piece': 30.0,
-      'pieces': 30.0,
-
-      // Dairy
-      'stick': 113.0, // butter stick
-    };
-
-    // Check ingredient-specific weights
-    for (final entry in commonWeights.entries) {
-      if (lowerIngredient.contains(entry.key) ||
-          lowerUnit.contains(entry.key)) {
+    // Check ingredient name against weights (longest keys first due to list order)
+    for (final entry in ingredientWeights) {
+      if (lowerIngredient.contains(entry.key)) {
         return count * entry.value;
       }
     }
 
-    // Special handling for "clove" of garlic
-    if (lowerUnit.contains('clove') && lowerIngredient.contains('garlic')) {
-      return count * 3.0;
+    // Check unit name for generic counts
+    if (lowerUnit.contains('piece') || lowerUnit.contains('item') ||
+        lowerUnit.contains('whole') || lowerUnit.contains('medium') ||
+        lowerUnit.contains('large') || lowerUnit.contains('small')) {
+      return count * 100.0; // generic piece
     }
 
-    // Special handling for "sprig" of herbs
-    if (lowerUnit.contains('sprig')) {
-      return count * 2.0; // ~2g per sprig of herbs
-    }
-
-    // Special handling for "bunch"
-    if (lowerUnit.contains('bunch')) {
-      return count * 50.0; // ~50g per small bunch of herbs
-    }
-
-    // Special handling for "head" of garlic/lettuce
-    if (lowerUnit.contains('head')) {
-      if (lowerIngredient.contains('garlic')) return count * 40.0;
-      if (lowerIngredient.contains('lettuce') || lowerIngredient.contains('cabbage')) {
-        return count * 500.0;
-      }
-      return count * 200.0;
-    }
-
-    // Generic pieces/items - rough estimate
-    if (lowerUnit.isEmpty ||
-        lowerUnit == 'piece' ||
-        lowerUnit == 'pieces' ||
-        lowerUnit == 'item' ||
-        lowerUnit == 'items') {
-      // Default to 100g per "piece" if we can't determine
+    // If no unit at all, assume count-based with 100g default
+    if (lowerUnit.isEmpty) {
       return count * 100.0;
     }
 

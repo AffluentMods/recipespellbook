@@ -505,6 +505,52 @@ class NutritionDatabase {
   };
 
   /// Estimate nutrition for an ingredient
+  /// Find a matching ingredient in the local database and return per-100g nutrition data
+  /// Does NOT apply amount conversion — just finds the best match by name.
+  /// Returns MapEntry(matchedKey, nutritionDataPer100g) or null.
+  static MapEntry<String, NutritionData>? findMatch(String ingredientName) {
+    final name = ingredientName.toLowerCase();
+    final cleanedName = stripCookingModifiers(name);
+
+    MapEntry<String, NutritionData>? bestMatch;
+
+    // Try exact match on raw name first
+    for (final entry in _data.entries) {
+      if (name.contains(entry.key)) {
+        if (bestMatch == null || entry.key.length > bestMatch.key.length) {
+          bestMatch = entry;
+        }
+      }
+    }
+
+    if (bestMatch != null) return bestMatch;
+
+    // Try match on cleaned name
+    for (final entry in _data.entries) {
+      if (cleanedName.contains(entry.key)) {
+        if (bestMatch == null || entry.key.length > bestMatch.key.length) {
+          bestMatch = entry;
+        }
+      }
+    }
+
+    if (bestMatch != null) return bestMatch;
+
+    // Try word-level matching
+    final words = cleanedName.split(' ');
+    for (final entry in _data.entries) {
+      for (final word in words) {
+        if (word.length > 2 && entry.key.contains(word)) {
+          if (bestMatch == null || entry.key.length > bestMatch.key.length) {
+            bestMatch = entry;
+          }
+        }
+      }
+    }
+
+    return bestMatch;
+  }
+
   static NutritionData? estimateForIngredient(Ingredient ingredient) {
     final name = ingredient.name.toLowerCase();
     final cleanedName = stripCookingModifiers(name);
@@ -587,7 +633,7 @@ class NutritionDatabase {
     if (numericAmount == null) return null;
 
     // Convert to 100g equivalent
-    final unitLower = (unit ?? '').toLowerCase();
+    final unitLower = (unit ?? '').toLowerCase().trim();
     switch (unitLower) {
       case 'g':
       case 'gram':
@@ -607,7 +653,7 @@ class NutritionDatabase {
         return numericAmount * 4.536;
       case 'cup':
       case 'cups':
-        return numericAmount * 2.4; // Approximate
+        return numericAmount * 2.4; // ~240g
       case 'tbsp':
       case 'tablespoon':
       case 'tablespoons':
@@ -616,8 +662,77 @@ class NutritionDatabase {
       case 'teaspoon':
       case 'teaspoons':
         return numericAmount * 0.05;
+      case 'fl oz':
+      case 'fluid ounce':
+      case 'fluid ounces':
+        return numericAmount * 0.296; // ~29.6g per fl oz
+      case 'ml':
+      case 'milliliter':
+      case 'milliliters':
+        return numericAmount / 100;
+      case 'l':
+      case 'liter':
+      case 'liters':
+        return numericAmount * 10;
+      case 'pint':
+      case 'pints':
+      case 'pt':
+        return numericAmount * 4.73; // ~473g
+      case 'quart':
+      case 'quarts':
+      case 'qt':
+        return numericAmount * 9.46;
+      case 'gallon':
+      case 'gallons':
+        return numericAmount * 37.85;
+      case 'clove':
+      case 'cloves':
+        return numericAmount * 0.03; // 3g per clove
+      case 'slice':
+      case 'slices':
+        return numericAmount * 0.28; // ~28g per slice
+      case 'stick':
+      case 'sticks':
+        return numericAmount * 1.13; // 113g butter stick
+      case 'bunch':
+      case 'bunches':
+        return numericAmount * 0.40; // ~40g herb bunch
+      case 'sprig':
+      case 'sprigs':
+        return numericAmount * 0.02; // ~2g per sprig
+      case 'head':
+      case 'heads':
+        return numericAmount * 3.0; // ~300g (varies)
+      case 'can':
+      case 'cans':
+        return numericAmount * 4.25; // 425g (15oz can)
+      case 'pinch':
+      case 'pinches':
+      case 'dash':
+        return numericAmount * 0.005; // ~0.5g
+      case 'stalk':
+      case 'stalks':
+      case 'rib':
+      case 'ribs':
+        return numericAmount * 0.40; // ~40g
+      case 'link':
+      case 'links':
+        return numericAmount * 0.68; // ~68g sausage link
+      case 'ear':
+      case 'ears':
+        return numericAmount * 0.90; // ~90g corn ear
+      case 'fillet':
+      case 'filet':
+      case 'fillets':
+        return numericAmount * 1.70; // ~170g
+      case 'strip':
+      case 'strips':
+      case 'rasher':
+      case 'rashers':
+        return numericAmount * 0.28; // ~28g bacon strip
       default:
-      // Assume 1 unit = roughly 100g
+      // For unknown units, assume 1 count ≈ 100g (safer than multiplying directly)
+      // This only affects the quick estimate card, not the full calculation sheet
         return numericAmount;
     }
   }
