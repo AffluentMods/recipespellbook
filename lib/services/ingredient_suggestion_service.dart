@@ -70,7 +70,7 @@ class IngredientSuggestionService {
     if (_loaded || _loading) return;
     _loading = true;
     try {
-      final raw = await rootBundle.loadString('assets/data/common_ingredients-old.json');
+      final raw = await rootBundle.loadString('assets/data/common_ingredients.json');
 
       // Parse & clean in background isolate to avoid UI jank
       final isolateResult = await Isolate.run(() => _processInIsolate(raw));

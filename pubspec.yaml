@@ -85,7 +85,7 @@ flutter:
   generate: true
 
   assets:
-    - assets/data/common_ingredients-old.json
+    - assets/data/common_ingredients.json
     - assets/images/
     - assets/images/default_recipes/
     - assets/images/themes/

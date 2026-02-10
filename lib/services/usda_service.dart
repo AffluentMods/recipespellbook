@@ -38,7 +38,7 @@ class UsdaService {
   Future<void> _loadBundledData() async {
     try {
       debugPrint('Loading bundled USDA data...');
-      final jsonString = await rootBundle.loadString('assets/data/common_ingredients-old.json');
+      final jsonString = await rootBundle.loadString('assets/data/common_ingredients.json');
       final List<dynamic> data = jsonDecode(jsonString);
 
       final foods = data.map((item) {
