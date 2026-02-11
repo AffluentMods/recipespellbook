@@ -77,7 +77,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
 
   // Accessors for DAOs
@@ -96,7 +96,43 @@ class AppDatabase extends _$AppDatabase {
         await m.createAll();
         await _seedDefaultData();
       },
+      onUpgrade: (Migrator m, int from, int to) async {
+        if (from < 2) {
+          // RecipeLinks now includes ingredientId in primary key (per-ingredient linking)
+          // Drop old table and recreate — old recipe-level links become per-ingredient
+          await m.deleteTable('recipe_links');
+          await m.createTable(recipeLinks);
+          // Re-seed default recipe links with ingredient IDs
+          await _reseedDefaultLinks();
+        }
+      },
     );
+  }
+
+  /// Re-seed default recipe links after schema migration
+  Future<void> _reseedDefaultLinks() async {
+    try {
+      // White Pizza: pizza dough ball → Pizza Dough
+      await into(recipeLinks).insertOnConflictUpdate(RecipeLinksCompanion.insert(
+        sourceRecipeId: 'default_white_pizza',
+        ingredientId: 'default_white_pizza_ing_0',
+        linkedRecipeId: 'default_pizza_dough',
+      ));
+      // White Pizza: white pizza sauce → White Pizza Sauce
+      await into(recipeLinks).insertOnConflictUpdate(RecipeLinksCompanion.insert(
+        sourceRecipeId: 'default_white_pizza',
+        ingredientId: 'default_white_pizza_ing_11',
+        linkedRecipeId: 'default_white_pizza_sauce',
+      ));
+      // Lomo Saltado: béarnaise sauce → Béarnaise Sauce
+      await into(recipeLinks).insertOnConflictUpdate(RecipeLinksCompanion.insert(
+        sourceRecipeId: 'default_lomo_saltado',
+        ingredientId: 'default_lomo_saltado_ing_13',
+        linkedRecipeId: 'default_bearnaise_sauce',
+      ));
+    } catch (_) {
+      // Best-effort — recipes may not exist if user deleted them
+    }
   }
 
   Future<void> _seedDefaultData() async {

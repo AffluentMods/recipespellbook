@@ -524,7 +524,7 @@ class _MediumGridView extends StatelessWidget {
       padding: const EdgeInsets.all(12).copyWith(bottom: 80),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.75, // Slightly taller to fit tags
+        childAspectRatio: 0.8,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
       ),

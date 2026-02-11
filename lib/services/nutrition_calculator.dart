@@ -14,11 +14,13 @@ class NutritionCalculator {
   /// Calculate nutrition for a recipe
   /// Returns a result with total nutrition and per-ingredient breakdown
   /// [manualOverrides] - Map of ingredient names to manually specified nutrition
+  /// [linkedRecipeNutrition] - Map of ingredient names to linked recipe nutrition data
   /// [languageCode] - User's language for translating ingredients to English (USDA lookup)
   Future<NutritionCalculationResult> calculateForRecipe({
     required List<Ingredient> ingredients,
     required String servings,
     Map<String, NutritionData>? manualOverrides,
+    Map<String, LinkedRecipeNutrition>? linkedRecipeNutrition,
     String languageCode = 'en',
   }) async {
     final ingredientResults = <IngredientNutritionResult>[];
@@ -26,7 +28,51 @@ class NutritionCalculator {
     int matchedCount = 0;
 
     for (final ingredient in ingredients) {
-      // Check for manual override first
+      // ── Priority 1: Check for linked recipe nutrition ──
+      // If this ingredient maps to a linked recipe, use that recipe's nutrition
+      // instead of USDA lookup. The ingredient name is matched against the keys
+      // in linkedRecipeNutrition (case-insensitive).
+      if (linkedRecipeNutrition != null) {
+        final linkedMatch = _findLinkedRecipeMatch(
+          ingredient.name,
+          linkedRecipeNutrition,
+        );
+        if (linkedMatch != null) {
+          final linked = linkedMatch.value;
+          if (linked.hasNutrition) {
+            // Linked recipe has nutrition — scale by amount
+            // 1 unit of ingredient = 1 serving of linked recipe
+            final amount = _parseAmount(ingredient.amount ?? '1') ?? 1.0;
+            final scaledNutrition = linked.perServingNutrition!.scaled(amount);
+            ingredientResults.add(IngredientNutritionResult(
+              ingredient: ingredient,
+              isMatched: true,
+              matchStatus: MatchStatus.linkedRecipe,
+              nutrition: scaledNutrition,
+              isLinkedRecipe: true,
+              linkedRecipeId: linked.recipeId,
+              linkedRecipeTitle: linked.recipeTitle,
+              matchDescription: linked.recipeTitle,
+            ));
+            totalNutrition = totalNutrition + scaledNutrition;
+            matchedCount++;
+          } else {
+            // Linked recipe exists but has no nutrition data
+            ingredientResults.add(IngredientNutritionResult(
+              ingredient: ingredient,
+              isMatched: false,
+              matchStatus: MatchStatus.linkedRecipeMissing,
+              isLinkedRecipe: true,
+              linkedRecipeId: linked.recipeId,
+              linkedRecipeTitle: linked.recipeTitle,
+              errorMessage: '${linked.recipeTitle} has no nutrition data',
+            ));
+          }
+          continue; // Skip USDA/local lookup for linked ingredients
+        }
+      }
+
+      // ── Priority 2: Check for manual override ──
       if (manualOverrides != null && manualOverrides.containsKey(ingredient.name)) {
         final manualNutrition = manualOverrides[ingredient.name]!;
         ingredientResults.add(IngredientNutritionResult(
@@ -158,6 +204,28 @@ class NutritionCalculator {
     }
 
     return cleanedName;
+  }
+
+  /// Find a linked recipe match for an ingredient name.
+  /// Matches case-insensitively against the keys in the linked recipe map.
+  MapEntry<String, LinkedRecipeNutrition>? _findLinkedRecipeMatch(
+      String ingredientName,
+      Map<String, LinkedRecipeNutrition> linkedMap,
+      ) {
+    final lowerName = ingredientName.toLowerCase().trim();
+    for (final entry in linkedMap.entries) {
+      if (lowerName == entry.key.toLowerCase().trim()) {
+        return entry;
+      }
+      // Also check if the ingredient name contains the linked key or vice versa
+      // e.g., ingredient "pizza dough ball" should match key "pizza dough ball"
+      // but also "white pizza sauce" should match "white pizza sauce"
+      if (lowerName.contains(entry.key.toLowerCase().trim()) ||
+          entry.key.toLowerCase().trim().contains(lowerName)) {
+        return entry;
+      }
+    }
+    return null;
   }
 
   /// Calculate nutrition for a single ingredient
@@ -807,6 +875,14 @@ class NutritionCalculationResult {
   /// Number of ingredients that couldn't be matched
   int get unmatchedCount => ingredientResults.where((r) => !r.isMatched).length;
 
+  /// Number of ingredients sourced from linked recipes
+  int get linkedRecipeCount =>
+      ingredientResults.where((r) => r.matchStatus == MatchStatus.linkedRecipe).length;
+
+  /// Number of linked recipes missing nutrition data
+  int get linkedRecipeMissingCount =>
+      ingredientResults.where((r) => r.matchStatus == MatchStatus.linkedRecipeMissing).length;
+
   /// Match percentage
   double get matchPercentage {
     if (ingredientResults.isEmpty) return 0;
@@ -832,6 +908,12 @@ class IngredientNutritionResult {
   final bool isManualOverride;
   /// Description of the match source (e.g., "Chicken broth" from local DB)
   final String? matchDescription;
+  /// Whether this ingredient's nutrition comes from a linked recipe
+  final bool isLinkedRecipe;
+  /// The linked recipe's ID (for navigation to add/view nutrition)
+  final String? linkedRecipeId;
+  /// The linked recipe's title (for display)
+  final String? linkedRecipeTitle;
 
   IngredientNutritionResult({
     required this.ingredient,
@@ -843,6 +925,9 @@ class IngredientNutritionResult {
     this.errorMessage,
     this.isManualOverride = false,
     this.matchDescription,
+    this.isLinkedRecipe = false,
+    this.linkedRecipeId,
+    this.linkedRecipeTitle,
   });
 
   /// Display string for the ingredient
@@ -868,4 +953,36 @@ enum MatchStatus {
 
   /// Error during matching
   error,
+
+  /// Matched via linked recipe with nutrition data
+  linkedRecipe,
+
+  /// Linked recipe exists but has no nutrition data
+  linkedRecipeMissing,
+}
+
+/// Nutrition info from a linked recipe, passed into the calculator
+/// so it can use the linked recipe's nutrition instead of USDA lookup.
+class LinkedRecipeNutrition {
+  /// The linked recipe's ID
+  final String recipeId;
+
+  /// The linked recipe's title (for display)
+  final String recipeTitle;
+
+  /// Per-serving nutrition of the linked recipe, or null if not yet calculated
+  final NutritionData? perServingNutrition;
+
+  /// Number of servings the linked recipe makes
+  final int servingCount;
+
+  const LinkedRecipeNutrition({
+    required this.recipeId,
+    required this.recipeTitle,
+    this.perServingNutrition,
+    this.servingCount = 1,
+  });
+
+  /// Whether the linked recipe has nutrition data
+  bool get hasNutrition => perServingNutrition != null;
 }

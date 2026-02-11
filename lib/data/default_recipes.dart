@@ -41,14 +41,48 @@ class DefaultIngredient {
 
 /// Pre-computed nutrition data (per serving) for default recipes.
 /// Calculated from USDA SR Legacy database using NutritionCalculator logic.
+/// All 35 nutrient fields matching NutritionData for complete display.
+/// White Pizza nutrition includes linked Pizza Dough (1/2 recipe) and White Pizza Sauce (full recipe).
 class DefaultNutritionData {
+  // Macros
   final double calories;
   final double protein;
   final double fat;
   final double carbohydrates;
   final double fiber;
   final double sugar;
+  final double saturatedFat;
+  final double transFat;
+  final double monounsaturatedFat;
+  final double polyunsaturatedFat;
+  // Minerals
   final double sodium;
+  final double potassium;
+  final double calcium;
+  final double iron;
+  final double magnesium;
+  final double phosphorus;
+  final double zinc;
+  final double copper;
+  final double manganese;
+  final double selenium;
+  // Vitamins
+  final double vitaminA;
+  final double vitaminC;
+  final double vitaminD;
+  final double vitaminE;
+  final double vitaminK;
+  final double vitaminB1;
+  final double vitaminB2;
+  final double vitaminB3;
+  final double vitaminB5;
+  final double vitaminB6;
+  final double vitaminB12;
+  final double folate;
+  final double choline;
+  // Other
+  final double cholesterol;
+  final double water;
 
   const DefaultNutritionData({
     required this.calories,
@@ -57,7 +91,35 @@ class DefaultNutritionData {
     required this.carbohydrates,
     this.fiber = 0,
     this.sugar = 0,
+    this.saturatedFat = 0,
+    this.transFat = 0,
+    this.monounsaturatedFat = 0,
+    this.polyunsaturatedFat = 0,
     this.sodium = 0,
+    this.potassium = 0,
+    this.calcium = 0,
+    this.iron = 0,
+    this.magnesium = 0,
+    this.phosphorus = 0,
+    this.zinc = 0,
+    this.copper = 0,
+    this.manganese = 0,
+    this.selenium = 0,
+    this.vitaminA = 0,
+    this.vitaminC = 0,
+    this.vitaminD = 0,
+    this.vitaminE = 0,
+    this.vitaminK = 0,
+    this.vitaminB1 = 0,
+    this.vitaminB2 = 0,
+    this.vitaminB3 = 0,
+    this.vitaminB5 = 0,
+    this.vitaminB6 = 0,
+    this.vitaminB12 = 0,
+    this.folate = 0,
+    this.choline = 0,
+    this.cholesterol = 0,
+    this.water = 0,
   });
 }
 
@@ -76,27 +138,34 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Meat',
     notes: 'Meal prep tip: Keeps 4 days in fridge. Use ground turkey or chicken for a leaner version. Add gochugaru or chili crisp for extra heat.',
     nutrition: DefaultNutritionData(
-      calories: 825, protein: 58, fat: 37, carbohydrates: 61,
-      fiber: 3, sugar: 6, sodium: 1392,
+      calories: 917.9, protein: 65.9, fat: 42.2, carbohydrates: 63.6,
+      fiber: 3.5, sugar: 12.2,
+      saturatedFat: 14.4, transFat: 1.38,
+      monounsaturatedFat: 17.8, polyunsaturatedFat: 5.0,
+      cholesterol: 364.8, sodium: 1905.4, potassium: 1102.1,
+      calcium: 173.3, iron: 7.9, magnesium: 108.2,
+      phosphorus: 602.6, zinc: 12.6, copper: 0.53, manganese: 1.25, selenium: 65.3,
+      vitaminA: 394.1, vitaminC: 8.2, vitaminD: 1.3, vitaminE: 1.4, vitaminK: 42.1,
+      vitaminB1: 0.26, vitaminB2: 0.73, vitaminB3: 11.5, vitaminB5: 3.03, vitaminB6: 1.12,
+      vitaminB12: 5.49, folate: 74.9, choline: 317.4, water: 405.0,
     ),
     ingredients: [
       DefaultIngredient('ground beef', amount: '1.5', unit: 'lbs'),
-      DefaultIngredient('garlic cloves, minced', amount: '4', unit: 'cloves'),
+      DefaultIngredient('garlic cloves, minced', amount: '4'),
       DefaultIngredient('fresh ginger, grated', amount: '1', unit: 'piece'),
       DefaultIngredient('soy sauce', amount: '0.25', unit: 'cup'),
       DefaultIngredient('brown sugar', amount: '2', unit: 'tbsp'),
       DefaultIngredient('gochujang or sriracha', amount: '1', unit: 'tbsp'),
       DefaultIngredient('rice vinegar', amount: '1', unit: 'tbsp'),
       DefaultIngredient('sesame oil', amount: '1', unit: 'tbsp'),
-      DefaultIngredient('salt', amount: '1', unit: 'tsp'),
-      DefaultIngredient('black pepper', amount: '0.5', unit: 'tsp'),
+      DefaultIngredient('salt & pepper'),
       DefaultIngredient('cucumber, thinly sliced', amount: '1'),
       DefaultIngredient('carrots, shredded', amount: '2'),
       DefaultIngredient('red onion, thinly sliced', amount: '1'),
       DefaultIngredient('eggs', amount: '4'),
       DefaultIngredient('cooked rice', amount: '3', unit: 'cups'),
-      DefaultIngredient('green onions', amount: '2'),
-      DefaultIngredient('sesame seeds', amount: '1', unit: 'tbsp'),
+      DefaultIngredient('green onions'),
+      DefaultIngredient('sesame seeds'),
     ],
     instructions: [
       'Make quick pickled onions: combine ½ cup vinegar, ½ cup hot water, 1 tsp sugar, and ½ tsp salt in a jar. Add sliced red onion and let sit at least 30 minutes.',
@@ -120,10 +189,18 @@ const defaultRecipes = <DefaultRecipeData>[
     cookTimeMinutes: 15,
     course: 'Main',
     category: 'Meat',
-    notes: 'Use a very hot pan for proper searing. Tomatoes should keep their structure — don\'t overcook them. See linked recipes for a béarnaise sauce that pairs perfectly.',
+    notes: 'Use a very hot pan for proper searing. Tomatoes should keep their structure — don\'t overcook them.',
     nutrition: DefaultNutritionData(
-      calories: 427, protein: 48, fat: 22, carbohydrates: 8,
-      fiber: 1, sugar: 1, sodium: 995,
+      calories: 413.9, protein: 48.9, fat: 20.9, carbohydrates: 4.7,
+      fiber: 0.9, sugar: 2.4,
+      saturatedFat: 6.8, transFat: 0.68,
+      monounsaturatedFat: 8.6, polyunsaturatedFat: 3.1,
+      cholesterol: 105.5, sodium: 1135.5, potassium: 751.0,
+      calcium: 24.4, iron: 3.9, magnesium: 49.3,
+      phosphorus: 388.5, zinc: 7.8, copper: 0.19, manganese: 0.23, selenium: 45.0,
+      vitaminA: 27.7, vitaminC: 10.3, vitaminD: 0.2, vitaminE: 1.2, vitaminK: 18.2,
+      vitaminB1: 0.16, vitaminB2: 0.29, vitaminB3: 13.4, vitaminB5: 0.83, vitaminB6: 1.02,
+      vitaminB12: 2.56, folate: 27.6, choline: 138.2, water: 159.8,
     ),
     ingredients: [
       DefaultIngredient('flank steak, cut into ½" strips', amount: '1.5', unit: 'lbs'),
@@ -134,20 +211,19 @@ const defaultRecipes = <DefaultRecipeData>[
       DefaultIngredient('oyster sauce', amount: '1', unit: 'tbsp'),
       DefaultIngredient('red wine vinegar', amount: '1', unit: 'tbsp'),
       DefaultIngredient('sugar', amount: '1', unit: 'tsp'),
-      DefaultIngredient('garlic cloves, minced', amount: '2', unit: 'cloves'),
+      DefaultIngredient('garlic cloves, minced', amount: '2'),
       DefaultIngredient('fresh cilantro', amount: '1', unit: 'handful'),
       DefaultIngredient('French fries, hot & crispy'),
       DefaultIngredient('cooked rice'),
-      DefaultIngredient('vegetable oil', amount: '2', unit: 'tbsp'),
-      DefaultIngredient('salt', amount: '1', unit: 'tsp'),
-      DefaultIngredient('black pepper', amount: '0.5', unit: 'tsp'),
+      DefaultIngredient('oil, salt, black pepper'),
+      DefaultIngredient('béarnaise sauce, for serving'),
     ],
     instructions: [
       'Sear steak in a very hot pan in batches — don\'t crowd. Season with salt and pepper. Remove and set aside.',
       'Stir-fry onion wedges for 1 minute. Add garlic and jalapeño, cook 20 seconds.',
       'Add tomato wedges and cook 30-45 seconds — keep their structure.',
       'Return steak to the pan with soy sauce, oyster sauce, vinegar, and sugar. Toss everything together for 30 seconds.',
-      'Pile over hot crispy fries, shower with cilantro, and serve with rice on the side.',
+      'Pile over hot crispy fries, shower with cilantro, and serve with rice on the side. Drizzle with béarnaise sauce.',
     ],
   ),
 
@@ -165,8 +241,16 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Meat',
     notes: 'Char chicken over flame for smoky flavor. Use cashew cream for dairy-free. Marinate overnight for best results. Keeps 3-4 days in fridge or 1 month frozen.',
     nutrition: DefaultNutritionData(
-      calories: 731, protein: 51, fat: 48, carbohydrates: 26,
-      fiber: 7, sugar: 0, sodium: 858,
+      calories: 622.9, protein: 44.7, fat: 42.0, carbohydrates: 18.4,
+      fiber: 3.5, sugar: 8.5,
+      saturatedFat: 21.5, transFat: 1.03,
+      monounsaturatedFat: 12.9, polyunsaturatedFat: 4.1,
+      cholesterol: 299.5, sodium: 1040.4, potassium: 912.5,
+      calcium: 162.1, iron: 5.2, magnesium: 80.1,
+      phosphorus: 427.0, zinc: 4.1, copper: 0.32, manganese: 0.58, selenium: 38.0,
+      vitaminA: 352.9, vitaminC: 37.6, vitaminD: 0.6, vitaminE: 2.7, vitaminK: 12.9,
+      vitaminB1: 0.21, vitaminB2: 0.52, vitaminB3: 11.9, vitaminB5: 2.58, vitaminB6: 0.91,
+      vitaminB12: 1.25, folate: 32.7, choline: 133.1, water: 303.6,
     ),
     ingredients: [
       DefaultIngredient('boneless skinless chicken thighs', amount: '1.5', unit: 'lbs'),
@@ -180,7 +264,7 @@ const defaultRecipes = <DefaultRecipeData>[
       DefaultIngredient('salt', amount: '1.5', unit: 'tsp'),
       DefaultIngredient('butter or ghee', amount: '3', unit: 'tbsp'),
       DefaultIngredient('onion, finely diced', amount: '1'),
-      DefaultIngredient('garlic cloves, minced', amount: '3', unit: 'cloves'),
+      DefaultIngredient('garlic cloves, minced', amount: '3'),
       DefaultIngredient('fresh ginger, grated', amount: '1', unit: 'tbsp'),
       DefaultIngredient('green chilies, slit', amount: '2'),
       DefaultIngredient('ground coriander', amount: '1', unit: 'tsp'),
@@ -214,8 +298,16 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Meat',
     notes: 'Swap turkey for ground chicken, pork, or beef. Skip rice for low-carb or serve in lettuce cups. Refrigerates 4-5 days — great for meal prep.',
     nutrition: DefaultNutritionData(
-      calories: 484, protein: 54, fat: 22, carbohydrates: 20,
-      fiber: 7, sugar: 1, sodium: 784,
+      calories: 468.1, protein: 53.6, fat: 21.6, carbohydrates: 16.9,
+      fiber: 5.8, sugar: 7.3,
+      saturatedFat: 5.2, transFat: 0.18,
+      monounsaturatedFat: 7.7, polyunsaturatedFat: 5.8,
+      cholesterol: 152.4, sodium: 999.2, potassium: 956.0,
+      calcium: 124.2, iron: 4.5, magnesium: 72.3,
+      phosphorus: 430.9, zinc: 6.8, copper: 0.32, manganese: 0.57, selenium: 44.6,
+      vitaminA: 92.1, vitaminC: 49.6, vitaminD: 0.9, vitaminE: 1.5, vitaminK: 100.8,
+      vitaminB1: 0.22, vitaminB2: 0.51, vitaminB3: 14.3, vitaminB5: 2.4, vitaminB6: 1.1,
+      vitaminB12: 2.73, folate: 87.2, choline: 132.0, water: 287.7,
     ),
     ingredients: [
       DefaultIngredient('ground turkey', amount: '2', unit: 'lbs'),
@@ -259,8 +351,16 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Pasta',
     notes: 'No cream, garlic, or peas — ever. Use Pecorino Romano for authenticity. Work off heat when mixing sauce to avoid scrambled eggs. Get real guanciale from an Italian deli.',
     nutrition: DefaultNutritionData(
-      calories: 1258, protein: 45, fat: 84, carbohydrates: 79,
-      fiber: 4, sugar: 3, sodium: 18,
+      calories: 995.6, protein: 34.5, fat: 66.6, carbohydrates: 63.2,
+      fiber: 2.9, sugar: 2.9,
+      saturatedFat: 26.7, transFat: 0.02,
+      monounsaturatedFat: 27.2, polyunsaturatedFat: 7.3,
+      cholesterol: 382.2, sodium: 1333.2, potassium: 380.1,
+      calcium: 487.4, iron: 2.6, magnesium: 68.5,
+      phosphorus: 549.8, zinc: 3.5, copper: 0.31, manganese: 1.01, selenium: 79.2,
+      vitaminA: 168.7, vitaminC: 0.0, vitaminD: 2.0, vitaminE: 1.0, vitaminK: 4.2,
+      vitaminB1: 0.24, vitaminB2: 0.44, vitaminB3: 2.8, vitaminB5: 1.61, vitaminB6: 0.32,
+      vitaminB12: 1.34, folate: 57.3, choline: 264.6, water: 62.7,
     ),
     ingredients: [
       DefaultIngredient('guanciale, cut into ¼-inch batons', amount: '6', unit: 'oz'),
@@ -294,13 +394,21 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Bread',
     notes: 'Optional: add spinach or artichokes. Bake at the highest your oven goes for best crust. See linked recipes for pizza dough and white sauce.',
     nutrition: DefaultNutritionData(
-      calories: 2195, protein: 116, fat: 109, carbohydrates: 189,
-      fiber: 14, sugar: 5, sodium: 2187,
+      calories: 1703.4, protein: 63.6, fat: 72.5, carbohydrates: 201.3,
+      fiber: 9.3, sugar: 18.6,
+      saturatedFat: 39.6, transFat: 1.8,
+      monounsaturatedFat: 21.8, polyunsaturatedFat: 4.7,
+      cholesterol: 172.9, sodium: 3040.6, potassium: 1259.6,
+      calcium: 989.6, iron: 5.3, magnesium: 124.4,
+      phosphorus: 1029.0, zinc: 5.4, copper: 0.93, manganese: 2.18, selenium: 112.7,
+      vitaminA: 492.9, vitaminC: 8.7, vitaminD: 4.5, vitaminE: 2.6, vitaminK: 13.8,
+      vitaminB1: 0.78, vitaminB2: 1.46, vitaminB3: 11.5, vitaminB5: 5.17, vitaminB6: 0.69,
+      vitaminB12: 1.84, folate: 243.9, choline: 110.8, water: 561.7,
     ),
     ingredients: [
       DefaultIngredient('pizza dough ball', amount: '1'),
       DefaultIngredient('butter', amount: '2', unit: 'tbsp'),
-      DefaultIngredient('garlic cloves, minced', amount: '3', unit: 'cloves'),
+      DefaultIngredient('garlic cloves, minced', amount: '3'),
       DefaultIngredient('crimini mushrooms, sliced', amount: '2'),
       DefaultIngredient('banana peppers'),
       DefaultIngredient('olives'),
@@ -335,8 +443,16 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Seafood',
     notes: 'Skip potatoes for low-carb. Add zoodles at the very end to prevent sogginess. Serve with crusty bread, rice, or pasta.',
     nutrition: DefaultNutritionData(
-      calories: 818, protein: 70, fat: 42, carbohydrates: 42,
-      fiber: 7, sugar: 0, sodium: 478,
+      calories: 816.7, protein: 70.4, fat: 42.3, carbohydrates: 42.2,
+      fiber: 5.7, sugar: 8.9,
+      saturatedFat: 22.5, transFat: 0.78,
+      monounsaturatedFat: 13.8, polyunsaturatedFat: 3.3,
+      cholesterol: 456.6, sodium: 1669.8, potassium: 2111.8,
+      calcium: 600.4, iron: 4.9, magnesium: 194.2,
+      phosphorus: 980.7, zinc: 5.8, copper: 0.89, manganese: 1.15, selenium: 85.5,
+      vitaminA: 628.7, vitaminC: 77.6, vitaminD: 0.7, vitaminE: 4.6, vitaminK: 223.4,
+      vitaminB1: 0.46, vitaminB2: 0.49, vitaminB3: 11.1, vitaminB5: 1.94, vitaminB6: 1.18,
+      vitaminB12: 2.62, folate: 148.8, choline: 228.8, water: 542.4,
     ),
     ingredients: [
       DefaultIngredient('bacon, diced', amount: '4', unit: 'slices'),
@@ -345,14 +461,13 @@ const defaultRecipes = <DefaultRecipeData>[
       DefaultIngredient('zucchini, julienned into noodles', amount: '2'),
       DefaultIngredient('baby spinach', amount: '5', unit: 'oz'),
       DefaultIngredient('grape tomatoes, halved', amount: '1', unit: 'pint'),
-      DefaultIngredient('garlic cloves, minced', amount: '4', unit: 'cloves'),
+      DefaultIngredient('garlic cloves, minced', amount: '4'),
       DefaultIngredient('fresh basil, thinly sliced', amount: '1', unit: 'bunch'),
       DefaultIngredient('heavy cream', amount: '8', unit: 'fl oz'),
       DefaultIngredient('Parmesan, finely grated', amount: '4', unit: 'oz'),
       DefaultIngredient('Italian seasoning', amount: '1', unit: 'tsp'),
       DefaultIngredient('red pepper flakes', amount: '0.25', unit: 'tsp'),
-      DefaultIngredient('kosher salt', amount: '1', unit: 'tsp'),
-      DefaultIngredient('black pepper', amount: '0.5', unit: 'tsp'),
+      DefaultIngredient('kosher salt & black pepper'),
     ],
     instructions: [
       'Cook diced bacon in a large skillet over medium heat for 4-5 min until crisp. Remove bacon; leave drippings in the pan.',
@@ -378,8 +493,16 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Soup',
     notes: 'Thicker: simmer uncovered longer. Thinner: add broth or milk. Add 1 tsp Dijon or splash of wine for flavor depth. Keeps 3 days refrigerated.',
     nutrition: DefaultNutritionData(
-      calories: 515, protein: 22, fat: 32, carbohydrates: 37,
-      fiber: 4, sugar: 5, sodium: 484,
+      calories: 501.9, protein: 21.5, fat: 31.4, carbohydrates: 34.5,
+      fiber: 3.1, sugar: 9.1,
+      saturatedFat: 17.2, transFat: 0.9,
+      monounsaturatedFat: 10.4, polyunsaturatedFat: 1.9,
+      cholesterol: 130.4, sodium: 918.0, potassium: 735.7,
+      calcium: 239.8, iron: 2.5, magnesium: 71.6,
+      phosphorus: 303.0, zinc: 1.4, copper: 0.15, manganese: 0.61, selenium: 19.6,
+      vitaminA: 589.3, vitaminC: 15.0, vitaminD: 1.8, vitaminE: 2.3, vitaminK: 170.9,
+      vitaminB1: 0.2, vitaminB2: 0.43, vitaminB3: 7.4, vitaminB5: 1.32, vitaminB6: 0.5,
+      vitaminB12: 0.69, folate: 97.0, choline: 79.3, water: 355.4,
     ),
     ingredients: [
       DefaultIngredient('butter', amount: '4', unit: 'tbsp'),
@@ -424,14 +547,22 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Tacos',
     notes: 'Optional toppings: avocado, pickled onions, cotija cheese, chipotle crema. Double the marinade for chicken or shrimp. Leftover steak keeps 3 days refrigerated.',
     nutrition: DefaultNutritionData(
-      calories: 498, protein: 36, fat: 22, carbohydrates: 38,
-      fiber: 4, sugar: 0, sodium: 278,
+      calories: 483.4, protein: 38.1, fat: 20.4, carbohydrates: 36.0,
+      fiber: 2.4, sugar: 3.0,
+      saturatedFat: 5.9, transFat: 0.47,
+      monounsaturatedFat: 9.6, polyunsaturatedFat: 3.0,
+      cholesterol: 76.0, sodium: 695.6, potassium: 549.5,
+      calcium: 106.1, iron: 5.5, magnesium: 47.0,
+      phosphorus: 325.9, zinc: 6.2, copper: 0.16, manganese: 0.41, selenium: 40.9,
+      vitaminA: 16.3, vitaminC: 7.5, vitaminD: 0.1, vitaminE: 1.6, vitaminK: 11.2,
+      vitaminB1: 0.39, vitaminB2: 0.38, vitaminB3: 10.5, vitaminB5: 0.73, vitaminB6: 0.69,
+      vitaminB12: 2.38, folate: 78.4, choline: 94.0, water: 123.9,
     ),
     ingredients: [
       DefaultIngredient('reduced-sodium soy sauce', amount: '2', unit: 'tbsp'),
       DefaultIngredient('fresh lime juice', amount: '2', unit: 'tbsp'),
       DefaultIngredient('canola oil', amount: '2', unit: 'tbsp'),
-      DefaultIngredient('garlic cloves, minced', amount: '3', unit: 'cloves'),
+      DefaultIngredient('garlic cloves, minced', amount: '3'),
       DefaultIngredient('chili powder', amount: '2', unit: 'tsp'),
       DefaultIngredient('ground cumin', amount: '1', unit: 'tsp'),
       DefaultIngredient('dried oregano', amount: '1', unit: 'tsp'),
@@ -463,8 +594,16 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Vegetable',
     notes: 'Pepper swaps: banana peppers or Cubanelle peppers work if you can\'t find Hungarian wax peppers. Cheese & sausage are flexible — try chorizo + manchego. The chive oil and fresh ciabatta are the non-negotiables. Chive oil keeps about two weeks refrigerated and tastes better after sitting overnight. Pairs well with beer or white wine.',
     nutrition: DefaultNutritionData(
-      calories: 1102, protein: 32, fat: 100, carbohydrates: 23,
-      fiber: 4, sugar: 0, sodium: 358,
+      calories: 1187.2, protein: 35.9, fat: 100.8, carbohydrates: 39.2,
+      fiber: 3.5, sugar: 9.2,
+      saturatedFat: 30.5, transFat: 0.28,
+      monounsaturatedFat: 47.5, polyunsaturatedFat: 16.9,
+      cholesterol: 173.2, sodium: 1959.3, potassium: 733.3,
+      calcium: 311.3, iron: 3.9, magnesium: 60.7,
+      phosphorus: 435.0, zinc: 4.3, copper: 0.22, manganese: 0.39, selenium: 33.9,
+      vitaminA: 345.1, vitaminC: 140.0, vitaminD: 1.1, vitaminE: 10.6, vitaminK: 61.0,
+      vitaminB1: 0.71, vitaminB2: 0.53, vitaminB3: 7.9, vitaminB5: 1.42, vitaminB6: 0.93,
+      vitaminB12: 1.38, folate: 95.3, choline: 99.7, water: 247.4,
     ),
     ingredients: [
       DefaultIngredient('Hungarian wax peppers', amount: '12'),
@@ -505,8 +644,16 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Sauce',
     notes: 'Thick, creamy, and smooth — not runny. Slightly stretchy from melted Parmesan. Perfect for chicken Alfredo pizza, white veggie pizza, spinach + bacon pizza, or any pizza with mozzarella, ricotta, or roasted veggies.',
     nutrition: DefaultNutritionData(
-      calories: 591, protein: 30, fat: 39, carbohydrates: 31,
-      fiber: 1, sugar: 12, sodium: 955,
+      calories: 586.7, protein: 30.0, fat: 39.2, carbohydrates: 30.3,
+      fiber: 1.0, sugar: 12.8,
+      saturatedFat: 24.1, transFat: 0.9,
+      monounsaturatedFat: 10.7, polyunsaturatedFat: 1.4,
+      cholesterol: 114.4, sodium: 1827.6, potassium: 492.2,
+      calcium: 927.2, iron: 1.6, magnesium: 57.7,
+      phosphorus: 616.4, zinc: 2.6, copper: 0.11, manganese: 0.45, selenium: 23.0,
+      vitaminA: 306.8, vitaminC: 2.9, vitaminD: 3.8, vitaminE: 0.8, vitaminK: 6.9,
+      vitaminB1: 0.26, vitaminB2: 0.7, vitaminB3: 1.4, vitaminB5: 1.3, vitaminB6: 0.27,
+      vitaminB12: 1.74, folate: 45.9, choline: 55.5, water: 244.6,
     ),
     ingredients: [
       DefaultIngredient('butter', amount: '2', unit: 'tbsp'),
@@ -534,8 +681,8 @@ const defaultRecipes = <DefaultRecipeData>[
   // ============================================================
   DefaultRecipeData(
     id: 'default_pizza_dough',
-    title: 'Pizza Dough (Neapolitan & Pan)',
-    description: 'A flexible, flavorful dough — crisp for Neapolitan, chewy for pan pizza.',
+    title: 'Pizza Dough',
+    description: 'A flexible, flavorful dough — crisp for Neapolitan, chewy for pan pizza. Works for both styles.',
     servings: '2 pizzas',
     prepTimeMinutes: 15,
     cookTimeMinutes: 10,
@@ -543,8 +690,16 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Bread',
     notes: 'Add 1 tsp honey for faster browning. Refrigerated dough improves flavor and texture dramatically. Cold ferment 12-48 hours for best results.',
     nutrition: DefaultNutritionData(
-      calories: 876, protein: 28, fat: 11, carbohydrates: 162,
-      fiber: 7, sugar: 2, sodium: 1194,
+      calories: 1753.0, protein: 56.6, fat: 21.7, carbohydrates: 326.4,
+      fiber: 13.2, sugar: 5.5,
+      saturatedFat: 2.8, transFat: 0.0,
+      monounsaturatedFat: 10.9, polyunsaturatedFat: 4.5,
+      cholesterol: 0.0, sodium: 2402.6, potassium: 533.8,
+      calcium: 70.5, iron: 5.6, magnesium: 101.9,
+      phosphorus: 536.8, zinc: 3.9, copper: 0.66, manganese: 3.02, selenium: 149.6,
+      vitaminA: 0.0, vitaminC: 0.0, vitaminD: 0.0, vitaminE: 2.2, vitaminK: 9.6,
+      vitaminB1: 0.76, vitaminB2: 0.33, vitaminB3: 9.7, vitaminB5: 3.26, vitaminB6: 0.32,
+      vitaminB12: 0.0, folate: 344.8, choline: 47.1, water: 348.9,
     ),
     ingredients: [
       DefaultIngredient('00 flour or bread flour', amount: '3.5', unit: 'cups'),
@@ -564,7 +719,6 @@ const defaultRecipes = <DefaultRecipeData>[
       'Cool: Rest 5 minutes before slicing.',
     ],
   ),
-
   // ============================================================
   // 13. Easy Béarnaise Sauce (linked to Lomo Saltado)
   // ============================================================
@@ -579,8 +733,16 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Sauce',
     notes: 'Storage: Keep warm in a water bath up to 1 hour; do not refrigerate (it will split). Flavor boost: Add a splash of dry white wine or shallot reduction before whisking for a more authentic restaurant Béarnaise. Pairings: Great with ribeye, salmon, asparagus, or crispy potatoes.',
     nutrition: DefaultNutritionData(
-      calories: 311, protein: 4, fat: 32, carbohydrates: 3,
-      fiber: 0, sugar: 0, sodium: 486,
+      calories: 304.8, protein: 3.5, fat: 32.0, carbohydrates: 1.9,
+      fiber: 0.1, sugar: 0.8,
+      saturatedFat: 19.0, transFat: 1.1,
+      monounsaturatedFat: 9.2, polyunsaturatedFat: 1.8,
+      cholesterol: 262.8, sodium: 495.1, potassium: 63.3,
+      calcium: 45.4, iron: 0.7, magnesium: 5.6,
+      phosphorus: 86.4, zinc: 0.5, copper: 0.02, manganese: 0.06, selenium: 10.3,
+      vitaminA: 316.2, vitaminC: 2.4, vitaminD: 1.4, vitaminE: 1.3, vitaminK: 6.7,
+      vitaminB1: 0.04, vitaminB2: 0.12, vitaminB3: 0.1, vitaminB5: 0.59, vitaminB6: 0.08,
+      vitaminB12: 0.41, folate: 29.4, choline: 147.5, water: 34.4,
     ),
     ingredients: [
       DefaultIngredient('unsalted butter', amount: '0.5', unit: 'cup'),
@@ -598,8 +760,8 @@ const defaultRecipes = <DefaultRecipeData>[
     instructions: [
       'Melt butter in a microwave-safe bowl on high for about 30 seconds until just melted.',
       'Whisk in egg yolks, heavy cream, vinegar, lemon juice, and onion. Add tarragon, parsley, salt, mustard, and cayenne; whisk until smooth.',
-      'Microwave on high, stirring every 20–30 seconds, until sauce thickens slightly — about 1½ minutes total. Do not overheat or it may curdle.',
-      'Serve immediately — spoon over grilled steak, roasted vegetables, or poached eggs.',
+      'Microwave on high, stirring every 20\u201330 seconds, until sauce thickens slightly \u2014 about 1\xbd minutes total. Do not overheat or it may curdle.',
+      'Serve immediately \u2014 spoon over grilled steak, roasted vegetables, or poached eggs.',
     ],
   ),
 ];

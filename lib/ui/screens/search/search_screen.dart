@@ -7,6 +7,7 @@ import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/cookbook_provider.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
+import '../../../utils/default_recipe_images.dart';
 
 /// Search query provider
 final searchQueryProvider = StateProvider<String>((ref) => '');
@@ -272,27 +273,7 @@ class _SearchResultCard extends ConsumerWidget {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: recipe.imagePath != null
-                    ? ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.file(
-                    File(recipe.imagePath!),
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Icon(
-                      Icons.restaurant,
-                      color: theme.colorScheme.outline,
-                    ),
-                  ),
-                )
-                    : Icon(Icons.restaurant, color: theme.colorScheme.outline),
-              ),
+              _SearchResultImage(recipe: recipe, size: 64),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -350,5 +331,50 @@ class _SearchResultCard extends ConsumerWidget {
     final mins = minutes % 60;
     if (mins == 0) return '$hours hr';
     return '$hours hr $mins min';
+  }
+}
+
+class _SearchResultImage extends StatelessWidget {
+  final Recipe recipe;
+  final double size;
+
+  const _SearchResultImage({required this.recipe, required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final hasImage = recipe.imagePath != null &&
+        recipe.imagePath!.isNotEmpty &&
+        File(recipe.imagePath!).existsSync();
+    final defaultAsset = defaultRecipeImageAsset(recipe.id);
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: hasImage
+          ? Image.file(
+        File(recipe.imagePath!),
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _placeholder(theme),
+      )
+          : defaultAsset != null
+          ? Image.asset(defaultAsset, fit: BoxFit.cover)
+          : _placeholder(theme),
+    );
+  }
+
+  Widget _placeholder(ThemeData theme) {
+    return Center(
+      child: Icon(
+        Icons.restaurant_menu,
+        size: size * 0.4,
+        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+      ),
+    );
   }
 }

@@ -5680,6 +5680,15 @@ class $RecipeLinksTable extends RecipeLinks
       requiredDuringInsert: true,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('REFERENCES recipes (id)'));
+  static const VerificationMeta _ingredientIdMeta =
+      const VerificationMeta('ingredientId');
+  @override
+  late final GeneratedColumn<String> ingredientId = GeneratedColumn<String>(
+      'ingredient_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES ingredients (id)'));
   static const VerificationMeta _linkedRecipeIdMeta =
       const VerificationMeta('linkedRecipeId');
   @override
@@ -5707,7 +5716,7 @@ class $RecipeLinksTable extends RecipeLinks
       defaultValue: currentDateAndTime);
   @override
   List<GeneratedColumn> get $columns =>
-      [sourceRecipeId, linkedRecipeId, sortOrder, createdAt];
+      [sourceRecipeId, ingredientId, linkedRecipeId, sortOrder, createdAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -5725,6 +5734,14 @@ class $RecipeLinksTable extends RecipeLinks
               data['source_recipe_id']!, _sourceRecipeIdMeta));
     } else if (isInserting) {
       context.missing(_sourceRecipeIdMeta);
+    }
+    if (data.containsKey('ingredient_id')) {
+      context.handle(
+          _ingredientIdMeta,
+          ingredientId.isAcceptableOrUnknown(
+              data['ingredient_id']!, _ingredientIdMeta));
+    } else if (isInserting) {
+      context.missing(_ingredientIdMeta);
     }
     if (data.containsKey('linked_recipe_id')) {
       context.handle(
@@ -5746,13 +5763,16 @@ class $RecipeLinksTable extends RecipeLinks
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {sourceRecipeId, linkedRecipeId};
+  Set<GeneratedColumn> get $primaryKey =>
+      {sourceRecipeId, ingredientId, linkedRecipeId};
   @override
   RecipeLink map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return RecipeLink(
       sourceRecipeId: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}source_recipe_id'])!,
+      ingredientId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}ingredient_id'])!,
       linkedRecipeId: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}linked_recipe_id'])!,
       sortOrder: attachedDatabase.typeMapping
@@ -5772,6 +5792,9 @@ class RecipeLink extends DataClass implements Insertable<RecipeLink> {
   /// The recipe that contains the link
   final String sourceRecipeId;
 
+  /// The ingredient this link is attached to
+  final String ingredientId;
+
   /// The recipe being linked to
   final String linkedRecipeId;
 
@@ -5782,6 +5805,7 @@ class RecipeLink extends DataClass implements Insertable<RecipeLink> {
   final DateTime createdAt;
   const RecipeLink(
       {required this.sourceRecipeId,
+      required this.ingredientId,
       required this.linkedRecipeId,
       required this.sortOrder,
       required this.createdAt});
@@ -5789,6 +5813,7 @@ class RecipeLink extends DataClass implements Insertable<RecipeLink> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['source_recipe_id'] = Variable<String>(sourceRecipeId);
+    map['ingredient_id'] = Variable<String>(ingredientId);
     map['linked_recipe_id'] = Variable<String>(linkedRecipeId);
     map['sort_order'] = Variable<int>(sortOrder);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -5798,6 +5823,7 @@ class RecipeLink extends DataClass implements Insertable<RecipeLink> {
   RecipeLinksCompanion toCompanion(bool nullToAbsent) {
     return RecipeLinksCompanion(
       sourceRecipeId: Value(sourceRecipeId),
+      ingredientId: Value(ingredientId),
       linkedRecipeId: Value(linkedRecipeId),
       sortOrder: Value(sortOrder),
       createdAt: Value(createdAt),
@@ -5809,6 +5835,7 @@ class RecipeLink extends DataClass implements Insertable<RecipeLink> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return RecipeLink(
       sourceRecipeId: serializer.fromJson<String>(json['sourceRecipeId']),
+      ingredientId: serializer.fromJson<String>(json['ingredientId']),
       linkedRecipeId: serializer.fromJson<String>(json['linkedRecipeId']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -5819,6 +5846,7 @@ class RecipeLink extends DataClass implements Insertable<RecipeLink> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'sourceRecipeId': serializer.toJson<String>(sourceRecipeId),
+      'ingredientId': serializer.toJson<String>(ingredientId),
       'linkedRecipeId': serializer.toJson<String>(linkedRecipeId),
       'sortOrder': serializer.toJson<int>(sortOrder),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -5827,11 +5855,13 @@ class RecipeLink extends DataClass implements Insertable<RecipeLink> {
 
   RecipeLink copyWith(
           {String? sourceRecipeId,
+          String? ingredientId,
           String? linkedRecipeId,
           int? sortOrder,
           DateTime? createdAt}) =>
       RecipeLink(
         sourceRecipeId: sourceRecipeId ?? this.sourceRecipeId,
+        ingredientId: ingredientId ?? this.ingredientId,
         linkedRecipeId: linkedRecipeId ?? this.linkedRecipeId,
         sortOrder: sortOrder ?? this.sortOrder,
         createdAt: createdAt ?? this.createdAt,
@@ -5841,6 +5871,9 @@ class RecipeLink extends DataClass implements Insertable<RecipeLink> {
       sourceRecipeId: data.sourceRecipeId.present
           ? data.sourceRecipeId.value
           : this.sourceRecipeId,
+      ingredientId: data.ingredientId.present
+          ? data.ingredientId.value
+          : this.ingredientId,
       linkedRecipeId: data.linkedRecipeId.present
           ? data.linkedRecipeId.value
           : this.linkedRecipeId,
@@ -5853,6 +5886,7 @@ class RecipeLink extends DataClass implements Insertable<RecipeLink> {
   String toString() {
     return (StringBuffer('RecipeLink(')
           ..write('sourceRecipeId: $sourceRecipeId, ')
+          ..write('ingredientId: $ingredientId, ')
           ..write('linkedRecipeId: $linkedRecipeId, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('createdAt: $createdAt')
@@ -5861,13 +5895,14 @@ class RecipeLink extends DataClass implements Insertable<RecipeLink> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(sourceRecipeId, linkedRecipeId, sortOrder, createdAt);
+  int get hashCode => Object.hash(
+      sourceRecipeId, ingredientId, linkedRecipeId, sortOrder, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is RecipeLink &&
           other.sourceRecipeId == this.sourceRecipeId &&
+          other.ingredientId == this.ingredientId &&
           other.linkedRecipeId == this.linkedRecipeId &&
           other.sortOrder == this.sortOrder &&
           other.createdAt == this.createdAt);
@@ -5875,12 +5910,14 @@ class RecipeLink extends DataClass implements Insertable<RecipeLink> {
 
 class RecipeLinksCompanion extends UpdateCompanion<RecipeLink> {
   final Value<String> sourceRecipeId;
+  final Value<String> ingredientId;
   final Value<String> linkedRecipeId;
   final Value<int> sortOrder;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
   const RecipeLinksCompanion({
     this.sourceRecipeId = const Value.absent(),
+    this.ingredientId = const Value.absent(),
     this.linkedRecipeId = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -5888,14 +5925,17 @@ class RecipeLinksCompanion extends UpdateCompanion<RecipeLink> {
   });
   RecipeLinksCompanion.insert({
     required String sourceRecipeId,
+    required String ingredientId,
     required String linkedRecipeId,
     this.sortOrder = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : sourceRecipeId = Value(sourceRecipeId),
+        ingredientId = Value(ingredientId),
         linkedRecipeId = Value(linkedRecipeId);
   static Insertable<RecipeLink> custom({
     Expression<String>? sourceRecipeId,
+    Expression<String>? ingredientId,
     Expression<String>? linkedRecipeId,
     Expression<int>? sortOrder,
     Expression<DateTime>? createdAt,
@@ -5903,6 +5943,7 @@ class RecipeLinksCompanion extends UpdateCompanion<RecipeLink> {
   }) {
     return RawValuesInsertable({
       if (sourceRecipeId != null) 'source_recipe_id': sourceRecipeId,
+      if (ingredientId != null) 'ingredient_id': ingredientId,
       if (linkedRecipeId != null) 'linked_recipe_id': linkedRecipeId,
       if (sortOrder != null) 'sort_order': sortOrder,
       if (createdAt != null) 'created_at': createdAt,
@@ -5912,12 +5953,14 @@ class RecipeLinksCompanion extends UpdateCompanion<RecipeLink> {
 
   RecipeLinksCompanion copyWith(
       {Value<String>? sourceRecipeId,
+      Value<String>? ingredientId,
       Value<String>? linkedRecipeId,
       Value<int>? sortOrder,
       Value<DateTime>? createdAt,
       Value<int>? rowid}) {
     return RecipeLinksCompanion(
       sourceRecipeId: sourceRecipeId ?? this.sourceRecipeId,
+      ingredientId: ingredientId ?? this.ingredientId,
       linkedRecipeId: linkedRecipeId ?? this.linkedRecipeId,
       sortOrder: sortOrder ?? this.sortOrder,
       createdAt: createdAt ?? this.createdAt,
@@ -5930,6 +5973,9 @@ class RecipeLinksCompanion extends UpdateCompanion<RecipeLink> {
     final map = <String, Expression>{};
     if (sourceRecipeId.present) {
       map['source_recipe_id'] = Variable<String>(sourceRecipeId.value);
+    }
+    if (ingredientId.present) {
+      map['ingredient_id'] = Variable<String>(ingredientId.value);
     }
     if (linkedRecipeId.present) {
       map['linked_recipe_id'] = Variable<String>(linkedRecipeId.value);
@@ -5950,6 +5996,7 @@ class RecipeLinksCompanion extends UpdateCompanion<RecipeLink> {
   String toString() {
     return (StringBuffer('RecipeLinksCompanion(')
           ..write('sourceRecipeId: $sourceRecipeId, ')
+          ..write('ingredientId: $ingredientId, ')
           ..write('linkedRecipeId: $linkedRecipeId, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('createdAt: $createdAt, ')
@@ -8039,6 +8086,19 @@ class $$IngredientsTableFilterComposer
       column: $state.table.notes,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ComposableFilter recipeLinksRefs(
+      ComposableFilter Function($$RecipeLinksTableFilterComposer f) f) {
+    final $$RecipeLinksTableFilterComposer composer = $state.composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $state.db.recipeLinks,
+        getReferencedColumn: (t) => t.ingredientId,
+        builder: (joinBuilder, parentComposers) =>
+            $$RecipeLinksTableFilterComposer(ComposerState($state.db,
+                $state.db.recipeLinks, joinBuilder, parentComposers)));
+    return f(composer);
+  }
 }
 
 class $$IngredientsTableOrderingComposer
@@ -9708,6 +9768,7 @@ class $$RecipeTagsTableOrderingComposer
 typedef $$RecipeLinksTableCreateCompanionBuilder = RecipeLinksCompanion
     Function({
   required String sourceRecipeId,
+  required String ingredientId,
   required String linkedRecipeId,
   Value<int> sortOrder,
   Value<DateTime> createdAt,
@@ -9716,6 +9777,7 @@ typedef $$RecipeLinksTableCreateCompanionBuilder = RecipeLinksCompanion
 typedef $$RecipeLinksTableUpdateCompanionBuilder = RecipeLinksCompanion
     Function({
   Value<String> sourceRecipeId,
+  Value<String> ingredientId,
   Value<String> linkedRecipeId,
   Value<int> sortOrder,
   Value<DateTime> createdAt,
@@ -9740,6 +9802,7 @@ class $$RecipeLinksTableTableManager extends RootTableManager<
               $$RecipeLinksTableOrderingComposer(ComposerState(db, table)),
           updateCompanionCallback: ({
             Value<String> sourceRecipeId = const Value.absent(),
+            Value<String> ingredientId = const Value.absent(),
             Value<String> linkedRecipeId = const Value.absent(),
             Value<int> sortOrder = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -9747,6 +9810,7 @@ class $$RecipeLinksTableTableManager extends RootTableManager<
           }) =>
               RecipeLinksCompanion(
             sourceRecipeId: sourceRecipeId,
+            ingredientId: ingredientId,
             linkedRecipeId: linkedRecipeId,
             sortOrder: sortOrder,
             createdAt: createdAt,
@@ -9754,6 +9818,7 @@ class $$RecipeLinksTableTableManager extends RootTableManager<
           ),
           createCompanionCallback: ({
             required String sourceRecipeId,
+            required String ingredientId,
             required String linkedRecipeId,
             Value<int> sortOrder = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -9761,6 +9826,7 @@ class $$RecipeLinksTableTableManager extends RootTableManager<
           }) =>
               RecipeLinksCompanion.insert(
             sourceRecipeId: sourceRecipeId,
+            ingredientId: ingredientId,
             linkedRecipeId: linkedRecipeId,
             sortOrder: sortOrder,
             createdAt: createdAt,
@@ -9791,6 +9857,18 @@ class $$RecipeLinksTableFilterComposer
         builder: (joinBuilder, parentComposers) => $$RecipesTableFilterComposer(
             ComposerState(
                 $state.db, $state.db.recipes, joinBuilder, parentComposers)));
+    return composer;
+  }
+
+  $$IngredientsTableFilterComposer get ingredientId {
+    final $$IngredientsTableFilterComposer composer = $state.composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.ingredientId,
+        referencedTable: $state.db.ingredients,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder, parentComposers) =>
+            $$IngredientsTableFilterComposer(ComposerState($state.db,
+                $state.db.ingredients, joinBuilder, parentComposers)));
     return composer;
   }
 
@@ -9829,6 +9907,18 @@ class $$RecipeLinksTableOrderingComposer
         builder: (joinBuilder, parentComposers) =>
             $$RecipesTableOrderingComposer(ComposerState(
                 $state.db, $state.db.recipes, joinBuilder, parentComposers)));
+    return composer;
+  }
+
+  $$IngredientsTableOrderingComposer get ingredientId {
+    final $$IngredientsTableOrderingComposer composer = $state.composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.ingredientId,
+        referencedTable: $state.db.ingredients,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder, parentComposers) =>
+            $$IngredientsTableOrderingComposer(ComposerState($state.db,
+                $state.db.ingredients, joinBuilder, parentComposers)));
     return composer;
   }
 

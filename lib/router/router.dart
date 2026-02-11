@@ -32,6 +32,7 @@ import '../ui/screens/settings/allergy_settings_screen.dart';
 import '../ui/screens/settings/nutrition_settings_screen.dart';
 import '../ui/screens/settings/ingredient_substitutions_screen.dart';
 import '../ui/screens/settings/manage_tags_screen.dart';
+import '../ui/screens/splash/splash_screen.dart';
 // RPG imports
 import '../ui/screens/rpg/rpg_profile_screen.dart';
 import '../ui/screens/rpg/rpg_achievements_screen.dart';
@@ -44,7 +45,7 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final router = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/',
+  initialLocation: '/splash',
   routes: [
     // Search (outside shell)
     GoRoute(
@@ -52,7 +53,11 @@ final router = GoRouter(
       name: 'search',
       builder: (context, state) => const SearchScreen(),
     ),
-
+    GoRoute(
+      path: '/splash',
+      name: 'splash',
+      builder: (context, state) => const SplashScreen(),
+    ),
     // Filtered recipe list (outside shell)
     GoRoute(
       path: '/recipes',

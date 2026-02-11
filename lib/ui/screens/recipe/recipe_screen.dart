@@ -141,6 +141,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   List<Step> _steps = [];
   NutritionData? _nutrition;
   List<Recipe> _linkedRecipes = [];
+  Map<String, List<Recipe>> _ingredientLinksMap = {};
   bool _isLoading = true;
   double _scaleFactor = 1.0;
   _UnitConversion _unitConversion = _UnitConversion.none;
@@ -172,6 +173,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     final ingredients = await dao.getIngredientsForRecipe(widget.recipeId);
     final steps = await dao.getStepsForRecipe(widget.recipeId);
     final linkedRecipes = await dao.getLinkedRecipes(widget.recipeId);
+    final ingredientLinksMap = await dao.getIngredientLinksMap(widget.recipeId);
 
     // Parse nutrition from nutritionJson field
     NutritionData? nutrition;
@@ -190,6 +192,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
       _steps = steps;
       _nutrition = nutrition;
       _linkedRecipes = linkedRecipes;
+      _ingredientLinksMap = ingredientLinksMap;
       _isLoading = false;
     });
   }
@@ -234,33 +237,12 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   }
 
   void _showLinkRecipePicker() async {
-    final dao = ref.read(recipeDaoProvider);
-    final allRecipes = await dao.getAllRecipes();
-    // Filter out current recipe and already-linked recipes
-    final linkedIds = _linkedRecipes.map((r) => r.id).toSet();
-    final available = allRecipes
-        .where((r) => r.id != widget.recipeId && !linkedIds.contains(r.id))
-        .toList();
-
-    if (!mounted) return;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => _RecipeLinkPicker(
-        recipes: available,
-        onSelected: (selectedId) async {
-          Navigator.pop(ctx);
-          await dao.addRecipeLink(widget.recipeId, selectedId);
-          _loadRecipe();
-        },
-      ),
-    );
+    // Per-ingredient linking is done in edit mode — redirect there
+    _navigateToEdit();
   }
 
   Future<void> _unlinkRecipe(String linkedId) async {
-    await ref.read(recipeDaoProvider).removeRecipeLink(widget.recipeId, linkedId);
-    _loadRecipe();
+    // Legacy — unused now that linking is per-ingredient
   }
 
   Future<void> _showNutritionCalculation() async {
@@ -271,6 +253,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
       ingredients: _ingredients,
       servings: _recipe!.servings ?? '1',
       existingNutrition: _nutrition,
+      recipeId: widget.recipeId,
     );
 
     if (result != null && mounted) {
@@ -289,6 +272,16 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     final hasCookTime = recipe.cookTimeMinutes != null && recipe.cookTimeMinutes! > 0;
     final hasServings = recipe.servings != null && recipe.servings!.isNotEmpty;
     return hasPrepTime || hasCookTime || hasServings;
+  }
+
+  List<Ingredient> get _sortedIngredients {
+    if (_ingredientLinksMap.isEmpty) return _ingredients;
+
+    bool isLinked(Ingredient ing) => _ingredientLinksMap.containsKey(ing.id);
+
+    final linked = _ingredients.where(isLinked).toList();
+    final rest = _ingredients.where((i) => !isLinked(i)).toList();
+    return [...linked, ...rest];
   }
 
   @override
@@ -399,7 +392,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 const SizedBox(height: 24),
                 _SectionHeader(title: l10n.ingredientsTitle, trailing: _scaleFactor != 1.0 ? Text('${_scaleFactor}x', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary)) : null),
                 const SizedBox(height: 12),
-                ..._ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: _scaleFactor, unitConversion: _unitConversion, linkedRecipes: _linkedRecipes)),
+                ..._sortedIngredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: _scaleFactor, unitConversion: _unitConversion, linkedRecipes: _ingredientLinksMap[ing.id] ?? [])),
 
                 // NEW: Large "Add to Shopping List" button at bottom of ingredients
                 const SizedBox(height: 16),
@@ -489,7 +482,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   Text(_recipe!.description!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
 
-                // Linked recipes
+                // Quick actions
                 const SizedBox(height: 16),
                 _ModernQuickActionsRow(
                   onAddToMealPlan: _showAddToMealPlanSheet,
@@ -536,7 +529,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
       body: TabBarView(
         controller: _tabController,
         children: [
-          _IngredientsTab(ingredients: _ingredients, scaleFactor: _scaleFactor, l10n: l10n, onAddToShopping: _showAddToShoppingSheet, unitConversion: _unitConversion, linkedRecipes: _linkedRecipes),
+          _IngredientsTab(ingredients: _sortedIngredients, scaleFactor: _scaleFactor, l10n: l10n, onAddToShopping: _showAddToShoppingSheet, unitConversion: _unitConversion, ingredientLinksMap: _ingredientLinksMap),
           _InstructionsTab(steps: _steps, notes: _recipe!.notes, l10n: l10n, nerdMode: isNerdMode),
           // Nutrition tab — uses the unified widget
           SingleChildScrollView(
@@ -1184,7 +1177,7 @@ class _IngredientsTab extends ConsumerWidget {
   final AppLocalizations l10n;
   final VoidCallback onAddToShopping;
   final _UnitConversion unitConversion;
-  final List<Recipe> linkedRecipes;
+  final Map<String, List<Recipe>> ingredientLinksMap;
 
   const _IngredientsTab({
     required this.ingredients,
@@ -1192,7 +1185,7 @@ class _IngredientsTab extends ConsumerWidget {
     required this.l10n,
     required this.onAddToShopping,
     this.unitConversion = _UnitConversion.none,
-    this.linkedRecipes = const [],
+    this.ingredientLinksMap = const {},
   });
 
   @override
@@ -1202,7 +1195,7 @@ class _IngredientsTab extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        ...ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: scaleFactor, unitConversion: unitConversion, linkedRecipes: linkedRecipes)),
+        ...ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: scaleFactor, unitConversion: unitConversion, linkedRecipes: ingredientLinksMap[ing.id] ?? [])),
         const SizedBox(height: 16),
         _LargeAddToShoppingButton(onTap: onAddToShopping),
         const SizedBox(height: 32),
@@ -1480,22 +1473,6 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
   final List<Recipe> linkedRecipes;
   const _IngredientItemWithAllergen({required this.ingredient, required this.scaleFactor, this.unitConversion = _UnitConversion.none, this.linkedRecipes = const []});
 
-  /// Try to find a linked recipe that matches this ingredient name
-  Recipe? _findLinkedRecipe() {
-    if (linkedRecipes.isEmpty) return null;
-    final ingName = ingredient.name.toLowerCase().trim();
-    for (final recipe in linkedRecipes) {
-      final recipeName = recipe.title.toLowerCase().trim();
-      // Exact match or ingredient contains recipe name or vice versa
-      if (ingName == recipeName ||
-          ingName.contains(recipeName) ||
-          recipeName.contains(ingName)) {
-        return recipe;
-      }
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -1526,9 +1503,6 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
     final userAllergyKeys = userAllergies.map((a) => a.key).toSet();
     final matchingAllergens = detectedAllergens.where((a) => userAllergyKeys.contains(a)).toList();
 
-    // Check for linked recipe
-    final linkedRecipe = _findLinkedRecipe();
-
     return GestureDetector(
       onLongPress: () => showIngredientSubsSheet(context, ingredient.name),
       child: Padding(
@@ -1557,35 +1531,34 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
                   child: Icon(Icons.warning_amber_rounded, size: 18, color: Colors.red.shade700),
                 ),
             ]),
-            // Linked recipe link
-            if (linkedRecipe != null)
-              Padding(
-                padding: const EdgeInsets.only(left: 20, top: 2),
-                child: GestureDetector(
-                  onTap: () => context.push('/recipe/${linkedRecipe.id}'),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.subdirectory_arrow_right, size: 14, color: theme.colorScheme.primary),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          linkedRecipe.title,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.primary,
-                            decoration: TextDecoration.underline,
-                            decorationColor: theme.colorScheme.primary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+            // Linked recipes for this ingredient
+            ...linkedRecipes.map((linkedRecipe) => Padding(
+              padding: const EdgeInsets.only(left: 20, top: 2),
+              child: GestureDetector(
+                onTap: () => context.push('/recipe/${linkedRecipe.id}'),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.subdirectory_arrow_right, size: 14, color: theme.colorScheme.primary),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        linkedRecipe.title,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                          decorationColor: theme.colorScheme.primary,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(width: 4),
-                      Icon(Icons.open_in_new, size: 12, color: theme.colorScheme.primary),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.open_in_new, size: 12, color: theme.colorScheme.primary),
+                  ],
                 ),
               ),
+            )),
           ],
         ),
       ),
@@ -1673,247 +1646,7 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
   @override bool shouldRebuild(_SliverTabBarDelegate oldDelegate) => false;
 }
 
-// ============ LINKED RECIPES SECTION ============
-
-class _LinkedRecipesSection extends StatelessWidget {
-  final List<Recipe> linkedRecipes;
-  final ValueChanged<String> onTap;
-  final ValueChanged<String>? onRemove;
-
-  const _LinkedRecipesSection({
-    required this.linkedRecipes,
-    required this.onTap,
-    this.onRemove,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.link, size: 16, color: theme.colorScheme.primary),
-            const SizedBox(width: 6),
-            Text(
-              'Linked Recipes',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: linkedRecipes.map((recipe) => _LinkedRecipeChip(
-            recipe: recipe,
-            onTap: () => onTap(recipe.id),
-            onRemove: onRemove != null ? () => onRemove!(recipe.id) : null,
-          )).toList(),
-        ),
-      ],
-    );
-  }
-}
-
-class _LinkedRecipeChip extends StatelessWidget {
-  final Recipe recipe;
-  final VoidCallback onTap;
-  final VoidCallback? onRemove;
-
-  const _LinkedRecipeChip({
-    required this.recipe,
-    required this.onTap,
-    this.onRemove,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Material(
-      color: theme.colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: EdgeInsets.only(left: 12, top: 6, bottom: 6, right: onRemove != null ? 4 : 12),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.restaurant_menu, size: 14, color: theme.colorScheme.primary),
-              const SizedBox(width: 6),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 180),
-                child: Text(
-                  recipe.title,
-                  style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (onRemove != null) ...[
-                const SizedBox(width: 2),
-                GestureDetector(
-                  onTap: onRemove,
-                  child: Icon(Icons.close, size: 16, color: theme.colorScheme.outline),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 // ============ RECIPE LINK PICKER ============
-
-class _RecipeLinkPicker extends StatefulWidget {
-  final List<Recipe> recipes;
-  final ValueChanged<String> onSelected;
-
-  const _RecipeLinkPicker({required this.recipes, required this.onSelected});
-
-  @override
-  State<_RecipeLinkPicker> createState() => _RecipeLinkPickerState();
-}
-
-class _RecipeLinkPickerState extends State<_RecipeLinkPicker> {
-  final _searchController = TextEditingController();
-  late List<Recipe> _filtered;
-
-  @override
-  void initState() {
-    super.initState();
-    _filtered = widget.recipes;
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  void _onSearch(String query) {
-    setState(() {
-      if (query.isEmpty) {
-        _filtered = widget.recipes;
-      } else {
-        final lower = query.toLowerCase();
-        _filtered = widget.recipes.where((r) => r.title.toLowerCase().contains(lower)).toList();
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return DraggableScrollableSheet(
-      initialChildSize: 0.7,
-      maxChildSize: 0.9,
-      minChildSize: 0.4,
-      builder: (_, controller) => Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          children: [
-            // Handle
-            Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            // Title
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-              child: Row(
-                children: [
-                  Icon(Icons.link, color: theme.colorScheme.primary),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Link a Recipe',
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-            // Search
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: TextField(
-                controller: _searchController,
-                onChanged: _onSearch,
-                decoration: InputDecoration(
-                  hintText: 'Search recipes...',
-                  prefixIcon: const Icon(Icons.search),
-                  filled: true,
-                  fillColor: theme.colorScheme.surfaceContainerHighest,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                ),
-              ),
-            ),
-            const Divider(),
-            // Recipe list
-            Expanded(
-              child: _filtered.isEmpty
-                  ? Center(
-                child: Text(
-                  'No recipes found',
-                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
-                ),
-              )
-                  : ListView.builder(
-                controller: controller,
-                itemCount: _filtered.length,
-                itemBuilder: (context, index) {
-                  final recipe = _filtered[index];
-                  return ListTile(
-                    leading: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: recipe.imagePath != null && File(recipe.imagePath!).existsSync()
-                          ? ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.file(File(recipe.imagePath!), fit: BoxFit.cover),
-                      )
-                          : Icon(Icons.restaurant_menu, color: theme.colorScheme.onPrimaryContainer, size: 20),
-                    ),
-                    title: Text(recipe.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    subtitle: recipe.description != null
-                        ? Text(recipe.description!, maxLines: 1, overflow: TextOverflow.ellipsis)
-                        : null,
-                    onTap: () => widget.onSelected(recipe.id),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 // ============ FULL-SCREEN IMAGE VIEWER ============
 

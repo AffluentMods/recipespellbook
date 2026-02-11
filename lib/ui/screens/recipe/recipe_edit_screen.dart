@@ -13,6 +13,7 @@ import 'package:path/path.dart' as p;
 import '../../../database/database.dart';
 import '../../../database/daos/tags_dao.dart';
 import '../../../providers/database_provider.dart';
+import '../../../utils/default_recipe_images.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../data/course_category_data.dart';
 import '../../../data/nutrition_data.dart';
@@ -151,7 +152,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
 
   final List<_SimpleIngredient> _ingredients = [];
   final List<EditableStep> _steps = [];
-  List<Recipe> _linkedRecipes = [];
+  Map<String, List<Recipe>> _ingredientLinksMap = {};
 
   // Tab controller for tabbed layout
   late TabController _tabController;
@@ -254,9 +255,9 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       _steps.add(EditableStep(id: 'step_${DateTime.now().millisecondsSinceEpoch}', instruction: ''));
     }
 
-    // Load linked recipes
-    final linked = await recipeDao.getLinkedRecipes(widget.recipeId!);
-    _linkedRecipes = linked;
+    // Load linked recipes (per-ingredient)
+    final linksMap = await recipeDao.getIngredientLinksMap(widget.recipeId!);
+    _ingredientLinksMap = linksMap;
 
     setState(() => _isLoading = false);
   }
@@ -415,7 +416,8 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
               ingredient: entry.value,
               onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
               onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
-              onLinkRecipe: _isEditing ? _showLinkRecipePicker : null,
+              onLinkRecipe: _isEditing ? () => _showLinkRecipePicker(entry.value.id, entry.value.text) : null,
+              linkedRecipes: _ingredientLinksMap[entry.value.id] ?? [],
             )),
             _AddIngredientButton(onTap: _addIngredient),
             const SizedBox(height: 32),
@@ -436,14 +438,6 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
               minLines: 3,
               textCapitalization: TextCapitalization.sentences,
             ),
-            if (_isEditing) ...[
-              const SizedBox(height: 32),
-              _LinkedRecipesEditSection(
-                linkedRecipes: _linkedRecipes,
-                onAdd: _showLinkRecipePicker,
-                onRemove: _unlinkRecipe,
-              ),
-            ],
             const SizedBox(height: 32),
             _SectionTitle(title: l10n.nutritionTitle),
             const SizedBox(height: 12),
@@ -516,14 +510,6 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
                   minLines: 3,
                   textCapitalization: TextCapitalization.sentences,
                 ),
-                if (_isEditing) ...[
-                  const SizedBox(height: 32),
-                  _LinkedRecipesEditSection(
-                    linkedRecipes: _linkedRecipes,
-                    onAdd: _showLinkRecipePicker,
-                    onRemove: _unlinkRecipe,
-                  ),
-                ],
                 const SizedBox(height: 32),
                 _SectionTitle(title: l10n.nutritionTitle),
                 const SizedBox(height: 12),
@@ -544,7 +530,8 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
                 ingredient: entry.value,
                 onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
                 onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
-                onLinkRecipe: _isEditing ? _showLinkRecipePicker : null,
+                onLinkRecipe: _isEditing ? () => _showLinkRecipePicker(entry.value.id, entry.value.text) : null,
+                linkedRecipes: _ingredientLinksMap[entry.value.id] ?? [],
               )),
               _AddIngredientButton(onTap: _addIngredient),
               const SizedBox(height: 100),
@@ -598,7 +585,13 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         return Ingredient(id: 'temp_${text.hashCode}', recipeId: widget.recipeId ?? 'new', sortOrder: 0, name: parsed.name, amount: parsed.amount, unit: parsed.unit, notes: parsed.notes);
       }).toList();
 
-      final result = await NutritionCalculationSheet.show(context: context, ingredients: ingredients, servings: _servingsController.text.isNotEmpty ? _servingsController.text : '1', existingNutrition: null);
+      final result = await NutritionCalculationSheet.show(
+          context: context,
+          ingredients: ingredients,
+          servings: _servingsController.text.isNotEmpty ? _servingsController.text : '1',
+          existingNutrition: null,
+          recipeId: widget.recipeId
+      );
 
       if (result != null && mounted) {
         setState(() => _nutrition = result);
@@ -613,99 +606,64 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
 
   // ============ LINKED RECIPE MANAGEMENT ============
 
-  Future<void> _showLinkRecipePicker() async {
+  Future<void> _showLinkRecipePicker(String ingredientId, String ingredientName) async {
     if (widget.recipeId == null) return;
     final recipeDao = ref.read(recipeDaoProvider);
     final allRecipes = await recipeDao.getAllRecipes();
-    final linkedIds = _linkedRecipes.map((r) => r.id).toSet();
+    final currentLinks = _ingredientLinksMap[ingredientId] ?? [];
+    final linkedIds = currentLinks.map((r) => r.id).toSet();
     final available = allRecipes
         .where((r) => r.id != widget.recipeId && !linkedIds.contains(r.id))
         .toList();
 
     if (!mounted) return;
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        String search = '';
-        return StatefulBuilder(
-          builder: (ctx, setModalState) {
-            final theme = Theme.of(ctx);
-            final filtered = search.isEmpty
-                ? available
-                : available.where((r) => r.title.toLowerCase().contains(search.toLowerCase())).toList();
-            return DraggableScrollableSheet(
-              initialChildSize: 0.5,
-              minChildSize: 0.3,
-              maxChildSize: 0.8,
-              expand: false,
-              builder: (_, scrollCtrl) => Column(
-                children: [
-                  const SizedBox(height: 12),
-                  Container(width: 32, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search recipes to link...',
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        isDense: true,
-                      ),
-                      onChanged: (v) => setModalState(() => search = v),
-                    ),
-                  ),
-                  Expanded(
-                    child: filtered.isEmpty
-                        ? Center(child: Text('No recipes available to link', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)))
-                        : ListView.builder(
-                      controller: scrollCtrl,
-                      itemCount: filtered.length,
-                      itemBuilder: (_, i) {
-                        final recipe = filtered[i];
-                        return ListTile(
-                          leading: Icon(Icons.restaurant_menu, color: theme.colorScheme.primary, size: 20),
-                          title: Text(recipe.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-                          subtitle: recipe.description != null ? Text(recipe.description!, maxLines: 1, overflow: TextOverflow.ellipsis) : null,
-                          onTap: () async {
-                            Navigator.pop(ctx);
-                            await _linkRecipe(recipe);
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => _RecipeLinkScreen(
+          available: available,
+          currentlyLinked: currentLinks,
+          ingredientName: ingredientName,
+          onLink: (recipe) async {
+            await _linkRecipeToIngredient(ingredientId, recipe);
           },
-        );
-      },
+          onUnlink: (id) async {
+            await _unlinkRecipeFromIngredient(ingredientId, id);
+          },
+        ),
+      ),
     );
+
+    // Refresh links when returning
+    if (mounted && widget.recipeId != null) {
+      final linksMap = await recipeDao.getIngredientLinksMap(widget.recipeId!);
+      setState(() {
+        _ingredientLinksMap = linksMap;
+      });
+    }
   }
 
-  Future<void> _linkRecipe(Recipe recipe) async {
+  Future<void> _linkRecipeToIngredient(String ingredientId, Recipe recipe) async {
     if (widget.recipeId == null) return;
     final recipeDao = ref.read(recipeDaoProvider);
     try {
-      await recipeDao.addRecipeLink(widget.recipeId!, recipe.id);
-      await recipeDao.addRecipeLink(recipe.id, widget.recipeId!);
-      final linked = await recipeDao.getLinkedRecipes(widget.recipeId!);
-      setState(() => _linkedRecipes = linked);
+      await recipeDao.addIngredientRecipeLink(widget.recipeId!, ingredientId, recipe.id);
+      final linksMap = await recipeDao.getIngredientLinksMap(widget.recipeId!);
+      setState(() {
+        _ingredientLinksMap = linksMap;
+      });
     } catch (_) {}
   }
 
-  Future<void> _unlinkRecipe(String linkedId) async {
+  Future<void> _unlinkRecipeFromIngredient(String ingredientId, String linkedId) async {
     if (widget.recipeId == null) return;
     final recipeDao = ref.read(recipeDaoProvider);
-    await recipeDao.removeRecipeLink(widget.recipeId!, linkedId);
-    await recipeDao.removeRecipeLink(linkedId, widget.recipeId!);
-    final linked = await recipeDao.getLinkedRecipes(widget.recipeId!);
-    setState(() => _linkedRecipes = linked);
+    await recipeDao.removeIngredientRecipeLink(widget.recipeId!, ingredientId, linkedId);
+    final linksMap = await recipeDao.getIngredientLinksMap(widget.recipeId!);
+    setState(() {
+      _ingredientLinksMap = linksMap;
+    });
   }
 
   Future<void> _saveRecipe() async {
@@ -1806,6 +1764,7 @@ class _IngredientRow extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final VoidCallback onDelete;
   final VoidCallback? onLinkRecipe;
+  final List<Recipe> linkedRecipes;
 
   const _IngredientRow({
     super.key,
@@ -1813,48 +1772,90 @@ class _IngredientRow extends StatelessWidget {
     required this.onChanged,
     required this.onDelete,
     this.onLinkRecipe,
+    this.linkedRecipes = const [],
   });
 
   @override Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [
-      Container(width: 8, height: 8, decoration: BoxDecoration(color: theme.colorScheme.primary, shape: BoxShape.circle)),
-      const SizedBox(width: 12),
-      Expanded(child: TextFormField(initialValue: ingredient.text, decoration: const InputDecoration(hintText: 'e.g., 2 cups flour', isDense: true, border: OutlineInputBorder()), textCapitalization: TextCapitalization.sentences, onChanged: onChanged)),
-      PopupMenuButton<String>(
-        icon: Icon(Icons.more_vert, size: 20, color: theme.colorScheme.outline),
-        padding: EdgeInsets.zero,
-        onSelected: (value) {
-          switch (value) {
-            case 'delete':
-              onDelete();
-              break;
-            case 'link_recipe':
-              onLinkRecipe?.call();
-              break;
-          }
-        },
-        itemBuilder: (context) => [
-          if (onLinkRecipe != null)
-            PopupMenuItem(
-              value: 'link_recipe',
-              child: Row(children: [
-                Icon(Icons.link, size: 18, color: theme.colorScheme.primary),
-                const SizedBox(width: 8),
-                const Text('Link Recipe'),
-              ]),
-            ),
-          PopupMenuItem(
-            value: 'delete',
-            child: Row(children: [
-              Icon(Icons.delete_outline, size: 18, color: theme.colorScheme.error),
-              const SizedBox(width: 8),
-              const Text('Delete'),
-            ]),
+    return Padding(padding: const EdgeInsets.only(bottom: 8), child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(children: [
+          Container(width: 8, height: 8, decoration: BoxDecoration(color: linkedRecipes.isNotEmpty ? theme.colorScheme.primary : theme.colorScheme.primary, shape: BoxShape.circle)),
+          const SizedBox(width: 12),
+          Expanded(child: TextFormField(initialValue: ingredient.text, decoration: const InputDecoration(hintText: 'e.g., 2 cups flour', isDense: true, border: OutlineInputBorder()), textCapitalization: TextCapitalization.sentences, onChanged: onChanged)),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert, size: 20, color: theme.colorScheme.outline),
+            padding: EdgeInsets.zero,
+            onSelected: (value) {
+              switch (value) {
+                case 'delete':
+                  onDelete();
+                  break;
+                case 'link_recipe':
+                  onLinkRecipe?.call();
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              if (onLinkRecipe != null)
+                PopupMenuItem(
+                  value: 'link_recipe',
+                  child: Row(children: [
+                    Icon(Icons.link, size: 18, color: theme.colorScheme.primary),
+                    const SizedBox(width: 8),
+                    const Text('Link Recipe'),
+                  ]),
+                ),
+              PopupMenuItem(
+                value: 'delete',
+                child: Row(children: [
+                  Icon(Icons.delete_outline, size: 18, color: theme.colorScheme.error),
+                  const SizedBox(width: 8),
+                  const Text('Delete'),
+                ]),
+              ),
+            ],
           ),
-        ],
-      ),
-    ]));
+        ]),
+        // Show linked recipes inline
+        ...linkedRecipes.map((recipe) => Padding(
+          padding: const EdgeInsets.only(left: 20, top: 4),
+          child: Row(
+            children: [
+              Icon(Icons.subdirectory_arrow_right, size: 14, color: theme.colorScheme.primary),
+              const SizedBox(width: 6),
+              // Recipe image thumbnail
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: _buildRecipeThumb(recipe, 20),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  recipe.title,
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+
+            ],
+          ),
+        )),
+      ],
+    ));
+  }
+
+  Widget _buildRecipeThumb(Recipe recipe, double size) {
+    final hasImage = recipe.imagePath != null && File(recipe.imagePath!).existsSync();
+    final defaultAsset = defaultRecipeImageAsset(recipe.id);
+    if (hasImage) {
+      return Image.file(File(recipe.imagePath!), width: size, height: size, fit: BoxFit.cover);
+    } else if (defaultAsset != null) {
+      return Image.asset(defaultAsset, width: size, height: size, fit: BoxFit.cover);
+    }
+    return SizedBox(width: size, height: size);
   }
 }
 
@@ -1945,71 +1946,392 @@ class _NutritionSection extends StatelessWidget {
   }
 }
 
-// ============ LINKED RECIPES EDIT SECTION ============
+// ============ FULL-SCREEN RECIPE LINK PICKER ============
 
-class _LinkedRecipesEditSection extends StatelessWidget {
-  final List<Recipe> linkedRecipes;
-  final VoidCallback onAdd;
-  final ValueChanged<String> onRemove;
+class _RecipeLinkScreen extends StatefulWidget {
+  final List<Recipe> available;
+  final List<Recipe> currentlyLinked;
+  final String ingredientName;
+  final Future<void> Function(Recipe) onLink;
+  final Future<void> Function(String) onUnlink;
 
-  const _LinkedRecipesEditSection({
-    required this.linkedRecipes,
-    required this.onAdd,
-    required this.onRemove,
+  const _RecipeLinkScreen({
+    required this.available,
+    required this.currentlyLinked,
+    required this.ingredientName,
+    required this.onLink,
+    required this.onUnlink,
   });
+
+  @override
+  State<_RecipeLinkScreen> createState() => _RecipeLinkScreenState();
+}
+
+class _RecipeLinkScreenState extends State<_RecipeLinkScreen> {
+  final _searchController = TextEditingController();
+  String _search = '';
+  late List<Recipe> _linked;
+  late List<Recipe> _available;
+
+  @override
+  void initState() {
+    super.initState();
+    _linked = List.from(widget.currentlyLinked);
+    _available = List.from(widget.available);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<Recipe> get _filteredAvailable {
+    if (_search.isEmpty) return _available;
+    final q = _search.toLowerCase();
+    return _available.where((r) => r.title.toLowerCase().contains(q)).toList();
+  }
+
+  Future<void> _handleLink(Recipe recipe) async {
+    await widget.onLink(recipe);
+    setState(() {
+      _linked.add(recipe);
+      _available.removeWhere((r) => r.id == recipe.id);
+    });
+  }
+
+  Future<void> _handleUnlink(Recipe recipe) async {
+    await widget.onUnlink(recipe.id);
+    setState(() {
+      _linked.removeWhere((r) => r.id == recipe.id);
+      _available.add(recipe);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final filtered = _filteredAvailable;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.link, size: 20, color: theme.colorScheme.primary),
-            const SizedBox(width: 8),
-            Text(
-              'Linked Recipes',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const Spacer(),
-            TextButton.icon(
-              onPressed: onAdd,
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Link'),
-            ),
-          ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Link to "${widget.ingredientName}"'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context, true),
         ),
-        const SizedBox(height: 8),
-        if (linkedRecipes.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Currently linked section
+          if (_linked.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Row(
+                children: [
+                  Icon(Icons.link, size: 18, color: theme.colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Currently Linked (${_linked.length})',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Text(
-              'No linked recipes. Link related recipes like sauces, sides, or component recipes.',
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-              textAlign: TextAlign.center,
+            SizedBox(
+              height: 100,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                itemCount: _linked.length,
+                itemBuilder: (_, i) {
+                  final recipe = _linked[i];
+                  return _LinkedRecipeCard(
+                    recipe: recipe,
+                    onUnlink: () => _handleUnlink(recipe),
+                  );
+                },
+              ),
             ),
-          )
-        else
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: linkedRecipes.map((recipe) => Chip(
-              avatar: Icon(Icons.restaurant_menu, size: 16, color: theme.colorScheme.primary),
-              label: Text(recipe.title, style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
-              deleteIcon: Icon(Icons.close, size: 16, color: theme.colorScheme.error),
-              onDeleted: () => onRemove(recipe.id),
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            )).toList(),
+            const Divider(height: 24),
+          ],
+
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (v) => setState(() => _search = v),
+              decoration: InputDecoration(
+                hintText: 'Search recipes to link...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _search.isNotEmpty
+                    ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() => _search = '');
+                  },
+                )
+                    : null,
+                filled: true,
+                fillColor: theme.colorScheme.surfaceContainerHighest,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
           ),
-      ],
+
+          // Available count
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              'Available (${filtered.length})',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.outline,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Available recipes list
+          Expanded(
+            child: filtered.isEmpty
+                ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.search_off, size: 48, color: theme.colorScheme.outline),
+                  const SizedBox(height: 12),
+                  Text(
+                    _search.isNotEmpty
+                        ? 'No recipes match "$_search"'
+                        : 'No recipes available to link',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                  ),
+                ],
+              ),
+            )
+                : ListView.builder(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+              itemCount: filtered.length,
+              itemBuilder: (_, i) {
+                final recipe = filtered[i];
+                return _AvailableRecipeCard(
+                  recipe: recipe,
+                  onLink: () => _handleLink(recipe),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
+  }
+}
+
+class _LinkedRecipeCard extends StatelessWidget {
+  final Recipe recipe;
+  final VoidCallback onUnlink;
+
+  const _LinkedRecipeCard({required this.recipe, required this.onUnlink});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final hasImage = recipe.imagePath != null &&
+        recipe.imagePath!.isNotEmpty &&
+        File(recipe.imagePath!).existsSync();
+    final defaultAsset = defaultRecipeImageAsset(recipe.id);
+
+    return Container(
+      width: 140,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: hasImage
+                    ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
+                    : defaultAsset != null
+                    ? Image.asset(defaultAsset, fit: BoxFit.cover)
+                    : Container(
+                  color: theme.colorScheme.primaryContainer,
+                  child: Icon(
+                    Icons.restaurant_menu,
+                    color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(
+                  recipe.title,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: onUnlink,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.error,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.close, size: 14, color: theme.colorScheme.onError),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AvailableRecipeCard extends StatelessWidget {
+  final Recipe recipe;
+  final VoidCallback onLink;
+
+  const _AvailableRecipeCard({required this.recipe, required this.onLink});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final hasImage = recipe.imagePath != null &&
+        recipe.imagePath!.isNotEmpty &&
+        File(recipe.imagePath!).existsSync();
+    final defaultAsset = defaultRecipeImageAsset(recipe.id);
+    final totalTime = (recipe.prepTimeMinutes ?? 0) + (recipe.cookTimeMinutes ?? 0);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onLink,
+        borderRadius: BorderRadius.circular(14),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: hasImage
+                    ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
+                    : defaultAsset != null
+                    ? Image.asset(defaultAsset, fit: BoxFit.cover)
+                    : Center(
+                  child: Icon(
+                    Icons.restaurant_menu,
+                    size: 24,
+                    color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      recipe.title,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (recipe.description != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        recipe.description!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.outline,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    if (totalTime > 0) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.schedule, size: 12, color: theme.colorScheme.outline),
+                          const SizedBox(width: 4),
+                          Text(
+                            _formatTime(totalTime),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.outline,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.add_link,
+                  size: 20,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatTime(int minutes) {
+    if (minutes < 60) return '$minutes min';
+    final hours = minutes ~/ 60;
+    final mins = minutes % 60;
+    if (mins == 0) return '$hours hr';
+    return '$hours hr $mins min';
   }
 }

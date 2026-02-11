@@ -43,7 +43,7 @@ class OnboardingService {
 
     for (final recipe in defaultRecipes) {
       try {
-        // Build pre-computed nutrition JSON (per-serving values)
+        // Build pre-computed nutrition JSON (per-serving, all 35 fields)
         String? nutritionJson;
         if (recipe.nutrition != null) {
           final n = recipe.nutrition!;
@@ -54,7 +54,35 @@ class OnboardingService {
             'carbohydrates': n.carbohydrates,
             'fiber': n.fiber,
             'sugar': n.sugar,
+            'saturatedFat': n.saturatedFat,
+            'transFat': n.transFat,
+            'monounsaturatedFat': n.monounsaturatedFat,
+            'polyunsaturatedFat': n.polyunsaturatedFat,
+            'cholesterol': n.cholesterol,
             'sodium': n.sodium,
+            'potassium': n.potassium,
+            'calcium': n.calcium,
+            'iron': n.iron,
+            'magnesium': n.magnesium,
+            'phosphorus': n.phosphorus,
+            'zinc': n.zinc,
+            'copper': n.copper,
+            'manganese': n.manganese,
+            'selenium': n.selenium,
+            'vitaminA': n.vitaminA,
+            'vitaminC': n.vitaminC,
+            'vitaminD': n.vitaminD,
+            'vitaminE': n.vitaminE,
+            'vitaminK': n.vitaminK,
+            'vitaminB1': n.vitaminB1,
+            'vitaminB2': n.vitaminB2,
+            'vitaminB3': n.vitaminB3,
+            'vitaminB5': n.vitaminB5,
+            'vitaminB6': n.vitaminB6,
+            'vitaminB12': n.vitaminB12,
+            'folate': n.folate,
+            'choline': n.choline,
+            'water': n.water,
             'isEstimated': true,
             'servingSize': '1 serving',
             'matchedIngredients': recipe.ingredients.length,
@@ -111,17 +139,20 @@ class OnboardingService {
 
     // No tags — keep starter recipes clean
 
-    // Link related recipes
+    // Link related recipes (per-ingredient: ingredient → linked recipe)
     try {
-      // Link Pizza Sauce and Pizza Dough to White Pizza
-      await dao.addRecipeLink('default_white_pizza', 'default_white_pizza_sauce');
-      await dao.addRecipeLink('default_white_pizza', 'default_pizza_dough');
-      // Reverse links so they show on all recipe pages
-      await dao.addRecipeLink('default_white_pizza_sauce', 'default_white_pizza');
-      await dao.addRecipeLink('default_pizza_dough', 'default_white_pizza');
-      // Link Béarnaise Sauce to Lomo Saltado
-      await dao.addRecipeLink('default_lomo_saltado', 'default_bearnaise_sauce');
-      await dao.addRecipeLink('default_bearnaise_sauce', 'default_lomo_saltado');
+      // White Pizza: "pizza dough ball" (ing_0) → Pizza Dough recipe
+      await dao.addIngredientRecipeLink(
+        'default_white_pizza', 'default_white_pizza_ing_0', 'default_pizza_dough',
+      );
+      // White Pizza: "white pizza sauce" (ing_11) → White Pizza Sauce recipe
+      await dao.addIngredientRecipeLink(
+        'default_white_pizza', 'default_white_pizza_ing_11', 'default_white_pizza_sauce',
+      );
+      // Lomo Saltado: "béarnaise sauce, for serving" (ing_13) → Béarnaise Sauce recipe
+      await dao.addIngredientRecipeLink(
+        'default_lomo_saltado', 'default_lomo_saltado_ing_13', 'default_bearnaise_sauce',
+      );
     } catch (_) {
       // Links are best-effort
     }

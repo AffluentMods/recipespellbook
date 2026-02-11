@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../data/nutrition_data.dart';
 import '../../database/database.dart';
+import '../../providers/database_provider.dart';
 import '../../providers/usda_provider.dart';
 import '../../services/nutrition_calculator.dart';
 import '../../services/usda_service.dart';
@@ -13,12 +16,15 @@ class NutritionCalculationSheet extends ConsumerStatefulWidget {
   final List<Ingredient> ingredients;
   final String servings;
   final NutritionData? existingNutrition;
+  /// Recipe ID — used to fetch linked recipes for nutrition calculation
+  final String? recipeId;
 
   const NutritionCalculationSheet({
     super.key,
     required this.ingredients,
     required this.servings,
     this.existingNutrition,
+    this.recipeId,
   });
 
   /// Show the bottom sheet
@@ -27,6 +33,7 @@ class NutritionCalculationSheet extends ConsumerStatefulWidget {
     required List<Ingredient> ingredients,
     required String servings,
     NutritionData? existingNutrition,
+    String? recipeId,
   }) {
     return showModalBottomSheet<NutritionData>(
       context: context,
@@ -36,6 +43,7 @@ class NutritionCalculationSheet extends ConsumerStatefulWidget {
         ingredients: ingredients,
         servings: servings,
         existingNutrition: existingNutrition,
+        recipeId: recipeId,
       ),
     );
   }
@@ -160,10 +168,17 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
       // Get user's language code for ingredient translation
       final locale = Localizations.localeOf(context);
 
+      // Build linked recipe nutrition map if we have a recipeId
+      Map<String, LinkedRecipeNutrition>? linkedRecipeNutrition;
+      if (widget.recipeId != null) {
+        linkedRecipeNutrition = await _buildLinkedRecipeNutritionMap();
+      }
+
       final result = await calculator.calculateForRecipe(
         ingredients: widget.ingredients,
         servings: widget.servings,
         manualOverrides: _manualOverrides,
+        linkedRecipeNutrition: linkedRecipeNutrition,
         languageCode: locale.languageCode,
       );
 
@@ -181,6 +196,48 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
         });
       }
     }
+  }
+
+  /// Build a map of ingredient names → linked recipe nutrition
+  /// using per-ingredient links from the database.
+  Future<Map<String, LinkedRecipeNutrition>> _buildLinkedRecipeNutritionMap() async {
+    final recipeDao = ref.read(recipeDaoProvider);
+    final linksMap = await recipeDao.getIngredientLinksMap(widget.recipeId!);
+
+    final linkedNutritionMap = <String, LinkedRecipeNutrition>{};
+
+    for (final ingredient in widget.ingredients) {
+      final linkedRecipes = linksMap[ingredient.id];
+      if (linkedRecipes == null || linkedRecipes.isEmpty) continue;
+
+      // Use the first linked recipe for nutrition calculation
+      final linkedRecipe = linkedRecipes.first;
+
+      // Parse the linked recipe's stored nutrition JSON
+      NutritionData? perServingNutrition;
+      if (linkedRecipe.nutritionJson != null) {
+        try {
+          final json = jsonDecode(linkedRecipe.nutritionJson!) as Map<String, dynamic>;
+          perServingNutrition = NutritionData.fromJson(json);
+        } catch (_) {
+          // Malformed JSON — treat as no nutrition
+        }
+      }
+
+      // Parse the linked recipe's servings
+      final linkedServings = int.tryParse(
+        RegExp(r'(\d+)').firstMatch(linkedRecipe.servings ?? '1')?.group(1) ?? '1',
+      ) ?? 1;
+
+      linkedNutritionMap[ingredient.name] = LinkedRecipeNutrition(
+        recipeId: linkedRecipe.id,
+        recipeTitle: linkedRecipe.title,
+        perServingNutrition: perServingNutrition,
+        servingCount: linkedServings,
+      );
+    }
+
+    return linkedNutritionMap;
   }
 
   @override
@@ -746,6 +803,16 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
           color = Colors.red;
           statusText = item.errorMessage ?? l10n.errorGeneric;
           break;
+        case MatchStatus.linkedRecipe:
+          icon = Icons.check_circle;
+          color = Colors.green;
+          statusText = '${item.linkedRecipeTitle ?? 'Linked recipe'}';
+          break;
+        case MatchStatus.linkedRecipeMissing:
+          icon = Icons.cancel;
+          color = Colors.red;
+          statusText = '${item.linkedRecipeTitle ?? 'Linked recipe'} — no nutrition data';
+          break;
       }
     }
 
@@ -753,7 +820,13 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => _showIngredientEditDialog(item),
+        onTap: () {
+          if (item.isLinkedRecipe) {
+            _showLinkedRecipeInfo(item);
+          } else {
+            _showIngredientEditDialog(item);
+          }
+        },
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
@@ -1091,6 +1164,87 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
         const SizedBox(width: 12),
         Expanded(child: Text(text)),
       ],
+    );
+  }
+
+  /// Show info dialog for linked recipe ingredients.
+  /// If the linked recipe has nutrition → show the nutrition summary.
+  /// If missing → show a prompt to add nutrition to that recipe.
+  void _showLinkedRecipeInfo(IngredientNutritionResult item) {
+    final theme = Theme.of(context);
+    final hasNutrition = item.matchStatus == MatchStatus.linkedRecipe;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              hasNutrition ? Icons.check_circle : Icons.cancel,
+              color: hasNutrition ? Colors.green : Colors.red,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                item.linkedRecipeTitle ?? 'Linked Recipe',
+                style: theme.textTheme.titleMedium,
+              ),
+            ),
+          ],
+        ),
+        content: hasNutrition
+            ? Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Nutrition pulled from linked recipe:',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 12),
+            if (item.nutrition != null) ...[
+              _linkedNutritionRow('Calories', '${item.nutrition!.calories?.round() ?? 0} kcal'),
+              _linkedNutritionRow('Protein', '${item.nutrition!.protein?.round() ?? 0}g'),
+              _linkedNutritionRow('Fat', '${item.nutrition!.fat?.round() ?? 0}g'),
+              _linkedNutritionRow('Carbs', '${item.nutrition!.carbohydrates?.round() ?? 0}g'),
+            ],
+          ],
+        )
+            : Text(
+          '${item.linkedRecipeTitle ?? 'This recipe'} doesn\'t have any saved nutrition data yet. '
+              'Open that recipe and calculate its nutrition first, then come back here to recalculate.',
+          style: theme.textTheme.bodyMedium,
+        ),
+        actions: [
+          if (!hasNutrition && item.linkedRecipeId != null)
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(this.context).pop(); // Close nutrition sheet
+                this.context.push('/recipe/${item.linkedRecipeId}');
+              },
+              child: const Text('Open Recipe'),
+            ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(hasNutrition ? 'OK' : 'Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _linkedNutritionRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+        ],
+      ),
     );
   }
 

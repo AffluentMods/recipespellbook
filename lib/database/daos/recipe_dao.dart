@@ -471,13 +471,13 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
     await softDeleteRecipe(recipeId);
   }
 
-  // ============ RECIPE LINKS ============
+  // ============ RECIPE LINKS (per-ingredient) ============
 
-  /// Add a link from one recipe to another
-  Future<void> addRecipeLink(String sourceId, String linkedId) async {
-    // Get current max sort order
+  /// Add a link from a specific ingredient to a recipe
+  Future<void> addIngredientRecipeLink(String sourceId, String ingredientId, String linkedId) async {
     final existing = await (select(recipeLinks)
       ..where((l) => l.sourceRecipeId.equals(sourceId))
+      ..where((l) => l.ingredientId.equals(ingredientId))
       ..orderBy([(l) => OrderingTerm.desc(l.sortOrder)])
       ..limit(1))
         .get();
@@ -485,25 +485,41 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
 
     await into(recipeLinks).insertOnConflictUpdate(RecipeLinksCompanion.insert(
       sourceRecipeId: sourceId,
+      ingredientId: ingredientId,
       linkedRecipeId: linkedId,
       sortOrder: drift.Value(nextOrder),
     ));
 
-    // Also stamp updatedAt on the source recipe
     await (update(recipes)..where((r) => r.id.equals(sourceId)))
         .write(RecipesCompanion(updatedAt: drift.Value(DateTime.now())));
   }
 
-  /// Remove a link
-  Future<void> removeRecipeLink(String sourceId, String linkedId) async {
+  /// Remove a link from a specific ingredient to a specific recipe
+  Future<void> removeIngredientRecipeLink(String sourceId, String ingredientId, String linkedId) async {
     await (delete(recipeLinks)
       ..where((l) => l.sourceRecipeId.equals(sourceId))
+      ..where((l) => l.ingredientId.equals(ingredientId))
       ..where((l) => l.linkedRecipeId.equals(linkedId)))
         .go();
   }
 
-  /// Watch all linked recipes for a source recipe (returns full Recipe objects)
-  Stream<List<Recipe>> watchLinkedRecipes(String sourceId) {
+  /// Get linked recipes for a specific ingredient
+  Future<List<Recipe>> getLinkedRecipesForIngredient(String sourceId, String ingredientId) async {
+    final query = select(recipeLinks).join([
+      innerJoin(recipes, recipes.id.equalsExp(recipeLinks.linkedRecipeId)),
+    ])
+      ..where(recipeLinks.sourceRecipeId.equals(sourceId))
+      ..where(recipeLinks.ingredientId.equals(ingredientId))
+      ..where(recipes.deletedAt.isNull())
+      ..orderBy([OrderingTerm.asc(recipeLinks.sortOrder)]);
+
+    final rows = await query.get();
+    return rows.map((row) => row.readTable(recipes)).toList();
+  }
+
+  /// Get all ingredient→recipe links for a source recipe as a map
+  /// Returns Map<ingredientId, List<Recipe>>
+  Future<Map<String, List<Recipe>>> getIngredientLinksMap(String sourceId) async {
     final query = select(recipeLinks).join([
       innerJoin(recipes, recipes.id.equalsExp(recipeLinks.linkedRecipeId)),
     ])
@@ -511,11 +527,17 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
       ..where(recipes.deletedAt.isNull())
       ..orderBy([OrderingTerm.asc(recipeLinks.sortOrder)]);
 
-    return query.watch().map((rows) =>
-        rows.map((row) => row.readTable(recipes)).toList());
+    final rows = await query.get();
+    final map = <String, List<Recipe>>{};
+    for (final row in rows) {
+      final link = row.readTable(recipeLinks);
+      final recipe = row.readTable(recipes);
+      map.putIfAbsent(link.ingredientId, () => []).add(recipe);
+    }
+    return map;
   }
 
-  /// Get all linked recipes (non-stream)
+  /// Get all linked recipes for a source recipe (flat deduplicated list)
   Future<List<Recipe>> getLinkedRecipes(String sourceId) async {
     final query = select(recipeLinks).join([
       innerJoin(recipes, recipes.id.equalsExp(recipeLinks.linkedRecipeId)),
@@ -525,6 +547,20 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
       ..orderBy([OrderingTerm.asc(recipeLinks.sortOrder)]);
 
     final rows = await query.get();
-    return rows.map((row) => row.readTable(recipes)).toList();
+    final seen = <String>{};
+    final result = <Recipe>[];
+    for (final row in rows) {
+      final recipe = row.readTable(recipes);
+      if (seen.add(recipe.id)) result.add(recipe);
+    }
+    return result;
+  }
+
+  /// Get ingredient IDs that have links (for UI sorting)
+  Future<Set<String>> getLinkedIngredientIds(String sourceId) async {
+    final links = await (select(recipeLinks)
+      ..where((l) => l.sourceRecipeId.equals(sourceId)))
+        .get();
+    return links.map((l) => l.ingredientId).toSet();
   }
 }

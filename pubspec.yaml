@@ -70,15 +70,11 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#EEBE8D"
-  image: assets/images/icon.png
-  branding: assets/images/splash_branding.png
   android: true
   ios: true
   android_12:
     color: "#EEBE8D"
-    image: assets/images/splash_icon_android12.png
     icon_background_color: "#EEBE8D"
-    branding: assets/images/splash_branding.png
 
 flutter:
   uses-material-design: true
