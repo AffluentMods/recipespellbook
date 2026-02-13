@@ -41,6 +41,16 @@ class LocalizedUnits {
   String get unitKilogram => l10n.unitKilogram;
   String get unitKilogramAbbrev => l10n.unitKilogramAbbrev;
 
+  // ============ LENGTH UNITS ============
+
+  String get unitInch => l10n.unitInch;
+  String get unitInches => l10n.unitInches;
+  String get unitInchAbbrev => l10n.unitInchAbbrev;
+  String get unitCentimeter => l10n.unitCentimeter;
+  String get unitCentimeterAbbrev => l10n.unitCentimeterAbbrev;
+  String get unitMillimeter => l10n.unitMillimeter;
+  String get unitMillimeterAbbrev => l10n.unitMillimeterAbbrev;
+
   // ============ OTHER UNITS ============
 
   String get unitPinch => l10n.unitPinch;
@@ -65,39 +75,130 @@ class LocalizedUnits {
   String get unitFahrenheit => l10n.unitFahrenheit;
   String get unitCelsius => l10n.unitCelsius;
 
-  /// Format a unit for display based on amount (singular/plural)
-  String formatUnit(String unitKey, double amount) {
-    final isPlural = amount != 1.0;
+  // ============ CONVERT DIALOG ============
 
-    switch (unitKey.toLowerCase()) {
+  String get convertUnitsTitle => l10n.convertUnitsTitle;
+  String get convertMetricToImperial => l10n.convertMetricToImperial;
+  String get convertMetricToImperialDesc => l10n.convertMetricToImperialDesc;
+  String get convertImperialToMetric => l10n.convertImperialToMetric;
+  String get convertImperialToMetricDesc => l10n.convertImperialToMetricDesc;
+  String get convertResetToOriginal => l10n.convertResetToOriginal;
+
+  // ============ LOCALIZE ANY UNIT STRING ============
+
+  /// Takes a raw unit string (e.g. from recipe data or converter output)
+  /// and returns the localized display string with singular/plural handling.
+  ///
+  /// [rawUnit] is the English unit key (e.g. "cup", "fl oz", "g")
+  /// [amount] is the numeric amount for singular/plural (1.0 = singular)
+  ///
+  /// Falls back to the raw string if no localization mapping exists.
+  String localizeUnit(String rawUnit, [double amount = 1.0]) {
+    final isPlural = amount != 1.0;
+    final key = rawUnit.toLowerCase().trim();
+
+    switch (key) {
+    // Volume — full names
       case 'cup':
         return isPlural ? unitCups : unitCup;
+      case 'cups':
+        return unitCups;
+      case 'tablespoon':
       case 'tbsp':
         return unitTablespoonAbbrev;
+      case 'teaspoon':
       case 'tsp':
         return unitTeaspoonAbbrev;
-      case 'oz':
-        return unitOunceAbbrev;
-      case 'lb':
-        return unitPoundAbbrev;
-      case 'g':
-        return unitGramAbbrev;
-      case 'kg':
-        return unitKilogramAbbrev;
+      case 'fluid ounce':
+      case 'fl oz':
+        return unitFluidOunceAbbrev;
+      case 'pint':
+      case 'pt':
+        return unitPint;
+      case 'quart':
+      case 'qt':
+        return unitQuart;
+      case 'gallon':
+      case 'gal':
+        return unitGallon;
+      case 'milliliter':
       case 'ml':
         return unitMilliliterAbbrev;
+      case 'liter':
       case 'l':
         return unitLiterAbbrev;
+
+    // Weight — full names & abbreviations
+      case 'ounce':
+      case 'oz':
+        return unitOunceAbbrev;
+      case 'pound':
+      case 'lb':
+      case 'lbs':
+        return unitPoundAbbrev;
+      case 'gram':
+      case 'g':
+        return unitGramAbbrev;
+      case 'kilogram':
+      case 'kg':
+        return unitKilogramAbbrev;
+
+    // Length
+      case 'inch':
+      case 'in':
+        return isPlural ? unitInches : unitInch;
+      case 'inches':
+        return unitInches;
+      case 'centimeter':
+      case 'cm':
+        return unitCentimeterAbbrev;
+      case 'millimeter':
+      case 'mm':
+        return unitMillimeterAbbrev;
+
+    // Count units — with singular/plural
+      case 'pinch':
+        return unitPinch;
+      case 'dash':
+        return unitDash;
       case 'clove':
         return isPlural ? unitCloves : unitClove;
+      case 'cloves':
+        return unitCloves;
+      case 'head':
+        return unitHead;
+      case 'bunch':
+        return unitBunch;
+      case 'can':
+        return unitCan;
+      case 'package':
+      case 'pkg':
+        return unitPackage;
       case 'slice':
         return isPlural ? unitSlices : unitSlice;
+      case 'slices':
+        return unitSlices;
       case 'piece':
         return isPlural ? unitPieces : unitPiece;
+      case 'pieces':
+        return unitPieces;
+      case 'whole':
+        return unitWhole;
+      case 'large':
+        return unitLarge;
+      case 'medium':
+        return unitMedium;
+      case 'small':
+        return unitSmall;
+
       default:
-        return unitKey;
+        return rawUnit; // Unrecognized — pass through as-is
     }
   }
+
+  /// Format a unit for display based on amount (singular/plural)
+  /// Alias for [localizeUnit] for backward compatibility.
+  String formatUnit(String unitKey, double amount) => localizeUnit(unitKey, amount);
 
   /// Get all common units for a dropdown picker
   List<UnitOption> getVolumeUnits(MeasurementSystem system) {

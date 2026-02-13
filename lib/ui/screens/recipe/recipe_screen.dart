@@ -9,20 +9,18 @@ import '../../../database/daos/recipe_dao.dart' show RecipeLinkInfo;
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
-import '../../../services/recipe_print_service.dart';
-import '../../widgets/cooking_mode_screen.dart';
-import '../../widgets/font_size_control.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../../data/nutrition_data.dart';
 import '../../../data/allergen_data.dart';
 import '../../widgets/recipe_tags_display.dart';
 import '../../widgets/add_to_meal_plan_dialogue.dart';
-import '../../../services/shopping_list_generator.dart';
+import '../../widgets/add_to_shopping_list_sheet.dart';
 import '../../widgets/recipe_share_sheet.dart';
 import '../../../data/rpg/rpg_text.dart';
 import '../settings/nutrition_settings_screen.dart';
 import '../settings/ingredient_substitutions_screen.dart';
 import '../../widgets/nutrition_calculation_sheet.dart';
+import '../../../data/localized_units.dart';
 
 // ============ DISMISSED ALLERGY WARNINGS ============
 // Canonical provider is in allergy_settings_screen.dart — imported via:
@@ -217,12 +215,16 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   }
 
   void _showAddToShoppingSheet() {
-    launchShoppingListGenerator(
-      context,
-      ref,
-      recipeId: widget.recipeId,
-      recipeName: _recipe?.title ?? '',
-      scale: _scaleFactor,
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => AddIngredientsToShoppingSheet(
+        ingredients: _ingredients,
+        recipeName: _recipe?.title ?? '',
+        recipeId: widget.recipeId,
+        scaleFactor: _scaleFactor,
+      ),
     );
   }
 
@@ -317,9 +319,6 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           isNerdMode: isNerdMode,
           isTabbed: false,
           onToggleLayout: _toggleLayout,
-          ingredients: _ingredients,
-          steps: _steps,
-          scaleFactor: _scaleFactor,
         ),
         SliverToBoxAdapter(
           child: Padding(
@@ -453,9 +452,6 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           isNerdMode: isNerdMode,
           isTabbed: true,
           onToggleLayout: _toggleLayout,
-          ingredients: _ingredients,
-          steps: _steps,
-          scaleFactor: _scaleFactor,
         ),
         SliverToBoxAdapter(
           child: Padding(
@@ -868,6 +864,7 @@ class _ModernScaleConvertButtons extends StatelessWidget {
 
   void _showConvertDialog(BuildContext context) {
     final theme = Theme.of(context);
+    final units = LocalizedUnits.of(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -891,12 +888,12 @@ class _ModernScaleConvertButtons extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Text('Convert Units', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            Text(units.convertUnitsTitle, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             ListTile(
               leading: Icon(Icons.straighten, color: unitConversion == _UnitConversion.toImperial ? theme.colorScheme.tertiary : null),
-              title: const Text('Metric → Imperial'),
-              subtitle: const Text('ml→fl oz, g→oz, kg→lb'),
+              title: Text(units.convertMetricToImperial),
+              subtitle: Text(units.convertMetricToImperialDesc),
               trailing: unitConversion == _UnitConversion.toImperial ? Icon(Icons.check_circle, color: theme.colorScheme.tertiary) : null,
               onTap: () {
                 Navigator.pop(ctx);
@@ -905,8 +902,8 @@ class _ModernScaleConvertButtons extends StatelessWidget {
             ),
             ListTile(
               leading: Icon(Icons.square_foot, color: unitConversion == _UnitConversion.toMetric ? theme.colorScheme.tertiary : null),
-              title: const Text('Imperial → Metric'),
-              subtitle: const Text('cups→ml, oz→g, tsp→ml'),
+              title: Text(units.convertImperialToMetric),
+              subtitle: Text(units.convertImperialToMetricDesc),
               trailing: unitConversion == _UnitConversion.toMetric ? Icon(Icons.check_circle, color: theme.colorScheme.tertiary) : null,
               onTap: () {
                 Navigator.pop(ctx);
@@ -921,7 +918,7 @@ class _ModernScaleConvertButtons extends StatelessWidget {
                     Navigator.pop(ctx);
                     onConversionChanged(_UnitConversion.none);
                   },
-                  child: const Text('Reset to Original'),
+                  child: Text(units.convertResetToOriginal),
                 ),
               ),
             const SizedBox(height: 16),
@@ -1251,9 +1248,6 @@ class _RecipeAppBar extends StatelessWidget {
   final bool isNerdMode;
   final bool isTabbed;
   final VoidCallback? onToggleLayout;
-  final List<Ingredient> ingredients;
-  final List<Step> steps;
-  final double scaleFactor;
 
   const _RecipeAppBar({
     required this.recipe,
@@ -1263,9 +1257,6 @@ class _RecipeAppBar extends StatelessWidget {
     this.isNerdMode = false,
     this.isTabbed = false,
     this.onToggleLayout,
-    required this.ingredients,
-    required this.steps,
-    required this.scaleFactor,
   });
 
   @override
@@ -1375,9 +1366,6 @@ class _RecipeAppBar extends StatelessWidget {
               PopupMenuItem(value: 'layout', child: Row(children: [Icon(isTabbed ? Icons.view_agenda_outlined : Icons.tab_outlined), const SizedBox(width: 12), Text(isTabbed ? 'Stacked Layout' : 'Tabbed Layout')])),
               PopupMenuItem(value: 'pin', child: Row(children: [Icon(recipe.isPinned ? Icons.push_pin : Icons.push_pin_outlined), const SizedBox(width: 12), Text(recipe.isPinned ? l10n.recipeUnpin : l10n.recipePin)])),
               PopupMenuItem(value: 'duplicate', child: Row(children: [const Icon(Icons.copy), const SizedBox(width: 12), Text(l10n.recipeDuplicate)])),
-              PopupMenuItem(value: 'cook', child: Row(children: [const Icon(Icons.play_circle_outline), const SizedBox(width: 12), Text(l10n.startCooking)])),
-              PopupMenuItem(value: 'print', child: Row(children: [const Icon(Icons.print_outlined), const SizedBox(width: 12), Text(l10n.recipePrint)])),
-              PopupMenuItem(value: 'font_size', child: Row(children: [const Icon(Icons.text_fields), const SizedBox(width: 12), Text(l10n.fontSizeLabel)])),
               const PopupMenuDivider(),
               PopupMenuItem(value: 'delete', child: Row(children: [const Icon(Icons.delete, color: Colors.red), const SizedBox(width: 12), Text(l10n.actionDelete, style: const TextStyle(color: Colors.red))])),
             ],
@@ -1400,20 +1388,6 @@ class _RecipeAppBar extends StatelessWidget {
         break;
       case 'duplicate':
         _duplicateRecipe(context);
-        break;
-      case 'cook':
-        if (context.mounted) launchCookingMode(context, recipe.id);
-        break;
-      case 'print':
-        await RecipePrintService.printRecipe(
-          recipe: recipe,
-          ingredients: ingredients,
-          steps: steps,
-          scale: scaleFactor,
-        );
-        break;
-      case 'font_size':
-        if (context.mounted) showFontSizeSheet(context);
         break;
       case 'delete':
         _confirmDelete(context);
@@ -1534,6 +1508,12 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
       final converted = _UnitConverter.convert(amount, unit, unitConversion);
       amount = converted.amount;
       unit = converted.unit;
+    }
+
+    // Localize unit for display (singular/plural, translated)
+    if (unit.isNotEmpty) {
+      final numAmount = double.tryParse(amount) ?? 1.0;
+      unit = LocalizedUnits.of(context).localizeUnit(unit, numAmount);
     }
 
     // Check for allergens

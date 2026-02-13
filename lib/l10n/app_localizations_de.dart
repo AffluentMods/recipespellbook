@@ -1123,6 +1123,45 @@ class AppLocalizationsDe extends AppLocalizations {
   String get unitCelsius => '°C';
 
   @override
+  String get unitInch => 'Zoll';
+
+  @override
+  String get unitInches => 'Zoll';
+
+  @override
+  String get unitInchAbbrev => 'Zoll';
+
+  @override
+  String get unitCentimeter => 'Zentimeter';
+
+  @override
+  String get unitCentimeterAbbrev => 'cm';
+
+  @override
+  String get unitMillimeter => 'Millimeter';
+
+  @override
+  String get unitMillimeterAbbrev => 'mm';
+
+  @override
+  String get convertUnitsTitle => 'Einheiten umrechnen';
+
+  @override
+  String get convertMetricToImperial => 'Metrisch → Imperial';
+
+  @override
+  String get convertMetricToImperialDesc => 'ml → fl oz, g → oz, kg → lb';
+
+  @override
+  String get convertImperialToMetric => 'Imperial → Metrisch';
+
+  @override
+  String get convertImperialToMetricDesc => 'Tassen → ml, oz → g, TL → ml';
+
+  @override
+  String get convertResetToOriginal => 'Zurücksetzen';
+
+  @override
   String get settingsRecipeLayout => 'Rezept-Layout';
 
   @override

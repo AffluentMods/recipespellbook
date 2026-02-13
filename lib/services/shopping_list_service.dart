@@ -12,24 +12,7 @@ class ShoppingListService {
 
   ShoppingListService(this.db);
 
-  /// Get all items in a list grouped by category
-  Future<Map<String?, List<ShoppingListItem>>> getItemsGroupedByCategory(String listId) async {
-    final items = await (db.select(db.shoppingListItems)
-      ..where((t) => t.listId.equals(listId))
-      ..orderBy([
-            (t) => OrderingTerm(expression: t.shoppingCategoryId),
-            (t) => OrderingTerm(expression: t.name),
-      ]))
-        .get();
-
-    final grouped = <String?, List<ShoppingListItem>>{};
-    for (final item in items) {
-      grouped.putIfAbsent(item.shoppingCategoryId, () => []).add(item);
-    }
-    return grouped;
-  }
-
-  /// Export list as plain text
+  /// Export list as plain text (for sharing / pasting into other apps)
   Future<String> exportAsText(String listId) async {
     final list = await (db.select(db.shoppingLists)
       ..where((t) => t.id.equals(listId)))
@@ -37,7 +20,6 @@ class ShoppingListService {
 
     final items = await (db.select(db.shoppingListItems)
       ..where((t) => t.listId.equals(listId))
-      ..where((t) => t.isChecked.equals(false))
       ..orderBy([(t) => OrderingTerm(expression: t.name)]))
         .get();
 
@@ -46,18 +28,30 @@ class ShoppingListService {
     buffer.writeln('─' * 30);
     buffer.writeln();
 
-    for (final item in items) {
+    final unchecked = items.where((i) => !i.isChecked).toList();
+    final checked = items.where((i) => i.isChecked).toList();
+
+    for (final item in unchecked) {
       final qty = item.quantity != null ? '${item.quantity} ' : '';
       buffer.writeln('☐ $qty${item.name}');
     }
 
+    if (checked.isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln('✅ Completed');
+      for (final item in checked) {
+        final qty = item.quantity != null ? '${item.quantity} ' : '';
+        buffer.writeln('☑ $qty${item.name}');
+      }
+    }
+
     buffer.writeln();
-    buffer.writeln('Created with recipespellbook');
+    buffer.writeln('Created with Recipe Spellbook');
 
     return buffer.toString();
   }
 
-  /// Export list as JSON
+  /// Export list as JSON (for import into another Recipe Spellbook app)
   Future<Map<String, dynamic>> exportAsJson(String listId) async {
     final list = await (db.select(db.shoppingLists)
       ..where((t) => t.id.equals(listId)))
@@ -71,6 +65,7 @@ class ShoppingListService {
     return {
       'version': 1,
       'type': 'shopping_list',
+      'app': 'recipespellbook',
       'exportedAt': DateTime.now().toIso8601String(),
       'list': {
         'name': list.name,
@@ -80,12 +75,14 @@ class ShoppingListService {
           'unit': item.unit,
           'isChecked': item.isChecked,
           'note': item.note,
+          'shoppingCategoryId': item.shoppingCategoryId,
+          'recipeId': item.recipeId,
         }).toList(),
       },
     };
   }
 
-  /// Export as markdown
+  /// Export as markdown (good for viewing in any text editor / notes app)
   Future<String> exportAsMarkdown(String listId) async {
     final list = await (db.select(db.shoppingLists)
       ..where((t) => t.id.equals(listId)))
@@ -93,7 +90,10 @@ class ShoppingListService {
 
     final items = await (db.select(db.shoppingListItems)
       ..where((t) => t.listId.equals(listId))
-      ..orderBy([(t) => OrderingTerm(expression: t.name)]))
+      ..orderBy([
+            (t) => OrderingTerm(expression: t.shoppingCategoryId),
+            (t) => OrderingTerm(expression: t.name),
+      ]))
         .get();
 
     final buffer = StringBuffer();
@@ -103,16 +103,27 @@ class ShoppingListService {
     final unchecked = items.where((i) => !i.isChecked).toList();
     final checked = items.where((i) => i.isChecked).toList();
 
+    // Group unchecked by category
     if (unchecked.isNotEmpty) {
+      final grouped = <String, List<ShoppingListItem>>{};
       for (final item in unchecked) {
-        final qty = item.quantity != null ? '${item.quantity} ' : '';
-        buffer.writeln('- [ ] $qty${item.name}');
+        final cat = item.shoppingCategoryId ?? 'other';
+        grouped.putIfAbsent(cat, () => []).add(item);
+      }
+
+      for (final entry in grouped.entries) {
+        final catName = entry.key[0].toUpperCase() + entry.key.substring(1);
+        buffer.writeln('## $catName');
+        for (final item in entry.value) {
+          final qty = item.quantity != null ? '${item.quantity} ' : '';
+          buffer.writeln('- [ ] $qty${item.name}');
+        }
+        buffer.writeln();
       }
     }
 
     if (checked.isNotEmpty) {
-      buffer.writeln();
-      buffer.writeln('### Completed');
+      buffer.writeln('## ✅ Completed');
       for (final item in checked) {
         final qty = item.quantity != null ? '${item.quantity} ' : '';
         buffer.writeln('- [x] $qty${item.name}');
@@ -122,21 +133,7 @@ class ShoppingListService {
     return buffer.toString();
   }
 
-  /// Generate shareable link data (base64 encoded)
-  Future<String> generateShareableLink(String listId) async {
-    final json = await exportAsJson(listId);
-    final encoded = base64Url.encode(utf8.encode(jsonEncode(json)));
-    // In production, you'd use a proper URL shortener or deep link
-    return 'recipespellbook://import-list?data=$encoded';
-  }
-
-  /// Share list as text
-  Future<void> shareAsText(String listId) async {
-    final text = await exportAsText(listId);
-    await Share.share(text, subject: 'Shopping List');
-  }
-
-  /// Share list as file
+  /// Share list as file via OS share sheet
   Future<void> shareAsFile(String listId, {String format = 'json'}) async {
     final dir = await getTemporaryDirectory();
 
@@ -167,11 +164,17 @@ class ShoppingListService {
     );
   }
 
-  /// Import list from JSON
+  /// Share list as plain text via OS share sheet
+  Future<void> shareAsText(String listId) async {
+    final text = await exportAsText(listId);
+    await Share.share(text, subject: 'Shopping List');
+  }
+
+  /// Import list from JSON (exported by another Recipe Spellbook user)
   Future<ImportListResult> importFromJson(Map<String, dynamic> data) async {
     try {
       if (data['type'] != 'shopping_list') {
-        return ImportListResult(success: false, message: 'Invalid file type');
+        return ImportListResult(success: false, message: 'Invalid file type — expected a Recipe Spellbook shopping list export.');
       }
 
       final listData = data['list'] as Map<String, dynamic>;
@@ -194,6 +197,7 @@ class ShoppingListService {
           unit: drift.Value(item['unit'] as String?),
           isChecked: drift.Value(item['isChecked'] as bool? ?? false),
           note: drift.Value(item['note'] as String?),
+          shoppingCategoryId: drift.Value(item['shoppingCategoryId'] as String?),
         ));
       }
 
@@ -201,6 +205,7 @@ class ShoppingListService {
         success: true,
         message: 'Imported ${items.length} items',
         listId: newListId,
+        listName: '${listData['name']} (imported)',
       );
     } catch (e) {
       return ImportListResult(success: false, message: 'Import failed: $e');
@@ -212,6 +217,12 @@ class ImportListResult {
   final bool success;
   final String message;
   final String? listId;
+  final String? listName;
 
-  ImportListResult({required this.success, required this.message, this.listId});
+  ImportListResult({
+    required this.success,
+    required this.message,
+    this.listId,
+    this.listName,
+  });
 }

@@ -2209,6 +2209,84 @@ abstract class AppLocalizations {
   /// **'°C'**
   String get unitCelsius;
 
+  /// No description provided for @unitInch.
+  ///
+  /// In en, this message translates to:
+  /// **'inch'**
+  String get unitInch;
+
+  /// No description provided for @unitInches.
+  ///
+  /// In en, this message translates to:
+  /// **'inches'**
+  String get unitInches;
+
+  /// No description provided for @unitInchAbbrev.
+  ///
+  /// In en, this message translates to:
+  /// **'in'**
+  String get unitInchAbbrev;
+
+  /// No description provided for @unitCentimeter.
+  ///
+  /// In en, this message translates to:
+  /// **'centimeter'**
+  String get unitCentimeter;
+
+  /// No description provided for @unitCentimeterAbbrev.
+  ///
+  /// In en, this message translates to:
+  /// **'cm'**
+  String get unitCentimeterAbbrev;
+
+  /// No description provided for @unitMillimeter.
+  ///
+  /// In en, this message translates to:
+  /// **'millimeter'**
+  String get unitMillimeter;
+
+  /// No description provided for @unitMillimeterAbbrev.
+  ///
+  /// In en, this message translates to:
+  /// **'mm'**
+  String get unitMillimeterAbbrev;
+
+  /// No description provided for @convertUnitsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert Units'**
+  String get convertUnitsTitle;
+
+  /// No description provided for @convertMetricToImperial.
+  ///
+  /// In en, this message translates to:
+  /// **'Metric → Imperial'**
+  String get convertMetricToImperial;
+
+  /// No description provided for @convertMetricToImperialDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'ml → fl oz, g → oz, kg → lb'**
+  String get convertMetricToImperialDesc;
+
+  /// No description provided for @convertImperialToMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'Imperial → Metric'**
+  String get convertImperialToMetric;
+
+  /// No description provided for @convertImperialToMetricDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'cups → ml, oz → g, tsp → ml'**
+  String get convertImperialToMetricDesc;
+
+  /// No description provided for @convertResetToOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to Original'**
+  String get convertResetToOriginal;
+
   /// No description provided for @settingsRecipeLayout.
   ///
   /// In en, this message translates to:

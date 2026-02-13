@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:drift/drift.dart' as drift;
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
@@ -16,6 +18,7 @@ import '../../../database/daos/shopping_dao.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/ingredient_suggestion_service.dart';
 import '../../../services/grocery_service.dart';
+import '../../../services/shopping_list_service.dart';
 import '../../widgets/rpg/rpg_navigation_shell.dart';
 
 /// Provider to track shopping list item count (for nav badge)
@@ -411,6 +414,25 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 },
               ),
               ListTile(
+                leading: const Icon(Icons.upload_file),
+                title: const Text('Export list...'),
+                subtitle: const Text('Share as JSON, Markdown, or text'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showExportSheet(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.download),
+                title: const Text('Import list...'),
+                subtitle: const Text('From text, photo, or file'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showImportSheet(context);
+                },
+              ),
+              const Divider(),
+              ListTile(
                 leading: const Icon(Icons.category),
                 title: Text(l10n.settingsShoppingCategories),
                 onTap: () {
@@ -424,6 +446,235 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
         ),
       ),
     );
+  }
+
+  // ── Export Sheet ──────────────────────────────────────────────
+
+  void _showExportSheet(BuildContext context) {
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'Export "$_currentListName"',
+                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: Container(
+                  width: 44, height: 44,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Center(child: Text('{ }', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                ),
+                title: const Text('JSON file'),
+                subtitle: const Text('Share with another Recipe Spellbook user'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _exportAs('json');
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  width: 44, height: 44,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Icons.description_outlined, color: theme.colorScheme.primary),
+                ),
+                title: const Text('Markdown (.md)'),
+                subtitle: const Text('Formatted with checkboxes — good for notes apps'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _exportAs('md');
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  width: 44, height: 44,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Icons.text_snippet_outlined, color: theme.colorScheme.primary),
+                ),
+                title: const Text('Plain text (.txt)'),
+                subtitle: const Text('Simple list — works with any app'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _exportAs('txt');
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _exportAs(String format) async {
+    try {
+      final shoppingDao = ref.read(shoppingDaoProvider);
+      final service = ShoppingListService(shoppingDao.attachedDatabase);
+      await service.shareAsFile(_currentListId, format: format);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Export failed: $e')),
+        );
+      }
+    }
+  }
+
+  // ── Import Sheet ─────────────────────────────────────────────
+
+  void _showImportSheet(BuildContext context) {
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'Import shopping list',
+                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: Container(
+                  width: 44, height: 44,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Center(child: Text('{ }', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                ),
+                title: const Text('From JSON file'),
+                subtitle: const Text('Import a Recipe Spellbook export'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _importFromJsonFile();
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  width: 44, height: 44,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Icons.text_snippet_outlined, color: theme.colorScheme.primary),
+                ),
+                title: const Text('From text'),
+                subtitle: const Text('Paste or type a list of items'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showAddItemSheet(context);
+                  // The Add Items screen has its own Import button
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  width: 44, height: 44,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Icons.camera_alt_outlined, color: theme.colorScheme.primary),
+                ),
+                title: const Text('From photo'),
+                subtitle: const Text('OCR scan a handwritten or printed list'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showAddItemSheet(context);
+                  // The Add Items screen has its own Import button
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _importFromJsonFile() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        allowMultiple: false,
+      );
+
+      if (result == null || result.files.isEmpty) return;
+
+      final file = File(result.files.single.path!);
+      final content = await file.readAsString();
+      final data = jsonDecode(content) as Map<String, dynamic>;
+
+      final shoppingDao = ref.read(shoppingDaoProvider);
+      final service = ShoppingListService(shoppingDao.attachedDatabase);
+      final importResult = await service.importFromJson(data);
+
+      if (mounted) {
+        if (importResult.success && importResult.listId != null) {
+          setState(() {
+            _currentListId = importResult.listId!;
+            _currentListName = importResult.listName ?? 'Imported List';
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('✅ ${importResult.message}'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(importResult.message)),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Import failed: $e')),
+        );
+      }
+    }
   }
 
   void _showAddItemSheet(BuildContext context) {
