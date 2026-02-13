@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../ui/screens/import/import_guides_screen.dart';
 import '../ui/shell/app_shell.dart';
 import '../ui/screens/home/home_screen.dart';
 import '../ui/screens/shopping/shopping_screen.dart';
@@ -330,7 +331,11 @@ final router = GoRouter(
       name: 'trash',
       builder: (context, state) => const TrashScreen(),
     ),
-
+    GoRoute(
+      path: '/import/guides',
+      name: 'import-guides',
+      builder: (context, state) => const ImportGuidesScreen(),
+    ),
     // Recipe edit (existing recipe)
     GoRoute(
       path: '/recipe/:id/edit',
