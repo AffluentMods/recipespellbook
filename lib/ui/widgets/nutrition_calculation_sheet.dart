@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,10 +7,12 @@ import 'package:go_router/go_router.dart';
 import '../../data/nutrition_data.dart';
 import '../../database/database.dart';
 import '../../providers/database_provider.dart';
+import '../../database/daos/recipe_dao.dart' show RecipeLinkInfo;
 import '../../providers/usda_provider.dart';
 import '../../services/nutrition_calculator.dart';
 import '../../services/usda_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/default_recipe_images.dart';
 
 /// Shows the nutrition calculation process and results
 class NutritionCalculationSheet extends ConsumerStatefulWidget {
@@ -39,6 +42,7 @@ class NutritionCalculationSheet extends ConsumerStatefulWidget {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (context) => NutritionCalculationSheet(
         ingredients: ingredients,
         servings: servings,
@@ -63,6 +67,16 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
 
   // Track which ingredients user has manually edited
   final Set<String> _editedIngredients = {};
+
+  // Linked recipe selection & scaling
+  // Key = ingredient name, Value = selected recipe ID (null = use first)
+  final Map<String, String> _selectedLinkedRecipeId = {};
+  // Key = ingredient name, Value = scale (1.0 = full recipe)
+  final Map<String, double> _linkedRecipeScales = {};
+  // Key = ingredient name, Value = DB-stored default scale from RecipeLinkInfo
+  final Map<String, double> _dbDefaultScales = {};
+  // Key = ingredient name, Value = all linked recipe infos
+  Map<String, List<RecipeLinkInfo>> _allLinkedRecipes = {};
 
   // For manual entry mode
   late TabController _tabController;
@@ -205,37 +219,61 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
     final linksMap = await recipeDao.getIngredientLinksMap(widget.recipeId!);
 
     final linkedNutritionMap = <String, LinkedRecipeNutrition>{};
+    final allLinked = <String, List<RecipeLinkInfo>>{};
 
     for (final ingredient in widget.ingredients) {
-      final linkedRecipes = linksMap[ingredient.id];
-      if (linkedRecipes == null || linkedRecipes.isEmpty) continue;
+      final linkedInfos = linksMap[ingredient.id];
+      if (linkedInfos == null || linkedInfos.isEmpty) continue;
 
-      // Use the first linked recipe for nutrition calculation
-      final linkedRecipe = linkedRecipes.first;
+      // Store all linked recipes for this ingredient (for the picker UI)
+      allLinked[ingredient.name] = linkedInfos;
+
+      // Pick the user-selected recipe, or default to first
+      final selectedId = _selectedLinkedRecipeId[ingredient.name];
+      RecipeLinkInfo selectedLinkInfo;
+      if (selectedId != null) {
+        selectedLinkInfo = linkedInfos.where((l) => l.recipe.id == selectedId).firstOrNull
+            ?? linkedInfos.first;
+      } else {
+        selectedLinkInfo = linkedInfos.first;
+      }
+      final linkedRecipe = selectedLinkInfo.recipe;
 
       // Parse the linked recipe's stored nutrition JSON
-      NutritionData? perServingNutrition;
+      // NOTE: nutritionJson stores the TOTAL recipe nutrition (not per-serving),
+      // regardless of whether calculatedServings is present.
+      NutritionData? storedNutrition;
       if (linkedRecipe.nutritionJson != null) {
         try {
           final json = jsonDecode(linkedRecipe.nutritionJson!) as Map<String, dynamic>;
-          perServingNutrition = NutritionData.fromJson(json);
+          storedNutrition = NutritionData.fromJson(json);
         } catch (_) {
           // Malformed JSON — treat as no nutrition
         }
       }
 
-      // Parse the linked recipe's servings
+      // Parse the linked recipe's servings (for display only)
       final linkedServings = int.tryParse(
         RegExp(r'(\d+)').firstMatch(linkedRecipe.servings ?? '1')?.group(1) ?? '1',
       ) ?? 1;
 
+      // Get scale: user override > DB-stored scale > 1.0
+      final scale = _linkedRecipeScales[ingredient.name] ?? selectedLinkInfo.scale;
+
+      // Store DB default scale for dialog display
+      _dbDefaultScales[ingredient.name] = selectedLinkInfo.scale;
+
       linkedNutritionMap[ingredient.name] = LinkedRecipeNutrition(
         recipeId: linkedRecipe.id,
         recipeTitle: linkedRecipe.title,
-        perServingNutrition: perServingNutrition,
+        perServingNutrition: storedNutrition,
         servingCount: linkedServings,
+        scale: scale,
       );
     }
+
+    // Update state with all linked recipe options
+    _allLinkedRecipes = allLinked;
 
     return linkedNutritionMap;
   }
@@ -478,24 +516,33 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
   }
 
   Widget _buildValidationWarnings(ThemeData theme, List<String> warnings) {
+    final isDark = theme.brightness == Brightness.dark;
+    final warningColor = isDark ? theme.colorScheme.tertiary : Colors.orange;
+    final warningBg = isDark
+        ? theme.colorScheme.surfaceContainerHigh
+        : Colors.orange.withValues(alpha: 0.1);
+    final warningBorder = isDark
+        ? theme.colorScheme.tertiary.withValues(alpha: 0.4)
+        : Colors.orange.withValues(alpha: 0.3);
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.orange.withValues(alpha: 0.1),
+        color: warningBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+        border: Border.all(color: warningBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.warning_amber, color: Colors.orange, size: 20),
+              Icon(Icons.warning_amber, color: warningColor, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Nutrition Review',
                 style: theme.textTheme.titleSmall?.copyWith(
-                  color: Colors.orange.shade800,
+                  color: warningColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -507,7 +554,7 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
             child: Text(
               w,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: Colors.orange.shade900,
+                color: warningColor,
               ),
             ),
           )),
@@ -526,13 +573,19 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
 
   Widget _buildMatchSummary(ThemeData theme, AppLocalizations l10n, NutritionCalculationResult result) {
     final matchPercent = result.matchPercentage.round();
+    final isDark = theme.brightness == Brightness.dark;
     final color = matchPercent >= 80
-        ? Colors.green
+        ? (isDark ? const Color(0xFF66BB6A) : Colors.green)
         : matchPercent >= 50
-        ? Colors.orange
-        : Colors.red;
+        ? (isDark ? theme.colorScheme.tertiary : Colors.orange)
+        : (isDark ? const Color(0xFFEF5350) : Colors.red);
 
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -600,7 +653,12 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
   Widget _buildNutritionCard(ThemeData theme, AppLocalizations l10n, NutritionCalculationResult result) {
     final nutrition = result.totalNutrition;
 
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -610,22 +668,29 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
               children: [
                 Icon(Icons.local_fire_department, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
-                Text(
-                  l10n.nutritionTotalRecipe,
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                Flexible(
+                  child: Text(
+                    l10n.nutritionTotalRecipe,
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 if (widget.servings.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '${widget.servings} servings',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onPrimaryContainer,
+                  Flexible(
+                    flex: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${widget.servings} servings',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onPrimaryContainer,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),
@@ -777,6 +842,11 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
     final Color color;
     final String statusText;
 
+    final isDark = theme.brightness == Brightness.dark;
+    final greenColor = isDark ? const Color(0xFF66BB6A) : Colors.green;
+    final orangeColor = isDark ? theme.colorScheme.tertiary : Colors.orange;
+    final redColor = isDark ? const Color(0xFFEF5350) : Colors.red;
+
     if (isEdited) {
       icon = Icons.edit;
       color = theme.colorScheme.primary;
@@ -785,39 +855,47 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
       switch (item.matchStatus) {
         case MatchStatus.matched:
           icon = Icons.check_circle;
-          color = Colors.green;
+          color = greenColor;
           statusText = item.usdaFood?.description ?? item.matchDescription ?? '';
           break;
         case MatchStatus.uncertain:
           icon = Icons.help;
-          color = Colors.orange;
+          color = orangeColor;
           statusText = '${item.usdaFood?.description ?? item.matchDescription ?? ''} (${l10n.nutritionUncertain})';
           break;
         case MatchStatus.notFound:
           icon = Icons.cancel;
-          color = Colors.red;
+          color = redColor;
           statusText = l10n.nutritionNotFound;
           break;
         case MatchStatus.error:
           icon = Icons.error;
-          color = Colors.red;
+          color = redColor;
           statusText = item.errorMessage ?? l10n.errorGeneric;
           break;
         case MatchStatus.linkedRecipe:
           icon = Icons.check_circle;
-          color = Colors.green;
-          statusText = '${item.linkedRecipeTitle ?? 'Linked recipe'}';
+          color = greenColor;
+          final scale = _linkedRecipeScales[item.ingredient.name]
+              ?? _dbDefaultScales[item.ingredient.name];
+          final scaleText = (scale != null && scale != 1.0) ? ' (${scale}x)' : '';
+          statusText = '${item.linkedRecipeTitle ?? 'Linked recipe'}$scaleText';
           break;
         case MatchStatus.linkedRecipeMissing:
           icon = Icons.cancel;
-          color = Colors.red;
+          color = redColor;
           statusText = '${item.linkedRecipeTitle ?? 'Linked recipe'} — no nutrition data';
           break;
       }
     }
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2)),
+      ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
@@ -1078,49 +1156,57 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
   // ============ BOTTOM ACTIONS ============
 
   Widget _buildBottomActions(ThemeData theme, AppLocalizations l10n) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            if (!_isManualMode) ...[
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh,
+        border: Border(
+          top: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
+        ),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              if (!_isManualMode) ...[
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _calculateNutrition,
+                    child: Text(l10n.nutritionRecalculate),
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
               Expanded(
-                child: OutlinedButton(
-                  onPressed: _calculateNutrition,
-                  child: Text(l10n.nutritionRecalculate),
+                flex: _isManualMode ? 1 : 1,
+                child: FilledButton(
+                  onPressed: () {
+                    if (_isManualMode) {
+                      final manual = _getManualNutrition();
+                      if (manual != null) {
+                        Navigator.pop(context, manual);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.nutritionEnterAtLeastOne)),
+                        );
+                      }
+                    } else if (_result != null) {
+                      // Store TOTAL nutrition with calculatedServings metadata
+                      // so display can correctly scale when servings change
+                      final servingsCount = int.tryParse(
+                        RegExp(r'(\d+)').firstMatch(widget.servings)?.group(1) ?? '',
+                      ) ?? 1;
+                      final total = _result!.totalNutrition.copyWith(
+                        calculatedServings: servingsCount,
+                      );
+                      Navigator.pop(context, total);
+                    }
+                  },
+                  child: Text(l10n.nutritionSave),
                 ),
               ),
-              const SizedBox(width: 12),
             ],
-            Expanded(
-              flex: _isManualMode ? 1 : 1,
-              child: FilledButton(
-                onPressed: () {
-                  if (_isManualMode) {
-                    final manual = _getManualNutrition();
-                    if (manual != null) {
-                      Navigator.pop(context, manual);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.nutritionEnterAtLeastOne)),
-                      );
-                    }
-                  } else if (_result != null) {
-                    // Store TOTAL nutrition with calculatedServings metadata
-                    // so display can correctly scale when servings change
-                    final servingsCount = int.tryParse(
-                      RegExp(r'(\d+)').firstMatch(widget.servings)?.group(1) ?? '',
-                    ) ?? 1;
-                    final total = _result!.totalNutrition.copyWith(
-                      calculatedServings: servingsCount,
-                    );
-                    Navigator.pop(context, total);
-                  }
-                },
-                child: Text(l10n.nutritionSave),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -1171,67 +1257,39 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
   /// If the linked recipe has nutrition → show the nutrition summary.
   /// If missing → show a prompt to add nutrition to that recipe.
   void _showLinkedRecipeInfo(IngredientNutritionResult item) {
-    final theme = Theme.of(context);
-    final hasNutrition = item.matchStatus == MatchStatus.linkedRecipe;
+    final ingredientName = item.ingredient.name;
+    final allLinks = _allLinkedRecipes[ingredientName] ?? [];
+    final currentScale = _linkedRecipeScales[ingredientName]
+        ?? _dbDefaultScales[ingredientName]
+        ?? 1.0;
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(
-              hasNutrition ? Icons.check_circle : Icons.cancel,
-              color: hasNutrition ? Colors.green : Colors.red,
-              size: 24,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                item.linkedRecipeTitle ?? 'Linked Recipe',
-                style: theme.textTheme.titleMedium,
-              ),
-            ),
-          ],
-        ),
-        content: hasNutrition
-            ? Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Nutrition pulled from linked recipe:',
-              style: theme.textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 12),
-            if (item.nutrition != null) ...[
-              _linkedNutritionRow('Calories', '${item.nutrition!.calories?.round() ?? 0} kcal'),
-              _linkedNutritionRow('Protein', '${item.nutrition!.protein?.round() ?? 0}g'),
-              _linkedNutritionRow('Fat', '${item.nutrition!.fat?.round() ?? 0}g'),
-              _linkedNutritionRow('Carbs', '${item.nutrition!.carbohydrates?.round() ?? 0}g'),
-            ],
-          ],
-        )
-            : Text(
-          '${item.linkedRecipeTitle ?? 'This recipe'} doesn\'t have any saved nutrition data yet. '
-              'Open that recipe and calculate its nutrition first, then come back here to recalculate.',
-          style: theme.textTheme.bodyMedium,
-        ),
-        actions: [
-          if (!hasNutrition && item.linkedRecipeId != null)
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
-                Navigator.of(this.context).pop(); // Close nutrition sheet
-                this.context.push('/recipe/${item.linkedRecipeId}');
-              },
-              child: const Text('Open Recipe'),
-            ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(hasNutrition ? 'OK' : 'Close'),
-          ),
-        ],
-      ),
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      builder: (bottomSheetContext) {
+        return _LinkedRecipePickerSheet(
+          ingredientName: ingredientName,
+          allLinks: allLinks,
+          initialSelectedId: _selectedLinkedRecipeId[ingredientName] ?? item.linkedRecipeId,
+          initialScale: currentScale,
+          onApply: (selectedId, scale) {
+            setState(() {
+              if (selectedId != null) {
+                _selectedLinkedRecipeId[ingredientName] = selectedId;
+              }
+              _linkedRecipeScales[ingredientName] = scale;
+            });
+            _calculateNutrition();
+          },
+          onOpenRecipe: (recipeId) {
+            Navigator.of(bottomSheetContext).pop();
+            Navigator.of(this.context).pop(); // Close nutrition sheet
+            this.context.push('/recipe/$recipeId');
+          },
+        );
+      },
     );
   }
 
@@ -1525,8 +1583,13 @@ class _IngredientEditDialogState extends State<_IngredientEditDialog>
             itemCount: _results.length,
             itemBuilder: (context, index) {
               final food = _results[index];
-              return Card(
+              return Container(
                 margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2)),
+                ),
                 child: ListTile(
                   title: Text(
                     food.description,
@@ -1664,4 +1727,582 @@ class DailyValues {
   static const double vitaminA = 900;
   static const double vitaminC = 90;
   static const double vitaminD = 20;
+}
+
+// ============ LINKED RECIPE PICKER SHEET ============
+
+/// Full-screen bottom sheet for picking which linked recipe to use for nutrition
+/// and setting the scale factor. Supports live preview of nutrition values.
+class _LinkedRecipePickerSheet extends StatefulWidget {
+  final String ingredientName;
+  final List<RecipeLinkInfo> allLinks;
+  final String? initialSelectedId;
+  final double initialScale;
+  final void Function(String? selectedId, double scale) onApply;
+  final void Function(String recipeId) onOpenRecipe;
+
+  const _LinkedRecipePickerSheet({
+    required this.ingredientName,
+    required this.allLinks,
+    this.initialSelectedId,
+    required this.initialScale,
+    required this.onApply,
+    required this.onOpenRecipe,
+  });
+
+  @override
+  State<_LinkedRecipePickerSheet> createState() => _LinkedRecipePickerSheetState();
+}
+
+class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
+  late String? _selectedId;
+  late double _scale;
+  bool _isCustomScale = false;
+  final _customScaleController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedId = widget.initialSelectedId ?? widget.allLinks.firstOrNull?.recipe.id;
+    _scale = widget.initialScale;
+    // Check if initial scale is a preset
+    _isCustomScale = ![0.25, 0.5, 1.0, 2.0].contains(_scale);
+    if (_isCustomScale) {
+      _customScaleController.text = _scale.toString();
+    }
+  }
+
+  @override
+  void dispose() {
+    _customScaleController.dispose();
+    super.dispose();
+  }
+
+  /// Parse nutrition from a Recipe's nutritionJson string
+  NutritionData? _parseNutrition(Recipe recipe) {
+    if (recipe.nutritionJson == null) return null;
+    try {
+      final json = jsonDecode(recipe.nutritionJson!) as Map<String, dynamic>;
+      return NutritionData.fromJson(json);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Get the currently selected recipe
+  Recipe? get _selectedRecipe {
+    if (_selectedId == null) return null;
+    return widget.allLinks
+        .where((l) => l.recipe.id == _selectedId)
+        .firstOrNull?.recipe;
+  }
+
+  /// Get scaled nutrition for preview
+  NutritionData? get _scaledNutrition {
+    final recipe = _selectedRecipe;
+    if (recipe == null) return null;
+    final nutrition = _parseNutrition(recipe);
+    if (nutrition == null) return null;
+    return nutrition.scaled(_scale);
+  }
+
+  void _showCustomScaleInput() {
+    final theme = Theme.of(context);
+    _customScaleController.text = _scale.toString();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Custom Scale', style: theme.textTheme.titleMedium),
+        content: TextField(
+          controller: _customScaleController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+          ],
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: 'Scale multiplier',
+            hintText: 'e.g. 0.5, 1.5, 3.0',
+            suffixText: 'x',
+            helperText: '1.0 = full recipe',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final value = double.tryParse(_customScaleController.text);
+              if (value != null && value > 0) {
+                setState(() {
+                  _scale = value;
+                  _isCustomScale = true;
+                });
+                Navigator.pop(ctx);
+              }
+            },
+            child: const Text('Set'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final scaledNutrition = _scaledNutrition;
+    final selectedRecipe = _selectedRecipe;
+    final hasNutrition = scaledNutrition != null;
+    final hasMultipleLinks = widget.allLinks.length > 1;
+
+    return DraggableScrollableSheet(
+      initialChildSize: hasMultipleLinks ? 0.85 : 0.65,
+      minChildSize: 0.4,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (context, scrollController) {
+        return Column(
+          children: [
+            // ── Handle ──
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            // ── Header ──
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(Icons.link, color: theme.colorScheme.primary, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Linked Recipe',
+                          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          widget.ingredientName,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.outline,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // ── Scrollable content ──
+            Expanded(
+              child: ListView(
+                controller: scrollController,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                children: [
+                  // ── Recipe picker ──
+                  if (hasMultipleLinks) ...[
+                    Text(
+                      '${widget.allLinks.length} recipes linked',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.outline,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+
+                  ...widget.allLinks.map((linkInfo) {
+                    final recipe = linkInfo.recipe;
+                    final isSelected = recipe.id == _selectedId;
+                    final recipeNutrition = _parseNutrition(recipe);
+                    final hasImage = recipe.imagePath != null &&
+                        recipe.imagePath!.isNotEmpty &&
+                        File(recipe.imagePath!).existsSync();
+                    final defaultAsset = defaultRecipeImageAsset(recipe.id);
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(14),
+                          onTap: () => setState(() => _selectedId = recipe.id),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? theme.colorScheme.primaryContainer.withValues(alpha: isDark ? 0.4 : 0.6)
+                                  : (isDark
+                                  ? theme.colorScheme.surfaceContainerHigh
+                                  : theme.colorScheme.surfaceContainerLowest),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: isSelected
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                                width: isSelected ? 2 : 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                // Recipe image
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: SizedBox(
+                                    width: 52, height: 52,
+                                    child: hasImage
+                                        ? Image.file(
+                                      File(recipe.imagePath!),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => _placeholderImage(theme),
+                                    )
+                                        : defaultAsset != null
+                                        ? Image.asset(
+                                      defaultAsset,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => _placeholderImage(theme),
+                                    )
+                                        : _placeholderImage(theme),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                // Recipe info
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        recipe.title,
+                                        style: theme.textTheme.bodyMedium?.copyWith(
+                                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Row(
+                                        children: [
+                                          if (recipe.servings != null) ...[
+                                            Icon(Icons.restaurant, size: 12, color: theme.colorScheme.outline),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              recipe.servings!,
+                                              style: theme.textTheme.bodySmall?.copyWith(
+                                                color: theme.colorScheme.outline,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                          ],
+                                          if (recipeNutrition != null) ...[
+                                            Icon(Icons.local_fire_department, size: 12, color: theme.colorScheme.outline),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              '${recipeNutrition.calories?.round() ?? 0} cal total',
+                                              style: theme.textTheme.bodySmall?.copyWith(
+                                                color: theme.colorScheme.outline,
+                                              ),
+                                            ),
+                                          ] else
+                                            Text(
+                                              'No nutrition data',
+                                              style: theme.textTheme.bodySmall?.copyWith(
+                                                color: theme.colorScheme.error,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Selection indicator — only show when selected
+                                if (isSelected)
+                                  Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.primary,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.check,
+                                      color: theme.colorScheme.onPrimary,
+                                      size: 16,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+
+                  const SizedBox(height: 16),
+
+                  // ── Nutrition preview card ──
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? theme.colorScheme.surfaceContainerHigh
+                          : theme.colorScheme.surfaceContainerLowest,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.local_fire_department, size: 18, color: theme.colorScheme.primary),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Nutrition from ${selectedRecipe?.title ?? 'linked recipe'}',
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (_scale != 1.0)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  '${_scale}x',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        if (hasNutrition) ...[
+                          _nutritionPreviewRow(theme, 'Calories', '${scaledNutrition.calories?.round() ?? 0}', 'kcal'),
+                          _nutritionPreviewRow(theme, 'Protein', '${scaledNutrition.protein?.round() ?? 0}', 'g'),
+                          _nutritionPreviewRow(theme, 'Fat', '${scaledNutrition.fat?.round() ?? 0}', 'g'),
+                          _nutritionPreviewRow(theme, 'Carbs', '${scaledNutrition.carbohydrates?.round() ?? 0}', 'g'),
+                        ] else
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Row(
+                              children: [
+                                Icon(Icons.warning_amber_rounded, size: 16, color: theme.colorScheme.error),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'No nutrition data. Open the recipe to calculate it first.',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.error,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // ── Scale control ──
+                  Text(
+                    'Recipe scale',
+                    style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'How much of the linked recipe does this ingredient use?',
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Scale preset buttons + custom
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ...[0.25, 0.5, 1.0, 2.0].map((s) {
+                        final isActive = _scale == s && !_isCustomScale;
+                        return _scaleChip(theme, '${s}x', isActive, () {
+                          setState(() {
+                            _scale = s;
+                            _isCustomScale = false;
+                          });
+                        });
+                      }),
+                      _scaleChip(
+                        theme,
+                        _isCustomScale ? '${_scale}x' : 'Custom',
+                        _isCustomScale,
+                        _showCustomScaleInput,
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // ── Open recipe link ──
+                  if (selectedRecipe != null && !hasNutrition)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: OutlinedButton.icon(
+                        onPressed: () => widget.onOpenRecipe(selectedRecipe.id),
+                        icon: const Icon(Icons.open_in_new, size: 18),
+                        label: Text('Open ${selectedRecipe.title}'),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 44),
+                        ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+
+            // ── Bottom action bar ──
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.8)
+                    : theme.colorScheme.surface,
+                border: Border(
+                  top: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: FilledButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        widget.onApply(_selectedId, _scale);
+                      },
+                      child: const Text('Apply & Recalculate'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _placeholderImage(ThemeData theme) {
+    return Container(
+      color: theme.colorScheme.surfaceContainerHighest,
+      child: Icon(
+        Icons.restaurant_menu,
+        color: theme.colorScheme.outline.withValues(alpha: 0.5),
+        size: 24,
+      ),
+    );
+  }
+
+  Widget _nutritionPreviewRow(ThemeData theme, String label, String value, String unit) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(label, style: theme.textTheme.bodyMedium),
+          ),
+          Text(
+            value,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(width: 2),
+          Text(
+            unit,
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _scaleChip(ThemeData theme, String label, bool isActive, VoidCallback onTap) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: isActive
+                ? theme.colorScheme.primaryContainer
+                : theme.colorScheme.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isActive
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+              width: isActive ? 1.5 : 1,
+            ),
+          ),
+          child: Text(
+            label,
+            style: theme.textTheme.labelMedium?.copyWith(
+              fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+              color: isActive ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

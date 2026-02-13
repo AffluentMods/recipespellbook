@@ -8,9 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 //  ENUMS & DATA CLASSES
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-enum GroceryProvider { instacart, kroger, amazonFresh, walmart }
-
-enum IntegrationType { fullApi, deepLink }
+enum GroceryProvider { instacart, kroger }
 
 class GroceryProduct {
   final String id;
@@ -57,7 +55,7 @@ class CartAddResult {
 class GroceryService {
   static const _storage = FlutterSecureStorage();
 
-  // Secure storage keys
+  // Secure storage keys (user overrides)
   static const _instacartApiKey = 'grocery_instacart_api_key';
   static const _krogerClientId = 'grocery_kroger_client_id';
   static const _krogerClientSecret = 'grocery_kroger_client_secret';
@@ -65,35 +63,42 @@ class GroceryService {
   static const _krogerRefreshToken = 'grocery_kroger_refresh_token';
   static const _krogerLocationId = 'grocery_kroger_location_id';
 
-  /// What type of integration each provider supports
-  static IntegrationType integrationTypeFor(GroceryProvider p) {
-    switch (p) {
-      case GroceryProvider.instacart:
-      case GroceryProvider.kroger:
-        return IntegrationType.fullApi;
-      case GroceryProvider.amazonFresh:
-      case GroceryProvider.walmart:
-        return IntegrationType.deepLink;
-    }
+  // ────────────────────────────────────────────
+  //  EMBEDDED DEFAULTS (bundled with app)
+  //  User-configured keys in secure storage take priority.
+  //  Replace with production keys before release.
+  // ────────────────────────────────────────────
+  static const _defaultInstacartKey = '***REMOVED***';
+  static const _defaultKrogerClientId = '***REMOVED***';
+  static const _defaultKrogerSecret = '***REMOVED***';
+
+  // ────────────────────────────────────────────
+  //  KEY RETRIEVAL (secure storage → embedded default)
+  // ────────────────────────────────────────────
+
+  static Future<String> _getInstacartKey() async {
+    final stored = await _storage.read(key: _instacartApiKey);
+    return (stored != null && stored.isNotEmpty) ? stored : _defaultInstacartKey;
+  }
+
+  static Future<String> _getKrogerClientId() async {
+    final stored = await _storage.read(key: _krogerClientId);
+    return (stored != null && stored.isNotEmpty) ? stored : _defaultKrogerClientId;
+  }
+
+  static Future<String> _getKrogerSecret() async {
+    final stored = await _storage.read(key: _krogerClientSecret);
+    return (stored != null && stored.isNotEmpty) ? stored : _defaultKrogerSecret;
   }
 
   // ────────────────────────────────────────────
   //  CONFIGURATION
   // ────────────────────────────────────────────
 
-  /// Check if a full-API provider has credentials stored
+  /// Always returns true — embedded defaults are available for both providers.
+  /// If user has overridden keys in secure storage, those take priority.
   static Future<bool> isConfigured(GroceryProvider provider) async {
-    switch (provider) {
-      case GroceryProvider.instacart:
-        final key = await _storage.read(key: _instacartApiKey);
-        return key != null && key.isNotEmpty;
-      case GroceryProvider.kroger:
-        final id = await _storage.read(key: _krogerClientId);
-        return id != null && id.isNotEmpty;
-      case GroceryProvider.amazonFresh:
-      case GroceryProvider.walmart:
-        return false; // Always deep-link only
-    }
+    return true;
   }
 
   static Future<void> configureInstacart({required String apiKey}) async {
@@ -112,6 +117,10 @@ class GroceryService {
     await _storage.write(key: _krogerLocationId, value: locationId);
   }
 
+  static Future<String?> getKrogerLocationId() async {
+    return _storage.read(key: _krogerLocationId);
+  }
+
   static Future<void> disconnect(GroceryProvider provider) async {
     switch (provider) {
       case GroceryProvider.instacart:
@@ -128,8 +137,6 @@ class GroceryService {
           await _storage.delete(key: k);
         }
         break;
-      default:
-        break;
     }
   }
 
@@ -139,8 +146,7 @@ class GroceryService {
   // ────────────────────────────────────────────
 
   static Future<List<GroceryProduct>> instacartSearch(String query) async {
-    final apiKey = await _storage.read(key: _instacartApiKey);
-    if (apiKey == null) return [];
+    final apiKey = await _getInstacartKey();
 
     try {
       final uri = Uri.parse(
@@ -166,6 +172,7 @@ class GroceryService {
         ))
             .toList();
       }
+      debugPrint('Instacart search: ${resp.statusCode} ${resp.body}');
     } catch (e) {
       debugPrint('Instacart search error: $e');
     }
@@ -174,10 +181,7 @@ class GroceryService {
 
   static Future<CartAddResult> instacartAddToCart(
       List<Map<String, dynamic>> items) async {
-    final apiKey = await _storage.read(key: _instacartApiKey);
-    if (apiKey == null) {
-      return const CartAddResult(success: false, message: 'Not configured');
-    }
+    final apiKey = await _getInstacartKey();
     try {
       final lineItems = items
           .map((it) => {
@@ -220,9 +224,8 @@ class GroceryService {
   // ────────────────────────────────────────────
 
   static Future<bool> krogerAuthenticate() async {
-    final clientId = await _storage.read(key: _krogerClientId);
-    final clientSecret = await _storage.read(key: _krogerClientSecret);
-    if (clientId == null || clientSecret == null) return false;
+    final clientId = await _getKrogerClientId();
+    final clientSecret = await _getKrogerSecret();
     try {
       final creds = base64Encode(utf8.encode('$clientId:$clientSecret'));
       final resp = await http.post(
@@ -235,12 +238,15 @@ class GroceryService {
       );
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
-        await _storage.write(key: _krogerAccessToken, value: data['access_token']);
+        await _storage.write(
+            key: _krogerAccessToken, value: data['access_token']);
         if (data['refresh_token'] != null) {
-          await _storage.write(key: _krogerRefreshToken, value: data['refresh_token']);
+          await _storage.write(
+              key: _krogerRefreshToken, value: data['refresh_token']);
         }
         return true;
       }
+      debugPrint('Kroger auth: ${resp.statusCode} ${resp.body}');
     } catch (e) {
       debugPrint('Kroger auth error: $e');
     }
@@ -264,8 +270,9 @@ class GroceryService {
         'Accept': 'application/json',
       });
       if (resp.statusCode == 401) {
+        // Token expired — re-auth and retry once
         if (!await krogerAuthenticate()) return [];
-        return krogerSearch(query); // one retry
+        return krogerSearch(query);
       }
       if (resp.statusCode == 200) {
         final products = (jsonDecode(resp.body)['data'] as List?) ?? [];
@@ -308,7 +315,8 @@ class GroceryService {
     }
     try {
       final cartItems = items
-          .map((it) => {'upc': it['product_id'], 'quantity': it['quantity'] ?? 1})
+          .map((it) =>
+      {'upc': it['product_id'], 'quantity': it['quantity'] ?? 1})
           .toList();
       final resp = await http.put(
         Uri.parse('https://api.kroger.com/v1/cart/add'),
@@ -373,7 +381,70 @@ class GroceryService {
   }
 
   // ────────────────────────────────────────────
-  //  DEEP LINK FALLBACKS
+  //  INGREDIENT NAME CLEANING
+  // ────────────────────────────────────────────
+
+  /// Strips prep instructions, quantities, and fractions from ingredient text
+  /// to produce a clean search-friendly name.
+  ///
+  /// "guanciale, cut into ¼-inch batons" → "guanciale"
+  /// "2 cups all-purpose flour, sifted" → "all-purpose flour"
+  /// "fresh mozzarella, sliced thin" → "fresh mozzarella"
+  /// "1½ lb boneless chicken breast, cubed" → "boneless chicken breast"
+  static String cleanForSearch(String raw) {
+    var s = raw.trim();
+
+    // Remove leading quantities: "2 cups", "1½ lb", "¼ tsp", "1/2 cup"
+    s = s.replaceFirst(
+      RegExp(
+        r'^[\d½¼¾⅓⅔⅛⅜⅝⅞/.\s]+'  // digits, fractions, slashes, dots
+        r'(?:'
+        r'cups?|tbsp|tsp|tablespoons?|teaspoons?|'
+        r'oz|ounces?|lbs?|pounds?|'
+        r'g|kg|ml|l|liters?|litres?|'
+        r'cloves?|stalks?|heads?|bunche?s?|'
+        r'cans?|jars?|bottles?|packages?|pkgs?|'
+        r'pieces?|slices?|pinche?s?|dashes?|'
+        r'large|medium|small|whole'
+        r')?'
+        r'\s*',
+        caseSensitive: false,
+      ),
+      '',
+    );
+
+    // Cut at comma, semicolon, or parenthetical — prep instructions follow
+    // "guanciale, cut into batons" → "guanciale"
+    // "flour (sifted)" → "flour"
+    s = s.split(RegExp(r'[,;(]')).first.trim();
+
+    // Remove trailing prep phrases after common keywords
+    s = s.replaceFirst(
+      RegExp(
+        r'\s+(?:cut|diced|chopped|sliced|minced|grated|shredded|'
+        r'crushed|julienned|cubed|halved|quartered|'
+        r'peeled|deveined|trimmed|deboned|'
+        r'to taste|for garnish|for serving|as needed|'
+        r'at room temperature|room temp|softened|melted|'
+        r'freshly ground|freshly cracked|finely|thinly|roughly)\b.*',
+        caseSensitive: false,
+      ),
+      '',
+    );
+
+    // Collapse whitespace
+    s = s.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+    // If cleaning removed everything, fall back to first 3 words of original
+    if (s.isEmpty) {
+      s = raw.trim().split(RegExp(r'\s+')).take(3).join(' ');
+    }
+
+    return s;
+  }
+
+  // ────────────────────────────────────────────
+  //  DEEP LINK FALLBACKS (when API not configured)
   // ────────────────────────────────────────────
 
   static Uri deepLinkUrl(GroceryProvider provider, String query) {
@@ -382,43 +453,46 @@ class GroceryService {
       case GroceryProvider.instacart:
         return Uri.parse('https://www.instacart.com/store/search/$q');
       case GroceryProvider.kroger:
-        return Uri.parse('https://www.kroger.com/search?query=$q&searchType=default_search');
-      case GroceryProvider.amazonFresh:
-        return Uri.parse('https://www.amazon.com/s?k=$q&i=amazonfresh');
-      case GroceryProvider.walmart:
-        return Uri.parse('https://www.walmart.com/search?q=$q&cat_id=976759');
+        return Uri.parse(
+            'https://www.kroger.com/search?query=$q&searchType=default_search');
     }
   }
 
-  static final _storeHomepages = {
-    GroceryProvider.instacart: 'https://www.instacart.com/',
-    GroceryProvider.kroger: 'https://www.kroger.com/',
-    GroceryProvider.amazonFresh:
-    'https://www.amazon.com/alm/storefront?almBrandId=QW1hem9uIEZyZXNo',
-    GroceryProvider.walmart: 'https://www.walmart.com/grocery',
-  };
-
-  static Future<bool> openDeepLink(GroceryProvider provider, String query) async {
-    final url = deepLinkUrl(provider, query);
-    if (await canLaunchUrl(url)) {
-      return launchUrl(url, mode: LaunchMode.externalApplication);
+  static Uri storeHomepage(GroceryProvider provider) {
+    switch (provider) {
+      case GroceryProvider.instacart:
+        return Uri.parse('https://www.instacart.com/');
+      case GroceryProvider.kroger:
+        return Uri.parse('https://www.kroger.com/');
     }
-    return false;
+  }
+
+  static Future<bool> openDeepLink(
+      GroceryProvider provider, String query) async {
+    final url = deepLinkUrl(provider, cleanForSearch(query));
+    try {
+      return await launchUrl(url, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      debugPrint('Failed to open deep link: $e');
+      return false;
+    }
   }
 
   static Future<bool> openStore(GroceryProvider provider) async {
-    final url = Uri.parse(_storeHomepages[provider]!);
-    if (await canLaunchUrl(url)) {
-      return launchUrl(url, mode: LaunchMode.externalApplication);
+    final url = storeHomepage(provider);
+    try {
+      return await launchUrl(url, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      debugPrint('Failed to open store: $e');
+      return false;
     }
-    return false;
   }
 
   // ────────────────────────────────────────────
   //  HIGH-LEVEL: SEND TO STORE
   // ────────────────────────────────────────────
 
-  /// Best-effort send: uses API when configured, deep link otherwise.
+  /// Best-effort send: uses API when configured, deep link fallback otherwise.
   static Future<CartAddResult> sendToStore({
     required GroceryProvider provider,
     required List<String> ingredientNames,
@@ -436,7 +510,8 @@ class GroceryService {
         onProgress: onProgress,
       );
     }
-    return _sendViaDeepLink(provider: provider, ingredientNames: ingredientNames);
+    return _sendViaDeepLink(
+        provider: provider, ingredientNames: ingredientNames);
   }
 
   static Future<CartAddResult> _sendViaApi({
@@ -448,8 +523,8 @@ class GroceryService {
     final failed = <String>[];
 
     for (var i = 0; i < ingredientNames.length; i++) {
-      final name = ingredientNames[i];
-      onProgress?.call(i + 1, ingredientNames.length, name);
+      final name = cleanForSearch(ingredientNames[i]);
+      onProgress?.call(i + 1, ingredientNames.length, ingredientNames[i]);
 
       List<GroceryProduct> results;
       switch (provider) {
@@ -459,8 +534,6 @@ class GroceryService {
         case GroceryProvider.kroger:
           results = await krogerSearch(name);
           break;
-        default:
-          results = [];
       }
 
       if (results.isNotEmpty) {
@@ -492,8 +565,6 @@ class GroceryService {
       case GroceryProvider.kroger:
         result = await krogerAddToCart(matched);
         break;
-      default:
-        result = const CartAddResult(success: false);
     }
 
     return CartAddResult(
@@ -510,13 +581,13 @@ class GroceryService {
     required GroceryProvider provider,
     required List<String> ingredientNames,
   }) async {
-    final query = ingredientNames.take(3).join(' ');
-    await openDeepLink(provider, query);
+    final cleaned = ingredientNames.take(3).map(cleanForSearch).join(' ');
+    await openDeepLink(provider, cleaned);
     return CartAddResult(
       success: true,
       itemsAdded: ingredientNames.length,
       message: 'Opened in browser',
-      checkoutUrl: deepLinkUrl(provider, query).toString(),
+      checkoutUrl: deepLinkUrl(provider, cleaned).toString(),
     );
   }
 

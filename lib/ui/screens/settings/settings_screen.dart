@@ -5,6 +5,7 @@ import '../../../providers/settings_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../services/export_import_service.dart';
+import '../../../services/onboarding_service.dart';
 import '../../../data/app_enums.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'nutrition_settings_screen.dart';
@@ -384,35 +385,76 @@ class SettingsScreen extends ConsumerWidget {
 
   void _showResetConfirmation(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        icon: Icon(Icons.warning_amber_rounded, size: 48, color: Theme.of(context).colorScheme.error),
+        icon: Icon(Icons.warning_amber_rounded, size: 48, color: theme.colorScheme.error),
         title: Text(l10n.resetApp),
-        content: Text(l10n.resetAppWarning),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.resetAppWarning),
+            const SizedBox(height: 20),
+            Text('What would you like to delete?',
+                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            // Local Data option
+            _ResetOptionTile(
+              icon: Icons.phone_android,
+              title: 'Local Data',
+              subtitle: 'Recipes, cookbooks, meal plans, shopping lists on this device',
+              color: theme.colorScheme.error,
+              onTap: () {
+                Navigator.pop(context);
+                _showFinalResetConfirmation(context, ref, _ResetScope.local);
+              },
+            ),
+            const SizedBox(height: 8),
+            // Cloud Data option (disabled for now)
+            _ResetOptionTile(
+              icon: Icons.cloud_outlined,
+              title: 'Cloud Data',
+              subtitle: 'Coming soon — Cloud Sync not yet available',
+              color: theme.colorScheme.outline,
+              enabled: false,
+              onTap: () {},
+            ),
+            const SizedBox(height: 8),
+            // All Data option
+            _ResetOptionTile(
+              icon: Icons.delete_forever,
+              title: 'All Data',
+              subtitle: 'Local data and settings — complete fresh start',
+              color: theme.colorScheme.error,
+              onTap: () {
+                Navigator.pop(context);
+                _showFinalResetConfirmation(context, ref, _ResetScope.all);
+              },
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(l10n.actionCancel),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-              _showFinalResetConfirmation(context, ref);
-            },
-            child: Text(l10n.actionContinue),
           ),
         ],
       ),
     );
   }
 
-  void _showFinalResetConfirmation(BuildContext context, WidgetRef ref) {
+  void _showFinalResetConfirmation(BuildContext context, WidgetRef ref, _ResetScope scope) {
     final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
+
+    final scopeLabel = switch (scope) {
+      _ResetScope.local => 'local data',
+      _ResetScope.cloud => 'cloud data',
+      _ResetScope.all => 'all data and settings',
+    };
 
     showDialog(
       context: context,
@@ -422,6 +464,8 @@ class SettingsScreen extends ConsumerWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Text('This will permanently delete $scopeLabel. This cannot be undone.'),
+            const SizedBox(height: 16),
             Text(l10n.typeDeleteToConfirm, style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             TextField(
@@ -448,7 +492,7 @@ class SettingsScreen extends ConsumerWidget {
                 style: FilledButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.error,
                 ),
-                onPressed: isValid ? () => _performReset(context, ref, l10n) : null,
+                onPressed: isValid ? () => _performReset(context, ref, l10n, scope) : null,
                 child: Text(l10n.actionDelete),
               );
             },
@@ -458,25 +502,39 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _performReset(BuildContext context, WidgetRef ref, AppLocalizations l10n) async {
+  Future<void> _performReset(BuildContext context, WidgetRef ref, AppLocalizations l10n, _ResetScope scope) async {
     try {
       final db = ref.read(databaseProvider);
 
-      await db.customStatement('DELETE FROM recipes');
+      // Delete all recipe data (order matters for foreign key deps)
+      await db.customStatement('DELETE FROM recipe_links');
+      await db.customStatement('DELETE FROM recipe_tags');
+      await db.customStatement('DELETE FROM ingredient_usda_mappings');
+      await db.customStatement('DELETE FROM user_ingredient_mappings');
       await db.customStatement('DELETE FROM ingredients');
       await db.customStatement('DELETE FROM steps');
-      await db.customStatement('DELETE FROM cookbooks WHERE id != "starter"');
-      await db.customStatement('DELETE FROM shopping_lists WHERE id != "list_default"');
+      await db.customStatement('DELETE FROM recipes');
+      await db.customStatement("DELETE FROM cookbooks WHERE id != 'starter'");
+
+      // Delete shopping data
       await db.customStatement('DELETE FROM shopping_list_items');
+      await db.customStatement("DELETE FROM shopping_lists WHERE id != 'list_default'");
+
+      // Delete meal plans
       await db.customStatement('DELETE FROM meal_plans');
-      ref.read(settingsProvider.notifier).resetToDefaults();
+
+      // Delete custom taxonomy (keep system defaults)
+      await db.customStatement('DELETE FROM custom_courses');
+      await db.customStatement('DELETE FROM custom_categories');
+
+      if (scope == _ResetScope.all) {
+        // Also reset all settings to defaults
+        ref.read(settingsProvider.notifier).resetToDefaults();
+      }
 
       if (context.mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.appResetSuccess), backgroundColor: Colors.green),
-        );
-        context.go('/');
+        Navigator.pop(context); // Close the type-DELETE dialog
+        _showReimportDefaultsDialog(context, ref, l10n);
       }
     } catch (e) {
       if (context.mounted) {
@@ -486,6 +544,127 @@ class SettingsScreen extends ConsumerWidget {
         );
       }
     }
+  }
+
+  void _showReimportDefaultsDialog(BuildContext context, WidgetRef ref, AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Icons.auto_awesome, size: 48, color: Colors.amber),
+        title: const Text('Data Reset Complete'),
+        content: const Text(
+          'All data has been cleared successfully.\n\n'
+              'Would you like to import the 10 default starter recipes?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.appResetSuccess), backgroundColor: Colors.green),
+              );
+              context.go('/');
+            },
+            child: const Text('No thanks'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              _showLoadingSnackbar(context, 'Importing default recipes...');
+              try {
+                final db = ref.read(databaseProvider);
+                final count = await OnboardingService.seedDefaultRecipes(db);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('$count default recipes imported!'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                  context.go('/');
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Import failed: $e'), backgroundColor: Colors.red),
+                  );
+                  context.go('/');
+                }
+              }
+            },
+            child: const Text('Yes, add them'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============ RESET SCOPE ENUM ============
+
+enum _ResetScope { local, cloud, all }
+
+class _ResetOptionTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _ResetOptionTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    this.enabled = true,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(12),
+        child: Opacity(
+          opacity: enabled ? 1.0 : 0.4,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              border: Border.all(color: color.withValues(alpha: 0.3)),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, color: color, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600, color: color,
+                      )),
+                      Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      )),
+                    ],
+                  ),
+                ),
+                if (enabled)
+                  Icon(Icons.chevron_right, color: color, size: 20),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -182,6 +182,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   }
 
   void _showListSwitcher(BuildContext context) {
+    final theme = Theme.of(context);
     final shoppingDao = ref.read(shoppingDaoProvider);
 
     showModalBottomSheet(
@@ -189,19 +190,19 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: theme.colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 12),
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Text('Shopping Lists', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  Text('Shopping Lists', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                   const Spacer(),
                   TextButton.icon(
                     onPressed: () {
@@ -227,7 +228,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                     return ListTile(
                       leading: Icon(
                         isSelected ? Icons.check_circle : Icons.circle_outlined,
-                        color: isSelected ? Theme.of(context).colorScheme.primary : null,
+                        color: isSelected ? theme.colorScheme.primary : null,
                       ),
                       title: Text(list.name),
                       trailing: Row(
@@ -358,6 +359,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   }
 
   void _showMoreOptions(BuildContext context) {
+    final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.read(shoppingDaoProvider);
 
@@ -366,7 +368,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: theme.colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: SafeArea(
@@ -374,7 +376,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 8),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(Icons.check_box),
@@ -573,7 +575,6 @@ class _OrderOnlineButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
@@ -586,7 +587,7 @@ class _OrderOnlineButton extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 14),
             decoration: BoxDecoration(
               border: Border.all(
-                color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
+                color: theme.colorScheme.outlineVariant,
                 width: 1.5,
               ),
               borderRadius: BorderRadius.circular(30),
@@ -626,8 +627,7 @@ class _OrderOnlineButton extends StatelessWidget {
   }
 }
 
-/// Bottom sheet with grocery provider options — two-tier layout:
-/// Full API (Instacart, Kroger) + Deep link fallback (Amazon Fresh, Walmart)
+/// Bottom sheet with grocery provider options — Instacart & Kroger
 class _OrderOnlineSheet extends StatefulWidget {
   final List<String> itemNames;
   final int itemCount;
@@ -653,18 +653,6 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
       name: 'Kroger',
       color: Color(0xFF0056A4),
       subtitle: 'Kroger, Fred Meyer, Ralphs, Harris Teeter & more',
-    ),
-    GroceryProvider.amazonFresh: _ProviderDisplay(
-      emoji: '📦',
-      name: 'Amazon Fresh',
-      color: Color(0xFFFF9900),
-      subtitle: 'Opens Amazon Fresh in browser',
-    ),
-    GroceryProvider.walmart: _ProviderDisplay(
-      emoji: '🔵',
-      name: 'Walmart',
-      color: Color(0xFF0071CE),
-      subtitle: 'Opens Walmart Grocery in browser',
     ),
   };
 
@@ -701,7 +689,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -714,19 +702,18 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
               const SizedBox(height: 4),
               Text('${widget.itemCount} items',
                   style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: Colors.grey)),
+                      ?.copyWith(color: theme.colorScheme.outline)),
               const SizedBox(height: 20),
 
-              // Full API providers
+              // Providers
               _SectionLabel(
                 icon: Icons.bolt,
-                label: 'Direct cart integration',
+                label: 'Send to cart',
                 color: const Color(0xFFE88B00),
               ),
               const SizedBox(height: 8),
               _ProviderTile(
                 display: _providerData[GroceryProvider.instacart]!,
-                isApi: true,
                 isConfigured: _configured[GroceryProvider.instacart] ?? false,
                 isLoading: _loading,
                 onTap: () => _handleProvider(GroceryProvider.instacart),
@@ -734,34 +721,9 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
               const SizedBox(height: 8),
               _ProviderTile(
                 display: _providerData[GroceryProvider.kroger]!,
-                isApi: true,
                 isConfigured: _configured[GroceryProvider.kroger] ?? false,
                 isLoading: _loading,
                 onTap: () => _handleProvider(GroceryProvider.kroger),
-              ),
-              const SizedBox(height: 16),
-
-              // Deep link providers
-              _SectionLabel(
-                icon: Icons.open_in_new,
-                label: 'Open in browser',
-                color: Colors.grey,
-              ),
-              const SizedBox(height: 8),
-              _ProviderTile(
-                display: _providerData[GroceryProvider.amazonFresh]!,
-                isApi: false,
-                isConfigured: false,
-                isLoading: false,
-                onTap: () => _handleProvider(GroceryProvider.amazonFresh),
-              ),
-              const SizedBox(height: 8),
-              _ProviderTile(
-                display: _providerData[GroceryProvider.walmart]!,
-                isApi: false,
-                isConfigured: false,
-                isLoading: false,
-                onTap: () => _handleProvider(GroceryProvider.walmart),
               ),
               const SizedBox(height: 16),
 
@@ -775,11 +737,11 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.copy, size: 18, color: Colors.grey.shade600),
+                      Icon(Icons.copy, size: 18, color: theme.colorScheme.outline),
                       const SizedBox(width: 8),
                       Text('Copy list to clipboard',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: Colors.grey.shade600)),
+                          style: theme.textTheme.bodyMedium
+                              ?.copyWith(color: theme.colorScheme.outline)),
                     ],
                   ),
                 ),
@@ -794,31 +756,13 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
   Future<void> _handleProvider(GroceryProvider provider) async {
     Navigator.pop(context);
 
-    final isApi = GroceryService.integrationTypeFor(provider) ==
-        IntegrationType.fullApi;
     final configured = _configured[provider] ?? false;
 
-    if (isApi && configured) {
+    if (configured) {
+      // API configured — send items directly to cart
       _showSendingProgress(provider);
-    } else if (isApi && !configured) {
-      await Clipboard.setData(
-        ClipboardData(
-          text: GroceryService.formatForClipboard(widget.itemNames),
-        ),
-      );
-      await GroceryService.openStore(provider);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'List copied! Paste items into ${_providerData[provider]?.name ?? "store"}',
-            ),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
     } else {
+      // Not configured — copy list + open store website as fallback
       await Clipboard.setData(
         ClipboardData(
           text: GroceryService.formatForClipboard(widget.itemNames),
@@ -832,9 +776,11 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('List copied to clipboard!'),
+            content: Text(
+              'List copied! Paste items into ${_providerData[provider]?.name ?? "store"}',
+            ),
             behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 4),
           ),
         );
       }
@@ -872,7 +818,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
   }
 }
 
-/// Section header (e.g. "Direct cart integration", "Open in browser")
+/// Section header (e.g. "Send to cart")
 class _SectionLabel extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -916,14 +862,12 @@ class _ProviderDisplay {
 /// A single provider row in the bottom sheet
 class _ProviderTile extends StatelessWidget {
   final _ProviderDisplay display;
-  final bool isApi;
   final bool isConfigured;
   final bool isLoading;
   final VoidCallback onTap;
 
   const _ProviderTile({
     required this.display,
-    required this.isApi,
     required this.isConfigured,
     required this.isLoading,
     required this.onTap,
@@ -953,7 +897,7 @@ class _ProviderTile extends StatelessWidget {
                         Text(display.name,
                             style: theme.textTheme.titleSmall
                                 ?.copyWith(fontWeight: FontWeight.w600)),
-                        if (isApi && isConfigured) ...[
+                        if (isConfigured) ...[
                           const SizedBox(width: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -976,18 +920,20 @@ class _ProviderTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      display.subtitle,
+                      isConfigured
+                          ? 'Tap to add items directly to your cart'
+                          : display.subtitle,
                       style: theme.textTheme.bodySmall
-                          ?.copyWith(color: Colors.grey.shade600, fontSize: 11),
+                          ?.copyWith(color: theme.colorScheme.outline, fontSize: 11),
                     ),
                   ],
                 ),
               ),
-              if (isApi && isConfigured)
+              if (isConfigured)
                 Icon(Icons.add_shopping_cart, color: display.color, size: 20)
               else
                 Icon(Icons.open_in_new,
-                    color: Colors.grey.shade400, size: 18),
+                    color: theme.colorScheme.outline, size: 18),
             ],
           ),
         ),
@@ -1051,6 +997,8 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       content: Column(
@@ -1076,14 +1024,14 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
             const SizedBox(height: 8),
             Text(
               '$_current of $_total items',
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
             ),
             if (_currentItem.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
                 _currentItem,
                 style: theme.textTheme.bodySmall
-                    ?.copyWith(color: Colors.grey.shade500, fontSize: 11),
+                    ?.copyWith(color: theme.colorScheme.outline.withValues(alpha: 0.7), fontSize: 11),
                 overflow: TextOverflow.ellipsis,
               ),
             ],
@@ -1108,7 +1056,7 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
               _result?.success == true
                   ? '${_result!.itemsAdded} items in your ${widget.providerName} cart'
                   : '${_result?.itemsAdded ?? 0} added, ${_result?.itemsFailed ?? 0} not found',
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
               textAlign: TextAlign.center,
             ),
             if (_result?.failedItems.isNotEmpty == true) ...[
@@ -1116,15 +1064,19 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.1),
+                  color: isDark
+                      ? theme.colorScheme.tertiary.withValues(alpha: 0.15)
+                      : Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 constraints: const BoxConstraints(maxHeight: 100),
                 child: SingleChildScrollView(
                   child: Text(
                     'Not found: ${_result!.failedItems.join(", ")}',
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(fontSize: 11, color: Colors.orange.shade700),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontSize: 11,
+                      color: isDark ? theme.colorScheme.tertiary : Colors.orange.shade700,
+                    ),
                   ),
                 ),
               ),
@@ -1238,16 +1190,12 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
   }
 
   /// Aggressively re-request focus and force the soft keyboard open.
-  /// Uses multiple retries with increasing delays because Android/iOS
-  /// don't always honour a single requestFocus after returning from
-  /// another app or the task switcher.
   void _ensureKeyboardVisible() {
     const delays = [100, 250, 500];
     for (final ms in delays) {
       Future.delayed(Duration(milliseconds: ms), () {
         if (!mounted) return;
         _focusNode.requestFocus();
-        // Explicitly tell the platform to show the soft keyboard
         SystemChannels.textInput.invokeMethod('TextInput.show');
       });
     }
@@ -1620,7 +1568,6 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     }
     final shoppingDao = ref.read(shoppingDaoProvider);
 
-    // Update item in database by finding it by name
     shoppingDao.getItemsForList(widget.listId).then((items) {
       final match = items.where((i) => i.name == oldName).firstOrNull;
       if (match != null) {
@@ -1639,7 +1586,6 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
   void _removeRecentItem(int index, String itemName) {
     final shoppingDao = ref.read(shoppingDaoProvider);
 
-    // Delete from database by finding the matching item
     shoppingDao.getItemsForList(widget.listId).then((items) {
       final match = items.where((i) => i.name == itemName).firstOrNull;
       if (match != null) shoppingDao.deleteItem(match.id);
@@ -1672,7 +1618,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
               Container(
                 width: 40, height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -1803,7 +1749,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
               Container(
                 width: 40, height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -1847,7 +1793,6 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     }
     if (image == null) return;
 
-    // Show a loading indicator
     if (mounted) {
       showDialog(
         context: context,
@@ -1862,7 +1807,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
       final recognized = await recognizer.processImage(inputImage);
       await recognizer.close();
 
-      if (mounted) Navigator.pop(context); // dismiss loading
+      if (mounted) Navigator.pop(context);
 
       final text = recognized.text;
       if (text.trim().isEmpty) {
@@ -1876,7 +1821,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
 
       _showOcrPreview(text);
     } catch (e) {
-      if (mounted) Navigator.pop(context); // dismiss loading
+      if (mounted) Navigator.pop(context);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error reading image: $e')),
@@ -1957,12 +1902,10 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     );
   }
 
-  /// Parse raw text into individual ingredient lines
   List<String> _parseTextToLines(String rawText) {
     return rawText
         .split(RegExp(r'[\n\r]+'))
         .map((line) => line.trim())
-    // Remove common list prefixes: bullets, numbers, dashes
         .map((line) => line.replaceFirst(RegExp(r'^[\-\•\*\→\>]\s*'), ''))
         .map((line) => line.replaceFirst(RegExp(r'^\d+[\.\)]\s*'), ''))
         .map((line) => line.replaceFirst(RegExp(r'^[☐☑✓✔]\s*'), ''))
@@ -1971,7 +1914,6 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
         .toList();
   }
 
-  /// Process text import (from paste dialog)
   void _processImportedLines(String rawText) {
     final lines = _parseTextToLines(rawText);
     if (lines.isEmpty) {
@@ -1983,7 +1925,6 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     _showOcrPreview(rawText);
   }
 
-  /// Bulk-add items to the shopping list
   void _bulkAddItems(List<String> items) {
     if (items.isEmpty) return;
 
@@ -2188,145 +2129,60 @@ class _SuggestionTile extends StatelessWidget {
     if (n.contains('cheese') || n.contains('cheddar') || n.contains('mozzarella') || n.contains('parmesan') || n.contains('gouda') || n.contains('brie') || n.contains('feta') || n.contains('ricotta') || n.contains('gruyere')) return '🧀';
     if (n.contains('yogurt') || n.contains('kefir')) return '🫙';
     if (n.contains('milk') || n.contains('cream') || n.contains('half and half') || n.contains('buttermilk') || n.contains('whey')) return '🥛';
-    if (n.contains('ice cream') || n.contains('gelato') || n.contains('sorbet') || n.contains('sherbet') || n.contains('frozen yogurt')) return '🍨';
-    if (n.contains('apple') && !n.contains('pineapple')) return '🍎';
-    if (n.contains('banana') || n.contains('plantain')) return '🍌';
-    if (n.contains('orange') && !n.contains('chicken')) return '🍊';
-    if (n.contains('lemon')) return '🍋';
-    if (n.contains('lime') && !n.contains('limestone')) return '🍋';
-    if (n.contains('grape') && !n.contains('grapefruit')) return '🍇';
-    if (n.contains('grapefruit')) return '🍊';
-    if (n.contains('strawberr')) return '🍓';
-    if (n.contains('blueberr') || n.contains('blackberr') || n.contains('raspberr') || n.contains('cranberr') || n.contains('boysenberr') || n.contains('berr')) return '🫐';
-    if (n.contains('cherry') || n.contains('cherries')) return '🍒';
-    if (n.contains('peach') || n.contains('nectarine') || n.contains('apricot')) return '🍑';
-    if (n.contains('pear')) return '🍐';
-    if (n.contains('pineapple')) return '🍍';
-    if (n.contains('watermelon') || n.contains('melon') || n.contains('cantaloupe') || n.contains('honeydew')) return '🍈';
-    if (n.contains('mango') || n.contains('papaya') || n.contains('guava') || n.contains('passion fruit') || n.contains('dragon fruit') || n.contains('lychee') || n.contains('kiwi') || n.contains('fig') || n.contains('date') || n.contains('persimmon') || n.contains('pomegranate')) return '🥭';
-    if (n.contains('coconut')) return '🥥';
-    if (n.contains('avocado')) return '🥑';
-    if (n.contains('tomato')) return '🍅';
-    if (n.contains('potato') && !n.contains('sweet potato')) return '🥔';
-    if (n.contains('sweet potato') || n.contains('yam')) return '🍠';
-    if (n.contains('corn') && !n.contains('corned') && !n.contains('cornish') && !n.contains('acorn')) return '🌽';
-    if (n.contains('carrot')) return '🥕';
-    if (n.contains('broccoli')) return '🥦';
-    if (n.contains('lettuce') || n.contains('salad') || n.contains('greens') || n.contains('arugula') || n.contains('spinach') || n.contains('kale') || n.contains('chard') || n.contains('romaine')) return '🥬';
-    if (n.contains('cucumber') || n.contains('pickle') || n.contains('gherkin')) return '🥒';
-    if (n.contains('pepper') && !n.contains('peppercorn') && !n.contains('dr pepper')) return '🌶️';
-    if (n.contains('onion') || n.contains('shallot') || n.contains('scallion') || n.contains('leek') || n.contains('chive')) return '🧅';
-    if (n.contains('garlic')) return '🧄';
-    if (n.contains('mushroom')) return '🍄';
-    if (n.contains('eggplant') || n.contains('aubergine')) return '🍆';
-    if (n.contains('pumpkin') || n.contains('squash') || n.contains('zucchini') || n.contains('gourd')) return '🎃';
-    if (n.contains('bean') || n.contains('lentil') || n.contains('chickpea') || n.contains('pea') && !n.contains('peach') && !n.contains('peanut') && !n.contains('pear')) return '🫘';
-    if (n.contains('cabbage') || n.contains('coleslaw') || n.contains('sauerkraut')) return '🥬';
-    if (n.contains('celery') || n.contains('asparagus') || n.contains('artichoke') || n.contains('beet') || n.contains('turnip') || n.contains('radish') || n.contains('parsnip') || n.contains('fennel') || n.contains('jicama')) return '🥬';
-    if (n.contains('steak') || n.contains('ribeye') || n.contains('sirloin') || n.contains('filet') || n.contains('tenderloin') || n.contains('brisket') || n.contains('t-bone') || n.contains('porterhouse')) return '🥩';
-    if (n.contains('bacon') || n.contains('pancetta')) return '🥓';
-    if (n.contains('sausage') || n.contains('bratwurst') || n.contains('kielbasa') || n.contains('frankfurter') || n.contains('hot dog') || n.contains('chorizo') || n.contains('andouille') || n.contains('salami') || n.contains('pepperoni')) return '🌭';
-    if (n.contains('ham') && !n.contains('hamburger') && !n.contains('chamomile')) return '🍖';
-    if (n.contains('rib') && !n.contains('ribbon')) return '🍖';
     if (n.contains('chicken') || n.contains('poultry')) return '🍗';
-    if (n.contains('turkey')) return '🦃';
-    if (n.contains('duck')) return '🦆';
-    if (n.contains('beef') || n.contains('ground beef') || n.contains('hamburger') || n.contains('veal') || n.contains('venison') || n.contains('bison') || n.contains('lamb') || n.contains('goat meat') || n.contains('caribou') || n.contains('moose') || n.contains('elk')) return '🥩';
-    if (n.contains('pork') || n.contains('pulled pork') || n.contains('carnitas')) return '🥩';
-    if (n.contains('salmon')) return '🐟';
-    if (n.contains('tuna')) return '🐟';
+    if (n.contains('beef') || n.contains('steak') || n.contains('ground beef')) return '🥩';
+    if (n.contains('pork') || n.contains('bacon') || n.contains('ham')) return '🥓';
+    if (n.contains('fish') || n.contains('salmon') || n.contains('tuna') || n.contains('cod') || n.contains('tilapia')) return '🐟';
     if (n.contains('shrimp') || n.contains('prawn')) return '🦐';
-    if (n.contains('crab')) return '🦀';
-    if (n.contains('lobster')) return '🦞';
-    if (n.contains('oyster') || n.contains('mussel') || n.contains('clam') || n.contains('scallop')) return '🦪';
-    if (n.contains('squid') || n.contains('calamari') || n.contains('octopus')) return '🦑';
-    if (n.contains('fish') || n.contains('cod') || n.contains('tilapia') || n.contains('halibut') || n.contains('bass') || n.contains('trout') || n.contains('catfish') || n.contains('mahi') || n.contains('swordfish') || n.contains('anchov') || n.contains('sardine') || n.contains('herring') || n.contains('mackerel')) return '🐟';
-    if (n.contains('bread') || n.contains('toast') || n.contains('baguette') || n.contains('ciabatta') || n.contains('sourdough') || n.contains('brioche') || n.contains('naan') || n.contains('pita') || n.contains('focaccia') || n.contains('tortilla') || n.contains('flatbread')) return '🍞';
-    if (n.contains('croissant') || n.contains('pastry') || n.contains('danish')) return '🥐';
-    if (n.contains('bagel')) return '🥯';
-    if (n.contains('pretzel')) return '🥨';
-    if (n.contains('waffle') || n.contains('pancake')) return '🧇';
-    if (n.contains('muffin') || n.contains('cupcake')) return '🧁';
-    if (n.contains('cake') && !n.contains('pancake')) return '🎂';
-    if (n.contains('cookie') || n.contains('biscuit')) return '🍪';
-    if (n.contains('pie') && !n.contains('spice')) return '🥧';
-    if (n.contains('donut') || n.contains('doughnut')) return '🍩';
-    if (n.contains('rice') && !n.contains('price') && !n.contains('licorice')) return '🍚';
-    if (n.contains('pasta') || n.contains('spaghetti') || n.contains('noodle') || n.contains('macaroni') || n.contains('penne') || n.contains('fettuccine') || n.contains('linguine') || n.contains('ravioli') || n.contains('lasagna') || n.contains('ramen') || n.contains('udon') || n.contains('orzo')) return '🍝';
-    if (n.contains('flour') || n.contains('wheat') || n.contains('oat') || n.contains('barley') || n.contains('quinoa') || n.contains('couscous') || n.contains('bulgur') || n.contains('millet') || n.contains('farro') || n.contains('cornmeal') || n.contains('polenta') || n.contains('grits')) return '🌾';
-    if (n.contains('cereal') || n.contains('granola')) return '🥣';
-    if (n.contains('peanut')) return '🥜';
-    if (n.contains('almond') || n.contains('walnut') || n.contains('pecan') || n.contains('cashew') || n.contains('pistachio') || n.contains('hazelnut') || n.contains('macadamia') || n.contains('chestnut') || n.contains('brazil nut') || n.contains('pine nut')) return '🌰';
-    if (n.contains('seed') || n.contains('sesame') || n.contains('sunflower') || n.contains('flax') || n.contains('chia') || n.contains('hemp seed') || n.contains('poppy')) return '🌻';
-    if (n.contains('salt') && !n.contains('malt')) return '🧂';
-    if (n.contains('cinnamon') || n.contains('nutmeg') || n.contains('clove') || n.contains('allspice') || n.contains('cardamom') || n.contains('ginger') && !n.contains('ginger ale')) return '🫚';
-    if (n.contains('vanilla')) return '🌸';
-    if (n.contains('herb') || n.contains('basil') || n.contains('oregano') || n.contains('thyme') || n.contains('rosemary') || n.contains('sage') || n.contains('cilantro') || n.contains('parsley') || n.contains('dill') || n.contains('mint') || n.contains('tarragon') || n.contains('bay leaf') || n.contains('marjoram') || n.contains('chervil')) return '🌿';
-    if (n.contains('spice') || n.contains('cumin') || n.contains('turmeric') || n.contains('paprika') || n.contains('curry') || n.contains('chili powder') || n.contains('cayenne') || n.contains('saffron') || n.contains('coriander') || n.contains('adobo') || n.contains('seasoning') || n.contains('rub') || n.contains('five spice') || n.contains('garam masala')) return '✨';
-    if (n.contains('pepper') && (n.contains('black') || n.contains('white') || n.contains('peppercorn') || n.contains('ground pepper'))) return '🫙';
-    if (n.contains('ketchup') || n.contains('catsup')) return '🍅';
-    if (n.contains('mustard')) return '🟡';
-    if (n.contains('mayonnaise') || n.contains('mayo')) return '🫙';
-    if (n.contains('hot sauce') || n.contains('sriracha') || n.contains('tabasco') || n.contains('buffalo sauce')) return '🌶️';
-    if (n.contains('soy sauce') || n.contains('tamari') || n.contains('teriyaki') || n.contains('fish sauce') || n.contains('oyster sauce') || n.contains('hoisin') || n.contains('worcestershire')) return '🫗';
-    if (n.contains('bbq') || n.contains('barbecue')) return '🔥';
-    if (n.contains('salsa') || n.contains('pico')) return '🫙';
-    if (n.contains('sauce') || n.contains('a1') || n.contains('steak sauce') || n.contains('marinara') || n.contains('alfredo') || n.contains('pesto') || n.contains('gravy') || n.contains('dressing') || n.contains('vinaigrette')) return '🫗';
-    if (n.contains('olive oil') || n.contains('oil') && !n.contains('foil')) return '🫒';
-    if (n.contains('vinegar') || n.contains('balsamic')) return '🍶';
-    if (n.contains('sugar') || n.contains('sweetener') || n.contains('stevia') || n.contains('splenda')) return '🍬';
-    if (n.contains('honey')) return '🍯';
-    if (n.contains('maple') || n.contains('syrup') || n.contains('molasses') || n.contains('agave')) return '🍁';
-    if (n.contains('chocolate') || n.contains('cocoa') || n.contains('cacao')) return '🍫';
-    if (n.contains('candy') || n.contains('caramel') || n.contains('toffee') || n.contains('marshmallow') || n.contains('gummy')) return '🍬';
-    if (n.contains('jam') || n.contains('jelly') || n.contains('preserves') || n.contains('marmalade')) return '🍇';
-    if (n.contains('baking powder') || n.contains('baking soda') || n.contains('yeast') || n.contains('cornstarch') || n.contains('gelatin') || n.contains('pectin')) return '🧁';
-    if (n.contains('coffee') || n.contains('espresso') || n.contains('cappuccino') || n.contains('latte')) return '☕';
-    if (n.contains('tea') && !n.contains('steak') && !n.contains('steam')) return '🍵';
+    if (n.contains('rice')) return '🍚';
+    if (n.contains('pasta') || n.contains('spaghetti') || n.contains('noodle')) return '🍝';
+    if (n.contains('bread') || n.contains('toast') || n.contains('tortilla')) return '🍞';
+    if (n.contains('flour') || n.contains('wheat') || n.contains('oat')) return '🌾';
+    if (n.contains('tomato')) return '🍅';
+    if (n.contains('onion') || n.contains('shallot')) return '🧅';
+    if (n.contains('garlic')) return '🧄';
+    if (n.contains('pepper') && !n.contains('peppercorn')) return '🌶️';
+    if (n.contains('carrot')) return '🥕';
+    if (n.contains('potato') && !n.contains('sweet potato')) return '🥔';
+    if (n.contains('lettuce') || n.contains('spinach') || n.contains('kale')) return '🥬';
+    if (n.contains('apple') && !n.contains('pineapple')) return '🍎';
+    if (n.contains('banana')) return '🍌';
+    if (n.contains('lemon') || n.contains('lime')) return '🍋';
+    if (n.contains('orange')) return '🍊';
+    if (n.contains('avocado')) return '🥑';
+    if (n.contains('mushroom')) return '🍄';
+    if (n.contains('corn') && !n.contains('corned')) return '🌽';
+    if (n.contains('broccoli')) return '🥦';
+    if (n.contains('cucumber')) return '🥒';
+    if (n.contains('salt')) return '🧂';
+    if (n.contains('oil') && !n.contains('foil')) return '🫒';
+    if (n.contains('sugar') || n.contains('honey')) return '🍯';
+    if (n.contains('sauce') || n.contains('soy') || n.contains('vinegar')) return '🫗';
+    if (n.contains('spice') || n.contains('cumin') || n.contains('paprika') || n.contains('cinnamon')) return '✨';
+    if (n.contains('herb') || n.contains('basil') || n.contains('cilantro') || n.contains('parsley')) return '🌿';
+    if (n.contains('chocolate') || n.contains('cocoa')) return '🍫';
+    if (n.contains('coffee')) return '☕';
+    if (n.contains('tea')) return '🍵';
+    if (n.contains('water') || n.contains('seltzer')) return '💧';
     if (n.contains('juice')) return '🧃';
-    if (n.contains('soda') || n.contains('cola') || n.contains('sprite') || n.contains('pop') || n.contains('carbonated') || n.contains('tonic')) return '🥤';
-    if (n.contains('beer') || n.contains('ale') || n.contains('lager') || n.contains('stout') || n.contains('ipa') || n.contains('porter')) return '🍺';
-    if (n.contains('wine') || n.contains('merlot') || n.contains('cabernet') || n.contains('chardonnay') || n.contains('pinot') || n.contains('champagne') || n.contains('prosecco')) return '🍷';
-    if (n.contains('whiskey') || n.contains('bourbon') || n.contains('scotch') || n.contains('rum') || n.contains('vodka') || n.contains('gin') || n.contains('tequila') || n.contains('brandy') || n.contains('cognac') || n.contains('liqueur') || n.contains('liquor')) return '🥃';
-    if (n.contains('water') || n.contains('sparkling') || n.contains('seltzer')) return '💧';
-    if (n.contains('smoothie') || n.contains('shake') || n.contains('milkshake')) return '🥤';
-    if (n.contains('canned') || n.contains('can of') || n.contains('condensed')) return '🥫';
-    if (n.contains('broth') || n.contains('stock') || n.contains('bouillon')) return '🍲';
-    if (n.contains('soup')) return '🥣';
-    if (n.contains('tofu') || n.contains('tempeh') || n.contains('seitan') || n.contains('edamame')) return '🫛';
-    if (n.contains('pizza')) return '🍕';
-    if (n.contains('burger') || n.contains('hamburger')) return '🍔';
-    if (n.contains('taco')) return '🌮';
-    if (n.contains('burrito') || n.contains('wrap')) return '🌯';
-    if (n.contains('sandwich') || n.contains('sub ')) return '🥪';
-    if (n.contains('sushi') || n.contains('sashimi')) return '🍣';
-    if (n.contains('dumpling') || n.contains('gyoza') || n.contains('wonton') || n.contains('pierogi')) return '🥟';
-    if (n.contains('fries') || n.contains('french fry')) return '🍟';
-    if (n.contains('baby food') || n.contains('infant formula')) return '🍼';
+    if (n.contains('wine')) return '🍷';
+    if (n.contains('beer')) return '🍺';
     final cat = usdaCategory.toLowerCase();
     if (cat.contains('fruit')) return '🍎';
     if (cat.contains('vegetable') || cat.contains('legume')) return '🥬';
     if (cat.contains('dairy') || cat.contains('egg')) return '🥛';
-    if (cat.contains('beef')) return '🥩';
-    if (cat.contains('pork')) return '🥩';
-    if (cat.contains('lamb') || cat.contains('veal') || cat.contains('game')) return '🥩';
+    if (cat.contains('beef') || cat.contains('pork') || cat.contains('lamb')) return '🥩';
     if (cat.contains('poultry')) return '🍗';
     if (cat.contains('finfish') || cat.contains('shellfish')) return '🐟';
-    if (cat.contains('cereal') && cat.contains('pasta')) return '🌾';
-    if (cat.contains('cereal') || cat.contains('breakfast')) return '🥣';
-    if (cat.contains('baked')) return '🍞';
+    if (cat.contains('cereal') || cat.contains('baked')) return '🌾';
     if (cat.contains('nut') || cat.contains('seed')) return '🌰';
     if (cat.contains('fat') || cat.contains('oil')) return '🫒';
     if (cat.contains('spice') || cat.contains('herb')) return '✨';
-    if (cat.contains('soup') || cat.contains('sauce') || cat.contains('gravy')) return '🫗';
+    if (cat.contains('soup') || cat.contains('sauce')) return '🫗';
     if (cat.contains('beverage')) return '🥤';
-    if (cat.contains('sweet') || cat.contains('candy') || cat.contains('sugar')) return '🍬';
+    if (cat.contains('sweet') || cat.contains('candy')) return '🍬';
     if (cat.contains('snack')) return '🍿';
-    if (cat.contains('baby')) return '🍼';
     if (cat.contains('sausage') || cat.contains('lunch')) return '🌭';
-    if (cat.contains('meal') || cat.contains('entree') || cat.contains('side')) return '🍽️';
-    if (cat.contains('fast food') || cat.contains('restaurant')) return '🍔';
-    if (cat.contains('native') || cat.contains('indian')) return '🌍';
     return '🛒';
   }
 }
@@ -2357,15 +2213,12 @@ class _SectionGroupedList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     // Group items by category
     final grouped = <String, List<ShoppingListItem>>{};
     for (final item in items) {
-      // Use saved category or detect
       String category = item.shoppingCategoryId ?? '';
       if (category.isEmpty) {
-        final normalized = normalizeIngredientName(item.name);
         category = getShoppingCategory(item.name, userMappings: userMappings);
       }
       grouped.putIfAbsent(category, () => []).add(item);
@@ -2386,7 +2239,6 @@ class _SectionGroupedList extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: 100),
       children: [
         for (final category in sortedKeys) ...[
-          // Section header
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 16, 4),
             child: Text(
@@ -2398,7 +2250,6 @@ class _SectionGroupedList extends ConsumerWidget {
               ),
             ),
           ),
-          // Items
           for (final item in grouped[category]!)
             _ShoppingItemTile(
               item: item,
@@ -2409,7 +2260,6 @@ class _SectionGroupedList extends ConsumerWidget {
               onItemUnchecked: onItemUnchecked,
             ),
         ],
-        // Checked items
         if (checkedItems.isNotEmpty)
           _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemUnchecked: onItemUnchecked),
       ],
@@ -2441,16 +2291,13 @@ class _RecipeGroupedList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final recipeDao = ref.watch(recipeDaoProvider);
 
-    // Group by recipe
     final grouped = <String?, List<ShoppingListItem>>{};
     for (final item in items) {
       grouped.putIfAbsent(item.recipeId, () => []).add(item);
     }
 
-    // Sort: recipes first, then manual items (null recipeId)
     final sortedKeys = grouped.keys.toList()..sort((a, b) {
       if (a == null && b == null) return 0;
       if (a == null) return 1;
@@ -2462,7 +2309,6 @@ class _RecipeGroupedList extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: 100),
       children: [
         for (final recipeId in sortedKeys) ...[
-          // Recipe header
           FutureBuilder<Recipe?>(
             future: recipeId != null ? recipeDao.getRecipeById(recipeId) : Future.value(null),
             builder: (context, snapshot) {
@@ -2483,7 +2329,6 @@ class _RecipeGroupedList extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    // Link to recipe
                     if (recipe != null)
                       GestureDetector(
                         onTap: () => context.push('/recipe/${recipe.id}'),
@@ -2494,7 +2339,6 @@ class _RecipeGroupedList extends ConsumerWidget {
               );
             },
           ),
-          // Items
           for (final item in grouped[recipeId]!)
             _ShoppingItemTile(
               item: item,
@@ -2576,11 +2420,9 @@ class _ShoppingItemTile extends ConsumerWidget {
     final isDark = theme.brightness == Brightness.dark;
     final recipeDao = ref.watch(recipeDaoProvider);
 
-    // Get emoji
     final parsed = parseIngredient(item.name);
     final emoji = IngredientImages.getEmoji(parsed.name);
 
-    // Check for source tracking (smart stacking)
     final sources = ShoppingSourceTracker.getSourceBreakdown(item.note);
     final hasMultipleSources = sources.length > 1;
 
@@ -2611,7 +2453,7 @@ class _ShoppingItemTile extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
-                  // Emoji circle — show stacked indicator for combined items
+                  // Emoji circle
                   Stack(
                     children: [
                       Container(
@@ -2632,7 +2474,7 @@ class _ShoppingItemTile extends ConsumerWidget {
                             decoration: BoxDecoration(
                               color: const Color(0xFFE8A860),
                               shape: BoxShape.circle,
-                              border: Border.all(color: isDark ? theme.colorScheme.surface : Colors.white, width: 2),
+                              border: Border.all(color: theme.colorScheme.surface, width: 2),
                             ),
                             alignment: Alignment.center,
                             child: Text(
@@ -2656,7 +2498,6 @@ class _ShoppingItemTile extends ConsumerWidget {
                             color: item.isChecked ? theme.colorScheme.outline : null,
                           ),
                         ),
-                        // Source recipe breakdown
                         if (showRecipeLink && hasMultipleSources && !item.isChecked)
                           Padding(
                             padding: const EdgeInsets.only(top: 4),
@@ -2682,7 +2523,6 @@ class _ShoppingItemTile extends ConsumerWidget {
                               }).toList(),
                             ),
                           ),
-                        // Single recipe link (legacy or single source)
                         if (showRecipeLink && !hasMultipleSources && sources.length == 1 && !item.isChecked)
                           GestureDetector(
                             onTap: sources.first.recipeId.isNotEmpty
@@ -2696,7 +2536,6 @@ class _ShoppingItemTile extends ConsumerWidget {
                               ),
                             ),
                           ),
-                        // Legacy recipe link (no source tracking)
                         if (showRecipeLink && sources.isEmpty && item.recipeId != null && !item.isChecked)
                           FutureBuilder<Recipe?>(
                             future: recipeDao.getRecipeById(item.recipeId!),
@@ -2731,7 +2570,7 @@ class _ShoppingItemTile extends ConsumerWidget {
                         }
                       },
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                      side: BorderSide(color: isDark ? theme.colorScheme.outlineVariant : theme.colorScheme.outlineVariant, width: 2),
+                      side: BorderSide(color: theme.colorScheme.outlineVariant, width: 2),
                     ),
                   ),
                 ],
@@ -2744,6 +2583,7 @@ class _ShoppingItemTile extends ConsumerWidget {
   }
 
   void _showItemOptions(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final shoppingDao = ref.read(shoppingDaoProvider);
     final controller = TextEditingController(text: item.name);
 
@@ -2755,7 +2595,7 @@ class _ShoppingItemTile extends ConsumerWidget {
         padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            color: theme.colorScheme.surface,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           padding: const EdgeInsets.all(20),
@@ -2763,12 +2603,11 @@ class _ShoppingItemTile extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)))),
+              Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)))),
               const SizedBox(height: 20),
-              Text('Edit Item', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              Text('Edit Item', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
 
-              // Name field
               TextField(
                 controller: controller,
                 decoration: InputDecoration(
@@ -2778,7 +2617,6 @@ class _ShoppingItemTile extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
 
-              // Category dropdown
               _CategoryDropdown(
                 currentCategoryId: item.shoppingCategoryId ?? getShoppingCategory(item.name, userMappings: userMappings),
                 onChanged: (newCategoryId) {
@@ -2788,7 +2626,6 @@ class _ShoppingItemTile extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
 
-              // Actions
               Row(
                 children: [
                   Expanded(
@@ -2797,8 +2634,8 @@ class _ShoppingItemTile extends ConsumerWidget {
                         shoppingDao.deleteItem(item.id);
                         Navigator.pop(ctx);
                       },
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      label: const Text('Delete', style: TextStyle(color: Colors.red)),
+                      icon: Icon(Icons.delete, color: theme.colorScheme.error),
+                      label: Text('Delete', style: TextStyle(color: theme.colorScheme.error)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -2842,14 +2679,11 @@ class _CategoryDropdown extends ConsumerWidget {
       builder: (context, snapshot) {
         final categories = snapshot.data ?? [];
 
-        // Build the complete list of valid category IDs
         final validIds = <String>{
           ...categories.map((c) => c.id),
-          'other', // Always include 'other' as fallback
+          'other',
         };
 
-        // FIX: Only set value if it exists in the items list, otherwise null
-        // This prevents the assertion error "There should be exactly one item with [DropdownButton]'s value"
         final String? safeValue = currentCategoryId.isNotEmpty && validIds.contains(currentCategoryId)
             ? currentCategoryId
             : null;
@@ -2865,13 +2699,11 @@ class _CategoryDropdown extends ConsumerWidget {
               isExpanded: true,
               value: safeValue,
               hint: Text(
-                // If we have a category ID but it's not valid, show it in the hint
                 currentCategoryId.isNotEmpty && !validIds.contains(currentCategoryId)
                     ? _formatCategoryName(currentCategoryId)
                     : 'Select category',
               ),
               items: [
-                // If current category isn't in list, add it as first item
                 if (currentCategoryId.isNotEmpty && !validIds.contains(currentCategoryId))
                   DropdownMenuItem(
                     value: currentCategoryId,
@@ -2909,7 +2741,6 @@ class _CategoryDropdown extends ConsumerWidget {
   }
 
   String _formatCategoryName(String categoryId) {
-    // Convert category ID to display name
     return categoryId
         .replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m.group(1)} ${m.group(2)}')
         .replaceFirst(categoryId[0], categoryId[0].toUpperCase());

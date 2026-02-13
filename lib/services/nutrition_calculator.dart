@@ -40,10 +40,12 @@ class NutritionCalculator {
         if (linkedMatch != null) {
           final linked = linkedMatch.value;
           if (linked.hasNutrition) {
-            // Linked recipe has nutrition — scale by amount
-            // 1 unit of ingredient = 1 serving of linked recipe
-            final amount = _parseAmount(ingredient.amount ?? '1') ?? 1.0;
-            final scaledNutrition = linked.perServingNutrition!.scaled(amount);
+            // Linked recipe has nutrition — use total recipe nutrition × scale
+            // perServing × servingCount = total recipe nutrition
+            // total × scale = how much of that recipe this ingredient uses
+            final scaledNutrition = linked.perServingNutrition!.scaled(
+              linked.servingCount.toDouble() * linked.scale,
+            );
             ingredientResults.add(IngredientNutritionResult(
               ingredient: ingredient,
               isMatched: true,
@@ -203,6 +205,12 @@ class NutritionCalculator {
       return 'cream cheese regular';
     }
 
+    // Cheese varieties — ensure USDA finds the cheese, not unrelated items
+    // e.g., "sharp cheddar" → "cheese cheddar", "mozzarella" → "cheese mozzarella"
+    if (_isCheeseVarietyName(lower) && !lower.contains('cheese')) {
+      return 'cheese $lower';
+    }
+
     return cleanedName;
   }
 
@@ -241,7 +249,10 @@ class NutritionCalculator {
       // We use findMatch() for NAME matching only, then use _parseAmountToGrams()
       // for proper amount→grams conversion (handles slices, cloves, fl oz, pints, etc.)
       final localMatch = local_db.NutritionDatabase.findMatch(ingredient.name);
-      if (localMatch != null) {
+      if (localMatch != null && _isLikelyBadLocalMatch(ingredient.name, localMatch.key)) {
+        debugPrint('Rejected bad local match: "${ingredient.name}" → "${localMatch.key}"');
+      }
+      if (localMatch != null && !_isLikelyBadLocalMatch(ingredient.name, localMatch.key)) {
         final per100g = localMatch.value; // NutritionData per 100g
         final matchedKey = localMatch.key;
 
@@ -436,6 +447,72 @@ class NutritionCalculator {
     return false;
   }
 
+  /// Check if a local nutrition database match is likely wrong.
+  /// The local DB uses fuzzy keyword matching, which can produce mismatches like:
+  ///   "olives" → "olive oil"  (shares "olive" but completely different food)
+  ///   "white pizza sauce" → "worcestershire sauce"  (shares "sauce" only)
+  bool _isLikelyBadLocalMatch(String ingredientName, String matchedKey) {
+    final ingLower = ingredientName.toLowerCase().trim();
+    final matchLower = matchedKey.toLowerCase().trim();
+
+    // Helper: strip trailing plural 's' or 'es'
+    String stem(String s) => s.replaceAll(RegExp(r'e?s$'), '');
+
+    // Word-level stem equality
+    bool wordMatch(String a, String b) => stem(a) == stem(b);
+
+    final ingWords = ingLower.split(RegExp(r'\s+'));
+    final matchWords = matchLower.split(RegExp(r'\s+'));
+
+    // If every word in the match key appears in the ingredient → match is a subset → OK
+    // e.g., ingredient "ground sausage", match "sausage" → all match words found
+    if (matchWords.every((mw) => ingWords.any((iw) => wordMatch(iw, mw)))) {
+      return false;
+    }
+
+    // Words in match that are NOT present in ingredient
+    final matchExtra = matchWords
+        .where((mw) => !ingWords.any((iw) => wordMatch(iw, mw)))
+        .toList();
+
+    // Words in ingredient that are NOT present in match
+    final ingExtra = ingWords
+        .where((iw) => !matchWords.any((mw) => wordMatch(iw, mw)))
+        .toList();
+
+    // ── Category-changing words ──
+    // If the match adds a word that fundamentally changes the food type → bad
+    // e.g., "olive" + "oil" = different food from "olives"
+    const categoryWords = {
+      'oil', 'sauce', 'juice', 'powder', 'flour', 'milk', 'cream',
+      'butter', 'extract', 'syrup', 'paste', 'vinegar', 'broth',
+      'stock', 'water', 'wine', 'beer', 'sugar', 'dried', 'seed',
+    };
+    if (matchExtra.any((w) => categoryWords.contains(w))) return true;
+    if (ingExtra.any((w) => categoryWords.contains(w))) return true;
+
+    // ── Completely unrelated primary words ──
+    // If the match has a significant word (4+ chars) with no relationship
+    // to any ingredient word → bad
+    // e.g., "worcestershire" has no relationship to "white", "pizza", or "sauce"
+    for (final extra in matchExtra) {
+      if (extra.length < 4) continue;
+      final relatedToAnyIngWord = ingWords.any((iw) {
+        if (iw.length < 3) return false;
+        // Check word containment (handles "sourdough" ↔ "dough")
+        if (extra.contains(iw) || iw.contains(extra)) return true;
+        // Check stem prefix overlap (at least 70% of shorter word)
+        final minLen = iw.length < extra.length ? iw.length : extra.length;
+        if (minLen < 4) return false;
+        final checkLen = (minLen * 0.7).ceil();
+        return iw.substring(0, checkLen) == extra.substring(0, checkLen);
+      });
+      if (!relatedToAnyIngWord) return true;
+    }
+
+    return false;
+  }
+
   /// Parse an amount string and unit to grams
   double? _parseAmountToGrams({
     required String? amount,
@@ -565,8 +642,8 @@ class NutritionCalculator {
       densityFactor = 1.03;
     } else if (lowerIngredient.contains('broth') || lowerIngredient.contains('stock')) {
       densityFactor = 1.0; // Broth is basically water density
-    } else if (lowerIngredient.contains('parmesan') || lowerIngredient.contains('cheese')) {
-      densityFactor = 0.45; // Grated cheese is airy
+    } else if (_isCheeseIngredient(lowerIngredient)) {
+      densityFactor = 0.45; // Grated/shredded cheese is airy (~106g/cup)
     }
 
     // ml to grams (then adjust for density)
@@ -611,6 +688,40 @@ class NutritionCalculator {
     }
 
     return null;
+  }
+
+  /// Check if a cleaned ingredient name is a cheese variety (for USDA query refinement).
+  /// This checks the CLEANED name (modifiers stripped) so "sharp cheddar" → "cheddar" is just "cheddar".
+  bool _isCheeseVarietyName(String lower) {
+    const varieties = [
+      'cheddar', 'mozzarella', 'gruyere', 'gruyère', 'gouda',
+      'colby', 'provolone', 'swiss', 'emmental', 'brie',
+      'camembert', 'feta', 'ricotta', 'mascarpone', 'gorgonzola',
+      'roquefort', 'stilton', 'manchego', 'havarti', 'fontina',
+      'asiago', 'pecorino', 'cotija', 'halloumi', 'paneer',
+      'parmigiano', 'monterey jack', 'pepper jack',
+    ];
+    return varieties.any((v) => lower.contains(v));
+  }
+
+  /// Check if an ingredient is a cheese (including by variety name).
+  /// Many cheese varieties don't include the word "cheese" in the ingredient text
+  /// (e.g. "1 cup sharp cheddar, grated" or "½ cup grated parmesan").
+  bool _isCheeseIngredient(String lowerIngredient) {
+    if (lowerIngredient.contains('cheese') || lowerIngredient.contains('parmesan')) {
+      return true;
+    }
+    // Common cheese varieties that may appear without the word "cheese"
+    const cheeseVarieties = [
+      'cheddar', 'mozzarella', 'gruyere', 'gruyère', 'gouda',
+      'colby', 'monterey jack', 'provolone', 'swiss', 'emmental',
+      'brie', 'camembert', 'feta', 'ricotta', 'mascarpone',
+      'gorgonzola', 'roquefort', 'stilton', 'manchego', 'havarti',
+      'fontina', 'asiago', 'pecorino', 'cotija', 'queso',
+      'goat cheese', 'burrata', 'halloumi', 'paneer',
+      'american cheese', 'velveeta', 'parmigiano',
+    ];
+    return cheeseVarieties.any((v) => lowerIngredient.contains(v));
   }
 
   /// Convert count-based amounts to grams
@@ -976,11 +1087,15 @@ class LinkedRecipeNutrition {
   /// Number of servings the linked recipe makes
   final int servingCount;
 
+  /// How much of the linked recipe to use (1.0 = full recipe, 0.5 = half)
+  final double scale;
+
   const LinkedRecipeNutrition({
     required this.recipeId,
     required this.recipeTitle,
     this.perServingNutrition,
     this.servingCount = 1,
+    this.scale = 1.0,
   });
 
   /// Whether the linked recipe has nutrition data

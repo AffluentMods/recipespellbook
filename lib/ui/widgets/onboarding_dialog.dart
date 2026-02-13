@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/onboarding_service.dart';
 import '../../providers/database_provider.dart';
 
-/// Shows a first-launch dialog asking if the user wants starter recipes.
+/// Shows a first-launch onboarding screen asking if the user wants starter recipes.
 /// Call this from HomeScreen's initState or after first frame.
 Future<void> showOnboardingDialog(BuildContext context, WidgetRef ref) async {
   // Check if we've already offered
@@ -12,164 +12,221 @@ Future<void> showOnboardingDialog(BuildContext context, WidgetRef ref) async {
 
   if (!context.mounted) return;
 
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (ctx) => _OnboardingDialog(ref: ref),
+  // Use a full-screen modal route instead of a dialog
+  await Navigator.of(context).push(
+    PageRouteBuilder(
+      opaque: true,
+      pageBuilder: (ctx, animation, secondaryAnimation) =>
+          _OnboardingScreen(ref: ref),
+      transitionsBuilder: (ctx, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation.drive(CurveTween(curve: Curves.easeOut)),
+          child: child,
+        );
+      },
+    ),
   );
 }
 
-class _OnboardingDialog extends StatefulWidget {
+class _OnboardingScreen extends StatefulWidget {
   final WidgetRef ref;
 
-  const _OnboardingDialog({required this.ref});
+  const _OnboardingScreen({required this.ref});
 
   @override
-  State<_OnboardingDialog> createState() => _OnboardingDialogState();
+  State<_OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingDialogState extends State<_OnboardingDialog> {
+class _OnboardingScreenState extends State<_OnboardingScreen> {
   bool _loading = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final size = MediaQuery.of(context).size;
 
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Icon
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer,
-              shape: BoxShape.circle,
+    return Scaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: size.height -
+                  MediaQuery.of(context).padding.top -
+                  MediaQuery.of(context).padding.bottom,
             ),
-            child: Icon(
-              Icons.auto_fix_high_rounded,
-              size: 32,
-              color: theme.colorScheme.primary,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 32),
+
+                // App logo
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Image.asset(
+                    'assets/images/icon.png',
+                    width: 100,
+                    height: 100,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Icon(
+                        Icons.menu_book_rounded,
+                        size: 48,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Title
+                Text(
+                  'Welcome to',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w300,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  'Recipe Spellbook!',
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+
+                // Description
+                Text(
+                  '10 handpicked recipes from around the world to get you started.',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+
+                // Recipe preview chips
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.center,
+                  children: const [
+                    _RecipeChip('🇰🇷 Korean Beef Bowls'),
+                    _RecipeChip('🇵🇪 Lomo Saltado'),
+                    _RecipeChip('🇮🇳 Butter Chicken'),
+                    _RecipeChip('🥟 Eggroll Bowl'),
+                    _RecipeChip('🇮🇹 Carbonara'),
+                    _RecipeChip('🍕 White Pizza'),
+                    _RecipeChip('🍤 Tuscan Shrimp'),
+                    _RecipeChip('🥣 Chicken Gnocchi'),
+                    _RecipeChip('🌮 Street Tacos'),
+                    _RecipeChip('🌶️ Stuffed Peppers'),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Subtitle
+                Text(
+                  'You can always delete them later.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.outline,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+
+                // Add recipes button (primary)
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _loading ? null : _addRecipes,
+                    icon: _loading
+                        ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                        : const Icon(Icons.auto_fix_high_rounded, size: 20),
+                    label: Text(
+                      _loading ? 'Adding...' : 'Add starter recipes',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Start empty (secondary)
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: _loading ? null : _startEmpty,
+                    child: Text(
+                      'Start with a blank cookbook',
+                      style: TextStyle(
+                        color: theme.colorScheme.outline,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
-
-          // Title
-          Text(
-            'Welcome to Recipe Spellbook!',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 12),
-
-          // Description
-          Text(
-            'Want to start with 10 handpicked recipes from around the world? '
-                'Korean beef bowls, butter chicken, stuffed peppers, carbonara, and more.',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-
-          // Subtitle
-          Text(
-            'You can always delete them later.',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.outline,
-              fontStyle: FontStyle.italic,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-
-          // Recipe preview chips
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            alignment: WrapAlignment.center,
-            children: [
-              _RecipeChip('🇰🇷 Korean Beef Bowls'),
-              _RecipeChip('🇵🇪 Lomo Saltado'),
-              _RecipeChip('🇮🇳 Butter Chicken'),
-              _RecipeChip('🥟 Eggroll Bowl'),
-              _RecipeChip('🇮🇹 Carbonara'),
-              _RecipeChip('🍕 White Pizza'),
-              _RecipeChip('🍤 Tuscan Shrimp'),
-              _RecipeChip('🥣 Chicken Gnocchi'),
-              _RecipeChip('🌮 Street Tacos'),
-              _RecipeChip('🌶️ Stuffed Peppers'),
-            ],
-          ),
-          const SizedBox(height: 8),
-        ],
+        ),
       ),
-      actions: [
-        // No thanks
-        TextButton(
-          onPressed: _loading
-              ? null
-              : () async {
-            await OnboardingService.declineDefaultRecipes();
-            if (context.mounted) Navigator.of(context).pop();
-          },
-          child: Text(
-            'Start empty',
-            style: TextStyle(color: theme.colorScheme.outline),
-          ),
-        ),
-
-        // Add recipes
-        FilledButton.icon(
-          onPressed: _loading
-              ? null
-              : () async {
-            setState(() => _loading = true);
-            try {
-              final db = widget.ref.read(databaseProvider);
-              final count = await OnboardingService.seedDefaultRecipes(db);
-              await OnboardingService.completeOnboarding();
-              if (context.mounted) {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Added $count starter recipes! 🎉'),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              }
-            } catch (e) {
-              if (context.mounted) {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Something went wrong: $e'),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              }
-            }
-          },
-          icon: _loading
-              ? const SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Colors.white,
-            ),
-          )
-              : const Icon(Icons.add_rounded, size: 18),
-          label: Text(_loading ? 'Adding...' : 'Add recipes'),
-        ),
-      ],
     );
+  }
+
+  Future<void> _addRecipes() async {
+    setState(() => _loading = true);
+    try {
+      final db = widget.ref.read(databaseProvider);
+      final count = await OnboardingService.seedDefaultRecipes(db);
+      await OnboardingService.completeOnboarding();
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Added $count starter recipes! 🎉'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Something went wrong: $e'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _startEmpty() async {
+    await OnboardingService.declineDefaultRecipes();
+    if (mounted) Navigator.of(context).pop();
   }
 }
 
@@ -181,14 +238,17 @@ class _RecipeChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.15),
+        ),
       ),
       child: Text(
         label,
-        style: theme.textTheme.labelSmall?.copyWith(
+        style: theme.textTheme.bodySmall?.copyWith(
           color: theme.colorScheme.onSurfaceVariant,
         ),
       ),

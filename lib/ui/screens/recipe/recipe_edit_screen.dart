@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:flutter/material.dart' hide Step;
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,6 +13,7 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import '../../../database/database.dart';
+import '../../../database/daos/recipe_dao.dart' show RecipeLinkInfo;
 import '../../../database/daos/tags_dao.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/default_recipe_images.dart';
@@ -26,86 +29,162 @@ import '../../widgets/recipe_edit_instructions.dart';
 
 // ============ IMAGE PREVIEW/CONFIRM HELPER ============
 
-/// Shows a full-screen preview of a picked image with Accept/Retake options.
-/// Returns the image path if accepted, or null if rejected.
+/// Shows a full-screen preview of a picked image with crop support.
+/// The user can pinch-to-zoom and pan to frame the photo.
+/// Returns the cropped image path if accepted, or null if rejected.
 Future<String?> showImagePreviewDialog(BuildContext context, String imagePath) async {
   return showDialog<String?>(
     context: context,
     barrierDismissible: false,
-    builder: (ctx) {
-      final theme = Theme.of(ctx);
-      return Scaffold(
+    builder: (ctx) => _ImageCropDialog(imagePath: imagePath),
+  );
+}
+
+class _ImageCropDialog extends StatefulWidget {
+  final String imagePath;
+  const _ImageCropDialog({required this.imagePath});
+
+  @override
+  State<_ImageCropDialog> createState() => _ImageCropDialogState();
+}
+
+class _ImageCropDialogState extends State<_ImageCropDialog> {
+  final _boundaryKey = GlobalKey();
+  final _transformController = TransformationController();
+  bool _isSaving = false;
+  bool _hasZoomed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _transformController.addListener(() {
+      if (!_hasZoomed && _transformController.value != Matrix4.identity()) {
+        setState(() => _hasZoomed = true);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _transformController.dispose();
+    super.dispose();
+  }
+
+  /// Capture the visible cropped region and save to a temp file.
+  Future<String?> _captureAndCrop() async {
+    if (!_hasZoomed) {
+      // No zoom applied — return original image as-is
+      return widget.imagePath;
+    }
+
+    setState(() => _isSaving = true);
+    try {
+      final boundary = _boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) return widget.imagePath;
+
+      // Capture at 3x pixel ratio for high-res output
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) return widget.imagePath;
+
+      final bytes = byteData.buffer.asUint8List();
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/crop_${DateTime.now().millisecondsSinceEpoch}.png');
+      await file.writeAsBytes(bytes);
+      return file.path;
+    } catch (e) {
+      debugPrint('Crop capture failed: $e');
+      return widget.imagePath; // Fallback to original
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
         backgroundColor: Colors.black,
-        appBar: AppBar(
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
-          title: const Text('Preview Photo'),
-          leading: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.pop(ctx, null),
-          ),
+        foregroundColor: Colors.white,
+        title: const Text('Preview Photo'),
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.pop(context, null),
         ),
-        body: Column(
-          children: [
-            Expanded(
-              child: InteractiveViewer(
-                minScale: 0.5,
-                maxScale: 4.0,
-                child: Center(
-                  child: Image.file(
-                    File(imagePath),
-                    fit: BoxFit.contain,
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ClipRect(
+              child: RepaintBoundary(
+                key: _boundaryKey,
+                child: InteractiveViewer(
+                  transformationController: _transformController,
+                  minScale: 0.5,
+                  maxScale: 4.0,
+                  child: Center(
+                    child: Image.file(
+                      File(widget.imagePath),
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ),
             ),
-            // Crop region indicator
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text(
-                'Pinch to zoom · This is how your photo will look',
-                style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
-                textAlign: TextAlign.center,
-              ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              _hasZoomed
+                  ? 'Pinch to zoom · Cropped area will be saved'
+                  : 'Pinch to zoom and crop · Or use as-is',
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
+              textAlign: TextAlign.center,
             ),
-            // Action buttons
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => Navigator.pop(ctx, null),
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Retake'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.white54),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _isSaving ? null : () => Navigator.pop(context, null),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Retake'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.white54),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: FilledButton.icon(
-                        onPressed: () => Navigator.pop(ctx, imagePath),
-                        icon: const Icon(Icons.check),
-                        label: const Text('Use Photo'),
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: _isSaving ? null : () async {
+                        final cropped = await _captureAndCrop();
+                        if (mounted) Navigator.pop(context, cropped);
+                      },
+                      icon: _isSaving
+                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          : const Icon(Icons.check),
+                      label: Text(_isSaving ? 'Saving...' : 'Use Photo'),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      );
-    },
-  );
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class RecipeEditScreen extends ConsumerStatefulWidget {
@@ -138,6 +217,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
 
   String? _imagePath;
   String? _imageUrl;
+  String? _defaultAssetPath; // For default recipes: asset image shown as preview only
   String? _selectedCourseId;
   String? _selectedCategoryId;
   int _rating = 0;
@@ -152,7 +232,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
 
   final List<_SimpleIngredient> _ingredients = [];
   final List<EditableStep> _steps = [];
-  Map<String, List<Recipe>> _ingredientLinksMap = {};
+  Map<String, List<RecipeLinkInfo>> _ingredientLinksMap = {};
 
   // Tab controller for tabbed layout
   late TabController _tabController;
@@ -210,6 +290,10 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     _cookTimeController.text = recipe.cookTimeMinutes?.toString() ?? '';
     _sourceUrlController.text = recipe.sourceUrl ?? '';
     _imagePath = recipe.imagePath;
+    // For default recipes with bundled asset images (no user-set imagePath)
+    if (_imagePath == null) {
+      _defaultAssetPath = defaultRecipeImageAsset(recipe.id);
+    }
     _rating = recipe.rating ?? 0;
     _selectedCourseId = recipe.courseId;
     _selectedCategoryId = recipe.categoryId;
@@ -367,7 +451,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _PhotoPicker(imagePath: _imagePath, onImageSelected: (path) => setState(() => _imagePath = path)),
+            _PhotoPicker(imagePath: _imagePath, defaultAssetPath: _defaultAssetPath, onImageSelected: (path) => setState(() { _imagePath = path; if (path != null) _defaultAssetPath = null; })),
             const SizedBox(height: 24),
             TextFormField(
               controller: _titleController,
@@ -417,7 +501,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
               onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
               onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
               onLinkRecipe: _isEditing ? () => _showLinkRecipePicker(entry.value.id, entry.value.text) : null,
-              linkedRecipes: _ingredientLinksMap[entry.value.id] ?? [],
+              linkedRecipes: (_ingredientLinksMap[entry.value.id] ?? []).map((info) => info.recipe).toList(),
             )),
             _AddIngredientButton(onTap: _addIngredient),
             const SizedBox(height: 32),
@@ -460,7 +544,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _PhotoPicker(imagePath: _imagePath, onImageSelected: (path) => setState(() => _imagePath = path)),
+                _PhotoPicker(imagePath: _imagePath, defaultAssetPath: _defaultAssetPath, onImageSelected: (path) => setState(() { _imagePath = path; if (path != null) _defaultAssetPath = null; })),
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _titleController,
@@ -531,7 +615,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
                 onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
                 onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
                 onLinkRecipe: _isEditing ? () => _showLinkRecipePicker(entry.value.id, entry.value.text) : null,
-                linkedRecipes: _ingredientLinksMap[entry.value.id] ?? [],
+                linkedRecipes: (_ingredientLinksMap[entry.value.id] ?? []).map((info) => info.recipe).toList(),
               )),
               _AddIngredientButton(onTap: _addIngredient),
               const SizedBox(height: 100),
@@ -569,9 +653,9 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   Future<void> _calculateNutrition() async {
     final l10n = AppLocalizations.of(context)!;
 
-    final ingredientTexts = _ingredients.where((i) => i.text.trim().isNotEmpty).map((i) => i.text.trim()).toList();
+    final activeIngredients = _ingredients.where((i) => i.text.trim().isNotEmpty).toList();
 
-    if (ingredientTexts.isEmpty) {
+    if (activeIngredients.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.ingredientsEmpty)));
       return;
     }
@@ -580,9 +664,9 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     setState(() => _isCalculatingNutrition = true);
 
     try {
-      final ingredients = ingredientTexts.map((text) {
-        final parsed = _parseIngredient(text);
-        return Ingredient(id: 'temp_${text.hashCode}', recipeId: widget.recipeId ?? 'new', sortOrder: 0, name: parsed.name, amount: parsed.amount, unit: parsed.unit, notes: parsed.notes);
+      final ingredients = activeIngredients.map((ing) {
+        final parsed = _parseIngredient(ing.text.trim());
+        return Ingredient(id: ing.id, recipeId: widget.recipeId ?? 'new', sortOrder: 0, name: parsed.name, amount: parsed.amount, unit: parsed.unit, notes: parsed.notes);
       }).toList();
 
       final result = await NutritionCalculationSheet.show(
@@ -610,7 +694,8 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     if (widget.recipeId == null) return;
     final recipeDao = ref.read(recipeDaoProvider);
     final allRecipes = await recipeDao.getAllRecipes();
-    final currentLinks = _ingredientLinksMap[ingredientId] ?? [];
+    final currentLinkInfos = _ingredientLinksMap[ingredientId] ?? [];
+    final currentLinks = currentLinkInfos.map((info) => info.recipe).toList();
     final linkedIds = currentLinks.map((r) => r.id).toSet();
     final available = allRecipes
         .where((r) => r.id != widget.recipeId && !linkedIds.contains(r.id))
@@ -1693,16 +1778,30 @@ class _CalculateNutritionCard extends StatelessWidget {
 }
 
 class _PhotoPicker extends StatelessWidget {
-  final String? imagePath; final ValueChanged<String?> onImageSelected;
-  const _PhotoPicker({required this.imagePath, required this.onImageSelected});
+  final String? imagePath;
+  final String? defaultAssetPath;
+  final ValueChanged<String?> onImageSelected;
+  const _PhotoPicker({required this.imagePath, this.defaultAssetPath, required this.onImageSelected});
   @override Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final hasImage = imagePath != null;
+    final hasAsset = defaultAssetPath != null;
+    final showImage = hasImage || hasAsset;
+
+    // Build the appropriate DecorationImage
+    DecorationImage? decorationImage;
+    if (hasImage) {
+      decorationImage = DecorationImage(image: FileImage(File(imagePath!)), fit: BoxFit.cover);
+    } else if (hasAsset) {
+      decorationImage = DecorationImage(image: AssetImage(defaultAssetPath!), fit: BoxFit.cover);
+    }
+
     return GestureDetector(
       onTap: () => _showImageOptions(context),
       child: Container(
         height: 200, width: double.infinity,
-        decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(16), border: Border.all(color: theme.colorScheme.outlineVariant, width: 1), image: imagePath != null ? DecorationImage(image: FileImage(File(imagePath!)), fit: BoxFit.cover) : null),
-        child: imagePath == null
+        decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(16), border: Border.all(color: theme.colorScheme.outlineVariant, width: 1), image: decorationImage),
+        child: !showImage
             ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Container(width: 64, height: 64, decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), shape: BoxShape.circle), child: Icon(Icons.add_photo_alternate_outlined, size: 32, color: theme.colorScheme.primary)),
           const SizedBox(height: 12),
@@ -1710,7 +1809,16 @@ class _PhotoPicker extends StatelessWidget {
           const SizedBox(height: 4),
           Text('Tap to select from gallery or camera', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
         ])
-            : Stack(children: [Positioned(top: 8, right: 8, child: Row(children: [_ImageActionButton(icon: Icons.edit, onTap: () => _showImageOptions(context)), const SizedBox(width: 8), _ImageActionButton(icon: Icons.close, onTap: () => onImageSelected(null))]))]),
+            : Stack(children: [
+          // Show "Default" badge for asset images
+          if (hasAsset && !hasImage)
+            Positioned(top: 8, left: 8, child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(8)),
+              child: const Text('Default', style: TextStyle(color: Colors.white70, fontSize: 11)),
+            )),
+          Positioned(top: 8, right: 8, child: Row(children: [_ImageActionButton(icon: Icons.edit, onTap: () => _showImageOptions(context)), const SizedBox(width: 8), _ImageActionButton(icon: Icons.close, onTap: () => onImageSelected(null))])),
+        ]),
       ),
     );
   }

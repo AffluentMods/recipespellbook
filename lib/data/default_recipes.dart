@@ -39,9 +39,11 @@ class DefaultIngredient {
   const DefaultIngredient(this.name, {this.amount, this.unit});
 }
 
-/// Pre-computed nutrition data (per serving) for default recipes.
+/// Pre-computed nutrition data (TOTAL recipe) for default recipes.
 /// Calculated from USDA SR Legacy database using NutritionCalculator logic.
 /// All 35 nutrient fields matching NutritionData for complete display.
+/// IMPORTANT: These values are TOTAL for the entire recipe, NOT per-serving.
+/// The calculatedServings field tells the display how to compute per-serving values.
 /// White Pizza nutrition includes linked Pizza Dough (1/2 recipe) and White Pizza Sauce (full recipe).
 class DefaultNutritionData {
   // Macros
@@ -83,6 +85,10 @@ class DefaultNutritionData {
   // Other
   final double cholesterol;
   final double water;
+  // How many servings the total nutrition values represent.
+  // When stored in DB, this should be included in nutritionJson
+  // so the display can correctly compute per-serving values.
+  final int? calculatedServings;
 
   const DefaultNutritionData({
     required this.calories,
@@ -120,6 +126,7 @@ class DefaultNutritionData {
     this.choline = 0,
     this.cholesterol = 0,
     this.water = 0,
+    this.calculatedServings,
   });
 }
 
@@ -138,6 +145,7 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Meat',
     notes: 'Meal prep tip: Keeps 4 days in fridge. Use ground turkey or chicken for a leaner version. Add gochugaru or chili crisp for extra heat.',
     nutrition: DefaultNutritionData(
+      calculatedServings: 4,
       calories: 917.9, protein: 65.9, fat: 42.2, carbohydrates: 63.6,
       fiber: 3.5, sugar: 12.2,
       saturatedFat: 14.4, transFat: 1.38,
@@ -191,6 +199,7 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Meat',
     notes: 'Use a very hot pan for proper searing. Tomatoes should keep their structure — don\'t overcook them.',
     nutrition: DefaultNutritionData(
+      calculatedServings: 4,
       calories: 413.9, protein: 48.9, fat: 20.9, carbohydrates: 4.7,
       fiber: 0.9, sugar: 2.4,
       saturatedFat: 6.8, transFat: 0.68,
@@ -241,6 +250,7 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Meat',
     notes: 'Char chicken over flame for smoky flavor. Use cashew cream for dairy-free. Marinate overnight for best results. Keeps 3-4 days in fridge or 1 month frozen.',
     nutrition: DefaultNutritionData(
+      calculatedServings: 5,
       calories: 622.9, protein: 44.7, fat: 42.0, carbohydrates: 18.4,
       fiber: 3.5, sugar: 8.5,
       saturatedFat: 21.5, transFat: 1.03,
@@ -298,6 +308,7 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Meat',
     notes: 'Swap turkey for ground chicken, pork, or beef. Skip rice for low-carb or serve in lettuce cups. Refrigerates 4-5 days — great for meal prep.',
     nutrition: DefaultNutritionData(
+      calculatedServings: 6,
       calories: 468.1, protein: 53.6, fat: 21.6, carbohydrates: 16.9,
       fiber: 5.8, sugar: 7.3,
       saturatedFat: 5.2, transFat: 0.18,
@@ -351,6 +362,7 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Pasta',
     notes: 'No cream, garlic, or peas — ever. Use Pecorino Romano for authenticity. Work off heat when mixing sauce to avoid scrambled eggs. Get real guanciale from an Italian deli.',
     nutrition: DefaultNutritionData(
+      calculatedServings: 3,
       calories: 995.6, protein: 34.5, fat: 66.6, carbohydrates: 63.2,
       fiber: 2.9, sugar: 2.9,
       saturatedFat: 26.7, transFat: 0.02,
@@ -387,23 +399,24 @@ const defaultRecipes = <DefaultRecipeData>[
     id: 'default_white_pizza',
     title: 'Combination White Pizza',
     description: 'Creamy, garlicky, cheesy perfection — simple but elite. A loaded white pizza with garlic butter base and your favorite toppings.',
-    servings: '1 pizza',
+    servings: '8 slices',
     prepTimeMinutes: 15,
     cookTimeMinutes: 10,
     course: 'Main',
     category: 'Bread',
     notes: 'Optional: add spinach or artichokes. Bake at the highest your oven goes for best crust. See linked recipes for pizza dough and white sauce.',
     nutrition: DefaultNutritionData(
-      calories: 1703.4, protein: 63.6, fat: 72.5, carbohydrates: 201.3,
+      calculatedServings: 8,
+      calories: 2294, protein: 87, fat: 173, carbohydrates: 101,
       fiber: 9.3, sugar: 18.6,
-      saturatedFat: 39.6, transFat: 1.8,
-      monounsaturatedFat: 21.8, polyunsaturatedFat: 4.7,
-      cholesterol: 172.9, sodium: 3040.6, potassium: 1259.6,
-      calcium: 989.6, iron: 5.3, magnesium: 124.4,
-      phosphorus: 1029.0, zinc: 5.4, copper: 0.93, manganese: 2.18, selenium: 112.7,
-      vitaminA: 492.9, vitaminC: 8.7, vitaminD: 4.5, vitaminE: 2.6, vitaminK: 13.8,
-      vitaminB1: 0.78, vitaminB2: 1.46, vitaminB3: 11.5, vitaminB5: 5.17, vitaminB6: 0.69,
-      vitaminB12: 1.84, folate: 243.9, choline: 110.8, water: 561.7,
+      saturatedFat: 53.3, transFat: 2.4,
+      monounsaturatedFat: 29.3, polyunsaturatedFat: 6.3,
+      cholesterol: 232.7, sodium: 4094, potassium: 1696,
+      calcium: 1333, iron: 7.1, magnesium: 167.5,
+      phosphorus: 1386, zinc: 7.3, copper: 1.25, manganese: 2.94, selenium: 151.8,
+      vitaminA: 663.8, vitaminC: 11.7, vitaminD: 6.1, vitaminE: 3.5, vitaminK: 18.6,
+      vitaminB1: 1.05, vitaminB2: 1.97, vitaminB3: 15.5, vitaminB5: 6.96, vitaminB6: 0.93,
+      vitaminB12: 2.48, folate: 328.5, choline: 149.2, water: 756.3,
     ),
     ingredients: [
       DefaultIngredient('pizza dough ball', amount: '1'),
@@ -443,6 +456,7 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Seafood',
     notes: 'Skip potatoes for low-carb. Add zoodles at the very end to prevent sogginess. Serve with crusty bread, rice, or pasta.',
     nutrition: DefaultNutritionData(
+      calculatedServings: 4,
       calories: 816.7, protein: 70.4, fat: 42.3, carbohydrates: 42.2,
       fiber: 5.7, sugar: 8.9,
       saturatedFat: 22.5, transFat: 0.78,
@@ -493,6 +507,7 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Soup',
     notes: 'Thicker: simmer uncovered longer. Thinner: add broth or milk. Add 1 tsp Dijon or splash of wine for flavor depth. Keeps 3 days refrigerated.',
     nutrition: DefaultNutritionData(
+      calculatedServings: 8,
       calories: 501.9, protein: 21.5, fat: 31.4, carbohydrates: 34.5,
       fiber: 3.1, sugar: 9.1,
       saturatedFat: 17.2, transFat: 0.9,
@@ -547,6 +562,7 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Tacos',
     notes: 'Optional toppings: avocado, pickled onions, cotija cheese, chipotle crema. Double the marinade for chicken or shrimp. Leftover steak keeps 3 days refrigerated.',
     nutrition: DefaultNutritionData(
+      calculatedServings: 6,
       calories: 483.4, protein: 38.1, fat: 20.4, carbohydrates: 36.0,
       fiber: 2.4, sugar: 3.0,
       saturatedFat: 5.9, transFat: 0.47,
@@ -592,8 +608,9 @@ const defaultRecipes = <DefaultRecipeData>[
     cookTimeMinutes: 15,
     course: 'Appetizer',
     category: 'Vegetable',
-    notes: 'Pepper swaps: banana peppers or Cubanelle peppers work if you can\'t find Hungarian wax peppers. Cheese & sausage are flexible — try chorizo + manchego. The chive oil and fresh ciabatta are the non-negotiables. Chive oil keeps about two weeks refrigerated and tastes better after sitting overnight. Pairs well with beer or white wine.',
+    notes: 'Pepper swaps: banana peppers or Cubanelle peppers work if you can\'t find Hungarian wax peppers. You can also use Pablano peppers, just use half as many peppers, instead of 12 grab 6. Cheese & sausage are flexible — try chorizo + manchego. The chive oil and fresh ciabatta are the non-negotiables. Chive oil keeps about two weeks refrigerated and tastes better after sitting overnight. Pairs well with beer or white wine.',
     nutrition: DefaultNutritionData(
+      calculatedServings: 4,
       calories: 1187.2, protein: 35.9, fat: 100.8, carbohydrates: 39.2,
       fiber: 3.5, sugar: 9.2,
       saturatedFat: 30.5, transFat: 0.28,
@@ -644,6 +661,7 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Sauce',
     notes: 'Thick, creamy, and smooth — not runny. Slightly stretchy from melted Parmesan. Perfect for chicken Alfredo pizza, white veggie pizza, spinach + bacon pizza, or any pizza with mozzarella, ricotta, or roasted veggies.',
     nutrition: DefaultNutritionData(
+      calculatedServings: 1,
       calories: 586.7, protein: 30.0, fat: 39.2, carbohydrates: 30.3,
       fiber: 1.0, sugar: 12.8,
       saturatedFat: 24.1, transFat: 0.9,
@@ -690,6 +708,7 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Bread',
     notes: 'Add 1 tsp honey for faster browning. Refrigerated dough improves flavor and texture dramatically. Cold ferment 12-48 hours for best results.',
     nutrition: DefaultNutritionData(
+      calculatedServings: 2,
       calories: 1753.0, protein: 56.6, fat: 21.7, carbohydrates: 326.4,
       fiber: 13.2, sugar: 5.5,
       saturatedFat: 2.8, transFat: 0.0,
@@ -733,6 +752,7 @@ const defaultRecipes = <DefaultRecipeData>[
     category: 'Sauce',
     notes: 'Storage: Keep warm in a water bath up to 1 hour; do not refrigerate (it will split). Flavor boost: Add a splash of dry white wine or shallot reduction before whisking for a more authentic restaurant Béarnaise. Pairings: Great with ribeye, salmon, asparagus, or crispy potatoes.',
     nutrition: DefaultNutritionData(
+      calculatedServings: 4,
       calories: 304.8, protein: 3.5, fat: 32.0, carbohydrates: 1.9,
       fiber: 0.1, sugar: 0.8,
       saturatedFat: 19.0, transFat: 1.1,

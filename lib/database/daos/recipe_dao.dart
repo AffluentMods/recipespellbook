@@ -8,6 +8,13 @@ import 'package:drift/drift.dart' as drift;
 
 part 'recipe_dao.g.dart';
 
+/// Holds a linked recipe along with the scale from the recipe_links table
+class RecipeLinkInfo {
+  final Recipe recipe;
+  final double scale;
+  const RecipeLinkInfo({required this.recipe, this.scale = 1.0});
+}
+
 @DriftAccessor(tables: [Recipes, Ingredients, Steps, RecipeLinks])
 class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
   RecipeDao(AppDatabase db) : super(db);
@@ -474,7 +481,7 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
   // ============ RECIPE LINKS (per-ingredient) ============
 
   /// Add a link from a specific ingredient to a recipe
-  Future<void> addIngredientRecipeLink(String sourceId, String ingredientId, String linkedId) async {
+  Future<void> addIngredientRecipeLink(String sourceId, String ingredientId, String linkedId, {double scale = 1.0}) async {
     final existing = await (select(recipeLinks)
       ..where((l) => l.sourceRecipeId.equals(sourceId))
       ..where((l) => l.ingredientId.equals(ingredientId))
@@ -487,6 +494,7 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
       sourceRecipeId: sourceId,
       ingredientId: ingredientId,
       linkedRecipeId: linkedId,
+      scale: drift.Value(scale),
       sortOrder: drift.Value(nextOrder),
     ));
 
@@ -503,8 +511,22 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
         .go();
   }
 
-  /// Get linked recipes for a specific ingredient
-  Future<List<Recipe>> getLinkedRecipesForIngredient(String sourceId, String ingredientId) async {
+  /// Update the scale of an ingredient→recipe link
+  Future<void> updateIngredientRecipeLinkScale(
+      String sourceId,
+      String ingredientId,
+      String linkedId,
+      double newScale,
+      ) async {
+    await (update(recipeLinks)
+      ..where((l) => l.sourceRecipeId.equals(sourceId))
+      ..where((l) => l.ingredientId.equals(ingredientId))
+      ..where((l) => l.linkedRecipeId.equals(linkedId)))
+        .write(RecipeLinksCompanion(scale: drift.Value(newScale)));
+  }
+
+  /// Get linked recipes for a specific ingredient (with scale info)
+  Future<List<RecipeLinkInfo>> getLinkedRecipesForIngredient(String sourceId, String ingredientId) async {
     final query = select(recipeLinks).join([
       innerJoin(recipes, recipes.id.equalsExp(recipeLinks.linkedRecipeId)),
     ])
@@ -514,12 +536,15 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
       ..orderBy([OrderingTerm.asc(recipeLinks.sortOrder)]);
 
     final rows = await query.get();
-    return rows.map((row) => row.readTable(recipes)).toList();
+    return rows.map((row) => RecipeLinkInfo(
+      recipe: row.readTable(recipes),
+      scale: row.readTable(recipeLinks).scale,
+    )).toList();
   }
 
   /// Get all ingredient→recipe links for a source recipe as a map
-  /// Returns Map<ingredientId, List<Recipe>>
-  Future<Map<String, List<Recipe>>> getIngredientLinksMap(String sourceId) async {
+  /// Returns Map<ingredientId, List<RecipeLinkInfo>> with scale info
+  Future<Map<String, List<RecipeLinkInfo>>> getIngredientLinksMap(String sourceId) async {
     final query = select(recipeLinks).join([
       innerJoin(recipes, recipes.id.equalsExp(recipeLinks.linkedRecipeId)),
     ])
@@ -528,11 +553,13 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
       ..orderBy([OrderingTerm.asc(recipeLinks.sortOrder)]);
 
     final rows = await query.get();
-    final map = <String, List<Recipe>>{};
+    final map = <String, List<RecipeLinkInfo>>{};
     for (final row in rows) {
       final link = row.readTable(recipeLinks);
       final recipe = row.readTable(recipes);
-      map.putIfAbsent(link.ingredientId, () => []).add(recipe);
+      map.putIfAbsent(link.ingredientId, () => []).add(
+        RecipeLinkInfo(recipe: recipe, scale: link.scale),
+      );
     }
     return map;
   }

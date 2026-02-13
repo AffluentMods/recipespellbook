@@ -77,7 +77,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
 
   // Accessors for DAOs
@@ -100,38 +100,72 @@ class AppDatabase extends _$AppDatabase {
         if (from < 2) {
           // RecipeLinks now includes ingredientId in primary key (per-ingredient linking)
           // Drop old table and recreate — old recipe-level links become per-ingredient
+          // Note: createTable uses current Dart schema, which includes the scale column
           await m.deleteTable('recipe_links');
           await m.createTable(recipeLinks);
-          // Re-seed default recipe links with ingredient IDs
+          // Re-seed default recipe links with ingredient IDs and scales
           await _reseedDefaultLinks();
+        } else if (from < 3) {
+          // Only ALTER if the table wasn't just recreated above (v1→v3 already has scale)
+          // Add scale column to recipe_links (default 1.0)
+          await customStatement(
+            'ALTER TABLE recipe_links ADD COLUMN scale REAL NOT NULL DEFAULT 1.0',
+          );
+          // Update default links with proper scale values
+          await _updateDefaultLinkScales();
         }
       },
     );
   }
 
-  /// Re-seed default recipe links after schema migration
+  /// Re-seed default recipe links after schema migration (v1 → v2)
   Future<void> _reseedDefaultLinks() async {
     try {
-      // White Pizza: pizza dough ball → Pizza Dough
+      // White Pizza: pizza dough ball → Pizza Dough (half the recipe)
       await into(recipeLinks).insertOnConflictUpdate(RecipeLinksCompanion.insert(
         sourceRecipeId: 'default_white_pizza',
         ingredientId: 'default_white_pizza_ing_0',
         linkedRecipeId: 'default_pizza_dough',
+        scale: const Value(0.5),
       ));
-      // White Pizza: white pizza sauce → White Pizza Sauce
+      // White Pizza: white pizza sauce → White Pizza Sauce (full recipe)
       await into(recipeLinks).insertOnConflictUpdate(RecipeLinksCompanion.insert(
         sourceRecipeId: 'default_white_pizza',
         ingredientId: 'default_white_pizza_ing_11',
         linkedRecipeId: 'default_white_pizza_sauce',
+        scale: const Value(1.0),
       ));
-      // Lomo Saltado: béarnaise sauce → Béarnaise Sauce
+      // Lomo Saltado: béarnaise sauce → Béarnaise Sauce (quarter for serving)
       await into(recipeLinks).insertOnConflictUpdate(RecipeLinksCompanion.insert(
         sourceRecipeId: 'default_lomo_saltado',
         ingredientId: 'default_lomo_saltado_ing_13',
         linkedRecipeId: 'default_bearnaise_sauce',
+        scale: const Value(0.25),
       ));
     } catch (_) {
       // Best-effort — recipes may not exist if user deleted them
+    }
+  }
+
+  /// Update existing default links with proper scale values (v2 → v3)
+  Future<void> _updateDefaultLinkScales() async {
+    try {
+      // Pizza dough: White Pizza uses 1 of 2 dough balls → 0.5
+      await customStatement(
+        "UPDATE recipe_links SET scale = 0.5 "
+            "WHERE source_recipe_id = 'default_white_pizza' "
+            "AND ingredient_id = 'default_white_pizza_ing_0' "
+            "AND linked_recipe_id = 'default_pizza_dough'",
+      );
+      // Béarnaise: Lomo uses ~¼ of the sauce → 0.25
+      await customStatement(
+        "UPDATE recipe_links SET scale = 0.25 "
+            "WHERE source_recipe_id = 'default_lomo_saltado' "
+            "AND ingredient_id = 'default_lomo_saltado_ing_13' "
+            "AND linked_recipe_id = 'default_bearnaise_sauce'",
+      );
+    } catch (_) {
+      // Best-effort — links may not exist
     }
   }
 

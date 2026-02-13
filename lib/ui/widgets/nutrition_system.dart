@@ -174,6 +174,14 @@ class NutritionDatabase {
     'bell pepper': NutritionData(calories: 31, protein: 1, carbs: 6, fat: 0.3, fiber: 2.1),
     'mushroom': NutritionData(calories: 22, protein: 3.1, carbs: 3.3, fat: 0.3, fiber: 1),
     'mushrooms': NutritionData(calories: 22, protein: 3.1, carbs: 3.3, fat: 0.3, fiber: 1),
+    'olive': NutritionData(calories: 115, protein: 0.8, carbs: 6.3, fat: 10.7, fiber: 3.2),
+    'olives': NutritionData(calories: 115, protein: 0.8, carbs: 6.3, fat: 10.7, fiber: 3.2),
+    'banana pepper': NutritionData(calories: 27, protein: 1.7, carbs: 5.4, fat: 0.5, fiber: 3.4),
+    'jalapeño': NutritionData(calories: 29, protein: 0.9, carbs: 6.5, fat: 0.4, fiber: 2.8),
+    'jalapeno': NutritionData(calories: 29, protein: 0.9, carbs: 6.5, fat: 0.4, fiber: 2.8),
+    'habanero': NutritionData(calories: 40, protein: 2, carbs: 8.8, fat: 0.4, fiber: 1.5),
+    'serrano': NutritionData(calories: 32, protein: 1.7, carbs: 6.7, fat: 0.4, fiber: 3.7),
+    'poblano': NutritionData(calories: 20, protein: 0.9, carbs: 4.3, fat: 0.2, fiber: 1.5),
 
     // Dairy (per 100g or 100ml)
     'milk': NutritionData(calories: 42, protein: 3.4, carbs: 5, fat: 1, sugar: 5),
@@ -212,13 +220,6 @@ class NutritionDatabase {
     'cilantro': NutritionData(calories: 23, protein: 2.1, carbs: 3.7, fat: 0.5, fiber: 2.8),
     'dill': NutritionData(calories: 43, protein: 3.5, carbs: 7, fat: 1.1, fiber: 2.1),
     'red pepper flake': NutritionData(calories: 318, protein: 12, carbs: 57, fat: 17, fiber: 27),
-
-    // Peppers
-    'jalapeno': NutritionData(calories: 29, protein: 0.9, carbs: 6.5, fat: 0.4, fiber: 2.8),
-    'habanero': NutritionData(calories: 40, protein: 2, carbs: 8.8, fat: 0.4, fiber: 1.5),
-    'serrano': NutritionData(calories: 32, protein: 1.7, carbs: 6.7, fat: 0.4, fiber: 3.7),
-    'banana pepper': NutritionData(calories: 27, protein: 1.7, carbs: 5.4, fat: 0.5, fiber: 3.4),
-    'poblano': NutritionData(calories: 20, protein: 0.9, carbs: 4.3, fat: 0.2, fiber: 1.5),
 
     // Cheese varieties
     'parmesan': NutritionData(calories: 431, protein: 38, carbs: 4.1, fat: 29),

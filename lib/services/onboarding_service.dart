@@ -43,7 +43,8 @@ class OnboardingService {
 
     for (final recipe in defaultRecipes) {
       try {
-        // Build pre-computed nutrition JSON (per-serving, all 35 fields)
+        // Build pre-computed nutrition JSON (TOTAL recipe, all 35 fields)
+        // calculatedServings tells the display how to compute per-serving values
         String? nutritionJson;
         if (recipe.nutrition != null) {
           final n = recipe.nutrition!;
@@ -83,6 +84,8 @@ class OnboardingService {
             'folate': n.folate,
             'choline': n.choline,
             'water': n.water,
+            if (n.calculatedServings != null)
+              'calculatedServings': n.calculatedServings,
             'isEstimated': true,
             'servingSize': '1 serving',
             'matchedIngredients': recipe.ingredients.length,
@@ -223,6 +226,10 @@ class OnboardingService {
         return 'dessert';
       case 'vegetable':
         return 'vegetable';
+      case 'sauce':
+      case 'condiment':
+      case 'dressing':
+        return 'sauce';
       default:
         return null;
     }
