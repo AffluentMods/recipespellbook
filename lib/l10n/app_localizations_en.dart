@@ -3421,4 +3421,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gradientBasedDescription => 'Color gradient based on your theme';
+
+  @override
+  String get startCooking => 'Start Cooking';
+
+  @override
+  String get fontSizeLabel => 'Font Size';
 }

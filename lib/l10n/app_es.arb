@@ -1460,5 +1460,7 @@
   "shoppingHousehold": "Hogar",
   "shoppingPersonalCare": "Cuidado Personal",
   "gradientBased": "Degradado",
-  "gradientBasedDescription": "Degradado de color basado en tu tema"
+  "gradientBasedDescription": "Degradado de color basado en tu tema",
+  "startCooking": "Empezar a cocinar",
+  "fontSizeLabel": "Tamaño de fuente"
 }

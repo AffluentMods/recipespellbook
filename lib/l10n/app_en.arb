@@ -1571,5 +1571,7 @@
   },
   "selectAllSteps": "Select All",
   "gradientBased": "Gradient-Based",
-  "gradientBasedDescription": "Color gradient based on your theme"
+  "gradientBasedDescription": "Color gradient based on your theme",
+  "startCooking": "Start Cooking",
+  "fontSizeLabel": "Font Size"
 }

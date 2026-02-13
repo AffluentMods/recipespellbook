@@ -1500,5 +1500,7 @@
   "shoppingHousehold": "Haushalt",
   "shoppingPersonalCare": "Körperpflege",
   "gradientBased": "Farbverlauf",
-  "gradientBasedDescription": "Farbverlauf basierend auf deinem Theme"
+  "gradientBasedDescription": "Farbverlauf basierend auf deinem Theme",
+  "startCooking": "Kochen starten",
+  "fontSizeLabel": "Schriftgröße"
 }

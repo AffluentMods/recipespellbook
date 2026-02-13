@@ -8,6 +8,7 @@ import '../../../providers/database_provider.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../widgets/placeholder_image.dart';
+import '../../../services/shopping_list_generator.dart';
 
 // ============ PROVIDERS ============
 
@@ -204,7 +205,6 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   void _showMoreOptions(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final mealPlanDao = ref.read(mealPlanDaoProvider);
-    final shoppingDao = ref.read(shoppingDaoProvider);
 
     showModalBottomSheet(
       context: context,
@@ -234,29 +234,29 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 title: const Text('Add week to shopping list'),
                 onTap: () async {
                   Navigator.pop(ctx);
-                  // Get all meals for the week
+                  // Collect all recipe IDs from this week's meal plans
                   final weekEnd = _weekStart.add(const Duration(days: 7));
                   final meals = await mealPlanDao.getMealPlansInRange('', _weekStart, weekEnd);
+                  final recipeIds = meals
+                      .where((m) => m.recipeId != null)
+                      .map((m) => m.recipeId!)
+                      .toSet() // deduplicate
+                      .toList();
 
-                  // Get recipes and add ingredients
-                  final recipeDao = ref.read(recipeDaoProvider);
-                  int addedCount = 0;
-
-                  for (final meal in meals) {
-                    if (meal.recipeId != null) {
-                      final ingredients = await recipeDao.getIngredientsForRecipe(meal.recipeId!);
-                      await shoppingDao.addItemsFromRecipe(
-                        listId: 'list_default',
-                        recipeId: meal.recipeId!,
-                        ingredients: ingredients.map((i) => i.name).toList(),
+                  if (recipeIds.isEmpty) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('No recipes planned this week')),
                       );
-                      addedCount += ingredients.length;
                     }
+                    return;
                   }
 
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Added $addedCount ingredients to shopping list')),
+                    launchShoppingListGeneratorFromMealPlan(
+                      context,
+                      ref,
+                      recipeIds: recipeIds,
                     );
                   }
                 },

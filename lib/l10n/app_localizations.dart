@@ -6384,6 +6384,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Color gradient based on your theme'**
   String get gradientBasedDescription;
+
+  /// No description provided for @startCooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Cooking'**
+  String get startCooking;
+
+  /// No description provided for @fontSizeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Font Size'**
+  String get fontSizeLabel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
