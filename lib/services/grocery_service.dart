@@ -55,25 +55,33 @@ class CartAddResult {
 class GroceryService {
   static const _storage = FlutterSecureStorage();
 
-  // Secure storage keys (user overrides)
+  // Secure storage keys
   static const _instacartApiKey = 'grocery_instacart_api_key';
   static const _krogerClientId = 'grocery_kroger_client_id';
   static const _krogerClientSecret = 'grocery_kroger_client_secret';
-  static const _krogerAccessToken = 'grocery_kroger_access_token';
-  static const _krogerRefreshToken = 'grocery_kroger_refresh_token';
+  static const _krogerSearchToken = 'grocery_kroger_search_token';
+  static const _krogerCartToken = 'grocery_kroger_cart_token';
+  static const _krogerCartRefreshToken = 'grocery_kroger_cart_refresh_token';
   static const _krogerLocationId = 'grocery_kroger_location_id';
+  static const _krogerTokenExpiry = 'grocery_kroger_token_expiry';
 
-  // ────────────────────────────────────────────
-  //  EMBEDDED DEFAULTS (bundled with app)
-  //  User-configured keys in secure storage take priority.
-  //  Replace with production keys before release.
-  // ────────────────────────────────────────────
-  static const _defaultInstacartKey = '***REMOVED***';
+  static const _defaultInstacartKey =
+      '***REMOVED***';
   static const _defaultKrogerClientId = '***REMOVED***';
   static const _defaultKrogerSecret = '***REMOVED***';
 
+  // Instacart Connect production endpoint
+  static const _instacartBase = 'https://connect.instacart.com';
+
+  // Kroger OAuth
+  static const _krogerRedirectUri = 'recipespellbook://kroger-callback';
+  static const _krogerAuthUrl =
+      'https://api.kroger.com/v1/connect/oauth2/authorize';
+  static const _krogerTokenUrl =
+      'https://api.kroger.com/v1/connect/oauth2/token';
+
   // ────────────────────────────────────────────
-  //  KEY RETRIEVAL (secure storage → embedded default)
+  //  KEY RETRIEVAL (secure storage override → embedded default)
   // ────────────────────────────────────────────
 
   static Future<String> _getInstacartKey() async {
@@ -92,13 +100,26 @@ class GroceryService {
   }
 
   // ────────────────────────────────────────────
-  //  CONFIGURATION
+  //  CONFIGURATION STATUS
   // ────────────────────────────────────────────
 
-  /// Always returns true — embedded defaults are available for both providers.
-  /// If user has overridden keys in secure storage, those take priority.
+  /// Instacart: always true (embedded key, swap to prod when ready).
+  /// Kroger: true only after user completes OAuth login.
   static Future<bool> isConfigured(GroceryProvider provider) async {
-    return true;
+    switch (provider) {
+      case GroceryProvider.instacart:
+        return true;
+      case GroceryProvider.kroger:
+        final token = await _storage.read(key: _krogerCartToken);
+        return token != null && token.isNotEmpty;
+    }
+  }
+
+  /// Check if Kroger can at least search (client_credentials — no login).
+  static Future<bool> isKrogerSearchReady() async {
+    final token = await _storage.read(key: _krogerSearchToken);
+    if (token != null) return true;
+    return krogerAuthenticateForSearch();
   }
 
   static Future<void> configureInstacart({required String apiKey}) async {
@@ -128,11 +149,10 @@ class GroceryService {
         break;
       case GroceryProvider.kroger:
         for (final k in [
-          _krogerClientId,
-          _krogerClientSecret,
-          _krogerAccessToken,
-          _krogerRefreshToken,
-          _krogerLocationId,
+          _krogerClientId, _krogerClientSecret,
+          _krogerSearchToken, _krogerCartToken,
+          _krogerCartRefreshToken, _krogerLocationId,
+          _krogerTokenExpiry,
         ]) {
           await _storage.delete(key: k);
         }
@@ -140,41 +160,46 @@ class GroceryService {
     }
   }
 
-  // ────────────────────────────────────────────
-  //  INSTACART  (Developer Platform)
-  //  https://docs.instacart.com/developer_platform_api/
-  // ────────────────────────────────────────────
+  // ════════════════════════════════════════════
+  //  INSTACART  (Connect API — production)
+  // ════════════════════════════════════════════
 
   static Future<List<GroceryProduct>> instacartSearch(String query) async {
     final apiKey = await _getInstacartKey();
-
     try {
       final uri = Uri.parse(
-        'https://connect.instacart.com/v2/fulfillment/catalog'
+        '$_instacartBase/v2/fulfillment/catalog'
             '?query=${Uri.encodeComponent(query)}&limit=5',
       );
+      debugPrint('[Instacart] Search "$query"');
       final resp = await http.get(uri, headers: {
         'Authorization': 'Bearer $apiKey',
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       });
+      debugPrint('[Instacart] → ${resp.statusCode} (${resp.body.length}b)');
+
       if (resp.statusCode == 200) {
-        final list = (jsonDecode(resp.body)['catalog_items'] as List?) ?? [];
-        return list
+        final body = jsonDecode(resp.body);
+        final List items =
+            body['catalog_items'] ?? body['items'] ?? body['products'] ?? [];
+        debugPrint('[Instacart] ${items.length} results for "$query"');
+        return items
             .map((i) => GroceryProduct(
-          id: i['id']?.toString() ?? '',
-          name: i['name'] ?? query,
-          brand: i['brand'],
-          imageUrl: i['image_url'],
-          price: (i['price'] as num?)?.toDouble(),
-          size: i['size'],
-          available: i['available'] ?? true,
+          id: (i['id'] ?? i['product_id'] ?? '').toString(),
+          name: i['name'] ?? i['title'] ?? query,
+          brand: i['brand'] ?? i['brand_name'],
+          imageUrl: i['image_url'] ?? i['thumbnail_url'],
+          price: (i['price'] as num?)?.toDouble() ??
+              (i['base_price'] as num?)?.toDouble(),
+          size: i['size'] ?? i['unit_size'],
+          available: i['available'] ?? i['in_stock'] ?? true,
         ))
             .toList();
       }
-      debugPrint('Instacart search: ${resp.statusCode} ${resp.body}');
+      _logResponse('[Instacart]', resp);
     } catch (e) {
-      debugPrint('Instacart search error: $e');
+      debugPrint('[Instacart] Search error: $e');
     }
     return [];
   }
@@ -183,81 +208,211 @@ class GroceryService {
       List<Map<String, dynamic>> items) async {
     final apiKey = await _getInstacartKey();
     try {
-      final lineItems = items
-          .map((it) => {
-        'line_num': it['index'] ?? 0,
-        'product_id': it['product_id'] ?? '',
-        'quantity': it['quantity'] ?? 1,
-      })
-          .toList();
+      final lineItems = items.asMap().entries.map((e) => {
+        'line_num': (e.key + 1).toString(),
+        'product_id': e.value['product_id']?.toString() ?? '',
+        'quantity': e.value['quantity'] ?? 1,
+      }).toList();
 
+      debugPrint('[Instacart] Creating order with ${lineItems.length} items');
       final resp = await http.post(
-        Uri.parse('https://connect.instacart.com/v2/fulfillment/orders'),
+        Uri.parse('$_instacartBase/v2/fulfillment/orders'),
         headers: {
           'Authorization': 'Bearer $apiKey',
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: jsonEncode({'order': {'line_items': lineItems}}),
+        body: jsonEncode({
+          'order': {'line_items': lineItems, 'order_type': 'delivery'},
+        }),
       );
+      debugPrint('[Instacart] Order → ${resp.statusCode}');
+
       if (resp.statusCode == 200 || resp.statusCode == 201) {
         final data = jsonDecode(resp.body);
+        final url = data['checkout_url'] ??
+            data['order']?['checkout_url'] ??
+            data['order']?['url'] ??
+            data['url'];
         return CartAddResult(
           success: true,
           itemsAdded: items.length,
-          checkoutUrl: data['checkout_url'],
+          checkoutUrl: url?.toString(),
+          message: url != null ? 'Order created' : 'Items added',
+        );
+      }
+      _logResponse('[Instacart]', resp);
+
+      // Fallback: open store search for first product
+      if (items.isNotEmpty) {
+        final name = items.first['name']?.toString() ?? '';
+        return CartAddResult(
+          success: false,
+          itemsFailed: items.length,
+          message: 'API ${resp.statusCode}',
+          checkoutUrl: deepLinkUrl(GroceryProvider.instacart, name).toString(),
         );
       }
       return CartAddResult(
-        success: false,
-        itemsFailed: items.length,
-        message: 'API ${resp.statusCode}',
-      );
+          success: false, itemsFailed: items.length, message: 'API ${resp.statusCode}');
     } catch (e) {
+      debugPrint('[Instacart] Order error: $e');
       return CartAddResult(success: false, message: '$e');
     }
   }
 
-  // ────────────────────────────────────────────
-  //  KROGER  (Public API)
-  //  https://developer.kroger.com/documentation
-  // ────────────────────────────────────────────
+  // ════════════════════════════════════════════
+  //  KROGER
+  // ════════════════════════════════════════════
 
-  static Future<bool> krogerAuthenticate() async {
+  // ── Search auth (client_credentials) ──
+
+  static Future<bool> krogerAuthenticateForSearch() async {
     final clientId = await _getKrogerClientId();
     final clientSecret = await _getKrogerSecret();
     try {
       final creds = base64Encode(utf8.encode('$clientId:$clientSecret'));
+      debugPrint('[Kroger] Auth (client_credentials)...');
       final resp = await http.post(
-        Uri.parse('https://api.kroger.com/v1/connect/oauth2/token'),
+        Uri.parse(_krogerTokenUrl),
         headers: {
           'Authorization': 'Basic $creds',
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: 'grant_type=client_credentials&scope=product.compact',
       );
+      debugPrint('[Kroger] Auth → ${resp.statusCode}');
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
-        await _storage.write(
-            key: _krogerAccessToken, value: data['access_token']);
-        if (data['refresh_token'] != null) {
-          await _storage.write(
-              key: _krogerRefreshToken, value: data['refresh_token']);
-        }
+        await _storage.write(key: _krogerSearchToken, value: data['access_token']);
         return true;
       }
-      debugPrint('Kroger auth: ${resp.statusCode} ${resp.body}');
+      _logResponse('[Kroger]', resp);
     } catch (e) {
-      debugPrint('Kroger auth error: $e');
+      debugPrint('[Kroger] Auth error: $e');
     }
     return false;
   }
 
+  // ── Cart auth (authorization_code — user login) ──
+
+  /// Opens browser → Kroger login → redirects to recipespellbook://kroger-callback?code=XXX
+  static Future<bool> krogerStartOAuthLogin() async {
+    final clientId = await _getKrogerClientId();
+    final authUri = Uri.parse(_krogerAuthUrl).replace(queryParameters: {
+      'scope': 'cart.basic:write product.compact',
+      'response_type': 'code',
+      'client_id': clientId,
+      'redirect_uri': _krogerRedirectUri,
+    });
+    debugPrint('[Kroger] OAuth URL: $authUri');
+    try {
+      return await launchUrl(authUri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      debugPrint('[Kroger] OAuth launch error: $e');
+      return false;
+    }
+  }
+
+  /// Exchange auth code from callback for tokens.
+  static Future<bool> krogerExchangeAuthCode(String authCode) async {
+    final clientId = await _getKrogerClientId();
+    final clientSecret = await _getKrogerSecret();
+    try {
+      final creds = base64Encode(utf8.encode('$clientId:$clientSecret'));
+      debugPrint('[Kroger] Exchanging auth code...');
+      final resp = await http.post(
+        Uri.parse(_krogerTokenUrl),
+        headers: {
+          'Authorization': 'Basic $creds',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'grant_type=authorization_code'
+            '&code=${Uri.encodeComponent(authCode)}'
+            '&redirect_uri=${Uri.encodeComponent(_krogerRedirectUri)}',
+      );
+      debugPrint('[Kroger] Token exchange → ${resp.statusCode}');
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body);
+        await _storage.write(key: _krogerCartToken, value: data['access_token']);
+        if (data['refresh_token'] != null) {
+          await _storage.write(
+              key: _krogerCartRefreshToken, value: data['refresh_token']);
+        }
+        final expiresIn = data['expires_in'] as int? ?? 1800;
+        final expiry = DateTime.now().add(Duration(seconds: expiresIn));
+        await _storage.write(key: _krogerTokenExpiry, value: expiry.toIso8601String());
+        debugPrint('[Kroger] Cart tokens saved, expires $expiry');
+        return true;
+      }
+      _logResponse('[Kroger]', resp);
+    } catch (e) {
+      debugPrint('[Kroger] Token exchange error: $e');
+    }
+    return false;
+  }
+
+  static Future<bool> _krogerRefreshCartToken() async {
+    final refreshToken = await _storage.read(key: _krogerCartRefreshToken);
+    if (refreshToken == null) return false;
+    final clientId = await _getKrogerClientId();
+    final clientSecret = await _getKrogerSecret();
+    try {
+      final creds = base64Encode(utf8.encode('$clientId:$clientSecret'));
+      debugPrint('[Kroger] Refreshing cart token...');
+      final resp = await http.post(
+        Uri.parse(_krogerTokenUrl),
+        headers: {
+          'Authorization': 'Basic $creds',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'grant_type=refresh_token'
+            '&refresh_token=${Uri.encodeComponent(refreshToken)}',
+      );
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body);
+        await _storage.write(key: _krogerCartToken, value: data['access_token']);
+        if (data['refresh_token'] != null) {
+          await _storage.write(
+              key: _krogerCartRefreshToken, value: data['refresh_token']);
+        }
+        final expiresIn = data['expires_in'] as int? ?? 1800;
+        final expiry = DateTime.now().add(Duration(seconds: expiresIn));
+        await _storage.write(key: _krogerTokenExpiry, value: expiry.toIso8601String());
+        debugPrint('[Kroger] Refreshed, expires $expiry');
+        return true;
+      }
+      debugPrint('[Kroger] Refresh failed: ${resp.statusCode}');
+    } catch (e) {
+      debugPrint('[Kroger] Refresh error: $e');
+    }
+    return false;
+  }
+
+  static Future<String?> _getKrogerCartToken() async {
+    final token = await _storage.read(key: _krogerCartToken);
+    if (token == null) return null;
+    final expiryStr = await _storage.read(key: _krogerTokenExpiry);
+    if (expiryStr != null) {
+      final expiry = DateTime.tryParse(expiryStr);
+      if (expiry != null &&
+          DateTime.now().isAfter(expiry.subtract(const Duration(minutes: 2)))) {
+        if (await _krogerRefreshCartToken()) {
+          return _storage.read(key: _krogerCartToken);
+        }
+        return null;
+      }
+    }
+    return token;
+  }
+
+  // ── Product search ──
+
   static Future<List<GroceryProduct>> krogerSearch(String query) async {
-    var token = await _storage.read(key: _krogerAccessToken);
+    var token = await _storage.read(key: _krogerSearchToken);
     if (token == null) {
-      if (!await krogerAuthenticate()) return [];
-      token = await _storage.read(key: _krogerAccessToken);
+      if (!await krogerAuthenticateForSearch()) return [];
+      token = await _storage.read(key: _krogerSearchToken);
     }
     final locationId = await _storage.read(key: _krogerLocationId);
     try {
@@ -265,17 +420,21 @@ class GroceryService {
           '?filter.term=${Uri.encodeComponent(query)}&filter.limit=5';
       if (locationId != null) url += '&filter.locationId=$locationId';
 
+      debugPrint('[Kroger] Search "$query"');
       final resp = await http.get(Uri.parse(url), headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
       });
+      debugPrint('[Kroger] → ${resp.statusCode}');
+
       if (resp.statusCode == 401) {
-        // Token expired — re-auth and retry once
-        if (!await krogerAuthenticate()) return [];
+        debugPrint('[Kroger] Search token expired, re-auth...');
+        if (!await krogerAuthenticateForSearch()) return [];
         return krogerSearch(query);
       }
       if (resp.statusCode == 200) {
         final products = (jsonDecode(resp.body)['data'] as List?) ?? [];
+        debugPrint('[Kroger] ${products.length} results for "$query"');
         return products.map((p) {
           final imgs = p['images'] as List?;
           String? imgUrl;
@@ -300,24 +459,32 @@ class GroceryService {
           );
         }).toList();
       }
+      _logResponse('[Kroger]', resp);
     } catch (e) {
-      debugPrint('Kroger search error: $e');
+      debugPrint('[Kroger] Search error: $e');
     }
     return [];
   }
 
-  /// Add to Kroger cart (one-way: API allows add but not remove)
+  // ── Add to cart ──
+
   static Future<CartAddResult> krogerAddToCart(
       List<Map<String, dynamic>> items) async {
-    final token = await _storage.read(key: _krogerAccessToken);
+    final token = await _getKrogerCartToken();
     if (token == null) {
-      return const CartAddResult(success: false, message: 'Not authenticated');
+      return const CartAddResult(
+        success: false,
+        message: 'Not signed in to Kroger. Please connect your account first.',
+      );
     }
     try {
       final cartItems = items
-          .map((it) =>
-      {'upc': it['product_id'], 'quantity': it['quantity'] ?? 1})
+          .map((it) => {
+        'upc': it['product_id']?.toString() ?? '',
+        'quantity': it['quantity'] ?? 1,
+      })
           .toList();
+      debugPrint('[Kroger] Adding ${cartItems.length} items to cart');
       final resp = await http.put(
         Uri.parse('https://api.kroger.com/v1/cart/add'),
         headers: {
@@ -327,6 +494,8 @@ class GroceryService {
         },
         body: jsonEncode({'items': cartItems}),
       );
+      debugPrint('[Kroger] Cart → ${resp.statusCode}');
+
       if (resp.statusCode == 204 || resp.statusCode == 200) {
         return CartAddResult(
           success: true,
@@ -334,12 +503,21 @@ class GroceryService {
           checkoutUrl: 'https://www.kroger.com/cart',
         );
       }
+      if (resp.statusCode == 401) {
+        if (await _krogerRefreshCartToken()) return krogerAddToCart(items);
+        return const CartAddResult(
+          success: false,
+          message: 'Session expired. Please reconnect Kroger.',
+        );
+      }
+      _logResponse('[Kroger]', resp);
       return CartAddResult(
         success: false,
         itemsFailed: items.length,
         message: 'API ${resp.statusCode}',
       );
     } catch (e) {
+      debugPrint('[Kroger] Cart error: $e');
       return CartAddResult(success: false, message: '$e');
     }
   }
@@ -347,19 +525,16 @@ class GroceryService {
   /// Find nearby Kroger-family stores by zip
   static Future<List<Map<String, dynamic>>> krogerSearchLocations(
       String zipCode) async {
-    var token = await _storage.read(key: _krogerAccessToken);
+    var token = await _storage.read(key: _krogerSearchToken);
     if (token == null) {
-      if (!await krogerAuthenticate()) return [];
-      token = await _storage.read(key: _krogerAccessToken);
+      if (!await krogerAuthenticateForSearch()) return [];
+      token = await _storage.read(key: _krogerSearchToken);
     }
     try {
       final resp = await http.get(
         Uri.parse('https://api.kroger.com/v1/locations'
             '?filter.zipCode.near=$zipCode&filter.limit=5'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
+        headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
       );
       if (resp.statusCode == 200) {
         final locs = (jsonDecode(resp.body)['data'] as List?) ?? [];
@@ -375,29 +550,20 @@ class GroceryService {
             .toList();
       }
     } catch (e) {
-      debugPrint('Kroger location error: $e');
+      debugPrint('[Kroger] Location error: $e');
     }
     return [];
   }
 
-  // ────────────────────────────────────────────
+  // ════════════════════════════════════════════
   //  INGREDIENT NAME CLEANING
-  // ────────────────────────────────────────────
+  // ════════════════════════════════════════════
 
-  /// Strips prep instructions, quantities, and fractions from ingredient text
-  /// to produce a clean search-friendly name.
-  ///
-  /// "guanciale, cut into ¼-inch batons" → "guanciale"
-  /// "2 cups all-purpose flour, sifted" → "all-purpose flour"
-  /// "fresh mozzarella, sliced thin" → "fresh mozzarella"
-  /// "1½ lb boneless chicken breast, cubed" → "boneless chicken breast"
   static String cleanForSearch(String raw) {
     var s = raw.trim();
-
-    // Remove leading quantities: "2 cups", "1½ lb", "¼ tsp", "1/2 cup"
     s = s.replaceFirst(
       RegExp(
-        r'^[\d½¼¾⅓⅔⅛⅜⅝⅞/.\s]+'  // digits, fractions, slashes, dots
+        r'^[\d½¼¾⅓⅔⅛⅜⅝⅞/.\s]+'
         r'(?:'
         r'cups?|tbsp|tsp|tablespoons?|teaspoons?|'
         r'oz|ounces?|lbs?|pounds?|'
@@ -412,13 +578,7 @@ class GroceryService {
       ),
       '',
     );
-
-    // Cut at comma, semicolon, or parenthetical — prep instructions follow
-    // "guanciale, cut into batons" → "guanciale"
-    // "flour (sifted)" → "flour"
     s = s.split(RegExp(r'[,;(]')).first.trim();
-
-    // Remove trailing prep phrases after common keywords
     s = s.replaceFirst(
       RegExp(
         r'\s+(?:cut|diced|chopped|sliced|minced|grated|shredded|'
@@ -431,21 +591,14 @@ class GroceryService {
       ),
       '',
     );
-
-    // Collapse whitespace
     s = s.replaceAll(RegExp(r'\s+'), ' ').trim();
-
-    // If cleaning removed everything, fall back to first 3 words of original
-    if (s.isEmpty) {
-      s = raw.trim().split(RegExp(r'\s+')).take(3).join(' ');
-    }
-
+    if (s.isEmpty) s = raw.trim().split(RegExp(r'\s+')).take(3).join(' ');
     return s;
   }
 
-  // ────────────────────────────────────────────
-  //  DEEP LINK FALLBACKS (when API not configured)
-  // ────────────────────────────────────────────
+  // ════════════════════════════════════════════
+  //  DEEP LINKS
+  // ════════════════════════════════════════════
 
   static Uri deepLinkUrl(GroceryProvider provider, String query) {
     final q = Uri.encodeComponent(query);
@@ -453,8 +606,7 @@ class GroceryService {
       case GroceryProvider.instacart:
         return Uri.parse('https://www.instacart.com/store/search/$q');
       case GroceryProvider.kroger:
-        return Uri.parse(
-            'https://www.kroger.com/search?query=$q&searchType=default_search');
+        return Uri.parse('https://www.kroger.com/search?query=$q&searchType=default_search');
     }
   }
 
@@ -467,32 +619,31 @@ class GroceryService {
     }
   }
 
-  static Future<bool> openDeepLink(
-      GroceryProvider provider, String query) async {
+  static Future<bool> openDeepLink(GroceryProvider provider, String query) async {
     final url = deepLinkUrl(provider, cleanForSearch(query));
+    debugPrint('[GroceryService] Deep link: $url');
     try {
       return await launchUrl(url, mode: LaunchMode.externalApplication);
     } catch (e) {
-      debugPrint('Failed to open deep link: $e');
+      debugPrint('[GroceryService] Deep link error: $e');
       return false;
     }
   }
 
   static Future<bool> openStore(GroceryProvider provider) async {
-    final url = storeHomepage(provider);
     try {
-      return await launchUrl(url, mode: LaunchMode.externalApplication);
+      return await launchUrl(storeHomepage(provider),
+          mode: LaunchMode.externalApplication);
     } catch (e) {
-      debugPrint('Failed to open store: $e');
+      debugPrint('[GroceryService] Open store error: $e');
       return false;
     }
   }
 
-  // ────────────────────────────────────────────
-  //  HIGH-LEVEL: SEND TO STORE
-  // ────────────────────────────────────────────
+  // ════════════════════════════════════════════
+  //  SEND TO STORE (high-level)
+  // ════════════════════════════════════════════
 
-  /// Best-effort send: uses API when configured, deep link fallback otherwise.
   static Future<CartAddResult> sendToStore({
     required GroceryProvider provider,
     required List<String> ingredientNames,
@@ -503,6 +654,9 @@ class GroceryService {
     }
 
     final configured = await isConfigured(provider);
+    debugPrint('[SendToStore] ${provider.name} configured=$configured '
+        'items=${ingredientNames.length}');
+
     if (configured) {
       return _sendViaApi(
         provider: provider,
@@ -521,10 +675,11 @@ class GroceryService {
   }) async {
     final matched = <Map<String, dynamic>>[];
     final failed = <String>[];
+    int consecutiveEmpty = 0;
 
     for (var i = 0; i < ingredientNames.length; i++) {
       final name = cleanForSearch(ingredientNames[i]);
-      onProgress?.call(i + 1, ingredientNames.length, ingredientNames[i]);
+      onProgress?.call(i + 1, ingredientNames.length, name);
 
       List<GroceryProduct> results;
       switch (provider) {
@@ -537,6 +692,7 @@ class GroceryService {
       }
 
       if (results.isNotEmpty) {
+        consecutiveEmpty = 0;
         matched.add({
           'product_id': results.first.id,
           'name': results.first.name,
@@ -544,18 +700,30 @@ class GroceryService {
           'index': i,
         });
       } else {
+        consecutiveEmpty++;
         failed.add(name);
+
+        // Safety: if first 3 all miss and nothing matched yet,
+        // API probably can't find products → bail to deep link
+        if (consecutiveEmpty >= 3 && matched.isEmpty) {
+          debugPrint('[SendToStore] 3 consecutive misses, 0 matches → deep link');
+          return _sendViaDeepLink(
+            provider: provider,
+            ingredientNames: ingredientNames,
+          );
+        }
       }
     }
 
     if (matched.isEmpty) {
-      return CartAddResult(
-        success: false,
-        itemsFailed: ingredientNames.length,
-        failedItems: failed,
-        message: 'No products found',
+      debugPrint('[SendToStore] 0 matches → deep link');
+      return _sendViaDeepLink(
+        provider: provider,
+        ingredientNames: ingredientNames,
       );
     }
+
+    debugPrint('[SendToStore] ${matched.length} matched, ${failed.length} failed → cart');
 
     CartAddResult result;
     switch (provider) {
@@ -569,7 +737,7 @@ class GroceryService {
 
     return CartAddResult(
       success: result.success,
-      itemsAdded: result.itemsAdded,
+      itemsAdded: result.itemsAdded > 0 ? result.itemsAdded : matched.length,
       itemsFailed: failed.length + result.itemsFailed,
       failedItems: [...failed, ...result.failedItems],
       checkoutUrl: result.checkoutUrl,
@@ -582,6 +750,7 @@ class GroceryService {
     required List<String> ingredientNames,
   }) async {
     final cleaned = ingredientNames.take(3).map(cleanForSearch).join(' ');
+    debugPrint('[SendToStore] Deep link: ${provider.name} "$cleaned"');
     await openDeepLink(provider, cleaned);
     return CartAddResult(
       success: true,
@@ -593,5 +762,11 @@ class GroceryService {
 
   /// Plain text for clipboard
   static String formatForClipboard(List<String> names) =>
-      names.map((n) => '• $n').join('\n');
+      names.map((n) => '\u2022 $n').join('\n');
+
+  // ── Logging helper ──
+  static void _logResponse(String tag, http.Response resp) {
+    final body = resp.body.length > 250 ? resp.body.substring(0, 250) : resp.body;
+    debugPrint('$tag ${resp.statusCode}: $body');
+  }
 }

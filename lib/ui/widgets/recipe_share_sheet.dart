@@ -226,7 +226,7 @@ class _RecipeShareSheet extends StatelessWidget {
     final steps = await ref.read(recipeDaoProvider).getStepsForRecipe(recipe.id);
 
     final buffer = StringBuffer();
-    buffer.writeln('📖 ${recipe.title}');
+    buffer.writeln('\u{1F4D6} ${recipe.title}');
     buffer.writeln();
 
     if (recipe.description != null && recipe.description!.isNotEmpty) {
@@ -244,19 +244,19 @@ class _RecipeShareSheet extends StatelessWidget {
     }
 
     if (ingredients.isNotEmpty) {
-      buffer.writeln('🥕 ${l10n.ingredientsTitle}:');
+      buffer.writeln('\u{1F955} ${l10n.ingredientsTitle}:');
       for (final ing in ingredients) {
         final parts = <String>[];
         if (ing.amount != null) parts.add(ing.amount!);
         if (ing.unit != null) parts.add(ing.unit!);
         parts.add(ing.name);
-        buffer.writeln('• ${parts.join(' ')}');
+        buffer.writeln('\u2022 ${parts.join(' ')}');
       }
       buffer.writeln();
     }
 
     if (steps.isNotEmpty) {
-      buffer.writeln('📝 ${l10n.instructionsTitle}:');
+      buffer.writeln('\u{1F4DD} ${l10n.instructionsTitle}:');
       for (var i = 0; i < steps.length; i++) {
         buffer.writeln('${i + 1}. ${steps[i].instruction}');
       }
@@ -264,7 +264,7 @@ class _RecipeShareSheet extends StatelessWidget {
     }
 
     if (recipe.notes != null && recipe.notes!.isNotEmpty) {
-      buffer.writeln('💡 ${l10n.notesTitle}:');
+      buffer.writeln('\u{1F4A1} ${l10n.notesTitle}:');
       buffer.writeln(recipe.notes);
     }
 
@@ -572,11 +572,11 @@ class _RecipeShareSheet extends StatelessWidget {
               mainAxisAlignment: pw.MainAxisAlignment.start,
               children: [
                 if (recipe.servings != null)
-                  _pdfMetaItem('🍽️', '${recipe.servings} servings'),
+                  _pdfMetaItem('\u{1F37D}\uFE0F', '${recipe.servings} servings'),
                 if (recipe.prepTimeMinutes != null)
-                  _pdfMetaItem('⏱️', '${recipe.prepTimeMinutes} min prep'),
+                  _pdfMetaItem('\u23F1\uFE0F', '${recipe.prepTimeMinutes} min prep'),
                 if (recipe.cookTimeMinutes != null)
-                  _pdfMetaItem('🔥', '${recipe.cookTimeMinutes} min cook'),
+                  _pdfMetaItem('\u{1F525}', '${recipe.cookTimeMinutes} min cook'),
               ],
             ),
 
@@ -606,7 +606,7 @@ class _RecipeShareSheet extends StatelessWidget {
                     child: pw.Row(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
-                        pw.Text('• ', style: const pw.TextStyle(fontSize: 12)),
+                        pw.Text('\u2022 ', style: const pw.TextStyle(fontSize: 12)),
                         pw.Expanded(
                           child: pw.Text(
                             parts.join(' '),

@@ -6,6 +6,7 @@ import '../../../providers/database_provider.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../services/export_import_service.dart';
 import '../../../services/onboarding_service.dart';
+import '../../../services/grocery_service.dart';
 import '../../../data/app_enums.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'nutrition_settings_screen.dart';
@@ -129,6 +130,9 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
+
+          // ============ STORE INTEGRATIONS ============
+          const _StoreIntegrationsSection(),
 
           // ============ DATA ============
           _SettingsSection(
@@ -1333,6 +1337,342 @@ class _LanguageTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════
+//  STORE INTEGRATIONS SECTION
+// ════════════════════════════════════════════
+
+class _StoreIntegrationsSection extends StatefulWidget {
+  const _StoreIntegrationsSection();
+
+  @override
+  State<_StoreIntegrationsSection> createState() =>
+      _StoreIntegrationsSectionState();
+}
+
+class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
+  bool _instacartConfigured = false;
+  bool _krogerConfigured = false;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkStatus();
+  }
+
+  Future<void> _checkStatus() async {
+    final ic = await GroceryService.isConfigured(GroceryProvider.instacart);
+    final kr = await GroceryService.isConfigured(GroceryProvider.kroger);
+    if (mounted) {
+      setState(() {
+        _instacartConfigured = ic;
+        _krogerConfigured = kr;
+        _loading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return _SettingsSection(
+      title: 'Store Integrations',
+      children: [
+        // Instacart
+        ListTile(
+          leading: const Text('\u{1F955}', style: TextStyle(fontSize: 22)),
+          title: const Text('Instacart'),
+          subtitle: Text(
+            _loading
+                ? 'Checking...'
+                : _instacartConfigured
+                ? 'Connected \u2022 Tap to manage'
+                : 'Not connected',
+            style: TextStyle(
+              color: _instacartConfigured
+                  ? const Color(0xFF43B02A)
+                  : theme.colorScheme.outline,
+            ),
+          ),
+          trailing: _instacartConfigured
+              ? const Icon(Icons.check_circle, color: Color(0xFF43B02A), size: 20)
+              : const Icon(Icons.chevron_right),
+          onTap: () => _showInstacartOptions(context),
+        ),
+        // Kroger
+        ListTile(
+          leading: const Text('\u{1F3EA}', style: TextStyle(fontSize: 22)),
+          title: const Text('Kroger'),
+          subtitle: Text(
+            _loading
+                ? 'Checking...'
+                : _krogerConfigured
+                ? 'Connected \u2022 Tap to manage'
+                : 'Tap to sign in',
+            style: TextStyle(
+              color: _krogerConfigured
+                  ? const Color(0xFF43B02A)
+                  : theme.colorScheme.outline,
+            ),
+          ),
+          trailing: _krogerConfigured
+              ? const Icon(Icons.check_circle, color: Color(0xFF43B02A), size: 20)
+              : const Icon(Icons.chevron_right),
+          onTap: () => _showKrogerOptions(context),
+        ),
+      ],
+    );
+  }
+
+  void _showInstacartOptions(BuildContext context) {
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  const Text('\u{1F955}', style: TextStyle(fontSize: 24)),
+                  const SizedBox(width: 12),
+                  Text('Instacart',
+                      style: theme.textTheme.titleLarge
+                          ?.copyWith(fontWeight: FontWeight.bold)),
+                  if (_instacartConfigured) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF43B02A).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text('Connected',
+                          style: TextStyle(
+                              color: Color(0xFF43B02A),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600)),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.vpn_key_outlined),
+              title: const Text('Set custom API key'),
+              subtitle: const Text('Use your own Instacart Connect key'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showApiKeyDialog(context,
+                    provider: GroceryProvider.instacart,
+                    title: 'Instacart API Key',
+                    hint: 'Bearer key from Developer Dashboard');
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.link_off, color: theme.colorScheme.error),
+              title: Text('Reset to default key',
+                  style: TextStyle(color: theme.colorScheme.error)),
+              subtitle: const Text('Remove custom key, use built-in'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                await GroceryService.disconnect(GroceryProvider.instacart);
+                _checkStatus();
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showKrogerOptions(BuildContext context) {
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  const Text('\u{1F3EA}', style: TextStyle(fontSize: 24)),
+                  const SizedBox(width: 12),
+                  Text('Kroger',
+                      style: theme.textTheme.titleLarge
+                          ?.copyWith(fontWeight: FontWeight.bold)),
+                  if (_krogerConfigured) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF43B02A).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text('Connected',
+                          style: TextStyle(
+                              color: Color(0xFF43B02A),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600)),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (!_krogerConfigured)
+              ListTile(
+                leading: const Icon(Icons.login),
+                title: const Text('Sign in to Kroger'),
+                subtitle: const Text('Connect to add items to your cart'),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await GroceryService.krogerStartOAuthLogin();
+                },
+              ),
+            ListTile(
+              leading: const Icon(Icons.location_on_outlined),
+              title: const Text('Set preferred store'),
+              subtitle: const Text('Search by zip code'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showKrogerLocationDialog(context);
+              },
+            ),
+            if (_krogerConfigured)
+              ListTile(
+                leading: Icon(Icons.link_off, color: theme.colorScheme.error),
+                title: Text('Disconnect',
+                    style: TextStyle(color: theme.colorScheme.error)),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await GroceryService.disconnect(GroceryProvider.kroger);
+                  _checkStatus();
+                },
+              ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showApiKeyDialog(BuildContext context, {
+    required GroceryProvider provider,
+    required String title,
+    required String hint,
+  }) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(hintText: hint, border: const OutlineInputBorder()),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () async {
+              final key = controller.text.trim();
+              if (key.isEmpty) return;
+              Navigator.pop(ctx);
+              await GroceryService.configureInstacart(apiKey: key);
+              _checkStatus();
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('API key saved'), behavior: SnackBarBehavior.floating, duration: Duration(seconds: 2)),
+                );
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showKrogerLocationDialog(BuildContext context) {
+    final controller = TextEditingController();
+    final theme = Theme.of(context);
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        List<Map<String, dynamic>> results = [];
+        bool searching = false;
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) => AlertDialog(
+            title: const Text('Find your Kroger store'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    hintText: 'Enter zip code',
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: searching
+                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Icon(Icons.search),
+                      onPressed: () async {
+                        final zip = controller.text.trim();
+                        if (zip.isEmpty) return;
+                        setDialogState(() => searching = true);
+                        final locs = await GroceryService.krogerSearchLocations(zip);
+                        setDialogState(() { results = locs; searching = false; });
+                      },
+                    ),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                if (results.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 200),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: results.length,
+                      itemBuilder: (_, i) {
+                        final loc = results[i];
+                        return ListTile(
+                          dense: true,
+                          title: Text(loc['name'] ?? 'Store'),
+                          subtitle: Text('${loc['address'] ?? ''}, ${loc['city'] ?? ''} ${loc['state'] ?? ''}',
+                              style: theme.textTheme.bodySmall),
+                          onTap: () async {
+                            final id = loc['id']?.toString();
+                            if (id != null) await GroceryService.setKrogerLocation(id);
+                            if (ctx.mounted) Navigator.pop(ctx);
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Store set: ${loc['name'] ?? 'Kroger'}'),
+                                    behavior: SnackBarBehavior.floating, duration: const Duration(seconds: 2)),
+                              );
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close'))],
+          ),
+        );
+      },
     );
   }
 }

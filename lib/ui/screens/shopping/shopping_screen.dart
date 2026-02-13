@@ -19,6 +19,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../services/ingredient_suggestion_service.dart';
 import '../../../services/grocery_service.dart';
 import '../../../services/shopping_list_service.dart';
+import '../../../services/barcode_scanner_service.dart';
 import '../../widgets/rpg/rpg_navigation_shell.dart';
 
 /// Provider to track shopping list item count (for nav badge)
@@ -375,77 +376,136 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: const Icon(Icons.check_box),
-                title: Text(l10n.shoppingCheckAll),
-                onTap: () { Navigator.pop(ctx); shoppingDao.checkAllItems(_currentListId); },
-              ),
-              ListTile(
-                leading: const Icon(Icons.check_box_outline_blank),
-                title: Text(l10n.shoppingUncheckAll),
-                onTap: () { Navigator.pop(ctx); shoppingDao.uncheckAllItems(_currentListId); },
-              ),
-              ListTile(
-                leading: const Icon(Icons.delete_sweep),
-                title: Text(l10n.shoppingClearChecked),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  shoppingDao.deleteCheckedItems(_currentListId);
-                  RpgIntegration.onShoppingListCompleted(ref);
-                },
-              ),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.copy),
-                title: Text(l10n.actionCopy),
-                onTap: () async {
-                  Navigator.pop(ctx);
-                  final items = await shoppingDao.getItemsForList(_currentListId);
-                  final buffer = StringBuffer('$_currentListName\n');
-                  for (final item in items) buffer.writeln('${item.isChecked ? '☑' : '☐'} ${item.name}');
-                  await Clipboard.setData(ClipboardData(text: buffer.toString()));
-                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.successCopied)));
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.upload_file),
-                title: const Text('Export list...'),
-                subtitle: const Text('Share as JSON, Markdown, or text'),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _showExportSheet(context);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.download),
-                title: const Text('Import list...'),
-                subtitle: const Text('From text, photo, or file'),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _showImportSheet(context);
-                },
-              ),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.category),
-                title: Text(l10n.settingsShoppingCategories),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  context.push('/settings/shopping-categories');
-                },
-              ),
-              const SizedBox(height: 16),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 8),
+                Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: const Icon(Icons.check_box),
+                  title: Text(l10n.shoppingCheckAll),
+                  onTap: () { Navigator.pop(ctx); shoppingDao.checkAllItems(_currentListId); },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.check_box_outline_blank),
+                  title: Text(l10n.shoppingUncheckAll),
+                  onTap: () { Navigator.pop(ctx); shoppingDao.uncheckAllItems(_currentListId); },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.delete_sweep),
+                  title: Text(l10n.shoppingClearChecked),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    shoppingDao.deleteCheckedItems(_currentListId);
+                    RpgIntegration.onShoppingListCompleted(ref);
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.copy),
+                  title: Text(l10n.actionCopy),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    final items = await shoppingDao.getItemsForList(_currentListId);
+                    final buffer = StringBuffer('$_currentListName\n');
+                    for (final item in items) buffer.writeln('${item.isChecked ? '☑' : '☐'} ${item.name}');
+                    await Clipboard.setData(ClipboardData(text: buffer.toString()));
+                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.successCopied), duration: const Duration(seconds: 2)));
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.upload_file),
+                  title: const Text('Export list'),
+                  subtitle: const Text('Share as a text file or backup'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _showExportSheet(context);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.download),
+                  title: const Text('Import list'),
+                  subtitle: const Text('Add items from a file, photo, or text'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _showImportSheet(context);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.qr_code_scanner),
+                  title: const Text('Scan barcode'),
+                  subtitle: const Text('Look up a product to add'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _openBarcodeScanner();
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.category),
+                  title: Text(l10n.settingsShoppingCategories),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    context.push('/settings/shopping-categories');
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  // ── Barcode Scanner ──────────────────────────────────────────
+
+  Future<void> _openBarcodeScanner() async {
+    final result = await Navigator.of(context).push<Map<String, dynamic>>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => const BarcodeScannerScreen(),
+      ),
+    );
+
+    if (result == null || !mounted) return;
+
+    final action = result['action'] as String?;
+
+    if (action == 'addToShopping') {
+      final product = result['product'];
+      final name = result['name'] as String?;
+
+      String itemName;
+      if (product is ProductInfo) {
+        itemName = product.displayName;
+      } else if (name != null && name.isNotEmpty) {
+        itemName = name;
+      } else {
+        return;
+      }
+
+      final shoppingDao = ref.read(shoppingDaoProvider);
+      final id = 'item_${DateTime.now().millisecondsSinceEpoch}';
+      await shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
+        id: id,
+        listId: _currentListId,
+        name: itemName,
+        sortOrder: const drift.Value(0),
+      ));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Added "$itemName"'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } else if (action == 'searchRecipes') {
+      // Navigate to search — user can search for the scanned product
+      context.push('/search');
+    }
   }
 
   // ── Export Sheet ──────────────────────────────────────────────
@@ -485,8 +545,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   ),
                   child: const Center(child: Text('{ }', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
                 ),
-                title: const Text('JSON file'),
-                subtitle: const Text('Share with another Recipe Spellbook user'),
+                title: const Text('Backup file'),
+                subtitle: const Text('For transferring to another device or app'),
                 onTap: () {
                   Navigator.pop(ctx);
                   _exportAs('json');
@@ -501,8 +561,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   ),
                   child: Icon(Icons.description_outlined, color: theme.colorScheme.primary),
                 ),
-                title: const Text('Markdown (.md)'),
-                subtitle: const Text('Formatted with checkboxes — good for notes apps'),
+                title: const Text('Formatted list'),
+                subtitle: const Text('With checkboxes — great for notes apps'),
                 onTap: () {
                   Navigator.pop(ctx);
                   _exportAs('md');
@@ -517,8 +577,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   ),
                   child: Icon(Icons.text_snippet_outlined, color: theme.colorScheme.primary),
                 ),
-                title: const Text('Plain text (.txt)'),
-                subtitle: const Text('Simple list — works with any app'),
+                title: const Text('Plain text'),
+                subtitle: const Text('Simple list — paste anywhere'),
                 onTap: () {
                   Navigator.pop(ctx);
                   _exportAs('txt');
@@ -540,7 +600,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e')),
+          SnackBar(content: Text('Export failed: $e'), duration: const Duration(seconds: 3)),
         );
       }
     }
@@ -583,8 +643,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   ),
                   child: const Center(child: Text('{ }', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
                 ),
-                title: const Text('From JSON file'),
-                subtitle: const Text('Import a Recipe Spellbook export'),
+                title: const Text('From backup file'),
+                subtitle: const Text('Import a Recipe Spellbook backup'),
                 onTap: () {
                   Navigator.pop(ctx);
                   _importFromJsonFile();
@@ -660,18 +720,19 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
             SnackBar(
               content: Text('✅ ${importResult.message}'),
               behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 2),
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(importResult.message)),
+            SnackBar(content: Text(importResult.message), duration: const Duration(seconds: 3)),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Import failed: $e')),
+          SnackBar(content: Text('Import failed: $e'), duration: const Duration(seconds: 3)),
         );
       }
     }
@@ -894,13 +955,13 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
 
   static const _providerData = <GroceryProvider, _ProviderDisplay>{
     GroceryProvider.instacart: _ProviderDisplay(
-      emoji: '🥕',
+      emoji: '\u{1F955}',
       name: 'Instacart',
       color: Color(0xFF43B02A),
       subtitle: 'Costco, Publix, Safeway, Aldi, Sprouts & 1,500+ retailers',
     ),
     GroceryProvider.kroger: _ProviderDisplay(
-      emoji: '🏪',
+      emoji: '\u{1F3EA}',
       name: 'Kroger',
       color: Color(0xFF0056A4),
       subtitle: 'Kroger, Fred Meyer, Ralphs, Harris Teeter & more',
@@ -916,6 +977,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
   Future<void> _checkConfigurations() async {
     for (final p in GroceryProvider.values) {
       _configured[p] = await GroceryService.isConfigured(p);
+      debugPrint('[OrderSheet] ${p.name} configured: ${_configured[p]}');
     }
     if (mounted) setState(() => _loading = false);
   }
@@ -1008,12 +1070,16 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
     Navigator.pop(context);
 
     final configured = _configured[provider] ?? false;
+    debugPrint('[OrderSheet] _handleProvider(${provider.name}) configured=$configured');
 
     if (configured) {
       // API configured — send items directly to cart
       _showSendingProgress(provider);
+    } else if (provider == GroceryProvider.kroger) {
+      // Kroger not connected — prompt OAuth login
+      _showKrogerConnectDialog();
     } else {
-      // Not configured — copy list + open store website as fallback
+      // Instacart fallback — copy list + open store
       await Clipboard.setData(
         ClipboardData(
           text: GroceryService.formatForClipboard(widget.itemNames),
@@ -1040,6 +1106,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
 
   void _showSendingProgress(GroceryProvider provider) {
     final name = _providerData[provider]?.name ?? 'store';
+    debugPrint('[OrderSheet] Launching SendingProgressDialog for $name with ${widget.itemNames.length} items');
 
     showDialog(
       context: context,
@@ -1049,6 +1116,86 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
         itemNames: widget.itemNames,
         provider: provider,
       ),
+    );
+  }
+
+  void _showKrogerConnectDialog() {
+    debugPrint('[OrderSheet] Showing Kroger connect dialog');
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              Text('\u{1F3EA}', style: const TextStyle(fontSize: 24)),
+              const SizedBox(width: 12),
+              const Text('Connect Kroger'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Sign in to your Kroger account to add items directly to your cart.',
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Works with Kroger, Fred Meyer, Ralphs, Harris Teeter, and more.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                // Fallback: copy + open store
+                Clipboard.setData(
+                  ClipboardData(text: GroceryService.formatForClipboard(widget.itemNames)),
+                );
+                if (widget.itemNames.isNotEmpty) {
+                  GroceryService.openDeepLink(GroceryProvider.kroger, widget.itemNames.first);
+                }
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('List copied! Opening Kroger...'),
+                      behavior: SnackBarBehavior.floating,
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Just open website'),
+            ),
+            FilledButton.icon(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                debugPrint('[OrderSheet] Starting Kroger OAuth login');
+                final launched = await GroceryService.krogerStartOAuthLogin();
+                debugPrint('[OrderSheet] Kroger OAuth launched: $launched');
+                if (!launched && mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Could not open Kroger sign-in'),
+                      behavior: SnackBarBehavior.floating,
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.login, size: 18),
+              label: const Text('Sign in'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -1180,7 +1327,12 @@ class _ProviderTile extends StatelessWidget {
                   ],
                 ),
               ),
-              if (isConfigured)
+              if (isLoading)
+                const SizedBox(
+                  width: 18, height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else if (isConfigured)
                 Icon(Icons.add_shopping_cart, color: display.color, size: 20)
               else
                 Icon(Icons.open_in_new,
@@ -1220,14 +1372,18 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
   void initState() {
     super.initState();
     _total = widget.itemNames.length;
+    debugPrint('[SendToStore] Starting ${widget.providerName} with $_total items');
     _sendItems();
   }
 
   Future<void> _sendItems() async {
+    final stopwatch = Stopwatch()..start();
+
     final result = await GroceryService.sendToStore(
       provider: widget.provider,
       ingredientNames: widget.itemNames,
       onProgress: (current, total, item) {
+        debugPrint('[SendToStore] Progress $current/$total: "$item"');
         if (mounted) {
           setState(() {
             _current = current;
@@ -1237,6 +1393,16 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
         }
       },
     );
+
+    stopwatch.stop();
+    debugPrint('[SendToStore] Complete in ${stopwatch.elapsedMilliseconds}ms');
+    debugPrint('[SendToStore] Result: success=${result.success} '
+        'added=${result.itemsAdded} failed=${result.itemsFailed} '
+        'message="${result.message}" checkoutUrl=${result.checkoutUrl}');
+    if (result.failedItems.isNotEmpty) {
+      debugPrint('[SendToStore] Failed items: ${result.failedItems.join(", ")}');
+    }
+
     if (mounted) {
       setState(() {
         _done = true;
@@ -1268,7 +1434,7 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Adding to ${widget.providerName}…',
+              'Adding to ${widget.providerName}\u2026',
               style: theme.textTheme.titleSmall
                   ?.copyWith(fontWeight: FontWeight.w600),
             ),
@@ -1310,6 +1476,18 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
               textAlign: TextAlign.center,
             ),
+            // Show API message for debugging
+            if (_result?.message != null && _result!.message!.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                _result!.message!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontSize: 10,
+                  color: theme.colorScheme.outline.withValues(alpha: 0.6),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
             if (_result?.failedItems.isNotEmpty == true) ...[
               const SizedBox(height: 8),
               Container(
@@ -1340,9 +1518,12 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
                   FilledButton.icon(
                     onPressed: () async {
                       Navigator.pop(context);
+                      debugPrint('[SendToStore] Opening checkout: ${_result!.checkoutUrl}');
                       final url = Uri.parse(_result!.checkoutUrl!);
-                      if (await canLaunchUrl(url)) {
-                        launchUrl(url, mode: LaunchMode.externalApplication);
+                      try {
+                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                      } catch (e) {
+                        debugPrint('[SendToStore] Failed to open checkout: $e');
                       }
                     },
                     icon: const Icon(Icons.shopping_cart_checkout, size: 18),
@@ -2037,7 +2218,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not access ${source == ImageSource.camera ? "camera" : "gallery"}')),
+          SnackBar(content: Text('Could not access ${source == ImageSource.camera ? "camera" : "gallery"}'), duration: const Duration(seconds: 3)),
         );
       }
       return;
@@ -2064,7 +2245,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
       if (text.trim().isEmpty) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No text found in image')),
+            const SnackBar(content: Text('No text found in image'), duration: const Duration(seconds: 3)),
           );
         }
         return;
@@ -2075,7 +2256,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
       if (mounted) Navigator.pop(context);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error reading image: $e')),
+          SnackBar(content: Text('Error reading image: $e'), duration: const Duration(seconds: 3)),
         );
       }
     }
@@ -2169,7 +2350,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     final lines = _parseTextToLines(rawText);
     if (lines.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No items found in text')),
+        const SnackBar(content: Text('No items found in text'), duration: const Duration(seconds: 3)),
       );
       return;
     }

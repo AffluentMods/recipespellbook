@@ -226,7 +226,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 title: const Text('Share meal plan'),
                 onTap: () {
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Coming soon!')));
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Coming soon!'), duration: Duration(seconds: 2)));
                 },
               ),
               ListTile(
@@ -246,7 +246,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                   if (recipeIds.isEmpty) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('No recipes planned this week')),
+                        const SnackBar(content: Text('No recipes planned this week'), duration: Duration(seconds: 2)),
                       );
                     }
                     return;
@@ -296,7 +296,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 await mealPlanDao.deleteMealPlan(meal.id);
               }
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Week cleared')));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Week cleared'), duration: Duration(seconds: 2)));
               }
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
@@ -923,7 +923,10 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
     if (mounted) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${recipe.title} added to $_selectedMealType')),
+        SnackBar(
+          content: Text('${recipe.title} added to $_selectedMealType'),
+          duration: const Duration(seconds: 2),
+        ),
       );
     }
   }

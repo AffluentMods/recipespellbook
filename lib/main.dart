@@ -7,12 +7,14 @@ import 'theme/app_theme.dart';
 import 'providers/settings_provider.dart';
 import 'l10n/app_localizations.dart';
 import 'services/ingredient_suggestion_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // Provider to hold shared recipe data (for future share intent)
 final sharedRecipeProvider = StateProvider<Map<String, dynamic>?>((ref) => null);
 
-void main() {
+Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   IngredientSuggestionService.instance.preload();
   runApp(const ProviderScope(child: RecipeSpellbookApp()));

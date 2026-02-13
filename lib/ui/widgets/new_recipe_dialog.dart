@@ -9,11 +9,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:archive/archive.dart';
-import 'package:html/parser.dart' as html_parser;
-import 'package:drift/drift.dart' as drift;
-import '../../services/recipe_parser.dart';
-import '../../database/database.dart';
-import '../../providers/database_provider.dart';
+import '../../services/recipe_import_engine.dart';
+import '../../models/imported_recipe.dart';
+import '../screens/import/import_preview_screen.dart';
 
 /// Shows the MODERN add recipe dialog with 2 options
 Future<void> showNewRecipeDialog(BuildContext context, String cookbookId) {
@@ -57,37 +55,20 @@ class _AddRecipeChooser extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Handle bar
               Container(
-                width: 40,
-                height: 4,
+                width: 40, height: 4,
                 decoration: BoxDecoration(
                   color: theme.colorScheme.outline.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(height: 24),
-
-              // Title
-              Text(
-                l10n.recipeAdd,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text(l10n.recipeAdd, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Text(
-                l10n.importChooseMethod,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.outline,
-                ),
-              ),
+              Text(l10n.importChooseMethod, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
               const SizedBox(height: 32),
-
-              // Option Cards
               Row(
                 children: [
-                  // Create Manually
                   Expanded(
                     child: _OptionCard(
                       icon: Icons.edit_note_rounded,
@@ -101,7 +82,6 @@ class _AddRecipeChooser extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  // Import
                   Expanded(
                     child: _OptionCard(
                       icon: Icons.download_rounded,
@@ -131,18 +111,11 @@ class _OptionCard extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
 
-  const _OptionCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.color,
-    required this.onTap,
-  });
+  const _OptionCard({required this.icon, required this.title, required this.subtitle, required this.color, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Material(
       color: color.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(20),
@@ -154,29 +127,14 @@ class _OptionCard extends StatelessWidget {
           child: Column(
             children: [
               Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
+                width: 64, height: 64,
+                decoration: BoxDecoration(color: color.withValues(alpha: 0.15), shape: BoxShape.circle),
                 child: Icon(icon, size: 32, color: color),
               ),
               const SizedBox(height: 16),
-              Text(
-                title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.outline,
-                ),
-                textAlign: TextAlign.center,
-              ),
+              Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline), textAlign: TextAlign.center),
             ],
           ),
         ),
@@ -212,18 +170,18 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   void _showError(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Theme.of(context).colorScheme.error),
+      SnackBar(content: Text(message), backgroundColor: Theme.of(context).colorScheme.error, duration: const Duration(seconds: 3)),
     );
   }
 
   void _showSuccess(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.green),
+      SnackBar(content: Text(message), backgroundColor: Colors.green, duration: const Duration(seconds: 2)),
     );
   }
 
-  void _navigateToEdit(ParsedRecipe recipe) {
+  void _navigateToEdit(ImportedRecipe recipe) {
     if (!mounted) return;
     Navigator.of(context).pop();
     context.push('/cookbook/${widget.cookbookId}/new-recipe', extra: recipe.toImportData());
@@ -233,10 +191,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   Future<void> _importFromUrl() async {
     final l10n = AppLocalizations.of(context)!;
     final url = _urlController.text.trim();
-    if (url.isEmpty) {
-      _showError(l10n.errorInvalidURL);
-      return;
-    }
+    if (url.isEmpty) { _showError(l10n.errorInvalidURL); return; }
 
     String finalUrl = url;
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
@@ -245,7 +200,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
     _showLoading(l10n.importProgress);
     try {
-      final recipe = await RecipeParser.parseFromUrl(finalUrl);
+      final recipe = await RecipeImportEngine.parseFromUrl(finalUrl);
       _hideLoading();
       _navigateToEdit(recipe);
     } catch (e) {
@@ -256,15 +211,10 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
   // ========== PDF IMPORT ==========
   Future<void> _importFromPdf() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'],
-    );
-
+    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
     if (result == null || result.files.isEmpty) return;
     final path = result.files.first.path;
     if (path == null) return;
-
     Navigator.of(context).pop();
     context.push('/import/pdf?path=${Uri.encodeComponent(path)}&cookbookId=${widget.cookbookId}');
   }
@@ -275,54 +225,40 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       builder: (ctx) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: Text(l10n.photoTakePhoto),
-              onTap: () => Navigator.pop(ctx, ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: Text(l10n.photoChooseGallery),
-              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
-            ),
-          ],
-        ),
+        child: Wrap(children: [
+          ListTile(leading: const Icon(Icons.camera_alt), title: Text(l10n.photoTakePhoto), onTap: () => Navigator.pop(ctx, ImageSource.camera)),
+          ListTile(leading: const Icon(Icons.photo_library), title: Text(l10n.photoChooseGallery), onTap: () => Navigator.pop(ctx, ImageSource.gallery)),
+        ]),
       ),
     );
-
     if (source == null) return;
 
     final picker = ImagePicker();
     final image = await picker.pickImage(source: source);
     if (image == null) return;
-
     _processImage(image.path);
   }
 
   Future<void> _processImage(String imagePath) async {
     final l10n = AppLocalizations.of(context)!;
     _showLoading(l10n.readingImage);
-
     try {
       final inputImage = InputImage.fromFilePath(imagePath);
       final textRecognizer = TextRecognizer();
       final recognizedText = await textRecognizer.processImage(inputImage);
       await textRecognizer.close();
 
-      if (recognizedText.text.isEmpty) {
-        _hideLoading();
-        _showError(l10n.noTextInImage);
-        return;
+      if (recognizedText.text.isEmpty) { _hideLoading(); _showError(l10n.noTextInImage); return; }
+
+      final lines = <String>[];
+      for (final block in recognizedText.blocks) {
+        for (final line in block.lines) { lines.add(line.text); }
+        lines.add('');
       }
 
-      final reconstructedText = _reconstructTextFromBlocks(recognizedText);
-
       _showLoading(l10n.parsingRecipe);
-      final recipe = RecipeParser.parseFromText(reconstructedText);
+      final recipe = RecipeImportEngine.parseOcrText(lines.join('\n'));
       recipe.imageUrl = imagePath;
-
       _hideLoading();
       _navigateToEdit(recipe);
     } catch (e) {
@@ -331,32 +267,18 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     }
   }
 
-  String _reconstructTextFromBlocks(RecognizedText recognizedText) {
-    final lines = <String>[];
-    for (final block in recognizedText.blocks) {
-      for (final line in block.lines) {
-        lines.add(line.text);
-      }
-      lines.add('');
-    }
-    return lines.join('\n');
-  }
-
   // ========== TEXT IMPORT ==========
   Future<void> _importFromText() async {
     final l10n = AppLocalizations.of(context)!;
     final text = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
       builder: (ctx) => const _TextInputSheet(),
     );
-
     if (text == null || text.isEmpty) return;
 
     _showLoading(l10n.parsingRecipe);
     try {
-      final recipe = RecipeParser.parseFromText(text);
+      final recipe = RecipeImportEngine.parseFromText(text);
       _hideLoading();
       _navigateToEdit(recipe);
     } catch (e) {
@@ -365,41 +287,87 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     }
   }
 
-  // ========== FILE IMPORT (for other recipe apps + PDF) ==========
+  // ========== FILE IMPORT ==========
+  // Supported extensions for recipe import
+  static const _supportedExtensions = {
+    'pdf', 'txt', 'md', 'json', 'zip', 'html', 'htm',
+    'mela', 'melarecipes', 'melarecipe',
+    'crumb', 'fdx', 'mmf', 'mk', 'rcb', 'mx2', 'mcx',
+  };
+
+  // Extensions that need user action before importing
+  static const _redirectExtensions = {
+    'paprikarecipes': 'Paprika files can\'t be imported directly. In Paprika, go to Export and choose "HTML" format instead, then import that file here.',
+    'paprikarecipe': 'Paprika files can\'t be imported directly. In Paprika, go to Export and choose "HTML" format instead, then import that file here.',
+  };
+
   Future<void> _importFromFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'txt', 'md', 'json', 'zip', 'html', 'paprikarecipes', 'mela'],
-    );
-
+    final l10n = AppLocalizations.of(context)!;
+    // Use FileType.any because Android doesn't recognize custom extensions
+    final result = await FilePicker.platform.pickFiles(type: FileType.any);
     if (result == null || result.files.isEmpty) return;
-
     final file = result.files.first;
     final path = file.path;
     if (path == null) return;
-
     final ext = file.extension?.toLowerCase() ?? '';
+
+    // Check for redirect extensions (e.g. Paprika)
+    if (_redirectExtensions.containsKey(ext)) {
+      _showInfoDialog(_redirectExtensions[ext]!);
+      return;
+    }
+
+    // Validate extension
+    if (ext.isNotEmpty && !_supportedExtensions.contains(ext)) {
+      _showError(l10n.failedToImport('Unsupported file type: .$ext'));
+      return;
+    }
 
     switch (ext) {
       case 'pdf':
         Navigator.of(context).pop();
         context.push('/import/pdf?path=${Uri.encodeComponent(path)}&cookbookId=${widget.cookbookId}');
         break;
-      case 'zip':
-      case 'paprikarecipes':
-      case 'mela':
-        _processZipFile(path);
+      case 'zip': case 'mela': case 'melarecipes':
+      case 'melarecipe': case 'crumb': case 'fdx': case 'rcb':
+      case 'mx2': case 'mcx':
+      _processZipFile(path);
+      break;
+      case 'html': case 'htm':
+      _processHtmlFile(path);
+      break;
+      case 'json':
+      // JSON might contain single or multiple recipes (Tandoor, Mealie, Crouton, etc.)
+        _processJsonFile(path);
         break;
-      case 'html':
-        _processHtmlFile(path);
-        break;
+      case 'mmf': case 'mk':
+    // MealMaster format — can contain multiple recipes
+      _processMealMasterFile(path);
+      break;
       default:
+      // For unknown extensions, try to detect format from content
         _processTextFile(path, file.name);
         break;
     }
   }
 
-  // ========== CREATE MANUALLY ==========
+  void _showInfoDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.info_outline, size: 32),
+        title: const Text('Export Format'),
+        content: Text(message),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Got it'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _createManually() {
     Navigator.of(context).pop();
     context.push('/cookbook/${widget.cookbookId}/new-recipe');
@@ -407,10 +375,10 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
   Future<void> _processTextFile(String path, String filename) async {
     final l10n = AppLocalizations.of(context)!;
-    _showLoading(l10n.readingImage); // Reusing "Reading..." message
+    _showLoading(l10n.readingImage);
     try {
       final content = await File(path).readAsString();
-      final recipe = RecipeParser.parseFromFile(content, filename);
+      final recipe = RecipeImportEngine.parseFromFile(content, filename);
       _hideLoading();
       _navigateToEdit(recipe);
     } catch (e) {
@@ -424,208 +392,75 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     _showLoading(l10n.importProcessing);
     try {
       final content = await File(path).readAsString();
-      final recipes = _parseHtmlForRecipes(content);
+      final recipes = RecipeImportEngine.parseFromHtml(content);
 
-      if (recipes.isEmpty) {
-        _hideLoading();
-        _showError(l10n.errorNoRecipeFound);
-        return;
-      }
-
-      if (recipes.length == 1) {
-        _hideLoading();
-        _navigateToEdit(recipes.first);
-      } else {
-        _hideLoading();
-        _showBulkImportDialog(recipes);
-      }
+      _hideLoading();
+      if (recipes.isEmpty) { _showError(l10n.errorNoRecipeFound); return; }
+      if (recipes.length == 1) { _navigateToEdit(recipes.first); return; }
+      _showBulkImportDialog(recipes);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedToImport(e.toString()));
     }
   }
 
-  List<ParsedRecipe> _parseHtmlForRecipes(String html) {
-    final document = html_parser.parse(html);
-    final recipes = <ParsedRecipe>[];
-
-    // Try JSON-LD
-    final scripts = document.querySelectorAll('script[type="application/ld+json"]');
-    for (final script in scripts) {
-      try {
-        dynamic json = jsonDecode(script.text);
-        if (json is List) {
-          for (final item in json) {
-            if (_isRecipeJson(item)) {
-              recipes.add(_parseRecipeJson(Map<String, dynamic>.from(item as Map)));
-            }
-          }
-        } else if (json is Map) {
-          if (json.containsKey('@graph')) {
-            for (final item in json['@graph']) {
-              if (_isRecipeJson(item)) {
-                recipes.add(_parseRecipeJson(Map<String, dynamic>.from(item as Map)));
-              }
-            }
-          } else if (_isRecipeJson(json)) {
-            recipes.add(_parseRecipeJson(Map<String, dynamic>.from(json)));
-          }
-        }
-      } catch (_) {}
-    }
-
-    return recipes;
-  }
-
-  bool _isRecipeJson(dynamic json) {
-    if (json is! Map) return false;
-    final type = json['@type'];
-    if (type == null) return false;
-    if (type is String) return type.contains('Recipe');
-    if (type is List) return type.any((t) => t.toString().contains('Recipe'));
-    return false;
-  }
-
-  ParsedRecipe _parseRecipeJson(Map<String, dynamic> json) {
-    return ParsedRecipe(
-      title: json['name']?.toString() ?? 'Imported Recipe',
-      description: json['description']?.toString(),
-      ingredients: _toList(json['recipeIngredient']),
-      instructions: _extractInstructions(json['recipeInstructions']),
-      prepTimeMinutes: _parseDuration(json['prepTime']),
-      cookTimeMinutes: _parseDuration(json['cookTime']),
-      servings: json['recipeYield']?.toString(),
-      imageUrl: _extractImage(json['image']),
-    );
-  }
-
-  List<String> _toList(dynamic data) {
-    if (data == null) return [];
-    if (data is List) return data.map((e) => e.toString().trim()).where((s) => s.isNotEmpty).toList();
-    if (data is String) return [data];
-    return [];
-  }
-
-  List<String> _extractInstructions(dynamic data) {
-    if (data == null) return [];
-    final results = <String>[];
-
-    void process(dynamic item) {
-      if (item is String) {
-        results.add(item.trim());
-      } else if (item is Map) {
-        if (item['text'] != null) results.add(item['text'].toString().trim());
-        if (item['itemListElement'] != null) process(item['itemListElement']);
-      } else if (item is List) {
-        for (final i in item) process(i);
-      }
-    }
-
-    process(data);
-    return results.where((s) => s.isNotEmpty).toList();
-  }
-
-  int? _parseDuration(dynamic value) {
-    if (value == null) return null;
-    if (value is int) return value;
-    final str = value.toString();
-    final match = RegExp(r'PT(?:(\d+)H)?(?:(\d+)M)?').firstMatch(str);
-    if (match != null) {
-      final h = int.tryParse(match.group(1) ?? '0') ?? 0;
-      final m = int.tryParse(match.group(2) ?? '0') ?? 0;
-      return h * 60 + m;
-    }
-    return int.tryParse(str);
-  }
-
-  String? _extractImage(dynamic img) {
-    if (img == null) return null;
-    if (img is String) return img;
-    if (img is List && img.isNotEmpty) return _extractImage(img.first);
-    if (img is Map) return img['url']?.toString();
-    return null;
-  }
-
-  void _showBulkImportDialog(List<ParsedRecipe> recipes) {
+  Future<void> _processJsonFile(String path) async {
     final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.importBulkFound(recipes.length)),
-        content: Text(l10n.importBulkQuestion(recipes.length)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              if (recipes.isNotEmpty) _navigateToEdit(recipes.first);
-            },
-            child: Text(l10n.importFirstRecipe),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _importAllRecipes(recipes);
-            },
-            child: Text(l10n.importAllRecipes),
-          ),
-        ],
+    _showLoading(l10n.importProcessing);
+    try {
+      final content = await File(path).readAsString();
+      final recipes = RecipeImportEngine.parseFromFileBulk(content, path.split('/').last);
+
+      _hideLoading();
+      if (recipes.isEmpty) {
+        // Fallback: try as generic JSON
+        final single = RecipeImportEngine.parseFromFile(content, path.split('/').last);
+        if (single.ingredients.isNotEmpty || single.instructions.isNotEmpty) {
+          _navigateToEdit(single);
+        } else {
+          _showError(l10n.errorNoRecipeFound);
+        }
+        return;
+      }
+      if (recipes.length == 1) { _navigateToEdit(recipes.first); return; }
+      _showBulkImportDialog(recipes);
+    } catch (e) {
+      _hideLoading();
+      _showError(l10n.failedToImport(e.toString()));
+    }
+  }
+
+  Future<void> _processMealMasterFile(String path) async {
+    final l10n = AppLocalizations.of(context)!;
+    _showLoading(l10n.importProcessing);
+    try {
+      final content = await File(path).readAsString();
+      final recipes = RecipeImportEngine.parseFromFileBulk(content, path.split('/').last);
+
+      _hideLoading();
+      if (recipes.isEmpty) { _showError(l10n.errorNoRecipeFound); return; }
+      if (recipes.length == 1) { _navigateToEdit(recipes.first); return; }
+      _showBulkImportDialog(recipes);
+    } catch (e) {
+      _hideLoading();
+      _showError(l10n.failedToImport(e.toString()));
+    }
+  }
+
+  void _showBulkImportDialog(List<ImportedRecipe> recipes) {
+    // Navigate to the full import preview screen
+    Navigator.of(context).pop(); // Close the new recipe dialog first
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => ImportPreviewScreen(
+          recipes: recipes,
+          cookbookId: widget.cookbookId,
+        ),
       ),
     );
   }
 
-  Future<void> _importAllRecipes(List<ParsedRecipe> recipes) async {
-    final l10n = AppLocalizations.of(context)!;
-    _showLoading(l10n.importingRecipes(recipes.length));
-
-    final recipeDao = ref.read(recipeDaoProvider);
-    int imported = 0;
-
-    for (final recipe in recipes) {
-      try {
-        final recipeId = 'recipe_${DateTime.now().millisecondsSinceEpoch}_$imported';
-
-        await recipeDao.insertRecipe(RecipesCompanion.insert(
-          id: recipeId,
-          cookbookId: widget.cookbookId,
-          title: recipe.title,
-          description: drift.Value(recipe.description),
-          servings: drift.Value(recipe.servings),
-          prepTimeMinutes: drift.Value(recipe.prepTimeMinutes),
-          cookTimeMinutes: drift.Value(recipe.cookTimeMinutes),
-          sourceUrl: drift.Value(recipe.sourceUrl),
-          courseId: drift.Value(recipe.suggestedCourse),
-          categoryId: drift.Value(recipe.suggestedCategory),
-        ));
-
-        for (var i = 0; i < recipe.ingredients.length; i++) {
-          await recipeDao.insertIngredient(IngredientsCompanion.insert(
-            id: '${recipeId}_ing_$i',
-            recipeId: recipeId,
-            sortOrder: i,
-            name: recipe.ingredients[i],
-          ));
-        }
-
-        for (var i = 0; i < recipe.instructions.length; i++) {
-          await recipeDao.insertStep(StepsCompanion.insert(
-            id: '${recipeId}_step_$i',
-            recipeId: recipeId,
-            sortOrder: i,
-            instruction: recipe.instructions[i],
-          ));
-        }
-
-        imported++;
-      } catch (e) {
-        // Continue with next recipe
-      }
-    }
-
-    _hideLoading();
-    Navigator.of(context).pop();
-    _showSuccess(l10n.importedRecipesCount(imported));
-  }
 
   Future<void> _processZipFile(String path) async {
     final l10n = AppLocalizations.of(context)!;
@@ -633,46 +468,32 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     try {
       final bytes = await File(path).readAsBytes();
       final archive = ZipDecoder().decodeBytes(bytes);
-
-      final recipes = <ParsedRecipe>[];
+      final recipes = <ImportedRecipe>[];
 
       for (final file in archive) {
         if (!file.isFile) continue;
-
         final name = file.name.toLowerCase();
         final content = utf8.decode(file.content as List<int>, allowMalformed: true);
 
         if (name.endsWith('.json')) {
           try {
-            final recipe = RecipeParser.parseFromFile(content, file.name);
-            if (recipe.title != 'Imported Recipe' || recipe.ingredients.isNotEmpty) {
-              recipes.add(recipe);
-            }
+            final bulkRecipes = RecipeImportEngine.parseFromFileBulk(content, file.name);
+            recipes.addAll(bulkRecipes);
           } catch (_) {}
         } else if (name.endsWith('.html') || name.endsWith('.htm')) {
-          recipes.addAll(_parseHtmlForRecipes(content));
-        } else if (name.endsWith('.md') || name.endsWith('.txt')) {
+          recipes.addAll(RecipeImportEngine.parseFromHtml(content));
+        } else if (name.endsWith('.md') || name.endsWith('.txt') || name.endsWith('.mmf') || name.endsWith('.mk')) {
           try {
-            final recipe = RecipeParser.parseFromText(content);
-            if (recipe.ingredients.isNotEmpty || recipe.instructions.isNotEmpty) {
-              recipes.add(recipe);
-            }
+            final bulkText = RecipeImportEngine.parseFromFileBulk(content, file.name);
+            recipes.addAll(bulkText);
           } catch (_) {}
         }
       }
 
       _hideLoading();
-
-      if (recipes.isEmpty) {
-        _showError(l10n.errorNoRecipeFound);
-        return;
-      }
-
-      if (recipes.length == 1) {
-        _navigateToEdit(recipes.first);
-      } else {
-        _showBulkImportDialog(recipes);
-      }
+      if (recipes.isEmpty) { _showError(l10n.errorNoRecipeFound); return; }
+      if (recipes.length == 1) { _navigateToEdit(recipes.first); return; }
+      _showBulkImportDialog(recipes);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedToImport(e.toString()));
@@ -694,48 +515,29 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       child: Stack(
         children: [
           SafeArea(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Handle bar
-                  Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
+                  Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
                   const SizedBox(height: 20),
-
-                  // Title
-                  Text(
-                    l10n.importRecipeTitle,
-                    style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-                  ),
+                  Text(l10n.importRecipeTitle, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 16),
 
                   // Platform icons row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _PlatformIcon(icon: Icons.play_circle_fill, color: Colors.red), // YouTube
-                      _PlatformIconTikTok(), // TikTok
-                      _PlatformIcon(icon: Icons.camera_alt, color: Colors.purple), // Instagram
-                      _PlatformIcon(icon: Icons.bookmark, color: Colors.orange), // Pinterest
-                      _PlatformIcon(icon: Icons.language, color: Colors.blue), // Web
+                      _PlatformIcon(icon: Icons.play_circle_fill, color: Colors.red),
+                      _PlatformIconTikTok(),
+                      _PlatformIcon(icon: Icons.camera_alt, color: Colors.purple),
+                      _PlatformIcon(icon: Icons.bookmark, color: Colors.orange),
+                      _PlatformIcon(icon: Icons.language, color: Colors.blue),
                     ],
                   ),
                   const SizedBox(height: 12),
-
-                  // Subtitle
-                  Text(
-                    l10n.importSocialMedia,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
-                    textAlign: TextAlign.center,
-                  ),
+                  Text(l10n.importSocialMedia, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline), textAlign: TextAlign.center),
                   const SizedBox(height: 20),
 
                   // URL Input
@@ -745,14 +547,8 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                       hintText: l10n.pasteRecipeUrl,
                       prefixIcon: const Icon(Icons.link),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
-                      ),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.5))),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: theme.colorScheme.primary, width: 2)),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
                     keyboardType: TextInputType.url,
@@ -761,31 +557,22 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Import from URL button
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
                       onPressed: _importFromUrl,
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                      ),
+                      style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))),
                       child: Text(l10n.importFromUrl, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     ),
                   ),
                   const SizedBox(height: 20),
 
                   // "OR" divider
-                  Row(
-                    children: [
-                      Expanded(child: Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3))),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(l10n.orDivider, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
-                      ),
-                      Expanded(child: Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3))),
-                    ],
-                  ),
+                  Row(children: [
+                    Expanded(child: Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3))),
+                    Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(l10n.orDivider, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline))),
+                    Expanded(child: Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3))),
+                  ]),
                   const SizedBox(height: 20),
 
                   // Option buttons
@@ -799,12 +586,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                     ],
                   ),
                   const SizedBox(height: 16),
-
-                  // Supported apps hint
-                  Text(
-                    l10n.supportedFormats,
-                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-                  ),
+                  Text(l10n.supportedFormats, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
                 ],
               ),
             ),
@@ -834,22 +616,18 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   }
 }
 
+// ============ HELPER WIDGETS ============
+
 class _PlatformIcon extends StatelessWidget {
   final IconData icon;
   final Color color;
-
   const _PlatformIcon({required this.icon, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 6),
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(10),
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: 6), width: 44, height: 44,
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
       child: Icon(icon, color: color, size: 24),
     );
   }
@@ -860,18 +638,9 @@ class _PlatformIconTikTok extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 6),
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Icon(
-        Icons.music_note,
-        color: isDark ? Colors.white : Colors.black,
-        size: 24,
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: 6), width: 44, height: 44,
+      decoration: BoxDecoration(color: isDark ? Colors.grey.shade800 : Colors.grey.shade200, borderRadius: BorderRadius.circular(10)),
+      child: Icon(Icons.music_note, color: isDark ? Colors.white : Colors.black, size: 24),
     );
   }
 }
@@ -880,39 +649,30 @@ class _CircleOptionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-
   const _CircleOptionButton({required this.icon, required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return GestureDetector(
       onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: theme.colorScheme.onSurfaceVariant, size: 24),
-          ),
-          const SizedBox(height: 8),
-          Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-        ],
-      ),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Container(
+          width: 56, height: 56,
+          decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, shape: BoxShape.circle),
+          child: Icon(icon, color: theme.colorScheme.onSurfaceVariant, size: 24),
+        ),
+        const SizedBox(height: 8),
+        Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+      ]),
     );
   }
 }
 
-// ========== TEXT INPUT SHEET ==========
+// ============ TEXT INPUT SHEET ============
+
 class _TextInputSheet extends StatefulWidget {
   const _TextInputSheet();
-
   @override
   State<_TextInputSheet> createState() => _TextInputSheetState();
 }
@@ -921,16 +681,11 @@ class _TextInputSheetState extends State<_TextInputSheet> {
   final _controller = TextEditingController();
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  void dispose() { _controller.dispose(); super.dispose(); }
 
   Future<void> _paste() async {
     final data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data?.text != null) {
-      setState(() => _controller.text = data!.text!);
-    }
+    if (data?.text != null) setState(() => _controller.text = data!.text!);
   }
 
   @override
@@ -942,46 +697,30 @@ class _TextInputSheetState extends State<_TextInputSheet> {
     return Container(
       margin: EdgeInsets.only(bottom: bottom),
       constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      decoration: BoxDecoration(color: theme.colorScheme.surface, borderRadius: const BorderRadius.vertical(top: Radius.circular(24))),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
-            ),
+            Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)))),
             const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(child: Text(l10n.pasteRecipeTitle, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold))),
-                TextButton.icon(onPressed: _paste, icon: const Icon(Icons.content_paste, size: 18), label: Text(l10n.actionPaste)),
-              ],
-            ),
+            Row(children: [
+              Expanded(child: Text(l10n.pasteRecipeTitle, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold))),
+              TextButton.icon(onPressed: _paste, icon: const Icon(Icons.content_paste, size: 18), label: Text(l10n.actionPaste)),
+            ]),
             const SizedBox(height: 16),
             Flexible(
               child: TextField(
                 controller: _controller,
-                decoration: InputDecoration(
-                  hintText: l10n.pasteRecipeHint,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  alignLabelWithHint: true,
-                ),
-                maxLines: null,
-                minLines: 10,
-                autofocus: true,
+                decoration: InputDecoration(hintText: l10n.pasteRecipeHint, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), alignLabelWithHint: true),
+                maxLines: null, minLines: 10, autofocus: true,
               ),
             ),
             const SizedBox(height: 20),
             FilledButton.icon(
-              onPressed: () {
-                final text = _controller.text.trim();
-                Navigator.pop(context, text.isEmpty ? null : text);
-              },
+              onPressed: () { final text = _controller.text.trim(); Navigator.pop(context, text.isEmpty ? null : text); },
               icon: const Icon(Icons.auto_fix_high),
               label: Text(l10n.parseRecipe),
             ),

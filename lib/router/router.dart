@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../ui/screens/import/import_guides_screen.dart';
 import '../ui/shell/app_shell.dart';
 import '../ui/screens/home/home_screen.dart';
 import '../ui/screens/shopping/shopping_screen.dart';
@@ -16,10 +15,9 @@ import '../ui/screens/recipe/recent_recipes_screen.dart';
 import '../ui/screens/recipe/favorite_recipes_screen.dart';
 import '../ui/screens/recipe/quick_access_screen.dart';
 import '../ui/screens/search/search_screen.dart';
-import '../ui/screens/import/import_url_screen.dart';
-import '../ui/screens/import/import_text_screen.dart';
-import '../ui/screens/import/import_scan_screen.dart';
 import '../ui/screens/import/import_pdf_screen.dart';
+import '../services/barcode_scanner_service.dart';
+import '../ui/screens/shopping/kroger_callback_screen.dart';
 import '../ui/screens/settings/trash_screen.dart';
 import '../ui/screens/settings/quick_access_settings_screen.dart';
 import '../ui/screens/settings/placeholder_settings_screen.dart';
@@ -221,10 +219,10 @@ final router = GoRouter(
       builder: (context, state) => const FavoriteRecipesScreen(),
     ),
 
-    // ============ RPG ROUTES (ONLY DEFINED ONCE!) ============
+    // ============ RPG ROUTES ============
     GoRoute(
       path: '/rpg/profile',
-      name: 'rpg-profile',  // Use hyphen style to match other routes
+      name: 'rpg-profile',
       builder: (context, state) => const RpgProfileScreen(),
     ),
     GoRoute(
@@ -285,26 +283,31 @@ final router = GoRouter(
       ],
     ),
 
-    // Import routes
-    GoRoute(
-      path: '/import/url',
-      name: 'import-url',
-      builder: (context, state) => const ImportUrlScreen(),
-    ),
-    GoRoute(
-      path: '/import/text',
-      name: 'import-text',
-      builder: (context, state) => const ImportTextScreen(),
-    ),
-    GoRoute(
-      path: '/import/scan',
-      name: 'import-scan',
-      builder: (context, state) => const ImportScanScreen(),
-    ),
+    // Import routes (only PDF — other import flows are inline in new_recipe_dialog)
     GoRoute(
       path: '/import/pdf',
       name: 'import-pdf',
       builder: (context, state) => const ImportPdfScreen(),
+    ),
+
+    // Barcode scanner
+    GoRoute(
+      path: '/scan-barcode',
+      name: 'scan-barcode',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const BarcodeScannerScreen(),
+    ),
+
+    // Kroger OAuth callback (deep link: recipespellbook://kroger-callback?code=XXX)
+    GoRoute(
+      path: '/kroger-callback',
+      name: 'kroger-callback',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final code = state.uri.queryParameters['code'];
+        final error = state.uri.queryParameters['error'];
+        return KrogerCallbackScreen(authCode: code, error: error);
+      },
     ),
 
     // Settings
@@ -330,11 +333,6 @@ final router = GoRouter(
       path: '/settings/trash',
       name: 'trash',
       builder: (context, state) => const TrashScreen(),
-    ),
-    GoRoute(
-      path: '/import/guides',
-      name: 'import-guides',
-      builder: (context, state) => const ImportGuidesScreen(),
     ),
     // Recipe edit (existing recipe)
     GoRoute(

@@ -66,7 +66,7 @@ class AppMenuDrawer extends ConsumerWidget {
                         subtitle: 'Instagram, TikTok, websites...',
                         onTap: () {
                           Navigator.pop(context);
-                          context.push('/import-guides');
+                          _showImportGuides(context);
                         },
                       ),
                       _MenuItem(
@@ -196,6 +196,101 @@ class AppMenuDrawer extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showImportGuides(BuildContext context) {
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.75,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (context, scrollController) {
+          return Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    const Icon(Icons.download_rounded, size: 28),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Import Recipes',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(height: 1, color: theme.colorScheme.outlineVariant),
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(20),
+                  children: const [
+                    _HelpItem(
+                      icon: Icons.link,
+                      title: 'From a website',
+                      description:
+                      'Tap + in any cookbook, then paste a recipe URL. Works with most recipe sites including AllRecipes, Food Network, NYT Cooking, and thousands more.',
+                    ),
+                    _HelpItem(
+                      icon: Icons.share,
+                      title: 'From Instagram or TikTok',
+                      description:
+                      'Copy the link to a recipe post, then tap + and paste it. Recipe Spellbook will extract the recipe from the page.',
+                    ),
+                    _HelpItem(
+                      icon: Icons.camera_alt,
+                      title: 'From a photo',
+                      description:
+                      'Take a photo of a recipe in a cookbook or magazine. Tap + then choose Image to scan it with OCR.',
+                    ),
+                    _HelpItem(
+                      icon: Icons.picture_as_pdf,
+                      title: 'From a PDF',
+                      description:
+                      'Tap + then choose File to import a PDF recipe. The text will be extracted automatically.',
+                    ),
+                    _HelpItem(
+                      icon: Icons.text_snippet,
+                      title: 'From text',
+                      description:
+                      'Copy recipe text from anywhere, tap + then Paste. Recipe Spellbook will detect ingredients and instructions.',
+                    ),
+                    _HelpItem(
+                      icon: Icons.swap_horiz,
+                      title: 'From Paprika',
+                      description:
+                      'In Paprika, go to Export and choose "HTML" format. Then tap + in Recipe Spellbook and import the HTML file.',
+                    ),
+                    _HelpItem(
+                      icon: Icons.html,
+                      title: 'From other apps',
+                      description:
+                      'Most recipe apps can export as HTML or text. Export from your old app, then import the file here using the + button.',
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -540,6 +635,7 @@ class _ProfileSection extends StatelessWidget {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Account system coming soon!'),
+                        duration: Duration(seconds: 2),
                       ),
                     );
                   },
