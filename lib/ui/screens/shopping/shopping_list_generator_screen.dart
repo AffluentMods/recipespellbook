@@ -8,6 +8,7 @@ import '../../../providers/database_provider.dart';
 import '../../../services/ingredient_resolver_service.dart';
 import '../../../utils/ingredient_utils.dart';
 import '../../../utils/default_recipe_images.dart';
+import '../../../services/pantry_service.dart';
 
 // ═══════════════════════════════════════════════════════════════════
 // SHOPPING LIST GENERATOR SCREEN
@@ -59,6 +60,12 @@ class _ShoppingListGeneratorScreenState
   // Expanded recipe cards
   final Set<String> _expandedRecipes = {};
 
+  // Per-recipe user scale multipliers (on top of link-resolved scale)
+  final Map<String, double> _userScales = {};
+
+  // Pantry items that should be unchecked by default
+  Set<String> _pantryMatches = {};
+
   // For scrolling to a linked recipe card
   final Map<String, GlobalKey> _recipeKeys = {};
 
@@ -73,21 +80,41 @@ class _ShoppingListGeneratorScreenState
     _pageController = PageController(initialPage: _currentStep);
     _initSelections();
     _loadLists();
+    _loadPantryAndFilter();
   }
 
   void _initSelections() {
     _selections = {};
     _recipeKeys.clear();
     for (final recipe in _result.recipes) {
-      // Pre-select all direct ingredients
       _selections[recipe.recipeId] =
           recipe.directIngredients.map((ri) => ri.ingredient.id).toSet();
       _recipeKeys[recipe.recipeId] = GlobalKey();
+      _userScales.putIfAbsent(recipe.recipeId, () => 1.0);
     }
     // Auto-expand first recipe
     _expandedRecipes.clear();
     if (_result.recipes.isNotEmpty) {
       _expandedRecipes.add(_result.recipes.first.recipeId);
+    }
+  }
+
+  /// Check all ingredients against pantry; uncheck matches by default.
+  Future<void> _loadPantryAndFilter() async {
+    final idToName = <String, String>{};
+    for (final recipe in _result.recipes) {
+      for (final ri in recipe.directIngredients) {
+        idToName[ri.ingredient.id] = ri.ingredient.name;
+      }
+    }
+    final matches = await PantryService.instance.filterPantryMatches(idToName);
+    if (mounted && matches.isNotEmpty) {
+      setState(() {
+        _pantryMatches = matches;
+        for (final recipe in _result.recipes) {
+          _selections[recipe.recipeId]?.removeAll(matches);
+        }
+      });
     }
   }
 
@@ -388,12 +415,17 @@ class _ShoppingListGeneratorScreenState
                 selectedIds: selected,
                 allRecipes: _result.recipes,
                 recipeKeys: _recipeKeys,
+                userScale: _userScales[recipe.recipeId] ?? 1.0,
+                pantryMatches: _pantryMatches,
                 onToggleExpand: () => _toggleExpand(recipe.recipeId),
                 onToggleIngredient: (ingId) =>
                     _toggleIngredient(recipe.recipeId, ingId),
                 onSelectAll: () => _selectAllForRecipe(recipe.recipeId),
                 onUnselectAll: () => _unselectAllForRecipe(recipe.recipeId),
                 onScrollToRecipe: _scrollToAndExpandRecipe,
+                onScaleChanged: (scale) {
+                  setState(() => _userScales[recipe.recipeId] = scale);
+                },
               );
             },
           ),
@@ -582,7 +614,13 @@ class _ShoppingListGeneratorScreenState
                     ),
                   ),
                   ...entry.value.map((ri) {
-                    final amt = ri.scaledAmount;
+                    // Find which recipe this ingredient belongs to for userScale
+                    final recipeNode = _result.recipes.firstWhere(
+                          (r) => r.directIngredients.any((i) => i.ingredient.id == ri.ingredient.id),
+                      orElse: () => _result.recipes.first,
+                    );
+                    final userScale = _userScaleForRecipe(recipeNode.recipeId);
+                    final amt = _scaleAmount(ri.scaledAmount, userScale);
                     final unit = ri.ingredient.unit ?? '';
                     final amountStr =
                     [amt, unit].where((s) => s.isNotEmpty).join(' ');
@@ -594,15 +632,16 @@ class _ShoppingListGeneratorScreenState
                           Icon(Icons.check_circle_outline,
                               size: 16, color: theme.colorScheme.primary),
                           const SizedBox(width: 10),
-                          if (amountStr.isNotEmpty)
-                            SizedBox(
-                              width: 72,
-                              child: Text(
-                                amountStr,
-                                style: theme.textTheme.bodyMedium
-                                    ?.copyWith(fontWeight: FontWeight.w600),
-                              ),
-                            ),
+                          SizedBox(
+                            width: 72,
+                            child: amountStr.isNotEmpty
+                                ? Text(
+                              amountStr,
+                              style: theme.textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            )
+                                : null,
+                          ),
                           Expanded(
                             child: Text(ri.ingredient.name,
                                 style: theme.textTheme.bodyMedium),
@@ -653,6 +692,32 @@ class _ShoppingListGeneratorScreenState
     return items;
   }
 
+  /// Apply user scale multiplier to a formatted amount string.
+  String _scaleAmount(String amountStr, double userScale) {
+    if (userScale == 1.0 || amountStr.isEmpty) return amountStr;
+    const fracs = {
+      '½': 0.5, '¼': 0.25, '¾': 0.75, '⅓': 0.333, '⅔': 0.666,
+      '⅛': 0.125, '⅜': 0.375, '⅝': 0.625, '⅞': 0.875,
+    };
+    double? parsed = double.tryParse(amountStr);
+    if (parsed == null) {
+      for (final e in fracs.entries) {
+        if (amountStr == e.key) { parsed = e.value; break; }
+        if (amountStr.contains(e.key)) {
+          final parts = amountStr.split(e.key);
+          parsed = (double.tryParse(parts[0].trim()) ?? 0) + e.value;
+          break;
+        }
+      }
+    }
+    if (parsed != null) return formatAmount(parsed * userScale);
+    return amountStr;
+  }
+
+  /// Get the effective user scale for a recipe (by recipeId).
+  double _userScaleForRecipe(String recipeId) =>
+      _userScales[recipeId] ?? 1.0;
+
   Future<void> _addToShoppingList() async {
     setState(() => _isAdding = true);
 
@@ -682,13 +747,15 @@ class _ShoppingListGeneratorScreenState
         final selected = _selections[recipe.recipeId] ?? {};
         if (selected.isEmpty) continue;
 
+        final userScale = _userScaleForRecipe(recipe.recipeId);
+
         final ingredientMaps = recipe.directIngredients
             .where((ri) => selected.contains(ri.ingredient.id))
             .map((ri) {
           final categoryId = getShoppingCategory(ri.ingredient.name);
           return <String, String?>{
             'name': ri.ingredient.name,
-            'amount': ri.scaledAmount,
+            'amount': _scaleAmount(ri.scaledAmount, userScale),
             'unit': ri.ingredient.unit ?? '',
             'categoryId': categoryId,
           };
@@ -898,11 +965,14 @@ class _RecipeCard extends StatelessWidget {
   final Set<String> selectedIds;
   final List<ResolvedRecipeNode> allRecipes;
   final Map<String, GlobalKey> recipeKeys;
+  final double userScale;
+  final Set<String> pantryMatches;
   final VoidCallback onToggleExpand;
   final void Function(String) onToggleIngredient;
   final VoidCallback onSelectAll;
   final VoidCallback onUnselectAll;
   final void Function(String) onScrollToRecipe;
+  final void Function(double) onScaleChanged;
 
   const _RecipeCard({
     super.key,
@@ -913,11 +983,14 @@ class _RecipeCard extends StatelessWidget {
     required this.selectedIds,
     required this.allRecipes,
     required this.recipeKeys,
+    required this.userScale,
+    required this.pantryMatches,
     required this.onToggleExpand,
     required this.onToggleIngredient,
     required this.onSelectAll,
     required this.onUnselectAll,
     required this.onScrollToRecipe,
+    required this.onScaleChanged,
   });
 
   @override
@@ -1044,7 +1117,7 @@ class _RecipeCard extends StatelessWidget {
                     color:
                     theme.colorScheme.outline.withValues(alpha: 0.1)),
 
-                // Select all / none
+                // Select all / none + scale
                 Padding(
                   padding:
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -1066,6 +1139,12 @@ class _RecipeCard extends StatelessWidget {
                         style: TextButton.styleFrom(
                             visualDensity: VisualDensity.compact),
                       ),
+                      const Spacer(),
+                      // Scale selector
+                      _ScaleSelector(
+                        scale: userScale,
+                        onChanged: onScaleChanged,
+                      ),
                     ],
                   ),
                 ),
@@ -1074,9 +1153,13 @@ class _RecipeCard extends StatelessWidget {
                 ...recipe.directIngredients.map((ri) {
                   final isSelected =
                   selectedIds.contains(ri.ingredient.id);
+                  final isPantry =
+                  pantryMatches.contains(ri.ingredient.id);
                   return _IngredientRow(
                     ingredient: ri,
                     isSelected: isSelected,
+                    isPantryItem: isPantry,
+                    userScale: userScale,
                     onToggle: () => onToggleIngredient(ri.ingredient.id),
                   );
                 }),
@@ -1106,19 +1189,46 @@ class _RecipeCard extends StatelessWidget {
 class _IngredientRow extends StatelessWidget {
   final ResolvedIngredient ingredient;
   final bool isSelected;
+  final bool isPantryItem;
+  final double userScale;
   final VoidCallback onToggle;
 
   const _IngredientRow({
     required this.ingredient,
     required this.isSelected,
+    this.isPantryItem = false,
+    this.userScale = 1.0,
     required this.onToggle,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final amt = ingredient.scaledAmount;
+    final rawAmt = ingredient.scaledAmount;
     final unit = ingredient.ingredient.unit ?? '';
+
+    // Apply user scale to displayed amount
+    String amt = rawAmt;
+    if (userScale != 1.0 && rawAmt.isNotEmpty) {
+      const fracs = {
+        '½': 0.5, '¼': 0.25, '¾': 0.75, '⅓': 0.333, '⅔': 0.666,
+        '⅛': 0.125, '⅜': 0.375, '⅝': 0.625, '⅞': 0.875,
+      };
+      double? parsed = double.tryParse(rawAmt);
+      if (parsed == null) {
+        for (final e in fracs.entries) {
+          if (rawAmt == e.key) { parsed = e.value; break; }
+          if (rawAmt.contains(e.key)) {
+            final parts = rawAmt.split(e.key);
+            parsed = (double.tryParse(parts[0].trim()) ?? 0) + e.value;
+            break;
+          }
+        }
+      }
+      if (parsed != null) amt = formatAmount(parsed * userScale);
+    }
+
+    final amountStr = [amt, unit].where((s) => s.isNotEmpty).join(' ');
 
     return InkWell(
       onTap: onToggle,
@@ -1131,30 +1241,114 @@ class _IngredientRow extends StatelessWidget {
               color: const Color(0xFFE8A860),
             ),
             const SizedBox(width: 12),
-            if (amt.isNotEmpty || unit.isNotEmpty)
-              SizedBox(
-                width: 72,
-                child: Text(
-                  [amt, unit].where((s) => s.isNotEmpty).join(' '),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isSelected ? null : theme.colorScheme.outline,
-                  ),
-                ),
-              ),
-            Expanded(
-              child: Text(
-                ingredient.ingredient.name,
+            // Always reserve space for amount column so names align
+            SizedBox(
+              width: 72,
+              child: amountStr.isNotEmpty
+                  ? Text(
+                amountStr,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  decoration:
-                  isSelected ? null : TextDecoration.lineThrough,
+                  fontWeight: FontWeight.w600,
                   color: isSelected ? null : theme.colorScheme.outline,
                 ),
+              )
+                  : null,
+            ),
+            Expanded(
+              child: Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      ingredient.ingredient.name,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        decoration:
+                        isSelected ? null : TextDecoration.lineThrough,
+                        color: isSelected ? null : theme.colorScheme.outline,
+                      ),
+                    ),
+                  ),
+                  if (isPantryItem) ...[
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 5, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.tertiaryContainer
+                            .withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'pantry',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontSize: 9,
+                          color: theme.colorScheme.onTertiaryContainer,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ScaleSelector extends StatelessWidget {
+  final double scale;
+  final void Function(double) onChanged;
+
+  const _ScaleSelector({required this.scale, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    const presets = [0.5, 1.0, 2.0, 3.0];
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.straighten, size: 14, color: theme.colorScheme.outline),
+        const SizedBox(width: 4),
+        ...presets.map((p) {
+          final isActive = (scale - p).abs() < 0.01;
+          final label = p == 0.5 ? '½×' : '${p.round()}×';
+          return Padding(
+            padding: const EdgeInsets.only(left: 2),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () => onChanged(p),
+              child: Container(
+                padding:
+                const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? const Color(0xFFE8A860).withValues(alpha: 0.25)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isActive
+                        ? const Color(0xFFE8A860)
+                        : theme.colorScheme.outline.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Text(
+                  label,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                    color: isActive
+                        ? const Color(0xFFE8A860)
+                        : theme.colorScheme.outline,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+      ],
     );
   }
 }

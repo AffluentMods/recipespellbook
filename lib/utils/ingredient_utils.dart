@@ -484,6 +484,28 @@ const shoppingCategoryKeywords = <String, List<String>>{
     'breadcrumbs', 'bread crumbs', 'panko', 'croutons', 'stuffing',
   ],
 
+  // ============ COOKING & BAKING ============
+  'cookingAndBaking': [
+    // Flour variants — MUST match before 'bread' triggers bakery
+    'bread flour', '00 flour', 'tipo 00', 'cake flour', 'pastry flour',
+    'almond flour', 'coconut flour', 'rice flour', 'semolina flour',
+    'whole wheat flour', 'self-rising flour', 'self rising flour',
+    'rye flour', 'oat flour', 'tapioca flour', 'chickpea flour',
+    'all-purpose flour', 'all purpose flour', 'ap flour',
+    // Compound baking terms
+    'brown sugar', 'powdered sugar', 'confectioners sugar', 'coconut sugar',
+    'baking powder', 'baking soda', 'baking chocolate', 'cocoa powder',
+    'chocolate chips', 'vanilla extract', 'almond extract',
+    'cream of tartar', 'active dry yeast', 'instant yeast',
+    // Oils (prevent matching other categories)
+    'olive oil', 'vegetable oil', 'canola oil', 'coconut oil',
+    'sesame oil', 'avocado oil', 'peanut oil', 'corn oil',
+    'cooking spray', 'nonstick spray',
+    // Vinegars
+    'apple cider vinegar', 'balsamic vinegar', 'red wine vinegar',
+    'white wine vinegar', 'rice vinegar', 'sherry vinegar',
+  ],
+
   // ============ CANNED GOODS & SOUPS ============
   'cannedGoods': [
     'canned', 'can of',
@@ -533,27 +555,6 @@ const shoppingCategoryKeywords = <String, List<String>>{
     'cajun seasoning', 'taco seasoning', 'fajita seasoning', 'ranch seasoning',
     'everything bagel seasoning', 'lemon pepper', 'garlic salt', 'seasoned salt',
     'msg', 'bouillon cube', 'stock cube',
-  ],
-
-  // ============ COOKING & BAKING ============
-  'cookingAndBaking': [
-    'flour', 'all-purpose flour', 'bread flour', 'whole wheat flour', 'cake flour',
-    'almond flour', 'coconut flour', 'cornmeal', 'cornstarch', 'corn starch',
-    'sugar', 'white sugar', 'brown sugar', 'powdered sugar', 'confectioners sugar',
-    'cane sugar', 'coconut sugar', 'molasses', 'agave',
-    'corn syrup', 'stevia', 'artificial sweetener',
-    'baking powder', 'baking soda', 'yeast', 'active dry yeast', 'instant yeast',
-    'vanilla', 'vanilla extract', 'almond extract', 'cocoa powder', 'chocolate chips',
-    'baking chocolate', 'chocolate', 'white chocolate',
-    'oil', 'olive oil', 'extra virgin olive oil', 'vegetable oil', 'canola oil',
-    'coconut oil', 'sesame oil', 'peanut oil', 'avocado oil', 'corn oil',
-    'cooking spray', 'nonstick spray',
-    'vinegar', 'white vinegar', 'apple cider vinegar', 'balsamic vinegar',
-    'red wine vinegar', 'white wine vinegar', 'rice vinegar', 'sherry vinegar',
-    'pie crust', 'puff pastry', 'phyllo', 'filo',
-    'vanilla bean', 'vanilla pod', 'extract', 'food coloring',
-    'cream of tartar', 'xanthan gum', 'pectin', 'gelatin',
-    'shortening', 'lard',
   ],
 
   // ============ SNACKS ============

@@ -1075,11 +1075,8 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
     if (configured) {
       // API configured — send items directly to cart
       _showSendingProgress(provider);
-    } else if (provider == GroceryProvider.kroger) {
-      // Kroger not connected — prompt OAuth login
-      _showKrogerConnectDialog();
     } else {
-      // Instacart fallback — copy list + open store
+      // Not configured — copy list + open store in browser
       await Clipboard.setData(
         ClipboardData(
           text: GroceryService.formatForClipboard(widget.itemNames),
@@ -1091,11 +1088,10 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
         await GroceryService.openStore(provider);
       }
       if (mounted) {
+        final name = _providerData[provider]?.name ?? 'store';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'List copied! Paste items into ${_providerData[provider]?.name ?? "store"}',
-            ),
+            content: Text('List copied! Opening $name...'),
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 4),
           ),
@@ -1116,86 +1112,6 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
         itemNames: widget.itemNames,
         provider: provider,
       ),
-    );
-  }
-
-  void _showKrogerConnectDialog() {
-    debugPrint('[OrderSheet] Showing Kroger connect dialog');
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        final theme = Theme.of(ctx);
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Row(
-            children: [
-              Text('\u{1F3EA}', style: const TextStyle(fontSize: 24)),
-              const SizedBox(width: 12),
-              const Text('Connect Kroger'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Sign in to your Kroger account to add items directly to your cart.',
-                style: theme.textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Works with Kroger, Fred Meyer, Ralphs, Harris Teeter, and more.',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.outline,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-                // Fallback: copy + open store
-                Clipboard.setData(
-                  ClipboardData(text: GroceryService.formatForClipboard(widget.itemNames)),
-                );
-                if (widget.itemNames.isNotEmpty) {
-                  GroceryService.openDeepLink(GroceryProvider.kroger, widget.itemNames.first);
-                }
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('List copied! Opening Kroger...'),
-                      behavior: SnackBarBehavior.floating,
-                      duration: Duration(seconds: 3),
-                    ),
-                  );
-                }
-              },
-              child: const Text('Just open website'),
-            ),
-            FilledButton.icon(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                debugPrint('[OrderSheet] Starting Kroger OAuth login');
-                final launched = await GroceryService.krogerStartOAuthLogin();
-                debugPrint('[OrderSheet] Kroger OAuth launched: $launched');
-                if (!launched && mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Could not open Kroger sign-in'),
-                      behavior: SnackBarBehavior.floating,
-                      duration: Duration(seconds: 3),
-                    ),
-                  );
-                }
-              },
-              icon: const Icon(Icons.login, size: 18),
-              label: const Text('Sign in'),
-            ),
-          ],
-        );
-      },
     );
   }
 

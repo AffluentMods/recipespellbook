@@ -721,7 +721,7 @@ const defaultRecipes = <DefaultRecipeData>[
       vitaminB12: 0.0, folate: 344.8, choline: 47.1, water: 348.9,
     ),
     ingredients: [
-      DefaultIngredient('00 flour or bread flour', amount: '3.5', unit: 'cups'),
+      DefaultIngredient('all purpose flour or bread flour', amount: '3.5', unit: 'cups'),
       DefaultIngredient('salt', amount: '1.25', unit: 'tsp'),
       DefaultIngredient('sugar', amount: '1', unit: 'tsp'),
       DefaultIngredient('instant yeast', amount: '2', unit: 'tsp'),
