@@ -12,6 +12,7 @@ import 'package:archive/archive.dart';
 import '../../services/recipe_import_engine.dart';
 import '../../models/imported_recipe.dart';
 import '../screens/import/import_preview_screen.dart';
+import '../screens/import/ai_import_screen.dart';
 
 /// Shows the MODERN add recipe dialog with 2 options
 Future<void> showNewRecipeDialog(BuildContext context, String cookbookId) {
@@ -582,6 +583,11 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                       _CircleOptionButton(icon: Icons.folder_open, label: l10n.fileOption, onTap: _importFromFile),
                       _CircleOptionButton(icon: Icons.image, label: l10n.imageOption, onTap: _importFromImage),
                       _CircleOptionButton(icon: Icons.text_snippet, label: l10n.pasteOption, onTap: _importFromText),
+                      _CircleOptionButton(icon: Icons.auto_awesome, label: 'AI', onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (_) => const AiImportScreen()));
+                      }),
                       _CircleOptionButton(icon: Icons.edit_note, label: l10n.importCreate, onTap: _createManually),
                     ],
                   ),

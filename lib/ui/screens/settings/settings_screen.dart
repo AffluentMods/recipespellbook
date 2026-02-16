@@ -11,6 +11,7 @@ import '../../../services/grocery_service.dart';
 import '../../../data/app_enums.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'nutrition_settings_screen.dart';
+import '../../../ui/widgets/account_section.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -27,6 +28,9 @@ class SettingsScreen extends ConsumerWidget {
       ),
       body: ListView(
         children: [
+          // ============ ACCOUNT & SYNC ============
+          const AccountSection(),
+
           // ============ APPEARANCE ============
           _SettingsSection(
             title: l10n.settingsAppearance,
@@ -158,20 +162,6 @@ class SettingsScreen extends ConsumerWidget {
                 title: l10n.settingsImport,
                 subtitle: l10n.settingsImportSubtitle,
                 onTap: () => _showImportOptions(context, ref),
-              ),
-            ],
-          ),
-
-          // ============ SYNC (Future) ============
-          _SettingsSection(
-            title: l10n.syncSection,
-            children: [
-              _SettingsTile(
-                icon: Icons.cloud_outlined,
-                title: l10n.cloudSync,
-                subtitle: l10n.comingSoon,
-                enabled: false,
-                onTap: () {},
               ),
             ],
           ),

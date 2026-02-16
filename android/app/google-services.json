@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "37618075189",
+    "project_id": "recipe-spellbook",
+    "storage_bucket": "recipe-spellbook.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:37618075189:android:b533f5a2a30d02e635537c",
+        "android_client_info": {
+          "package_name": "com.affluentlabs.recipespellbook"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMTf25McyLE8XqaRVK8Lv4QGy7Us2KhaQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

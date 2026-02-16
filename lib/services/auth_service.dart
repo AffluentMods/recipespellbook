@@ -1,0 +1,408 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:http/http.dart' as http;
+
+/// User model returned from the API after auth.
+class AuthUser {
+  final String id;
+  final String email;
+  final String? name;
+  final String? avatarUrl;
+  final String tier; // free, basic, standard, premium
+  final DateTime? createdAt;
+
+  const AuthUser({
+    required this.id,
+    required this.email,
+    this.name,
+    this.avatarUrl,
+    this.tier = 'free',
+    this.createdAt,
+  });
+
+  factory AuthUser.fromJson(Map<String, dynamic> json) {
+    return AuthUser(
+      id: json['id'] as String,
+      email: json['email'] as String? ?? '',
+      name: json['name'] as String?,
+      avatarUrl: json['avatarUrl'] as String? ?? json['avatar_url'] as String?,
+      tier: json['tier'] as String? ?? 'free',
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'] as String)
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'email': email,
+    'name': name,
+    'avatarUrl': avatarUrl,
+    'tier': tier,
+    'createdAt': createdAt?.toIso8601String(),
+  };
+
+  bool get isSubscribed => tier == 'standard' || tier == 'premium';
+  bool get isPremium => tier == 'premium';
+
+  String get displayName => name ?? email.split('@').first;
+  String get initials {
+    final parts = (name ?? email).split(' ');
+    if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    return parts[0].substring(0, 1).toUpperCase();
+  }
+}
+
+/// Auth state — either signed out or signed in with a user + JWT.
+class AuthState {
+  final AuthUser? user;
+  final String? jwt;
+  final bool isLoading;
+  final String? error;
+
+  const AuthState({
+    this.user,
+    this.jwt,
+    this.isLoading = false,
+    this.error,
+  });
+
+  const AuthState.initial() : user = null, jwt = null, isLoading = false, error = null;
+  const AuthState.loading() : user = null, jwt = null, isLoading = true, error = null;
+
+  bool get isSignedIn => user != null && jwt != null;
+  bool get isSignedOut => user == null;
+
+  AuthState copyWith({
+    AuthUser? user,
+    String? jwt,
+    bool? isLoading,
+    String? error,
+  }) => AuthState(
+    user: user ?? this.user,
+    jwt: jwt ?? this.jwt,
+    isLoading: isLoading ?? this.isLoading,
+    error: error,
+  );
+}
+
+// ════════════════════════════════════════════
+//  AUTH SERVICE
+// ════════════════════════════════════════════
+
+class AuthService {
+  AuthService._();
+  static final instance = AuthService._();
+
+  // ── Storage keys ──
+  static const _keyJwt = 'auth_jwt';
+  static const _keyUser = 'auth_user';
+  static const _keyProvider = 'auth_provider'; // 'google' or 'apple'
+
+  final _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+  );
+
+  /// Base URL for the main Node.js API.
+  String get _apiBaseUrl =>
+      dotenv.get('API_URL', fallback: 'https://api.affluentlabs.dev');
+
+  // ── Cached state ──
+  AuthUser? _currentUser;
+  String? _currentJwt;
+
+  AuthUser? get currentUser => _currentUser;
+  String? get currentJwt => _currentJwt;
+  bool get isSignedIn => _currentUser != null && _currentJwt != null;
+
+  // ════════════════════════════════════════════
+  //  INITIALIZATION
+  // ════════════════════════════════════════════
+
+  /// Call once at app startup (in main.dart or splash screen).
+  /// Restores saved session from secure storage.
+  Future<AuthState> initialize() async {
+    try {
+      final jwt = await _storage.read(key: _keyJwt);
+      final userJson = await _storage.read(key: _keyUser);
+
+      if (jwt != null && userJson != null) {
+        final user = AuthUser.fromJson(jsonDecode(userJson));
+
+        // Validate the JWT is still good by calling the API
+        final refreshed = await _refreshUser(jwt);
+        if (refreshed != null) {
+          _currentJwt = jwt;
+          _currentUser = refreshed;
+          await _saveUser(refreshed);
+          return AuthState(user: refreshed, jwt: jwt);
+        }
+
+        // JWT expired — clear storage
+        await _clearStorage();
+      }
+    } catch (e) {
+      debugPrint('Auth init error: $e');
+      await _clearStorage();
+    }
+
+    return const AuthState.initial();
+  }
+
+  // ════════════════════════════════════════════
+  //  GOOGLE SIGN-IN
+  // ════════════════════════════════════════════
+
+  Future<AuthState> signInWithGoogle() async {
+    try {
+      final googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+      final account = await googleSignIn.signIn();
+
+      if (account == null) {
+        // User cancelled
+        return const AuthState.initial();
+      }
+
+      final auth = await account.authentication;
+      final idToken = auth.idToken;
+
+      if (idToken == null) {
+        return AuthState(error: 'Failed to get Google ID token');
+      }
+
+      // Exchange with our API
+      return await _exchangeToken(
+        endpoint: '/v1/auth/google',
+        body: {'idToken': idToken},
+        provider: 'google',
+      );
+    } catch (e) {
+      debugPrint('Google sign-in error: $e');
+      return AuthState(error: 'Google sign-in failed: ${_friendlyError(e)}');
+    }
+  }
+
+  // ════════════════════════════════════════════
+  //  APPLE SIGN-IN
+  // ════════════════════════════════════════════
+
+  Future<AuthState> signInWithApple() async {
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      return await _exchangeToken(
+        endpoint: '/v1/auth/apple',
+        body: {
+          'identityToken': credential.identityToken,
+          'authorizationCode': credential.authorizationCode,
+          if (credential.givenName != null) 'firstName': credential.givenName,
+          if (credential.familyName != null) 'lastName': credential.familyName,
+        },
+        provider: 'apple',
+      );
+    } catch (e) {
+      debugPrint('Apple sign-in error: $e');
+      if (e.toString().contains('canceled') || e.toString().contains('cancelled')) {
+        return const AuthState.initial();
+      }
+      return AuthState(error: 'Apple sign-in failed: ${_friendlyError(e)}');
+    }
+  }
+
+  // ════════════════════════════════════════════
+  //  SIGN OUT
+  // ════════════════════════════════════════════
+
+  Future<void> signOut() async {
+    // Try to sign out from Google (no-op if wasn't Google)
+    try {
+      final provider = await _storage.read(key: _keyProvider);
+      if (provider == 'google') {
+        await GoogleSignIn().signOut();
+      }
+    } catch (_) {}
+
+    _currentUser = null;
+    _currentJwt = null;
+    await _clearStorage();
+  }
+
+  // ════════════════════════════════════════════
+  //  DELETE ACCOUNT
+  // ════════════════════════════════════════════
+
+  /// Requests account deletion from the server, then signs out locally.
+  Future<bool> deleteAccount() async {
+    if (_currentJwt == null) return false;
+
+    try {
+      final response = await _authRequest('DELETE', '/v1/auth/account');
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        await signOut();
+        return true;
+      }
+      debugPrint('Delete account failed: ${response.statusCode}');
+      return false;
+    } catch (e) {
+      debugPrint('Delete account error: $e');
+      return false;
+    }
+  }
+
+  // ════════════════════════════════════════════
+  //  AUTHENTICATED REQUESTS
+  // ════════════════════════════════════════════
+
+  /// Make an authenticated GET request to the main API.
+  Future<http.Response> get(String path) => _authRequest('GET', path);
+
+  /// Make an authenticated POST request to the main API.
+  Future<http.Response> post(String path, Map<String, dynamic> body) =>
+      _authRequest('POST', path, body: body);
+
+  /// Make an authenticated PUT request to the main API.
+  Future<http.Response> put(String path, Map<String, dynamic> body) =>
+      _authRequest('PUT', path, body: body);
+
+  /// Make an authenticated DELETE request to the main API.
+  Future<http.Response> delete(String path) => _authRequest('DELETE', path);
+
+  // ════════════════════════════════════════════
+  //  INTERNALS
+  // ════════════════════════════════════════════
+
+  /// Exchange an OAuth token with our API for a JWT.
+  Future<AuthState> _exchangeToken({
+    required String endpoint,
+    required Map<String, dynamic> body,
+    required String provider,
+  }) async {
+    try {
+      final uri = Uri.parse('$_apiBaseUrl$endpoint');
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+
+        final jwt = data['token'] as String;
+        final userJson = data['user'] as Map<String, dynamic>;
+        final user = AuthUser.fromJson(userJson);
+
+        // Save everything
+        _currentJwt = jwt;
+        _currentUser = user;
+        await _storage.write(key: _keyJwt, value: jwt);
+        await _saveUser(user);
+        await _storage.write(key: _keyProvider, value: provider);
+
+        return AuthState(user: user, jwt: jwt);
+      }
+
+      // Parse error message from API
+      String errorMsg = 'Sign-in failed';
+      try {
+        final data = jsonDecode(response.body);
+        errorMsg = data['message'] ?? data['error'] ?? errorMsg;
+      } catch (_) {}
+
+      return AuthState(error: errorMsg);
+    } on SocketException {
+      return const AuthState(error: 'No internet connection');
+    } catch (e) {
+      return AuthState(error: 'Sign-in failed: ${_friendlyError(e)}');
+    }
+  }
+
+  /// Refresh user data from the API using existing JWT.
+  Future<AuthUser?> _refreshUser(String jwt) async {
+    try {
+      final uri = Uri.parse('$_apiBaseUrl/v1/auth/me');
+      final response = await http.get(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $jwt',
+          'Content-Type': 'application/json',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        // Handle both { user: {...} } and direct user object
+        final userJson = data['user'] as Map<String, dynamic>? ?? data;
+        return AuthUser.fromJson(userJson);
+      }
+
+      return null; // JWT invalid/expired
+    } catch (e) {
+      debugPrint('Refresh user failed: $e');
+      // Network error — return null but don't clear session
+      // (user might just be offline)
+      return null;
+    }
+  }
+
+  /// Make an authenticated HTTP request.
+  Future<http.Response> _authRequest(
+      String method,
+      String path, {
+        Map<String, dynamic>? body,
+      }) async {
+    final uri = Uri.parse('$_apiBaseUrl$path');
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      if (_currentJwt != null) 'Authorization': 'Bearer $_currentJwt',
+    };
+
+    switch (method) {
+      case 'GET':
+        return http.get(uri, headers: headers).timeout(const Duration(seconds: 15));
+      case 'POST':
+        return http.post(uri, headers: headers, body: body != null ? jsonEncode(body) : null)
+            .timeout(const Duration(seconds: 15));
+      case 'PUT':
+        return http.put(uri, headers: headers, body: body != null ? jsonEncode(body) : null)
+            .timeout(const Duration(seconds: 15));
+      case 'DELETE':
+        return http.delete(uri, headers: headers).timeout(const Duration(seconds: 15));
+      default:
+        throw ArgumentError('Unsupported method: $method');
+    }
+  }
+
+  Future<void> _saveUser(AuthUser user) async {
+    await _storage.write(key: _keyUser, value: jsonEncode(user.toJson()));
+  }
+
+  Future<void> _clearStorage() async {
+    await _storage.delete(key: _keyJwt);
+    await _storage.delete(key: _keyUser);
+    await _storage.delete(key: _keyProvider);
+  }
+
+  String _friendlyError(dynamic e) {
+    final msg = e.toString();
+    if (msg.contains('SocketException') || msg.contains('HandshakeException')) {
+      return 'No internet connection';
+    }
+    if (msg.contains('TimeoutException')) {
+      return 'Connection timed out';
+    }
+    // Strip Flutter exception prefixes
+    return msg.replaceFirst('Exception: ', '').replaceFirst('PlatformException', 'Error');
+  }
+}

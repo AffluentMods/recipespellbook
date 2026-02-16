@@ -16,6 +16,7 @@ import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/rpg/rpg_navigation_shell.dart';
 import '../../widgets/onboarding_dialog.dart';
 import '../../../utils/default_recipe_images.dart';
+import '../../../providers/auth_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -37,6 +38,7 @@ class HomeScreen extends ConsumerWidget {
           _onboardingChecked = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             FlutterNativeSplash.remove();
+            ref.read(authProvider.notifier).initialize();  // ← add this line
             if (context.mounted) {
               showOnboardingDialog(context, ref);
             }

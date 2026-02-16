@@ -3,6 +3,7 @@ import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:drift/drift.dart' hide Column;
 import '../../../database/database.dart';
 import '../../../database/daos/tags_dao.dart';
 import '../../../providers/database_provider.dart';
@@ -10,6 +11,8 @@ import '../../../providers/settings_provider.dart';
 import '../../widgets/new_recipe_dialog.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../../utils/default_recipe_images.dart';
+import '../../../data/course_category_data.dart' as taxonomy;
+import '../../../utils/taxonomy_translator.dart';
 
 /// Generic recipe list screen with filtering by course/category/tags
 /// Supports view size, sorting, search, and tag filtering
@@ -42,6 +45,40 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
   bool _showTagFilter = false;
 
   final TextEditingController _searchController = TextEditingController();
+
+  // ── Multi-select state ──
+  bool _isSelecting = false;
+  final Set<String> _selectedIds = {};
+  List<Recipe> _currentVisibleRecipes = [];
+
+  void _toggleSelection(String id) {
+    setState(() {
+      if (_selectedIds.contains(id)) {
+        _selectedIds.remove(id);
+        if (_selectedIds.isEmpty) _isSelecting = false;
+      } else {
+        _selectedIds.add(id);
+      }
+    });
+  }
+
+  void _enterSelection(String id) {
+    setState(() {
+      _isSelecting = true;
+      _selectedIds.add(id);
+    });
+  }
+
+  void _exitSelection() {
+    setState(() {
+      _isSelecting = false;
+      _selectedIds.clear();
+    });
+  }
+
+  void _selectAll(List<Recipe> recipes) {
+    setState(() => _selectedIds.addAll(recipes.map((r) => r.id)));
+  }
 
   @override
   void dispose() {
@@ -80,7 +117,15 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: _isSelecting
+          ? AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: _exitSelection,
+        ),
+        title: Text('${_selectedIds.length} selected'),
+      )
+          : AppBar(
         title: _isSearching
             ? TextField(
           controller: _searchController,
@@ -93,7 +138,6 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         )
             : Text(widget.title),
         actions: [
-          // Search toggle
           IconButton(
             icon: Icon(_isSearching ? Icons.close : Icons.search),
             onPressed: () {
@@ -106,7 +150,6 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
               });
             },
           ),
-          // Tag filter toggle
           IconButton(
             icon: Badge(
               isLabelVisible: _selectedTagIds.isNotEmpty,
@@ -116,7 +159,6 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
             tooltip: 'Filter by tags',
             onPressed: () => setState(() => _showTagFilter = !_showTagFilter),
           ),
-          // View size
           PopupMenuButton<_ViewSize>(
             icon: Icon(_viewSize.icon),
             tooltip: 'View size',
@@ -124,17 +166,14 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
             itemBuilder: (ctx) => _ViewSize.values.map((size) {
               return PopupMenuItem(
                 value: size,
-                child: Row(
-                  children: [
-                    Icon(size.icon, color: _viewSize == size ? theme.colorScheme.primary : null),
-                    const SizedBox(width: 12),
-                    Text(size.label),
-                  ],
-                ),
+                child: Row(children: [
+                  Icon(size.icon, color: _viewSize == size ? theme.colorScheme.primary : null),
+                  const SizedBox(width: 12),
+                  Text(size.label),
+                ]),
               );
             }).toList(),
           ),
-          // Sort
           PopupMenuButton<_SortMode>(
             icon: const Icon(Icons.sort),
             tooltip: 'Sort',
@@ -142,13 +181,11 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
             itemBuilder: (ctx) => _SortMode.values.map((sort) {
               return PopupMenuItem(
                 value: sort,
-                child: Row(
-                  children: [
-                    Icon(sort.icon, color: _sort == sort ? theme.colorScheme.primary : null),
-                    const SizedBox(width: 12),
-                    Text(sort.label),
-                  ],
-                ),
+                child: Row(children: [
+                  Icon(sort.icon, color: _sort == sort ? theme.colorScheme.primary : null),
+                  const SizedBox(width: 12),
+                  Text(sort.label),
+                ]),
               );
             }).toList(),
           ),
@@ -156,8 +193,16 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       ),
       body: Column(
         children: [
+          // Select all bar
+          if (_isSelecting)
+            _SelectAllBar(
+              selectedCount: _selectedIds.length,
+              totalCount: _currentVisibleRecipes.length,
+              onSelectAll: () => _selectAll(_currentVisibleRecipes),
+            ),
+
           // Tag filter bar
-          if (_showTagFilter)
+          if (_showTagFilter && !_isSelecting)
             _TagFilterBar(
               selectedTagIds: _selectedTagIds,
               onTagToggled: (tagId, selected) {
@@ -183,7 +228,6 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
 
                 var recipes = snapshot.data ?? [];
 
-                // Apply search filter
                 if (_searchQuery.isNotEmpty) {
                   recipes = recipes.where((r) =>
                   r.title.toLowerCase().contains(_searchQuery) ||
@@ -191,7 +235,6 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
                   ).toList();
                 }
 
-                // Apply tag filter if tags are selected
                 if (_selectedTagIds.isNotEmpty) {
                   return FutureBuilder<List<Recipe>>(
                     future: _filterByTags(recipes, tagsDao),
@@ -200,21 +243,33 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
                         return const Center(child: CircularProgressIndicator());
                       }
                       final filteredRecipes = _sortRecipes(tagSnapshot.data!);
+                      _currentVisibleRecipes = filteredRecipes;
                       return _buildRecipeList(filteredRecipes, effectiveCookbookId, tagsDao);
                     },
                   );
                 }
 
-                // Apply sort
                 recipes = _sortRecipes(recipes);
+                _currentVisibleRecipes = recipes;
                 return _buildRecipeList(recipes, effectiveCookbookId, tagsDao);
               },
             ),
           ),
+
+          // Bulk action bar
+          if (_isSelecting && _selectedIds.isNotEmpty)
+            _BulkActionBar(
+              selectedCount: _selectedIds.length,
+              onDelete: () => _bulkDelete(context),
+              onSetCourse: () => _bulkSetCourse(context),
+              onSetCategory: () => _bulkSetCategory(context),
+              onFavorite: () => _bulkFavorite(),
+            ),
         ],
       ),
-      // FAB to add recipe
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: _isSelecting
+          ? null
+          : FloatingActionButton.extended(
         onPressed: () => _showAddRecipeDialog(context),
         icon: const Icon(Icons.add),
         label: Text(AppLocalizations.of(context)!.recipeAdd),
@@ -285,14 +340,143 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     return sorted;
   }
 
+  // ── Bulk actions ──
+
+  Future<void> _bulkDelete(BuildContext context) async {
+    final count = _selectedIds.length;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.delete_outline, size: 32, color: Colors.red),
+        title: Text('Delete $count recipe${count == 1 ? '' : 's'}?'),
+        content: const Text('Recipes will be moved to trash.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    final dao = ref.read(recipeDaoProvider);
+    for (final id in _selectedIds) {
+      await dao.moveToTrash(id);
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$count recipe${count == 1 ? '' : 's'} moved to trash')),
+      );
+      _exitSelection();
+    }
+  }
+
+  Future<void> _bulkSetCourse(BuildContext context) async {
+    final translator = TaxonomyTranslator.of(context);
+    final courses = taxonomy.CourseData.courses;
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text('Set Course', style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          ),
+          Flexible(
+            child: ListView(shrinkWrap: true, children: courses.map((c) => ListTile(
+              leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
+              title: Text(translator.translateCourse(c.name)),
+              onTap: () => Navigator.pop(ctx, c.id),
+            )).toList()),
+          ),
+        ]),
+      ),
+    );
+    if (selected == null) return;
+    final dao = ref.read(recipeDaoProvider);
+    for (final id in _selectedIds) {
+      await dao.updateRecipeFields(id, RecipesCompanion(courseId: Value(selected)));
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Course set for ${_selectedIds.length} recipes')),
+      );
+      _exitSelection();
+    }
+  }
+
+  Future<void> _bulkSetCategory(BuildContext context) async {
+    final translator = TaxonomyTranslator.of(context);
+    final categories = taxonomy.CategoryData.categories;
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text('Set Category', style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          ),
+          Flexible(
+            child: ListView(shrinkWrap: true, children: categories.map((c) => ListTile(
+              leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
+              title: Text(translator.translateCategory(c.name)),
+              onTap: () => Navigator.pop(ctx, c.id),
+            )).toList()),
+          ),
+        ]),
+      ),
+    );
+    if (selected == null) return;
+    final dao = ref.read(recipeDaoProvider);
+    for (final id in _selectedIds) {
+      await dao.updateRecipeFields(id, RecipesCompanion(categoryId: Value(selected)));
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Category set for ${_selectedIds.length} recipes')),
+      );
+      _exitSelection();
+    }
+  }
+
+  Future<void> _bulkFavorite() async {
+    final dao = ref.read(recipeDaoProvider);
+    for (final id in _selectedIds) {
+      await dao.toggleFavorite(id, true);
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${_selectedIds.length} recipes favorited')),
+      );
+      _exitSelection();
+    }
+  }
+
   Widget _buildList(List<Recipe> recipes, TagsDao tagsDao) {
     switch (_viewSize) {
       case _ViewSize.small:
-        return _SmallListView(recipes: recipes, tagsDao: tagsDao);
+        return _SmallListView(
+          recipes: recipes, tagsDao: tagsDao,
+          isSelecting: _isSelecting, selectedIds: _selectedIds,
+          onTap: (id) { if (_isSelecting) { _toggleSelection(id); } else { context.push('/recipe/$id'); } },
+          onLongPress: (id) { if (!_isSelecting) _enterSelection(id); },
+        );
       case _ViewSize.medium:
-        return _MediumGridView(recipes: recipes, tagsDao: tagsDao);
+        return _MediumGridView(
+          recipes: recipes, tagsDao: tagsDao,
+          isSelecting: _isSelecting, selectedIds: _selectedIds,
+          onTap: (id) { if (_isSelecting) { _toggleSelection(id); } else { context.push('/recipe/$id'); } },
+          onLongPress: (id) { if (!_isSelecting) _enterSelection(id); },
+        );
       case _ViewSize.large:
-        return _LargeCardView(recipes: recipes, tagsDao: tagsDao);
+        return _LargeCardView(
+          recipes: recipes, tagsDao: tagsDao,
+          isSelecting: _isSelecting, selectedIds: _selectedIds,
+          onTap: (id) { if (_isSelecting) { _toggleSelection(id); } else { context.push('/recipe/$id'); } },
+          onLongPress: (id) { if (!_isSelecting) _enterSelection(id); },
+        );
     }
   }
 }
@@ -439,8 +623,16 @@ enum _SortMode {
 class _SmallListView extends StatelessWidget {
   final List<Recipe> recipes;
   final TagsDao tagsDao;
+  final bool isSelecting;
+  final Set<String> selectedIds;
+  final ValueChanged<String> onTap;
+  final ValueChanged<String> onLongPress;
 
-  const _SmallListView({required this.recipes, required this.tagsDao});
+  const _SmallListView({
+    required this.recipes, required this.tagsDao,
+    required this.isSelecting, required this.selectedIds,
+    required this.onTap, required this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -452,51 +644,64 @@ class _SmallListView extends StatelessWidget {
       itemBuilder: (context, index) {
         final recipe = recipes[index];
         final totalTime = (recipe.prepTimeMinutes ?? 0) + (recipe.cookTimeMinutes ?? 0);
+        final isSelected = selectedIds.contains(recipe.id);
 
-        return ListTile(
-          leading: _RecipeThumbnail(recipe: recipe, size: 48),
-          title: Text(recipe.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  if (totalTime > 0) ...[
-                    Icon(Icons.timer, size: 12, color: theme.colorScheme.outline),
-                    const SizedBox(width: 4),
-                    Text(_formatTime(totalTime), style: TextStyle(fontSize: 12, color: theme.colorScheme.outline)),
-                    const SizedBox(width: 8),
+        return Container(
+          color: isSelected ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3) : null,
+          child: ListTile(
+            leading: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isSelecting)
+                  Checkbox(
+                    value: isSelected,
+                    onChanged: (_) => onTap(recipe.id),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                  ),
+                _RecipeThumbnail(recipe: recipe, size: 48),
+              ],
+            ),
+            title: Text(recipe.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    if (totalTime > 0) ...[
+                      Icon(Icons.timer, size: 12, color: theme.colorScheme.outline),
+                      const SizedBox(width: 4),
+                      Text(_formatTime(totalTime), style: TextStyle(fontSize: 12, color: theme.colorScheme.outline)),
+                      const SizedBox(width: 8),
+                    ],
+                    if (recipe.rating != null && recipe.rating! > 0) ...[
+                      const Icon(Icons.star, size: 12, color: Colors.amber),
+                      const SizedBox(width: 2),
+                      Text('${recipe.rating}', style: TextStyle(fontSize: 12, color: theme.colorScheme.outline)),
+                    ],
                   ],
-                  if (recipe.rating != null && recipe.rating! > 0) ...[
-                    const Icon(Icons.star, size: 12, color: Colors.amber),
-                    const SizedBox(width: 2),
-                    Text('${recipe.rating}', style: TextStyle(fontSize: 12, color: theme.colorScheme.outline)),
-                  ],
-                ],
-              ),
-              // Tags row
-              FutureBuilder<List<Tag>>(
-                future: tagsDao.getTagsForRecipe(recipe.id),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: _CompactTagChips(tags: snapshot.data!, maxVisible: 2),
-                  );
-                },
-              ),
-            ],
+                ),
+                FutureBuilder<List<Tag>>(
+                  future: tagsDao.getTagsForRecipe(recipe.id),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: _CompactTagChips(tags: snapshot.data!, maxVisible: 2),
+                    );
+                  },
+                ),
+              ],
+            ),
+            trailing: isSelecting ? null : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (recipe.isFavorite) Icon(Icons.favorite, size: 18, color: theme.colorScheme.error),
+                if (recipe.isPinned) const Icon(Icons.push_pin, size: 18, color: Colors.orange),
+              ],
+            ),
+            onTap: () => onTap(recipe.id),
+            onLongPress: () => onLongPress(recipe.id),
           ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (recipe.isFavorite) Icon(Icons.favorite, size: 18, color: theme.colorScheme.error),
-              if (recipe.isPinned) const Icon(Icons.push_pin, size: 18, color: Colors.orange),
-            ],
-          ),
-          onTap: () => context.push('/recipe/${recipe.id}'),
         );
       },
     );
@@ -515,8 +720,16 @@ class _SmallListView extends StatelessWidget {
 class _MediumGridView extends StatelessWidget {
   final List<Recipe> recipes;
   final TagsDao tagsDao;
+  final bool isSelecting;
+  final Set<String> selectedIds;
+  final ValueChanged<String> onTap;
+  final ValueChanged<String> onLongPress;
 
-  const _MediumGridView({required this.recipes, required this.tagsDao});
+  const _MediumGridView({
+    required this.recipes, required this.tagsDao,
+    required this.isSelecting, required this.selectedIds,
+    required this.onTap, required this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -529,7 +742,13 @@ class _MediumGridView extends StatelessWidget {
         mainAxisSpacing: 12,
       ),
       itemCount: recipes.length,
-      itemBuilder: (context, index) => _MediumCard(recipe: recipes[index], tagsDao: tagsDao),
+      itemBuilder: (context, index) => _MediumCard(
+        recipe: recipes[index], tagsDao: tagsDao,
+        isSelecting: isSelecting,
+        isSelected: selectedIds.contains(recipes[index].id),
+        onTap: () => onTap(recipes[index].id),
+        onLongPress: () => onLongPress(recipes[index].id),
+      ),
     );
   }
 }
@@ -537,8 +756,16 @@ class _MediumGridView extends StatelessWidget {
 class _MediumCard extends StatelessWidget {
   final Recipe recipe;
   final TagsDao tagsDao;
+  final bool isSelecting;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
 
-  const _MediumCard({required this.recipe, required this.tagsDao});
+  const _MediumCard({
+    required this.recipe, required this.tagsDao,
+    required this.isSelecting, required this.isSelected,
+    required this.onTap, required this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -548,8 +775,15 @@ class _MediumCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
+      shape: isSelected
+          ? RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: theme.colorScheme.primary, width: 2.5),
+      )
+          : null,
       child: InkWell(
-        onTap: () => context.push('/recipe/${recipe.id}'),
+        onTap: onTap,
+        onLongPress: onLongPress,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -567,8 +801,25 @@ class _MediumCard extends StatelessWidget {
                         ? Image.asset(defaultAsset, fit: BoxFit.cover)
                         : const RecipePlaceholderImage(height: double.infinity, width: double.infinity),
                   ),
+                  // Selection indicator
+                  if (isSelecting)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected ? theme.colorScheme.primary : Colors.black.withValues(alpha: 0.4),
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(2),
+                        child: Icon(
+                          isSelected ? Icons.check : Icons.circle_outlined,
+                          size: 20, color: Colors.white,
+                        ),
+                      ),
+                    ),
                   // Badges
-                  if (recipe.isPinned || recipe.isFavorite)
+                  if (!isSelecting && (recipe.isPinned || recipe.isFavorite))
                     Positioned(
                       top: 8,
                       right: 8,
@@ -578,20 +829,14 @@ class _MediumCard extends StatelessWidget {
                           if (recipe.isPinned)
                             Container(
                               padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: Colors.orange,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
+                              decoration: BoxDecoration(color: Colors.orange, borderRadius: BorderRadius.circular(4)),
                               child: const Icon(Icons.push_pin, size: 14, color: Colors.white),
                             ),
                           if (recipe.isPinned && recipe.isFavorite) const SizedBox(width: 4),
                           if (recipe.isFavorite)
                             Container(
                               padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.error,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
+                              decoration: BoxDecoration(color: theme.colorScheme.error, borderRadius: BorderRadius.circular(4)),
                               child: const Icon(Icons.favorite, size: 14, color: Colors.white),
                             ),
                         ],
@@ -617,13 +862,10 @@ class _MediumCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    // Tags
                     FutureBuilder<List<Tag>>(
                       future: tagsDao.getTagsForRecipe(recipe.id),
                       builder: (context, snapshot) {
-                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 4),
                           child: _CompactTagChips(tags: snapshot.data!, maxVisible: 2),
@@ -649,23 +891,15 @@ class _MediumCard extends StatelessWidget {
         if (totalTime > 0) ...[
           Icon(Icons.timer, size: 14, color: theme.colorScheme.outline),
           const SizedBox(width: 4),
-          Text(
-            _formatTime(totalTime),
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-          ),
+          Text(_formatTime(totalTime), style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
         ],
         const Spacer(),
         if (recipe.rating != null && recipe.rating! > 0)
-          Row(
-            children: [
-              const Icon(Icons.star, size: 14, color: Colors.amber),
-              const SizedBox(width: 2),
-              Text(
-                '${recipe.rating}',
-                style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+          Row(children: [
+            const Icon(Icons.star, size: 14, color: Colors.amber),
+            const SizedBox(width: 2),
+            Text('${recipe.rating}', style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+          ]),
       ],
     );
   }
@@ -683,15 +917,29 @@ class _MediumCard extends StatelessWidget {
 class _LargeCardView extends StatelessWidget {
   final List<Recipe> recipes;
   final TagsDao tagsDao;
+  final bool isSelecting;
+  final Set<String> selectedIds;
+  final ValueChanged<String> onTap;
+  final ValueChanged<String> onLongPress;
 
-  const _LargeCardView({required this.recipes, required this.tagsDao});
+  const _LargeCardView({
+    required this.recipes, required this.tagsDao,
+    required this.isSelecting, required this.selectedIds,
+    required this.onTap, required this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
       padding: const EdgeInsets.all(12).copyWith(bottom: 80),
       itemCount: recipes.length,
-      itemBuilder: (context, index) => _LargeCard(recipe: recipes[index], tagsDao: tagsDao),
+      itemBuilder: (context, index) => _LargeCard(
+        recipe: recipes[index], tagsDao: tagsDao,
+        isSelecting: isSelecting,
+        isSelected: selectedIds.contains(recipes[index].id),
+        onTap: () => onTap(recipes[index].id),
+        onLongPress: () => onLongPress(recipes[index].id),
+      ),
     );
   }
 }
@@ -699,8 +947,16 @@ class _LargeCardView extends StatelessWidget {
 class _LargeCard extends StatelessWidget {
   final Recipe recipe;
   final TagsDao tagsDao;
+  final bool isSelecting;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
 
-  const _LargeCard({required this.recipe, required this.tagsDao});
+  const _LargeCard({
+    required this.recipe, required this.tagsDao,
+    required this.isSelecting, required this.isSelected,
+    required this.onTap, required this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -711,8 +967,15 @@ class _LargeCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       clipBehavior: Clip.antiAlias,
+      shape: isSelected
+          ? RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: theme.colorScheme.primary, width: 2.5),
+      )
+          : null,
       child: InkWell(
-        onTap: () => context.push('/recipe/${recipe.id}'),
+        onTap: onTap,
+        onLongPress: onLongPress,
         child: SizedBox(
           height: 200,
           child: Stack(
@@ -722,10 +985,7 @@ class _LargeCard extends StatelessWidget {
               Container(
                 color: theme.colorScheme.primaryContainer,
                 child: hasImage
-                    ? Image.file(
-                  File(recipe.imagePath!),
-                  fit: BoxFit.cover,
-                )
+                    ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
                     : defaultAsset != null
                     ? Image.asset(defaultAsset, fit: BoxFit.cover)
                     : const RecipePlaceholderImage(height: 200, width: double.infinity),
@@ -736,16 +996,30 @@ class _LargeCard extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.7),
-                    ],
+                    colors: [Colors.transparent, Colors.black.withValues(alpha: 0.7)],
                     stops: const [0.4, 1.0],
                   ),
                 ),
               ),
+              // Selection indicator
+              if (isSelecting)
+                Positioned(
+                  top: 12,
+                  left: 12,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isSelected ? theme.colorScheme.primary : Colors.black.withValues(alpha: 0.4),
+                      shape: BoxShape.circle,
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: Icon(
+                      isSelected ? Icons.check : Icons.circle_outlined,
+                      size: 22, color: Colors.white,
+                    ),
+                  ),
+                ),
               // Top badges (pinned, favorite)
-              if (recipe.isPinned || recipe.isFavorite)
+              if (!isSelecting && (recipe.isPinned || recipe.isFavorite))
                 Positioned(
                   top: 12,
                   right: 12,
@@ -755,10 +1029,7 @@ class _LargeCard extends StatelessWidget {
                       if (recipe.isPinned)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.orange,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          decoration: BoxDecoration(color: Colors.orange, borderRadius: BorderRadius.circular(12)),
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -772,10 +1043,7 @@ class _LargeCard extends StatelessWidget {
                       if (recipe.isFavorite)
                         Container(
                           padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.error,
-                            shape: BoxShape.circle,
-                          ),
+                          decoration: BoxDecoration(color: theme.colorScheme.error, shape: BoxShape.circle),
                           child: const Icon(Icons.favorite, size: 16, color: Colors.white),
                         ),
                     ],
@@ -790,38 +1058,28 @@ class _LargeCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Title
                     Text(
                       recipe.title,
                       style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(offset: Offset(0, 1), blurRadius: 3, color: Colors.black54),
-                        ],
+                        color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold,
+                        shadows: [Shadow(offset: Offset(0, 1), blurRadius: 3, color: Colors.black54)],
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    // Tags
                     FutureBuilder<List<Tag>>(
                       future: tagsDao.getTagsForRecipe(recipe.id),
                       builder: (context, snapshot) {
-                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 4),
                           child: _CompactTagChips(tags: snapshot.data!, maxVisible: 3, lightMode: true),
                         );
                       },
                     ),
-                    // Meta row
                     Row(
                       children: [
-                        // Time
                         if ((recipe.prepTimeMinutes ?? 0) + (recipe.cookTimeMinutes ?? 0) > 0) ...[
                           const Icon(Icons.timer, size: 16, color: Colors.white70),
                           const SizedBox(width: 4),
@@ -831,23 +1089,16 @@ class _LargeCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 16),
                         ],
-                        // Rating
                         if (recipe.rating != null && recipe.rating! > 0) ...[
                           _buildStarRating(recipe.rating!),
                         ],
                         const Spacer(),
-                        // Servings
                         if (recipe.servings != null && recipe.servings!.isNotEmpty)
-                          Row(
-                            children: [
-                              const Icon(Icons.people_outline, size: 16, color: Colors.white70),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${recipe.servings}',
-                                style: const TextStyle(color: Colors.white70, fontSize: 14),
-                              ),
-                            ],
-                          ),
+                          Row(children: [
+                            const Icon(Icons.people_outline, size: 16, color: Colors.white70),
+                            const SizedBox(width: 4),
+                            Text('${recipe.servings}', style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                          ]),
                       ],
                     ),
                   ],
@@ -864,11 +1115,7 @@ class _LargeCard extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(5, (index) {
-        return Icon(
-          index < rating ? Icons.star : Icons.star_border,
-          size: 16,
-          color: Colors.amber,
-        );
+        return Icon(index < rating ? Icons.star : Icons.star_border, size: 16, color: Colors.amber);
       }),
     );
   }
@@ -1058,5 +1305,112 @@ class _EmptyState extends StatelessWidget {
 
   void _showAddRecipeDialog(BuildContext context) {
     showNewRecipeDialog(context, cookbookId);
+  }
+}
+
+// ============ SELECT ALL BAR ============
+
+class _SelectAllBar extends StatelessWidget {
+  final int selectedCount;
+  final int totalCount;
+  final VoidCallback onSelectAll;
+
+  const _SelectAllBar({
+    required this.selectedCount,
+    required this.totalCount,
+    required this.onSelectAll,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      color: theme.colorScheme.surfaceContainerHighest,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Row(
+        children: [
+          Text('$selectedCount of $totalCount',
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+          const Spacer(),
+          TextButton(
+            onPressed: onSelectAll,
+            child: Text(selectedCount >= totalCount ? 'Deselect all' : 'Select all'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============ BULK ACTION BAR ============
+
+class _BulkActionBar extends StatelessWidget {
+  final int selectedCount;
+  final VoidCallback onDelete;
+  final VoidCallback onSetCourse;
+  final VoidCallback onSetCategory;
+  final VoidCallback onFavorite;
+
+  const _BulkActionBar({
+    required this.selectedCount,
+    required this.onDelete,
+    required this.onSetCourse,
+    required this.onSetCategory,
+    required this.onFavorite,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: EdgeInsets.fromLTRB(8, 8, 8, 8 + MediaQuery.of(context).padding.bottom),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        border: Border(top: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2))),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _BulkAction(icon: Icons.restaurant_menu, label: 'Course', onTap: onSetCourse),
+          _BulkAction(icon: Icons.category, label: 'Category', onTap: onSetCategory),
+          _BulkAction(icon: Icons.star_outline, label: 'Favorite', onTap: onFavorite),
+          _BulkAction(icon: Icons.delete_outline, label: 'Delete', onTap: onDelete, color: Colors.red),
+        ],
+      ),
+    );
+  }
+}
+
+class _BulkAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color? color;
+
+  const _BulkAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = color ?? Theme.of(context).colorScheme.onSurface;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 22, color: c),
+            const SizedBox(height: 4),
+            Text(label, style: TextStyle(fontSize: 11, color: c)),
+          ],
+        ),
+      ),
+    );
   }
 }
