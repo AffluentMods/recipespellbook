@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/auth_service.dart';
 import '../services/smart_import_service.dart';
+import 'subscription_provider.dart';
 
 // ════════════════════════════════════════════
 //  PROVIDERS
@@ -105,6 +106,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   void _syncAuthToServices() {
     final jwt = _service.currentJwt;
+    final user = _service.currentUser;
     if (jwt != null) {
       SmartImportService.instance.setAuthToken(jwt);
       // Add other services here as you build them:

@@ -8,6 +8,7 @@ import 'providers/settings_provider.dart';
 import 'l10n/app_localizations.dart';
 import 'services/ingredient_suggestion_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'providers/subscription_provider.dart';
 import 'providers/auth_provider.dart';  // add import
 
 // Provider to hold shared recipe data (for future share intent)

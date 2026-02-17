@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/subscription_provider.dart';
 import '../widgets/app_menu_drawer.dart';
 import '../widgets/rpg/rpg_navigation_shell.dart';
 
@@ -28,26 +30,66 @@ class AppShell extends ConsumerStatefulWidget {
 
 class _AppShellState extends ConsumerState<AppShell> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _servicesInitialized = false;
 
-  /// Dismiss any open modals/bottom sheets/snackbars before navigating tabs
-  void _dismissOverlays() {
-    // Clear snackbars
-    ScaffoldMessenger.maybeOf(context)?.clearSnackBars();
+  @override
+  void initState() {
+    super.initState();
+    // Initialize auth + subscription once when the shell first mounts.
+    // This runs every app launch (not gated by onboarding).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initServices();
+    });
+  }
 
+  Future<void> _initServices() async {
+    if (_servicesInitialized) return;
+    _servicesInitialized = true;
+
+    // Initialize auth (restore JWT from secure storage)
+    await ref.read(authProvider.notifier).initialize();
+
+    // Initialize RevenueCat SDK
+    await ref.read(subscriptionProvider.notifier).initialize();
+
+    // Listen for auth changes → sync RevenueCat identity
+    ref.listenManual(authProvider, (prev, next) {
+      final wasSignedIn = prev?.isSignedIn ?? false;
+      final isSignedIn = next.isSignedIn;
+
+      if (isSignedIn && !wasSignedIn && next.user != null) {
+        // User just signed in — link RevenueCat
+        ref.read(subscriptionProvider.notifier).login(next.user!.id);
+      } else if (!isSignedIn && wasSignedIn) {
+        // User signed out — unlink RevenueCat
+        ref.read(subscriptionProvider.notifier).logout();
+      }
+    });
+  }
+
+  /// Dismiss any open modals/bottom sheets/full-screen overlays before navigating tabs
+  void _navigateTo(String path, int index) {
     // Close the end drawer if open
     if (_scaffoldKey.currentState?.isEndDrawerOpen ?? false) {
       _scaffoldKey.currentState?.closeEndDrawer();
     }
 
-    // Pop all modals/sheets on the root navigator
-    final rootNav = Navigator.maybeOf(context, rootNavigator: true);
-    if (rootNav != null && rootNav.canPop()) {
-      rootNav.popUntil((route) => route.isFirst);
-    }
-  }
+    // Pop nested navigator first (catches bottom sheets shown from child screens)
+    try {
+      final nestedNav = Navigator.of(context);
+      if (nestedNav.canPop()) {
+        nestedNav.popUntil((route) => route.isFirst);
+      }
+    } catch (_) {}
 
-  void _navigateTo(String path, int index) {
-    _dismissOverlays();
+    // Then pop root navigator (catches full-screen modals)
+    try {
+      final rootNav = Navigator.of(context, rootNavigator: true);
+      if (rootNav.canPop()) {
+        rootNav.popUntil((route) => route.isFirst);
+      }
+    } catch (_) {}
+
     ref.read(currentNavIndexProvider.notifier).state = index;
     context.go(path);
   }
@@ -121,7 +163,19 @@ class _AppShellState extends ConsumerState<AppShell> {
                       label: l10n.navMenu,
                       isSelected: false,
                       onTap: () {
-                        _dismissOverlays();
+                        // Close any open sheets/modals
+                        try {
+                          final nestedNav = Navigator.of(context);
+                          if (nestedNav.canPop()) {
+                            nestedNav.popUntil((route) => route.isFirst);
+                          }
+                        } catch (_) {}
+                        try {
+                          final rootNav = Navigator.of(context, rootNavigator: true);
+                          if (rootNav.canPop()) {
+                            rootNav.popUntil((route) => route.isFirst);
+                          }
+                        } catch (_) {}
                         _scaffoldKey.currentState?.openEndDrawer();
                       },
                     ),

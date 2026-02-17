@@ -11,7 +11,7 @@ import '../../../services/grocery_service.dart';
 import '../../../data/app_enums.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'nutrition_settings_screen.dart';
-import '../../../ui/widgets/account_section.dart';
+import '../../../ui/widgets/subscription_section.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -28,8 +28,8 @@ class SettingsScreen extends ConsumerWidget {
       ),
       body: ListView(
         children: [
-          // ============ ACCOUNT & SYNC ============
-          const AccountSection(),
+          // ============ SUBSCRIPTION ============
+          const SubscriptionSection(),
 
           // ============ APPEARANCE ============
           _SettingsSection(

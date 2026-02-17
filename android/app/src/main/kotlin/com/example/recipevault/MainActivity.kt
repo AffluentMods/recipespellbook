@@ -1,5 +1,5 @@
-package com.example.recipespellbook
+package com.affluentlabs.recipespellbook
 
 import io.flutter.embedding.android.FlutterActivity
 
-class MainActivity : FlutterActivity()
+class MainActivity: FlutterActivity()

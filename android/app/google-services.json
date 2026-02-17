@@ -12,7 +12,20 @@
           "package_name": "com.affluentlabs.recipespellbook"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "37618075189-jnq6tb0phjcn607fu3njhn9a5vjk6uee.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.affluentlabs.recipespellbook",
+            "certificate_hash": "168e544a30e3a3b2ced0add0a47eed9b7bbfb529"
+          }
+        },
+        {
+          "client_id": "37618075189-003tm8gs83qelruo1jkuadf70ur9drr7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBMTf25McyLE8XqaRVK8Lv4QGy7Us2KhaQ"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "37618075189-003tm8gs83qelruo1jkuadf70ur9drr7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "37618075189-k3bh6km7r7lurkvg5lld1sgoleo4s3p5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.affluentlabs.recipespellbook"
+              }
+            }
+          ]
         }
       }
     }
