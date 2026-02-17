@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../services/feature_gate.dart';
+import '../../../providers/subscription_provider.dart';
 
 /// Step data model for editing
 class EditableStep {
@@ -246,6 +248,10 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
                 },
                 onLongPress: () => _onLongPress(step.id),
                 onTap: _isSelectionMode ? () => _toggleSelection(step.id) : null,
+                onImageGateCheck: () =>
+                    checkFeatureAccess(context, ref, GatedFeature.stepPhotos),
+                hasStepPhotoAccess: GatedFeature.stepPhotos.isUnlockedFor(
+                    ref.watch(subscriptionProvider).tier),
               );
             },
           ),
@@ -337,6 +343,8 @@ class _StepCard extends StatelessWidget {
   final ValueChanged<String?> onImageChanged;
   final VoidCallback onLongPress;
   final VoidCallback? onTap;
+  final bool Function() onImageGateCheck;
+  final bool hasStepPhotoAccess;
 
   const _StepCard({
     super.key,
@@ -349,6 +357,8 @@ class _StepCard extends StatelessWidget {
     required this.onTextChanged,
     required this.onImageChanged,
     required this.onLongPress,
+    required this.onImageGateCheck,
+    required this.hasStepPhotoAccess,
     this.onTap,
   });
 
@@ -406,32 +416,56 @@ class _StepCard extends StatelessWidget {
                   // Camera icon / image thumbnail
                   GestureDetector(
                     onTap: () => _showImagePicker(context),
-                    child: Container(
+                    child: SizedBox(
                       width: 38,
                       height: 38,
-                      decoration: BoxDecoration(
-                        color: hasImage
-                            ? Colors.transparent
-                            : (isDark
-                            ? theme.colorScheme.surfaceContainerHighest
-                            : theme.colorScheme.surfaceContainerLow),
-                        borderRadius: BorderRadius.circular(10),
-                        border: hasImage
-                            ? null
-                            : Border.all(
-                          color: theme.colorScheme.outline.withValues(alpha: 0.2),
-                        ),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: hasImage
-                          ? Image.file(
-                        File(step.imagePath!),
-                        fit: BoxFit.cover,
-                      )
-                          : Icon(
-                        Icons.camera_alt_outlined,
-                        size: 18,
-                        color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: hasImage
+                                  ? Colors.transparent
+                                  : (isDark
+                                  ? theme.colorScheme.surfaceContainerHighest
+                                  : theme.colorScheme.surfaceContainerLow),
+                              borderRadius: BorderRadius.circular(10),
+                              border: hasImage
+                                  ? null
+                                  : Border.all(
+                                color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                              ),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: hasImage
+                                ? Image.file(
+                              File(step.imagePath!),
+                              fit: BoxFit.cover,
+                            )
+                                : Icon(
+                              Icons.camera_alt_outlined,
+                              size: 18,
+                              color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          // Premium badge on camera icon
+                          if (!hasImage && !hasStepPhotoAccess)
+                            Positioned(
+                              right: -4,
+                              top: -4,
+                              child: Container(
+                                width: 16,
+                                height: 16,
+                                decoration: const BoxDecoration(
+                                  color: Colors.amber,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.star, size: 10, color: Colors.white),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
@@ -510,6 +544,12 @@ class _StepCard extends StatelessWidget {
   }
 
   void _showImagePicker(BuildContext context) {
+    final hasExistingImage = step.imagePath != null && step.imagePath!.isNotEmpty;
+
+    // Gate: adding NEW step photos requires Premium or higher.
+    // Users can still remove existing photos (from imports/transfers).
+    if (!hasExistingImage && !onImageGateCheck()) return;
+
     final picker = ImagePicker();
 
     showModalBottomSheet(
@@ -527,25 +567,55 @@ class _StepCard extends StatelessWidget {
                 },
               ),
             ListTile(
-              leading: const Icon(Icons.camera_alt),
+              leading: Icon(
+                Icons.camera_alt,
+                color: hasStepPhotoAccess ? null : Theme.of(context).disabledColor,
+              ),
               title: const Text('Take photo'),
-              onTap: () async {
+              subtitle: hasStepPhotoAccess
+                  ? null
+                  : Text('Requires Premium',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.outline,
+                  )),
+              onTap: hasStepPhotoAccess
+                  ? () async {
                 Navigator.pop(ctx);
                 final image = await picker.pickImage(source: ImageSource.camera);
                 if (image != null && context.mounted) {
                   onImageChanged(image.path);
                 }
+              }
+                  : () {
+                Navigator.pop(ctx);
+                onImageGateCheck(); // Shows upgrade sheet
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library),
+              leading: Icon(
+                Icons.photo_library,
+                color: hasStepPhotoAccess ? null : Theme.of(context).disabledColor,
+              ),
               title: const Text('Choose from gallery'),
-              onTap: () async {
+              subtitle: hasStepPhotoAccess
+                  ? null
+                  : Text('Requires Premium',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.outline,
+                  )),
+              onTap: hasStepPhotoAccess
+                  ? () async {
                 Navigator.pop(ctx);
                 final image = await picker.pickImage(source: ImageSource.gallery);
                 if (image != null && context.mounted) {
                   onImageChanged(image.path);
                 }
+              }
+                  : () {
+                Navigator.pop(ctx);
+                onImageGateCheck(); // Shows upgrade sheet
               },
             ),
           ],
@@ -650,8 +720,12 @@ class _StepImagePreview extends StatelessWidget {
 
 class _AddStepImageButton extends StatelessWidget {
   final ValueChanged<String?> onImageSelected;
+  final bool Function()? onImageGateCheck;
 
-  const _AddStepImageButton({required this.onImageSelected});
+  const _AddStepImageButton({
+    required this.onImageSelected,
+    this.onImageGateCheck,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -685,6 +759,9 @@ class _AddStepImageButton extends StatelessWidget {
   }
 
   void _pickImage(BuildContext context) async {
+    // Gate: step photos require Premium or higher
+    if (onImageGateCheck != null && !onImageGateCheck!()) return;
+
     final picker = ImagePicker();
 
     showModalBottomSheet(
