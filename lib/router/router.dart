@@ -32,6 +32,8 @@ import '../ui/screens/settings/nutrition_settings_screen.dart';
 import '../ui/screens/settings/ingredient_substitutions_screen.dart';
 import '../ui/screens/settings/manage_tags_screen.dart';
 import '../ui/screens/splash/splash_screen.dart';
+import '../ui/screens/premium/paywall_screen.dart';
+import '../ui/screens/import/transfer_screen.dart';
 // RPG imports
 import '../ui/screens/rpg/rpg_profile_screen.dart';
 import '../ui/screens/rpg/rpg_achievements_screen.dart';
@@ -328,7 +330,14 @@ final router = GoRouter(
         return RecipeScreen(recipeId: id);
       },
     ),
-
+    GoRoute(
+      path: '/upgrade',
+      builder: (context, state) => const PaywallScreen(),
+    ),
+    GoRoute(
+      path: '/transfer',
+      builder: (context, state) => const TransferScreen(),
+    ),
     GoRoute(
       path: '/settings/trash',
       name: 'trash',

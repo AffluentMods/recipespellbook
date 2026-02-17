@@ -26,6 +26,9 @@ import '../../widgets/nutrition_calculation_sheet.dart';
 import '../../widgets/rpg/rpg_rarity_picker.dart';
 import '../../widgets/rpg/rpg_navigation_shell.dart';
 import '../../widgets/recipe_edit_instructions.dart';
+import '../../../services/image_service.dart';
+import '../../../services/auth_service.dart';
+import '../../../providers/subscription_provider.dart';
 
 // ============ IMAGE PREVIEW/CONFIRM HELPER ============
 
@@ -770,6 +773,17 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       if (_imageUrl != null && _imagePath == null) {
         final recipeId = widget.recipeId ?? 'recipe_${DateTime.now().millisecondsSinceEpoch}';
         finalImagePath = await _downloadImage(_imageUrl!, recipeId);
+      }
+
+      // Upload to cloud if user has cloud sync and image is a local file
+      if (finalImagePath != null &&
+          !ImageService.isServerPath(finalImagePath) &&
+          AuthService.instance.isSignedIn &&
+          ref.read(subscriptionProvider).tier.hasCloudSync) {
+        final uploadResult = await ImageService.instance.uploadFile(File(finalImagePath));
+        if (uploadResult != null) {
+          finalImagePath = uploadResult.path; // Store server path instead
+        }
       }
 
       final nutritionJson = _nutrition != null && !_nutrition!.isEmpty ? jsonEncode(_nutrition!.toJson()) : null;
@@ -1791,7 +1805,12 @@ class _PhotoPicker extends StatelessWidget {
     // Build the appropriate DecorationImage
     DecorationImage? decorationImage;
     if (hasImage) {
-      decorationImage = DecorationImage(image: FileImage(File(imagePath!)), fit: BoxFit.cover);
+      if (ImageService.isServerPath(imagePath!)) {
+        // Server-hosted image — we'll show it via a FutureBuilder below
+        decorationImage = null; // handled separately
+      } else {
+        decorationImage = DecorationImage(image: FileImage(File(imagePath!)), fit: BoxFit.cover);
+      }
     } else if (hasAsset) {
       decorationImage = DecorationImage(image: AssetImage(defaultAssetPath!), fit: BoxFit.cover);
     }

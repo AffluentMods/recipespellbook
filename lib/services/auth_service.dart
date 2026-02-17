@@ -239,6 +239,41 @@ class AuthService {
   }
 
   // ════════════════════════════════════════════
+  //  RESTORE FROM TRANSFER BUNDLE
+  // ════════════════════════════════════════════
+
+  /// Restores an auth session from a transfer bundle (JWT + user info).
+  /// Used when the receiver device gets the sender's auth token.
+  Future<AuthState> restoreFromTransfer({
+    required String token,
+    required String userId,
+    String? displayName,
+    String? email,
+    String? avatarUrl,
+  }) async {
+    try {
+      // Validate the JWT is still good
+      final refreshed = await _refreshUser(token);
+      if (refreshed != null) {
+        _currentJwt = token;
+        _currentUser = refreshed;
+        await _storage.write(key: _keyJwt, value: token);
+        await _saveUser(refreshed);
+        await _storage.write(key: _keyProvider, value: 'transfer');
+        return AuthState(user: refreshed, jwt: token);
+      }
+
+      // JWT expired — build a user from the bundle info anyway?
+      // No — if the token is dead, don't pretend we're signed in.
+      debugPrint('[Auth] Transfer token is expired or invalid');
+      return const AuthState(error: 'Transfer sign-in failed — token expired');
+    } catch (e) {
+      debugPrint('[Auth] restoreFromTransfer error: $e');
+      return AuthState(error: 'Transfer sign-in failed: ${_friendlyError(e)}');
+    }
+  }
+
+  // ════════════════════════════════════════════
   //  DELETE ACCOUNT
   // ════════════════════════════════════════════
 

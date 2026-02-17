@@ -1,125 +1,244 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import '../services/revenuecat_service.dart';
+import '../services/auth_service.dart';
 
-// ════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
+//  SUBSCRIPTION STATUS
+// ════════════════════════════════════════════════════════════════
+
+class SubscriptionStatus {
+  final SubscriptionTier tier;
+  final bool isLoading;
+  final String? error;
+  final bool isCancelled;
+  final DateTime? expirationDate;
+
+  const SubscriptionStatus({
+    this.tier = SubscriptionTier.free,
+    this.isLoading = false,
+    this.error,
+    this.isCancelled = false,
+    this.expirationDate,
+  });
+
+  /// Whether the user has any paid subscription.
+  bool get isPaid => tier != SubscriptionTier.free;
+
+  /// Alias for isPaid — used by many screens.
+  bool get isPro => tier != SubscriptionTier.free;
+
+  /// Whether cloud sync is available.
+  bool get hasCloudSync => tier.hasCloudSync;
+
+  /// Whether sharing features are available.
+  bool get hasSharing => tier.hasSharing;
+
+  SubscriptionStatus copyWith({
+    SubscriptionTier? tier,
+    bool? isLoading,
+    String? error,
+    bool? isCancelled,
+    DateTime? expirationDate,
+    bool clearExpiration = false,
+  }) =>
+      SubscriptionStatus(
+        tier: tier ?? this.tier,
+        isLoading: isLoading ?? this.isLoading,
+        error: error,
+        isCancelled: isCancelled ?? this.isCancelled,
+        expirationDate: clearExpiration ? null : (expirationDate ?? this.expirationDate),
+      );
+}
+
+// ════════════════════════════════════════════════════════════════
 //  PROVIDERS
-// ════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 
-/// Main subscription state provider.
 final subscriptionProvider =
 StateNotifierProvider<SubscriptionNotifier, SubscriptionStatus>((ref) {
   return SubscriptionNotifier();
 });
 
-/// Convenience: is the user a Pro subscriber?
+/// Convenience: current tier.
+final currentTierProvider = Provider<SubscriptionTier>((ref) {
+  return ref.watch(subscriptionProvider).tier;
+});
+
+/// Convenience: whether user is on any paid plan.
+final isPaidProvider = Provider<bool>((ref) {
+  return ref.watch(subscriptionProvider).isPaid;
+});
+
+/// Convenience: whether user is pro (alias for isPaid).
 final isProProvider = Provider<bool>((ref) {
   return ref.watch(subscriptionProvider).isPro;
 });
 
-/// Convenience: current subscription tier.
-final subscriptionTierProvider = Provider<SubscriptionTier>((ref) {
-  return ref.watch(subscriptionProvider).tier;
-});
-
-// ════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 //  NOTIFIER
-// ════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 
 class SubscriptionNotifier extends StateNotifier<SubscriptionStatus> {
-  SubscriptionNotifier() : super(const SubscriptionStatus.free());
+  SubscriptionNotifier() : super(const SubscriptionStatus()) {
+    RevenueCatService.instance.addListener(_onTierChanged);
+  }
 
-  final _service = RevenueCatService.instance;
+  @override
+  void dispose() {
+    RevenueCatService.instance.removeListener(_onTierChanged);
+    super.dispose();
+  }
 
-  /// Initialize RevenueCat and fetch current status.
-  /// Call once at app startup, after auth init.
+  void _onTierChanged(SubscriptionTier tier) {
+    _syncState();
+  }
+
+  /// Sync full state from RevenueCatService.
+  void _syncState() {
+    final rc = RevenueCatService.instance;
+    state = state.copyWith(
+      tier: rc.currentTier,
+      isCancelled: rc.isCancelled,
+      expirationDate: rc.expirationDate,
+    );
+  }
+
+  // ── Lifecycle ──
+
+  /// Initialize subscription state. Call after auth is ready.
   Future<void> initialize() async {
-    await _service.initialize();
+    state = state.copyWith(isLoading: true);
 
-    // Listen for real-time subscription changes
-    _service.addCustomerInfoListener(_onCustomerInfoUpdate);
+    try {
+      final user = AuthService.instance.currentUser;
 
-    // Fetch initial status
-    await refresh();
+      // Initialize RevenueCat SDK
+      await RevenueCatService.instance.initialize(
+        userId: user?.id,
+      );
+
+      // Also set from backend as fallback
+      if (user != null) {
+        RevenueCatService.instance.setTierFromBackend(user.tier);
+      }
+
+      _syncState();
+      state = state.copyWith(isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load subscription: $e',
+      );
+    }
   }
 
-  /// Link RevenueCat to your backend user ID after sign-in.
+  /// Identify user in RevenueCat after sign-in.
   Future<void> login(String userId) async {
-    await _service.login(userId);
-    await refresh();
+    await RevenueCatService.instance.login(userId);
+    _syncState();
   }
 
-  /// Unlink user on sign-out.
+  /// Log out of RevenueCat on sign-out.
   Future<void> logout() async {
-    await _service.logout();
-    state = const SubscriptionStatus.free();
+    await RevenueCatService.instance.logout();
+    _syncState();
   }
 
   /// Refresh subscription status from RevenueCat.
-  Future<void> refresh() async {
-    final status = await _service.getStatus();
-    state = status;
+  Future<void> refreshStatus() async {
+    state = state.copyWith(isLoading: true);
+    try {
+      await RevenueCatService.instance.refreshStatus();
+      _syncState();
+      state = state.copyWith(isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Refresh failed: $e',
+      );
+    }
   }
 
-  /// Purchase a package and update state.
-  Future<bool> purchase(Package package) async {
+  /// Update tier from backend after auth changes.
+  void syncFromUser(String? backendTier) {
+    RevenueCatService.instance.setTierFromBackend(backendTier);
+    _syncState();
+  }
+
+  // ── Purchases ──
+
+  /// Show the RevenueCat paywall.
+  Future<bool> presentPaywall() async {
     try {
-      final status = await _service.purchasePackage(package);
-      state = status;
-      return status.isPro;
+      final result = await RevenueCatService.instance.presentPaywall();
+      if (result == PaywallResult.purchased ||
+          result == PaywallResult.restored) {
+        await refreshStatus();
+        return true;
+      }
+      return false;
     } catch (e) {
-      debugPrint('[Subscription] Purchase error: $e');
+      state = state.copyWith(error: 'Paywall error: $e');
       return false;
     }
   }
 
-  /// Restore purchases (e.g. after reinstall).
-  Future<bool> restore() async {
-    try {
-      final status = await _service.restorePurchases();
-      state = status;
-      return status.isPro;
-    } catch (e) {
-      debugPrint('[Subscription] Restore error: $e');
-      return false;
-    }
-  }
-
-  /// Present the RevenueCat paywall.
-  Future<void> presentPaywall() async {
-    await _service.presentPaywall();
-    await refresh(); // Status may have changed
-  }
-
-  /// Present the paywall only if not Pro.
-  Future<void> presentPaywallIfNeeded() async {
-    await _service.presentPaywallIfNeeded();
-    await refresh();
-  }
-
-  /// Present Customer Center for managing subscriptions.
+  /// Show the RevenueCat customer center (manage/cancel subscription).
   Future<void> presentCustomerCenter() async {
+    await RevenueCatService.instance.presentCustomerCenter();
+    // Refresh after user returns from customer center
+    await refreshStatus();
+  }
+
+  /// Restore previous purchases.
+  Future<bool> restorePurchases() async {
+    state = state.copyWith(isLoading: true, error: null);
+
     try {
-      await _service.presentCustomerCenter();
-      await refresh();
+      final tier = await RevenueCatService.instance.restorePurchases();
+      _syncState();
+      state = state.copyWith(isLoading: false);
+      return tier != SubscriptionTier.free;
     } catch (e) {
-      debugPrint('[Subscription] Customer Center error: $e');
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Restore failed: $e',
+      );
+      return false;
     }
   }
 
-  /// Called by RevenueCat when customer info changes in real-time.
-  void _onCustomerInfoUpdate(CustomerInfo info) {
-    final entitlement = info.entitlements.all[RCConfig.entitlementId];
-    final isPro = entitlement?.isActive ?? false;
+  /// Purchase a specific package.
+  Future<bool> purchase(Package package) async {
+    state = state.copyWith(isLoading: true, error: null);
 
-    // Only update if status actually changed
-    if (isPro != state.isPro) {
-      debugPrint('[Subscription] Status changed: isPro=$isPro');
-      // Re-parse full status
-      _service.getStatus().then((status) {
-        state = status;
-      });
+    try {
+      final newTier =
+      await RevenueCatService.instance.purchasePackage(package);
+      _syncState();
+      state = state.copyWith(isLoading: false);
+      return newTier != null;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Purchase failed: $e',
+      );
+      return false;
     }
+  }
+
+  // ── Cleanup ──
+
+  /// Reset to free tier (on sign-out).
+  void reset() {
+    RevenueCatService.instance.reset();
+    state = const SubscriptionStatus();
+  }
+
+  /// Clear any error.
+  void clearError() {
+    state = state.copyWith(error: null);
   }
 }

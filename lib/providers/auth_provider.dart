@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/auth_service.dart';
 import '../services/smart_import_service.dart';
+import '../services/revenuecat_service.dart';
 import 'subscription_provider.dart';
 
 // ════════════════════════════════════════════
@@ -97,6 +98,34 @@ class AuthNotifier extends StateNotifier<AuthState> {
     return success;
   }
 
+  /// Restore auth session from a transfer bundle.
+  /// Called when receiver device claims a transfer that includes auth info.
+  Future<bool> restoreFromTransfer({
+    required String token,
+    required String userId,
+    String? displayName,
+    String? email,
+    String? avatarUrl,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    final result = await _service.restoreFromTransfer(
+      token: token,
+      userId: userId,
+      displayName: displayName,
+      email: email,
+      avatarUrl: avatarUrl,
+    );
+
+    if (result.isSignedIn) {
+      state = result;
+      _syncAuthToServices();
+      return true;
+    } else {
+      state = state.copyWith(isLoading: false, error: result.error);
+      return false;
+    }
+  }
+
   /// Clear any auth error (e.g. after user dismisses error dialog).
   void clearError() {
     state = state.copyWith(error: null);
@@ -109,9 +138,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final user = _service.currentUser;
     if (jwt != null) {
       SmartImportService.instance.setAuthToken(jwt);
-      // Add other services here as you build them:
       // SyncService.instance.setAuthToken(jwt);
       // ImageService.instance.setAuthToken(jwt);
+    }
+    // Sync subscription tier from backend user profile
+    if (user != null) {
+      RevenueCatService.instance.setTierFromBackend(user.tier);
+      // Identify user in RevenueCat
+      RevenueCatService.instance.login(user.id);
     }
   }
 
@@ -119,6 +153,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     SmartImportService.instance.clearAuth();
     // SyncService.instance.clearAuth();
     // ImageService.instance.clearAuth();
+    RevenueCatService.instance.logout();
+    RevenueCatService.instance.reset();
   }
 }
 

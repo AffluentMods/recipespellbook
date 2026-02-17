@@ -22,6 +22,7 @@ import '../settings/nutrition_settings_screen.dart';
 import '../settings/ingredient_substitutions_screen.dart';
 import '../../widgets/nutrition_calculation_sheet.dart';
 import '../../../data/localized_units.dart';
+import '../../../services/image_service.dart';
 
 // ============ DISMISSED ALLERGY WARNINGS ============
 // Canonical provider is in allergy_settings_screen.dart — imported via:
@@ -1259,7 +1260,9 @@ class _RecipeAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final hasImage = recipe.imagePath != null && File(recipe.imagePath!).existsSync();
+    final isServer = ImageService.isServerPath(recipe.imagePath);
+    final hasImage = recipe.imagePath != null &&
+        (isServer || File(recipe.imagePath!).existsSync());
     final defaultAsset = defaultRecipeImageAsset(recipe.id);
 
     // Get rarity color for border glow
@@ -1284,12 +1287,16 @@ class _RecipeAppBar extends StatelessWidget {
               GestureDetector(
                 onTap: () => _FullScreenImageViewer.show(
                   context,
-                  imageProvider: FileImage(File(recipe.imagePath!)),
+                  imageProvider: isServer
+                      ? NetworkImage(recipe.imagePath!) as ImageProvider
+                      : FileImage(File(recipe.imagePath!)),
                   heroTag: 'recipe_image_${recipe.id}',
                 ),
                 child: Hero(
                   tag: 'recipe_image_${recipe.id}',
-                  child: Image.file(File(recipe.imagePath!), fit: BoxFit.cover),
+                  child: isServer
+                      ? _ServerImage(path: recipe.imagePath!)
+                      : Image.file(File(recipe.imagePath!), fit: BoxFit.cover),
                 ),
               )
             else if (defaultAsset != null)
@@ -1758,6 +1765,51 @@ class _FullScreenImageViewer extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ServerImage extends StatefulWidget {
+  final String path;
+  final BoxFit fit;
+  const _ServerImage({required this.path, this.fit = BoxFit.cover});
+
+  @override
+  State<_ServerImage> createState() => _ServerImageState();
+}
+
+class _ServerImageState extends State<_ServerImage> {
+  String? _url;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUrl();
+  }
+
+  Future<void> _loadUrl() async {
+    final url = await ImageService.instance.getImageUrl(widget.path);
+    if (mounted) {
+      setState(() {
+        _url = url;
+        _loading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_url == null) {
+      return const Center(child: Icon(Icons.broken_image));
+    }
+    return Image.network(
+      _url!,
+      fit: widget.fit,
+      errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image)),
     );
   }
 }

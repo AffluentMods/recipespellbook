@@ -1,0 +1,220 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as p;
+import '../services/auth_service.dart';
+
+// ════════════════════════════════════════════
+//  IMAGE RESULT
+// ════════════════════════════════════════════
+
+/// Result from a successful image upload.
+class ImageUploadResult {
+  /// Server storage path (e.g. "userId/abc123.jpg"). Store this in Drift.
+  final String path;
+
+  /// Presigned display URL (expires in 7 days).
+  final String url;
+
+  const ImageUploadResult({required this.path, required this.url});
+
+  factory ImageUploadResult.fromJson(Map<String, dynamic> json) {
+    return ImageUploadResult(
+      path: json['path'] as String,
+      url: json['url'] as String,
+    );
+  }
+}
+
+// ════════════════════════════════════════════
+//  IMAGE SERVICE
+// ════════════════════════════════════════════
+
+/// Handles image picking, compression, upload to MinIO via the backend API,
+/// presigned URL retrieval, and deletion.
+///
+/// Usage:
+/// ```dart
+/// final result = await ImageService.instance.pickAndUpload();
+/// if (result != null) {
+///   // Save result.path to recipe.imagePath in Drift
+///   // Display using result.url (or fetch fresh URL later)
+/// }
+/// ```
+class ImageService {
+  ImageService._();
+  static final instance = ImageService._();
+
+  final _auth = AuthService.instance;
+  final _picker = ImagePicker();
+
+  /// Max image dimension (pixels) before upload. Keeps file size reasonable.
+  static const int maxDimension = 1920;
+
+  /// JPEG compression quality (0-100).
+  static const int jpegQuality = 80;
+
+  /// Max file size in bytes before rejection (5 MB).
+  static const int maxFileSize = 5 * 1024 * 1024;
+
+  // ════════════════════════════════════════════
+  //  PICK + UPLOAD (convenience)
+  // ════════════════════════════════════════════
+
+  /// Pick an image from the gallery, compress, and upload.
+  /// Returns null if the user cancels or upload fails.
+  Future<ImageUploadResult?> pickAndUploadFromGallery() async {
+    final file = await _pickImage(ImageSource.gallery);
+    if (file == null) return null;
+    return uploadFile(file);
+  }
+
+  /// Pick an image from the camera, compress, and upload.
+  Future<ImageUploadResult?> pickAndUploadFromCamera() async {
+    final file = await _pickImage(ImageSource.camera);
+    if (file == null) return null;
+    return uploadFile(file);
+  }
+
+  // ════════════════════════════════════════════
+  //  UPLOAD
+  // ════════════════════════════════════════════
+
+  /// Upload an image file to the server.
+  /// The file is read, base64-encoded, and sent to POST /v1/images/upload.
+  /// Returns the upload result with server path and presigned URL.
+  Future<ImageUploadResult?> uploadFile(File file) async {
+    if (!_auth.isSignedIn) {
+      debugPrint('[ImageService] Not signed in — cannot upload');
+      return null;
+    }
+
+    try {
+      final bytes = await file.readAsBytes();
+
+      if (bytes.length > maxFileSize) {
+        debugPrint('[ImageService] File too large: ${bytes.length} bytes');
+        return null;
+      }
+
+      final base64Data = base64Encode(bytes);
+      final contentType = _contentTypeFromPath(file.path);
+
+      debugPrint('[ImageService] Uploading ${bytes.length} bytes as $contentType');
+
+      final response = await _auth.post('/v1/images/upload', {
+        'base64': base64Data,
+        'contentType': contentType,
+      });
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final result = ImageUploadResult.fromJson(data);
+        debugPrint('[ImageService] Uploaded: ${result.path}');
+        return result;
+      }
+
+      debugPrint('[ImageService] Upload failed: ${response.statusCode} ${response.body}');
+      return null;
+    } catch (e) {
+      debugPrint('[ImageService] Upload error: $e');
+      return null;
+    }
+  }
+
+  // ════════════════════════════════════════════
+  //  GET URL (for displaying images)
+  // ════════════════════════════════════════════
+
+  /// Get a fresh presigned URL for a stored image path.
+  ///
+  /// [imagePath] is the server path stored in Drift (e.g. "userId/abc123.jpg").
+  /// Returns a presigned URL valid for 7 days, or null on failure.
+  Future<String?> getImageUrl(String imagePath) async {
+    if (!_auth.isSignedIn || imagePath.isEmpty) return null;
+
+    // imagePath format: "userId/filename.ext"
+    // API endpoint: GET /v1/images/:userId/:filename
+    try {
+      final response = await _auth.get('/v1/images/$imagePath');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        return data['url'] as String?;
+      }
+
+      debugPrint('[ImageService] Get URL failed: ${response.statusCode}');
+      return null;
+    } catch (e) {
+      debugPrint('[ImageService] Get URL error: $e');
+      return null;
+    }
+  }
+
+  /// Check if an imagePath is a server path (vs a local file path).
+  /// Server paths look like "userId/hash.ext" (no slashes besides the one).
+  static bool isServerPath(String? imagePath) {
+    if (imagePath == null || imagePath.isEmpty) return false;
+    // Local paths start with / (Unix) or C:\ (Windows)
+    if (imagePath.startsWith('/') || imagePath.contains(':\\')) return false;
+    // Server paths have exactly one slash: userId/filename
+    return imagePath.split('/').length == 2;
+  }
+
+  // ════════════════════════════════════════════
+  //  DELETE
+  // ════════════════════════════════════════════
+
+  /// Delete an image from the server.
+  /// [imagePath] is the server path (e.g. "userId/abc123.jpg").
+  Future<bool> deleteImage(String imagePath) async {
+    if (!_auth.isSignedIn || imagePath.isEmpty) return false;
+
+    try {
+      final response = await _auth.delete('/v1/images/$imagePath');
+      if (response.statusCode == 200) {
+        debugPrint('[ImageService] Deleted: $imagePath');
+        return true;
+      }
+      debugPrint('[ImageService] Delete failed: ${response.statusCode}');
+      return false;
+    } catch (e) {
+      debugPrint('[ImageService] Delete error: $e');
+      return false;
+    }
+  }
+
+  // ════════════════════════════════════════════
+  //  INTERNALS
+  // ════════════════════════════════════════════
+
+  /// Pick and compress an image using image_picker.
+  Future<File?> _pickImage(ImageSource source) async {
+    try {
+      final xFile = await _picker.pickImage(
+        source: source,
+        maxWidth: maxDimension.toDouble(),
+        maxHeight: maxDimension.toDouble(),
+        imageQuality: jpegQuality,
+      );
+      if (xFile == null) return null;
+      return File(xFile.path);
+    } catch (e) {
+      debugPrint('[ImageService] Pick image error: $e');
+      return null;
+    }
+  }
+
+  /// Determine MIME content type from file extension.
+  String _contentTypeFromPath(String filePath) {
+    final ext = p.extension(filePath).toLowerCase();
+    return switch (ext) {
+      '.png' => 'image/png',
+      '.webp' => 'image/webp',
+      '.gif' => 'image/gif',
+      '.heic' || '.heif' => 'image/heic',
+      _ => 'image/jpeg',
+    };
+  }
+}

@@ -96,16 +96,28 @@ class _FreeContent extends ConsumerWidget {
           const SizedBox(height: 8),
           TextButton(
             onPressed: () async {
-              final restored = await ref.read(subscriptionProvider.notifier).restore();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(restored
-                        ? 'Purchases restored successfully!'
-                        : 'No previous purchases found.'),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
+              try {
+                await ref.read(subscriptionProvider.notifier).restorePurchases();
+                if (context.mounted) {
+                  final isPro = ref.read(subscriptionProvider).isPro;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(isPro
+                          ? 'Purchases restored successfully!'
+                          : 'No previous purchases found.'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Restore failed: $e'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
               }
             },
             child: const Text('Restore purchases'),
@@ -199,7 +211,7 @@ class _ProContent extends ConsumerWidget {
                 const SizedBox(height: 12),
               ],
 
-              if (status.tier != SubscriptionTier.lifetime &&
+              if (status.tier != SubscriptionTier.premium &&
                   status.expirationDate != null &&
                   !status.isCancelled) ...[
                 _DetailRow(
@@ -209,7 +221,7 @@ class _ProContent extends ConsumerWidget {
                 const SizedBox(height: 4),
               ],
 
-              if (status.tier == SubscriptionTier.lifetime)
+              if (status.tier == SubscriptionTier.premium)
                 _DetailRow(label: 'Plan', value: 'Lifetime — never expires'),
             ],
           ),

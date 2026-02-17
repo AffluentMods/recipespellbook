@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +10,8 @@ import '../../providers/auth_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../services/revenuecat_service.dart';
 import '../../services/auth_service.dart';
+import '../../providers/sync_provider.dart';
+import '../../services/sync_service.dart';
 
 /// Modern sidebar menu drawer
 class AppMenuDrawer extends ConsumerWidget {
@@ -74,16 +78,24 @@ class AppMenuDrawer extends ConsumerWidget {
                         },
                       ),
                       _MenuItem(
-                        icon: Icons.computer_rounded,
-                        label: 'Use on desktop',
-                        subtitle: 'Sync across devices',
+                        icon: Icons.swap_horiz_rounded,
+                        label: _isDesktopPlatform
+                            ? 'Sync to mobile'
+                            : 'Sync to desktop',
+                        subtitle: _isDesktopPlatform
+                            ? 'Transfer data to your phone'
+                            : 'Transfer data to another device',
                         onTap: () {
                           Navigator.pop(context);
-                          _showDesktopInfo(context);
+                          context.push('/transfer');
                         },
                       ),
                     ],
                   ),
+
+                  // ── CLOUD SYNC ──
+                  const _CloudSyncSection(),
+                  const SizedBox(height: 12),
 
                   // === RPG MODE - ONLY IF ENABLED ===
                   if (isRpgEnabled) ...[
@@ -204,6 +216,12 @@ class AppMenuDrawer extends ConsumerWidget {
     );
   }
 
+  /// Whether the app is running on desktop (macOS, Windows, Linux).
+  static bool get _isDesktopPlatform {
+    if (kIsWeb) return false;
+    return Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+  }
+
   void _showImportGuides(BuildContext context) {
     final theme = Theme.of(context);
     showModalBottomSheet(
@@ -299,50 +317,6 @@ class AppMenuDrawer extends ConsumerWidget {
     );
   }
 
-  void _showDesktopInfo(BuildContext context) {
-    final theme = Theme.of(context);
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Icon(Icons.computer, size: 48, color: theme.colorScheme.primary),
-            const SizedBox(height: 16),
-            Text(
-              'Use on Desktop',
-              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Desktop sync coming soon! Your recipes will automatically sync across all your devices.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Got it'),
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _showHelpSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -412,9 +386,9 @@ class AppMenuDrawer extends ConsumerWidget {
                     ),
                     _HelpItem(
                       icon: Icons.sync,
-                      title: 'Syncing',
+                      title: 'Cloud Sync',
                       description:
-                      'Cloud sync is coming soon! Your recipes will sync across all your devices.',
+                      'Subscribe to Cloud Sync to keep your recipes in sync across all your devices. Tap the sync button in the sidebar to sync manually.',
                     ),
                     _HelpItem(
                       icon: Icons.mail_outline,
@@ -758,9 +732,10 @@ class _ProfileSection extends ConsumerWidget {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: () async {
+                onPressed: () {
+                  final notifier = ref.read(authProvider.notifier);
                   Navigator.pop(ctx);
-                  await ref.read(authProvider.notifier).signInWithGoogle();
+                  notifier.signInWithGoogle();
                 },
                 icon: const Text('G', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 label: const Text('Continue with Google'),
@@ -777,9 +752,10 @@ class _ProfileSection extends ConsumerWidget {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
-                  onPressed: () async {
+                  onPressed: () {
+                    final notifier = ref.read(authProvider.notifier);
                     Navigator.pop(ctx);
-                    await ref.read(authProvider.notifier).signInWithApple();
+                    notifier.signInWithApple();
                   },
                   icon: const Icon(Icons.apple, size: 22),
                   label: const Text('Continue with Apple'),
@@ -885,7 +861,7 @@ class _ProfileSection extends ConsumerWidget {
               ),
 
             // Renewal / lifetime info
-            if (status.tier == SubscriptionTier.lifetime)
+            if (status.tier == SubscriptionTier.premium)
               Text(
                 'Lifetime — never expires',
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -1113,5 +1089,78 @@ class _MenuItem extends StatelessWidget {
         onTap: enabled ? onTap : null,
       ),
     );
+  }
+}
+
+class _CloudSyncSection extends ConsumerWidget {
+  const _CloudSyncSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final authState = ref.watch(authProvider);
+    final subStatus = ref.watch(subscriptionProvider);
+    final syncState = ref.watch(syncProvider);
+
+    // Only show if signed in AND has cloud sync
+    if (!authState.isSignedIn || !subStatus.tier.hasCloudSync) {
+      return const SizedBox.shrink();
+    }
+
+    // Format last sync time
+    String syncSubtitle;
+    if (syncState.isSyncing) {
+      syncSubtitle = 'Syncing...';
+    } else if (syncState.lastSyncAt != null) {
+      syncSubtitle = 'Last synced ${_timeAgo(syncState.lastSyncAt!)}';
+    } else {
+      syncSubtitle = 'Not yet synced';
+    }
+
+    return Column(
+      children: [
+        const SizedBox(height: 12),
+        _DrawerSection(
+          title: 'CLOUD SYNC',
+          children: [
+            _MenuItem(
+              icon: syncState.isSyncing ? Icons.sync : Icons.cloud_done,
+              label: 'Sync Now',
+              subtitle: syncSubtitle,
+              trailing: syncState.isSyncing
+                  ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+                  : null,
+              onTap: () {
+                if (!syncState.isSyncing) {
+                  ref.read(syncProvider.notifier).sync();
+                }
+              },
+            ),
+            if (syncState.hasError)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                child: Text(
+                  syncState.error!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  static String _timeAgo(DateTime dt) {
+    final diff = DateTime.now().difference(dt);
+    if (diff.inMinutes < 1) return 'just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    return '${diff.inDays}d ago';
   }
 }
