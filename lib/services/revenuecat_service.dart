@@ -13,10 +13,10 @@ class RCConfig {
   RCConfig._();
 
   /// Google Play API key
-  static const String googleApiKey = 'goog_YOUR_KEY_HERE';
+  static const String googleApiKey = '***REMOVED***';
 
   /// Apple App Store API key
-  static const String appleApiKey = 'appl_YOUR_KEY_HERE';
+  static const String appleApiKey = '***REMOVED***';
 
   /// Entitlement identifiers (must match RC dashboard)
   static const String premiumEntitlement = 'premium';
