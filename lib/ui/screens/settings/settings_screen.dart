@@ -135,8 +135,8 @@ class SettingsScreen extends ConsumerWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.kitchen),
-                title: const Text('My Pantry'),
-                subtitle: const Text('Items you always have on hand'),
+                title: Text(l10n.myPantry),
+                subtitle: Text(l10n.itemsAlwaysOnHand),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => Navigator.push(context,
                     MaterialPageRoute(builder: (_) => const PantryScreen())),
@@ -401,14 +401,14 @@ class SettingsScreen extends ConsumerWidget {
           children: [
             Text(l10n.resetAppWarning),
             const SizedBox(height: 20),
-            Text('What would you like to delete?',
+            Text(l10n.whatToDelete,
                 style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             // Local Data option
             _ResetOptionTile(
               icon: Icons.phone_android,
-              title: 'Local Data',
-              subtitle: 'Recipes, cookbooks, meal plans, shopping lists on this device',
+              title: l10n.localData,
+              subtitle: l10n.localDataDesc,
               color: theme.colorScheme.error,
               onTap: () {
                 Navigator.pop(context);
@@ -419,8 +419,8 @@ class SettingsScreen extends ConsumerWidget {
             // Cloud Data option (disabled for now)
             _ResetOptionTile(
               icon: Icons.cloud_outlined,
-              title: 'Cloud Data',
-              subtitle: 'Coming soon — Cloud Sync not yet available',
+              title: l10n.cloudData,
+              subtitle: l10n.cloudDataDesc,
               color: theme.colorScheme.outline,
               enabled: false,
               onTap: () {},
@@ -429,8 +429,8 @@ class SettingsScreen extends ConsumerWidget {
             // All Data option
             _ResetOptionTile(
               icon: Icons.delete_forever,
-              title: 'All Data',
-              subtitle: 'Local data and settings — complete fresh start',
+              title: l10n.allData,
+              subtitle: l10n.allDataDesc,
               color: theme.colorScheme.error,
               onTap: () {
                 Navigator.pop(context);
@@ -467,7 +467,7 @@ class SettingsScreen extends ConsumerWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('This will permanently delete $scopeLabel. This cannot be undone.'),
+            Text(l10n.permanentlyDeleteWarning(scopeLabel)),
             const SizedBox(height: 16),
             Text(l10n.typeDeleteToConfirm, style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
@@ -555,7 +555,7 @@ class SettingsScreen extends ConsumerWidget {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         icon: const Icon(Icons.auto_awesome, size: 48, color: Colors.amber),
-        title: const Text('Data Reset Complete'),
+        title: Text(l10n.dataResetComplete),
         content: const Text(
           'All data has been cleared successfully.\n\n'
               'Would you like to import the 10 default starter recipes?',
@@ -569,7 +569,7 @@ class SettingsScreen extends ConsumerWidget {
               );
               context.go('/');
             },
-            child: const Text('No thanks'),
+            child: Text(l10n.noThanks),
           ),
           FilledButton(
             onPressed: () async {
@@ -582,7 +582,7 @@ class SettingsScreen extends ConsumerWidget {
                   ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('$count default recipes imported!'),
+                      content: Text(l10n.defaultRecipesImported(count)),
                       backgroundColor: Colors.green,
                     ),
                   );
@@ -592,13 +592,13 @@ class SettingsScreen extends ConsumerWidget {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Import failed: $e'), backgroundColor: Colors.red),
+                    SnackBar(content: Text('${l10n.importFailed}: $e'), backgroundColor: Colors.red),
                   );
                   context.go('/');
                 }
               }
             },
-            child: const Text('Yes, add them'),
+            child: Text(l10n.yesAddThem),
           ),
         ],
       ),
@@ -681,13 +681,14 @@ class _NutritionSettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return _SettingsSection(
-      title: 'Nutrition Display',
+      title: l10n.nutritionDisplay,
       children: [
         ListTile(
           leading: const Icon(Icons.tune),
-          title: const Text('Nutrition Display'),
-          subtitle: const Text('Chart style, visible nutrients'),
+          title: Text(l10n.nutritionDisplay),
+          subtitle: Text(l10n.nutritionDisplaySubtitle),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => const NutritionSettingsScreen()),
@@ -1272,14 +1273,14 @@ class _MeasurementSystemTile extends StatelessWidget {
             ListTile(
               leading: const Text('🇺🇸', style: TextStyle(fontSize: 24)),
               title: Text(l10n.settingsMeasurementsUS),
-              subtitle: const Text('cups, tablespoons, ounces, °F'),
+              subtitle: Text(l10n.usUnits),
               trailing: currentSystem == MeasurementSystem.us ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary) : null,
               onTap: () { onSystemSelected(MeasurementSystem.us); Navigator.pop(context); },
             ),
             ListTile(
               leading: const Text('🌍', style: TextStyle(fontSize: 24)),
               title: Text(l10n.settingsMeasurementsMetric),
-              subtitle: const Text('milliliters, grams, °C'),
+              subtitle: Text(l10n.metricUnits),
               trailing: currentSystem == MeasurementSystem.metric ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary) : null,
               onTap: () { onSystemSelected(MeasurementSystem.metric); Navigator.pop(context); },
             ),
@@ -1377,15 +1378,16 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return _SettingsSection(
-      title: 'Store Integrations',
+      title: l10n.storeIntegrations,
       children: [
         // Instacart
         ListTile(
           leading: const Text('\u{1F955}', style: TextStyle(fontSize: 22)),
-          title: const Text('Instacart'),
+          title: Text(l10n.instacart),
           subtitle: Text(
             _loading
                 ? 'Checking...'
@@ -1406,7 +1408,7 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
         // Kroger
         ListTile(
           leading: const Text('\u{1F3EA}', style: TextStyle(fontSize: 22)),
-          title: const Text('Kroger'),
+          title: Text(l10n.kroger),
           subtitle: Text(
             _loading
                 ? 'Checking...'
@@ -1429,6 +1431,7 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
   }
 
   void _showInstacartOptions(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
@@ -1442,7 +1445,7 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
                 children: [
                   const Text('\u{1F955}', style: TextStyle(fontSize: 24)),
                   const SizedBox(width: 12),
-                  Text('Instacart',
+                  Text(l10n.instacart,
                       style: theme.textTheme.titleLarge
                           ?.copyWith(fontWeight: FontWeight.bold)),
                   if (_instacartConfigured) ...[
@@ -1453,7 +1456,7 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
                         color: const Color(0xFF43B02A).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: const Text('Connected',
+                      child: Text(l10n.connected,
                           style: TextStyle(
                               color: Color(0xFF43B02A),
                               fontSize: 11,
@@ -1465,21 +1468,21 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
             ),
             ListTile(
               leading: const Icon(Icons.vpn_key_outlined),
-              title: const Text('Set custom API key'),
-              subtitle: const Text('Use your own Instacart Connect key'),
+              title: Text(l10n.setCustomApiKey),
+              subtitle: Text(l10n.useOwnInstacartKey),
               onTap: () {
                 Navigator.pop(ctx);
                 _showApiKeyDialog(context,
                     provider: GroceryProvider.instacart,
-                    title: 'Instacart API Key',
+                    title: l10n.instacartApiKey,
                     hint: 'Bearer key from Developer Dashboard');
               },
             ),
             ListTile(
               leading: Icon(Icons.link_off, color: theme.colorScheme.error),
-              title: Text('Reset to default key',
+              title: Text(l10n.resetToDefaultKey,
                   style: TextStyle(color: theme.colorScheme.error)),
-              subtitle: const Text('Remove custom key, use built-in'),
+              subtitle: Text(l10n.removeCustomKey),
               onTap: () async {
                 Navigator.pop(ctx);
                 await GroceryService.disconnect(GroceryProvider.instacart);
@@ -1494,6 +1497,7 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
   }
 
   void _showKrogerOptions(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
@@ -1507,7 +1511,7 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
                 children: [
                   const Text('\u{1F3EA}', style: TextStyle(fontSize: 24)),
                   const SizedBox(width: 12),
-                  Text('Kroger',
+                  Text(l10n.kroger,
                       style: theme.textTheme.titleLarge
                           ?.copyWith(fontWeight: FontWeight.bold)),
                   if (_krogerConfigured) ...[
@@ -1518,7 +1522,7 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
                         color: const Color(0xFF43B02A).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: const Text('Connected',
+                      child: Text(l10n.connected,
                           style: TextStyle(
                               color: Color(0xFF43B02A),
                               fontSize: 11,
@@ -1531,8 +1535,8 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
             if (!_krogerConfigured)
               ListTile(
                 leading: const Icon(Icons.login),
-                title: const Text('Sign in to Kroger'),
-                subtitle: const Text('Connect to add items to your cart'),
+                title: Text(l10n.signInToKroger),
+                subtitle: Text(l10n.connectToAddItems),
                 onTap: () async {
                   Navigator.pop(ctx);
                   await GroceryService.krogerStartOAuthLogin();
@@ -1540,8 +1544,8 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
               ),
             ListTile(
               leading: const Icon(Icons.location_on_outlined),
-              title: const Text('Set preferred store'),
-              subtitle: const Text('Search by zip code'),
+              title: Text(l10n.setPreferredStore),
+              subtitle: Text(l10n.searchByZipCode),
               onTap: () {
                 Navigator.pop(ctx);
                 _showKrogerLocationDialog(context);
@@ -1550,7 +1554,7 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
             if (_krogerConfigured)
               ListTile(
                 leading: Icon(Icons.link_off, color: theme.colorScheme.error),
-                title: Text('Disconnect',
+                title: Text(l10n.disconnect,
                     style: TextStyle(color: theme.colorScheme.error)),
                 onTap: () async {
                   Navigator.pop(ctx);
@@ -1570,6 +1574,7 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
     required String title,
     required String hint,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
     showDialog(
       context: context,
@@ -1581,7 +1586,7 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
           autofocus: true,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
           FilledButton(
             onPressed: () async {
               final key = controller.text.trim();
@@ -1591,11 +1596,11 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
               _checkStatus();
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('API key saved'), behavior: SnackBarBehavior.floating, duration: Duration(seconds: 2)),
+                  SnackBar(content: Text(l10n.apiKeySaved), behavior: SnackBarBehavior.floating, duration: const Duration(seconds: 2)),
                 );
               }
             },
-            child: const Text('Save'),
+            child: Text(l10n.actionSave),
           ),
         ],
       ),
@@ -1603,6 +1608,7 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
   }
 
   void _showKrogerLocationDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
     final theme = Theme.of(context);
     showDialog(
@@ -1612,14 +1618,14 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
         bool searching = false;
         return StatefulBuilder(
           builder: (ctx, setDialogState) => AlertDialog(
-            title: const Text('Find your Kroger store'),
+            title: Text(l10n.findYourKrogerStore),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: controller,
                   decoration: InputDecoration(
-                    hintText: 'Enter zip code',
+                    hintText: l10n.enterZipCode,
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: searching
@@ -1656,7 +1662,7 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
                             if (ctx.mounted) Navigator.pop(ctx);
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Store set: ${loc['name'] ?? 'Kroger'}'),
+                                SnackBar(content: Text(l10n.storeSet(loc['name'] ?? 'Kroger')),
                                     behavior: SnackBarBehavior.floating, duration: const Duration(seconds: 2)),
                               );
                             }
@@ -1668,7 +1674,7 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
                 ],
               ],
             ),
-            actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close'))],
+            actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionClose))],
           ),
         );
       },

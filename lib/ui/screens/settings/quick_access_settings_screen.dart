@@ -9,11 +9,12 @@ class QuickAccessSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.settingsQuickAccess),
+        title: Text(l10n.settingsQuickAccess),
       ),
       body: ListView(
         children: [
@@ -30,14 +31,14 @@ class QuickAccessSettingsScreen extends ConsumerWidget {
                       Icon(Icons.flash_on, color: theme.colorScheme.primary),
                       const SizedBox(width: 8),
                       Text(
-                        'Quick Access',
+                        l10n.settingsQuickAccess,
                         style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Quick Access shows your most relevant recipes at the top of the home screen. Customize what appears here.',
+                    l10n.quickAccessSubtitle,
                     style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                 ],
@@ -55,29 +56,29 @@ class QuickAccessSettingsScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Badge Legend',
+                      l10n.quickAccessHelpIntro,
                       style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
                     _BadgeLegendItem(
                       color: Colors.blue,
                       icon: Icons.calendar_today,
-                      label: "Today's Meal Plan",
-                      description: 'Recipes scheduled for today',
+                      label: l10n.quickAccessHelpMealPlan,
+                      description: l10n.homeMealPlan,
                     ),
                     const SizedBox(height: 8),
                     _BadgeLegendItem(
                       color: Colors.orange,
                       icon: Icons.push_pin,
-                      label: 'Pinned',
-                      description: 'Recipes you\'ve pinned for quick access',
+                      label: l10n.quickAccessHelpPinned,
+                      description: l10n.homePinnedRecipes,
                     ),
                     const SizedBox(height: 8),
                     _BadgeLegendItem(
                       color: Colors.grey,
                       icon: Icons.history,
-                      label: 'Recently Viewed',
-                      description: 'Recipes you\'ve opened recently',
+                      label: l10n.quickAccessHelpRecent,
+                      description: l10n.homeRecentRecipes,
                     ),
                   ],
                 ),
@@ -88,12 +89,12 @@ class QuickAccessSettingsScreen extends ConsumerWidget {
           const SizedBox(height: 24),
 
           // Toggle sections
-          _SectionHeader(title: 'Display Options'),
+          _SectionHeader(title: l10n.displayOptions),
 
           // Meal Plan toggle
           SwitchListTile(
-            title: const Text('Show Meal Plan'),
-            subtitle: const Text('Display today\'s scheduled recipes'),
+            title: Text(l10n.showMealPlan),
+            subtitle: Text(l10n.showMealPlanSubtitle),
             secondary: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -110,8 +111,8 @@ class QuickAccessSettingsScreen extends ConsumerWidget {
 
           // Pinned toggle
           SwitchListTile(
-            title: const Text('Show Pinned Recipes'),
-            subtitle: const Text('Display recipes you\'ve pinned'),
+            title: Text(l10n.showPinnedRecipes),
+            subtitle: Text(l10n.showPinnedSubtitle),
             secondary: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -128,8 +129,8 @@ class QuickAccessSettingsScreen extends ConsumerWidget {
 
           // History toggle
           SwitchListTile(
-            title: const Text('Show Recent History'),
-            subtitle: const Text('Display recently viewed recipes'),
+            title: Text(l10n.showRecentHistory),
+            subtitle: Text(l10n.showRecentSubtitle),
             secondary: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -156,12 +157,12 @@ class QuickAccessSettingsScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'History Count',
+                        l10n.historyCount,
                         style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Maximum number of recent recipes to show',
+                        l10n.historyCountSubtitle,
                         style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
                       ),
                       const SizedBox(height: 16),

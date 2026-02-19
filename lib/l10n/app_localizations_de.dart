@@ -2176,9 +2176,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String importingRecipes(int count) {
-    return 'Importiere $count Rezepte...';
-  }
+  String get importingRecipes => 'Importiere Rezepte...';
 
   @override
   String importedRecipesCount(int count) {
@@ -3466,4 +3464,1349 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get fontSizeLabel => 'Schriftgröße';
+
+  @override
+  String krogerLoginDenied(String error) {
+    return 'Kroger-Anmeldung abgelehnt: $error';
+  }
+
+  @override
+  String get krogerNoAuthCode => 'Kein Autorisierungscode von Kroger erhalten.';
+
+  @override
+  String get krogerConnected => 'Kroger verbunden! Du kannst jetzt Artikel direkt in deinen Warenkorb legen.';
+
+  @override
+  String get krogerConnectFailed => 'Verbindung mit Kroger fehlgeschlagen. Bitte versuche es erneut.';
+
+  @override
+  String get krogerConnecting => 'Verbindung mit Kroger wird hergestellt…';
+
+  @override
+  String get krogerExchanging => 'Autorisierung wird ausgetauscht...';
+
+  @override
+  String get krogerConnectedTitle => 'Verbunden!';
+
+  @override
+  String get krogerConnectionFailed => 'Verbindung fehlgeschlagen';
+
+  @override
+  String get goToShoppingList => 'Zur Einkaufsliste';
+
+  @override
+  String get tryAgain => 'Erneut versuchen';
+
+  @override
+  String get skipForNow => 'Jetzt überspringen';
+
+  @override
+  String get skipDuplicates => 'Duplikate überspringen';
+
+  @override
+  String get deselectAll => 'Alle abwählen';
+
+  @override
+  String get duplicate => 'Duplikat';
+
+  @override
+  String recipesImported(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rezepte',
+      one: 'Rezept',
+    );
+    return '$count $_temp0 importiert';
+  }
+
+  @override
+  String importCountRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rezepte',
+      one: 'Rezept',
+    );
+    return '$count $_temp0 importieren';
+  }
+
+  @override
+  String get productNotFound => 'Produkt nicht gefunden';
+
+  @override
+  String barcodeNotFound(String barcode) {
+    return 'Kein Produkt für Barcode gefunden:\n$barcode';
+  }
+
+  @override
+  String get manualEntryHint => 'Du kannst den Produktnamen manuell eingeben.';
+
+  @override
+  String get scanAgain => 'Erneut scannen';
+
+  @override
+  String get enterManually => 'Manuell eingeben';
+
+  @override
+  String get enterProductName => 'Produktname eingeben';
+
+  @override
+  String get productName => 'Produktname';
+
+  @override
+  String get scanBarcode => 'Barcode scannen';
+
+  @override
+  String get lookingUpProduct => 'Produkt wird gesucht...';
+
+  @override
+  String get pointCameraBarcode => 'Richte die Kamera auf einen Produkt-Barcode';
+
+  @override
+  String get unknownProduct => 'Unbekanntes Produkt';
+
+  @override
+  String get nutritionPer100g => 'Nährwerte (pro 100g)';
+
+  @override
+  String get findRecipesWithThis => 'Rezepte damit finden';
+
+  @override
+  String get scanAnother => 'Weiteren scannen';
+
+  @override
+  String get exportFormat => 'Exportformat';
+
+  @override
+  String get gotIt => 'Verstanden';
+
+  @override
+  String get calendar => 'Kalender';
+
+  @override
+  String get today => 'Heute';
+
+  @override
+  String get shareMealPlan => 'Essensplan teilen';
+
+  @override
+  String get addWeekToShoppingList => 'Woche zur Einkaufsliste hinzufügen';
+
+  @override
+  String get clearThisWeek => 'Diese Woche löschen?';
+
+  @override
+  String get clearWeekWarning => 'Dies entfernt alle geplanten Mahlzeiten für diese Woche. Dies kann nicht rückgängig gemacht werden.';
+
+  @override
+  String get goToToday => 'Zu heute springen';
+
+  @override
+  String get addAnotherMeal => 'Weitere Mahlzeit hinzufügen';
+
+  @override
+  String get meal => 'Mahlzeit';
+
+  @override
+  String get noMealsPlanned => 'Keine Mahlzeiten geplant';
+
+  @override
+  String get tapToAddMeal => 'Tippe auf + um eine Mahlzeit für diesen Tag hinzuzufügen';
+
+  @override
+  String get addMeal => 'Mahlzeit hinzufügen';
+
+  @override
+  String addToDay(String dayName) {
+    return 'Zum $dayName hinzufügen';
+  }
+
+  @override
+  String get searchRecipes => 'Rezepte suchen...';
+
+  @override
+  String get noRecipesFound => 'Keine Rezepte gefunden';
+
+  @override
+  String get exitShoppingListGenerator => 'Einkaufslisten-Generator verlassen?';
+
+  @override
+  String get actionExit => 'Verlassen';
+
+  @override
+  String get shoppingListGenerator => 'Einkaufslisten-Generator';
+
+  @override
+  String reviewAndAdd(int count) {
+    return 'Überprüfen & hinzufügen ($count Artikel)';
+  }
+
+  @override
+  String addItemsToList(int count) {
+    return '$count Artikel zur Liste hinzufügen';
+  }
+
+  @override
+  String addedItemsToShoppingList(int count) {
+    return '$count Artikel zur Einkaufsliste hinzugefügt';
+  }
+
+  @override
+  String get createNewList => 'Neue Liste erstellen';
+
+  @override
+  String get listName => 'Listenname';
+
+  @override
+  String get manage => 'Verwalten';
+
+  @override
+  String get myPantry => 'Meine Vorratskammer';
+
+  @override
+  String get itemsAlwaysOnHand => 'Artikel, die du immer vorrätig hast';
+
+  @override
+  String get whatToDelete => 'Was möchtest du löschen?';
+
+  @override
+  String get localData => 'Lokale Daten';
+
+  @override
+  String get localDataDesc => 'Rezepte, Kochbücher, Essenspläne, Einkaufslisten auf diesem Gerät';
+
+  @override
+  String get cloudData => 'Cloud-Daten';
+
+  @override
+  String get cloudDataDesc => 'Demnächst verfügbar — Cloud-Synchronisierung noch nicht verfügbar';
+
+  @override
+  String get allData => 'Alle Daten';
+
+  @override
+  String get allDataDesc => 'Lokale Daten und Einstellungen — kompletter Neustart';
+
+  @override
+  String permanentDeleteWarning(String scope) {
+    return 'Dies wird $scope dauerhaft löschen. Dies kann nicht rückgängig gemacht werden.';
+  }
+
+  @override
+  String get dataResetComplete => 'Daten zurückgesetzt';
+
+  @override
+  String get noThanks => 'Nein, danke';
+
+  @override
+  String importFailed(String error) {
+    return 'Import fehlgeschlagen: $error';
+  }
+
+  @override
+  String get yesAddThem => 'Ja, hinzufügen';
+
+  @override
+  String get nutritionDisplay => 'Nährwertanzeige';
+
+  @override
+  String get nutritionDisplaySubtitle => 'Diagrammstil, sichtbare Nährstoffe';
+
+  @override
+  String get storeIntegrations => 'Shop-Integrationen';
+
+  @override
+  String get instacart => 'Instacart';
+
+  @override
+  String get kroger => 'Kroger';
+
+  @override
+  String get connected => 'Verbunden';
+
+  @override
+  String get setCustomApiKey => 'Eigenen API-Schlüssel festlegen';
+
+  @override
+  String get useOwnInstacartKey => 'Verwende deinen eigenen Instacart Connect Schlüssel';
+
+  @override
+  String get instacartApiKey => 'Instacart API-Schlüssel';
+
+  @override
+  String get resetToDefaultKey => 'Standardschlüssel wiederherstellen';
+
+  @override
+  String get removeCustomKey => 'Eigenen Schlüssel entfernen, Standard verwenden';
+
+  @override
+  String get signInToKroger => 'Bei Kroger anmelden';
+
+  @override
+  String get connectToAddItems => 'Verbinde dich, um Artikel in deinen Warenkorb zu legen';
+
+  @override
+  String get setPreferredStore => 'Bevorzugten Markt festlegen';
+
+  @override
+  String get searchByZipCode => 'Nach Postleitzahl suchen';
+
+  @override
+  String get disconnect => 'Trennen';
+
+  @override
+  String get apiKeySaved => 'API-Schlüssel gespeichert';
+
+  @override
+  String get findYourKrogerStore => 'Finde deinen Kroger-Markt';
+
+  @override
+  String get enterZipCode => 'Postleitzahl eingeben';
+
+  @override
+  String storeSet(String name) {
+    return 'Markt festgelegt: $name';
+  }
+
+  @override
+  String get menuImportSubtitle => 'Instagram, TikTok, Webseiten...';
+
+  @override
+  String get menuSyncToMobile => 'Mit Handy synchronisieren';
+
+  @override
+  String get menuSyncToDesktop => 'Mit Desktop synchronisieren';
+
+  @override
+  String get menuTransferToPhone => 'Daten auf dein Handy übertragen';
+
+  @override
+  String get menuTransferToDevice => 'Daten auf ein anderes Gerät übertragen';
+
+  @override
+  String get menuProfile => 'Profil';
+
+  @override
+  String get menuProfileSubtitle => 'Statistiken und Fortschritt anzeigen';
+
+  @override
+  String get menuAchievementsSubtitle => 'Belohnungen freischalten';
+
+  @override
+  String get menuCosmetics => 'Kosmetik';
+
+  @override
+  String get menuCosmeticsSubtitle => 'Aussehen anpassen';
+
+  @override
+  String get menuLeaderboardsSubtitle => 'Mit anderen messen';
+
+  @override
+  String get menuBossBattles => 'Bosskämpfe';
+
+  @override
+  String get menuBossBattlesSubtitle => 'Epische Koch-Herausforderungen';
+
+  @override
+  String get menuImportRecipes => 'Rezepte importieren';
+
+  @override
+  String get menuHelpSupport => 'Hilfe & Support';
+
+  @override
+  String menuAppVersion(String version) {
+    return 'Recipe Spellbook v$version';
+  }
+
+  @override
+  String get menuShareApp => 'Recipe Spellbook teilen';
+
+  @override
+  String get menuShareSubtitle => 'Lade deine Freunde und Familie zum gemeinsamen Kochen ein!';
+
+  @override
+  String get menuShareMessage => 'Schau dir Recipe Spellbook an — die beste Rezepte-App! https://recipespellbook.app';
+
+  @override
+  String get signIn => 'Anmelden';
+
+  @override
+  String get helpFromWebsite => 'Von einer Webseite';
+
+  @override
+  String get helpFromWebsiteDesc => 'Tippe + in einem Kochbuch und füge eine Rezept-URL ein. Funktioniert mit den meisten Rezeptseiten.';
+
+  @override
+  String get helpFromSocial => 'Von Instagram oder TikTok';
+
+  @override
+  String get helpFromSocialDesc => 'Kopiere den Link eines Rezept-Posts, tippe + und füge ihn ein.';
+
+  @override
+  String get helpFromPhoto => 'Von einem Foto';
+
+  @override
+  String get helpFromPhotoDesc => 'Fotografiere ein Rezept. Tippe + und wähle Bild zum Scannen mit OCR.';
+
+  @override
+  String get helpFromPdf => 'Von einer PDF';
+
+  @override
+  String get helpFromPdfDesc => 'Tippe + und wähle Datei, um ein PDF-Rezept zu importieren.';
+
+  @override
+  String get helpFromText => 'Aus Text';
+
+  @override
+  String get helpFromTextDesc => 'Kopiere Rezepttext, tippe + und Einfügen.';
+
+  @override
+  String get helpFromPaprika => 'Von Paprika';
+
+  @override
+  String get helpFromPaprikaDesc => 'In Paprika: Exportieren → \"HTML\"-Format. Dann tippe + und importiere die Datei.';
+
+  @override
+  String get helpFromOtherApps => 'Von anderen Apps';
+
+  @override
+  String get helpFromOtherAppsDesc => 'Die meisten Rezepte-Apps exportieren als HTML oder Text. Exportiere und importiere hier mit +.';
+
+  @override
+  String get helpCloudSync => 'Cloud-Synchronisierung';
+
+  @override
+  String get helpCloudSyncDesc => 'Abonniere Cloud Sync, um deine Rezepte auf allen Geräten synchron zu halten.';
+
+  @override
+  String get accountTitle => 'Konto';
+
+  @override
+  String get signInToSync => 'Anmelden zum Synchronisieren';
+
+  @override
+  String get signInSyncDesc => 'Sichere deine Rezepte, synchronisiere zwischen Geräten und schalte Premium-Funktionen frei.';
+
+  @override
+  String get continueWithGoogle => 'Weiter mit Google';
+
+  @override
+  String get continueWithApple => 'Weiter mit Apple';
+
+  @override
+  String get signOut => 'Abmelden';
+
+  @override
+  String get signOutQuestion => 'Abmelden?';
+
+  @override
+  String get signOutDesc => 'Deine Rezepte bleiben auf diesem Gerät. Du kannst dich jederzeit wieder anmelden.';
+
+  @override
+  String get deleteAccount => 'Konto löschen';
+
+  @override
+  String get deleteAccountQuestion => 'Konto löschen?';
+
+  @override
+  String get deleteAccountDesc => 'Dies löscht dein Konto und alle synchronisierten Daten dauerhaft.\n\nLokal gespeicherte Rezepte werden NICHT gelöscht.';
+
+  @override
+  String get deletePermanently => 'Dauerhaft löschen';
+
+  @override
+  String get deleteAccountFailed => 'Konto konnte nicht gelöscht werden. Bitte versuche es erneut.';
+
+  @override
+  String get signInToApp => 'Bei Recipe Spellbook anmelden';
+
+  @override
+  String get signInSyncLong => 'Synchronisiere Rezepte, schalte Cloud-Backup frei und greife auf Pro-Funktionen zu.';
+
+  @override
+  String get recipesStayOnDevice => 'Deine Rezepte bleiben auch ohne Konto auf diesem Gerät.';
+
+  @override
+  String get upgradeToPro => 'Auf Pro upgraden';
+
+  @override
+  String subscriptionDot(String tier) {
+    return 'Abo · $tier';
+  }
+
+  @override
+  String get affluentLabsPro => 'Affluent Labs Pro';
+
+  @override
+  String cancelledAccessUntil(String date) {
+    return 'Gekündigt — Zugang bis $date';
+  }
+
+  @override
+  String get lifetimeNeverExpires => 'Lebenslang — läuft nie ab';
+
+  @override
+  String renewsDate(String date) {
+    return 'Verlängerung $date';
+  }
+
+  @override
+  String get manageSubscription => 'Abo verwalten';
+
+  @override
+  String get tierPremium => 'Premium';
+
+  @override
+  String get tierStandard => 'Standard';
+
+  @override
+  String get tierBasic => 'Basis';
+
+  @override
+  String get tierFree => 'Kostenlos';
+
+  @override
+  String tierPlan(String tier) {
+    return '$tier-Plan';
+  }
+
+  @override
+  String get upgradeArrow => 'Upgrade →';
+
+  @override
+  String get syncNow => 'Jetzt synchronisieren';
+
+  @override
+  String get syncing => 'Synchronisiere...';
+
+  @override
+  String lastSynced(String time) {
+    return 'Letzte Synchronisierung $time';
+  }
+
+  @override
+  String get notYetSynced => 'Noch nicht synchronisiert';
+
+  @override
+  String get cloudSyncSection => 'CLOUD-SYNC';
+
+  @override
+  String get noRecipesPlannedThisWeek => 'Keine Rezepte für diese Woche geplant';
+
+  @override
+  String get todayBadge => 'HEUTE';
+
+  @override
+  String get noCourseAssigned => 'Kein Gang zugewiesen';
+
+  @override
+  String get uncategorized => 'Unkategorisiert';
+
+  @override
+  String get allRecipesHaveCourse => 'Alle Rezepte haben einen Gang!';
+
+  @override
+  String get allRecipesCategorized => 'Alle Rezepte sind kategorisiert!';
+
+  @override
+  String get greatJobOrganizing => 'Gut gemacht beim Organisieren deiner Rezepte!';
+
+  @override
+  String countOfTotal(int count, int total) {
+    return '$count von $total';
+  }
+
+  @override
+  String get tapToAssignCourse => 'Tippen, um einen Gang zuzuweisen';
+
+  @override
+  String get tapToAssignCategory => 'Tippen, um eine Kategorie zuzuweisen';
+
+  @override
+  String deleteCountRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rezepte',
+      one: 'Rezept',
+    );
+    return '$count $_temp0 löschen?';
+  }
+
+  @override
+  String countRecipesMovedToTrash(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rezepte',
+      one: 'Rezept',
+    );
+    return '$count $_temp0 in den Papierkorb verschoben';
+  }
+
+  @override
+  String get setCourse => 'Gang festlegen';
+
+  @override
+  String get setCategory => 'Kategorie festlegen';
+
+  @override
+  String courseSetForCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rezepte',
+      one: 'Rezept',
+    );
+    return 'Gang festgelegt für $count $_temp0';
+  }
+
+  @override
+  String categorySetForCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rezepte',
+      one: 'Rezept',
+    );
+    return 'Kategorie festgelegt für $count $_temp0';
+  }
+
+  @override
+  String countRecipesFavorited(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rezepte',
+      one: 'Rezept',
+    );
+    return '$count $_temp0 als Favorit markiert';
+  }
+
+  @override
+  String get bulkCourse => 'Gang';
+
+  @override
+  String get bulkCategory => 'Kategorie';
+
+  @override
+  String get bulkFavorite => 'Favorit';
+
+  @override
+  String get aiImportTitle => 'Von KI importieren';
+
+  @override
+  String get aiCopyPrompt => 'Prompt kopieren';
+
+  @override
+  String get aiCopyPromptSubtitle => 'Füge dies in ChatGPT, Claude, Gemini oder eine andere KI zusammen mit deinem Rezept ein.';
+
+  @override
+  String get aiCopied => 'Kopiert!';
+
+  @override
+  String get aiCopyToClipboard => 'Prompt in Zwischenablage kopieren';
+
+  @override
+  String get aiPreviewPrompt => 'Prompt-Vorschau';
+
+  @override
+  String get aiPasteOutput => 'KI-Ausgabe einfügen';
+
+  @override
+  String get aiPasteSubtitle => 'Füge das JSON der KI ein oder importiere eine .json-Datei.';
+
+  @override
+  String get aiPasteFirst => 'Erst JSON einfügen oder laden.';
+
+  @override
+  String aiFailedReadFile(String error) {
+    return 'Datei konnte nicht gelesen werden: $error';
+  }
+
+  @override
+  String get aiUntitledRecipe => 'Unbenanntes Rezept';
+
+  @override
+  String get aiImporting => 'Importiere...';
+
+  @override
+  String get aiImportToCookbook => 'In Kochbuch importieren';
+
+  @override
+  String get aiImportSuccess => 'Rezept erfolgreich importiert!';
+
+  @override
+  String get aiPreviewImport => 'Vorschau & Importieren';
+
+  @override
+  String get aiPromptCopied => 'Prompt kopiert! Füge ihn in eine KI mit deinem Rezept ein.';
+
+  @override
+  String get aiLoadJsonFile => '.json-Datei laden';
+
+  @override
+  String get aiPaste => 'Einfügen';
+
+  @override
+  String get aiTipsTitle => 'Tipps';
+
+  @override
+  String get aiTip1 => 'Funktioniert mit ChatGPT, Claude, Gemini, Copilot oder jeder KI';
+
+  @override
+  String get aiTip2 => 'Du kannst auch ein Foto eines Rezepts mit dem Prompt einfügen';
+
+  @override
+  String get aiTip3 => 'Die KI konvertiert handgeschriebene, gedruckte oder Web-Rezepte';
+
+  @override
+  String get aiTip4 => 'Wenn das JSON Fehler hat, bitte die KI es zu korrigieren';
+
+  @override
+  String aiServingsLabel(String count) {
+    return '$count Portionen';
+  }
+
+  @override
+  String aiPrepLabel(String minutes) {
+    return '${minutes}m Vorbereitung';
+  }
+
+  @override
+  String aiCookLabel(String minutes) {
+    return '${minutes}m Kochen';
+  }
+
+  @override
+  String aiIngredientsCount(int count) {
+    return 'Zutaten ($count)';
+  }
+
+  @override
+  String aiStepsCount(int count) {
+    return 'Schritte ($count)';
+  }
+
+  @override
+  String get restoreAllWarnings => 'Alle Warnungen wiederherstellen';
+
+  @override
+  String get warningsRestoredForRecipe => 'Warnungen für Rezept wiederhergestellt';
+
+  @override
+  String get restoreAllWarningsQuestion => 'Alle Warnungen wiederherstellen?';
+
+  @override
+  String get restoreAll => 'Alle wiederherstellen';
+
+  @override
+  String get allWarningsRestored => 'Alle Warnungen wiederhergestellt';
+
+  @override
+  String dismissedWarnings(int count) {
+    return '$count ausgeblendet';
+  }
+
+  @override
+  String get restoringPurchases => 'Käufe werden wiederhergestellt...';
+
+  @override
+  String get restorePurchases => 'Wiederherstellen';
+
+  @override
+  String get compareAllPlans => 'Alle Pläne vergleichen';
+
+  @override
+  String get oneTimeTab => 'Einmalig';
+
+  @override
+  String get subscriptionTab => 'Abo';
+
+  @override
+  String get payOnceKeepForever => 'Einmal zahlen, für immer behalten';
+
+  @override
+  String get cloudSyncFeature => 'Cloud-Sync';
+
+  @override
+  String get cloudSyncPlusFeature => 'Cloud-Sync+';
+
+  @override
+  String get unableToLoadProducts => 'Produkte konnten nicht geladen werden. Erneut versuchen.';
+
+  @override
+  String get noOfferingsAvailable => 'Keine Angebote verfügbar. Später erneut versuchen.';
+
+  @override
+  String purchaseFailed(String error) {
+    return 'Kauf fehlgeschlagen: $error';
+  }
+
+  @override
+  String get hintProductExample => 'z.B. Bio-Nudelsauce';
+
+  @override
+  String get previewPhoto => 'Fotovorschau';
+
+  @override
+  String get retake => 'Neu aufnehmen';
+
+  @override
+  String get usePhoto => 'Foto verwenden';
+
+  @override
+  String get takePhoto => 'Foto aufnehmen';
+
+  @override
+  String get chooseFromGallery => 'Aus Galerie wählen';
+
+  @override
+  String get removeImage => 'Bild entfernen';
+
+  @override
+  String get tipsPlaceholder => 'Tipps, Variationen, Lagerung...';
+
+  @override
+  String get totalCalories => 'Gesamt kcal';
+
+  @override
+  String get caloriesPerServing => 'kcal/Portion';
+
+  @override
+  String get totalNutrition => 'Gesamt';
+
+  @override
+  String get linkRecipe => 'Rezept verknüpfen';
+
+  @override
+  String get addIngredient => 'Zutat hinzufügen';
+
+  @override
+  String get searchRecipesToLink => 'Rezepte zum Verknüpfen suchen...';
+
+  @override
+  String linkToIngredient(String name) {
+    return 'Mit \"$name\" verknüpfen';
+  }
+
+  @override
+  String errorSavingRecipe(String error) {
+    return 'Fehler beim Speichern: $error';
+  }
+
+  @override
+  String deleteSelectedCount(int count) {
+    return '$count löschen';
+  }
+
+  @override
+  String get takeAPhoto => 'Ein Foto machen';
+
+  @override
+  String get defaultLabel => 'Standard';
+
+  @override
+  String get scaleRecipe => 'Rezept skalieren';
+
+  @override
+  String get scaleHint => 'z.B. 2,5';
+
+  @override
+  String get badgePinned => 'Angepinnt';
+
+  @override
+  String get badgeRecentlyViewed => 'Zuletzt angesehen';
+
+  @override
+  String get displayOptions => 'Anzeigeoptionen';
+
+  @override
+  String get showMealPlan => 'Essensplan anzeigen';
+
+  @override
+  String get showMealPlanSubtitle => 'Heutige geplante Rezepte anzeigen';
+
+  @override
+  String get showPinnedRecipes => 'Angepinnte Rezepte anzeigen';
+
+  @override
+  String get showPinnedSubtitle => 'Angepinnte Rezepte anzeigen';
+
+  @override
+  String get showRecentHistory => 'Verlauf anzeigen';
+
+  @override
+  String get showRecentSubtitle => 'Kürzlich angesehene Rezepte anzeigen';
+
+  @override
+  String versionLabel(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get measurementsUS => 'Tassen, Esslöffel, Unzen, °F';
+
+  @override
+  String get measurementsMetric => 'Milliliter, Gramm, °C';
+
+  @override
+  String defaultRecipesImported(int count) {
+    return '$count Standardrezepte importiert!';
+  }
+
+  @override
+  String get shoppingListGeneratorTitle => 'Einkaufslisten-Generator';
+
+  @override
+  String get exitShoppingListGeneratorQuestion => 'Generator verlassen?';
+
+  @override
+  String reviewAndAddItems(int count) {
+    return 'Prüfen & Hinzufügen ($count Artikel)';
+  }
+
+  @override
+  String addedTotalItemsToList(int count) {
+    return '$count Artikel zur Einkaufsliste hinzugefügt';
+  }
+
+  @override
+  String scaleMultiplier(String scale) {
+    return '${scale}x';
+  }
+
+  @override
+  String get printIngredients => 'Zutaten';
+
+  @override
+  String get printInstructions => 'Zubereitung';
+
+  @override
+  String get printNotes => 'Notizen';
+
+  @override
+  String printPrep(int minutes) {
+    return 'Vorbereitung: $minutes Min.';
+  }
+
+  @override
+  String printCook(int minutes) {
+    return 'Kochen: $minutes Min.';
+  }
+
+  @override
+  String get printFooter => 'Gedruckt aus Recipe Spellbook';
+
+  @override
+  String printPage(int current, int total) {
+    return 'Seite $current von $total';
+  }
+
+  @override
+  String get menuNavigation => 'NAVIGATION';
+
+  @override
+  String get menuImport => 'IMPORTIEREN';
+
+  @override
+  String get menuRpgMode => 'RPG-MODUS';
+
+  @override
+  String get menuSocial => 'SOZIALES';
+
+  @override
+  String get menuApp => 'APP';
+
+  @override
+  String get historyCount => 'Verlauf-Anzahl';
+
+  @override
+  String get historyCountSubtitle => 'Maximale Anzahl der angezeigten letzten Rezepte';
+
+  @override
+  String get restoreAllWarningsDesc => 'Dadurch werden Allergie-Warnungen für alle Rezepte wieder aktiviert.';
+
+  @override
+  String get signInToContinue => 'Anmelden um fortzufahren';
+
+  @override
+  String get signInForPurchaseDesc => 'Vor dem Kauf ist ein Konto erforderlich, damit dein Abo geräteübergreifend verknüpft bleibt.';
+
+  @override
+  String get menuAchievements => 'Erfolge';
+
+  @override
+  String get menuLeaderboards => 'Bestenlisten';
+
+  @override
+  String get requiresPremium => 'Premium erforderlich';
+
+  @override
+  String deleteCount(int count) {
+    return '$count löschen';
+  }
+
+  @override
+  String get tapToSelectPhoto => 'Tippen, um aus Galerie oder Kamera auszuwählen';
+
+  @override
+  String get rating => 'Bewertung';
+
+  @override
+  String get usUnits => 'Cups, Esslöffel, Unzen, °F';
+
+  @override
+  String get metricUnits => 'Milliliter, Gramm, °C';
+
+  @override
+  String selectedCount(int count) {
+    return '$count ausgewählt';
+  }
+
+  @override
+  String deleteRecipesConfirm(int count) {
+    return '$count Rezept(e) löschen?';
+  }
+
+  @override
+  String courseSetForRecipes(int count) {
+    return 'Gang für $count Rezept(e) festgelegt';
+  }
+
+  @override
+  String get recipeImportedSuccess => 'Rezept erfolgreich importiert!';
+
+  @override
+  String get promptCopied => 'Prompt kopiert! Füge ihn in eine KI mit deinem Rezept ein.';
+
+  @override
+  String get importFromAI => 'Aus KI importieren';
+
+  @override
+  String get paste => 'Einfügen';
+
+  @override
+  String get previewAndImport => 'Vorschau & Importieren';
+
+  @override
+  String get signInDescription => 'Sichere deine Rezepte, synchronisiere zwischen Geräten und schalte Premium-Funktionen frei.';
+
+  @override
+  String get signOutConfirmTitle => 'Abmelden?';
+
+  @override
+  String get signOutConfirmMessage => 'Deine Rezepte bleiben auf diesem Gerät. Du kannst dich jederzeit wieder anmelden, um die Synchronisierung zu aktivieren.';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Konto löschen?';
+
+  @override
+  String get deleteAccountConfirmMessage => 'Dadurch werden dein Konto und alle synchronisierten Daten dauerhaft von unseren Servern gelöscht.\n\nLokal auf diesem Gerät gespeicherte Rezepte werden NICHT gelöscht.';
+
+  @override
+  String planLabel(String label) {
+    return '$label-Abo';
+  }
+
+  @override
+  String permanentlyDeleteWarning(String scope) {
+    return 'Dies wird $scope dauerhaft löschen. Dies kann nicht rückgängig gemacht werden.';
+  }
+
+  @override
+  String recipesMovedToTrash(int count) {
+    return 'Rezepte werden in den Papierkorb verschoben. Du kannst sie später wiederherstellen.';
+  }
+
+  @override
+  String recipesFavorited(int count) {
+    return '$count Rezept(e) favorisiert';
+  }
+
+  @override
+  String get upgradeRecipeSpellbook => 'Recipe Spellbook upgraden';
+
+  @override
+  String get choosePlanSubtitle => 'Wähle den Plan, der zu deiner Küche passt';
+
+  @override
+  String get premiumInfoNotice => 'Premium ist ein einmaliger Kauf, der dein kostenloses Erlebnis verbessert. Familienfreigabe und erweiterte Cloud-Funktionen sind nicht enthalten — siehe Abonnements.';
+
+  @override
+  String get bestValue => 'BESTER WERT';
+
+  @override
+  String get billedMonthly => 'Monatlich abgerechnet';
+
+  @override
+  String get save16Yearly => 'Spare 16% — nur 2,50 \$/Monat';
+
+  @override
+  String get save16Badge => 'SPARE 16%';
+
+  @override
+  String get save17Yearly => 'Spare 17% — nur 4,17 \$/Monat';
+
+  @override
+  String get subscriptionsIncludePremium => 'Alle Abonnements beinhalten alles aus Premium.';
+
+  @override
+  String get monthly => 'Monatlich';
+
+  @override
+  String get yearly => 'Jährlich';
+
+  @override
+  String get purchasePremiumCta => 'Premium kaufen — 6,99 \$';
+
+  @override
+  String get subscribeCloudSyncMonthlyCta => 'Abonnieren — 2,99 \$/Monat';
+
+  @override
+  String get subscribeCloudSyncYearlyCta => 'Abonnieren — 29,99 \$/Jahr';
+
+  @override
+  String get subscribeCloudSyncPlusMonthlyCta => 'Abonnieren — 4,99 \$/Monat';
+
+  @override
+  String get subscribeCloudSyncPlusYearlyCta => 'Abonnieren — 49,99 \$/Jahr';
+
+  @override
+  String get signInRequiredBeforePurchase => 'Anmeldung vor dem Kauf erforderlich';
+
+  @override
+  String get terms => 'AGB';
+
+  @override
+  String get privacy => 'Datenschutz';
+
+  @override
+  String get comparePlans => 'Pläne vergleichen';
+
+  @override
+  String get featureCloudSyncPersonal => 'Cloud-Sync (persönlich)';
+
+  @override
+  String get featurePhotosOnSteps => 'Fotos bei Schritten';
+
+  @override
+  String get featurePhotoStorage250 => '250 MB Fotospeicher (~500 Fotos)';
+
+  @override
+  String get featureRpgCosmeticsStarter => 'RPG-Kosmetik-Starterpaket';
+
+  @override
+  String get featureSupporterBadge => 'Premium-Unterstützer-Abzeichen';
+
+  @override
+  String get featureExtraPolish => 'Extra UI-Feinschliff & QoL-Funktionen';
+
+  @override
+  String get featureFamilySharing5 => 'Familienfreigabe (5 Mitglieder)';
+
+  @override
+  String get featurePhotoStorage1gb => '1 GB Fotospeicher (~2.000 Fotos)';
+
+  @override
+  String get featureSharedLists => 'Geteilte Einkaufslisten';
+
+  @override
+  String get featureSharedCookbooks => 'Geteilte Kochbücher';
+
+  @override
+  String get featureSharedMealPlan => 'Geteilte Essensplanung';
+
+  @override
+  String get featureEncryptedBackups => 'Verschlüsselte Backups + Versionshistorie';
+
+  @override
+  String get featureFamilySharing10 => 'Familienfreigabe (10 Mitglieder)';
+
+  @override
+  String get featurePhotoStorage5gb => '5 GB Fotospeicher (~10.000 Fotos)';
+
+  @override
+  String get featureExtendedVersionHistory => 'Erweiterte Versionshistorie';
+
+  @override
+  String get featurePrioritySync => 'Prioritäts-Sync-Leistung';
+
+  @override
+  String get featureFutureAdvanced => 'Zukünftige erweiterte Funktionen inklusive';
+
+  @override
+  String get tierCloudSync => 'Cloud\nSync';
+
+  @override
+  String get tierCloudSyncPlus => 'Cloud\nSync+';
+
+  @override
+  String get comparePrice => 'Preis';
+
+  @override
+  String get priceFree => '0 \$';
+
+  @override
+  String get pricePremium => '6,99 \$\neinmalig';
+
+  @override
+  String get priceCloudSync => '2,99 \$\n/Monat';
+
+  @override
+  String get priceCloudSyncPlus => '4,99 \$\n/Monat';
+
+  @override
+  String get compareDeviceTransfer => 'Geräteübertragung';
+
+  @override
+  String get qrCode => 'QR-Code';
+
+  @override
+  String get cloud => 'Cloud';
+
+  @override
+  String get comparePhotoStorage => 'Fotospeicher';
+
+  @override
+  String get compareStepPhotos => 'Schrittfotos';
+
+  @override
+  String get compareFamilySharing => 'Familienfreigabe';
+
+  @override
+  String get compareSharedLists => 'Geteilte Listen';
+
+  @override
+  String get compareSharedCookbooks => 'Geteilte Kochbücher';
+
+  @override
+  String get compareSharedMealPlan => 'Geteilter Essensplan';
+
+  @override
+  String get compareBackups => 'Backups';
+
+  @override
+  String get compareVersionHistory => 'Versionshistorie';
+
+  @override
+  String get light => 'Leicht';
+
+  @override
+  String get extended => 'Erweitert';
+
+  @override
+  String get compareRpgCosmetics => 'RPG-Kosmetik';
+
+  @override
+  String get basic => 'Basis';
+
+  @override
+  String get starterPack => 'Starter-\npaket';
+
+  @override
+  String get compareSupporterBadge => 'Unterstützer-Abzeichen';
+
+  @override
+  String get printOf => 'von';
+
+  @override
+  String get printRecipe => 'Drucken';
+
+  @override
+  String get stackedLayout => 'Gestapeltes Layout';
+
+  @override
+  String get tabbedLayout => 'Tab-Layout';
+
+  @override
+  String get printLabelIngredients => 'Zutaten';
+
+  @override
+  String get printLabelInstructions => 'Anleitung';
+
+  @override
+  String get printLabelNotes => 'Notizen';
+
+  @override
+  String get printLabelPrep => 'Vorbereitung';
+
+  @override
+  String get printLabelCook => 'Kochen';
+
+  @override
+  String get printLabelFooter => 'Gedruckt aus Recipe Spellbook';
+
+  @override
+  String get printLabelPage => 'Seite';
+
+  @override
+  String get printLabelOf => 'von';
+
+  @override
+  String get smallerText => 'Kleinere Schrift';
+
+  @override
+  String get largerText => 'Größere Schrift';
+
+  @override
+  String get textSize => 'Textgröße';
+
+  @override
+  String get ingredientPreview => 'Zutatenvorschau';
+
+  @override
+  String get resetToDefault => 'Auf Standard zurücksetzen';
+
+  @override
+  String get smartImportSuccess => 'Rezept von KI neu analysiert';
+
+  @override
+  String smartImportSuccessWithRemaining(int remaining) {
+    return 'Rezept von KI neu analysiert • $remaining Importe diesen Monat übrig';
+  }
+
+  @override
+  String get smartImportLimitTitle => 'Smart-Import-Limit erreicht';
+
+  @override
+  String smartImportLimitMessage(int limit) {
+    return 'Du hast alle $limit Smart-Importe diesen Monat verbraucht.';
+  }
+
+  @override
+  String get smartImportUpgradeHint => 'Upgrade auf Premium für 200 Importe/Monat.';
+
+  @override
+  String get smartImportParsing => 'KI analysiert...';
+
+  @override
+  String get smartImportFix => 'Mit Smart Import korrigieren ✨';
+
+  @override
+  String smartImportRemaining(int remaining, int limit) {
+    return '$remaining von $limit Smart-Importen diesen Monat übrig';
+  }
+
+  @override
+  String get smartImportHintTitle => 'Import sieht nicht richtig aus?';
+
+  @override
+  String get smartImportHintSubtitle => 'Abonniere Smart Import — KI-gestützte Rezeptanalyse';
+
+  @override
+  String get learnMore => 'Mehr erfahren';
+
+  @override
+  String get retry => 'Erneut versuchen';
+
+  @override
+  String get upgrade => 'Upgraden';
+
+  @override
+  String get cookingMode => 'Kochmodus';
+
+  @override
+  String get mealTypeDessert => 'Dessert';
 }

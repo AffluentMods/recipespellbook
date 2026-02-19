@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../services/grocery_service.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Handles the Kroger OAuth callback deep link:
 ///   recipespellbook://kroger-callback?code=XXXX
@@ -33,7 +34,7 @@ class _KrogerCallbackScreenState extends State<KrogerCallbackScreen> {
       setState(() {
         _loading = false;
         _success = false;
-        _message = 'Kroger login was denied: ${widget.error}';
+        _message = 'krogerLoginDenied'; // resolved in build
       });
       return;
     }
@@ -42,7 +43,7 @@ class _KrogerCallbackScreenState extends State<KrogerCallbackScreen> {
       setState(() {
         _loading = false;
         _success = false;
-        _message = 'No authorization code received from Kroger.';
+        _message = 'krogerNoAuthCode'; // resolved in build
       });
       return;
     }
@@ -55,9 +56,7 @@ class _KrogerCallbackScreenState extends State<KrogerCallbackScreen> {
       setState(() {
         _loading = false;
         _success = ok;
-        _message = ok
-            ? 'Kroger connected! You can now send items directly to your cart.'
-            : 'Failed to connect Kroger. Please try again.';
+        _message = ok ? 'krogerConnected' : 'krogerConnectFailed'; // resolved in build
       });
 
       // Auto-navigate after short delay on success
@@ -71,6 +70,22 @@ class _KrogerCallbackScreenState extends State<KrogerCallbackScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    // Resolve message key to localized string
+    String resolvedMessage;
+    switch (_message) {
+      case 'krogerLoginDenied':
+        resolvedMessage = l10n.krogerLoginDenied(widget.error ?? '');
+      case 'krogerNoAuthCode':
+        resolvedMessage = l10n.krogerNoAuthCode;
+      case 'krogerConnected':
+        resolvedMessage = l10n.krogerConnected;
+      case 'krogerConnectFailed':
+        resolvedMessage = l10n.krogerConnectFailed;
+      default:
+        resolvedMessage = _message;
+    }
 
     return Scaffold(
       body: Center(
@@ -85,10 +100,10 @@ class _KrogerCallbackScreenState extends State<KrogerCallbackScreen> {
                   child: CircularProgressIndicator(strokeWidth: 3),
                 ),
                 const SizedBox(height: 24),
-                Text('Connecting to Kroger\u2026',
+                Text(l10n.krogerConnecting,
                     style: theme.textTheme.titleMedium),
                 const SizedBox(height: 8),
-                Text('Exchanging authorization...',
+                Text(l10n.krogerExchanging,
                     style: theme.textTheme.bodySmall
                         ?.copyWith(color: theme.colorScheme.outline)),
               ] else ...[
@@ -101,13 +116,13 @@ class _KrogerCallbackScreenState extends State<KrogerCallbackScreen> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  _success ? 'Connected!' : 'Connection Failed',
+                  _success ? l10n.krogerConnectedTitle : l10n.krogerConnectionFailed,
                   style: theme.textTheme.headlineSmall
                       ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  _message,
+                  resolvedMessage,
                   style: theme.textTheme.bodyMedium
                       ?.copyWith(color: theme.colorScheme.outline),
                   textAlign: TextAlign.center,
@@ -117,7 +132,7 @@ class _KrogerCallbackScreenState extends State<KrogerCallbackScreen> {
                   FilledButton.icon(
                     onPressed: () => context.go('/shopping'),
                     icon: const Icon(Icons.shopping_cart, size: 18),
-                    label: const Text('Go to Shopping List'),
+                    label: Text(l10n.goToShoppingList),
                   )
                 else ...[
                   FilledButton(
@@ -127,12 +142,12 @@ class _KrogerCallbackScreenState extends State<KrogerCallbackScreen> {
                       // If they come back, they'll hit this screen again
                       if (mounted) setState(() { _loading = false; });
                     },
-                    child: const Text('Try Again'),
+                    child: Text(l10n.tryAgain),
                   ),
                   const SizedBox(height: 12),
                   TextButton(
                     onPressed: () => context.go('/shopping'),
-                    child: const Text('Skip for now'),
+                    child: Text(l10n.skipForNow),
                   ),
                 ],
               ],

@@ -562,7 +562,7 @@ class _DisabledWarningsTab extends ConsumerWidget {
           child: OutlinedButton.icon(
             onPressed: () => _restoreAll(context, ref),
             icon: const Icon(Icons.restore),
-            label: const Text('Restore All Warnings'),
+            label: Text(l10n.restoreAllWarnings),
           ),
         ),
 
@@ -577,7 +577,7 @@ class _DisabledWarningsTab extends ConsumerWidget {
               ref.read(dismissedAllergyWarningsProvider.notifier)
                   .restoreForRecipe(entry.key);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Warnings restored for recipe')),
+                SnackBar(content: Text(l10n.warningsRestoredForRecipe)),
               );
             },
           );
@@ -589,21 +589,22 @@ class _DisabledWarningsTab extends ConsumerWidget {
   }
 
   void _restoreAll(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Restore All Warnings?'),
-        content: const Text(
-          'This will re-enable allergy warnings for all recipes. You will start seeing warnings again when viewing these recipes.',
+        title: Text(l10n.restoreAllWarningsQuestion),
+        content: Text(
+          l10n.restoreAllWarningsDesc,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.actionCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Restore All'),
+            child: Text(l10n.restoreAll),
           ),
         ],
       ),
@@ -613,7 +614,7 @@ class _DisabledWarningsTab extends ConsumerWidget {
       ref.read(dismissedAllergyWarningsProvider.notifier).restoreAll();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('All warnings restored')),
+          SnackBar(content: Text(l10n.allWarningsRestored)),
         );
       }
     }
@@ -742,7 +743,7 @@ class _DisabledRecipeTile extends ConsumerWidget {
                     Icons.restore,
                     color: theme.colorScheme.primary,
                   ),
-                  tooltip: 'Restore warnings',
+                  tooltip: l10n.restoreAllWarnings,
                 ),
               ],
             ),

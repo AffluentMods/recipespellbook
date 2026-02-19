@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/auth_service.dart';
 
@@ -21,6 +22,7 @@ class AccountSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -28,7 +30,7 @@ class AccountSection extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Text(
-            'Account',
+            l10n.accountTitle,
             style: theme.textTheme.titleSmall?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.w600,
@@ -59,6 +61,7 @@ class _SignedOutContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.all(20),
@@ -71,12 +74,12 @@ class _SignedOutContent extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Sign in to sync recipes',
+            l10n.signInToSync,
             style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
           Text(
-            'Back up your recipes, sync across devices, and unlock premium features.',
+            l10n.signInDescription,
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
             textAlign: TextAlign.center,
           ),
@@ -118,7 +121,7 @@ class _SignedOutContent extends ConsumerWidget {
               icon: isLoading
                   ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                   : const _GoogleIcon(),
-              label: const Text('Continue with Google'),
+              label: Text(l10n.continueWithGoogle),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -134,7 +137,7 @@ class _SignedOutContent extends ConsumerWidget {
               child: FilledButton.icon(
                 onPressed: isLoading ? null : () => ref.read(authProvider.notifier).signInWithApple(),
                 icon: const Icon(Icons.apple, size: 20),
-                label: const Text('Continue with Apple'),
+                label: Text(l10n.continueWithApple),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   backgroundColor: theme.brightness == Brightness.dark ? Colors.white : Colors.black,
@@ -161,6 +164,7 @@ class _SignedInContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       children: [
@@ -188,14 +192,14 @@ class _SignedInContent extends ConsumerWidget {
         // Sign out
         ListTile(
           leading: Icon(Icons.logout, color: theme.colorScheme.outline),
-          title: const Text('Sign out'),
+          title: Text(l10n.signOut),
           onTap: () => _confirmSignOut(context, ref),
         ),
 
         // Delete account
         ListTile(
           leading: Icon(Icons.delete_forever_outlined, color: theme.colorScheme.error),
-          title: Text('Delete account', style: TextStyle(color: theme.colorScheme.error)),
+          title: Text(l10n.deleteAccount, style: TextStyle(color: theme.colorScheme.error)),
           onTap: () => _confirmDeleteAccount(context, ref),
         ),
       ],
@@ -203,19 +207,20 @@ class _SignedInContent extends ConsumerWidget {
   }
 
   void _confirmSignOut(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Sign out?'),
-        content: const Text('Your recipes stay on this device. You can sign back in anytime to re-enable sync.'),
+        title: Text(l10n.signOutConfirmTitle),
+        content: Text(l10n.signOutConfirmMessage),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
           FilledButton(
             onPressed: () {
               Navigator.pop(ctx);
               ref.read(authProvider.notifier).signOut();
             },
-            child: const Text('Sign out'),
+            child: Text(l10n.signOut),
           ),
         ],
       ),
@@ -223,17 +228,15 @@ class _SignedInContent extends ConsumerWidget {
   }
 
   void _confirmDeleteAccount(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         icon: Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.error, size: 32),
-        title: const Text('Delete account?'),
-        content: const Text(
-          'This permanently deletes your account and all synced data from our servers.\n\n'
-              'Recipes stored locally on this device will NOT be deleted.',
-        ),
+        title: Text(l10n.deleteAccountConfirmTitle),
+        content: Text(l10n.deleteAccountConfirmMessage),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             onPressed: () async {
@@ -241,11 +244,11 @@ class _SignedInContent extends ConsumerWidget {
               final success = await ref.read(authProvider.notifier).deleteAccount();
               if (!success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Failed to delete account. Please try again.')),
+                  SnackBar(content: Text(l10n.deleteAccountFailed)),
                 );
               }
             },
-            child: const Text('Delete permanently'),
+            child: Text(l10n.deletePermanently),
           ),
         ],
       ),
@@ -264,6 +267,7 @@ class _TierBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     final (label, color, icon) = switch (tier) {
       'premium' => ('Premium', Colors.amber.shade700, Icons.star),
@@ -283,10 +287,10 @@ class _TierBadge extends StatelessWidget {
         children: [
           Icon(icon, size: 18, color: color),
           const SizedBox(width: 8),
-          Text('$label Plan', style: TextStyle(fontWeight: FontWeight.w600, color: color, fontSize: 13)),
+          Text(l10n.planLabel(label), style: TextStyle(fontWeight: FontWeight.w600, color: color, fontSize: 13)),
           const Spacer(),
           if (tier == 'free' || tier == 'basic')
-            Text('Upgrade →', style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w500)),
+            Text(l10n.upgradeArrow, style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w500)),
         ],
       ),
     );

@@ -1074,14 +1074,7 @@
       }
     }
   },
-  "importingRecipes": "Importing {count} recipes...",
-  "@importingRecipes": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "importingRecipes": "Importing recipes...",
   "importedRecipesCount": "Imported {count} recipes",
   "@importedRecipesCount": {
     "placeholders": {
@@ -1586,5 +1579,763 @@
   "gradientBased": "Gradient-Based",
   "gradientBasedDescription": "Color gradient based on your theme",
   "startCooking": "Start Cooking",
-  "fontSizeLabel": "Font Size"
+  "fontSizeLabel": "Font Size",
+  "krogerLoginDenied": "Kroger login was denied: {error}",
+  "@krogerLoginDenied": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "krogerNoAuthCode": "No authorization code received from Kroger.",
+  "krogerConnected": "Kroger connected! You can now send items directly to your cart.",
+  "krogerConnectFailed": "Failed to connect Kroger. Please try again.",
+  "krogerConnecting": "Connecting to Kroger…",
+  "krogerExchanging": "Exchanging authorization...",
+  "krogerConnectedTitle": "Connected!",
+  "krogerConnectionFailed": "Connection Failed",
+  "goToShoppingList": "Go to Shopping List",
+  "tryAgain": "Try Again",
+  "skipForNow": "Skip for now",
+  "skipDuplicates": "Skip dupes",
+  "deselectAll": "Deselect all",
+  "duplicate": "Duplicate",
+  "recipesImported": "{count} {count, plural, =1{recipe} other{recipes}} imported",
+  "@recipesImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importCountRecipes": "Import {count} {count, plural, =1{recipe} other{recipes}}",
+  "@importCountRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productNotFound": "Product Not Found",
+  "barcodeNotFound": "No product found for barcode:\n{barcode}",
+  "@barcodeNotFound": {
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "manualEntryHint": "You can manually enter the product name.",
+  "scanAgain": "Scan Again",
+  "enterManually": "Enter Manually",
+  "enterProductName": "Enter Product Name",
+  "productName": "Product name",
+  "scanBarcode": "Scan Barcode",
+  "lookingUpProduct": "Looking up product...",
+  "pointCameraBarcode": "Point your camera at a product barcode",
+  "unknownProduct": "Unknown Product",
+  "nutritionPer100g": "Nutrition (per 100g)",
+  "findRecipesWithThis": "Find Recipes with This",
+  "scanAnother": "Scan Another",
+  "exportFormat": "Export Format",
+  "gotIt": "Got it",
+  "calendar": "Calendar",
+  "today": "Today",
+  "shareMealPlan": "Share meal plan",
+  "addWeekToShoppingList": "Add week to shopping list",
+  "clearThisWeek": "Clear this week?",
+  "clearWeekWarning": "This will remove all meals planned for this week. This cannot be undone.",
+  "goToToday": "Go to today",
+  "addAnotherMeal": "Add another meal",
+  "meal": "Meal",
+  "noMealsPlanned": "No meals planned",
+  "tapToAddMeal": "Tap + to add a meal for this day",
+  "addMeal": "Add meal",
+  "addToDay": "Add to {dayName}",
+  "@addToDay": {
+    "placeholders": {
+      "dayName": {
+        "type": "String"
+      }
+    }
+  },
+  "searchRecipes": "Search recipes...",
+  "noRecipesFound": "No recipes found",
+  "exitShoppingListGenerator": "Exit Shopping List Generator?",
+  "actionExit": "Exit",
+  "shoppingListGenerator": "Shopping List Generator",
+  "reviewAndAdd": "Review & Add ({count} items)",
+  "@reviewAndAdd": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addItemsToList": "Add {count} items to list",
+  "@addItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedItemsToShoppingList": "Added {count} items to shopping list",
+  "@addedItemsToShoppingList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "createNewList": "Create new list",
+  "listName": "List name",
+  "manage": "Manage",
+  "myPantry": "My Pantry",
+  "itemsAlwaysOnHand": "Items you always have on hand",
+  "whatToDelete": "What would you like to delete?",
+  "localData": "Local Data",
+  "localDataDesc": "Recipes, cookbooks, meal plans, shopping lists on this device",
+  "cloudData": "Cloud Data",
+  "cloudDataDesc": "Coming soon — Cloud Sync not yet available",
+  "allData": "All Data",
+  "allDataDesc": "Local data and settings — complete fresh start",
+  "permanentDeleteWarning": "This will permanently delete {scope}. This cannot be undone.",
+  "@permanentDeleteWarning": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "dataResetComplete": "Data Reset Complete",
+  "noThanks": "No thanks",
+  "importFailed": "Import failed: {error}",
+  "@importFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "yesAddThem": "Yes, add them",
+  "nutritionDisplay": "Nutrition Display",
+  "nutritionDisplaySubtitle": "Chart style, visible nutrients",
+  "storeIntegrations": "Store Integrations",
+  "instacart": "Instacart",
+  "kroger": "Kroger",
+  "connected": "Connected",
+  "setCustomApiKey": "Set custom API key",
+  "useOwnInstacartKey": "Use your own Instacart Connect key",
+  "instacartApiKey": "Instacart API Key",
+  "resetToDefaultKey": "Reset to default key",
+  "removeCustomKey": "Remove custom key, use built-in",
+  "signInToKroger": "Sign in to Kroger",
+  "connectToAddItems": "Connect to add items to your cart",
+  "setPreferredStore": "Set preferred store",
+  "searchByZipCode": "Search by zip code",
+  "disconnect": "Disconnect",
+  "apiKeySaved": "API key saved",
+  "findYourKrogerStore": "Find your Kroger store",
+  "enterZipCode": "Enter zip code",
+  "storeSet": "Store set: {name}",
+  "@storeSet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "menuImportSubtitle": "Instagram, TikTok, websites...",
+  "menuSyncToMobile": "Sync to mobile",
+  "menuSyncToDesktop": "Sync to desktop",
+  "menuTransferToPhone": "Transfer data to your phone",
+  "menuTransferToDevice": "Transfer data to another device",
+  "menuProfile": "Profile",
+  "menuProfileSubtitle": "View your stats and progress",
+  "menuAchievementsSubtitle": "Unlock rewards",
+  "menuCosmetics": "Cosmetics",
+  "menuCosmeticsSubtitle": "Customize your look",
+  "menuLeaderboardsSubtitle": "Compete with others",
+  "menuBossBattles": "Boss Battles",
+  "menuBossBattlesSubtitle": "Epic cooking challenges",
+  "menuImportRecipes": "Import Recipes",
+  "menuHelpSupport": "Help & Support",
+  "menuAppVersion": "Recipe Spellbook v{version}",
+  "@menuAppVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "menuShareApp": "Share Recipe Spellbook",
+  "menuShareSubtitle": "Invite your friends and family to start cooking together!",
+  "menuShareMessage": "Check out Recipe Spellbook - the best recipe app! https://recipespellbook.app",
+  "signIn": "Sign in",
+  "helpFromWebsite": "From a website",
+  "helpFromWebsiteDesc": "Tap + in any cookbook, then paste a recipe URL. Works with most recipe sites including AllRecipes, Food Network, NYT Cooking, and thousands more.",
+  "helpFromSocial": "From Instagram or TikTok",
+  "helpFromSocialDesc": "Copy the link to a recipe post, then tap + and paste it. Recipe Spellbook will extract the recipe from the page.",
+  "helpFromPhoto": "From a photo",
+  "helpFromPhotoDesc": "Take a photo of a recipe in a cookbook or magazine. Tap + then choose Image to scan it with OCR.",
+  "helpFromPdf": "From a PDF",
+  "helpFromPdfDesc": "Tap + then choose File to import a PDF recipe. The text will be extracted automatically.",
+  "helpFromText": "From text",
+  "helpFromTextDesc": "Copy recipe text from anywhere, tap + then Paste. Recipe Spellbook will detect ingredients and instructions.",
+  "helpFromPaprika": "From Paprika",
+  "helpFromPaprikaDesc": "In Paprika, go to Export and choose \"HTML\" format. Then tap + in Recipe Spellbook and import the HTML file.",
+  "helpFromOtherApps": "From other apps",
+  "helpFromOtherAppsDesc": "Most recipe apps can export as HTML or text. Export from your old app, then import the file here using the + button.",
+  "helpCloudSync": "Cloud Sync",
+  "helpCloudSyncDesc": "Subscribe to Cloud Sync to keep your recipes in sync across all your devices. Tap the sync button in the sidebar to sync manually.",
+  "accountTitle": "Account",
+  "signInToSync": "Sign in to sync recipes",
+  "signInSyncDesc": "Back up your recipes, sync across devices, and unlock premium features.",
+  "continueWithGoogle": "Continue with Google",
+  "continueWithApple": "Continue with Apple",
+  "signOut": "Sign out",
+  "signOutQuestion": "Sign out?",
+  "signOutDesc": "Your recipes stay on this device. You can sign back in anytime to re-enable sync.",
+  "deleteAccount": "Delete account",
+  "deleteAccountQuestion": "Delete account?",
+  "deleteAccountDesc": "This permanently deletes your account and all synced data from our servers.\n\nRecipes stored locally on this device will NOT be deleted.",
+  "deletePermanently": "Delete permanently",
+  "deleteAccountFailed": "Failed to delete account. Please try again.",
+  "signInToApp": "Sign in to Recipe Spellbook",
+  "signInSyncLong": "Sync your recipes across devices, unlock cloud backup, and access Pro features.",
+  "recipesStayOnDevice": "Your recipes stay on this device even without an account.",
+  "upgradeToPro": "Upgrade to Pro",
+  "subscriptionDot": "Subscription · {tier}",
+  "@subscriptionDot": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "affluentLabsPro": "Affluent Labs Pro",
+  "cancelledAccessUntil": "Cancelled — access until {date}",
+  "@cancelledAccessUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "lifetimeNeverExpires": "Lifetime — never expires",
+  "renewsDate": "Renews {date}",
+  "@renewsDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "manageSubscription": "Manage Subscription",
+  "tierPremium": "Premium",
+  "tierStandard": "Standard",
+  "tierBasic": "Basic",
+  "tierFree": "Free",
+  "tierPlan": "{tier} Plan",
+  "@tierPlan": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "upgradeArrow": "Upgrade →",
+  "syncNow": "Sync Now",
+  "syncing": "Syncing...",
+  "lastSynced": "Last synced {time}",
+  "@lastSynced": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "notYetSynced": "Not yet synced",
+  "cloudSyncSection": "CLOUD SYNC",
+  "noRecipesPlannedThisWeek": "No recipes planned this week",
+  "todayBadge": "TODAY",
+  "noCourseAssigned": "No Course Assigned",
+  "uncategorized": "Uncategorized",
+  "allRecipesHaveCourse": "All recipes have a course!",
+  "allRecipesCategorized": "All recipes are categorized!",
+  "greatJobOrganizing": "Great job organizing your recipes.",
+  "countOfTotal": "{count} of {total}",
+  "@countOfTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "tapToAssignCourse": "Tap to assign a course",
+  "tapToAssignCategory": "Tap to assign a category",
+  "deleteCountRecipes": "Delete {count} {count, plural, =1{recipe} other{recipes}}?",
+  "@deleteCountRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipesMovedToTrash": "{count} {count, plural, =1{recipe} other{recipes}} moved to trash",
+  "@countRecipesMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "setCourse": "Set Course",
+  "setCategory": "Set Category",
+  "courseSetForCount": "Course set for {count} {count, plural, =1{recipe} other{recipes}}",
+  "@courseSetForCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categorySetForCount": "Category set for {count} {count, plural, =1{recipe} other{recipes}}",
+  "@categorySetForCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipesFavorited": "{count} {count, plural, =1{recipe} other{recipes}} favorited",
+  "@countRecipesFavorited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkCourse": "Course",
+  "bulkCategory": "Category",
+  "bulkFavorite": "Favorite",
+  "aiImportTitle": "Import from AI",
+  "aiCopyPrompt": "Copy the prompt",
+  "aiCopyPromptSubtitle": "Paste this into ChatGPT, Claude, Gemini, or any AI along with your recipe.",
+  "aiCopied": "Copied!",
+  "aiCopyToClipboard": "Copy Prompt to Clipboard",
+  "aiPreviewPrompt": "Preview prompt",
+  "aiPasteOutput": "Paste the AI output",
+  "aiPasteSubtitle": "Paste the JSON the AI gave you, or import a .json file.",
+  "aiPasteFirst": "Paste or load JSON first.",
+  "aiFailedReadFile": "Failed to read file: {error}",
+  "@aiFailedReadFile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "aiUntitledRecipe": "Untitled Recipe",
+  "aiImporting": "Importing...",
+  "aiImportToCookbook": "Import to Cookbook",
+  "aiImportSuccess": "Recipe imported successfully!",
+  "aiPreviewImport": "Preview & Import",
+  "aiPromptCopied": "Prompt copied! Paste it into any AI with your recipe.",
+  "aiLoadJsonFile": "Load .json file",
+  "aiPaste": "Paste",
+  "aiTipsTitle": "Tips",
+  "aiTip1": "Works with ChatGPT, Claude, Gemini, Copilot, or any AI",
+  "aiTip2": "You can also take a photo of a recipe and paste it with the prompt",
+  "aiTip3": "The AI will convert handwritten, printed, or web recipes",
+  "aiTip4": "If the JSON has errors, try telling the AI to fix it",
+  "aiServingsLabel": "{count} servings",
+  "@aiServingsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "aiPrepLabel": "{minutes}m prep",
+  "@aiPrepLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "aiCookLabel": "{minutes}m cook",
+  "@aiCookLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "aiIngredientsCount": "Ingredients ({count})",
+  "@aiIngredientsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aiStepsCount": "Steps ({count})",
+  "@aiStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreAllWarnings": "Restore All Warnings",
+  "warningsRestoredForRecipe": "Warnings restored for recipe",
+  "restoreAllWarningsQuestion": "Restore All Warnings?",
+  "restoreAll": "Restore All",
+  "allWarningsRestored": "All warnings restored",
+  "dismissedWarnings": "{count} dismissed",
+  "@dismissedWarnings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restoringPurchases": "Restoring purchases...",
+  "restorePurchases": "Restore",
+  "compareAllPlans": "Compare all plans",
+  "oneTimeTab": "One-Time",
+  "subscriptionTab": "Subscription",
+  "payOnceKeepForever": "Pay once, keep forever",
+  "cloudSyncFeature": "Cloud Sync",
+  "cloudSyncPlusFeature": "Cloud Sync+",
+  "unableToLoadProducts": "Unable to load products. Try again.",
+  "noOfferingsAvailable": "No offerings available. Try again later.",
+  "purchaseFailed": "Purchase failed: {error}",
+  "@purchaseFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "hintProductExample": "e.g., Organic Pasta Sauce",
+  "previewPhoto": "Preview Photo",
+  "retake": "Retake",
+  "usePhoto": "Use Photo",
+  "takePhoto": "Take photo",
+  "chooseFromGallery": "Choose from gallery",
+  "removeImage": "Remove image",
+  "tipsPlaceholder": "Tips, variations, storage instructions...",
+  "totalCalories": "Total cal",
+  "caloriesPerServing": "Cal/serving",
+  "totalNutrition": "Total",
+  "linkRecipe": "Link Recipe",
+  "addIngredient": "Add Ingredient",
+  "searchRecipesToLink": "Search recipes to link...",
+  "linkToIngredient": "Link to \"{name}\"",
+  "@linkToIngredient": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "errorSavingRecipe": "Error saving recipe: {error}",
+  "@errorSavingRecipe": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteSelectedCount": "Delete {count}",
+  "@deleteSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "takeAPhoto": "Take a photo",
+  "defaultLabel": "Default",
+  "scaleRecipe": "Scale Recipe",
+  "scaleHint": "e.g., 2.5",
+  "badgePinned": "Pinned",
+  "badgeRecentlyViewed": "Recently Viewed",
+  "displayOptions": "Display Options",
+  "showMealPlan": "Show Meal Plan",
+  "showMealPlanSubtitle": "Display today's scheduled recipes",
+  "showPinnedRecipes": "Show Pinned Recipes",
+  "showPinnedSubtitle": "Display recipes you've pinned",
+  "showRecentHistory": "Show Recent History",
+  "showRecentSubtitle": "Display recently viewed recipes",
+  "versionLabel": "Version {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "measurementsUS": "cups, tablespoons, ounces, °F",
+  "measurementsMetric": "milliliters, grams, °C",
+  "defaultRecipesImported": "{count} default recipes imported!",
+  "@defaultRecipesImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingListGeneratorTitle": "Shopping List Generator",
+  "exitShoppingListGeneratorQuestion": "Exit Shopping List Generator?",
+  "reviewAndAddItems": "Review & Add ({count} items)",
+  "@reviewAndAddItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedTotalItemsToList": "Added {count} items to shopping list",
+  "@addedTotalItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scaleMultiplier": "{scale}x",
+  "@scaleMultiplier": {
+    "placeholders": {
+      "scale": {
+        "type": "String"
+      }
+    }
+  },
+  "printIngredients": "Ingredients",
+  "printInstructions": "Instructions",
+  "printNotes": "Notes",
+  "printPrep": "Prep: {minutes} min",
+  "@printPrep": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "printCook": "Cook: {minutes} min",
+  "@printCook": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "printFooter": "Printed from Recipe Spellbook",
+  "printPage": "Page {current} of {total}",
+  "@printPage": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "menuNavigation": "NAVIGATION",
+  "menuImport": "IMPORT",
+  "menuRpgMode": "RPG MODE",
+  "menuSocial": "SOCIAL",
+  "menuApp": "APP",
+  "historyCount": "History Count",
+  "historyCountSubtitle": "Maximum number of recent recipes to show",
+  "restoreAllWarningsDesc": "This will re-enable allergy warnings for all recipes. You will start seeing warnings again when viewing these recipes.",
+  "signInToContinue": "Sign in to continue",
+  "signInForPurchaseDesc": "An account is required before purchasing so your subscription stays linked across devices.",
+  "menuAchievements": "Achievements",
+  "menuLeaderboards": "Leaderboards",
+  "requiresPremium": "Requires Premium",
+  "deleteCount": "Delete {count}",
+  "@deleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tapToSelectPhoto": "Tap to select from gallery or camera",
+  "rating": "Rating",
+  "usUnits": "cups, tablespoons, ounces, °F",
+  "metricUnits": "milliliters, grams, °C",
+  "selectedCount": "{count} selected",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteRecipesConfirm": "Delete {count} recipe(s)?",
+  "@deleteRecipesConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courseSetForRecipes": "Course set for {count} recipe(s)",
+  "@courseSetForRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@recipesFavorited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeImportedSuccess": "Recipe imported successfully!",
+  "promptCopied": "Prompt copied! Paste it into any AI with your recipe.",
+  "importFromAI": "Import from AI",
+  "paste": "Paste",
+  "previewAndImport": "Preview & Import",
+  "signInDescription": "Back up your recipes, sync across devices, and unlock premium features.",
+  "signOutConfirmTitle": "Sign out?",
+  "signOutConfirmMessage": "Your recipes stay on this device. You can sign back in anytime to re-enable sync.",
+  "deleteAccountConfirmTitle": "Delete account?",
+  "deleteAccountConfirmMessage": "This permanently deletes your account and all synced data from our servers.\n\nRecipes stored locally on this device will NOT be deleted.",
+  "planLabel": "{label} Plan",
+  "@planLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "permanentlyDeleteWarning": "This will permanently delete {scope}. This cannot be undone.",
+  "@permanentlyDeleteWarning": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "recipesMovedToTrash": "{count} recipe(s) moved to trash",
+  "@recipesMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipesFavorited": "{count} recipe(s) favorited",
+  "upgradeRecipeSpellbook": "Upgrade Recipe Spellbook",
+  "choosePlanSubtitle": "Choose the plan that fits your kitchen",
+  "premiumInfoNotice": "Premium is a one-time purchase that enhances your free experience. It does not include family sharing or advanced cloud features — see Subscriptions for those.",
+  "bestValue": "BEST VALUE",
+  "billedMonthly": "Billed monthly",
+  "save16Yearly": "Save 16% — only $2.50/mo",
+  "save16Badge": "SAVE 16%",
+  "save17Yearly": "Save 17% — only $4.17/mo",
+  "subscriptionsIncludePremium": "All subscriptions include everything in Premium.",
+  "monthly": "Monthly",
+  "yearly": "Yearly",
+  "purchasePremiumCta": "Purchase Premium — $6.99",
+  "subscribeCloudSyncMonthlyCta": "Subscribe — $2.99/mo",
+  "subscribeCloudSyncYearlyCta": "Subscribe — $29.99/yr",
+  "subscribeCloudSyncPlusMonthlyCta": "Subscribe — $4.99/mo",
+  "subscribeCloudSyncPlusYearlyCta": "Subscribe — $49.99/yr",
+  "signInRequiredBeforePurchase": "Sign-in required before purchase",
+  "terms": "Terms",
+  "privacy": "Privacy",
+  "comparePlans": "Compare Plans",
+  "featureCloudSyncPersonal": "Cloud sync (personal)",
+  "featurePhotosOnSteps": "Photos on steps",
+  "featurePhotoStorage250": "250 MB photo storage (~500 photos)",
+  "featureRpgCosmeticsStarter": "RPG cosmetics starter pack",
+  "featureSupporterBadge": "Premium supporter badge",
+  "featureExtraPolish": "Extra UI polish & QoL features",
+  "featureFamilySharing5": "Family sharing (5 members)",
+  "featurePhotoStorage1gb": "1 GB photo storage (~2,000 photos)",
+  "featureSharedLists": "Shared shopping lists",
+  "featureSharedCookbooks": "Shared cookbooks",
+  "featureSharedMealPlan": "Shared meal planning",
+  "featureEncryptedBackups": "Encrypted backups + version history",
+  "featureFamilySharing10": "Family sharing (10 members)",
+  "featurePhotoStorage5gb": "5 GB photo storage (~10,000 photos)",
+  "featureExtendedVersionHistory": "Extended version history",
+  "featurePrioritySync": "Priority sync performance",
+  "featureFutureAdvanced": "Future advanced features included",
+  "tierCloudSync": "Cloud\nSync",
+  "tierCloudSyncPlus": "Cloud\nSync+",
+  "comparePrice": "Price",
+  "priceFree": "$0",
+  "pricePremium": "$6.99\nonce",
+  "priceCloudSync": "$2.99\n/mo",
+  "priceCloudSyncPlus": "$4.99\n/mo",
+  "compareDeviceTransfer": "Device transfer",
+  "qrCode": "QR code",
+  "cloud": "Cloud",
+  "comparePhotoStorage": "Photo storage",
+  "compareStepPhotos": "Step photos",
+  "compareFamilySharing": "Family sharing",
+  "compareSharedLists": "Shared lists",
+  "compareSharedCookbooks": "Shared cookbooks",
+  "compareSharedMealPlan": "Shared meal plan",
+  "compareBackups": "Backups",
+  "compareVersionHistory": "Version history",
+  "light": "Light",
+  "extended": "Extended",
+  "compareRpgCosmetics": "RPG cosmetics",
+  "basic": "Basic",
+  "starterPack": "Starter\npack",
+  "compareSupporterBadge": "Supporter badge",
+  "printOf": "of",
+  "printRecipe": "Print",
+  "stackedLayout": "Stacked Layout",
+  "tabbedLayout": "Tabbed Layout",
+  "printLabelIngredients": "Ingredients",
+  "printLabelInstructions": "Instructions",
+  "printLabelNotes": "Notes",
+  "printLabelPrep": "Prep",
+  "printLabelCook": "Cook",
+  "printLabelFooter": "Printed from Recipe Spellbook",
+  "printLabelPage": "Page",
+  "printLabelOf": "of",
+  "smallerText": "Smaller text",
+  "largerText": "Larger text",
+  "textSize": "Text Size",
+  "ingredientPreview": "Ingredient Preview",
+  "resetToDefault": "Reset to Default",
+  "smartImportSuccess": "Recipe re-parsed by AI",
+  "smartImportSuccessWithRemaining": "Recipe re-parsed by AI • {remaining} imports left this month",
+  "@smartImportSuccessWithRemaining": { "placeholders": { "remaining": { "type": "int" } } },
+  "smartImportLimitTitle": "Smart Import Limit Reached",
+  "smartImportLimitMessage": "You''ve used all {limit} smart imports this month.",
+  "@smartImportLimitMessage": { "placeholders": { "limit": { "type": "int" } } },
+  "smartImportUpgradeHint": "Upgrade to Premium for 200 imports/month.",
+  "smartImportParsing": "AI is parsing...",
+  "smartImportFix": "Fix with Smart Import ✨",
+  "smartImportRemaining": "{remaining} of {limit} smart imports remaining this month",
+  "@smartImportRemaining": { "placeholders": { "remaining": { "type": "int" }, "limit": { "type": "int" } } },
+  "smartImportHintTitle": "Import not looking right?",
+  "smartImportHintSubtitle": "Subscribe for Smart Import — AI-powered recipe parsing",
+  "learnMore": "Learn more",
+  "retry": "Retry",
+  "upgrade": "Upgrade",
+  "cookingMode": "Cooking Mode",
+  "mealTypeDessert": "Dessert"
 }

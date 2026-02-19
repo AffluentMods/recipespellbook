@@ -60,6 +60,7 @@ class _UncategorizedRecipesScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider);
     final cookbookId = settings.currentCookbookId ?? 'starter';
     final recipeDao = ref.watch(recipeDaoProvider);
@@ -75,14 +76,14 @@ class _UncategorizedRecipesScreenState
           icon: const Icon(Icons.close),
           onPressed: _exitSelection,
         ),
-        title: Text('${_selectedIds.length} selected'),
+        title: Text(l10n.selectedCount(_selectedIds.length)),
         actions: [
           TextButton(
             onPressed: () {
               // Get current visible recipes from stream
               // selectAll is called from the StreamBuilder below
             },
-            child: const Text('Select all'),
+            child: Text(l10n.selectAll),
           ),
         ],
       )
@@ -97,11 +98,31 @@ class _UncategorizedRecipesScreenState
           }
 
           final allRecipes = snapshot.data ?? [];
+
+          // Match the home screen logic: "uncategorized" means doesn't match
+          // any known course AND doesn't match any known category
+          final knownCourseIds = taxonomy.CourseData.courses.map((c) => c.id).toSet();
+          final knownCourseNames = taxonomy.CourseData.courses.map((c) => c.name.toLowerCase()).toSet();
+          final knownCategoryIds = taxonomy.CategoryData.categories.map((c) => c.id).toSet();
+          final knownCategoryNames = taxonomy.CategoryData.categories.map((c) => c.name.toLowerCase()).toSet();
+
+          bool matchesCourse(String? courseId) {
+            if (courseId == null || courseId.isEmpty) return false;
+            final lower = courseId.toLowerCase();
+            return knownCourseIds.contains(lower) || knownCourseNames.contains(lower);
+          }
+
+          bool matchesCategory(String? categoryId) {
+            if (categoryId == null || categoryId.isEmpty) return false;
+            final lower = categoryId.toLowerCase();
+            return knownCategoryIds.contains(lower) || knownCategoryNames.contains(lower);
+          }
+
           final uncategorized = allRecipes.where((r) {
             if (isCourse) {
-              return r.courseId == null || r.courseId!.isEmpty;
+              return !matchesCourse(r.courseId);
             } else {
-              return r.categoryId == null || r.categoryId!.isEmpty;
+              return !matchesCourse(r.courseId) && !matchesCategory(r.categoryId);
             }
           }).toList();
 
@@ -154,7 +175,7 @@ class _UncategorizedRecipesScreenState
                         const Spacer(),
                         TextButton(
                           onPressed: () => _selectAll(uncategorized),
-                          child: const Text('Select all'),
+                          child: Text(l10n.selectAll),
                         ),
                       ],
                     ),
@@ -214,22 +235,23 @@ class _UncategorizedRecipesScreenState
 
   Future<void> _bulkDelete(
       BuildContext context, WidgetRef ref, List<Recipe> allRecipes) async {
+    final l10n = AppLocalizations.of(context)!;
     final count = _selectedIds.length;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         icon: const Icon(Icons.delete_outline, size: 32, color: Colors.red),
-        title: Text('Delete $count recipe${count == 1 ? '' : 's'}?'),
+        title: Text(l10n.deleteRecipesConfirm(count)),
         content: const Text(
             'Recipes will be moved to trash. You can restore them later.'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+              child: Text(l10n.actionCancel)),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(l10n.actionDelete),
           ),
         ],
       ),
@@ -244,13 +266,14 @@ class _UncategorizedRecipesScreenState
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$count recipe${count == 1 ? '' : 's'} moved to trash')),
+        SnackBar(content: Text(l10n.recipesMovedToTrash(count))),
       );
       _exitSelection();
     }
   }
 
   Future<void> _bulkSetCourse(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final translator = TaxonomyTranslator.of(context);
     final courses = taxonomy.CourseData.courses;
 
@@ -262,7 +285,7 @@ class _UncategorizedRecipesScreenState
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text('Set Course',
+              child: Text(l10n.setCourse,
                   style: Theme.of(ctx)
                       .textTheme
                       .titleMedium
@@ -295,13 +318,14 @@ class _UncategorizedRecipesScreenState
     if (mounted) {
       final count = _selectedIds.length;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Course set for $count recipe${count == 1 ? '' : 's'}')),
+        SnackBar(content: Text(l10n.courseSetForRecipes(count))),
       );
       _exitSelection();
     }
   }
 
   Future<void> _bulkSetCategory(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final translator = TaxonomyTranslator.of(context);
     final categories = taxonomy.CategoryData.categories;
 
@@ -313,7 +337,7 @@ class _UncategorizedRecipesScreenState
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text('Set Category',
+              child: Text(l10n.setCategory,
                   style: Theme.of(ctx)
                       .textTheme
                       .titleMedium
@@ -355,6 +379,7 @@ class _UncategorizedRecipesScreenState
   }
 
   Future<void> _bulkFavorite(WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final dao = ref.read(recipeDaoProvider);
     for (final id in _selectedIds) {
       await dao.toggleFavorite(id, true);
@@ -362,7 +387,7 @@ class _UncategorizedRecipesScreenState
     if (mounted) {
       final count = _selectedIds.length;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$count recipe${count == 1 ? '' : 's'} favorited')),
+        SnackBar(content: Text(l10n.recipesFavorited(count))),
       );
       _exitSelection();
     }

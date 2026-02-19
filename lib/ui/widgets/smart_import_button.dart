@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/smart_import_service.dart';
 
 /// A widget that shows the "Fix with Smart Import" button on the import preview.
@@ -91,7 +92,7 @@ class _SmartImportButtonState extends ConsumerState<SmartImportButton> {
       );
     } else {
       setState(() => _loading = false);
-      _showError('No source material to send. The original import data is missing.');
+      _showError('No source material to send.');
       return;
     }
 
@@ -101,6 +102,7 @@ class _SmartImportButtonState extends ConsumerState<SmartImportButton> {
     if (result.success && result.recipe != null) {
       setState(() => _done = true);
       widget.onResult(result.recipe!);
+      final l10n = AppLocalizations.of(context)!;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -110,8 +112,9 @@ class _SmartImportButtonState extends ConsumerState<SmartImportButton> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Recipe re-parsed by AI'
-                      '${result.remaining > 0 ? ' • ${result.remaining} imports left this month' : ''}',
+                  result.remaining > 0
+                      ? l10n.smartImportSuccessWithRemaining(result.remaining)
+                      : l10n.smartImportSuccess,
                 ),
               ),
             ],
@@ -152,31 +155,32 @@ class _SmartImportButtonState extends ConsumerState<SmartImportButton> {
   }
 
   void _showUpgradeDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         icon: const Icon(Icons.auto_awesome, size: 40, color: Color(0xFFE8A860)),
-        title: const Text('Smart Import Limit Reached'),
+        title: Text(l10n.smartImportLimitTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'You\'ve used all ${_usage?.limit ?? 0} smart imports this month.',
+              l10n.smartImportLimitMessage(_usage?.limit ?? 0),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             if (_usage?.tier == 'standard')
-              const Text(
-                'Upgrade to Premium for 200 imports/month.',
+              Text(
+                l10n.smartImportUpgradeHint,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w500),
+                style: const TextStyle(fontWeight: FontWeight.w500),
               ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK'),
+            child: Text(l10n.actionOk),
           ),
           if (_usage?.tier == 'standard')
             FilledButton(
@@ -184,7 +188,7 @@ class _SmartImportButtonState extends ConsumerState<SmartImportButton> {
                 Navigator.pop(ctx);
                 // TODO: Navigate to subscription/upgrade screen
               },
-              child: const Text('Upgrade'),
+              child: Text(l10n.upgrade),
             ),
         ],
       ),
@@ -194,6 +198,7 @@ class _SmartImportButtonState extends ConsumerState<SmartImportButton> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isAvailable = SmartImportService.instance.isAuthenticated;
     final hasSource = widget.sourceText != null ||
         widget.sourceUrl != null ||
@@ -228,7 +233,7 @@ class _SmartImportButtonState extends ConsumerState<SmartImportButton> {
                 setState(() => _done = false);
                 _runSmartImport();
               },
-              child: const Text('Retry', style: TextStyle(fontSize: 12)),
+              child: Text(l10n.retry, style: const TextStyle(fontSize: 12)),
             ),
           ],
         ),
@@ -252,8 +257,8 @@ class _SmartImportButtonState extends ConsumerState<SmartImportButton> {
                   : const Icon(Icons.auto_awesome, size: 18),
               label: Text(
                 _loading
-                    ? 'AI is parsing...'
-                    : 'Fix with Smart Import ✨',
+                    ? l10n.smartImportParsing
+                    : l10n.smartImportFix,
               ),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -272,7 +277,7 @@ class _SmartImportButtonState extends ConsumerState<SmartImportButton> {
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                '${_usage!.remaining} of ${_usage!.limit} smart imports remaining this month',
+                l10n.smartImportRemaining(_usage!.remaining, _usage!.limit),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.outline,
                   fontSize: 11,
@@ -292,6 +297,7 @@ class _SubscribeHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(12),
@@ -309,13 +315,13 @@ class _SubscribeHint extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Import not looking right?',
+                  l10n.smartImportHintTitle,
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
-                  'Subscribe for Smart Import — AI-powered recipe parsing',
+                  l10n.smartImportHintSubtitle,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.outline,
                     fontSize: 11,
@@ -332,7 +338,7 @@ class _SubscribeHint extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               minimumSize: Size.zero,
             ),
-            child: const Text('Learn more', style: TextStyle(fontSize: 12)),
+            child: Text(l10n.learnMore, style: const TextStyle(fontSize: 12)),
           ),
         ],
       ),

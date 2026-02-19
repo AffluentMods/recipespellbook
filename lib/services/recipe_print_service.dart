@@ -16,6 +16,7 @@ class RecipePrintService {
     required List<Step> steps, // This now refers to Database Step
     double scale = 1.0,
     bool includeImage = true,
+    required Map<String, String> labels,
   }) async {
     final pdf = pw.Document();
 
@@ -38,7 +39,7 @@ class RecipePrintService {
         pageFormat: PdfPageFormat.letter,
         margin: const pw.EdgeInsets.all(40),
         header: (context) => _buildHeader(recipe),
-        footer: (context) => _buildFooter(context),
+        footer: (context) => _buildFooter(context, labels),
         build: (context) => [
           // Image
           if (recipeImage != null) ...[
@@ -55,7 +56,7 @@ class RecipePrintService {
           ],
 
           // Meta info row
-          _buildMetaRow(recipe),
+          _buildMetaRow(recipe, labels),
           pw.SizedBox(height: 8),
 
           // Description
@@ -72,16 +73,16 @@ class RecipePrintService {
           ],
 
           // Ingredients
-          _buildIngredientsSection(ingredients, scale),
+          _buildIngredientsSection(ingredients, scale, labels),
           pw.SizedBox(height: 20),
 
           // Instructions
-          _buildInstructionsSection(steps),
+          _buildInstructionsSection(steps, labels),
 
           // Notes
           if (recipe.notes != null && recipe.notes!.isNotEmpty) ...[
             pw.SizedBox(height: 20),
-            _buildNotesSection(recipe.notes!),
+            _buildNotesSection(recipe.notes!, labels),
           ],
         ],
       ),
@@ -148,7 +149,7 @@ class RecipePrintService {
     );
   }
 
-  static pw.Widget _buildMetaRow(Recipe recipe) {
+  static pw.Widget _buildMetaRow(Recipe recipe, Map<String, String> labels) {
     final items = <pw.Widget>[];
 
     // Total time
@@ -164,12 +165,12 @@ class RecipePrintService {
 
     // Prep time
     if (recipe.prepTimeMinutes != null) {
-      items.add(_buildMetaItem('🔪', 'Prep: ${recipe.prepTimeMinutes} min'));
+      items.add(_buildMetaItem('🔪', '${labels['prep'] ?? 'Prep'}: ${recipe.prepTimeMinutes} min'));
     }
 
     // Cook time
     if (recipe.cookTimeMinutes != null) {
-      items.add(_buildMetaItem('🔥', 'Cook: ${recipe.cookTimeMinutes} min'));
+      items.add(_buildMetaItem('🔥', '${labels['cook'] ?? 'Cook'}: ${recipe.cookTimeMinutes} min'));
     }
 
     if (items.isEmpty) return pw.SizedBox.shrink();
@@ -192,14 +193,14 @@ class RecipePrintService {
     );
   }
 
-  static pw.Widget _buildIngredientsSection(List<Ingredient> ingredients, double scale) {
+  static pw.Widget _buildIngredientsSection(List<Ingredient> ingredients, double scale, Map<String, String> labels) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Row(
           children: [
             pw.Text(
-              'Ingredients',
+              labels['ingredients'] ?? 'Ingredients',
               style: pw.TextStyle(
                 fontSize: 16,
                 fontWeight: pw.FontWeight.bold,
@@ -269,12 +270,12 @@ class RecipePrintService {
     );
   }
 
-  static pw.Widget _buildInstructionsSection(List<Step> steps) {
+  static pw.Widget _buildInstructionsSection(List<Step> steps, Map<String, String> labels) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text(
-          'Instructions',
+          labels['instructions'] ?? 'Instructions',
           style: pw.TextStyle(
             fontSize: 16,
             fontWeight: pw.FontWeight.bold,
@@ -322,7 +323,7 @@ class RecipePrintService {
     );
   }
 
-  static pw.Widget _buildNotesSection(String notes) {
+  static pw.Widget _buildNotesSection(String notes, Map<String, String> labels) {
     return pw.Container(
       padding: const pw.EdgeInsets.all(12),
       decoration: pw.BoxDecoration(
@@ -338,7 +339,7 @@ class RecipePrintService {
               pw.Text('📝', style: const pw.TextStyle(fontSize: 12)),
               pw.SizedBox(width: 4),
               pw.Text(
-                'Notes',
+                labels['notes'] ?? 'Notes',
                 style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
               ),
             ],
@@ -350,12 +351,12 @@ class RecipePrintService {
     );
   }
 
-  static pw.Widget _buildFooter(pw.Context context) {
+  static pw.Widget _buildFooter(pw.Context context, Map<String, String> labels) {
     return pw.Container(
       alignment: pw.Alignment.centerRight,
       margin: const pw.EdgeInsets.only(top: 8),
       child: pw.Text(
-        'Printed from Recipe Spellbook • Page ${context.pageNumber} of ${context.pagesCount}',
+        '${labels['footer'] ?? 'Printed from Recipe Spellbook'} • ${labels['page'] ?? 'Page'} ${context.pageNumber} ${labels['of'] ?? 'of'} ${context.pagesCount}',
         style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
       ),
     );

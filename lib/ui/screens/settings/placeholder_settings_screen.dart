@@ -12,6 +12,7 @@ class PlaceholderSettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isDark = theme.brightness == Brightness.dark;
 
     // Use recipe mode as the unified mode (both are always in sync)
@@ -19,14 +20,14 @@ class PlaceholderSettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Image Placeholders'),
+        title: Text(l10n.imagePlaceholders),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // Description
           Text(
-            'Choose what to display for recipes and cookbooks that don\'t have images.',
+            l10n.placeholderDescription,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.outline,
             ),
@@ -35,8 +36,8 @@ class PlaceholderSettingsScreen extends ConsumerWidget {
 
           // ============ DEFAULT IMAGES ============
           _PlaceholderOptionCard(
-            title: 'Default images',
-            description: 'Displays default app artwork',
+            title: l10n.defaultImages,
+            description: l10n.defaultImagesDescription,
             isSelected: currentMode == PlaceholderImageMode.custom,
             onTap: () => ref.read(settingsProvider.notifier)
                 .setPlaceholderMode(PlaceholderImageMode.custom),
@@ -48,8 +49,8 @@ class PlaceholderSettingsScreen extends ConsumerWidget {
 
           // ============ THEME-BASED ============
           _PlaceholderOptionCard(
-            title: 'Theme-based',
-            description: 'Art that changes with your color theme',
+            title: l10n.themeBased,
+            description: l10n.themeBasedDescription,
             isSelected: currentMode == PlaceholderImageMode.theme,
             onTap: () => ref.read(settingsProvider.notifier)
                 .setPlaceholderMode(PlaceholderImageMode.theme),
@@ -61,8 +62,8 @@ class PlaceholderSettingsScreen extends ConsumerWidget {
 
           // ============ GRADIENT-BASED ============
           _PlaceholderOptionCard(
-            title: 'Gradient-based',
-            description: 'Color gradient based on your theme',
+            title: l10n.gradientBased,
+            description: l10n.gradientBasedDescription,
             isSelected: currentMode == PlaceholderImageMode.gradient,
             onTap: () => ref.read(settingsProvider.notifier)
                 .setPlaceholderMode(PlaceholderImageMode.gradient),

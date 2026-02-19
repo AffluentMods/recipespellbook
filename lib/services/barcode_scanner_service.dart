@@ -216,7 +216,7 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Product Not Found'),
+        title: Text(l10n.productNotFound),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -225,7 +225,7 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen> {
             Text('No product found for barcode:\n$barcode'),
             const SizedBox(height: 8),
             Text(
-              'You can manually enter the product name.',
+              l10n.manualEntryHint,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -236,14 +236,14 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen> {
               Navigator.pop(ctx);
               setState(() => _lastScannedBarcode = null);
             },
-            child: const Text('Scan Again'),
+            child: Text(l10n.scanAgain),
           ),
           FilledButton(
             onPressed: () {
               Navigator.pop(ctx);
               _showManualEntryDialog(barcode);
             },
-            child: const Text('Enter Manually'),
+            child: Text(l10n.enterManually),
           ),
         ],
       ),
@@ -251,17 +251,18 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen> {
   }
 
   void _showManualEntryDialog(String barcode) {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Enter Product Name'),
+        title: Text(l10n.enterProductName),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Product name',
-            hintText: 'e.g., Organic Pasta Sauce',
+          decoration: InputDecoration(
+            labelText: l10n.productName,
+            hintText: l10n.hintProductExample,
           ),
           autofocus: true,
           textCapitalization: TextCapitalization.words,
@@ -269,7 +270,7 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.actionCancel),
           ),
           FilledButton(
             onPressed: () {
@@ -279,7 +280,7 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen> {
               }
               setState(() => _lastScannedBarcode = null);
             },
-            child: const Text('Add'),
+            child: Text(l10n.actionAdd),
           ),
         ],
       ),
@@ -303,11 +304,12 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scan Barcode'),
+        title: Text(l10n.scanBarcode),
         actions: [
           IconButton(
             icon: Icon(_torchEnabled ? Icons.flash_on : Icons.flash_off),
@@ -333,14 +335,14 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen> {
           if (_isProcessing)
             Container(
               color: Colors.black54,
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CircularProgressIndicator(color: Colors.white),
                     SizedBox(height: 16),
                     Text(
-                      'Looking up product...',
+                      l10n.lookingUpProduct,
                       style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ],
@@ -356,7 +358,7 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               child: Text(
-                'Point your camera at a product barcode',
+                l10n.pointCameraBarcode,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: Colors.white,
@@ -473,6 +475,7 @@ class _ProductInfoSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return DraggableScrollableSheet(
@@ -548,7 +551,7 @@ class _ProductInfoSheet extends StatelessWidget {
                                   ),
                                 ),
                               Text(
-                                product.name ?? 'Unknown Product',
+                                product.name ?? l10n.unknownProduct,
                                 style: theme.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -573,7 +576,7 @@ class _ProductInfoSheet extends StatelessWidget {
                     // Nutrition info
                     if (product.nutrition != null) ...[
                       Text(
-                        'Nutrition (per 100g)',
+                        l10n.nutritionPer100g,
                         style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 12),
@@ -582,13 +585,13 @@ class _ProductInfoSheet extends StatelessWidget {
                         runSpacing: 8,
                         children: [
                           if (product.nutrition!['calories'] != null)
-                            _NutritionChip(label: 'Calories', value: '${product.nutrition!['calories']?.round()}'),
+                            _NutritionChip(label: l10n.nutritionCalories, value: '${product.nutrition!['calories']?.round()}'),
                           if (product.nutrition!['protein'] != null)
-                            _NutritionChip(label: 'Protein', value: '${product.nutrition!['protein']?.round()}g'),
+                            _NutritionChip(label: l10n.nutritionProtein, value: '${product.nutrition!['protein']?.round()}g'),
                           if (product.nutrition!['carbs'] != null)
-                            _NutritionChip(label: 'Carbs', value: '${product.nutrition!['carbs']?.round()}g'),
+                            _NutritionChip(label: l10n.nutritionCarbs, value: '${product.nutrition!['carbs']?.round()}g'),
                           if (product.nutrition!['fat'] != null)
-                            _NutritionChip(label: 'Fat', value: '${product.nutrition!['fat']?.round()}g'),
+                            _NutritionChip(label: l10n.nutritionFat, value: '${product.nutrition!['fat']?.round()}g'),
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -598,7 +601,7 @@ class _ProductInfoSheet extends StatelessWidget {
                     FilledButton.icon(
                       onPressed: onAddToShopping,
                       icon: const Icon(Icons.add_shopping_cart),
-                      label: const Text('Add to Shopping List'),
+                      label: Text(l10n.addToShoppingList),
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
                       ),
@@ -607,7 +610,7 @@ class _ProductInfoSheet extends StatelessWidget {
                     OutlinedButton.icon(
                       onPressed: onSearchRecipes,
                       icon: const Icon(Icons.search),
-                      label: const Text('Find Recipes with This'),
+                      label: Text(l10n.findRecipesWithThis),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
                       ),
@@ -615,7 +618,7 @@ class _ProductInfoSheet extends StatelessWidget {
                     const SizedBox(height: 12),
                     TextButton(
                       onPressed: onScanAnother,
-                      child: const Text('Scan Another'),
+                      child: Text(l10n.scanAnother),
                     ),
                   ],
                 ),

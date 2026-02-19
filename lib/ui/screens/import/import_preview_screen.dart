@@ -5,17 +5,22 @@ import '../../../database/database.dart';
 import '../../../models/imported_recipe.dart';
 import '../../../providers/database_provider.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../widgets/smart_import_button.dart';
 
 /// Full-screen import preview — lets users review, select/deselect, and spot
 /// duplicates before committing recipes to a cookbook.
 class ImportPreviewScreen extends ConsumerStatefulWidget {
   final List<ImportedRecipe> recipes;
   final String cookbookId;
+  final String? sourceText;
+  final String? sourceUrl;
 
   const ImportPreviewScreen({
     super.key,
     required this.recipes,
     required this.cookbookId,
+    this.sourceText,
+    this.sourceUrl,
   });
 
   @override
@@ -23,6 +28,7 @@ class ImportPreviewScreen extends ConsumerStatefulWidget {
 }
 
 class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
+  late List<ImportedRecipe> _recipes;
   late List<bool> _selected;
   late List<bool> _expanded;
   Set<String> _existingTitles = {};
@@ -34,8 +40,9 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
   @override
   void initState() {
     super.initState();
-    _selected = List.filled(widget.recipes.length, true);
-    _expanded = List.filled(widget.recipes.length, false);
+    _recipes = List.from(_recipes);
+    _selected = List.filled(_recipes.length, true);
+    _expanded = List.filled(_recipes.length, false);
     _checkForDuplicates();
   }
 
@@ -47,8 +54,8 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
       _checkedDuplicates = true;
 
       // Auto-deselect exact duplicates
-      for (var i = 0; i < widget.recipes.length; i++) {
-        if (_isDuplicate(widget.recipes[i].title)) {
+      for (var i = 0; i < _recipes.length; i++) {
+        if (_isDuplicate(_recipes[i].title)) {
           _selected[i] = false;
         }
       }
@@ -62,7 +69,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
   int get _selectedCount => _selected.where((s) => s).length;
   int get _duplicateCount {
     if (!_checkedDuplicates) return 0;
-    return widget.recipes.where((r) => _isDuplicate(r.title)).length;
+    return _recipes.where((r) => _isDuplicate(r.title)).length;
   }
 
   void _toggleAll(bool value) {
@@ -76,15 +83,16 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
   void _selectNonDuplicates() {
     setState(() {
       for (var i = 0; i < _selected.length; i++) {
-        _selected[i] = !_isDuplicate(widget.recipes[i].title);
+        _selected[i] = !_isDuplicate(_recipes[i].title);
       }
     });
   }
 
   Future<void> _importSelected() async {
+    final l10n = AppLocalizations.of(context)!;
     final selectedRecipes = <ImportedRecipe>[];
-    for (var i = 0; i < widget.recipes.length; i++) {
-      if (_selected[i]) selectedRecipes.add(widget.recipes[i]);
+    for (var i = 0; i < _recipes.length; i++) {
+      if (_selected[i]) selectedRecipes.add(_recipes[i]);
     }
     if (selectedRecipes.isEmpty) return;
 
@@ -148,7 +156,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
           content: Text('$_importedCount ${_importedCount == 1 ? 'recipe' : 'recipes'} imported'),
           duration: const Duration(seconds: 3),
           action: SnackBarAction(
-            label: 'View',
+            label: l10n.actionView,
             onPressed: () {
               // Already on the cookbook screen after pop
             },
@@ -165,14 +173,14 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Import Preview'),
+        title: Text(l10n.importPreview),
         centerTitle: true,
         actions: [
           if (_duplicateCount > 0)
             TextButton.icon(
               onPressed: _selectNonDuplicates,
               icon: Icon(Icons.filter_alt_outlined, size: 18),
-              label: Text('Skip dupes'),
+              label: Text(l10n.skipDuplicates),
             ),
         ],
       ),
@@ -182,11 +190,11 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
             children: [
               // ── Summary bar ──
               _SummaryBar(
-                total: widget.recipes.length,
+                total: _recipes.length,
                 selected: _selectedCount,
                 duplicates: _duplicateCount,
                 checkedDuplicates: _checkedDuplicates,
-                allSelected: _selectedCount == widget.recipes.length,
+                allSelected: _selectedCount == _recipes.length,
                 onToggleAll: _toggleAll,
               ),
 
@@ -194,9 +202,9 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                  itemCount: widget.recipes.length,
+                  itemCount: _recipes.length,
                   itemBuilder: (context, index) {
-                    final recipe = widget.recipes[index];
+                    final recipe = _recipes[index];
                     final isDupe = _checkedDuplicates && _isDuplicate(recipe.title);
 
                     return _RecipePreviewCard(
@@ -205,6 +213,31 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                       isSelected: _selected[index],
                       isExpanded: _expanded[index],
                       isDuplicate: isDupe,
+                      sourceText: widget.sourceText,
+                      sourceUrl: recipe.sourceUrl ?? widget.sourceUrl,
+                      onSmartImportResult: (result) {
+                        setState(() {
+                          _recipes[index] = ImportedRecipe(
+                            title: result['title'] as String? ?? _recipes[index].title,
+                            description: result['description'] as String? ?? _recipes[index].description,
+                            servings: result['servings']?.toString() ?? _recipes[index].servings,
+                            prepTimeMinutes: result['prepTimeMinutes'] as int? ?? _recipes[index].prepTimeMinutes,
+                            cookTimeMinutes: result['cookTimeMinutes'] as int? ?? _recipes[index].cookTimeMinutes,
+                            ingredients: (result['ingredients'] as List?)?.cast<String>() ?? _recipes[index].ingredients,
+                            instructions: (result['instructions'] as List?)?.cast<String>() ?? _recipes[index].instructions,
+                            sourceUrl: _recipes[index].sourceUrl,
+                            sourceApp: _recipes[index].sourceApp,
+                            suggestedCourse: result['course'] as String? ?? _recipes[index].suggestedCourse,
+                            suggestedCategory: result['category'] as String? ?? _recipes[index].suggestedCategory,
+                            notes: result['notes'] as String? ?? _recipes[index].notes,
+                            imageUrl: _recipes[index].imageUrl,
+                            imageData: _recipes[index].imageData,
+                            tags: _recipes[index].tags,
+                            cuisine: result['cuisine'] as String? ?? _recipes[index].cuisine,
+                            rating: _recipes[index].rating,
+                          );
+                        });
+                      },
                       onSelectedChanged: (val) {
                         setState(() => _selected[index] = val);
                       },
@@ -260,6 +293,7 @@ class _SummaryBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Container(
@@ -317,7 +351,7 @@ class _SummaryBar extends StatelessWidget {
           // Select all toggle
           TextButton(
             onPressed: () => onToggleAll(!allSelected),
-            child: Text(allSelected ? 'Deselect all' : 'Select all'),
+            child: Text(allSelected ? l10n.deselectAll : l10n.selectAll),
           ),
         ],
       ),
@@ -335,6 +369,9 @@ class _RecipePreviewCard extends StatelessWidget {
   final bool isSelected;
   final bool isExpanded;
   final bool isDuplicate;
+  final String? sourceText;
+  final String? sourceUrl;
+  final ValueChanged<Map<String, dynamic>>? onSmartImportResult;
   final ValueChanged<bool> onSelectedChanged;
   final VoidCallback onExpandToggle;
 
@@ -344,12 +381,16 @@ class _RecipePreviewCard extends StatelessWidget {
     required this.isSelected,
     required this.isExpanded,
     required this.isDuplicate,
+    this.sourceText,
+    this.sourceUrl,
+    this.onSmartImportResult,
     required this.onSelectedChanged,
     required this.onExpandToggle,
   });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Padding(
@@ -416,7 +457,7 @@ class _RecipePreviewCard extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
-                                    'Duplicate',
+                                    l10n.duplicate,
                                     style: theme.textTheme.labelSmall?.copyWith(
                                       color: theme.colorScheme.onTertiaryContainer,
                                       fontWeight: FontWeight.bold,
@@ -480,7 +521,12 @@ class _RecipePreviewCard extends StatelessWidget {
             // ── Expanded content ──
             AnimatedCrossFade(
               firstChild: const SizedBox.shrink(),
-              secondChild: _ExpandedContent(recipe: recipe),
+              secondChild: _ExpandedContent(
+                recipe: recipe,
+                sourceText: sourceText,
+                sourceUrl: sourceUrl,
+                onSmartImportResult: onSmartImportResult,
+              ),
               crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
               duration: const Duration(milliseconds: 200),
             ),
@@ -518,10 +564,20 @@ class _RecipePreviewCard extends StatelessWidget {
 
 class _ExpandedContent extends StatelessWidget {
   final ImportedRecipe recipe;
-  const _ExpandedContent({required this.recipe});
+  final String? sourceText;
+  final String? sourceUrl;
+  final ValueChanged<Map<String, dynamic>>? onSmartImportResult;
+
+  const _ExpandedContent({
+    required this.recipe,
+    this.sourceText,
+    this.sourceUrl,
+    this.onSmartImportResult,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Container(
@@ -531,6 +587,21 @@ class _ExpandedContent extends StatelessWidget {
         children: [
           Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
           const SizedBox(height: 8),
+
+          // Smart Import button (when source data is available)
+          if (sourceText != null || sourceUrl != null)
+            SmartImportButton(
+              sourceText: sourceText,
+              sourceUrl: sourceUrl,
+              existingParse: {
+                'title': recipe.title,
+                if (recipe.description != null) 'description': recipe.description,
+                if (recipe.servings != null) 'servings': recipe.servings,
+                'ingredients': recipe.ingredients,
+                'instructions': recipe.instructions,
+              },
+              onResult: (result) => onSmartImportResult?.call(result),
+            ),
 
           // Description
           if (recipe.description != null && recipe.description!.isNotEmpty) ...[
@@ -553,7 +624,7 @@ class _ExpandedContent extends StatelessWidget {
                 Icon(Icons.egg_outlined, size: 16, color: theme.colorScheme.primary),
                 const SizedBox(width: 6),
                 Text(
-                  'Ingredients',
+                  l10n.ingredientsTitle,
                   style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.primary,
@@ -600,7 +671,7 @@ class _ExpandedContent extends StatelessWidget {
                 Icon(Icons.format_list_numbered, size: 16, color: theme.colorScheme.primary),
                 const SizedBox(width: 6),
                 Text(
-                  'Instructions',
+                  l10n.instructionsTitle,
                   style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.primary,
@@ -739,6 +810,7 @@ class _BottomActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Container(
@@ -784,6 +856,7 @@ class _LoadingOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Container(
@@ -799,7 +872,7 @@ class _LoadingOverlay extends StatelessWidget {
                 Icon(Icons.restaurant_menu, size: 40, color: theme.colorScheme.primary),
                 const SizedBox(height: 20),
                 Text(
-                  'Importing recipes...',
+                  l10n.importingRecipes,
                   style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),

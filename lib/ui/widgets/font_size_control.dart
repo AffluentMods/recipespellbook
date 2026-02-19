@@ -41,6 +41,7 @@ class FontSizeControl extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final scale = ref.watch(recipeFontScaleProvider);
     final notifier = ref.read(recipeFontScaleProvider.notifier);
 
@@ -56,7 +57,7 @@ class FontSizeControl extends ConsumerWidget {
           IconButton(
             icon: const Text('A-', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
             onPressed: scale > RecipeFontScaleNotifier.minScale ? notifier.decrease : null,
-            tooltip: 'Smaller text',
+            tooltip: l10n.smallerText,
             visualDensity: VisualDensity.compact,
           ),
           // Current scale indicator
@@ -76,7 +77,7 @@ class FontSizeControl extends ConsumerWidget {
           IconButton(
             icon: const Text('A+', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
             onPressed: scale < RecipeFontScaleNotifier.maxScale ? notifier.increase : null,
-            tooltip: 'Larger text',
+            tooltip: l10n.largerText,
             visualDensity: VisualDensity.compact,
           ),
         ],
@@ -92,6 +93,7 @@ class FontSizeSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final scale = ref.watch(recipeFontScaleProvider);
     final notifier = ref.read(recipeFontScaleProvider.notifier);
 
@@ -101,7 +103,7 @@ class FontSizeSheet extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Text Size',
+            l10n.textSize,
             style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
@@ -117,7 +119,7 @@ class FontSizeSheet extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Ingredient Preview',
+                  l10n.ingredientPreview,
                   style: TextStyle(
                     fontSize: 16 * scale,
                     fontWeight: FontWeight.w500,
@@ -161,7 +163,7 @@ class FontSizeSheet extends ConsumerWidget {
           // Reset button
           TextButton(
             onPressed: notifier.reset,
-            child: const Text('Reset to Default'),
+            child: Text(l10n.resetToDefault),
           ),
 
           const SizedBox(height: 8),

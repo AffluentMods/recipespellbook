@@ -4,6 +4,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/revenuecat_service.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Custom paywall screen — replaces RevenueCat's default template.
 ///
@@ -32,6 +33,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isDark = theme.brightness == Brightness.dark;
     final authState = ref.watch(authProvider);
 
@@ -53,10 +55,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     onPressed: () {
                       ref.read(subscriptionProvider.notifier).restorePurchases();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Restoring purchases...')),
+                        SnackBar(content: Text(l10n.restoringPurchases)),
                       );
                     },
-                    child: const Text('Restore'),
+                    child: Text(l10n.restorePurchases),
                   ),
                 ],
               ),
@@ -102,7 +104,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
                     // ── Title ──
                     Text(
-                      'Upgrade Recipe Spellbook',
+                      l10n.upgradeRecipeSpellbook,
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -110,7 +112,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Choose the plan that fits your kitchen',
+                      l10n.choosePlanSubtitle,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -119,15 +121,15 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     const SizedBox(height: 20),
 
                     // ── Tab toggle: One-Time | Subscription ──
-                    _buildTabToggle(theme, isDark),
+                    _buildTabToggle(theme, isDark, l10n),
                     const SizedBox(height: 20),
 
                     // ── Content based on tab ──
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 250),
                       child: _tabIndex == 0
-                          ? _buildPremiumTab(theme, isDark)
-                          : _buildSubscriptionTab(theme, isDark),
+                          ? _buildPremiumTab(theme, isDark, l10n)
+                          : _buildSubscriptionTab(theme, isDark, l10n),
                     ),
 
                     const SizedBox(height: 16),
@@ -136,7 +138,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     TextButton.icon(
                       onPressed: () => _showCompareSheet(context),
                       icon: const Icon(Icons.compare_arrows, size: 18),
-                      label: const Text('Compare all plans'),
+                      label: Text(l10n.compareAllPlans),
                     ),
 
                     const SizedBox(height: 8),
@@ -146,10 +148,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       _buildInfoCard(
                         theme,
                         icon: Icons.info_outline,
-                        text:
-                        'Premium is a one-time purchase that enhances your free experience. '
-                            'It does not include family sharing or advanced cloud features — '
-                            'see Subscriptions for those.',
+                        text: l10n.premiumInfoNotice,
                       ),
 
                     const SizedBox(height: 24),
@@ -159,7 +158,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             ),
 
             // ── Purchase button + footer ──
-            _buildPurchaseFooter(theme, isDark, authState),
+            _buildPurchaseFooter(theme, isDark, authState, l10n),
           ],
         ),
       ),
@@ -170,7 +169,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   //  TAB TOGGLE
   // ════════════════════════════════════════════════════════════════
 
-  Widget _buildTabToggle(ThemeData theme, bool isDark) {
+  Widget _buildTabToggle(ThemeData theme, bool isDark, AppLocalizations l10n) {
     return Container(
       decoration: BoxDecoration(
         color: isDark
@@ -182,13 +181,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       child: Row(
         children: [
           _toggleButton(
-            label: 'One-Time',
+            label: l10n.oneTimeTab,
             index: 0,
             theme: theme,
             isDark: isDark,
           ),
           _toggleButton(
-            label: 'Subscription',
+            label: l10n.subscriptionTab,
             index: 1,
             theme: theme,
             isDark: isDark,
@@ -246,28 +245,28 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   //  PREMIUM TAB (One-Time Purchase)
   // ════════════════════════════════════════════════════════════════
 
-  Widget _buildPremiumTab(ThemeData theme, bool isDark) {
+  Widget _buildPremiumTab(ThemeData theme, bool isDark, AppLocalizations l10n) {
     return Column(
       key: const ValueKey('premium'),
       children: [
         // Price card
         _PlanCard(
-          title: 'Premium',
+          title: l10n.tierPremium,
           price: '\$6.99',
-          subtitle: 'Pay once, keep forever',
+          subtitle: l10n.payOnceKeepForever,
           isSelected: true,
           accentColor: Colors.amber,
           theme: theme,
           isDark: isDark,
-          badge: 'BEST VALUE',
+          badge: l10n.bestValue,
           onTap: () {},
-          features: const [
-            _Feature(icon: Icons.cloud_sync, text: 'Cloud sync (personal)'),
-            _Feature(icon: Icons.photo_library, text: 'Photos on steps'),
-            _Feature(icon: Icons.sd_storage, text: '250 MB photo storage (~500 photos)'),
-            _Feature(icon: Icons.palette, text: 'RPG cosmetics starter pack'),
-            _Feature(icon: Icons.verified, text: 'Premium supporter badge'),
-            _Feature(icon: Icons.auto_awesome, text: 'Extra UI polish & QoL features'),
+          features: [
+            _Feature(icon: Icons.cloud_sync, text: l10n.featureCloudSyncPersonal),
+            _Feature(icon: Icons.photo_library, text: l10n.featurePhotosOnSteps),
+            _Feature(icon: Icons.sd_storage, text: l10n.featurePhotoStorage250),
+            _Feature(icon: Icons.palette, text: l10n.featureRpgCosmeticsStarter),
+            _Feature(icon: Icons.verified, text: l10n.featureSupporterBadge),
+            _Feature(icon: Icons.auto_awesome, text: l10n.featureExtraPolish),
           ],
         ),
       ],
@@ -278,32 +277,32 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   //  SUBSCRIPTION TAB
   // ════════════════════════════════════════════════════════════════
 
-  Widget _buildSubscriptionTab(ThemeData theme, bool isDark) {
+  Widget _buildSubscriptionTab(ThemeData theme, bool isDark, AppLocalizations l10n) {
     return Column(
       key: const ValueKey('subscription'),
       children: [
         // Monthly / Yearly toggle
-        _buildBillingToggle(theme, isDark),
+        _buildBillingToggle(theme, isDark, l10n),
         const SizedBox(height: 16),
 
         // Cloud Sync
         _PlanCard(
-          title: 'Cloud Sync',
+          title: l10n.cloudSyncFeature,
           price: _billingCycle == 0 ? '\$2.99/mo' : '\$29.99/yr',
-          subtitle: _billingCycle == 1 ? 'Save 16% — only \$2.50/mo' : 'Billed monthly',
+          subtitle: _billingCycle == 1 ? l10n.save16Yearly : l10n.billedMonthly,
           isSelected: _subTierIndex == 0,
           accentColor: Colors.blue,
           theme: theme,
           isDark: isDark,
-          badge: _billingCycle == 1 ? 'SAVE 16%' : null,
+          badge: _billingCycle == 1 ? l10n.save16Badge : null,
           onTap: () => setState(() => _subTierIndex = 0),
-          features: const [
-            _Feature(icon: Icons.family_restroom, text: 'Family sharing (5 members)'),
-            _Feature(icon: Icons.sd_storage, text: '1 GB photo storage (~2,000 photos)'),
-            _Feature(icon: Icons.shopping_cart, text: 'Shared shopping lists'),
-            _Feature(icon: Icons.menu_book, text: 'Shared cookbooks'),
-            _Feature(icon: Icons.calendar_month, text: 'Shared meal planning'),
-            _Feature(icon: Icons.backup, text: 'Encrypted backups + version history'),
+          features: [
+            _Feature(icon: Icons.family_restroom, text: l10n.featureFamilySharing5),
+            _Feature(icon: Icons.sd_storage, text: l10n.featurePhotoStorage1gb),
+            _Feature(icon: Icons.shopping_cart, text: l10n.featureSharedLists),
+            _Feature(icon: Icons.menu_book, text: l10n.featureSharedCookbooks),
+            _Feature(icon: Icons.calendar_month, text: l10n.featureSharedMealPlan),
+            _Feature(icon: Icons.backup, text: l10n.featureEncryptedBackups),
           ],
         ),
         const SizedBox(height: 12),
@@ -311,21 +310,21 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         // Cloud Sync+ (hidden until launch — flip _showCloudSyncPlus to enable)
         if (_showCloudSyncPlus) ...[
           _PlanCard(
-            title: 'Cloud Sync+',
+            title: l10n.cloudSyncPlusFeature,
             price: _billingCycle == 0 ? '\$4.99/mo' : '\$49.99/yr',
-            subtitle: _billingCycle == 1 ? 'Save 17% — only \$4.17/mo' : 'Billed monthly',
+            subtitle: _billingCycle == 1 ? l10n.save17Yearly : l10n.billedMonthly,
             isSelected: _subTierIndex == 1,
             accentColor: Colors.deepPurple,
             theme: theme,
             isDark: isDark,
             badge: null,
             onTap: () => setState(() => _subTierIndex = 1),
-            features: const [
-              _Feature(icon: Icons.family_restroom, text: 'Family sharing (10 members)'),
-              _Feature(icon: Icons.sd_storage, text: '5 GB photo storage (~10,000 photos)'),
-              _Feature(icon: Icons.history, text: 'Extended version history'),
-              _Feature(icon: Icons.speed, text: 'Priority sync performance'),
-              _Feature(icon: Icons.auto_awesome, text: 'Future advanced features included'),
+            features: [
+              _Feature(icon: Icons.family_restroom, text: l10n.featureFamilySharing10),
+              _Feature(icon: Icons.sd_storage, text: l10n.featurePhotoStorage5gb),
+              _Feature(icon: Icons.history, text: l10n.featureExtendedVersionHistory),
+              _Feature(icon: Icons.speed, text: l10n.featurePrioritySync),
+              _Feature(icon: Icons.auto_awesome, text: l10n.featureFutureAdvanced),
             ],
           ),
         ],
@@ -336,14 +335,14 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         _buildInfoCard(
           theme,
           icon: Icons.check_circle_outline,
-          text: 'All subscriptions include everything in Premium.',
+          text: l10n.subscriptionsIncludePremium,
           color: Colors.green,
         ),
       ],
     );
   }
 
-  Widget _buildBillingToggle(ThemeData theme, bool isDark) {
+  Widget _buildBillingToggle(ThemeData theme, bool isDark, AppLocalizations l10n) {
     return Container(
       decoration: BoxDecoration(
         color: isDark
@@ -354,8 +353,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       padding: const EdgeInsets.all(3),
       child: Row(
         children: [
-          _billingButton('Monthly', 0, theme, isDark),
-          _billingButton('Yearly', 1, theme, isDark),
+          _billingButton(l10n.monthly, 0, theme, isDark),
+          _billingButton(l10n.yearly, 1, theme, isDark),
         ],
       ),
     );
@@ -399,16 +398,17 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       ThemeData theme,
       bool isDark,
       AuthState authState,
+      AppLocalizations l10n,
       ) {
     final buttonLabel = _tabIndex == 0
-        ? 'Purchase Premium — \$6.99'
+        ? l10n.purchasePremiumCta
         : _subTierIndex == 0
         ? (_billingCycle == 0
-        ? 'Subscribe — \$2.99/mo'
-        : 'Subscribe — \$29.99/yr')
+        ? l10n.subscribeCloudSyncMonthlyCta
+        : l10n.subscribeCloudSyncYearlyCta)
         : (_billingCycle == 0
-        ? 'Subscribe — \$4.99/mo'
-        : 'Subscribe — \$49.99/yr');
+        ? l10n.subscribeCloudSyncPlusMonthlyCta
+        : l10n.subscribeCloudSyncPlusYearlyCta);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
@@ -438,7 +438,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         size: 16, color: theme.colorScheme.outline),
                     const SizedBox(width: 6),
                     Text(
-                      'Sign-in required before purchase',
+                      l10n.signInRequiredBeforePurchase,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.outline,
                       ),
@@ -511,9 +511,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _legalLink('Terms', theme),
+                _legalLink(l10n.terms, theme),
                 _dot(theme),
-                _legalLink('Privacy', theme),
+                _legalLink(l10n.privacy, theme),
               ],
             ),
             const SizedBox(height: 4),
@@ -559,6 +559,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _purchasing = true);
 
     try {
@@ -584,7 +585,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       if (offerings == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Unable to load products. Try again.')),
+            SnackBar(content: Text(l10n.unableToLoadProducts)),
           );
         }
         return;
@@ -595,8 +596,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       if (current == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('No offerings available. Try again later.')),
+            SnackBar(
+                content: Text(l10n.noOfferingsAvailable)),
           );
         }
         return;
@@ -621,7 +622,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Purchase failed: $e')),
+          SnackBar(content: Text(l10n.purchaseFailed(e.toString()))),
         );
       }
     } finally {
@@ -632,6 +633,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   void _showSignInForPurchase() {
     final authNotifier = ref.read(authProvider.notifier);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     showModalBottomSheet(
       context: context,
@@ -652,13 +654,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             Icon(Icons.account_circle, size: 48, color: theme.colorScheme.primary),
             const SizedBox(height: 16),
             Text(
-              'Sign in to continue',
+              l10n.signInToContinue,
               style: theme.textTheme.titleLarge
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
-              'An account is required before purchasing so your subscription stays linked across devices.',
+              l10n.signInForPurchaseDesc,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -678,7 +680,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 icon: const Text('G',
                     style:
                     TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                label: const Text('Continue with Google'),
+                label: Text(l10n.continueWithGoogle),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -698,7 +700,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     await authNotifier.signInWithApple();
                   },
                   icon: const Icon(Icons.apple, size: 22),
-                  label: const Text('Continue with Apple'),
+                  label: Text(l10n.continueWithApple),
                   style: FilledButton.styleFrom(
                     backgroundColor: theme.brightness == Brightness.dark
                         ? Colors.white
@@ -725,6 +727,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
   void _showCompareSheet(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -748,7 +751,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Text(
-                  'Compare Plans',
+                  l10n.comparePlans,
                   style: theme.textTheme.titleLarge
                       ?.copyWith(fontWeight: FontWeight.bold),
                 ),
@@ -963,6 +966,7 @@ class _CompareTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final headerStyle = TextStyle(
       fontWeight: FontWeight.bold,
       fontSize: 11,
@@ -991,52 +995,52 @@ class _CompareTable extends StatelessWidget {
           ),
           children: [
             const SizedBox(height: 36),
-            _headerCell('Free', Colors.grey, headerStyle),
-            _headerCell('Premium', Colors.amber, headerStyle),
-            _headerCell('Cloud\nSync', Colors.blue, headerStyle),
-            _headerCell('Cloud\nSync+', Colors.deepPurple, headerStyle),
+            _headerCell(l10n.tierFree, Colors.grey, headerStyle),
+            _headerCell(l10n.tierPremium, Colors.amber, headerStyle),
+            _headerCell(l10n.tierCloudSync, Colors.blue, headerStyle),
+            _headerCell(l10n.tierCloudSyncPlus, Colors.deepPurple, headerStyle),
           ],
         ),
 
         // Price row
-        _row('Price', ['\$0', '\$6.99\nonce', '\$2.99\n/mo', '\$4.99\n/mo'],
+        _row(l10n.comparePrice, [l10n.priceFree, l10n.pricePremium, l10n.priceCloudSync, l10n.priceCloudSyncPlus],
             cellStyle),
 
         // Device transfer
-        _row('Device transfer', ['QR code', 'Cloud', 'Cloud', 'Cloud'],
+        _row(l10n.compareDeviceTransfer, [l10n.qrCode, l10n.cloud, l10n.cloud, l10n.cloud],
             cellStyle),
 
         // Photo storage
-        _row('Photo storage', ['100 MB', '250 MB', '1 GB', '5 GB'],
+        _row(l10n.comparePhotoStorage, ['100 MB', '250 MB', '1 GB', '5 GB'],
             cellStyle),
 
         // Photos per recipe
-        _row('Step photos', [_x, _check, _check, _check], cellStyle),
+        _row(l10n.compareStepPhotos, [_x, _check, _check, _check], cellStyle),
 
         // Family sharing
-        _row('Family sharing', [_x, _x, '5', '10'], cellStyle),
+        _row(l10n.compareFamilySharing, [_x, _x, '5', '10'], cellStyle),
 
         // Shared lists
-        _row('Shared lists', [_x, _x, _check, _check], cellStyle),
+        _row(l10n.compareSharedLists, [_x, _x, _check, _check], cellStyle),
 
         // Shared cookbooks
-        _row('Shared cookbooks', [_x, _x, _check, _check], cellStyle),
+        _row(l10n.compareSharedCookbooks, [_x, _x, _check, _check], cellStyle),
 
         // Shared meal plan
-        _row('Shared meal plan', [_x, _x, _check, _check], cellStyle),
+        _row(l10n.compareSharedMealPlan, [_x, _x, _check, _check], cellStyle),
 
         // Encrypted backups
-        _row('Backups', [_x, _x, _check, _check], cellStyle),
+        _row(l10n.compareBackups, [_x, _x, _check, _check], cellStyle),
 
         // Version history
-        _row('Version history', [_x, _x, 'Light', 'Extended'], cellStyle),
+        _row(l10n.compareVersionHistory, [_x, _x, l10n.light, l10n.extended], cellStyle),
 
         // RPG cosmetics
-        _row('RPG cosmetics', ['Basic', 'Starter\npack', _check, _check],
+        _row(l10n.compareRpgCosmetics, [l10n.basic, l10n.starterPack, _check, _check],
             cellStyle),
 
         // Supporter badge
-        _row('Supporter badge', [_x, _check, _check, _check], cellStyle),
+        _row(l10n.compareSupporterBadge, [_x, _check, _check, _check], cellStyle),
       ],
     );
   }

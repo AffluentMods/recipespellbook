@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:go_router/go_router.dart';
 import '../../../providers/database_provider.dart';
@@ -358,6 +359,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
   }
 
   Future<void> _doImport(BuildContext sheetContext, String json) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _importing = true);
 
     try {
@@ -376,7 +378,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Recipe imported successfully!'),
+            content: Text(l10n.recipeImportedSuccess),
             behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.green,
             action: SnackBarAction(
@@ -415,6 +417,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
   }
 
   void _copyPrompt() {
+    final l10n = AppLocalizations.of(context)!;
     final prompt = AiImportService.generateRecipePrompt();
     Clipboard.setData(ClipboardData(text: prompt));
     setState(() => _promptCopied = true);
@@ -422,8 +425,8 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
       if (mounted) setState(() => _promptCopied = false);
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Prompt copied! Paste it into any AI with your recipe.'),
+      SnackBar(
+        content: Text(l10n.promptCopied),
         behavior: SnackBarBehavior.floating,
         duration: Duration(seconds: 3),
       ),
@@ -433,10 +436,11 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Import from AI'),
+        title: Text(l10n.importFromAI),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -555,7 +559,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                         }
                       },
                       icon: const Icon(Icons.paste, size: 18),
-                      label: const Text('Paste'),
+                      label: Text(l10n.paste),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
                             vertical: 10, horizontal: 16),
@@ -603,7 +607,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
             child: FilledButton.icon(
               onPressed: _validateAndPreview,
               icon: const Icon(Icons.auto_awesome),
-              label: const Text('Preview & Import'),
+              label: Text(l10n.previewAndImport),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(

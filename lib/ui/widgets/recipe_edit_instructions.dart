@@ -307,7 +307,7 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
             if (_selectedStepIds.length < _steps.length)
               TextButton(
                 onPressed: _selectAll,
-                child: const Text('Select All'),
+                child: Text(l10n.selectAll),
               ),
           ],
         ),
@@ -544,6 +544,7 @@ class _StepCard extends StatelessWidget {
   }
 
   void _showImagePicker(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final hasExistingImage = step.imagePath != null && step.imagePath!.isNotEmpty;
 
     // Gate: adding NEW step photos requires Premium or higher.
@@ -560,7 +561,7 @@ class _StepCard extends StatelessWidget {
             if (step.imagePath != null && step.imagePath!.isNotEmpty)
               ListTile(
                 leading: const Icon(Icons.delete_outline, color: Colors.red),
-                title: const Text('Remove image'),
+                title: Text(l10n.removeImage),
                 onTap: () {
                   Navigator.pop(ctx);
                   onImageChanged(null);
@@ -571,10 +572,10 @@ class _StepCard extends StatelessWidget {
                 Icons.camera_alt,
                 color: hasStepPhotoAccess ? null : Theme.of(context).disabledColor,
               ),
-              title: const Text('Take photo'),
+              title: Text(l10n.takePhoto),
               subtitle: hasStepPhotoAccess
                   ? null
-                  : Text('Requires Premium',
+                  : Text(l10n.requiresPremium,
                   style: TextStyle(
                     fontSize: 12,
                     color: Theme.of(context).colorScheme.outline,
@@ -597,10 +598,10 @@ class _StepCard extends StatelessWidget {
                 Icons.photo_library,
                 color: hasStepPhotoAccess ? null : Theme.of(context).disabledColor,
               ),
-              title: const Text('Choose from gallery'),
+              title: Text(l10n.chooseFromGallery),
               subtitle: hasStepPhotoAccess
                   ? null
-                  : Text('Requires Premium',
+                  : Text(l10n.requiresPremium,
                   style: TextStyle(
                     fontSize: 12,
                     color: Theme.of(context).colorScheme.outline,
@@ -659,7 +660,7 @@ class _SelectionActionBar extends StatelessWidget {
           FilledButton.tonalIcon(
             onPressed: onDelete,
             icon: const Icon(Icons.delete_outline),
-            label: Text('Delete $selectedCount'),
+            label: Text(l10n.deleteCount(selectedCount)),
             style: FilledButton.styleFrom(
               backgroundColor: theme.colorScheme.error,
               foregroundColor: theme.colorScheme.onError,
@@ -759,6 +760,7 @@ class _AddStepImageButton extends StatelessWidget {
   }
 
   void _pickImage(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     // Gate: step photos require Premium or higher
     if (onImageGateCheck != null && !onImageGateCheck!()) return;
 
@@ -771,7 +773,7 @@ class _AddStepImageButton extends StatelessWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Take photo'),
+              title: Text(l10n.takePhoto),
               onTap: () async {
                 Navigator.pop(ctx);
                 final image = await picker.pickImage(source: ImageSource.camera);
@@ -783,7 +785,7 @@ class _AddStepImageButton extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Choose from gallery'),
+              title: Text(l10n.chooseFromGallery),
               onTap: () async {
                 Navigator.pop(ctx);
                 final image = await picker.pickImage(source: ImageSource.gallery);
@@ -801,6 +803,7 @@ class _AddStepImageButton extends StatelessWidget {
 
   Future<String?> _showImageConfirm(BuildContext context, String imagePath) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return showDialog<String?>(
       context: context,
       barrierDismissible: false,
@@ -809,7 +812,7 @@ class _AddStepImageButton extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.black,
           foregroundColor: Colors.white,
-          title: const Text('Preview Photo'),
+          title: Text(l10n.previewPhoto),
           leading: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () => Navigator.pop(ctx, null),
@@ -843,7 +846,7 @@ class _AddStepImageButton extends StatelessWidget {
                       child: OutlinedButton.icon(
                         onPressed: () => Navigator.pop(ctx, null),
                         icon: const Icon(Icons.refresh),
-                        label: const Text('Retake'),
+                        label: Text(l10n.retake),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.white,
                           side: const BorderSide(color: Colors.white54),
@@ -856,7 +859,7 @@ class _AddStepImageButton extends StatelessWidget {
                       child: FilledButton.icon(
                         onPressed: () => Navigator.pop(ctx, imagePath),
                         icon: const Icon(Icons.check),
-                        label: const Text('Use Photo'),
+                        label: Text(l10n.usePhoto),
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
@@ -883,6 +886,7 @@ class _EmptyStepsState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.all(32),
@@ -907,7 +911,7 @@ class _EmptyStepsState extends StatelessWidget {
           FilledButton.icon(
             onPressed: onAdd,
             icon: const Icon(Icons.add),
-            label: const Text('Add first step'),
+            label: Text(l10n.addFirstStep),
           ),
         ],
       ),

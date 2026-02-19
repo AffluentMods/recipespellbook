@@ -50,7 +50,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Sign in with Google OAuth.
   Future<void> signInWithGoogle() async {
     state = state.copyWith(isLoading: true, error: null);
+    debugPrint('[Auth] Starting Google sign-in...');
     final result = await _service.signInWithGoogle();
+    debugPrint('[Auth] Result: isSignedIn=${result.isSignedIn}, error=${result.error}, user=${result.user?.displayName}');
 
     if (result.isSignedIn) {
       state = result;
@@ -138,6 +140,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final user = _service.currentUser;
     if (jwt != null) {
       SmartImportService.instance.setAuthToken(jwt);
+      // Add other services here as you build them:
       // SyncService.instance.setAuthToken(jwt);
       // ImageService.instance.setAuthToken(jwt);
     }

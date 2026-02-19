@@ -117,10 +117,9 @@ class HomeScreen extends ConsumerWidget {
               ),
             ],
           ),
-          floatingActionButton: FloatingActionButton.extended(
+          floatingActionButton: _ModernFAB(
             onPressed: () => showNewRecipeDialog(context, cookbookId),
-            icon: const Icon(Icons.add),
-            label: Text(l10n.recipeAdd),
+            label: l10n.recipeAdd,
           ),
         );
       },
@@ -882,6 +881,7 @@ class _CookbookDropdown extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final cookbooksAsync = ref.watch(cookbooksProvider);
     final theme = Theme.of(context);
 
@@ -916,6 +916,7 @@ class _CookbookDropdown extends ConsumerWidget {
   }
 
   void _showCookbookPicker(BuildContext context, WidgetRef ref, List<Cookbook> cookbooks) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final selectedId = ref.read(selectedCookbookIdProvider);
 
@@ -956,7 +957,7 @@ class _CookbookDropdown extends ConsumerWidget {
                         Navigator.pop(ctx);
                         context.go('/cookbooks');
                       },
-                      child: const Text('Manage'),
+                      child: Text(l10n.manage),
                     ),
                   ],
                 ),
@@ -1034,6 +1035,56 @@ class _CookbookDropdown extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+// ═══════════════════════════════════════════════════════════════════
+// MODERN FAB
+// ═══════════════════════════════════════════════════════════════════
+
+class _ModernFAB extends StatelessWidget {
+  final VoidCallback onPressed;
+  final String? label;
+  final IconData icon;
+  const _ModernFAB({required this.onPressed, this.label, this.icon = Icons.add});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bg = theme.colorScheme.primary;
+    final fg = theme.colorScheme.onPrimary;
+
+    if (label != null) {
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: bg.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))],
+        ),
+        child: FloatingActionButton.extended(
+          onPressed: onPressed,
+          backgroundColor: bg,
+          foregroundColor: fg,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          icon: Icon(icon, size: 22),
+          label: Text(label!, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: bg.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))],
+      ),
+      child: FloatingActionButton(
+        onPressed: onPressed,
+        backgroundColor: bg,
+        foregroundColor: fg,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Icon(icon, size: 26),
       ),
     );
   }

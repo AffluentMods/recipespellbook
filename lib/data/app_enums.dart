@@ -6,31 +6,31 @@ enum AppColorTheme {
   spellbook(
     label: 'The Cozy Kitchen',
     emoji: '✨',
-    seedColor: Color(0xFFD4A055),
+    seedColor: Color(0xFFD4972E),
     bannerAsset: 'assets/images/themes/theme_spellbook.png',
     light: ThemePalette(
-      background: Color(0xFFFFF8F0),       // Cream / parchment
-      surface: Color(0xFFFFF3E6),           // Warm off-white
-      primary: Color(0xFF6D4C2B),           // Leather brown
-      primaryContainer: Color(0xFFEDD9BE),  // Light leather
-      secondary: Color(0xFFD4A055),         // Golden amber
-      secondaryContainer: Color(0xFFF5DEB3),// Wheat
-      accent: Color(0xFFE8A860),            // Magic glow gold
-      onBackground: Color(0xFF3E2723),      // Dark chocolate brown
-      onSurface: Color(0xFF4E342E),         // Warm dark brown
+      background: Color(0xFFFAF4E8),       // Warm aged parchment
+      surface: Color(0xFFFFF0D8),           // Golden warm surface
+      primary: Color(0xFF7B3F1D),           // Rich mahogany
+      primaryContainer: Color(0xFFF0D4A8),  // Warm honey
+      secondary: Color(0xFFB8860B),         // Dark goldenrod
+      secondaryContainer: Color(0xFFF5E0B8),// Light gold
+      accent: Color(0xFFD4972E),            // Vibrant amber gold
+      onBackground: Color(0xFF2C1A0E),      // Deep warm espresso
+      onSurface: Color(0xFF3E2816),         // Warm charcoal-brown
       onPrimary: Color(0xFFFFFFFF),
     ),
     dark: ThemePalette(
-      background: Color(0xFF1C1410),
-      surface: Color(0xFF2C2018),
-      primary: Color(0xFFD4A055),
-      primaryContainer: Color(0xFF4A3520),
-      secondary: Color(0xFFE8A860),
-      secondaryContainer: Color(0xFF5C4020),
-      accent: Color(0xFFF0B860),
-      onBackground: Color(0xFFF5E6D0),
-      onSurface: Color(0xFFEED9BE),
-      onPrimary: Color(0xFF1C1410),
+      background: Color(0xFF1A120A),        // Candlelit dark
+      surface: Color(0xFF2A1C12),           // Warm dark leather
+      primary: Color(0xFFD4972E),           // Amber gold
+      primaryContainer: Color(0xFF4A3018),  // Deep warm brown
+      secondary: Color(0xFFE8B04A),         // Bright warm gold
+      secondaryContainer: Color(0xFF5C3C18),// Medium warm brown
+      accent: Color(0xFFF0C460),            // Bright candlelight gold
+      onBackground: Color(0xFFF5E0C4),      // Warm cream
+      onSurface: Color(0xFFEDD5B8),         // Warm parchment text
+      onPrimary: Color(0xFF1A120A),
     ),
   ),
 

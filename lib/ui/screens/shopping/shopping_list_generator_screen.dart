@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:drift/drift.dart' as drift;
+import '../../../l10n/app_localizations.dart';
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../services/ingredient_resolver_service.dart';
@@ -151,6 +152,7 @@ class _ShoppingListGeneratorScreenState
   }
 
   Future<bool> _onWillPop() async {
+    final l10n = AppLocalizations.of(context)!;
     // Navigate back a step first
     if (_currentStep > (_hasConflictStep ? 0 : 1)) {
       _goToStep(_currentStep - 1);
@@ -160,7 +162,7 @@ class _ShoppingListGeneratorScreenState
     final shouldExit = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Exit Shopping List Generator?'),
+        title: Text(l10n.exitShoppingListGenerator),
         content: const Text(
           'Are you sure you wish to exit the shopping list generator? '
               'Unsaved changes will be lost.',
@@ -168,11 +170,11 @@ class _ShoppingListGeneratorScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.actionCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Exit'),
+            child: Text(l10n.actionExit),
           ),
         ],
       ),
@@ -182,6 +184,7 @@ class _ShoppingListGeneratorScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
@@ -191,7 +194,7 @@ class _ShoppingListGeneratorScreenState
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Shopping List Generator'),
+          title: Text(l10n.shoppingListGenerator),
           leading: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () async {
@@ -337,6 +340,7 @@ class _ShoppingListGeneratorScreenState
 
   Widget _buildRecipeCardsStep() {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       children: [
@@ -436,7 +440,7 @@ class _ShoppingListGeneratorScreenState
           child: FilledButton.icon(
             onPressed: _totalSelected > 0 ? () => _goToStep(2) : null,
             icon: const Icon(Icons.arrow_forward),
-            label: Text('Review & Add ($_totalSelected items)'),
+            label: Text(l10n.reviewAndAddItems(_totalSelected)),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
@@ -719,6 +723,7 @@ class _ShoppingListGeneratorScreenState
       _userScales[recipeId] ?? 1.0;
 
   Future<void> _addToShoppingList() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _isAdding = true);
 
     try {
@@ -774,7 +779,7 @@ class _ShoppingListGeneratorScreenState
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Added $totalAdded items to shopping list'),
+            content: Text(l10n.addedItemsToList(totalAdded)),
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
               label: 'View',
@@ -786,7 +791,7 @@ class _ShoppingListGeneratorScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('${l10n.errorGeneric}: $e')),
         );
       }
     } finally {
@@ -805,6 +810,7 @@ class _BottomActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -995,6 +1001,7 @@ class _RecipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Card(
@@ -1127,7 +1134,7 @@ class _RecipeCard extends StatelessWidget {
                         onPressed: onSelectAll,
                         icon:
                         const Icon(Icons.check_box_outlined, size: 16),
-                        label: const Text('All'),
+                        label: Text(l10n.all),
                         style: TextButton.styleFrom(
                             visualDensity: VisualDensity.compact),
                       ),
@@ -1135,7 +1142,7 @@ class _RecipeCard extends StatelessWidget {
                         onPressed: onUnselectAll,
                         icon: const Icon(Icons.check_box_outline_blank,
                             size: 16),
-                        label: const Text('None'),
+                        label: Text(l10n.none),
                         style: TextButton.styleFrom(
                             visualDensity: VisualDensity.compact),
                       ),
@@ -1203,6 +1210,7 @@ class _IngredientRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final rawAmt = ingredient.scaledAmount;
     final unit = ingredient.ingredient.unit ?? '';
@@ -1452,6 +1460,7 @@ class _ListDestinationPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Card(
@@ -1493,7 +1502,7 @@ class _ListDestinationPicker extends StatelessWidget {
                   }),
                   ActionChip(
                     avatar: const Icon(Icons.add, size: 16),
-                    label: const Text('New list'),
+                    label: Text(l10n.newList),
                     onPressed: onCreateNewList,
                     backgroundColor: isCreatingNewList
                         ? theme.colorScheme.primaryContainer
@@ -1504,7 +1513,7 @@ class _ListDestinationPicker extends StatelessWidget {
             else
               ActionChip(
                 avatar: const Icon(Icons.add, size: 16),
-                label: const Text('Create new list'),
+                label: Text(l10n.createNewList),
                 onPressed: onCreateNewList,
                 backgroundColor: isCreatingNewList
                     ? theme.colorScheme.primaryContainer
@@ -1517,7 +1526,7 @@ class _ListDestinationPicker extends StatelessWidget {
                 autofocus: true,
                 onChanged: onNewListNameChanged,
                 decoration: InputDecoration(
-                  hintText: 'List name',
+                  hintText: l10n.listName,
                   isDense: true,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10)),

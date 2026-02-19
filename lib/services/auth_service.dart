@@ -161,7 +161,10 @@ class AuthService {
 
   Future<AuthState> signInWithGoogle() async {
     try {
-      final googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+      final googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+        serverClientId: '37618075189-003tm8gs83qelruo1jkuadf70ur9drr7.apps.googleusercontent.com',
+      );
       final account = await googleSignIn.signIn();
 
       if (account == null) {

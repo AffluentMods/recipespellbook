@@ -203,7 +203,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     try {
       final recipe = await RecipeImportEngine.parseFromUrl(finalUrl);
       _hideLoading();
-      _navigateToEdit(recipe);
+      _showImportPreview([recipe], sourceUrl: finalUrl);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedToImport(e.toString().replaceFirst("Exception: ", "")));
@@ -258,10 +258,11 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       }
 
       _showLoading(l10n.parsingRecipe);
-      final recipe = RecipeImportEngine.parseOcrText(lines.join('\n'));
+      final ocrText = lines.join('\n');
+      final recipe = RecipeImportEngine.parseOcrText(ocrText);
       recipe.imageUrl = imagePath;
       _hideLoading();
-      _navigateToEdit(recipe);
+      _showImportPreview([recipe], sourceText: ocrText);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedProcessImage(e.toString()));
@@ -281,7 +282,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     try {
       final recipe = RecipeImportEngine.parseFromText(text);
       _hideLoading();
-      _navigateToEdit(recipe);
+      _showImportPreview([recipe], sourceText: text);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedToParse(e.toString()));
@@ -353,16 +354,17 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   }
 
   void _showInfoDialog(String message) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         icon: const Icon(Icons.info_outline, size: 32),
-        title: const Text('Export Format'),
+        title: Text(l10n.exportFormat),
         content: Text(message),
         actions: [
           FilledButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Got it'),
+            child: Text(l10n.gotIt),
           ),
         ],
       ),
@@ -381,7 +383,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       final content = await File(path).readAsString();
       final recipe = RecipeImportEngine.parseFromFile(content, filename);
       _hideLoading();
-      _navigateToEdit(recipe);
+      _showImportPreview([recipe], sourceText: content);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedToImport(e.toString()));
@@ -397,8 +399,8 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
       _hideLoading();
       if (recipes.isEmpty) { _showError(l10n.errorNoRecipeFound); return; }
-      if (recipes.length == 1) { _navigateToEdit(recipes.first); return; }
-      _showBulkImportDialog(recipes);
+      // All imports route through preview for Smart Import fallback
+      _showImportPreview(recipes);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedToImport(e.toString()));
@@ -417,14 +419,14 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
         // Fallback: try as generic JSON
         final single = RecipeImportEngine.parseFromFile(content, path.split('/').last);
         if (single.ingredients.isNotEmpty || single.instructions.isNotEmpty) {
-          _navigateToEdit(single);
+          _showImportPreview([single], sourceText: content);
         } else {
           _showError(l10n.errorNoRecipeFound);
         }
         return;
       }
-      if (recipes.length == 1) { _navigateToEdit(recipes.first); return; }
-      _showBulkImportDialog(recipes);
+      // All imports route through preview for Smart Import fallback
+      _showImportPreview(recipes);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedToImport(e.toString()));
@@ -440,15 +442,15 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
       _hideLoading();
       if (recipes.isEmpty) { _showError(l10n.errorNoRecipeFound); return; }
-      if (recipes.length == 1) { _navigateToEdit(recipes.first); return; }
-      _showBulkImportDialog(recipes);
+      // All imports route through preview for Smart Import fallback
+      _showImportPreview(recipes);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedToImport(e.toString()));
     }
   }
 
-  void _showBulkImportDialog(List<ImportedRecipe> recipes) {
+  void _showImportPreview(List<ImportedRecipe> recipes, {String? sourceUrl, String? sourceText}) {
     // Navigate to the full import preview screen
     Navigator.of(context).pop(); // Close the new recipe dialog first
     Navigator.of(context).push(
@@ -457,6 +459,8 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
         builder: (_) => ImportPreviewScreen(
           recipes: recipes,
           cookbookId: widget.cookbookId,
+          sourceUrl: sourceUrl,
+          sourceText: sourceText,
         ),
       ),
     );
@@ -493,8 +497,8 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
       _hideLoading();
       if (recipes.isEmpty) { _showError(l10n.errorNoRecipeFound); return; }
-      if (recipes.length == 1) { _navigateToEdit(recipes.first); return; }
-      _showBulkImportDialog(recipes);
+      // All imports route through preview for Smart Import fallback
+      _showImportPreview(recipes);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedToImport(e.toString()));

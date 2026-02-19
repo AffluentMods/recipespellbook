@@ -5,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/subscription_provider.dart';
+import '../../router/router.dart';
 import '../widgets/app_menu_drawer.dart';
 import '../widgets/rpg/rpg_navigation_shell.dart';
 
@@ -52,43 +53,88 @@ class _AppShellState extends ConsumerState<AppShell> {
     // Initialize RevenueCat SDK
     await ref.read(subscriptionProvider.notifier).initialize();
 
-    // Listen for auth changes → sync RevenueCat identity
+    // Listen for auth changes → sync RevenueCat identity + show feedback
     ref.listenManual(authProvider, (prev, next) {
       final wasSignedIn = prev?.isSignedIn ?? false;
       final isSignedIn = next.isSignedIn;
+      final wasLoading = prev?.isLoading ?? false;
 
       if (isSignedIn && !wasSignedIn && next.user != null) {
         // User just signed in — link RevenueCat
         ref.read(subscriptionProvider.notifier).login(next.user!.id);
+
+        // Show success feedback
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text('Signed in as ${next.user!.displayName}')),
+                ],
+              ),
+              backgroundColor: Colors.green.shade700,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
       } else if (!isSignedIn && wasSignedIn) {
         // User signed out — unlink RevenueCat
         ref.read(subscriptionProvider.notifier).logout();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Signed out'),
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+
+      // Show auth errors
+      if (next.error != null && !next.isLoading && wasLoading) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(next.error!)),
+                ],
+              ),
+              backgroundColor: Colors.red.shade700,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+          // Clear the error after showing
+          ref.read(authProvider.notifier).clearError();
+        }
       }
     });
   }
 
-  /// Dismiss any open modals/bottom sheets/full-screen overlays before navigating tabs
+  /// Dismiss any open modals/bottom sheets before navigating tabs
   void _navigateTo(String path, int index) {
     // Close the end drawer if open
     if (_scaffoldKey.currentState?.isEndDrawerOpen ?? false) {
       _scaffoldKey.currentState?.closeEndDrawer();
     }
 
-    // Pop nested navigator first (catches bottom sheets shown from child screens)
-    try {
-      final nestedNav = Navigator.of(context);
-      if (nestedNav.canPop()) {
-        nestedNav.popUntil((route) => route.isFirst);
-      }
-    } catch (_) {}
+    // Pop bottom sheets / dialogs on the shell navigator (where child screens open them)
+    if (shellNavigatorKey.currentState?.canPop() ?? false) {
+      shellNavigatorKey.currentState!.popUntil((route) => route.isFirst);
+    }
 
-    // Then pop root navigator (catches full-screen modals)
-    try {
-      final rootNav = Navigator.of(context, rootNavigator: true);
-      if (rootNav.canPop()) {
-        rootNav.popUntil((route) => route.isFirst);
-      }
-    } catch (_) {}
+    // Pop full-screen modals on the root navigator
+    if (rootNavigatorKey.currentState?.canPop() ?? false) {
+      rootNavigatorKey.currentState!.popUntil((route) => route.isFirst);
+    }
 
     ref.read(currentNavIndexProvider.notifier).state = index;
     context.go(path);
@@ -96,186 +142,191 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final currentIndex = ref.watch(currentNavIndexProvider);
     final shoppingCountAsync = ref.watch(shoppingBadgeCountProvider);
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return RpgNavigationShell(
         child: Scaffold(
           key: _scaffoldKey,
           body: widget.child,
           endDrawer: const AppMenuDrawer(),
-          bottomNavigationBar: Container(
-            decoration: BoxDecoration(
-              color: isDark
-                  ? theme.scaffoldBackgroundColor
-                  : Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -2),
-                ),
-              ],
+          bottomNavigationBar: _GradientNavBar(
+            currentIndex: currentIndex,
+            shoppingBadge: shoppingCountAsync.when(
+              data: (count) => count > 0 ? count : null,
+              loading: () => null,
+              error: (_, __) => null,
             ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    // Home
-                    _NavItem(
-                      icon: Icons.home_outlined,
-                      selectedIcon: Icons.home_rounded,
-                      label: l10n.navHome,
-                      isSelected: currentIndex == 0,
-                      onTap: () => _navigateTo('/', 0),
-                    ),
-                    // Meal Plan
-                    _NavItem(
-                      icon: Icons.calendar_today_outlined,
-                      selectedIcon: Icons.calendar_today_rounded,
-                      label: l10n.navPlanner,
-                      isSelected: currentIndex == 1,
-                      selectedColor: theme.colorScheme.tertiary,
-                      onTap: () => _navigateTo('/planner', 1),
-                    ),
-                    // Groceries with badge
-                    _NavItem(
-                      icon: Icons.shopping_cart_outlined,
-                      selectedIcon: Icons.shopping_cart_rounded,
-                      label: l10n.navShopping,
-                      isSelected: currentIndex == 2,
-                      badge: shoppingCountAsync.when(
-                        data: (count) => count > 0 ? count : null,
-                        loading: () => null,
-                        error: (_, __) => null,
-                      ),
-                      onTap: () => _navigateTo('/shopping', 2),
-                    ),
-                    // More (Menu)
-                    _NavItem(
-                      icon: Icons.menu_rounded,
-                      selectedIcon: Icons.menu_rounded,
-                      label: l10n.navMenu,
-                      isSelected: false,
-                      onTap: () {
-                        // Close any open sheets/modals
-                        try {
-                          final nestedNav = Navigator.of(context);
-                          if (nestedNav.canPop()) {
-                            nestedNav.popUntil((route) => route.isFirst);
-                          }
-                        } catch (_) {}
-                        try {
-                          final rootNav = Navigator.of(context, rootNavigator: true);
-                          if (rootNav.canPop()) {
-                            rootNav.popUntil((route) => route.isFirst);
-                          }
-                        } catch (_) {}
-                        _scaffoldKey.currentState?.openEndDrawer();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            onTap: (index) {
+              switch (index) {
+                case 0: _navigateTo('/', 0);
+                case 1: _navigateTo('/planner', 1);
+                case 2: _navigateTo('/shopping', 2);
+                case 3:
+                // Menu button
+                  if (shellNavigatorKey.currentState?.canPop() ?? false) {
+                    shellNavigatorKey.currentState!.popUntil((route) => route.isFirst);
+                  }
+                  if (rootNavigatorKey.currentState?.canPop() ?? false) {
+                    rootNavigatorKey.currentState!.popUntil((route) => route.isFirst);
+                  }
+                  _scaffoldKey.currentState?.openEndDrawer();
+              }
+            },
           ),
         )
     );
   }
 }
 
-class _NavItem extends StatelessWidget {
-  final IconData icon;
-  final IconData selectedIcon;
-  final String label;
-  final bool isSelected;
-  final Color? selectedColor;
-  final int? badge;
-  final VoidCallback onTap;
+class _GradientNavBar extends StatelessWidget {
+  final int currentIndex;
+  final int? shoppingBadge;
+  final ValueChanged<int> onTap;
 
-  const _NavItem({
-    required this.icon,
-    required this.selectedIcon,
-    required this.label,
-    required this.isSelected,
-    this.selectedColor,
-    this.badge,
+  const _GradientNavBar({
+    required this.currentIndex,
+    this.shoppingBadge,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = selectedColor ?? theme.colorScheme.primary;
+    final isDark = theme.brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 16 : 12,
-          vertical: 10,
+    // Theme-derived gradient
+    final gradientColors = isDark
+        ? [
+      theme.colorScheme.primary.withValues(alpha: 0.3),
+      theme.colorScheme.tertiary.withValues(alpha: 0.25),
+    ]
+        : [
+      theme.colorScheme.primary.withValues(alpha: 0.08),
+      theme.colorScheme.tertiary.withValues(alpha: 0.12),
+    ];
+
+    final items = [
+      _NavDef(Icons.home_outlined, Icons.home_rounded, l10n.navHome),
+      _NavDef(Icons.calendar_today_outlined, Icons.calendar_today_rounded, l10n.navPlanner),
+      _NavDef(Icons.shopping_cart_outlined, Icons.shopping_cart_rounded, l10n.navShopping),
+      _NavDef(Icons.menu_rounded, Icons.menu_rounded, l10n.navMenu),
+    ];
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: gradientColors,
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
         ),
-        decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.15) : Colors.transparent,
-          borderRadius: BorderRadius.circular(24),
+        border: Border(
+          top: BorderSide(
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
+            width: 0.5,
+          ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Icon with optional badge
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Icon(
-                  isSelected ? selectedIcon : icon,
-                  color: isSelected ? color : theme.colorScheme.outline,
-                  size: 24,
-                ),
-                if (badge != null && badge! > 0)
-                  Positioned(
-                    right: -8,
-                    top: -6,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.tertiary,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-                      child: Text(
-                        badge! > 99 ? '99+' : badge.toString(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          child: Row(
+            children: List.generate(items.length, (i) {
+              final item = items[i];
+              final selected = i == currentIndex && i != 3; // menu never "selected"
+              final badge = i == 2 ? shoppingBadge : null;
+
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => onTap(i),
+                  behavior: HitTestBehavior.opaque,
+                  child: _buildNavItem(
+                    theme: theme,
+                    icon: selected ? item.selectedIcon : item.icon,
+                    label: item.label,
+                    selected: selected,
+                    badge: badge,
                   ),
-              ],
-            ),
-            if (isSelected) ...[
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
                 ),
-              ),
-            ],
-          ],
+              );
+            }),
+          ),
         ),
       ),
     );
   }
+
+  Widget _buildNavItem({
+    required ThemeData theme,
+    required IconData icon,
+    required String label,
+    required bool selected,
+    int? badge,
+  }) {
+    final activeColor = theme.colorScheme.onSurface;
+    final inactiveColor = theme.colorScheme.onSurface.withValues(alpha: 0.45);
+    final color = selected ? activeColor : inactiveColor;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Icon(icon, size: 24, color: color),
+              if (badge != null && badge > 0)
+                Positioned(
+                  right: -8,
+                  top: -6,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.error,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                    child: Text(
+                      badge > 99 ? '99+' : badge.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 3),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+              color: color,
+            ),
+          ),
+          // Active indicator dot
+          const SizedBox(height: 2),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: selected ? 5 : 0,
+            height: selected ? 5 : 0,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NavDef {
+  final IconData icon;
+  final IconData selectedIcon;
+  final String label;
+  const _NavDef(this.icon, this.selectedIcon, this.label);
 }

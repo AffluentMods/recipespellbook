@@ -7,6 +7,7 @@ import 'package:recipespellbook/providers/database_provider.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:recipespellbook/data/nutrition_data.dart';
 import '../../../ui/widgets/nutrition_widgets.dart';
+import '../../ui/widgets/font_size_control.dart';
 import 'rpg/rpg_navigation_shell.dart';
 
 /// Launches cooking mode for a recipe
@@ -225,6 +226,7 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
                 _showNutrition = !_showNutrition;
                 if (_showNutrition) _showIngredients = false;
               }),
+              onFontSize: () => showFontSizeSheet(context),
               onExit: _confirmExit,
             ),
 
@@ -252,7 +254,7 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
               )
                   : _steps.isEmpty
                   ? Center(child: Text(l10n.instructionsEmpty, style: const TextStyle(color: Colors.white)))
-                  : _StepView(step: _steps[_currentStepIndex], stepNumber: _currentStepIndex + 1, totalSteps: _steps.length),
+                  : _StepView(step: _steps[_currentStepIndex], stepNumber: _currentStepIndex + 1, totalSteps: _steps.length, allIngredients: _ingredients),
             ),
 
             // Bottom navigation
@@ -278,6 +280,7 @@ class _TopBar extends StatelessWidget {
   final bool showNutrition;
   final VoidCallback onToggleIngredients;
   final VoidCallback onToggleNutrition;
+  final VoidCallback onFontSize;
   final VoidCallback onExit;
 
   const _TopBar({
@@ -287,6 +290,7 @@ class _TopBar extends StatelessWidget {
     required this.showNutrition,
     required this.onToggleIngredients,
     required this.onToggleNutrition,
+    required this.onFontSize,
     required this.onExit,
   });
 
@@ -318,6 +322,11 @@ class _TopBar extends StatelessWidget {
               ),
               onPressed: onToggleNutrition,
             ),
+          // Font size
+          IconButton(
+            icon: const Icon(Icons.text_fields, color: Colors.white, size: 20),
+            onPressed: onFontSize,
+          ),
           // Ingredients toggle
           IconButton(
             icon: Icon(
@@ -373,31 +382,143 @@ class _TimerBar extends StatelessWidget {
   }
 }
 
-class _StepView extends StatelessWidget {
+class _StepView extends ConsumerWidget {
   final Step step;
   final int stepNumber;
   final int totalSteps;
+  final List<Ingredient> allIngredients;
 
-  const _StepView({required this.step, required this.stepNumber, required this.totalSteps});
+  const _StepView({required this.step, required this.stepNumber, required this.totalSteps, required this.allIngredients});
+
+  /// Fuzzy-match ingredients mentioned in the step instruction.
+  /// Splits ingredient names into tokens and checks if any appear in the step text.
+  List<Ingredient> _matchIngredients() {
+    final instruction = step.instruction.toLowerCase();
+    final matched = <Ingredient>[];
+
+    for (final ing in allIngredients) {
+      final name = ing.name.toLowerCase().trim();
+      if (name.isEmpty) continue;
+
+      // Direct substring match (handles "chicken breast", "olive oil", etc.)
+      if (instruction.contains(name)) {
+        matched.add(ing);
+        continue;
+      }
+
+      // Token match: split ingredient name into words and check if the
+      // significant ones appear in the instruction. Skip short common words.
+      final tokens = name.split(RegExp(r'[\s,/]+'))
+          .where((t) => t.length > 2)
+          .where((t) => !_commonWords.contains(t))
+          .toList();
+
+      // If most tokens match, consider it a hit
+      if (tokens.isNotEmpty) {
+        final matchCount = tokens.where((t) => instruction.contains(t)).length;
+        if (matchCount >= (tokens.length * 0.6).ceil() && matchCount > 0) {
+          matched.add(ing);
+        }
+      }
+    }
+
+    return matched;
+  }
+
+  static const _commonWords = {
+    // English
+    'the', 'and', 'for', 'with', 'cut', 'all', 'fresh', 'dried',
+    'large', 'small', 'medium', 'whole', 'half', 'cup', 'cups',
+    'purpose', 'into', 'pieces', 'sliced', 'diced', 'chopped',
+    'minced', 'optional', 'taste', 'needed',
+    // German
+    'und', 'mit', 'für', 'alle', 'frisch', 'getrocknet',
+    'groß', 'große', 'klein', 'kleine', 'mittel', 'ganz', 'halb',
+    'tasse', 'tassen', 'stück', 'stücke', 'geschnitten', 'gewürfelt',
+    'gehackt', 'fein', 'nach', 'geschmack', 'bedarf',
+    // Spanish
+    'con', 'para', 'todo', 'toda', 'fresco', 'fresca', 'seco', 'seca',
+    'grande', 'pequeño', 'pequeña', 'mediano', 'mediana', 'entero', 'entera', 'medio', 'media',
+    'taza', 'tazas', 'trozo', 'trozos', 'cortado', 'cortada', 'picado', 'picada',
+    'opcional', 'gusto', 'necesario',
+  };
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final fontScale = ref.watch(recipeFontScaleProvider);
+    final matched = _matchIngredients();
+
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          const SizedBox(height: 16),
           Text('${l10n.stepNumber(stepNumber)} / $totalSteps', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 16)),
-          const SizedBox(height: 32),
-          Text(step.instruction, style: const TextStyle(color: Colors.white, fontSize: 28, height: 1.4), textAlign: TextAlign.center),
+
+          // Matched ingredients chips
+          if (matched.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              ),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: matched.map((ing) {
+                  final label = [
+                    if (ing.amount != null) ing.amount!,
+                    if (ing.unit != null) ing.unit!,
+                    ing.name,
+                  ].join(' ');
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8A860).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFE8A860).withValues(alpha: 0.3)),
+                    ),
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        color: const Color(0xFFE8A860),
+                        fontSize: 13 * fontScale,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+
+          // Instruction text
+          Expanded(
+            child: Center(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Text(
+                    step.instruction,
+                    style: TextStyle(color: Colors.white, fontSize: 28 * fontScale, height: 1.4),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _IngredientsView extends StatelessWidget {
+class _IngredientsView extends ConsumerWidget {
   final List<Ingredient> ingredients;
   final Set<String> checkedIds;
   final Function(String) onToggle;
@@ -405,7 +526,8 @@ class _IngredientsView extends StatelessWidget {
   const _IngredientsView({required this.ingredients, required this.checkedIds, required this.onToggle});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final fontScale = ref.watch(recipeFontScaleProvider);
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: ingredients.length,
@@ -426,7 +548,7 @@ class _IngredientsView extends StatelessWidget {
                 Expanded(
                   child: Text(
                     [if (ing.amount != null) ing.amount!, if (ing.unit != null) ing.unit!, ing.name].join(' '),
-                    style: TextStyle(color: isChecked ? Colors.white.withValues(alpha: 0.5) : Colors.white, fontSize: 18, decoration: isChecked ? TextDecoration.lineThrough : null),
+                    style: TextStyle(color: isChecked ? Colors.white.withValues(alpha: 0.5) : Colors.white, fontSize: 18 * fontScale, decoration: isChecked ? TextDecoration.lineThrough : null),
                   ),
                 ),
               ],

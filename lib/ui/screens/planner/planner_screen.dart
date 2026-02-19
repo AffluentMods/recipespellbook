@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:drift/drift.dart' as drift;
+import 'package:intl/intl.dart';
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../widgets/placeholder_image.dart';
+import '../../../utils/default_recipe_images.dart';
 import '../../../services/shopping_list_generator.dart';
 
 // ============ PROVIDERS ============
@@ -135,15 +137,14 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: _ModernFAB(
         onPressed: () => _showAddMealSheet(context, selectedDate),
-        backgroundColor: const Color(0xFFE8A860),
-        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
 
   void _showFullCalendar(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final selectedDate = ref.read(selectedPlannerDateProvider);
 
     showModalBottomSheet(
@@ -168,14 +169,14 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      Text('Calendar', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                      Text(l10n.calendar, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                       const Spacer(),
                       TextButton(
                         onPressed: () {
                           Navigator.pop(ctx);
                           _goToToday();
                         },
-                        child: const Text('Today'),
+                        child: Text(l10n.today),
                       ),
                     ],
                   ),
@@ -223,15 +224,15 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(Icons.share),
-                title: const Text('Share meal plan'),
+                title: Text(l10n.shareMealPlan),
                 onTap: () {
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Coming soon!'), duration: Duration(seconds: 2)));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.comingSoon), duration: Duration(seconds: 2)));
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.add_shopping_cart),
-                title: const Text('Add week to shopping list'),
+                title: Text(l10n.addWeekToShoppingList),
                 onTap: () async {
                   Navigator.pop(ctx);
                   // Collect all recipe IDs from this week's meal plans
@@ -246,7 +247,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                   if (recipeIds.isEmpty) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('No recipes planned this week'), duration: Duration(seconds: 2)),
+                        SnackBar(content: Text(l10n.noRecipesPlannedThisWeek), duration: Duration(seconds: 2)),
                       );
                     }
                     return;
@@ -263,7 +264,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.delete_sweep, color: Colors.red),
-                title: const Text('Clear this week', style: TextStyle(color: Colors.red)),
+                title: Text(l10n.clearThisWeek, style: const TextStyle(color: Colors.red)),
                 onTap: () {
                   Navigator.pop(ctx);
                   _confirmClearWeek(context);
@@ -278,15 +279,16 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   }
 
   void _confirmClearWeek(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final mealPlanDao = ref.read(mealPlanDaoProvider);
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Clear this week?'),
-        content: const Text('This will remove all meals planned for this week. This cannot be undone.'),
+        title: Text(l10n.clearThisWeek),
+        content: Text(l10n.clearWeekWarning),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
           FilledButton(
             onPressed: () async {
               Navigator.pop(ctx);
@@ -296,11 +298,11 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 await mealPlanDao.deleteMealPlan(meal.id);
               }
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Week cleared'), duration: Duration(seconds: 2)));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.plannerWeekCleared), duration: Duration(seconds: 2)));
               }
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Clear'),
+            child: Text(l10n.actionClear),
           ),
         ],
       ),
@@ -339,8 +341,8 @@ class _PlannerHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final weekEnd = weekStart.add(const Duration(days: 6));
 
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    final weekLabel = '${months[weekStart.month - 1]} ${weekStart.day} - ${months[weekEnd.month - 1]} ${weekEnd.day}';
+    final locale = Localizations.localeOf(context).toString();
+    final weekLabel = '${DateFormat.MMMd(locale).format(weekStart)} - ${DateFormat.MMMd(locale).format(weekEnd)}';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
@@ -418,7 +420,10 @@ class _WeekStrip extends StatelessWidget {
           final isToday = dateNormalized == todayNormalized;
           final mealCount = mealCounts[dateNormalized] ?? 0;
 
-          final dayNames = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+          final dayNames = List.generate(7, (i) {
+            final d = weekStart.add(Duration(days: i));
+            return DateFormat.E(Localizations.localeOf(context).toString()).format(d)[0].toUpperCase();
+          });
 
           return Expanded(
             child: GestureDetector(
@@ -501,15 +506,14 @@ class _DateHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final today = DateTime.now();
     final isToday = date.year == today.year && date.month == today.month && date.day == today.day;
 
-    final weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    final months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
-    final dayName = weekdays[date.weekday - 1];
-    final monthName = months[date.month - 1];
+    final locale = Localizations.localeOf(context).toString();
+    final dayName = DateFormat.EEEE(locale).format(date);
+    final monthName = DateFormat.MMMM(locale).format(date);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
@@ -534,8 +538,8 @@ class _DateHeader extends StatelessWidget {
                         color: const Color(0xFFE8A860),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Text(
-                        'TODAY',
+                      child: Text(
+                        l10n.todayBadge,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 10,
@@ -558,7 +562,7 @@ class _DateHeader extends StatelessWidget {
           if (!isToday)
             TextButton(
               onPressed: onTodayTap,
-              child: const Text('Go to today'),
+              child: Text(l10n.goToToday),
             ),
         ],
       ),
@@ -581,6 +585,7 @@ class _MealsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     // Group by meal type
     final grouped = <String, List<MealPlanWithRecipe>>{};
     for (final plan in plans) {
@@ -589,7 +594,7 @@ class _MealsList extends ConsumerWidget {
     }
 
     // Order: Breakfast, Lunch, Dinner, Snack
-    final orderedTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
+    final orderedTypes = ['Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snack'];
     final sortedKeys = grouped.keys.toList()
       ..sort((a, b) {
         final aIdx = orderedTypes.indexOf(a);
@@ -618,7 +623,7 @@ class _MealsList extends ConsumerWidget {
           child: OutlinedButton.icon(
             onPressed: onAddMeal,
             icon: const Icon(Icons.add),
-            label: const Text('Add another meal'),
+            label: Text(l10n.addAnotherMeal),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
@@ -641,6 +646,7 @@ class _MealTypeHeader extends StatelessWidget {
       case 'breakfast': return '🌅';
       case 'lunch': return '☀️';
       case 'dinner': return '🌙';
+      case 'dessert': return '🍰';
       case 'snack': return '🍪';
       default: return '🍽️';
     }
@@ -679,6 +685,7 @@ class _MealTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final recipe = plan.recipe;
     final mealPlanDao = ref.read(mealPlanDaoProvider);
@@ -708,11 +715,14 @@ class _MealTile extends ConsumerWidget {
               height: 56,
               child: recipe?.imagePath != null && File(recipe!.imagePath!).existsSync()
                   ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
+                  : defaultRecipeImageAsset(recipe?.id ?? '') != null
+                  ? Image.asset(defaultRecipeImageAsset(recipe!.id)!, fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const RecipePlaceholderImage(height: 56, width: 56))
                   : const RecipePlaceholderImage(height: 56, width: 56),
             ),
           ),
           title: Text(
-            recipe?.title ?? plan.mealPlan.name ?? 'Meal',
+            recipe?.title ?? plan.mealPlan.name ?? l10n.meal,
             style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           subtitle: recipe != null
@@ -746,6 +756,7 @@ class _EmptyDayState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Center(
@@ -761,14 +772,14 @@ class _EmptyDayState extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'No meals planned',
+              l10n.noMealsPlanned,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Tap + to add a meal for this day',
+              l10n.tapToAddMeal,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.outline,
               ),
@@ -777,7 +788,7 @@ class _EmptyDayState extends StatelessWidget {
             FilledButton.icon(
               onPressed: onAddMeal,
               icon: const Icon(Icons.add),
-              label: const Text('Add meal'),
+              label: Text(l10n.addMeal),
             ),
           ],
         ),
@@ -806,8 +817,9 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
     final theme = Theme.of(context);
     final recipeDao = ref.watch(recipeDaoProvider);
 
-    final weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    final dayName = weekdays[widget.date.weekday - 1];
+    final locale = Localizations.localeOf(context).toString();
+    final l10n = AppLocalizations.of(context)!;
+    final dayName = DateFormat.EEEE(locale).format(widget.date);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.85,
@@ -840,10 +852,11 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
                     Wrap(
                       spacing: 8,
                       children: [
-                        _MealTypeChip(emoji: '🌅', label: 'Breakfast', isSelected: _selectedMealType == 'Breakfast', onTap: () => setState(() => _selectedMealType = 'Breakfast')),
-                        _MealTypeChip(emoji: '☀️', label: 'Lunch', isSelected: _selectedMealType == 'Lunch', onTap: () => setState(() => _selectedMealType = 'Lunch')),
-                        _MealTypeChip(emoji: '🌙', label: 'Dinner', isSelected: _selectedMealType == 'Dinner', onTap: () => setState(() => _selectedMealType = 'Dinner')),
-                        _MealTypeChip(emoji: '🍪', label: 'Snack', isSelected: _selectedMealType == 'Snack', onTap: () => setState(() => _selectedMealType = 'Snack')),
+                        _MealTypeChip(emoji: '🌅', label: l10n.mealTypeBreakfast, isSelected: _selectedMealType == 'Breakfast', onTap: () => setState(() => _selectedMealType = 'Breakfast')),
+                        _MealTypeChip(emoji: '☀️', label: l10n.mealTypeLunch, isSelected: _selectedMealType == 'Lunch', onTap: () => setState(() => _selectedMealType = 'Lunch')),
+                        _MealTypeChip(emoji: '🌙', label: l10n.mealTypeDinner, isSelected: _selectedMealType == 'Dinner', onTap: () => setState(() => _selectedMealType = 'Dinner')),
+                        _MealTypeChip(emoji: '🍰', label: l10n.mealTypeDessert, isSelected: _selectedMealType == 'Dessert', onTap: () => setState(() => _selectedMealType = 'Dessert')),
+                        _MealTypeChip(emoji: '🍪', label: l10n.mealTypeSnack, isSelected: _selectedMealType == 'Snack', onTap: () => setState(() => _selectedMealType = 'Snack')),
                       ],
                     ),
 
@@ -852,7 +865,7 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
                     // Search
                     TextField(
                       decoration: InputDecoration(
-                        hintText: 'Search recipes...',
+                        hintText: l10n.searchRecipes,
                         prefixIcon: const Icon(Icons.search),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -882,7 +895,7 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
                     if (recipes.isEmpty) {
                       return Center(
                         child: Text(
-                          _searchQuery.isEmpty ? 'No recipes yet' : 'No recipes found',
+                          _searchQuery.isEmpty ? l10n.noRecipesYet : l10n.noRecipesFound,
                           style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
                         ),
                       );
@@ -910,6 +923,7 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
   }
 
   void _addRecipeToMealPlan(Recipe recipe) async {
+    final l10n = AppLocalizations.of(context)!;
     final mealPlanDao = ref.read(mealPlanDaoProvider);
     final id = 'meal_${DateTime.now().millisecondsSinceEpoch}';
 
@@ -924,7 +938,7 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${recipe.title} added to $_selectedMealType'),
+          content: Text(l10n.plannerMealAdded(recipe.title, _selectedMealType)),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -1000,6 +1014,9 @@ class _RecipeSelectTile extends StatelessWidget {
           height: 56,
           child: recipe.imagePath != null && File(recipe.imagePath!).existsSync()
               ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
+              : defaultRecipeImageAsset(recipe.id) != null
+              ? Image.asset(defaultRecipeImageAsset(recipe.id)!, fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const RecipePlaceholderImage(height: 56, width: 56))
               : const RecipePlaceholderImage(height: 56, width: 56),
         ),
       ),
@@ -1013,6 +1030,56 @@ class _RecipeSelectTile extends StatelessWidget {
       ),
       trailing: const Icon(Icons.add_circle_outline, color: Color(0xFFE8A860)),
       onTap: onTap,
+    );
+  }
+}
+// ═══════════════════════════════════════════════════════════════════
+// MODERN FAB
+// ═══════════════════════════════════════════════════════════════════
+
+class _ModernFAB extends StatelessWidget {
+  final VoidCallback onPressed;
+  final String? label;
+  final IconData icon;
+  const _ModernFAB({required this.onPressed, this.label, this.icon = Icons.add});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bg = theme.colorScheme.primary;
+    final fg = theme.colorScheme.onPrimary;
+
+    if (label != null) {
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: bg.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))],
+        ),
+        child: FloatingActionButton.extended(
+          onPressed: onPressed,
+          backgroundColor: bg,
+          foregroundColor: fg,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          icon: Icon(icon, size: 22),
+          label: Text(label!, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: bg.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))],
+      ),
+      child: FloatingActionButton(
+        onPressed: onPressed,
+        backgroundColor: bg,
+        foregroundColor: fg,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Icon(icon, size: 26),
+      ),
     );
   }
 }

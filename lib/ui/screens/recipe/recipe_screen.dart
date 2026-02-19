@@ -23,6 +23,8 @@ import '../settings/ingredient_substitutions_screen.dart';
 import '../../widgets/nutrition_calculation_sheet.dart';
 import '../../../data/localized_units.dart';
 import '../../../services/image_service.dart';
+import '../../../services/recipe_print_service.dart';
+import '../../../ui/widgets/cooking_mode_screen.dart';
 
 // ============ DISMISSED ALLERGY WARNINGS ============
 // Canonical provider is in allergy_settings_screen.dart — imported via:
@@ -283,6 +285,27 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     ref.read(settingsProvider.notifier).setRecipeLayoutMode(newMode);
   }
 
+  Future<void> _printRecipe() async {
+    if (_recipe == null) return;
+    final l10n = AppLocalizations.of(context)!;
+    await RecipePrintService.printRecipe(
+      recipe: _recipe!,
+      ingredients: _ingredients,
+      steps: _steps,
+      scale: _scaleFactor,
+      labels: {
+        'ingredients': l10n.printLabelIngredients,
+        'instructions': l10n.printLabelInstructions,
+        'notes': l10n.printLabelNotes,
+        'prep': l10n.printLabelPrep,
+        'cook': l10n.printLabelCook,
+        'footer': l10n.printLabelFooter,
+        'page': l10n.printLabelPage,
+        'of': l10n.printLabelOf,
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -314,6 +337,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           ref: ref,
           onEdit: _navigateToEdit,
           onReload: _loadRecipe,
+          onPrint: _printRecipe,
           isNerdMode: isNerdMode,
           isTabbed: false,
           onToggleLayout: _toggleLayout,
@@ -447,6 +471,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           ref: ref,
           onEdit: _navigateToEdit,
           onReload: _loadRecipe,
+          onPrint: _printRecipe,
           isNerdMode: isNerdMode,
           isTabbed: true,
           onToggleLayout: _toggleLayout,
@@ -1243,6 +1268,7 @@ class _RecipeAppBar extends StatelessWidget {
   final WidgetRef ref;
   final VoidCallback onEdit;
   final VoidCallback onReload;
+  final VoidCallback? onPrint;
   final bool isNerdMode;
   final bool isTabbed;
   final VoidCallback? onToggleLayout;
@@ -1252,6 +1278,7 @@ class _RecipeAppBar extends StatelessWidget {
     required this.ref,
     required this.onEdit,
     required this.onReload,
+    this.onPrint,
     this.isNerdMode = false,
     this.isTabbed = false,
     this.onToggleLayout,
@@ -1367,7 +1394,10 @@ class _RecipeAppBar extends StatelessWidget {
             icon: const Icon(Icons.more_vert, color: Colors.white),
             onSelected: (value) => _handleMenuAction(context, value),
             itemBuilder: (context) => [
-              PopupMenuItem(value: 'layout', child: Row(children: [Icon(isTabbed ? Icons.view_agenda_outlined : Icons.tab_outlined), const SizedBox(width: 12), Text(isTabbed ? 'Stacked Layout' : 'Tabbed Layout')])),
+              PopupMenuItem(value: 'cook', child: Row(children: [const Icon(Icons.local_fire_department_outlined), const SizedBox(width: 12), Text(l10n.cookingMode)])),
+              const PopupMenuDivider(),
+              PopupMenuItem(value: 'layout', child: Row(children: [Icon(isTabbed ? Icons.view_agenda_outlined : Icons.tab_outlined), const SizedBox(width: 12), Text(isTabbed ? l10n.stackedLayout : l10n.tabbedLayout)])),
+              PopupMenuItem(value: 'print', child: Row(children: [const Icon(Icons.print_outlined), const SizedBox(width: 12), Text(l10n.printRecipe)])),
               PopupMenuItem(value: 'pin', child: Row(children: [Icon(recipe.isPinned ? Icons.push_pin : Icons.push_pin_outlined), const SizedBox(width: 12), Text(recipe.isPinned ? l10n.recipeUnpin : l10n.recipePin)])),
               PopupMenuItem(value: 'duplicate', child: Row(children: [const Icon(Icons.copy), const SizedBox(width: 12), Text(l10n.recipeDuplicate)])),
               const PopupMenuDivider(),
@@ -1382,8 +1412,14 @@ class _RecipeAppBar extends StatelessWidget {
   void _handleMenuAction(BuildContext context, String action) async {
     final l10n = AppLocalizations.of(context)!;
     switch (action) {
+      case 'cook':
+        launchCookingMode(context, recipe.id);
+        break;
       case 'layout':
         onToggleLayout?.call();
+        break;
+      case 'print':
+        onPrint?.call();
         break;
       case 'pin':
         await ref.read(recipeDaoProvider).togglePin(recipe.id, !recipe.isPinned);

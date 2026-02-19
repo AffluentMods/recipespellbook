@@ -1474,16 +1474,22 @@ class _ModernFAB extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 60, height: 60,
-        decoration: BoxDecoration(
-          color: const Color(0xFFE8A860),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: const Color(0xFFE8A860).withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))],
-        ),
-        child: const Icon(Icons.add, color: Colors.white, size: 32),
+    final theme = Theme.of(context);
+    final bg = theme.colorScheme.primary;
+    final fg = theme.colorScheme.onPrimary;
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: bg.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))],
+      ),
+      child: FloatingActionButton(
+        onPressed: onTap,
+        backgroundColor: bg,
+        foregroundColor: fg,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Icon(Icons.add, size: 26, color: fg),
       ),
     );
   }

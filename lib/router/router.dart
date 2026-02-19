@@ -41,11 +41,11 @@ import '../ui/screens/rpg/rpg_cosmetics_screen.dart';
 import '../ui/screens/rpg/rpg_leaderboard_screen.dart';
 import '../ui/screens/rpg/rpg_boss_screen.dart';
 
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final _shellNavigatorKey = GlobalKey<NavigatorState>();
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+final shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final router = GoRouter(
-  navigatorKey: _rootNavigatorKey,
+  navigatorKey: rootNavigatorKey,
   initialLocation: '/splash',
   routes: [
     // Search (outside shell)
@@ -251,7 +251,7 @@ final router = GoRouter(
 
     // Main shell with bottom navigation
     ShellRoute(
-      navigatorKey: _shellNavigatorKey,
+      navigatorKey: shellNavigatorKey,
       builder: (context, state, child) => AppShell(child: child),
       routes: [
         GoRoute(
@@ -296,7 +296,7 @@ final router = GoRouter(
     GoRoute(
       path: '/scan-barcode',
       name: 'scan-barcode',
-      parentNavigatorKey: _rootNavigatorKey,
+      parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const BarcodeScannerScreen(),
     ),
 
@@ -304,7 +304,7 @@ final router = GoRouter(
     GoRoute(
       path: '/kroger-callback',
       name: 'kroger-callback',
-      parentNavigatorKey: _rootNavigatorKey,
+      parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) {
         final code = state.uri.queryParameters['code'];
         final error = state.uri.queryParameters['error'];
@@ -316,7 +316,7 @@ final router = GoRouter(
     GoRoute(
       path: '/settings',
       name: 'settings',
-      parentNavigatorKey: _rootNavigatorKey,
+      parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const SettingsScreen(),
     ),
 
@@ -324,7 +324,7 @@ final router = GoRouter(
     GoRoute(
       path: '/recipe/:id',
       name: 'recipe',
-      parentNavigatorKey: _rootNavigatorKey,
+      parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) {
         final id = state.pathParameters['id']!;
         return RecipeScreen(recipeId: id);
@@ -347,7 +347,7 @@ final router = GoRouter(
     GoRoute(
       path: '/recipe/:id/edit',
       name: 'recipe-edit',
-      parentNavigatorKey: _rootNavigatorKey,
+      parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) {
         final id = state.pathParameters['id']!;
         return RecipeEditScreen(recipeId: id);
@@ -358,7 +358,7 @@ final router = GoRouter(
     GoRoute(
       path: '/cookbook/:cookbookId/new-recipe',
       name: 'new-recipe',
-      parentNavigatorKey: _rootNavigatorKey,
+      parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) {
         final cookbookId = state.pathParameters['cookbookId']!;
         final extra = state.extra as Map<String, dynamic>?;

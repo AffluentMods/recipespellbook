@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "37618075189-5r0o3t0eq7b3nnoc3bhojsc8m2fns9gl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.affluentlabs.recipespellbook",
+            "certificate_hash": "87fa52d0e900031c6227d0ce4f3ebda6a81d12f2"
+          }
+        },
+        {
           "client_id": "37618075189-jnq6tb0phjcn607fu3njhn9a5vjk6uee.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

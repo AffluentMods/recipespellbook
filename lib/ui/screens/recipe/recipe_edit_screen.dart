@@ -106,12 +106,13 @@ class _ImageCropDialogState extends State<_ImageCropDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: const Text('Preview Photo'),
+        title: Text(l10n.previewPhoto),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.pop(context, null),
@@ -156,7 +157,7 @@ class _ImageCropDialogState extends State<_ImageCropDialog> {
                     child: OutlinedButton.icon(
                       onPressed: _isSaving ? null : () => Navigator.pop(context, null),
                       icon: const Icon(Icons.refresh),
-                      label: const Text('Retake'),
+                      label: Text(l10n.retake),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
                         side: const BorderSide(color: Colors.white54),
@@ -915,7 +916,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         context.pop(true);
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error saving recipe: $e')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${l10n.errorSavingRecipe}: $e')));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -1798,6 +1799,7 @@ class _PhotoPicker extends StatelessWidget {
   const _PhotoPicker({required this.imagePath, this.defaultAssetPath, required this.onImageSelected});
   @override Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final hasImage = imagePath != null;
     final hasAsset = defaultAssetPath != null;
     final showImage = hasImage || hasAsset;
@@ -1824,9 +1826,9 @@ class _PhotoPicker extends StatelessWidget {
             ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Container(width: 64, height: 64, decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), shape: BoxShape.circle), child: Icon(Icons.add_photo_alternate_outlined, size: 32, color: theme.colorScheme.primary)),
           const SizedBox(height: 12),
-          Text('Add Photo', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.primary)),
+          Text(l10n.addPhoto, style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.primary)),
           const SizedBox(height: 4),
-          Text('Tap to select from gallery or camera', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+          Text(l10n.tapToSelectPhoto, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
         ])
             : Stack(children: [
           // Show "Default" badge for asset images
@@ -1834,7 +1836,7 @@ class _PhotoPicker extends StatelessWidget {
             Positioned(top: 8, left: 8, child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(8)),
-              child: const Text('Default', style: TextStyle(color: Colors.white70, fontSize: 11)),
+              child: Text(l10n.defaultLabel, style: const TextStyle(color: Colors.white70, fontSize: 11)),
             )),
           Positioned(top: 8, right: 8, child: Row(children: [_ImageActionButton(icon: Icons.edit, onTap: () => _showImageOptions(context)), const SizedBox(width: 8), _ImageActionButton(icon: Icons.close, onTap: () => onImageSelected(null))])),
         ]),
@@ -1842,9 +1844,10 @@ class _PhotoPicker extends StatelessWidget {
     );
   }
   void _showImageOptions(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(context: context, builder: (ctx) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-      ListTile(leading: const Icon(Icons.photo_library), title: const Text('Choose from gallery'), onTap: () { Navigator.pop(ctx); _pickImageWithPreview(context, ImageSource.gallery); }),
-      ListTile(leading: const Icon(Icons.camera_alt), title: const Text('Take a photo'), onTap: () { Navigator.pop(ctx); _pickImageWithPreview(context, ImageSource.camera); }),
+      ListTile(leading: const Icon(Icons.photo_library), title: Text(l10n.chooseFromGallery), onTap: () { Navigator.pop(ctx); _pickImageWithPreview(context, ImageSource.gallery); }),
+      ListTile(leading: const Icon(Icons.camera_alt), title: Text(l10n.takePhoto), onTap: () { Navigator.pop(ctx); _pickImageWithPreview(context, ImageSource.camera); }),
     ])));
   }
   Future<void> _pickImageWithPreview(BuildContext context, ImageSource source) async {
@@ -1868,8 +1871,9 @@ class _RatingSelector extends StatelessWidget {
   const _RatingSelector({required this.rating, required this.onChanged});
   @override Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text('Rating', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+      Text(l10n.rating, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
       const SizedBox(height: 8),
       Row(children: List.generate(5, (index) {
         final starIndex = index + 1;
@@ -1904,6 +1908,7 @@ class _IngredientRow extends StatelessWidget {
 
   @override Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Padding(padding: const EdgeInsets.only(bottom: 8), child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1931,7 +1936,7 @@ class _IngredientRow extends StatelessWidget {
                   child: Row(children: [
                     Icon(Icons.link, size: 18, color: theme.colorScheme.primary),
                     const SizedBox(width: 8),
-                    const Text('Link Recipe'),
+                    Text(l10n.linkRecipe),
                   ]),
                 ),
               PopupMenuItem(
@@ -1939,7 +1944,7 @@ class _IngredientRow extends StatelessWidget {
                 child: Row(children: [
                   Icon(Icons.delete_outline, size: 18, color: theme.colorScheme.error),
                   const SizedBox(width: 8),
-                  const Text('Delete'),
+                  Text(l10n.actionDelete),
                 ]),
               ),
             ],
@@ -1991,10 +1996,11 @@ class _AddIngredientButton extends StatelessWidget {
   const _AddIngredientButton({required this.onTap});
   @override Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(onTap: onTap, child: Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(border: Border.all(color: theme.colorScheme.outlineVariant), borderRadius: BorderRadius.circular(12)),
-      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.add, color: theme.colorScheme.primary, size: 20), const SizedBox(width: 8), Text('Add Ingredient', style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.primary))]),
+      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.add, color: theme.colorScheme.primary, size: 20), const SizedBox(width: 8), Text(l10n.addIngredient, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.primary))]),
     ));
   }
 }
@@ -2138,11 +2144,12 @@ class _RecipeLinkScreenState extends State<_RecipeLinkScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final filtered = _filteredAvailable;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Link to "${widget.ingredientName}"'),
+        title: Text(l10n.linkToIngredient(widget.ingredientName)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context, true),

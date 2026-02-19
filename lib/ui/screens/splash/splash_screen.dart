@@ -149,17 +149,19 @@ class _SplashScreenState extends State<SplashScreen>
           return Opacity(
             opacity: _exitFade.value,
             child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildIconWithGlow(),
-                  const SizedBox(height: 36),
-                  _buildTitle(),
-                  const SizedBox(height: 14),
-                  _buildDivider(),
-                  const SizedBox(height: 14),
-                  _buildTagline(),
-                ],
+              child: FittedBox(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildIconWithGlow(),
+                    const SizedBox(height: 36),
+                    _buildTitle(),
+                    const SizedBox(height: 14),
+                    _buildDivider(),
+                    const SizedBox(height: 14),
+                    _buildTagline(),
+                  ],
+                ),
               ),
             ),
           );
