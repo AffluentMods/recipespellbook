@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:share_handler/share_handler.dart';
 import 'router/router.dart';
 import 'theme/app_theme.dart';
 import 'providers/settings_provider.dart';
@@ -14,6 +15,10 @@ import 'providers/database_provider.dart';
 import 'providers/sync_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/subscription_provider.dart';
+
+/// Holds a URL shared from another app (e.g. Instagram, browser).
+/// The URL import screen should read this on init and pre-fill its text field.
+final sharedUrlProvider = StateProvider<String?>((ref) => null);
 
 // Provider to hold shared recipe data (for future share intent)
 final sharedRecipeProvider = StateProvider<Map<String, dynamic>?>((ref) => null);
@@ -120,6 +125,64 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
 
     // 5. Auto-sync on launch if eligible
     ref.read(syncProvider.notifier).autoSync();
+
+    // 6. Wire up share intent handling
+    _initShareHandler();
+  }
+
+  // ── Share intent handling ──────────────────────────────────────────
+  void _initShareHandler() {
+    final handler = ShareHandlerPlatform.instance;
+
+    // Cold start — app was launched via share
+    handler.getInitialSharedMedia().then((SharedMedia? media) {
+      if (media != null) _handleSharedMedia(media);
+    });
+
+    // Warm start — app already running, user shares to it
+    handler.sharedMediaStream.listen((SharedMedia media) {
+      _handleSharedMedia(media);
+    });
+  }
+
+  void _handleSharedMedia(SharedMedia media) {
+    // 1. Check for shared text/URL
+    final content = media.content?.trim();
+    if (content != null && content.isNotEmpty) {
+      final url = _extractUrl(content);
+      if (url != null) {
+        // Set the shared URL so the import screen can pre-fill it
+        ref.read(sharedUrlProvider.notifier).state = url;
+        router.push('/import/url');
+        return;
+      }
+      // Plain text without URL — route to AI import
+      ref.read(sharedUrlProvider.notifier).state = content;
+      router.push('/import/ai');
+      return;
+    }
+
+    // 2. Check for shared images (for OCR)
+    if (media.attachments != null && media.attachments!.isNotEmpty) {
+      final firstImage = media.attachments!.first;
+      if (firstImage?.path != null) {
+        // Store image path and route to image import
+        ref.read(sharedUrlProvider.notifier).state = firstImage!.path;
+        router.push('/import/ai');
+        return;
+      }
+    }
+  }
+
+  /// Extracts the first URL from shared text.
+  /// Handles cases like "Check out this recipe! https://example.com/recipe"
+  String? _extractUrl(String text) {
+    final urlPattern = RegExp(
+      r'https?://[^\s<>"{}|\\^`\[\]]+',
+      caseSensitive: false,
+    );
+    final match = urlPattern.firstMatch(text);
+    return match?.group(0);
   }
 
   @override
