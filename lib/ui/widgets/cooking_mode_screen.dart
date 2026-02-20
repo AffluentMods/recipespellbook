@@ -182,18 +182,7 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
   }
 
   void _confirmExit() {
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.cookingExitTitle),
-        content: Text(l10n.cookingExitMessage),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
-          FilledButton(onPressed: () { Navigator.pop(ctx); Navigator.pop(context); }, child: Text(l10n.cookingExit)),
-        ],
-      ),
-    );
+    Navigator.pop(context);
   }
 
   @override
@@ -391,46 +380,131 @@ class _StepView extends ConsumerWidget {
   const _StepView({required this.step, required this.stepNumber, required this.totalSteps, required this.allIngredients});
 
   /// Fuzzy-match ingredients mentioned in the step instruction.
-  /// Splits ingredient names into tokens and checks if any appear in the step text.
+  /// Uses stemming, bidirectional token matching, and smart thresholds.
   List<Ingredient> _matchIngredients() {
     final instruction = step.instruction.toLowerCase();
+    final instructionTokens = instruction
+        .split(RegExp(r'[\s,.\-—–;:!?()]+'))
+        .where((t) => t.length > 2)
+        .map(_stem)
+        .toSet();
     final matched = <Ingredient>[];
 
     for (final ing in allIngredients) {
       final name = ing.name.toLowerCase().trim();
       if (name.isEmpty) continue;
 
-      // Direct substring match (handles "chicken breast", "olive oil", etc.)
+      // 1. Direct substring match (handles multi-word like "olive oil")
       if (instruction.contains(name)) {
         matched.add(ing);
         continue;
       }
 
-      // Token match: split ingredient name into words and check if the
-      // significant ones appear in the instruction. Skip short common words.
-      final tokens = name.split(RegExp(r'[\s,/]+'))
+      // 2. Stemmed direct match — stem the full name and check
+      final stemmedName = _stem(name);
+      if (stemmedName.length > 3 && instruction.contains(stemmedName)) {
+        matched.add(ing);
+        continue;
+      }
+
+      // 3. Token-based matching with stemming
+      final nameTokens = name
+          .split(RegExp(r'[\s,/()]+'))
           .where((t) => t.length > 2)
           .where((t) => !_commonWords.contains(t))
+          .map(_stem)
+          .where((t) => t.length > 2)
           .toList();
 
-      // If most tokens match, consider it a hit
-      if (tokens.isNotEmpty) {
-        final matchCount = tokens.where((t) => instruction.contains(t)).length;
-        if (matchCount >= (tokens.length * 0.6).ceil() && matchCount > 0) {
-          matched.add(ing);
+      if (nameTokens.isEmpty) continue;
+
+      // Count how many ingredient tokens appear in the instruction
+      int matchCount = 0;
+      for (final token in nameTokens) {
+        // Check if stemmed token appears in instruction text directly
+        if (instruction.contains(token)) {
+          matchCount++;
+          continue;
         }
+        // Check if any instruction word stems to the same thing
+        if (instructionTokens.contains(token)) {
+          matchCount++;
+        }
+      }
+
+      // Adaptive threshold:
+      // - Single significant token (e.g., "garlic"): must match
+      // - 2 tokens (e.g., "red onion"): at least 1 must match
+      // - 3+ tokens: at least 50% must match
+      final threshold = nameTokens.length == 1
+          ? 1
+          : nameTokens.length == 2
+          ? 1
+          : (nameTokens.length * 0.5).ceil();
+
+      if (matchCount >= threshold && matchCount > 0) {
+        matched.add(ing);
       }
     }
 
     return matched;
   }
 
+  /// Basic English/multilingual stemmer — strips common suffixes to normalize
+  /// "tomatoes" → "tomato", "sliced" → "slic", "cooking" → "cook", etc.
+  static String _stem(String word) {
+    var w = word.toLowerCase().trim();
+    if (w.length <= 3) return w;
+
+    // Irregular plurals
+    const irregulars = {
+      'potatoes': 'potato', 'tomatoes': 'tomato', 'mangoes': 'mango',
+      'halves': 'half', 'leaves': 'leaf', 'loaves': 'loaf',
+      'knives': 'knife', 'selves': 'self', 'calves': 'calf',
+    };
+    if (irregulars.containsKey(w)) return irregulars[w]!;
+
+    // -ies → -y (berries → berry, cherries → cherry)
+    if (w.endsWith('ies') && w.length > 4) return '${w.substring(0, w.length - 3)}y';
+    // -ves → -f (halves → half -- catch any not in irregulars)
+    if (w.endsWith('ves') && w.length > 4) return '${w.substring(0, w.length - 3)}f';
+    // -es (tomatoes → tomato, potatoes → potato, sauces → sauc)
+    if (w.endsWith('es') && w.length > 4) {
+      // Keep words ending in -ss (e.g., "bless") or -us
+      if (!w.endsWith('ss') && !w.endsWith('us')) {
+        final without = w.substring(0, w.length - 2);
+        // If removing -es leaves a word ending in a consonant + 'o', keep it
+        if (without.endsWith('o') || without.endsWith('c') ||
+            without.endsWith('sh') || without.endsWith('ch') ||
+            without.endsWith('x') || without.endsWith('z')) {
+          return without;
+        }
+        // Otherwise just remove the -s
+        return w.substring(0, w.length - 1);
+      }
+    }
+    // -s (onions → onion, cloves → clove)
+    if (w.endsWith('s') && !w.endsWith('ss') && w.length > 3) {
+      return w.substring(0, w.length - 1);
+    }
+
+    return w;
+  }
+
   static const _commonWords = {
-    // English
-    'the', 'and', 'for', 'with', 'cut', 'all', 'fresh', 'dried',
+    // English - articles/prepositions
+    'the', 'and', 'for', 'with', 'cut', 'all', 'into', 'from', 'some',
+    // English - sizes/amounts
     'large', 'small', 'medium', 'whole', 'half', 'cup', 'cups',
-    'purpose', 'into', 'pieces', 'sliced', 'diced', 'chopped',
-    'minced', 'optional', 'taste', 'needed',
+    'tablespoon', 'tablespoons', 'teaspoon', 'teaspoons',
+    'pound', 'pounds', 'ounce', 'ounces', 'piece', 'pieces',
+    // English - prep descriptors (these describe HOW the ingredient is prepped, not WHAT it is)
+    'fresh', 'dried', 'frozen', 'canned', 'raw', 'cooked',
+    'sliced', 'diced', 'chopped', 'minced', 'grated', 'shredded',
+    'crushed', 'ground', 'peeled', 'seeded', 'deveined', 'trimmed',
+    'boneless', 'skinless', 'optional', 'taste', 'needed',
+    'purpose', 'divided', 'packed', 'lightly', 'finely', 'roughly',
+    'thinly', 'thickly', 'softened', 'melted', 'room', 'temperature',
     // German
     'und', 'mit', 'für', 'alle', 'frisch', 'getrocknet',
     'groß', 'große', 'klein', 'kleine', 'mittel', 'ganz', 'halb',

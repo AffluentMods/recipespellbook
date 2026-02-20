@@ -330,14 +330,21 @@ final router = GoRouter(
         return RecipeScreen(recipeId: id);
       },
     ),
+
+    // ── Upgrade & Transfer — full-screen pushes via rootNavigatorKey ──
     GoRoute(
       path: '/upgrade',
+      name: 'upgrade',
+      parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const PaywallScreen(),
     ),
     GoRoute(
       path: '/transfer',
+      name: 'transfer',
+      parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const TransferScreen(),
     ),
+
     GoRoute(
       path: '/settings/trash',
       name: 'trash',

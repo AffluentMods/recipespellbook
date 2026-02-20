@@ -5,9 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/transfer_service.dart';
+import '../../widgets/app_snackbar.dart';
 
 /// One-time device transfer screen for free users.
 ///
@@ -246,7 +248,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                   IconButton(
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: _transferCode ?? ''));
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Code copied!')));
+                      AppSnackbar.success(context, 'Code copied!');
                     },
                     icon: const Icon(Icons.copy, size: 20),
                     tooltip: 'Copy code',
@@ -484,9 +486,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
 
   void _scanQR() {
     if (_isDesktop) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('QR scanning is only available on mobile devices.')),
-      );
+      AppSnackbar.info(context, AppLocalizations.of(context)!.qrScanningMobileOnly);
       return;
     }
     Navigator.of(context).push(

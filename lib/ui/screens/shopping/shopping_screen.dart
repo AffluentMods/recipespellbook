@@ -21,6 +21,7 @@ import '../../../services/grocery_service.dart';
 import '../../../services/shopping_list_service.dart';
 import '../../../services/barcode_scanner_service.dart';
 import '../../widgets/rpg/rpg_navigation_shell.dart';
+import '../../widgets/app_snackbar.dart';
 
 /// Provider to track shopping list item count (for nav badge)
 final shoppingItemCountProvider = StreamProvider<int>((ref) {
@@ -412,7 +413,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                     final buffer = StringBuffer('$_currentListName\n');
                     for (final item in items) buffer.writeln('${item.isChecked ? '☑' : '☐'} ${item.name}');
                     await Clipboard.setData(ClipboardData(text: buffer.toString()));
-                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.successCopied), duration: const Duration(seconds: 2)));
+                    if (mounted) AppSnackbar.info(context, l10n.successCopied);
                   },
                 ),
                 ListTile(
@@ -496,12 +497,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
         sortOrder: const drift.Value(0),
       ));
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Added "$itemName"'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      AppSnackbar.info(context, 'Added "$itemName"');
     } else if (action == 'searchRecipes') {
       // Navigate to search — user can search for the scanned product
       context.push('/search');
@@ -599,9 +595,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       await service.shareAsFile(_currentListId, format: format);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e'), duration: const Duration(seconds: 3)),
-        );
+        AppSnackbar.info(context, 'Export failed: $e');
       }
     }
   }
@@ -716,24 +710,14 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
             _currentListId = importResult.listId!;
             _currentListName = importResult.listName ?? 'Imported List';
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('✅ ${importResult.message}'),
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 2),
-            ),
-          );
+          AppSnackbar.info(context, '✅ ${importResult.message}');
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(importResult.message), duration: const Duration(seconds: 3)),
-          );
+          AppSnackbar.info(context, importResult.message);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Import failed: $e'), duration: const Duration(seconds: 3)),
-        );
+        AppSnackbar.info(context, 'Import failed: $e');
       }
     }
   }
@@ -1089,13 +1073,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
       }
       if (mounted) {
         final name = _providerData[provider]?.name ?? 'store';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('List copied! Opening $name...'),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 4),
-          ),
-        );
+        AppSnackbar.info(context, 'List copied! Opening $name...');
       }
     }
   }
@@ -1122,13 +1100,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
         text: GroceryService.formatForClipboard(widget.itemNames),
       ),
     );
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${widget.itemCount} items copied to clipboard'),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    AppSnackbar.info(context, '${widget.itemCount} items copied to clipboard');
   }
 }
 
@@ -2139,9 +2111,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
       image = await picker.pickImage(source: source, imageQuality: 85);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not access ${source == ImageSource.camera ? "camera" : "gallery"}'), duration: const Duration(seconds: 3)),
-        );
+        AppSnackbar.info(context, 'Could not access ${source == ImageSource.camera ? "camera" : "gallery"}');
       }
       return;
     }
@@ -2166,9 +2136,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
       final text = recognized.text;
       if (text.trim().isEmpty) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No text found in image'), duration: const Duration(seconds: 3)),
-          );
+          AppSnackbar.warning(context, AppLocalizations.of(context)!.noTextFoundInImage);
         }
         return;
       }
@@ -2177,9 +2145,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     } catch (e) {
       if (mounted) Navigator.pop(context);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error reading image: $e'), duration: const Duration(seconds: 3)),
-        );
+        AppSnackbar.info(context, 'Error reading image: $e');
       }
     }
   }
@@ -2271,9 +2237,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
   void _processImportedLines(String rawText) {
     final lines = _parseTextToLines(rawText);
     if (lines.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No items found in text'), duration: const Duration(seconds: 3)),
-      );
+      AppSnackbar.warning(context, AppLocalizations.of(context)!.noItemsFoundInText);
       return;
     }
     _showOcrPreview(rawText);
@@ -2313,13 +2277,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
       while (_recentlyAdded.length > 30) _recentlyAdded.removeLast();
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${items.length} items added'),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    AppSnackbar.info(context, '${items.length} items added');
     _ensureKeyboardVisible();
   }
 
@@ -2797,8 +2755,11 @@ class _ShoppingItemTile extends ConsumerWidget {
         onDismissed: (_) => shoppingDao.deleteItem(item.id),
         child: Container(
           decoration: BoxDecoration(
-            color: isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surfaceContainerLowest,
+            color: isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(14),
+            border: isDark ? null : Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.08),
+            ),
           ),
           clipBehavior: Clip.antiAlias,
           child: InkWell(

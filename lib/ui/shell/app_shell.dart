@@ -8,6 +8,7 @@ import '../../providers/subscription_provider.dart';
 import '../../router/router.dart';
 import '../widgets/app_menu_drawer.dart';
 import '../widgets/rpg/rpg_navigation_shell.dart';
+import '../widgets/app_snackbar.dart';
 
 /// Provider to track current navigation index
 final currentNavIndexProvider = StateProvider<int>((ref) => 0);
@@ -22,7 +23,6 @@ final shoppingBadgeCountProvider = StreamProvider<int>((ref) {
 
 class AppShell extends ConsumerStatefulWidget {
   final Widget child;
-
   const AppShell({super.key, required this.child});
 
   @override
@@ -36,106 +36,52 @@ class _AppShellState extends ConsumerState<AppShell> {
   @override
   void initState() {
     super.initState();
-    // Initialize auth + subscription once when the shell first mounts.
-    // This runs every app launch (not gated by onboarding).
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initServices();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initServices());
   }
 
   Future<void> _initServices() async {
     if (_servicesInitialized) return;
     _servicesInitialized = true;
 
-    // Initialize auth (restore JWT from secure storage)
     await ref.read(authProvider.notifier).initialize();
-
-    // Initialize RevenueCat SDK
     await ref.read(subscriptionProvider.notifier).initialize();
 
-    // Listen for auth changes → sync RevenueCat identity + show feedback
     ref.listenManual(authProvider, (prev, next) {
       final wasSignedIn = prev?.isSignedIn ?? false;
       final isSignedIn = next.isSignedIn;
       final wasLoading = prev?.isLoading ?? false;
 
       if (isSignedIn && !wasSignedIn && next.user != null) {
-        // User just signed in — link RevenueCat
         ref.read(subscriptionProvider.notifier).login(next.user!.id);
-
-        // Show success feedback
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.white, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text('Signed in as ${next.user!.displayName}')),
-                ],
-              ),
-              backgroundColor: Colors.green.shade700,
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 3),
-            ),
-          );
+          AppSnackbar.success(context, 'Signed in as ${next.user!.displayName}');
         }
       } else if (!isSignedIn && wasSignedIn) {
-        // User signed out — unlink RevenueCat
         ref.read(subscriptionProvider.notifier).logout();
-
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Signed out'),
-              behavior: SnackBarBehavior.floating,
-              duration: Duration(seconds: 2),
-            ),
-          );
+          AppSnackbar.info(context, 'Signed out');
         }
       }
 
-      // Show auth errors
       if (next.error != null && !next.isLoading && wasLoading) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.error_outline, color: Colors.white, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(next.error!)),
-                ],
-              ),
-              backgroundColor: Colors.red.shade700,
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 4),
-            ),
-          );
-          // Clear the error after showing
+          AppSnackbar.error(context, next.error!);
           ref.read(authProvider.notifier).clearError();
         }
       }
     });
   }
 
-  /// Dismiss any open modals/bottom sheets before navigating tabs
   void _navigateTo(String path, int index) {
-    // Close the end drawer if open
     if (_scaffoldKey.currentState?.isEndDrawerOpen ?? false) {
       _scaffoldKey.currentState?.closeEndDrawer();
     }
-
-    // Pop bottom sheets / dialogs on the shell navigator (where child screens open them)
     if (shellNavigatorKey.currentState?.canPop() ?? false) {
       shellNavigatorKey.currentState!.popUntil((route) => route.isFirst);
     }
-
-    // Pop full-screen modals on the root navigator
     if (rootNavigatorKey.currentState?.canPop() ?? false) {
       rootNavigatorKey.currentState!.popUntil((route) => route.isFirst);
     }
-
     ref.read(currentNavIndexProvider.notifier).state = index;
     context.go(path);
   }
@@ -146,178 +92,312 @@ class _AppShellState extends ConsumerState<AppShell> {
     final shoppingCountAsync = ref.watch(shoppingBadgeCountProvider);
 
     return RpgNavigationShell(
-        child: Scaffold(
-          key: _scaffoldKey,
-          body: widget.child,
-          endDrawer: const AppMenuDrawer(),
-          bottomNavigationBar: _GradientNavBar(
-            currentIndex: currentIndex,
-            shoppingBadge: shoppingCountAsync.when(
-              data: (count) => count > 0 ? count : null,
-              loading: () => null,
-              error: (_, __) => null,
-            ),
-            onTap: (index) {
-              switch (index) {
-                case 0: _navigateTo('/', 0);
-                case 1: _navigateTo('/planner', 1);
-                case 2: _navigateTo('/shopping', 2);
-                case 3:
-                // Menu button
-                  if (shellNavigatorKey.currentState?.canPop() ?? false) {
-                    shellNavigatorKey.currentState!.popUntil((route) => route.isFirst);
-                  }
-                  if (rootNavigatorKey.currentState?.canPop() ?? false) {
-                    rootNavigatorKey.currentState!.popUntil((route) => route.isFirst);
-                  }
-                  _scaffoldKey.currentState?.openEndDrawer();
-              }
-            },
+      child: Scaffold(
+        key: _scaffoldKey,
+        body: widget.child,
+        endDrawer: const AppMenuDrawer(),
+        bottomNavigationBar: _NotchNavBar(
+          currentIndex: currentIndex,
+          shoppingBadge: shoppingCountAsync.when(
+            data: (count) => count > 0 ? count : null,
+            loading: () => null,
+            error: (_, __) => null,
           ),
-        )
+          onTap: (index) {
+            switch (index) {
+              case 0: _navigateTo('/', 0);
+              case 1: _navigateTo('/cookbooks', 1);
+              case 2: _navigateTo('/planner', 2);
+              case 3: _navigateTo('/shopping', 3);
+              case 4:
+                if (shellNavigatorKey.currentState?.canPop() ?? false) {
+                  shellNavigatorKey.currentState!.popUntil((route) => route.isFirst);
+                }
+                if (rootNavigatorKey.currentState?.canPop() ?? false) {
+                  rootNavigatorKey.currentState!.popUntil((route) => route.isFirst);
+                }
+                _scaffoldKey.currentState?.openEndDrawer();
+            }
+          },
+        ),
+      ),
     );
   }
 }
 
-class _GradientNavBar extends StatelessWidget {
+// ═══════════════════════════════════════════════════════════════════
+// NOTCH NAV BAR — notch slides, icons stay in place (no lift)
+// ═══════════════════════════════════════════════════════════════════
+
+class _NotchNavBar extends StatefulWidget {
   final int currentIndex;
   final int? shoppingBadge;
   final ValueChanged<int> onTap;
 
-  const _GradientNavBar({
+  const _NotchNavBar({
     required this.currentIndex,
     this.shoppingBadge,
     required this.onTap,
   });
 
   @override
+  State<_NotchNavBar> createState() => _NotchNavBarState();
+}
+
+class _NotchNavBarState extends State<_NotchNavBar>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  static const int _navItemCount = 5;
+  static const int _lastNavIndex = _navItemCount - 1;
+  static const double _barHeight = 60.0;
+  static const double _notchRadius = 26.0;
+  static const double _notchDepth = 10.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 280),
+      vsync: this,
+    )..value = 1.0;
+
+    _animation = Tween<double>(
+      begin: widget.currentIndex.toDouble(),
+      end: widget.currentIndex.toDouble(),
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+  }
+
+  @override
+  void didUpdateWidget(covariant _NotchNavBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentIndex != widget.currentIndex) {
+      final from = oldWidget.currentIndex < _lastNavIndex
+          ? oldWidget.currentIndex.toDouble()
+          : _animation.value;
+      final to = widget.currentIndex < _lastNavIndex
+          ? widget.currentIndex.toDouble()
+          : _animation.value;
+
+      _animation = Tween<double>(begin: from, end: to)
+          .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+      _controller.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
+    final isDark = theme.brightness == Brightness.dark;
 
-    // Theme-derived gradient
-    final gradientColors = isDark
-        ? [
-      theme.colorScheme.primary.withValues(alpha: 0.3),
-      theme.colorScheme.tertiary.withValues(alpha: 0.25),
-    ]
-        : [
-      theme.colorScheme.primary.withValues(alpha: 0.08),
-      theme.colorScheme.tertiary.withValues(alpha: 0.12),
-    ];
+    final barBg = isDark
+        ? Color.lerp(theme.colorScheme.surface, theme.colorScheme.primary, 0.06)!
+        : Color.lerp(theme.colorScheme.surface, theme.colorScheme.primary, 0.03)!;
 
     final items = [
       _NavDef(Icons.home_outlined, Icons.home_rounded, l10n.navHome),
+      _NavDef(Icons.menu_book_outlined, Icons.menu_book_rounded, l10n.navCookbooks),
       _NavDef(Icons.calendar_today_outlined, Icons.calendar_today_rounded, l10n.navPlanner),
       _NavDef(Icons.shopping_cart_outlined, Icons.shopping_cart_rounded, l10n.navShopping),
       _NavDef(Icons.menu_rounded, Icons.menu_rounded, l10n.navMenu),
     ];
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: gradientColors,
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-        border: Border(
-          top: BorderSide(
-            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
-            width: 0.5,
-          ),
-        ),
-      ),
+      color: Colors.transparent,
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-          child: Row(
-            children: List.generate(items.length, (i) {
-              final item = items[i];
-              final selected = i == currentIndex && i != 3; // menu never "selected"
-              final badge = i == 2 ? shoppingBadge : null;
+        child: SizedBox(
+          height: _barHeight,
+          child: AnimatedBuilder(
+            animation: _animation,
+            builder: (context, _) {
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  final itemWidth = constraints.maxWidth / _navItemCount;
+                  final notchCenterX = (_animation.value * itemWidth) + (itemWidth / 2);
 
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => onTap(i),
-                  behavior: HitTestBehavior.opaque,
-                  child: _buildNavItem(
-                    theme: theme,
-                    icon: selected ? item.selectedIcon : item.icon,
-                    label: item.label,
-                    selected: selected,
-                    badge: badge,
-                  ),
-                ),
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // ── Bar with notch ──
+                      Positioned.fill(
+                        child: CustomPaint(
+                          painter: _NotchBarPainter(
+                            notchCenterX: widget.currentIndex < _lastNavIndex ? notchCenterX : -200,
+                            notchRadius: _notchRadius,
+                            notchDepth: _notchDepth,
+                            barColor: barBg,
+                            borderColor: theme.colorScheme.outlineVariant.withValues(alpha: 0.15),
+                            shadowColor: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
+                          ),
+                          child: const SizedBox.expand(),
+                        ),
+                      ),
+
+                      // ── Nav items — NO lift, just icon size change ──
+                      Positioned.fill(
+                        child: Row(
+                          children: List.generate(_navItemCount, (i) {
+                            final isSelected = i == widget.currentIndex && i < _lastNavIndex;
+                            final badge = i == 3 ? widget.shoppingBadge : null;
+
+                            return Expanded(
+                              child: GestureDetector(
+                                onTap: () => widget.onTap(i),
+                                behavior: HitTestBehavior.opaque,
+                                child: _NavItem(
+                                  theme: theme,
+                                  def: items[i],
+                                  isSelected: isSelected,
+                                  badge: badge,
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               );
-            }),
+            },
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildNavItem({
-    required ThemeData theme,
-    required IconData icon,
-    required String label,
-    required bool selected,
-    int? badge,
-  }) {
-    final activeColor = theme.colorScheme.onSurface;
-    final inactiveColor = theme.colorScheme.onSurface.withValues(alpha: 0.45);
-    final color = selected ? activeColor : inactiveColor;
+// ── CustomPainter — smooth notch in top edge ──
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.symmetric(vertical: 6),
+class _NotchBarPainter extends CustomPainter {
+  final double notchCenterX;
+  final double notchRadius;
+  final double notchDepth;
+  final Color barColor;
+  final Color borderColor;
+  final Color shadowColor;
+
+  _NotchBarPainter({
+    required this.notchCenterX,
+    required this.notchRadius,
+    required this.notchDepth,
+    required this.barColor,
+    required this.borderColor,
+    required this.shadowColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = _buildNotchPath(size);
+    canvas.drawPath(path.shift(const Offset(0, -2)),
+        Paint()..color = shadowColor..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6));
+    canvas.drawPath(path, Paint()..color = barColor);
+    canvas.drawPath(path, Paint()..color = borderColor..style = PaintingStyle.stroke..strokeWidth = 0.5);
+  }
+
+  Path _buildNotchPath(Size size) {
+    final path = Path();
+    final w = size.width;
+    final h = size.height;
+    final spread = notchRadius + 14;
+    final nLeft = notchCenterX - spread;
+    final nRight = notchCenterX + spread;
+
+    path.moveTo(0, 0);
+
+    if (notchCenterX >= 0 && nLeft > -spread && nRight < w + spread) {
+      path.lineTo(nLeft.clamp(0, w), 0);
+      path.cubicTo(
+        notchCenterX - notchRadius * 0.4, 0,
+        notchCenterX - notchRadius * 0.5, notchDepth,
+        notchCenterX, notchDepth,
+      );
+      path.cubicTo(
+        notchCenterX + notchRadius * 0.5, notchDepth,
+        notchCenterX + notchRadius * 0.4, 0,
+        nRight.clamp(0, w), 0,
+      );
+      path.lineTo(w, 0);
+    } else {
+      path.lineTo(w, 0);
+    }
+
+    path.lineTo(w, h);
+    path.lineTo(0, h);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldRepaint(covariant _NotchBarPainter old) =>
+      old.notchCenterX != notchCenterX || old.barColor != barColor;
+}
+
+// ── Nav item — NO lift, just larger icon when selected ──
+
+class _NavItem extends StatelessWidget {
+  final ThemeData theme;
+  final _NavDef def;
+  final bool isSelected;
+  final int? badge;
+
+  const _NavItem({
+    required this.theme,
+    required this.def,
+    required this.isSelected,
+    this.badge,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final activeColor = theme.colorScheme.primary;
+    final inactiveColor = theme.colorScheme.onSurface.withValues(alpha: 0.4);
+    final color = isSelected ? activeColor : inactiveColor;
+    // Selected icon slightly larger: 28 vs 24
+    final iconSize = isSelected ? 28.0 : 24.0;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Stack(
             clipBehavior: Clip.none,
             children: [
-              Icon(icon, size: 24, color: color),
-              if (badge != null && badge > 0)
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                child: Icon(isSelected ? def.selectedIcon : def.icon, size: iconSize, color: color),
+              ),
+              if (badge != null && badge! > 0)
                 Positioned(
-                  right: -8,
-                  top: -6,
+                  right: -8, top: -6,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.error,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    decoration: BoxDecoration(color: theme.colorScheme.error, borderRadius: BorderRadius.circular(10)),
                     constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                    child: Text(
-                      badge > 99 ? '99+' : badge.toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
+                    child: Text(badge! > 99 ? '99+' : badge.toString(),
+                        style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 3),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-              color: color,
-            ),
-          ),
-          // Active indicator dot
-          const SizedBox(height: 2),
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: selected ? 5 : 0,
-            height: selected ? 5 : 0,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary,
-              shape: BoxShape.circle,
-            ),
-          ),
+          const SizedBox(height: 4),
+          Text(def.label,
+              style: TextStyle(
+                fontSize: isSelected ? 11.0 : 10.0,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+                color: color,
+              ),
+              maxLines: 1, overflow: TextOverflow.ellipsis),
         ],
       ),
     );

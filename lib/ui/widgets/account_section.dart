@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/auth_service.dart';
+import 'app_snackbar.dart';
 
 /// Account section for settings_screen.dart.
 ///
@@ -243,9 +244,7 @@ class _SignedInContent extends ConsumerWidget {
               Navigator.pop(ctx);
               final success = await ref.read(authProvider.notifier).deleteAccount();
               if (!success && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.deleteAccountFailed)),
-                );
+                AppSnackbar.info(context, l10n.deleteAccountFailed);
               }
             },
             child: Text(l10n.deletePermanently),

@@ -6,6 +6,7 @@ import '../../database/database.dart';
 import '../../providers/database_provider.dart';
 import 'rpg/rpg_navigation_shell.dart';
 import '../widgets/add_to_meal_plan_dialogue.dart';
+import 'app_snackbar.dart';
 
 /// Shows a bottom sheet to add a recipe to meal plan
 /// Call this from recipe_screen.dart like:
@@ -246,17 +247,11 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Added to $_selectedMealType on ${_formatDate(_selectedDate)}'),
-          ),
-        );
+        AppSnackbar.success(context, AppLocalizations.of(context)!.addedToMealPlan(_selectedMealType, _formatDate(_selectedDate)));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        AppSnackbar.info(context, 'Error: $e');
       }
     } finally {
       if (mounted) {

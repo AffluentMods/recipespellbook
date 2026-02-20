@@ -29,6 +29,7 @@ import '../../widgets/recipe_edit_instructions.dart';
 import '../../../services/image_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../providers/subscription_provider.dart';
+import '../../widgets/app_snackbar.dart';
 
 // ============ IMAGE PREVIEW/CONFIRM HELPER ============
 
@@ -660,7 +661,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     final activeIngredients = _ingredients.where((i) => i.text.trim().isNotEmpty).toList();
 
     if (activeIngredients.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.ingredientsEmpty)));
+      AppSnackbar.info(context, l10n.ingredientsEmpty);
       return;
     }
 
@@ -683,10 +684,10 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
 
       if (result != null && mounted) {
         setState(() => _nutrition = result);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.nutritionCalculated)));
+        AppSnackbar.info(context, l10n.nutritionCalculated);
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${l10n.nutritionCalculationFailed}: $e')));
+      if (mounted) AppSnackbar.info(context, '${l10n.nutritionCalculationFailed}: $e');
     } finally {
       if (mounted) setState(() => _isCalculatingNutrition = false);
     }
@@ -758,7 +759,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   Future<void> _saveRecipe() async {
     final l10n = AppLocalizations.of(context)!;
     if (_titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.errorGeneric)));
+      AppSnackbar.info(context, l10n.errorGeneric);
       return;
     }
 
@@ -891,7 +892,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       await tagsDao.setTagsForRecipe(recipeId, _selectedTagIds);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_isEditing ? 'Recipe updated!' : l10n.successSaved)));
+        AppSnackbar.info(context, _isEditing ? 'Recipe updated!' : l10n.successSaved);
 
         // RPG XP - only for new recipes
         if (!_isEditing) {
@@ -916,7 +917,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         context.pop(true);
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${l10n.errorSavingRecipe}: $e')));
+      if (mounted) AppSnackbar.info(context, '${l10n.errorSavingRecipe}: $e');
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -2004,7 +2005,6 @@ class _AddIngredientButton extends StatelessWidget {
     ));
   }
 }
-
 
 class _NutritionSection extends StatelessWidget {
   final NutritionData? nutrition;

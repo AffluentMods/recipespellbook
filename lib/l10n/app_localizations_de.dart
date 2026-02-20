@@ -4809,4 +4809,43 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get mealTypeDessert => 'Dessert';
+
+  @override
+  String get noContentToSave => 'Kein Inhalt zum Speichern';
+
+  @override
+  String get recipeSaved => 'Rezept gespeichert!';
+
+  @override
+  String get qrScanningMobileOnly => 'QR-Scannen ist nur auf Mobilgeräten verfügbar.';
+
+  @override
+  String get notEnoughMana => 'Nicht genug Mana! Verdiene XP durch Rezepte, um es zu regenerieren.';
+
+  @override
+  String get communityComingSoon => 'Community-Funktionen kommen in einem zukünftigen Update!';
+
+  @override
+  String somethingWentWrong(String error) {
+    return 'Etwas ist schiefgelaufen: $error';
+  }
+
+  @override
+  String starterRecipesAdded(int count) {
+    return '$count Starterrezepte hinzugefügt! 🎉';
+  }
+
+  @override
+  String get enterAtLeastOneNutrient => 'Geben Sie mindestens Kalorien oder einen Makronährstoff ein';
+
+  @override
+  String addedToMealPlan(String mealType, String date) {
+    return 'Zu $mealType am $date hinzugefügt';
+  }
+
+  @override
+  String get noItemsFoundInText => 'Keine Einträge im Text gefunden';
+
+  @override
+  String get noTextFoundInImage => 'Kein Text im Bild gefunden';
 }

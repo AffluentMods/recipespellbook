@@ -11,6 +11,7 @@ import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../services/ocr_service.dart';
+import '../../widgets/app_snackbar.dart';
 
 class ImportPdfScreen extends ConsumerStatefulWidget {
   const ImportPdfScreen({super.key});
@@ -212,12 +213,12 @@ class _ImportPdfScreenState extends ConsumerState<ImportPdfScreen> {
 
   Future<void> _saveRecipe() async {
     if (_titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a title')));
+      AppSnackbar.warning(context, 'Please enter a title');
       return;
     }
 
     if (_ingredients.isEmpty && _instructions.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No content to save')));
+      AppSnackbar.warning(context, AppLocalizations.of(context)!.noContentToSave);
       return;
     }
 
@@ -253,17 +254,13 @@ class _ImportPdfScreenState extends ConsumerState<ImportPdfScreen> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Recipe saved!'), backgroundColor: Colors.green),
-        );
+        AppSnackbar.success(context, AppLocalizations.of(context)!.recipeSaved);
         context.pop();
         context.pushNamed('recipe', pathParameters: {'id': recipeId});
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-      );
+      AppSnackbar.error(context, 'Error: $e');
     }
   }
 

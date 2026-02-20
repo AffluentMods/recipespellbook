@@ -403,6 +403,8 @@ class _QuickRecipeCard extends StatelessWidget {
     final hasImage = item.recipe.imagePath != null && File(item.recipe.imagePath!).existsSync();
     final defaultAsset = defaultRecipeImageAsset(item.recipe.id);
 
+    final isDark = theme.brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () => context.push('/recipe/${item.recipe.id}'),
       child: Container(
@@ -411,6 +413,14 @@ class _QuickRecipeCard extends StatelessWidget {
         child: Card(
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: BorderSide(
+              color: isDark
+                  ? theme.colorScheme.outlineVariant
+                  : theme.colorScheme.outline.withValues(alpha: 0.12),
+            ),
+          ),
           child: Stack(
             children: [
               Column(
@@ -545,7 +555,7 @@ class _CoursesSection extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 90,
+          height: 105,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -622,7 +632,7 @@ class _CategoriesSection extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 90,
+          height: 105,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -707,7 +717,7 @@ class _UncategorizedSection extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 90,
+          height: 105,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -731,6 +741,7 @@ class _UncategorizedRecipeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () => context.push('/recipe/${recipe.id}'),
@@ -739,6 +750,14 @@ class _UncategorizedRecipeChip extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         child: Card(
           margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: BorderSide(
+              color: isDark
+                  ? theme.colorScheme.outlineVariant
+                  : theme.colorScheme.outline.withValues(alpha: 0.12),
+            ),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Column(
@@ -779,21 +798,31 @@ class _CourseChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final isDark = theme.brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 85,
+        width: 90,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         child: Card(
           margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: BorderSide(
+              color: isDark
+                  ? theme.colorScheme.outlineVariant
+                  : theme.colorScheme.outline.withValues(alpha: 0.12),
+            ),
+          ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(emoji, style: const TextStyle(fontSize: 22)),
-                const SizedBox(height: 2),
+                Text(emoji, style: const TextStyle(fontSize: 24)),
+                const SizedBox(height: 4),
                 Text(
                   label,
                   maxLines: 1,

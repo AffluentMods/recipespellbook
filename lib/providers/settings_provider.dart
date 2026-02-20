@@ -62,6 +62,9 @@ class AppSettings {
   final bool showExpandedNutrition;
   final Set<String> enabledNutrients;
 
+  // Accessibility — text scale factor (0.8 to 1.3)
+  final double textScaleFactor;
+
   /// Default nutrients shown in the nutrition widget
   static const Set<String> defaultEnabledNutrients = {
     'calories', 'protein', 'carbs', 'fat', 'fiber', 'sugar', 'sodium',
@@ -88,9 +91,11 @@ class AppSettings {
     this.defaultNutritionView = NutritionDisplayMode.perServing,
     this.nutritionChartStyle = NutritionChartStyle.donut,
     this.showExpandedNutrition = false,
+    this.textScaleFactor = 1.0,
     Set<String>? enabledNutrients,
   }) : seedColor = appTheme.seedColor,
         enabledNutrients = enabledNutrients ?? defaultEnabledNutrients;
+
   AppSettings copyWith({
     AppColorTheme? appTheme,
     ThemeMode? themeMode,
@@ -113,6 +118,7 @@ class AppSettings {
     NutritionChartStyle? nutritionChartStyle,
     bool? showExpandedNutrition,
     Set<String>? enabledNutrients,
+    double? textScaleFactor,
   }) {
     return AppSettings(
       appTheme: appTheme ?? this.appTheme,
@@ -136,6 +142,7 @@ class AppSettings {
       nutritionChartStyle: nutritionChartStyle ?? this.nutritionChartStyle,
       showExpandedNutrition: showExpandedNutrition ?? this.showExpandedNutrition,
       enabledNutrients: enabledNutrients ?? this.enabledNutrients,
+      textScaleFactor: textScaleFactor ?? this.textScaleFactor,
     );
   }
 }
@@ -203,6 +210,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
   static const _rpgAnimationsKey = 'rpg_animations_enabled';
   static const _rpgSoundsKey = 'rpg_sounds_enabled';
   static const _recipeEditLayoutKey = 'recipe_edit_layout';
+  static const _textScaleKey = 'text_scale_factor';
 
   @override
   AppSettings build() {
@@ -301,6 +309,9 @@ class SettingsNotifier extends Notifier<AppSettings> {
         ? enabledNutrientsStrings.toSet()
         : AppSettings.defaultEnabledNutrients;
 
+    // Load text scale factor
+    final textScaleFactor = (prefs.getDouble(_textScaleKey) ?? 1.0).clamp(0.8, 1.3);
+
     state = AppSettings(
       appTheme: appTheme,
       themeMode: themeMode,
@@ -323,6 +334,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
       nutritionChartStyle: chartStyle,
       showExpandedNutrition: showExpandedNutrition,
       enabledNutrients: enabledNutrients,
+      textScaleFactor: textScaleFactor,
     );
   }
 
@@ -466,6 +478,14 @@ class SettingsNotifier extends Notifier<AppSettings> {
     state = state.copyWith(rpgSoundsEnabled: enabled);
   }
 
+  // Text scale — accessibility
+  Future<void> setTextScaleFactor(double scale) async {
+    final clamped = scale.clamp(0.8, 1.3);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_textScaleKey, clamped);
+    state = state.copyWith(textScaleFactor: clamped);
+  }
+
   // Legacy method for backward compatibility
   Future<void> setSeedColor(Color color) async {
     // Find closest matching theme
@@ -510,6 +530,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
     await prefs.remove(_allergensKey);
     await prefs.remove(_rpgAnimationsKey);
     await prefs.remove(_rpgSoundsKey);
+    await prefs.remove(_textScaleKey);
     state = AppSettings();
   }
 
@@ -559,4 +580,9 @@ final appColorThemeProvider = Provider<AppColorTheme>((ref) {
 /// Provides just the ThemeMode for MaterialApp
 final themeModeProvider = Provider<ThemeMode>((ref) {
   return ref.watch(settingsProvider.select((s) => s.themeMode));
+});
+
+/// Provides just the text scale factor for MaterialApp builder
+final textScaleProvider = Provider<double>((ref) {
+  return ref.watch(settingsProvider.select((s) => s.textScaleFactor));
 });

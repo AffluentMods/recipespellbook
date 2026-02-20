@@ -4809,4 +4809,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mealTypeDessert => 'Dessert';
+
+  @override
+  String get noContentToSave => 'No content to save';
+
+  @override
+  String get recipeSaved => 'Recipe saved!';
+
+  @override
+  String get qrScanningMobileOnly => 'QR scanning is only available on mobile devices.';
+
+  @override
+  String get notEnoughMana => 'Not enough mana! Earn XP from recipes to regenerate.';
+
+  @override
+  String get communityComingSoon => 'Community features coming in a future update!';
+
+  @override
+  String somethingWentWrong(String error) {
+    return 'Something went wrong: $error';
+  }
+
+  @override
+  String starterRecipesAdded(int count) {
+    return 'Added $count starter recipes! 🎉';
+  }
+
+  @override
+  String get enterAtLeastOneNutrient => 'Enter at least calories or one macro nutrient';
+
+  @override
+  String addedToMealPlan(String mealType, String date) {
+    return 'Added to $mealType on $date';
+  }
+
+  @override
+  String get noItemsFoundInText => 'No items found in text';
+
+  @override
+  String get noTextFoundInImage => 'No text found in image';
 }

@@ -9,6 +9,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipespellbook/data/rpg/rpg_models.dart';
 import 'package:recipespellbook/providers/rpg_provider.dart';
 
+import '../../../l10n/app_localizations.dart';
+import '../../widgets/app_snackbar.dart';
+
 // ============ ENEMY DEFINITIONS ============
 
 class Enemy {
@@ -243,13 +246,7 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
 
     final profile = ref.read(rpgProvider).profile;
     if (profile.mana < 10) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Not enough mana! Earn XP from recipes to regenerate.'),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      AppSnackbar.warning(context, AppLocalizations.of(context)!.notEnoughMana);
       return;
     }
 

@@ -14,6 +14,7 @@ import 'package:pdf/widgets.dart' as pw;
 import '../../database/database.dart';
 import '../../providers/database_provider.dart';
 import '../../l10n/app_localizations.dart';
+import 'app_snackbar.dart';
 
 /// Shows a share sheet for a recipe with multiple options
 void showRecipeShareSheet(
@@ -181,9 +182,7 @@ class _RecipeShareSheet extends StatelessWidget {
                       icon: const Icon(Icons.copy, size: 20),
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: shareUrl));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(l10n.successCopied)),
-                        );
+                        AppSnackbar.info(context, l10n.successCopied);
                       },
                       tooltip: l10n.actionCopy,
                     ),
@@ -278,9 +277,7 @@ class _RecipeShareSheet extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     Navigator.pop(context);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.shareCreatingCard)),
-    );
+    AppSnackbar.info(context, l10n.shareCreatingCard);
 
     try {
       final ingredients = await ref.read(recipeDaoProvider).getIngredientsForRecipe(recipe.id);
@@ -299,8 +296,7 @@ class _RecipeShareSheet extends StatelessWidget {
       );
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.shareErrorImage(e.toString()))),
+        AppSnackbar.info(context, l10n.shareErrorImage(e.toString()),
         );
       }
     }
@@ -407,9 +403,7 @@ class _RecipeShareSheet extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.errorGeneric}: $e')),
-        );
+        AppSnackbar.info(context, '${l10n.errorGeneric}: $e');
       }
     }
   }
@@ -418,9 +412,7 @@ class _RecipeShareSheet extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     Navigator.pop(context);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.shareCreatingDocument)),
-    );
+    AppSnackbar.info(context, l10n.shareCreatingDocument);
 
     try {
       final ingredients = await ref.read(recipeDaoProvider).getIngredientsForRecipe(recipe.id);
@@ -439,9 +431,7 @@ class _RecipeShareSheet extends StatelessWidget {
       );
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.errorGeneric}: $e')),
-        );
+        AppSnackbar.info(context, '${l10n.errorGeneric}: $e');
       }
     }
   }
@@ -462,9 +452,7 @@ class _RecipeShareSheet extends StatelessWidget {
       );
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.errorGeneric}: $e')),
-        );
+        AppSnackbar.info(context, '${l10n.errorGeneric}: $e');
       }
     }
   }

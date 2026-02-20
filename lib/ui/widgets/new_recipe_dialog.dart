@@ -13,6 +13,7 @@ import '../../services/recipe_import_engine.dart';
 import '../../models/imported_recipe.dart';
 import '../screens/import/import_preview_screen.dart';
 import '../screens/import/ai_import_screen.dart';
+import 'app_snackbar.dart';
 
 /// Shows the MODERN add recipe dialog with 2 options
 Future<void> showNewRecipeDialog(BuildContext context, String cookbookId) {
@@ -170,16 +171,12 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
   void _showError(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Theme.of(context).colorScheme.error, duration: const Duration(seconds: 3)),
-    );
+    AppSnackbar.error(context, message);
   }
 
   void _showSuccess(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.green, duration: const Duration(seconds: 2)),
-    );
+    AppSnackbar.success(context, message);
   }
 
   void _navigateToEdit(ImportedRecipe recipe) {
@@ -465,7 +462,6 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       ),
     );
   }
-
 
   Future<void> _processZipFile(String path) async {
     final l10n = AppLocalizations.of(context)!;

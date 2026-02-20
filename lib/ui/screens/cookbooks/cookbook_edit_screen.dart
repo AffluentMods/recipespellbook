@@ -10,6 +10,7 @@ import 'package:drift/drift.dart' as drift;
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../widgets/rpg/rpg_navigation_shell.dart';
+import '../../widgets/app_snackbar.dart';
 
 class CookbookEditScreen extends ConsumerStatefulWidget {
   final String? cookbookId; // null for new cookbook
@@ -140,9 +141,7 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving cookbook: $e')),
-        );
+        AppSnackbar.info(context, 'Error saving cookbook: $e');
       }
     } finally {
       if (mounted) {
@@ -153,15 +152,12 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
 
   Future<void> _delete() async {
     if (!_isEditing) return;
-
     // Check if this is the only cookbook
     final dao = ref.read(cookbookDaoProvider);
     final cookbooks = await dao.getAllCookbooks();
 
     if (cookbooks.length <= 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cannot delete your only cookbook')),
-      );
+      AppSnackbar.warning(context, AppLocalizations.of(context)!.cookbookCannotDelete);
       return;
     }
 

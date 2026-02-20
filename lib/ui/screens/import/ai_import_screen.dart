@@ -9,6 +9,7 @@ import '../../../providers/database_provider.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../services/ai_import_service.dart';
 import 'dart:convert';
+import '../../widgets/app_snackbar.dart';
 
 /// Screen for importing recipes from AI-generated JSON.
 ///
@@ -424,13 +425,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) setState(() => _promptCopied = false);
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(l10n.promptCopied),
-        behavior: SnackBarBehavior.floating,
-        duration: Duration(seconds: 3),
-      ),
-    );
+    AppSnackbar.info(context, l10n.promptCopied);
   }
 
   @override

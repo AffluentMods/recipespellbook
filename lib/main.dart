@@ -34,6 +34,7 @@ class RecipeSpellbookApp extends ConsumerWidget {
     final colorTheme = ref.watch(appColorThemeProvider);
     final themeMode = ref.watch(themeModeProvider);
     final settings = ref.watch(settingsProvider);
+    final textScale = ref.watch(textScaleProvider);
 
     final Locale? locale = settings.languageCode == 'system'
         ? null
@@ -66,6 +67,15 @@ class RecipeSpellbookApp extends ConsumerWidget {
         darkTheme: AppTheme.darkTheme(colorTheme),
         themeMode: themeMode,
         routerConfig: router,
+        // ── Text scale — applies user's accessibility preference globally ──
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: TextScaler.linear(textScale),
+            ),
+            child: child!,
+          );
+        },
       ),
     );
   }

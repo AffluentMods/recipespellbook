@@ -5,6 +5,7 @@ import '../providers/database_provider.dart';
 import 'ingredient_resolver_service.dart';
 import '../ui/widgets/add_to_shopping_list_sheet.dart';
 import '../ui/screens/shopping/shopping_list_generator_screen.dart';
+import '../ui/widgets/app_snackbar.dart';
 
 // ═══════════════════════════════════════════════════════════════════
 // SHOPPING LIST GENERATOR — Single Entry Point
@@ -64,9 +65,7 @@ Future<void> launchShoppingListGenerator(
   } catch (e) {
     overlay.remove();
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error resolving ingredients: $e')),
-      );
+      AppSnackbar.info(context, 'Error resolving ingredients: $e');
     }
   }
 }
@@ -94,9 +93,7 @@ Future<void> launchShoppingListGeneratorFromMealPlan(
   } catch (e) {
     overlay.remove();
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error resolving ingredients: $e')),
-      );
+      AppSnackbar.info(context, 'Error resolving ingredients: $e');
     }
   }
 }

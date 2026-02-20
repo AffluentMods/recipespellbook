@@ -117,6 +117,26 @@ class AppTheme {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: palette.background,
 
+      // ── Global circular back button — applies to ALL screens ──
+      actionIconTheme: ActionIconThemeData(
+        backButtonIconBuilder: (BuildContext context) {
+          final cs = Theme.of(context).colorScheme;
+          return Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.arrow_back_rounded,
+              size: 20,
+              color: cs.onSurface,
+            ),
+          );
+        },
+      ),
+
       // ── AppBar ──
       appBarTheme: AppBarTheme(
         backgroundColor: palette.background,
@@ -124,6 +144,7 @@ class AppTheme {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0.5,
+        leadingWidth: 56,
       ),
 
       // ── Cards — elevated warm color for clear separation from dark bg ──

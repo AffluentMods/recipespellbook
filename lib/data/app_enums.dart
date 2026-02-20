@@ -6,31 +6,31 @@ enum AppColorTheme {
   spellbook(
     label: 'The Cozy Kitchen',
     emoji: '✨',
-    seedColor: Color(0xFFD4972E),
+    seedColor: Color(0xFFE8882A),
     bannerAsset: 'assets/images/themes/theme_spellbook.png',
     light: ThemePalette(
-      background: Color(0xFFFAF4E8),       // Warm aged parchment
-      surface: Color(0xFFFFF0D8),           // Golden warm surface
-      primary: Color(0xFF7B3F1D),           // Rich mahogany
-      primaryContainer: Color(0xFFF0D4A8),  // Warm honey
-      secondary: Color(0xFFB8860B),         // Dark goldenrod
-      secondaryContainer: Color(0xFFF5E0B8),// Light gold
-      accent: Color(0xFFD4972E),            // Vibrant amber gold
-      onBackground: Color(0xFF2C1A0E),      // Deep warm espresso
-      onSurface: Color(0xFF3E2816),         // Warm charcoal-brown
+      background: Color(0xFFFAF9F7),       // Clean warm white
+      surface: Color(0xFFFFFFFF),           // Pure white cards
+      primary: Color(0xFFE8882A),           // Warm orange (buttons, accents)
+      primaryContainer: Color(0xFFFDE8D0),  // Light peach/orange tint
+      secondary: Color(0xFF8A7E72),         // Warm grey-brown (secondary text)
+      secondaryContainer: Color(0xFFF2E8DC),// Beige (subtle containers)
+      accent: Color(0xFFE8882A),            // Same orange for consistency
+      onBackground: Color(0xFF1A1A1A),      // Near-black text
+      onSurface: Color(0xFF2C2520),         // Dark warm brown text
       onPrimary: Color(0xFFFFFFFF),
     ),
     dark: ThemePalette(
-      background: Color(0xFF1A120A),        // Candlelit dark
-      surface: Color(0xFF2A1C12),           // Warm dark leather
-      primary: Color(0xFFD4972E),           // Amber gold
-      primaryContainer: Color(0xFF4A3018),  // Deep warm brown
-      secondary: Color(0xFFE8B04A),         // Bright warm gold
-      secondaryContainer: Color(0xFF5C3C18),// Medium warm brown
-      accent: Color(0xFFF0C460),            // Bright candlelight gold
-      onBackground: Color(0xFFF5E0C4),      // Warm cream
-      onSurface: Color(0xFFEDD5B8),         // Warm parchment text
-      onPrimary: Color(0xFF1A120A),
+      background: Color(0xFF131110),        // Deep warm dark
+      surface: Color(0xFF1E1B18),           // Slightly lifted warm surface
+      primary: Color(0xFFEA943A),           // Orange — slightly brighter for dark
+      primaryContainer: Color(0xFF3D2A14),  // Deep warm brown
+      secondary: Color(0xFFB8A898),         // Warm taupe
+      secondaryContainer: Color(0xFF2C2620),// Dark beige-brown
+      accent: Color(0xFFF0A04A),            // Brighter warm gold
+      onBackground: Color(0xFFF0E8DC),      // Warm cream text
+      onSurface: Color(0xFFE4DCD0),         // Lighter cream
+      onPrimary: Color(0xFF1A1208),
     ),
   ),
 
@@ -40,14 +40,14 @@ enum AppColorTheme {
     seedColor: Color(0xFF4CAF50),
     bannerAsset: 'assets/images/themes/theme_forest.png',
     light: ThemePalette(
-      background: Color(0xFFF0F4EE),       // Sage green
+      background: Color(0xFFF0F4EE),
       surface: Color(0xFFE8EDE6),
-      primary: Color(0xFF2E5E2C),           // Moss green
+      primary: Color(0xFF2E5E2C),
       primaryContainer: Color(0xFFC5DFC3),
-      secondary: Color(0xFF6B9E3C),         // Sapling green
+      secondary: Color(0xFF6B9E3C),
       secondaryContainer: Color(0xFFD4EDCC),
-      accent: Color(0xFF8BC34A),            // Bright chartreuse
-      onBackground: Color(0xFF1B3518),      // Deep forest green
+      accent: Color(0xFF8BC34A),
+      onBackground: Color(0xFF1B3518),
       onSurface: Color(0xFF2E4A2C),
       onPrimary: Color(0xFFFFFFFF),
     ),
@@ -71,14 +71,14 @@ enum AppColorTheme {
     seedColor: Color(0xFF0288D1),
     bannerAsset: 'assets/images/themes/theme_ocean.png',
     light: ThemePalette(
-      background: Color(0xFFECF7FA),       // Pale aqua
+      background: Color(0xFFECF7FA),
       surface: Color(0xFFE0F2F7),
-      primary: Color(0xFF00695C),           // Deep teal
+      primary: Color(0xFF00695C),
       primaryContainer: Color(0xFFB2DFDB),
-      secondary: Color(0xFF0097A7),         // Teal blue
+      secondary: Color(0xFF0097A7),
       secondaryContainer: Color(0xFFB2EBF2),
-      accent: Color(0xFF00BCD4),            // Cyan / electric blue
-      onBackground: Color(0xFF0D2B3E),      // Dark navy
+      accent: Color(0xFF00BCD4),
+      onBackground: Color(0xFF0D2B3E),
       onSurface: Color(0xFF1A3C50),
       onPrimary: Color(0xFFFFFFFF),
     ),
@@ -102,14 +102,14 @@ enum AppColorTheme {
     seedColor: Color(0xFFE64A19),
     bannerAsset: 'assets/images/themes/theme_sunset.png',
     light: ThemePalette(
-      background: Color(0xFFFFF3EC),       // Peach
+      background: Color(0xFFFFF3EC),
       surface: Color(0xFFFEECE2),
-      primary: Color(0xFFC65100),           // Burnt orange
+      primary: Color(0xFFC65100),
       primaryContainer: Color(0xFFFFCCBC),
-      secondary: Color(0xFFE8871E),         // Warm orange
+      secondary: Color(0xFFE8871E),
       secondaryContainer: Color(0xFFFFE0B2),
-      accent: Color(0xFFF9A825),            // Sunflower yellow
-      onBackground: Color(0xFF3E1A47),      // Dark purple/maroon
+      accent: Color(0xFFF9A825),
+      onBackground: Color(0xFF3E1A47),
       onSurface: Color(0xFF4E2A20),
       onPrimary: Color(0xFFFFFFFF),
     ),
@@ -133,14 +133,14 @@ enum AppColorTheme {
     seedColor: Color(0xFF5C6BC0),
     bannerAsset: 'assets/images/themes/theme_midnight.png',
     light: ThemePalette(
-      background: Color(0xFF1A1A2E),       // Midnight blue (always dark)
-      surface: Color(0xFF232345),           // Indigo
-      primary: Color(0xFF5C6BC0),           // Indigo blue
+      background: Color(0xFF1A1A2E),
+      surface: Color(0xFF232345),
+      primary: Color(0xFF5C6BC0),
       primaryContainer: Color(0xFF303060),
-      secondary: Color(0xFF9FA8DA),         // Lavender
+      secondary: Color(0xFF9FA8DA),
       secondaryContainer: Color(0xFF3A3A6E),
-      accent: Color(0xFFCFD8DC),            // Moonlight silver
-      onBackground: Color(0xFFC5CAE9),      // Silver text
+      accent: Color(0xFFCFD8DC),
+      onBackground: Color(0xFFC5CAE9),
       onSurface: Color(0xFFB0BEC5),
       onPrimary: Color(0xFF1A1A2E),
     ),
@@ -164,14 +164,14 @@ enum AppColorTheme {
     seedColor: Color(0xFFE91E63),
     bannerAsset: 'assets/images/themes/theme_rose.png',
     light: ThemePalette(
-      background: Color(0xFFFFF0F3),       // Blush pink
+      background: Color(0xFFFFF0F3),
       surface: Color(0xFFFFE8ED),
-      primary: Color(0xFFAD5068),           // Dusty rose
+      primary: Color(0xFFAD5068),
       primaryContainer: Color(0xFFF8C8D4),
-      secondary: Color(0xFFD4618C),         // Medium rose
+      secondary: Color(0xFFD4618C),
       secondaryContainer: Color(0xFFF8D0DC),
-      accent: Color(0xFFE91E63),            // Hot pink
-      onBackground: Color(0xFF3C2030),      // Charcoal / dark plum
+      accent: Color(0xFFE91E63),
+      onBackground: Color(0xFF3C2030),
       onSurface: Color(0xFF4A2840),
       onPrimary: Color(0xFFFFFFFF),
     ),
@@ -196,13 +196,13 @@ enum AppColorTheme {
     seedColor: Color(0xFF90CAF9),
     bannerAsset: 'assets/images/themes/theme_frost.png',
     light: ThemePalette(
-      background: Color(0xFFF0F6FA),       // Ice white
+      background: Color(0xFFF0F6FA),
       surface: Color(0xFFE6EFF5),
-      primary: Color(0xFF546E8A),           // Steel blue
+      primary: Color(0xFF546E8A),
       primaryContainer: Color(0xFFC8DCE8),
-      secondary: Color(0xFF78A8CC),         // Frost blue
+      secondary: Color(0xFF78A8CC),
       secondaryContainer: Color(0xFFD6E8F4),
-      accent: Color(0xFF90CAF9),            // Light ice blue
+      accent: Color(0xFF90CAF9),
       onBackground: Color(0xFF1C2E3E),
       onSurface: Color(0xFF2A3E50),
       onPrimary: Color(0xFFFFFFFF),
@@ -227,13 +227,13 @@ enum AppColorTheme {
     seedColor: Color(0xFFD84315),
     bannerAsset: 'assets/images/themes/theme_ember.png',
     light: ThemePalette(
-      background: Color(0xFFFBF0EB),       // Warm off-white
+      background: Color(0xFFFBF0EB),
       surface: Color(0xFFF5E6DE),
-      primary: Color(0xFF8E2C0C),           // Deep red-brown
+      primary: Color(0xFF8E2C0C),
       primaryContainer: Color(0xFFFFCCBC),
-      secondary: Color(0xFFD84315),         // Ember orange
+      secondary: Color(0xFFD84315),
       secondaryContainer: Color(0xFFFFAB91),
-      accent: Color(0xFFFF9100),            // Bright amber
+      accent: Color(0xFFFF9100),
       onBackground: Color(0xFF3E1408),
       onSurface: Color(0xFF4E2010),
       onPrimary: Color(0xFFFFFFFF),
@@ -258,13 +258,13 @@ enum AppColorTheme {
     seedColor: Color(0xFF81C784),
     bannerAsset: 'assets/images/themes/theme_spring.png',
     light: ThemePalette(
-      background: Color(0xFFF5FAF0),       // Pale green-white
+      background: Color(0xFFF5FAF0),
       surface: Color(0xFFEDF5E6),
-      primary: Color(0xFF5A8C5E),           // Sage green
+      primary: Color(0xFF5A8C5E),
       primaryContainer: Color(0xFFC8E6CA),
-      secondary: Color(0xFFE8A0B8),         // Soft pink
+      secondary: Color(0xFFE8A0B8),
       secondaryContainer: Color(0xFFF8D0DC),
-      accent: Color(0xFFC8A060),            // Warm gold
+      accent: Color(0xFFC8A060),
       onBackground: Color(0xFF2A402C),
       onSurface: Color(0xFF3A503C),
       onPrimary: Color(0xFFFFFFFF),
@@ -289,13 +289,13 @@ enum AppColorTheme {
     seedColor: Color(0xFF66BB6A),
     bannerAsset: 'assets/images/themes/theme_alchemist.png',
     light: ThemePalette(
-      background: Color(0xFFF0EDF5),       // Pale purple-grey
+      background: Color(0xFFF0EDF5),
       surface: Color(0xFFE8E4F0),
-      primary: Color(0xFF5E4080),           // Rich purple
+      primary: Color(0xFF5E4080),
       primaryContainer: Color(0xFFD4C0E8),
-      secondary: Color(0xFF2E8B57),         // Emerald green
+      secondary: Color(0xFF2E8B57),
       secondaryContainer: Color(0xFFB8E0CC),
-      accent: Color(0xFFCD8032),            // Bronze
+      accent: Color(0xFFCD8032),
       onBackground: Color(0xFF2A1840),
       onSurface: Color(0xFF3A2850),
       onPrimary: Color(0xFFFFFFFF),

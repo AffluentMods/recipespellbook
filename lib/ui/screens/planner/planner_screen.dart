@@ -11,6 +11,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../../utils/default_recipe_images.dart';
 import '../../../services/shopping_list_generator.dart';
+import '../../widgets/app_snackbar.dart';
 
 // ============ PROVIDERS ============
 
@@ -227,7 +228,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 title: Text(l10n.shareMealPlan),
                 onTap: () {
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.comingSoon), duration: Duration(seconds: 2)));
+                  AppSnackbar.info(context, l10n.comingSoon);
                 },
               ),
               ListTile(
@@ -246,9 +247,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
 
                   if (recipeIds.isEmpty) {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.noRecipesPlannedThisWeek), duration: Duration(seconds: 2)),
-                      );
+                      AppSnackbar.info(context, l10n.noRecipesPlannedThisWeek);
                     }
                     return;
                   }
@@ -298,7 +297,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 await mealPlanDao.deleteMealPlan(meal.id);
               }
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.plannerWeekCleared), duration: Duration(seconds: 2)));
+                AppSnackbar.info(context, l10n.plannerWeekCleared);
               }
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
@@ -936,12 +935,7 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
 
     if (mounted) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.plannerMealAdded(recipe.title, _selectedMealType)),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      AppSnackbar.success(context, AppLocalizations.of(context)!.plannerMealAdded(recipe.title, _selectedMealType));
     }
   }
 }

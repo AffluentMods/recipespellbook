@@ -6,6 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipespellbook/data/rpg/rpg_models.dart';
 import 'package:recipespellbook/providers/rpg_provider.dart';
 
+import '../../../l10n/app_localizations.dart' show AppLocalizations;
+import '../../widgets/app_snackbar.dart';
+
 // ============ LEADERBOARD CATEGORIES ============
 
 enum LeaderboardCategory {
@@ -359,9 +362,7 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
             const SizedBox(height: 16),
             OutlinedButton.icon(
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Community features coming in a future update!')),
-                );
+                AppSnackbar.info(context, AppLocalizations.of(context)!.communityComingSoon);
               },
               icon: const Icon(Icons.notifications_active),
               label: const Text('Notify Me'),

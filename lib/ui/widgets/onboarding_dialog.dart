@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/onboarding_service.dart';
 import '../../providers/database_provider.dart';
+import 'app_snackbar.dart';
 
 /// Shows a first-launch onboarding screen asking if the user wants starter recipes.
 /// Call this from HomeScreen's initState or after first frame.
@@ -204,22 +206,12 @@ class _OnboardingScreenState extends State<_OnboardingScreen> {
       await OnboardingService.completeOnboarding();
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Added $count starter recipes! 🎉'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        AppSnackbar.success(context, AppLocalizations.of(context)!.starterRecipesAdded(count));
       }
     } catch (e) {
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Something went wrong: $e'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        AppSnackbar.error(context, AppLocalizations.of(context)!.somethingWentWrong(e.toString()));
       }
     }
   }

@@ -1944,5 +1944,16 @@
   "retry": "Reintentar",
   "upgrade": "Mejorar",
   "cookingMode": "Modo de cocina",
-  "mealTypeDessert": "Postre"
+  "mealTypeDessert": "Postre",
+  "noContentToSave": "No hay contenido para guardar",
+  "recipeSaved": "¡Receta guardada!",
+  "qrScanningMobileOnly": "El escaneo QR solo está disponible en dispositivos móviles.",
+  "notEnoughMana": "¡No hay suficiente maná! Gana XP con recetas para regenerarlo.",
+  "communityComingSoon": "¡Las funciones de comunidad llegarán en una futura actualización!",
+  "somethingWentWrong": "Algo salió mal: {error}",
+  "starterRecipesAdded": "¡Se añadieron {count} recetas iniciales! 🎉",
+  "enterAtLeastOneNutrient": "Ingrese al menos calorías o un macronutriente",
+  "addedToMealPlan": "Añadido a {mealType} el {date}",
+  "noItemsFoundInText": "No se encontraron elementos en el texto",
+  "noTextFoundInImage": "No se encontró texto en la imagen"
 }

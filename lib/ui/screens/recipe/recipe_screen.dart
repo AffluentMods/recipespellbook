@@ -30,6 +30,7 @@ import '../../../ui/widgets/cooking_mode_screen.dart';
 // Canonical provider is in allergy_settings_screen.dart — imported via:
 import '../settings/allergy_settings_screen.dart' show dismissedAllergyWarningsProvider;
 import '../../../utils/default_recipe_images.dart';
+import '../../widgets/app_snackbar.dart';
 
 // ============ SESSION DISMISSED WARNINGS (temporary) ============
 
@@ -1189,9 +1190,7 @@ class _ImprovedAllergyWarningState extends ConsumerState<_ImprovedAllergyWarning
                 final currentAllergens = ref.read(settingsProvider).allergens.toSet();
                 ref.read(dismissedAllergyWarningsProvider.notifier).dismissForRecipe(widget.recipeId, currentAllergens);
                 setState(() => _showDisablePrompt = false);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.allergyDisabledForRecipe), duration: const Duration(seconds: 2)),
-                );
+                AppSnackbar.info(context, l10n.allergyDisabledForRecipe);
               },
               child: Text(l10n.yes),
             ),
@@ -1424,7 +1423,7 @@ class _RecipeAppBar extends StatelessWidget {
       case 'pin':
         await ref.read(recipeDaoProvider).togglePin(recipe.id, !recipe.isPinned);
         onReload();
-        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(recipe.isPinned ? l10n.recipeUnpin : l10n.recipePin), duration: const Duration(seconds: 2)));
+        if (context.mounted) AppSnackbar.info(context, recipe.isPinned ? l10n.recipeUnpin : l10n.recipePin);
         break;
       case 'duplicate':
         _duplicateRecipe(context);
@@ -1443,12 +1442,12 @@ class _RecipeAppBar extends StatelessWidget {
     try {
       await recipeDao.duplicateRecipe(recipe.id, newId);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.recipeDuplicated), duration: const Duration(seconds: 2)));
+        AppSnackbar.info(context, l10n.recipeDuplicated);
         context.push('/recipe/$newId');
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'), duration: const Duration(seconds: 3)));
+        AppSnackbar.info(context, 'Error: $e');
       }
     }
   }
@@ -1469,7 +1468,7 @@ class _RecipeAppBar extends StatelessWidget {
               if (ctx.mounted) Navigator.pop(ctx);
               if (context.mounted) {
                 context.pop();
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.recipeDeleted), duration: const Duration(seconds: 2)));
+                AppSnackbar.info(context, l10n.recipeDeleted);
               }
             },
             child: Text(l10n.actionDelete),

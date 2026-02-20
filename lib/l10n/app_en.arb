@@ -2337,5 +2337,19 @@
   "retry": "Retry",
   "upgrade": "Upgrade",
   "cookingMode": "Cooking Mode",
-  "mealTypeDessert": "Dessert"
+  "mealTypeDessert": "Dessert",
+  "noContentToSave": "No content to save",
+  "recipeSaved": "Recipe saved!",
+  "qrScanningMobileOnly": "QR scanning is only available on mobile devices.",
+  "notEnoughMana": "Not enough mana! Earn XP from recipes to regenerate.",
+  "communityComingSoon": "Community features coming in a future update!",
+  "somethingWentWrong": "Something went wrong: {error}",
+  "@somethingWentWrong": {"placeholders": {"error": {"type": "String"}}},
+  "starterRecipesAdded": "Added {count} starter recipes! 🎉",
+  "@starterRecipesAdded": {"placeholders": {"count": {"type": "int"}}},
+  "enterAtLeastOneNutrient": "Enter at least calories or one macro nutrient",
+  "addedToMealPlan": "Added to {mealType} on {date}",
+  "@addedToMealPlan": {"placeholders": {"mealType": {"type": "String"}, "date": {"type": "String"}}},
+  "noItemsFoundInText": "No items found in text",
+  "noTextFoundInImage": "No text found in image"
 }

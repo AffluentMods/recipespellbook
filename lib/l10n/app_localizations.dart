@@ -8868,6 +8868,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dessert'**
   String get mealTypeDessert;
+
+  /// No description provided for @noContentToSave.
+  ///
+  /// In en, this message translates to:
+  /// **'No content to save'**
+  String get noContentToSave;
+
+  /// No description provided for @recipeSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe saved!'**
+  String get recipeSaved;
+
+  /// No description provided for @qrScanningMobileOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'QR scanning is only available on mobile devices.'**
+  String get qrScanningMobileOnly;
+
+  /// No description provided for @notEnoughMana.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough mana! Earn XP from recipes to regenerate.'**
+  String get notEnoughMana;
+
+  /// No description provided for @communityComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Community features coming in a future update!'**
+  String get communityComingSoon;
+
+  /// No description provided for @somethingWentWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong: {error}'**
+  String somethingWentWrong(String error);
+
+  /// No description provided for @starterRecipesAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {count} starter recipes! 🎉'**
+  String starterRecipesAdded(int count);
+
+  /// No description provided for @enterAtLeastOneNutrient.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least calories or one macro nutrient'**
+  String get enterAtLeastOneNutrient;
+
+  /// No description provided for @addedToMealPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to {mealType} on {date}'**
+  String addedToMealPlan(String mealType, String date);
+
+  /// No description provided for @noItemsFoundInText.
+  ///
+  /// In en, this message translates to:
+  /// **'No items found in text'**
+  String get noItemsFoundInText;
+
+  /// No description provided for @noTextFoundInImage.
+  ///
+  /// In en, this message translates to:
+  /// **'No text found in image'**
+  String get noTextFoundInImage;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -7,6 +7,7 @@ import '../../../providers/settings_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../widgets/placeholder_image.dart';
+import '../../widgets/app_snackbar.dart';
 
 /// Provider for dismissed allergy warnings
 /// Stores recipe IDs where user has permanently dismissed warnings
@@ -576,9 +577,7 @@ class _DisabledWarningsTab extends ConsumerWidget {
             onRestore: () {
               ref.read(dismissedAllergyWarningsProvider.notifier)
                   .restoreForRecipe(entry.key);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.warningsRestoredForRecipe)),
-              );
+              AppSnackbar.info(context, l10n.warningsRestoredForRecipe);
             },
           );
         }),
@@ -613,9 +612,7 @@ class _DisabledWarningsTab extends ConsumerWidget {
     if (confirmed == true) {
       ref.read(dismissedAllergyWarningsProvider.notifier).restoreAll();
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.allWarningsRestored)),
-        );
+        AppSnackbar.info(context, l10n.allWarningsRestored);
       }
     }
   }

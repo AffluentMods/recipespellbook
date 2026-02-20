@@ -13,6 +13,7 @@ import '../../services/nutrition_calculator.dart';
 import '../../services/usda_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/default_recipe_images.dart';
+import 'app_snackbar.dart';
 
 /// Shows the nutrition calculation process and results
 class NutritionCalculationSheet extends ConsumerStatefulWidget {
@@ -1186,9 +1187,7 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
                       if (manual != null) {
                         Navigator.pop(context, manual);
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(l10n.nutritionEnterAtLeastOne)),
-                        );
+                        AppSnackbar.info(context, l10n.nutritionEnterAtLeastOne);
                       }
                     } else if (_result != null) {
                       // Store TOTAL nutrition with calculatedServings metadata
@@ -1691,9 +1690,7 @@ class _IngredientEditDialogState extends State<_IngredientEditDialog>
 
     // Need at least calories or one macro
     if (calories == null && protein == null && carbs == null && fat == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter at least calories or one macro nutrient')),
-      );
+      AppSnackbar.warning(context, AppLocalizations.of(context)!.enterAtLeastOneNutrient);
       return;
     }
 

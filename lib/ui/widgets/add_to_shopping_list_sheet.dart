@@ -7,6 +7,7 @@ import '../../../database/daos/shopping_dao.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/ingredient_utils.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
+import 'app_snackbar.dart';
 
 /// Modern sheet for selecting which ingredients to add to shopping list
 /// Features:
@@ -204,9 +205,7 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        AppSnackbar.info(context, 'Error: $e');
       }
     } finally {
       if (mounted) setState(() => _isAdding = false);

@@ -6,6 +6,7 @@ import '../../database/database.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/cookbook_provider.dart';
 import '../../data/course_category_data.dart';
+import 'app_snackbar.dart';
 
 /// A unified item that can be either a built-in or custom course/category
 class TaxonomyItem {
@@ -243,20 +244,20 @@ class _TaxonomyPickerSheetState extends ConsumerState<_TaxonomyPickerSheet> {
     try {
       if (widget.type == _TaxonomyType.course) {
         if (await customDao.customCourseNameExists(cookbookId, name)) {
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Course "$name" already exists')));
+          if (mounted) AppSnackbar.info(context, 'Course "$name" already exists');
           return;
         }
         await customDao.insertCustomCourse(CustomCoursesCompanion.insert(id: id, cookbookId: cookbookId, name: name.trim(), emoji: Value(emoji)));
       } else {
         if (await customDao.customCategoryNameExists(cookbookId, name)) {
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Category "$name" already exists')));
+          if (mounted) AppSnackbar.info(context, 'Category "$name" already exists');
           return;
         }
         await customDao.insertCustomCategory(CustomCategoriesCompanion.insert(id: id, cookbookId: cookbookId, name: name.trim(), emoji: Value(emoji)));
       }
       if (mounted) Navigator.of(context).pop(id);
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error creating: $e')));
+      if (mounted) AppSnackbar.info(context, 'Error creating: $e');
     }
   }
 

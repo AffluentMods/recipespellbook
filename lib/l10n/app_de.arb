@@ -1984,5 +1984,16 @@
   "retry": "Erneut versuchen",
   "upgrade": "Upgraden",
   "cookingMode": "Kochmodus",
-  "mealTypeDessert": "Dessert"
+  "mealTypeDessert": "Dessert",
+  "noContentToSave": "Kein Inhalt zum Speichern",
+  "recipeSaved": "Rezept gespeichert!",
+  "qrScanningMobileOnly": "QR-Scannen ist nur auf Mobilgeräten verfügbar.",
+  "notEnoughMana": "Nicht genug Mana! Verdiene XP durch Rezepte, um es zu regenerieren.",
+  "communityComingSoon": "Community-Funktionen kommen in einem zukünftigen Update!",
+  "somethingWentWrong": "Etwas ist schiefgelaufen: {error}",
+  "starterRecipesAdded": "{count} Starterrezepte hinzugefügt! 🎉",
+  "enterAtLeastOneNutrient": "Geben Sie mindestens Kalorien oder einen Makronährstoff ein",
+  "addedToMealPlan": "Zu {mealType} am {date} hinzugefügt",
+  "noItemsFoundInText": "Keine Einträge im Text gefunden",
+  "noTextFoundInImage": "Kein Text im Bild gefunden"
 }

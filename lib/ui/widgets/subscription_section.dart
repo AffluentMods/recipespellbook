@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/subscription_provider.dart';
 import '../../services/revenuecat_service.dart';
+import 'app_snackbar.dart';
 
 /// Subscription section for settings_screen.dart.
 ///
@@ -100,23 +101,15 @@ class _FreeContent extends ConsumerWidget {
                 await ref.read(subscriptionProvider.notifier).restorePurchases();
                 if (context.mounted) {
                   final isPro = ref.read(subscriptionProvider).isPro;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(isPro
-                          ? 'Purchases restored successfully!'
-                          : 'No previous purchases found.'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
+                  if (isPro) {
+                    AppSnackbar.success(context, 'Purchases restored successfully!');
+                  } else {
+                    AppSnackbar.info(context, 'No previous purchases found.');
+                  }
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Restore failed: $e'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
+                  AppSnackbar.error(context, 'Restore failed: $e');
                 }
               }
             },

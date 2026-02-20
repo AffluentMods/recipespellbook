@@ -11,6 +11,7 @@ import '../../../data/course_category_data.dart' as taxonomy;
 import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/placeholder_image.dart';
 import 'package:drift/drift.dart' hide Column;
+import '../../widgets/app_snackbar.dart';
 
 class UncategorizedRecipesScreen extends ConsumerStatefulWidget {
   const UncategorizedRecipesScreen({super.key});
@@ -265,9 +266,7 @@ class _UncategorizedRecipesScreenState
     }
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.recipesMovedToTrash(count))),
-      );
+      AppSnackbar.info(context, l10n.recipesMovedToTrash(count));
       _exitSelection();
     }
   }
@@ -317,9 +316,7 @@ class _UncategorizedRecipesScreenState
 
     if (mounted) {
       final count = _selectedIds.length;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.courseSetForRecipes(count))),
-      );
+      AppSnackbar.info(context, l10n.courseSetForRecipes(count));
       _exitSelection();
     }
   }
@@ -369,11 +366,7 @@ class _UncategorizedRecipesScreenState
 
     if (mounted) {
       final count = _selectedIds.length;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-                'Category set for $count recipe${count == 1 ? '' : 's'}')),
-      );
+      AppSnackbar.info(context, 'Category set for $count recipe${count == 1 ? '' : 's'}');
       _exitSelection();
     }
   }
@@ -386,9 +379,7 @@ class _UncategorizedRecipesScreenState
     }
     if (mounted) {
       final count = _selectedIds.length;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.recipesFavorited(count))),
-      );
+      AppSnackbar.info(context, l10n.recipesFavorited(count));
       _exitSelection();
     }
   }

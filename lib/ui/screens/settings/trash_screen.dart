@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
+import '../../widgets/app_snackbar.dart';
 
 // Provider for deleted recipes
 final deletedRecipesProvider = StreamProvider<List<Recipe>>((ref) {
@@ -145,9 +146,7 @@ class TrashScreen extends ConsumerWidget {
               Navigator.pop(context);
               await ref.read(recipeDaoProvider).permanentlyDeleteRecipe(recipe.id);
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.successDeleted)),
-                );
+                AppSnackbar.info(context, l10n.successDeleted);
               }
             },
             child: Text(l10n.actionDelete),
@@ -178,9 +177,7 @@ class TrashScreen extends ConsumerWidget {
               Navigator.pop(context);
               await ref.read(recipeDaoProvider).emptyTrash();
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.trashEmptied)),
-                );
+                AppSnackbar.info(context, l10n.trashEmptied);
               }
             },
             child: Text(l10n.trashEmptyTrash),

@@ -9,6 +9,7 @@ import '../../../data/rpg/rpg_models.dart';
 import '../../../data/rpg/rpg_cosmetics.dart';
 import '../../../providers/rpg_provider.dart';
 import '../../../../ui/widgets/rpg/rpg_widgets.dart';
+import '../../widgets/app_snackbar.dart';
 
 class RpgCosmeticsScreen extends ConsumerStatefulWidget {
   const RpgCosmeticsScreen({super.key});
@@ -473,12 +474,7 @@ class _RpgCosmeticsScreenState extends ConsumerState<RpgCosmeticsScreen>
                     : await ref.read(rpgProvider.notifier)
                     .purchaseWithGems(item);
                 if (success && context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Purchased ${item.name}!'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
+                  AppSnackbar.success(context, 'Purchased ${item.name}!');
                 }
               }
                   : null,

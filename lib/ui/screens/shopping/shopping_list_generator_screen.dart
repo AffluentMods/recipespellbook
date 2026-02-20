@@ -10,6 +10,7 @@ import '../../../services/ingredient_resolver_service.dart';
 import '../../../utils/ingredient_utils.dart';
 import '../../../utils/default_recipe_images.dart';
 import '../../../services/pantry_service.dart';
+import '../../widgets/app_snackbar.dart';
 
 // ═══════════════════════════════════════════════════════════════════
 // SHOPPING LIST GENERATOR SCREEN
@@ -790,9 +791,7 @@ class _ShoppingListGeneratorScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.errorGeneric}: $e')),
-        );
+        AppSnackbar.info(context, '${l10n.errorGeneric}: $e');
       }
     } finally {
       if (mounted) setState(() => _isAdding = false);

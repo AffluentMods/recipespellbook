@@ -13,6 +13,7 @@ import '../../widgets/placeholder_image.dart';
 import '../../../utils/default_recipe_images.dart';
 import '../../../data/course_category_data.dart' as taxonomy;
 import '../../../utils/taxonomy_translator.dart';
+import '../../widgets/app_snackbar.dart';
 
 /// Generic recipe list screen with filtering by course/category/tags
 /// Supports view size, sorting, search, and tag filtering
@@ -366,9 +367,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       await dao.moveToTrash(id);
     }
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$count recipe${count == 1 ? '' : 's'} moved to trash')),
-      );
+      AppSnackbar.info(context, '$count recipe${count == 1 ? '' : 's'} moved to trash');
       _exitSelection();
     }
   }
@@ -400,9 +399,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       await dao.updateRecipeFields(id, RecipesCompanion(courseId: Value(selected)));
     }
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Course set for ${_selectedIds.length} recipes')),
-      );
+      AppSnackbar.info(context, 'Course set for ${_selectedIds.length} recipes');
       _exitSelection();
     }
   }
@@ -434,9 +431,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       await dao.updateRecipeFields(id, RecipesCompanion(categoryId: Value(selected)));
     }
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Category set for ${_selectedIds.length} recipes')),
-      );
+      AppSnackbar.info(context, 'Category set for ${_selectedIds.length} recipes');
       _exitSelection();
     }
   }
@@ -447,9 +442,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       await dao.toggleFavorite(id, true);
     }
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${_selectedIds.length} recipes favorited')),
-      );
+      AppSnackbar.info(context, '${_selectedIds.length} recipes favorited');
       _exitSelection();
     }
   }

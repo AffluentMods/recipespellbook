@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:drift/drift.dart' as drift;
 import '../../database/database.dart';
 import '../../providers/database_provider.dart';
+import 'app_snackbar.dart';
 
 /// Model for recipe tags/collections
 class RecipeTag {
@@ -186,9 +187,7 @@ class _ManageTagsSheetState extends ConsumerState<_ManageTagsSheet> {
             child: FilledButton(
               onPressed: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${_selectedTags.length} tags applied')),
-                );
+                AppSnackbar.info(context, '${_selectedTags.length} tags applied');
               },
               child: const Text('Save Tags'),
             ),

@@ -7,6 +7,7 @@ import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../data/course_category_data.dart';
 import '../../../utils/taxonomy_translator.dart';
+import '../../widgets/app_snackbar.dart';
 
 class ManageCoursesScreen extends ConsumerStatefulWidget {
   const ManageCoursesScreen({super.key});
@@ -247,9 +248,7 @@ class _ManageCoursesScreenState extends ConsumerState<ManageCoursesScreen> {
 
     _loadCourses();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.taxonomyDefaultsRestored)),
-      );
+      AppSnackbar.info(context, l10n.taxonomyDefaultsRestored);
     }
   }
 }
