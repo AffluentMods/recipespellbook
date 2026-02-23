@@ -24,7 +24,7 @@ final sharedRecipeProvider = StateProvider<Map<String, dynamic>?>((ref) => null)
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '..env');
+  await dotenv.load(fileName: '.env');
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   IngredientSuggestionService.instance.preload();
   runApp(const ProviderScope(child: RecipeSpellbookApp()));
