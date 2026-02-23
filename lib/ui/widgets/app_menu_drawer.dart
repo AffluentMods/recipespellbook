@@ -593,7 +593,7 @@ class _BottomSection extends ConsumerWidget {
         ),
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
-          child: Text('Recipe Spellbook v1.0.0 · Beta',
+          child: Text('Recipe Spellbook v1.0.2 · Beta',
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline.withValues(alpha: 0.45), fontSize: 11)),
         ),
       ],

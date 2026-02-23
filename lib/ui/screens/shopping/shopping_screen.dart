@@ -2994,8 +2994,11 @@ class _CategoryDropdown extends ConsumerWidget {
       builder: (context, snapshot) {
         final categories = snapshot.data ?? [];
 
+        // Build unique set of category IDs to avoid duplicates
+        final categoryIds = categories.map((c) => c.id).toSet();
+
         final validIds = <String>{
-          ...categories.map((c) => c.id),
+          ...categoryIds,
           'other',
         };
 
@@ -3019,12 +3022,12 @@ class _CategoryDropdown extends ConsumerWidget {
                     : 'Select category',
               ),
               items: [
-                if (currentCategoryId.isNotEmpty && !validIds.contains(currentCategoryId))
+                if (currentCategoryId.isNotEmpty && !validIds.contains(currentCategoryId) && currentCategoryId != 'other')
                   DropdownMenuItem(
                     value: currentCategoryId,
                     child: Text(_formatCategoryName(currentCategoryId)),
                   ),
-                ...categories.map((cat) => DropdownMenuItem(
+                ...categories.where((cat) => cat.id != 'other').map((cat) => DropdownMenuItem(
                   value: cat.id,
                   child: Row(
                     children: [

@@ -236,6 +236,85 @@ class NutritionCalculator {
     return null;
   }
 
+  /// Check if an ingredient should have negligible calories.
+  /// Returns a near-zero result for bones, water, salt, and "to taste" items
+  /// that would otherwise get wildly inaccurate matches.
+  IngredientNutritionResult? _checkNegligibleCalorieIngredient(Ingredient ingredient) {
+    final lower = ingredient.name.toLowerCase().trim();
+    final notes = (ingredient.notes ?? '').toLowerCase();
+    final unit = (ingredient.unit ?? '').toLowerCase();
+
+    // "To taste" items — negligible regardless of what they are
+    final isToTaste = notes.contains('to taste') ||
+        lower.contains('to taste') ||
+        unit.contains('to taste');
+
+    // Bones — used for stock/broth, not eaten
+    final isBone = lower.contains('bone') ||
+        lower.contains('carcass') ||
+        lower.contains('marrow bone');
+
+    // Water & ice — zero calories
+    final isWater = lower == 'water' || lower == 'ice' ||
+        lower == 'cold water' || lower == 'hot water' ||
+        lower == 'warm water' || lower == 'boiling water' ||
+        lower == 'ice water' || lower == 'filtered water';
+
+    // Negligible-calorie seasonings when used in cooking amounts
+    final isNegligibleSeasoning = _isNegligibleSeasoning(lower, ingredient.amount, unit);
+
+    if (!isBone && !isWater && !isToTaste && !isNegligibleSeasoning) return null;
+
+    // Build descriptive match reason
+    String reason;
+    if (isBone) {
+      reason = 'Bones (for stock) — negligible calories';
+    } else if (isWater) {
+      reason = 'Water — 0 calories';
+    } else if (isToTaste) {
+      reason = 'To taste — negligible calories';
+    } else {
+      reason = 'Seasoning amount — negligible calories';
+    }
+
+    debugPrint('Negligible calorie: "${ingredient.name}" → $reason');
+
+    return IngredientNutritionResult(
+      ingredient: ingredient,
+      isMatched: true,
+      nutrition: const NutritionData(
+        calories: 0,
+        protein: 0,
+        fat: 0,
+        carbohydrates: 0,
+        fiber: 0,
+        sugar: 0,
+        sodium: 0,
+      ),
+      gramsUsed: 0,
+      matchStatus: MatchStatus.matched,
+      matchDescription: reason,
+    );
+  }
+
+  /// Check if a seasoning is used in negligible-calorie amounts.
+  /// Salt has 0 cal, pepper ~3 cal/tsp — both effectively 0 in recipes.
+  bool _isNegligibleSeasoning(String lower, String? amount, String unit) {
+    const negligibleSeasonings = {
+      'salt', 'sea salt', 'kosher salt', 'table salt', 'flaky salt',
+      'pepper', 'black pepper', 'white pepper', 'ground pepper',
+      'cracked pepper', 'peppercorn', 'peppercorns',
+    };
+
+    if (!negligibleSeasonings.contains(lower)) return false;
+
+    // If no amount or small amounts (pinch, tsp, tbsp, dash) → negligible
+    if (amount == null || amount.isEmpty) return true;
+    final smallUnits = {'pinch', 'pinches', 'dash', 'tsp', 'teaspoon',
+      'teaspoons', 'tbsp', 'tablespoon', 'tablespoons', ''};
+    return smallUnits.contains(unit.toLowerCase().trim());
+  }
+
   /// Calculate nutrition for a single ingredient
   /// [languageCode] - Used to translate ingredient name to English for USDA lookup
   Future<IngredientNutritionResult> _calculateForIngredient(
@@ -243,6 +322,12 @@ class NutritionCalculator {
       String languageCode,
       ) async {
     try {
+      // ── Step 0: Handle negligible-calorie ingredients ──
+      // Bones (used for stock/broth), water, salt, and "to taste" items
+      // should return near-zero nutrition instead of wildly wrong values.
+      final negligibleResult = _checkNegligibleCalorieIngredient(ingredient);
+      if (negligibleResult != null) return negligibleResult;
+
       // ── Step 1: Try local NutritionDatabase first ──
       // This has ~300 curated entries with correct per-100g values for common ingredients.
       // Much more reliable than USDA search for staples like milk, pepper, broth.

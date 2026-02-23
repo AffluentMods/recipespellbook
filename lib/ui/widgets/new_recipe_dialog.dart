@@ -8,6 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:pdfx/pdfx.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/imported_recipe.dart';
 import '../../services/recipe_import_engine.dart';
@@ -213,8 +216,70 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     if (result == null || result.files.isEmpty) return;
     final path = result.files.first.path;
     if (path == null) return;
-    Navigator.of(context).pop();
-    context.push('/import/pdf?path=${Uri.encodeComponent(path)}&cookbookId=${widget.cookbookId}');
+    _processPdfFile(path);
+  }
+
+  Future<void> _processPdfFile(String path) async {
+    final l10n = AppLocalizations.of(context)!;
+    _showLoading(l10n.readingImage);
+    try {
+      final document = await PdfDocument.openFile(path);
+      final tempDir = await getTemporaryDirectory();
+      final allLines = <String>[];
+      final textRecognizer = TextRecognizer();
+
+      try {
+        for (int pageNum = 1; pageNum <= document.pagesCount; pageNum++) {
+          final page = await document.getPage(pageNum);
+          final pageImage = await page.render(
+            width: page.width * 2,
+            height: page.height * 2,
+            format: PdfPageImageFormat.png,
+          );
+          await page.close();
+
+          if (pageImage != null) {
+            final imagePath = p.join(tempDir.path, 'pdf_page_$pageNum.png');
+            final file = File(imagePath);
+            await file.writeAsBytes(pageImage.bytes);
+
+            final inputImage = InputImage.fromFilePath(imagePath);
+            final recognized = await textRecognizer.processImage(inputImage);
+
+            for (final block in recognized.blocks) {
+              for (final line in block.lines) {
+                allLines.add(line.text);
+              }
+              allLines.add('');
+            }
+
+            await file.delete();
+          }
+        }
+      } finally {
+        await textRecognizer.close();
+        await document.close();
+      }
+
+      final ocrText = allLines.join('\n');
+      if (ocrText.trim().isEmpty) {
+        _hideLoading();
+        _showError(l10n.noTextInImage);
+        return;
+      }
+
+      _showLoading(l10n.parsingRecipe);
+      final recipe = RecipeImportEngine.parseOcrText(ocrText);
+      // Use filename as fallback title
+      if (recipe.title.isEmpty || recipe.title == 'Untitled Recipe') {
+        recipe.title = p.basenameWithoutExtension(path).replaceAll(RegExp(r'[-_]'), ' ');
+      }
+      _hideLoading();
+      _showImportPreview([recipe], sourceText: ocrText);
+    } catch (e) {
+      _hideLoading();
+      _showError(l10n.failedToImport(e.toString()));
+    }
   }
 
   // ========== IMAGE IMPORT ==========
@@ -324,8 +389,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
     switch (ext) {
       case 'pdf':
-        Navigator.of(context).pop();
-        context.push('/import/pdf?path=${Uri.encodeComponent(path)}&cookbookId=${widget.cookbookId}');
+        _processPdfFile(path);
         break;
       case 'zip': case 'mela': case 'melarecipes':
       case 'melarecipe': case 'crumb': case 'fdx': case 'rcb':

@@ -40,7 +40,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
   @override
   void initState() {
     super.initState();
-    _recipes = List.from(_recipes);
+    _recipes = List.from(widget.recipes);
     _selected = List.filled(_recipes.length, true);
     _expanded = List.filled(_recipes.length, false);
     _checkForDuplicates();

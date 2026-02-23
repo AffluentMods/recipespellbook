@@ -4,7 +4,6 @@ import '../services/barcode_scanner_service.dart';
 import '../ui/screens/cookbooks/cookbook_edit_screen.dart';
 import '../ui/screens/cookbooks/cookbooks_screen.dart';
 import '../ui/screens/home/home_screen.dart';
-import '../ui/screens/import/import_pdf_screen.dart';
 import '../ui/screens/import/transfer_screen.dart';
 import '../ui/screens/planner/planner_screen.dart';
 import '../ui/screens/premium/paywall_screen.dart';
@@ -282,13 +281,6 @@ final router = GoRouter(
           ),
         ),
       ],
-    ),
-
-    // Import routes (only PDF — other import flows are inline in new_recipe_dialog)
-    GoRoute(
-      path: '/import/pdf',
-      name: 'import-pdf',
-      builder: (context, state) => const ImportPdfScreen(),
     ),
 
     // Barcode scanner

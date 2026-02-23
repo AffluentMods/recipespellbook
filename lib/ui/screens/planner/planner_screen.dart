@@ -884,104 +884,97 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
     final l10n = AppLocalizations.of(context)!;
     final dayName = DateFormat.EEEE(locale).format(widget.date);
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.85,
-      minChildSize: 0.5,
-      maxChildSize: 0.95,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              const SizedBox(height: 12),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.85,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 12),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
 
-              // Header
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.addToDay(dayName),
+                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+
+                // Meal type chips
+                Wrap(
+                  spacing: 8,
                   children: [
-                    Text(
-                      l10n.addToDay(dayName),
-                      style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Meal type chips
-                    Wrap(
-                      spacing: 8,
-                      children: [
-                        _MealTypeChip(emoji: '🌅', label: l10n.mealTypeBreakfast, isSelected: _selectedMealType == 'Breakfast', onTap: () => setState(() => _selectedMealType = 'Breakfast')),
-                        _MealTypeChip(emoji: '☀️', label: l10n.mealTypeLunch, isSelected: _selectedMealType == 'Lunch', onTap: () => setState(() => _selectedMealType = 'Lunch')),
-                        _MealTypeChip(emoji: '🌙', label: l10n.mealTypeDinner, isSelected: _selectedMealType == 'Dinner', onTap: () => setState(() => _selectedMealType = 'Dinner')),
-                        _MealTypeChip(emoji: '🍰', label: l10n.mealTypeDessert, isSelected: _selectedMealType == 'Dessert', onTap: () => setState(() => _selectedMealType = 'Dessert')),
-                        _MealTypeChip(emoji: '🍪', label: l10n.mealTypeSnack, isSelected: _selectedMealType == 'Snack', onTap: () => setState(() => _selectedMealType = 'Snack')),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Search
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: l10n.searchRecipes,
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                      ),
-                      onChanged: (value) => setState(() => _searchQuery = value),
-                    ),
+                    _MealTypeChip(emoji: '🌅', label: l10n.mealTypeBreakfast, isSelected: _selectedMealType == 'Breakfast', onTap: () => setState(() => _selectedMealType = 'Breakfast')),
+                    _MealTypeChip(emoji: '☀️', label: l10n.mealTypeLunch, isSelected: _selectedMealType == 'Lunch', onTap: () => setState(() => _selectedMealType = 'Lunch')),
+                    _MealTypeChip(emoji: '🌙', label: l10n.mealTypeDinner, isSelected: _selectedMealType == 'Dinner', onTap: () => setState(() => _selectedMealType = 'Dinner')),
+                    _MealTypeChip(emoji: '🍰', label: l10n.mealTypeDessert, isSelected: _selectedMealType == 'Dessert', onTap: () => setState(() => _selectedMealType = 'Dessert')),
+                    _MealTypeChip(emoji: '🍪', label: l10n.mealTypeSnack, isSelected: _selectedMealType == 'Snack', onTap: () => setState(() => _selectedMealType = 'Snack')),
                   ],
                 ),
-              ),
 
-              const Divider(height: 1),
+                const SizedBox(height: 16),
 
-              // Recipe list
-              Expanded(
-                child: StreamBuilder<List<Recipe>>(
-                  stream: recipeDao.watchAllRecipesGlobal(),
-                  builder: (context, snapshot) {
-                    var recipes = snapshot.data ?? [];
+                // Search
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: l10n.searchRecipes,
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                  onChanged: (value) => setState(() => _searchQuery = value),
+                ),
+              ],
+            ),
+          ),
 
-                    // Filter by search
-                    if (_searchQuery.isNotEmpty) {
-                      recipes = recipes.where((r) =>
-                          r.title.toLowerCase().contains(_searchQuery.toLowerCase())
-                      ).toList();
-                    }
+          const Divider(height: 1),
 
-                    if (recipes.isEmpty) {
-                      return Center(
-                        child: Text(
-                          _searchQuery.isEmpty ? l10n.noRecipesYet : l10n.noRecipesFound,
-                          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
-                        ),
-                      );
-                    }
+          // Recipe list
+          Expanded(
+            child: StreamBuilder<List<Recipe>>(
+              stream: recipeDao.watchAllRecipesGlobal(),
+              builder: (context, snapshot) {
+                var recipes = snapshot.data ?? [];
 
-                    return ListView.builder(
-                      controller: scrollController,
-                      itemCount: recipes.length,
-                      itemBuilder: (context, index) {
-                        final recipe = recipes[index];
-                        return _RecipeSelectTile(
-                          recipe: recipe,
-                          onTap: () => _addRecipeToMealPlan(recipe),
-                        );
-                      },
+                // Filter by search
+                if (_searchQuery.isNotEmpty) {
+                  recipes = recipes.where((r) =>
+                      r.title.toLowerCase().contains(_searchQuery.toLowerCase())
+                  ).toList();
+                }
+
+                if (recipes.isEmpty) {
+                  return Center(
+                    child: Text(
+                      _searchQuery.isEmpty ? l10n.noRecipesYet : l10n.noRecipesFound,
+                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: recipes.length,
+                  itemBuilder: (context, index) {
+                    final recipe = recipes[index];
+                    return _RecipeSelectTile(
+                      recipe: recipe,
+                      onTap: () => _addRecipeToMealPlan(recipe),
                     );
                   },
-                ),
-              ),
-            ],
+                );
+              },
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
