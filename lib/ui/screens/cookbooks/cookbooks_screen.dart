@@ -12,6 +12,7 @@ import '../../../providers/settings_provider.dart';
 import '../../shell/app_shell.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/placeholder_image.dart';
+import '../../../utils/responsive_utils.dart';
 
 class CookbooksScreen extends ConsumerWidget {
   const CookbooksScreen({super.key});
@@ -145,8 +146,8 @@ class _CookbookGrid extends ConsumerWidget {
         Expanded(
           child: GridView.builder(
             padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: Responsive.cookbookColumns(context),
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
               childAspectRatio: 1.1,

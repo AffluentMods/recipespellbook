@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../utils/taxonomy_translator.dart';
+import '../../../utils/responsive_utils.dart';
 
 enum BrowseMode { courses, categories }
 
@@ -135,8 +136,8 @@ class CategoriesBrowseScreen extends ConsumerWidget {
                 GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: Responsive.browseGridColumns(context),
                     childAspectRatio: 1.5,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
@@ -182,8 +183,8 @@ class CategoriesBrowseScreen extends ConsumerWidget {
                 GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: Responsive.browseGridColumns(context),
                     childAspectRatio: 1.5,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,

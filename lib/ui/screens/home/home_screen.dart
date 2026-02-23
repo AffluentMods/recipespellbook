@@ -16,6 +16,7 @@ import '../../widgets/new_recipe_dialog.dart';
 import '../../widgets/onboarding_dialog.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/rpg/rpg_navigation_shell.dart';
+import '../../../utils/responsive_utils.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -206,7 +207,7 @@ class _QuickRecipesWidget extends ConsumerWidget {
 
             // Horizontal scroll list
             SizedBox(
-              height: 165,
+              height: Responsive.quickAccessHeight(context),
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -555,7 +556,7 @@ class _CoursesSection extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 105,
+          height: Responsive.chipRowHeight(context),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -632,7 +633,7 @@ class _CategoriesSection extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 105,
+          height: Responsive.chipRowHeight(context),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -717,7 +718,7 @@ class _UncategorizedSection extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 105,
+          height: Responsive.chipRowHeight(context),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),

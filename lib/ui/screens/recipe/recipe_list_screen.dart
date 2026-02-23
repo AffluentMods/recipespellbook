@@ -15,6 +15,7 @@ import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/new_recipe_dialog.dart';
 import '../../widgets/placeholder_image.dart';
+import '../../../utils/responsive_utils.dart';
 
 /// Generic recipe list screen with filtering by course/category/tags
 /// Supports view size, sorting, search, and tag filtering
@@ -729,8 +730,8 @@ class _MediumGridView extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.builder(
       padding: const EdgeInsets.all(12).copyWith(bottom: 80),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: Responsive.recipeGridColumns(context),
         childAspectRatio: 0.8,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
