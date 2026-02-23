@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import '../database.dart';
-import '../tables/custom_courses.dart';
 import '../tables/custom_categories.dart';
+import '../tables/custom_courses.dart';
 
 part 'custom_taxonomy_dao.g.dart';
 

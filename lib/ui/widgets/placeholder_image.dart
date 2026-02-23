@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/settings_provider.dart';
 import '../../data/app_enums.dart';
+import '../../providers/settings_provider.dart';
 
 /// Recipe placeholder image widget
 /// Shows either default artwork, theme banner, or gradient based on settings

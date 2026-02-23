@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
+
 import '../database/database.dart';
 
 /// Service that parses and imports recipes from AI-generated JSON.
@@ -212,48 +213,98 @@ class AiImportService {
   }
 
   /// Try to map a course name to a known course ID.
+  /// IDs must match CourseData in course_category_data.dart
   static String? _resolveCourseId(String? name) {
     if (name == null) return null;
     final lower = name.toLowerCase().trim();
     const courseMap = {
-      'appetizer': 'course_appetizer',
-      'starter': 'course_appetizer',
-      'entrée': 'course_entree',
-      'entree': 'course_entree',
-      'main': 'course_entree',
-      'main course': 'course_entree',
-      'side': 'course_side',
-      'side dish': 'course_side',
-      'dessert': 'course_dessert',
-      'beverage': 'course_beverage',
-      'drink': 'course_beverage',
-      'breakfast': 'course_breakfast',
-      'brunch': 'course_brunch',
-      'lunch': 'course_lunch',
-      'dinner': 'course_dinner',
-      'snack': 'course_snack',
-      'sauce': 'course_sauce',
-      'salad': 'course_salad',
-      'soup': 'course_soup',
+      'appetizer': 'appetizer',
+      'starter': 'appetizer',
+      'beverage': 'beverage',
+      'drink': 'beverage',
+      'breakfast': 'breakfast',
+      'brunch': 'brunch',
+      'dessert': 'dessert',
+      'main': 'main',
+      'main dish': 'main',
+      'main course': 'main',
+      'entrée': 'main',
+      'entree': 'main',
+      'dinner': 'main',
+      'lunch': 'main',
+      'sauce': 'sauce',
+      'side': 'side',
+      'side dish': 'side',
+      'snack': 'snack',
     };
     return courseMap[lower] ?? name;
   }
 
   /// Try to map a category name to a known category ID.
+  /// IDs must match CategoryData in course_category_data.dart
   static String? _resolveCategoryId(String? name) {
     if (name == null) return null;
     final lower = name.toLowerCase().trim();
     const catMap = {
-      'appetizer': 'cat_appetizer',
-      'beverages': 'cat_beverage',
-      'desserts': 'cat_dessert',
-      'dessert': 'cat_dessert',
-      'entrée': 'cat_entree',
-      'entree': 'cat_entree',
-      'sides': 'cat_side',
-      'side': 'cat_side',
-      'sauces': 'cat_sauce',
-      'sauce': 'cat_sauce',
+      'bean': 'bean',
+      'beans': 'bean',
+      'legume': 'bean',
+      'legumes': 'bean',
+      'beverage': 'beverage',
+      'beverages': 'beverage',
+      'drink': 'beverage',
+      'drinks': 'beverage',
+      'bread': 'bread',
+      'breads': 'bread',
+      'burrito': 'burrito-taco',
+      'taco': 'burrito-taco',
+      'burrito/taco': 'burrito-taco',
+      'mexican': 'burrito-taco',
+      'casserole': 'casserole',
+      'bake': 'casserole',
+      'chicken': 'chicken-steak-meat',
+      'steak': 'chicken-steak-meat',
+      'meat': 'chicken-steak-meat',
+      'chicken/steak/meat': 'chicken-steak-meat',
+      'beef': 'chicken-steak-meat',
+      'pork': 'chicken-steak-meat',
+      'poultry': 'chicken-steak-meat',
+      'dessert': 'dessert',
+      'desserts': 'dessert',
+      'sweets': 'dessert',
+      'fish': 'fish',
+      'seafood': 'fish',
+      'fruit': 'fruit',
+      'fruits': 'fruit',
+      'muffin': 'muffin',
+      'muffins': 'muffin',
+      'cupcake': 'muffin',
+      'pasta': 'pasta',
+      'noodles': 'pasta',
+      'noodle': 'pasta',
+      'rice': 'rice',
+      'grain': 'rice',
+      'grains': 'rice',
+      'salad': 'salad',
+      'salads': 'salad',
+      'sandwich': 'sandwich',
+      'sandwiches': 'sandwich',
+      'wrap': 'sandwich',
+      'wraps': 'sandwich',
+      'sauce': 'sauce',
+      'sauces': 'sauce',
+      'dip': 'sauce',
+      'dips': 'sauce',
+      'condiment': 'sauce',
+      'soup': 'soup',
+      'soups': 'soup',
+      'stew': 'soup',
+      'chili': 'soup',
+      'vegetable': 'vegetable',
+      'vegetables': 'vegetable',
+      'veggie': 'vegetable',
+      'vegan': 'vegetable',
+      'vegetarian': 'vegetable',
     };
     return catMap[lower] ?? name;
   }
@@ -460,8 +511,8 @@ Here is the shopping list:
   "servings": "4",
   "prepTimeMinutes": 15,
   "cookTimeMinutes": 30,
-  "course": "Entrée",
-  "category": "Italian",
+  "course": "Main Dish",
+  "category": "Pasta",
   "sourceUrl": "",
   "notes": "",
   "ingredients": [
@@ -485,7 +536,9 @@ Rules:
 - "unit" is a string (cups, tbsp, tsp, oz, lb, g, kg, ml, etc.) or null if not applicable (e.g. "3 eggs")
 - "notes" on ingredients is for prep details like "diced", "room temperature", "melted"
 - "durationMinutes" on steps is optional (null if not specified)
-- "course" options: Appetizer, Entrée, Side, Dessert, Beverage, Breakfast, Lunch, Dinner, Snack, Sauce, Salad, Soup
+- "course" must be one of: Appetizer, Beverage, Breakfast, Brunch, Dessert, Main Dish, Sauce, Side Dish, Snack
+- "category" must be one of: Bean, Beverage, Bread, Burrito/Taco, Casserole, Chicken/Steak/Meat, Dessert, Fish, Fruit, Muffin, Pasta, Rice, Salad, Sandwich, Sauce, Soup, Vegetable
+- Pick the single best-matching course and category for the recipe
 - Keep step instructions clear and concise
 - Output valid JSON only — no markdown, no backticks, no commentary
 

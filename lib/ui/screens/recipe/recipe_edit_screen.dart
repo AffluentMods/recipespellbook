@@ -2,34 +2,31 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'package:recipespellbook/l10n/app_localizations.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:drift/drift.dart' as drift;
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
-import '../../../database/database.dart';
-import '../../../database/daos/recipe_dao.dart' show RecipeLinkInfo;
-import '../../../database/daos/tags_dao.dart';
-import '../../../providers/database_provider.dart';
-import '../../../utils/default_recipe_images.dart';
-import '../../../providers/settings_provider.dart';
-import '../../../data/course_category_data.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../data/nutrition_data.dart';
-import '../../widgets/taxonomy_picker.dart';
-import '../../widgets/tag_picker.dart';
-import '../../widgets/nutrition_calculation_sheet.dart';
-import '../../widgets/rpg/rpg_rarity_picker.dart';
-import '../../widgets/rpg/rpg_navigation_shell.dart';
-import '../../widgets/recipe_edit_instructions.dart';
-import '../../../services/image_service.dart';
-import '../../../services/auth_service.dart';
+import '../../../database/database.dart';
+import '../../../providers/database_provider.dart';
+import '../../../providers/settings_provider.dart';
 import '../../../providers/subscription_provider.dart';
+import '../../../services/auth_service.dart';
+import '../../../services/image_service.dart';
+import '../../../utils/default_recipe_images.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/nutrition_calculation_sheet.dart';
+import '../../widgets/recipe_edit_instructions.dart';
+import '../../widgets/rpg/rpg_navigation_shell.dart';
+import '../../widgets/rpg/rpg_rarity_picker.dart';
+import '../../widgets/tag_picker.dart';
+import '../../widgets/taxonomy_picker.dart';
 
 // ============ IMAGE PREVIEW/CONFIRM HELPER ============
 
@@ -321,6 +318,11 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     // Load ingredients
     final ingredients = await recipeDao.getIngredientsForRecipe(widget.recipeId!);
     for (final ing in ingredients) {
+      // Detect section headers (stored with notes='__header__')
+      if (ing.notes == '__header__') {
+        _ingredients.add(_SimpleIngredient(id: ing.id, text: ing.name, isHeader: true));
+        continue;
+      }
       final parts = <String>[];
       if (ing.amount != null && ing.amount!.isNotEmpty) parts.add(ing.amount!);
       if (ing.unit != null && ing.unit!.isNotEmpty) parts.add(ing.unit!);
@@ -500,7 +502,14 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
             const SizedBox(height: 32),
             _SectionTitle(title: l10n.ingredientsTitle),
             const SizedBox(height: 12),
-            ..._ingredients.asMap().entries.map((entry) => _IngredientRow(
+            ..._ingredients.asMap().entries.map((entry) => entry.value.isHeader
+                ? _IngredientHeaderRow(
+              key: ValueKey(entry.value.id),
+              ingredient: entry.value,
+              onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
+              onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
+            )
+                : _IngredientRow(
               key: ValueKey(entry.value.id),
               ingredient: entry.value,
               onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
@@ -508,7 +517,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
               onLinkRecipe: _isEditing ? () => _showLinkRecipePicker(entry.value.id, entry.value.text) : null,
               linkedRecipes: (_ingredientLinksMap[entry.value.id] ?? []).map((info) => info.recipe).toList(),
             )),
-            _AddIngredientButton(onTap: _addIngredient),
+            _AddIngredientButton(onTap: _addIngredient, onAddHeader: _addHeader),
             const SizedBox(height: 32),
             InstructionsEditor(
               steps: _steps,
@@ -614,7 +623,14 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ..._ingredients.asMap().entries.map((entry) => _IngredientRow(
+              ..._ingredients.asMap().entries.map((entry) => entry.value.isHeader
+                  ? _IngredientHeaderRow(
+                key: ValueKey(entry.value.id),
+                ingredient: entry.value,
+                onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
+                onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
+              )
+                  : _IngredientRow(
                 key: ValueKey(entry.value.id),
                 ingredient: entry.value,
                 onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
@@ -622,7 +638,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
                 onLinkRecipe: _isEditing ? () => _showLinkRecipePicker(entry.value.id, entry.value.text) : null,
                 linkedRecipes: (_ingredientLinksMap[entry.value.id] ?? []).map((info) => info.recipe).toList(),
               )),
-              _AddIngredientButton(onTap: _addIngredient),
+              _AddIngredientButton(onTap: _addIngredient, onAddHeader: _addHeader),
               const SizedBox(height: 100),
             ],
           ),
@@ -655,10 +671,17 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     });
   }
 
+  void _addHeader() {
+    setState(() => _ingredients.add(_SimpleIngredient(id: 'hdr_${DateTime.now().millisecondsSinceEpoch}', text: '', isHeader: true)));
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+    });
+  }
+
   Future<void> _calculateNutrition() async {
     final l10n = AppLocalizations.of(context)!;
 
-    final activeIngredients = _ingredients.where((i) => i.text.trim().isNotEmpty).toList();
+    final activeIngredients = _ingredients.where((i) => i.text.trim().isNotEmpty && !i.isHeader).toList();
 
     if (activeIngredients.isEmpty) {
       AppSnackbar.info(context, l10n.ingredientsEmpty);
@@ -814,8 +837,13 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         await recipeDao.deleteIngredientsForRecipe(widget.recipeId!);
         for (var i = 0; i < _ingredients.length; i++) {
           if (_ingredients[i].text.trim().isNotEmpty) {
-            final parsed = _parseIngredient(_ingredients[i].text);
-            await recipeDao.insertIngredient(IngredientsCompanion.insert(id: '${widget.recipeId}_ing_$i', recipeId: widget.recipeId!, sortOrder: i, name: parsed.name, amount: drift.Value(parsed.amount), unit: drift.Value(parsed.unit), notes: drift.Value(parsed.notes)));
+            if (_ingredients[i].isHeader) {
+              // Save header as ingredient with __header__ marker
+              await recipeDao.insertIngredient(IngredientsCompanion.insert(id: '${widget.recipeId}_ing_$i', recipeId: widget.recipeId!, sortOrder: i, name: _ingredients[i].text.trim(), amount: const drift.Value(null), unit: const drift.Value(null), notes: const drift.Value('__header__')));
+            } else {
+              final parsed = _parseIngredient(_ingredients[i].text);
+              await recipeDao.insertIngredient(IngredientsCompanion.insert(id: '${widget.recipeId}_ing_$i', recipeId: widget.recipeId!, sortOrder: i, name: parsed.name, amount: drift.Value(parsed.amount), unit: drift.Value(parsed.unit), notes: drift.Value(parsed.notes)));
+            }
           }
         }
 
@@ -863,8 +891,12 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         // Save ingredients
         for (var i = 0; i < _ingredients.length; i++) {
           if (_ingredients[i].text.trim().isNotEmpty) {
-            final parsed = _parseIngredient(_ingredients[i].text);
-            await recipeDao.insertIngredient(IngredientsCompanion.insert(id: '${recipeId}_ing_$i', recipeId: recipeId, sortOrder: i, name: parsed.name, amount: drift.Value(parsed.amount), unit: drift.Value(parsed.unit), notes: drift.Value(parsed.notes)));
+            if (_ingredients[i].isHeader) {
+              await recipeDao.insertIngredient(IngredientsCompanion.insert(id: '${recipeId}_ing_$i', recipeId: recipeId, sortOrder: i, name: _ingredients[i].text.trim(), amount: const drift.Value(null), unit: const drift.Value(null), notes: const drift.Value('__header__')));
+            } else {
+              final parsed = _parseIngredient(_ingredients[i].text);
+              await recipeDao.insertIngredient(IngredientsCompanion.insert(id: '${recipeId}_ing_$i', recipeId: recipeId, sortOrder: i, name: parsed.name, amount: drift.Value(parsed.amount), unit: drift.Value(parsed.unit), notes: drift.Value(parsed.notes)));
+            }
           }
         }
 
@@ -975,7 +1007,8 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
 class _SimpleIngredient {
   final String id;
   String text;
-  _SimpleIngredient({required this.id, this.text = ''});
+  bool isHeader; // Section header/divider (not a real ingredient)
+  _SimpleIngredient({required this.id, this.text = '', this.isHeader = false});
 }
 
 class _ParsedIngredient {
@@ -1994,15 +2027,92 @@ class _IngredientRow extends StatelessWidget {
 
 class _AddIngredientButton extends StatelessWidget {
   final VoidCallback onTap;
-  const _AddIngredientButton({required this.onTap});
+  final VoidCallback? onAddHeader;
+  const _AddIngredientButton({required this.onTap, this.onAddHeader});
   @override Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    return GestureDetector(onTap: onTap, child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(border: Border.all(color: theme.colorScheme.outlineVariant), borderRadius: BorderRadius.circular(12)),
-      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.add, color: theme.colorScheme.primary, size: 20), const SizedBox(width: 8), Text(l10n.addIngredient, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.primary))]),
-    ));
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(onTap: onTap, child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(border: Border.all(color: theme.colorScheme.outlineVariant), borderRadius: BorderRadius.circular(12)),
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.add, color: theme.colorScheme.primary, size: 20), const SizedBox(width: 8), Text(l10n.addIngredient, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.primary))]),
+          )),
+        ),
+        if (onAddHeader != null) ...[
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: onAddHeader,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+              decoration: BoxDecoration(
+                border: Border.all(color: theme.colorScheme.outlineVariant),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.segment, color: theme.colorScheme.outline, size: 18),
+                  const SizedBox(width: 6),
+                  Text(l10n.ingredientHeader, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _IngredientHeaderRow extends StatelessWidget {
+  final _SimpleIngredient ingredient;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onDelete;
+
+  const _IngredientHeaderRow({
+    super.key,
+    required this.ingredient,
+    required this.onChanged,
+    required this.onDelete,
+  });
+
+  @override Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(padding: const EdgeInsets.only(bottom: 8, top: 8), child: Row(children: [
+      Container(
+        width: 8, height: 2,
+        color: theme.colorScheme.primary.withValues(alpha: 0.5),
+      ),
+      const SizedBox(width: 8),
+      Icon(Icons.segment, size: 16, color: theme.colorScheme.primary),
+      const SizedBox(width: 8),
+      Expanded(child: TextFormField(
+        initialValue: ingredient.text,
+        decoration: InputDecoration(
+          hintText: l10n.ingredientHeaderHint,
+          isDense: true,
+          border: InputBorder.none,
+          hintStyle: TextStyle(color: theme.colorScheme.outline),
+        ),
+        style: TextStyle(
+          fontWeight: FontWeight.w700,
+          fontSize: 14,
+          color: theme.colorScheme.primary,
+          letterSpacing: 0.3,
+        ),
+        textCapitalization: TextCapitalization.sentences,
+        onChanged: onChanged,
+      )),
+      IconButton(
+        icon: Icon(Icons.close, size: 18, color: theme.colorScheme.outline),
+        onPressed: onDelete,
+        visualDensity: VisualDensity.compact,
+      ),
+    ]));
   }
 }
 

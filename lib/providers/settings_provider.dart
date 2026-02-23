@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../data/app_enums.dart';
 import '../data/allergen_data.dart';
+import '../data/app_enums.dart';
 
 // ============ RECIPE LAYOUT MODE ============
 
@@ -65,6 +65,9 @@ class AppSettings {
   // Accessibility — text scale factor (0.8 to 1.3)
   final double textScaleFactor;
 
+  // Planner — week start day (1=Monday, 7=Sunday, follows DateTime.weekday)
+  final int weekStartDay;
+
   /// Default nutrients shown in the nutrition widget
   static const Set<String> defaultEnabledNutrients = {
     'calories', 'protein', 'carbs', 'fat', 'fiber', 'sugar', 'sodium',
@@ -92,6 +95,7 @@ class AppSettings {
     this.nutritionChartStyle = NutritionChartStyle.donut,
     this.showExpandedNutrition = false,
     this.textScaleFactor = 1.0,
+    this.weekStartDay = 1,
     Set<String>? enabledNutrients,
   }) : seedColor = appTheme.seedColor,
         enabledNutrients = enabledNutrients ?? defaultEnabledNutrients;
@@ -119,6 +123,7 @@ class AppSettings {
     bool? showExpandedNutrition,
     Set<String>? enabledNutrients,
     double? textScaleFactor,
+    int? weekStartDay,
   }) {
     return AppSettings(
       appTheme: appTheme ?? this.appTheme,
@@ -143,6 +148,7 @@ class AppSettings {
       showExpandedNutrition: showExpandedNutrition ?? this.showExpandedNutrition,
       enabledNutrients: enabledNutrients ?? this.enabledNutrients,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+      weekStartDay: weekStartDay ?? this.weekStartDay,
     );
   }
 }
@@ -211,6 +217,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
   static const _rpgSoundsKey = 'rpg_sounds_enabled';
   static const _recipeEditLayoutKey = 'recipe_edit_layout';
   static const _textScaleKey = 'text_scale_factor';
+  static const _weekStartDayKey = 'week_start_day';
 
   @override
   AppSettings build() {
@@ -312,6 +319,9 @@ class SettingsNotifier extends Notifier<AppSettings> {
     // Load text scale factor
     final textScaleFactor = (prefs.getDouble(_textScaleKey) ?? 1.0).clamp(0.8, 1.3);
 
+    // Load week start day (1=Monday default, 7=Sunday)
+    final weekStartDay = (prefs.getInt(_weekStartDayKey) ?? 1).clamp(1, 7);
+
     state = AppSettings(
       appTheme: appTheme,
       themeMode: themeMode,
@@ -335,6 +345,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
       showExpandedNutrition: showExpandedNutrition,
       enabledNutrients: enabledNutrients,
       textScaleFactor: textScaleFactor,
+      weekStartDay: weekStartDay,
     );
   }
 
@@ -486,6 +497,14 @@ class SettingsNotifier extends Notifier<AppSettings> {
     state = state.copyWith(textScaleFactor: clamped);
   }
 
+  // Planner — week start day (1=Monday .. 7=Sunday)
+  Future<void> setWeekStartDay(int day) async {
+    final clamped = day.clamp(1, 7);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_weekStartDayKey, clamped);
+    state = state.copyWith(weekStartDay: clamped);
+  }
+
   // Legacy method for backward compatibility
   Future<void> setSeedColor(Color color) async {
     // Find closest matching theme
@@ -531,6 +550,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
     await prefs.remove(_rpgAnimationsKey);
     await prefs.remove(_rpgSoundsKey);
     await prefs.remove(_textScaleKey);
+    await prefs.remove(_weekStartDayKey);
     state = AppSettings();
   }
 

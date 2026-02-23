@@ -1,19 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../database/database.dart';
-import '../../providers/database_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/database_provider.dart';
 import 'app_snackbar.dart';
 
 /// Shows a share sheet for a recipe with multiple options

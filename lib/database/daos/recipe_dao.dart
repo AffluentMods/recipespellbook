@@ -1,10 +1,10 @@
+import 'package:drift/drift.dart' as drift;
 import 'package:drift/drift.dart';
 import '../database.dart';
-import '../tables/recipes.dart';
 import '../tables/ingredients.dart';
-import '../tables/steps.dart';
 import '../tables/recipe_links.dart';
-import 'package:drift/drift.dart' as drift;
+import '../tables/recipes.dart';
+import '../tables/steps.dart';
 
 part 'recipe_dao.g.dart';
 

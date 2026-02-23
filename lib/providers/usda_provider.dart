@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../database/database.dart';
-import '../services/usda_service.dart';
 import '../services/nutrition_calculator.dart';
+import '../services/usda_service.dart';
 import 'database_provider.dart';
 
 /// Provider for the USDA service

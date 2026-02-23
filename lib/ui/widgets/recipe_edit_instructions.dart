@@ -4,8 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../services/feature_gate.dart';
 import '../../../providers/subscription_provider.dart';
+import '../../../services/feature_gate.dart';
 
 /// Step data model for editing
 class EditableStep {

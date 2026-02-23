@@ -1,17 +1,17 @@
 import 'dart:io';
-import 'package:recipespellbook/l10n/app_localizations.dart';
+import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:recipespellbook/l10n/app_localizations.dart';
+import '../../../data/course_category_data.dart' as taxonomy;
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../utils/default_recipe_images.dart';
-import '../../../data/course_category_data.dart' as taxonomy;
 import '../../../utils/taxonomy_translator.dart';
-import '../../widgets/placeholder_image.dart';
-import 'package:drift/drift.dart' hide Column;
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/placeholder_image.dart';
 
 class UncategorizedRecipesScreen extends ConsumerStatefulWidget {
   const UncategorizedRecipesScreen({super.key});

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../l10n/app_localizations.dart';
-import '../../providers/database_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/database_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../router/router.dart';
 import '../widgets/app_menu_drawer.dart';
-import '../widgets/rpg/rpg_navigation_shell.dart';
 import '../widgets/app_snackbar.dart';
+import '../widgets/rpg/rpg_navigation_shell.dart';
 
 /// Provider to track current navigation index
 final currentNavIndexProvider = StateProvider<int>((ref) => 0);

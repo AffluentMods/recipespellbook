@@ -2,14 +2,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:drift/drift.dart' as drift;
+import 'package:recipespellbook/l10n/app_localizations.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../../data/rpg/rpg_text.dart';
 import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
-import '../../../data/rpg/rpg_text.dart';
-import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../shell/app_shell.dart';
+import '../../widgets/app_snackbar.dart';
 import '../../widgets/placeholder_image.dart';
 
 class CookbooksScreen extends ConsumerWidget {
@@ -186,6 +187,14 @@ class _CookbookGrid extends ConsumerWidget {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.share),
+              title: Text(l10n.shareCookbook),
+              onTap: () {
+                Navigator.pop(ctx);
+                _shareCookbook(context, ref, cookbook);
+              },
+            ),
+            ListTile(
               leading: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
               title: Text(l10n.actionDelete, style: TextStyle(color: Theme.of(context).colorScheme.error)),
               onTap: () {
@@ -197,6 +206,48 @@ class _CookbookGrid extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _shareCookbook(BuildContext context, WidgetRef ref, Cookbook cookbook) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final recipeDao = ref.read(recipeDaoProvider);
+      final allRecipes = await recipeDao.getAllRecipes();
+      final recipes = allRecipes.where((r) => r.cookbookId == cookbook.id).toList();
+
+      if (recipes.isEmpty) {
+        if (context.mounted) AppSnackbar.info(context, l10n.cookbookEmpty);
+        return;
+      }
+
+      // Build text representation of cookbook
+      final buffer = StringBuffer();
+      buffer.writeln('📖 ${cookbook.name}');
+      if (cookbook.description != null && cookbook.description!.isNotEmpty) {
+        buffer.writeln(cookbook.description);
+      }
+      buffer.writeln('${'─' * 30}');
+      buffer.writeln('${recipes.length} ${l10n.recipes}\n');
+
+      for (final recipe in recipes) {
+        buffer.writeln('🍽️ ${recipe.title}');
+        if (recipe.description != null && recipe.description!.isNotEmpty) {
+          buffer.writeln('   ${recipe.description}');
+        }
+        final parts = <String>[];
+        if (recipe.prepTimeMinutes != null) parts.add('${recipe.prepTimeMinutes}m prep');
+        if (recipe.cookTimeMinutes != null) parts.add('${recipe.cookTimeMinutes}m cook');
+        if (recipe.servings != null) parts.add('${recipe.servings} servings');
+        if (parts.isNotEmpty) buffer.writeln('   ${parts.join(' • ')}');
+        buffer.writeln();
+      }
+
+      buffer.writeln('${l10n.shareFromApp}');
+
+      await Share.share(buffer.toString(), subject: cookbook.name);
+    } catch (e) {
+      if (context.mounted) AppSnackbar.info(context, '${l10n.errorGeneric}: $e');
+    }
   }
 
   void _showRenameDialog(BuildContext context, WidgetRef ref, Cookbook cookbook) {
@@ -288,9 +339,10 @@ class _CookbookCard extends StatelessWidget {
         child: Stack(
           children: [
             // Cover image or placeholder
-            // Note: Cookbook may use 'imagePath' field - adjust as needed
             Positioned.fill(
-              child: const CookbookPlaceholderImage(height: double.infinity),
+              child: cookbook.imagePath != null && File(cookbook.imagePath!).existsSync()
+                  ? Image.file(File(cookbook.imagePath!), fit: BoxFit.cover)
+                  : const CookbookPlaceholderImage(height: double.infinity),
             ),
             // Gradient overlay
             Positioned.fill(

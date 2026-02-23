@@ -2,10 +2,11 @@ import 'dart:async';
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:recipespellbook/database/database.dart';
-import 'package:recipespellbook/providers/database_provider.dart';
-import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:recipespellbook/data/nutrition_data.dart';
+import 'package:recipespellbook/database/database.dart';
+import 'package:recipespellbook/l10n/app_localizations.dart';
+import 'package:recipespellbook/providers/database_provider.dart';
+
 import '../../../ui/widgets/nutrition_widgets.dart';
 import '../../ui/widgets/font_size_control.dart';
 import 'rpg/rpg_navigation_shell.dart';
@@ -48,9 +49,13 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
   // Checked ingredients
   final Set<String> _checkedIngredients = {};
 
+  // Page controller for swipeable steps
+  late PageController _pageController;
+
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
     _loadRecipe();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
@@ -58,6 +63,7 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    _pageController.dispose();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
   }
@@ -91,14 +97,20 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
 
   void _nextStep() {
     if (_currentStepIndex < _steps.length - 1) {
-      setState(() => _currentStepIndex++);
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
       HapticFeedback.lightImpact();
     }
   }
 
   void _previousStep() {
     if (_currentStepIndex > 0) {
-      setState(() => _currentStepIndex--);
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
       HapticFeedback.lightImpact();
     }
   }
@@ -243,7 +255,20 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
               )
                   : _steps.isEmpty
                   ? Center(child: Text(l10n.instructionsEmpty, style: const TextStyle(color: Colors.white)))
-                  : _StepView(step: _steps[_currentStepIndex], stepNumber: _currentStepIndex + 1, totalSteps: _steps.length, allIngredients: _ingredients),
+                  : PageView.builder(
+                controller: _pageController,
+                itemCount: _steps.length,
+                onPageChanged: (index) {
+                  setState(() => _currentStepIndex = index);
+                  HapticFeedback.selectionClick();
+                },
+                itemBuilder: (context, index) => _StepView(
+                  step: _steps[index],
+                  stepNumber: index + 1,
+                  totalSteps: _steps.length,
+                  allIngredients: _ingredients,
+                ),
+              ),
             ),
 
             // Bottom navigation

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
-import '../../services/onboarding_service.dart';
 import '../../providers/database_provider.dart';
+import '../../services/onboarding_service.dart';
 import 'app_snackbar.dart';
 
 /// Shows a first-launch onboarding screen asking if the user wants starter recipes.

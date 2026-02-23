@@ -1,14 +1,10 @@
-// lib/ui/screens/rpg/rpg_cosmetics_screen.dart
-// Cosmetics shop and customization for Recipe Spellbook RPG System
-
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../data/rpg/rpg_models.dart';
-import '../../../data/rpg/rpg_cosmetics.dart';
-import '../../../providers/rpg_provider.dart';
 import '../../../../ui/widgets/rpg/rpg_widgets.dart';
+import '../../../data/rpg/rpg_cosmetics.dart';
+import '../../../data/rpg/rpg_models.dart';
+import '../../../providers/rpg_provider.dart';
 import '../../widgets/app_snackbar.dart';
 
 class RpgCosmeticsScreen extends ConsumerStatefulWidget {

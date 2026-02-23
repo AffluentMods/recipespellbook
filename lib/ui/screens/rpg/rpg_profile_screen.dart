@@ -4,13 +4,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../../data/rpg/rpg_models.dart';
 import '../../../data/rpg/rpg_achievements.dart';
-import '../../../data/rpg/rpg_cosmetics.dart';
+import '../../../data/rpg/rpg_models.dart';
 import '../../../providers/rpg_provider.dart';
-import '../../../ui/widgets/rpg/rpg_widgets.dart';
 import '../../../ui/screens/rpg/rpg_daily_quests.dart';
+import '../../../ui/widgets/rpg/rpg_widgets.dart';
 
 class RpgProfileScreen extends ConsumerWidget {
   const RpgProfileScreen({super.key});

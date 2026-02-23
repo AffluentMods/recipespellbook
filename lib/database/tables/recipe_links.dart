@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
-import 'recipes.dart';
 import 'ingredients.dart';
+import 'recipes.dart';
 
 @DataClassName('RecipeLink')
 class RecipeLinks extends Table {

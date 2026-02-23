@@ -1,11 +1,9 @@
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:flutter/material.dart' hide Step; // HIDE STEP FROM HERE
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import '../../database/database.dart'; // Keep Step from here
 import '../../data/course_category_data.dart';
+import '../../database/database.dart'; // Keep Step from here
 
 /// Service for printing recipes
 class RecipePrintService {

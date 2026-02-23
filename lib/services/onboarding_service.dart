@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../database/database.dart';
 import '../../data/default_recipes.dart';
+import '../database/database.dart';
 
 /// Handles first-launch detection and default recipe seeding
 class OnboardingService {

@@ -1,17 +1,18 @@
 import 'dart:io';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:drift/drift.dart' as drift;
 import 'package:intl/intl.dart';
+
 import '../../../database/database.dart';
-import '../../../providers/database_provider.dart';
-import '../../../providers/cookbook_provider.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../widgets/placeholder_image.dart';
-import '../../../utils/default_recipe_images.dart';
+import '../../../providers/database_provider.dart';
+import '../../../providers/settings_provider.dart';
 import '../../../services/shopping_list_generator.dart';
+import '../../../utils/default_recipe_images.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/placeholder_image.dart';
 
 // ============ PROVIDERS ============
 
@@ -50,9 +51,11 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   }
 
   DateTime _getWeekStart(DateTime date) {
-    // Get Monday of the week
-    final weekday = date.weekday;
-    return DateTime(date.year, date.month, date.day - (weekday - 1));
+    // Get the start of week based on user's preferred start day
+    final settings = ref.read(settingsProvider);
+    final startDay = settings.weekStartDay; // 1=Mon, 7=Sun
+    int diff = (date.weekday - startDay) % 7;
+    return DateTime(date.year, date.month, date.day - diff);
   }
 
   void _goToPreviousWeek() {
@@ -152,54 +155,48 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (context, scrollController) {
-          return Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: Column(
-              children: [
-                const SizedBox(height: 12),
-                Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Text(l10n.calendar, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          _goToToday();
-                        },
-                        child: Text(l10n.today),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: CalendarDatePicker(
-                    initialDate: selectedDate,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime(2030),
-                    onDateChanged: (date) {
-                      ref.read(selectedPlannerDateProvider.notifier).state = date;
-                      setState(() {
-                        _weekStart = _getWeekStart(date);
-                      });
+      builder: (ctx) => Container(
+        height: MediaQuery.of(context).size.height * 0.65,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Text(l10n.calendar, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () {
                       Navigator.pop(ctx);
+                      _goToToday();
                     },
+                    child: Text(l10n.today),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          );
-        },
+            Expanded(
+              child: CalendarDatePicker(
+                initialDate: selectedDate,
+                firstDate: DateTime(2020),
+                lastDate: DateTime(2030),
+                onDateChanged: (date) {
+                  ref.read(selectedPlannerDateProvider.notifier).state = date;
+                  setState(() {
+                    _weekStart = _getWeekStart(date);
+                  });
+                  Navigator.pop(ctx);
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -585,6 +582,7 @@ class _MealsList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     // Group by meal type
     final grouped = <String, List<MealPlanWithRecipe>>{};
     for (final plan in plans) {
@@ -601,9 +599,36 @@ class _MealsList extends ConsumerWidget {
         return (aIdx == -1 ? 999 : aIdx).compareTo(bIdx == -1 ? 999 : bIdx);
       });
 
+    // Collect recipe IDs for shopping list
+    final recipeIds = plans
+        .where((p) => p.recipe != null)
+        .map((p) => p.recipe!.id)
+        .toSet()
+        .toList();
+
     return ListView(
       padding: const EdgeInsets.only(bottom: 100),
       children: [
+        // Send day to shopping list button (top)
+        if (recipeIds.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: OutlinedButton.icon(
+              onPressed: () => launchShoppingListGeneratorFromMealPlan(
+                context,
+                ref,
+                recipeIds: recipeIds,
+              ),
+              icon: const Icon(Icons.add_shopping_cart, size: 18),
+              label: Text(l10n.addDayToShoppingList),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                side: BorderSide(color: const Color(0xFFE8A860).withValues(alpha: 0.5)),
+                foregroundColor: const Color(0xFFE8A860),
+              ),
+            ),
+          ),
+
         for (final mealType in sortedKeys) ...[
           _MealTypeHeader(mealType: mealType),
           const SizedBox(height: 4),
@@ -628,6 +653,24 @@ class _MealsList extends ConsumerWidget {
             ),
           ),
         ),
+        // Send day to shopping list button (bottom)
+        if (recipeIds.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: FilledButton.icon(
+              onPressed: () => launchShoppingListGeneratorFromMealPlan(
+                context,
+                ref,
+                recipeIds: recipeIds,
+              ),
+              icon: const Icon(Icons.add_shopping_cart, size: 18),
+              label: Text(l10n.sendDayToShoppingList),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                backgroundColor: const Color(0xFFE8A860),
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -739,6 +782,27 @@ class _MealTile extends ConsumerWidget {
               context.push('/recipe/${recipe.id}');
             }
           },
+          onLongPress: () {
+            showDialog(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: Text(l10n.removeMeal),
+                content: Text(l10n.removeMealConfirm(recipe?.title ?? plan.mealPlan.name ?? l10n.meal)),
+                actions: [
+                  TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
+                  FilledButton(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      mealPlanDao.deleteMealPlan(plan.mealPlan.id);
+                      AppSnackbar.info(context, l10n.plannerMealRemoved);
+                    },
+                    style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                    child: Text(l10n.actionRemove),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
@@ -842,7 +906,7 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Add to $dayName',
+                      l10n.addToDay(dayName),
                       style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 16),

@@ -1,36 +1,35 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:drift/drift.dart' as drift;
+import 'package:recipespellbook/l10n/app_localizations.dart';
+
+import '../../../data/allergen_data.dart';
+import '../../../data/ingredient_images.dart';
+import '../../../data/localized_units.dart';
+import '../../../data/nutrition_data.dart';
+import '../../../data/rpg/rpg_text.dart';
 import '../../../database/database.dart';
-import '../../../database/daos/recipe_dao.dart' show RecipeLinkInfo;
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
-import 'package:recipespellbook/l10n/app_localizations.dart';
-import '../../widgets/placeholder_image.dart';
-import '../../../data/nutrition_data.dart';
-import '../../../data/allergen_data.dart';
-import '../../widgets/recipe_tags_display.dart';
-import '../../widgets/add_to_meal_plan_dialogue.dart';
-import '../../widgets/add_to_shopping_list_sheet.dart';
-import '../../../services/shopping_list_generator.dart';
-import '../../widgets/recipe_share_sheet.dart';
-import '../../../data/rpg/rpg_text.dart';
-import '../settings/nutrition_settings_screen.dart';
-import '../settings/ingredient_substitutions_screen.dart';
-import '../../widgets/nutrition_calculation_sheet.dart';
-import '../../../data/localized_units.dart';
 import '../../../services/image_service.dart';
 import '../../../services/recipe_print_service.dart';
+import '../../../services/shopping_list_generator.dart';
 import '../../../ui/widgets/cooking_mode_screen.dart';
-
+import '../../../utils/default_recipe_images.dart';
+import '../../widgets/add_to_meal_plan_dialogue.dart';
+import '../../widgets/app_snackbar.dart';
+import '../../widgets/nutrition_calculation_sheet.dart';
+import '../../widgets/placeholder_image.dart';
+import '../../widgets/recipe_share_sheet.dart';
+import '../../widgets/recipe_tags_display.dart';
 // ============ DISMISSED ALLERGY WARNINGS ============
 // Canonical provider is in allergy_settings_screen.dart — imported via:
 import '../settings/allergy_settings_screen.dart' show dismissedAllergyWarningsProvider;
-import '../../../utils/default_recipe_images.dart';
-import '../../widgets/app_snackbar.dart';
+import '../settings/ingredient_substitutions_screen.dart';
+import '../settings/nutrition_settings_screen.dart';
 
 // ============ SESSION DISMISSED WARNINGS (temporary) ============
 
@@ -1527,6 +1526,22 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+
+    // Render section headers (ingredient dividers)
+    if (ingredient.notes == '__header__') {
+      return Padding(
+        padding: const EdgeInsets.only(top: 16, bottom: 4),
+        child: Text(
+          ingredient.name,
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: theme.colorScheme.primary,
+            letterSpacing: 0.3,
+          ),
+        ),
+      );
+    }
+
     final settings = ref.watch(settingsProvider);
     final userAllergies = settings.allergens;
 
@@ -1568,8 +1583,8 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Container(margin: const EdgeInsets.only(top: 6), width: 8, height: 8, decoration: BoxDecoration(color: matchingAllergens.isNotEmpty ? Colors.red : theme.colorScheme.primary, shape: BoxShape.circle)),
-              const SizedBox(width: 12),
+              Text(IngredientImages.getEmoji(ingredient.name), style: const TextStyle(fontSize: 18)),
+              const SizedBox(width: 10),
               Expanded(
                 child: RichText(
                   text: TextSpan(

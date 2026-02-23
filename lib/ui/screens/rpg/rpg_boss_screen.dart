@@ -1,6 +1,3 @@
-// lib/ui/screens/rpg/rpg_boss_screen.dart
-// Boss Fight System for Recipe Spellbook RPG
-
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -8,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipespellbook/data/rpg/rpg_models.dart';
 import 'package:recipespellbook/providers/rpg_provider.dart';
-
 import '../../../l10n/app_localizations.dart';
 import '../../widgets/app_snackbar.dart';
 

@@ -1,9 +1,10 @@
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drift/drift.dart' as drift;
+
 import '../../database/database.dart';
-import '../../providers/database_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/database_provider.dart';
 
 /// A widget that displays selected tags and allows adding/removing tags
 class TagPicker extends ConsumerStatefulWidget {

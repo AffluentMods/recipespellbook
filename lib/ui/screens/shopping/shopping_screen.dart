@@ -1,27 +1,27 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
+import 'package:drift/drift.dart' as drift;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:drift/drift.dart' as drift;
-import '../../../database/database.dart';
-import '../../../providers/database_provider.dart';
-import '../../../utils/ingredient_utils.dart';
+
 import '../../../data/ingredient_images.dart';
-import '../../../database/daos/shopping_dao.dart';
+import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../services/ingredient_suggestion_service.dart';
-import '../../../services/grocery_service.dart';
-import '../../../services/shopping_list_service.dart';
+import '../../../providers/database_provider.dart';
 import '../../../services/barcode_scanner_service.dart';
-import '../../widgets/rpg/rpg_navigation_shell.dart';
+import '../../../services/grocery_service.dart';
+import '../../../services/ingredient_suggestion_service.dart';
+import '../../../services/shopping_list_service.dart';
+import '../../../utils/ingredient_utils.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/rpg/rpg_navigation_shell.dart';
 
 /// Provider to track shopping list item count (for nav badge)
 final shoppingItemCountProvider = StreamProvider<int>((ref) {

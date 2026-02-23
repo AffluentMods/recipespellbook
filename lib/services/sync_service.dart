@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../database/database.dart';
 import '../services/auth_service.dart';
 

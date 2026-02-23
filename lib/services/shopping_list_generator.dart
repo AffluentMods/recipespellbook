@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../database/database.dart';
 import '../providers/database_provider.dart';
-import 'ingredient_resolver_service.dart';
-import '../ui/widgets/add_to_shopping_list_sheet.dart';
 import '../ui/screens/shopping/shopping_list_generator_screen.dart';
+import '../ui/widgets/add_to_shopping_list_sheet.dart';
 import '../ui/widgets/app_snackbar.dart';
+import 'ingredient_resolver_service.dart';
 
 // ═══════════════════════════════════════════════════════════════════
 // SHOPPING LIST GENERATOR — Single Entry Point

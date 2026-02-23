@@ -1,12 +1,11 @@
-import 'package:flutter/material.dart';
-import '../../l10n/app_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' as drift;
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../database/database.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
-import 'rpg/rpg_navigation_shell.dart';
-import '../widgets/add_to_meal_plan_dialogue.dart';
 import 'app_snackbar.dart';
+import 'rpg/rpg_navigation_shell.dart';
 
 /// Shows a bottom sheet to add a recipe to meal plan
 /// Call this from recipe_screen.dart like:

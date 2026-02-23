@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' as html_parser;
 import 'package:html/dom.dart';
+import 'package:html/parser.dart' as html_parser;
+import 'package:http/http.dart' as http;
 import '../models/imported_recipe.dart';
 
 /// Consolidated recipe import engine.

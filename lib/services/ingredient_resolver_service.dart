@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import '../database/database.dart';
-import '../database/daos/recipe_dao.dart' show RecipeLinkInfo;
 
 // ═══════════════════════════════════════════════════════════════════
 // INGREDIENT RESOLVER SERVICE

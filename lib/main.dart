@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_handler/share_handler.dart';
-import 'router/router.dart';
-import 'theme/app_theme.dart';
-import 'providers/settings_provider.dart';
 import 'l10n/app_localizations.dart';
+import 'providers/auth_provider.dart';
+import 'providers/cookbook_provider.dart';
+import 'providers/database_provider.dart';
+import 'providers/settings_provider.dart';
+import 'providers/subscription_provider.dart';
+import 'providers/sync_provider.dart';
+import 'router/router.dart';
 import 'services/ingredient_suggestion_service.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'services/recipe_import_engine.dart';
 import 'services/sync_service.dart';
 import 'services/transfer_service.dart';
-import 'services/recipe_import_engine.dart';
-import 'providers/database_provider.dart';
-import 'providers/sync_provider.dart';
-import 'providers/auth_provider.dart';
-import 'providers/subscription_provider.dart';
-import 'providers/cookbook_provider.dart';
+import 'theme/app_theme.dart';
 import 'ui/screens/import/import_preview_screen.dart';
 
 // Provider to hold shared recipe data (for future share intent)

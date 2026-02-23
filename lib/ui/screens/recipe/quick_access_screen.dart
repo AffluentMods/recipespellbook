@@ -1,13 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../database/database.dart';
-import '../../../providers/database_provider.dart';
 import '../../../providers/cookbook_provider.dart';
-import '../../widgets/placeholder_image.dart';
+import '../../../providers/database_provider.dart';
 import '../../../utils/default_recipe_images.dart';
+import '../../widgets/placeholder_image.dart';
 
 /// Screen showing all quick access recipes (meal plan + pinned + recent)
 /// with filtering, sorting, and view size options

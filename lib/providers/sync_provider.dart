@@ -1,9 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../services/sync_service.dart';
-import '../services/revenuecat_service.dart';
-import '../providers/subscription_provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/subscription_provider.dart';
+import '../services/sync_service.dart';
 
 // ════════════════════════════════════════════
 //  SYNC STATE

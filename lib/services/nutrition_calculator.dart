@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import '../data/nutrition_data.dart';
 import '../data/ingredient_translations.dart';
+import '../data/nutrition_data.dart';
 import '../database/database.dart';
 import '../services/usda_service.dart';
 import '../ui/widgets/nutrition_system.dart' as local_db;

@@ -1,41 +1,38 @@
 import 'dart:io';
-
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
-
-import 'tables/cookbooks.dart';
-import 'tables/recipes.dart';
-import 'tables/ingredients.dart';
-import 'tables/steps.dart';
-import 'tables/categories.dart';
-import 'tables/shopping_categories.dart';
-import 'tables/shopping_lists.dart';
-import 'tables/shopping_list_items.dart';
-import 'tables/meal_plans.dart';
-import 'tables/custom_courses.dart';
-import 'tables/custom_categories.dart';
-import 'tables/recipe_tags.dart';
-import 'tables/recipe_links.dart';
-import 'tables/user_ingredient_mappings.dart';
-import 'tables/usda_foods.dart';
-
-import 'daos/cookbook_dao.dart';
-import 'daos/recipe_dao.dart';
+import 'package:path_provider/path_provider.dart';
 import 'daos/category_dao.dart';
-import 'daos/shopping_dao.dart';
-import 'daos/meal_plan_dao.dart';
+import 'daos/cookbook_dao.dart';
 import 'daos/custom_taxonomy_dao.dart';
+import 'daos/meal_plan_dao.dart';
+import 'daos/recipe_dao.dart';
+import 'daos/shopping_dao.dart';
 import 'daos/tags_dao.dart';
-import 'daos/user_ingredient_mappings_dao.dart';
 import 'daos/usda_dao.dart';
+import 'daos/user_ingredient_mappings_dao.dart';
+import 'tables/categories.dart';
+import 'tables/cookbooks.dart';
+import 'tables/custom_categories.dart';
+import 'tables/custom_courses.dart';
+import 'tables/ingredients.dart';
+import 'tables/meal_plans.dart';
+import 'tables/recipe_links.dart';
+import 'tables/recipe_tags.dart';
+import 'tables/recipes.dart';
+import 'tables/shopping_categories.dart';
+import 'tables/shopping_list_items.dart';
+import 'tables/shopping_lists.dart';
+import 'tables/steps.dart';
+import 'tables/usda_foods.dart';
+import 'tables/user_ingredient_mappings.dart';
 
-export 'daos/cookbook_dao.dart';
-export 'daos/recipe_dao.dart';
 export 'daos/category_dao.dart';
-export 'daos/shopping_dao.dart';
+export 'daos/cookbook_dao.dart';
 export 'daos/meal_plan_dao.dart';
+export 'daos/recipe_dao.dart';
+export 'daos/shopping_dao.dart';
 export 'daos/usda_dao.dart';
 
 part 'database.g.dart';

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/revenuecat_service.dart';
-import '../../../l10n/app_localizations.dart';
 import '../../widgets/app_snackbar.dart';
 
 /// Custom paywall screen — replaces RevenueCat's default template.

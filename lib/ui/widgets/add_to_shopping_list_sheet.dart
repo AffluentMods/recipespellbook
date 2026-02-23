@@ -1,12 +1,11 @@
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:drift/drift.dart' as drift;
+import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../database/database.dart';
-import '../../../database/daos/shopping_dao.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/ingredient_utils.dart';
-import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'app_snackbar.dart';
 
 /// Modern sheet for selecting which ingredients to add to shopping list
@@ -72,6 +71,7 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
     if (_selectedIds.isEmpty) return;
 
     setState(() => _isAdding = true);
+    final l10n = AppLocalizations.of(context)!;
 
     try {
       final shoppingDao = ref.read(shoppingDaoProvider);
@@ -83,7 +83,7 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
         listId = 'list_${DateTime.now().millisecondsSinceEpoch}';
         await shoppingDao.insertList(ShoppingListsCompanion.insert(
           id: listId,
-          name: 'Shopping List',
+          name: l10n.defaultShoppingListName,
         ));
       } else {
         listId = lists.first.id;
@@ -92,6 +92,9 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
       final selectedIngredients = widget.ingredients
           .where((i) => _selectedIds.contains(i.id))
           .toList();
+
+      // Get the list name for the snackbar message
+      final listName = lists.isEmpty ? l10n.defaultShoppingListName : lists.first.name;
 
       // Use smart stacking if we have a recipeId
       if (widget.recipeId != null) {
@@ -127,29 +130,22 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
 
         if (mounted) {
           Navigator.pop(context);
-          final l10n = AppLocalizations.of(context)!;
 
-          // Build informative snackbar message
+          // Build informative snackbar message with list name
           String message;
           if (result.combined > 0 && result.added > 0) {
-            message = '${l10n.addedItemsToList(result.added)}, ${result.combined} combined';
+            message = l10n.shoppingAddedAndCombined(result.added, result.combined, listName);
           } else if (result.combined > 0) {
-            message = '${result.combined} ${result.combined == 1 ? 'item' : 'items'} updated on list';
+            message = l10n.shoppingItemsUpdated(result.combined, listName);
           } else {
-            message = l10n.addedItemsToList(result.added);
+            message = l10n.shoppingAddedToList(result.added, listName);
           }
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(message),
-              behavior: SnackBarBehavior.floating,
-              action: SnackBarAction(
-                label: l10n.viewList,
-                onPressed: () {
-                  context.go('/shopping');
-                },
-              ),
-            ),
+          AppSnackbar.successWithAction(
+            context,
+            message,
+            actionLabel: l10n.viewList,
+            onAction: () => context.go('/shopping'),
           );
         }
       } else {
@@ -188,24 +184,17 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
 
         if (mounted) {
           Navigator.pop(context);
-          final l10n = AppLocalizations.of(context)!;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.addedItemsToList(addedCount)),
-              behavior: SnackBarBehavior.floating,
-              action: SnackBarAction(
-                label: l10n.viewList,
-                onPressed: () {
-                  context.go('/shopping');
-                },
-              ),
-            ),
+          AppSnackbar.successWithAction(
+            context,
+            l10n.shoppingAddedToList(addedCount, listName),
+            actionLabel: l10n.viewList,
+            onAction: () => context.go('/shopping'),
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        AppSnackbar.info(context, 'Error: $e');
+        AppSnackbar.error(context, l10n.shoppingAddError(e.toString()));
       }
     } finally {
       if (mounted) setState(() => _isAdding = false);

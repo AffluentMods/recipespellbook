@@ -1,12 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../database/database.dart';
-import '../database/daos/recipe_dao.dart';
-import '../database/daos/cookbook_dao.dart';
-import '../database/daos/shopping_dao.dart';
-import '../database/daos/meal_plan_dao.dart';
+import '../database/daos/custom_taxonomy_dao.dart';
 import '../database/daos/tags_dao.dart';
 import '../database/daos/user_ingredient_mappings_dao.dart';
-import '../database/daos/custom_taxonomy_dao.dart';
+import '../database/database.dart';
 
 /// Main database provider
 final databaseProvider = Provider<AppDatabase>((ref) {

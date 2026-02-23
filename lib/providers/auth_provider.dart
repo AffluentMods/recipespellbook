@@ -2,9 +2,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/auth_service.dart';
-import '../services/smart_import_service.dart';
 import '../services/revenuecat_service.dart';
-import 'subscription_provider.dart';
+import '../services/smart_import_service.dart';
 
 // ════════════════════════════════════════════
 //  PROVIDERS

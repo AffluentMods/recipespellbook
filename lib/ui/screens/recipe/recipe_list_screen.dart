@@ -1,19 +1,20 @@
 import 'dart:io';
-import 'package:recipespellbook/l10n/app_localizations.dart';
+import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:drift/drift.dart' hide Column;
-import '../../../database/database.dart';
+import 'package:recipespellbook/l10n/app_localizations.dart';
+
+import '../../../data/course_category_data.dart' as taxonomy;
 import '../../../database/daos/tags_dao.dart';
+import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
-import '../../widgets/new_recipe_dialog.dart';
-import '../../widgets/placeholder_image.dart';
 import '../../../utils/default_recipe_images.dart';
-import '../../../data/course_category_data.dart' as taxonomy;
 import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/new_recipe_dialog.dart';
+import '../../widgets/placeholder_image.dart';
 
 /// Generic recipe list screen with filtering by course/category/tags
 /// Supports view size, sorting, search, and tag filtering

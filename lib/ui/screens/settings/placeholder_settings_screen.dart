@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../providers/settings_provider.dart';
-import '../../../data/app_enums.dart';
-import '../../widgets/placeholder_image.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
+import '../../../data/app_enums.dart';
+import '../../../providers/settings_provider.dart';
 
 class PlaceholderSettingsScreen extends ConsumerWidget {
   const PlaceholderSettingsScreen({super.key});

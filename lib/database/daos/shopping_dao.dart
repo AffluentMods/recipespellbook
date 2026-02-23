@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:drift/drift.dart';
-import '../database.dart';
-import '../tables/shopping_lists.dart';
-import '../tables/shopping_list_items.dart';
-import '../tables/shopping_categories.dart';
-import '../tables/user_ingredient_mappings.dart';
 import '../../utils/ingredient_utils.dart';
+import '../database.dart';
+import '../tables/shopping_categories.dart';
+import '../tables/shopping_list_items.dart';
+import '../tables/shopping_lists.dart';
+import '../tables/user_ingredient_mappings.dart';
 
 part 'shopping_dao.g.dart';
 

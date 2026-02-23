@@ -8934,6 +8934,360 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No text found in image'**
   String get noTextFoundInImage;
+
+  /// No description provided for @addDayToShoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'Add day to shopping list'**
+  String get addDayToShoppingList;
+
+  /// No description provided for @sendDayToShoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'Send day to shopping list'**
+  String get sendDayToShoppingList;
+
+  /// No description provided for @removeMeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Meal'**
+  String get removeMeal;
+
+  /// No description provided for @removeMealConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {recipeName} from this day?'**
+  String removeMealConfirm(String recipeName);
+
+  /// No description provided for @actionRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get actionRemove;
+
+  /// No description provided for @plannerMealRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal removed'**
+  String get plannerMealRemoved;
+
+  /// No description provided for @weekStartsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Week starts on'**
+  String get weekStartsOn;
+
+  /// No description provided for @monday.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get monday;
+
+  /// No description provided for @saturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get saturday;
+
+  /// No description provided for @sunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get sunday;
+
+  /// No description provided for @ingredientHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Header'**
+  String get ingredientHeader;
+
+  /// No description provided for @ingredientHeaderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., For the sauce'**
+  String get ingredientHeaderHint;
+
+  /// No description provided for @settingsWeekStartDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Week starts on'**
+  String get settingsWeekStartDay;
+
+  /// No description provided for @tuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get tuesday;
+
+  /// No description provided for @wednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get wednesday;
+
+  /// No description provided for @thursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get thursday;
+
+  /// No description provided for @friday.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get friday;
+
+  /// No description provided for @shoppingAddedToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {count} {count, plural, =1{item} other{items}} to \"{listName}\"'**
+  String shoppingAddedToList(int count, String listName);
+
+  /// No description provided for @shoppingAddedAndCombined.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {added} {added, plural, =1{item} other{items}} to \"{listName}\", {combined} combined'**
+  String shoppingAddedAndCombined(int added, int combined, String listName);
+
+  /// No description provided for @shoppingItemsUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {count, plural, =1{item} other{items}} updated on \"{listName}\"'**
+  String shoppingItemsUpdated(int count, String listName);
+
+  /// No description provided for @shoppingAddError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {message}'**
+  String shoppingAddError(String message);
+
+  /// No description provided for @editCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Cookbook'**
+  String get editCookbook;
+
+  /// No description provided for @newCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'New Cookbook'**
+  String get newCookbook;
+
+  /// No description provided for @tapToAddCoverImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to add cover image'**
+  String get tapToAddCoverImage;
+
+  /// No description provided for @cookbookDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get cookbookDescriptionLabel;
+
+  /// No description provided for @cookbookDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A collection of recipes...'**
+  String get cookbookDescriptionHint;
+
+  /// No description provided for @cookbookNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a name'**
+  String get cookbookNameRequired;
+
+  /// No description provided for @addCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Cover'**
+  String get addCover;
+
+  /// No description provided for @recipeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {count, plural, =1{recipe} other{recipes}}'**
+  String recipeCount(int count);
+
+  /// No description provided for @cookbookDeleteWithRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'This cookbook contains {count} {count, plural, =1{recipe} other{recipes}}. They will be moved to trash.\n\nAre you sure you want to delete \"{name}\"?'**
+  String cookbookDeleteWithRecipes(int count, String name);
+
+  /// No description provided for @cookbookDeleteConfirmNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"?'**
+  String cookbookDeleteConfirmNamed(String name);
+
+  /// No description provided for @shareCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Cookbook'**
+  String get shareCookbook;
+
+  /// No description provided for @cookbookEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This cookbook has no recipes to share'**
+  String get cookbookEmpty;
+
+  /// No description provided for @recipes.
+  ///
+  /// In en, this message translates to:
+  /// **'recipes'**
+  String get recipes;
+
+  /// No description provided for @sendSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a Suggestion'**
+  String get sendSuggestion;
+
+  /// No description provided for @sendSuggestionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help us improve Recipe Spellbook'**
+  String get sendSuggestionSubtitle;
+
+  /// No description provided for @reportBug.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a Bug'**
+  String get reportBug;
+
+  /// No description provided for @reportBugSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Something not working right?'**
+  String get reportBugSubtitle;
+
+  /// No description provided for @joinDiscord.
+  ///
+  /// In en, this message translates to:
+  /// **'Join our Discord'**
+  String get joinDiscord;
+
+  /// No description provided for @joinDiscordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get help, chat, and share recipes'**
+  String get joinDiscordSubtitle;
+
+  /// No description provided for @actionSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get actionSend;
+
+  /// No description provided for @suggestionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'d love to hear your ideas! Your suggestion will be sent directly to our team.'**
+  String get suggestionDescription;
+
+  /// No description provided for @suggestionTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestion Title'**
+  String get suggestionTitleLabel;
+
+  /// No description provided for @suggestionTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Add dark mode for cooking screen'**
+  String get suggestionTitleHint;
+
+  /// No description provided for @suggestionDetailsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get suggestionDetailsLabel;
+
+  /// No description provided for @suggestionDetailsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe your idea in detail...'**
+  String get suggestionDetailsHint;
+
+  /// No description provided for @contactOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact (optional)'**
+  String get contactOptionalLabel;
+
+  /// No description provided for @contactOptionalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Email or Discord username'**
+  String get contactOptionalHint;
+
+  /// No description provided for @suggestionSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks! Your suggestion has been sent 💡'**
+  String get suggestionSent;
+
+  /// No description provided for @bugDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Found a bug? Let us know and we\'ll squash it. Device info is included automatically.'**
+  String get bugDescription;
+
+  /// No description provided for @bugTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bug Title'**
+  String get bugTitleLabel;
+
+  /// No description provided for @bugTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., App crashes when importing PDF'**
+  String get bugTitleHint;
+
+  /// No description provided for @bugDetailsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened?'**
+  String get bugDetailsLabel;
+
+  /// No description provided for @bugDetailsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe what went wrong...'**
+  String get bugDetailsHint;
+
+  /// No description provided for @bugStepsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps to Reproduce (optional)'**
+  String get bugStepsLabel;
+
+  /// No description provided for @bugStepsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Open recipe\n2. Tap share\n3. App crashes'**
+  String get bugStepsHint;
+
+  /// No description provided for @bugReportSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks! Your bug report has been sent 🐛'**
+  String get bugReportSent;
+
+  /// No description provided for @feedbackFieldsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill in the title and details'**
+  String get feedbackFieldsRequired;
+
+  /// No description provided for @feedbackSendError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send feedback. Check your internet connection.'**
+  String get feedbackSendError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

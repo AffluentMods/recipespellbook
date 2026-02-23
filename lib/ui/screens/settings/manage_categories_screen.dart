@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
-import '../../../l10n/app_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' as drift;
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../data/course_category_data.dart';
 import '../../../database/database.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
-import '../../../data/course_category_data.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/app_snackbar.dart';
 

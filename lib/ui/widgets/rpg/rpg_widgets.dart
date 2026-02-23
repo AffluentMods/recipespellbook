@@ -1,12 +1,8 @@
-// lib/ui/widgets/rpg/rpg_widgets.dart
-// Reusable RPG UI components for Recipe Spellbook
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../data/rpg/rpg_models.dart';
 import '../../../data/rpg/rpg_achievements.dart';
 import '../../../data/rpg/rpg_cosmetics.dart';
+import '../../../data/rpg/rpg_models.dart';
 import '../../../providers/rpg_provider.dart';
 
 // ============ RPG AVATAR WIDGET ============

@@ -6,12 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/nutrition_data.dart';
 import '../../database/database.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
-import '../../database/daos/recipe_dao.dart' show RecipeLinkInfo;
 import '../../providers/usda_provider.dart';
 import '../../services/nutrition_calculator.dart';
 import '../../services/usda_service.dart';
-import '../../l10n/app_localizations.dart';
 import '../../utils/default_recipe_images.dart';
 import 'app_snackbar.dart';
 

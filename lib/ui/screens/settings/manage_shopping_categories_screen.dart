@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
-import '../../../l10n/app_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' as drift;
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../data/localized_defaults.dart';
 import '../../../database/database.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/ingredient_utils.dart';
-import '../../../data/localized_defaults.dart';
 
 class ManageShoppingCategoriesScreen extends ConsumerStatefulWidget {
   const ManageShoppingCategoriesScreen({super.key});

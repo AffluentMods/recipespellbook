@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:recipespellbook/ui/screens/settings/pantry_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../data/app_enums.dart';
+import '../../../providers/cookbook_provider.dart';
+import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../providers/subscription_provider.dart';
-import '../../../providers/database_provider.dart';
-import '../../../providers/cookbook_provider.dart';
 import '../../../services/export_import_service.dart';
-import '../../../services/onboarding_service.dart';
+import '../../../services/feedback_service.dart';
 import '../../../services/grocery_service.dart';
-import '../../../data/app_enums.dart';
-import 'package:recipespellbook/l10n/app_localizations.dart';
+import '../../../services/onboarding_service.dart';
 import '../../../services/revenuecat_service.dart';
-import 'nutrition_settings_screen.dart';
 import '../../widgets/app_snackbar.dart';
+import 'nutrition_settings_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -133,6 +135,19 @@ class SettingsScreen extends ConsumerWidget {
           // ============ NUTRITION DISPLAY (NEW!) ============
           _NutritionSettingsSection(settings: settings, ref: ref),
 
+          // ============ PLANNER ============
+          _SettingsSection(
+            title: l10n.plannerTitle,
+            children: [
+              _WeekStartDayTile(
+                currentDay: settings.weekStartDay,
+                onDaySelected: (day) {
+                  ref.read(settingsProvider.notifier).setWeekStartDay(day);
+                },
+              ),
+            ],
+          ),
+
           // ============ SHOPPING ============
           _SettingsSection(
             title: l10n.shoppingTitle,
@@ -187,6 +202,31 @@ class SettingsScreen extends ConsumerWidget {
               ),
               // RPG sub-settings removed — animations, sounds, achievements,
               // and stats are controlled by RPG mode toggle only
+            ],
+          ),
+
+          // ============ FEEDBACK & SUPPORT ============
+          _SettingsSection(
+            title: l10n.settingsFeedback,
+            children: [
+              _SettingsTile(
+                icon: Icons.lightbulb_outline,
+                title: l10n.sendSuggestion,
+                subtitle: l10n.sendSuggestionSubtitle,
+                onTap: () => _showSuggestionDialog(context),
+              ),
+              _SettingsTile(
+                icon: Icons.bug_report_outlined,
+                title: l10n.reportBug,
+                subtitle: l10n.reportBugSubtitle,
+                onTap: () => _showBugReportDialog(context),
+              ),
+              _SettingsTile(
+                icon: Icons.forum_outlined,
+                title: l10n.joinDiscord,
+                subtitle: l10n.joinDiscordSubtitle,
+                onTap: () => _openDiscord(),
+              ),
             ],
           ),
 
@@ -344,6 +384,218 @@ class SettingsScreen extends ConsumerWidget {
         Text(l10n.madeWithLove, style: const TextStyle(fontSize: 12)),
       ],
     );
+  }
+
+  void _showSuggestionDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final titleController = TextEditingController();
+    final descriptionController = TextEditingController();
+    final contactController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          bool isSending = false;
+
+          return AlertDialog(
+            icon: Icon(Icons.lightbulb, color: theme.colorScheme.primary, size: 32),
+            title: Text(l10n.sendSuggestion),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(l10n.suggestionDescription, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      labelText: l10n.suggestionTitleLabel,
+                      hintText: l10n.suggestionTitleHint,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: descriptionController,
+                    decoration: InputDecoration(
+                      labelText: l10n.suggestionDetailsLabel,
+                      hintText: l10n.suggestionDetailsHint,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      alignLabelWithHint: true,
+                    ),
+                    maxLines: 4,
+                    minLines: 3,
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: contactController,
+                    decoration: InputDecoration(
+                      labelText: l10n.contactOptionalLabel,
+                      hintText: l10n.contactOptionalHint,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(l10n.actionCancel),
+              ),
+              FilledButton.icon(
+                onPressed: isSending ? null : () async {
+                  if (titleController.text.trim().isEmpty || descriptionController.text.trim().isEmpty) {
+                    AppSnackbar.warning(ctx, l10n.feedbackFieldsRequired);
+                    return;
+                  }
+                  setDialogState(() => isSending = true);
+                  final success = await FeedbackService.sendSuggestion(
+                    title: titleController.text.trim(),
+                    description: descriptionController.text.trim(),
+                    contactInfo: contactController.text.trim(),
+                  );
+                  if (ctx.mounted) {
+                    Navigator.pop(ctx);
+                    if (success) {
+                      AppSnackbar.success(context, l10n.suggestionSent);
+                    } else {
+                      AppSnackbar.warning(context, l10n.feedbackSendError);
+                    }
+                  }
+                },
+                icon: isSending
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.send),
+                label: Text(l10n.actionSend),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _showBugReportDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final titleController = TextEditingController();
+    final descriptionController = TextEditingController();
+    final stepsController = TextEditingController();
+    final contactController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          bool isSending = false;
+
+          return AlertDialog(
+            icon: Icon(Icons.bug_report, color: theme.colorScheme.error, size: 32),
+            title: Text(l10n.reportBug),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(l10n.bugDescription, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      labelText: l10n.bugTitleLabel,
+                      hintText: l10n.bugTitleHint,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: descriptionController,
+                    decoration: InputDecoration(
+                      labelText: l10n.bugDetailsLabel,
+                      hintText: l10n.bugDetailsHint,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      alignLabelWithHint: true,
+                    ),
+                    maxLines: 3,
+                    minLines: 2,
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: stepsController,
+                    decoration: InputDecoration(
+                      labelText: l10n.bugStepsLabel,
+                      hintText: l10n.bugStepsHint,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      alignLabelWithHint: true,
+                    ),
+                    maxLines: 3,
+                    minLines: 2,
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: contactController,
+                    decoration: InputDecoration(
+                      labelText: l10n.contactOptionalLabel,
+                      hintText: l10n.contactOptionalHint,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(l10n.actionCancel),
+              ),
+              FilledButton.icon(
+                onPressed: isSending ? null : () async {
+                  if (titleController.text.trim().isEmpty || descriptionController.text.trim().isEmpty) {
+                    AppSnackbar.warning(ctx, l10n.feedbackFieldsRequired);
+                    return;
+                  }
+                  setDialogState(() => isSending = true);
+                  final success = await FeedbackService.sendBugReport(
+                    title: titleController.text.trim(),
+                    description: descriptionController.text.trim(),
+                    stepsToReproduce: stepsController.text.trim(),
+                    contactInfo: contactController.text.trim(),
+                  );
+                  if (ctx.mounted) {
+                    Navigator.pop(ctx);
+                    if (success) {
+                      AppSnackbar.success(context, l10n.bugReportSent);
+                    } else {
+                      AppSnackbar.warning(context, l10n.feedbackSendError);
+                    }
+                  }
+                },
+                icon: isSending
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.send),
+                label: Text(l10n.actionSend),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _openDiscord() async {
+    final uri = Uri.parse(FeedbackService.discordInviteUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   void _showResetConfirmation(BuildContext context, WidgetRef ref) {
@@ -1506,6 +1758,85 @@ class _MeasurementSystemTile extends StatelessWidget {
               trailing: currentSystem == MeasurementSystem.metric ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary) : null,
               onTap: () { onSystemSelected(MeasurementSystem.metric); Navigator.pop(context); },
             ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WeekStartDayTile extends StatelessWidget {
+  final int currentDay; // 1=Mon .. 7=Sun
+  final ValueChanged<int> onDaySelected;
+
+  const _WeekStartDayTile({required this.currentDay, required this.onDaySelected});
+
+  String _dayName(BuildContext context, int day) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (day) {
+      case 1: return l10n.monday;
+      case 2: return l10n.tuesday;
+      case 3: return l10n.wednesday;
+      case 4: return l10n.thursday;
+      case 5: return l10n.friday;
+      case 6: return l10n.saturday;
+      case 7: return l10n.sunday;
+      default: return l10n.monday;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      leading: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(Icons.calendar_today, size: 20, color: theme.colorScheme.primary),
+      ),
+      title: Text(l10n.settingsWeekStartDay,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+      subtitle: Text(_dayName(context, currentDay),
+          style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
+      trailing: Icon(Icons.chevron_right,
+          size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+      onTap: () => _showDayPicker(context),
+    );
+  }
+
+  void _showDayPicker(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.settingsWeekStartDay, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            ),
+            ...[1, 6, 7].map((day) => ListTile(
+              leading: Text(
+                day == 1 ? '📅' : day == 6 ? '🛋️' : '☀️',
+                style: const TextStyle(fontSize: 24),
+              ),
+              title: Text(_dayName(context, day)),
+              trailing: currentDay == day
+                  ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+                  : null,
+              onTap: () {
+                onDaySelected(day);
+                Navigator.pop(context);
+              },
+            )),
             const SizedBox(height: 16),
           ],
         ),

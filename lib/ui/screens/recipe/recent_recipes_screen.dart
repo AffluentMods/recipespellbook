@@ -1,12 +1,11 @@
 import 'dart:io';
-import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../database/database.dart';
-import '../../../providers/database_provider.dart';
-import '../../../providers/cookbook_provider.dart';
 import '../../../data/course_category_data.dart';
+import '../../../database/database.dart';
+import '../../../providers/cookbook_provider.dart';
+import '../../../providers/database_provider.dart';
 import '../../../utils/default_recipe_images.dart';
 
 /// Provider for recently viewed recipes (no limit)

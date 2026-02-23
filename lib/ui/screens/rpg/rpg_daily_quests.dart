@@ -1,10 +1,7 @@
-// lib/ui/widgets/rpg/rpg_daily_quests.dart
-// Daily Quests Widget for Recipe Spellbook RPG
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:recipespellbook/data/rpg/rpg_quests.dart';
 import 'package:recipespellbook/data/rpg/rpg_models.dart';
+import 'package:recipespellbook/data/rpg/rpg_quests.dart';
 import 'package:recipespellbook/providers/rpg_provider.dart';
 
 // ============ QUESTS PROVIDER ============

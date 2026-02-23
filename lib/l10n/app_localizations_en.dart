@@ -4848,4 +4848,227 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noTextFoundInImage => 'No text found in image';
+
+  @override
+  String get addDayToShoppingList => 'Add day to shopping list';
+
+  @override
+  String get sendDayToShoppingList => 'Send day to shopping list';
+
+  @override
+  String get removeMeal => 'Remove Meal';
+
+  @override
+  String removeMealConfirm(String recipeName) {
+    return 'Remove $recipeName from this day?';
+  }
+
+  @override
+  String get actionRemove => 'Remove';
+
+  @override
+  String get plannerMealRemoved => 'Meal removed';
+
+  @override
+  String get weekStartsOn => 'Week starts on';
+
+  @override
+  String get monday => 'Monday';
+
+  @override
+  String get saturday => 'Saturday';
+
+  @override
+  String get sunday => 'Sunday';
+
+  @override
+  String get ingredientHeader => 'Header';
+
+  @override
+  String get ingredientHeaderHint => 'e.g., For the sauce';
+
+  @override
+  String get settingsWeekStartDay => 'Week starts on';
+
+  @override
+  String get tuesday => 'Tuesday';
+
+  @override
+  String get wednesday => 'Wednesday';
+
+  @override
+  String get thursday => 'Thursday';
+
+  @override
+  String get friday => 'Friday';
+
+  @override
+  String shoppingAddedToList(int count, String listName) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'items',
+      one: 'item',
+    );
+    return 'Added $count $_temp0 to \"$listName\"';
+  }
+
+  @override
+  String shoppingAddedAndCombined(int added, int combined, String listName) {
+    String _temp0 = intl.Intl.pluralLogic(
+      added,
+      locale: localeName,
+      other: 'items',
+      one: 'item',
+    );
+    return 'Added $added $_temp0 to \"$listName\", $combined combined';
+  }
+
+  @override
+  String shoppingItemsUpdated(int count, String listName) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'items',
+      one: 'item',
+    );
+    return '$count $_temp0 updated on \"$listName\"';
+  }
+
+  @override
+  String shoppingAddError(String message) {
+    return 'Error: $message';
+  }
+
+  @override
+  String get editCookbook => 'Edit Cookbook';
+
+  @override
+  String get newCookbook => 'New Cookbook';
+
+  @override
+  String get tapToAddCoverImage => 'Tap to add cover image';
+
+  @override
+  String get cookbookDescriptionLabel => 'Description';
+
+  @override
+  String get cookbookDescriptionHint => 'A collection of recipes...';
+
+  @override
+  String get cookbookNameRequired => 'Please enter a name';
+
+  @override
+  String get addCover => 'Add Cover';
+
+  @override
+  String recipeCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'recipes',
+      one: 'recipe',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String cookbookDeleteWithRecipes(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'recipes',
+      one: 'recipe',
+    );
+    return 'This cookbook contains $count $_temp0. They will be moved to trash.\n\nAre you sure you want to delete \"$name\"?';
+  }
+
+  @override
+  String cookbookDeleteConfirmNamed(String name) {
+    return 'Are you sure you want to delete \"$name\"?';
+  }
+
+  @override
+  String get shareCookbook => 'Share Cookbook';
+
+  @override
+  String get cookbookEmpty => 'This cookbook has no recipes to share';
+
+  @override
+  String get recipes => 'recipes';
+
+  @override
+  String get sendSuggestion => 'Send a Suggestion';
+
+  @override
+  String get sendSuggestionSubtitle => 'Help us improve Recipe Spellbook';
+
+  @override
+  String get reportBug => 'Report a Bug';
+
+  @override
+  String get reportBugSubtitle => 'Something not working right?';
+
+  @override
+  String get joinDiscord => 'Join our Discord';
+
+  @override
+  String get joinDiscordSubtitle => 'Get help, chat, and share recipes';
+
+  @override
+  String get actionSend => 'Send';
+
+  @override
+  String get suggestionDescription => 'We\'d love to hear your ideas! Your suggestion will be sent directly to our team.';
+
+  @override
+  String get suggestionTitleLabel => 'Suggestion Title';
+
+  @override
+  String get suggestionTitleHint => 'e.g., Add dark mode for cooking screen';
+
+  @override
+  String get suggestionDetailsLabel => 'Details';
+
+  @override
+  String get suggestionDetailsHint => 'Describe your idea in detail...';
+
+  @override
+  String get contactOptionalLabel => 'Contact (optional)';
+
+  @override
+  String get contactOptionalHint => 'Email or Discord username';
+
+  @override
+  String get suggestionSent => 'Thanks! Your suggestion has been sent 💡';
+
+  @override
+  String get bugDescription => 'Found a bug? Let us know and we\'ll squash it. Device info is included automatically.';
+
+  @override
+  String get bugTitleLabel => 'Bug Title';
+
+  @override
+  String get bugTitleHint => 'e.g., App crashes when importing PDF';
+
+  @override
+  String get bugDetailsLabel => 'What happened?';
+
+  @override
+  String get bugDetailsHint => 'Describe what went wrong...';
+
+  @override
+  String get bugStepsLabel => 'Steps to Reproduce (optional)';
+
+  @override
+  String get bugStepsHint => '1. Open recipe\n2. Tap share\n3. App crashes';
+
+  @override
+  String get bugReportSent => 'Thanks! Your bug report has been sent 🐛';
+
+  @override
+  String get feedbackFieldsRequired => 'Please fill in the title and details';
+
+  @override
+  String get feedbackSendError => 'Couldn\'t send feedback. Check your internet connection.';
 }

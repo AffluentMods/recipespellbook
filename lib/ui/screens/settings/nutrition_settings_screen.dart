@@ -1,8 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../providers/settings_provider.dart';
 import '../../../data/nutrition_data.dart';
+import '../../../providers/settings_provider.dart';
 
 // ============================================================
 // NUTRIENT REGISTRY — single source of truth for all nutrients

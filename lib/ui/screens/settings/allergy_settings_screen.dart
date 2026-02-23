@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../data/allergen_data.dart';
-import '../../../providers/settings_provider.dart';
-import '../../../providers/database_provider.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../widgets/placeholder_image.dart';
+import '../../../providers/database_provider.dart';
+import '../../../providers/settings_provider.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/placeholder_image.dart';
 
 /// Provider for dismissed allergy warnings
 /// Stores recipe IDs where user has permanently dismissed warnings

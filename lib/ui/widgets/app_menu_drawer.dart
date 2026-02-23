@@ -5,13 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../l10n/app_localizations.dart';
-import '../../providers/settings_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/settings_provider.dart';
 import '../../providers/subscription_provider.dart';
-import '../../services/revenuecat_service.dart';
-import '../../services/auth_service.dart';
 import '../../router/router.dart';
+import '../../services/auth_service.dart';
+import '../../services/revenuecat_service.dart';
 import '../../ui/screens/import/import_guides_screen.dart';
 import 'app_snackbar.dart';
 

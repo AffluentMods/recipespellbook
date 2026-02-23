@@ -1,11 +1,10 @@
 import 'dart:convert';
+import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:drift/drift.dart';
-import '../database/database.dart';
-import '../database/daos/usda_dao.dart';
 import '../data/nutrition_data.dart';
+import '../database/database.dart';
 
 /// Service for interacting with USDA FoodData Central via your server
 class UsdaService {

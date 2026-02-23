@@ -2351,5 +2351,109 @@
   "addedToMealPlan": "Added to {mealType} on {date}",
   "@addedToMealPlan": {"placeholders": {"mealType": {"type": "String"}, "date": {"type": "String"}}},
   "noItemsFoundInText": "No items found in text",
-  "noTextFoundInImage": "No text found in image"
+  "noTextFoundInImage": "No text found in image",
+  "addDayToShoppingList": "Add day to shopping list",
+  "sendDayToShoppingList": "Send day to shopping list",
+  "removeMeal": "Remove Meal",
+  "removeMealConfirm": "Remove {recipeName} from this day?",
+  "@removeMealConfirm": {
+    "placeholders": {
+      "recipeName": { "type": "String" }
+    }
+  },
+  "actionRemove": "Remove",
+  "plannerMealRemoved": "Meal removed",
+  "weekStartsOn": "Week starts on",
+  "monday": "Monday",
+  "saturday": "Saturday",
+  "sunday": "Sunday",
+  "ingredientHeader": "Header",
+  "ingredientHeaderHint": "e.g., For the sauce",
+  "settingsWeekStartDay": "Week starts on",
+  "tuesday": "Tuesday",
+  "wednesday": "Wednesday",
+  "thursday": "Thursday",
+  "friday": "Friday",
+  "shoppingAddedToList": "Added {count} {count, plural, =1{item} other{items}} to \"{listName}\"",
+  "@shoppingAddedToList": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "listName": { "type": "String" }
+    }
+  },
+  "shoppingAddedAndCombined": "Added {added} {added, plural, =1{item} other{items}} to \"{listName}\", {combined} combined",
+  "@shoppingAddedAndCombined": {
+    "placeholders": {
+      "added": { "type": "int" },
+      "combined": { "type": "int" },
+      "listName": { "type": "String" }
+    }
+  },
+  "shoppingItemsUpdated": "{count} {count, plural, =1{item} other{items}} updated on \"{listName}\"",
+  "@shoppingItemsUpdated": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "listName": { "type": "String" }
+    }
+  },
+  "shoppingAddError": "Error: {message}",
+  "@shoppingAddError": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
+  "editCookbook": "Edit Cookbook",
+  "newCookbook": "New Cookbook",
+  "tapToAddCoverImage": "Tap to add cover image",
+  "cookbookDescriptionLabel": "Description",
+  "cookbookDescriptionHint": "A collection of recipes...",
+  "cookbookNameRequired": "Please enter a name",
+  "addCover": "Add Cover",
+  "recipeCount": "{count} {count, plural, =1{recipe} other{recipes}}",
+  "@recipeCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "cookbookDeleteWithRecipes": "This cookbook contains {count} {count, plural, =1{recipe} other{recipes}}. They will be moved to trash.\n\nAre you sure you want to delete \"{name}\"?",
+  "@cookbookDeleteWithRecipes": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "name": { "type": "String" }
+    }
+  },
+  "cookbookDeleteConfirmNamed": "Are you sure you want to delete \"{name}\"?",
+  "@cookbookDeleteConfirmNamed": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "shareCookbook": "Share Cookbook",
+  "cookbookEmpty": "This cookbook has no recipes to share",
+  "recipes": "recipes",
+  "sendSuggestion": "Send a Suggestion",
+  "sendSuggestionSubtitle": "Help us improve Recipe Spellbook",
+  "reportBug": "Report a Bug",
+  "reportBugSubtitle": "Something not working right?",
+  "joinDiscord": "Join our Discord",
+  "joinDiscordSubtitle": "Get help, chat, and share recipes",
+  "actionSend": "Send",
+  "suggestionDescription": "We'd love to hear your ideas! Your suggestion will be sent directly to our team.",
+  "suggestionTitleLabel": "Suggestion Title",
+  "suggestionTitleHint": "e.g., Add dark mode for cooking screen",
+  "suggestionDetailsLabel": "Details",
+  "suggestionDetailsHint": "Describe your idea in detail...",
+  "contactOptionalLabel": "Contact (optional)",
+  "contactOptionalHint": "Email or Discord username",
+  "suggestionSent": "Thanks! Your suggestion has been sent 💡",
+  "bugDescription": "Found a bug? Let us know and we'll squash it. Device info is included automatically.",
+  "bugTitleLabel": "Bug Title",
+  "bugTitleHint": "e.g., App crashes when importing PDF",
+  "bugDetailsLabel": "What happened?",
+  "bugDetailsHint": "Describe what went wrong...",
+  "bugStepsLabel": "Steps to Reproduce (optional)",
+  "bugStepsHint": "1. Open recipe\n2. Tap share\n3. App crashes",
+  "bugReportSent": "Thanks! Your bug report has been sent 🐛",
+  "feedbackFieldsRequired": "Please fill in the title and details",
+  "feedbackSendError": "Couldn't send feedback. Check your internet connection."
 }

@@ -1,6 +1,3 @@
-// lib/data/rpg/rpg_quests.dart
-// Daily Quest System for Recipe Spellbook RPG
-
 import 'dart:math';
 import 'package:flutter/material.dart';
 

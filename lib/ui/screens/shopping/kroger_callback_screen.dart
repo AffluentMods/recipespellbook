@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../services/grocery_service.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../services/grocery_service.dart';
 
 /// Handles the Kroger OAuth callback deep link:
 ///   recipespellbook://kroger-callback?code=XXXX

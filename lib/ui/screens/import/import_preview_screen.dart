@@ -1,10 +1,10 @@
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drift/drift.dart' as drift;
 import '../../../database/database.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/imported_recipe.dart';
 import '../../../providers/database_provider.dart';
-import '../../../l10n/app_localizations.dart';
 import '../../widgets/smart_import_button.dart';
 
 /// Full-screen import preview — lets users review, select/deselect, and spot

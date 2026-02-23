@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 ///   AppSnackbar.error(context, 'Something went wrong');
 ///   AppSnackbar.info(context, 'Signed out');
 ///   AppSnackbar.warning(context, 'Low storage');
+///   AppSnackbar.successWithAction(context, 'Added 5 items to Shopping List', actionLabel: 'View', onAction: () => ...);
 
 class AppSnackbar {
   AppSnackbar._();
@@ -25,6 +26,62 @@ class AppSnackbar {
 
   static void custom(BuildContext context, String message, {required IconData icon, required Color color}) =>
       _show(context, message, icon, color, color.withValues(alpha: 0.08));
+
+  /// Success snackbar with an action button (e.g. "View List") — auto-dismisses after 4 seconds
+  static void successWithAction(
+      BuildContext context,
+      String message, {
+        required String actionLabel,
+        required VoidCallback onAction,
+        Duration duration = const Duration(seconds: 4),
+      }) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const accent = Color(0xFF2E7D32);
+    final bgLight = const Color(0xFFE8F5E9);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Container(
+              width: 32, height: 32,
+              decoration: BoxDecoration(
+                color: isDark ? accent.withValues(alpha: 0.25) : accent.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.check_circle_rounded, size: 18, color: isDark ? accent.withValues(alpha: 0.9) : accent),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(message,
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.grey.shade900,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: isDark
+            ? Color.lerp(Colors.grey.shade900, accent, 0.08)
+            : bgLight,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        elevation: isDark ? 8 : 2,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        duration: duration,
+        dismissDirection: DismissDirection.horizontal,
+        action: SnackBarAction(
+          label: actionLabel,
+          textColor: isDark ? const Color(0xFF81C784) : accent,
+          onPressed: onAction,
+        ),
+      ),
+    );
+  }
 
   /// Loading snackbar with spinner — stays until manually dismissed
   static void loading(BuildContext context, String message) {

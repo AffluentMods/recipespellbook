@@ -1,16 +1,17 @@
 import 'dart:io';
-import 'package:recipespellbook/l10n/app_localizations.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
-import 'package:drift/drift.dart' as drift;
+import 'package:path_provider/path_provider.dart';
+import 'package:recipespellbook/l10n/app_localizations.dart';
+
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
-import '../../widgets/rpg/rpg_navigation_shell.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/rpg/rpg_navigation_shell.dart';
 
 class CookbookEditScreen extends ConsumerStatefulWidget {
   final String? cookbookId; // null for new cookbook
@@ -62,6 +63,7 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
   }
 
   Future<void> _pickImage() async {
+    final l10n = AppLocalizations.of(context)!;
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       builder: (ctx) => SafeArea(
@@ -70,18 +72,18 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Take Photo'),
+              title: Text(l10n.takePhoto),
               onTap: () => Navigator.pop(ctx, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Choose from Gallery'),
+              title: Text(l10n.chooseFromGallery),
               onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
             if (_imagePath != null)
               ListTile(
                 leading: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
-                title: Text('Remove Image', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                title: Text(l10n.removeImage, style: TextStyle(color: Theme.of(context).colorScheme.error)),
                 onTap: () {
                   Navigator.pop(ctx);
                   setState(() => _imagePath = null);
@@ -141,7 +143,7 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
       }
     } catch (e) {
       if (mounted) {
-        AppSnackbar.info(context, 'Error saving cookbook: $e');
+        AppSnackbar.info(context, '${AppLocalizations.of(context)!.errorGeneric}: $e');
       }
     } finally {
       if (mounted) {
@@ -164,27 +166,29 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
     // Check if cookbook has recipes
     final recipeCount = await ref.read(recipeDaoProvider).getRecipeCountForCookbook(widget.cookbookId!);
 
+    final l10n = AppLocalizations.of(context)!;
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         icon: Icon(Icons.warning, color: Theme.of(context).colorScheme.error),
-        title: const Text('Delete Cookbook?'),
+        title: Text(l10n.cookbookDelete),
         content: Text(
           recipeCount > 0
-              ? 'This cookbook contains $recipeCount recipes. They will be moved to trash.\n\nAre you sure you want to delete "${_cookbook?.name}"?'
-              : 'Are you sure you want to delete "${_cookbook?.name}"?',
+              ? l10n.cookbookDeleteWithRecipes(recipeCount, _cookbook?.name ?? '')
+              : l10n.cookbookDeleteConfirmNamed(_cookbook?.name ?? ''),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.actionCancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
+            child: Text(l10n.actionDelete),
           ),
         ],
       ),
@@ -201,17 +205,18 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: Text(_isEditing ? 'Edit Cookbook' : 'New Cookbook')),
+        appBar: AppBar(title: Text(_isEditing ? l10n.editCookbook : l10n.newCookbook)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Cookbook' : 'New Cookbook'),
+        title: Text(_isEditing ? l10n.editCookbook : l10n.newCookbook),
         actions: [
           if (_isEditing)
             IconButton(
@@ -226,7 +231,7 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
               height: 16,
               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
             )
-                : const Text('Save'),
+                : Text(l10n.actionSave),
           ),
           const SizedBox(width: 8),
         ],
@@ -260,7 +265,7 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
                       Image.file(
                         File(_imagePath!),
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _imagePlaceholder(theme),
+                        errorBuilder: (_, __, ___) => _imagePlaceholder(theme, l10n),
                       ),
                       Positioned(
                         bottom: 8,
@@ -276,14 +281,14 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
                       ),
                     ],
                   )
-                      : _imagePlaceholder(theme),
+                      : _imagePlaceholder(theme, l10n),
                 ),
               ),
             ),
             const SizedBox(height: 8),
             Center(
               child: Text(
-                'Tap to add cover image',
+                l10n.tapToAddCoverImage,
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
               ),
             ),
@@ -293,14 +298,14 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
             // Name field
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Cookbook Name *',
-                hintText: 'e.g., Family Favorites',
+              decoration: InputDecoration(
+                labelText: l10n.cookbookNameLabel,
+                hintText: l10n.cookbookNameHint,
               ),
               textCapitalization: TextCapitalization.words,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a name';
+                  return l10n.cookbookNameRequired;
                 }
                 return null;
               },
@@ -311,9 +316,9 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
             // Description field
             TextFormField(
               controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                hintText: 'A collection of recipes...',
+              decoration: InputDecoration(
+                labelText: l10n.cookbookDescriptionLabel,
+                hintText: l10n.cookbookDescriptionHint,
                 alignLabelWithHint: true,
               ),
               maxLines: 3,
@@ -339,7 +344,7 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
                         Icon(Icons.restaurant_menu, color: theme.colorScheme.primary),
                         const SizedBox(width: 12),
                         Text(
-                          '$count recipes',
+                          l10n.recipeCount(count),
                           style: theme.textTheme.titleMedium,
                         ),
                       ],
@@ -354,7 +359,7 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
     );
   }
 
-  Widget _imagePlaceholder(ThemeData theme) {
+  Widget _imagePlaceholder(ThemeData theme, AppLocalizations l10n) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -365,7 +370,7 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Add Cover',
+          l10n.addCover,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.outline,
           ),

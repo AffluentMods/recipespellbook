@@ -1,45 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../ui/shell/app_shell.dart';
-import '../ui/screens/home/home_screen.dart';
-import '../ui/screens/shopping/shopping_screen.dart';
+import '../services/barcode_scanner_service.dart';
+import '../ui/screens/cookbooks/cookbook_edit_screen.dart';
 import '../ui/screens/cookbooks/cookbooks_screen.dart';
+import '../ui/screens/home/home_screen.dart';
+import '../ui/screens/import/import_pdf_screen.dart';
+import '../ui/screens/import/transfer_screen.dart';
 import '../ui/screens/planner/planner_screen.dart';
-import '../ui/screens/settings/settings_screen.dart';
-import '../ui/screens/recipe/recipe_screen.dart';
-import '../ui/screens/recipe/recipe_edit_screen.dart';
-import '../ui/screens/recipe/recipe_list_screen.dart';
+import '../ui/screens/premium/paywall_screen.dart';
 import '../ui/screens/recipe/categories_browse_screen.dart';
-import '../ui/screens/recipe/uncategorized_recipes_screen.dart';
-import '../ui/screens/recipe/recent_recipes_screen.dart';
 import '../ui/screens/recipe/favorite_recipes_screen.dart';
 import '../ui/screens/recipe/quick_access_screen.dart';
-import '../ui/screens/search/search_screen.dart';
-import '../ui/screens/import/import_pdf_screen.dart';
-import '../services/barcode_scanner_service.dart';
-import '../ui/screens/shopping/kroger_callback_screen.dart';
-import '../ui/screens/settings/trash_screen.dart';
-import '../ui/screens/settings/quick_access_settings_screen.dart';
-import '../ui/screens/settings/placeholder_settings_screen.dart';
-import '../ui/screens/settings/manage_courses_screen.dart';
-import '../ui/screens/settings/manage_categories_screen.dart';
-import '../ui/screens/settings/manage_shopping_categories_screen.dart';
-import '../ui/screens/cookbooks/cookbook_edit_screen.dart';
-import '../ui/screens/settings/appearance_screen.dart';
-import '../ui/screens/settings/recipe_layout_settings_screen.dart';
-import '../ui/screens/settings/allergy_settings_screen.dart';
-import '../ui/screens/settings/nutrition_settings_screen.dart';
-import '../ui/screens/settings/ingredient_substitutions_screen.dart';
-import '../ui/screens/settings/manage_tags_screen.dart';
-import '../ui/screens/splash/splash_screen.dart';
-import '../ui/screens/premium/paywall_screen.dart';
-import '../ui/screens/import/transfer_screen.dart';
-// RPG imports
-import '../ui/screens/rpg/rpg_profile_screen.dart';
+import '../ui/screens/recipe/recent_recipes_screen.dart';
+import '../ui/screens/recipe/recipe_edit_screen.dart';
+import '../ui/screens/recipe/recipe_list_screen.dart';
+import '../ui/screens/recipe/recipe_screen.dart';
+import '../ui/screens/recipe/uncategorized_recipes_screen.dart';
 import '../ui/screens/rpg/rpg_achievements_screen.dart';
+import '../ui/screens/rpg/rpg_boss_screen.dart';
 import '../ui/screens/rpg/rpg_cosmetics_screen.dart';
 import '../ui/screens/rpg/rpg_leaderboard_screen.dart';
-import '../ui/screens/rpg/rpg_boss_screen.dart';
+// RPG imports
+import '../ui/screens/rpg/rpg_profile_screen.dart';
+import '../ui/screens/search/search_screen.dart';
+import '../ui/screens/settings/allergy_settings_screen.dart';
+import '../ui/screens/settings/appearance_screen.dart';
+import '../ui/screens/settings/ingredient_substitutions_screen.dart';
+import '../ui/screens/settings/manage_categories_screen.dart';
+import '../ui/screens/settings/manage_courses_screen.dart';
+import '../ui/screens/settings/manage_shopping_categories_screen.dart';
+import '../ui/screens/settings/manage_tags_screen.dart';
+import '../ui/screens/settings/nutrition_settings_screen.dart';
+import '../ui/screens/settings/placeholder_settings_screen.dart';
+import '../ui/screens/settings/quick_access_settings_screen.dart';
+import '../ui/screens/settings/recipe_layout_settings_screen.dart';
+import '../ui/screens/settings/settings_screen.dart';
+import '../ui/screens/settings/trash_screen.dart';
+import '../ui/screens/shopping/kroger_callback_screen.dart';
+import '../ui/screens/shopping/shopping_screen.dart';
+import '../ui/screens/splash/splash_screen.dart';
+import '../ui/shell/app_shell.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -67,7 +67,6 @@ final router = GoRouter(
         final courseId = state.uri.queryParameters['course'];
         final categoryId = state.uri.queryParameters['category'];
         final cookbookId = state.uri.queryParameters['cookbook'] ?? 'starter';
-        final title = state.uri.queryParameters['title'];
         return RecipeListScreen(
           title: 'Recipes',
           cookbookId: cookbookId,
