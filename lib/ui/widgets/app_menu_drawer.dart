@@ -12,6 +12,7 @@ import '../../providers/settings_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../router/router.dart';
 import '../../services/auth_service.dart';
+import '../../services/feedback_service.dart';
 import '../../services/revenuecat_service.dart';
 import '../../ui/screens/import/import_guides_screen.dart';
 import 'app_snackbar.dart';
@@ -319,8 +320,225 @@ class HelpSupportScreen extends StatelessWidget {
             subtitle: _websiteUrl,
             onTap: () => _launchExternalUrl(context, _websiteUrl),
           ),
+          const SizedBox(height: 24),
+
+          // ── Feedback section ──
+          Text('FEEDBACK',
+              style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.outline, fontWeight: FontWeight.w600, letterSpacing: 0.8)),
+          const SizedBox(height: 10),
+          _SupportCard(
+            icon: Icons.lightbulb_outline, iconColor: Colors.amber.shade700,
+            title: 'Submit a Suggestion',
+            subtitle: 'Help us improve Recipe Spellbook',
+            onTap: () => _showSuggestionDialog(context),
+          ),
+          const SizedBox(height: 10),
+          _SupportCard(
+            icon: Icons.bug_report_outlined, iconColor: Colors.red.shade400,
+            title: 'Submit a Bug',
+            subtitle: 'Something not working right?',
+            onTap: () => _showBugReportDialog(context),
+          ),
           const SizedBox(height: 32),
         ],
+      ),
+    );
+  }
+
+  void _showSuggestionDialog(BuildContext context) {
+    final theme = Theme.of(context);
+    final titleController = TextEditingController();
+    final descriptionController = TextEditingController();
+    final contactController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          bool isSending = false;
+
+          return AlertDialog(
+            icon: Icon(Icons.lightbulb, color: theme.colorScheme.primary, size: 32),
+            title: const Text('Send a Suggestion'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('We\'d love to hear your ideas!',
+                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      labelText: 'Title',
+                      hintText: 'Brief summary of your suggestion',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: descriptionController,
+                    decoration: InputDecoration(
+                      labelText: 'Details',
+                      hintText: 'Describe your idea in detail...',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      alignLabelWithHint: true,
+                    ),
+                    maxLines: 4,
+                    minLines: 3,
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: contactController,
+                    decoration: InputDecoration(
+                      labelText: 'Contact (optional)',
+                      hintText: 'Email or Discord username',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              FilledButton.icon(
+                onPressed: isSending ? null : () async {
+                  if (titleController.text.trim().isEmpty || descriptionController.text.trim().isEmpty) {
+                    AppSnackbar.warning(ctx, 'Please fill in both fields');
+                    return;
+                  }
+                  setDialogState(() => isSending = true);
+                  final success = await FeedbackService.sendSuggestion(
+                    title: titleController.text.trim(),
+                    description: descriptionController.text.trim(),
+                    contactInfo: contactController.text.trim(),
+                  );
+                  if (ctx.mounted) {
+                    Navigator.pop(ctx);
+                    if (success) {
+                      AppSnackbar.success(context, 'Suggestion sent! Thank you!');
+                    } else {
+                      AppSnackbar.warning(context, 'Couldn\'t send feedback. Check your internet connection.');
+                    }
+                  }
+                },
+                icon: isSending
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.send),
+                label: const Text('Send'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _showBugReportDialog(BuildContext context) {
+    final theme = Theme.of(context);
+    final titleController = TextEditingController();
+    final descriptionController = TextEditingController();
+    final stepsController = TextEditingController();
+    final contactController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          bool isSending = false;
+
+          return AlertDialog(
+            icon: Icon(Icons.bug_report, color: theme.colorScheme.error, size: 32),
+            title: const Text('Report a Bug'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Help us squash bugs!',
+                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      labelText: 'Title',
+                      hintText: 'Brief summary of the bug',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: descriptionController,
+                    decoration: InputDecoration(
+                      labelText: 'Description',
+                      hintText: 'What happened?',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      alignLabelWithHint: true,
+                    ),
+                    maxLines: 3, minLines: 2,
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: stepsController,
+                    decoration: InputDecoration(
+                      labelText: 'Steps to Reproduce (optional)',
+                      hintText: '1. Go to...\n2. Tap on...',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      alignLabelWithHint: true,
+                    ),
+                    maxLines: 3, minLines: 2,
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: contactController,
+                    decoration: InputDecoration(
+                      labelText: 'Contact (optional)',
+                      hintText: 'Email or Discord username',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              FilledButton.icon(
+                onPressed: isSending ? null : () async {
+                  if (titleController.text.trim().isEmpty || descriptionController.text.trim().isEmpty) {
+                    AppSnackbar.warning(ctx, 'Please fill in both fields');
+                    return;
+                  }
+                  setDialogState(() => isSending = true);
+                  final success = await FeedbackService.sendBugReport(
+                    title: titleController.text.trim(),
+                    description: descriptionController.text.trim(),
+                    stepsToReproduce: stepsController.text.trim(),
+                    contactInfo: contactController.text.trim(),
+                  );
+                  if (ctx.mounted) {
+                    Navigator.pop(ctx);
+                    if (success) {
+                      AppSnackbar.success(context, 'Bug report sent! Thank you!');
+                    } else {
+                      AppSnackbar.warning(context, 'Couldn\'t send feedback. Check your internet connection.');
+                    }
+                  }
+                },
+                icon: isSending
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.send),
+                label: const Text('Send'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

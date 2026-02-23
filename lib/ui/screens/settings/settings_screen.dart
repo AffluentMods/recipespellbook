@@ -3,19 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:recipespellbook/ui/screens/settings/pantry_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../data/app_enums.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../providers/subscription_provider.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../services/auth_service.dart';
 import '../../../services/export_import_service.dart';
-import '../../../services/feedback_service.dart';
 import '../../../services/grocery_service.dart';
 import '../../../services/onboarding_service.dart';
 import '../../../services/revenuecat_service.dart';
 import '../../widgets/app_snackbar.dart';
 import 'nutrition_settings_screen.dart';
+
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -64,19 +65,26 @@ class SettingsScreen extends ConsumerWidget {
                   ref.read(settingsProvider.notifier).setTextScaleFactor(scale);
                 },
               ),
-              // Image Placeholders — hidden for now, functionality preserved
-              // _SettingsTile(
-              //   icon: Icons.image_outlined,
-              //   title: l10n.imagePlaceholders,
-              //   subtitle: l10n.imagePlaceholdersSubtitle,
-              //   onTap: () => context.push('/settings/placeholders'),
-              // ),
+              _SettingsTile(
+                icon: Icons.tune,
+                title: l10n.nutritionDisplay,
+                subtitle: l10n.nutritionDisplaySubtitle,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const NutritionSettingsScreen()),
+                ),
+              ),
+              _WeekStartDayTile(
+                currentDay: settings.weekStartDay,
+                onDaySelected: (day) {
+                  ref.read(settingsProvider.notifier).setWeekStartDay(day);
+                },
+              ),
             ],
           ),
 
-          // ============ HOME SCREEN ============
+          // ============ RECIPES & SHOPPING ============
           _SettingsSection(
-            title: l10n.homeScreenSection,
+            title: 'Recipes & Shopping',
             children: [
               _SettingsTile(
                 icon: Icons.bolt,
@@ -84,13 +92,6 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: l10n.settingsQuickAccessSubtitle,
                 onTap: () => context.push('/settings/quick-access'),
               ),
-            ],
-          ),
-
-          // ============ RECIPES ============
-          _SettingsSection(
-            title: l10n.settingsRecipes,
-            children: [
               _SettingsTile(
                 icon: Icons.view_agenda,
                 title: l10n.settingsRecipeLayout,
@@ -106,57 +107,10 @@ class SettingsScreen extends ConsumerWidget {
                 },
               ),
               _SettingsTile(
-                icon: Icons.local_offer_outlined,
-                title: l10n.settingsManageTags,
-                subtitle: l10n.settingsManageTagsSubtitle,
-                onTap: () => context.push('/settings/tags'),
-              ),
-              _SettingsTile(
-                icon: Icons.restaurant_menu,
-                title: l10n.settingsManageCourses,
-                subtitle: l10n.settingsManageCoursesSubtitle,
-                onTap: () => context.push('/settings/courses'),
-              ),
-              _SettingsTile(
-                icon: Icons.category_outlined,
-                title: l10n.settingsManageCategories,
-                subtitle: l10n.settingsManageCategoriesSubtitle,
-                onTap: () => context.push('/settings/categories'),
-              ),
-              _SettingsTile(
                 icon: settings.nerdMode ? Icons.flash_on : Icons.warning_amber,
                 title: settings.nerdMode ? 'Weaknesses' : l10n.settingsAllergies,
                 subtitle: settings.nerdMode ? 'Set your dietary vulnerabilities' : l10n.settingsAllergiesSubtitle,
                 onTap: () => context.push('/settings/allergies'),
-              ),
-            ],
-          ),
-
-          // ============ NUTRITION DISPLAY (NEW!) ============
-          _NutritionSettingsSection(settings: settings, ref: ref),
-
-          // ============ PLANNER ============
-          _SettingsSection(
-            title: l10n.plannerTitle,
-            children: [
-              _WeekStartDayTile(
-                currentDay: settings.weekStartDay,
-                onDaySelected: (day) {
-                  ref.read(settingsProvider.notifier).setWeekStartDay(day);
-                },
-              ),
-            ],
-          ),
-
-          // ============ SHOPPING ============
-          _SettingsSection(
-            title: l10n.shoppingTitle,
-            children: [
-              _SettingsTile(
-                icon: Icons.view_list,
-                title: l10n.settingsShoppingCategories,
-                subtitle: l10n.settingsShoppingCategoriesSubtitle,
-                onTap: () => context.push('/settings/shopping-categories'),
               ),
               _SettingsTile(
                 icon: Icons.kitchen,
@@ -165,11 +119,65 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () => Navigator.push(context,
                     MaterialPageRoute(builder: (_) => const PantryScreen())),
               ),
+              _SettingsTile(
+                icon: Icons.delete_outline,
+                title: l10n.trashTitle,
+                subtitle: l10n.trashSubtitle,
+                onTap: () => context.push('/settings/trash'),
+              ),
             ],
           ),
 
-          // ============ STORE INTEGRATIONS ============
-          const _StoreIntegrationsSection(),
+          // ============ INTEGRATIONS ============
+          const _IntegrationsSection(),
+
+          // ============ ADVANCED SETTINGS ============
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 24, 12, 0),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const AdvancedSettingsScreen())),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36, height: 36,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(Icons.tune, size: 20, color: theme.colorScheme.primary),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Advanced Settings',
+                                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                            Text('Tags, courses, categories & more',
+                                style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
+                          ],
+                        ),
+                      ),
+                      Icon(Icons.chevron_right, size: 20,
+                          color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
 
           // ============ DATA ============
           _SettingsSection(
@@ -187,45 +195,25 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: l10n.settingsImportSubtitle,
                 onTap: () => _showImportOptions(context, ref),
               ),
+              _SettingsTile(
+                icon: Icons.delete_forever_outlined,
+                title: 'Delete Data',
+                subtitle: 'Erase app or cloud data',
+                titleColor: theme.colorScheme.error,
+                onTap: () => _showResetConfirmation(context, ref),
+              ),
             ],
           ),
 
-          // ============ RPG MODE ============
+          // ============ SECRET ============
           _SettingsSection(
-            title: settings.nerdMode ? '🎮 RPG Mode' : '✨ Secret',
+            title: settings.nerdMode ? '\u{1F3AE} RPG Mode' : '\u2728 Secret',
             children: [
               _RpgModeTile(
                 isEnabled: settings.nerdMode,
                 onChanged: (value) {
                   ref.read(settingsProvider.notifier).setNerdMode(value);
                 },
-              ),
-              // RPG sub-settings removed — animations, sounds, achievements,
-              // and stats are controlled by RPG mode toggle only
-            ],
-          ),
-
-          // ============ FEEDBACK & SUPPORT ============
-          _SettingsSection(
-            title: l10n.settingsFeedback,
-            children: [
-              _SettingsTile(
-                icon: Icons.lightbulb_outline,
-                title: l10n.sendSuggestion,
-                subtitle: l10n.sendSuggestionSubtitle,
-                onTap: () => _showSuggestionDialog(context),
-              ),
-              _SettingsTile(
-                icon: Icons.bug_report_outlined,
-                title: l10n.reportBug,
-                subtitle: l10n.reportBugSubtitle,
-                onTap: () => _showBugReportDialog(context),
-              ),
-              _SettingsTile(
-                icon: Icons.forum_outlined,
-                title: l10n.joinDiscord,
-                subtitle: l10n.joinDiscordSubtitle,
-                onTap: () => _openDiscord(),
               ),
             ],
           ),
@@ -237,21 +225,18 @@ class SettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.info_outline,
                 title: l10n.appTitle,
-                subtitle: 'Version 1.0.0 · Beta',
+                subtitle: 'Version 1.0.0 \u00B7 Beta',
                 onTap: () => _showAboutDialog(context),
               ),
               _SettingsTile(
-                icon: Icons.delete_outline,
-                title: l10n.trashTitle,
-                subtitle: l10n.trashSubtitle,
-                onTap: () => context.push('/settings/trash'),
-              ),
-              _SettingsTile(
-                icon: Icons.delete_forever_outlined,
-                title: l10n.resetApp,
-                subtitle: l10n.resetAppSubtitle,
-                titleColor: theme.colorScheme.error,
-                onTap: () => _showResetConfirmation(context, ref),
+                icon: Icons.description_outlined,
+                title: 'Licenses',
+                subtitle: 'Open source licenses',
+                onTap: () => showLicensePage(
+                  context: context,
+                  applicationName: l10n.appTitle,
+                  applicationVersion: '1.0.0',
+                ),
               ),
             ],
           ),
@@ -384,218 +369,6 @@ class SettingsScreen extends ConsumerWidget {
         Text(l10n.madeWithLove, style: const TextStyle(fontSize: 12)),
       ],
     );
-  }
-
-  void _showSuggestionDialog(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final titleController = TextEditingController();
-    final descriptionController = TextEditingController();
-    final contactController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          bool isSending = false;
-
-          return AlertDialog(
-            icon: Icon(Icons.lightbulb, color: theme.colorScheme.primary, size: 32),
-            title: Text(l10n.sendSuggestion),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(l10n.suggestionDescription, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: titleController,
-                    decoration: InputDecoration(
-                      labelText: l10n.suggestionTitleLabel,
-                      hintText: l10n.suggestionTitleHint,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    textCapitalization: TextCapitalization.sentences,
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: descriptionController,
-                    decoration: InputDecoration(
-                      labelText: l10n.suggestionDetailsLabel,
-                      hintText: l10n.suggestionDetailsHint,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      alignLabelWithHint: true,
-                    ),
-                    maxLines: 4,
-                    minLines: 3,
-                    textCapitalization: TextCapitalization.sentences,
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: contactController,
-                    decoration: InputDecoration(
-                      labelText: l10n.contactOptionalLabel,
-                      hintText: l10n.contactOptionalHint,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text(l10n.actionCancel),
-              ),
-              FilledButton.icon(
-                onPressed: isSending ? null : () async {
-                  if (titleController.text.trim().isEmpty || descriptionController.text.trim().isEmpty) {
-                    AppSnackbar.warning(ctx, l10n.feedbackFieldsRequired);
-                    return;
-                  }
-                  setDialogState(() => isSending = true);
-                  final success = await FeedbackService.sendSuggestion(
-                    title: titleController.text.trim(),
-                    description: descriptionController.text.trim(),
-                    contactInfo: contactController.text.trim(),
-                  );
-                  if (ctx.mounted) {
-                    Navigator.pop(ctx);
-                    if (success) {
-                      AppSnackbar.success(context, l10n.suggestionSent);
-                    } else {
-                      AppSnackbar.warning(context, l10n.feedbackSendError);
-                    }
-                  }
-                },
-                icon: isSending
-                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Icon(Icons.send),
-                label: Text(l10n.actionSend),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  void _showBugReportDialog(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final titleController = TextEditingController();
-    final descriptionController = TextEditingController();
-    final stepsController = TextEditingController();
-    final contactController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          bool isSending = false;
-
-          return AlertDialog(
-            icon: Icon(Icons.bug_report, color: theme.colorScheme.error, size: 32),
-            title: Text(l10n.reportBug),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(l10n.bugDescription, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: titleController,
-                    decoration: InputDecoration(
-                      labelText: l10n.bugTitleLabel,
-                      hintText: l10n.bugTitleHint,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    textCapitalization: TextCapitalization.sentences,
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: descriptionController,
-                    decoration: InputDecoration(
-                      labelText: l10n.bugDetailsLabel,
-                      hintText: l10n.bugDetailsHint,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      alignLabelWithHint: true,
-                    ),
-                    maxLines: 3,
-                    minLines: 2,
-                    textCapitalization: TextCapitalization.sentences,
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: stepsController,
-                    decoration: InputDecoration(
-                      labelText: l10n.bugStepsLabel,
-                      hintText: l10n.bugStepsHint,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      alignLabelWithHint: true,
-                    ),
-                    maxLines: 3,
-                    minLines: 2,
-                    textCapitalization: TextCapitalization.sentences,
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: contactController,
-                    decoration: InputDecoration(
-                      labelText: l10n.contactOptionalLabel,
-                      hintText: l10n.contactOptionalHint,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text(l10n.actionCancel),
-              ),
-              FilledButton.icon(
-                onPressed: isSending ? null : () async {
-                  if (titleController.text.trim().isEmpty || descriptionController.text.trim().isEmpty) {
-                    AppSnackbar.warning(ctx, l10n.feedbackFieldsRequired);
-                    return;
-                  }
-                  setDialogState(() => isSending = true);
-                  final success = await FeedbackService.sendBugReport(
-                    title: titleController.text.trim(),
-                    description: descriptionController.text.trim(),
-                    stepsToReproduce: stepsController.text.trim(),
-                    contactInfo: contactController.text.trim(),
-                  );
-                  if (ctx.mounted) {
-                    Navigator.pop(ctx);
-                    if (success) {
-                      AppSnackbar.success(context, l10n.bugReportSent);
-                    } else {
-                      AppSnackbar.warning(context, l10n.feedbackSendError);
-                    }
-                  }
-                },
-                icon: isSending
-                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Icon(Icons.send),
-                label: Text(l10n.actionSend),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Future<void> _openDiscord() async {
-    final uri = Uri.parse(FeedbackService.discordInviteUrl);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
   }
 
   void _showResetConfirmation(BuildContext context, WidgetRef ref) {
@@ -872,33 +645,6 @@ class _ResetOptionTile extends StatelessWidget {
   }
 }
 
-// ============ NUTRITION SETTINGS SECTION (NEW!) ============
-
-class _NutritionSettingsSection extends StatelessWidget {
-  final AppSettings settings;
-  final WidgetRef ref;
-
-  const _NutritionSettingsSection({required this.settings, required this.ref});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return _SettingsSection(
-      title: l10n.nutritionDisplay,
-      children: [
-        _SettingsTile(
-          icon: Icons.tune,
-          title: l10n.nutritionDisplay,
-          subtitle: l10n.nutritionDisplaySubtitle,
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const NutritionSettingsScreen()),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 // ============ COMPACT UPGRADE CARD ============
 
 class _CompactUpgradeCard extends ConsumerWidget {
@@ -1090,6 +836,7 @@ class _TextScaleTile extends StatelessWidget {
   }
 }
 
+
 // ============ HELPER WIDGETS ============
 
 class _SettingsSection extends StatelessWidget {
@@ -1217,6 +964,7 @@ class _SettingsTile extends StatelessWidget {
     );
   }
 }
+
 
 // ============ RPG MODE TILE WITH ANIMATION ============
 
@@ -1413,6 +1161,7 @@ class _RpgModeTileState extends State<_RpgModeTile> with SingleTickerProviderSta
     );
   }
 }
+
 
 class _ThemeSelectionTile extends StatelessWidget {
   final AppColorTheme currentTheme;
@@ -1621,6 +1370,7 @@ class _ThemeCard extends StatelessWidget {
   }
 }
 
+
 class _ThemeModeTile extends StatelessWidget {
   final ThemeMode currentMode;
   final ValueChanged<ThemeMode> onModeSelected;
@@ -1704,6 +1454,7 @@ class _ThemeModeTile extends StatelessWidget {
   }
 }
 
+
 class _MeasurementSystemTile extends StatelessWidget {
   final MeasurementSystem currentSystem;
   final ValueChanged<MeasurementSystem> onSystemSelected;
@@ -1766,6 +1517,7 @@ class _MeasurementSystemTile extends StatelessWidget {
   }
 }
 
+
 class _WeekStartDayTile extends StatelessWidget {
   final int currentDay; // 1=Mon .. 7=Sun
   final ValueChanged<int> onDaySelected;
@@ -1783,6 +1535,19 @@ class _WeekStartDayTile extends StatelessWidget {
       case 6: return l10n.saturday;
       case 7: return l10n.sunday;
       default: return l10n.monday;
+    }
+  }
+
+  String _dayEmoji(int day) {
+    switch (day) {
+      case 1: return '📅';
+      case 2: return '🔥';
+      case 3: return '💧';
+      case 4: return '⚡';
+      case 5: return '🎉';
+      case 6: return '🛋️';
+      case 7: return '☀️';
+      default: return '📅';
     }
   }
 
@@ -1823,9 +1588,9 @@ class _WeekStartDayTile extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Text(l10n.settingsWeekStartDay, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ),
-            ...[1, 6, 7].map((day) => ListTile(
+            ...[1, 2, 3, 4, 5, 6, 7].map((day) => ListTile(
               leading: Text(
-                day == 1 ? '📅' : day == 6 ? '🛋️' : '☀️',
+                _dayEmoji(day),
                 style: const TextStyle(fontSize: 24),
               ),
               title: Text(_dayName(context, day)),
@@ -1844,6 +1609,7 @@ class _WeekStartDayTile extends StatelessWidget {
     );
   }
 }
+
 
 class _LanguageTile extends StatelessWidget {
   final String currentLanguage;
@@ -1907,19 +1673,18 @@ class _LanguageTile extends StatelessWidget {
   }
 }
 
-// ════════════════════════════════════════════
-//  STORE INTEGRATIONS SECTION
-// ════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
+//  INTEGRATIONS SECTION (unified: auth + Discord + stores)
+// ════════════════════════════════════════════════════════════
 
-class _StoreIntegrationsSection extends StatefulWidget {
-  const _StoreIntegrationsSection();
+class _IntegrationsSection extends ConsumerStatefulWidget {
+  const _IntegrationsSection();
 
   @override
-  State<_StoreIntegrationsSection> createState() =>
-      _StoreIntegrationsSectionState();
+  ConsumerState<_IntegrationsSection> createState() => _IntegrationsSectionState();
 }
 
-class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
+class _IntegrationsSectionState extends ConsumerState<_IntegrationsSection> {
   bool _instacartConfigured = false;
   bool _krogerConfigured = false;
   bool _loading = true;
@@ -1927,10 +1692,10 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
   @override
   void initState() {
     super.initState();
-    _checkStatus();
+    _checkStoreStatus();
   }
 
-  Future<void> _checkStatus() async {
+  Future<void> _checkStoreStatus() async {
     final ic = await GroceryService.isConfigured(GroceryProvider.instacart);
     final kr = await GroceryService.isConfigured(GroceryProvider.kroger);
     if (mounted) {
@@ -1944,18 +1709,28 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final authState = ref.watch(authProvider);
 
     return _SettingsSection(
-      title: l10n.storeIntegrations,
+      title: 'Integrations',
       children: [
-        // Instacart
+        // ── Auth status ──
+        _buildAuthTile(context, theme, authState),
+        // ── Discord (coming soon) ──
+        _SettingsTile(
+          icon: Icons.forum_outlined,
+          title: 'Discord',
+          subtitle: 'Coming soon',
+          enabled: false,
+          onTap: () {},
+        ),
+        // ── Instacart ──
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
           leading: Container(
-            width: 36,
-            height: 36,
+            width: 36, height: 36,
             decoration: BoxDecoration(
               color: const Color(0xFF43B02A).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
@@ -1965,30 +1740,22 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
           title: Text(l10n.instacart,
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
           subtitle: Text(
-            _loading
-                ? 'Checking...'
-                : _instacartConfigured
-                ? 'Connected \u2022 Tap to manage'
-                : 'Not connected',
-            style: TextStyle(
-              fontSize: 13,
-              color: _instacartConfigured
-                  ? const Color(0xFF43B02A)
-                  : theme.colorScheme.outline,
-            ),
+            _loading ? 'Checking...'
+                : _instacartConfigured ? 'Connected \u2022 Tap to manage' : 'Not connected',
+            style: TextStyle(fontSize: 13,
+                color: _instacartConfigured ? const Color(0xFF43B02A) : theme.colorScheme.outline),
           ),
           trailing: _instacartConfigured
               ? const Icon(Icons.check_circle, color: Color(0xFF43B02A), size: 20)
-              : Icon(Icons.chevron_right,
-              size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+              : Icon(Icons.chevron_right, size: 20,
+              color: theme.colorScheme.outline.withValues(alpha: 0.5)),
           onTap: () => _showInstacartOptions(context),
         ),
-        // Kroger
+        // ── Kroger ──
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
           leading: Container(
-            width: 36,
-            height: 36,
+            width: 36, height: 36,
             decoration: BoxDecoration(
               color: const Color(0xFF0068B5).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
@@ -1998,25 +1765,133 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
           title: Text(l10n.kroger,
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
           subtitle: Text(
-            _loading
-                ? 'Checking...'
-                : _krogerConfigured
-                ? 'Connected \u2022 Tap to manage'
-                : 'Tap to sign in',
-            style: TextStyle(
-              fontSize: 13,
-              color: _krogerConfigured
-                  ? const Color(0xFF43B02A)
-                  : theme.colorScheme.outline,
-            ),
+            _loading ? 'Checking...'
+                : _krogerConfigured ? 'Connected \u2022 Tap to manage' : 'Tap to sign in',
+            style: TextStyle(fontSize: 13,
+                color: _krogerConfigured ? const Color(0xFF43B02A) : theme.colorScheme.outline),
           ),
           trailing: _krogerConfigured
               ? const Icon(Icons.check_circle, color: Color(0xFF43B02A), size: 20)
-              : Icon(Icons.chevron_right,
-              size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+              : Icon(Icons.chevron_right, size: 20,
+              color: theme.colorScheme.outline.withValues(alpha: 0.5)),
           onTap: () => _showKrogerOptions(context),
         ),
       ],
+    );
+  }
+
+  Widget _buildAuthTile(BuildContext context, ThemeData theme, AuthState authState) {
+    final isSignedIn = authState.isSignedIn;
+    final user = authState.user;
+
+    if (isSignedIn && user != null) {
+      return ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+        leading: Container(
+          width: 36, height: 36,
+          decoration: BoxDecoration(
+            color: const Color(0xFF43B02A).withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: const Icon(Icons.check_circle, color: Color(0xFF43B02A), size: 20),
+        ),
+        title: Text('Signed in as ${user.displayName}',
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+        subtitle: Text(user.email,
+            style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
+        trailing: TextButton(
+          onPressed: () => ref.read(authProvider.notifier).signOut(),
+          child: Text('Log out', style: TextStyle(color: theme.colorScheme.error, fontSize: 13)),
+        ),
+      );
+    }
+
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      leading: Container(
+        width: 36, height: 36,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(Icons.person_outline, size: 20, color: theme.colorScheme.primary),
+      ),
+      title: const Text('Sign In', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+      subtitle: Text('Google or Apple',
+          style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
+      trailing: Icon(Icons.chevron_right, size: 20,
+          color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+      onTap: () => _showSignInSheet(context),
+    );
+  }
+
+  void _showSignInSheet(BuildContext context) {
+    final theme = Theme.of(context);
+    final authNotifier = ref.read(authProvider.notifier);
+
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(width: 40, height: 4,
+                  decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+              const SizedBox(height: 20),
+              Icon(Icons.account_circle_outlined, size: 48, color: theme.colorScheme.primary),
+              const SizedBox(height: 12),
+              Text('Sign In', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text('Sync recipes and back up your data',
+                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () { Navigator.pop(ctx); authNotifier.signInWithGoogle(); },
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    side: BorderSide(color: theme.colorScheme.outlineVariant),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('G', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
+                      const SizedBox(width: 10),
+                      Text('Continue with Google', style: TextStyle(fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () { Navigator.pop(ctx); authNotifier.signInWithApple(); },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: theme.brightness == Brightness.dark ? Colors.white : Colors.black,
+                    foregroundColor: theme.brightness == Brightness.dark ? Colors.black : Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.apple, size: 20),
+                      const SizedBox(width: 10),
+                      const Text('Continue with Apple', style: TextStyle(fontWeight: FontWeight.w500)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -2031,30 +1906,23 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  const Text('\u{1F955}', style: TextStyle(fontSize: 24)),
-                  const SizedBox(width: 12),
-                  Text(l10n.instacart,
-                      style: theme.textTheme.titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold)),
-                  if (_instacartConfigured) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF43B02A).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(l10n.connected,
-                          style: TextStyle(
-                              color: Color(0xFF43B02A),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600)),
+              child: Row(children: [
+                const Text('\u{1F955}', style: TextStyle(fontSize: 24)),
+                const SizedBox(width: 12),
+                Text(l10n.instacart, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                if (_instacartConfigured) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF43B02A).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                  ],
+                    child: Text(l10n.connected,
+                        style: const TextStyle(color: Color(0xFF43B02A), fontSize: 11, fontWeight: FontWeight.w600)),
+                  ),
                 ],
-              ),
+              ]),
             ),
             ListTile(
               leading: const Icon(Icons.vpn_key_outlined),
@@ -2070,13 +1938,12 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
             ),
             ListTile(
               leading: Icon(Icons.link_off, color: theme.colorScheme.error),
-              title: Text(l10n.resetToDefaultKey,
-                  style: TextStyle(color: theme.colorScheme.error)),
+              title: Text(l10n.resetToDefaultKey, style: TextStyle(color: theme.colorScheme.error)),
               subtitle: Text(l10n.removeCustomKey),
               onTap: () async {
                 Navigator.pop(ctx);
                 await GroceryService.disconnect(GroceryProvider.instacart);
-                _checkStatus();
+                _checkStoreStatus();
               },
             ),
             const SizedBox(height: 16),
@@ -2097,30 +1964,23 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  const Text('\u{1F3EA}', style: TextStyle(fontSize: 24)),
-                  const SizedBox(width: 12),
-                  Text(l10n.kroger,
-                      style: theme.textTheme.titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold)),
-                  if (_krogerConfigured) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF43B02A).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(l10n.connected,
-                          style: TextStyle(
-                              color: Color(0xFF43B02A),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600)),
+              child: Row(children: [
+                const Text('\u{1F3EA}', style: TextStyle(fontSize: 24)),
+                const SizedBox(width: 12),
+                Text(l10n.kroger, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                if (_krogerConfigured) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF43B02A).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                  ],
+                    child: Text(l10n.connected,
+                        style: const TextStyle(color: Color(0xFF43B02A), fontSize: 11, fontWeight: FontWeight.w600)),
+                  ),
                 ],
-              ),
+              ]),
             ),
             if (!_krogerConfigured)
               ListTile(
@@ -2144,12 +2004,11 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
             if (_krogerConfigured)
               ListTile(
                 leading: Icon(Icons.link_off, color: theme.colorScheme.error),
-                title: Text(l10n.disconnect,
-                    style: TextStyle(color: theme.colorScheme.error)),
+                title: Text(l10n.disconnect, style: TextStyle(color: theme.colorScheme.error)),
                 onTap: () async {
                   Navigator.pop(ctx);
                   await GroceryService.disconnect(GroceryProvider.kroger);
-                  _checkStatus();
+                  _checkStoreStatus();
                 },
               ),
             const SizedBox(height: 16),
@@ -2183,7 +2042,7 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
               if (key.isEmpty) return;
               Navigator.pop(ctx);
               await GroceryService.configureInstacart(apiKey: key);
-              _checkStatus();
+              _checkStoreStatus();
               if (mounted) {
                 AppSnackbar.success(context, l10n.apiKeySaved);
               }
@@ -2263,6 +2122,57 @@ class _StoreIntegrationsSectionState extends State<_StoreIntegrationsSection> {
           ),
         );
       },
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  ADVANCED SETTINGS SCREEN
+// ════════════════════════════════════════════════════════════
+
+class AdvancedSettingsScreen extends StatelessWidget {
+  const AdvancedSettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Advanced Settings')),
+      body: ListView(
+        children: [
+          _SettingsSection(
+            title: 'Manage',
+            children: [
+              _SettingsTile(
+                icon: Icons.local_offer_outlined,
+                title: l10n.settingsManageTags,
+                subtitle: l10n.settingsManageTagsSubtitle,
+                onTap: () => context.push('/settings/tags'),
+              ),
+              _SettingsTile(
+                icon: Icons.restaurant_menu,
+                title: l10n.settingsManageCourses,
+                subtitle: l10n.settingsManageCoursesSubtitle,
+                onTap: () => context.push('/settings/courses'),
+              ),
+              _SettingsTile(
+                icon: Icons.category_outlined,
+                title: l10n.settingsManageCategories,
+                subtitle: l10n.settingsManageCategoriesSubtitle,
+                onTap: () => context.push('/settings/categories'),
+              ),
+              _SettingsTile(
+                icon: Icons.view_list,
+                title: l10n.settingsShoppingCategories,
+                subtitle: l10n.settingsShoppingCategoriesSubtitle,
+                onTap: () => context.push('/settings/shopping-categories'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+        ],
+      ),
     );
   }
 }
