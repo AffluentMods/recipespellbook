@@ -2,31 +2,34 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'package:drift/drift.dart' as drift;
+import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as p;
+import 'package:drift/drift.dart' as drift;
+import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-import 'package:recipespellbook/l10n/app_localizations.dart';
-import '../../../data/nutrition_data.dart';
+import 'package:path/path.dart' as p;
 import '../../../database/database.dart';
+import '../../../database/daos/recipe_dao.dart' show RecipeLinkInfo;
+import '../../../database/daos/tags_dao.dart';
 import '../../../providers/database_provider.dart';
-import '../../../providers/settings_provider.dart';
-import '../../../providers/subscription_provider.dart';
-import '../../../services/auth_service.dart';
-import '../../../services/image_service.dart';
 import '../../../utils/default_recipe_images.dart';
-import '../../widgets/app_snackbar.dart';
-import '../../widgets/nutrition_calculation_sheet.dart';
-import '../../widgets/recipe_edit_instructions.dart';
-import '../../widgets/rpg/rpg_navigation_shell.dart';
-import '../../widgets/rpg/rpg_rarity_picker.dart';
-import '../../widgets/tag_picker.dart';
+import '../../../providers/settings_provider.dart';
+import '../../../data/course_category_data.dart';
+import '../../../data/nutrition_data.dart';
 import '../../widgets/taxonomy_picker.dart';
+import '../../widgets/tag_picker.dart';
+import '../../widgets/nutrition_calculation_sheet.dart';
+import '../../widgets/rpg/rpg_rarity_picker.dart';
+import '../../widgets/rpg/rpg_navigation_shell.dart';
+import '../../widgets/recipe_edit_instructions.dart';
+import '../../../services/image_service.dart';
+import '../../../services/auth_service.dart';
+import '../../../providers/subscription_provider.dart';
+import '../../widgets/app_snackbar.dart';
 
 // ============ IMAGE PREVIEW/CONFIRM HELPER ============
 
@@ -500,7 +503,11 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
             const SizedBox(height: 16),
             TextFormField(controller: _sourceUrlController, decoration: InputDecoration(labelText: l10n.recipeFieldSource, hintText: 'https://...', prefixIcon: const Icon(Icons.link)), keyboardType: TextInputType.url),
             const SizedBox(height: 32),
-            _SectionTitle(title: l10n.ingredientsTitle),
+            _SectionTitleWithAdd(
+              title: l10n.ingredientsTitle,
+              onAddIngredient: _addIngredient,
+              onAddHeader: _addHeader,
+            ),
             const SizedBox(height: 12),
             ..._ingredients.asMap().entries.map((entry) => entry.value.isHeader
                 ? _IngredientHeaderRow(
@@ -508,6 +515,14 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
               ingredient: entry.value,
               onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
               onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
+              onMoveUp: entry.key > 0 ? () => setState(() {
+                final item = _ingredients.removeAt(entry.key);
+                _ingredients.insert(entry.key - 1, item);
+              }) : null,
+              onMoveDown: entry.key < _ingredients.length - 1 ? () => setState(() {
+                final item = _ingredients.removeAt(entry.key);
+                _ingredients.insert(entry.key + 1, item);
+              }) : null,
             )
                 : _IngredientRow(
               key: ValueKey(entry.value.id),
@@ -629,6 +644,14 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
                 ingredient: entry.value,
                 onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
                 onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
+                onMoveUp: entry.key > 0 ? () => setState(() {
+                  final item = _ingredients.removeAt(entry.key);
+                  _ingredients.insert(entry.key - 1, item);
+                }) : null,
+                onMoveDown: entry.key < _ingredients.length - 1 ? () => setState(() {
+                  final item = _ingredients.removeAt(entry.key);
+                  _ingredients.insert(entry.key + 1, item);
+                }) : null,
               )
                   : _IngredientRow(
                 key: ValueKey(entry.value.id),
@@ -673,9 +696,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
 
   void _addHeader() {
     setState(() => _ingredients.add(_SimpleIngredient(id: 'hdr_${DateTime.now().millisecondsSinceEpoch}', text: '', isHeader: true)));
-    Future.delayed(const Duration(milliseconds: 100), () {
-      _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
-    });
+    // Don't scroll — headers are usually added between existing items
   }
 
   Future<void> _calculateNutrition() async {
@@ -1924,6 +1945,58 @@ class _SectionTitle extends StatelessWidget {
   @override Widget build(BuildContext context) => Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700));
 }
 
+class _SectionTitleWithAdd extends StatelessWidget {
+  final String title;
+  final VoidCallback onAddIngredient;
+  final VoidCallback onAddHeader;
+
+  const _SectionTitleWithAdd({
+    required this.title,
+    required this.onAddIngredient,
+    required this.onAddHeader,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    return Row(
+      children: [
+        Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+        const Spacer(),
+        PopupMenuButton<String>(
+          icon: Icon(Icons.add_circle_outline, color: theme.colorScheme.primary, size: 22),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          tooltip: l10n.addIngredient,
+          onSelected: (value) {
+            if (value == 'ingredient') onAddIngredient();
+            if (value == 'header') onAddHeader();
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'ingredient',
+              child: Row(children: [
+                Icon(Icons.add, size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 10),
+                Text(l10n.addIngredient),
+              ]),
+            ),
+            PopupMenuItem(
+              value: 'header',
+              child: Row(children: [
+                Icon(Icons.segment, size: 18, color: theme.colorScheme.outline),
+                const SizedBox(width: 10),
+                Text(l10n.ingredientHeader),
+              ]),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 class _IngredientRow extends StatelessWidget {
   final _SimpleIngredient ingredient;
   final ValueChanged<String> onChanged;
@@ -2071,12 +2144,16 @@ class _IngredientHeaderRow extends StatelessWidget {
   final _SimpleIngredient ingredient;
   final ValueChanged<String> onChanged;
   final VoidCallback onDelete;
+  final VoidCallback? onMoveUp;
+  final VoidCallback? onMoveDown;
 
   const _IngredientHeaderRow({
     super.key,
     required this.ingredient,
     required this.onChanged,
     required this.onDelete,
+    this.onMoveUp,
+    this.onMoveDown,
   });
 
   @override Widget build(BuildContext context) {
@@ -2107,10 +2184,44 @@ class _IngredientHeaderRow extends StatelessWidget {
         textCapitalization: TextCapitalization.sentences,
         onChanged: onChanged,
       )),
-      IconButton(
-        icon: Icon(Icons.close, size: 18, color: theme.colorScheme.outline),
-        onPressed: onDelete,
-        visualDensity: VisualDensity.compact,
+      PopupMenuButton<String>(
+        icon: Icon(Icons.more_vert, size: 20, color: theme.colorScheme.outline),
+        padding: EdgeInsets.zero,
+        onSelected: (value) {
+          switch (value) {
+            case 'up': onMoveUp?.call(); break;
+            case 'down': onMoveDown?.call(); break;
+            case 'delete': onDelete(); break;
+          }
+        },
+        itemBuilder: (context) => [
+          if (onMoveUp != null)
+            PopupMenuItem(
+              value: 'up',
+              child: Row(children: [
+                Icon(Icons.arrow_upward, size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                const Text('Move Up'),
+              ]),
+            ),
+          if (onMoveDown != null)
+            PopupMenuItem(
+              value: 'down',
+              child: Row(children: [
+                Icon(Icons.arrow_downward, size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                const Text('Move Down'),
+              ]),
+            ),
+          PopupMenuItem(
+            value: 'delete',
+            child: Row(children: [
+              Icon(Icons.delete_outline, size: 18, color: theme.colorScheme.error),
+              const SizedBox(width: 8),
+              Text(l10n.actionDelete),
+            ]),
+          ),
+        ],
       ),
     ]));
   }

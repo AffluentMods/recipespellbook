@@ -45,8 +45,13 @@ class ExportImportService {
         'cookTimeMinutes': recipe.cookTimeMinutes,
         'sourceUrl': recipe.sourceUrl,
         'categoryId': recipe.categoryId,
+        'courseId': recipe.courseId,
         'isFavorite': recipe.isFavorite,
+        'rating': recipe.rating,
+        'notes': recipe.notes,
+        'nutritionJson': recipe.nutritionJson,
         'createdAt': recipe.createdAt.toIso8601String(),
+        'imageBase64': await _encodeImage(recipe.imagePath),
         'ingredients': ingredients.map((i) => {
           'id': i.id,
           'sortOrder': i.sortOrder,
@@ -60,6 +65,7 @@ class ExportImportService {
           'sortOrder': s.sortOrder,
           'instruction': s.instruction,
           'durationMinutes': s.durationMinutes,
+          'imageBase64': null, // Step images omitted to keep file size reasonable
         }).toList(),
       });
     }
@@ -145,30 +151,44 @@ class ExportImportService {
 
   Future<ImportResult> _importData(Map<String, dynamic> data) async {
     int recipesImported = 0;
+    int recipesSkipped = 0;
     int cookbooksImported = 0;
 
     try {
+      // Get existing recipe IDs for deduplication of default recipes ONLY
+      final existingRecipes = await db.select(db.recipes).get();
+      final existingIds = existingRecipes.map((r) => r.id).toSet();
+
       // Check if it's a full export or single cookbook
       if (data.containsKey('cookbooks')) {
         // Full export
         final cookbooks = data['cookbooks'] as List;
         for (final cbData in cookbooks) {
-          await _importCookbook(cbData as Map<String, dynamic>);
+          final result = await _importCookbook(
+            cbData as Map<String, dynamic>,
+            existingIds: existingIds,
+          );
           cookbooksImported++;
-          recipesImported += (cbData['recipes'] as List).length;
+          recipesImported += result.imported;
+          recipesSkipped += result.skipped;
         }
       } else if (data.containsKey('cookbook')) {
         // Single cookbook export
-        await _importCookbook(data);
+        final result = await _importCookbook(
+          data,
+          existingIds: existingIds,
+        );
         cookbooksImported = 1;
-        recipesImported = (data['recipes'] as List).length;
+        recipesImported = result.imported;
+        recipesSkipped = result.skipped;
       } else {
         return ImportResult(success: false, message: 'Invalid file format');
       }
 
+      final skipMsg = recipesSkipped > 0 ? ' ($recipesSkipped default duplicates skipped)' : '';
       return ImportResult(
         success: true,
-        message: 'Imported $cookbooksImported cookbook(s) with $recipesImported recipe(s)',
+        message: 'Imported $cookbooksImported cookbook(s) with $recipesImported recipe(s)$skipMsg',
         cookbooksImported: cookbooksImported,
         recipesImported: recipesImported,
       );
@@ -177,9 +197,14 @@ class ExportImportService {
     }
   }
 
-  Future<void> _importCookbook(Map<String, dynamic> data) async {
+  Future<_ImportCookbookResult> _importCookbook(
+      Map<String, dynamic> data, {
+        required Set<String> existingIds,
+      }) async {
     final cookbookData = data['cookbook'] as Map<String, dynamic>;
     final recipes = data['recipes'] as List;
+    int imported = 0;
+    int skipped = 0;
 
     // Generate new ID to avoid conflicts
     final newCookbookId = 'imported_${DateTime.now().millisecondsSinceEpoch}';
@@ -190,10 +215,36 @@ class ExportImportService {
       name: '${cookbookData['name']} (imported)',
     ));
 
+    // Get app images directory for saving imported images
+    final appDir = await getApplicationDocumentsDirectory();
+    final imagesDir = Directory(p.join(appDir.path, 'images', 'imported'));
+    if (!await imagesDir.exists()) await imagesDir.create(recursive: true);
+
     // Insert recipes
     for (final recipeData in recipes) {
       final recipe = recipeData as Map<String, dynamic>;
+      final originalId = recipe['id'] as String? ?? '';
+
+      // ONLY skip default recipes that already exist on device
+      // Never skip user recipes — even if titles match
+      if (originalId.startsWith('default_') && existingIds.contains(originalId)) {
+        skipped++;
+        continue;
+      }
+
       final newRecipeId = '${newCookbookId}_${recipe['id']}';
+
+      // Decode and save image if present
+      String? imagePath;
+      final imageBase64 = recipe['imageBase64'] as String?;
+      if (imageBase64 != null && imageBase64.isNotEmpty) {
+        try {
+          final imageBytes = base64Decode(imageBase64);
+          final imageFile = File(p.join(imagesDir.path, '$newRecipeId.jpg'));
+          await imageFile.writeAsBytes(imageBytes);
+          imagePath = imageFile.path;
+        } catch (_) {}
+      }
 
       await db.into(db.recipes).insert(RecipesCompanion.insert(
         id: newRecipeId,
@@ -205,7 +256,12 @@ class ExportImportService {
         cookTimeMinutes: Value(recipe['cookTimeMinutes'] as int?),
         sourceUrl: Value(recipe['sourceUrl'] as String?),
         categoryId: Value(recipe['categoryId'] as String?),
+        courseId: Value(recipe['courseId'] as String?),
+        rating: Value(recipe['rating'] as int? ?? 0),
+        notes: Value(recipe['notes'] as String?),
         isFavorite: Value(recipe['isFavorite'] as bool? ?? false),
+        imagePath: Value(imagePath),
+        nutritionJson: Value(recipe['nutritionJson'] as String?),
       ));
 
       // Insert ingredients
@@ -213,7 +269,7 @@ class ExportImportService {
       for (final ing in ingredients) {
         final ingredient = ing as Map<String, dynamic>;
         await db.into(db.ingredients).insert(IngredientsCompanion.insert(
-          id: '${newRecipeId}_ing_${ingredient['id']}',
+          id: '${newRecipeId}_ing_${ingredient['sortOrder'] ?? ingredient['id']}',
           recipeId: newRecipeId,
           sortOrder: ingredient['sortOrder'] as int? ?? 0,
           name: ingredient['name'] as String,
@@ -228,15 +284,40 @@ class ExportImportService {
       for (final s in steps) {
         final step = s as Map<String, dynamic>;
         await db.into(db.steps).insert(StepsCompanion.insert(
-          id: '${newRecipeId}_step_${step['id']}',
+          id: '${newRecipeId}_step_${step['sortOrder'] ?? step['id']}',
           recipeId: newRecipeId,
           sortOrder: step['sortOrder'] as int? ?? 0,
           instruction: step['instruction'] as String,
           durationMinutes: Value(step['durationMinutes'] as int?),
         ));
       }
+
+      imported++;
+    }
+
+    return _ImportCookbookResult(imported: imported, skipped: skipped);
+  }
+
+  /// Base64-encode a recipe image file, or return null if not available
+  Future<String?> _encodeImage(String? imagePath) async {
+    if (imagePath == null || imagePath.isEmpty) return null;
+    try {
+      final file = File(imagePath);
+      if (!await file.exists()) return null;
+      final bytes = await file.readAsBytes();
+      // Skip images larger than 2MB to keep export files reasonable
+      if (bytes.length > 2 * 1024 * 1024) return null;
+      return base64Encode(bytes);
+    } catch (_) {
+      return null;
     }
   }
+}
+
+class _ImportCookbookResult {
+  final int imported;
+  final int skipped;
+  _ImportCookbookResult({required this.imported, required this.skipped});
 }
 
 class ImportResult {

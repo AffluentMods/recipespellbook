@@ -473,6 +473,16 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     _showLoading(l10n.importProcessing);
     try {
       final content = await File(path).readAsString();
+      final data = jsonDecode(content);
+
+      // ── Detect Recipe Spellbook's own export format ──
+      if (data is Map<String, dynamic> && data.containsKey('version') &&
+          (data.containsKey('cookbook') || data.containsKey('cookbooks'))) {
+        _hideLoading();
+        _processOwnExportFormat(data);
+        return;
+      }
+
       final recipes = RecipeImportEngine.parseFromFileBulk(content, path.split('/').last);
 
       _hideLoading();
@@ -492,6 +502,66 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       _hideLoading();
       _showError(l10n.failedToImport(e.toString()));
     }
+  }
+
+  /// Handle Recipe Spellbook's own JSON export format.
+  /// Converts structured recipe data into ImportedRecipe objects for preview.
+  void _processOwnExportFormat(Map<String, dynamic> data) {
+    final allRecipeData = <Map<String, dynamic>>[];
+
+    if (data.containsKey('cookbooks')) {
+      // Full export — multiple cookbooks
+      for (final cb in (data['cookbooks'] as List)) {
+        final cbData = cb as Map<String, dynamic>;
+        allRecipeData.addAll((cbData['recipes'] as List).cast<Map<String, dynamic>>());
+      }
+    } else if (data.containsKey('recipes')) {
+      // Single cookbook export
+      allRecipeData.addAll((data['recipes'] as List).cast<Map<String, dynamic>>());
+    }
+
+    if (allRecipeData.isEmpty) {
+      _showError(AppLocalizations.of(context)!.errorNoRecipeFound);
+      return;
+    }
+
+    final recipes = allRecipeData.map((r) {
+      // Convert structured ingredients to text lines
+      final ingredients = (r['ingredients'] as List? ?? []).map((ing) {
+        final i = ing as Map<String, dynamic>;
+        final parts = <String>[];
+        if (i['amount'] != null && i['amount'].toString().isNotEmpty) parts.add(i['amount'].toString());
+        if (i['unit'] != null && i['unit'].toString().isNotEmpty) parts.add(i['unit'].toString());
+        parts.add(i['name'] as String? ?? '');
+        if (i['notes'] != null && i['notes'].toString().isNotEmpty && i['notes'] != '__header__') {
+          parts.add('(${i['notes']})');
+        }
+        return parts.join(' ').trim();
+      }).toList();
+
+      // Convert structured steps to text lines
+      final instructions = (r['steps'] as List? ?? [])
+          .map((s) => (s as Map<String, dynamic>)['instruction'] as String? ?? '')
+          .where((s) => s.isNotEmpty)
+          .toList();
+
+      return ImportedRecipe(
+        title: r['title'] as String? ?? 'Untitled',
+        description: r['description'] as String?,
+        servings: r['servings']?.toString(),
+        prepTimeMinutes: r['prepTimeMinutes'] as int?,
+        cookTimeMinutes: r['cookTimeMinutes'] as int?,
+        ingredients: ingredients.cast<String>(),
+        instructions: instructions.cast<String>(),
+        sourceUrl: r['sourceUrl'] as String?,
+        suggestedCategory: r['categoryId'] as String?,
+        suggestedCourse: r['courseId'] as String?,
+        notes: r['notes'] as String?,
+        imageUrl: r['imageBase64'] != null ? null : null, // Images handled separately on final import
+      );
+    }).toList();
+
+    _showImportPreview(recipes, sourceText: 'Recipe Spellbook export (${recipes.length} recipes)');
   }
 
   Future<void> _processMealMasterFile(String path) async {
