@@ -12,7 +12,7 @@ class FeedbackService {
       '***REMOVED***';
 
   /// Discord invite link for your server
-  static const discordInviteUrl = 'https://discord.gg/YOUR_INVITE_CODE';
+  static const discordInviteUrl = 'https://discord.gg/fqtrekcKFt';
 
   /// Send a suggestion to the #suggestions channel
   static Future<bool> sendSuggestion({

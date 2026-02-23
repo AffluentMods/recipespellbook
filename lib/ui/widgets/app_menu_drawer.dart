@@ -243,7 +243,7 @@ Future<void> _launchEmail(BuildContext context, String email, {String? subject})
 class HelpSupportScreen extends StatelessWidget {
   const HelpSupportScreen({super.key});
 
-  static const _discordUrl = 'https://discord.gg/2DSPdR2YPW';
+  static const _discordUrl = 'https://discord.gg/fqtrekcKFt';
   static const _supportEmail = 'support@recipespellbook.app';
   static const _websiteUrl = 'https://recipespellbook.app';
 
