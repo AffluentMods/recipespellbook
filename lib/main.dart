@@ -11,21 +11,20 @@ import 'services/ingredient_suggestion_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'services/sync_service.dart';
 import 'services/transfer_service.dart';
+import 'services/recipe_import_engine.dart';
 import 'providers/database_provider.dart';
 import 'providers/sync_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/subscription_provider.dart';
-
-/// Holds a URL shared from another app (e.g. Instagram, browser).
-/// The URL import screen should read this on init and pre-fill its text field.
-final sharedUrlProvider = StateProvider<String?>((ref) => null);
+import 'providers/cookbook_provider.dart';
+import 'ui/screens/import/import_preview_screen.dart';
 
 // Provider to hold shared recipe data (for future share intent)
 final sharedRecipeProvider = StateProvider<Map<String, dynamic>?>((ref) => null);
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env');
+  await dotenv.load(fileName: '..env');
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   IngredientSuggestionService.instance.preload();
   runApp(const ProviderScope(child: RecipeSpellbookApp()));
@@ -146,30 +145,88 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
   }
 
   void _handleSharedMedia(SharedMedia media) {
-    // 1. Check for shared text/URL
+    // Check for shared text/URL
     final content = media.content?.trim();
     if (content != null && content.isNotEmpty) {
       final url = _extractUrl(content);
       if (url != null) {
-        // Set the shared URL so the import screen can pre-fill it
-        ref.read(sharedUrlProvider.notifier).state = url;
-        router.push('/import/url');
+        _importFromSharedUrl(url);
         return;
       }
-      // Plain text without URL — route to AI import
-      ref.read(sharedUrlProvider.notifier).state = content;
-      router.push('/import/ai');
-      return;
+    }
+  }
+
+  /// Parses a shared URL and navigates directly to ImportPreviewScreen.
+  Future<void> _importFromSharedUrl(String url) async {
+    final nav = rootNavigatorKey.currentState;
+    if (nav == null) return;
+
+    // Ensure https prefix
+    String finalUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      finalUrl = 'https://$url';
     }
 
-    // 2. Check for shared images (for OCR)
-    if (media.attachments != null && media.attachments!.isNotEmpty) {
-      final firstImage = media.attachments!.first;
-      if (firstImage?.path != null) {
-        // Store image path and route to image import
-        ref.read(sharedUrlProvider.notifier).state = firstImage!.path;
-        router.push('/import/ai');
-        return;
+    // Get the active cookbook ID
+    final cookbookAsync = ref.read(selectedCookbookProvider);
+    final cookbookId = cookbookAsync.valueOrNull?.id ?? 'starter';
+
+    // Show a loading overlay
+    showDialog(
+      context: nav.context,
+      barrierDismissible: false,
+      builder: (_) => PopScope(
+        canPop: false,
+        child: Center(
+          child: Card(
+            margin: const EdgeInsets.all(32),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Importing recipe…', style: TextStyle(fontWeight: FontWeight.w500)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    try {
+      final recipe = await RecipeImportEngine.parseFromUrl(finalUrl);
+
+      // Dismiss loading dialog
+      if (nav.canPop()) nav.pop();
+
+      // Navigate to preview screen
+      nav.push(
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (_) => ImportPreviewScreen(
+            recipes: [recipe],
+            cookbookId: cookbookId,
+            sourceUrl: finalUrl,
+          ),
+        ),
+      );
+    } catch (e) {
+      // Dismiss loading dialog
+      if (nav.canPop()) nav.pop();
+
+      // Show error snackbar
+      final ctx = nav.context;
+      if (ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(
+            content: Text('Failed to import: ${e.toString().replaceFirst("Exception: ", "")}'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
