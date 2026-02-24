@@ -5,7 +5,7 @@ import '../../../data/course_category_data.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
-import '../../../providers/settings_provider.dart';
+import '../../../providers/cookbook_provider.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/app_snackbar.dart';
 
@@ -26,8 +26,7 @@ class _ManageCategoriesScreenState extends ConsumerState<ManageCategoriesScreen>
   }
 
   Future<void> _loadCategories() async {
-    final settings = ref.read(settingsProvider);
-    final cookbookId = settings.currentCookbookId ?? 'cookbook_default';
+    final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
     final dao = ref.read(customTaxonomyDaoProvider);
     final custom = await dao.getCustomCategories(cookbookId);
 
@@ -140,11 +139,11 @@ class _ManageCategoriesScreenState extends ConsumerState<ManageCategoriesScreen>
         TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
         FilledButton(onPressed: () async {
           if (nameController.text.trim().isEmpty) return;
-          final settings = ref.read(settingsProvider);
+          final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
           final dao = ref.read(customTaxonomyDaoProvider);
           await dao.insertCustomCategory(CustomCategoriesCompanion.insert(
-            id: 'category_${DateTime.now().millisecondsSinceEpoch}',
-            cookbookId: settings.currentCookbookId ?? 'cookbook_default',
+            id: 'custom_category_${DateTime.now().millisecondsSinceEpoch}',
+            cookbookId: cookbookId,
             name: nameController.text.trim(),
             emoji: drift.Value(emojiController.text.trim().isEmpty ? '📁' : emojiController.text.trim()),
           ));
@@ -232,8 +231,7 @@ class _ManageCategoriesScreenState extends ConsumerState<ManageCategoriesScreen>
 
   void _restoreDefaults() async {
     final l10n = AppLocalizations.of(context)!;
-    final settings = ref.read(settingsProvider);
-    final cookbookId = settings.currentCookbookId ?? 'cookbook_default';
+    final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
     final dao = ref.read(customTaxonomyDaoProvider);
     final custom = await dao.getCustomCategories(cookbookId);
 

@@ -5071,4 +5071,19 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get feedbackSendError => 'Senden fehlgeschlagen. Überprüfe deine Internetverbindung.';
+
+  @override
+  String get mealTypeAppetizer => 'Vorspeise';
+
+  @override
+  String get allergenContains => 'Enthält';
+
+  @override
+  String get settingsIngredientLayout => 'Zutatenlayout';
+
+  @override
+  String get ingredientLayoutInline => 'Inline — 1 TL Butter';
+
+  @override
+  String get ingredientLayoutColumnar => 'Spalten — Mengen ausgerichtet';
 }

@@ -249,14 +249,13 @@ class RecipePrintService {
               shape: pw.BoxShape.circle,
             ),
           ),
-          if (amountUnit.isNotEmpty)
-            pw.SizedBox(
-              width: 60,
-              child: pw.Text(
-                amountUnit,
-                style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
-              ),
+          if (amountUnit.isNotEmpty) ...[
+            pw.Text(
+              amountUnit,
+              style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
             ),
+            pw.SizedBox(width: 6),
+          ],
           pw.Expanded(
             child: pw.Text(
               ingredient.name,

@@ -9288,6 +9288,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t send feedback. Check your internet connection.'**
   String get feedbackSendError;
+
+  /// No description provided for @mealTypeAppetizer.
+  ///
+  /// In en, this message translates to:
+  /// **'Appetizer'**
+  String get mealTypeAppetizer;
+
+  /// No description provided for @allergenContains.
+  ///
+  /// In en, this message translates to:
+  /// **'Contains'**
+  String get allergenContains;
+
+  /// No description provided for @settingsIngredientLayout.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredient Layout'**
+  String get settingsIngredientLayout;
+
+  /// No description provided for @ingredientLayoutInline.
+  ///
+  /// In en, this message translates to:
+  /// **'Inline — 1 tsp butter'**
+  String get ingredientLayoutInline;
+
+  /// No description provided for @ingredientLayoutColumnar.
+  ///
+  /// In en, this message translates to:
+  /// **'Columnar — amounts aligned'**
+  String get ingredientLayoutColumnar;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

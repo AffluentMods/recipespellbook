@@ -25,6 +25,12 @@ enum NutritionChartStyle {
   numbers,
 }
 
+/// Ingredient display layout in recipe view and print
+enum IngredientLayout {
+  inline,   // "1 tsp butter" — amount, unit, name flow together
+  columnar, // Amount+unit in a fixed column, name in another (aligned)
+}
+
 // ============ SETTINGS STATE ============
 
 class AppSettings {
@@ -68,6 +74,9 @@ class AppSettings {
   // Planner — week start day (1=Monday, 7=Sunday, follows DateTime.weekday)
   final int weekStartDay;
 
+  // Ingredient display layout
+  final IngredientLayout ingredientLayout;
+
   /// Default nutrients shown in the nutrition widget
   static const Set<String> defaultEnabledNutrients = {
     'calories', 'protein', 'carbs', 'fat', 'fiber', 'sugar', 'sodium',
@@ -96,6 +105,7 @@ class AppSettings {
     this.showExpandedNutrition = false,
     this.textScaleFactor = 1.0,
     this.weekStartDay = 1,
+    this.ingredientLayout = IngredientLayout.inline,
     Set<String>? enabledNutrients,
   }) : seedColor = appTheme.seedColor,
         enabledNutrients = enabledNutrients ?? defaultEnabledNutrients;
@@ -124,6 +134,7 @@ class AppSettings {
     Set<String>? enabledNutrients,
     double? textScaleFactor,
     int? weekStartDay,
+    IngredientLayout? ingredientLayout,
   }) {
     return AppSettings(
       appTheme: appTheme ?? this.appTheme,
@@ -149,6 +160,7 @@ class AppSettings {
       enabledNutrients: enabledNutrients ?? this.enabledNutrients,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       weekStartDay: weekStartDay ?? this.weekStartDay,
+      ingredientLayout: ingredientLayout ?? this.ingredientLayout,
     );
   }
 }
@@ -218,6 +230,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
   static const _recipeEditLayoutKey = 'recipe_edit_layout';
   static const _textScaleKey = 'text_scale_factor';
   static const _weekStartDayKey = 'week_start_day';
+  static const _ingredientLayoutKey = 'ingredient_layout';
 
   @override
   AppSettings build() {
@@ -322,6 +335,13 @@ class SettingsNotifier extends Notifier<AppSettings> {
     // Load week start day (1=Monday default, 7=Sunday)
     final weekStartDay = (prefs.getInt(_weekStartDayKey) ?? 1).clamp(1, 7);
 
+    // Load ingredient layout
+    final ingredientLayoutString = prefs.getString(_ingredientLayoutKey);
+    final ingredientLayout = IngredientLayout.values.firstWhere(
+          (m) => m.name == ingredientLayoutString,
+      orElse: () => IngredientLayout.inline,
+    );
+
     state = AppSettings(
       appTheme: appTheme,
       themeMode: themeMode,
@@ -346,6 +366,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
       enabledNutrients: enabledNutrients,
       textScaleFactor: textScaleFactor,
       weekStartDay: weekStartDay,
+      ingredientLayout: ingredientLayout,
     );
   }
 
@@ -476,6 +497,13 @@ class SettingsNotifier extends Notifier<AppSettings> {
     state = state.copyWith(recipeLayoutMode: mode);
   }
 
+  // Ingredient layout setting
+  Future<void> setIngredientLayout(IngredientLayout layout) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_ingredientLayoutKey, layout.name);
+    state = state.copyWith(ingredientLayout: layout);
+  }
+
   // RPG Mode settings
   Future<void> setRpgAnimations(bool enabled) async {
     final prefs = await SharedPreferences.getInstance();
@@ -551,6 +579,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
     await prefs.remove(_rpgSoundsKey);
     await prefs.remove(_textScaleKey);
     await prefs.remove(_weekStartDayKey);
+    await prefs.remove(_ingredientLayoutKey);
     state = AppSettings();
   }
 

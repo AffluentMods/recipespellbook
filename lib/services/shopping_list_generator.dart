@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/database_provider.dart';
 import '../ui/screens/shopping/shopping_list_generator_screen.dart';
-import '../ui/widgets/add_to_shopping_list_sheet.dart';
 import '../ui/widgets/app_snackbar.dart';
 import 'ingredient_resolver_service.dart';
 
@@ -41,22 +40,8 @@ Future<void> launchShoppingListGenerator(
     if (!context.mounted) return;
 
     if (result.isSingleSimpleRecipe) {
-      // Simple: 1 recipe, no links → existing bottom sheet
-      final ingredients = result.recipes.first.directIngredients
-          .map((ri) => ri.ingredient)
-          .toList();
-
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (ctx) => AddIngredientsToShoppingSheet(
-          ingredients: ingredients,
-          recipeName: recipeName,
-          recipeId: recipeId,
-          scaleFactor: scale,
-        ),
-      );
+      // Single recipe, no links → still use full generator for consistent UX
+      _pushGeneratorScreen(context, result);
     } else {
       // Complex: linked recipes or conflicts → full screen
       _pushGeneratorScreen(context, result);

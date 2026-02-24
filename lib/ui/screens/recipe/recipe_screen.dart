@@ -1526,6 +1526,7 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     // Render section headers (ingredient dividers)
     if (ingredient.notes == '__header__') {
@@ -1599,7 +1600,7 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
               ),
               if (matchingAllergens.isNotEmpty)
                 Tooltip(
-                  message: 'Contains: ${matchingAllergens.join(", ")}',
+                  message: '${l10n.allergenContains}: ${matchingAllergens.join(", ")}',
                   child: Icon(Icons.warning_amber_rounded, size: 18, color: Colors.red.shade700),
                 ),
             ]),

@@ -501,11 +501,39 @@ class _SourceBadge extends StatelessWidget {
 
 // ============ COURSES SECTION ============
 
-class _CoursesSection extends StatelessWidget {
+/// Unified chip entry for both built-in and custom taxonomy items
+class _ChipEntry {
+  final String id;
+  final String name;
+  final String emoji;
+  final int count;
+  const _ChipEntry({required this.id, required this.name, required this.emoji, required this.count});
+}
+
+class _CoursesSection extends ConsumerStatefulWidget {
   final String cookbookId;
   final List<Recipe> recipes;
 
   const _CoursesSection({required this.cookbookId, required this.recipes});
+
+  @override
+  ConsumerState<_CoursesSection> createState() => _CoursesSectionState();
+}
+
+class _CoursesSectionState extends ConsumerState<_CoursesSection> {
+  List<CustomCourse> _customCourses = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCustomCourses();
+  }
+
+  Future<void> _loadCustomCourses() async {
+    final dao = ref.read(customTaxonomyDaoProvider);
+    final courses = await dao.getCustomCourses(widget.cookbookId);
+    if (mounted) setState(() => _customCourses = courses);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -513,12 +541,13 @@ class _CoursesSection extends StatelessWidget {
     final theme = Theme.of(context);
     final translator = TaxonomyTranslator(l10n);
 
-    // Build counts with case-insensitive ID matching
-    final courseCounts = <String, int>{}; // keyed by CourseData.id (lowercase)
-    for (final recipe in recipes) {
+    // Build counts — match against built-in AND custom IDs
+    final courseCounts = <String, int>{};
+    final customIds = _customCourses.map((c) => c.id).toSet();
+
+    for (final recipe in widget.recipes) {
       if (recipe.courseId != null) {
         final normalizedId = recipe.courseId!.toLowerCase();
-        // Match against known course IDs or names
         String? matchedId;
         for (final c in CourseData.courses) {
           if (c.id == normalizedId || c.name.toLowerCase() == normalizedId) {
@@ -526,18 +555,33 @@ class _CoursesSection extends StatelessWidget {
             break;
           }
         }
+        // Check custom courses (exact ID match)
+        if (matchedId == null && customIds.contains(recipe.courseId)) {
+          matchedId = recipe.courseId;
+        }
         if (matchedId != null) {
           courseCounts[matchedId] = (courseCounts[matchedId] ?? 0) + 1;
         }
       }
     }
 
-    final coursesWithRecipes = CourseData.courses
-        .where((c) => (courseCounts[c.id] ?? 0) > 0)
-        .toList()
-      ..sort((a, b) => (courseCounts[b.id] ?? 0).compareTo(courseCounts[a.id] ?? 0));
+    // Merge built-in + custom, filter to those with recipes
+    final chips = <_ChipEntry>[];
+    for (final c in CourseData.courses) {
+      final count = courseCounts[c.id] ?? 0;
+      if (count > 0) {
+        chips.add(_ChipEntry(id: c.id, name: translator.translateCourse(c.name), emoji: c.emoji, count: count));
+      }
+    }
+    for (final c in _customCourses) {
+      final count = courseCounts[c.id] ?? 0;
+      if (count > 0) {
+        chips.add(_ChipEntry(id: c.id, name: c.name, emoji: c.emoji ?? '📁', count: count));
+      }
+    }
+    chips.sort((a, b) => b.count.compareTo(a.count));
 
-    if (coursesWithRecipes.isEmpty) return const SizedBox.shrink();
+    if (chips.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,14 +604,14 @@ class _CoursesSection extends StatelessWidget {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            itemCount: coursesWithRecipes.length,
+            itemCount: chips.length,
             itemBuilder: (context, index) {
-              final course = coursesWithRecipes[index];
+              final chip = chips[index];
               return _CourseChip(
-                label: translator.translateCourse(course.name),
-                emoji: course.emoji,
-                count: courseCounts[course.id] ?? 0,
-                onTap: () => context.push('/recipes?cookbook=$cookbookId&course=${course.id}&title=${Uri.encodeComponent(translator.translateCourse(course.name))}'),
+                label: chip.name,
+                emoji: chip.emoji,
+                count: chip.count,
+                onTap: () => context.push('/recipes?cookbook=${widget.cookbookId}&course=${chip.id}&title=${Uri.encodeComponent(chip.name)}'),
               );
             },
           ),
@@ -579,11 +623,30 @@ class _CoursesSection extends StatelessWidget {
 
 // ============ CATEGORIES SECTION ============
 
-class _CategoriesSection extends StatelessWidget {
+class _CategoriesSection extends ConsumerStatefulWidget {
   final String cookbookId;
   final List<Recipe> recipes;
 
   const _CategoriesSection({required this.cookbookId, required this.recipes});
+
+  @override
+  ConsumerState<_CategoriesSection> createState() => _CategoriesSectionState();
+}
+
+class _CategoriesSectionState extends ConsumerState<_CategoriesSection> {
+  List<CustomCategory> _customCategories = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCustomCategories();
+  }
+
+  Future<void> _loadCustomCategories() async {
+    final dao = ref.read(customTaxonomyDaoProvider);
+    final categories = await dao.getCustomCategories(widget.cookbookId);
+    if (mounted) setState(() => _customCategories = categories);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -591,9 +654,11 @@ class _CategoriesSection extends StatelessWidget {
     final theme = Theme.of(context);
     final translator = TaxonomyTranslator(l10n);
 
-    // Build counts with case-insensitive ID matching
-    final categoryCounts = <String, int>{}; // keyed by CategoryData.id (lowercase)
-    for (final recipe in recipes) {
+    // Build counts — match against built-in AND custom IDs
+    final categoryCounts = <String, int>{};
+    final customIds = _customCategories.map((c) => c.id).toSet();
+
+    for (final recipe in widget.recipes) {
       if (recipe.categoryId != null) {
         final normalizedId = recipe.categoryId!.toLowerCase();
         String? matchedId;
@@ -603,18 +668,33 @@ class _CategoriesSection extends StatelessWidget {
             break;
           }
         }
+        // Check custom categories (exact ID match)
+        if (matchedId == null && customIds.contains(recipe.categoryId)) {
+          matchedId = recipe.categoryId;
+        }
         if (matchedId != null) {
           categoryCounts[matchedId] = (categoryCounts[matchedId] ?? 0) + 1;
         }
       }
     }
 
-    final categoriesWithRecipes = CategoryData.categories
-        .where((c) => (categoryCounts[c.id] ?? 0) > 0)
-        .toList()
-      ..sort((a, b) => (categoryCounts[b.id] ?? 0).compareTo(categoryCounts[a.id] ?? 0));
+    // Merge built-in + custom, filter to those with recipes
+    final chips = <_ChipEntry>[];
+    for (final c in CategoryData.categories) {
+      final count = categoryCounts[c.id] ?? 0;
+      if (count > 0) {
+        chips.add(_ChipEntry(id: c.id, name: translator.translateCategory(c.name), emoji: c.emoji, count: count));
+      }
+    }
+    for (final c in _customCategories) {
+      final count = categoryCounts[c.id] ?? 0;
+      if (count > 0) {
+        chips.add(_ChipEntry(id: c.id, name: c.name, emoji: c.emoji ?? '📁', count: count));
+      }
+    }
+    chips.sort((a, b) => b.count.compareTo(a.count));
 
-    if (categoriesWithRecipes.isEmpty) return const SizedBox.shrink();
+    if (chips.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -637,14 +717,14 @@ class _CategoriesSection extends StatelessWidget {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            itemCount: categoriesWithRecipes.length,
+            itemCount: chips.length,
             itemBuilder: (context, index) {
-              final cat = categoriesWithRecipes[index];
+              final chip = chips[index];
               return _CourseChip(
-                label: translator.translateCategory(cat.name),
-                emoji: cat.emoji,
-                count: categoryCounts[cat.id] ?? 0,
-                onTap: () => context.push('/recipes?cookbook=$cookbookId&category=${cat.id}&title=${Uri.encodeComponent(translator.translateCategory(cat.name))}'),
+                label: chip.name,
+                emoji: chip.emoji,
+                count: chip.count,
+                onTap: () => context.push('/recipes?cookbook=${widget.cookbookId}&category=${chip.id}&title=${Uri.encodeComponent(chip.name)}'),
               );
             },
           ),
@@ -656,36 +736,62 @@ class _CategoriesSection extends StatelessWidget {
 
 // ============ UNCATEGORIZED SECTION ============
 
-class _UncategorizedSection extends StatelessWidget {
+class _UncategorizedSection extends ConsumerStatefulWidget {
   final String cookbookId;
   final List<Recipe> recipes;
 
   const _UncategorizedSection({required this.cookbookId, required this.recipes});
 
   @override
+  ConsumerState<_UncategorizedSection> createState() => _UncategorizedSectionState();
+}
+
+class _UncategorizedSectionState extends ConsumerState<_UncategorizedSection> {
+  Set<String> _customCourseIds = {};
+  Set<String> _customCategoryIds = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCustomIds();
+  }
+
+  Future<void> _loadCustomIds() async {
+    final dao = ref.read(customTaxonomyDaoProvider);
+    final courses = await dao.getCustomCourses(widget.cookbookId);
+    final categories = await dao.getCustomCategories(widget.cookbookId);
+    if (mounted) {
+      setState(() {
+        _customCourseIds = courses.map((c) => c.id).toSet();
+        _customCategoryIds = categories.map((c) => c.id).toSet();
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
-    // "Uncategorized" = no course/category OR course/category that doesn't match any known entry
+    // "Uncategorized" = no course/category OR ID doesn't match any known entry
     final knownCourseIds = CourseData.courses.map((c) => c.id).toSet();
     final knownCourseNames = CourseData.courses.map((c) => c.name.toLowerCase()).toSet();
     final knownCategoryIds = CategoryData.categories.map((c) => c.id).toSet();
     final knownCategoryNames = CategoryData.categories.map((c) => c.name.toLowerCase()).toSet();
 
-    bool _matchesCourse(String? courseId) {
+    bool matchesCourse(String? courseId) {
       if (courseId == null) return false;
       final lower = courseId.toLowerCase();
-      return knownCourseIds.contains(lower) || knownCourseNames.contains(lower);
+      return knownCourseIds.contains(lower) || knownCourseNames.contains(lower) || _customCourseIds.contains(courseId);
     }
 
-    bool _matchesCategory(String? categoryId) {
+    bool matchesCategory(String? categoryId) {
       if (categoryId == null) return false;
       final lower = categoryId.toLowerCase();
-      return knownCategoryIds.contains(lower) || knownCategoryNames.contains(lower);
+      return knownCategoryIds.contains(lower) || knownCategoryNames.contains(lower) || _customCategoryIds.contains(categoryId);
     }
 
-    final uncategorized = recipes.where((r) => !_matchesCourse(r.courseId) && !_matchesCategory(r.categoryId)).toList();
+    final uncategorized = widget.recipes.where((r) => !matchesCourse(r.courseId) && !matchesCategory(r.categoryId)).toList();
 
     if (uncategorized.isEmpty) return const SizedBox.shrink();
 

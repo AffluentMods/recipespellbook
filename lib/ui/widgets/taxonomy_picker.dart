@@ -109,39 +109,80 @@ class CoursePicker extends ConsumerWidget {
 
 // ============ CATEGORY PICKER FIELD (MULTI-SELECT) ============
 
-class CategoryPicker extends ConsumerWidget {
+class CategoryPicker extends ConsumerStatefulWidget {
   final String? selectedCategoryId; // comma-separated IDs for multi-select
   final ValueChanged<String?> onChanged;
 
   const CategoryPicker({super.key, required this.selectedCategoryId, required this.onChanged});
 
+  @override
+  ConsumerState<CategoryPicker> createState() => _CategoryPickerState();
+}
+
+class _CategoryPickerState extends ConsumerState<CategoryPicker> {
+  List<TaxonomyItem> _resolvedItems = [];
+
   List<String> get _selectedIds {
-    if (selectedCategoryId == null || selectedCategoryId!.isEmpty) return [];
-    return selectedCategoryId!.split(',').where((s) => s.isNotEmpty).toList();
+    if (widget.selectedCategoryId == null || widget.selectedCategoryId!.isEmpty) return [];
+    return widget.selectedCategoryId!.split(',').where((s) => s.isNotEmpty).toList();
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final ids = _selectedIds;
+  void initState() {
+    super.initState();
+    _resolveNames();
+  }
 
-    // Resolve names for display
-    final selectedItems = <TaxonomyItem>[];
+  @override
+  void didUpdateWidget(covariant CategoryPicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedCategoryId != widget.selectedCategoryId) {
+      _resolveNames();
+    }
+  }
+
+  Future<void> _resolveNames() async {
+    final ids = _selectedIds;
+    if (ids.isEmpty) {
+      if (mounted) setState(() => _resolvedItems = []);
+      return;
+    }
+
+    final items = <TaxonomyItem>[];
+    final customDao = ref.read(customTaxonomyDaoProvider);
+
     for (final id in ids) {
       final builtIn = CategoryData.getById(id);
       if (builtIn != null) {
-        selectedItems.add(TaxonomyItem(id: builtIn.id, name: builtIn.name, emoji: builtIn.emoji, isBuiltIn: true));
+        items.add(TaxonomyItem(id: builtIn.id, name: builtIn.name, emoji: builtIn.emoji, isBuiltIn: true));
       } else {
-        // Custom categories get resolved in the sheet — show ID as fallback
-        selectedItems.add(TaxonomyItem(id: id, name: id, emoji: '🏷️', isCustom: true));
+        // Resolve custom category name from database
+        try {
+          final custom = await customDao.getCustomCategoryById(id);
+          if (custom != null) {
+            items.add(TaxonomyItem(id: custom.id, name: custom.name, emoji: custom.emoji ?? '🏷️', isCustom: true));
+          } else {
+            items.add(TaxonomyItem(id: id, name: id, emoji: '🏷️', isCustom: true));
+          }
+        } catch (_) {
+          items.add(TaxonomyItem(id: id, name: id, emoji: '🏷️', isCustom: true));
+        }
       }
     }
 
+    if (mounted) setState(() => _resolvedItems = items);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final selectedItems = _resolvedItems;
+
     return InkWell(
       onTap: () async {
-        final result = await showMultiCategoryPickerDialog(context, ref, ids);
+        final result = await showMultiCategoryPickerDialog(context, ref, _selectedIds);
         if (result != null) {
-          onChanged(result.isEmpty ? null : result.join(','));
+          widget.onChanged(result.isEmpty ? null : result.join(','));
         }
       },
       borderRadius: BorderRadius.circular(12),

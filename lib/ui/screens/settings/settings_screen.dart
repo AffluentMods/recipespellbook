@@ -100,6 +100,19 @@ class SettingsScreen extends ConsumerWidget {
                     : l10n.layoutStacked,
                 onTap: () => context.push('/settings/recipe-layout'),
               ),
+              _SettingsTile(
+                icon: Icons.format_align_left,
+                title: l10n.settingsIngredientLayout,
+                subtitle: settings.ingredientLayout == IngredientLayout.columnar
+                    ? l10n.ingredientLayoutColumnar
+                    : l10n.ingredientLayoutInline,
+                onTap: () {
+                  final next = settings.ingredientLayout == IngredientLayout.inline
+                      ? IngredientLayout.columnar
+                      : IngredientLayout.inline;
+                  ref.read(settingsProvider.notifier).setIngredientLayout(next);
+                },
+              ),
               _MeasurementSystemTile(
                 currentSystem: settings.measurementSystem,
                 onSystemSelected: (system) {

@@ -12,13 +12,50 @@ import '../../../utils/responsive_utils.dart';
 
 enum BrowseMode { courses, categories }
 
-class CategoriesBrowseScreen extends ConsumerWidget {
+/// Unified browse item for both built-in and custom taxonomy entries
+class _BrowseEntry {
+  final String id;
+  final String name;
+  final String emoji;
+
+  const _BrowseEntry({required this.id, required this.name, required this.emoji});
+}
+
+class CategoriesBrowseScreen extends ConsumerStatefulWidget {
   final BrowseMode mode;
 
   const CategoriesBrowseScreen({super.key, required this.mode});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CategoriesBrowseScreen> createState() => _CategoriesBrowseScreenState();
+}
+
+class _CategoriesBrowseScreenState extends ConsumerState<CategoriesBrowseScreen> {
+  List<CustomCourse> _customCourses = [];
+  List<CustomCategory> _customCategories = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCustomTaxonomy();
+  }
+
+  Future<void> _loadCustomTaxonomy() async {
+    final dao = ref.read(customTaxonomyDaoProvider);
+    final settings = ref.read(settingsProvider);
+    final cookbookId = settings.currentCookbookId ?? 'starter';
+    final courses = await dao.getCustomCourses(cookbookId);
+    final categories = await dao.getCustomCategories(cookbookId);
+    if (mounted) {
+      setState(() {
+        _customCourses = courses;
+        _customCategories = categories;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final translator = TaxonomyTranslator.of(context);
@@ -27,7 +64,7 @@ class CategoriesBrowseScreen extends ConsumerWidget {
     final cookbookId = settings.currentCookbookId ?? 'starter';
     final recipeDao = ref.watch(recipeDaoProvider);
 
-    final isCourses = mode == BrowseMode.courses;
+    final isCourses = widget.mode == BrowseMode.courses;
     final primaryLabel = isCourses ? rpg.coursesTitle : rpg.categoriesTitle;
     final secondaryLabel = isCourses ? rpg.categoriesTitle : rpg.coursesTitle;
 
@@ -40,7 +77,7 @@ class CategoriesBrowseScreen extends ConsumerWidget {
         builder: (context, snapshot) {
           final recipes = snapshot.data ?? [];
 
-          // Calculate counts
+          // Calculate counts for ALL IDs (built-in + custom)
           final courseCounts = <String, int>{};
           final categoryCounts = <String, int>{};
           for (final recipe in recipes) {
@@ -52,39 +89,40 @@ class CategoriesBrowseScreen extends ConsumerWidget {
             }
           }
 
-          // Sort courses: those with recipes first (by count desc), then A-Z for those without
-          final sortedCourses = List<taxonomy.Course>.from(taxonomy.CourseData.courses);
-          sortedCourses.sort((a, b) {
-            final aCount = courseCounts[a.id] ?? 0;
-            final bCount = courseCounts[b.id] ?? 0;
-            if (aCount > 0 && bCount == 0) return -1;
-            if (aCount == 0 && bCount > 0) return 1;
-            if (aCount > 0 && bCount > 0) {
-              final countCompare = bCount.compareTo(aCount);
-              if (countCompare != 0) return countCompare;
-            }
-            // Sort by translated name
-            final aName = translator.translateCourse(a.name);
-            final bName = translator.translateCourse(b.name);
-            return aName.compareTo(bName);
-          });
+          // Build unified course list: built-in + custom
+          final allCourses = <_BrowseEntry>[
+            ...taxonomy.CourseData.courses.map((c) => _BrowseEntry(
+              id: c.id,
+              name: translator.translateCourse(c.name),
+              emoji: c.emoji,
+            )),
+            ..._customCourses.map((c) => _BrowseEntry(
+              id: c.id,
+              name: c.name,
+              emoji: c.emoji ?? '📁',
+            )),
+          ];
+          _sortEntries(allCourses, courseCounts);
 
-          // Sort categories the same way
-          final sortedCategories = List<taxonomy.Category>.from(taxonomy.CategoryData.categories);
-          sortedCategories.sort((a, b) {
-            final aCount = categoryCounts[a.id] ?? 0;
-            final bCount = categoryCounts[b.id] ?? 0;
-            if (aCount > 0 && bCount == 0) return -1;
-            if (aCount == 0 && bCount > 0) return 1;
-            if (aCount > 0 && bCount > 0) {
-              final countCompare = bCount.compareTo(aCount);
-              if (countCompare != 0) return countCompare;
-            }
-            // Sort by translated name
-            final aName = translator.translateCategory(a.name);
-            final bName = translator.translateCategory(b.name);
-            return aName.compareTo(bName);
-          });
+          // Build unified category list: built-in + custom
+          final allCategories = <_BrowseEntry>[
+            ...taxonomy.CategoryData.categories.map((c) => _BrowseEntry(
+              id: c.id,
+              name: translator.translateCategory(c.name),
+              emoji: c.emoji,
+            )),
+            ..._customCategories.map((c) => _BrowseEntry(
+              id: c.id,
+              name: c.name,
+              emoji: c.emoji ?? '📁',
+            )),
+          ];
+          _sortEntries(allCategories, categoryCounts);
+
+          final primaryEntries = isCourses ? allCourses : allCategories;
+          final primaryCounts = isCourses ? courseCounts : categoryCounts;
+          final secondaryEntries = isCourses ? allCategories : allCourses;
+          final secondaryCounts = isCourses ? categoryCounts : courseCounts;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -133,40 +171,7 @@ class CategoriesBrowseScreen extends ConsumerWidget {
                 _SectionHeader(title: primaryLabel, icon: isCourses ? Icons.restaurant_menu : Icons.category),
                 const SizedBox(height: 12),
 
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: Responsive.browseGridColumns(context),
-                    childAspectRatio: 1.5,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemCount: isCourses ? sortedCourses.length : sortedCategories.length,
-                  itemBuilder: (context, index) {
-                    if (isCourses) {
-                      final course = sortedCourses[index];
-                      final count = courseCounts[course.id] ?? 0;
-                      final displayName = translator.translateCourse(course.name);
-                      return _BrowseCardStatic(
-                        emoji: course.emoji,
-                        name: displayName,
-                        count: count,
-                        onTap: () => context.push('/recipes?cookbook=$cookbookId&course=${course.id}&title=${Uri.encodeComponent(displayName)}'),
-                      );
-                    } else {
-                      final category = sortedCategories[index];
-                      final count = categoryCounts[category.id] ?? 0;
-                      final displayName = translator.translateCategory(category.name);
-                      return _BrowseCardStatic(
-                        emoji: category.emoji,
-                        name: displayName,
-                        count: count,
-                        onTap: () => context.push('/recipes?cookbook=$cookbookId&category=${category.id}&title=${Uri.encodeComponent(displayName)}'),
-                      );
-                    }
-                  },
-                ),
+                _buildGrid(context, primaryEntries, primaryCounts, cookbookId, isCourse: isCourses),
 
                 _UncategorizedTile(
                   cookbookId: cookbookId,
@@ -180,40 +185,7 @@ class CategoriesBrowseScreen extends ConsumerWidget {
                 _SectionHeader(title: secondaryLabel, icon: isCourses ? Icons.category : Icons.restaurant_menu),
                 const SizedBox(height: 12),
 
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: Responsive.browseGridColumns(context),
-                    childAspectRatio: 1.5,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemCount: isCourses ? sortedCategories.length : sortedCourses.length,
-                  itemBuilder: (context, index) {
-                    if (isCourses) {
-                      final category = sortedCategories[index];
-                      final count = categoryCounts[category.id] ?? 0;
-                      final displayName = translator.translateCategory(category.name);
-                      return _BrowseCardStatic(
-                        emoji: category.emoji,
-                        name: displayName,
-                        count: count,
-                        onTap: () => context.push('/recipes?cookbook=$cookbookId&category=${category.id}&title=${Uri.encodeComponent(displayName)}'),
-                      );
-                    } else {
-                      final course = sortedCourses[index];
-                      final count = courseCounts[course.id] ?? 0;
-                      final displayName = translator.translateCourse(course.name);
-                      return _BrowseCardStatic(
-                        emoji: course.emoji,
-                        name: displayName,
-                        count: count,
-                        onTap: () => context.push('/recipes?cookbook=$cookbookId&course=${course.id}&title=${Uri.encodeComponent(displayName)}'),
-                      );
-                    }
-                  },
-                ),
+                _buildGrid(context, secondaryEntries, secondaryCounts, cookbookId, isCourse: !isCourses),
 
                 _UncategorizedTile(
                   cookbookId: cookbookId,
@@ -227,6 +199,45 @@ class CategoriesBrowseScreen extends ConsumerWidget {
           );
         },
       ),
+    );
+  }
+
+  void _sortEntries(List<_BrowseEntry> entries, Map<String, int> counts) {
+    entries.sort((a, b) {
+      final aCount = counts[a.id] ?? 0;
+      final bCount = counts[b.id] ?? 0;
+      if (aCount > 0 && bCount == 0) return -1;
+      if (aCount == 0 && bCount > 0) return 1;
+      if (aCount > 0 && bCount > 0) {
+        final countCompare = bCount.compareTo(aCount);
+        if (countCompare != 0) return countCompare;
+      }
+      return a.name.compareTo(b.name);
+    });
+  }
+
+  Widget _buildGrid(BuildContext context, List<_BrowseEntry> entries, Map<String, int> counts, String cookbookId, {required bool isCourse}) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: Responsive.browseGridColumns(context),
+        childAspectRatio: 1.5,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+      ),
+      itemCount: entries.length,
+      itemBuilder: (context, index) {
+        final entry = entries[index];
+        final count = counts[entry.id] ?? 0;
+        final param = isCourse ? 'course' : 'category';
+        return _BrowseCardStatic(
+          emoji: entry.emoji,
+          name: entry.name,
+          count: count,
+          onTap: () => context.push('/recipes?cookbook=$cookbookId&$param=${entry.id}&title=${Uri.encodeComponent(entry.name)}'),
+        );
+      },
     );
   }
 }

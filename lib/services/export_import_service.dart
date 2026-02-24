@@ -36,6 +36,11 @@ class ExportImportService {
         ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
           .get();
 
+      // Export recipe links (ingredient → linked recipe connections)
+      final links = await (db.select(db.recipeLinks)
+        ..where((t) => t.sourceRecipeId.equals(recipe.id)))
+          .get();
+
       recipesWithDetails.add({
         'id': recipe.id,
         'title': recipe.title,
@@ -66,6 +71,12 @@ class ExportImportService {
           'instruction': s.instruction,
           'durationMinutes': s.durationMinutes,
           'imageBase64': null, // Step images omitted to keep file size reasonable
+        }).toList(),
+        'recipeLinks': links.map((l) => {
+          'ingredientId': l.ingredientId,
+          'linkedRecipeId': l.linkedRecipeId,
+          'scale': l.scale,
+          'sortOrder': l.sortOrder,
         }).toList(),
       });
     }
@@ -209,6 +220,10 @@ class ExportImportService {
     // Generate new ID to avoid conflicts
     final newCookbookId = 'imported_${DateTime.now().millisecondsSinceEpoch}';
 
+    // ID remapping: old ID → new ID (for recipe links)
+    final recipeIdMap = <String, String>{};
+    final ingredientIdMap = <String, String>{};
+
     // Insert cookbook
     await db.into(db.cookbooks).insert(CookbooksCompanion.insert(
       id: newCookbookId,
@@ -229,10 +244,13 @@ class ExportImportService {
       // Never skip user recipes — even if titles match
       if (originalId.startsWith('default_') && existingIds.contains(originalId)) {
         skipped++;
+        // Map default recipe to itself so links to defaults still work
+        recipeIdMap[originalId] = originalId;
         continue;
       }
 
       final newRecipeId = '${newCookbookId}_${recipe['id']}';
+      recipeIdMap[originalId] = newRecipeId;
 
       // Decode and save image if present
       String? imagePath;
@@ -264,12 +282,16 @@ class ExportImportService {
         nutritionJson: Value(recipe['nutritionJson'] as String?),
       ));
 
-      // Insert ingredients
+      // Insert ingredients (tracking ID mappings for recipe links)
       final ingredients = recipe['ingredients'] as List? ?? [];
       for (final ing in ingredients) {
         final ingredient = ing as Map<String, dynamic>;
+        final oldIngId = ingredient['id'] as String? ?? '';
+        final newIngId = '${newRecipeId}_ing_${ingredient['sortOrder'] ?? ingredient['id']}';
+        if (oldIngId.isNotEmpty) ingredientIdMap[oldIngId] = newIngId;
+
         await db.into(db.ingredients).insert(IngredientsCompanion.insert(
-          id: '${newRecipeId}_ing_${ingredient['sortOrder'] ?? ingredient['id']}',
+          id: newIngId,
           recipeId: newRecipeId,
           sortOrder: ingredient['sortOrder'] as int? ?? 0,
           name: ingredient['name'] as String,
@@ -293,6 +315,43 @@ class ExportImportService {
       }
 
       imported++;
+    }
+
+    // Import recipe links (after all recipes so ID mappings are complete)
+    for (final recipeData in recipes) {
+      final recipe = recipeData as Map<String, dynamic>;
+      final originalId = recipe['id'] as String? ?? '';
+      final links = recipe['recipeLinks'] as List? ?? [];
+      if (links.isEmpty) continue;
+
+      final newSourceId = recipeIdMap[originalId];
+      if (newSourceId == null) continue;
+
+      for (final linkData in links) {
+        final link = linkData as Map<String, dynamic>;
+        final oldIngId = link['ingredientId'] as String? ?? '';
+        final oldLinkedId = link['linkedRecipeId'] as String? ?? '';
+
+        final newIngId = ingredientIdMap[oldIngId];
+        final newLinkedId = recipeIdMap[oldLinkedId];
+
+        // Both the ingredient and linked recipe must exist
+        if (newIngId == null || newLinkedId == null) continue;
+
+        try {
+          await db.into(db.recipeLinks).insertOnConflictUpdate(
+            RecipeLinksCompanion.insert(
+              sourceRecipeId: newSourceId,
+              ingredientId: newIngId,
+              linkedRecipeId: newLinkedId,
+              scale: Value((link['scale'] as num?)?.toDouble() ?? 1.0),
+              sortOrder: Value(link['sortOrder'] as int? ?? 0),
+            ),
+          );
+        } catch (_) {
+          // Best-effort — skip if link target doesn't exist
+        }
+      }
     }
 
     return _ImportCookbookResult(imported: imported, skipped: skipped);

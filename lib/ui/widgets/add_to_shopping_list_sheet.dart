@@ -129,6 +129,7 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
         );
 
         if (mounted) {
+          final router = GoRouter.of(context);
           Navigator.pop(context);
 
           // Build informative snackbar message with list name
@@ -145,7 +146,7 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
             context,
             message,
             actionLabel: l10n.viewList,
-            onAction: () => context.go('/shopping'),
+            onAction: () => router.go('/shopping'),
           );
         }
       } else {
@@ -183,12 +184,13 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
         }
 
         if (mounted) {
+          final router = GoRouter.of(context);
           Navigator.pop(context);
           AppSnackbar.successWithAction(
             context,
             l10n.shoppingAddedToList(addedCount, listName),
             actionLabel: l10n.viewList,
-            onAction: () => context.go('/shopping'),
+            onAction: () => router.go('/shopping'),
           );
         }
       }

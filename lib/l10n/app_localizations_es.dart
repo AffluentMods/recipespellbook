@@ -5071,4 +5071,19 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get feedbackSendError => 'No se pudo enviar. Verifica tu conexión a internet.';
+
+  @override
+  String get mealTypeAppetizer => 'Aperitivo';
+
+  @override
+  String get allergenContains => 'Contiene';
+
+  @override
+  String get settingsIngredientLayout => 'Diseño de ingredientes';
+
+  @override
+  String get ingredientLayoutInline => 'En línea — 1 cdta mantequilla';
+
+  @override
+  String get ingredientLayoutColumnar => 'Columnas — cantidades alineadas';
 }

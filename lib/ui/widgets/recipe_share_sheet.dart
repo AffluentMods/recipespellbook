@@ -358,8 +358,8 @@ class _RecipeShareSheet extends StatelessWidget {
           ),
           FilledButton.icon(
             onPressed: () async {
-              Navigator.pop(ctx);
-              await _saveQRCode(context, json);
+              await _saveQRCode(ctx, json);
+              if (ctx.mounted) Navigator.pop(ctx);
             },
             icon: const Icon(Icons.save),
             label: Text(l10n.actionSave),

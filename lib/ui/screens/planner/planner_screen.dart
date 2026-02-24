@@ -590,8 +590,8 @@ class _MealsList extends ConsumerWidget {
       grouped.putIfAbsent(type, () => []).add(plan);
     }
 
-    // Order: Breakfast, Lunch, Dinner, Snack
-    final orderedTypes = ['Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snack'];
+    // Order: Breakfast, Lunch, Dinner, Appetizer, Dessert, Snack
+    final orderedTypes = ['Breakfast', 'Lunch', 'Dinner', 'Appetizer', 'Dessert', 'Snack'];
     final sortedKeys = grouped.keys.toList()
       ..sort((a, b) {
         final aIdx = orderedTypes.indexOf(a);
@@ -688,6 +688,7 @@ class _MealTypeHeader extends StatelessWidget {
       case 'breakfast': return '🌅';
       case 'lunch': return '☀️';
       case 'dinner': return '🌙';
+      case 'appetizer': return '🥗';
       case 'dessert': return '🍰';
       case 'snack': return '🍪';
       default: return '🍽️';
@@ -910,10 +911,12 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
                 // Meal type chips
                 Wrap(
                   spacing: 8,
+                  runSpacing: 8,
                   children: [
                     _MealTypeChip(emoji: '🌅', label: l10n.mealTypeBreakfast, isSelected: _selectedMealType == 'Breakfast', onTap: () => setState(() => _selectedMealType = 'Breakfast')),
                     _MealTypeChip(emoji: '☀️', label: l10n.mealTypeLunch, isSelected: _selectedMealType == 'Lunch', onTap: () => setState(() => _selectedMealType = 'Lunch')),
                     _MealTypeChip(emoji: '🌙', label: l10n.mealTypeDinner, isSelected: _selectedMealType == 'Dinner', onTap: () => setState(() => _selectedMealType = 'Dinner')),
+                    _MealTypeChip(emoji: '🥗', label: l10n.mealTypeAppetizer, isSelected: _selectedMealType == 'Appetizer', onTap: () => setState(() => _selectedMealType = 'Appetizer')),
                     _MealTypeChip(emoji: '🍰', label: l10n.mealTypeDessert, isSelected: _selectedMealType == 'Dessert', onTap: () => setState(() => _selectedMealType = 'Dessert')),
                     _MealTypeChip(emoji: '🍪', label: l10n.mealTypeSnack, isSelected: _selectedMealType == 'Snack', onTap: () => setState(() => _selectedMealType = 'Snack')),
                   ],

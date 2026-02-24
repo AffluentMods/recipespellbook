@@ -2455,5 +2455,10 @@
   "bugStepsHint": "1. Open recipe\n2. Tap share\n3. App crashes",
   "bugReportSent": "Thanks! Your bug report has been sent 🐛",
   "feedbackFieldsRequired": "Please fill in the title and details",
-  "feedbackSendError": "Couldn't send feedback. Check your internet connection."
+  "feedbackSendError": "Couldn't send feedback. Check your internet connection.",
+  "mealTypeAppetizer": "Appetizer",
+  "allergenContains": "Contains",
+  "settingsIngredientLayout": "Ingredient Layout",
+  "ingredientLayoutInline": "Inline — 1 tsp butter",
+  "ingredientLayoutColumnar": "Columnar — amounts aligned"
 }

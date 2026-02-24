@@ -2059,5 +2059,10 @@
   "bugStepsHint": "1. Rezept öffnen\n2. Teilen antippen\n3. App stürzt ab",
   "bugReportSent": "Danke! Dein Fehlerbericht wurde gesendet 🐛",
   "feedbackFieldsRequired": "Bitte fülle Titel und Details aus",
-  "feedbackSendError": "Senden fehlgeschlagen. Überprüfe deine Internetverbindung."
+  "feedbackSendError": "Senden fehlgeschlagen. Überprüfe deine Internetverbindung.",
+  "mealTypeAppetizer": "Vorspeise",
+  "allergenContains": "Enthält",
+  "settingsIngredientLayout": "Zutatenlayout",
+  "ingredientLayoutInline": "Inline — 1 TL Butter",
+  "ingredientLayoutColumnar": "Spalten — Mengen ausgerichtet"
 }

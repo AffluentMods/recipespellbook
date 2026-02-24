@@ -1,14 +1,22 @@
 import 'dart:convert';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/default_recipes.dart';
 import '../database/database.dart';
+import 'nutrition_calculator.dart';
+import 'usda_service.dart';
 
 /// Handles first-launch detection and default recipe seeding
 class OnboardingService {
   static const _keyOnboardingComplete = 'onboarding_complete';
   static const _keyDefaultRecipesOffered = 'default_recipes_offered';
+  static const _keyNutritionVersion = 'default_nutrition_version';
   static const _defaultCookbookId = 'starter';
+
+  /// Bump this whenever default recipe nutrition needs recalculation.
+  /// All users with a lower stored version will get a background recalc.
+  static const int _currentNutritionVersion = 2;
 
   /// Returns true if this is the first time the app has been opened
   static Future<bool> isFirstLaunch() async {
@@ -232,6 +240,116 @@ class OnboardingService {
         return 'sauce';
       default:
         return null;
+    }
+  }
+
+  // ============ NUTRITION RECALCULATION ============
+
+  /// Recalculate nutrition for all default recipes if the stored version
+  /// is outdated. Call this from splash screen after USDA data is loaded.
+  /// Runs in background — does not block UI.
+  static Future<void> recalculateDefaultNutritionIfNeeded(
+      AppDatabase db,
+      UsdaService usdaService,
+      ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final storedVersion = prefs.getInt(_keyNutritionVersion) ?? 0;
+      if (storedVersion >= _currentNutritionVersion) return;
+
+      debugPrint('[OnboardingService] Recalculating default recipe nutrition '
+          '(v$storedVersion → v$_currentNutritionVersion)');
+
+      final calculator = NutritionCalculator(usdaService: usdaService);
+      final dao = db.recipeDao;
+      int updated = 0;
+
+      for (final recipe in defaultRecipes) {
+        try {
+          // Check recipe exists in DB
+          final dbRecipe = await dao.getRecipeById(recipe.id);
+          if (dbRecipe == null) continue;
+
+          // Load ingredients from DB
+          final ingredients = await dao.getIngredientsForRecipe(recipe.id);
+          if (ingredients.isEmpty) continue;
+
+          // Parse servings
+          final servings = dbRecipe.servings ?? recipe.servings ?? '1';
+
+          // Run calculator
+          final result = await calculator.calculateForRecipe(
+            ingredients: ingredients,
+            servings: servings,
+          );
+
+          // Build nutrition JSON matching the seed format
+          final total = result.totalNutrition;
+          final nutritionJson = jsonEncode({
+            'calories': total.calories,
+            'protein': total.protein,
+            'fat': total.fat,
+            'carbohydrates': total.carbohydrates,
+            'fiber': total.fiber,
+            'sugar': total.sugar,
+            'saturatedFat': total.saturatedFat,
+            'transFat': total.transFat,
+            'monounsaturatedFat': total.monounsaturatedFat,
+            'polyunsaturatedFat': total.polyunsaturatedFat,
+            'cholesterol': total.cholesterol,
+            'sodium': total.sodium,
+            'potassium': total.potassium,
+            'calcium': total.calcium,
+            'iron': total.iron,
+            'magnesium': total.magnesium,
+            'phosphorus': total.phosphorus,
+            'zinc': total.zinc,
+            'copper': total.copper,
+            'manganese': total.manganese,
+            'selenium': total.selenium,
+            'vitaminA': total.vitaminA,
+            'vitaminC': total.vitaminC,
+            'vitaminD': total.vitaminD,
+            'vitaminE': total.vitaminE,
+            'vitaminK': total.vitaminK,
+            'vitaminB1': total.vitaminB1,
+            'vitaminB2': total.vitaminB2,
+            'vitaminB3': total.vitaminB3,
+            'vitaminB5': total.vitaminB5,
+            'vitaminB6': total.vitaminB6,
+            'vitaminB12': total.vitaminB12,
+            'folate': total.folate,
+            'choline': total.choline,
+            'water': total.water,
+            'calculatedServings': result.servingCount,
+            'isEstimated': true,
+            'servingSize': '1 serving',
+            'matchedIngredients': result.ingredientResults
+                .where((r) => r.isMatched)
+                .length,
+            'totalIngredients': ingredients.length,
+          });
+
+          // Update recipe in DB
+          await (db.update(db.recipes)
+            ..where((r) => r.id.equals(recipe.id)))
+              .write(RecipesCompanion(
+            nutritionJson: Value(nutritionJson),
+          ));
+
+          updated++;
+          debugPrint('[OnboardingService] Recalculated: ${recipe.title} '
+              '(${result.ingredientResults.where((r) => r.isMatched).length}/'
+              '${ingredients.length} matched)');
+        } catch (e) {
+          debugPrint('[OnboardingService] Failed to recalc ${recipe.title}: $e');
+        }
+      }
+
+      await prefs.setInt(_keyNutritionVersion, _currentNutritionVersion);
+      debugPrint('[OnboardingService] Nutrition recalc done: $updated recipes updated');
+    } catch (e) {
+      debugPrint('[OnboardingService] Nutrition recalc error: $e');
     }
   }
 }

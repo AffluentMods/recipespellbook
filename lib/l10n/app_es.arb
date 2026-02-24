@@ -2019,5 +2019,10 @@
   "bugStepsHint": "1. Abrir receta\n2. Tocar compartir\n3. La app se cierra",
   "bugReportSent": "¡Gracias! Tu reporte de error ha sido enviado 🐛",
   "feedbackFieldsRequired": "Por favor completa el título y los detalles",
-  "feedbackSendError": "No se pudo enviar. Verifica tu conexión a internet."
+  "feedbackSendError": "No se pudo enviar. Verifica tu conexión a internet.",
+  "mealTypeAppetizer": "Aperitivo",
+  "allergenContains": "Contiene",
+  "settingsIngredientLayout": "Diseño de ingredientes",
+  "ingredientLayoutInline": "En línea — 1 cdta mantequilla",
+  "ingredientLayoutColumnar": "Columnas — cantidades alineadas"
 }

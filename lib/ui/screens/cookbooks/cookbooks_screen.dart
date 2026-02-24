@@ -181,10 +181,10 @@ class _CookbookGrid extends ConsumerWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.edit),
-              title: Text(l10n.rename),
+              title: const Text('Edit'),
               onTap: () {
                 Navigator.pop(ctx);
-                _showRenameDialog(context, ref, cookbook);
+                context.push('/cookbook/${cookbook.id}/edit');
               },
             ),
             ListTile(

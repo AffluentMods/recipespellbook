@@ -5071,4 +5071,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get feedbackSendError => 'Couldn\'t send feedback. Check your internet connection.';
+
+  @override
+  String get mealTypeAppetizer => 'Appetizer';
+
+  @override
+  String get allergenContains => 'Contains';
+
+  @override
+  String get settingsIngredientLayout => 'Ingredient Layout';
+
+  @override
+  String get ingredientLayoutInline => 'Inline — 1 tsp butter';
+
+  @override
+  String get ingredientLayoutColumnar => 'Columnar — amounts aligned';
 }
