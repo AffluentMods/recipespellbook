@@ -106,7 +106,12 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: settings.ingredientLayout == IngredientLayout.columnar
                     ? l10n.ingredientLayoutColumnar
                     : l10n.ingredientLayoutInline,
-                onTap: () => context.push('/settings/ingredient-layout'),
+                onTap: () {
+                  final next = settings.ingredientLayout == IngredientLayout.inline
+                      ? IngredientLayout.columnar
+                      : IngredientLayout.inline;
+                  ref.read(settingsProvider.notifier).setIngredientLayout(next);
+                },
               ),
               _MeasurementSystemTile(
                 currentSystem: settings.measurementSystem,
@@ -233,18 +238,8 @@ class SettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.info_outline,
                 title: l10n.appTitle,
-                subtitle: 'Version 1.0.0 \u00B7 Beta',
-                onTap: () => _showAboutDialog(context),
-              ),
-              _SettingsTile(
-                icon: Icons.description_outlined,
-                title: 'Licenses',
-                subtitle: 'Open source licenses',
-                onTap: () => showLicensePage(
-                  context: context,
-                  applicationName: l10n.appTitle,
-                  applicationVersion: '1.0.0',
-                ),
+                subtitle: 'Version 1.0.0 · Beta',
+                onTap: () => context.push('/about'),
               ),
             ],
           ),
@@ -352,31 +347,6 @@ class SettingsScreen extends ConsumerWidget {
 
   void _showLoadingSnackbar(BuildContext context, String message) {
     AppSnackbar.loading(context, message);
-  }
-
-  void _showAboutDialog(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    showAboutDialog(
-      context: context,
-      applicationName: l10n.appTitle,
-      applicationVersion: '1.0.0',
-      applicationIcon: Container(
-        width: 64,
-        height: 64,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Center(
-          child: Text('📖✨', style: TextStyle(fontSize: 32)),
-        ),
-      ),
-      children: [
-        Text(l10n.aboutDescription),
-        const SizedBox(height: 16),
-        Text(l10n.madeWithLove, style: const TextStyle(fontSize: 12)),
-      ],
-    );
   }
 
   void _showResetConfirmation(BuildContext context, WidgetRef ref) {

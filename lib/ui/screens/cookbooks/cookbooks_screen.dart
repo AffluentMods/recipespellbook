@@ -14,39 +14,85 @@ import '../../widgets/app_snackbar.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../../utils/responsive_utils.dart';
 
-class CookbooksScreen extends ConsumerWidget {
+class CookbooksScreen extends ConsumerStatefulWidget {
   const CookbooksScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CookbooksScreen> createState() => _CookbooksScreenState();
+}
+
+class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cookbooksAsync = ref.watch(cookbooksProvider);
     final selectedId = ref.watch(selectedCookbookIdProvider);
     final nerdMode = ref.watch(settingsProvider).nerdMode;
     final rpg = RpgText.of(l10n, nerdMode);
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(rpg.cookbooksTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => context.push('/settings'),
-          ),
-        ],
       ),
       body: cookbooksAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('${l10n.errorGeneric}: $e')),
-        data: (cookbooks) => _CookbookGrid(
-          cookbooks: cookbooks,
-          selectedId: selectedId,
-          onCookbookSelected: (id) {
-            ref.read(selectedCookbookIdProvider.notifier).state = id;
-            ref.read(currentNavIndexProvider.notifier).state = 0;
-            context.go('/');
-          },
-        ),
+        data: (cookbooks) {
+          final filtered = _query.isEmpty
+              ? cookbooks
+              : cookbooks.where((c) => c.name.toLowerCase().contains(_query.toLowerCase())).toList();
+
+          return Column(
+            children: [
+              if (cookbooks.length > 5)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: l10n.searchCookbooks,
+                      prefixIcon: const Icon(Icons.search, size: 20),
+                      suffixIcon: _query.isNotEmpty
+                          ? IconButton(
+                        icon: const Icon(Icons.clear, size: 18),
+                        onPressed: () => setState(() {
+                          _searchController.clear();
+                          _query = '';
+                        }),
+                      )
+                          : null,
+                      filled: true,
+                      fillColor: theme.colorScheme.surfaceContainerHighest,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                    onChanged: (v) => setState(() => _query = v),
+                  ),
+                ),
+              Expanded(
+                child: _CookbookGrid(
+                  cookbooks: filtered,
+                  selectedId: selectedId,
+                  onCookbookSelected: (id) {
+                    ref.read(selectedCookbookIdProvider.notifier).state = id;
+                    ref.read(currentNavIndexProvider.notifier).state = 0;
+                    context.go('/');
+                  },
+                ),
+              ),
+            ],
+          );
+        },
       ),
       floatingActionButton: _ModernFAB(
         onPressed: () => _showNewCookbookDialog(context, ref),

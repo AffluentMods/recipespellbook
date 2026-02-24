@@ -9342,6 +9342,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This setting applies to recipe view, shopping list generator, and printed recipes.'**
   String get ingredientLayoutInfoText;
+
+  /// No description provided for @searchCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Search cookbooks...'**
+  String get searchCookbooks;
+
+  /// No description provided for @aboutWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get aboutWebsite;
+
+  /// No description provided for @aboutPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get aboutPrivacyPolicy;
+
+  /// No description provided for @aboutPrivacyPolicySub.
+  ///
+  /// In en, this message translates to:
+  /// **'How we handle your data'**
+  String get aboutPrivacyPolicySub;
+
+  /// No description provided for @aboutTermsOfService.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get aboutTermsOfService;
+
+  /// No description provided for @aboutTermsOfServiceSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage terms and conditions'**
+  String get aboutTermsOfServiceSub;
+
+  /// No description provided for @aboutCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Community'**
+  String get aboutCommunity;
+
+  /// No description provided for @aboutCommunitySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Join our Discord server'**
+  String get aboutCommunitySub;
+
+  /// No description provided for @aboutReportBug.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a Bug'**
+  String get aboutReportBug;
+
+  /// No description provided for @aboutReportBugSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Help us improve the app'**
+  String get aboutReportBugSub;
+
+  /// No description provided for @aboutRateApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate the App'**
+  String get aboutRateApp;
+
+  /// No description provided for @aboutRateAppSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave a review on the store'**
+  String get aboutRateAppSub;
+
+  /// No description provided for @aboutLicenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Source Licenses'**
+  String get aboutLicenses;
+
+  /// No description provided for @aboutLicensesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Third-party software used'**
+  String get aboutLicensesSub;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

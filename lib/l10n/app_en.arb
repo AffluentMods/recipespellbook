@@ -2464,5 +2464,19 @@
   "settingsIngredientLayoutDescription": "Choose how ingredient amounts and names are displayed in recipes, shopping lists, and print.",
   "ingredientLayoutInlineDescription": "Amount, unit, and name flow together naturally",
   "ingredientLayoutColumnarDescription": "Amounts aligned in a fixed column for easy scanning",
-  "ingredientLayoutInfoText": "This setting applies to recipe view, shopping list generator, and printed recipes."
+  "ingredientLayoutInfoText": "This setting applies to recipe view, shopping list generator, and printed recipes.",
+  "searchCookbooks": "Search cookbooks...",
+  "aboutWebsite": "Website",
+  "aboutPrivacyPolicy": "Privacy Policy",
+  "aboutPrivacyPolicySub": "How we handle your data",
+  "aboutTermsOfService": "Terms of Service",
+  "aboutTermsOfServiceSub": "Usage terms and conditions",
+  "aboutCommunity": "Community",
+  "aboutCommunitySub": "Join our Discord server",
+  "aboutReportBug": "Report a Bug",
+  "aboutReportBugSub": "Help us improve the app",
+  "aboutRateApp": "Rate the App",
+  "aboutRateAppSub": "Leave a review on the store",
+  "aboutLicenses": "Open Source Licenses",
+  "aboutLicensesSub": "Third-party software used"
 }

@@ -2068,5 +2068,19 @@
   "settingsIngredientLayoutDescription": "Wähle aus, wie Mengenangaben und Namen der Zutaten in Rezepten, Einkaufslisten und im Druck angezeigt werden.",
   "ingredientLayoutInlineDescription": "Menge, Einheit und Name fließen natürlich zusammen",
   "ingredientLayoutColumnarDescription": "Mengenangaben sind in einer festen Spalte ausgerichtet für einfaches Erfassen",
-  "ingredientLayoutInfoText": "Diese Einstellung gilt für die Rezeptansicht, den Einkaufslistengenerator und gedruckte Rezepte."
+  "ingredientLayoutInfoText": "Diese Einstellung gilt für die Rezeptansicht, den Einkaufslistengenerator und gedruckte Rezepte.",
+  "searchCookbooks": "Kochbücher suchen...",
+  "aboutWebsite": "Webseite",
+  "aboutPrivacyPolicy": "Datenschutzrichtlinie",
+  "aboutPrivacyPolicySub": "Wie wir mit deinen Daten umgehen",
+  "aboutTermsOfService": "Nutzungsbedingungen",
+  "aboutTermsOfServiceSub": "Bedingungen und Konditionen",
+  "aboutCommunity": "Community",
+  "aboutCommunitySub": "Tritt unserem Discord-Server bei",
+  "aboutReportBug": "Fehler melden",
+  "aboutReportBugSub": "Hilf uns, die App zu verbessern",
+  "aboutRateApp": "App bewerten",
+  "aboutRateAppSub": "Hinterlasse eine Bewertung im Store",
+  "aboutLicenses": "Open-Source-Lizenzen",
+  "aboutLicensesSub": "Verwendete Drittanbieter-Software"
 }

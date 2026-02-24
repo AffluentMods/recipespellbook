@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
@@ -77,7 +75,7 @@ class _RecipeShareSheet extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Share options - Row 1
+            // Share options
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -92,23 +90,10 @@ class _RecipeShareSheet extends StatelessWidget {
                   onTap: () => _shareAsText(context),
                 ),
                 _ShareOption(
-                  icon: Icons.qr_code,
-                  label: l10n.shareQrCode,
-                  onTap: () => _showQRCode(context),
-                ),
-                _ShareOption(
                   icon: Icons.file_copy,
                   label: l10n.shareExport,
                   onTap: () => _exportRecipe(context),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Share options - Row 2
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
                 _ShareOption(
                   icon: Icons.picture_as_pdf,
                   label: l10n.shareDocument,
@@ -119,13 +104,6 @@ class _RecipeShareSheet extends StatelessWidget {
                   label: l10n.sharePrint,
                   onTap: () => _printRecipe(context),
                 ),
-                _ShareOption(
-                  icon: Icons.image,
-                  label: l10n.shareAsImage,
-                  onTap: () => _shareAsImage(context),
-                ),
-                // Placeholder for alignment
-                const SizedBox(width: 56),
               ],
             ),
             const SizedBox(height: 16),
@@ -139,9 +117,13 @@ class _RecipeShareSheet extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     Navigator.pop(context);
 
-    // Generate shareable deep link
-    final shareUrl = 'https://recipespellbook.app/recipe/${recipe.id}';
-    final shareText = '${recipe.title}\n\n$shareUrl\n\n${l10n.shareFromApp}';
+    // Use the recipe's actual source URL if available, otherwise share title + attribution
+    final hasSourceUrl = recipe.sourceUrl != null && recipe.sourceUrl!.isNotEmpty;
+    final shareSnippet = hasSourceUrl ? recipe.sourceUrl! : recipe.title;
+    final shareText = '${recipe.title}\n\n'
+        '${hasSourceUrl ? recipe.sourceUrl! : ''}'
+        '${hasSourceUrl ? '\n\n' : ''}'
+        '${l10n.shareFromApp}';
 
     if (context.mounted) {
       showDialog(
@@ -151,7 +133,7 @@ class _RecipeShareSheet extends StatelessWidget {
             children: [
               const Icon(Icons.link),
               const SizedBox(width: 12),
-              Text(l10n.shareLink),
+              Expanded(child: Text(l10n.shareLink)),
             ],
           ),
           content: Column(
@@ -170,17 +152,18 @@ class _RecipeShareSheet extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        shareUrl,
+                        shareSnippet,
                         style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
                           fontFamily: 'monospace',
                         ),
                         overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
                       ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.copy, size: 20),
                       onPressed: () {
-                        Clipboard.setData(ClipboardData(text: shareUrl));
+                        Clipboard.setData(ClipboardData(text: shareSnippet));
                         AppSnackbar.info(context, l10n.successCopied);
                       },
                       tooltip: l10n.actionCopy,
@@ -188,13 +171,15 @@ class _RecipeShareSheet extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.shareLinkNote,
-                style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(ctx).colorScheme.outline,
+              if (!hasSourceUrl) ...[
+                const SizedBox(height: 8),
+                Text(
+                  l10n.shareLinkNote,
+                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(ctx).colorScheme.outline,
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
           actions: [
@@ -272,141 +257,6 @@ class _RecipeShareSheet extends StatelessWidget {
     await Share.share(buffer.toString(), subject: recipe.title);
   }
 
-  Future<void> _shareAsImage(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    Navigator.pop(context);
-
-    AppSnackbar.info(context, l10n.shareCreatingCard);
-
-    try {
-      final ingredients = await ref.read(recipeDaoProvider).getIngredientsForRecipe(recipe.id);
-      final steps = await ref.read(recipeDaoProvider).getStepsForRecipe(recipe.id);
-
-      final image = await _createRecipeCardImage(recipe, ingredients, steps);
-
-      final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/recipe_${recipe.id}.png');
-      await file.writeAsBytes(image);
-
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        subject: recipe.title,
-        text: l10n.shareCheckRecipe(recipe.title),
-      );
-    } catch (e) {
-      if (context.mounted) {
-        AppSnackbar.info(context, l10n.shareErrorImage(e.toString()),
-        );
-      }
-    }
-  }
-
-  void _showQRCode(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    Navigator.pop(context);
-
-    final data = {
-      'title': recipe.title,
-      'desc': recipe.description,
-      'servings': recipe.servings,
-      'prep': recipe.prepTimeMinutes,
-      'cook': recipe.cookTimeMinutes,
-      'url': recipe.sourceUrl,
-    };
-
-    final json = jsonEncode(data);
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.qr_code),
-            const SizedBox(width: 12),
-            Text(l10n.shareQrCode),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: QrImageView(
-                data: json,
-                version: QrVersions.auto,
-                size: 200,
-                backgroundColor: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.scanToImport,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.actionClose),
-          ),
-          FilledButton.icon(
-            onPressed: () async {
-              await _saveQRCode(ctx, json);
-              if (ctx.mounted) Navigator.pop(ctx);
-            },
-            icon: const Icon(Icons.save),
-            label: Text(l10n.actionSave),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _saveQRCode(BuildContext context, String data) async {
-    final l10n = AppLocalizations.of(context)!;
-    try {
-      final qrValidationResult = QrValidator.validate(
-        data: data,
-        version: QrVersions.auto,
-        errorCorrectionLevel: QrErrorCorrectLevel.L,
-      );
-
-      if (qrValidationResult.status == QrValidationStatus.valid) {
-        final painter = QrPainter.withQr(
-          qr: qrValidationResult.qrCode!,
-          color: const Color(0xFF000000),
-          gapless: true,
-          embeddedImageStyle: null,
-          embeddedImage: null,
-        );
-
-        final dir = await getTemporaryDirectory();
-        final file = File('${dir.path}/recipe_${recipe.id}_qr.png');
-
-        final picData = await painter.toImageData(400);
-        if (picData != null) {
-          await file.writeAsBytes(picData.buffer.asUint8List());
-
-          await Share.shareXFiles(
-            [XFile(file.path)],
-            subject: '${recipe.title} QR Code',
-          );
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
-        AppSnackbar.info(context, '${l10n.errorGeneric}: $e');
-      }
-    }
-  }
-
   Future<void> _shareAsDocument(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
     Navigator.pop(context);
@@ -482,7 +332,6 @@ class _RecipeShareSheet extends StatelessWidget {
         'notes': i.notes,
       }).toList(),
       'instructions': steps.map((s) {
-        // Handle case where imagePath field might not exist yet
         String? imagePath;
         int? duration;
         try {
@@ -530,31 +379,19 @@ class _RecipeShareSheet extends StatelessWidget {
         margin: const pw.EdgeInsets.all(40),
         build: (pw.Context context) {
           return [
-            // Title
             pw.Header(
               level: 0,
               child: pw.Text(
                 recipe.title,
-                style: pw.TextStyle(
-                  fontSize: 28,
-                  fontWeight: pw.FontWeight.bold,
-                ),
+                style: pw.TextStyle(fontSize: 28, fontWeight: pw.FontWeight.bold),
               ),
             ),
-
-            // Description
             if (recipe.description != null && recipe.description!.isNotEmpty)
               pw.Paragraph(
                 text: recipe.description!,
-                style: const pw.TextStyle(
-                  fontSize: 12,
-                  color: PdfColors.grey700,
-                ),
+                style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
               ),
-
             pw.SizedBox(height: 16),
-
-            // Meta info row
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.start,
               children: [
@@ -566,20 +403,12 @@ class _RecipeShareSheet extends StatelessWidget {
                   _pdfMetaItem('\u{1F525}', '${recipe.cookTimeMinutes} min cook'),
               ],
             ),
-
             pw.SizedBox(height: 24),
-
-            // Ingredients
             if (ingredients.isNotEmpty) ...[
               pw.Header(
                 level: 1,
-                child: pw.Text(
-                  l10n.ingredientsTitle,
-                  style: pw.TextStyle(
-                    fontSize: 18,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
+                child: pw.Text(l10n.ingredientsTitle,
+                    style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
               ),
               pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -595,10 +424,7 @@ class _RecipeShareSheet extends StatelessWidget {
                       children: [
                         pw.Text('\u2022 ', style: const pw.TextStyle(fontSize: 12)),
                         pw.Expanded(
-                          child: pw.Text(
-                            parts.join(' '),
-                            style: const pw.TextStyle(fontSize: 12),
-                          ),
+                          child: pw.Text(parts.join(' '), style: const pw.TextStyle(fontSize: 12)),
                         ),
                       ],
                     ),
@@ -607,18 +433,11 @@ class _RecipeShareSheet extends StatelessWidget {
               ),
               pw.SizedBox(height: 24),
             ],
-
-            // Instructions
             if (steps.isNotEmpty) ...[
               pw.Header(
                 level: 1,
-                child: pw.Text(
-                  l10n.instructionsTitle,
-                  style: pw.TextStyle(
-                    fontSize: 18,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
+                child: pw.Text(l10n.instructionsTitle,
+                    style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
               ),
               pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -629,29 +448,20 @@ class _RecipeShareSheet extends StatelessWidget {
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Container(
-                          width: 24,
-                          height: 24,
+                          width: 24, height: 24,
                           decoration: const pw.BoxDecoration(
-                            shape: pw.BoxShape.circle,
-                            color: PdfColors.purple,
+                            shape: pw.BoxShape.circle, color: PdfColors.purple,
                           ),
                           child: pw.Center(
-                            child: pw.Text(
-                              '${entry.key + 1}',
-                              style: pw.TextStyle(
-                                color: PdfColors.white,
-                                fontWeight: pw.FontWeight.bold,
-                                fontSize: 10,
-                              ),
-                            ),
+                            child: pw.Text('${entry.key + 1}',
+                                style: pw.TextStyle(color: PdfColors.white,
+                                    fontWeight: pw.FontWeight.bold, fontSize: 10)),
                           ),
                         ),
                         pw.SizedBox(width: 12),
                         pw.Expanded(
-                          child: pw.Text(
-                            entry.value.instruction,
-                            style: const pw.TextStyle(fontSize: 12),
-                          ),
+                          child: pw.Text(entry.value.instruction,
+                              style: const pw.TextStyle(fontSize: 12)),
                         ),
                       ],
                     ),
@@ -659,19 +469,12 @@ class _RecipeShareSheet extends StatelessWidget {
                 }).toList(),
               ),
             ],
-
-            // Notes
             if (recipe.notes != null && recipe.notes!.isNotEmpty) ...[
               pw.SizedBox(height: 24),
               pw.Header(
                 level: 1,
-                child: pw.Text(
-                  l10n.notesTitle,
-                  style: pw.TextStyle(
-                    fontSize: 18,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
+                child: pw.Text(l10n.notesTitle,
+                    style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
               ),
               pw.Container(
                 padding: const pw.EdgeInsets.all(12),
@@ -679,24 +482,14 @@ class _RecipeShareSheet extends StatelessWidget {
                   color: PdfColors.grey100,
                   borderRadius: pw.BorderRadius.circular(8),
                 ),
-                child: pw.Text(
-                  recipe.notes!,
-                  style: const pw.TextStyle(fontSize: 11),
-                ),
+                child: pw.Text(recipe.notes!, style: const pw.TextStyle(fontSize: 11)),
               ),
             ],
-
-            // Footer
             pw.SizedBox(height: 32),
             pw.Divider(color: PdfColors.grey300),
             pw.SizedBox(height: 8),
-            pw.Text(
-              l10n.shareFromApp,
-              style: const pw.TextStyle(
-                fontSize: 9,
-                color: PdfColors.grey500,
-              ),
-            ),
+            pw.Text(l10n.shareFromApp,
+                style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey500)),
           ];
         },
       ),
@@ -713,52 +506,8 @@ class _RecipeShareSheet extends StatelessWidget {
         color: PdfColors.grey100,
         borderRadius: pw.BorderRadius.circular(4),
       ),
-      child: pw.Text(
-        '$emoji $text',
-        style: const pw.TextStyle(fontSize: 10),
-      ),
+      child: pw.Text('$emoji $text', style: const pw.TextStyle(fontSize: 10)),
     );
-  }
-
-  Future<Uint8List> _createRecipeCardImage(
-      Recipe recipe,
-      List<Ingredient> ingredients,
-      List<Step> steps,
-      ) async {
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder);
-
-    const width = 800.0;
-    const height = 1200.0;
-
-    // Background
-    final bgPaint = Paint()..color = const Color(0xFFFAF8FF);
-    canvas.drawRect(const Rect.fromLTWH(0, 0, width, height), bgPaint);
-
-    // Header gradient
-    final headerPaint = Paint()..color = const Color(0xFF6B4C9A);
-    canvas.drawRect(const Rect.fromLTWH(0, 0, width, 200), headerPaint);
-
-    // Title
-    final titlePainter = TextPainter(
-      text: TextSpan(
-        text: recipe.title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 40,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-    titlePainter.layout(maxWidth: width - 80);
-    titlePainter.paint(canvas, const Offset(40, 80));
-
-    final picture = recorder.endRecording();
-    final img = await picture.toImage(width.toInt(), height.toInt());
-    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
-
-    return byteData!.buffer.asUint8List();
   }
 }
 
@@ -788,11 +537,7 @@ class _ShareOption extends StatelessWidget {
               color: theme.colorScheme.primaryContainer,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              color: theme.colorScheme.onPrimaryContainer,
-              size: 24,
-            ),
+            child: Icon(icon, color: theme.colorScheme.onPrimaryContainer, size: 24),
           ),
           const SizedBox(height: 8),
           SizedBox(

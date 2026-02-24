@@ -2833,22 +2833,47 @@ class _ShoppingItemTile extends ConsumerWidget {
                         if (showRecipeLink && hasMultipleSources && !item.isChecked)
                           Padding(
                             padding: const EdgeInsets.only(top: 4),
-                            child: Wrap(
-                              spacing: 4,
-                              runSpacing: 2,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: sources.map((source) {
                                 final detail = source.detail.isNotEmpty ? ' (${source.detail})' : '';
-                                return GestureDetector(
-                                  onTap: source.recipeId.isNotEmpty
-                                      ? () => context.push('/recipe/${source.recipeId}')
-                                      : null,
-                                  child: Text(
-                                    '${source.recipeName}$detail',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: source.recipeId.isNotEmpty
-                                          ? theme.colorScheme.primary
-                                          : theme.colorScheme.outline,
-                                      fontSize: 11,
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 2),
+                                  child: GestureDetector(
+                                    onTap: source.recipeId.isNotEmpty
+                                        ? () => context.push('/recipe/${source.recipeId}')
+                                        : null,
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 4, right: 6),
+                                          child: Container(
+                                            width: 4, height: 4,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: source.recipeId.isNotEmpty
+                                                  ? theme.colorScheme.primary
+                                                  : theme.colorScheme.outline,
+                                            ),
+                                          ),
+                                        ),
+                                        Flexible(
+                                          child: Text(
+                                            '${source.recipeName}$detail',
+                                            style: theme.textTheme.bodySmall?.copyWith(
+                                              color: source.recipeId.isNotEmpty
+                                                  ? theme.colorScheme.primary
+                                                  : theme.colorScheme.outline,
+                                              decoration: source.recipeId.isNotEmpty
+                                                  ? TextDecoration.underline
+                                                  : null,
+                                              decorationColor: theme.colorScheme.primary,
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 );

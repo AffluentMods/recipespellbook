@@ -5098,4 +5098,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ingredientLayoutInfoText => 'This setting applies to recipe view, shopping list generator, and printed recipes.';
+
+  @override
+  String get searchCookbooks => 'Search cookbooks...';
+
+  @override
+  String get aboutWebsite => 'Website';
+
+  @override
+  String get aboutPrivacyPolicy => 'Privacy Policy';
+
+  @override
+  String get aboutPrivacyPolicySub => 'How we handle your data';
+
+  @override
+  String get aboutTermsOfService => 'Terms of Service';
+
+  @override
+  String get aboutTermsOfServiceSub => 'Usage terms and conditions';
+
+  @override
+  String get aboutCommunity => 'Community';
+
+  @override
+  String get aboutCommunitySub => 'Join our Discord server';
+
+  @override
+  String get aboutReportBug => 'Report a Bug';
+
+  @override
+  String get aboutReportBugSub => 'Help us improve the app';
+
+  @override
+  String get aboutRateApp => 'Rate the App';
+
+  @override
+  String get aboutRateAppSub => 'Leave a review on the store';
+
+  @override
+  String get aboutLicenses => 'Open Source Licenses';
+
+  @override
+  String get aboutLicensesSub => 'Third-party software used';
 }

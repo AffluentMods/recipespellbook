@@ -22,6 +22,7 @@ import '../ui/screens/rpg/rpg_leaderboard_screen.dart';
 // RPG imports
 import '../ui/screens/rpg/rpg_profile_screen.dart';
 import '../ui/screens/search/search_screen.dart';
+import '../ui/screens/settings/about_screen.dart';
 import '../ui/screens/settings/allergy_settings_screen.dart';
 import '../ui/screens/settings/appearance_screen.dart';
 import '../ui/screens/settings/ingredient_substitutions_screen.dart';
@@ -316,6 +317,12 @@ final router = GoRouter(
       name: 'settings',
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: '/about',
+      name: 'about',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const AboutScreen(),
     ),
 
     // Recipe view
