@@ -1602,9 +1602,7 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Text(ingredient.name, style: theme.textTheme.bodyLarge),
-                ),
+                Expanded(child: Text(ingredient.name, style: theme.textTheme.bodyLarge)),
               ] else
                 Expanded(
                   child: RichText(
@@ -1624,55 +1622,30 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
                   child: Icon(Icons.warning_amber_rounded, size: 18, color: Colors.red.shade700),
                 ),
             ]),
-            // Linked recipes for this ingredient (with thumbnails)
+            // Linked recipes for this ingredient
             ...linkedRecipes.map((linkedRecipe) {
-              final hasLinkedImage = linkedRecipe.imagePath != null &&
-                  linkedRecipe.imagePath!.isNotEmpty &&
-                  File(linkedRecipe.imagePath!).existsSync();
-              final defaultAsset = defaultRecipeImageAsset(linkedRecipe.id);
               return Padding(
-                padding: const EdgeInsets.only(left: 20, top: 4),
+                padding: const EdgeInsets.only(left: 34, top: 2),
                 child: GestureDetector(
                   onTap: () => context.push('/recipe/${linkedRecipe.id}'),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.subdirectory_arrow_right, size: 14, color: theme.colorScheme.primary),
-                      const SizedBox(width: 6),
-                      // Recipe thumbnail
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: SizedBox(
-                          width: 24, height: 24,
-                          child: hasLinkedImage
-                              ? Image.file(
-                            File(linkedRecipe.imagePath!),
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _linkedPlaceholder(theme),
-                          )
-                              : defaultAsset != null
-                              ? Image.asset(
-                            defaultAsset,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _linkedPlaceholder(theme),
-                          )
-                              : _linkedPlaceholder(theme),
-                        ),
-                      ),
+                      Icon(Icons.link, size: 14, color: Colors.orange.shade700),
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
                           linkedRecipe.title,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.primary,
-                            decoration: TextDecoration.underline,
-                            decorationColor: theme.colorScheme.primary,
+                            color: Colors.orange.shade700,
+                            fontWeight: FontWeight.w500,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Icon(Icons.open_in_new, size: 12, color: theme.colorScheme.primary),
+                      Icon(Icons.open_in_new, size: 11, color: Colors.orange.shade700),
                     ],
                   ),
                 ),
@@ -1766,13 +1739,6 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
 }
 
 // ============ RECIPE LINK PICKER ============
-
-Widget _linkedPlaceholder(ThemeData theme) {
-  return Container(
-    color: theme.colorScheme.surfaceContainerHighest,
-    child: Icon(Icons.restaurant_menu, size: 14, color: theme.colorScheme.outline),
-  );
-}
 
 // ============ FULL-SCREEN IMAGE VIEWER ============
 

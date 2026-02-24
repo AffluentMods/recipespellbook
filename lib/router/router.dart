@@ -33,6 +33,7 @@ import '../ui/screens/settings/nutrition_settings_screen.dart';
 import '../ui/screens/settings/placeholder_settings_screen.dart';
 import '../ui/screens/settings/quick_access_settings_screen.dart';
 import '../ui/screens/settings/recipe_layout_settings_screen.dart';
+import '../ui/screens/settings/ingredient_layout_settings_screen.dart';
 import '../ui/screens/settings/settings_screen.dart';
 import '../ui/screens/settings/trash_screen.dart';
 import '../ui/screens/shopping/kroger_callback_screen.dart';
@@ -147,6 +148,12 @@ final router = GoRouter(
       path: '/settings/recipe-layout',
       name: 'recipe-layout',
       builder: (context, state) => const RecipeLayoutSettingsScreen(),
+    ),
+
+    GoRoute(
+      path: '/settings/ingredient-layout',
+      name: 'ingredient-layout',
+      builder: (context, state) => const IngredientLayoutSettingsScreen(),
     ),
 
     GoRoute(

@@ -5086,4 +5086,16 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get ingredientLayoutColumnar => 'Spalten — Mengen ausgerichtet';
+
+  @override
+  String get settingsIngredientLayoutDescription => 'Wähle aus, wie Mengenangaben und Namen der Zutaten in Rezepten, Einkaufslisten und im Druck angezeigt werden.';
+
+  @override
+  String get ingredientLayoutInlineDescription => 'Menge, Einheit und Name fließen natürlich zusammen';
+
+  @override
+  String get ingredientLayoutColumnarDescription => 'Mengenangaben sind in einer festen Spalte ausgerichtet für einfaches Erfassen';
+
+  @override
+  String get ingredientLayoutInfoText => 'Diese Einstellung gilt für die Rezeptansicht, den Einkaufslistengenerator und gedruckte Rezepte.';
 }

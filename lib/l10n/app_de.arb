@@ -2064,5 +2064,9 @@
   "allergenContains": "Enthält",
   "settingsIngredientLayout": "Zutatenlayout",
   "ingredientLayoutInline": "Inline — 1 TL Butter",
-  "ingredientLayoutColumnar": "Spalten — Mengen ausgerichtet"
+  "ingredientLayoutColumnar": "Spalten — Mengen ausgerichtet",
+  "settingsIngredientLayoutDescription": "Wähle aus, wie Mengenangaben und Namen der Zutaten in Rezepten, Einkaufslisten und im Druck angezeigt werden.",
+  "ingredientLayoutInlineDescription": "Menge, Einheit und Name fließen natürlich zusammen",
+  "ingredientLayoutColumnarDescription": "Mengenangaben sind in einer festen Spalte ausgerichtet für einfaches Erfassen",
+  "ingredientLayoutInfoText": "Diese Einstellung gilt für die Rezeptansicht, den Einkaufslistengenerator und gedruckte Rezepte."
 }

@@ -5086,4 +5086,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get ingredientLayoutColumnar => 'Columnas — cantidades alineadas';
+
+  @override
+  String get settingsIngredientLayoutDescription => 'Elige cómo se muestran las cantidades y los nombres de los ingredientes en recetas, listas de compras e impresión.';
+
+  @override
+  String get ingredientLayoutInlineDescription => 'Cantidad, unidad y nombre fluyen juntos de forma natural';
+
+  @override
+  String get ingredientLayoutColumnarDescription => 'Las cantidades se alinean en una columna fija para facilitar la lectura';
+
+  @override
+  String get ingredientLayoutInfoText => 'Esta configuración se aplica a la vista de recetas, al generador de listas de compras y a las recetas impresas.';
 }

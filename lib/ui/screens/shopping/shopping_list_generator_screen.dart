@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
+import '../../../providers/settings_provider.dart';
 import '../../../services/ingredient_resolver_service.dart';
 import '../../../services/pantry_service.dart';
 import '../../../utils/default_recipe_images.dart';
@@ -628,6 +629,7 @@ class _ShoppingListGeneratorScreenState
                     final unit = ri.ingredient.unit ?? '';
                     final amountStr =
                     [amt, unit].where((s) => s.isNotEmpty).join(' ');
+                    final isColumnar = ref.watch(settingsProvider).ingredientLayout == IngredientLayout.columnar;
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 3),
@@ -636,20 +638,33 @@ class _ShoppingListGeneratorScreenState
                           Icon(Icons.check_circle_outline,
                               size: 16, color: theme.colorScheme.primary),
                           const SizedBox(width: 10),
-                          SizedBox(
-                            width: 72,
-                            child: amountStr.isNotEmpty
-                                ? Text(
-                              amountStr,
-                              style: theme.textTheme.bodyMedium
-                                  ?.copyWith(fontWeight: FontWeight.w600),
-                            )
-                                : null,
-                          ),
-                          Expanded(
-                            child: Text(ri.ingredient.name,
-                                style: theme.textTheme.bodyMedium),
-                          ),
+                          if (isColumnar) ...[
+                            SizedBox(
+                              width: 72,
+                              child: amountStr.isNotEmpty
+                                  ? Text(
+                                amountStr,
+                                style: theme.textTheme.bodyMedium
+                                    ?.copyWith(fontWeight: FontWeight.w600),
+                              )
+                                  : null,
+                            ),
+                            Expanded(
+                              child: Text(ri.ingredient.name,
+                                  style: theme.textTheme.bodyMedium),
+                            ),
+                          ] else
+                            Expanded(
+                              child: Text.rich(
+                                TextSpan(
+                                  style: theme.textTheme.bodyMedium,
+                                  children: [
+                                    if (amountStr.isNotEmpty) TextSpan(text: '$amountStr ', style: const TextStyle(fontWeight: FontWeight.w600)),
+                                    TextSpan(text: ri.ingredient.name),
+                                  ],
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     );
@@ -1191,7 +1206,7 @@ class _RecipeCard extends StatelessWidget {
 // INGREDIENT ROWS
 // ═══════════════════════════════════════════════════════════════════
 
-class _IngredientRow extends StatelessWidget {
+class _IngredientRow extends ConsumerWidget {
   final ResolvedIngredient ingredient;
   final bool isSelected;
   final bool isPantryItem;
@@ -1207,9 +1222,10 @@ class _IngredientRow extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final isColumnar = ref.watch(settingsProvider).ingredientLayout == IngredientLayout.columnar;
     final rawAmt = ingredient.scaledAmount;
     final unit = ingredient.ingredient.unit ?? '';
 
@@ -1235,6 +1251,8 @@ class _IngredientRow extends StatelessWidget {
     }
 
     final amountStr = [amt, unit].where((s) => s.isNotEmpty).join(' ');
+    final nameColor = isSelected ? null : theme.colorScheme.outline;
+    final nameDecoration = isSelected ? null : TextDecoration.lineThrough;
 
     return InkWell(
       onTap: onToggle,
@@ -1247,55 +1265,82 @@ class _IngredientRow extends StatelessWidget {
               color: const Color(0xFFE8A860),
             ),
             const SizedBox(width: 12),
-            // Always reserve space for amount column so names align
-            SizedBox(
-              width: 72,
-              child: amountStr.isNotEmpty
-                  ? Text(
-                amountStr,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isSelected ? null : theme.colorScheme.outline,
-                ),
-              )
-                  : null,
-            ),
-            Expanded(
-              child: Row(
-                children: [
-                  Flexible(
-                    child: Text(
-                      ingredient.ingredient.name,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        decoration:
-                        isSelected ? null : TextDecoration.lineThrough,
-                        color: isSelected ? null : theme.colorScheme.outline,
-                      ),
-                    ),
+            if (isColumnar) ...[
+              SizedBox(
+                width: 72,
+                child: amountStr.isNotEmpty
+                    ? Text(
+                  amountStr,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isSelected ? null : theme.colorScheme.outline,
                   ),
-                  if (isPantryItem) ...[
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 5, vertical: 1),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.tertiaryContainer
-                            .withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
+                )
+                    : null,
+              ),
+              Expanded(
+                child: Row(
+                  children: [
+                    Flexible(
                       child: Text(
-                        'pantry',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          fontSize: 9,
-                          color: theme.colorScheme.onTertiaryContainer,
+                        ingredient.ingredient.name,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          decoration: nameDecoration,
+                          color: nameColor,
                         ),
                       ),
                     ),
+                    if (isPantryItem) ...[
+                      const SizedBox(width: 6),
+                      _pantryBadge(theme),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
+            ] else ...[
+              Expanded(
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text.rich(
+                        TextSpan(
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            decoration: nameDecoration,
+                            color: nameColor,
+                          ),
+                          children: [
+                            if (amountStr.isNotEmpty) TextSpan(text: '$amountStr ', style: TextStyle(fontWeight: FontWeight.w600, color: isSelected ? null : theme.colorScheme.outline)),
+                            TextSpan(text: ingredient.ingredient.name),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (isPantryItem) ...[
+                      const SizedBox(width: 6),
+                      _pantryBadge(theme),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _pantryBadge(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        'pantry',
+        style: theme.textTheme.labelSmall?.copyWith(
+          fontSize: 9,
+          color: theme.colorScheme.onTertiaryContainer,
         ),
       ),
     );

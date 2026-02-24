@@ -9318,6 +9318,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Columnar — amounts aligned'**
   String get ingredientLayoutColumnar;
+
+  /// No description provided for @settingsIngredientLayoutDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how ingredient amounts and names are displayed in recipes, shopping lists, and print.'**
+  String get settingsIngredientLayoutDescription;
+
+  /// No description provided for @ingredientLayoutInlineDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount, unit, and name flow together naturally'**
+  String get ingredientLayoutInlineDescription;
+
+  /// No description provided for @ingredientLayoutColumnarDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Amounts aligned in a fixed column for easy scanning'**
+  String get ingredientLayoutColumnarDescription;
+
+  /// No description provided for @ingredientLayoutInfoText.
+  ///
+  /// In en, this message translates to:
+  /// **'This setting applies to recipe view, shopping list generator, and printed recipes.'**
+  String get ingredientLayoutInfoText;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

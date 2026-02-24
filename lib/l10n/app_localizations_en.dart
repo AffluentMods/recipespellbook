@@ -5086,4 +5086,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ingredientLayoutColumnar => 'Columnar — amounts aligned';
+
+  @override
+  String get settingsIngredientLayoutDescription => 'Choose how ingredient amounts and names are displayed in recipes, shopping lists, and print.';
+
+  @override
+  String get ingredientLayoutInlineDescription => 'Amount, unit, and name flow together naturally';
+
+  @override
+  String get ingredientLayoutColumnarDescription => 'Amounts aligned in a fixed column for easy scanning';
+
+  @override
+  String get ingredientLayoutInfoText => 'This setting applies to recipe view, shopping list generator, and printed recipes.';
 }

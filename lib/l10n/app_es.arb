@@ -2024,5 +2024,9 @@
   "allergenContains": "Contiene",
   "settingsIngredientLayout": "Diseño de ingredientes",
   "ingredientLayoutInline": "En línea — 1 cdta mantequilla",
-  "ingredientLayoutColumnar": "Columnas — cantidades alineadas"
+  "ingredientLayoutColumnar": "Columnas — cantidades alineadas",
+  "settingsIngredientLayoutDescription": "Elige cómo se muestran las cantidades y los nombres de los ingredientes en recetas, listas de compras e impresión.",
+  "ingredientLayoutInlineDescription": "Cantidad, unidad y nombre fluyen juntos de forma natural",
+  "ingredientLayoutColumnarDescription": "Las cantidades se alinean en una columna fija para facilitar la lectura",
+  "ingredientLayoutInfoText": "Esta configuración se aplica a la vista de recetas, al generador de listas de compras y a las recetas impresas."
 }
