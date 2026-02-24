@@ -14,6 +14,7 @@ class RecipePrintService {
     required List<Step> steps, // This now refers to Database Step
     double scale = 1.0,
     bool includeImage = true,
+    bool columnarLayout = false,
     required Map<String, String> labels,
   }) async {
     final pdf = pw.Document();
@@ -71,7 +72,7 @@ class RecipePrintService {
           ],
 
           // Ingredients
-          _buildIngredientsSection(ingredients, scale, labels),
+          _buildIngredientsSection(ingredients, scale, labels, columnarLayout),
           pw.SizedBox(height: 20),
 
           // Instructions
@@ -191,7 +192,7 @@ class RecipePrintService {
     );
   }
 
-  static pw.Widget _buildIngredientsSection(List<Ingredient> ingredients, double scale, Map<String, String> labels) {
+  static pw.Widget _buildIngredientsSection(List<Ingredient> ingredients, double scale, Map<String, String> labels, bool columnarLayout) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -225,13 +226,13 @@ class RecipePrintService {
         pw.Wrap(
           spacing: 16,
           runSpacing: 4,
-          children: ingredients.map((ing) => _buildIngredientItem(ing, scale)).toList(),
+          children: ingredients.map((ing) => _buildIngredientItem(ing, scale, columnarLayout)).toList(),
         ),
       ],
     );
   }
 
-  static pw.Widget _buildIngredientItem(Ingredient ingredient, double scale) {
+  static pw.Widget _buildIngredientItem(Ingredient ingredient, double scale, bool columnarLayout) {
     final scaledAmount = _scaleAmount(ingredient.amount, scale);
     final amountUnit = '${scaledAmount ?? ''} ${ingredient.unit ?? ''}'.trim();
 
@@ -249,19 +250,28 @@ class RecipePrintService {
               shape: pw.BoxShape.circle,
             ),
           ),
-          if (amountUnit.isNotEmpty) ...[
-            pw.Text(
-              amountUnit,
-              style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+          if (columnarLayout) ...[
+            // Columnar: fixed-width amount+unit column, then name
+            pw.SizedBox(
+              width: 55,
+              child: amountUnit.isNotEmpty
+                  ? pw.Text(amountUnit, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold))
+                  : pw.SizedBox.shrink(),
             ),
-            pw.SizedBox(width: 6),
+            pw.SizedBox(width: 4),
+            pw.Expanded(
+              child: pw.Text(ingredient.name, style: const pw.TextStyle(fontSize: 10)),
+            ),
+          ] else ...[
+            // Inline: amount unit name flowing together
+            if (amountUnit.isNotEmpty) ...[
+              pw.Text(amountUnit, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(width: 6),
+            ],
+            pw.Expanded(
+              child: pw.Text(ingredient.name, style: const pw.TextStyle(fontSize: 10)),
+            ),
           ],
-          pw.Expanded(
-            child: pw.Text(
-              ingredient.name,
-              style: const pw.TextStyle(fontSize: 10),
-            ),
-          ),
         ],
       ),
     );

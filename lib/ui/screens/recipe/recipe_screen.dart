@@ -288,11 +288,13 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   Future<void> _printRecipe() async {
     if (_recipe == null) return;
     final l10n = AppLocalizations.of(context)!;
+    final settings = ref.read(settingsProvider);
     await RecipePrintService.printRecipe(
       recipe: _recipe!,
       ingredients: _ingredients,
       steps: _steps,
       scale: _scaleFactor,
+      columnarLayout: settings.ingredientLayout == IngredientLayout.columnar,
       labels: {
         'ingredients': l10n.printLabelIngredients,
         'instructions': l10n.printLabelInstructions,
@@ -1586,18 +1588,36 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
             Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(IngredientImages.getEmoji(ingredient.name), style: const TextStyle(fontSize: 18)),
               const SizedBox(width: 10),
-              Expanded(
-                child: RichText(
-                  text: TextSpan(
-                    style: theme.textTheme.bodyLarge,
-                    children: [
-                      if (amount.isNotEmpty) TextSpan(text: '$amount ', style: const TextStyle(fontWeight: FontWeight.w600)),
-                      if (unit.isNotEmpty) TextSpan(text: '$unit '),
-                      TextSpan(text: ingredient.name),
-                    ],
+              if (settings.ingredientLayout == IngredientLayout.columnar) ...[
+                SizedBox(
+                  width: 72,
+                  child: Text.rich(
+                    TextSpan(
+                      style: theme.textTheme.bodyLarge,
+                      children: [
+                        if (amount.isNotEmpty) TextSpan(text: amount, style: const TextStyle(fontWeight: FontWeight.w600)),
+                        if (unit.isNotEmpty) TextSpan(text: ' $unit'),
+                      ],
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(ingredient.name, style: theme.textTheme.bodyLarge),
+                ),
+              ] else
+                Expanded(
+                  child: RichText(
+                    text: TextSpan(
+                      style: theme.textTheme.bodyLarge,
+                      children: [
+                        if (amount.isNotEmpty) TextSpan(text: '$amount ', style: const TextStyle(fontWeight: FontWeight.w600)),
+                        if (unit.isNotEmpty) TextSpan(text: '$unit '),
+                        TextSpan(text: ingredient.name),
+                      ],
+                    ),
+                  ),
+                ),
               if (matchingAllergens.isNotEmpty)
                 Tooltip(
                   message: '${l10n.allergenContains}: ${matchingAllergens.join(", ")}',
