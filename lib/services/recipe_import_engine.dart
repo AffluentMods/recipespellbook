@@ -637,19 +637,27 @@ class RecipeImportEngine {
     // Instagram puts the caption in og:description
     final caption = _getMetaContent(document, 'og:description')
         ?? _getMetaContent(document, 'description');
-    final title = _getMetaContent(document, 'og:title') ?? 'Instagram Recipe';
+    final rawTitle = _getMetaContent(document, 'og:title') ?? 'Instagram Recipe';
     final image = _getMetaContent(document, 'og:image');
 
     if (caption == null || caption.length < 50) return null;
+
+    // og:title is typically: "Username on Instagram: "actual recipe name here 🔁 Save this..."
+    // _extractSocialTitle handles the quoted-title pattern; fall back to caption, then _cleanSocialTitle
+    final cleanTitle = _extractSocialTitle(rawTitle)
+        ?? _extractSocialTitle(caption)
+        ?? _cleanSocialTitle(rawTitle);
 
     // Try to parse the caption as a recipe
     final parsed = _parseStructuredText(caption);
     if (parsed.ingredients.isEmpty && parsed.instructions.isEmpty) {
       // Caption wasn't structured — try splitting on common patterns
-      return _parseSocialCaption(caption, title, image);
+      final result = _parseSocialCaption(caption, rawTitle, image);
+      result?.title = cleanTitle; // override _cleanSocialTitle(title) done internally
+      return result;
     }
 
-    parsed.title = _cleanSocialTitle(title);
+    parsed.title = cleanTitle;
     parsed.imageUrl = image;
     return parsed;
   }

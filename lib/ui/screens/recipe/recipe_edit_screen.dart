@@ -521,6 +521,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
                 title: l10n.ingredientsTitle,
                 onAddIngredient: _addIngredient,
                 onAddHeader: _addHeader,
+                onSortMode: _toggleSortMode,
               ),
             const SizedBox(height: 12),
             _buildIngredientList(),
@@ -648,6 +649,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
                   title: l10n.ingredientsTitle,
                   onAddIngredient: _addIngredient,
                   onAddHeader: _addHeader,
+                  onSortMode: _toggleSortMode,
                 ),
               const SizedBox(height: 12),
               _buildIngredientList(),
@@ -2029,11 +2031,13 @@ class _SectionTitleWithAdd extends StatelessWidget {
   final String title;
   final VoidCallback onAddIngredient;
   final VoidCallback onAddHeader;
+  final VoidCallback? onSortMode;
 
   const _SectionTitleWithAdd({
     required this.title,
     required this.onAddIngredient,
     required this.onAddHeader,
+    this.onSortMode,
   });
 
   @override
@@ -2043,7 +2047,7 @@ class _SectionTitleWithAdd extends StatelessWidget {
     return Row(
       children: [
         Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-        const Spacer(),
+        const SizedBox(width: 4),
         PopupMenuButton<String>(
           icon: Icon(Icons.add_circle_outline, color: theme.colorScheme.primary, size: 22),
           padding: EdgeInsets.zero,
@@ -2065,13 +2069,24 @@ class _SectionTitleWithAdd extends StatelessWidget {
             PopupMenuItem(
               value: 'header',
               child: Row(children: [
-                Icon(Icons.menu, size: 18, color: theme.colorScheme.outline),
+                Icon(Icons.menu, size: 18, color: theme.colorScheme.primary),
                 const SizedBox(width: 10),
                 Text(l10n.ingredientAddHeader),
               ]),
             ),
           ],
         ),
+        const Spacer(),
+        if (onSortMode != null)
+          TextButton.icon(
+            icon: const Icon(Icons.swap_vert, size: 18),
+            label: Text(l10n.sortOrder),
+            onPressed: onSortMode,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              visualDensity: VisualDensity.compact,
+            ),
+          ),
       ],
     );
   }
@@ -2215,9 +2230,9 @@ class _AddIngredientButton extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.menu, color: theme.colorScheme.outline, size: 18),
+                    Icon(Icons.menu, color: theme.colorScheme.primary, size: 18),
                     const SizedBox(width: 6),
-                    Text(l10n.ingredientAddHeader, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
+                    Text(l10n.ingredientAddHeader, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.primary)),
                   ],
                 ),
               ),
