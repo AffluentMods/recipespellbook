@@ -2082,5 +2082,7 @@
   "aboutRateApp": "App bewerten",
   "aboutRateAppSub": "Hinterlasse eine Bewertung im Store",
   "aboutLicenses": "Open-Source-Lizenzen",
-  "aboutLicensesSub": "Verwendete Drittanbieter-Software"
+  "aboutLicensesSub": "Verwendete Drittanbieter-Software",
+  "sortOrder": "Sortieren",
+  "ingredientAddHeader": "Überschrift"
 }

@@ -2042,5 +2042,7 @@
   "aboutRateApp": "Calificar la app",
   "aboutRateAppSub": "Deja una reseña en la tienda",
   "aboutLicenses": "Licencias de código abierto",
-  "aboutLicensesSub": "Software de terceros utilizado"
+  "aboutLicensesSub": "Software de terceros utilizado",
+  "sortOrder": "Ordenar",
+  "ingredientAddHeader": "Añadir Sección"
 }

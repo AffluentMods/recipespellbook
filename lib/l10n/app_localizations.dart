@@ -9426,6 +9426,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Third-party software used'**
   String get aboutLicensesSub;
+
+  /// No description provided for @sortOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort Order'**
+  String get sortOrder;
+
+  /// No description provided for @ingredientAddHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Header'**
+  String get ingredientAddHeader;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

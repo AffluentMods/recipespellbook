@@ -283,7 +283,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
     final currentCookbookId = prefs.getString(_cookbookKey);
 
     // Load language
-    final languageCode = prefs.getString(_languageKey) ?? 'en';
+    final languageCode = prefs.getString(_languageKey) ?? 'system';
 
     // Load quick access settings
     final quickAccessShowHistory = prefs.getBool(_quickAccessHistoryKey) ?? true;

@@ -56,6 +56,7 @@ class OnboardingService {
         String? nutritionJson;
         if (recipe.nutrition != null) {
           final n = recipe.nutrition!;
+          final realIngredients = recipe.ingredients.where((i) => !i.isHeader);
           nutritionJson = jsonEncode({
             'calories': n.calories,
             'protein': n.protein,
@@ -96,8 +97,8 @@ class OnboardingService {
               'calculatedServings': n.calculatedServings,
             'isEstimated': true,
             'servingSize': '1 serving',
-            'matchedIngredients': recipe.ingredients.length,
-            'totalIngredients': recipe.ingredients.length,
+            'matchedIngredients': realIngredients.length,
+            'totalIngredients': realIngredients.length,
           });
         }
 
@@ -118,7 +119,7 @@ class OnboardingService {
           nutritionJson: Value(nutritionJson),
         ));
 
-        // Insert ingredients
+        // Insert ingredients (headers stored with notes='__header__')
         for (var i = 0; i < recipe.ingredients.length; i++) {
           final ing = recipe.ingredients[i];
           await dao.insertIngredient(IngredientsCompanion.insert(
@@ -128,6 +129,7 @@ class OnboardingService {
             name: ing.name,
             amount: Value(ing.amount),
             unit: Value(ing.unit),
+            notes: Value(ing.isHeader ? '__header__' : null),
           ));
         }
 
@@ -151,18 +153,19 @@ class OnboardingService {
     // No tags — keep starter recipes clean
 
     // Link related recipes (per-ingredient: ingredient → linked recipe)
+    // NOTE: Indices account for header rows in ingredient lists
     try {
-      // White Pizza: "pizza dough ball" (ing_0) → Pizza Dough recipe
+      // White Pizza: "pizza dough ball" (ing_1, after Base header) → Pizza Dough recipe
       await dao.addIngredientRecipeLink(
-        'default_white_pizza', 'default_white_pizza_ing_0', 'default_pizza_dough',
+        'default_white_pizza', 'default_white_pizza_ing_1', 'default_pizza_dough',
       );
-      // White Pizza: "white pizza sauce" (ing_11) → White Pizza Sauce recipe
+      // White Pizza: "white pizza sauce" (ing_4, after Base header) → White Pizza Sauce recipe
       await dao.addIngredientRecipeLink(
-        'default_white_pizza', 'default_white_pizza_ing_11', 'default_white_pizza_sauce',
+        'default_white_pizza', 'default_white_pizza_ing_4', 'default_white_pizza_sauce',
       );
-      // Lomo Saltado: "béarnaise sauce, for serving" (ing_13) → Béarnaise Sauce recipe
+      // Lomo Saltado: "béarnaise sauce, for serving" (ing_15, after 2 headers) → Béarnaise Sauce recipe
       await dao.addIngredientRecipeLink(
-        'default_lomo_saltado', 'default_lomo_saltado_ing_13', 'default_bearnaise_sauce',
+        'default_lomo_saltado', 'default_lomo_saltado_ing_15', 'default_bearnaise_sauce',
       );
     } catch (_) {
       // Links are best-effort
@@ -283,6 +286,11 @@ class OnboardingService {
             servings: servings,
           );
 
+          // Count real ingredients (exclude headers)
+          final realIngredientCount = ingredients
+              .where((i) => i.notes != '__header__')
+              .length;
+
           // Build nutrition JSON matching the seed format
           final total = result.totalNutrition;
           final nutritionJson = jsonEncode({
@@ -327,7 +335,7 @@ class OnboardingService {
             'matchedIngredients': result.ingredientResults
                 .where((r) => r.isMatched)
                 .length,
-            'totalIngredients': ingredients.length,
+            'totalIngredients': realIngredientCount,
           });
 
           // Update recipe in DB
@@ -340,7 +348,7 @@ class OnboardingService {
           updated++;
           debugPrint('[OnboardingService] Recalculated: ${recipe.title} '
               '(${result.ingredientResults.where((r) => r.isMatched).length}/'
-              '${ingredients.length} matched)');
+              '$realIngredientCount matched)');
         } catch (e) {
           debugPrint('[OnboardingService] Failed to recalc ${recipe.title}: $e');
         }

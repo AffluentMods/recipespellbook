@@ -845,6 +845,67 @@ class RecipeImportEngine {
         .trim();
   }
 
+  /// Detect social media caption text pasted as plain text and extract recipe name.
+  /// Returns null if the text doesn't look like a social media caption.
+  static String? _extractSocialTitle(String text) {
+    // Pattern: "Username on Instagram: "recipe title here..."
+    final instagramQuoteMatch = RegExp(
+      r'(?:^|\b)\w[\w.]*\s+on\s+Instagram:\s*["""\u201C]([^"""\u201D]+)["""\u201D]',
+      caseSensitive: false,
+    ).firstMatch(text);
+    if (instagramQuoteMatch != null) {
+      var extracted = instagramQuoteMatch.group(1)!.trim();
+      // Take only up to first emoji or special marker
+      extracted = extracted.replaceAll(RegExp(r'[\u{1F000}-\u{1FFFF}].*', unicode: true), '').trim();
+      if (extracted.length > 3 && extracted.length < 150) return extracted;
+    }
+
+    // Pattern: "Username on Platform: ..." or "@username ..."
+    final socialPrefixMatch = RegExp(
+      r'^(?:@\w[\w.]*|[\w.][\w.]*\s+on\s+(?:Instagram|TikTok|Facebook|Pinterest))\s*[:\-–]\s*["""\u201C]?(.+)',
+      caseSensitive: false,
+    ).firstMatch(text);
+    if (socialPrefixMatch != null) {
+      var rest = socialPrefixMatch.group(1)!;
+      // Extract up to first sentence-ending punctuation, emoji block, or recipe keyword
+      final sentenceEnd = RegExp(
+        r'[.!?]\s|[\u{1F000}-\u{1FFFF}]|(?:Dough|Ingredients|Instructions|Directions|Recipe|Save this|Makes?\s+\d)',
+        unicode: true,
+        caseSensitive: false,
+      ).firstMatch(rest);
+      if (sentenceEnd != null) {
+        rest = rest.substring(0, sentenceEnd.start).trim();
+      }
+      rest = rest.replaceAll(RegExp(r'^["""\u201C]|["""\u201D]$'), '').trim();
+      if (rest.length > 3 && rest.length < 150) return rest;
+    }
+
+    // Very long first line (>150 chars) — likely social paste, extract before recipe keywords
+    if (text.length > 150) {
+      final keywordMatch = RegExp(
+        r'(?:Dough|Batter|Filling|Sauce|Frosting|Glaze|Topping|Ingredients|Instructions|Directions|Recipe|Method|Steps)\s*:',
+        caseSensitive: false,
+      ).firstMatch(text);
+      if (keywordMatch != null && keywordMatch.start > 10) {
+        var candidate = text.substring(0, keywordMatch.start).trim();
+        // Stop at first emoji, period, or social phrase
+        final stopMatch = RegExp(
+          r'[\u{1F000}-\u{1FFFF}]|[.!?]\s|Save this|They.re\s|And so\s|So easy|So good|Makes?\s+\d',
+          unicode: true,
+          caseSensitive: false,
+        ).firstMatch(candidate);
+        if (stopMatch != null && stopMatch.start > 3) {
+          candidate = candidate.substring(0, stopMatch.start).trim();
+        }
+        candidate = _cleanSocialTitle(candidate);
+        candidate = candidate.replaceAll(RegExp(r'^["""\u201C]|["""\u201D]$'), '').trim();
+        if (candidate.length > 3 && candidate.length < 150) return candidate;
+      }
+    }
+
+    return null;
+  }
+
   /// Get meta tag content by property or name
   static String? _getMetaContent(Document document, String key) {
     final byProperty = document.querySelector('meta[property="$key"]')?.attributes['content'];
@@ -1626,11 +1687,20 @@ class RecipeImportEngine {
 
         if (i < 5 &&
             !_isListItem(line) &&
-            line.length > 3 &&
-            line.length < 150) {
-          title = _cleanMarkdown(line);
-          foundTitle = true;
-          continue;
+            line.length > 3) {
+          // Detect social media caption patterns and extract recipe name
+          final socialTitle = _extractSocialTitle(line);
+          if (socialTitle != null) {
+            title = socialTitle;
+            foundTitle = true;
+            continue;
+          }
+
+          if (line.length < 150) {
+            title = _cleanMarkdown(line);
+            foundTitle = true;
+            continue;
+          }
         }
       }
 

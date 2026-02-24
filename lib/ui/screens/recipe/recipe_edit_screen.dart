@@ -238,6 +238,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   final List<_SimpleIngredient> _ingredients = [];
   final List<EditableStep> _steps = [];
   Map<String, List<RecipeLinkInfo>> _ingredientLinksMap = {};
+  bool _ingredientSortMode = false;
 
   // Tab controller for tabbed layout
   late TabController _tabController;
@@ -503,36 +504,28 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
             const SizedBox(height: 16),
             TextFormField(controller: _sourceUrlController, decoration: InputDecoration(labelText: l10n.recipeFieldSource, hintText: 'https://...', prefixIcon: const Icon(Icons.link)), keyboardType: TextInputType.url),
             const SizedBox(height: 32),
-            _SectionTitleWithAdd(
-              title: l10n.ingredientsTitle,
-              onAddIngredient: _addIngredient,
-              onAddHeader: _addHeader,
-            ),
+            if (_ingredientSortMode)
+              Row(
+                children: [
+                  Text(l10n.ingredientsTitle, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                  const Spacer(),
+                  TextButton.icon(
+                    icon: const Icon(Icons.check, size: 16),
+                    label: Text(l10n.actionDone),
+                    onPressed: _toggleSortMode,
+                  ),
+                ],
+              )
+            else
+              _SectionTitleWithAdd(
+                title: l10n.ingredientsTitle,
+                onAddIngredient: _addIngredient,
+                onAddHeader: _addHeader,
+              ),
             const SizedBox(height: 12),
-            ..._ingredients.asMap().entries.map((entry) => entry.value.isHeader
-                ? _IngredientHeaderRow(
-              key: ValueKey(entry.value.id),
-              ingredient: entry.value,
-              onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
-              onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
-              onMoveUp: entry.key > 0 ? () => setState(() {
-                final item = _ingredients.removeAt(entry.key);
-                _ingredients.insert(entry.key - 1, item);
-              }) : null,
-              onMoveDown: entry.key < _ingredients.length - 1 ? () => setState(() {
-                final item = _ingredients.removeAt(entry.key);
-                _ingredients.insert(entry.key + 1, item);
-              }) : null,
-            )
-                : _IngredientRow(
-              key: ValueKey(entry.value.id),
-              ingredient: entry.value,
-              onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
-              onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
-              onLinkRecipe: _isEditing ? () => _showLinkRecipePicker(entry.value.id, entry.value.text) : null,
-              linkedRecipes: (_ingredientLinksMap[entry.value.id] ?? []).map((info) => info.recipe).toList(),
-            )),
-            _AddIngredientButton(onTap: _addIngredient, onAddHeader: _addHeader),
+            _buildIngredientList(),
+            if (!_ingredientSortMode)
+              _AddIngredientButton(onTap: _addIngredient, onAddHeader: _addHeader),
             const SizedBox(height: 32),
             InstructionsEditor(
               steps: _steps,
@@ -638,30 +631,28 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ..._ingredients.asMap().entries.map((entry) => entry.value.isHeader
-                  ? _IngredientHeaderRow(
-                key: ValueKey(entry.value.id),
-                ingredient: entry.value,
-                onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
-                onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
-                onMoveUp: entry.key > 0 ? () => setState(() {
-                  final item = _ingredients.removeAt(entry.key);
-                  _ingredients.insert(entry.key - 1, item);
-                }) : null,
-                onMoveDown: entry.key < _ingredients.length - 1 ? () => setState(() {
-                  final item = _ingredients.removeAt(entry.key);
-                  _ingredients.insert(entry.key + 1, item);
-                }) : null,
-              )
-                  : _IngredientRow(
-                key: ValueKey(entry.value.id),
-                ingredient: entry.value,
-                onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
-                onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
-                onLinkRecipe: _isEditing ? () => _showLinkRecipePicker(entry.value.id, entry.value.text) : null,
-                linkedRecipes: (_ingredientLinksMap[entry.value.id] ?? []).map((info) => info.recipe).toList(),
-              )),
-              _AddIngredientButton(onTap: _addIngredient, onAddHeader: _addHeader),
+              if (_ingredientSortMode)
+                Row(
+                  children: [
+                    Text(l10n.ingredientsTitle, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                    const Spacer(),
+                    TextButton.icon(
+                      icon: const Icon(Icons.check, size: 16),
+                      label: Text(l10n.actionDone),
+                      onPressed: _toggleSortMode,
+                    ),
+                  ],
+                )
+              else
+                _SectionTitleWithAdd(
+                  title: l10n.ingredientsTitle,
+                  onAddIngredient: _addIngredient,
+                  onAddHeader: _addHeader,
+                ),
+              const SizedBox(height: 12),
+              _buildIngredientList(),
+              if (!_ingredientSortMode)
+                _AddIngredientButton(onTap: _addIngredient, onAddHeader: _addHeader),
               const SizedBox(height: 100),
             ],
           ),
@@ -697,6 +688,95 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   void _addHeader() {
     setState(() => _ingredients.add(_SimpleIngredient(id: 'hdr_${DateTime.now().millisecondsSinceEpoch}', text: '', isHeader: true)));
     // Don't scroll — headers are usually added between existing items
+  }
+
+  void _toggleSortMode() {
+    setState(() => _ingredientSortMode = !_ingredientSortMode);
+  }
+
+  Widget _buildIngredientList() {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    if (_ingredientSortMode) {
+      return ReorderableListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: _ingredients.length,
+        proxyDecorator: (child, index, animation) {
+          return AnimatedBuilder(
+            animation: animation,
+            builder: (context, child) => Material(
+              elevation: 4,
+              borderRadius: BorderRadius.circular(12),
+              color: theme.colorScheme.surfaceContainerHigh,
+              child: child,
+            ),
+            child: child,
+          );
+        },
+        onReorder: (oldIndex, newIndex) {
+          setState(() {
+            if (oldIndex < newIndex) newIndex -= 1;
+            final item = _ingredients.removeAt(oldIndex);
+            _ingredients.insert(newIndex, item);
+          });
+        },
+        itemBuilder: (context, index) {
+          final ing = _ingredients[index];
+          return ListTile(
+            key: ValueKey(ing.id),
+            dense: true,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+            leading: ing.isHeader
+                ? Icon(Icons.menu, size: 18, color: theme.colorScheme.primary)
+                : Container(
+              width: 8, height: 8,
+              decoration: BoxDecoration(color: theme.colorScheme.primary, shape: BoxShape.circle),
+            ),
+            title: Text(
+              ing.text.isEmpty ? (ing.isHeader ? '(empty header)' : '(empty ingredient)') : ing.text,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: ing.isHeader ? FontWeight.w700 : FontWeight.normal,
+                color: ing.isHeader ? theme.colorScheme.primary : null,
+                fontStyle: ing.text.isEmpty ? FontStyle.italic : null,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: ReorderableDragStartListener(
+              index: index,
+              child: Icon(Icons.drag_handle, color: theme.colorScheme.outline),
+            ),
+          );
+        },
+      );
+    }
+
+    // Normal mode
+    return Column(
+      children: _ingredients.asMap().entries.map((entry) {
+        if (entry.value.isHeader) {
+          return _IngredientHeaderRow(
+            key: ValueKey(entry.value.id),
+            ingredient: entry.value,
+            onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
+            onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
+            onSortMode: _toggleSortMode,
+          );
+        }
+        return _IngredientRow(
+          key: ValueKey(entry.value.id),
+          ingredient: entry.value,
+          onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
+          onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
+          onLinkRecipe: _isEditing ? () => _showLinkRecipePicker(entry.value.id, entry.value.text) : null,
+          linkedRecipes: (_ingredientLinksMap[entry.value.id] ?? []).map((info) => info.recipe).toList(),
+          onSortMode: _toggleSortMode,
+        );
+      }).toList(),
+    );
   }
 
   Future<void> _calculateNutrition() async {
@@ -1985,9 +2065,9 @@ class _SectionTitleWithAdd extends StatelessWidget {
             PopupMenuItem(
               value: 'header',
               child: Row(children: [
-                Icon(Icons.segment, size: 18, color: theme.colorScheme.outline),
+                Icon(Icons.menu, size: 18, color: theme.colorScheme.outline),
                 const SizedBox(width: 10),
-                Text(l10n.ingredientHeader),
+                Text(l10n.ingredientAddHeader),
               ]),
             ),
           ],
@@ -2002,6 +2082,7 @@ class _IngredientRow extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final VoidCallback onDelete;
   final VoidCallback? onLinkRecipe;
+  final VoidCallback? onSortMode;
   final List<Recipe> linkedRecipes;
 
   const _IngredientRow({
@@ -2010,6 +2091,7 @@ class _IngredientRow extends StatelessWidget {
     required this.onChanged,
     required this.onDelete,
     this.onLinkRecipe,
+    this.onSortMode,
     this.linkedRecipes = const [],
   });
 
@@ -2020,7 +2102,7 @@ class _IngredientRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(children: [
-          Container(width: 8, height: 8, decoration: BoxDecoration(color: linkedRecipes.isNotEmpty ? theme.colorScheme.primary : theme.colorScheme.primary, shape: BoxShape.circle)),
+          Container(width: 8, height: 8, decoration: BoxDecoration(color: theme.colorScheme.primary, shape: BoxShape.circle)),
           const SizedBox(width: 12),
           Expanded(child: TextFormField(initialValue: ingredient.text, decoration: const InputDecoration(hintText: 'e.g., 2 cups flour', isDense: true, border: OutlineInputBorder()), textCapitalization: TextCapitalization.sentences, onChanged: onChanged)),
           PopupMenuButton<String>(
@@ -2028,12 +2110,9 @@ class _IngredientRow extends StatelessWidget {
             padding: EdgeInsets.zero,
             onSelected: (value) {
               switch (value) {
-                case 'delete':
-                  onDelete();
-                  break;
-                case 'link_recipe':
-                  onLinkRecipe?.call();
-                  break;
+                case 'delete': onDelete(); break;
+                case 'link_recipe': onLinkRecipe?.call(); break;
+                case 'sort_order': onSortMode?.call(); break;
               }
             },
             itemBuilder: (context) => [
@@ -2046,6 +2125,14 @@ class _IngredientRow extends StatelessWidget {
                     Text(l10n.linkRecipe),
                   ]),
                 ),
+              PopupMenuItem(
+                value: 'sort_order',
+                child: Row(children: [
+                  Icon(Icons.swap_vert, size: 18, color: theme.colorScheme.onSurface),
+                  const SizedBox(width: 8),
+                  Text(l10n.sortOrder),
+                ]),
+              ),
               PopupMenuItem(
                 value: 'delete',
                 child: Row(children: [
@@ -2116,21 +2203,23 @@ class _AddIngredientButton extends StatelessWidget {
         ),
         if (onAddHeader != null) ...[
           const SizedBox(width: 8),
-          GestureDetector(
-            onTap: onAddHeader,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
-              decoration: BoxDecoration(
-                border: Border.all(color: theme.colorScheme.outlineVariant),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.segment, color: theme.colorScheme.outline, size: 18),
-                  const SizedBox(width: 6),
-                  Text(l10n.ingredientHeader, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
-                ],
+          Expanded(
+            child: GestureDetector(
+              onTap: onAddHeader,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: theme.colorScheme.outlineVariant),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.menu, color: theme.colorScheme.outline, size: 18),
+                    const SizedBox(width: 6),
+                    Text(l10n.ingredientAddHeader, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
+                  ],
+                ),
               ),
             ),
           ),
@@ -2144,29 +2233,22 @@ class _IngredientHeaderRow extends StatelessWidget {
   final _SimpleIngredient ingredient;
   final ValueChanged<String> onChanged;
   final VoidCallback onDelete;
-  final VoidCallback? onMoveUp;
-  final VoidCallback? onMoveDown;
+  final VoidCallback? onSortMode;
 
   const _IngredientHeaderRow({
     super.key,
     required this.ingredient,
     required this.onChanged,
     required this.onDelete,
-    this.onMoveUp,
-    this.onMoveDown,
+    this.onSortMode,
   });
 
   @override Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     return Padding(padding: const EdgeInsets.only(bottom: 8, top: 8), child: Row(children: [
-      Container(
-        width: 8, height: 2,
-        color: theme.colorScheme.primary.withValues(alpha: 0.5),
-      ),
-      const SizedBox(width: 8),
-      Icon(Icons.segment, size: 16, color: theme.colorScheme.primary),
-      const SizedBox(width: 8),
+      Icon(Icons.menu, size: 18, color: theme.colorScheme.primary),
+      const SizedBox(width: 10),
       Expanded(child: TextFormField(
         initialValue: ingredient.text,
         decoration: InputDecoration(
@@ -2189,30 +2271,19 @@ class _IngredientHeaderRow extends StatelessWidget {
         padding: EdgeInsets.zero,
         onSelected: (value) {
           switch (value) {
-            case 'up': onMoveUp?.call(); break;
-            case 'down': onMoveDown?.call(); break;
+            case 'sort_order': onSortMode?.call(); break;
             case 'delete': onDelete(); break;
           }
         },
         itemBuilder: (context) => [
-          if (onMoveUp != null)
-            PopupMenuItem(
-              value: 'up',
-              child: Row(children: [
-                Icon(Icons.arrow_upward, size: 18, color: theme.colorScheme.primary),
-                const SizedBox(width: 8),
-                const Text('Move Up'),
-              ]),
-            ),
-          if (onMoveDown != null)
-            PopupMenuItem(
-              value: 'down',
-              child: Row(children: [
-                Icon(Icons.arrow_downward, size: 18, color: theme.colorScheme.primary),
-                const SizedBox(width: 8),
-                const Text('Move Down'),
-              ]),
-            ),
+          PopupMenuItem(
+            value: 'sort_order',
+            child: Row(children: [
+              Icon(Icons.swap_vert, size: 18, color: theme.colorScheme.onSurface),
+              const SizedBox(width: 8),
+              Text(l10n.sortOrder),
+            ]),
+          ),
           PopupMenuItem(
             value: 'delete',
             child: Row(children: [

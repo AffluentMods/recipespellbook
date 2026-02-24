@@ -5140,4 +5140,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get aboutLicensesSub => 'Software de terceros utilizado';
+
+  @override
+  String get sortOrder => 'Ordenar';
+
+  @override
+  String get ingredientAddHeader => 'Añadir Sección';
 }

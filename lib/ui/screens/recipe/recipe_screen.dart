@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 
 import '../../../data/allergen_data.dart';
+import '../../../data/app_enums.dart';
 import '../../../data/ingredient_images.dart';
 import '../../../data/localized_units.dart';
 import '../../../data/nutrition_data.dart';
@@ -158,6 +159,13 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
+
+    // Apply measurement system preference as default conversion
+    final measurementPref = ref.read(settingsProvider).measurementSystem;
+    _unitConversion = measurementPref == MeasurementSystem.metric
+        ? _UnitConversion.toMetric
+        : _UnitConversion.toImperial;
+
     _loadRecipe();
     _markAsViewed();
   }
@@ -1622,30 +1630,55 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
                   child: Icon(Icons.warning_amber_rounded, size: 18, color: Colors.red.shade700),
                 ),
             ]),
-            // Linked recipes for this ingredient
+            // Linked recipes for this ingredient (with thumbnails)
             ...linkedRecipes.map((linkedRecipe) {
+              final hasLinkedImage = linkedRecipe.imagePath != null &&
+                  linkedRecipe.imagePath!.isNotEmpty &&
+                  File(linkedRecipe.imagePath!).existsSync();
+              final defaultAsset = defaultRecipeImageAsset(linkedRecipe.id);
               return Padding(
-                padding: const EdgeInsets.only(left: 34, top: 2),
+                padding: const EdgeInsets.only(left: 20, top: 4),
                 child: GestureDetector(
                   onTap: () => context.push('/recipe/${linkedRecipe.id}'),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.link, size: 14, color: Colors.orange.shade700),
+                      Icon(Icons.subdirectory_arrow_right, size: 14, color: theme.colorScheme.primary),
+                      const SizedBox(width: 6),
+                      // Recipe thumbnail
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: SizedBox(
+                          width: 24, height: 24,
+                          child: hasLinkedImage
+                              ? Image.file(
+                            File(linkedRecipe.imagePath!),
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => _linkedPlaceholder(theme),
+                          )
+                              : defaultAsset != null
+                              ? Image.asset(
+                            defaultAsset,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => _linkedPlaceholder(theme),
+                          )
+                              : _linkedPlaceholder(theme),
+                        ),
+                      ),
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
                           linkedRecipe.title,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.orange.shade700,
-                            fontWeight: FontWeight.w500,
+                            color: theme.colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            decorationColor: theme.colorScheme.primary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Icon(Icons.open_in_new, size: 11, color: Colors.orange.shade700),
+                      Icon(Icons.open_in_new, size: 12, color: theme.colorScheme.primary),
                     ],
                   ),
                 ),
@@ -1739,6 +1772,13 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
 }
 
 // ============ RECIPE LINK PICKER ============
+
+Widget _linkedPlaceholder(ThemeData theme) {
+  return Container(
+    color: theme.colorScheme.surfaceContainerHighest,
+    child: Icon(Icons.restaurant_menu, size: 14, color: theme.colorScheme.outline),
+  );
+}
 
 // ============ FULL-SCREEN IMAGE VIEWER ============
 

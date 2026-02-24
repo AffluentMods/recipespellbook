@@ -2478,5 +2478,7 @@
   "aboutRateApp": "Rate the App",
   "aboutRateAppSub": "Leave a review on the store",
   "aboutLicenses": "Open Source Licenses",
-  "aboutLicensesSub": "Third-party software used"
+  "aboutLicensesSub": "Third-party software used",
+  "sortOrder": "Sort Order",
+  "ingredientAddHeader": "Add Header"
 }
