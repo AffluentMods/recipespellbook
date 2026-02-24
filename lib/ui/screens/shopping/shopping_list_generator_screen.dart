@@ -791,17 +791,16 @@ class _ShoppingListGeneratorScreenState
 
       if (mounted) {
         final totalAdded = _totalSelected;
+        final router = GoRouter.of(context);
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.addedItemsToList(totalAdded)),
-            behavior: SnackBarBehavior.floating,
-            action: SnackBarAction(
-              label: 'View',
-              onPressed: () => context.go('/shopping'),
-            ),
-          ),
-        );
+        if (context.mounted) {
+          AppSnackbar.successWithAction(
+            context,
+            l10n.addedItemsToList(totalAdded),
+            actionLabel: l10n.viewList,
+            onAction: () => router.go('/shopping'),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

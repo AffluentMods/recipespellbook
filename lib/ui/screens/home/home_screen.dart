@@ -659,21 +659,25 @@ class _CategoriesSectionState extends ConsumerState<_CategoriesSection> {
     final customIds = _customCategories.map((c) => c.id).toSet();
 
     for (final recipe in widget.recipes) {
-      if (recipe.categoryId != null) {
-        final normalizedId = recipe.categoryId!.toLowerCase();
-        String? matchedId;
-        for (final c in CategoryData.categories) {
-          if (c.id == normalizedId || c.name.toLowerCase() == normalizedId) {
-            matchedId = c.id;
-            break;
+      if (recipe.categoryId != null && recipe.categoryId!.isNotEmpty) {
+        // categoryId can be comma-separated (multi-select)
+        final ids = recipe.categoryId!.split(',').where((s) => s.isNotEmpty);
+        for (final rawId in ids) {
+          final normalizedId = rawId.toLowerCase();
+          String? matchedId;
+          for (final c in CategoryData.categories) {
+            if (c.id == normalizedId || c.name.toLowerCase() == normalizedId) {
+              matchedId = c.id;
+              break;
+            }
           }
-        }
-        // Check custom categories (exact ID match)
-        if (matchedId == null && customIds.contains(recipe.categoryId)) {
-          matchedId = recipe.categoryId;
-        }
-        if (matchedId != null) {
-          categoryCounts[matchedId] = (categoryCounts[matchedId] ?? 0) + 1;
+          // Check custom categories (exact ID match)
+          if (matchedId == null && customIds.contains(rawId)) {
+            matchedId = rawId;
+          }
+          if (matchedId != null) {
+            categoryCounts[matchedId] = (categoryCounts[matchedId] ?? 0) + 1;
+          }
         }
       }
     }
@@ -786,9 +790,16 @@ class _UncategorizedSectionState extends ConsumerState<_UncategorizedSection> {
     }
 
     bool matchesCategory(String? categoryId) {
-      if (categoryId == null) return false;
-      final lower = categoryId.toLowerCase();
-      return knownCategoryIds.contains(lower) || knownCategoryNames.contains(lower) || _customCategoryIds.contains(categoryId);
+      if (categoryId == null || categoryId.isEmpty) return false;
+      // categoryId can be comma-separated (multi-select)
+      final ids = categoryId.split(',').where((s) => s.isNotEmpty);
+      for (final rawId in ids) {
+        final lower = rawId.toLowerCase();
+        if (knownCategoryIds.contains(lower) || knownCategoryNames.contains(lower) || _customCategoryIds.contains(rawId)) {
+          return true;
+        }
+      }
+      return false;
     }
 
     final uncategorized = widget.recipes.where((r) => !matchesCourse(r.courseId) && !matchesCategory(r.categoryId)).toList();

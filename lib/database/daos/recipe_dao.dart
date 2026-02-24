@@ -36,7 +36,13 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
       ..where((t) => t.cookbookId.equals(cookbookId))
       ..where((t) => t.deletedAt.isNull());
     if (categoryId != null) {
-      query.where((t) => t.categoryId.lower().equals(categoryId.toLowerCase()));
+      final cat = categoryId.toLowerCase();
+      query.where((t) =>
+      t.categoryId.lower().equals(cat) |
+      t.categoryId.lower().like('$cat,%') |
+      t.categoryId.lower().like('%,$cat,%') |
+      t.categoryId.lower().like('%,$cat')
+      );
     }
     query.orderBy([(t) => OrderingTerm(expression: t.title)]);
     return query.watch();
@@ -63,7 +69,13 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
       query.where((t) => t.courseId.lower().equals(courseId.toLowerCase()));
     }
     if (categoryId != null) {
-      query.where((t) => t.categoryId.lower().equals(categoryId.toLowerCase()));
+      final cat = categoryId.toLowerCase();
+      query.where((t) =>
+      t.categoryId.lower().equals(cat) |
+      t.categoryId.lower().like('$cat,%') |
+      t.categoryId.lower().like('%,$cat,%') |
+      t.categoryId.lower().like('%,$cat')
+      );
     }
     query.orderBy([(t) => OrderingTerm(expression: t.title)]);
     return query.watch();
@@ -135,11 +147,17 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
     return query.get().then((list) => list.length);
   }
 
-  /// Get recipe count by category (case-insensitive)
+  /// Get recipe count by category (case-insensitive, handles comma-separated multi-category)
   Future<int> getRecipeCountByCategory(String cookbookId, String categoryId) {
+    final cat = categoryId.toLowerCase();
     final query = select(recipes)
       ..where((t) => t.cookbookId.equals(cookbookId))
-      ..where((t) => t.categoryId.lower().equals(categoryId.toLowerCase()))
+      ..where((t) =>
+      t.categoryId.lower().equals(cat) |
+      t.categoryId.lower().like('$cat,%') |
+      t.categoryId.lower().like('%,$cat,%') |
+      t.categoryId.lower().like('%,$cat')
+      )
       ..where((t) => t.deletedAt.isNull());
     return query.get().then((list) => list.length);
   }

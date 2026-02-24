@@ -81,11 +81,15 @@ class _CategoriesBrowseScreenState extends ConsumerState<CategoriesBrowseScreen>
           final courseCounts = <String, int>{};
           final categoryCounts = <String, int>{};
           for (final recipe in recipes) {
-            if (recipe.courseId != null) {
+            if (recipe.courseId != null && recipe.courseId!.isNotEmpty) {
               courseCounts[recipe.courseId!] = (courseCounts[recipe.courseId!] ?? 0) + 1;
             }
-            if (recipe.categoryId != null) {
-              categoryCounts[recipe.categoryId!] = (categoryCounts[recipe.categoryId!] ?? 0) + 1;
+            if (recipe.categoryId != null && recipe.categoryId!.isNotEmpty) {
+              // categoryId can be comma-separated (multi-select)
+              final ids = recipe.categoryId!.split(',').where((s) => s.isNotEmpty);
+              for (final id in ids) {
+                categoryCounts[id] = (categoryCounts[id] ?? 0) + 1;
+              }
             }
           }
 

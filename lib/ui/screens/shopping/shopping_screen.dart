@@ -2525,56 +2525,73 @@ class _SectionGroupedList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final shoppingDao = ref.watch(shoppingDaoProvider);
 
-    // Group items by category
-    final grouped = <String, List<ShoppingListItem>>{};
-    for (final item in items) {
-      String category = item.shoppingCategoryId ?? '';
-      if (category.isEmpty) {
-        category = getShoppingCategory(item.name, userMappings: userMappings);
-      }
-      grouped.putIfAbsent(category, () => []).add(item);
-    }
+    // Load custom shopping category names to resolve IDs like SHOP_xxx
+    return StreamBuilder<List<ShoppingCategory>>(
+      stream: shoppingDao.watchAllShoppingCategories(),
+      builder: (context, catSnapshot) {
+        final dbCategories = catSnapshot.data ?? [];
+        final categoryNameMap = <String, String>{for (final c in dbCategories) c.id: c.name};
 
-    // Sort categories
-    final sortedKeys = grouped.keys.toList()..sort((a, b) {
-      final order = ['produce', 'dairy', 'meat', 'seafood', 'bakery', 'deli', 'frozen',
-        'breakfast', 'canned', 'pasta', 'grains', 'baking', 'condiments',
-        'oil', 'spices', 'snacks', 'beverages', 'alcohol', 'baby',
-        'beauty', 'household', 'pet', 'international', 'other'];
-      final aIdx = order.indexOf(a);
-      final bIdx = order.indexOf(b);
-      return (aIdx == -1 ? 999 : aIdx).compareTo(bIdx == -1 ? 999 : bIdx);
-    });
+        String resolveCategoryName(String id) {
+          // Check DB first for custom categories
+          if (categoryNameMap.containsKey(id)) return categoryNameMap[id]!;
+          // Fall back to built-in display name
+          return getShoppingCategoryDisplayName(id);
+        }
 
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 100),
-      children: [
-        for (final category in sortedKeys) ...[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 16, 4),
-            child: Text(
-              getShoppingCategoryDisplayName(category).toUpperCase(),
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.primary,
-                letterSpacing: 0.5,
+        // Group items by category
+        final grouped = <String, List<ShoppingListItem>>{};
+        for (final item in items) {
+          String category = item.shoppingCategoryId ?? '';
+          if (category.isEmpty) {
+            category = getShoppingCategory(item.name, userMappings: userMappings);
+          }
+          grouped.putIfAbsent(category, () => []).add(item);
+        }
+
+        // Sort categories
+        final sortedKeys = grouped.keys.toList()..sort((a, b) {
+          final order = ['produce', 'dairy', 'meat', 'seafood', 'bakery', 'deli', 'frozen',
+            'breakfast', 'canned', 'pasta', 'grains', 'baking', 'condiments',
+            'oil', 'spices', 'snacks', 'beverages', 'alcohol', 'baby',
+            'beauty', 'household', 'pet', 'international', 'other'];
+          final aIdx = order.indexOf(a);
+          final bIdx = order.indexOf(b);
+          return (aIdx == -1 ? 999 : aIdx).compareTo(bIdx == -1 ? 999 : bIdx);
+        });
+
+        return ListView(
+          padding: const EdgeInsets.only(bottom: 100),
+          children: [
+            for (final category in sortedKeys) ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 16, 4),
+                child: Text(
+                  resolveCategoryName(category).toUpperCase(),
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                    letterSpacing: 0.5,
+                  ),
+                ),
               ),
-            ),
-          ),
-          for (final item in grouped[category]!)
-            _ShoppingItemTile(
-              item: item,
-              listId: listId,
-              userMappings: userMappings,
-              onCategoryChanged: onCategoryChanged,
-              onItemChecked: onItemChecked,
-              onItemUnchecked: onItemUnchecked,
-            ),
-        ],
-        if (checkedItems.isNotEmpty)
-          _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemUnchecked: onItemUnchecked),
-      ],
+              for (final item in grouped[category]!)
+                _ShoppingItemTile(
+                  item: item,
+                  listId: listId,
+                  userMappings: userMappings,
+                  onCategoryChanged: onCategoryChanged,
+                  onItemChecked: onItemChecked,
+                  onItemUnchecked: onItemUnchecked,
+                ),
+            ],
+            if (checkedItems.isNotEmpty)
+              _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemUnchecked: onItemUnchecked),
+          ],
+        );
+      },
     );
   }
 }

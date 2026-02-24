@@ -66,28 +66,70 @@ String getSuggestedEmoji(String name) {
 
 // ============ COURSE PICKER FIELD ============
 
-class CoursePicker extends ConsumerWidget {
+class CoursePicker extends ConsumerStatefulWidget {
   final String? selectedCourseId;
   final ValueChanged<String?> onChanged;
 
   const CoursePicker({super.key, required this.selectedCourseId, required this.onChanged});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+  ConsumerState<CoursePicker> createState() => _CoursePickerState();
+}
 
-    TaxonomyItem? selectedItem;
-    if (selectedCourseId != null) {
-      final builtIn = CourseData.getById(selectedCourseId!);
-      if (builtIn != null) {
-        selectedItem = TaxonomyItem(id: builtIn.id, name: builtIn.name, emoji: builtIn.emoji, isBuiltIn: true);
-      }
+class _CoursePickerState extends ConsumerState<CoursePicker> {
+  TaxonomyItem? _resolvedItem;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolveName();
+  }
+
+  @override
+  void didUpdateWidget(covariant CoursePicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedCourseId != widget.selectedCourseId) {
+      _resolveName();
     }
+  }
+
+  Future<void> _resolveName() async {
+    final id = widget.selectedCourseId;
+    if (id == null || id.isEmpty) {
+      if (mounted) setState(() => _resolvedItem = null);
+      return;
+    }
+
+    // Try built-in first
+    final builtIn = CourseData.getById(id);
+    if (builtIn != null) {
+      if (mounted) setState(() => _resolvedItem = TaxonomyItem(id: builtIn.id, name: builtIn.name, emoji: builtIn.emoji, isBuiltIn: true));
+      return;
+    }
+
+    // Try custom course from database
+    try {
+      final customDao = ref.read(customTaxonomyDaoProvider);
+      final custom = await customDao.getCustomCourseById(id);
+      if (custom != null) {
+        if (mounted) setState(() => _resolvedItem = TaxonomyItem(id: custom.id, name: custom.name, emoji: custom.emoji ?? '🍽️', isCustom: true));
+        return;
+      }
+    } catch (_) {}
+
+    // Fallback: show the ID as name
+    if (mounted) setState(() => _resolvedItem = TaxonomyItem(id: id, name: id, emoji: '🍽️', isCustom: true));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final selectedItem = _resolvedItem;
 
     return InkWell(
       onTap: () async {
-        final result = await showCoursePickerDialog(context, ref, selectedCourseId);
-        if (result != null) onChanged(result.isEmpty ? null : result);
+        final result = await showCoursePickerDialog(context, ref, widget.selectedCourseId);
+        if (result != null) widget.onChanged(result.isEmpty ? null : result);
       },
       borderRadius: BorderRadius.circular(12),
       child: InputDecorator(
@@ -541,8 +583,9 @@ class _MultiCategoryPickerSheetState extends ConsumerState<_MultiCategoryPickerS
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: Row(children: [
-                Text('Select Categories', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                const Spacer(),
+                Expanded(
+                  child: Text('Select Categories', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                ),
                 if (_selectedIds.isNotEmpty)
                   TextButton(onPressed: () => setState(() => _selectedIds.clear()), child: const Text('Clear')),
                 FilledButton(

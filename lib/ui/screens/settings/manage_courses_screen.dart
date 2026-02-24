@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/course_category_data.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
-import '../../../providers/settings_provider.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/app_snackbar.dart';
 
@@ -26,8 +26,8 @@ class _ManageCoursesScreenState extends ConsumerState<ManageCoursesScreen> {
   }
 
   Future<void> _loadCourses() async {
-    final settings = ref.read(settingsProvider);
-    final cookbookId = settings.currentCookbookId ?? 'cookbook_default';
+
+    final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
     final dao = ref.read(customTaxonomyDaoProvider);
     final custom = await dao.getCustomCourses(cookbookId);
 
@@ -145,11 +145,11 @@ class _ManageCoursesScreenState extends ConsumerState<ManageCoursesScreen> {
         TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
         FilledButton(onPressed: () async {
           if (nameController.text.trim().isEmpty) return;
-          final settings = ref.read(settingsProvider);
+
           final dao = ref.read(customTaxonomyDaoProvider);
           await dao.insertCustomCourse(CustomCoursesCompanion.insert(
             id: 'course_${DateTime.now().millisecondsSinceEpoch}',
-            cookbookId: settings.currentCookbookId ?? 'cookbook_default',
+            cookbookId: ref.read(selectedCookbookIdProvider) ?? 'starter',
             name: nameController.text.trim(),
             emoji: drift.Value(emojiController.text.trim().isEmpty ? '🍽️' : emojiController.text.trim()),
           ));
@@ -237,8 +237,8 @@ class _ManageCoursesScreenState extends ConsumerState<ManageCoursesScreen> {
 
   void _restoreDefaults() async {
     final l10n = AppLocalizations.of(context)!;
-    final settings = ref.read(settingsProvider);
-    final cookbookId = settings.currentCookbookId ?? 'cookbook_default';
+
+    final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
     final dao = ref.read(customTaxonomyDaoProvider);
     final custom = await dao.getCustomCourses(cookbookId);
 
