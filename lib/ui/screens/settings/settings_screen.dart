@@ -106,12 +106,7 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: settings.ingredientLayout == IngredientLayout.columnar
                     ? l10n.ingredientLayoutColumnar
                     : l10n.ingredientLayoutInline,
-                onTap: () {
-                  final next = settings.ingredientLayout == IngredientLayout.inline
-                      ? IngredientLayout.columnar
-                      : IngredientLayout.inline;
-                  ref.read(settingsProvider.notifier).setIngredientLayout(next);
-                },
+                onTap: () => context.push('/settings/ingredient-layout'),
               ),
               _MeasurementSystemTile(
                 currentSystem: settings.measurementSystem,
@@ -238,7 +233,7 @@ class SettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.info_outline,
                 title: l10n.appTitle,
-                subtitle: 'Version 1.0.0 · Beta',
+                subtitle: 'Version 1.0.3 · Beta',
                 onTap: () => context.push('/about'),
               ),
             ],
