@@ -132,6 +132,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
           categoryId: drift.Value(recipe.suggestedCategory),
           notes: drift.Value(recipe.notes),
           imagePath: drift.Value(localImagePath),
+          lastViewedAt: drift.Value(DateTime.now()),
         ));
 
         for (var i = 0; i < recipe.ingredients.length; i++) {

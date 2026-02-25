@@ -989,6 +989,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
           rating: drift.Value(_rating),
           notes: drift.Value(_notesController.text.trim().isEmpty ? null : _notesController.text.trim()),
           nutritionJson: drift.Value(nutritionJson),
+          lastViewedAt: drift.Value(DateTime.now()),
         ));
 
         // Save ingredients

@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/settings_provider.dart';
@@ -801,6 +800,7 @@ class _BottomSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isPro = subStatus.isPro;
+    final version = ref.watch(appVersionProvider).valueOrNull ?? '...';
 
     return Column(
       children: [
@@ -811,7 +811,7 @@ class _BottomSection extends ConsumerWidget {
         ),
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
-          child: Text('Recipe Spellbook v1.0.3 · Beta',
+          child: Text('Recipe Spellbook v$version · Beta',
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline.withValues(alpha: 0.45), fontSize: 11)),
         ),
       ],

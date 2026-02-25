@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/allergen_data.dart';
 import '../data/app_enums.dart';
@@ -203,10 +204,18 @@ const supportedLanguages = [
   SupportedLanguage(code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸'),
   SupportedLanguage(code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸'),
   SupportedLanguage(code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪'),
+  SupportedLanguage(code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷'),
+  SupportedLanguage(code: 'it', name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹'),
+  SupportedLanguage(code: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷'),
+  SupportedLanguage(code: 'nl', name: 'Dutch', nativeName: 'Nederlands', flag: '🇳🇱'),
+  SupportedLanguage(code: 'pl', name: 'Polish', nativeName: 'Polski', flag: '🇵🇱'),
+  SupportedLanguage(code: 'ru', name: 'Russian', nativeName: 'Русский', flag: '🇷🇺'),
+  SupportedLanguage(code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵'),
+  SupportedLanguage(code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷'),
+  SupportedLanguage(code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳'),
 ];
 
-/// List of actual locale codes (excluding 'system')
-const supportedLocaleCodes = ['en', 'es', 'de'];
+const supportedLocaleCodes = ['en', 'es', 'de', 'fr', 'it', 'pt', 'nl', 'pl', 'ru', 'ja', 'ko', 'zh'];
 
 // ============ SETTINGS NOTIFIER ============
 
@@ -634,4 +643,9 @@ final themeModeProvider = Provider<ThemeMode>((ref) {
 /// Provides just the text scale factor for MaterialApp builder
 final textScaleProvider = Provider<double>((ref) {
   return ref.watch(settingsProvider.select((s) => s.textScaleFactor));
+});
+
+final appVersionProvider = FutureProvider<String>((ref) async {
+  final info = await PackageInfo.fromPlatform();
+  return info.version;
 });

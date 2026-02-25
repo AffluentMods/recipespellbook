@@ -233,7 +233,7 @@ class SettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.info_outline,
                 title: l10n.appTitle,
-                subtitle: 'Version 1.0.3 · Beta',
+                subtitle: 'Version ${ref.watch(appVersionProvider).valueOrNull ?? '...'} · Beta',
                 onTap: () => context.push('/about'),
               ),
             ],
