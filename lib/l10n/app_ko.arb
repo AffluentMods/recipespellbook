@@ -1,0 +1,2575 @@
+{
+  "@@locale": "ko",
+  "@@last_modified": "2026-01-28",
+  "appTitle": "Recipe Spellbook",
+  "navHome": "홈",
+  "navCookbooks": "요리책",
+  "navPlanner": "플래너",
+  "navShopping": "쇼핑",
+  "navSettings": "설정",
+  "homeGreeting": "돌아오셨군요!",
+  "homeQuickAccess": "빠른 접근",
+  "homeMealPlan": "오늘의 식사",
+  "homePinnedRecipes": "고정된 레시피",
+  "homeRecentRecipes": "최근 본 항목",
+  "homeNoMealsPlanned": "오늘 계획된 식사가 없습니다",
+  "homeNoPinnedRecipes": "고정된 레시피가 없습니다",
+  "homeNoRecentRecipes": "최근 레시피가 없습니다",
+  "recipesTitle": "레시피",
+  "recipesEmpty": "레시피가 없습니다",
+  "recipesEmptySubtitle": "첫 번째 레시피를 추가하여 시작하세요",
+  "recipeAdd": "레시피 추가",
+  "recipeEdit": "레시피 편집",
+  "recipeDelete": "레시피 삭제",
+  "recipeDeleteConfirm": "이 레시피를 삭제하시겠습니까?",
+  "recipeFavorite": "즐겨찾기에 추가",
+  "recipeUnfavorite": "즐겨찾기에서 제거",
+  "recipePin": "레시피 고정",
+  "recipeUnpin": "고정 해제",
+  "recipeShare": "레시피 공유",
+  "recipePrint": "레시피 인쇄",
+  "recipeDuplicate": "레시피 복제",
+  "recipeAddToMealPlan": "식사 계획에 추가",
+  "recipeAddToShoppingList": "쇼핑 목록에 추가",
+  "recipeStartCooking": "요리 시작",
+  "recipeFieldTitle": "제목",
+  "recipeFieldDescription": "설명",
+  "recipeFieldIngredients": "재료",
+  "recipeFieldInstructions": "조리법",
+  "recipeFieldNotes": "메모",
+  "notesTitle": "메모",
+  "recipeFieldServings": "인분",
+  "recipeFieldPrepTime": "준비 시간",
+  "recipeFieldCookTime": "조리 시간",
+  "recipeFieldTotalTime": "총 시간",
+  "recipeFieldSource": "출처",
+  "recipeFieldCourse": "코스",
+  "recipeFieldCategory": "카테고리",
+  "recipeFieldTags": "태그",
+  "recipeFieldRating": "평점",
+  "ratingCommon": "일반",
+  "ratingUncommon": "특별",
+  "ratingRare": "희귀",
+  "ratingEpic": "에픽",
+  "ratingLegendary": "전설",
+  "ratingUnrated": "미평가",
+  "minutesAbbrev": "분",
+  "hoursAbbrev": "시간",
+  "servingsUnit": "인분",
+  "ingredientsTitle": "재료",
+  "ingredientsEmpty": "추가된 재료가 없습니다",
+  "ingredientAdd": "재료 추가",
+  "ingredientPlaceholder": "예: 밀가루 2컵",
+  "instructionsTitle": "조리법",
+  "instructionsEmpty": "추가된 조리법이 없습니다",
+  "instructionAdd": "단계 추가",
+  "instructionPlaceholder": "이 단계를 설명하세요...",
+  "stepNumber": "단계 {number}",
+  "@stepNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbooksTitle": "요리책",
+  "cookbooksEmpty": "요리책이 없습니다",
+  "cookbookAdd": "새 요리책",
+  "cookbookEdit": "요리책 편집",
+  "cookbookDelete": "요리책 삭제",
+  "cookbookDeleteConfirm": "이 요리책과 모든 레시피를 삭제하시겠습니까?",
+  "cookbookRecipeCount": "{count, plural, other{{count}개의 레시피}}",
+  "@cookbookRecipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingDeli": "델리",
+  "shoppingCannedGoods": "통조림 및 수프",
+  "shoppingCondiments": "조미료 및 소스",
+  "shoppingGrainsAndPasta": "곡물, 파스타 및 쌀",
+  "shoppingCookingAndBaking": "요리 및 제과",
+  "shoppingBreakfastCereal": "아침식사 및 시리얼",
+  "shoppingBeerWineSpirits": "맥주, 와인 및 주류",
+  "shoppingBaby": "유아용품",
+  "shoppingPet": "반려동물용품",
+  "shoppingHousehold": "생활용품",
+  "shoppingPersonalCare": "개인 위생용품",
+  "plannerTitle": "식사 플래너",
+  "plannerEmpty": "계획된 식사가 없습니다",
+  "plannerEmptySubtitle": "+ 버튼을 눌러 식사를 추가하세요",
+  "plannerAddMeal": "식사 추가",
+  "plannerToday": "오늘",
+  "plannerThisWeek": "이번 주",
+  "plannerBreakfast": "아침식사",
+  "plannerLunch": "점심식사",
+  "plannerDinner": "저녁식사",
+  "plannerSnack": "간식",
+  "shoppingTitle": "쇼핑 목록",
+  "shoppingEmpty": "목록이 비어 있습니다",
+  "shoppingEmptySubtitle": "항목을 추가하거나 레시피에서 가져오세요",
+  "shoppingAddItem": "항목 추가...",
+  "shoppingCheckedItems": "체크된 항목",
+  "shoppingClearChecked": "체크된 항목 삭제",
+  "shoppingClearAll": "모두 삭제",
+  "shoppingCategories": "쇼핑 카테고리",
+  "shoppingUncategorized": "카테고리 없음",
+  "shoppingItemCount": "{count, plural, other{{count}개}}",
+  "@shoppingItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsTitle": "설정",
+  "settingsAppearance": "외관",
+  "settingsTheme": "테마",
+  "settingsThemeMode": "테마 모드",
+  "settingsThemeModeSystem": "시스템",
+  "settingsThemeModeLight": "라이트",
+  "settingsThemeModeDark": "다크",
+  "settingsLanguage": "언어",
+  "settingsMeasurements": "단위",
+  "settingsMeasurementsUS": "미국식 (컵, 온스)",
+  "settingsMeasurementsMetric": "미터법 (ml, g)",
+  "settingsRPGMode": "RPG 모드",
+  "settingsRPGModeSubtitle": "판타지 스타일 텍스트 및 이미지 활성화",
+  "settingsRecipes": "레시피",
+  "settingsManageCourses": "코스 관리",
+  "settingsManageCategories": "카테고리 관리",
+  "settingsManageTags": "태그 관리",
+  "settingsData": "데이터",
+  "settingsExport": "데이터 내보내기",
+  "settingsExportSubtitle": "레시피 백업",
+  "settingsImport": "데이터 가져오기",
+  "settingsImportSubtitle": "백업에서 복원",
+  "settingsImportFromApps": "다른 앱에서 가져오기",
+  "settingsImportFromAppsSubtitle": "Paprika, Crouton, Mela 등",
+  "settingsAbout": "정보",
+  "settingsVersion": "버전 {version}",
+  "@settingsVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsPrivacy": "개인정보 처리방침",
+  "settingsTerms": "이용약관",
+  "settingsFeedback": "피드백 보내기",
+  "importTitle": "가져오기",
+  "importCreate": "만들기",
+  "importCreateSubtitle": "나만의 레시피 작성",
+  "importSubtitle": "URL, 이미지 또는 파일에서",
+  "importChooseMethod": "레시피를 어떻게 추가하시겠습니까?",
+  "importProgress": "레시피 가져오는 중...",
+  "importFromURL": "URL에서",
+  "importFromImage": "이미지에서",
+  "importFromFile": "파일에서",
+  "importFromText": "텍스트에서 가져오기",
+  "importProcessing": "처리 중...",
+  "importSuccess": "레시피를 성공적으로 가져왔습니다",
+  "importError": "레시피 가져오기 실패",
+  "importBulkTitle": "레시피 가져오기",
+  "importBulkFound": "{count}개의 레시피를 찾았습니다",
+  "@importBulkFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importBulkImportAll": "모두 가져오기",
+  "importBulkImportFirst": "첫 번째 가져오기",
+  "searchTitle": "검색",
+  "searchHint": "레시피 검색...",
+  "searchNoResults": "레시피를 찾을 수 없습니다",
+  "searchFilters": "필터",
+  "actionSave": "저장",
+  "actionCancel": "취소",
+  "actionDelete": "삭제",
+  "actionEdit": "편집",
+  "actionAdd": "추가",
+  "actionDone": "완료",
+  "actionClose": "닫기",
+  "actionConfirm": "확인",
+  "actionUndo": "실행 취소",
+  "actionRetry": "다시 시도",
+  "actionCopy": "복사",
+  "actionPaste": "붙여넣기",
+  "actionOk": "확인",
+  "actionShare": "공유",
+  "actionClear": "지우기",
+  "errorGeneric": "오류가 발생했습니다",
+  "errorNetwork": "네트워크 오류. 연결을 확인하세요.",
+  "errorNotFound": "찾을 수 없습니다",
+  "errorInvalidURL": "잘못된 URL",
+  "successSaved": "성공적으로 저장되었습니다",
+  "successDeleted": "성공적으로 삭제되었습니다",
+  "successCopied": "클립보드에 복사되었습니다",
+  "confirmDeleteTitle": "삭제 확인",
+  "confirmDeleteMessage": "이 작업은 취소할 수 없습니다.",
+  "emptyStateTitle": "아직 아무것도 없습니다",
+  "emptyStateSubtitle": "첫 번째 항목을 추가하여 시작하세요",
+  "dateToday": "오늘",
+  "dateYesterday": "어제",
+  "dateTomorrow": "내일",
+  "timeMinutes": "{count, plural, other{{count}분}}",
+  "@timeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHours": "{count, plural, other{{count}시간}}",
+  "@timeHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trashTitle": "휴지통",
+  "trashEmpty": "휴지통이 비어 있습니다",
+  "trashEmptySubtitle": "삭제된 레시피는 30일 동안 여기에 보관됩니다",
+  "trashRestore": "복원",
+  "trashRestored": "복원되었습니다",
+  "trashDeletePermanently": "영구 삭제",
+  "trashEmptyTrash": "휴지통 비우기",
+  "trashEmptyConfirm": "휴지통의 모든 레시피가 영구적으로 삭제됩니다. 이 작업은 취소할 수 없습니다.",
+  "trashEmptied": "휴지통을 비웠습니다",
+  "trashDeleted": "삭제되었습니다",
+  "trashDeletedToday": "오늘 삭제됨",
+  "trashDeletedYesterday": "어제 삭제됨",
+  "trashDeletedDaysAgo": "{days}일 전에 삭제됨",
+  "@trashDeletedDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "trashExpiresToday": "오늘 만료됨",
+  "trashDaysLeft": "{days}일 남음",
+  "@trashDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "cookingModeTitle": "요리 모드",
+  "cookingSetTimer": "타이머 설정",
+  "cookingTimerDone": "타이머 완료!",
+  "cookingTimerFinished": "타이머가 종료되었습니다.",
+  "cookingExitTitle": "요리 모드를 종료하시겠습니까?",
+  "cookingExitMessage": "진행 상황이 사라집니다.",
+  "cookingExit": "종료",
+  "cookingFinish": "완료",
+  "taxonomyAddCourse": "코스 추가",
+  "taxonomyEditCourse": "코스 편집",
+  "taxonomyDeleteCourse": "코스를 삭제하시겠습니까?",
+  "taxonomyAddCategory": "카테고리 추가",
+  "taxonomyEditCategory": "카테고리 편집",
+  "taxonomyDeleteCategory": "카테고리를 삭제하시겠습니까?",
+  "taxonomyBuiltIn": "기본 제공",
+  "taxonomyCustom": "사용자 지정",
+  "taxonomyRestoreDefaults": "기본값 복원",
+  "taxonomyDefaultsRestored": "사용자 지정 항목이 삭제되고 기본값이 복원되었습니다",
+  "taxonomyCourseName": "코스 이름",
+  "taxonomyCourseNameHint": "예: 브런치, 전채",
+  "taxonomyCategoryName": "카테고리 이름",
+  "taxonomyCategoryNameHint": "예: 글루텐 프리, 저탄수화물",
+  "taxonomyEmojiHint": "이모지 필드를 탭하여 편집",
+  "taxonomyDeleteCourseMessage": "\"{name}\"을 삭제하시겠습니까? 이 코스의 레시피가 미분류됩니다.",
+  "@taxonomyDeleteCourseMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "taxonomyDeleteCategoryMessage": "\"{name}\"을 삭제하시겠습니까? 이 카테고리의 레시피가 미분류됩니다.",
+  "@taxonomyDeleteCategoryMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsQuickAccess": "빠른 접근",
+  "settingsPlaceholders": "기본 이미지",
+  "actionView": "보기",
+  "browseViewAll": "모든 레시피 보기",
+  "browseRecipesTotal": "총 {count}개의 레시피",
+  "@browseRecipesTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "browseCourses": "코스",
+  "browseCategories": "카테고리",
+  "browseNoCourse": "코스 없음",
+  "browseUncategorized": "미분류",
+  "favoritesTitle": "즐겨찾기",
+  "favoritesEmpty": "즐겨찾기 레시피가 없습니다",
+  "favoritesEmptySubtitle": "레시피의 별 아이콘을 탭하여 여기에 추가",
+  "favoritesRemoved": "즐겨찾기에서 제거되었습니다",
+  "recentTitle": "최근 본 항목",
+  "recentEmpty": "최근 레시피가 없습니다",
+  "recentEmptySubtitle": "본 레시피가 여기에 표시됩니다",
+  "recentJustNow": "방금",
+  "recentMinutesAgo": "{count}분 전",
+  "@recentMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recentHoursAgo": "{count}시간 전",
+  "@recentHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recentYesterday": "어제",
+  "recentDaysAgo": "{count}일 전",
+  "@recentDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importFromUrl": "URL에서 가져오기",
+  "importUrlHint": "레시피 URL",
+  "importUrlPlaceholder": "https://example.com/recipe",
+  "importFetch": "레시피 가져오기",
+  "importFetching": "가져오는 중...",
+  "importPreview": "미리보기",
+  "importRecipeFound": "레시피를 찾았습니다!",
+  "importReviewSave": "검토 및 저장",
+  "importEditBeforeSave": "저장하기 전에 레시피를 편집할 수 있습니다",
+  "importSupportedSites": "지원 사이트",
+  "importSupportedSitesInfo": "대부분의 레시피 사이트에서 작동합니다!",
+  "importFromScan": "레시피 스캔",
+  "importFromPdf": "PDF에서 가져오기",
+  "cookbookNew": "새 요리책",
+  "cookbookNameLabel": "요리책 이름",
+  "cookbookNameHint": "예: 가족 레시피",
+  "cookbookDescLabel": "설명",
+  "cookbookDescHint": "레시피 모음...",
+  "cookbookAddCover": "표지 추가",
+  "cookbookTapToAdd": "탭하여 표지 이미지 추가",
+  "cookbookDeleteTitle": "요리책을 삭제하시겠습니까?",
+  "cookbookDeleteMessage": "이 요리책에는 {count}개의 레시피가 있습니다. 휴지통으로 이동됩니다.",
+  "@cookbookDeleteMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbookCannotDelete": "유일한 요리책은 삭제할 수 없습니다",
+  "fontSizeTitle": "글자 크기",
+  "fontSizeReset": "기본값으로 초기화",
+  "fontSizeSmaller": "글자 작게",
+  "fontSizeLarger": "글자 크게",
+  "defaultCookbookName": "내 레시피",
+  "defaultCookbookDescription": "개인 레시피 모음",
+  "defaultShoppingListName": "쇼핑 목록",
+  "courseBreakfast": "아침식사",
+  "courseLunch": "점심식사",
+  "courseDinner": "저녁식사",
+  "courseAppetizer": "전채",
+  "courseSoup": "수프",
+  "courseSalad": "샐러드",
+  "courseMain": "메인 요리",
+  "courseSide": "사이드 요리",
+  "courseDessert": "디저트",
+  "courseSnack": "간식",
+  "courseBeverage": "음료",
+  "categoryQuick": "빠르고 쉬운",
+  "categoryHealthy": "건강한",
+  "categoryComfort": "위로 음식",
+  "categoryVegetarian": "채식",
+  "categoryVegan": "비건",
+  "categoryGlutenFree": "글루텐 프리",
+  "categoryDairyFree": "유제품 없음",
+  "categoryLowCarb": "저탄수화물",
+  "categorySpicy": "매운",
+  "categoryFamilyFriendly": "가족 친화적",
+  "categoryParty": "파티",
+  "categoryHoliday": "명절",
+  "categoryBbq": "바베큐",
+  "categoryBaking": "베이킹",
+  "shoppingProduce": "채소 및 과일",
+  "shoppingDairy": "유제품 및 달걀",
+  "shoppingMeat": "육류 및 가금류",
+  "shoppingSeafood": "해산물",
+  "shoppingBakery": "베이커리",
+  "shoppingFrozen": "냉동식품",
+  "shoppingPantry": "식료품",
+  "shoppingSpices": "향신료 및 조미료",
+  "shoppingBeverages": "음료",
+  "shoppingSnacks": "스낵",
+  "shoppingInternational": "수입 식품",
+  "shoppingOther": "기타",
+  "unitCup": "컵",
+  "unitCups": "컵",
+  "unitTablespoon": "큰술",
+  "unitTablespoonAbbrev": "큰술",
+  "unitTeaspoon": "작은술",
+  "unitTeaspoonAbbrev": "작은술",
+  "unitFluidOunce": "액량 온스",
+  "unitFluidOunceAbbrev": "fl oz",
+  "unitPint": "파인트",
+  "unitQuart": "쿼트",
+  "unitGallon": "갤런",
+  "unitMilliliter": "밀리리터",
+  "unitMilliliterAbbrev": "ml",
+  "unitLiter": "리터",
+  "unitLiterAbbrev": "L",
+  "unitOunce": "온스",
+  "unitOunceAbbrev": "oz",
+  "unitPound": "파운드",
+  "unitPoundAbbrev": "lb",
+  "unitGram": "그램",
+  "unitGramAbbrev": "g",
+  "unitKilogram": "킬로그램",
+  "unitKilogramAbbrev": "kg",
+  "unitPinch": "한 꼬집",
+  "unitDash": "조금",
+  "unitClove": "쪽",
+  "unitCloves": "쪽",
+  "unitHead": "통",
+  "unitBunch": "단",
+  "unitCan": "캔",
+  "unitPackage": "봉지",
+  "unitSlice": "장",
+  "unitSlices": "장",
+  "unitPiece": "개",
+  "unitPieces": "개",
+  "unitWhole": "통째로",
+  "unitLarge": "대",
+  "unitMedium": "중",
+  "unitSmall": "소",
+  "unitFahrenheit": "°F",
+  "unitCelsius": "°C",
+  "unitInch": "인치",
+  "unitInches": "인치",
+  "unitInchAbbrev": "in",
+  "unitCentimeter": "센티미터",
+  "unitCentimeterAbbrev": "cm",
+  "unitMillimeter": "밀리미터",
+  "unitMillimeterAbbrev": "mm",
+  "convertUnitsTitle": "단위 변환",
+  "convertMetricToImperial": "미터법 → 야드파운드법",
+  "convertMetricToImperialDesc": "ml → fl oz, g → oz, kg → lb",
+  "convertImperialToMetric": "야드파운드법 → 미터법",
+  "convertImperialToMetricDesc": "컵 → ml, oz → g, 작은술 → ml",
+  "convertResetToOriginal": "원래대로 초기화",
+  "settingsRecipeLayout": "레시피 레이아웃",
+  "settingsRecipeLayoutDescription": "재료와 조리법 표시 방법 선택",
+  "settingsRecipeDisplay": "레시피 표시",
+  "layoutStacked": "스택형",
+  "layoutStackedDescription": "모든 콘텐츠를 스크롤 목록으로 표시",
+  "layoutTabbed": "탭형",
+  "layoutTabbedDescription": "재료와 조리법 사이 스와이프",
+  "recipeSwipeHint": "스와이프하여 섹션 전환",
+  "recipeIngredients": "재료",
+  "recipeInstructions": "조리법",
+  "dateNextWeek": "다음 주",
+  "timeJustNow": "방금",
+  "timeMinutesAgo": "{count, plural, other{{count}분 전}}",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHoursAgo": "{count, plural, other{{count}시간 전}}",
+  "@timeHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeDaysAgo": "{count, plural, other{{count}일 전}}",
+  "@timeDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeWeeksAgo": "{count, plural, other{{count}주 전}}",
+  "@timeWeeksAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeMonthsAgo": "{count, plural, other{{count}개월 전}}",
+  "@timeMonthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeYearsAgo": "{count, plural, other{{count}년 전}}",
+  "@timeYearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeInMinutes": "{count, plural, other{{count}분 후}}",
+  "@timeInMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeInHours": "{count, plural, other{{count}시간 후}}",
+  "@timeInHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationMinutes": "{count}분",
+  "@durationMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHours": "{count, plural, other{{count}시간}}",
+  "@durationHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHoursMinutes": "{hours}시간 {minutes}분",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipes": "{count, plural, other{{count}개의 레시피}}",
+  "@countRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countIngredients": "{count, plural, other{{count}가지 재료}}",
+  "@countIngredients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countSteps": "{count, plural, other{{count}단계}}",
+  "@countSteps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countItems": "{count, plural, other{{count}개}}",
+  "@countItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countSelected": "{count}개 선택됨",
+  "@countSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorGenericTitle": "오류",
+  "errorGenericMessage": "오류가 발생했습니다. 다시 시도하세요.",
+  "errorNetworkTitle": "연결 오류",
+  "errorNetworkMessage": "인터넷 연결을 확인하고 다시 시도하세요.",
+  "errorNotFoundTitle": "찾을 수 없습니다",
+  "errorNotFoundMessage": "요청한 콘텐츠를 찾을 수 없습니다.",
+  "errorInvalidUrlTitle": "잘못된 URL",
+  "errorInvalidUrlMessage": "http:// 또는 https://로 시작하는 올바른 URL을 입력하세요",
+  "errorPermissionDenied": "접근이 거부되었습니다",
+  "errorStorageFull": "저장 공간이 가득 찼습니다",
+  "errorFileNotFound": "파일을 찾을 수 없습니다",
+  "errorUnsupportedFormat": "지원되지 않는 파일 형식",
+  "errorParsingFailed": "콘텐츠 처리 실패",
+  "errorSaveFailed": "저장 실패",
+  "errorLoadFailed": "불러오기 실패",
+  "errorDeleteFailed": "삭제 실패",
+  "errorImportFailed": "가져오기 실패",
+  "errorExportFailed": "내보내기 실패",
+  "errorCameraAccess": "카메라에 접근할 수 없습니다",
+  "errorGalleryAccess": "갤러리에 접근할 수 없습니다",
+  "errorTimeout": "시간 초과",
+  "errorServerError": "서버 오류. 나중에 다시 시도하세요.",
+  "errorNoRecipeFound": "이 페이지에서 레시피를 찾을 수 없습니다",
+  "errorInvalidRecipe": "잘못된 레시피 데이터",
+  "errorDuplicateRecipe": "이 레시피는 이미 존재합니다",
+  "validationRequired": "이 필드는 필수입니다",
+  "validationTooShort": "{min}자 이상이어야 합니다",
+  "@validationTooShort": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "validationTooLong": "{max}자 미만이어야 합니다",
+  "@validationTooLong": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "validationInvalidEmail": "유효한 이메일 주소를 입력하세요",
+  "validationInvalidUrl": "유효한 URL을 입력하세요",
+  "validationInvalidNumber": "유효한 숫자를 입력하세요",
+  "validationMinValue": "{min} 이상이어야 합니다",
+  "@validationMinValue": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "validationMaxValue": "{max} 이하이어야 합니다",
+  "@validationMaxValue": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "photoTakePhoto": "사진 찍기",
+  "photoChooseFromGallery": "갤러리에서 선택",
+  "photoRemoveImage": "이미지 제거",
+  "shareAsText": "텍스트",
+  "shareAsImage": "이미지",
+  "shareAsFile": "파일로 공유",
+  "shareQrCode": "레시피 QR 코드",
+  "languageSystem": "시스템 기본값",
+  "languageEnglish": "English",
+  "languageSpanish": "Español",
+  "languageGerman": "Deutsch",
+  "scalingOriginal": "원본",
+  "scalingHalf": "절반",
+  "scalingDouble": "2배",
+  "scalingTriple": "3배",
+  "scalingCustom": "사용자 지정",
+  "scalingServings": "{count, plural, other{{count}인분}}",
+  "@scalingServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importRecipe": "Import Recipe",
+  "importFile": "File",
+  "importImage": "Image",
+  "importPaste": "Paste",
+  "importPasteUrl": "Paste recipe URL",
+  "importOr": "OR",
+  "importSupportsFormats": "Supports Paprika, Mela, JSON, ZIP exports",
+  "importFromSocialMedia": "Import your recipes from any social media platform or website.",
+  "tagsTitle": "태그",
+  "tagsSelect": "태그 선택",
+  "tagsNoTags": "태그 없음",
+  "tagsCreate": "태그 만들기",
+  "tagsCreateNew": "새 태그 만들기",
+  "tagsEnterName": "태그 이름",
+  "tagsSearch": "태그 검색...",
+  "tagsSuggested": "추천 태그",
+  "tagsRecent": "최근 사용",
+  "tagsAll": "모든 태그",
+  "tagVegetarian": "채식",
+  "tagVegan": "비건",
+  "tagGlutenFree": "글루텐 프리",
+  "tagDairyFree": "유제품 없음",
+  "tagNutFree": "견과류 없음",
+  "tagLowCarb": "저탄수화물",
+  "tagKeto": "키토",
+  "tagPaleo": "팔레오",
+  "tagWhole30": "Whole30",
+  "tagQuick": "간편",
+  "tagEasy": "쉬운",
+  "tagHealthy": "건강한",
+  "tagComfortFood": "위로 음식",
+  "tagFamilyFriendly": "가족 친화적",
+  "tagKidFriendly": "아이 친화적",
+  "tagMealPrep": "밀 프렙",
+  "tagOnePot": "원팟",
+  "tagInstantPot": "전기압력솥",
+  "tagSlowCooker": "슬로우쿠커",
+  "tagAirFryer": "에어프라이어",
+  "tagGrill": "그릴",
+  "tagBBQ": "바베큐",
+  "tagHoliday": "명절",
+  "tagParty": "파티",
+  "tagBudget": "절약",
+  "tagSpicy": "매운",
+  "tagSweet": "달콤한",
+  "tagSavory": "짭짤한",
+  "tagLight": "가벼운",
+  "tagHearty": "든든한",
+  "tagSummer": "여름",
+  "tagWinter": "겨울",
+  "tagFall": "가을",
+  "tagSpring": "봄",
+  "settingsImagePlaceholders": "기본 이미지",
+  "settingsImagePlaceholdersSubtitle": "이미지가 없을 때 표시할 항목 선택",
+  "settingsQuickAccessSubtitle": "빠른 접근 구성",
+  "settingsManageCoursesSubtitle": "코스 추가, 편집 또는 삭제",
+  "settingsManageCategoriesSubtitle": "카테고리 추가, 편집 또는 삭제",
+  "settingsShoppingCategories": "쇼핑 카테고리",
+  "settingsShoppingCategoriesSubtitle": "통로별로 항목 정리",
+  "shoppingIngredientMappings": "재료 매핑",
+  "shoppingPriority": "우선순위: {priority}",
+  "shoppingAddCategory": "카테고리 추가",
+  "shoppingEditCategory": "카테고리 편집",
+  "shoppingDeleteCategory": "카테고리를 삭제하시겠습니까?",
+  "shoppingDeleteCategoryMessage": "\"{name}\"을 삭제하시겠습니까? 항목이 미분류됩니다.",
+  "@shoppingDeleteCategoryMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingCategoryName": "이름",
+  "shoppingSearchIngredients": "재료 검색...",
+  "shoppingMappingsInfo": "카테고리를 탭하여 위치 변경. ({count}개의 매핑)",
+  "@shoppingMappingsInfo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingCategoryFor": "\"{ingredient}\"의 카테고리",
+  "@shoppingCategoryFor": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingMovedTo": "\"{ingredient}\"이(가) {category}(으)로 이동되었습니다",
+  "@shoppingMovedTo": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingResetToDefault": "\"{ingredient}\"이(가) 기본값으로 초기화되었습니다",
+  "@shoppingResetToDefault": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "actionReset": "초기화",
+  "@shoppingPriority": {
+    "placeholders": {
+      "priority": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingMappingMoved": "\"{ingredient}\"이(가) {category}(으)로 이동되었습니다",
+  "@shoppingMappingMoved": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingMappingReset": "\"{ingredient}\"이(가) 기본값으로 초기화되었습니다",
+  "@shoppingMappingReset": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "addPhoto": "사진 추가",
+  "addPhotoSubtitle": "탭하여 갤러리 또는 카메라에서 선택",
+  "viewAllRecipes": "모든 레시피 보기",
+  "recipesTotal": "총 {count}개의 레시피",
+  "@recipesTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "coursesTitle": "코스",
+  "categoriesTitle": "카테고리",
+  "courseBrunch": "브런치",
+  "courseMainDish": "메인 요리",
+  "courseSideDish": "사이드 요리",
+  "courseSauce": "소스",
+  "courseBread": "빵",
+  "categoryBean": "콩류",
+  "categoryBread": "빵",
+  "categoryBurritoTaco": "부리토/타코",
+  "categoryCasserole": "캐서롤",
+  "categoryChickenSteakMeat": "치킨/스테이크/고기",
+  "categoryDessert": "디저트",
+  "categoryFish": "생선",
+  "categoryFruit": "과일",
+  "categoryPasta": "파스타",
+  "categoryPizza": "피자",
+  "categoryPork": "돼지고기",
+  "categoryRice": "밥",
+  "categorySandwich": "샌드위치",
+  "categorySeafood": "해산물",
+  "categorySoup": "수프",
+  "categoryVegetable": "채소",
+  "or": "또는",
+  "and": "그리고",
+  "wordOf": "의",
+  "items": "개",
+  "more": "더",
+  "less": "적게",
+  "all": "전체",
+  "none": "없음",
+  "other": "기타",
+  "custom": "사용자 지정",
+  "defaultValue": "기본값",
+  "required": "필수",
+  "optional": "선택",
+  "photoChooseGallery": "갤러리에서 선택",
+  "importFirstRecipe": "Import First",
+  "importAllRecipes": "Import All",
+  "parseRecipe": "Parse Recipe",
+  "shareRecipe": "레시피 공유",
+  "shareExport": "내보내기",
+  "shareServings": "{count}인분",
+  "@shareServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharePrep": "준비: {minutes}분",
+  "@sharePrep": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shareCook": "조리: {minutes}분",
+  "@shareCook": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shareFromApp": "Recipe Spellbook에서 공유 ✨",
+  "shareCreatingCard": "레시피 카드 만드는 중...",
+  "shareCheckRecipe": "이 레시피를 확인하세요: {title}",
+  "@shareCheckRecipe": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "shareErrorImage": "이미지 생성 오류: {error}",
+  "@shareErrorImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "editItem": "항목 편집",
+  "selectAll": "모두 선택",
+  "selectNone": "선택 해제",
+  "viewPlanner": "View Planner",
+  "planNow": "Plan Now",
+  "loadingText": "로딩 중...",
+  "errorText": "오류",
+  "errorLoadingMeals": "식사 불러오기 오류",
+  "readingImage": "이미지 읽는 중...",
+  "parsingRecipe": "레시피 처리 중...",
+  "noTextInImage": "이미지에서 텍스트를 찾을 수 없습니다",
+  "failedProcessImage": "이미지 처리 실패: {error}",
+  "@failedProcessImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cookingModeExit": "요리 모드 종료",
+  "cookingModeStep": "단계 {current} / {total}",
+  "@cookingModeStep": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cookingModePrevious": "이전",
+  "cookingModeNext": "다음",
+  "cookingModeFinish": "완료",
+  "cookingModeCompleted": "레시피 완성!",
+  "cookingModeGreatJob": "잘 하셨습니다! 맛있게 드세요.",
+  "mealPlanBreakfast": "아침식사",
+  "mealPlanLunch": "점심식사",
+  "mealPlanDinner": "저녁식사",
+  "mealPlanSnack": "간식",
+  "mealPlanAddMeal": "식사 추가",
+  "mealPlanRemove": "계획에서 제거",
+  "mealPlanNoMeals": "계획된 식사가 없습니다",
+  "mealPlanTapToAdd": "+ 버튼을 눌러 식사 추가",
+  "thisWeek": "이번 주",
+  "itemName": "항목 이름",
+  "addToShoppingList": "쇼핑 목록에 추가",
+  "addToList": "목록에 추가",
+  "addedItemsToList": "목록에 {count}개를 추가했습니다",
+  "@addedItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scanToImport": "스캔하여 레시피 가져오기",
+  "xOfY": "{total}개 중 {current}개",
+  "@xOfY": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "addItems": "{count}개 추가",
+  "@addItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToParse": "처리 실패: {error}",
+  "@failedToParse": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToImport": "가져오기 실패: {error}",
+  "groupBy": "그룹화 기준",
+  "@failedToImport": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cookbookHint": "탭하여 선택 • 길게 눌러 편집",
+  "rename": "이름 바꾸기",
+  "renameCookbook": "요리책 이름 바꾸기",
+  "seeAll": "모두 보기",
+  "imagePlaceholders": "Image Placeholders",
+  "imagePlaceholdersSubtitle": "Choose what shows when images are missing",
+  "homeScreenSection": "Home Screen",
+  "quickAccessSubtitle": "Configure what appears in Quick Access",
+  "manageCoursesSubtitle": "Add, edit, or remove courses",
+  "manageCategoriesSubtitle": "Add, edit, or remove categories",
+  "shoppingCategoriesSubtitle": "Organize items by aisle",
+  "syncSection": "동기화",
+  "cloudSync": "클라우드 동기화",
+  "comingSoon": "곧 출시",
+  "resetApp": "앱 초기화",
+  "resetAppSubtitle": "모든 데이터를 영구적으로 삭제",
+  "trashSubtitle": "삭제된 레시피 (30일 보관)",
+  "importRecipeTitle": "레시피 가져오기",
+  "importSocialMedia": "소셜 미디어나 모든 웹사이트에서 레시피를 가져오세요.",
+  "pasteRecipeUrl": "레시피 URL 붙여넣기",
+  "orDivider": "또는",
+  "fileOption": "파일",
+  "imageOption": "이미지",
+  "pasteOption": "붙여넣기",
+  "supportedFormats": "Paprika, Mela, JSON, ZIP 지원",
+  "pasteRecipeTitle": "레시피 붙여넣기",
+  "pasteRecipeHint": "여기에 레시피를 붙여넣으세요...",
+  "quickAccessHelpIntro": "이 배지는 레시피가 여기에 표시되는 이유를 나타냅니다:",
+  "quickAccessHelpMealPlan": "오늘 계획됨",
+  "quickAccessHelpPinned": "이 레시피를 고정했습니다",
+  "quickAccessHelpRecent": "최근에 봤습니다",
+  "openCalendar": "달력 열기",
+  "editNotes": "메모 편집",
+  "addNotesHint": "메모 추가...",
+  "moveToAnotherDay": "다른 날로 이동",
+  "addToPlan": "계획에 추가",
+  "importBulkQuestion": "{count}개의 레시피를 모두 가져오시겠습니까, 아니면 개별 선택하시겠습니까?",
+  "@importBulkQuestion": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importingRecipes": "레시피 가져오는 중...",
+  "importedRecipesCount": "{count}개의 레시피를 가져왔습니다",
+  "@importedRecipesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "extractingArchive": "아카이브 압축 해제 중...",
+  "themeSpellbook": "스펠북",
+  "themeForest": "포레스트",
+  "themeOcean": "오션",
+  "themeSunset": "선셋",
+  "themeMidnight": "미드나잇",
+  "themeRose": "로즈",
+  "colorTheme": "색상 테마",
+  "colorThemeSubtitle": "색상 팔레트 선택",
+  "preview": "미리보기",
+  "previewPrimary": "기본",
+  "previewSecondary": "보조",
+  "previewTertiary": "세 번째",
+  "previewError": "오류",
+  "placeholderDescription": "레시피나 요리책에 이미지가 없을 때 표시할 항목을 선택하세요.",
+  "recipePlaceholders": "레시피 이미지",
+  "cookbookPlaceholders": "요리책 이미지",
+  "defaultImages": "기본 이미지",
+  "defaultImagesDescription": "RPG 모드에 따라 바뀌는 일러스트",
+  "themeBased": "테마 기반",
+  "themeBasedDescription": "테마에 맞는 로고가 있는 그라데이션",
+  "placeholderRpgInfo": "기본 이미지는 일반 및 RPG 변형 사이를 전환합니다.",
+  "groupBySection": "통로별",
+  "groupByRecipe": "레시피별",
+  "groupByUngrouped": "그룹 없음",
+  "copyAsText": "텍스트로 복사",
+  "printList": "목록 인쇄",
+  "manageLists": "목록 관리",
+  "newList": "새로 만들기",
+  "newShoppingList": "새 쇼핑 목록",
+  "listNameHint": "List name",
+  "recipeLayoutSetting": "레이아웃",
+  "recipeLayoutSettingSubtitle": "레시피 표시 방법 선택",
+  "layoutTabbedOption": "탭 보기",
+  "layoutStackedOption": "스택 보기",
+  "nutrientsTitle": "영양소",
+  "nutrientsSubtitle": "1인분당 영양 정보",
+  "addNutrients": "영양 정보 추가",
+  "calculateNutrients": "재료에서 계산",
+  "nutrientsDisclaimer": "영양 수치는 추정치입니다.",
+  "calories": "칼로리",
+  "protein": "단백질",
+  "carbohydrates": "탄수화물",
+  "fat": "지방",
+  "fiber": "식이섬유",
+  "sugar": "당류",
+  "sodium": "나트륨",
+  "cholesterol": "콜레스테롤",
+  "saturatedFat": "포화지방",
+  "transFat": "트랜스지방",
+  "servingSize": "1회 제공량",
+  "perServing": "1인분당",
+  "calculatingNutrients": "영양소 계산 중...",
+  "nutrientsCalculated": "영양소가 계산되었습니다",
+  "nutrientsFailed": "영양소 계산 실패: {error}",
+  "@nutrientsFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "premiumFeature": "프리미엄 기능",
+  "premiumNutrientsDescription": "자동 영양소 계산은 프리미엄 구독이 필요합니다",
+  "exportCurrentCookbook": "현재 요리책 내보내기",
+  "exporting": "내보내는 중...",
+  "exportAllCookbooks": "모든 요리책 내보내기",
+  "importing": "가져오는 중...",
+  "importFromJson": "JSON에서 가져오기",
+  "importFromJsonSubtitle": "백업 파일 선택",
+  "aboutDescription": "맛있는 식사를 정리하고 계획하고 요리하는 마법 같은 파트너.",
+  "madeWithLove": "전 세계 요리사를 위해 ❤️로 만들었습니다",
+  "resetAppWarning": "모든 레시피, 식사 계획, 쇼핑 목록 및 설정이 영구적으로 삭제됩니다.",
+  "actionContinue": "계속",
+  "finalConfirmation": "최종 확인",
+  "typeDeleteToConfirm": "삭제를 입력하여 확인",
+  "typeDeleteHint": "삭제",
+  "resetEverything": "모두 초기화",
+  "resettingApp": "초기화 중...",
+  "appResetSuccess": "앱이 초기화되었습니다",
+  "resetFailed": "초기화 실패",
+  "successAdded": "성공적으로 추가되었습니다",
+  "selectToday": "오늘 선택",
+  "selectTomorrow": "내일 선택",
+  "addedManually": "수동으로 추가됨",
+  "unknownRecipe": "알 수 없는 레시피",
+  "shoppingListEmpty": "쇼핑 목록이 비어 있습니다",
+  "shoppingListEmptyHint": "항목을 추가하거나 레시피에서 가져오세요",
+  "settingsRPGModeActive": "마법 텍스트 소환 중...",
+  "shoppingCheckAll": "모두 체크",
+  "shoppingUncheckAll": "체크 해제",
+  "shoppingManageLists": "목록 관리",
+  "shoppingNewList": "새 쇼핑 목록",
+  "shoppingListName": "목록 이름",
+  "shoppingLists": "쇼핑 목록",
+  "shoppingRenameList": "목록 이름 바꾸기",
+  "shoppingDeleteList": "목록을 삭제하시겠습니까?",
+  "categoryProduce": "채소 및 과일",
+  "categoryDairy": "유제품",
+  "categoryMeat": "육류",
+  "categoryBakery": "베이커리",
+  "categoryFrozen": "냉동식품",
+  "categoryBeverages": "음료",
+  "categoryPantry": "식료품",
+  "categorySpices": "향신료",
+  "categoryInternational": "수입 식품",
+  "categorySnacks": "스낵",
+  "categoryOther": "기타",
+  "from": "에서",
+  "deleted": "삭제됨",
+  "currently": "현재",
+  "autoDetect": "자동 감지",
+  "category": "카테고리",
+  "actionNew": "새로 만들기",
+  "actionCreate": "만들기",
+  "tagsAdd": "태그 추가",
+  "tagsSearchOrCreate": "태그 검색 또는 만들기...",
+  "tagsNoResults": "태그를 찾을 수 없습니다",
+  "color": "색상",
+  "icon": "아이콘",
+  "nutritionTitle": "영양 정보",
+  "nutritionEmpty": "영양 데이터가 없습니다",
+  "nutritionEmptyHint": "레시피를 편집하고 재료에서 영양소를 계산하세요",
+  "scaled": "배율 조정됨",
+  "nutritionCalculate": "영양소 계산",
+  "nutritionCalculating": "계산 중...",
+  "nutritionMatchingIngredients": "USDA 데이터베이스와 재료 매칭 중",
+  "nutritionCalculationFailed": "영양소 계산 실패",
+  "nutritionDisclaimer": "영양 수치는 USDA 데이터 기반 추정치입니다.",
+  "nutritionPerServing": "1인분당",
+  "nutritionServings": "{count}인분",
+  "@nutritionServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionIngredientBreakdown": "재료별 분류",
+  "nutritionIngredientsMatched": "매칭된 재료",
+  "nutritionMatchedCount": "{total}개 중 {matched}개 매칭됨",
+  "@nutritionMatchedCount": {
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionUncertainCount": "{count}개 확인 필요",
+  "@nutritionUncertainCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionUncertain": "매칭 확인",
+  "nutritionNotFound": "매칭 없음 — 탭하여 검색",
+  "nutritionRecalculate": "재계산",
+  "nutritionOverwriteTitle": "영양 데이터를 덮어쓰시겠습니까?",
+  "nutritionOverwriteMessage": "이 레시피에는 이미 영양 데이터가 있습니다. 재계산하시겠습니까?",
+  "nutritionCalculated": "영양소 계산이 완료되었습니다",
+  "nutritionSave": "영양소 저장",
+  "nutritionSelectFood": "USDA 식품 선택",
+  "nutritionSearchFood": "식품 검색...",
+  "nutritionNoResults": "결과 없음",
+  "nutritionCalories": "칼로리",
+  "nutritionProtein": "단백질",
+  "nutritionCarbs": "탄수화물",
+  "nutritionFat": "총 지방",
+  "nutritionSaturatedFat": "포화지방",
+  "nutritionTransFat": "트랜스지방",
+  "nutritionFiber": "식이섬유",
+  "nutritionSugar": "당류",
+  "nutritionCholesterol": "콜레스테롤",
+  "nutritionSodium": "나트륨",
+  "nutritionPotassium": "칼륨",
+  "nutritionCalcium": "칼슘",
+  "nutritionIron": "철분",
+  "nutritionVitaminA": "비타민 A",
+  "nutritionVitaminC": "비타민 C",
+  "nutritionVitaminD": "비타민 D",
+  "layoutInfoText": "영양 데이터는 두 레이아웃 모두에 표시됩니다.",
+  "settingsManageTagsSubtitle": "태그 만들기 및 구성",
+  "nutritionTotal": "합계",
+  "nutritionAutoCalculate": "자동 계산",
+  "nutritionManualEntry": "수동 입력",
+  "nutritionManualEntryTitle": "알려진 값 입력",
+  "nutritionManualEntryDescription": "정확한 값을 알고 있다면 여기에 입력하세요.",
+  "nutritionMainNutrients": "주요 영양소",
+  "nutritionOtherNutrients": "기타 영양소",
+  "nutritionEnterAtLeastOne": "칼로리 또는 하나 이상의 다량 영양소를 입력하세요",
+  "nutritionHowToFix": "수정 방법",
+  "nutritionHowToImproveAccuracy": "정확도 향상 방법",
+  "nutritionEditIngredient": "재료 편집",
+  "nutritionSearchUsda": "USDA 검색",
+  "nutritionEnterManually": "수동으로 입력",
+  "nutritionManualIngredientHint": "이 재료의 영양 수치를 입력하세요.",
+  "nutritionApplyManual": "수동 값 적용",
+  "nutritionTotalRecipe": "레시피 전체 영양 정보",
+  "nutritionMatchRate": "매칭률",
+  "allergySettingsTitle": "알레르기 설정",
+  "allergyInfoText": "알레르겐을 선택하세요. 레시피에 포함된 경우 Recipe Spellbook이 알려드립니다.",
+  "allergySelectedCount": "{count}개의 알레르겐 선택됨",
+  "@allergySelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "allergySelectAll": "모두 선택",
+  "allergyClearAll": "모두 지우기",
+  "allergyMajorTitle": "주요 알레르겐",
+  "allergyMajorSubtitle": "FDA 인정 식품 알레르겐",
+  "allergyAdditionalTitle": "추가 알레르겐",
+  "allergyAdditionalSubtitle": "기타 일반적인 식품 과민증",
+  "allergyWillWarn": "이 알레르겐에 대해 경고를 받습니다",
+  "allergyWarningTitle": "⚠️ 알레르기 경고",
+  "allergyWarningTitlePossible": "⚠️ 잠재적 알레르겐",
+  "allergyContains": "포함:",
+  "allergyMayContain": "포함 가능성:",
+  "allergyContainsAllergens": "알레르겐 포함",
+  "allergyManageSettings": "알레르기 설정 관리",
+  "allergyDetailsTitle": "알레르겐 세부 정보",
+  "settingsAllergies": "알레르기",
+  "settingsAllergiesSubtitle": "알레르겐 경고 설정",
+  "allergenMilk": "우유/유제품",
+  "allergenEggs": "달걀",
+  "allergenFish": "생선",
+  "allergenShellfish": "갑각류",
+  "allergenTreeNuts": "견과류",
+  "allergenPeanuts": "땅콩",
+  "allergenWheat": "밀/글루텐",
+  "allergenSoy": "대두",
+  "allergenSesame": "참깨",
+  "allergenMustard": "겨자",
+  "allergenCelery": "셀러리",
+  "allergenLupin": "루팽",
+  "allergenMollusks": "연체동물",
+  "allergenSulfites": "아황산염",
+  "allergenCorn": "옥수수",
+  "allergenNightshades": "가짓과",
+  "nutritionCopyFromAuto": "자동 계산에서 복사",
+  "nutritionEstimatedDisclaimer": "USDA 데이터 기반 추정치",
+  "actionDiscard": "취소",
+  "unsavedChangesTitle": "저장되지 않은 변경 사항",
+  "unsavedChangesMessage": "저장되지 않은 변경 사항이 있습니다. 저장하시겠습니까?",
+  "tagsEmptyTitle": "태그 없음",
+  "tagsEmptySubtitle": "태그를 만들어 레시피를 정리하세요.",
+  "tagsLoadDefaults": "기본 태그 불러오기",
+  "tagsAddNew": "태그 추가",
+  "tagsEdit": "태그 편집",
+  "tagsDelete": "태그 삭제",
+  "tagsDeleteConfirm": "\"{name}\"을 삭제하시겠습니까?",
+  "@tagsDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsNameLabel": "태그 이름",
+  "tagsIconLabel": "아이콘 (이모지)",
+  "tagsColorLabel": "색상",
+  "settingsRpgAnimations": "희귀도 애니메이션",
+  "settingsRpgAnimationsSubtitle": "에픽 및 전설 레시피의 광택 효과",
+  "settingsRpgSounds": "사운드 효과",
+  "settingsRpgSoundsSubtitle": "업적 및 레벨 업 사운드",
+  "settingsRpgAchievements": "업적",
+  "settingsRpgAchievementsSubtitle": "잠금 해제된 업적 보기",
+  "settingsRpgStats": "요리 통계",
+  "settingsRpgStatsSubtitle": "요리 통계 보기",
+  "settingsRpgModeEnabled": "Transform your cooking into an adventure!",
+  "settingsRecipeLayoutSubtitle": "레시피 표시 사용자 지정",
+  "rarityCommon": "일반",
+  "rarityCommonDesc": "간단한 일상 레시피",
+  "rarityUncommon": "특별",
+  "rarityUncommonDesc": "독특한 매력이 있는 맛있는 레시피",
+  "rarityRare": "희귀",
+  "rarityRareDesc": "마스터할 가치가 있는 특별한 레시피",
+  "rarityEpic": "에픽",
+  "rarityEpicDesc": "강력한 힘을 가진 에픽 레시피!",
+  "rarityLegendary": "전설",
+  "rarityLegendaryDesc": "신들에게 어울리는 전설의 레시피!",
+  "shareLink": "링크",
+  "shareDocument": "PDF",
+  "sharePrint": "인쇄",
+  "shareLinkDescription": "링크를 공유하여 다른 사람들이 이 레시피를 볼 수 있게 합니다.",
+  "shareLinkNote": "받는 사람은 Recipe Spellbook이 필요하거나 웹에서 볼 수 있습니다.",
+  "shareCreatingDocument": "문서 만드는 중...",
+  "editLayoutTitle": "편집 레이아웃",
+  "editLayoutStacked": "스택형",
+  "editLayoutTabbed": "탭형",
+  "editLayoutStackedDesc": "모든 섹션을 스크롤 보기로",
+  "editLayoutTabbedDesc": "세부 정보, 재료, 조리법을 별도 탭으로",
+  "tabDetails": "세부 정보",
+  "tabIngredients": "재료",
+  "tabInstructions": "조리법",
+  "stepImageAdd": "이미지 추가",
+  "stepImageChange": "이미지 변경",
+  "stepImageRemove": "이미지 제거",
+  "stepTimer": "타이머",
+  "stepTimerMinutes": "{minutes}분",
+  "@stepTimerMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeAddToCookbook": "요리책에 추가",
+  "recipeMoveToTrash": "휴지통으로 이동",
+  "tagsEmpty": "태그 없음",
+  "nutritionPerServingLabel": "1인분당",
+  "nutritionTotalLabel": "레시피 전체",
+  "trendingRecipes": "인기 레시피",
+  "addShortcut": "Recipe Spellbook 바로가기 추가",
+  "addShortcutSubtitle": "제스처로 레시피 가져오기",
+  "importGuides": "가져오기 가이드 읽기",
+  "useOnDesktop": "컴퓨터에서 Recipe Spellbook 사용",
+  "inviteFriends": "친구 초대",
+  "inviteFriendsTitle": "Recipe Spellbook 공유",
+  "inviteFriendsSubtitle": "친구와 가족을 함께 요리에 초대하세요!",
+  "shareApp": "앱 공유",
+  "maybeLater": "나중에",
+  "createAccount": "계정 만들기",
+  "upgradeToPremium": "프리미엄으로 업그레이드",
+  "premiumSubtitle": "동기화, 무제한 레시피 등을 잠금 해제",
+  "rpgMode": "RPG 모드",
+  "leaderboards": "리더보드",
+  "achievements": "업적",
+  "cookingStats": "요리 통계",
+  "stepByStepGuides": "단계별 가이드",
+  "importGuidesSubtitle": "좋아하는 앱과 사이트에서 가져오는 방법 알아보기",
+  "importFromOtherApps": "다른 앱에서 가져오기",
+  "orderOnline": "온라인 주문",
+  "helpTitle": "도움말",
+  "navMenu": "메뉴",
+  "mealPlanTitle": "내 식사 계획",
+  "noRecipesYet": "레시피가 없습니다",
+  "breakfast": "아침식사",
+  "lunch": "점심식사",
+  "dinner": "저녁식사",
+  "snack": "간식",
+  "allergenGluten": "글루텐",
+  "allergenChocolate": "초콜릿 및 카카오",
+  "allergenCaffeine": "카페인",
+  "allergenAlcohol": "알코올",
+  "allergenCitrus": "감귤류",
+  "allergenStoneFruits": "핵과류",
+  "allergenCoconut": "코코넛",
+  "allergenGarlic": "마늘",
+  "allergenOnion": "양파",
+  "allergenMushrooms": "버섯",
+  "allergenAvocado": "아보카도",
+  "allergenBanana": "바나나",
+  "allergenKiwi": "키위",
+  "allergenLatexFoods": "라텍스 교차 반응",
+  "allergenFodmap": "고 FODMAP",
+  "allergenHistamine": "고 히스타민",
+  "allergenSalicylates": "살리실산염",
+  "allergenMsg": "MSG",
+  "allergenRedMeat": "붉은 고기 (알파-갈)",
+  "allergenGelatin": "젤라틴",
+  "allergyWarningContains": "포함",
+  "allergyDismissForRecipe": "이 레시피에서 숨기기",
+  "allergyDismissUndo": "실행 취소",
+  "allergyWarningDismissed": "이 레시피의 경고를 숨겼습니다",
+  "scaleCustom": "사용자 지정",
+  "scaleCustomTitle": "사용자 지정 배율",
+  "scaleCustomHint": "숫자 입력 (예: ¾은 0.75, 2½는 2.5)",
+  "scaleApply": "적용",
+  "addStep": "단계 추가",
+  "noInstructionsYet": "조리법이 없습니다",
+  "addFirstStep": "첫 번째 단계 추가",
+  "enterInstruction": "조리법을 입력하세요...",
+  "addStepImage": "단계에 이미지 추가",
+  "removeStep": "단계 제거",
+  "plannerNoMeals": "계획된 식사가 없습니다",
+  "plannerAddMealHint": "+ 버튼을 눌러 식사 추가",
+  "plannerMealAdded": "{mealType}에 {recipe}이(가) 추가되었습니다",
+  "@plannerMealAdded": {
+    "placeholders": {
+      "recipe": {
+        "type": "String"
+      },
+      "mealType": {
+        "type": "String"
+      }
+    }
+  },
+  "plannerShareMealPlan": "식사 계획 공유",
+  "plannerAddWeekToShopping": "이번 주를 쇼핑 목록에 추가",
+  "plannerClearWeek": "이번 주 지우기",
+  "plannerClearWeekConfirm": "이번 주의 모든 계획된 식사가 삭제됩니다.",
+  "plannerWeekCleared": "이번 주를 지웠습니다",
+  "plannerGoToToday": "오늘로 이동",
+  "plannerAddAnother": "다른 식사 추가",
+  "plannerSearchRecipes": "레시피 검색...",
+  "mealTypeBreakfast": "아침식사",
+  "mealTypeLunch": "점심식사",
+  "mealTypeDinner": "저녁식사",
+  "mealTypeSnack": "간식",
+  "shoppingItems": "{count, plural, other{{count}개}}",
+  "@shoppingItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingBySection": "통로별",
+  "shoppingByRecipe": "레시피별",
+  "shoppingUngrouped": "그룹 없음",
+  "shoppingOrderOnline": "온라인 주문",
+  "shoppingEditItem": "항목 편집",
+  "shoppingItemName": "항목 이름",
+  "shoppingSelectCategory": "카테고리 선택",
+  "shoppingAddedManually": "수동으로 추가됨",
+  "shoppingEmptyList": "목록이 비어 있습니다",
+  "shoppingEmptyHint": "+ 버튼을 눌러 항목 추가",
+  "shoppingAddHint": "Enter를 눌러 추가, 다음 항목 입력",
+  "categoryDeli": "Deli",
+  "categoryBreakfast": "Breakfast & Cereal",
+  "categoryCanned": "Canned Goods & Soups",
+  "categoryCondiments": "Condiments, Sauces & Spices",
+  "categoryAlcohol": "Beer, Wine & Spirits",
+  "categoryBaby": "Baby",
+  "categoryBeauty": "Beauty & Personal Care",
+  "categoryHousehold": "Housewares",
+  "categoryPet": "Pet",
+  "importFromPlatform": "{platform}에서 가져오기",
+  "@importFromPlatform": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "importFromApp": "{app}에서 가져오기",
+  "@importFromApp": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "helpAddingRecipes": "레시피 추가",
+  "helpAddingRecipesDesc": "요리책에서 +를 탭하여 레시피를 추가하세요.",
+  "helpImporting": "앱에서 가져오기",
+  "helpImportingDesc": "Instagram, TikTok 또는 웹사이트에서 레시피를 공유하세요.",
+  "helpMealPlanning": "식사 계획",
+  "helpMealPlanningDesc": "플래너 탭을 탭하여 주간 식사를 계획하세요.",
+  "helpShopping": "쇼핑 목록",
+  "helpShoppingDesc": "목록에 재료를 추가하세요. 항목은 통로별로 정리됩니다.",
+  "helpSyncing": "동기화",
+  "helpSyncingDesc": "클라우드 동기화가 곧 출시됩니다!",
+  "helpContactUs": "문의하기",
+  "helpContactUsDesc": "질문이 있으신가요? support@recipespellbook.com으로 문의하세요.",
+  "navCommunity": "커뮤니티",
+  "navComingSoon": "곧 출시",
+  "mealPlanButton": "식사 계획",
+  "groceriesButton": "쇼핑",
+  "shareButton": "공유",
+  "scaleRecipeButton": "배율",
+  "convertUnitsButton": "단위 변환",
+  "allergyDismissTooltip": "경고 숨기기",
+  "allergyDisablePrompt": "이 레시피의 경고를 영구적으로 비활성화하시겠습니까?",
+  "allergyDisabledForRecipe": "이 레시피의 경고가 비활성화되었습니다",
+  "allergyRestoreWarnings": "경고 복원",
+  "recipeDuplicated": "레시피가 복제되었습니다",
+  "recipeDeleted": "레시피가 휴지통으로 이동되었습니다",
+  "deleteRecipeTitle": "레시피 삭제",
+  "deleteRecipeConfirm": "이 레시피를 삭제하시겠습니까? 휴지통으로 이동됩니다.",
+  "addToShoppingListTitle": "쇼핑 목록에 추가",
+  "viewList": "목록 보기",
+  "selectItems": "항목 선택",
+  "addToListCount": "{count}개 추가",
+  "@addToListCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yes": "예",
+  "no": "아니오",
+  "cancel": "취소",
+  "delete": "삭제",
+  "save": "저장",
+  "restore": "복원",
+  "unselectAll": "선택 해제",
+  "deleteStep": "단계 삭제",
+  "deleteSteps": "단계 삭제",
+  "deleteStepConfirm": "이 단계를 삭제하시겠습니까?",
+  "deleteStepsConfirm": "{count}개의 단계를 삭제하시겠습니까?",
+  "@deleteStepsConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stepSelected": "{count}개 선택됨",
+  "@stepSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectAllSteps": "모두 선택",
+  "gradientBased": "그라데이션 기반",
+  "gradientBasedDescription": "테마의 색상 그라데이션",
+  "startCooking": "요리 시작",
+  "fontSizeLabel": "글자 크기",
+  "krogerLoginDenied": "Kroger 로그인 거부됨: {error}",
+  "@krogerLoginDenied": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "krogerNoAuthCode": "Kroger에서 인증 코드를 받지 못했습니다.",
+  "krogerConnected": "Kroger에 연결되었습니다! 장바구니에 직접 항목을 보낼 수 있습니다.",
+  "krogerConnectFailed": "Kroger 연결 실패.",
+  "krogerConnecting": "Kroger에 연결 중…",
+  "krogerExchanging": "인증 교환 중...",
+  "krogerConnectedTitle": "연결되었습니다!",
+  "krogerConnectionFailed": "연결 실패",
+  "goToShoppingList": "쇼핑 목록으로 이동",
+  "tryAgain": "다시 시도",
+  "skipForNow": "지금은 건너뛰기",
+  "skipDuplicates": "중복 건너뛰기",
+  "deselectAll": "선택 해제",
+  "duplicate": "복제",
+  "recipesImported": "{count, plural, other{{count}개의 레시피}}를 가져왔습니다",
+  "@recipesImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importCountRecipes": "{count, plural, other{{count}개의 레시피}} 가져오기",
+  "@importCountRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productNotFound": "제품을 찾을 수 없습니다",
+  "barcodeNotFound": "바코드에 대한 제품을 찾을 수 없습니다:\n{barcode}",
+  "@barcodeNotFound": {
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "manualEntryHint": "제품 이름을 수동으로 입력할 수 있습니다.",
+  "scanAgain": "다시 스캔",
+  "enterManually": "수동으로 입력",
+  "enterProductName": "제품 이름 입력",
+  "productName": "제품 이름",
+  "scanBarcode": "바코드 스캔",
+  "lookingUpProduct": "제품 검색 중...",
+  "pointCameraBarcode": "카메라를 바코드에 향하게 하세요",
+  "unknownProduct": "알 수 없는 제품",
+  "nutritionPer100g": "영양 정보 (100g당)",
+  "findRecipesWithThis": "이것을 사용한 레시피 찾기",
+  "scanAnother": "다른 것 스캔",
+  "exportFormat": "내보내기 형식",
+  "gotIt": "알겠습니다",
+  "calendar": "달력",
+  "today": "오늘",
+  "shareMealPlan": "식사 계획 공유",
+  "addWeekToShoppingList": "이번 주를 목록에 추가",
+  "clearThisWeek": "이번 주를 지우시겠습니까?",
+  "clearWeekWarning": "이번 주의 모든 계획된 식사가 삭제됩니다.",
+  "goToToday": "오늘로 이동",
+  "addAnotherMeal": "다른 식사 추가",
+  "meal": "식사",
+  "noMealsPlanned": "계획된 식사가 없습니다",
+  "tapToAddMeal": "+ 버튼을 눌러 추가",
+  "addMeal": "식사 추가",
+  "addToDay": "{dayName}에 추가",
+  "@addToDay": {
+    "placeholders": {
+      "dayName": {
+        "type": "String"
+      }
+    }
+  },
+  "searchRecipes": "레시피 검색...",
+  "noRecipesFound": "레시피를 찾을 수 없습니다",
+  "exitShoppingListGenerator": "목록 생성기를 종료하시겠습니까?",
+  "actionExit": "종료",
+  "shoppingListGenerator": "쇼핑 목록 생성기",
+  "reviewAndAdd": "검토 및 추가 ({count}개)",
+  "@reviewAndAdd": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addItemsToList": "목록에 {count}개 추가",
+  "@addItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedItemsToShoppingList": "쇼핑 목록에 {count}개를 추가했습니다",
+  "@addedItemsToShoppingList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "createNewList": "새 목록 만들기",
+  "listName": "목록 이름",
+  "manage": "관리",
+  "myPantry": "내 식료품 저장소",
+  "itemsAlwaysOnHand": "항상 갖고 있는 항목",
+  "whatToDelete": "무엇을 삭제하시겠습니까?",
+  "localData": "로컬 데이터",
+  "localDataDesc": "이 기기의 레시피, 요리책, 식사 계획, 쇼핑 목록",
+  "cloudData": "클라우드 데이터",
+  "cloudDataDesc": "곧 출시 — 클라우드 동기화는 아직 사용 불가",
+  "allData": "모든 데이터",
+  "allDataDesc": "로컬 데이터 및 설정 — 전체 초기화",
+  "permanentDeleteWarning": "{scope}이(가) 영구적으로 삭제됩니다. 이 작업은 취소할 수 없습니다.",
+  "@permanentDeleteWarning": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "dataResetComplete": "데이터가 초기화되었습니다",
+  "noThanks": "아니요, 괜찮습니다",
+  "importFailed": "가져오기 실패: {error}",
+  "@importFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "yesAddThem": "예, 추가하세요",
+  "nutritionDisplay": "영양 표시",
+  "nutritionDisplaySubtitle": "차트 스타일, 표시할 영양소",
+  "storeIntegrations": "스토어 연동",
+  "instacart": "Instacart",
+  "kroger": "Kroger",
+  "connected": "연결됨",
+  "setCustomApiKey": "사용자 지정 API 키 설정",
+  "useOwnInstacartKey": "나만의 Instacart Connect 키 사용",
+  "instacartApiKey": "Instacart API 키",
+  "resetToDefaultKey": "기본 키로 초기화",
+  "removeCustomKey": "사용자 지정 키 제거",
+  "signInToKroger": "Kroger에 로그인",
+  "connectToAddItems": "연결하여 장바구니에 항목 추가",
+  "setPreferredStore": "선호 매장 설정",
+  "searchByZipCode": "우편번호로 검색",
+  "disconnect": "연결 해제",
+  "apiKeySaved": "API 키가 저장되었습니다",
+  "findYourKrogerStore": "Kroger 매장 찾기",
+  "enterZipCode": "우편번호 입력",
+  "storeSet": "매장이 설정되었습니다: {name}",
+  "@storeSet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "menuImportSubtitle": "Instagram, TikTok, 웹사이트...",
+  "menuSyncToMobile": "모바일에 동기화",
+  "menuSyncToDesktop": "컴퓨터에 동기화",
+  "menuTransferToPhone": "스마트폰으로 데이터 전송",
+  "menuTransferToDevice": "다른 기기로 데이터 전송",
+  "menuProfile": "프로필",
+  "menuProfileSubtitle": "통계 및 진행 상황 보기",
+  "menuAchievementsSubtitle": "보상 잠금 해제",
+  "menuCosmetics": "코스메틱",
+  "menuCosmeticsSubtitle": "외관 사용자 지정",
+  "menuLeaderboardsSubtitle": "다른 사용자와 경쟁",
+  "menuBossBattles": "보스 배틀",
+  "menuBossBattlesSubtitle": "장대한 요리 도전",
+  "menuImportRecipes": "레시피 가져오기",
+  "menuHelpSupport": "도움말 및 지원",
+  "menuAppVersion": "Recipe Spellbook v{version}",
+  "@menuAppVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "menuShareApp": "Recipe Spellbook 공유",
+  "menuShareSubtitle": "친구와 가족을 함께 요리에 초대하세요!",
+  "menuShareMessage": "Recipe Spellbook을 확인하세요 - 최고의 레시피 앱! https://recipespellbook.app",
+  "signIn": "로그인",
+  "helpFromWebsite": "웹사이트에서",
+  "helpFromWebsiteDesc": "요리책에서 +를 탭한 다음 레시피 URL을 붙여넣으세요.",
+  "helpFromSocial": "Instagram 또는 TikTok에서",
+  "helpFromSocialDesc": "레시피 게시물 링크를 복사하고 +를 탭하여 붙여넣으세요.",
+  "helpFromPhoto": "사진에서",
+  "helpFromPhotoDesc": "책의 레시피 사진을 찍으세요. +를 탭하고 이미지를 선택하세요.",
+  "helpFromPdf": "PDF에서",
+  "helpFromPdfDesc": "+를 탭하고 파일을 선택하여 PDF를 가져오세요.",
+  "helpFromText": "텍스트에서",
+  "helpFromTextDesc": "레시피 텍스트를 복사하고 +를 탭한 다음 붙여넣기를 선택하세요.",
+  "helpFromPaprika": "Paprika에서",
+  "helpFromPaprikaDesc": "Paprika에서 내보내기로 이동하여 HTML 형식을 선택하세요.",
+  "helpFromOtherApps": "다른 앱에서",
+  "helpFromOtherAppsDesc": "대부분의 레시피 앱은 HTML 또는 텍스트로 내보낼 수 있습니다.",
+  "helpCloudSync": "클라우드 동기화",
+  "helpCloudSyncDesc": "Cloud Sync를 구독하여 모든 기기에서 레시피를 동기화하세요.",
+  "accountTitle": "계정",
+  "signInToSync": "동기화하려면 로그인",
+  "signInSyncDesc": "레시피를 백업하고 여러 기기에서 동기화하고 프리미엄 기능을 잠금 해제하세요.",
+  "continueWithGoogle": "Google로 계속",
+  "continueWithApple": "Apple로 계속",
+  "signOut": "로그아웃",
+  "signOutQuestion": "로그아웃하시겠습니까?",
+  "signOutDesc": "레시피는 이 기기에 남아 있습니다.",
+  "deleteAccount": "계정 삭제",
+  "deleteAccountQuestion": "계정을 삭제하시겠습니까?",
+  "deleteAccountDesc": "계정과 모든 동기화된 데이터가 영구적으로 삭제됩니다.\n\n로컬에 저장된 레시피는 삭제되지 않습니다.",
+  "deletePermanently": "영구 삭제",
+  "deleteAccountFailed": "계정 삭제 실패.",
+  "signInToApp": "Recipe Spellbook에 로그인",
+  "signInSyncLong": "레시피를 동기화하고 클라우드 백업을 잠금 해제하고 Pro 기능에 액세스하세요.",
+  "recipesStayOnDevice": "레시피는 계정 없이도 이 기기에 남아 있습니다.",
+  "upgradeToPro": "Pro로 업그레이드",
+  "subscriptionDot": "구독 · {tier}",
+  "@subscriptionDot": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "affluentLabsPro": "Affluent Labs Pro",
+  "cancelledAccessUntil": "취소됨 — {date}까지 접근 가능",
+  "@cancelledAccessUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "lifetimeNeverExpires": "평생 — 만료 없음",
+  "renewsDate": "{date}에 갱신됩니다",
+  "@renewsDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "manageSubscription": "구독 관리",
+  "tierPremium": "프리미엄",
+  "tierStandard": "스탠다드",
+  "tierBasic": "베이직",
+  "tierFree": "무료",
+  "tierPlan": "{tier} 플랜",
+  "@tierPlan": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "upgradeArrow": "업그레이드 →",
+  "syncNow": "지금 동기화",
+  "syncing": "동기화 중...",
+  "lastSynced": "마지막 동기화 {time}",
+  "@lastSynced": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "notYetSynced": "아직 동기화되지 않음",
+  "cloudSyncSection": "클라우드 동기화",
+  "noRecipesPlannedThisWeek": "이번 주에 계획된 레시피가 없습니다",
+  "todayBadge": "오늘",
+  "noCourseAssigned": "코스 없음",
+  "uncategorized": "미분류",
+  "allRecipesHaveCourse": "모든 레시피에 코스가 지정되었습니다!",
+  "allRecipesCategorized": "모든 레시피가 분류되었습니다!",
+  "greatJobOrganizing": "잘 정리되었습니다!",
+  "countOfTotal": "{total}개 중 {count}개",
+  "@countOfTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "tapToAssignCourse": "탭하여 코스 지정",
+  "tapToAssignCategory": "탭하여 카테고리 지정",
+  "deleteCountRecipes": "{count, plural, other{{count}개의 레시피}}를 삭제하시겠습니까?",
+  "@deleteCountRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipesMovedToTrash": "{count, plural, other{{count}개의 레시피}}가 휴지통으로 이동되었습니다",
+  "@countRecipesMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "setCourse": "코스 설정",
+  "setCategory": "카테고리 설정",
+  "courseSetForCount": "{count, plural, other{{count}개의 레시피}}에 코스가 설정되었습니다",
+  "@courseSetForCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categorySetForCount": "{count, plural, other{{count}개의 레시피}}에 카테고리가 설정되었습니다",
+  "@categorySetForCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipesFavorited": "{count, plural, other{{count}개의 레시피}}가 즐겨찾기에 추가되었습니다",
+  "@countRecipesFavorited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkCourse": "코스",
+  "bulkCategory": "카테고리",
+  "bulkFavorite": "즐겨찾기",
+  "aiImportTitle": "AI로 가져오기",
+  "aiCopyPrompt": "프롬프트 복사",
+  "aiCopyPromptSubtitle": "이것을 ChatGPT, Claude, Gemini 또는 레시피와 함께 AI에 붙여넣으세요.",
+  "aiCopied": "복사되었습니다!",
+  "aiCopyToClipboard": "프롬프트 복사",
+  "aiPreviewPrompt": "프롬프트 미리보기",
+  "aiPasteOutput": "AI 출력 붙여넣기",
+  "aiPasteSubtitle": "AI의 JSON을 붙여넣거나 .json 파일을 가져오세요.",
+  "aiPasteFirst": "먼저 JSON을 붙여넣거나 로드하세요.",
+  "aiFailedReadFile": "파일 읽기 실패: {error}",
+  "@aiFailedReadFile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "aiUntitledRecipe": "제목 없는 레시피",
+  "aiImporting": "가져오는 중...",
+  "aiImportToCookbook": "요리책에 가져오기",
+  "aiImportSuccess": "레시피를 성공적으로 가져왔습니다!",
+  "aiPreviewImport": "미리보기 및 가져오기",
+  "aiPromptCopied": "프롬프트가 복사되었습니다! 레시피와 함께 AI에 붙여넣으세요.",
+  "aiLoadJsonFile": ".json 파일 로드",
+  "aiPaste": "붙여넣기",
+  "aiTipsTitle": "팁",
+  "aiTip1": "ChatGPT, Claude, Gemini, Copilot 또는 모든 AI에서 작동",
+  "aiTip2": "레시피 사진을 찍어 프롬프트와 함께 붙여넣을 수도 있습니다",
+  "aiTip3": "AI는 손으로 쓴, 인쇄된 또는 웹 레시피를 변환합니다",
+  "aiTip4": "JSON에 오류가 있으면 AI에 수정을 요청하세요",
+  "aiServingsLabel": "{count}인분",
+  "@aiServingsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "aiPrepLabel": "{minutes}분 준비",
+  "@aiPrepLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "aiCookLabel": "{minutes}분 조리",
+  "@aiCookLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "aiIngredientsCount": "재료 ({count}가지)",
+  "@aiIngredientsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aiStepsCount": "단계 ({count}개)",
+  "@aiStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreAllWarnings": "모든 경고 복원",
+  "warningsRestoredForRecipe": "이 레시피의 경고가 복원되었습니다",
+  "restoreAllWarningsQuestion": "모든 경고를 복원하시겠습니까?",
+  "restoreAll": "모두 복원",
+  "allWarningsRestored": "모든 경고가 복원되었습니다",
+  "dismissedWarnings": "{count}개 숨겨짐",
+  "@dismissedWarnings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restoringPurchases": "구매 복원 중...",
+  "restorePurchases": "복원",
+  "compareAllPlans": "모든 플랜 비교",
+  "oneTimeTab": "일회성",
+  "subscriptionTab": "구독",
+  "payOnceKeepForever": "한 번 결제, 영원히 사용",
+  "cloudSyncFeature": "Cloud Sync",
+  "cloudSyncPlusFeature": "Cloud Sync+",
+  "unableToLoadProducts": "제품을 로드할 수 없습니다.",
+  "noOfferingsAvailable": "사용 가능한 오퍼가 없습니다.",
+  "purchaseFailed": "구매 실패: {error}",
+  "@purchaseFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "hintProductExample": "예: 유기농 토마토 소스",
+  "previewPhoto": "사진 미리보기",
+  "retake": "다시 찍기",
+  "usePhoto": "이 사진 사용",
+  "takePhoto": "사진 찍기",
+  "chooseFromGallery": "갤러리에서 선택",
+  "removeImage": "이미지 제거",
+  "tipsPlaceholder": "팁, 변형, 보관 방법...",
+  "totalCalories": "총 칼로리",
+  "caloriesPerServing": "칼로리/인분",
+  "totalNutrition": "합계",
+  "linkRecipe": "레시피 연결",
+  "addIngredient": "재료 추가",
+  "searchRecipesToLink": "연결할 레시피 검색...",
+  "linkToIngredient": "\"{name}\"에 연결",
+  "@linkToIngredient": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "errorSavingRecipe": "저장 오류: {error}",
+  "@errorSavingRecipe": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteSelectedCount": "{count}개 삭제",
+  "@deleteSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "takeAPhoto": "사진 찍기",
+  "defaultLabel": "기본값",
+  "scaleRecipe": "레시피 배율 조정",
+  "scaleHint": "예: 2.5",
+  "badgePinned": "고정됨",
+  "badgeRecentlyViewed": "최근에 봤습니다",
+  "displayOptions": "표시 옵션",
+  "showMealPlan": "식사 계획 표시",
+  "showMealPlanSubtitle": "오늘의 계획된 레시피 표시",
+  "showPinnedRecipes": "고정된 레시피 표시",
+  "showPinnedSubtitle": "고정된 레시피 표시",
+  "showRecentHistory": "최근 기록 표시",
+  "showRecentSubtitle": "최근 본 레시피 표시",
+  "versionLabel": "버전 {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "measurementsUS": "컵, 스푼, 온스, °F",
+  "measurementsMetric": "밀리리터, 그램, °C",
+  "defaultRecipesImported": "{count}개의 기본 레시피를 가져왔습니다!",
+  "@defaultRecipesImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingListGeneratorTitle": "쇼핑 목록 생성기",
+  "exitShoppingListGeneratorQuestion": "생성기를 종료하시겠습니까?",
+  "reviewAndAddItems": "검토 및 추가 ({count}개)",
+  "@reviewAndAddItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedTotalItemsToList": "목록에 {count}개를 추가했습니다",
+  "@addedTotalItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scaleMultiplier": "{scale}배",
+  "@scaleMultiplier": {
+    "placeholders": {
+      "scale": {
+        "type": "String"
+      }
+    }
+  },
+  "printIngredients": "재료",
+  "printInstructions": "조리법",
+  "printNotes": "메모",
+  "printPrep": "준비: {minutes}분",
+  "@printPrep": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "printCook": "조리: {minutes}분",
+  "@printCook": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "printFooter": "Recipe Spellbook에서 인쇄",
+  "printPage": "{current}/{total} 페이지",
+  "@printPage": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "menuNavigation": "탐색",
+  "menuImport": "가져오기",
+  "menuRpgMode": "RPG 모드",
+  "menuSocial": "소셜",
+  "menuApp": "앱",
+  "historyCount": "기록 수",
+  "historyCountSubtitle": "표시할 최근 레시피의 최대 수",
+  "restoreAllWarningsDesc": "이렇게 하면 모든 레시피의 알레르기 경고가 다시 활성화됩니다.",
+  "signInToContinue": "계속하려면 로그인",
+  "signInForPurchaseDesc": "구매 전 계정이 필요합니다.",
+  "menuAchievements": "업적",
+  "menuLeaderboards": "리더보드",
+  "requiresPremium": "프리미엄 필요",
+  "deleteCount": "{count}개 삭제",
+  "@deleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tapToSelectPhoto": "탭하여 갤러리 또는 카메라에서 선택",
+  "rating": "평점",
+  "usUnits": "cups, tablespoons, ounces, °F",
+  "metricUnits": "milliliters, grams, °C",
+  "selectedCount": "{count}개 선택됨",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteRecipesConfirm": "{count}개의 레시피를 삭제하시겠습니까?",
+  "@deleteRecipesConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courseSetForRecipes": "{count}개의 레시피에 코스가 설정되었습니다",
+  "@courseSetForRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@recipesFavorited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeImportedSuccess": "레시피를 성공적으로 가져왔습니다!",
+  "promptCopied": "프롬프트가 복사되었습니다! 레시피와 함께 AI에 붙여넣으세요.",
+  "importFromAI": "AI로 가져오기",
+  "paste": "붙여넣기",
+  "previewAndImport": "미리보기 및 가져오기",
+  "signInDescription": "레시피를 저장하고 여러 기기에서 동기화하세요.",
+  "signOutConfirmTitle": "로그아웃하시겠습니까?",
+  "signOutConfirmMessage": "레시피는 이 기기에 남아 있습니다.",
+  "deleteAccountConfirmTitle": "계정을 삭제하시겠습니까?",
+  "deleteAccountConfirmMessage": "계정이 영구적으로 삭제됩니다.\n\n로컬 레시피는 삭제되지 않습니다.",
+  "planLabel": "{label} 플랜",
+  "@planLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "permanentlyDeleteWarning": "{scope}이(가) 영구적으로 삭제됩니다. 이 작업은 취소할 수 없습니다.",
+  "@permanentlyDeleteWarning": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "recipesMovedToTrash": "{count}개의 레시피가 휴지통으로 이동되었습니다",
+  "@recipesMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipesFavorited": "{count}개의 레시피가 즐겨찾기에 추가되었습니다",
+  "upgradeRecipeSpellbook": "Recipe Spellbook 업그레이드",
+  "choosePlanSubtitle": "주방에 맞는 플랜을 선택하세요",
+  "premiumInfoNotice": "프리미엄은 무료 경험을 향상시키는 일회성 구매입니다.",
+  "bestValue": "최고의 가치",
+  "billedMonthly": "월별 청구",
+  "save16Yearly": "16% 절약 — 월 $2.50",
+  "save16Badge": "16% 절약",
+  "save17Yearly": "17% 절약 — 월 $4.17",
+  "subscriptionsIncludePremium": "모든 구독에는 프리미엄의 모든 것이 포함됩니다.",
+  "monthly": "월간",
+  "yearly": "연간",
+  "purchasePremiumCta": "프리미엄 구매 — $6.99",
+  "subscribeCloudSyncMonthlyCta": "구독하기 — $2.99/월",
+  "subscribeCloudSyncYearlyCta": "구독하기 — $29.99/년",
+  "subscribeCloudSyncPlusMonthlyCta": "구독하기 — $4.99/월",
+  "subscribeCloudSyncPlusYearlyCta": "구독하기 — $49.99/년",
+  "signInRequiredBeforePurchase": "구매 전 로그인 필요",
+  "terms": "약관",
+  "privacy": "개인정보",
+  "comparePlans": "플랜 비교",
+  "featureCloudSyncPersonal": "클라우드 동기화 (개인)",
+  "featurePhotosOnSteps": "단계별 사진",
+  "featurePhotoStorage250": "사진 저장공간 250MB (약 500장)",
+  "featureRpgCosmeticsStarter": "RPG 코스메틱 스타터 팩",
+  "featureSupporterBadge": "프리미엄 서포터 배지",
+  "featureExtraPolish": "UI 및 기능 개선",
+  "featureFamilySharing5": "가족 공유 (5명)",
+  "featurePhotoStorage1gb": "사진 저장공간 1GB (약 2,000장)",
+  "featureSharedLists": "공유 쇼핑 목록",
+  "featureSharedCookbooks": "공유 요리책",
+  "featureSharedMealPlan": "공유 식사 계획",
+  "featureEncryptedBackups": "암호화된 백업 + 기록",
+  "featureFamilySharing10": "가족 공유 (10명)",
+  "featurePhotoStorage5gb": "사진 저장공간 5GB (약 10,000장)",
+  "featureExtendedVersionHistory": "확장된 기록",
+  "featurePrioritySync": "우선 동기화",
+  "featureFutureAdvanced": "향후 고급 기능 포함",
+  "tierCloudSync": "Cloud\nSync",
+  "tierCloudSyncPlus": "Cloud\nSync+",
+  "comparePrice": "가격",
+  "priceFree": "$0",
+  "pricePremium": "$6.99\n일회성",
+  "priceCloudSync": "$2.99\n/월",
+  "priceCloudSyncPlus": "$4.99\n/월",
+  "compareDeviceTransfer": "기기 전송",
+  "qrCode": "QR 코드",
+  "cloud": "클라우드",
+  "comparePhotoStorage": "사진 저장공간",
+  "compareStepPhotos": "단계 사진",
+  "compareFamilySharing": "가족 공유",
+  "compareSharedLists": "공유 목록",
+  "compareSharedCookbooks": "공유 요리책",
+  "compareSharedMealPlan": "공유 식사 계획",
+  "compareBackups": "백업",
+  "compareVersionHistory": "기록",
+  "light": "가벼운",
+  "extended": "확장된",
+  "compareRpgCosmetics": "RPG 코스메틱",
+  "basic": "베이직",
+  "starterPack": "스타터\n팩",
+  "compareSupporterBadge": "서포터 배지",
+  "printOf": "/",
+  "printRecipe": "인쇄",
+  "stackedLayout": "스택형 레이아웃",
+  "tabbedLayout": "탭형 레이아웃",
+  "printLabelIngredients": "재료",
+  "printLabelInstructions": "조리법",
+  "printLabelNotes": "메모",
+  "printLabelPrep": "준비",
+  "printLabelCook": "조리",
+  "printLabelFooter": "Recipe Spellbook에서 인쇄",
+  "printLabelPage": "페이지",
+  "printLabelOf": "/",
+  "smallerText": "글자 작게",
+  "largerText": "글자 크게",
+  "textSize": "글자 크기",
+  "ingredientPreview": "재료 미리보기",
+  "resetToDefault": "Reset to Default",
+  "smartImportSuccess": "AI가 레시피를 다시 분석했습니다",
+  "smartImportSuccessWithRemaining": "AI가 레시피를 분석했습니다 • 이번 달 {remaining}회 남음",
+  "@smartImportSuccessWithRemaining": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "smartImportLimitTitle": "스마트 가져오기 한도에 도달했습니다",
+  "smartImportLimitMessage": "이번 달 {limit}회의 스마트 가져오기를 모두 사용했습니다.",
+  "@smartImportLimitMessage": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "smartImportUpgradeHint": "프리미엄으로 업그레이드하여 월 200회 가져오기.",
+  "smartImportParsing": "AI 분석 중...",
+  "smartImportFix": "스마트 가져오기로 수정 ✨",
+  "smartImportRemaining": "이번 달 {remaining}/{limit}회의 스마트 가져오기 남음",
+  "@smartImportRemaining": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "smartImportHintTitle": "가져오기가 올바르지 않아 보이나요?",
+  "smartImportHintSubtitle": "스마트 가져오기 구독 — AI 레시피 분석",
+  "learnMore": "자세히 알아보기",
+  "retry": "다시 시도",
+  "upgrade": "업그레이드",
+  "cookingMode": "요리 모드",
+  "mealTypeDessert": "디저트",
+  "noContentToSave": "저장할 콘텐츠가 없습니다",
+  "recipeSaved": "레시피가 저장되었습니다!",
+  "qrScanningMobileOnly": "QR 스캔은 모바일에서만 사용 가능합니다.",
+  "notEnoughMana": "마나가 부족합니다! 레시피로 경험치를 얻어 회복하세요.",
+  "communityComingSoon": "커뮤니티 기능이 곧 출시됩니다!",
+  "somethingWentWrong": "오류가 발생했습니다: {error}",
+  "@somethingWentWrong": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "starterRecipesAdded": "{count}개의 스타터 레시피가 추가되었습니다! 🎉",
+  "@starterRecipesAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enterAtLeastOneNutrient": "칼로리 또는 하나 이상의 다량 영양소를 입력하세요",
+  "addedToMealPlan": "{date}의 {mealType}에 추가되었습니다",
+  "@addedToMealPlan": {
+    "placeholders": {
+      "mealType": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noItemsFoundInText": "텍스트에서 항목을 찾을 수 없습니다",
+  "noTextFoundInImage": "이미지에서 텍스트를 찾을 수 없습니다",
+  "addDayToShoppingList": "오늘을 목록에 추가",
+  "sendDayToShoppingList": "오늘을 목록으로 보내기",
+  "removeMeal": "식사 제거",
+  "removeMealConfirm": "이 날에서 {recipeName}을(를) 제거하시겠습니까?",
+  "@removeMealConfirm": {
+    "placeholders": {
+      "recipeName": {
+        "type": "String"
+      }
+    }
+  },
+  "actionRemove": "제거",
+  "plannerMealRemoved": "식사가 제거되었습니다",
+  "weekStartsOn": "주 시작일",
+  "monday": "월요일",
+  "saturday": "토요일",
+  "sunday": "일요일",
+  "ingredientHeader": "제목",
+  "ingredientHeaderHint": "예: 소스용",
+  "settingsWeekStartDay": "주 시작일",
+  "tuesday": "화요일",
+  "wednesday": "수요일",
+  "thursday": "목요일",
+  "friday": "금요일",
+  "shoppingAddedToList": "\"{listName}\"에 {count}개 추가되었습니다",
+  "@shoppingAddedToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingAddedAndCombined": "\"{listName}\"에 {added}개 추가, {combined}개 합산되었습니다",
+  "@shoppingAddedAndCombined": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "combined": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingItemsUpdated": "\"{listName}\"에서 {count}개가 업데이트되었습니다",
+  "@shoppingItemsUpdated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingAddError": "오류: {message}",
+  "@shoppingAddError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "editCookbook": "요리책 편집",
+  "newCookbook": "새 요리책",
+  "tapToAddCoverImage": "탭하여 표지 이미지 추가",
+  "cookbookDescriptionLabel": "설명",
+  "cookbookDescriptionHint": "레시피 모음...",
+  "cookbookNameRequired": "이름을 입력하세요",
+  "addCover": "표지 추가",
+  "recipeCount": "{count, plural, other{{count}개의 레시피}}",
+  "@recipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbookDeleteWithRecipes": "이 요리책에는 {count, plural, other{{count}개의 레시피}}가 있습니다. 휴지통으로 이동됩니다.\n\n\"{name}\"을 삭제하시겠습니까?",
+  "@cookbookDeleteWithRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cookbookDeleteConfirmNamed": "\"{name}\"을 삭제하시겠습니까?",
+  "@cookbookDeleteConfirmNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shareCookbook": "요리책 공유",
+  "cookbookEmpty": "이 요리책에는 공유할 레시피가 없습니다",
+  "recipes": "레시피",
+  "sendSuggestion": "제안 보내기",
+  "sendSuggestionSubtitle": "Recipe Spellbook 개선에 도움을 주세요",
+  "reportBug": "버그 신고",
+  "reportBugSubtitle": "제대로 작동하지 않는 것이 있나요?",
+  "joinDiscord": "Discord에 참여",
+  "joinDiscordSubtitle": "도움을 받고 레시피를 공유하세요",
+  "actionSend": "보내기",
+  "suggestionDescription": "아이디어를 기다립니다! 제안은 팀에 직접 전송됩니다.",
+  "suggestionTitleLabel": "제안 제목",
+  "suggestionTitleHint": "예: 요리용 다크 모드 추가",
+  "suggestionDetailsLabel": "세부 정보",
+  "suggestionDetailsHint": "아이디어를 자세히 설명해 주세요...",
+  "contactOptionalLabel": "연락처 (선택)",
+  "contactOptionalHint": "이메일 또는 Discord 이름",
+  "suggestionSent": "감사합니다! 제안이 전송되었습니다 💡",
+  "bugDescription": "버그를 발견했나요? 알려주시면 수정하겠습니다.",
+  "bugTitleLabel": "버그 제목",
+  "bugTitleHint": "예: PDF 가져오기 시 앱이 충돌함",
+  "bugDetailsLabel": "무슨 일이 있었나요?",
+  "bugDetailsHint": "무엇이 잘못되었는지 설명해 주세요...",
+  "bugStepsLabel": "재현 단계 (선택)",
+  "bugStepsHint": "1. 레시피 열기\n2. 공유 탭하기\n3. 앱이 충돌함",
+  "bugReportSent": "감사합니다! 버그 보고서가 전송되었습니다 🐛",
+  "feedbackFieldsRequired": "제목과 세부 정보를 입력하세요",
+  "feedbackSendError": "피드백을 전송할 수 없습니다. 연결을 확인하세요.",
+  "mealTypeAppetizer": "전채",
+  "allergenContains": "Contains",
+  "settingsIngredientLayout": "재료 레이아웃",
+  "ingredientLayoutInline": "인라인 — 버터 1작은술",
+  "ingredientLayoutColumnar": "컬럼 — 양 정렬",
+  "settingsIngredientLayoutDescription": "재료의 양과 이름 표시 방법 선택.",
+  "ingredientLayoutInlineDescription": "양, 단위, 이름을 자연스러운 흐름으로",
+  "ingredientLayoutColumnarDescription": "고정 열에 양을 정렬",
+  "ingredientLayoutInfoText": "이 설정은 레시피 보기, 목록 생성기, 인쇄 레시피에 적용됩니다.",
+  "searchCookbooks": "요리책 검색...",
+  "aboutWebsite": "웹사이트",
+  "aboutPrivacyPolicy": "개인정보 처리방침",
+  "aboutPrivacyPolicySub": "데이터 처리 방법",
+  "aboutTermsOfService": "이용약관",
+  "aboutTermsOfServiceSub": "이용 조건",
+  "aboutCommunity": "커뮤니티",
+  "aboutCommunitySub": "Discord 서버에 참여",
+  "aboutReportBug": "버그 신고",
+  "aboutReportBugSub": "앱 개선에 도움을 주세요",
+  "aboutRateApp": "앱 평가",
+  "aboutRateAppSub": "스토어에 리뷰 남기기",
+  "aboutLicenses": "오픈 소스 라이선스",
+  "aboutLicensesSub": "사용된 타사 소프트웨어",
+  "sortOrder": "정렬 순서",
+  "ingredientAddHeader": "제목 추가"
+}

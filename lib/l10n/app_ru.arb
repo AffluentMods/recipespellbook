@@ -1,0 +1,2575 @@
+{
+  "@@locale": "ru",
+  "@@last_modified": "2026-01-28",
+  "appTitle": "Recipe Spellbook",
+  "navHome": "Главная",
+  "navCookbooks": "Кулинарные книги",
+  "navPlanner": "Планировщик",
+  "navShopping": "Покупки",
+  "navSettings": "Настройки",
+  "homeGreeting": "С возвращением!",
+  "homeQuickAccess": "Быстрый доступ",
+  "homeMealPlan": "Блюда на сегодня",
+  "homePinnedRecipes": "Закреплённые рецепты",
+  "homeRecentRecipes": "Недавно просмотренные",
+  "homeNoMealsPlanned": "Нет запланированных блюд на сегодня",
+  "homeNoPinnedRecipes": "Нет закреплённых рецептов",
+  "homeNoRecentRecipes": "Нет недавних рецептов",
+  "recipesTitle": "Рецепты",
+  "recipesEmpty": "Нет рецептов",
+  "recipesEmptySubtitle": "Добавьте первый рецепт для начала",
+  "recipeAdd": "Добавить рецепт",
+  "recipeEdit": "Редактировать рецепт",
+  "recipeDelete": "Удалить рецепт",
+  "recipeDeleteConfirm": "Вы уверены, что хотите удалить этот рецепт?",
+  "recipeFavorite": "Добавить в избранное",
+  "recipeUnfavorite": "Удалить из избранного",
+  "recipePin": "Закрепить рецепт",
+  "recipeUnpin": "Открепить рецепт",
+  "recipeShare": "Поделиться рецептом",
+  "recipePrint": "Распечатать рецепт",
+  "recipeDuplicate": "Дублировать рецепт",
+  "recipeAddToMealPlan": "Добавить в план питания",
+  "recipeAddToShoppingList": "Добавить в список покупок",
+  "recipeStartCooking": "Начать готовить",
+  "recipeFieldTitle": "Название",
+  "recipeFieldDescription": "Описание",
+  "recipeFieldIngredients": "Ингредиенты",
+  "recipeFieldInstructions": "Инструкции",
+  "recipeFieldNotes": "Заметки",
+  "notesTitle": "Заметки",
+  "recipeFieldServings": "Порции",
+  "recipeFieldPrepTime": "Время подготовки",
+  "recipeFieldCookTime": "Время приготовления",
+  "recipeFieldTotalTime": "Общее время",
+  "recipeFieldSource": "Источник",
+  "recipeFieldCourse": "Блюдо",
+  "recipeFieldCategory": "Категория",
+  "recipeFieldTags": "Теги",
+  "recipeFieldRating": "Рейтинг",
+  "ratingCommon": "Обычный",
+  "ratingUncommon": "Необычный",
+  "ratingRare": "Редкий",
+  "ratingEpic": "Эпический",
+  "ratingLegendary": "Легендарный",
+  "ratingUnrated": "Без оценки",
+  "minutesAbbrev": "мин",
+  "hoursAbbrev": "ч",
+  "servingsUnit": "порций",
+  "ingredientsTitle": "Ингредиенты",
+  "ingredientsEmpty": "Ингредиенты не добавлены",
+  "ingredientAdd": "Добавить ингредиент",
+  "ingredientPlaceholder": "напр., 2 стакана муки",
+  "instructionsTitle": "Инструкции",
+  "instructionsEmpty": "Инструкции не добавлены",
+  "instructionAdd": "Добавить шаг",
+  "instructionPlaceholder": "Опишите этот шаг...",
+  "stepNumber": "Шаг {number}",
+  "@stepNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbooksTitle": "Кулинарные книги",
+  "cookbooksEmpty": "Нет кулинарных книг",
+  "cookbookAdd": "Новая книга",
+  "cookbookEdit": "Редактировать книгу",
+  "cookbookDelete": "Удалить книгу",
+  "cookbookDeleteConfirm": "Удалить эту книгу и все рецепты?",
+  "cookbookRecipeCount": "{count, plural, =0{Нет рецептов} =1{1 рецепт} few{{count} рецепта} many{{count} рецептов} other{{count} рецепта}}",
+  "@cookbookRecipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingDeli": "Деликатесы",
+  "shoppingCannedGoods": "Консервы и супы",
+  "shoppingCondiments": "Соусы и приправы",
+  "shoppingGrainsAndPasta": "Крупы, макароны и рис",
+  "shoppingCookingAndBaking": "Готовка и выпечка",
+  "shoppingBreakfastCereal": "Завтрак и хлопья",
+  "shoppingBeerWineSpirits": "Пиво, вино и крепкие напитки",
+  "shoppingBaby": "Товары для малышей",
+  "shoppingPet": "Товары для животных",
+  "shoppingHousehold": "Хозяйственные товары",
+  "shoppingPersonalCare": "Уход за собой",
+  "plannerTitle": "Планировщик питания",
+  "plannerEmpty": "Нет запланированных блюд",
+  "plannerEmptySubtitle": "Нажмите + чтобы добавить блюдо",
+  "plannerAddMeal": "Добавить блюдо",
+  "plannerToday": "Сегодня",
+  "plannerThisWeek": "На этой неделе",
+  "plannerBreakfast": "Завтрак",
+  "plannerLunch": "Обед",
+  "plannerDinner": "Ужин",
+  "plannerSnack": "Перекус",
+  "shoppingTitle": "Список покупок",
+  "shoppingEmpty": "Ваш список пуст",
+  "shoppingEmptySubtitle": "Добавьте товары или импортируйте из рецептов",
+  "shoppingAddItem": "Добавить товар...",
+  "shoppingCheckedItems": "Отмеченные товары",
+  "shoppingClearChecked": "Удалить отмеченные",
+  "shoppingClearAll": "Удалить всё",
+  "shoppingCategories": "Категории покупок",
+  "shoppingUncategorized": "Без категории",
+  "shoppingItemCount": "{count, plural, =0{Нет товаров} =1{1 товар} few{{count} товара} many{{count} товаров} other{{count} товара}}",
+  "@shoppingItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsTitle": "Настройки",
+  "settingsAppearance": "Внешний вид",
+  "settingsTheme": "Тема",
+  "settingsThemeMode": "Режим темы",
+  "settingsThemeModeSystem": "Системный",
+  "settingsThemeModeLight": "Светлый",
+  "settingsThemeModeDark": "Тёмный",
+  "settingsLanguage": "Язык",
+  "settingsMeasurements": "Единицы измерения",
+  "settingsMeasurementsUS": "США (стаканы, унции)",
+  "settingsMeasurementsMetric": "Метрические (мл, г)",
+  "settingsRPGMode": "Режим RPG",
+  "settingsRPGModeSubtitle": "Включить текст и изображения в стиле фэнтези",
+  "settingsRecipes": "Рецепты",
+  "settingsManageCourses": "Управление блюдами",
+  "settingsManageCategories": "Управление категориями",
+  "settingsManageTags": "Управление тегами",
+  "settingsData": "Данные",
+  "settingsExport": "Экспорт данных",
+  "settingsExportSubtitle": "Резервная копия рецептов",
+  "settingsImport": "Импорт данных",
+  "settingsImportSubtitle": "Восстановить из резервной копии",
+  "settingsImportFromApps": "Импорт из других приложений",
+  "settingsImportFromAppsSubtitle": "Paprika, Crouton, Mela и другие",
+  "settingsAbout": "О приложении",
+  "settingsVersion": "Версия {version}",
+  "@settingsVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsPrivacy": "Политика конфиденциальности",
+  "settingsTerms": "Условия использования",
+  "settingsFeedback": "Отправить отзыв",
+  "importTitle": "Импорт",
+  "importCreate": "Создать",
+  "importCreateSubtitle": "Напишите собственный рецепт",
+  "importSubtitle": "Из URL, изображения или файла",
+  "importChooseMethod": "Как вы хотите добавить рецепт?",
+  "importProgress": "Импорт рецепта...",
+  "importFromURL": "Из URL",
+  "importFromImage": "Из изображения",
+  "importFromFile": "Из файла",
+  "importFromText": "Импорт из текста",
+  "importProcessing": "Обработка...",
+  "importSuccess": "Рецепт успешно импортирован",
+  "importError": "Не удалось импортировать рецепт",
+  "importBulkTitle": "Импорт рецептов",
+  "importBulkFound": "Найдено {count} рецептов",
+  "@importBulkFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importBulkImportAll": "Импортировать всё",
+  "importBulkImportFirst": "Импортировать первый",
+  "searchTitle": "Поиск",
+  "searchHint": "Поиск рецептов...",
+  "searchNoResults": "Рецепты не найдены",
+  "searchFilters": "Фильтры",
+  "actionSave": "Сохранить",
+  "actionCancel": "Отмена",
+  "actionDelete": "Удалить",
+  "actionEdit": "Редактировать",
+  "actionAdd": "Добавить",
+  "actionDone": "Готово",
+  "actionClose": "Закрыть",
+  "actionConfirm": "Подтвердить",
+  "actionUndo": "Отменить",
+  "actionRetry": "Повторить",
+  "actionCopy": "Копировать",
+  "actionPaste": "Вставить",
+  "actionOk": "ОК",
+  "actionShare": "Поделиться",
+  "actionClear": "Очистить",
+  "errorGeneric": "Что-то пошло не так",
+  "errorNetwork": "Ошибка сети. Проверьте подключение.",
+  "errorNotFound": "Не найдено",
+  "errorInvalidURL": "Неверный URL",
+  "successSaved": "Успешно сохранено",
+  "successDeleted": "Успешно удалено",
+  "successCopied": "Скопировано в буфер обмена",
+  "confirmDeleteTitle": "Подтвердите удаление",
+  "confirmDeleteMessage": "Это действие нельзя отменить.",
+  "emptyStateTitle": "Здесь пока ничего нет",
+  "emptyStateSubtitle": "Начните с добавления первого элемента",
+  "dateToday": "Сегодня",
+  "dateYesterday": "Вчера",
+  "dateTomorrow": "Завтра",
+  "timeMinutes": "{count} {count, plural, =1{минута} few{минуты} many{минут} other{минуты}}",
+  "@timeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHours": "{count} {count, plural, =1{час} few{часа} many{часов} other{часа}}",
+  "@timeHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trashTitle": "Корзина",
+  "trashEmpty": "Корзина пуста",
+  "trashEmptySubtitle": "Удалённые рецепты хранятся здесь 30 дней",
+  "trashRestore": "Восстановить",
+  "trashRestored": "восстановлено",
+  "trashDeletePermanently": "Удалить навсегда",
+  "trashEmptyTrash": "Очистить корзину",
+  "trashEmptyConfirm": "Это навсегда удалит все рецепты в корзине. Действие нельзя отменить.",
+  "trashEmptied": "Корзина очищена",
+  "trashDeleted": "Удалено",
+  "trashDeletedToday": "Удалено сегодня",
+  "trashDeletedYesterday": "Удалено вчера",
+  "trashDeletedDaysAgo": "Удалено {days} дней назад",
+  "@trashDeletedDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "trashExpiresToday": "Истекает сегодня",
+  "trashDaysLeft": "Осталось {days} дней",
+  "@trashDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "cookingModeTitle": "Режим готовки",
+  "cookingSetTimer": "Установить таймер",
+  "cookingTimerDone": "Таймер готов!",
+  "cookingTimerFinished": "Ваш таймер завершился.",
+  "cookingExitTitle": "Выйти из режима готовки?",
+  "cookingExitMessage": "Ваш прогресс будет потерян.",
+  "cookingExit": "Выйти",
+  "cookingFinish": "Завершить",
+  "taxonomyAddCourse": "Добавить блюдо",
+  "taxonomyEditCourse": "Редактировать блюдо",
+  "taxonomyDeleteCourse": "Удалить блюдо?",
+  "taxonomyAddCategory": "Добавить категорию",
+  "taxonomyEditCategory": "Редактировать категорию",
+  "taxonomyDeleteCategory": "Удалить категорию?",
+  "taxonomyBuiltIn": "Встроенное",
+  "taxonomyCustom": "Пользовательское",
+  "taxonomyRestoreDefaults": "Восстановить по умолчанию",
+  "taxonomyDefaultsRestored": "Пользовательские элементы удалены, настройки по умолчанию восстановлены",
+  "taxonomyCourseName": "Название блюда",
+  "taxonomyCourseNameHint": "напр., Бранч, Закуска",
+  "taxonomyCategoryName": "Название категории",
+  "taxonomyCategoryNameHint": "напр., Без глютена, Низкоуглеводное",
+  "taxonomyEmojiHint": "Нажмите поле эмодзи для редактирования",
+  "taxonomyDeleteCourseMessage": "Удалить \"{name}\"? Рецепты с этим блюдом станут без категории.",
+  "@taxonomyDeleteCourseMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "taxonomyDeleteCategoryMessage": "Удалить \"{name}\"? Рецепты с этой категорией станут без категории.",
+  "@taxonomyDeleteCategoryMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsQuickAccess": "Быстрый доступ",
+  "settingsPlaceholders": "Изображения по умолчанию",
+  "actionView": "Просмотр",
+  "browseViewAll": "Просмотреть все рецепты",
+  "browseRecipesTotal": "{count} рецептов всего",
+  "@browseRecipesTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "browseCourses": "Блюда",
+  "browseCategories": "Категории",
+  "browseNoCourse": "Без блюда",
+  "browseUncategorized": "Без категории",
+  "favoritesTitle": "Избранное",
+  "favoritesEmpty": "Нет избранных рецептов",
+  "favoritesEmptySubtitle": "Нажмите на звёздочку рецепта чтобы добавить его сюда",
+  "favoritesRemoved": "Удалено из избранного",
+  "recentTitle": "Недавно просмотренные",
+  "recentEmpty": "Нет недавних рецептов",
+  "recentEmptySubtitle": "Здесь появятся рецепты, которые вы просматривали",
+  "recentJustNow": "Только что",
+  "recentMinutesAgo": "{count} мин назад",
+  "@recentMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recentHoursAgo": "{count} ч назад",
+  "@recentHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recentYesterday": "Вчера",
+  "recentDaysAgo": "{count} дней назад",
+  "@recentDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importFromUrl": "Импорт из URL",
+  "importUrlHint": "URL рецепта",
+  "importUrlPlaceholder": "https://example.com/recipe",
+  "importFetch": "Получить рецепт",
+  "importFetching": "Загрузка...",
+  "importPreview": "Предпросмотр",
+  "importRecipeFound": "Рецепт найден!",
+  "importReviewSave": "Просмотреть и сохранить",
+  "importEditBeforeSave": "Вы можете отредактировать рецепт перед сохранением",
+  "importSupportedSites": "Поддерживаемые сайты",
+  "importSupportedSitesInfo": "Работает с большинством кулинарных сайтов!",
+  "importFromScan": "Сканировать рецепт",
+  "importFromPdf": "Импорт из PDF",
+  "cookbookNew": "Новая книга",
+  "cookbookNameLabel": "Название книги",
+  "cookbookNameHint": "напр., Семейные рецепты",
+  "cookbookDescLabel": "Описание",
+  "cookbookDescHint": "Коллекция рецептов...",
+  "cookbookAddCover": "Добавить обложку",
+  "cookbookTapToAdd": "Нажмите чтобы добавить изображение обложки",
+  "cookbookDeleteTitle": "Удалить книгу?",
+  "cookbookDeleteMessage": "Эта книга содержит {count} рецептов. Они будут перемещены в корзину.",
+  "@cookbookDeleteMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbookCannotDelete": "Нельзя удалить единственную книгу",
+  "fontSizeTitle": "Размер текста",
+  "fontSizeReset": "Восстановить по умолчанию",
+  "fontSizeSmaller": "Уменьшить текст",
+  "fontSizeLarger": "Увеличить текст",
+  "defaultCookbookName": "Мои рецепты",
+  "defaultCookbookDescription": "Ваша личная коллекция рецептов",
+  "defaultShoppingListName": "Список покупок",
+  "courseBreakfast": "Завтрак",
+  "courseLunch": "Обед",
+  "courseDinner": "Ужин",
+  "courseAppetizer": "Закуска",
+  "courseSoup": "Суп",
+  "courseSalad": "Салат",
+  "courseMain": "Основное блюдо",
+  "courseSide": "Гарнир",
+  "courseDessert": "Десерт",
+  "courseSnack": "Перекус",
+  "courseBeverage": "Напиток",
+  "categoryQuick": "Быстро и просто",
+  "categoryHealthy": "Полезное",
+  "categoryComfort": "Домашняя кухня",
+  "categoryVegetarian": "Вегетарианское",
+  "categoryVegan": "Веганское",
+  "categoryGlutenFree": "Без глютена",
+  "categoryDairyFree": "Без молочных продуктов",
+  "categoryLowCarb": "Низкоуглеводное",
+  "categorySpicy": "Острое",
+  "categoryFamilyFriendly": "Для всей семьи",
+  "categoryParty": "Вечеринка",
+  "categoryHoliday": "Праздники",
+  "categoryBbq": "Гриль и барбекю",
+  "categoryBaking": "Выпечка",
+  "shoppingProduce": "Овощи и фрукты",
+  "shoppingDairy": "Молочные продукты и яйца",
+  "shoppingMeat": "Мясо и птица",
+  "shoppingSeafood": "Морепродукты",
+  "shoppingBakery": "Хлебобулочные",
+  "shoppingFrozen": "Замороженные",
+  "shoppingPantry": "Кладовая",
+  "shoppingSpices": "Специи и приправы",
+  "shoppingBeverages": "Напитки",
+  "shoppingSnacks": "Снеки",
+  "shoppingInternational": "Международные",
+  "shoppingOther": "Другое",
+  "unitCup": "стакан",
+  "unitCups": "стаканов",
+  "unitTablespoon": "столовая ложка",
+  "unitTablespoonAbbrev": "ст. л.",
+  "unitTeaspoon": "чайная ложка",
+  "unitTeaspoonAbbrev": "ч. л.",
+  "unitFluidOunce": "жидкая унция",
+  "unitFluidOunceAbbrev": "фл. унц.",
+  "unitPint": "пинта",
+  "unitQuart": "кварта",
+  "unitGallon": "галлон",
+  "unitMilliliter": "миллилитр",
+  "unitMilliliterAbbrev": "мл",
+  "unitLiter": "литр",
+  "unitLiterAbbrev": "л",
+  "unitOunce": "унция",
+  "unitOunceAbbrev": "унц.",
+  "unitPound": "фунт",
+  "unitPoundAbbrev": "фунт",
+  "unitGram": "грамм",
+  "unitGramAbbrev": "г",
+  "unitKilogram": "килограмм",
+  "unitKilogramAbbrev": "кг",
+  "unitPinch": "щепотка",
+  "unitDash": "капля",
+  "unitClove": "зубчик",
+  "unitCloves": "зубчиков",
+  "unitHead": "головка",
+  "unitBunch": "пучок",
+  "unitCan": "банка",
+  "unitPackage": "упаковка",
+  "unitSlice": "ломтик",
+  "unitSlices": "ломтиков",
+  "unitPiece": "кусок",
+  "unitPieces": "кусков",
+  "unitWhole": "целый",
+  "unitLarge": "большой",
+  "unitMedium": "средний",
+  "unitSmall": "маленький",
+  "unitFahrenheit": "°F",
+  "unitCelsius": "°C",
+  "unitInch": "дюйм",
+  "unitInches": "дюймов",
+  "unitInchAbbrev": "дюйм",
+  "unitCentimeter": "сантиметр",
+  "unitCentimeterAbbrev": "см",
+  "unitMillimeter": "миллиметр",
+  "unitMillimeterAbbrev": "мм",
+  "convertUnitsTitle": "Конвертировать единицы",
+  "convertMetricToImperial": "Метрические → Имперские",
+  "convertMetricToImperialDesc": "мл → фл. унц., г → унц., кг → фунт",
+  "convertImperialToMetric": "Имперские → Метрические",
+  "convertImperialToMetricDesc": "стаканы → мл, унц. → г, ч. л. → мл",
+  "convertResetToOriginal": "Восстановить оригинал",
+  "settingsRecipeLayout": "Макет рецепта",
+  "settingsRecipeLayoutDescription": "Выберите как отображаются ингредиенты и инструкции",
+  "settingsRecipeDisplay": "Отображение рецептов",
+  "layoutStacked": "Стопкой",
+  "layoutStackedDescription": "Весь контент в прокручиваемом списке",
+  "layoutTabbed": "Вкладки",
+  "layoutTabbedDescription": "Листайте между ингредиентами и инструкциями",
+  "recipeSwipeHint": "Листайте для смены раздела",
+  "recipeIngredients": "Ингредиенты",
+  "recipeInstructions": "Инструкции",
+  "dateNextWeek": "На следующей неделе",
+  "timeJustNow": "Только что",
+  "timeMinutesAgo": "{count, plural, =1{1 минуту назад} few{{count} минуты назад} many{{count} минут назад} other{{count} минуты назад}}",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHoursAgo": "{count, plural, =1{1 час назад} few{{count} часа назад} many{{count} часов назад} other{{count} часа назад}}",
+  "@timeHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeDaysAgo": "{count, plural, =1{1 день назад} few{{count} дня назад} many{{count} дней назад} other{{count} дня назад}}",
+  "@timeDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeWeeksAgo": "{count, plural, =1{1 неделю назад} few{{count} недели назад} many{{count} недель назад} other{{count} недели назад}}",
+  "@timeWeeksAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeMonthsAgo": "{count, plural, =1{1 месяц назад} few{{count} месяца назад} many{{count} месяцев назад} other{{count} месяца назад}}",
+  "@timeMonthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeYearsAgo": "{count, plural, =1{1 год назад} few{{count} года назад} many{{count} лет назад} other{{count} года назад}}",
+  "@timeYearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeInMinutes": "через {count, plural, =1{1 минуту} few{{count} минуты} many{{count} минут} other{{count} минуты}}",
+  "@timeInMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeInHours": "через {count, plural, =1{1 час} few{{count} часа} many{{count} часов} other{{count} часа}}",
+  "@timeInHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationMinutes": "{count} мин",
+  "@durationMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHours": "{count, plural, =1{1 ч} few{{count} ч} many{{count} ч} other{{count} ч}}",
+  "@durationHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHoursMinutes": "{hours} ч {minutes} мин",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipes": "{count, plural, =0{Нет рецептов} =1{1 рецепт} few{{count} рецепта} many{{count} рецептов} other{{count} рецепта}}",
+  "@countRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countIngredients": "{count, plural, =0{Нет ингредиентов} =1{1 ингредиент} few{{count} ингредиента} many{{count} ингредиентов} other{{count} ингредиента}}",
+  "@countIngredients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countSteps": "{count, plural, =0{Нет шагов} =1{1 шаг} few{{count} шага} many{{count} шагов} other{{count} шага}}",
+  "@countSteps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countItems": "{count, plural, =0{Нет товаров} =1{1 товар} few{{count} товара} many{{count} товаров} other{{count} товара}}",
+  "@countItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countSelected": "{count} выбрано",
+  "@countSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorGenericTitle": "Ошибка",
+  "errorGenericMessage": "Что-то пошло не так. Попробуйте снова.",
+  "errorNetworkTitle": "Ошибка подключения",
+  "errorNetworkMessage": "Проверьте интернет-соединение и попробуйте снова.",
+  "errorNotFoundTitle": "Не найдено",
+  "errorNotFoundMessage": "Запрошенный контент не найден.",
+  "errorInvalidUrlTitle": "Неверный URL",
+  "errorInvalidUrlMessage": "Введите корректный URL, начинающийся с http:// или https://",
+  "errorPermissionDenied": "Доступ запрещён",
+  "errorStorageFull": "Память заполнена",
+  "errorFileNotFound": "Файл не найден",
+  "errorUnsupportedFormat": "Неподдерживаемый формат файла",
+  "errorParsingFailed": "Не удалось обработать содержимое",
+  "errorSaveFailed": "Не удалось сохранить",
+  "errorLoadFailed": "Не удалось загрузить",
+  "errorDeleteFailed": "Не удалось удалить",
+  "errorImportFailed": "Не удалось импортировать",
+  "errorExportFailed": "Не удалось экспортировать",
+  "errorCameraAccess": "Нет доступа к камере",
+  "errorGalleryAccess": "Нет доступа к галерее",
+  "errorTimeout": "Время ожидания истекло",
+  "errorServerError": "Ошибка сервера. Попробуйте позже.",
+  "errorNoRecipeFound": "Рецепт не найден на этой странице",
+  "errorInvalidRecipe": "Неверные данные рецепта",
+  "errorDuplicateRecipe": "Этот рецепт уже существует",
+  "validationRequired": "Это поле обязательно",
+  "validationTooShort": "Должно содержать не менее {min} символов",
+  "@validationTooShort": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "validationTooLong": "Должно содержать менее {max} символов",
+  "@validationTooLong": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "validationInvalidEmail": "Введите корректный email",
+  "validationInvalidUrl": "Введите корректный URL",
+  "validationInvalidNumber": "Введите корректное число",
+  "validationMinValue": "Должно быть не менее {min}",
+  "@validationMinValue": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "validationMaxValue": "Должно быть не более {max}",
+  "@validationMaxValue": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "photoTakePhoto": "Сделать фото",
+  "photoChooseFromGallery": "Выбрать из галереи",
+  "photoRemoveImage": "Удалить изображение",
+  "shareAsText": "Текст",
+  "shareAsImage": "Изображение",
+  "shareAsFile": "Поделиться файлом",
+  "shareQrCode": "QR-код рецепта",
+  "languageSystem": "Системный язык",
+  "languageEnglish": "English",
+  "languageSpanish": "Español",
+  "languageGerman": "Deutsch",
+  "scalingOriginal": "Оригинал",
+  "scalingHalf": "Половина",
+  "scalingDouble": "Двойной",
+  "scalingTriple": "Тройной",
+  "scalingCustom": "Пользовательский",
+  "scalingServings": "{count, plural, =1{1 порция} few{{count} порции} many{{count} порций} other{{count} порции}}",
+  "@scalingServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importRecipe": "Import Recipe",
+  "importFile": "File",
+  "importImage": "Image",
+  "importPaste": "Paste",
+  "importPasteUrl": "Paste recipe URL",
+  "importOr": "OR",
+  "importSupportsFormats": "Supports Paprika, Mela, JSON, ZIP exports",
+  "importFromSocialMedia": "Import your recipes from any social media platform or website.",
+  "tagsTitle": "Теги",
+  "tagsSelect": "Выбрать теги",
+  "tagsNoTags": "Нет тегов",
+  "tagsCreate": "Создать тег",
+  "tagsCreateNew": "Создать новый тег",
+  "tagsEnterName": "Название тега",
+  "tagsSearch": "Поиск тегов...",
+  "tagsSuggested": "Предлагаемые теги",
+  "tagsRecent": "Недавно использованные",
+  "tagsAll": "Все теги",
+  "tagVegetarian": "Вегетарианское",
+  "tagVegan": "Веганское",
+  "tagGlutenFree": "Без глютена",
+  "tagDairyFree": "Без молочных",
+  "tagNutFree": "Без орехов",
+  "tagLowCarb": "Низкоуглеводное",
+  "tagKeto": "Кето",
+  "tagPaleo": "Палео",
+  "tagWhole30": "Whole30",
+  "tagQuick": "Быстрое",
+  "tagEasy": "Простое",
+  "tagHealthy": "Полезное",
+  "tagComfortFood": "Домашняя еда",
+  "tagFamilyFriendly": "Для семьи",
+  "tagKidFriendly": "Для детей",
+  "tagMealPrep": "Заготовка",
+  "tagOnePot": "Одна кастрюля",
+  "tagInstantPot": "Мультиварка",
+  "tagSlowCooker": "Медленноварка",
+  "tagAirFryer": "Аэрофритюрница",
+  "tagGrill": "Гриль",
+  "tagBBQ": "Барбекю",
+  "tagHoliday": "Праздники",
+  "tagParty": "Вечеринка",
+  "tagBudget": "Экономично",
+  "tagSpicy": "Острое",
+  "tagSweet": "Сладкое",
+  "tagSavory": "Солёное",
+  "tagLight": "Лёгкое",
+  "tagHearty": "Сытное",
+  "tagSummer": "Лето",
+  "tagWinter": "Зима",
+  "tagFall": "Осень",
+  "tagSpring": "Весна",
+  "settingsImagePlaceholders": "Изображения по умолчанию",
+  "settingsImagePlaceholdersSubtitle": "Выберите что отображается при отсутствии изображений",
+  "settingsQuickAccessSubtitle": "Настроить быстрый доступ",
+  "settingsManageCoursesSubtitle": "Добавлять, редактировать или удалять блюда",
+  "settingsManageCategoriesSubtitle": "Добавлять, редактировать или удалять категории",
+  "settingsShoppingCategories": "Категории покупок",
+  "settingsShoppingCategoriesSubtitle": "Организовывать товары по отделам",
+  "shoppingIngredientMappings": "Привязки ингредиентов",
+  "shoppingPriority": "Приоритет: {priority}",
+  "shoppingAddCategory": "Добавить категорию",
+  "shoppingEditCategory": "Редактировать категорию",
+  "shoppingDeleteCategory": "Удалить категорию?",
+  "shoppingDeleteCategoryMessage": "Удалить \"{name}\"? Товары останутся без категории.",
+  "@shoppingDeleteCategoryMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingCategoryName": "Название",
+  "shoppingSearchIngredients": "Поиск ингредиентов...",
+  "shoppingMappingsInfo": "Нажмите категорию для изменения расположения. ({count} привязок)",
+  "@shoppingMappingsInfo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingCategoryFor": "Категория для \"{ingredient}\"",
+  "@shoppingCategoryFor": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingMovedTo": "\"{ingredient}\" перемещён в {category}",
+  "@shoppingMovedTo": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingResetToDefault": "\"{ingredient}\" сброшен на значение по умолчанию",
+  "@shoppingResetToDefault": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "actionReset": "Сбросить",
+  "@shoppingPriority": {
+    "placeholders": {
+      "priority": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingMappingMoved": "\"{ingredient}\" перемещён в {category}",
+  "@shoppingMappingMoved": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingMappingReset": "\"{ingredient}\" сброшен на значение по умолчанию",
+  "@shoppingMappingReset": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "addPhoto": "Добавить фото",
+  "addPhotoSubtitle": "Нажмите чтобы выбрать из галереи или камеры",
+  "viewAllRecipes": "Просмотреть все рецепты",
+  "recipesTotal": "{count} рецептов всего",
+  "@recipesTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "coursesTitle": "Блюда",
+  "categoriesTitle": "Категории",
+  "courseBrunch": "Бранч",
+  "courseMainDish": "Основное блюдо",
+  "courseSideDish": "Гарнир",
+  "courseSauce": "Соус",
+  "courseBread": "Хлеб",
+  "categoryBean": "Бобовые",
+  "categoryBread": "Хлеб",
+  "categoryBurritoTaco": "Буррито/Тако",
+  "categoryCasserole": "Запеканка",
+  "categoryChickenSteakMeat": "Курица/Стейк/Мясо",
+  "categoryDessert": "Десерт",
+  "categoryFish": "Рыба",
+  "categoryFruit": "Фрукты",
+  "categoryPasta": "Паста",
+  "categoryPizza": "Пицца",
+  "categoryPork": "Свинина",
+  "categoryRice": "Рис",
+  "categorySandwich": "Сэндвич",
+  "categorySeafood": "Морепродукты",
+  "categorySoup": "Суп",
+  "categoryVegetable": "Овощи",
+  "or": "или",
+  "and": "и",
+  "wordOf": "из",
+  "items": "товаров",
+  "more": "больше",
+  "less": "меньше",
+  "all": "Все",
+  "none": "Нет",
+  "other": "Другое",
+  "custom": "Пользовательский",
+  "defaultValue": "По умолчанию",
+  "required": "Обязательное",
+  "optional": "Необязательное",
+  "photoChooseGallery": "Выбрать из галереи",
+  "importFirstRecipe": "Import First",
+  "importAllRecipes": "Import All",
+  "parseRecipe": "Parse Recipe",
+  "shareRecipe": "Поделиться рецептом",
+  "shareExport": "Экспорт",
+  "shareServings": "Порции: {count}",
+  "@shareServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharePrep": "Подготовка: {minutes} мин",
+  "@sharePrep": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shareCook": "Готовка: {minutes} мин",
+  "@shareCook": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shareFromApp": "Поделился из Recipe Spellbook ✨",
+  "shareCreatingCard": "Создаю карточку рецепта...",
+  "shareCheckRecipe": "Посмотрите этот рецепт: {title}",
+  "@shareCheckRecipe": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "shareErrorImage": "Ошибка создания изображения: {error}",
+  "@shareErrorImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "editItem": "Редактировать товар",
+  "selectAll": "Выбрать всё",
+  "selectNone": "Снять выбор",
+  "viewPlanner": "View Planner",
+  "planNow": "Plan Now",
+  "loadingText": "Загрузка...",
+  "errorText": "Ошибка",
+  "errorLoadingMeals": "Ошибка загрузки блюд",
+  "readingImage": "Чтение изображения...",
+  "parsingRecipe": "Обработка рецепта...",
+  "noTextInImage": "Текст не найден на изображении",
+  "failedProcessImage": "Не удалось обработать изображение: {error}",
+  "@failedProcessImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cookingModeExit": "Выйти из режима готовки",
+  "cookingModeStep": "Шаг {current} из {total}",
+  "@cookingModeStep": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cookingModePrevious": "Назад",
+  "cookingModeNext": "Далее",
+  "cookingModeFinish": "Завершить",
+  "cookingModeCompleted": "Рецепт готов!",
+  "cookingModeGreatJob": "Отличная работа! Приятного аппетита.",
+  "mealPlanBreakfast": "Завтрак",
+  "mealPlanLunch": "Обед",
+  "mealPlanDinner": "Ужин",
+  "mealPlanSnack": "Перекус",
+  "mealPlanAddMeal": "Добавить блюдо",
+  "mealPlanRemove": "Удалить из плана",
+  "mealPlanNoMeals": "Нет запланированных блюд",
+  "mealPlanTapToAdd": "Нажмите + чтобы добавить блюдо",
+  "thisWeek": "На этой неделе",
+  "itemName": "Название товара",
+  "addToShoppingList": "Добавить в список покупок",
+  "addToList": "Добавить в список",
+  "addedItemsToList": "{count} товаров добавлено в список",
+  "@addedItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scanToImport": "Сканировать для импорта рецепта",
+  "xOfY": "{current} из {total}",
+  "@xOfY": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "addItems": "Добавить {count} товаров",
+  "@addItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToParse": "Обработка не удалась: {error}",
+  "@failedToParse": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToImport": "Импорт не удался: {error}",
+  "groupBy": "Группировать по",
+  "@failedToImport": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cookbookHint": "Нажмите для выбора • Удерживайте для редактирования",
+  "rename": "Переименовать",
+  "renameCookbook": "Переименовать книгу",
+  "seeAll": "Смотреть всё",
+  "imagePlaceholders": "Image Placeholders",
+  "imagePlaceholdersSubtitle": "Choose what shows when images are missing",
+  "homeScreenSection": "Home Screen",
+  "quickAccessSubtitle": "Configure what appears in Quick Access",
+  "manageCoursesSubtitle": "Add, edit, or remove courses",
+  "manageCategoriesSubtitle": "Add, edit, or remove categories",
+  "shoppingCategoriesSubtitle": "Organize items by aisle",
+  "syncSection": "Синхронизация",
+  "cloudSync": "Облачная синхронизация",
+  "comingSoon": "Скоро",
+  "resetApp": "Сбросить приложение",
+  "resetAppSubtitle": "Удалить все данные навсегда",
+  "trashSubtitle": "Удалённые рецепты (хранятся 30 дней)",
+  "importRecipeTitle": "Импорт рецепта",
+  "importSocialMedia": "Импортируйте рецепты из социальных сетей или любого сайта.",
+  "pasteRecipeUrl": "Вставить URL рецепта",
+  "orDivider": "ИЛИ",
+  "fileOption": "Файл",
+  "imageOption": "Изображение",
+  "pasteOption": "Вставить",
+  "supportedFormats": "Поддерживает Paprika, Mela, JSON, ZIP",
+  "pasteRecipeTitle": "Вставить рецепт",
+  "pasteRecipeHint": "Вставьте рецепт здесь...",
+  "quickAccessHelpIntro": "Эти значки показывают почему рецепты здесь:",
+  "quickAccessHelpMealPlan": "Запланировано на сегодня",
+  "quickAccessHelpPinned": "Вы закрепили этот рецепт",
+  "quickAccessHelpRecent": "Недавно просмотрено",
+  "openCalendar": "Открыть календарь",
+  "editNotes": "Редактировать заметки",
+  "addNotesHint": "Добавить заметки...",
+  "moveToAnotherDay": "Переместить на другой день",
+  "addToPlan": "Добавить в план",
+  "importBulkQuestion": "Импортировать все {count} рецептов или выбрать индивидуально?",
+  "@importBulkQuestion": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importingRecipes": "Импорт рецептов...",
+  "importedRecipesCount": "Импортировано {count} рецептов",
+  "@importedRecipesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "extractingArchive": "Извлечение архива...",
+  "themeSpellbook": "Spellbook",
+  "themeForest": "Лес",
+  "themeOcean": "Океан",
+  "themeSunset": "Закат",
+  "themeMidnight": "Полночь",
+  "themeRose": "Роза",
+  "colorTheme": "Цветовая тема",
+  "colorThemeSubtitle": "Выберите цветовую палитру",
+  "preview": "Предпросмотр",
+  "previewPrimary": "Основной",
+  "previewSecondary": "Вторичный",
+  "previewTertiary": "Третичный",
+  "previewError": "Ошибка",
+  "placeholderDescription": "Выберите что отображается когда у рецептов или книг нет изображений.",
+  "recipePlaceholders": "Изображения рецептов",
+  "cookbookPlaceholders": "Изображения книг",
+  "defaultImages": "Изображения по умолчанию",
+  "defaultImagesDescription": "Иллюстрации, меняющиеся в режиме RPG",
+  "themeBased": "На основе темы",
+  "themeBasedDescription": "Градиент с логотипом согласно вашей теме",
+  "placeholderRpgInfo": "Изображения по умолчанию переключаются между обычными и RPG вариантами.",
+  "groupBySection": "По отделу",
+  "groupByRecipe": "По рецепту",
+  "groupByUngrouped": "Без группировки",
+  "copyAsText": "Копировать как текст",
+  "printList": "Печать списка",
+  "manageLists": "Управление списками",
+  "newList": "Новый",
+  "newShoppingList": "Новый список покупок",
+  "listNameHint": "List name",
+  "recipeLayoutSetting": "Макет",
+  "recipeLayoutSettingSubtitle": "Выберите как отображаются рецепты",
+  "layoutTabbedOption": "Вид с вкладками",
+  "layoutStackedOption": "Вид стопкой",
+  "nutrientsTitle": "Пищевая ценность",
+  "nutrientsSubtitle": "Пищевая информация на порцию",
+  "addNutrients": "Добавить пищевую информацию",
+  "calculateNutrients": "Рассчитать из ингредиентов",
+  "nutrientsDisclaimer": "Пищевая ценность является приблизительной.",
+  "calories": "Калории",
+  "protein": "Белки",
+  "carbohydrates": "Углеводы",
+  "fat": "Жиры",
+  "fiber": "Клетчатка",
+  "sugar": "Сахар",
+  "sodium": "Натрий",
+  "cholesterol": "Холестерин",
+  "saturatedFat": "Насыщенные жиры",
+  "transFat": "Транс-жиры",
+  "servingSize": "Размер порции",
+  "perServing": "На порцию",
+  "calculatingNutrients": "Расчёт пищевой ценности...",
+  "nutrientsCalculated": "Пищевая ценность рассчитана",
+  "nutrientsFailed": "Не удалось рассчитать пищевую ценность: {error}",
+  "@nutrientsFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "premiumFeature": "Функция Premium",
+  "premiumNutrientsDescription": "Автоматический расчёт питательности требует премиум-подписки",
+  "exportCurrentCookbook": "Экспортировать текущую книгу",
+  "exporting": "Экспорт...",
+  "exportAllCookbooks": "Экспортировать все книги",
+  "importing": "Импорт...",
+  "importFromJson": "Импорт из JSON",
+  "importFromJsonSubtitle": "Выбрать файл резервной копии",
+  "aboutDescription": "Ваш магический помощник для организации, планирования и приготовления вкусных блюд.",
+  "madeWithLove": "Сделано с ❤️ для поваров по всему миру",
+  "resetAppWarning": "Это навсегда удалит все ваши рецепты, планы питания, списки покупок и настройки.",
+  "actionContinue": "Продолжить",
+  "finalConfirmation": "Финальное подтверждение",
+  "typeDeleteToConfirm": "Введите УДАЛИТЬ для подтверждения",
+  "typeDeleteHint": "УДАЛИТЬ",
+  "resetEverything": "Сбросить всё",
+  "resettingApp": "Сброс...",
+  "appResetSuccess": "Приложение сброшено",
+  "resetFailed": "Сброс не удался",
+  "successAdded": "Успешно добавлено",
+  "selectToday": "Выбрать сегодня",
+  "selectTomorrow": "Выбрать завтра",
+  "addedManually": "Добавлено вручную",
+  "unknownRecipe": "Неизвестный рецепт",
+  "shoppingListEmpty": "Ваш список покупок пуст",
+  "shoppingListEmptyHint": "Добавьте товары или импортируйте из рецептов",
+  "settingsRPGModeActive": "Призываю магический текст...",
+  "shoppingCheckAll": "Отметить всё",
+  "shoppingUncheckAll": "Снять все отметки",
+  "shoppingManageLists": "Управление списками",
+  "shoppingNewList": "Новый список покупок",
+  "shoppingListName": "Название списка",
+  "shoppingLists": "Списки покупок",
+  "shoppingRenameList": "Переименовать список",
+  "shoppingDeleteList": "Удалить список?",
+  "categoryProduce": "Овощи и фрукты",
+  "categoryDairy": "Молочные продукты",
+  "categoryMeat": "Мясо",
+  "categoryBakery": "Хлебобулочные",
+  "categoryFrozen": "Замороженные",
+  "categoryBeverages": "Напитки",
+  "categoryPantry": "Кладовая",
+  "categorySpices": "Специи",
+  "categoryInternational": "Международные",
+  "categorySnacks": "Снеки",
+  "categoryOther": "Другое",
+  "from": "из",
+  "deleted": "удалено",
+  "currently": "Сейчас в",
+  "autoDetect": "Автоопределение",
+  "category": "Категория",
+  "actionNew": "Новый",
+  "actionCreate": "Создать",
+  "tagsAdd": "Добавить тег",
+  "tagsSearchOrCreate": "Поиск или создание тега...",
+  "tagsNoResults": "Теги не найдены",
+  "color": "Цвет",
+  "icon": "Иконка",
+  "nutritionTitle": "Пищевая ценность",
+  "nutritionEmpty": "Нет данных о питательности",
+  "nutritionEmptyHint": "Отредактируйте рецепт и рассчитайте питательность из ингредиентов",
+  "scaled": "масштабировано",
+  "nutritionCalculate": "Рассчитать питательность",
+  "nutritionCalculating": "Расчёт...",
+  "nutritionMatchingIngredients": "Сопоставление ингредиентов с базой USDA",
+  "nutritionCalculationFailed": "Не удалось рассчитать питательность",
+  "nutritionDisclaimer": "Пищевая ценность приблизительна на основе данных USDA.",
+  "nutritionPerServing": "На порцию",
+  "nutritionServings": "{count} порций",
+  "@nutritionServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionIngredientBreakdown": "Разбивка по ингредиентам",
+  "nutritionIngredientsMatched": "Сопоставленные ингредиенты",
+  "nutritionMatchedCount": "{matched} из {total} сопоставлено",
+  "@nutritionMatchedCount": {
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionUncertainCount": "{count} для проверки",
+  "@nutritionUncertainCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionUncertain": "проверить сопоставление",
+  "nutritionNotFound": "Нет сопоставления — нажмите для поиска",
+  "nutritionRecalculate": "Пересчитать",
+  "nutritionOverwriteTitle": "Перезаписать данные о питательности?",
+  "nutritionOverwriteMessage": "Этот рецепт уже имеет данные о питательности. Пересчитать?",
+  "nutritionCalculated": "Питательность успешно рассчитана",
+  "nutritionSave": "Сохранить питательность",
+  "nutritionSelectFood": "Выбрать продукт USDA",
+  "nutritionSearchFood": "Поиск продуктов...",
+  "nutritionNoResults": "Нет результатов",
+  "nutritionCalories": "Калории",
+  "nutritionProtein": "Белки",
+  "nutritionCarbs": "Углеводы",
+  "nutritionFat": "Общий жир",
+  "nutritionSaturatedFat": "Насыщенные жиры",
+  "nutritionTransFat": "Транс-жиры",
+  "nutritionFiber": "Пищевые волокна",
+  "nutritionSugar": "Сахара",
+  "nutritionCholesterol": "Холестерин",
+  "nutritionSodium": "Натрий",
+  "nutritionPotassium": "Калий",
+  "nutritionCalcium": "Кальций",
+  "nutritionIron": "Железо",
+  "nutritionVitaminA": "Витамин А",
+  "nutritionVitaminC": "Витамин С",
+  "nutritionVitaminD": "Витамин Д",
+  "layoutInfoText": "Данные о питательности отображаются в обоих макетах.",
+  "settingsManageTagsSubtitle": "Создавать и организовывать теги",
+  "nutritionTotal": "Всего",
+  "nutritionAutoCalculate": "Автоматический расчёт",
+  "nutritionManualEntry": "Ручной ввод",
+  "nutritionManualEntryTitle": "Ввести известные значения",
+  "nutritionManualEntryDescription": "Если вы знаете точные значения, введите их здесь.",
+  "nutritionMainNutrients": "Основные питательные вещества",
+  "nutritionOtherNutrients": "Другие питательные вещества",
+  "nutritionEnterAtLeastOne": "Введите хотя бы калории или один макронутриент",
+  "nutritionHowToFix": "Как исправить",
+  "nutritionHowToImproveAccuracy": "Как улучшить точность",
+  "nutritionEditIngredient": "Редактировать ингредиент",
+  "nutritionSearchUsda": "Поиск USDA",
+  "nutritionEnterManually": "Ввести вручную",
+  "nutritionManualIngredientHint": "Введите данные о питательности для этого ингредиента.",
+  "nutritionApplyManual": "Применить ручные значения",
+  "nutritionTotalRecipe": "Общая питательность рецепта",
+  "nutritionMatchRate": "Процент сопоставления",
+  "allergySettingsTitle": "Настройки аллергий",
+  "allergyInfoText": "Выберите ваши аллергены. Recipe Spellbook предупредит вас, когда рецепты их содержат.",
+  "allergySelectedCount": "{count} аллергенов выбрано",
+  "@allergySelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "allergySelectAll": "Выбрать всё",
+  "allergyClearAll": "Очистить всё",
+  "allergyMajorTitle": "Основные аллергены",
+  "allergyMajorSubtitle": "Пищевые аллергены, признанные FDA",
+  "allergyAdditionalTitle": "Дополнительные аллергены",
+  "allergyAdditionalSubtitle": "Другие распространённые пищевые непереносимости",
+  "allergyWillWarn": "Вы будете предупреждены об этом аллергене",
+  "allergyWarningTitle": "⚠️ Предупреждение об аллергии",
+  "allergyWarningTitlePossible": "⚠️ Возможные аллергены",
+  "allergyContains": "Содержит:",
+  "allergyMayContain": "Может содержать:",
+  "allergyContainsAllergens": "Содержит аллергены",
+  "allergyManageSettings": "Управление настройками аллергий",
+  "allergyDetailsTitle": "Детали аллергенов",
+  "settingsAllergies": "Аллергии",
+  "settingsAllergiesSubtitle": "Настроить предупреждения об аллергенах",
+  "allergenMilk": "Молоко/Молочные продукты",
+  "allergenEggs": "Яйца",
+  "allergenFish": "Рыба",
+  "allergenShellfish": "Ракообразные",
+  "allergenTreeNuts": "Орехи",
+  "allergenPeanuts": "Арахис",
+  "allergenWheat": "Пшеница/Глютен",
+  "allergenSoy": "Соя",
+  "allergenSesame": "Кунжут",
+  "allergenMustard": "Горчица",
+  "allergenCelery": "Сельдерей",
+  "allergenLupin": "Люпин",
+  "allergenMollusks": "Моллюски",
+  "allergenSulfites": "Сульфиты",
+  "allergenCorn": "Кукуруза",
+  "allergenNightshades": "Паслёновые",
+  "nutritionCopyFromAuto": "Скопировать из автоматического расчёта",
+  "nutritionEstimatedDisclaimer": "Значения приблизительны на основе данных USDA",
+  "actionDiscard": "Отменить",
+  "unsavedChangesTitle": "Несохранённые изменения",
+  "unsavedChangesMessage": "У вас есть несохранённые изменения. Хотите сохранить их?",
+  "tagsEmptyTitle": "Нет тегов",
+  "tagsEmptySubtitle": "Создайте теги для организации рецептов.",
+  "tagsLoadDefaults": "Загрузить теги по умолчанию",
+  "tagsAddNew": "Добавить тег",
+  "tagsEdit": "Редактировать тег",
+  "tagsDelete": "Удалить тег",
+  "tagsDeleteConfirm": "Вы уверены, что хотите удалить \"{name}\"?",
+  "@tagsDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsNameLabel": "Название тега",
+  "tagsIconLabel": "Иконка (эмодзи)",
+  "tagsColorLabel": "Цвет",
+  "settingsRpgAnimations": "Анимации редкости",
+  "settingsRpgAnimationsSubtitle": "Световые эффекты для эпических и легендарных рецептов",
+  "settingsRpgSounds": "Звуковые эффекты",
+  "settingsRpgSoundsSubtitle": "Звуки для достижений и повышений уровня",
+  "settingsRpgAchievements": "Достижения",
+  "settingsRpgAchievementsSubtitle": "Просмотреть разблокированные достижения",
+  "settingsRpgStats": "Статистика готовки",
+  "settingsRpgStatsSubtitle": "Просмотреть статистику готовки",
+  "settingsRpgModeEnabled": "Transform your cooking into an adventure!",
+  "settingsRecipeLayoutSubtitle": "Настроить отображение рецептов",
+  "rarityCommon": "Обычный",
+  "rarityCommonDesc": "Простой повседневный рецепт",
+  "rarityUncommon": "Необычный",
+  "rarityUncommonDesc": "Вкусный рецепт с изюминкой",
+  "rarityRare": "Редкий",
+  "rarityRareDesc": "Особый рецепт, достойный освоения",
+  "rarityEpic": "Эпический",
+  "rarityEpicDesc": "Эпический рецепт великой силы!",
+  "rarityLegendary": "Легендарный",
+  "rarityLegendaryDesc": "Легендарный рецепт, достойный богов!",
+  "shareLink": "Ссылка",
+  "shareDocument": "PDF",
+  "sharePrint": "Печать",
+  "shareLinkDescription": "Поделитесь ссылкой чтобы другие могли увидеть этот рецепт.",
+  "shareLinkNote": "Получателям нужен Recipe Spellbook или они могут просмотреть в интернете.",
+  "shareCreatingDocument": "Создаю документ...",
+  "editLayoutTitle": "Макет редактирования",
+  "editLayoutStacked": "Стопкой",
+  "editLayoutTabbed": "Вкладки",
+  "editLayoutStackedDesc": "Все разделы в прокручиваемом виде",
+  "editLayoutTabbedDesc": "Отдельные вкладки для деталей, ингредиентов, инструкций",
+  "tabDetails": "Детали",
+  "tabIngredients": "Ингредиенты",
+  "tabInstructions": "Инструкции",
+  "stepImageAdd": "Добавить изображение",
+  "stepImageChange": "Изменить изображение",
+  "stepImageRemove": "Удалить изображение",
+  "stepTimer": "Таймер",
+  "stepTimerMinutes": "{minutes} мин",
+  "@stepTimerMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeAddToCookbook": "Добавить в книгу",
+  "recipeMoveToTrash": "Переместить в корзину",
+  "tagsEmpty": "Нет тегов",
+  "nutritionPerServingLabel": "На порцию",
+  "nutritionTotalLabel": "Весь рецепт",
+  "trendingRecipes": "Популярные рецепты",
+  "addShortcut": "Добавить ярлык Recipe Spellbook",
+  "addShortcutSubtitle": "Импортируйте рецепты одним жестом",
+  "importGuides": "Читать руководства по импорту",
+  "useOnDesktop": "Использовать Recipe Spellbook на компьютере",
+  "inviteFriends": "Пригласить друзей",
+  "inviteFriendsTitle": "Поделиться Recipe Spellbook",
+  "inviteFriendsSubtitle": "Пригласите друзей и семью готовить вместе!",
+  "shareApp": "Поделиться приложением",
+  "maybeLater": "Может потом",
+  "createAccount": "Создать аккаунт",
+  "upgradeToPremium": "Перейти на Premium",
+  "premiumSubtitle": "Откройте синхронизацию, неограниченные рецепты и многое другое",
+  "rpgMode": "Режим RPG",
+  "leaderboards": "Таблицы лидеров",
+  "achievements": "Достижения",
+  "cookingStats": "Статистика готовки",
+  "stepByStepGuides": "Пошаговые руководства",
+  "importGuidesSubtitle": "Узнайте как импортировать из любимых приложений и сайтов",
+  "importFromOtherApps": "Импорт из других приложений",
+  "orderOnline": "Заказать онлайн",
+  "helpTitle": "Помощь",
+  "navMenu": "Меню",
+  "mealPlanTitle": "Мой план питания",
+  "noRecipesYet": "Нет рецептов",
+  "breakfast": "Завтрак",
+  "lunch": "Обед",
+  "dinner": "Ужин",
+  "snack": "Перекус",
+  "allergenGluten": "Глютен",
+  "allergenChocolate": "Шоколад и какао",
+  "allergenCaffeine": "Кофеин",
+  "allergenAlcohol": "Алкоголь",
+  "allergenCitrus": "Цитрусовые",
+  "allergenStoneFruits": "Косточковые фрукты",
+  "allergenCoconut": "Кокос",
+  "allergenGarlic": "Чеснок",
+  "allergenOnion": "Лук",
+  "allergenMushrooms": "Грибы",
+  "allergenAvocado": "Авокадо",
+  "allergenBanana": "Банан",
+  "allergenKiwi": "Киви",
+  "allergenLatexFoods": "Перекрёстная реакция латекса",
+  "allergenFodmap": "Высокий FODMAP",
+  "allergenHistamine": "Высокий гистамин",
+  "allergenSalicylates": "Салицилаты",
+  "allergenMsg": "MSG",
+  "allergenRedMeat": "Красное мясо (Альфа-гал)",
+  "allergenGelatin": "Желатин",
+  "allergyWarningContains": "Содержит",
+  "allergyDismissForRecipe": "Скрыть для этого рецепта",
+  "allergyDismissUndo": "Отменить",
+  "allergyWarningDismissed": "Предупреждение скрыто для этого рецепта",
+  "scaleCustom": "Пользовательский",
+  "scaleCustomTitle": "Пользовательский масштаб",
+  "scaleCustomHint": "Введите число (напр., 0,75 для ¾, 2,5 для 2½)",
+  "scaleApply": "Применить",
+  "addStep": "Добавить шаг",
+  "noInstructionsYet": "Нет инструкций",
+  "addFirstStep": "Добавить первый шаг",
+  "enterInstruction": "Введите инструкцию...",
+  "addStepImage": "Добавить изображение к шагу",
+  "removeStep": "Удалить шаг",
+  "plannerNoMeals": "Нет запланированных блюд",
+  "plannerAddMealHint": "Нажмите + чтобы добавить блюдо",
+  "plannerMealAdded": "{recipe} добавлено в {mealType}",
+  "@plannerMealAdded": {
+    "placeholders": {
+      "recipe": {
+        "type": "String"
+      },
+      "mealType": {
+        "type": "String"
+      }
+    }
+  },
+  "plannerShareMealPlan": "Поделиться планом питания",
+  "plannerAddWeekToShopping": "Добавить неделю в список покупок",
+  "plannerClearWeek": "Очистить эту неделю",
+  "plannerClearWeekConfirm": "Это удалит все запланированные блюда на этой неделе.",
+  "plannerWeekCleared": "Неделя очищена",
+  "plannerGoToToday": "Перейти к сегодня",
+  "plannerAddAnother": "Добавить ещё блюдо",
+  "plannerSearchRecipes": "Поиск рецептов...",
+  "mealTypeBreakfast": "Завтрак",
+  "mealTypeLunch": "Обед",
+  "mealTypeDinner": "Ужин",
+  "mealTypeSnack": "Перекус",
+  "shoppingItems": "{count} {count, plural, =1{товар} few{товара} many{товаров} other{товара}}",
+  "@shoppingItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingBySection": "По отделу",
+  "shoppingByRecipe": "По рецепту",
+  "shoppingUngrouped": "Без группировки",
+  "shoppingOrderOnline": "Заказать онлайн",
+  "shoppingEditItem": "Редактировать товар",
+  "shoppingItemName": "Название товара",
+  "shoppingSelectCategory": "Выбрать категорию",
+  "shoppingAddedManually": "Добавлено вручную",
+  "shoppingEmptyList": "Ваш список пуст",
+  "shoppingEmptyHint": "Нажмите + чтобы добавить товары",
+  "shoppingAddHint": "Нажмите Enter для добавления, затем введите следующий",
+  "categoryDeli": "Deli",
+  "categoryBreakfast": "Breakfast & Cereal",
+  "categoryCanned": "Canned Goods & Soups",
+  "categoryCondiments": "Condiments, Sauces & Spices",
+  "categoryAlcohol": "Beer, Wine & Spirits",
+  "categoryBaby": "Baby",
+  "categoryBeauty": "Beauty & Personal Care",
+  "categoryHousehold": "Housewares",
+  "categoryPet": "Pet",
+  "importFromPlatform": "Импорт из {platform}",
+  "@importFromPlatform": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "importFromApp": "Импорт из {app}",
+  "@importFromApp": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "helpAddingRecipes": "Добавление рецептов",
+  "helpAddingRecipesDesc": "Нажмите + в любой книге чтобы добавить рецепт.",
+  "helpImporting": "Импорт из приложений",
+  "helpImportingDesc": "Поделитесь рецептом из Instagram, TikTok или любого сайта.",
+  "helpMealPlanning": "Планирование питания",
+  "helpMealPlanningDesc": "Нажмите вкладку Планировщик чтобы запланировать питание на неделю.",
+  "helpShopping": "Списки покупок",
+  "helpShoppingDesc": "Добавьте ингредиенты в список. Товары организованы по отделам.",
+  "helpSyncing": "Синхронизация",
+  "helpSyncingDesc": "Облачная синхронизация скоро появится!",
+  "helpContactUs": "Свяжитесь с нами",
+  "helpContactUsDesc": "Есть вопросы? Напишите нам на support@recipespellbook.com",
+  "navCommunity": "Сообщество",
+  "navComingSoon": "Скоро",
+  "mealPlanButton": "План питания",
+  "groceriesButton": "Покупки",
+  "shareButton": "Поделиться",
+  "scaleRecipeButton": "Масштаб",
+  "convertUnitsButton": "Конвертировать",
+  "allergyDismissTooltip": "Скрыть предупреждение",
+  "allergyDisablePrompt": "Навсегда отключить это предупреждение для этого рецепта?",
+  "allergyDisabledForRecipe": "Предупреждение отключено для этого рецепта",
+  "allergyRestoreWarnings": "Восстановить предупреждения",
+  "recipeDuplicated": "Рецепт дублирован",
+  "recipeDeleted": "Рецепт перемещён в корзину",
+  "deleteRecipeTitle": "Удалить рецепт",
+  "deleteRecipeConfirm": "Вы уверены, что хотите удалить этот рецепт? Он будет перемещён в корзину.",
+  "addToShoppingListTitle": "Добавить в список покупок",
+  "viewList": "Смотреть список",
+  "selectItems": "Выбрать товары",
+  "addToListCount": "Добавить {count} товаров",
+  "@addToListCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yes": "Да",
+  "no": "Нет",
+  "cancel": "Отмена",
+  "delete": "Удалить",
+  "save": "Сохранить",
+  "restore": "Восстановить",
+  "unselectAll": "Снять выбор",
+  "deleteStep": "Удалить шаг",
+  "deleteSteps": "Удалить шаги",
+  "deleteStepConfirm": "Удалить этот шаг?",
+  "deleteStepsConfirm": "Удалить {count} шагов?",
+  "@deleteStepsConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stepSelected": "{count} выбрано",
+  "@stepSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectAllSteps": "Выбрать всё",
+  "gradientBased": "На основе градиента",
+  "gradientBasedDescription": "Цветовой градиент вашей темы",
+  "startCooking": "Начать готовить",
+  "fontSizeLabel": "Размер текста",
+  "krogerLoginDenied": "Вход в Kroger отклонён: {error}",
+  "@krogerLoginDenied": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "krogerNoAuthCode": "Не получен код авторизации от Kroger.",
+  "krogerConnected": "Kroger подключён! Вы можете отправлять товары прямо в корзину.",
+  "krogerConnectFailed": "Подключение к Kroger не удалось.",
+  "krogerConnecting": "Подключение к Kroger…",
+  "krogerExchanging": "Обмен авторизацией...",
+  "krogerConnectedTitle": "Подключено!",
+  "krogerConnectionFailed": "Подключение не удалось",
+  "goToShoppingList": "Перейти к списку покупок",
+  "tryAgain": "Попробовать снова",
+  "skipForNow": "Пропустить",
+  "skipDuplicates": "Пропустить дубликаты",
+  "deselectAll": "Снять выбор",
+  "duplicate": "Дублировать",
+  "recipesImported": "{count, plural, =1{1 рецепт импортирован} few{{count} рецепта импортировано} many{{count} рецептов импортировано} other{{count} рецепта импортировано}}",
+  "@recipesImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importCountRecipes": "Импортировать {count, plural, =1{1 рецепт} few{{count} рецепта} many{{count} рецептов} other{{count} рецепта}}",
+  "@importCountRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productNotFound": "Продукт не найден",
+  "barcodeNotFound": "Продукт не найден по штрихкоду:\n{barcode}",
+  "@barcodeNotFound": {
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "manualEntryHint": "Вы можете ввести название продукта вручную.",
+  "scanAgain": "Сканировать снова",
+  "enterManually": "Ввести вручную",
+  "enterProductName": "Ввести название продукта",
+  "productName": "Название продукта",
+  "scanBarcode": "Сканировать штрихкод",
+  "lookingUpProduct": "Поиск продукта...",
+  "pointCameraBarcode": "Наведите камеру на штрихкод",
+  "unknownProduct": "Неизвестный продукт",
+  "nutritionPer100g": "Питательность (на 100г)",
+  "findRecipesWithThis": "Найти рецепты с этим",
+  "scanAnother": "Сканировать ещё",
+  "exportFormat": "Формат экспорта",
+  "gotIt": "Понятно",
+  "calendar": "Календарь",
+  "today": "Сегодня",
+  "shareMealPlan": "Поделиться планом питания",
+  "addWeekToShoppingList": "Добавить неделю в список",
+  "clearThisWeek": "Очистить эту неделю?",
+  "clearWeekWarning": "Это удалит все запланированные блюда на этой неделе.",
+  "goToToday": "Перейти к сегодня",
+  "addAnotherMeal": "Добавить ещё блюдо",
+  "meal": "Блюдо",
+  "noMealsPlanned": "Нет запланированных блюд",
+  "tapToAddMeal": "Нажмите + чтобы добавить",
+  "addMeal": "Добавить блюдо",
+  "addToDay": "Добавить на {dayName}",
+  "@addToDay": {
+    "placeholders": {
+      "dayName": {
+        "type": "String"
+      }
+    }
+  },
+  "searchRecipes": "Поиск рецептов...",
+  "noRecipesFound": "Рецепты не найдены",
+  "exitShoppingListGenerator": "Выйти из генератора списка?",
+  "actionExit": "Выйти",
+  "shoppingListGenerator": "Генератор списка покупок",
+  "reviewAndAdd": "Просмотреть и добавить ({count} товаров)",
+  "@reviewAndAdd": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addItemsToList": "Добавить {count} товаров в список",
+  "@addItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedItemsToShoppingList": "{count} товаров добавлено в список покупок",
+  "@addedItemsToShoppingList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "createNewList": "Создать новый список",
+  "listName": "Название списка",
+  "manage": "Управление",
+  "myPantry": "Моя кладовая",
+  "itemsAlwaysOnHand": "Товары всегда под рукой",
+  "whatToDelete": "Что вы хотите удалить?",
+  "localData": "Локальные данные",
+  "localDataDesc": "Рецепты, книги, планы питания, списки покупок на этом устройстве",
+  "cloudData": "Облачные данные",
+  "cloudDataDesc": "Скоро — облачная синхронизация ещё недоступна",
+  "allData": "Все данные",
+  "allDataDesc": "Локальные данные и настройки — полный сброс",
+  "permanentDeleteWarning": "Это навсегда удалит {scope}. Действие нельзя отменить.",
+  "@permanentDeleteWarning": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "dataResetComplete": "Данные сброшены",
+  "noThanks": "Нет, спасибо",
+  "importFailed": "Импорт не удался: {error}",
+  "@importFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "yesAddThem": "Да, добавить",
+  "nutritionDisplay": "Отображение питательности",
+  "nutritionDisplaySubtitle": "Стиль графика, видимые питательные вещества",
+  "storeIntegrations": "Интеграции магазинов",
+  "instacart": "Instacart",
+  "kroger": "Kroger",
+  "connected": "Подключено",
+  "setCustomApiKey": "Установить собственный API-ключ",
+  "useOwnInstacartKey": "Использовать собственный ключ Instacart Connect",
+  "instacartApiKey": "API-ключ Instacart",
+  "resetToDefaultKey": "Сбросить до ключа по умолчанию",
+  "removeCustomKey": "Удалить собственный ключ",
+  "signInToKroger": "Войти в Kroger",
+  "connectToAddItems": "Подключитесь чтобы добавлять товары в корзину",
+  "setPreferredStore": "Установить предпочитаемый магазин",
+  "searchByZipCode": "Поиск по почтовому индексу",
+  "disconnect": "Отключить",
+  "apiKeySaved": "API-ключ сохранён",
+  "findYourKrogerStore": "Найти магазин Kroger",
+  "enterZipCode": "Введите почтовый индекс",
+  "storeSet": "Магазин установлен: {name}",
+  "@storeSet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "menuImportSubtitle": "Instagram, TikTok, сайты...",
+  "menuSyncToMobile": "Синхронизировать на телефон",
+  "menuSyncToDesktop": "Синхронизировать на компьютер",
+  "menuTransferToPhone": "Перенести данные на телефон",
+  "menuTransferToDevice": "Перенести данные на другое устройство",
+  "menuProfile": "Профиль",
+  "menuProfileSubtitle": "Просмотреть статистику и прогресс",
+  "menuAchievementsSubtitle": "Разблокировать награды",
+  "menuCosmetics": "Косметика",
+  "menuCosmeticsSubtitle": "Настроить внешний вид",
+  "menuLeaderboardsSubtitle": "Соревноваться с другими",
+  "menuBossBattles": "Битвы с боссами",
+  "menuBossBattlesSubtitle": "Эпические кулинарные испытания",
+  "menuImportRecipes": "Импортировать рецепты",
+  "menuHelpSupport": "Помощь и поддержка",
+  "menuAppVersion": "Recipe Spellbook v{version}",
+  "@menuAppVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "menuShareApp": "Поделиться Recipe Spellbook",
+  "menuShareSubtitle": "Пригласите друзей и семью готовить вместе!",
+  "menuShareMessage": "Попробуйте Recipe Spellbook — лучшее приложение для рецептов! https://recipespellbook.app",
+  "signIn": "Войти",
+  "helpFromWebsite": "С веб-сайта",
+  "helpFromWebsiteDesc": "Нажмите + в любой книге, затем вставьте URL рецепта.",
+  "helpFromSocial": "Из Instagram или TikTok",
+  "helpFromSocialDesc": "Скопируйте ссылку на пост с рецептом, нажмите + и вставьте.",
+  "helpFromPhoto": "Из фото",
+  "helpFromPhotoDesc": "Сфотографируйте рецепт в книге. Нажмите + и выберите Изображение.",
+  "helpFromPdf": "Из PDF",
+  "helpFromPdfDesc": "Нажмите + и выберите Файл для импорта PDF.",
+  "helpFromText": "Из текста",
+  "helpFromTextDesc": "Скопируйте текст рецепта, нажмите +, затем Вставить.",
+  "helpFromPaprika": "Из Paprika",
+  "helpFromPaprikaDesc": "В Paprika перейдите в Экспорт и выберите формат HTML.",
+  "helpFromOtherApps": "Из других приложений",
+  "helpFromOtherAppsDesc": "Большинство приложений для рецептов умеют экспортировать в HTML или текст.",
+  "helpCloudSync": "Облачная синхронизация",
+  "helpCloudSyncDesc": "Подпишитесь на Cloud Sync чтобы синхронизировать рецепты на всех устройствах.",
+  "accountTitle": "Аккаунт",
+  "signInToSync": "Войдите для синхронизации",
+  "signInSyncDesc": "Создайте резервную копию рецептов, синхронизируйте на нескольких устройствах и откройте функции premium.",
+  "continueWithGoogle": "Продолжить с Google",
+  "continueWithApple": "Продолжить с Apple",
+  "signOut": "Выйти",
+  "signOutQuestion": "Выйти?",
+  "signOutDesc": "Ваши рецепты остаются на этом устройстве.",
+  "deleteAccount": "Удалить аккаунт",
+  "deleteAccountQuestion": "Удалить аккаунт?",
+  "deleteAccountDesc": "Это навсегда удалит ваш аккаунт и все синхронизированные данные.\n\nЛокально сохранённые рецепты НЕ будут удалены.",
+  "deletePermanently": "Удалить навсегда",
+  "deleteAccountFailed": "Не удалось удалить аккаунт.",
+  "signInToApp": "Войти в Recipe Spellbook",
+  "signInSyncLong": "Синхронизируйте рецепты, откройте облачные резервные копии и доступ к функциям Pro.",
+  "recipesStayOnDevice": "Ваши рецепты остаются на устройстве даже без аккаунта.",
+  "upgradeToPro": "Перейти на Pro",
+  "subscriptionDot": "Подписка · {tier}",
+  "@subscriptionDot": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "affluentLabsPro": "Affluent Labs Pro",
+  "cancelledAccessUntil": "Отменено — доступ до {date}",
+  "@cancelledAccessUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "lifetimeNeverExpires": "Пожизненная — никогда не истекает",
+  "renewsDate": "Обновляется {date}",
+  "@renewsDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "manageSubscription": "Управление подпиской",
+  "tierPremium": "Premium",
+  "tierStandard": "Стандартный",
+  "tierBasic": "Базовый",
+  "tierFree": "Бесплатный",
+  "tierPlan": "План {tier}",
+  "@tierPlan": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "upgradeArrow": "Улучшить →",
+  "syncNow": "Синхронизировать сейчас",
+  "syncing": "Синхронизация...",
+  "lastSynced": "Последняя синхр. {time}",
+  "@lastSynced": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "notYetSynced": "Ещё не синхронизировано",
+  "cloudSyncSection": "CLOUD SYNC",
+  "noRecipesPlannedThisWeek": "Нет рецептов запланировано на этой неделе",
+  "todayBadge": "СЕГОДНЯ",
+  "noCourseAssigned": "Без блюда",
+  "uncategorized": "Без категории",
+  "allRecipesHaveCourse": "Все рецепты имеют блюдо!",
+  "allRecipesCategorized": "Все рецепты категоризированы!",
+  "greatJobOrganizing": "Отличная организация!",
+  "countOfTotal": "{count} из {total}",
+  "@countOfTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "tapToAssignCourse": "Нажмите чтобы назначить блюдо",
+  "tapToAssignCategory": "Нажмите чтобы назначить категорию",
+  "deleteCountRecipes": "Удалить {count} {count, plural, =1{рецепт} few{рецепта} many{рецептов} other{рецепта}}?",
+  "@deleteCountRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipesMovedToTrash": "{count} {count, plural, =1{рецепт перемещён} few{рецепта перемещено} many{рецептов перемещено} other{рецепта перемещено}} в корзину",
+  "@countRecipesMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "setCourse": "Установить блюдо",
+  "setCategory": "Установить категорию",
+  "courseSetForCount": "Блюдо установлено для {count} {count, plural, =1{рецепта} few{рецептов} many{рецептов} other{рецептов}}",
+  "@courseSetForCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categorySetForCount": "Категория установлена для {count} {count, plural, =1{рецепта} few{рецептов} many{рецептов} other{рецептов}}",
+  "@categorySetForCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipesFavorited": "{count} {count, plural, =1{рецепт} few{рецепта} many{рецептов} other{рецепта}} добавлено в избранное",
+  "@countRecipesFavorited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkCourse": "Блюдо",
+  "bulkCategory": "Категория",
+  "bulkFavorite": "Избранное",
+  "aiImportTitle": "Импорт через AI",
+  "aiCopyPrompt": "Копировать промпт",
+  "aiCopyPromptSubtitle": "Вставьте это в ChatGPT, Claude, Gemini или любой AI с вашим рецептом.",
+  "aiCopied": "Скопировано!",
+  "aiCopyToClipboard": "Копировать промпт",
+  "aiPreviewPrompt": "Предпросмотр промпта",
+  "aiPasteOutput": "Вставить результат AI",
+  "aiPasteSubtitle": "Вставьте JSON от AI или импортируйте файл .json.",
+  "aiPasteFirst": "Сначала вставьте или загрузите JSON.",
+  "aiFailedReadFile": "Не удалось прочитать файл: {error}",
+  "@aiFailedReadFile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "aiUntitledRecipe": "Рецепт без названия",
+  "aiImporting": "Импорт...",
+  "aiImportToCookbook": "Импортировать в книгу",
+  "aiImportSuccess": "Рецепт успешно импортирован!",
+  "aiPreviewImport": "Предпросмотр и импорт",
+  "aiPromptCopied": "Промпт скопирован! Вставьте его в любой AI с вашим рецептом.",
+  "aiLoadJsonFile": "Загрузить файл .json",
+  "aiPaste": "Вставить",
+  "aiTipsTitle": "Советы",
+  "aiTip1": "Работает с ChatGPT, Claude, Gemini, Copilot или любым AI",
+  "aiTip2": "Вы также можете сфотографировать рецепт и вставить его с промптом",
+  "aiTip3": "AI конвертирует рукописные, печатные или веб-рецепты",
+  "aiTip4": "Если JSON содержит ошибки, попросите AI исправить их",
+  "aiServingsLabel": "{count} порций",
+  "@aiServingsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "aiPrepLabel": "{minutes}мин подготовки",
+  "@aiPrepLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "aiCookLabel": "{minutes}мин готовки",
+  "@aiCookLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "aiIngredientsCount": "Ингредиенты ({count})",
+  "@aiIngredientsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aiStepsCount": "Шаги ({count})",
+  "@aiStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreAllWarnings": "Восстановить все предупреждения",
+  "warningsRestoredForRecipe": "Предупреждения восстановлены для этого рецепта",
+  "restoreAllWarningsQuestion": "Восстановить все предупреждения?",
+  "restoreAll": "Восстановить всё",
+  "allWarningsRestored": "Все предупреждения восстановлены",
+  "dismissedWarnings": "{count} скрыто",
+  "@dismissedWarnings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restoringPurchases": "Восстановление покупок...",
+  "restorePurchases": "Восстановить",
+  "compareAllPlans": "Сравнить все планы",
+  "oneTimeTab": "Единовременный",
+  "subscriptionTab": "Подписка",
+  "payOnceKeepForever": "Заплатите один раз, пользуйтесь всегда",
+  "cloudSyncFeature": "Cloud Sync",
+  "cloudSyncPlusFeature": "Cloud Sync+",
+  "unableToLoadProducts": "Не удалось загрузить продукты.",
+  "noOfferingsAvailable": "Нет доступных предложений.",
+  "purchaseFailed": "Покупка не удалась: {error}",
+  "@purchaseFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "hintProductExample": "напр., Органический томатный соус",
+  "previewPhoto": "Предпросмотр фото",
+  "retake": "Переснять",
+  "usePhoto": "Использовать фото",
+  "takePhoto": "Сделать фото",
+  "chooseFromGallery": "Выбрать из галереи",
+  "removeImage": "Удалить изображение",
+  "tipsPlaceholder": "Советы, варианты, инструкции хранения...",
+  "totalCalories": "Всего ккал",
+  "caloriesPerServing": "Ккал/порция",
+  "totalNutrition": "Всего",
+  "linkRecipe": "Связать рецепт",
+  "addIngredient": "Добавить ингредиент",
+  "searchRecipesToLink": "Поиск рецептов для связи...",
+  "linkToIngredient": "Связать с \"{name}\"",
+  "@linkToIngredient": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "errorSavingRecipe": "Ошибка при сохранении: {error}",
+  "@errorSavingRecipe": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteSelectedCount": "Удалить {count}",
+  "@deleteSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "takeAPhoto": "Сделать фото",
+  "defaultLabel": "По умолчанию",
+  "scaleRecipe": "Масштабировать рецепт",
+  "scaleHint": "напр., 2,5",
+  "badgePinned": "Закреплено",
+  "badgeRecentlyViewed": "Недавно просмотрено",
+  "displayOptions": "Параметры отображения",
+  "showMealPlan": "Показать план питания",
+  "showMealPlanSubtitle": "Показать запланированные рецепты на сегодня",
+  "showPinnedRecipes": "Показать закреплённые рецепты",
+  "showPinnedSubtitle": "Показать закреплённые рецепты",
+  "showRecentHistory": "Показать историю просмотров",
+  "showRecentSubtitle": "Показать недавно просмотренные рецепты",
+  "versionLabel": "Версия {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "measurementsUS": "стаканы, ложки, унции, °F",
+  "measurementsMetric": "миллилитры, граммы, °C",
+  "defaultRecipesImported": "Импортировано {count} рецептов по умолчанию!",
+  "@defaultRecipesImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingListGeneratorTitle": "Генератор списка покупок",
+  "exitShoppingListGeneratorQuestion": "Выйти из генератора?",
+  "reviewAndAddItems": "Просмотреть и добавить ({count} товаров)",
+  "@reviewAndAddItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedTotalItemsToList": "{count} товаров добавлено в список",
+  "@addedTotalItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scaleMultiplier": "{scale}x",
+  "@scaleMultiplier": {
+    "placeholders": {
+      "scale": {
+        "type": "String"
+      }
+    }
+  },
+  "printIngredients": "Ингредиенты",
+  "printInstructions": "Инструкции",
+  "printNotes": "Заметки",
+  "printPrep": "Подготовка: {minutes} мин",
+  "@printPrep": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "printCook": "Готовка: {minutes} мин",
+  "@printCook": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "printFooter": "Распечатано из Recipe Spellbook",
+  "printPage": "Страница {current} из {total}",
+  "@printPage": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "menuNavigation": "НАВИГАЦИЯ",
+  "menuImport": "ИМПОРТ",
+  "menuRpgMode": "РЕЖИМ RPG",
+  "menuSocial": "СООБЩЕСТВО",
+  "menuApp": "ПРИЛОЖЕНИЕ",
+  "historyCount": "Количество в истории",
+  "historyCountSubtitle": "Максимальное количество недавних рецептов для отображения",
+  "restoreAllWarningsDesc": "Это повторно активирует предупреждения об аллергиях для всех рецептов.",
+  "signInToContinue": "Войдите для продолжения",
+  "signInForPurchaseDesc": "Аккаунт требуется перед покупкой.",
+  "menuAchievements": "Достижения",
+  "menuLeaderboards": "Таблицы лидеров",
+  "requiresPremium": "Требует Premium",
+  "deleteCount": "Удалить {count}",
+  "@deleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tapToSelectPhoto": "Нажмите чтобы выбрать из галереи или камеры",
+  "rating": "Рейтинг",
+  "usUnits": "cups, tablespoons, ounces, °F",
+  "metricUnits": "milliliters, grams, °C",
+  "selectedCount": "{count} выбрано",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteRecipesConfirm": "Удалить {count} рецепт(ов)?",
+  "@deleteRecipesConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courseSetForRecipes": "Блюдо установлено для {count} рецепт(ов)",
+  "@courseSetForRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@recipesFavorited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeImportedSuccess": "Рецепт успешно импортирован!",
+  "promptCopied": "Промпт скопирован! Вставьте его в любой AI с вашим рецептом.",
+  "importFromAI": "Импорт через AI",
+  "paste": "Вставить",
+  "previewAndImport": "Предпросмотр и импорт",
+  "signInDescription": "Сохраняйте рецепты, синхронизируйте на нескольких устройствах.",
+  "signOutConfirmTitle": "Выйти?",
+  "signOutConfirmMessage": "Ваши рецепты остаются на этом устройстве.",
+  "deleteAccountConfirmTitle": "Удалить аккаунт?",
+  "deleteAccountConfirmMessage": "Это навсегда удалит ваш аккаунт.\n\nЛокальные рецепты НЕ будут удалены.",
+  "planLabel": "План {label}",
+  "@planLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "permanentlyDeleteWarning": "Это навсегда удалит {scope}. Действие нельзя отменить.",
+  "@permanentlyDeleteWarning": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "recipesMovedToTrash": "{count} рецепт(ов) перемещено в корзину",
+  "@recipesMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipesFavorited": "{count} рецепт(ов) добавлено в избранное",
+  "upgradeRecipeSpellbook": "Улучшить Recipe Spellbook",
+  "choosePlanSubtitle": "Выберите подходящий план для вашей кухни",
+  "premiumInfoNotice": "Premium — единовременная покупка, улучшающая бесплатный опыт.",
+  "bestValue": "ЛУЧШАЯ ЦЕННОСТЬ",
+  "billedMonthly": "Выставляется ежемесячно",
+  "save16Yearly": "Сэкономьте 16% — всего $2,50/мес.",
+  "save16Badge": "ЭКОНОМИЯ 16%",
+  "save17Yearly": "Сэкономьте 17% — всего $4,17/мес.",
+  "subscriptionsIncludePremium": "Все подписки включают всё из Premium.",
+  "monthly": "Ежемесячно",
+  "yearly": "Ежегодно",
+  "purchasePremiumCta": "Купить Premium — $6,99",
+  "subscribeCloudSyncMonthlyCta": "Подписаться — $2,99/мес.",
+  "subscribeCloudSyncYearlyCta": "Подписаться — $29,99/год",
+  "subscribeCloudSyncPlusMonthlyCta": "Подписаться — $4,99/мес.",
+  "subscribeCloudSyncPlusYearlyCta": "Подписаться — $49,99/год",
+  "signInRequiredBeforePurchase": "Требуется вход перед покупкой",
+  "terms": "Условия",
+  "privacy": "Конфиденциальность",
+  "comparePlans": "Сравнить планы",
+  "featureCloudSyncPersonal": "Cloud Sync (личный)",
+  "featurePhotosOnSteps": "Фото к шагам",
+  "featurePhotoStorage250": "250 МБ хранилища фото (~500 фото)",
+  "featureRpgCosmeticsStarter": "Стартовый набор косметики RPG",
+  "featureSupporterBadge": "Значок поддержки Premium",
+  "featureExtraPolish": "Улучшения UI и функций",
+  "featureFamilySharing5": "Семейный доступ (5 человек)",
+  "featurePhotoStorage1gb": "1 ГБ хранилища фото (~2 000 фото)",
+  "featureSharedLists": "Общие списки покупок",
+  "featureSharedCookbooks": "Общие кулинарные книги",
+  "featureSharedMealPlan": "Общий план питания",
+  "featureEncryptedBackups": "Зашифрованные резервные копии + история",
+  "featureFamilySharing10": "Семейный доступ (10 человек)",
+  "featurePhotoStorage5gb": "5 ГБ хранилища фото (~10 000 фото)",
+  "featureExtendedVersionHistory": "Расширенная история",
+  "featurePrioritySync": "Приоритетная синхронизация",
+  "featureFutureAdvanced": "Будущие расширенные функции включены",
+  "tierCloudSync": "Cloud\nSync",
+  "tierCloudSyncPlus": "Cloud\nSync+",
+  "comparePrice": "Цена",
+  "priceFree": "$0",
+  "pricePremium": "$6,99\nединовременно",
+  "priceCloudSync": "$2,99\n/мес.",
+  "priceCloudSyncPlus": "$4,99\n/мес.",
+  "compareDeviceTransfer": "Перенос устройства",
+  "qrCode": "QR-код",
+  "cloud": "Облако",
+  "comparePhotoStorage": "Хранилище фото",
+  "compareStepPhotos": "Фото шагов",
+  "compareFamilySharing": "Семейный доступ",
+  "compareSharedLists": "Общие списки",
+  "compareSharedCookbooks": "Общие книги",
+  "compareSharedMealPlan": "Общий план",
+  "compareBackups": "Резервные копии",
+  "compareVersionHistory": "История",
+  "light": "Лёгкая",
+  "extended": "Расширенная",
+  "compareRpgCosmetics": "Косметика RPG",
+  "basic": "Базовый",
+  "starterPack": "Стартовый\nнабор",
+  "compareSupporterBadge": "Значок поддержки",
+  "printOf": "из",
+  "printRecipe": "Печать",
+  "stackedLayout": "Макет стопкой",
+  "tabbedLayout": "Макет с вкладками",
+  "printLabelIngredients": "Ингредиенты",
+  "printLabelInstructions": "Инструкции",
+  "printLabelNotes": "Заметки",
+  "printLabelPrep": "Подготовка",
+  "printLabelCook": "Готовка",
+  "printLabelFooter": "Распечатано из Recipe Spellbook",
+  "printLabelPage": "Страница",
+  "printLabelOf": "из",
+  "smallerText": "Уменьшить текст",
+  "largerText": "Увеличить текст",
+  "textSize": "Размер текста",
+  "ingredientPreview": "Предпросмотр ингредиентов",
+  "resetToDefault": "Reset to Default",
+  "smartImportSuccess": "Рецепт повторно проанализирован AI",
+  "smartImportSuccessWithRemaining": "Рецепт проанализирован AI • {remaining} импортов осталось в этом месяце",
+  "@smartImportSuccessWithRemaining": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "smartImportLimitTitle": "Достигнут лимит умного импорта",
+  "smartImportLimitMessage": "Вы использовали {limit} умных импортов за этот месяц.",
+  "@smartImportLimitMessage": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "smartImportUpgradeHint": "Перейдите на Premium для 200 импортов/месяц.",
+  "smartImportParsing": "AI анализирует...",
+  "smartImportFix": "Исправить умным импортом ✨",
+  "smartImportRemaining": "{remaining} из {limit} умных импортов осталось в этом месяце",
+  "@smartImportRemaining": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "smartImportHintTitle": "Импорт выглядит неправильным?",
+  "smartImportHintSubtitle": "Подпишитесь на умный импорт — анализ рецептов AI",
+  "learnMore": "Узнать больше",
+  "retry": "Повторить",
+  "upgrade": "Улучшить",
+  "cookingMode": "Режим готовки",
+  "mealTypeDessert": "Десерт",
+  "noContentToSave": "Нет контента для сохранения",
+  "recipeSaved": "Рецепт сохранён!",
+  "qrScanningMobileOnly": "Сканирование QR доступно только на мобильном.",
+  "notEnoughMana": "Недостаточно маны! Получайте опыт из рецептов для восстановления.",
+  "communityComingSoon": "Функции сообщества скоро появятся!",
+  "somethingWentWrong": "Что-то пошло не так: {error}",
+  "@somethingWentWrong": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "starterRecipesAdded": "{count} начальных рецептов добавлено! 🎉",
+  "@starterRecipesAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enterAtLeastOneNutrient": "Введите хотя бы калории или один макронутриент",
+  "addedToMealPlan": "Добавлено в {mealType} на {date}",
+  "@addedToMealPlan": {
+    "placeholders": {
+      "mealType": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noItemsFoundInText": "Товары не найдены в тексте",
+  "noTextFoundInImage": "Текст не найден на изображении",
+  "addDayToShoppingList": "Добавить день в список",
+  "sendDayToShoppingList": "Отправить день в список",
+  "removeMeal": "Удалить блюдо",
+  "removeMealConfirm": "Удалить {recipeName} из этого дня?",
+  "@removeMealConfirm": {
+    "placeholders": {
+      "recipeName": {
+        "type": "String"
+      }
+    }
+  },
+  "actionRemove": "Удалить",
+  "plannerMealRemoved": "Блюдо удалено",
+  "weekStartsOn": "Неделя начинается с",
+  "monday": "Понедельник",
+  "saturday": "Суббота",
+  "sunday": "Воскресенье",
+  "ingredientHeader": "Заголовок",
+  "ingredientHeaderHint": "напр., Для соуса",
+  "settingsWeekStartDay": "Неделя начинается с",
+  "tuesday": "Вторник",
+  "wednesday": "Среда",
+  "thursday": "Четверг",
+  "friday": "Пятница",
+  "shoppingAddedToList": "{count} {count, plural, =1{товар добавлен} few{товара добавлено} many{товаров добавлено} other{товара добавлено}} в \"{listName}\"",
+  "@shoppingAddedToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingAddedAndCombined": "{added} {added, plural, =1{товар} few{товара} many{товаров} other{товара}} добавлено в \"{listName}\", {combined} объединено",
+  "@shoppingAddedAndCombined": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "combined": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingItemsUpdated": "{count} {count, plural, =1{товар} few{товара} many{товаров} other{товара}} обновлено в \"{listName}\"",
+  "@shoppingItemsUpdated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingAddError": "Ошибка: {message}",
+  "@shoppingAddError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "editCookbook": "Редактировать книгу",
+  "newCookbook": "Новая книга",
+  "tapToAddCoverImage": "Нажмите чтобы добавить изображение обложки",
+  "cookbookDescriptionLabel": "Описание",
+  "cookbookDescriptionHint": "Коллекция рецептов...",
+  "cookbookNameRequired": "Введите название",
+  "addCover": "Добавить обложку",
+  "recipeCount": "{count, plural, =1{1 рецепт} few{{count} рецепта} many{{count} рецептов} other{{count} рецепта}}",
+  "@recipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbookDeleteWithRecipes": "Эта книга содержит {count} {count, plural, =1{рецепт} few{рецепта} many{рецептов} other{рецепта}}. Они будут перемещены в корзину.\n\nВы уверены, что хотите удалить \"{name}\"?",
+  "@cookbookDeleteWithRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cookbookDeleteConfirmNamed": "Вы уверены, что хотите удалить \"{name}\"?",
+  "@cookbookDeleteConfirmNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shareCookbook": "Поделиться книгой",
+  "cookbookEmpty": "В этой книге нет рецептов для обмена",
+  "recipes": "рецептов",
+  "sendSuggestion": "Отправить предложение",
+  "sendSuggestionSubtitle": "Помогите нам улучшить Recipe Spellbook",
+  "reportBug": "Сообщить об ошибке",
+  "reportBugSubtitle": "Что-то не работает?",
+  "joinDiscord": "Присоединиться к Discord",
+  "joinDiscordSubtitle": "Получите помощь и делитесь рецептами",
+  "actionSend": "Отправить",
+  "suggestionDescription": "Мы любим ваши идеи! Ваше предложение будет отправлено напрямую нашей команде.",
+  "suggestionTitleLabel": "Заголовок предложения",
+  "suggestionTitleHint": "напр., Добавить тёмный режим для готовки",
+  "suggestionDetailsLabel": "Детали",
+  "suggestionDetailsHint": "Опишите вашу идею подробно...",
+  "contactOptionalLabel": "Контакт (необязательно)",
+  "contactOptionalHint": "Email или имя Discord",
+  "suggestionSent": "Спасибо! Ваше предложение отправлено 💡",
+  "bugDescription": "Нашли ошибку? Расскажите нам, и мы исправим её.",
+  "bugTitleLabel": "Заголовок ошибки",
+  "bugTitleHint": "напр., Приложение вылетает при импорте PDF",
+  "bugDetailsLabel": "Что произошло?",
+  "bugDetailsHint": "Опишите что пошло не так...",
+  "bugStepsLabel": "Шаги для воспроизведения (необязательно)",
+  "bugStepsHint": "1. Открыть рецепт\n2. Нажать поделиться\n3. Приложение вылетает",
+  "bugReportSent": "Спасибо! Ваш отчёт об ошибке отправлен 🐛",
+  "feedbackFieldsRequired": "Заполните заголовок и детали",
+  "feedbackSendError": "Не удалось отправить отзыв. Проверьте подключение.",
+  "mealTypeAppetizer": "Закуска",
+  "allergenContains": "Contains",
+  "settingsIngredientLayout": "Макет ингредиентов",
+  "ingredientLayoutInline": "В строку — 1 ч. л. масла",
+  "ingredientLayoutColumnar": "Колонки — выровненные количества",
+  "settingsIngredientLayoutDescription": "Выберите как отображаются количества и названия ингредиентов.",
+  "ingredientLayoutInlineDescription": "Количество, единица и название в естественном потоке",
+  "ingredientLayoutColumnarDescription": "Количества выровнены в фиксированной колонке",
+  "ingredientLayoutInfoText": "Этот параметр применяется к просмотру рецепта, генератору списка и печатным рецептам.",
+  "searchCookbooks": "Поиск книг...",
+  "aboutWebsite": "Сайт",
+  "aboutPrivacyPolicy": "Политика конфиденциальности",
+  "aboutPrivacyPolicySub": "Как мы обрабатываем ваши данные",
+  "aboutTermsOfService": "Условия использования",
+  "aboutTermsOfServiceSub": "Условия пользования",
+  "aboutCommunity": "Сообщество",
+  "aboutCommunitySub": "Присоединиться к нашему серверу Discord",
+  "aboutReportBug": "Сообщить об ошибке",
+  "aboutReportBugSub": "Помогите нам улучшить приложение",
+  "aboutRateApp": "Оценить приложение",
+  "aboutRateAppSub": "Оставить отзыв в магазине",
+  "aboutLicenses": "Лицензии с открытым исходным кодом",
+  "aboutLicensesSub": "Используемые сторонние программы",
+  "sortOrder": "Порядок сортировки",
+  "ingredientAddHeader": "Добавить заголовок"
+}

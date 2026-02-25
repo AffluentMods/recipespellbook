@@ -1,0 +1,2575 @@
+{
+  "@@locale": "nl",
+  "@@last_modified": "2026-01-28",
+  "appTitle": "Recipe Spellbook",
+  "navHome": "Startpagina",
+  "navCookbooks": "Kookboeken",
+  "navPlanner": "Planner",
+  "navShopping": "Boodschappen",
+  "navSettings": "Instellingen",
+  "homeGreeting": "Welkom terug!",
+  "homeQuickAccess": "Snelle toegang",
+  "homeMealPlan": "Maaltijden van vandaag",
+  "homePinnedRecipes": "Vastgezette recepten",
+  "homeRecentRecipes": "Recent bekeken",
+  "homeNoMealsPlanned": "Geen maaltijden gepland voor vandaag",
+  "homeNoPinnedRecipes": "Nog geen vastgezette recepten",
+  "homeNoRecentRecipes": "Geen recente recepten",
+  "recipesTitle": "Recepten",
+  "recipesEmpty": "Nog geen recepten",
+  "recipesEmptySubtitle": "Voeg je eerste recept toe om te beginnen",
+  "recipeAdd": "Recept toevoegen",
+  "recipeEdit": "Recept bewerken",
+  "recipeDelete": "Recept verwijderen",
+  "recipeDeleteConfirm": "Weet je zeker dat je dit recept wilt verwijderen?",
+  "recipeFavorite": "Toevoegen aan favorieten",
+  "recipeUnfavorite": "Verwijderen uit favorieten",
+  "recipePin": "Recept vastzetten",
+  "recipeUnpin": "Recept losmaken",
+  "recipeShare": "Recept delen",
+  "recipePrint": "Recept afdrukken",
+  "recipeDuplicate": "Recept dupliceren",
+  "recipeAddToMealPlan": "Toevoegen aan maaltijdplan",
+  "recipeAddToShoppingList": "Toevoegen aan boodschappenlijst",
+  "recipeStartCooking": "Beginnen met koken",
+  "recipeFieldTitle": "Titel",
+  "recipeFieldDescription": "Beschrijving",
+  "recipeFieldIngredients": "Ingrediënten",
+  "recipeFieldInstructions": "Instructies",
+  "recipeFieldNotes": "Notities",
+  "notesTitle": "Notities",
+  "recipeFieldServings": "Porties",
+  "recipeFieldPrepTime": "Voorbereidingstijd",
+  "recipeFieldCookTime": "Kooktijd",
+  "recipeFieldTotalTime": "Totale tijd",
+  "recipeFieldSource": "Bron",
+  "recipeFieldCourse": "Gang",
+  "recipeFieldCategory": "Categorie",
+  "recipeFieldTags": "Labels",
+  "recipeFieldRating": "Beoordeling",
+  "ratingCommon": "Gewoon",
+  "ratingUncommon": "Ongewoon",
+  "ratingRare": "Zeldzaam",
+  "ratingEpic": "Episch",
+  "ratingLegendary": "Legendarisch",
+  "ratingUnrated": "Niet beoordeeld",
+  "minutesAbbrev": "min",
+  "hoursAbbrev": "u",
+  "servingsUnit": "porties",
+  "ingredientsTitle": "Ingrediënten",
+  "ingredientsEmpty": "Geen ingrediënten toegevoegd",
+  "ingredientAdd": "Ingrediënt toevoegen",
+  "ingredientPlaceholder": "bijv. 2 kopjes bloem",
+  "instructionsTitle": "Instructies",
+  "instructionsEmpty": "Geen instructies toegevoegd",
+  "instructionAdd": "Stap toevoegen",
+  "instructionPlaceholder": "Beschrijf deze stap...",
+  "stepNumber": "Stap {number}",
+  "@stepNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbooksTitle": "Kookboeken",
+  "cookbooksEmpty": "Nog geen kookboeken",
+  "cookbookAdd": "Nieuw kookboek",
+  "cookbookEdit": "Kookboek bewerken",
+  "cookbookDelete": "Kookboek verwijderen",
+  "cookbookDeleteConfirm": "Dit kookboek en alle recepten verwijderen?",
+  "cookbookRecipeCount": "{count, plural, =0{Geen recepten} =1{1 recept} other{{count} recepten}}",
+  "@cookbookRecipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingDeli": "Delicatessen",
+  "shoppingCannedGoods": "Blikvoer & Soepen",
+  "shoppingCondiments": "Condimenten & Sauzen",
+  "shoppingGrainsAndPasta": "Granen, Pasta & Rijst",
+  "shoppingCookingAndBaking": "Koken & Bakken",
+  "shoppingBreakfastCereal": "Ontbijt & Granen",
+  "shoppingBeerWineSpirits": "Bier, Wijn & Sterke drank",
+  "shoppingBaby": "Baby",
+  "shoppingPet": "Huisdier",
+  "shoppingHousehold": "Huishouden",
+  "shoppingPersonalCare": "Persoonlijke verzorging",
+  "plannerTitle": "Maaltijdplanner",
+  "plannerEmpty": "Geen maaltijden gepland",
+  "plannerEmptySubtitle": "Tik op + om een maaltijd toe te voegen",
+  "plannerAddMeal": "Maaltijd toevoegen",
+  "plannerToday": "Vandaag",
+  "plannerThisWeek": "Deze week",
+  "plannerBreakfast": "Ontbijt",
+  "plannerLunch": "Lunch",
+  "plannerDinner": "Diner",
+  "plannerSnack": "Snack",
+  "shoppingTitle": "Boodschappenlijst",
+  "shoppingEmpty": "Je lijst is leeg",
+  "shoppingEmptySubtitle": "Voeg items toe of importeer vanuit recepten",
+  "shoppingAddItem": "Item toevoegen...",
+  "shoppingCheckedItems": "Aangevinkte items",
+  "shoppingClearChecked": "Aangevinkte items verwijderen",
+  "shoppingClearAll": "Alles verwijderen",
+  "shoppingCategories": "Boodschappencategorieën",
+  "shoppingUncategorized": "Ongecategoriseerd",
+  "shoppingItemCount": "{count, plural, =0{Geen items} =1{1 item} other{{count} items}}",
+  "@shoppingItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsTitle": "Instellingen",
+  "settingsAppearance": "Uiterlijk",
+  "settingsTheme": "Thema",
+  "settingsThemeMode": "Theemmodus",
+  "settingsThemeModeSystem": "Systeem",
+  "settingsThemeModeLight": "Licht",
+  "settingsThemeModeDark": "Donker",
+  "settingsLanguage": "Taal",
+  "settingsMeasurements": "Maten",
+  "settingsMeasurementsUS": "VS (kopjes, oz)",
+  "settingsMeasurementsMetric": "Metrisch (ml, g)",
+  "settingsRPGMode": "RPG-modus",
+  "settingsRPGModeSubtitle": "Fantasy-stijl tekst en afbeeldingen inschakelen",
+  "settingsRecipes": "Recepten",
+  "settingsManageCourses": "Gangen beheren",
+  "settingsManageCategories": "Categorieën beheren",
+  "settingsManageTags": "Labels beheren",
+  "settingsData": "Gegevens",
+  "settingsExport": "Gegevens exporteren",
+  "settingsExportSubtitle": "Back-up van je recepten",
+  "settingsImport": "Gegevens importeren",
+  "settingsImportSubtitle": "Herstellen van back-up",
+  "settingsImportFromApps": "Importeren vanuit andere apps",
+  "settingsImportFromAppsSubtitle": "Paprika, Crouton, Mela en meer",
+  "settingsAbout": "Over",
+  "settingsVersion": "Versie {version}",
+  "@settingsVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsPrivacy": "Privacybeleid",
+  "settingsTerms": "Servicevoorwaarden",
+  "settingsFeedback": "Feedback sturen",
+  "importTitle": "Importeren",
+  "importCreate": "Aanmaken",
+  "importCreateSubtitle": "Schrijf je eigen recept",
+  "importSubtitle": "Van URL, afbeelding of bestand",
+  "importChooseMethod": "Hoe wil je je recept toevoegen?",
+  "importProgress": "Recept importeren...",
+  "importFromURL": "Van URL",
+  "importFromImage": "Van afbeelding",
+  "importFromFile": "Van bestand",
+  "importFromText": "Importeren van tekst",
+  "importProcessing": "Verwerken...",
+  "importSuccess": "Recept succesvol geïmporteerd",
+  "importError": "Importeren mislukt",
+  "importBulkTitle": "Recepten importeren",
+  "importBulkFound": "{count} recepten gevonden",
+  "@importBulkFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importBulkImportAll": "Alles importeren",
+  "importBulkImportFirst": "Eerste importeren",
+  "searchTitle": "Zoeken",
+  "searchHint": "Recepten zoeken...",
+  "searchNoResults": "Geen recepten gevonden",
+  "searchFilters": "Filters",
+  "actionSave": "Opslaan",
+  "actionCancel": "Annuleren",
+  "actionDelete": "Verwijderen",
+  "actionEdit": "Bewerken",
+  "actionAdd": "Toevoegen",
+  "actionDone": "Klaar",
+  "actionClose": "Sluiten",
+  "actionConfirm": "Bevestigen",
+  "actionUndo": "Ongedaan maken",
+  "actionRetry": "Opnieuw proberen",
+  "actionCopy": "Kopiëren",
+  "actionPaste": "Plakken",
+  "actionOk": "OK",
+  "actionShare": "Delen",
+  "actionClear": "Wissen",
+  "errorGeneric": "Er is iets misgegaan",
+  "errorNetwork": "Netwerkfout. Controleer je verbinding.",
+  "errorNotFound": "Niet gevonden",
+  "errorInvalidURL": "Ongeldige URL",
+  "successSaved": "Succesvol opgeslagen",
+  "successDeleted": "Succesvol verwijderd",
+  "successCopied": "Gekopieerd naar klembord",
+  "confirmDeleteTitle": "Verwijdering bevestigen",
+  "confirmDeleteMessage": "Deze actie kan niet ongedaan worden gemaakt.",
+  "emptyStateTitle": "Hier is nog niets",
+  "emptyStateSubtitle": "Begin door je eerste item toe te voegen",
+  "dateToday": "Vandaag",
+  "dateYesterday": "Gisteren",
+  "dateTomorrow": "Morgen",
+  "timeMinutes": "{count} {count, plural, =1{minuut} other{minuten}}",
+  "@timeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHours": "{count} {count, plural, =1{uur} other{uur}}",
+  "@timeHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trashTitle": "Prullenbak",
+  "trashEmpty": "Prullenbak is leeg",
+  "trashEmptySubtitle": "Verwijderde recepten verschijnen hier 30 dagen lang",
+  "trashRestore": "Herstellen",
+  "trashRestored": "hersteld",
+  "trashDeletePermanently": "Definitief verwijderen",
+  "trashEmptyTrash": "Prullenbak legen",
+  "trashEmptyConfirm": "Dit verwijdert alle recepten in de prullenbak definitief. Deze actie kan niet ongedaan worden gemaakt.",
+  "trashEmptied": "Prullenbak geleegd",
+  "trashDeleted": "Verwijderd",
+  "trashDeletedToday": "Vandaag verwijderd",
+  "trashDeletedYesterday": "Gisteren verwijderd",
+  "trashDeletedDaysAgo": "{days} dagen geleden verwijderd",
+  "@trashDeletedDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "trashExpiresToday": "Verloopt vandaag",
+  "trashDaysLeft": "Nog {days} dagen",
+  "@trashDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "cookingModeTitle": "Kookmodus",
+  "cookingSetTimer": "Timer instellen",
+  "cookingTimerDone": "Timer klaar!",
+  "cookingTimerFinished": "Je timer is afgelopen.",
+  "cookingExitTitle": "Kookmodus verlaten?",
+  "cookingExitMessage": "Je voortgang gaat verloren.",
+  "cookingExit": "Verlaten",
+  "cookingFinish": "Voltooien",
+  "taxonomyAddCourse": "Gang toevoegen",
+  "taxonomyEditCourse": "Gang bewerken",
+  "taxonomyDeleteCourse": "Gang verwijderen?",
+  "taxonomyAddCategory": "Categorie toevoegen",
+  "taxonomyEditCategory": "Categorie bewerken",
+  "taxonomyDeleteCategory": "Categorie verwijderen?",
+  "taxonomyBuiltIn": "Standaard",
+  "taxonomyCustom": "Aangepast",
+  "taxonomyRestoreDefaults": "Standaarden herstellen",
+  "taxonomyDefaultsRestored": "Aangepaste items verwijderd, standaarden hersteld",
+  "taxonomyCourseName": "Naam gang",
+  "taxonomyCourseNameHint": "bijv. Brunch, Voorgerecht",
+  "taxonomyCategoryName": "Naam categorie",
+  "taxonomyCategoryNameHint": "bijv. Glutenvrij, Weinig koolhydraten",
+  "taxonomyEmojiHint": "Tik op het emojiveld om te bewerken",
+  "taxonomyDeleteCourseMessage": "Gang \"{name}\" verwijderen? Recepten met deze gang worden ongecategoriseerd.",
+  "@taxonomyDeleteCourseMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "taxonomyDeleteCategoryMessage": "Categorie \"{name}\" verwijderen? Recepten met deze categorie worden ongecategoriseerd.",
+  "@taxonomyDeleteCategoryMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsQuickAccess": "Snelle toegang",
+  "settingsPlaceholders": "Standaardafbeeldingen",
+  "actionView": "Weergeven",
+  "browseViewAll": "Alle recepten bekijken",
+  "browseRecipesTotal": "{count} recepten in totaal",
+  "@browseRecipesTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "browseCourses": "Gangen",
+  "browseCategories": "Categorieën",
+  "browseNoCourse": "Zonder gang",
+  "browseUncategorized": "Ongecategoriseerd",
+  "favoritesTitle": "Favorieten",
+  "favoritesEmpty": "Geen favoriete recepten",
+  "favoritesEmptySubtitle": "Tik op de ster van een recept om het hier toe te voegen",
+  "favoritesRemoved": "Verwijderd uit favorieten",
+  "recentTitle": "Recent bekeken",
+  "recentEmpty": "Geen recente recepten",
+  "recentEmptySubtitle": "Recepten die je bekijkt verschijnen hier",
+  "recentJustNow": "Zojuist",
+  "recentMinutesAgo": "{count} min geleden",
+  "@recentMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recentHoursAgo": "{count} uur geleden",
+  "@recentHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recentYesterday": "Gisteren",
+  "recentDaysAgo": "{count} dagen geleden",
+  "@recentDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importFromUrl": "Importeren van URL",
+  "importUrlHint": "Recept-URL",
+  "importUrlPlaceholder": "https://voorbeeld.nl/recept",
+  "importFetch": "Recept ophalen",
+  "importFetching": "Ophalen...",
+  "importPreview": "Voorbeeld",
+  "importRecipeFound": "Recept gevonden!",
+  "importReviewSave": "Bekijken en opslaan",
+  "importEditBeforeSave": "Je kunt het recept bewerken voor het opslaan",
+  "importSupportedSites": "Ondersteunde sites",
+  "importSupportedSitesInfo": "Werkt met de meeste receptsites!",
+  "importFromScan": "Recept scannen",
+  "importFromPdf": "Importeren van PDF",
+  "cookbookNew": "Nieuw kookboek",
+  "cookbookNameLabel": "Naam kookboek",
+  "cookbookNameHint": "bijv. Familierecepten",
+  "cookbookDescLabel": "Beschrijving",
+  "cookbookDescHint": "Een verzameling recepten...",
+  "cookbookAddCover": "Omslag toevoegen",
+  "cookbookTapToAdd": "Tik om omslagafbeelding toe te voegen",
+  "cookbookDeleteTitle": "Kookboek verwijderen?",
+  "cookbookDeleteMessage": "Dit kookboek bevat {count} recepten. Ze worden naar de prullenbak verplaatst.",
+  "@cookbookDeleteMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbookCannotDelete": "Je kunt je enige kookboek niet verwijderen",
+  "fontSizeTitle": "Tekstgrootte",
+  "fontSizeReset": "Standaard herstellen",
+  "fontSizeSmaller": "Kleinere tekst",
+  "fontSizeLarger": "Grotere tekst",
+  "defaultCookbookName": "Mijn recepten",
+  "defaultCookbookDescription": "Je persoonlijke receptenverzameling",
+  "defaultShoppingListName": "Boodschappenlijst",
+  "courseBreakfast": "Ontbijt",
+  "courseLunch": "Lunch",
+  "courseDinner": "Diner",
+  "courseAppetizer": "Voorgerecht",
+  "courseSoup": "Soep",
+  "courseSalad": "Salade",
+  "courseMain": "Hoofdgerecht",
+  "courseSide": "Bijgerecht",
+  "courseDessert": "Dessert",
+  "courseSnack": "Snack",
+  "courseBeverage": "Drank",
+  "categoryQuick": "Snel & Makkelijk",
+  "categoryHealthy": "Gezond",
+  "categoryComfort": "Troosteten",
+  "categoryVegetarian": "Vegetarisch",
+  "categoryVegan": "Veganistisch",
+  "categoryGlutenFree": "Glutenvrij",
+  "categoryDairyFree": "Zuivelvrij",
+  "categoryLowCarb": "Weinig koolhydraten",
+  "categorySpicy": "Pittig",
+  "categoryFamilyFriendly": "Gezinsvriendelijk",
+  "categoryParty": "Feest",
+  "categoryHoliday": "Feestdagen",
+  "categoryBbq": "BBQ & Grill",
+  "categoryBaking": "Bakken",
+  "shoppingProduce": "Groente & Fruit",
+  "shoppingDairy": "Zuivel & Eieren",
+  "shoppingMeat": "Vlees & Gevogelte",
+  "shoppingSeafood": "Zeevruchten",
+  "shoppingBakery": "Bakkerij",
+  "shoppingFrozen": "Diepvries",
+  "shoppingPantry": "Voorraadkast",
+  "shoppingSpices": "Kruiden & Specerijen",
+  "shoppingBeverages": "Dranken",
+  "shoppingSnacks": "Snacks",
+  "shoppingInternational": "Internationaal",
+  "shoppingOther": "Overig",
+  "unitCup": "kopje",
+  "unitCups": "kopjes",
+  "unitTablespoon": "eetlepel",
+  "unitTablespoonAbbrev": "el",
+  "unitTeaspoon": "theelepel",
+  "unitTeaspoonAbbrev": "tl",
+  "unitFluidOunce": "vloeistofons",
+  "unitFluidOunceAbbrev": "fl oz",
+  "unitPint": "pint",
+  "unitQuart": "quart",
+  "unitGallon": "gallon",
+  "unitMilliliter": "milliliter",
+  "unitMilliliterAbbrev": "ml",
+  "unitLiter": "liter",
+  "unitLiterAbbrev": "L",
+  "unitOunce": "ons",
+  "unitOunceAbbrev": "oz",
+  "unitPound": "pond",
+  "unitPoundAbbrev": "lb",
+  "unitGram": "gram",
+  "unitGramAbbrev": "g",
+  "unitKilogram": "kilogram",
+  "unitKilogramAbbrev": "kg",
+  "unitPinch": "snufje",
+  "unitDash": "scheutje",
+  "unitClove": "teen",
+  "unitCloves": "tenen",
+  "unitHead": "bol",
+  "unitBunch": "bosje",
+  "unitCan": "blik",
+  "unitPackage": "pakket",
+  "unitSlice": "plakje",
+  "unitSlices": "plakjes",
+  "unitPiece": "stuk",
+  "unitPieces": "stuks",
+  "unitWhole": "geheel",
+  "unitLarge": "groot",
+  "unitMedium": "middel",
+  "unitSmall": "klein",
+  "unitFahrenheit": "°F",
+  "unitCelsius": "°C",
+  "unitInch": "inch",
+  "unitInches": "inch",
+  "unitInchAbbrev": "in",
+  "unitCentimeter": "centimeter",
+  "unitCentimeterAbbrev": "cm",
+  "unitMillimeter": "millimeter",
+  "unitMillimeterAbbrev": "mm",
+  "convertUnitsTitle": "Eenheden omrekenen",
+  "convertMetricToImperial": "Metrisch → Imperiaal",
+  "convertMetricToImperialDesc": "ml → fl oz, g → oz, kg → lb",
+  "convertImperialToMetric": "Imperiaal → Metrisch",
+  "convertImperialToMetricDesc": "kopjes → ml, oz → g, tl → ml",
+  "convertResetToOriginal": "Herstellen naar origineel",
+  "settingsRecipeLayout": "Receptindeling",
+  "settingsRecipeLayoutDescription": "Kies hoe ingrediënten en instructies worden weergegeven",
+  "settingsRecipeDisplay": "Receptweergave",
+  "layoutStacked": "Gestapeld",
+  "layoutStackedDescription": "Alle inhoud in een scrollbare lijst",
+  "layoutTabbed": "Tabbladen",
+  "layoutTabbedDescription": "Veeg tussen ingrediënten en instructies",
+  "recipeSwipeHint": "Veeg om van sectie te wisselen",
+  "recipeIngredients": "Ingrediënten",
+  "recipeInstructions": "Instructies",
+  "dateNextWeek": "Volgende week",
+  "timeJustNow": "Zojuist",
+  "timeMinutesAgo": "{count, plural, =1{1 minuut geleden} other{{count} minuten geleden}}",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHoursAgo": "{count, plural, =1{1 uur geleden} other{{count} uur geleden}}",
+  "@timeHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeDaysAgo": "{count, plural, =1{1 dag geleden} other{{count} dagen geleden}}",
+  "@timeDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeWeeksAgo": "{count, plural, =1{1 week geleden} other{{count} weken geleden}}",
+  "@timeWeeksAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeMonthsAgo": "{count, plural, =1{1 maand geleden} other{{count} maanden geleden}}",
+  "@timeMonthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeYearsAgo": "{count, plural, =1{1 jaar geleden} other{{count} jaar geleden}}",
+  "@timeYearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeInMinutes": "over {count, plural, =1{1 minuut} other{{count} minuten}}",
+  "@timeInMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeInHours": "over {count, plural, =1{1 uur} other{{count} uur}}",
+  "@timeInHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationMinutes": "{count} min",
+  "@durationMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHours": "{count, plural, =1{1 u} other{{count} u}}",
+  "@durationHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHoursMinutes": "{hours} u {minutes} min",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipes": "{count, plural, =0{Geen recepten} =1{1 recept} other{{count} recepten}}",
+  "@countRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countIngredients": "{count, plural, =0{Geen ingrediënten} =1{1 ingrediënt} other{{count} ingrediënten}}",
+  "@countIngredients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countSteps": "{count, plural, =0{Geen stappen} =1{1 stap} other{{count} stappen}}",
+  "@countSteps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countItems": "{count, plural, =0{Geen items} =1{1 item} other{{count} items}}",
+  "@countItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countSelected": "{count} geselecteerd",
+  "@countSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorGenericTitle": "Fout",
+  "errorGenericMessage": "Er is iets misgegaan. Probeer opnieuw.",
+  "errorNetworkTitle": "Verbindingsfout",
+  "errorNetworkMessage": "Controleer je verbinding en probeer opnieuw.",
+  "errorNotFoundTitle": "Niet gevonden",
+  "errorNotFoundMessage": "De gevraagde inhoud is niet gevonden.",
+  "errorInvalidUrlTitle": "Ongeldige URL",
+  "errorInvalidUrlMessage": "Voer een geldige URL in die begint met http:// of https://",
+  "errorPermissionDenied": "Toestemming geweigerd",
+  "errorStorageFull": "Opslag vol",
+  "errorFileNotFound": "Bestand niet gevonden",
+  "errorUnsupportedFormat": "Bestandsformaat niet ondersteund",
+  "errorParsingFailed": "Verwerken van inhoud mislukt",
+  "errorSaveFailed": "Opslaan mislukt",
+  "errorLoadFailed": "Laden mislukt",
+  "errorDeleteFailed": "Verwijderen mislukt",
+  "errorImportFailed": "Importeren mislukt",
+  "errorExportFailed": "Exporteren mislukt",
+  "errorCameraAccess": "Kan geen toegang krijgen tot camera",
+  "errorGalleryAccess": "Kan geen toegang krijgen tot galerij",
+  "errorTimeout": "Tijdslimiet overschreden",
+  "errorServerError": "Serverfout. Probeer later opnieuw.",
+  "errorNoRecipeFound": "Geen recept gevonden op deze pagina",
+  "errorInvalidRecipe": "Ongeldige receptgegevens",
+  "errorDuplicateRecipe": "Dit recept bestaat al",
+  "validationRequired": "Dit veld is verplicht",
+  "validationTooShort": "Moet minimaal {min} tekens bevatten",
+  "@validationTooShort": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "validationTooLong": "Moet minder dan {max} tekens bevatten",
+  "@validationTooLong": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "validationInvalidEmail": "Voer een geldig e-mailadres in",
+  "validationInvalidUrl": "Voer een geldige URL in",
+  "validationInvalidNumber": "Voer een geldig getal in",
+  "validationMinValue": "Moet minimaal {min} zijn",
+  "@validationMinValue": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "validationMaxValue": "Moet maximaal {max} zijn",
+  "@validationMaxValue": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "photoTakePhoto": "Foto maken",
+  "photoChooseFromGallery": "Kiezen uit galerij",
+  "photoRemoveImage": "Afbeelding verwijderen",
+  "shareAsText": "Tekst",
+  "shareAsImage": "Afbeelding",
+  "shareAsFile": "Delen als bestand",
+  "shareQrCode": "QR-code recept",
+  "languageSystem": "Systeemstandaard",
+  "languageEnglish": "English",
+  "languageSpanish": "Español",
+  "languageGerman": "Deutsch",
+  "scalingOriginal": "Origineel",
+  "scalingHalf": "Half",
+  "scalingDouble": "Dubbel",
+  "scalingTriple": "Drievoudig",
+  "scalingCustom": "Aangepast",
+  "scalingServings": "{count, plural, =1{1 portie} other{{count} porties}}",
+  "@scalingServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importRecipe": "Import Recipe",
+  "importFile": "File",
+  "importImage": "Image",
+  "importPaste": "Paste",
+  "importPasteUrl": "Paste recipe URL",
+  "importOr": "OR",
+  "importSupportsFormats": "Supports Paprika, Mela, JSON, ZIP exports",
+  "importFromSocialMedia": "Import your recipes from any social media platform or website.",
+  "tagsTitle": "Labels",
+  "tagsSelect": "Labels selecteren",
+  "tagsNoTags": "Geen labels",
+  "tagsCreate": "Label aanmaken",
+  "tagsCreateNew": "Nieuw label aanmaken",
+  "tagsEnterName": "Labelnaam",
+  "tagsSearch": "Labels zoeken...",
+  "tagsSuggested": "Aanbevolen labels",
+  "tagsRecent": "Recent gebruikt",
+  "tagsAll": "Alle labels",
+  "tagVegetarian": "Vegetarisch",
+  "tagVegan": "Veganistisch",
+  "tagGlutenFree": "Glutenvrij",
+  "tagDairyFree": "Zuivelvrij",
+  "tagNutFree": "Notenvrij",
+  "tagLowCarb": "Weinig koolhydraten",
+  "tagKeto": "Keto",
+  "tagPaleo": "Paleo",
+  "tagWhole30": "Whole30",
+  "tagQuick": "Snel",
+  "tagEasy": "Makkelijk",
+  "tagHealthy": "Gezond",
+  "tagComfortFood": "Troosteten",
+  "tagFamilyFriendly": "Gezinsvriendelijk",
+  "tagKidFriendly": "Kindvriendelijk",
+  "tagMealPrep": "Maaltijdvoorbereiding",
+  "tagOnePot": "Eén pot",
+  "tagInstantPot": "Instant Pot",
+  "tagSlowCooker": "Slowcooker",
+  "tagAirFryer": "Airfryer",
+  "tagGrill": "Grill",
+  "tagBBQ": "BBQ",
+  "tagHoliday": "Feestdagen",
+  "tagParty": "Feest",
+  "tagBudget": "Budgetvriendelijk",
+  "tagSpicy": "Pittig",
+  "tagSweet": "Zoet",
+  "tagSavory": "Hartig",
+  "tagLight": "Licht",
+  "tagHearty": "Stevig",
+  "tagSummer": "Zomer",
+  "tagWinter": "Winter",
+  "tagFall": "Herfst",
+  "tagSpring": "Lente",
+  "settingsImagePlaceholders": "Standaardafbeeldingen",
+  "settingsImagePlaceholdersSubtitle": "Kies wat er wordt weergegeven als afbeeldingen ontbreken",
+  "settingsQuickAccessSubtitle": "Snelle toegang configureren",
+  "settingsManageCoursesSubtitle": "Gangen toevoegen, bewerken of verwijderen",
+  "settingsManageCategoriesSubtitle": "Categorieën toevoegen, bewerken of verwijderen",
+  "settingsShoppingCategories": "Boodschappencategorieën",
+  "settingsShoppingCategoriesSubtitle": "Items per afdeling organiseren",
+  "shoppingIngredientMappings": "Ingrediëntmappings",
+  "shoppingPriority": "Prioriteit: {priority}",
+  "shoppingAddCategory": "Categorie toevoegen",
+  "shoppingEditCategory": "Categorie bewerken",
+  "shoppingDeleteCategory": "Categorie verwijderen?",
+  "shoppingDeleteCategoryMessage": "Categorie \"{name}\" verwijderen? Items worden ongecategoriseerd.",
+  "@shoppingDeleteCategoryMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingCategoryName": "Naam",
+  "shoppingSearchIngredients": "Ingrediënten zoeken...",
+  "shoppingMappingsInfo": "Tik op categorie om locatie te wijzigen. ({count} mappings)",
+  "@shoppingMappingsInfo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingCategoryFor": "Categorie voor \"{ingredient}\"",
+  "@shoppingCategoryFor": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingMovedTo": "\"{ingredient}\" verplaatst naar {category}",
+  "@shoppingMovedTo": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingResetToDefault": "\"{ingredient}\" hersteld naar standaard",
+  "@shoppingResetToDefault": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "actionReset": "Herstellen",
+  "@shoppingPriority": {
+    "placeholders": {
+      "priority": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingMappingMoved": "\"{ingredient}\" verplaatst naar {category}",
+  "@shoppingMappingMoved": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingMappingReset": "\"{ingredient}\" hersteld naar standaard",
+  "@shoppingMappingReset": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "addPhoto": "Foto toevoegen",
+  "addPhotoSubtitle": "Tik om te selecteren uit galerij of camera",
+  "viewAllRecipes": "Alle recepten bekijken",
+  "recipesTotal": "{count} recepten in totaal",
+  "@recipesTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "coursesTitle": "Gangen",
+  "categoriesTitle": "Categorieën",
+  "courseBrunch": "Brunch",
+  "courseMainDish": "Hoofdgerecht",
+  "courseSideDish": "Bijgerecht",
+  "courseSauce": "Saus",
+  "courseBread": "Brood",
+  "categoryBean": "Peulvruchten",
+  "categoryBread": "Brood",
+  "categoryBurritoTaco": "Burrito/Taco",
+  "categoryCasserole": "Ovenschotel",
+  "categoryChickenSteakMeat": "Kip/Biefstuk/Vlees",
+  "categoryDessert": "Dessert",
+  "categoryFish": "Vis",
+  "categoryFruit": "Fruit",
+  "categoryPasta": "Pasta",
+  "categoryPizza": "Pizza",
+  "categoryPork": "Varkensvlees",
+  "categoryRice": "Rijst",
+  "categorySandwich": "Broodje",
+  "categorySeafood": "Zeevruchten",
+  "categorySoup": "Soep",
+  "categoryVegetable": "Groente",
+  "or": "of",
+  "and": "en",
+  "wordOf": "van",
+  "items": "items",
+  "more": "meer",
+  "less": "minder",
+  "all": "Alles",
+  "none": "Geen",
+  "other": "Overig",
+  "custom": "Aangepast",
+  "defaultValue": "Standaard",
+  "required": "Verplicht",
+  "optional": "Optioneel",
+  "photoChooseGallery": "Kiezen uit galerij",
+  "importFirstRecipe": "Import First",
+  "importAllRecipes": "Import All",
+  "parseRecipe": "Parse Recipe",
+  "shareRecipe": "Recept delen",
+  "shareExport": "Exporteren",
+  "shareServings": "Porties: {count}",
+  "@shareServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharePrep": "Prep: {minutes} min",
+  "@sharePrep": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shareCook": "Kooktijd: {minutes} min",
+  "@shareCook": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shareFromApp": "Gedeeld vanuit Recipe Spellbook ✨",
+  "shareCreatingCard": "Receptkaart aanmaken...",
+  "shareCheckRecipe": "Bekijk dit recept: {title}",
+  "@shareCheckRecipe": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "shareErrorImage": "Fout bij aanmaken afbeelding: {error}",
+  "@shareErrorImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "editItem": "Item bewerken",
+  "selectAll": "Alles selecteren",
+  "selectNone": "Niets selecteren",
+  "viewPlanner": "View Planner",
+  "planNow": "Plan Now",
+  "loadingText": "Laden...",
+  "errorText": "Fout",
+  "errorLoadingMeals": "Fout bij laden maaltijden",
+  "readingImage": "Afbeelding lezen...",
+  "parsingRecipe": "Recept verwerken...",
+  "noTextInImage": "Geen tekst gevonden in afbeelding",
+  "failedProcessImage": "Fout bij verwerken afbeelding: {error}",
+  "@failedProcessImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cookingModeExit": "Kookmodus verlaten",
+  "cookingModeStep": "Stap {current} van {total}",
+  "@cookingModeStep": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cookingModePrevious": "Vorige",
+  "cookingModeNext": "Volgende",
+  "cookingModeFinish": "Voltooien",
+  "cookingModeCompleted": "Recept voltooid!",
+  "cookingModeGreatJob": "Goed gedaan! Eet smakelijk.",
+  "mealPlanBreakfast": "Ontbijt",
+  "mealPlanLunch": "Lunch",
+  "mealPlanDinner": "Diner",
+  "mealPlanSnack": "Snack",
+  "mealPlanAddMeal": "Maaltijd toevoegen",
+  "mealPlanRemove": "Verwijderen uit plan",
+  "mealPlanNoMeals": "Geen maaltijden gepland",
+  "mealPlanTapToAdd": "Tik op + om een maaltijd toe te voegen",
+  "thisWeek": "Deze week",
+  "itemName": "Itemnaam",
+  "addToShoppingList": "Toevoegen aan boodschappenlijst",
+  "addToList": "Toevoegen aan lijst",
+  "addedItemsToList": "{count} items toegevoegd aan lijst",
+  "@addedItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scanToImport": "Scannen om recept te importeren",
+  "xOfY": "{current} van {total}",
+  "@xOfY": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "addItems": "{count} items toevoegen",
+  "@addItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToParse": "Verwerken mislukt: {error}",
+  "@failedToParse": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToImport": "Importeren mislukt: {error}",
+  "groupBy": "Groeperen op",
+  "@failedToImport": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cookbookHint": "Tik om te selecteren • Lang tikken om te bewerken",
+  "rename": "Hernoemen",
+  "renameCookbook": "Kookboek hernoemen",
+  "seeAll": "Alles bekijken",
+  "imagePlaceholders": "Image Placeholders",
+  "imagePlaceholdersSubtitle": "Choose what shows when images are missing",
+  "homeScreenSection": "Home Screen",
+  "quickAccessSubtitle": "Configure what appears in Quick Access",
+  "manageCoursesSubtitle": "Add, edit, or remove courses",
+  "manageCategoriesSubtitle": "Add, edit, or remove categories",
+  "shoppingCategoriesSubtitle": "Organize items by aisle",
+  "syncSection": "Synchronisatie",
+  "cloudSync": "Cloudsynchronisatie",
+  "comingSoon": "Binnenkort",
+  "resetApp": "App resetten",
+  "resetAppSubtitle": "Alle gegevens permanent verwijderen",
+  "trashSubtitle": "Verwijderde recepten (30 dagen bewaard)",
+  "importRecipeTitle": "Recept importeren",
+  "importSocialMedia": "Importeer je recepten van sociale media of elke website.",
+  "pasteRecipeUrl": "Recept-URL plakken",
+  "orDivider": "OF",
+  "fileOption": "Bestand",
+  "imageOption": "Afbeelding",
+  "pasteOption": "Plakken",
+  "supportedFormats": "Ondersteunt Paprika, Mela, JSON, ZIP",
+  "pasteRecipeTitle": "Recept plakken",
+  "pasteRecipeHint": "Plak je recept hier...",
+  "quickAccessHelpIntro": "Deze badges geven aan waarom recepten hier verschijnen:",
+  "quickAccessHelpMealPlan": "Gepland voor vandaag",
+  "quickAccessHelpPinned": "Je hebt dit recept vastgezet",
+  "quickAccessHelpRecent": "Recent bekeken",
+  "openCalendar": "Kalender openen",
+  "editNotes": "Notities bewerken",
+  "addNotesHint": "Notities toevoegen...",
+  "moveToAnotherDay": "Naar andere dag verplaatsen",
+  "addToPlan": "Toevoegen aan plan",
+  "importBulkQuestion": "Wil je alle {count} recepten importeren of individueel selecteren?",
+  "@importBulkQuestion": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importingRecipes": "Recepten importeren...",
+  "importedRecipesCount": "{count} recepten geïmporteerd",
+  "@importedRecipesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "extractingArchive": "Archief uitpakken...",
+  "themeSpellbook": "Spellbook",
+  "themeForest": "Bos",
+  "themeOcean": "Oceaan",
+  "themeSunset": "Zonsondergang",
+  "themeMidnight": "Middernacht",
+  "themeRose": "Roos",
+  "colorTheme": "Kleurthema",
+  "colorThemeSubtitle": "Kies het kleurpalet",
+  "preview": "Voorbeeld",
+  "previewPrimary": "Primair",
+  "previewSecondary": "Secundair",
+  "previewTertiary": "Tertiair",
+  "previewError": "Fout",
+  "placeholderDescription": "Kies wat er wordt weergegeven wanneer recepten of kookboeken geen afbeeldingen hebben.",
+  "recipePlaceholders": "Receptafbeeldingen",
+  "cookbookPlaceholders": "Kookboekafbeeldingen",
+  "defaultImages": "Standaardafbeeldingen",
+  "defaultImagesDescription": "Illustraties die veranderen met de RPG-modus",
+  "themeBased": "Op thema gebaseerd",
+  "themeBasedDescription": "Verloop met logo op basis van je thema",
+  "placeholderRpgInfo": "Standaardafbeeldingen wisselen tussen normale en RPG-varianten.",
+  "groupBySection": "Op afdeling",
+  "groupByRecipe": "Op recept",
+  "groupByUngrouped": "Niet gegroepeerd",
+  "copyAsText": "Kopiëren als tekst",
+  "printList": "Lijst afdrukken",
+  "manageLists": "Lijsten beheren",
+  "newList": "Nieuw",
+  "newShoppingList": "Nieuwe boodschappenlijst",
+  "listNameHint": "List name",
+  "recipeLayoutSetting": "Indeling",
+  "recipeLayoutSettingSubtitle": "Kies hoe recepten worden weergegeven",
+  "layoutTabbedOption": "Tabbladweergave",
+  "layoutStackedOption": "Gestapelde weergave",
+  "nutrientsTitle": "Voedingswaarden",
+  "nutrientsSubtitle": "Voedingsinformatie per portie",
+  "addNutrients": "Voedingsinformatie toevoegen",
+  "calculateNutrients": "Berekenen van ingrediënten",
+  "nutrientsDisclaimer": "Voedingswaarden zijn schattingen.",
+  "calories": "Calorieën",
+  "protein": "Eiwit",
+  "carbohydrates": "Koolhydraten",
+  "fat": "Vet",
+  "fiber": "Vezels",
+  "sugar": "Suiker",
+  "sodium": "Natrium",
+  "cholesterol": "Cholesterol",
+  "saturatedFat": "Verzadigd vet",
+  "transFat": "Transvet",
+  "servingSize": "Portiegrootte",
+  "perServing": "Per portie",
+  "calculatingNutrients": "Voedingswaarden berekenen...",
+  "nutrientsCalculated": "Voedingswaarden berekend",
+  "nutrientsFailed": "Kan voedingswaarden niet berekenen: {error}",
+  "@nutrientsFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "premiumFeature": "Premium functie",
+  "premiumNutrientsDescription": "Automatische voedingsberekening vereist een premium abonnement",
+  "exportCurrentCookbook": "Huidig kookboek exporteren",
+  "exporting": "Exporteren...",
+  "exportAllCookbooks": "Alle kookboeken exporteren",
+  "importing": "Importeren...",
+  "importFromJson": "Importeren van JSON",
+  "importFromJsonSubtitle": "Back-upbestand selecteren",
+  "aboutDescription": "Je magische metgezel voor het organiseren, plannen en koken van heerlijke maaltijden.",
+  "madeWithLove": "Gemaakt met ❤️ voor koks over de hele wereld",
+  "resetAppWarning": "Dit verwijdert al je recepten, maaltijdplannen, boodschappenlijsten en instellingen permanent.",
+  "actionContinue": "Doorgaan",
+  "finalConfirmation": "Definitieve bevestiging",
+  "typeDeleteToConfirm": "Typ VERWIJDER ter bevestiging",
+  "typeDeleteHint": "VERWIJDER",
+  "resetEverything": "Alles resetten",
+  "resettingApp": "Resetten...",
+  "appResetSuccess": "App gereset",
+  "resetFailed": "Resetten mislukt",
+  "successAdded": "Succesvol toegevoegd",
+  "selectToday": "Vandaag selecteren",
+  "selectTomorrow": "Morgen selecteren",
+  "addedManually": "Handmatig toegevoegd",
+  "unknownRecipe": "Onbekend recept",
+  "shoppingListEmpty": "Je boodschappenlijst is leeg",
+  "shoppingListEmptyHint": "Voeg items toe of importeer vanuit recepten",
+  "settingsRPGModeActive": "Magische tekst oproepen...",
+  "shoppingCheckAll": "Alles aanvinken",
+  "shoppingUncheckAll": "Alles uitvinken",
+  "shoppingManageLists": "Lijsten beheren",
+  "shoppingNewList": "Nieuwe boodschappenlijst",
+  "shoppingListName": "Lijstnaam",
+  "shoppingLists": "Boodschappenlijsten",
+  "shoppingRenameList": "Lijst hernoemen",
+  "shoppingDeleteList": "Lijst verwijderen?",
+  "categoryProduce": "Groente & Fruit",
+  "categoryDairy": "Zuivel",
+  "categoryMeat": "Vlees",
+  "categoryBakery": "Bakkerij",
+  "categoryFrozen": "Diepvries",
+  "categoryBeverages": "Dranken",
+  "categoryPantry": "Voorraadkast",
+  "categorySpices": "Kruiden",
+  "categoryInternational": "Internationaal",
+  "categorySnacks": "Snacks",
+  "categoryOther": "Overig",
+  "from": "van",
+  "deleted": "verwijderd",
+  "currently": "Momenteel in",
+  "autoDetect": "Automatisch detecteren",
+  "category": "Categorie",
+  "actionNew": "Nieuw",
+  "actionCreate": "Aanmaken",
+  "tagsAdd": "Label toevoegen",
+  "tagsSearchOrCreate": "Label zoeken of aanmaken...",
+  "tagsNoResults": "Geen labels gevonden",
+  "color": "Kleur",
+  "icon": "Icoon",
+  "nutritionTitle": "Voeding",
+  "nutritionEmpty": "Geen voedingsgegevens",
+  "nutritionEmptyHint": "Bewerk dit recept en bereken voeding vanuit de ingrediënten",
+  "scaled": "geschaald",
+  "nutritionCalculate": "Voeding berekenen",
+  "nutritionCalculating": "Berekenen...",
+  "nutritionMatchingIngredients": "Ingrediënten koppelen aan USDA-database",
+  "nutritionCalculationFailed": "Kan voeding niet berekenen",
+  "nutritionDisclaimer": "Voedingswaarden zijn schattingen op basis van USDA-gegevens.",
+  "nutritionPerServing": "Per portie",
+  "nutritionServings": "{count} porties",
+  "@nutritionServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionIngredientBreakdown": "Uitsplitsing per ingrediënt",
+  "nutritionIngredientsMatched": "Gekoppelde ingrediënten",
+  "nutritionMatchedCount": "{matched} van {total} gekoppeld",
+  "@nutritionMatchedCount": {
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionUncertainCount": "{count} te controleren",
+  "@nutritionUncertainCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionUncertain": "koppeling controleren",
+  "nutritionNotFound": "Geen koppeling — tik om te zoeken",
+  "nutritionRecalculate": "Herberekenen",
+  "nutritionOverwriteTitle": "Voedingsgegevens overschrijven?",
+  "nutritionOverwriteMessage": "Dit recept heeft al voedingsgegevens. Wil je herberekenen?",
+  "nutritionCalculated": "Voeding succesvol berekend",
+  "nutritionSave": "Voeding opslaan",
+  "nutritionSelectFood": "USDA-voedingsmiddel selecteren",
+  "nutritionSearchFood": "Voedingsmiddelen zoeken...",
+  "nutritionNoResults": "Geen resultaten",
+  "nutritionCalories": "Calorieën",
+  "nutritionProtein": "Eiwit",
+  "nutritionCarbs": "Koolhydraten",
+  "nutritionFat": "Totaal vet",
+  "nutritionSaturatedFat": "Verzadigd vet",
+  "nutritionTransFat": "Transvet",
+  "nutritionFiber": "Voedingsvezels",
+  "nutritionSugar": "Suikers",
+  "nutritionCholesterol": "Cholesterol",
+  "nutritionSodium": "Natrium",
+  "nutritionPotassium": "Kalium",
+  "nutritionCalcium": "Calcium",
+  "nutritionIron": "IJzer",
+  "nutritionVitaminA": "Vitamine A",
+  "nutritionVitaminC": "Vitamine C",
+  "nutritionVitaminD": "Vitamine D",
+  "layoutInfoText": "Voedingsgegevens verschijnen in beide indelingen.",
+  "settingsManageTagsSubtitle": "Labels maken en organiseren",
+  "nutritionTotal": "Totaal",
+  "nutritionAutoCalculate": "Automatisch berekenen",
+  "nutritionManualEntry": "Handmatige invoer",
+  "nutritionManualEntryTitle": "Bekende waarden invoeren",
+  "nutritionManualEntryDescription": "Als je de exacte waarden kent, voer ze dan hier in.",
+  "nutritionMainNutrients": "Hoofdvoedingsstoffen",
+  "nutritionOtherNutrients": "Andere voedingsstoffen",
+  "nutritionEnterAtLeastOne": "Voer minimaal calorieën of een macronutriënt in",
+  "nutritionHowToFix": "Hoe te herstellen",
+  "nutritionHowToImproveAccuracy": "Hoe nauwkeurigheid te verbeteren",
+  "nutritionEditIngredient": "Ingrediënt bewerken",
+  "nutritionSearchUsda": "USDA doorzoeken",
+  "nutritionEnterManually": "Handmatig invoeren",
+  "nutritionManualIngredientHint": "Voer de voedingswaarden voor dit ingrediënt in.",
+  "nutritionApplyManual": "Handmatige waarden toepassen",
+  "nutritionTotalRecipe": "Totale voeding recept",
+  "nutritionMatchRate": "Koppelingspercentage",
+  "allergySettingsTitle": "Allergieënstellingen",
+  "allergyInfoText": "Selecteer je allergenen. Recipe Spellbook waarschuwt je wanneer recepten deze bevatten.",
+  "allergySelectedCount": "{count} allergenen geselecteerd",
+  "@allergySelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "allergySelectAll": "Alles selecteren",
+  "allergyClearAll": "Alles wissen",
+  "allergyMajorTitle": "Belangrijkste allergenen",
+  "allergyMajorSubtitle": "Door de FDA erkende voedselallergenen",
+  "allergyAdditionalTitle": "Aanvullende allergenen",
+  "allergyAdditionalSubtitle": "Andere veelvoorkomende voedselgevoeligheden",
+  "allergyWillWarn": "Je wordt gewaarschuwd voor dit allergeen",
+  "allergyWarningTitle": "⚠️ Allergiewaarschuwing",
+  "allergyWarningTitlePossible": "⚠️ Mogelijke allergenen",
+  "allergyContains": "Bevat:",
+  "allergyMayContain": "Kan bevatten:",
+  "allergyContainsAllergens": "Bevat allergenen",
+  "allergyManageSettings": "Allergieënstellingen beheren",
+  "allergyDetailsTitle": "Allergenendetails",
+  "settingsAllergies": "Allergieën",
+  "settingsAllergiesSubtitle": "Allergeenwaarschuwingen configureren",
+  "allergenMilk": "Melk/Zuivel",
+  "allergenEggs": "Eieren",
+  "allergenFish": "Vis",
+  "allergenShellfish": "Schaaldieren",
+  "allergenTreeNuts": "Boomnotenoten",
+  "allergenPeanuts": "Pinda's",
+  "allergenWheat": "Tarwe/Gluten",
+  "allergenSoy": "Soja",
+  "allergenSesame": "Sesam",
+  "allergenMustard": "Mosterd",
+  "allergenCelery": "Selderij",
+  "allergenLupin": "Lupine",
+  "allergenMollusks": "Weekdieren",
+  "allergenSulfites": "Sulfieten",
+  "allergenCorn": "Maïs",
+  "allergenNightshades": "Nachtschaden",
+  "nutritionCopyFromAuto": "Kopiëren van automatische berekening",
+  "nutritionEstimatedDisclaimer": "Waarden zijn geschat op basis van USDA-gegevens",
+  "actionDiscard": "Verwijderen",
+  "unsavedChangesTitle": "Niet-opgeslagen wijzigingen",
+  "unsavedChangesMessage": "Je hebt niet-opgeslagen wijzigingen. Wil je ze opslaan?",
+  "tagsEmptyTitle": "Geen labels",
+  "tagsEmptySubtitle": "Maak labels aan om je recepten te organiseren.",
+  "tagsLoadDefaults": "Standaardlabels laden",
+  "tagsAddNew": "Label toevoegen",
+  "tagsEdit": "Label bewerken",
+  "tagsDelete": "Label verwijderen",
+  "tagsDeleteConfirm": "Weet je zeker dat je \"{name}\" wilt verwijderen?",
+  "@tagsDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsNameLabel": "Labelnaam",
+  "tagsIconLabel": "Icoon (emoji)",
+  "tagsColorLabel": "Kleur",
+  "settingsRpgAnimations": "Zeldzaamheidsanimaties",
+  "settingsRpgAnimationsSubtitle": "Gloweffecten voor epische en legendarische recepten",
+  "settingsRpgSounds": "Geluidseffecten",
+  "settingsRpgSoundsSubtitle": "Geluiden voor prestaties en niveaustijgingen",
+  "settingsRpgAchievements": "Prestaties",
+  "settingsRpgAchievementsSubtitle": "Je ontgrendelde prestaties bekijken",
+  "settingsRpgStats": "Kookstatistieken",
+  "settingsRpgStatsSubtitle": "Je kookstatistieken bekijken",
+  "settingsRpgModeEnabled": "Transform your cooking into an adventure!",
+  "settingsRecipeLayoutSubtitle": "Receptweergave aanpassen",
+  "rarityCommon": "Gewoon",
+  "rarityCommonDesc": "Een eenvoudig alledaags recept",
+  "rarityUncommon": "Ongewoon",
+  "rarityUncommonDesc": "Een smakelijk recept met een twist",
+  "rarityRare": "Zeldzaam",
+  "rarityRareDesc": "Een speciaal recept dat het waard is om te beheersen",
+  "rarityEpic": "Episch",
+  "rarityEpicDesc": "Een episch recept van grote kracht!",
+  "rarityLegendary": "Legendarisch",
+  "rarityLegendaryDesc": "Een legendarisch recept waardig van de goden!",
+  "shareLink": "Link",
+  "shareDocument": "PDF",
+  "sharePrint": "Afdrukken",
+  "shareLinkDescription": "Deel een link zodat anderen dit recept kunnen bekijken.",
+  "shareLinkNote": "Ontvangers hebben Recipe Spellbook nodig of kunnen het op het web bekijken.",
+  "shareCreatingDocument": "Document aanmaken...",
+  "editLayoutTitle": "Bewerkingsindeling",
+  "editLayoutStacked": "Gestapeld",
+  "editLayoutTabbed": "Tabbladen",
+  "editLayoutStackedDesc": "Alle secties in een scrollbare weergave",
+  "editLayoutTabbedDesc": "Aparte tabbladen voor details, ingrediënten, instructies",
+  "tabDetails": "Details",
+  "tabIngredients": "Ingrediënten",
+  "tabInstructions": "Instructies",
+  "stepImageAdd": "Afbeelding toevoegen",
+  "stepImageChange": "Afbeelding wijzigen",
+  "stepImageRemove": "Afbeelding verwijderen",
+  "stepTimer": "Timer",
+  "stepTimerMinutes": "{minutes} min",
+  "@stepTimerMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeAddToCookbook": "Toevoegen aan kookboek",
+  "recipeMoveToTrash": "Naar prullenbak verplaatsen",
+  "tagsEmpty": "Geen labels",
+  "nutritionPerServingLabel": "Per portie",
+  "nutritionTotalLabel": "Volledig recept",
+  "trendingRecipes": "Populaire recepten",
+  "addShortcut": "Recipe Spellbook-snelkoppeling toevoegen",
+  "addShortcutSubtitle": "Importeer recepten met één gebaar",
+  "importGuides": "Lees onze importgidsen",
+  "useOnDesktop": "Recipe Spellbook gebruiken op desktop",
+  "inviteFriends": "Vrienden uitnodigen",
+  "inviteFriendsTitle": "Recipe Spellbook delen",
+  "inviteFriendsSubtitle": "Nodig vrienden en familie uit om samen te koken!",
+  "shareApp": "App delen",
+  "maybeLater": "Misschien later",
+  "createAccount": "Account aanmaken",
+  "upgradeToPremium": "Upgraden naar Premium",
+  "premiumSubtitle": "Ontgrendel synchronisatie, onbeperkte recepten en meer",
+  "rpgMode": "RPG-modus",
+  "leaderboards": "Ranglijsten",
+  "achievements": "Prestaties",
+  "cookingStats": "Kookstatistieken",
+  "stepByStepGuides": "Stap-voor-stap gidsen",
+  "importGuidesSubtitle": "Leer importeren vanuit je favoriete apps en sites",
+  "importFromOtherApps": "Importeren vanuit andere apps",
+  "orderOnline": "Online bestellen",
+  "helpTitle": "Help",
+  "navMenu": "Menu",
+  "mealPlanTitle": "Mijn maaltijdplan",
+  "noRecipesYet": "Nog geen recepten",
+  "breakfast": "Ontbijt",
+  "lunch": "Lunch",
+  "dinner": "Diner",
+  "snack": "Snack",
+  "allergenGluten": "Gluten",
+  "allergenChocolate": "Chocolade & Cacao",
+  "allergenCaffeine": "Cafeïne",
+  "allergenAlcohol": "Alcohol",
+  "allergenCitrus": "Citrus",
+  "allergenStoneFruits": "Steenvruchten",
+  "allergenCoconut": "Kokosnoot",
+  "allergenGarlic": "Knoflook",
+  "allergenOnion": "Ui",
+  "allergenMushrooms": "Paddenstoelen",
+  "allergenAvocado": "Avocado",
+  "allergenBanana": "Banaan",
+  "allergenKiwi": "Kiwi",
+  "allergenLatexFoods": "Latex-kruisreactiviteit",
+  "allergenFodmap": "Hoog FODMAP",
+  "allergenHistamine": "Hoge histamine",
+  "allergenSalicylates": "Salicylaten",
+  "allergenMsg": "MSG",
+  "allergenRedMeat": "Rood vlees (Alpha-gal)",
+  "allergenGelatin": "Gelatine",
+  "allergyWarningContains": "Bevat",
+  "allergyDismissForRecipe": "Negeren voor dit recept",
+  "allergyDismissUndo": "Ongedaan maken",
+  "allergyWarningDismissed": "Waarschuwing genegeerd voor dit recept",
+  "scaleCustom": "Aangepast",
+  "scaleCustomTitle": "Aangepaste schaal",
+  "scaleCustomHint": "Voer een getal in (bijv. 0,75 voor ¾, 2,5 voor 2½)",
+  "scaleApply": "Toepassen",
+  "addStep": "Stap toevoegen",
+  "noInstructionsYet": "Nog geen instructies",
+  "addFirstStep": "Eerste stap toevoegen",
+  "enterInstruction": "Voer instructie in...",
+  "addStepImage": "Afbeelding toevoegen aan stap",
+  "removeStep": "Stap verwijderen",
+  "plannerNoMeals": "Geen maaltijden gepland",
+  "plannerAddMealHint": "Tik op + om een maaltijd toe te voegen",
+  "plannerMealAdded": "{recipe} toegevoegd aan {mealType}",
+  "@plannerMealAdded": {
+    "placeholders": {
+      "recipe": {
+        "type": "String"
+      },
+      "mealType": {
+        "type": "String"
+      }
+    }
+  },
+  "plannerShareMealPlan": "Maaltijdplan delen",
+  "plannerAddWeekToShopping": "Week toevoegen aan boodschappenlijst",
+  "plannerClearWeek": "Deze week wissen",
+  "plannerClearWeekConfirm": "Dit verwijdert alle geplande maaltijden van deze week.",
+  "plannerWeekCleared": "Week gewist",
+  "plannerGoToToday": "Naar vandaag gaan",
+  "plannerAddAnother": "Nog een maaltijd toevoegen",
+  "plannerSearchRecipes": "Recepten zoeken...",
+  "mealTypeBreakfast": "Ontbijt",
+  "mealTypeLunch": "Lunch",
+  "mealTypeDinner": "Diner",
+  "mealTypeSnack": "Snack",
+  "shoppingItems": "{count} {count, plural, =1{item} other{items}}",
+  "@shoppingItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingBySection": "Op afdeling",
+  "shoppingByRecipe": "Op recept",
+  "shoppingUngrouped": "Niet gegroepeerd",
+  "shoppingOrderOnline": "Online bestellen",
+  "shoppingEditItem": "Item bewerken",
+  "shoppingItemName": "Itemnaam",
+  "shoppingSelectCategory": "Categorie selecteren",
+  "shoppingAddedManually": "Handmatig toegevoegd",
+  "shoppingEmptyList": "Je lijst is leeg",
+  "shoppingEmptyHint": "Tik op + om items toe te voegen",
+  "shoppingAddHint": "Druk op Enter om toe te voegen, typ dan het volgende",
+  "categoryDeli": "Deli",
+  "categoryBreakfast": "Breakfast & Cereal",
+  "categoryCanned": "Canned Goods & Soups",
+  "categoryCondiments": "Condiments, Sauces & Spices",
+  "categoryAlcohol": "Beer, Wine & Spirits",
+  "categoryBaby": "Baby",
+  "categoryBeauty": "Beauty & Personal Care",
+  "categoryHousehold": "Housewares",
+  "categoryPet": "Pet",
+  "importFromPlatform": "Importeren van {platform}",
+  "@importFromPlatform": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "importFromApp": "Importeren van {app}",
+  "@importFromApp": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "helpAddingRecipes": "Recepten toevoegen",
+  "helpAddingRecipesDesc": "Tik op + in een kookboek om een recept toe te voegen.",
+  "helpImporting": "Importeren vanuit apps",
+  "helpImportingDesc": "Deel een recept vanuit Instagram, TikTok of een website.",
+  "helpMealPlanning": "Maaltijdplanning",
+  "helpMealPlanningDesc": "Tik op het tabblad Planner om je maaltijden voor de week te plannen.",
+  "helpShopping": "Boodschappenlijsten",
+  "helpShoppingDesc": "Voeg ingrediënten toe aan je lijst. Items zijn georganiseerd per afdeling.",
+  "helpSyncing": "Synchronisatie",
+  "helpSyncingDesc": "Cloud sync komt binnenkort!",
+  "helpContactUs": "Neem contact op",
+  "helpContactUsDesc": "Vragen? Schrijf ons op support@recipespellbook.com",
+  "navCommunity": "Community",
+  "navComingSoon": "Binnenkort",
+  "mealPlanButton": "Maaltijdplan",
+  "groceriesButton": "Boodschappen",
+  "shareButton": "Delen",
+  "scaleRecipeButton": "Schalen",
+  "convertUnitsButton": "Omrekenen",
+  "allergyDismissTooltip": "Waarschuwing negeren",
+  "allergyDisablePrompt": "Deze waarschuwing permanent uitschakelen voor dit recept?",
+  "allergyDisabledForRecipe": "Waarschuwing uitgeschakeld voor dit recept",
+  "allergyRestoreWarnings": "Waarschuwingen herstellen",
+  "recipeDuplicated": "Recept gedupliceerd",
+  "recipeDeleted": "Recept naar prullenbak verplaatst",
+  "deleteRecipeTitle": "Recept verwijderen",
+  "deleteRecipeConfirm": "Weet je zeker dat je dit recept wilt verwijderen? Het wordt naar de prullenbak verplaatst.",
+  "addToShoppingListTitle": "Toevoegen aan boodschappenlijst",
+  "viewList": "Lijst bekijken",
+  "selectItems": "Items selecteren",
+  "addToListCount": "{count} items toevoegen",
+  "@addToListCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yes": "Ja",
+  "no": "Nee",
+  "cancel": "Annuleren",
+  "delete": "Verwijderen",
+  "save": "Opslaan",
+  "restore": "Herstellen",
+  "unselectAll": "Selectie opheffen",
+  "deleteStep": "Stap verwijderen",
+  "deleteSteps": "Stappen verwijderen",
+  "deleteStepConfirm": "Deze stap verwijderen?",
+  "deleteStepsConfirm": "{count} stappen verwijderen?",
+  "@deleteStepsConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stepSelected": "{count} geselecteerd",
+  "@stepSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectAllSteps": "Alles selecteren",
+  "gradientBased": "Op verloop gebaseerd",
+  "gradientBasedDescription": "Kleurverloop van je thema",
+  "startCooking": "Beginnen met koken",
+  "fontSizeLabel": "Tekstgrootte",
+  "krogerLoginDenied": "Kroger-aanmelding geweigerd: {error}",
+  "@krogerLoginDenied": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "krogerNoAuthCode": "Geen autorisatiecode ontvangen van Kroger.",
+  "krogerConnected": "Kroger verbonden! Je kunt items rechtstreeks naar je winkelwagen sturen.",
+  "krogerConnectFailed": "Verbinding met Kroger mislukt.",
+  "krogerConnecting": "Verbinding maken met Kroger…",
+  "krogerExchanging": "Autorisatie uitwisselen...",
+  "krogerConnectedTitle": "Verbonden!",
+  "krogerConnectionFailed": "Verbinding mislukt",
+  "goToShoppingList": "Naar boodschappenlijst gaan",
+  "tryAgain": "Opnieuw proberen",
+  "skipForNow": "Voorlopig overslaan",
+  "skipDuplicates": "Duplicaten overslaan",
+  "deselectAll": "Selectie opheffen",
+  "duplicate": "Dupliceren",
+  "recipesImported": "{count} {count, plural, =1{recept geïmporteerd} other{recepten geïmporteerd}}",
+  "@recipesImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importCountRecipes": "{count} {count, plural, =1{recept} other{recepten}} importeren",
+  "@importCountRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productNotFound": "Product niet gevonden",
+  "barcodeNotFound": "Geen product gevonden voor barcode:\n{barcode}",
+  "@barcodeNotFound": {
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "manualEntryHint": "Je kunt de productnaam handmatig invoeren.",
+  "scanAgain": "Opnieuw scannen",
+  "enterManually": "Handmatig invoeren",
+  "enterProductName": "Productnaam invoeren",
+  "productName": "Productnaam",
+  "scanBarcode": "Barcode scannen",
+  "lookingUpProduct": "Product opzoeken...",
+  "pointCameraBarcode": "Richt je camera op een barcode",
+  "unknownProduct": "Onbekend product",
+  "nutritionPer100g": "Voeding (per 100g)",
+  "findRecipesWithThis": "Recepten vinden met dit product",
+  "scanAnother": "Nog een scannen",
+  "exportFormat": "Exportformaat",
+  "gotIt": "Begrepen",
+  "calendar": "Kalender",
+  "today": "Vandaag",
+  "shareMealPlan": "Maaltijdplan delen",
+  "addWeekToShoppingList": "Week toevoegen aan lijst",
+  "clearThisWeek": "Deze week wissen?",
+  "clearWeekWarning": "Dit verwijdert alle geplande maaltijden van deze week.",
+  "goToToday": "Naar vandaag",
+  "addAnotherMeal": "Nog een maaltijd toevoegen",
+  "meal": "Maaltijd",
+  "noMealsPlanned": "Geen maaltijden gepland",
+  "tapToAddMeal": "Tik op + om toe te voegen",
+  "addMeal": "Maaltijd toevoegen",
+  "addToDay": "Toevoegen aan {dayName}",
+  "@addToDay": {
+    "placeholders": {
+      "dayName": {
+        "type": "String"
+      }
+    }
+  },
+  "searchRecipes": "Recepten zoeken...",
+  "noRecipesFound": "Geen recepten gevonden",
+  "exitShoppingListGenerator": "Lijstgenerator verlaten?",
+  "actionExit": "Verlaten",
+  "shoppingListGenerator": "Boodschappenlijstgenerator",
+  "reviewAndAdd": "Bekijken en toevoegen ({count} items)",
+  "@reviewAndAdd": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addItemsToList": "{count} items toevoegen aan lijst",
+  "@addItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedItemsToShoppingList": "{count} items toegevoegd aan boodschappenlijst",
+  "@addedItemsToShoppingList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "createNewList": "Nieuwe lijst aanmaken",
+  "listName": "Lijstnaam",
+  "manage": "Beheren",
+  "myPantry": "Mijn voorraadkast",
+  "itemsAlwaysOnHand": "Items altijd beschikbaar",
+  "whatToDelete": "Wat wil je verwijderen?",
+  "localData": "Lokale gegevens",
+  "localDataDesc": "Recepten, kookboeken, maaltijdplannen, boodschappenlijsten op dit apparaat",
+  "cloudData": "Cloudgegevens",
+  "cloudDataDesc": "Binnenkort — Cloud sync nog niet beschikbaar",
+  "allData": "Alle gegevens",
+  "allDataDesc": "Lokale gegevens en instellingen — volledige reset",
+  "permanentDeleteWarning": "Dit verwijdert {scope} permanent. Deze actie kan niet ongedaan worden gemaakt.",
+  "@permanentDeleteWarning": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "dataResetComplete": "Gegevens reset voltooid",
+  "noThanks": "Nee bedankt",
+  "importFailed": "Importeren mislukt: {error}",
+  "@importFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "yesAddThem": "Ja, toevoegen",
+  "nutritionDisplay": "Voedingsweergave",
+  "nutritionDisplaySubtitle": "Grafiekstijl, zichtbare voedingsstoffen",
+  "storeIntegrations": "Wintelintegraties",
+  "instacart": "Instacart",
+  "kroger": "Kroger",
+  "connected": "Verbonden",
+  "setCustomApiKey": "Aangepaste API-sleutel instellen",
+  "useOwnInstacartKey": "Je eigen Instacart Connect-sleutel gebruiken",
+  "instacartApiKey": "Instacart API-sleutel",
+  "resetToDefaultKey": "Herstellen naar standaardsleutel",
+  "removeCustomKey": "Aangepaste sleutel verwijderen",
+  "signInToKroger": "Inloggen bij Kroger",
+  "connectToAddItems": "Verbind om items aan je winkelwagen toe te voegen",
+  "setPreferredStore": "Voorkeurwinkel instellen",
+  "searchByZipCode": "Zoeken op postcode",
+  "disconnect": "Verbinding verbreken",
+  "apiKeySaved": "API-sleutel opgeslagen",
+  "findYourKrogerStore": "Je Kroger-winkel vinden",
+  "enterZipCode": "Postcode invoeren",
+  "storeSet": "Winkel ingesteld: {name}",
+  "@storeSet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "menuImportSubtitle": "Instagram, TikTok, websites...",
+  "menuSyncToMobile": "Synchroniseren naar mobiel",
+  "menuSyncToDesktop": "Synchroniseren naar desktop",
+  "menuTransferToPhone": "Gegevens overzetten naar je telefoon",
+  "menuTransferToDevice": "Gegevens overzetten naar ander apparaat",
+  "menuProfile": "Profiel",
+  "menuProfileSubtitle": "Je statistieken en voortgang bekijken",
+  "menuAchievementsSubtitle": "Beloningen ontgrendelen",
+  "menuCosmetics": "Cosmetica",
+  "menuCosmeticsSubtitle": "Je uiterlijk aanpassen",
+  "menuLeaderboardsSubtitle": "Concurreren met anderen",
+  "menuBossBattles": "Bosggevechten",
+  "menuBossBattlesSubtitle": "Epische kookuitdagingen",
+  "menuImportRecipes": "Recepten importeren",
+  "menuHelpSupport": "Help & Ondersteuning",
+  "menuAppVersion": "Recipe Spellbook v{version}",
+  "@menuAppVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "menuShareApp": "Recipe Spellbook delen",
+  "menuShareSubtitle": "Nodig vrienden en familie uit om samen te koken!",
+  "menuShareMessage": "Bekijk Recipe Spellbook - de beste recepten-app! https://recipespellbook.app",
+  "signIn": "Inloggen",
+  "helpFromWebsite": "Van een website",
+  "helpFromWebsiteDesc": "Tik op + in een kookboek en plak een recept-URL.",
+  "helpFromSocial": "Van Instagram of TikTok",
+  "helpFromSocialDesc": "Kopieer de link van een receptpost, tik op + en plak.",
+  "helpFromPhoto": "Van een foto",
+  "helpFromPhotoDesc": "Maak een foto van een recept in een boek. Tik op + en kies Afbeelding.",
+  "helpFromPdf": "Van een PDF",
+  "helpFromPdfDesc": "Tik op + en kies Bestand om een PDF te importeren.",
+  "helpFromText": "Van tekst",
+  "helpFromTextDesc": "Kopieer recepttekst, tik op + en dan Plakken.",
+  "helpFromPaprika": "Van Paprika",
+  "helpFromPaprikaDesc": "Ga in Paprika naar Exporteren en kies HTML-formaat.",
+  "helpFromOtherApps": "Van andere apps",
+  "helpFromOtherAppsDesc": "De meeste recepten-apps kunnen exporteren als HTML of tekst.",
+  "helpCloudSync": "Cloudsynchronisatie",
+  "helpCloudSyncDesc": "Abonneer je op Cloud Sync om recepten te synchroniseren op al je apparaten.",
+  "accountTitle": "Account",
+  "signInToSync": "Inloggen om te synchroniseren",
+  "signInSyncDesc": "Maak back-up van je recepten, synchroniseer op meerdere apparaten en ontgrendel premium functies.",
+  "continueWithGoogle": "Doorgaan met Google",
+  "continueWithApple": "Doorgaan met Apple",
+  "signOut": "Uitloggen",
+  "signOutQuestion": "Uitloggen?",
+  "signOutDesc": "Je recepten blijven op dit apparaat.",
+  "deleteAccount": "Account verwijderen",
+  "deleteAccountQuestion": "Account verwijderen?",
+  "deleteAccountDesc": "Dit verwijdert je account en alle gesynchroniseerde gegevens permanent.\n\nLokaal opgeslagen recepten worden NIET verwijderd.",
+  "deletePermanently": "Permanent verwijderen",
+  "deleteAccountFailed": "Account verwijderen mislukt.",
+  "signInToApp": "Inloggen bij Recipe Spellbook",
+  "signInSyncLong": "Synchroniseer je recepten, ontgrendel cloud-back-up en toegang tot Pro-functies.",
+  "recipesStayOnDevice": "Je recepten blijven op dit apparaat, ook zonder account.",
+  "upgradeToPro": "Upgraden naar Pro",
+  "subscriptionDot": "Abonnement · {tier}",
+  "@subscriptionDot": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "affluentLabsPro": "Affluent Labs Pro",
+  "cancelledAccessUntil": "Geannuleerd — toegang tot {date}",
+  "@cancelledAccessUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "lifetimeNeverExpires": "Levenslang — verloopt nooit",
+  "renewsDate": "Verlengt op {date}",
+  "@renewsDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "manageSubscription": "Abonnement beheren",
+  "tierPremium": "Premium",
+  "tierStandard": "Standaard",
+  "tierBasic": "Basis",
+  "tierFree": "Gratis",
+  "tierPlan": "Plan {tier}",
+  "@tierPlan": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "upgradeArrow": "Upgraden →",
+  "syncNow": "Nu synchroniseren",
+  "syncing": "Synchroniseren...",
+  "lastSynced": "Laatste sync {time}",
+  "@lastSynced": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "notYetSynced": "Nog niet gesynchroniseerd",
+  "cloudSyncSection": "CLOUD SYNC",
+  "noRecipesPlannedThisWeek": "Geen recepten gepland deze week",
+  "todayBadge": "VANDAAG",
+  "noCourseAssigned": "Geen gang",
+  "uncategorized": "Ongecategoriseerd",
+  "allRecipesHaveCourse": "Alle recepten hebben een gang!",
+  "allRecipesCategorized": "Alle recepten zijn gecategoriseerd!",
+  "greatJobOrganizing": "Goed georganiseerd!",
+  "countOfTotal": "{count} van {total}",
+  "@countOfTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "tapToAssignCourse": "Tik om gang toe te wijzen",
+  "tapToAssignCategory": "Tik om categorie toe te wijzen",
+  "deleteCountRecipes": "{count} {count, plural, =1{recept} other{recepten}} verwijderen?",
+  "@deleteCountRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipesMovedToTrash": "{count} {count, plural, =1{recept} other{recepten}} naar prullenbak verplaatst",
+  "@countRecipesMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "setCourse": "Gang instellen",
+  "setCategory": "Categorie instellen",
+  "courseSetForCount": "Gang ingesteld voor {count} {count, plural, =1{recept} other{recepten}}",
+  "@courseSetForCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categorySetForCount": "Categorie ingesteld voor {count} {count, plural, =1{recept} other{recepten}}",
+  "@categorySetForCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipesFavorited": "{count} {count, plural, =1{recept} other{recepten}} toegevoegd aan favorieten",
+  "@countRecipesFavorited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkCourse": "Gang",
+  "bulkCategory": "Categorie",
+  "bulkFavorite": "Favoriet",
+  "aiImportTitle": "Importeren via AI",
+  "aiCopyPrompt": "Prompt kopiëren",
+  "aiCopyPromptSubtitle": "Plak dit in ChatGPT, Claude, Gemini of een AI naar keuze met je recept.",
+  "aiCopied": "Gekopieerd!",
+  "aiCopyToClipboard": "Prompt kopiëren",
+  "aiPreviewPrompt": "Prompt bekijken",
+  "aiPasteOutput": "AI-uitvoer plakken",
+  "aiPasteSubtitle": "Plak de JSON van de AI of importeer een .json-bestand.",
+  "aiPasteFirst": "Plak of laad eerst de JSON.",
+  "aiFailedReadFile": "Fout bij lezen bestand: {error}",
+  "@aiFailedReadFile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "aiUntitledRecipe": "Recept zonder titel",
+  "aiImporting": "Importeren...",
+  "aiImportToCookbook": "Importeren naar kookboek",
+  "aiImportSuccess": "Recept succesvol geïmporteerd!",
+  "aiPreviewImport": "Bekijken en importeren",
+  "aiPromptCopied": "Prompt gekopieerd! Plak het in een AI met je recept.",
+  "aiLoadJsonFile": ".json-bestand laden",
+  "aiPaste": "Plakken",
+  "aiTipsTitle": "Tips",
+  "aiTip1": "Werkt met ChatGPT, Claude, Gemini, Copilot of elke AI",
+  "aiTip2": "Je kunt ook een foto van een recept maken en met de prompt plakken",
+  "aiTip3": "AI zet handgeschreven, gedrukte of webrecepten om",
+  "aiTip4": "Als de JSON fouten bevat, vraag de AI dit te corrigeren",
+  "aiServingsLabel": "{count} porties",
+  "@aiServingsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "aiPrepLabel": "{minutes}min prep",
+  "@aiPrepLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "aiCookLabel": "{minutes}min koken",
+  "@aiCookLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "aiIngredientsCount": "Ingrediënten ({count})",
+  "@aiIngredientsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aiStepsCount": "Stappen ({count})",
+  "@aiStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreAllWarnings": "Alle waarschuwingen herstellen",
+  "warningsRestoredForRecipe": "Waarschuwingen hersteld voor dit recept",
+  "restoreAllWarningsQuestion": "Alle waarschuwingen herstellen?",
+  "restoreAll": "Alles herstellen",
+  "allWarningsRestored": "Alle waarschuwingen hersteld",
+  "dismissedWarnings": "{count} genegeerd",
+  "@dismissedWarnings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restoringPurchases": "Aankopen herstellen...",
+  "restorePurchases": "Herstellen",
+  "compareAllPlans": "Alle plannen vergelijken",
+  "oneTimeTab": "Eenmalig",
+  "subscriptionTab": "Abonnement",
+  "payOnceKeepForever": "Eén keer betalen, voor altijd behouden",
+  "cloudSyncFeature": "Cloud Sync",
+  "cloudSyncPlusFeature": "Cloud Sync+",
+  "unableToLoadProducts": "Kan producten niet laden.",
+  "noOfferingsAvailable": "Geen aanbiedingen beschikbaar.",
+  "purchaseFailed": "Aankoop mislukt: {error}",
+  "@purchaseFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "hintProductExample": "bijv. Biologische tomatensaus",
+  "previewPhoto": "Foto bekijken",
+  "retake": "Opnieuw maken",
+  "usePhoto": "Foto gebruiken",
+  "takePhoto": "Foto maken",
+  "chooseFromGallery": "Kiezen uit galerij",
+  "removeImage": "Afbeelding verwijderen",
+  "tipsPlaceholder": "Tips, variaties, bewaarinstructies...",
+  "totalCalories": "Totaal calorieën",
+  "caloriesPerServing": "Cal./portie",
+  "totalNutrition": "Totaal",
+  "linkRecipe": "Recept koppelen",
+  "addIngredient": "Ingrediënt toevoegen",
+  "searchRecipesToLink": "Recepten zoeken om te koppelen...",
+  "linkToIngredient": "Koppelen aan \"{name}\"",
+  "@linkToIngredient": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "errorSavingRecipe": "Fout bij opslaan: {error}",
+  "@errorSavingRecipe": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteSelectedCount": "{count} verwijderen",
+  "@deleteSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "takeAPhoto": "Een foto maken",
+  "defaultLabel": "Standaard",
+  "scaleRecipe": "Recept schalen",
+  "scaleHint": "bijv. 2,5",
+  "badgePinned": "Vastgezet",
+  "badgeRecentlyViewed": "Recent bekeken",
+  "displayOptions": "Weergaveopties",
+  "showMealPlan": "Maaltijdplan weergeven",
+  "showMealPlanSubtitle": "Geplande recepten voor vandaag weergeven",
+  "showPinnedRecipes": "Vastgezette recepten weergeven",
+  "showPinnedSubtitle": "Vastgezette recepten weergeven",
+  "showRecentHistory": "Recente geschiedenis weergeven",
+  "showRecentSubtitle": "Recent bekeken recepten weergeven",
+  "versionLabel": "Versie {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "measurementsUS": "kopjes, lepels, ons, °F",
+  "measurementsMetric": "milliliters, gram, °C",
+  "defaultRecipesImported": "{count} standaardrecepten geïmporteerd!",
+  "@defaultRecipesImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingListGeneratorTitle": "Boodschappenlijstgenerator",
+  "exitShoppingListGeneratorQuestion": "Generator verlaten?",
+  "reviewAndAddItems": "Bekijken en toevoegen ({count} items)",
+  "@reviewAndAddItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedTotalItemsToList": "{count} items toegevoegd aan lijst",
+  "@addedTotalItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scaleMultiplier": "{scale}x",
+  "@scaleMultiplier": {
+    "placeholders": {
+      "scale": {
+        "type": "String"
+      }
+    }
+  },
+  "printIngredients": "Ingrediënten",
+  "printInstructions": "Instructies",
+  "printNotes": "Notities",
+  "printPrep": "Prep: {minutes} min",
+  "@printPrep": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "printCook": "Kooktijd: {minutes} min",
+  "@printCook": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "printFooter": "Afgedrukt vanuit Recipe Spellbook",
+  "printPage": "Pagina {current} van {total}",
+  "@printPage": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "menuNavigation": "NAVIGATIE",
+  "menuImport": "IMPORTEREN",
+  "menuRpgMode": "RPG-MODUS",
+  "menuSocial": "SOCIAAL",
+  "menuApp": "APP",
+  "historyCount": "Geschiedenisaantal",
+  "historyCountSubtitle": "Maximum aantal recente recepten om weer te geven",
+  "restoreAllWarningsDesc": "Dit heractiveer allergiewaarschuwingen voor alle recepten.",
+  "signInToContinue": "Inloggen om door te gaan",
+  "signInForPurchaseDesc": "Een account is vereist voor aankoop.",
+  "menuAchievements": "Prestaties",
+  "menuLeaderboards": "Ranglijsten",
+  "requiresPremium": "Premium vereist",
+  "deleteCount": "{count} verwijderen",
+  "@deleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tapToSelectPhoto": "Tik om te selecteren uit galerij of camera",
+  "rating": "Beoordeling",
+  "usUnits": "cups, tablespoons, ounces, °F",
+  "metricUnits": "milliliters, grams, °C",
+  "selectedCount": "{count} geselecteerd",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteRecipesConfirm": "{count} recept(en) verwijderen?",
+  "@deleteRecipesConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courseSetForRecipes": "Gang ingesteld voor {count} recept(en)",
+  "@courseSetForRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@recipesFavorited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeImportedSuccess": "Recept succesvol geïmporteerd!",
+  "promptCopied": "Prompt gekopieerd! Plak het in een AI met je recept.",
+  "importFromAI": "Importeren via AI",
+  "paste": "Plakken",
+  "previewAndImport": "Bekijken en importeren",
+  "signInDescription": "Sla je recepten op, synchroniseer op meerdere apparaten.",
+  "signOutConfirmTitle": "Uitloggen?",
+  "signOutConfirmMessage": "Je recepten blijven op dit apparaat.",
+  "deleteAccountConfirmTitle": "Account verwijderen?",
+  "deleteAccountConfirmMessage": "Dit verwijdert je account permanent.\n\nLokale recepten worden NIET verwijderd.",
+  "planLabel": "Plan {label}",
+  "@planLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "permanentlyDeleteWarning": "Dit verwijdert {scope} permanent. Deze actie kan niet ongedaan worden gemaakt.",
+  "@permanentlyDeleteWarning": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "recipesMovedToTrash": "{count} recept(en) naar prullenbak verplaatst",
+  "@recipesMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipesFavorited": "{count} recept(en) toegevoegd aan favorieten",
+  "upgradeRecipeSpellbook": "Recipe Spellbook upgraden",
+  "choosePlanSubtitle": "Kies het juiste plan voor jouw keuken",
+  "premiumInfoNotice": "Premium is een eenmalige aankoop die je gratis ervaring verbetert.",
+  "bestValue": "BESTE WAARDE",
+  "billedMonthly": "Maandelijks gefactureerd",
+  "save16Yearly": "Bespaar 16% — slechts €2,50/maand",
+  "save16Badge": "BESPAAR 16%",
+  "save17Yearly": "Bespaar 17% — slechts €4,17/maand",
+  "subscriptionsIncludePremium": "Alle abonnementen bevatten alles uit Premium.",
+  "monthly": "Maandelijks",
+  "yearly": "Jaarlijks",
+  "purchasePremiumCta": "Premium kopen — €6,99",
+  "subscribeCloudSyncMonthlyCta": "Abonneren — €2,99/maand",
+  "subscribeCloudSyncYearlyCta": "Abonneren — €29,99/jaar",
+  "subscribeCloudSyncPlusMonthlyCta": "Abonneren — €4,99/maand",
+  "subscribeCloudSyncPlusYearlyCta": "Abonneren — €49,99/jaar",
+  "signInRequiredBeforePurchase": "Inloggen vereist voor aankoop",
+  "terms": "Voorwaarden",
+  "privacy": "Privacy",
+  "comparePlans": "Plannen vergelijken",
+  "featureCloudSyncPersonal": "Cloud sync (persoonlijk)",
+  "featurePhotosOnSteps": "Foto's bij stappen",
+  "featurePhotoStorage250": "250 MB fotoopslag (~500 foto's)",
+  "featureRpgCosmeticsStarter": "Starter RPG-cosmeticapakket",
+  "featureSupporterBadge": "Premium-ondersteunersbadge",
+  "featureExtraPolish": "UI-verbeteringen & functies",
+  "featureFamilySharing5": "Gezinsdeling (5 leden)",
+  "featurePhotoStorage1gb": "1 GB fotoopslag (~2.000 foto's)",
+  "featureSharedLists": "Gedeelde boodschappenlijsten",
+  "featureSharedCookbooks": "Gedeelde kookboeken",
+  "featureSharedMealPlan": "Gedeeld maaltijdplan",
+  "featureEncryptedBackups": "Versleutelde back-ups + geschiedenis",
+  "featureFamilySharing10": "Gezinsdeling (10 leden)",
+  "featurePhotoStorage5gb": "5 GB fotoopslag (~10.000 foto's)",
+  "featureExtendedVersionHistory": "Uitgebreide versiegeschiedenis",
+  "featurePrioritySync": "Prioriteitssynchronisatie",
+  "featureFutureAdvanced": "Toekomstige geavanceerde functies inbegrepen",
+  "tierCloudSync": "Cloud\nSync",
+  "tierCloudSyncPlus": "Cloud\nSync+",
+  "comparePrice": "Prijs",
+  "priceFree": "€0",
+  "pricePremium": "€6,99\neenmalig",
+  "priceCloudSync": "€2,99\n/maand",
+  "priceCloudSyncPlus": "€4,99\n/maand",
+  "compareDeviceTransfer": "Apparaatoverdracht",
+  "qrCode": "QR-code",
+  "cloud": "Cloud",
+  "comparePhotoStorage": "Fotoopslag",
+  "compareStepPhotos": "Stap-foto's",
+  "compareFamilySharing": "Gezinsdeling",
+  "compareSharedLists": "Gedeelde lijsten",
+  "compareSharedCookbooks": "Gedeelde kookboeken",
+  "compareSharedMealPlan": "Gedeeld maaltijdplan",
+  "compareBackups": "Back-ups",
+  "compareVersionHistory": "Geschiedenis",
+  "light": "Licht",
+  "extended": "Uitgebreid",
+  "compareRpgCosmetics": "RPG-cosmetica",
+  "basic": "Basis",
+  "starterPack": "Starter-\npakket",
+  "compareSupporterBadge": "Ondersteunersbadge",
+  "printOf": "van",
+  "printRecipe": "Afdrukken",
+  "stackedLayout": "Gestapelde indeling",
+  "tabbedLayout": "Tabbladindeling",
+  "printLabelIngredients": "Ingrediënten",
+  "printLabelInstructions": "Instructies",
+  "printLabelNotes": "Notities",
+  "printLabelPrep": "Prep",
+  "printLabelCook": "Kooktijd",
+  "printLabelFooter": "Afgedrukt vanuit Recipe Spellbook",
+  "printLabelPage": "Pagina",
+  "printLabelOf": "van",
+  "smallerText": "Kleinere tekst",
+  "largerText": "Grotere tekst",
+  "textSize": "Tekstgrootte",
+  "ingredientPreview": "Ingrediëntenvoorbeeld",
+  "resetToDefault": "Reset to Default",
+  "smartImportSuccess": "Recept opnieuw verwerkt door AI",
+  "smartImportSuccessWithRemaining": "Recept verwerkt door AI • {remaining} importen over deze maand",
+  "@smartImportSuccessWithRemaining": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "smartImportLimitTitle": "Limiet voor slim importeren bereikt",
+  "smartImportLimitMessage": "Je hebt de {limit} slimme importen van deze maand gebruikt.",
+  "@smartImportLimitMessage": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "smartImportUpgradeHint": "Upgrade naar Premium voor 200 importen/maand.",
+  "smartImportParsing": "AI verwerkt...",
+  "smartImportFix": "Corrigeren met slim importeren ✨",
+  "smartImportRemaining": "{remaining} van {limit} slimme importen over deze maand",
+  "@smartImportRemaining": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "smartImportHintTitle": "Ziet de import er niet correct uit?",
+  "smartImportHintSubtitle": "Abonneer voor slim importeren — AI-receptverwerking",
+  "learnMore": "Meer informatie",
+  "retry": "Opnieuw proberen",
+  "upgrade": "Upgraden",
+  "cookingMode": "Kookmodus",
+  "mealTypeDessert": "Dessert",
+  "noContentToSave": "Geen inhoud om op te slaan",
+  "recipeSaved": "Recept opgeslagen!",
+  "qrScanningMobileOnly": "QR-scannen is alleen beschikbaar op mobiel.",
+  "notEnoughMana": "Onvoldoende mana! Verdien XP van recepten om bij te laden.",
+  "communityComingSoon": "Communityfuncties komen binnenkort!",
+  "somethingWentWrong": "Er is iets misgegaan: {error}",
+  "@somethingWentWrong": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "starterRecipesAdded": "{count} startersrecepten toegevoegd! 🎉",
+  "@starterRecipesAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enterAtLeastOneNutrient": "Voer minimaal calorieën of een macronutriënt in",
+  "addedToMealPlan": "Toegevoegd aan {mealType} op {date}",
+  "@addedToMealPlan": {
+    "placeholders": {
+      "mealType": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noItemsFoundInText": "Geen items gevonden in tekst",
+  "noTextFoundInImage": "Geen tekst gevonden in afbeelding",
+  "addDayToShoppingList": "Dag toevoegen aan lijst",
+  "sendDayToShoppingList": "Dag sturen naar lijst",
+  "removeMeal": "Maaltijd verwijderen",
+  "removeMealConfirm": "{recipeName} verwijderen van deze dag?",
+  "@removeMealConfirm": {
+    "placeholders": {
+      "recipeName": {
+        "type": "String"
+      }
+    }
+  },
+  "actionRemove": "Verwijderen",
+  "plannerMealRemoved": "Maaltijd verwijderd",
+  "weekStartsOn": "Week begint op",
+  "monday": "Maandag",
+  "saturday": "Zaterdag",
+  "sunday": "Zondag",
+  "ingredientHeader": "Koptekst",
+  "ingredientHeaderHint": "bijv. Voor de saus",
+  "settingsWeekStartDay": "Week begint op",
+  "tuesday": "Dinsdag",
+  "wednesday": "Woensdag",
+  "thursday": "Donderdag",
+  "friday": "Vrijdag",
+  "shoppingAddedToList": "{count} {count, plural, =1{item} other{items}} toegevoegd aan \"{listName}\"",
+  "@shoppingAddedToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingAddedAndCombined": "{added} {added, plural, =1{item} other{items}} toegevoegd aan \"{listName}\", {combined} gecombineerd",
+  "@shoppingAddedAndCombined": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "combined": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingItemsUpdated": "{count} {count, plural, =1{item} other{items}} bijgewerkt in \"{listName}\"",
+  "@shoppingItemsUpdated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingAddError": "Fout: {message}",
+  "@shoppingAddError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "editCookbook": "Kookboek bewerken",
+  "newCookbook": "Nieuw kookboek",
+  "tapToAddCoverImage": "Tik om omslagafbeelding toe te voegen",
+  "cookbookDescriptionLabel": "Beschrijving",
+  "cookbookDescriptionHint": "Een verzameling recepten...",
+  "cookbookNameRequired": "Voer een naam in",
+  "addCover": "Omslag toevoegen",
+  "recipeCount": "{count} {count, plural, =1{recept} other{recepten}}",
+  "@recipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbookDeleteWithRecipes": "Dit kookboek bevat {count} {count, plural, =1{recept} other{recepten}}. Ze worden naar de prullenbak verplaatst.\n\nWeet je zeker dat je \"{name}\" wilt verwijderen?",
+  "@cookbookDeleteWithRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cookbookDeleteConfirmNamed": "Weet je zeker dat je \"{name}\" wilt verwijderen?",
+  "@cookbookDeleteConfirmNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shareCookbook": "Kookboek delen",
+  "cookbookEmpty": "Dit kookboek heeft geen recepten om te delen",
+  "recipes": "recepten",
+  "sendSuggestion": "Suggestie sturen",
+  "sendSuggestionSubtitle": "Help ons Recipe Spellbook te verbeteren",
+  "reportBug": "Bug rapporteren",
+  "reportBugSubtitle": "Werkt iets niet goed?",
+  "joinDiscord": "Ons Discord-server joinen",
+  "joinDiscordSubtitle": "Krijg hulp en deel recepten",
+  "actionSend": "Sturen",
+  "suggestionDescription": "We zijn dol op je ideeën! Je suggestie wordt rechtstreeks naar ons team gestuurd.",
+  "suggestionTitleLabel": "Suggestietitel",
+  "suggestionTitleHint": "bijv. Donkere modus voor koken toevoegen",
+  "suggestionDetailsLabel": "Details",
+  "suggestionDetailsHint": "Beschrijf je idee in detail...",
+  "contactOptionalLabel": "Contact (optioneel)",
+  "contactOptionalHint": "E-mail of Discord-naam",
+  "suggestionSent": "Bedankt! Je suggestie is verstuurd 💡",
+  "bugDescription": "Bug gevonden? Vertel het ons en we lossen het op.",
+  "bugTitleLabel": "Bugtitel",
+  "bugTitleHint": "bijv. App crasht bij PDF importeren",
+  "bugDetailsLabel": "Wat is er gebeurd?",
+  "bugDetailsHint": "Beschrijf wat er misging...",
+  "bugStepsLabel": "Stappen om te reproduceren (optioneel)",
+  "bugStepsHint": "1. Recept openen\n2. Op delen tikken\n3. App crasht",
+  "bugReportSent": "Bedankt! Je bugrapport is verstuurd 🐛",
+  "feedbackFieldsRequired": "Vul de titel en details in",
+  "feedbackSendError": "Kan feedback niet versturen. Controleer je verbinding.",
+  "mealTypeAppetizer": "Voorgerecht",
+  "allergenContains": "Contains",
+  "settingsIngredientLayout": "Ingrediëntenindeling",
+  "ingredientLayoutInline": "Inline — 1 tl boter",
+  "ingredientLayoutColumnar": "Kolommen — hoeveelheden uitgelijnd",
+  "settingsIngredientLayoutDescription": "Kies hoe hoeveelheden en ingrediëntnamen worden weergegeven.",
+  "ingredientLayoutInlineDescription": "Hoeveelheid, eenheid en naam in natuurlijke volgorde",
+  "ingredientLayoutColumnarDescription": "Hoeveelheden uitgelijnd in vaste kolom",
+  "ingredientLayoutInfoText": "Deze instelling geldt voor de receptweergave, lijstgenerator en afgedrukte recepten.",
+  "searchCookbooks": "Kookboeken zoeken...",
+  "aboutWebsite": "Website",
+  "aboutPrivacyPolicy": "Privacybeleid",
+  "aboutPrivacyPolicySub": "Hoe we je gegevens behandelen",
+  "aboutTermsOfService": "Servicevoorwaarden",
+  "aboutTermsOfServiceSub": "Gebruiksvoorwaarden",
+  "aboutCommunity": "Community",
+  "aboutCommunitySub": "Ons Discord-server joinen",
+  "aboutReportBug": "Bug rapporteren",
+  "aboutReportBugSub": "Help ons de app te verbeteren",
+  "aboutRateApp": "App beoordelen",
+  "aboutRateAppSub": "Een recensie achterlaten in de store",
+  "aboutLicenses": "Open-source licenties",
+  "aboutLicensesSub": "Gebruikte software van derden",
+  "sortOrder": "Sorteervolgorde",
+  "ingredientAddHeader": "Koptekst toevoegen"
+}

@@ -1,0 +1,2575 @@
+{
+  "@@locale": "ja",
+  "@@last_modified": "2026-01-28",
+  "appTitle": "Recipe Spellbook",
+  "navHome": "ホーム",
+  "navCookbooks": "レシピ本",
+  "navPlanner": "プランナー",
+  "navShopping": "買い物",
+  "navSettings": "設定",
+  "homeGreeting": "おかえりなさい！",
+  "homeQuickAccess": "クイックアクセス",
+  "homeMealPlan": "今日の食事",
+  "homePinnedRecipes": "固定レシピ",
+  "homeRecentRecipes": "最近見たもの",
+  "homeNoMealsPlanned": "今日の食事が計画されていません",
+  "homeNoPinnedRecipes": "固定されたレシピがありません",
+  "homeNoRecentRecipes": "最近のレシピがありません",
+  "recipesTitle": "レシピ",
+  "recipesEmpty": "レシピがありません",
+  "recipesEmptySubtitle": "最初のレシピを追加して始めましょう",
+  "recipeAdd": "レシピを追加",
+  "recipeEdit": "レシピを編集",
+  "recipeDelete": "レシピを削除",
+  "recipeDeleteConfirm": "このレシピを削除してもよろしいですか？",
+  "recipeFavorite": "お気に入りに追加",
+  "recipeUnfavorite": "お気に入りから削除",
+  "recipePin": "レシピを固定",
+  "recipeUnpin": "固定を解除",
+  "recipeShare": "レシピを共有",
+  "recipePrint": "レシピを印刷",
+  "recipeDuplicate": "レシピを複製",
+  "recipeAddToMealPlan": "食事プランに追加",
+  "recipeAddToShoppingList": "買い物リストに追加",
+  "recipeStartCooking": "調理を始める",
+  "recipeFieldTitle": "タイトル",
+  "recipeFieldDescription": "説明",
+  "recipeFieldIngredients": "材料",
+  "recipeFieldInstructions": "手順",
+  "recipeFieldNotes": "メモ",
+  "notesTitle": "メモ",
+  "recipeFieldServings": "人数",
+  "recipeFieldPrepTime": "準備時間",
+  "recipeFieldCookTime": "調理時間",
+  "recipeFieldTotalTime": "合計時間",
+  "recipeFieldSource": "出典",
+  "recipeFieldCourse": "コース",
+  "recipeFieldCategory": "カテゴリ",
+  "recipeFieldTags": "タグ",
+  "recipeFieldRating": "評価",
+  "ratingCommon": "コモン",
+  "ratingUncommon": "アンコモン",
+  "ratingRare": "レア",
+  "ratingEpic": "エピック",
+  "ratingLegendary": "レジェンダリー",
+  "ratingUnrated": "未評価",
+  "minutesAbbrev": "分",
+  "hoursAbbrev": "時間",
+  "servingsUnit": "人分",
+  "ingredientsTitle": "材料",
+  "ingredientsEmpty": "材料が追加されていません",
+  "ingredientAdd": "材料を追加",
+  "ingredientPlaceholder": "例：小麦粉 2カップ",
+  "instructionsTitle": "手順",
+  "instructionsEmpty": "手順が追加されていません",
+  "instructionAdd": "ステップを追加",
+  "instructionPlaceholder": "このステップを説明してください...",
+  "stepNumber": "ステップ {number}",
+  "@stepNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbooksTitle": "レシピ本",
+  "cookbooksEmpty": "レシピ本がありません",
+  "cookbookAdd": "新しいレシピ本",
+  "cookbookEdit": "レシピ本を編集",
+  "cookbookDelete": "レシピ本を削除",
+  "cookbookDeleteConfirm": "このレシピ本とすべてのレシピを削除しますか？",
+  "cookbookRecipeCount": "{count, plural, other{{count}個のレシピ}}",
+  "@cookbookRecipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingDeli": "デリ",
+  "shoppingCannedGoods": "缶詰・スープ",
+  "shoppingCondiments": "調味料・ソース",
+  "shoppingGrainsAndPasta": "穀物・パスタ・米",
+  "shoppingCookingAndBaking": "料理・製菓",
+  "shoppingBreakfastCereal": "朝食・シリアル",
+  "shoppingBeerWineSpirits": "ビール・ワイン・スピリッツ",
+  "shoppingBaby": "ベビー用品",
+  "shoppingPet": "ペット用品",
+  "shoppingHousehold": "日用品",
+  "shoppingPersonalCare": "パーソナルケア",
+  "plannerTitle": "食事プランナー",
+  "plannerEmpty": "食事が計画されていません",
+  "plannerEmptySubtitle": "＋をタップして食事を追加",
+  "plannerAddMeal": "食事を追加",
+  "plannerToday": "今日",
+  "plannerThisWeek": "今週",
+  "plannerBreakfast": "朝食",
+  "plannerLunch": "昼食",
+  "plannerDinner": "夕食",
+  "plannerSnack": "おやつ",
+  "shoppingTitle": "買い物リスト",
+  "shoppingEmpty": "リストが空です",
+  "shoppingEmptySubtitle": "商品を追加するかレシピからインポートしてください",
+  "shoppingAddItem": "商品を追加...",
+  "shoppingCheckedItems": "チェック済み商品",
+  "shoppingClearChecked": "チェック済みを削除",
+  "shoppingClearAll": "すべて削除",
+  "shoppingCategories": "買い物カテゴリ",
+  "shoppingUncategorized": "カテゴリなし",
+  "shoppingItemCount": "{count, plural, other{{count}個}}",
+  "@shoppingItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsTitle": "設定",
+  "settingsAppearance": "外観",
+  "settingsTheme": "テーマ",
+  "settingsThemeMode": "テーマモード",
+  "settingsThemeModeSystem": "システム",
+  "settingsThemeModeLight": "ライト",
+  "settingsThemeModeDark": "ダーク",
+  "settingsLanguage": "言語",
+  "settingsMeasurements": "単位",
+  "settingsMeasurementsUS": "US（カップ、オンス）",
+  "settingsMeasurementsMetric": "メートル（ml、g）",
+  "settingsRPGMode": "RPGモード",
+  "settingsRPGModeSubtitle": "ファンタジースタイルのテキストと画像を有効にする",
+  "settingsRecipes": "レシピ",
+  "settingsManageCourses": "コースを管理",
+  "settingsManageCategories": "カテゴリを管理",
+  "settingsManageTags": "タグを管理",
+  "settingsData": "データ",
+  "settingsExport": "データをエクスポート",
+  "settingsExportSubtitle": "レシピをバックアップ",
+  "settingsImport": "データをインポート",
+  "settingsImportSubtitle": "バックアップから復元",
+  "settingsImportFromApps": "他のアプリからインポート",
+  "settingsImportFromAppsSubtitle": "Paprika、Crouton、Melaなど",
+  "settingsAbout": "About",
+  "settingsVersion": "バージョン {version}",
+  "@settingsVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsPrivacy": "プライバシーポリシー",
+  "settingsTerms": "利用規約",
+  "settingsFeedback": "フィードバックを送る",
+  "importTitle": "インポート",
+  "importCreate": "作成",
+  "importCreateSubtitle": "自分のレシピを書く",
+  "importSubtitle": "URL、画像またはファイルから",
+  "importChooseMethod": "レシピをどのように追加しますか？",
+  "importProgress": "レシピをインポート中...",
+  "importFromURL": "URLから",
+  "importFromImage": "画像から",
+  "importFromFile": "ファイルから",
+  "importFromText": "テキストからインポート",
+  "importProcessing": "処理中...",
+  "importSuccess": "レシピを正常にインポートしました",
+  "importError": "レシピのインポートに失敗しました",
+  "importBulkTitle": "レシピをインポート",
+  "importBulkFound": "{count}件のレシピが見つかりました",
+  "@importBulkFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importBulkImportAll": "すべてインポート",
+  "importBulkImportFirst": "最初をインポート",
+  "searchTitle": "検索",
+  "searchHint": "レシピを検索...",
+  "searchNoResults": "レシピが見つかりません",
+  "searchFilters": "フィルター",
+  "actionSave": "保存",
+  "actionCancel": "キャンセル",
+  "actionDelete": "削除",
+  "actionEdit": "編集",
+  "actionAdd": "追加",
+  "actionDone": "完了",
+  "actionClose": "閉じる",
+  "actionConfirm": "確認",
+  "actionUndo": "元に戻す",
+  "actionRetry": "再試行",
+  "actionCopy": "コピー",
+  "actionPaste": "貼り付け",
+  "actionOk": "OK",
+  "actionShare": "共有",
+  "actionClear": "クリア",
+  "errorGeneric": "エラーが発生しました",
+  "errorNetwork": "ネットワークエラー。接続を確認してください。",
+  "errorNotFound": "見つかりません",
+  "errorInvalidURL": "無効なURL",
+  "successSaved": "正常に保存しました",
+  "successDeleted": "正常に削除しました",
+  "successCopied": "クリップボードにコピーしました",
+  "confirmDeleteTitle": "削除の確認",
+  "confirmDeleteMessage": "この操作は取り消せません。",
+  "emptyStateTitle": "まだ何もありません",
+  "emptyStateSubtitle": "最初のアイテムを追加して始めましょう",
+  "dateToday": "今日",
+  "dateYesterday": "昨日",
+  "dateTomorrow": "明日",
+  "timeMinutes": "{count, plural, other{{count}分}}",
+  "@timeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHours": "{count, plural, other{{count}時間}}",
+  "@timeHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trashTitle": "ゴミ箱",
+  "trashEmpty": "ゴミ箱は空です",
+  "trashEmptySubtitle": "削除されたレシピは30日間ここに保存されます",
+  "trashRestore": "復元",
+  "trashRestored": "復元しました",
+  "trashDeletePermanently": "完全に削除",
+  "trashEmptyTrash": "ゴミ箱を空にする",
+  "trashEmptyConfirm": "ゴミ箱内のすべてのレシピが完全に削除されます。この操作は取り消せません。",
+  "trashEmptied": "ゴミ箱を空にしました",
+  "trashDeleted": "削除しました",
+  "trashDeletedToday": "今日削除",
+  "trashDeletedYesterday": "昨日削除",
+  "trashDeletedDaysAgo": "{days}日前に削除",
+  "@trashDeletedDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "trashExpiresToday": "今日期限切れ",
+  "trashDaysLeft": "残り{days}日",
+  "@trashDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "cookingModeTitle": "調理モード",
+  "cookingSetTimer": "タイマーを設定",
+  "cookingTimerDone": "タイマー完了！",
+  "cookingTimerFinished": "タイマーが終了しました。",
+  "cookingExitTitle": "調理モードを終了しますか？",
+  "cookingExitMessage": "進捗が失われます。",
+  "cookingExit": "終了",
+  "cookingFinish": "完了",
+  "taxonomyAddCourse": "コースを追加",
+  "taxonomyEditCourse": "コースを編集",
+  "taxonomyDeleteCourse": "コースを削除しますか？",
+  "taxonomyAddCategory": "カテゴリを追加",
+  "taxonomyEditCategory": "カテゴリを編集",
+  "taxonomyDeleteCategory": "カテゴリを削除しますか？",
+  "taxonomyBuiltIn": "組み込み",
+  "taxonomyCustom": "カスタム",
+  "taxonomyRestoreDefaults": "デフォルトに戻す",
+  "taxonomyDefaultsRestored": "カスタムアイテムが削除され、デフォルトが復元されました",
+  "taxonomyCourseName": "コース名",
+  "taxonomyCourseNameHint": "例：ブランチ、前菜",
+  "taxonomyCategoryName": "カテゴリ名",
+  "taxonomyCategoryNameHint": "例：グルテンフリー、低糖質",
+  "taxonomyEmojiHint": "絵文字フィールドをタップして編集",
+  "taxonomyDeleteCourseMessage": "「{name}」を削除しますか？このコースのレシピはカテゴリなしになります。",
+  "@taxonomyDeleteCourseMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "taxonomyDeleteCategoryMessage": "「{name}」を削除しますか？このカテゴリのレシピはカテゴリなしになります。",
+  "@taxonomyDeleteCategoryMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsQuickAccess": "クイックアクセス",
+  "settingsPlaceholders": "デフォルト画像",
+  "actionView": "表示",
+  "browseViewAll": "すべてのレシピを表示",
+  "browseRecipesTotal": "合計{count}件のレシピ",
+  "@browseRecipesTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "browseCourses": "コース",
+  "browseCategories": "カテゴリ",
+  "browseNoCourse": "コースなし",
+  "browseUncategorized": "カテゴリなし",
+  "favoritesTitle": "お気に入り",
+  "favoritesEmpty": "お気に入りのレシピがありません",
+  "favoritesEmptySubtitle": "レシピの星をタップしてここに追加",
+  "favoritesRemoved": "お気に入りから削除しました",
+  "recentTitle": "最近見たもの",
+  "recentEmpty": "最近のレシピがありません",
+  "recentEmptySubtitle": "見たレシピがここに表示されます",
+  "recentJustNow": "たった今",
+  "recentMinutesAgo": "{count}分前",
+  "@recentMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recentHoursAgo": "{count}時間前",
+  "@recentHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recentYesterday": "昨日",
+  "recentDaysAgo": "{count}日前",
+  "@recentDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importFromUrl": "URLからインポート",
+  "importUrlHint": "レシピURL",
+  "importUrlPlaceholder": "https://example.com/recipe",
+  "importFetch": "レシピを取得",
+  "importFetching": "取得中...",
+  "importPreview": "プレビュー",
+  "importRecipeFound": "レシピが見つかりました！",
+  "importReviewSave": "確認して保存",
+  "importEditBeforeSave": "保存前にレシピを編集できます",
+  "importSupportedSites": "対応サイト",
+  "importSupportedSitesInfo": "ほとんどのレシピサイトに対応！",
+  "importFromScan": "レシピをスキャン",
+  "importFromPdf": "PDFからインポート",
+  "cookbookNew": "新しいレシピ本",
+  "cookbookNameLabel": "レシピ本の名前",
+  "cookbookNameHint": "例：家族のレシピ",
+  "cookbookDescLabel": "説明",
+  "cookbookDescHint": "レシピのコレクション...",
+  "cookbookAddCover": "カバーを追加",
+  "cookbookTapToAdd": "タップしてカバー画像を追加",
+  "cookbookDeleteTitle": "レシピ本を削除しますか？",
+  "cookbookDeleteMessage": "このレシピ本には{count}件のレシピがあります。ゴミ箱に移動されます。",
+  "@cookbookDeleteMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbookCannotDelete": "唯一のレシピ本は削除できません",
+  "fontSizeTitle": "文字サイズ",
+  "fontSizeReset": "デフォルトに戻す",
+  "fontSizeSmaller": "文字を小さく",
+  "fontSizeLarger": "文字を大きく",
+  "defaultCookbookName": "私のレシピ",
+  "defaultCookbookDescription": "個人のレシピコレクション",
+  "defaultShoppingListName": "買い物リスト",
+  "courseBreakfast": "朝食",
+  "courseLunch": "昼食",
+  "courseDinner": "夕食",
+  "courseAppetizer": "前菜",
+  "courseSoup": "スープ",
+  "courseSalad": "サラダ",
+  "courseMain": "メインディッシュ",
+  "courseSide": "サイドディッシュ",
+  "courseDessert": "デザート",
+  "courseSnack": "スナック",
+  "courseBeverage": "飲み物",
+  "categoryQuick": "簡単・時短",
+  "categoryHealthy": "ヘルシー",
+  "categoryComfort": "家庭料理",
+  "categoryVegetarian": "ベジタリアン",
+  "categoryVegan": "ビーガン",
+  "categoryGlutenFree": "グルテンフリー",
+  "categoryDairyFree": "乳製品不使用",
+  "categoryLowCarb": "低糖質",
+  "categorySpicy": "辛口",
+  "categoryFamilyFriendly": "家族向け",
+  "categoryParty": "パーティー",
+  "categoryHoliday": "ホリデー",
+  "categoryBbq": "バーベキュー",
+  "categoryBaking": "ベーキング",
+  "shoppingProduce": "野菜・果物",
+  "shoppingDairy": "乳製品・卵",
+  "shoppingMeat": "肉・鶏肉",
+  "shoppingSeafood": "シーフード",
+  "shoppingBakery": "ベーカリー",
+  "shoppingFrozen": "冷凍食品",
+  "shoppingPantry": "食料品",
+  "shoppingSpices": "スパイス・調味料",
+  "shoppingBeverages": "飲み物",
+  "shoppingSnacks": "スナック",
+  "shoppingInternational": "輸入食品",
+  "shoppingOther": "その他",
+  "unitCup": "カップ",
+  "unitCups": "カップ",
+  "unitTablespoon": "大さじ",
+  "unitTablespoonAbbrev": "大さじ",
+  "unitTeaspoon": "小さじ",
+  "unitTeaspoonAbbrev": "小さじ",
+  "unitFluidOunce": "液量オンス",
+  "unitFluidOunceAbbrev": "fl oz",
+  "unitPint": "パイント",
+  "unitQuart": "クォート",
+  "unitGallon": "ガロン",
+  "unitMilliliter": "ミリリットル",
+  "unitMilliliterAbbrev": "ml",
+  "unitLiter": "リットル",
+  "unitLiterAbbrev": "L",
+  "unitOunce": "オンス",
+  "unitOunceAbbrev": "oz",
+  "unitPound": "ポンド",
+  "unitPoundAbbrev": "lb",
+  "unitGram": "グラム",
+  "unitGramAbbrev": "g",
+  "unitKilogram": "キログラム",
+  "unitKilogramAbbrev": "kg",
+  "unitPinch": "ひとつまみ",
+  "unitDash": "少々",
+  "unitClove": "片",
+  "unitCloves": "片",
+  "unitHead": "個",
+  "unitBunch": "束",
+  "unitCan": "缶",
+  "unitPackage": "袋",
+  "unitSlice": "枚",
+  "unitSlices": "枚",
+  "unitPiece": "個",
+  "unitPieces": "個",
+  "unitWhole": "丸ごと",
+  "unitLarge": "大",
+  "unitMedium": "中",
+  "unitSmall": "小",
+  "unitFahrenheit": "°F",
+  "unitCelsius": "°C",
+  "unitInch": "インチ",
+  "unitInches": "インチ",
+  "unitInchAbbrev": "in",
+  "unitCentimeter": "センチメートル",
+  "unitCentimeterAbbrev": "cm",
+  "unitMillimeter": "ミリメートル",
+  "unitMillimeterAbbrev": "mm",
+  "convertUnitsTitle": "単位を変換",
+  "convertMetricToImperial": "メートル法 → ヤード・ポンド法",
+  "convertMetricToImperialDesc": "ml → fl oz, g → oz, kg → lb",
+  "convertImperialToMetric": "ヤード・ポンド法 → メートル法",
+  "convertImperialToMetricDesc": "カップ → ml, oz → g, 小さじ → ml",
+  "convertResetToOriginal": "元に戻す",
+  "settingsRecipeLayout": "レシピレイアウト",
+  "settingsRecipeLayoutDescription": "材料と手順の表示方法を選択",
+  "settingsRecipeDisplay": "レシピ表示",
+  "layoutStacked": "スタック",
+  "layoutStackedDescription": "すべてのコンテンツをスクロールリストで表示",
+  "layoutTabbed": "タブ",
+  "layoutTabbedDescription": "材料と手順をスワイプで切り替え",
+  "recipeSwipeHint": "スワイプしてセクションを切り替え",
+  "recipeIngredients": "材料",
+  "recipeInstructions": "手順",
+  "dateNextWeek": "来週",
+  "timeJustNow": "たった今",
+  "timeMinutesAgo": "{count, plural, other{{count}分前}}",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHoursAgo": "{count, plural, other{{count}時間前}}",
+  "@timeHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeDaysAgo": "{count, plural, other{{count}日前}}",
+  "@timeDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeWeeksAgo": "{count, plural, other{{count}週間前}}",
+  "@timeWeeksAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeMonthsAgo": "{count, plural, other{{count}ヶ月前}}",
+  "@timeMonthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeYearsAgo": "{count, plural, other{{count}年前}}",
+  "@timeYearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeInMinutes": "{count, plural, other{{count}分後}}",
+  "@timeInMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeInHours": "{count, plural, other{{count}時間後}}",
+  "@timeInHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationMinutes": "{count}分",
+  "@durationMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHours": "{count, plural, other{{count}時間}}",
+  "@durationHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHoursMinutes": "{hours}時間{minutes}分",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipes": "{count, plural, other{{count}件のレシピ}}",
+  "@countRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countIngredients": "{count, plural, other{{count}種の材料}}",
+  "@countIngredients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countSteps": "{count, plural, other{{count}ステップ}}",
+  "@countSteps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countItems": "{count, plural, other{{count}個}}",
+  "@countItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countSelected": "{count}件選択中",
+  "@countSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorGenericTitle": "エラー",
+  "errorGenericMessage": "エラーが発生しました。再試行してください。",
+  "errorNetworkTitle": "接続エラー",
+  "errorNetworkMessage": "インターネット接続を確認して再試行してください。",
+  "errorNotFoundTitle": "見つかりません",
+  "errorNotFoundMessage": "要求されたコンテンツが見つかりませんでした。",
+  "errorInvalidUrlTitle": "無効なURL",
+  "errorInvalidUrlMessage": "http://またはhttps://で始まる有効なURLを入力してください",
+  "errorPermissionDenied": "アクセスが拒否されました",
+  "errorStorageFull": "ストレージが満杯です",
+  "errorFileNotFound": "ファイルが見つかりません",
+  "errorUnsupportedFormat": "サポートされていないファイル形式",
+  "errorParsingFailed": "コンテンツの処理に失敗しました",
+  "errorSaveFailed": "保存に失敗しました",
+  "errorLoadFailed": "読み込みに失敗しました",
+  "errorDeleteFailed": "削除に失敗しました",
+  "errorImportFailed": "インポートに失敗しました",
+  "errorExportFailed": "エクスポートに失敗しました",
+  "errorCameraAccess": "カメラにアクセスできません",
+  "errorGalleryAccess": "ギャラリーにアクセスできません",
+  "errorTimeout": "タイムアウト",
+  "errorServerError": "サーバーエラー。後でもう一度お試しください。",
+  "errorNoRecipeFound": "このページにレシピが見つかりません",
+  "errorInvalidRecipe": "無効なレシピデータ",
+  "errorDuplicateRecipe": "このレシピはすでに存在します",
+  "validationRequired": "このフィールドは必須です",
+  "validationTooShort": "{min}文字以上必要です",
+  "@validationTooShort": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "validationTooLong": "{max}文字未満にしてください",
+  "@validationTooLong": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "validationInvalidEmail": "有効なメールアドレスを入力してください",
+  "validationInvalidUrl": "有効なURLを入力してください",
+  "validationInvalidNumber": "有効な数値を入力してください",
+  "validationMinValue": "{min}以上にしてください",
+  "@validationMinValue": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "validationMaxValue": "{max}以下にしてください",
+  "@validationMaxValue": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "photoTakePhoto": "写真を撮る",
+  "photoChooseFromGallery": "ギャラリーから選択",
+  "photoRemoveImage": "画像を削除",
+  "shareAsText": "テキスト",
+  "shareAsImage": "画像",
+  "shareAsFile": "ファイルとして共有",
+  "shareQrCode": "レシピQRコード",
+  "languageSystem": "システムデフォルト",
+  "languageEnglish": "English",
+  "languageSpanish": "Español",
+  "languageGerman": "Deutsch",
+  "scalingOriginal": "オリジナル",
+  "scalingHalf": "半量",
+  "scalingDouble": "2倍",
+  "scalingTriple": "3倍",
+  "scalingCustom": "カスタム",
+  "scalingServings": "{count, plural, other{{count}人分}}",
+  "@scalingServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importRecipe": "Import Recipe",
+  "importFile": "File",
+  "importImage": "Image",
+  "importPaste": "Paste",
+  "importPasteUrl": "Paste recipe URL",
+  "importOr": "OR",
+  "importSupportsFormats": "Supports Paprika, Mela, JSON, ZIP exports",
+  "importFromSocialMedia": "Import your recipes from any social media platform or website.",
+  "tagsTitle": "タグ",
+  "tagsSelect": "タグを選択",
+  "tagsNoTags": "タグなし",
+  "tagsCreate": "タグを作成",
+  "tagsCreateNew": "新しいタグを作成",
+  "tagsEnterName": "タグ名",
+  "tagsSearch": "タグを検索...",
+  "tagsSuggested": "おすすめのタグ",
+  "tagsRecent": "最近使用",
+  "tagsAll": "すべてのタグ",
+  "tagVegetarian": "ベジタリアン",
+  "tagVegan": "ビーガン",
+  "tagGlutenFree": "グルテンフリー",
+  "tagDairyFree": "乳製品不使用",
+  "tagNutFree": "ナッツなし",
+  "tagLowCarb": "低糖質",
+  "tagKeto": "ケトジェニック",
+  "tagPaleo": "パレオ",
+  "tagWhole30": "Whole30",
+  "tagQuick": "時短",
+  "tagEasy": "簡単",
+  "tagHealthy": "ヘルシー",
+  "tagComfortFood": "家庭料理",
+  "tagFamilyFriendly": "家族向け",
+  "tagKidFriendly": "子ども向け",
+  "tagMealPrep": "作り置き",
+  "tagOnePot": "一鍋",
+  "tagInstantPot": "電気圧力鍋",
+  "tagSlowCooker": "スロークッカー",
+  "tagAirFryer": "エアフライヤー",
+  "tagGrill": "グリル",
+  "tagBBQ": "バーベキュー",
+  "tagHoliday": "ホリデー",
+  "tagParty": "パーティー",
+  "tagBudget": "節約",
+  "tagSpicy": "辛口",
+  "tagSweet": "甘口",
+  "tagSavory": "塩味",
+  "tagLight": "あっさり",
+  "tagHearty": "がっつり",
+  "tagSummer": "夏",
+  "tagWinter": "冬",
+  "tagFall": "秋",
+  "tagSpring": "春",
+  "settingsImagePlaceholders": "デフォルト画像",
+  "settingsImagePlaceholdersSubtitle": "画像がない時に表示するものを選択",
+  "settingsQuickAccessSubtitle": "クイックアクセスを設定",
+  "settingsManageCoursesSubtitle": "コースの追加、編集、削除",
+  "settingsManageCategoriesSubtitle": "カテゴリの追加、編集、削除",
+  "settingsShoppingCategories": "買い物カテゴリ",
+  "settingsShoppingCategoriesSubtitle": "通路別に商品を整理",
+  "shoppingIngredientMappings": "材料マッピング",
+  "shoppingPriority": "優先度：{priority}",
+  "shoppingAddCategory": "カテゴリを追加",
+  "shoppingEditCategory": "カテゴリを編集",
+  "shoppingDeleteCategory": "カテゴリを削除しますか？",
+  "shoppingDeleteCategoryMessage": "「{name}」を削除しますか？商品がカテゴリなしになります。",
+  "@shoppingDeleteCategoryMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingCategoryName": "名前",
+  "shoppingSearchIngredients": "材料を検索...",
+  "shoppingMappingsInfo": "カテゴリをタップして場所を変更。（{count}件のマッピング）",
+  "@shoppingMappingsInfo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingCategoryFor": "「{ingredient}」のカテゴリ",
+  "@shoppingCategoryFor": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingMovedTo": "「{ingredient}」を{category}に移動しました",
+  "@shoppingMovedTo": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingResetToDefault": "「{ingredient}」をデフォルトにリセットしました",
+  "@shoppingResetToDefault": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "actionReset": "リセット",
+  "@shoppingPriority": {
+    "placeholders": {
+      "priority": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingMappingMoved": "「{ingredient}」を{category}に移動しました",
+  "@shoppingMappingMoved": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingMappingReset": "「{ingredient}」をデフォルトにリセットしました",
+  "@shoppingMappingReset": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "addPhoto": "写真を追加",
+  "addPhotoSubtitle": "タップしてギャラリーまたはカメラから選択",
+  "viewAllRecipes": "すべてのレシピを表示",
+  "recipesTotal": "合計{count}件のレシピ",
+  "@recipesTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "coursesTitle": "コース",
+  "categoriesTitle": "カテゴリ",
+  "courseBrunch": "ブランチ",
+  "courseMainDish": "メインディッシュ",
+  "courseSideDish": "サイドディッシュ",
+  "courseSauce": "ソース",
+  "courseBread": "パン",
+  "categoryBean": "豆類",
+  "categoryBread": "パン",
+  "categoryBurritoTaco": "ブリトー/タコ",
+  "categoryCasserole": "キャセロール",
+  "categoryChickenSteakMeat": "チキン/ステーキ/肉",
+  "categoryDessert": "デザート",
+  "categoryFish": "魚",
+  "categoryFruit": "果物",
+  "categoryPasta": "パスタ",
+  "categoryPizza": "ピザ",
+  "categoryPork": "豚肉",
+  "categoryRice": "ご飯",
+  "categorySandwich": "サンドイッチ",
+  "categorySeafood": "シーフード",
+  "categorySoup": "スープ",
+  "categoryVegetable": "野菜",
+  "or": "または",
+  "and": "と",
+  "wordOf": "の",
+  "items": "個",
+  "more": "もっと",
+  "less": "少なく",
+  "all": "すべて",
+  "none": "なし",
+  "other": "その他",
+  "custom": "カスタム",
+  "defaultValue": "デフォルト",
+  "required": "必須",
+  "optional": "任意",
+  "photoChooseGallery": "ギャラリーから選択",
+  "importFirstRecipe": "Import First",
+  "importAllRecipes": "Import All",
+  "parseRecipe": "Parse Recipe",
+  "shareRecipe": "レシピを共有",
+  "shareExport": "エクスポート",
+  "shareServings": "{count}人分",
+  "@shareServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharePrep": "準備：{minutes}分",
+  "@sharePrep": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shareCook": "調理：{minutes}分",
+  "@shareCook": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shareFromApp": "Recipe Spellbookから共有 ✨",
+  "shareCreatingCard": "レシピカードを作成中...",
+  "shareCheckRecipe": "このレシピを見てください：{title}",
+  "@shareCheckRecipe": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "shareErrorImage": "画像作成エラー：{error}",
+  "@shareErrorImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "editItem": "商品を編集",
+  "selectAll": "すべて選択",
+  "selectNone": "選択解除",
+  "viewPlanner": "View Planner",
+  "planNow": "Plan Now",
+  "loadingText": "読み込み中...",
+  "errorText": "エラー",
+  "errorLoadingMeals": "食事の読み込みエラー",
+  "readingImage": "画像を読み込み中...",
+  "parsingRecipe": "レシピを処理中...",
+  "noTextInImage": "画像にテキストが見つかりません",
+  "failedProcessImage": "画像の処理に失敗しました：{error}",
+  "@failedProcessImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cookingModeExit": "調理モードを終了",
+  "cookingModeStep": "ステップ {current} / {total}",
+  "@cookingModeStep": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cookingModePrevious": "前へ",
+  "cookingModeNext": "次へ",
+  "cookingModeFinish": "完了",
+  "cookingModeCompleted": "レシピ完成！",
+  "cookingModeGreatJob": "お疲れ様でした！いただきます。",
+  "mealPlanBreakfast": "朝食",
+  "mealPlanLunch": "昼食",
+  "mealPlanDinner": "夕食",
+  "mealPlanSnack": "おやつ",
+  "mealPlanAddMeal": "食事を追加",
+  "mealPlanRemove": "プランから削除",
+  "mealPlanNoMeals": "食事が計画されていません",
+  "mealPlanTapToAdd": "＋をタップして食事を追加",
+  "thisWeek": "今週",
+  "itemName": "商品名",
+  "addToShoppingList": "買い物リストに追加",
+  "addToList": "リストに追加",
+  "addedItemsToList": "リストに{count}個追加しました",
+  "@addedItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scanToImport": "スキャンしてレシピをインポート",
+  "xOfY": "{total}件中{current}件",
+  "@xOfY": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "addItems": "{count}個追加",
+  "@addItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToParse": "処理に失敗しました：{error}",
+  "@failedToParse": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToImport": "インポートに失敗しました：{error}",
+  "groupBy": "グループ化",
+  "@failedToImport": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cookbookHint": "タップして選択 • 長押しで編集",
+  "rename": "名前変更",
+  "renameCookbook": "レシピ本の名前を変更",
+  "seeAll": "すべて見る",
+  "imagePlaceholders": "Image Placeholders",
+  "imagePlaceholdersSubtitle": "Choose what shows when images are missing",
+  "homeScreenSection": "Home Screen",
+  "quickAccessSubtitle": "Configure what appears in Quick Access",
+  "manageCoursesSubtitle": "Add, edit, or remove courses",
+  "manageCategoriesSubtitle": "Add, edit, or remove categories",
+  "shoppingCategoriesSubtitle": "Organize items by aisle",
+  "syncSection": "同期",
+  "cloudSync": "クラウド同期",
+  "comingSoon": "近日公開",
+  "resetApp": "アプリをリセット",
+  "resetAppSubtitle": "すべてのデータを完全に削除",
+  "trashSubtitle": "削除されたレシピ（30日間保持）",
+  "importRecipeTitle": "レシピをインポート",
+  "importSocialMedia": "SNSや任意のサイトからレシピをインポート。",
+  "pasteRecipeUrl": "レシピURLを貼り付け",
+  "orDivider": "または",
+  "fileOption": "ファイル",
+  "imageOption": "画像",
+  "pasteOption": "貼り付け",
+  "supportedFormats": "Paprika、Mela、JSON、ZIPに対応",
+  "pasteRecipeTitle": "レシピを貼り付け",
+  "pasteRecipeHint": "ここにレシピを貼り付けてください...",
+  "quickAccessHelpIntro": "これらのバッジはレシピがここに表示される理由を示します：",
+  "quickAccessHelpMealPlan": "今日の計画",
+  "quickAccessHelpPinned": "このレシピを固定しました",
+  "quickAccessHelpRecent": "最近見た",
+  "openCalendar": "カレンダーを開く",
+  "editNotes": "メモを編集",
+  "addNotesHint": "メモを追加...",
+  "moveToAnotherDay": "別の日に移動",
+  "addToPlan": "プランに追加",
+  "importBulkQuestion": "{count}件のレシピをすべてインポートしますか、それとも個別に選択しますか？",
+  "@importBulkQuestion": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importingRecipes": "レシピをインポート中...",
+  "importedRecipesCount": "{count}件のレシピをインポートしました",
+  "@importedRecipesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "extractingArchive": "アーカイブを展開中...",
+  "themeSpellbook": "スペルブック",
+  "themeForest": "フォレスト",
+  "themeOcean": "オーシャン",
+  "themeSunset": "サンセット",
+  "themeMidnight": "ミッドナイト",
+  "themeRose": "ローズ",
+  "colorTheme": "カラーテーマ",
+  "colorThemeSubtitle": "カラーパレットを選択",
+  "preview": "プレビュー",
+  "previewPrimary": "プライマリ",
+  "previewSecondary": "セカンダリ",
+  "previewTertiary": "ターシャリ",
+  "previewError": "エラー",
+  "placeholderDescription": "レシピやレシピ本に画像がない時に表示するものを選択。",
+  "recipePlaceholders": "レシピ画像",
+  "cookbookPlaceholders": "レシピ本画像",
+  "defaultImages": "デフォルト画像",
+  "defaultImagesDescription": "RPGモードで変わるイラスト",
+  "themeBased": "テーマベース",
+  "themeBasedDescription": "テーマに合ったロゴ入りグラデーション",
+  "placeholderRpgInfo": "デフォルト画像は通常とRPGバリアントを切り替えます。",
+  "groupBySection": "通路別",
+  "groupByRecipe": "レシピ別",
+  "groupByUngrouped": "グループなし",
+  "copyAsText": "テキストとしてコピー",
+  "printList": "リストを印刷",
+  "manageLists": "リストを管理",
+  "newList": "新規",
+  "newShoppingList": "新しい買い物リスト",
+  "listNameHint": "List name",
+  "recipeLayoutSetting": "レイアウト",
+  "recipeLayoutSettingSubtitle": "レシピの表示方法を選択",
+  "layoutTabbedOption": "タブ表示",
+  "layoutStackedOption": "スタック表示",
+  "nutrientsTitle": "栄養素",
+  "nutrientsSubtitle": "1人分の栄養情報",
+  "addNutrients": "栄養情報を追加",
+  "calculateNutrients": "材料から計算",
+  "nutrientsDisclaimer": "栄養価は目安です。",
+  "calories": "カロリー",
+  "protein": "タンパク質",
+  "carbohydrates": "炭水化物",
+  "fat": "脂質",
+  "fiber": "食物繊維",
+  "sugar": "糖質",
+  "sodium": "ナトリウム",
+  "cholesterol": "コレステロール",
+  "saturatedFat": "飽和脂肪酸",
+  "transFat": "トランス脂肪酸",
+  "servingSize": "1人分の量",
+  "perServing": "1人分あたり",
+  "calculatingNutrients": "栄養素を計算中...",
+  "nutrientsCalculated": "栄養素を計算しました",
+  "nutrientsFailed": "栄養素の計算に失敗しました：{error}",
+  "@nutrientsFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "premiumFeature": "プレミアム機能",
+  "premiumNutrientsDescription": "栄養素の自動計算にはプレミアムサブスクリプションが必要です",
+  "exportCurrentCookbook": "現在のレシピ本をエクスポート",
+  "exporting": "エクスポート中...",
+  "exportAllCookbooks": "すべてのレシピ本をエクスポート",
+  "importing": "インポート中...",
+  "importFromJson": "JSONからインポート",
+  "importFromJsonSubtitle": "バックアップファイルを選択",
+  "aboutDescription": "美味しい食事を整理、計画、調理するための魔法のパートナー。",
+  "madeWithLove": "世界中の料理好きに❤️を込めて",
+  "resetAppWarning": "すべてのレシピ、食事プラン、買い物リスト、設定が完全に削除されます。",
+  "actionContinue": "続ける",
+  "finalConfirmation": "最終確認",
+  "typeDeleteToConfirm": "削除と入力して確認",
+  "typeDeleteHint": "削除",
+  "resetEverything": "すべてリセット",
+  "resettingApp": "リセット中...",
+  "appResetSuccess": "アプリをリセットしました",
+  "resetFailed": "リセットに失敗しました",
+  "successAdded": "正常に追加しました",
+  "selectToday": "今日を選択",
+  "selectTomorrow": "明日を選択",
+  "addedManually": "手動で追加",
+  "unknownRecipe": "不明なレシピ",
+  "shoppingListEmpty": "買い物リストが空です",
+  "shoppingListEmptyHint": "商品を追加するかレシピからインポートしてください",
+  "settingsRPGModeActive": "魔法のテキストを召喚中...",
+  "shoppingCheckAll": "すべてチェック",
+  "shoppingUncheckAll": "チェックを外す",
+  "shoppingManageLists": "リストを管理",
+  "shoppingNewList": "新しい買い物リスト",
+  "shoppingListName": "リスト名",
+  "shoppingLists": "買い物リスト",
+  "shoppingRenameList": "リスト名を変更",
+  "shoppingDeleteList": "リストを削除しますか？",
+  "categoryProduce": "野菜・果物",
+  "categoryDairy": "乳製品",
+  "categoryMeat": "肉類",
+  "categoryBakery": "ベーカリー",
+  "categoryFrozen": "冷凍食品",
+  "categoryBeverages": "飲み物",
+  "categoryPantry": "食料品",
+  "categorySpices": "スパイス",
+  "categoryInternational": "輸入食品",
+  "categorySnacks": "スナック",
+  "categoryOther": "その他",
+  "from": "から",
+  "deleted": "削除済み",
+  "currently": "現在",
+  "autoDetect": "自動検出",
+  "category": "カテゴリ",
+  "actionNew": "新規",
+  "actionCreate": "作成",
+  "tagsAdd": "タグを追加",
+  "tagsSearchOrCreate": "タグを検索または作成...",
+  "tagsNoResults": "タグが見つかりません",
+  "color": "カラー",
+  "icon": "アイコン",
+  "nutritionTitle": "栄養価",
+  "nutritionEmpty": "栄養データがありません",
+  "nutritionEmptyHint": "レシピを編集して材料から栄養素を計算してください",
+  "scaled": "スケール済み",
+  "nutritionCalculate": "栄養素を計算",
+  "nutritionCalculating": "計算中...",
+  "nutritionMatchingIngredients": "USDAデータベースと材料を照合中",
+  "nutritionCalculationFailed": "栄養素の計算に失敗しました",
+  "nutritionDisclaimer": "栄養価はUSDAデータに基づく目安です。",
+  "nutritionPerServing": "1人分あたり",
+  "nutritionServings": "{count}人分",
+  "@nutritionServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionIngredientBreakdown": "材料別内訳",
+  "nutritionIngredientsMatched": "照合済み材料",
+  "nutritionMatchedCount": "{total}件中{matched}件照合済み",
+  "@nutritionMatchedCount": {
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionUncertainCount": "{count}件を確認",
+  "@nutritionUncertainCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionUncertain": "照合を確認",
+  "nutritionNotFound": "照合なし — タップして検索",
+  "nutritionRecalculate": "再計算",
+  "nutritionOverwriteTitle": "栄養データを上書きしますか？",
+  "nutritionOverwriteMessage": "このレシピにはすでに栄養データがあります。再計算しますか？",
+  "nutritionCalculated": "栄養素の計算が完了しました",
+  "nutritionSave": "栄養素を保存",
+  "nutritionSelectFood": "USDA食品を選択",
+  "nutritionSearchFood": "食品を検索...",
+  "nutritionNoResults": "結果なし",
+  "nutritionCalories": "カロリー",
+  "nutritionProtein": "タンパク質",
+  "nutritionCarbs": "炭水化物",
+  "nutritionFat": "総脂質",
+  "nutritionSaturatedFat": "飽和脂肪酸",
+  "nutritionTransFat": "トランス脂肪酸",
+  "nutritionFiber": "食物繊維",
+  "nutritionSugar": "糖類",
+  "nutritionCholesterol": "コレステロール",
+  "nutritionSodium": "ナトリウム",
+  "nutritionPotassium": "カリウム",
+  "nutritionCalcium": "カルシウム",
+  "nutritionIron": "鉄分",
+  "nutritionVitaminA": "ビタミンA",
+  "nutritionVitaminC": "ビタミンC",
+  "nutritionVitaminD": "ビタミンD",
+  "layoutInfoText": "栄養データは両方のレイアウトで表示されます。",
+  "settingsManageTagsSubtitle": "タグの作成と整理",
+  "nutritionTotal": "合計",
+  "nutritionAutoCalculate": "自動計算",
+  "nutritionManualEntry": "手動入力",
+  "nutritionManualEntryTitle": "既知の値を入力",
+  "nutritionManualEntryDescription": "正確な値がわかっている場合は、ここに入力してください。",
+  "nutritionMainNutrients": "主要栄養素",
+  "nutritionOtherNutrients": "その他の栄養素",
+  "nutritionEnterAtLeastOne": "カロリーまたは少なくとも1つのマクロ栄養素を入力してください",
+  "nutritionHowToFix": "修正方法",
+  "nutritionHowToImproveAccuracy": "精度を上げる方法",
+  "nutritionEditIngredient": "材料を編集",
+  "nutritionSearchUsda": "USDAを検索",
+  "nutritionEnterManually": "手動で入力",
+  "nutritionManualIngredientHint": "この材料の栄養値を入力してください。",
+  "nutritionApplyManual": "手動値を適用",
+  "nutritionTotalRecipe": "レシピ全体の栄養価",
+  "nutritionMatchRate": "照合率",
+  "allergySettingsTitle": "アレルギー設定",
+  "allergyInfoText": "アレルゲンを選択してください。Recipe Spellbookがレシピに含まれる場合に警告します。",
+  "allergySelectedCount": "{count}個のアレルゲンを選択中",
+  "@allergySelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "allergySelectAll": "すべて選択",
+  "allergyClearAll": "すべてクリア",
+  "allergyMajorTitle": "主要アレルゲン",
+  "allergyMajorSubtitle": "FDA認定の食品アレルゲン",
+  "allergyAdditionalTitle": "追加アレルゲン",
+  "allergyAdditionalSubtitle": "その他の一般的な食物過敏症",
+  "allergyWillWarn": "このアレルゲンについて警告されます",
+  "allergyWarningTitle": "⚠️ アレルギー警告",
+  "allergyWarningTitlePossible": "⚠️ アレルゲンの可能性",
+  "allergyContains": "含む：",
+  "allergyMayContain": "含む可能性：",
+  "allergyContainsAllergens": "アレルゲンを含む",
+  "allergyManageSettings": "アレルギー設定を管理",
+  "allergyDetailsTitle": "アレルゲン詳細",
+  "settingsAllergies": "アレルギー",
+  "settingsAllergiesSubtitle": "アレルゲン警告を設定",
+  "allergenMilk": "乳・乳製品",
+  "allergenEggs": "卵",
+  "allergenFish": "魚",
+  "allergenShellfish": "甲殻類",
+  "allergenTreeNuts": "木の実",
+  "allergenPeanuts": "ピーナッツ",
+  "allergenWheat": "小麦・グルテン",
+  "allergenSoy": "大豆",
+  "allergenSesame": "ごま",
+  "allergenMustard": "マスタード",
+  "allergenCelery": "セロリ",
+  "allergenLupin": "ルパン豆",
+  "allergenMollusks": "軟体動物",
+  "allergenSulfites": "亜硫酸塩",
+  "allergenCorn": "とうもろこし",
+  "allergenNightshades": "ナス科",
+  "nutritionCopyFromAuto": "自動計算からコピー",
+  "nutritionEstimatedDisclaimer": "USDAデータに基づく推定値",
+  "actionDiscard": "破棄",
+  "unsavedChangesTitle": "保存されていない変更",
+  "unsavedChangesMessage": "保存されていない変更があります。保存しますか？",
+  "tagsEmptyTitle": "タグなし",
+  "tagsEmptySubtitle": "タグを作成してレシピを整理しましょう。",
+  "tagsLoadDefaults": "デフォルトタグを読み込む",
+  "tagsAddNew": "タグを追加",
+  "tagsEdit": "タグを編集",
+  "tagsDelete": "タグを削除",
+  "tagsDeleteConfirm": "「{name}」を削除してもよろしいですか？",
+  "@tagsDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsNameLabel": "タグ名",
+  "tagsIconLabel": "アイコン（絵文字）",
+  "tagsColorLabel": "カラー",
+  "settingsRpgAnimations": "レアリティアニメーション",
+  "settingsRpgAnimationsSubtitle": "エピック・レジェンダリーレシピの光沢エフェクト",
+  "settingsRpgSounds": "サウンドエフェクト",
+  "settingsRpgSoundsSubtitle": "実績とレベルアップの音",
+  "settingsRpgAchievements": "実績",
+  "settingsRpgAchievementsSubtitle": "アンロックした実績を表示",
+  "settingsRpgStats": "調理統計",
+  "settingsRpgStatsSubtitle": "調理統計を表示",
+  "settingsRpgModeEnabled": "Transform your cooking into an adventure!",
+  "settingsRecipeLayoutSubtitle": "レシピ表示のカスタマイズ",
+  "rarityCommon": "コモン",
+  "rarityCommonDesc": "シンプルな日常レシピ",
+  "rarityUncommon": "アンコモン",
+  "rarityUncommonDesc": "一工夫ある美味しいレシピ",
+  "rarityRare": "レア",
+  "rarityRareDesc": "マスターする価値のある特別なレシピ",
+  "rarityEpic": "エピック",
+  "rarityEpicDesc": "強力な力を持つエピックレシピ！",
+  "rarityLegendary": "レジェンダリー",
+  "rarityLegendaryDesc": "神々にふさわしい伝説のレシピ！",
+  "shareLink": "リンク",
+  "shareDocument": "PDF",
+  "sharePrint": "印刷",
+  "shareLinkDescription": "リンクを共有して他の人がこのレシピを見られるようにします。",
+  "shareLinkNote": "受信者はRecipe Spellbookが必要か、ウェブで閲覧できます。",
+  "shareCreatingDocument": "ドキュメントを作成中...",
+  "editLayoutTitle": "編集レイアウト",
+  "editLayoutStacked": "スタック",
+  "editLayoutTabbed": "タブ",
+  "editLayoutStackedDesc": "すべてのセクションをスクロールビューで",
+  "editLayoutTabbedDesc": "詳細、材料、手順を別々のタブで",
+  "tabDetails": "詳細",
+  "tabIngredients": "材料",
+  "tabInstructions": "手順",
+  "stepImageAdd": "画像を追加",
+  "stepImageChange": "画像を変更",
+  "stepImageRemove": "画像を削除",
+  "stepTimer": "タイマー",
+  "stepTimerMinutes": "{minutes}分",
+  "@stepTimerMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeAddToCookbook": "レシピ本に追加",
+  "recipeMoveToTrash": "ゴミ箱に移動",
+  "tagsEmpty": "タグなし",
+  "nutritionPerServingLabel": "1人分あたり",
+  "nutritionTotalLabel": "レシピ全体",
+  "trendingRecipes": "人気レシピ",
+  "addShortcut": "Recipe Spellbookのショートカットを追加",
+  "addShortcutSubtitle": "ジェスチャーでレシピをインポート",
+  "importGuides": "インポートガイドを読む",
+  "useOnDesktop": "パソコンでRecipe Spellbookを使用",
+  "inviteFriends": "友だちを招待",
+  "inviteFriendsTitle": "Recipe Spellbookをシェア",
+  "inviteFriendsSubtitle": "友だちや家族を一緒に料理に招待しましょう！",
+  "shareApp": "アプリをシェア",
+  "maybeLater": "後で",
+  "createAccount": "アカウントを作成",
+  "upgradeToPremium": "プレミアムにアップグレード",
+  "premiumSubtitle": "同期、無制限レシピなどをアンロック",
+  "rpgMode": "RPGモード",
+  "leaderboards": "ランキング",
+  "achievements": "実績",
+  "cookingStats": "調理統計",
+  "stepByStepGuides": "ステップバイステップガイド",
+  "importGuidesSubtitle": "お気に入りのアプリとサイトからのインポート方法を学ぶ",
+  "importFromOtherApps": "他のアプリからインポート",
+  "orderOnline": "オンラインで注文",
+  "helpTitle": "ヘルプ",
+  "navMenu": "メニュー",
+  "mealPlanTitle": "私の食事プラン",
+  "noRecipesYet": "レシピがありません",
+  "breakfast": "朝食",
+  "lunch": "昼食",
+  "dinner": "夕食",
+  "snack": "おやつ",
+  "allergenGluten": "グルテン",
+  "allergenChocolate": "チョコレート・カカオ",
+  "allergenCaffeine": "カフェイン",
+  "allergenAlcohol": "アルコール",
+  "allergenCitrus": "柑橘類",
+  "allergenStoneFruits": "核果類",
+  "allergenCoconut": "ココナッツ",
+  "allergenGarlic": "にんにく",
+  "allergenOnion": "たまねぎ",
+  "allergenMushrooms": "キノコ",
+  "allergenAvocado": "アボカド",
+  "allergenBanana": "バナナ",
+  "allergenKiwi": "キウイ",
+  "allergenLatexFoods": "ラテックス交差反応",
+  "allergenFodmap": "高FODMAP",
+  "allergenHistamine": "高ヒスタミン",
+  "allergenSalicylates": "サリチル酸塩",
+  "allergenMsg": "MSG",
+  "allergenRedMeat": "赤身肉（アルファガル）",
+  "allergenGelatin": "ゼラチン",
+  "allergyWarningContains": "含む",
+  "allergyDismissForRecipe": "このレシピでは非表示",
+  "allergyDismissUndo": "元に戻す",
+  "allergyWarningDismissed": "このレシピの警告を非表示にしました",
+  "scaleCustom": "カスタム",
+  "scaleCustomTitle": "カスタム倍率",
+  "scaleCustomHint": "数値を入力（例：¾は0.75、2½は2.5）",
+  "scaleApply": "適用",
+  "addStep": "ステップを追加",
+  "noInstructionsYet": "手順がありません",
+  "addFirstStep": "最初のステップを追加",
+  "enterInstruction": "手順を入力...",
+  "addStepImage": "ステップに画像を追加",
+  "removeStep": "ステップを削除",
+  "plannerNoMeals": "食事が計画されていません",
+  "plannerAddMealHint": "＋をタップして食事を追加",
+  "plannerMealAdded": "{mealType}に{recipe}を追加しました",
+  "@plannerMealAdded": {
+    "placeholders": {
+      "recipe": {
+        "type": "String"
+      },
+      "mealType": {
+        "type": "String"
+      }
+    }
+  },
+  "plannerShareMealPlan": "食事プランを共有",
+  "plannerAddWeekToShopping": "今週を買い物リストに追加",
+  "plannerClearWeek": "今週をクリア",
+  "plannerClearWeekConfirm": "今週の計画された食事がすべて削除されます。",
+  "plannerWeekCleared": "今週をクリアしました",
+  "plannerGoToToday": "今日に移動",
+  "plannerAddAnother": "別の食事を追加",
+  "plannerSearchRecipes": "レシピを検索...",
+  "mealTypeBreakfast": "朝食",
+  "mealTypeLunch": "昼食",
+  "mealTypeDinner": "夕食",
+  "mealTypeSnack": "おやつ",
+  "shoppingItems": "{count, plural, other{{count}個}}",
+  "@shoppingItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingBySection": "通路別",
+  "shoppingByRecipe": "レシピ別",
+  "shoppingUngrouped": "グループなし",
+  "shoppingOrderOnline": "オンラインで注文",
+  "shoppingEditItem": "商品を編集",
+  "shoppingItemName": "商品名",
+  "shoppingSelectCategory": "カテゴリを選択",
+  "shoppingAddedManually": "手動で追加",
+  "shoppingEmptyList": "リストが空です",
+  "shoppingEmptyHint": "＋をタップして商品を追加",
+  "shoppingAddHint": "Enterで追加、次を入力",
+  "categoryDeli": "Deli",
+  "categoryBreakfast": "Breakfast & Cereal",
+  "categoryCanned": "Canned Goods & Soups",
+  "categoryCondiments": "Condiments, Sauces & Spices",
+  "categoryAlcohol": "Beer, Wine & Spirits",
+  "categoryBaby": "Baby",
+  "categoryBeauty": "Beauty & Personal Care",
+  "categoryHousehold": "Housewares",
+  "categoryPet": "Pet",
+  "importFromPlatform": "{platform}からインポート",
+  "@importFromPlatform": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "importFromApp": "{app}からインポート",
+  "@importFromApp": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "helpAddingRecipes": "レシピの追加",
+  "helpAddingRecipesDesc": "任意のレシピ本で＋をタップしてレシピを追加。",
+  "helpImporting": "アプリからのインポート",
+  "helpImportingDesc": "Instagram、TikTok、またはウェブサイトからレシピを共有。",
+  "helpMealPlanning": "食事計画",
+  "helpMealPlanningDesc": "プランナータブをタップして週の食事を計画。",
+  "helpShopping": "買い物リスト",
+  "helpShoppingDesc": "リストに材料を追加。商品は通路別に整理されます。",
+  "helpSyncing": "同期",
+  "helpSyncingDesc": "クラウド同期は近日公開！",
+  "helpContactUs": "お問い合わせ",
+  "helpContactUsDesc": "ご質問はsupport@recipespellbook.comまで。",
+  "navCommunity": "コミュニティ",
+  "navComingSoon": "近日公開",
+  "mealPlanButton": "食事プラン",
+  "groceriesButton": "買い物",
+  "shareButton": "共有",
+  "scaleRecipeButton": "スケール",
+  "convertUnitsButton": "単位変換",
+  "allergyDismissTooltip": "警告を非表示",
+  "allergyDisablePrompt": "このレシピの警告を永久に無効にしますか？",
+  "allergyDisabledForRecipe": "このレシピの警告を無効にしました",
+  "allergyRestoreWarnings": "警告を復元",
+  "recipeDuplicated": "レシピを複製しました",
+  "recipeDeleted": "レシピをゴミ箱に移動しました",
+  "deleteRecipeTitle": "レシピを削除",
+  "deleteRecipeConfirm": "このレシピを削除してもよろしいですか？ゴミ箱に移動されます。",
+  "addToShoppingListTitle": "買い物リストに追加",
+  "viewList": "リストを見る",
+  "selectItems": "商品を選択",
+  "addToListCount": "{count}個追加",
+  "@addToListCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yes": "はい",
+  "no": "いいえ",
+  "cancel": "キャンセル",
+  "delete": "削除",
+  "save": "保存",
+  "restore": "復元",
+  "unselectAll": "選択解除",
+  "deleteStep": "ステップを削除",
+  "deleteSteps": "ステップを削除",
+  "deleteStepConfirm": "このステップを削除しますか？",
+  "deleteStepsConfirm": "{count}ステップを削除しますか？",
+  "@deleteStepsConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stepSelected": "{count}件選択",
+  "@stepSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectAllSteps": "すべて選択",
+  "gradientBased": "グラデーションベース",
+  "gradientBasedDescription": "テーマのカラーグラデーション",
+  "startCooking": "調理を始める",
+  "fontSizeLabel": "文字サイズ",
+  "krogerLoginDenied": "Krogerログインが拒否されました：{error}",
+  "@krogerLoginDenied": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "krogerNoAuthCode": "Krogerから認証コードが受信されませんでした。",
+  "krogerConnected": "Krogerに接続しました！カートに直接商品を送れます。",
+  "krogerConnectFailed": "Krogerへの接続に失敗しました。",
+  "krogerConnecting": "Krogerに接続中…",
+  "krogerExchanging": "認証を交換中...",
+  "krogerConnectedTitle": "接続しました！",
+  "krogerConnectionFailed": "接続に失敗しました",
+  "goToShoppingList": "買い物リストへ",
+  "tryAgain": "再試行",
+  "skipForNow": "今はスキップ",
+  "skipDuplicates": "重複をスキップ",
+  "deselectAll": "選択解除",
+  "duplicate": "複製",
+  "recipesImported": "{count, plural, other{{count}件のレシピ}}をインポートしました",
+  "@recipesImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importCountRecipes": "{count, plural, other{{count}件のレシピ}}をインポート",
+  "@importCountRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productNotFound": "商品が見つかりません",
+  "barcodeNotFound": "バーコードの商品が見つかりません：\n{barcode}",
+  "@barcodeNotFound": {
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "manualEntryHint": "商品名を手動で入力できます。",
+  "scanAgain": "再スキャン",
+  "enterManually": "手動で入力",
+  "enterProductName": "商品名を入力",
+  "productName": "商品名",
+  "scanBarcode": "バーコードをスキャン",
+  "lookingUpProduct": "商品を検索中...",
+  "pointCameraBarcode": "カメラをバーコードに向けてください",
+  "unknownProduct": "不明な商品",
+  "nutritionPer100g": "栄養価（100gあたり）",
+  "findRecipesWithThis": "これを使ったレシピを探す",
+  "scanAnother": "別のものをスキャン",
+  "exportFormat": "エクスポート形式",
+  "gotIt": "わかりました",
+  "calendar": "カレンダー",
+  "today": "今日",
+  "shareMealPlan": "食事プランを共有",
+  "addWeekToShoppingList": "今週をリストに追加",
+  "clearThisWeek": "今週をクリアしますか？",
+  "clearWeekWarning": "今週の計画された食事がすべて削除されます。",
+  "goToToday": "今日に移動",
+  "addAnotherMeal": "別の食事を追加",
+  "meal": "食事",
+  "noMealsPlanned": "食事が計画されていません",
+  "tapToAddMeal": "＋をタップして追加",
+  "addMeal": "食事を追加",
+  "addToDay": "{dayName}に追加",
+  "@addToDay": {
+    "placeholders": {
+      "dayName": {
+        "type": "String"
+      }
+    }
+  },
+  "searchRecipes": "レシピを検索...",
+  "noRecipesFound": "レシピが見つかりません",
+  "exitShoppingListGenerator": "リストジェネレーターを終了しますか？",
+  "actionExit": "終了",
+  "shoppingListGenerator": "買い物リストジェネレーター",
+  "reviewAndAdd": "確認して追加（{count}個）",
+  "@reviewAndAdd": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addItemsToList": "リストに{count}個追加",
+  "@addItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedItemsToShoppingList": "買い物リストに{count}個追加しました",
+  "@addedItemsToShoppingList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "createNewList": "新しいリストを作成",
+  "listName": "リスト名",
+  "manage": "管理",
+  "myPantry": "私のパントリー",
+  "itemsAlwaysOnHand": "常に手元にある商品",
+  "whatToDelete": "何を削除しますか？",
+  "localData": "ローカルデータ",
+  "localDataDesc": "このデバイスのレシピ、レシピ本、食事プラン、買い物リスト",
+  "cloudData": "クラウドデータ",
+  "cloudDataDesc": "近日公開 — クラウド同期はまだ利用できません",
+  "allData": "すべてのデータ",
+  "allDataDesc": "ローカルデータと設定 — 完全リセット",
+  "permanentDeleteWarning": "{scope}が完全に削除されます。この操作は取り消せません。",
+  "@permanentDeleteWarning": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "dataResetComplete": "データをリセットしました",
+  "noThanks": "いいえ、結構です",
+  "importFailed": "インポートに失敗しました：{error}",
+  "@importFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "yesAddThem": "はい、追加する",
+  "nutritionDisplay": "栄養表示",
+  "nutritionDisplaySubtitle": "グラフスタイル、表示する栄養素",
+  "storeIntegrations": "ストア連携",
+  "instacart": "Instacart",
+  "kroger": "Kroger",
+  "connected": "接続済み",
+  "setCustomApiKey": "カスタムAPIキーを設定",
+  "useOwnInstacartKey": "独自のInstacart Connectキーを使用",
+  "instacartApiKey": "Instacart APIキー",
+  "resetToDefaultKey": "デフォルトキーにリセット",
+  "removeCustomKey": "カスタムキーを削除",
+  "signInToKroger": "Krogerにサインイン",
+  "connectToAddItems": "接続してカートに商品を追加",
+  "setPreferredStore": "お気に入りの店を設定",
+  "searchByZipCode": "郵便番号で検索",
+  "disconnect": "切断",
+  "apiKeySaved": "APIキーを保存しました",
+  "findYourKrogerStore": "Krogerの店舗を探す",
+  "enterZipCode": "郵便番号を入力",
+  "storeSet": "店舗を設定しました：{name}",
+  "@storeSet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "menuImportSubtitle": "Instagram、TikTok、ウェブサイト...",
+  "menuSyncToMobile": "モバイルに同期",
+  "menuSyncToDesktop": "パソコンに同期",
+  "menuTransferToPhone": "スマートフォンにデータ転送",
+  "menuTransferToDevice": "別のデバイスにデータ転送",
+  "menuProfile": "プロフィール",
+  "menuProfileSubtitle": "統計と進捗を表示",
+  "menuAchievementsSubtitle": "報酬をアンロック",
+  "menuCosmetics": "コスメティクス",
+  "menuCosmeticsSubtitle": "外観をカスタマイズ",
+  "menuLeaderboardsSubtitle": "他のユーザーと競争",
+  "menuBossBattles": "ボス戦",
+  "menuBossBattlesSubtitle": "壮大な料理チャレンジ",
+  "menuImportRecipes": "レシピをインポート",
+  "menuHelpSupport": "ヘルプ・サポート",
+  "menuAppVersion": "Recipe Spellbook v{version}",
+  "@menuAppVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "menuShareApp": "Recipe Spellbookをシェア",
+  "menuShareSubtitle": "友だちや家族を一緒に料理に招待しましょう！",
+  "menuShareMessage": "Recipe Spellbookをチェックしてください - 最高のレシピアプリです！ https://recipespellbook.app",
+  "signIn": "サインイン",
+  "helpFromWebsite": "ウェブサイトから",
+  "helpFromWebsiteDesc": "任意のレシピ本で＋をタップして、レシピURLを貼り付けてください。",
+  "helpFromSocial": "InstagramまたはTikTokから",
+  "helpFromSocialDesc": "レシピ投稿のリンクをコピーして、＋をタップして貼り付けてください。",
+  "helpFromPhoto": "写真から",
+  "helpFromPhotoDesc": "本のレシピを写真に撮ってください。＋をタップして画像を選択。",
+  "helpFromPdf": "PDFから",
+  "helpFromPdfDesc": "＋をタップしてファイルを選択してPDFをインポート。",
+  "helpFromText": "テキストから",
+  "helpFromTextDesc": "レシピのテキストをコピーして、＋をタップして貼り付け。",
+  "helpFromPaprika": "Paprikaから",
+  "helpFromPaprikaDesc": "Paprikaでエクスポートに移動してHTML形式を選択。",
+  "helpFromOtherApps": "他のアプリから",
+  "helpFromOtherAppsDesc": "ほとんどのレシピアプリはHTMLまたはテキストでエクスポートできます。",
+  "helpCloudSync": "クラウド同期",
+  "helpCloudSyncDesc": "Cloud Syncを購読してすべてのデバイスでレシピを同期。",
+  "accountTitle": "アカウント",
+  "signInToSync": "同期するにはサインイン",
+  "signInSyncDesc": "レシピをバックアップし、複数のデバイスで同期し、プレミアム機能をアンロック。",
+  "continueWithGoogle": "Googleで続ける",
+  "continueWithApple": "Appleで続ける",
+  "signOut": "サインアウト",
+  "signOutQuestion": "サインアウトしますか？",
+  "signOutDesc": "レシピはこのデバイスに残ります。",
+  "deleteAccount": "アカウントを削除",
+  "deleteAccountQuestion": "アカウントを削除しますか？",
+  "deleteAccountDesc": "アカウントとすべての同期データが完全に削除されます。\n\nローカルに保存されたレシピは削除されません。",
+  "deletePermanently": "完全に削除",
+  "deleteAccountFailed": "アカウントの削除に失敗しました。",
+  "signInToApp": "Recipe Spellbookにサインイン",
+  "signInSyncLong": "レシピを同期し、クラウドバックアップをアンロックし、Pro機能にアクセス。",
+  "recipesStayOnDevice": "レシピはアカウントなしでもこのデバイスに残ります。",
+  "upgradeToPro": "Proにアップグレード",
+  "subscriptionDot": "サブスクリプション · {tier}",
+  "@subscriptionDot": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "affluentLabsPro": "Affluent Labs Pro",
+  "cancelledAccessUntil": "キャンセル済み — {date}までアクセス可",
+  "@cancelledAccessUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "lifetimeNeverExpires": "ライフタイム — 期限なし",
+  "renewsDate": "{date}に更新",
+  "@renewsDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "manageSubscription": "サブスクリプションを管理",
+  "tierPremium": "プレミアム",
+  "tierStandard": "スタンダード",
+  "tierBasic": "ベーシック",
+  "tierFree": "無料",
+  "tierPlan": "{tier}プラン",
+  "@tierPlan": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "upgradeArrow": "アップグレード →",
+  "syncNow": "今すぐ同期",
+  "syncing": "同期中...",
+  "lastSynced": "最終同期 {time}",
+  "@lastSynced": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "notYetSynced": "まだ同期していません",
+  "cloudSyncSection": "クラウド同期",
+  "noRecipesPlannedThisWeek": "今週計画されたレシピがありません",
+  "todayBadge": "今日",
+  "noCourseAssigned": "コースなし",
+  "uncategorized": "カテゴリなし",
+  "allRecipesHaveCourse": "すべてのレシピにコースが設定されています！",
+  "allRecipesCategorized": "すべてのレシピがカテゴリ分けされています！",
+  "greatJobOrganizing": "よく整理されています！",
+  "countOfTotal": "{total}件中{count}件",
+  "@countOfTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "tapToAssignCourse": "タップしてコースを割り当て",
+  "tapToAssignCategory": "タップしてカテゴリを割り当て",
+  "deleteCountRecipes": "{count, plural, other{{count}件のレシピ}}を削除しますか？",
+  "@deleteCountRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipesMovedToTrash": "{count, plural, other{{count}件のレシピ}}をゴミ箱に移動しました",
+  "@countRecipesMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "setCourse": "コースを設定",
+  "setCategory": "カテゴリを設定",
+  "courseSetForCount": "{count, plural, other{{count}件のレシピ}}にコースを設定しました",
+  "@courseSetForCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categorySetForCount": "{count, plural, other{{count}件のレシピ}}にカテゴリを設定しました",
+  "@categorySetForCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipesFavorited": "{count, plural, other{{count}件のレシピ}}をお気に入りに追加しました",
+  "@countRecipesFavorited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkCourse": "コース",
+  "bulkCategory": "カテゴリ",
+  "bulkFavorite": "お気に入り",
+  "aiImportTitle": "AIでインポート",
+  "aiCopyPrompt": "プロンプトをコピー",
+  "aiCopyPromptSubtitle": "これをChatGPT、Claude、Geminiなど任意のAIにレシピと一緒に貼り付けてください。",
+  "aiCopied": "コピーしました！",
+  "aiCopyToClipboard": "プロンプトをコピー",
+  "aiPreviewPrompt": "プロンプトをプレビュー",
+  "aiPasteOutput": "AI出力を貼り付け",
+  "aiPasteSubtitle": "AIのJSONを貼り付けるか.jsonファイルをインポートしてください。",
+  "aiPasteFirst": "最初にJSONを貼り付けるか読み込んでください。",
+  "aiFailedReadFile": "ファイルの読み込みに失敗しました：{error}",
+  "@aiFailedReadFile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "aiUntitledRecipe": "無題のレシピ",
+  "aiImporting": "インポート中...",
+  "aiImportToCookbook": "レシピ本にインポート",
+  "aiImportSuccess": "レシピのインポートに成功しました！",
+  "aiPreviewImport": "プレビューしてインポート",
+  "aiPromptCopied": "プロンプトをコピーしました！レシピと一緒に任意のAIに貼り付けてください。",
+  "aiLoadJsonFile": ".jsonファイルを読み込む",
+  "aiPaste": "貼り付け",
+  "aiTipsTitle": "ヒント",
+  "aiTip1": "ChatGPT、Claude、Gemini、Copilotなど任意のAIで動作",
+  "aiTip2": "レシピの写真を撮ってプロンプトと一緒に貼り付けることもできます",
+  "aiTip3": "AIは手書き、印刷、またはウェブのレシピを変換します",
+  "aiTip4": "JSONにエラーがある場合は、AIに修正を依頼してください",
+  "aiServingsLabel": "{count}人分",
+  "@aiServingsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "aiPrepLabel": "{minutes}分準備",
+  "@aiPrepLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "aiCookLabel": "{minutes}分調理",
+  "@aiCookLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "aiIngredientsCount": "材料（{count}種）",
+  "@aiIngredientsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aiStepsCount": "手順（{count}ステップ）",
+  "@aiStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreAllWarnings": "すべての警告を復元",
+  "warningsRestoredForRecipe": "このレシピの警告を復元しました",
+  "restoreAllWarningsQuestion": "すべての警告を復元しますか？",
+  "restoreAll": "すべて復元",
+  "allWarningsRestored": "すべての警告を復元しました",
+  "dismissedWarnings": "{count}件非表示",
+  "@dismissedWarnings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restoringPurchases": "購入を復元中...",
+  "restorePurchases": "復元",
+  "compareAllPlans": "すべてのプランを比較",
+  "oneTimeTab": "一回払い",
+  "subscriptionTab": "サブスクリプション",
+  "payOnceKeepForever": "一度払えばずっと使える",
+  "cloudSyncFeature": "Cloud Sync",
+  "cloudSyncPlusFeature": "Cloud Sync+",
+  "unableToLoadProducts": "製品を読み込めません。",
+  "noOfferingsAvailable": "利用可能なオファーがありません。",
+  "purchaseFailed": "購入に失敗しました：{error}",
+  "@purchaseFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "hintProductExample": "例：有機トマトソース",
+  "previewPhoto": "写真をプレビュー",
+  "retake": "撮り直す",
+  "usePhoto": "この写真を使用",
+  "takePhoto": "写真を撮る",
+  "chooseFromGallery": "ギャラリーから選択",
+  "removeImage": "画像を削除",
+  "tipsPlaceholder": "ヒント、バリエーション、保存方法...",
+  "totalCalories": "合計カロリー",
+  "caloriesPerServing": "カロリー/人分",
+  "totalNutrition": "合計",
+  "linkRecipe": "レシピをリンク",
+  "addIngredient": "材料を追加",
+  "searchRecipesToLink": "リンクするレシピを検索...",
+  "linkToIngredient": "「{name}」にリンク",
+  "@linkToIngredient": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "errorSavingRecipe": "保存エラー：{error}",
+  "@errorSavingRecipe": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteSelectedCount": "{count}件削除",
+  "@deleteSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "takeAPhoto": "写真を撮る",
+  "defaultLabel": "デフォルト",
+  "scaleRecipe": "レシピをスケール",
+  "scaleHint": "例：2.5",
+  "badgePinned": "固定",
+  "badgeRecentlyViewed": "最近見た",
+  "displayOptions": "表示オプション",
+  "showMealPlan": "食事プランを表示",
+  "showMealPlanSubtitle": "今日の計画されたレシピを表示",
+  "showPinnedRecipes": "固定レシピを表示",
+  "showPinnedSubtitle": "固定レシピを表示",
+  "showRecentHistory": "最近の履歴を表示",
+  "showRecentSubtitle": "最近見たレシピを表示",
+  "versionLabel": "バージョン {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "measurementsUS": "カップ、スプーン、オンス、°F",
+  "measurementsMetric": "ミリリットル、グラム、°C",
+  "defaultRecipesImported": "{count}件のデフォルトレシピをインポートしました！",
+  "@defaultRecipesImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingListGeneratorTitle": "買い物リストジェネレーター",
+  "exitShoppingListGeneratorQuestion": "ジェネレーターを終了しますか？",
+  "reviewAndAddItems": "確認して追加（{count}個）",
+  "@reviewAndAddItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedTotalItemsToList": "リストに{count}個追加しました",
+  "@addedTotalItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scaleMultiplier": "{scale}倍",
+  "@scaleMultiplier": {
+    "placeholders": {
+      "scale": {
+        "type": "String"
+      }
+    }
+  },
+  "printIngredients": "材料",
+  "printInstructions": "手順",
+  "printNotes": "メモ",
+  "printPrep": "準備：{minutes}分",
+  "@printPrep": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "printCook": "調理：{minutes}分",
+  "@printCook": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "printFooter": "Recipe Spellbookより印刷",
+  "printPage": "{current}/{total}ページ",
+  "@printPage": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "menuNavigation": "ナビゲーション",
+  "menuImport": "インポート",
+  "menuRpgMode": "RPGモード",
+  "menuSocial": "ソーシャル",
+  "menuApp": "アプリ",
+  "historyCount": "履歴件数",
+  "historyCountSubtitle": "表示する最近のレシピの最大数",
+  "restoreAllWarningsDesc": "これによりすべてのレシピのアレルギー警告が再有効化されます。",
+  "signInToContinue": "続けるにはサインイン",
+  "signInForPurchaseDesc": "購入前にアカウントが必要です。",
+  "menuAchievements": "実績",
+  "menuLeaderboards": "ランキング",
+  "requiresPremium": "プレミアムが必要です",
+  "deleteCount": "{count}件削除",
+  "@deleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tapToSelectPhoto": "タップしてギャラリーまたはカメラから選択",
+  "rating": "評価",
+  "usUnits": "cups, tablespoons, ounces, °F",
+  "metricUnits": "milliliters, grams, °C",
+  "selectedCount": "{count}件選択中",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteRecipesConfirm": "{count}件のレシピを削除しますか？",
+  "@deleteRecipesConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courseSetForRecipes": "{count}件のレシピにコースを設定しました",
+  "@courseSetForRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@recipesFavorited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeImportedSuccess": "レシピのインポートに成功しました！",
+  "promptCopied": "プロンプトをコピーしました！レシピと一緒に任意のAIに貼り付けてください。",
+  "importFromAI": "AIでインポート",
+  "paste": "貼り付け",
+  "previewAndImport": "プレビューしてインポート",
+  "signInDescription": "レシピを保存し、複数のデバイスで同期。",
+  "signOutConfirmTitle": "サインアウトしますか？",
+  "signOutConfirmMessage": "レシピはこのデバイスに残ります。",
+  "deleteAccountConfirmTitle": "アカウントを削除しますか？",
+  "deleteAccountConfirmMessage": "アカウントが完全に削除されます。\n\nローカルレシピは削除されません。",
+  "planLabel": "{label}プラン",
+  "@planLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "permanentlyDeleteWarning": "{scope}が完全に削除されます。この操作は取り消せません。",
+  "@permanentlyDeleteWarning": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "recipesMovedToTrash": "{count}件のレシピをゴミ箱に移動しました",
+  "@recipesMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipesFavorited": "{count}件のレシピをお気に入りに追加しました",
+  "upgradeRecipeSpellbook": "Recipe Spellbookをアップグレード",
+  "choosePlanSubtitle": "あなたのキッチンに合ったプランを選んでください",
+  "premiumInfoNotice": "プレミアムは無料体験を向上させる一回払いの購入です。",
+  "bestValue": "ベストバリュー",
+  "billedMonthly": "月次請求",
+  "save16Yearly": "16%節約 — 月2.50ドル",
+  "save16Badge": "16%節約",
+  "save17Yearly": "17%節約 — 月4.17ドル",
+  "subscriptionsIncludePremium": "すべてのサブスクリプションにはプレミアムのすべてが含まれます。",
+  "monthly": "月払い",
+  "yearly": "年払い",
+  "purchasePremiumCta": "プレミアムを購入 — $6.99",
+  "subscribeCloudSyncMonthlyCta": "購読する — $2.99/月",
+  "subscribeCloudSyncYearlyCta": "購読する — $29.99/年",
+  "subscribeCloudSyncPlusMonthlyCta": "購読する — $4.99/月",
+  "subscribeCloudSyncPlusYearlyCta": "購読する — $49.99/年",
+  "signInRequiredBeforePurchase": "購入前にサインインが必要です",
+  "terms": "利用規約",
+  "privacy": "プライバシー",
+  "comparePlans": "プランを比較",
+  "featureCloudSyncPersonal": "クラウド同期（個人）",
+  "featurePhotosOnSteps": "ステップに写真",
+  "featurePhotoStorage250": "写真ストレージ250MB（約500枚）",
+  "featureRpgCosmeticsStarter": "RPGコスメスターターパック",
+  "featureSupporterBadge": "プレミアムサポーターバッジ",
+  "featureExtraPolish": "UIと機能の改善",
+  "featureFamilySharing5": "ファミリー共有（5名）",
+  "featurePhotoStorage1gb": "写真ストレージ1GB（約2,000枚）",
+  "featureSharedLists": "共有買い物リスト",
+  "featureSharedCookbooks": "共有レシピ本",
+  "featureSharedMealPlan": "共有食事プラン",
+  "featureEncryptedBackups": "暗号化バックアップ＋履歴",
+  "featureFamilySharing10": "ファミリー共有（10名）",
+  "featurePhotoStorage5gb": "写真ストレージ5GB（約10,000枚）",
+  "featureExtendedVersionHistory": "拡張履歴",
+  "featurePrioritySync": "優先同期",
+  "featureFutureAdvanced": "将来の高度な機能を含む",
+  "tierCloudSync": "Cloud\nSync",
+  "tierCloudSyncPlus": "Cloud\nSync+",
+  "comparePrice": "価格",
+  "priceFree": "$0",
+  "pricePremium": "$6.99\n一回払い",
+  "priceCloudSync": "$2.99\n/月",
+  "priceCloudSyncPlus": "$4.99\n/月",
+  "compareDeviceTransfer": "デバイス転送",
+  "qrCode": "QRコード",
+  "cloud": "クラウド",
+  "comparePhotoStorage": "写真ストレージ",
+  "compareStepPhotos": "ステップ写真",
+  "compareFamilySharing": "ファミリー共有",
+  "compareSharedLists": "共有リスト",
+  "compareSharedCookbooks": "共有レシピ本",
+  "compareSharedMealPlan": "共有食事プラン",
+  "compareBackups": "バックアップ",
+  "compareVersionHistory": "履歴",
+  "light": "ライト",
+  "extended": "拡張",
+  "compareRpgCosmetics": "RPGコスメ",
+  "basic": "ベーシック",
+  "starterPack": "スターター\nパック",
+  "compareSupporterBadge": "サポーターバッジ",
+  "printOf": "/",
+  "printRecipe": "印刷",
+  "stackedLayout": "スタックレイアウト",
+  "tabbedLayout": "タブレイアウト",
+  "printLabelIngredients": "材料",
+  "printLabelInstructions": "手順",
+  "printLabelNotes": "メモ",
+  "printLabelPrep": "準備",
+  "printLabelCook": "調理",
+  "printLabelFooter": "Recipe Spellbookより印刷",
+  "printLabelPage": "ページ",
+  "printLabelOf": "/",
+  "smallerText": "文字を小さく",
+  "largerText": "文字を大きく",
+  "textSize": "文字サイズ",
+  "ingredientPreview": "材料プレビュー",
+  "resetToDefault": "Reset to Default",
+  "smartImportSuccess": "AIがレシピを再解析しました",
+  "smartImportSuccessWithRemaining": "AIがレシピを解析しました • 今月残り{remaining}回",
+  "@smartImportSuccessWithRemaining": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "smartImportLimitTitle": "スマートインポートの上限に達しました",
+  "smartImportLimitMessage": "今月の{limit}回のスマートインポートを使い切りました。",
+  "@smartImportLimitMessage": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "smartImportUpgradeHint": "プレミアムにアップグレードして月200回のインポートを。",
+  "smartImportParsing": "AIが解析中...",
+  "smartImportFix": "スマートインポートで修正 ✨",
+  "smartImportRemaining": "今月残り{remaining}/{limit}回のスマートインポート",
+  "@smartImportRemaining": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "smartImportHintTitle": "インポートが正しくないですか？",
+  "smartImportHintSubtitle": "スマートインポートを購読 — AIレシピ解析",
+  "learnMore": "詳細を見る",
+  "retry": "再試行",
+  "upgrade": "アップグレード",
+  "cookingMode": "調理モード",
+  "mealTypeDessert": "デザート",
+  "noContentToSave": "保存するコンテンツがありません",
+  "recipeSaved": "レシピを保存しました！",
+  "qrScanningMobileOnly": "QRスキャンはモバイルのみ利用可能です。",
+  "notEnoughMana": "マナが足りません！レシピでXPを獲得して回復してください。",
+  "communityComingSoon": "コミュニティ機能は近日公開！",
+  "somethingWentWrong": "エラーが発生しました：{error}",
+  "@somethingWentWrong": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "starterRecipesAdded": "{count}件のスターターレシピを追加しました！🎉",
+  "@starterRecipesAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enterAtLeastOneNutrient": "カロリーまたは少なくとも1つのマクロ栄養素を入力してください",
+  "addedToMealPlan": "{date}の{mealType}に追加しました",
+  "@addedToMealPlan": {
+    "placeholders": {
+      "mealType": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noItemsFoundInText": "テキストに商品が見つかりません",
+  "noTextFoundInImage": "画像にテキストが見つかりません",
+  "addDayToShoppingList": "今日をリストに追加",
+  "sendDayToShoppingList": "今日をリストに送る",
+  "removeMeal": "食事を削除",
+  "removeMealConfirm": "この日から{recipeName}を削除しますか？",
+  "@removeMealConfirm": {
+    "placeholders": {
+      "recipeName": {
+        "type": "String"
+      }
+    }
+  },
+  "actionRemove": "削除",
+  "plannerMealRemoved": "食事を削除しました",
+  "weekStartsOn": "週の始まり",
+  "monday": "月曜日",
+  "saturday": "土曜日",
+  "sunday": "日曜日",
+  "ingredientHeader": "見出し",
+  "ingredientHeaderHint": "例：ソース用",
+  "settingsWeekStartDay": "週の始まり",
+  "tuesday": "火曜日",
+  "wednesday": "水曜日",
+  "thursday": "木曜日",
+  "friday": "金曜日",
+  "shoppingAddedToList": "「{listName}」に{count}個追加しました",
+  "@shoppingAddedToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingAddedAndCombined": "「{listName}」に{added}個追加、{combined}個結合しました",
+  "@shoppingAddedAndCombined": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "combined": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingItemsUpdated": "「{listName}」の{count}個を更新しました",
+  "@shoppingItemsUpdated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingAddError": "エラー：{message}",
+  "@shoppingAddError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "editCookbook": "レシピ本を編集",
+  "newCookbook": "新しいレシピ本",
+  "tapToAddCoverImage": "タップしてカバー画像を追加",
+  "cookbookDescriptionLabel": "説明",
+  "cookbookDescriptionHint": "レシピのコレクション...",
+  "cookbookNameRequired": "名前を入力してください",
+  "addCover": "カバーを追加",
+  "recipeCount": "{count, plural, other{{count}件のレシピ}}",
+  "@recipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbookDeleteWithRecipes": "このレシピ本には{count, plural, other{{count}件のレシピ}}があります。ゴミ箱に移動されます。\n\n「{name}」を削除してもよろしいですか？",
+  "@cookbookDeleteWithRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cookbookDeleteConfirmNamed": "「{name}」を削除してもよろしいですか？",
+  "@cookbookDeleteConfirmNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shareCookbook": "レシピ本を共有",
+  "cookbookEmpty": "このレシピ本には共有するレシピがありません",
+  "recipes": "レシピ",
+  "sendSuggestion": "提案を送る",
+  "sendSuggestionSubtitle": "Recipe Spellbookの改善にご協力ください",
+  "reportBug": "バグを報告",
+  "reportBugSubtitle": "うまく動作しないことがありますか？",
+  "joinDiscord": "Discordに参加",
+  "joinDiscordSubtitle": "サポートを受けてレシピを共有",
+  "actionSend": "送信",
+  "suggestionDescription": "アイデアをお待ちしています！提案はチームに直接送信されます。",
+  "suggestionTitleLabel": "提案のタイトル",
+  "suggestionTitleHint": "例：料理用ダークモードを追加",
+  "suggestionDetailsLabel": "詳細",
+  "suggestionDetailsHint": "アイデアを詳しく説明してください...",
+  "contactOptionalLabel": "連絡先（任意）",
+  "contactOptionalHint": "メールまたはDiscord名",
+  "suggestionSent": "ありがとうございます！提案を送信しました 💡",
+  "bugDescription": "バグを見つけましたか？お知らせください。修正します。",
+  "bugTitleLabel": "バグのタイトル",
+  "bugTitleHint": "例：PDFインポート時にアプリがクラッシュする",
+  "bugDetailsLabel": "何が起きましたか？",
+  "bugDetailsHint": "何が問題だったか説明してください...",
+  "bugStepsLabel": "再現手順（任意）",
+  "bugStepsHint": "1. レシピを開く\n2. 共有をタップ\n3. アプリがクラッシュする",
+  "bugReportSent": "ありがとうございます！バグ報告を送信しました 🐛",
+  "feedbackFieldsRequired": "タイトルと詳細を入力してください",
+  "feedbackSendError": "フィードバックを送信できません。接続を確認してください。",
+  "mealTypeAppetizer": "前菜",
+  "allergenContains": "Contains",
+  "settingsIngredientLayout": "材料レイアウト",
+  "ingredientLayoutInline": "インライン — 小さじ1バター",
+  "ingredientLayoutColumnar": "カラム — 量を揃える",
+  "settingsIngredientLayoutDescription": "材料の量と名前の表示方法を選択。",
+  "ingredientLayoutInlineDescription": "量、単位、名前を自然な流れで",
+  "ingredientLayoutColumnarDescription": "量を固定カラムに揃える",
+  "ingredientLayoutInfoText": "この設定はレシピビュー、リスト生成、印刷レシピに適用されます。",
+  "searchCookbooks": "レシピ本を検索...",
+  "aboutWebsite": "ウェブサイト",
+  "aboutPrivacyPolicy": "プライバシーポリシー",
+  "aboutPrivacyPolicySub": "データの取り扱い方",
+  "aboutTermsOfService": "利用規約",
+  "aboutTermsOfServiceSub": "利用条件",
+  "aboutCommunity": "コミュニティ",
+  "aboutCommunitySub": "Discordサーバーに参加",
+  "aboutReportBug": "バグを報告",
+  "aboutReportBugSub": "アプリの改善にご協力ください",
+  "aboutRateApp": "アプリを評価",
+  "aboutRateAppSub": "ストアにレビューを残す",
+  "aboutLicenses": "オープンソースライセンス",
+  "aboutLicensesSub": "使用しているサードパーティソフトウェア",
+  "sortOrder": "並び順",
+  "ingredientAddHeader": "見出しを追加"
+}

@@ -1,0 +1,2575 @@
+{
+  "@@locale": "zh",
+  "@@last_modified": "2026-01-28",
+  "appTitle": "Recipe Spellbook",
+  "navHome": "首页",
+  "navCookbooks": "食谱书",
+  "navPlanner": "计划",
+  "navShopping": "购物",
+  "navSettings": "设置",
+  "homeGreeting": "欢迎回来！",
+  "homeQuickAccess": "快速访问",
+  "homeMealPlan": "今日餐食",
+  "homePinnedRecipes": "已固定食谱",
+  "homeRecentRecipes": "最近浏览",
+  "homeNoMealsPlanned": "今天没有计划餐食",
+  "homeNoPinnedRecipes": "没有固定食谱",
+  "homeNoRecentRecipes": "没有最近食谱",
+  "recipesTitle": "食谱",
+  "recipesEmpty": "没有食谱",
+  "recipesEmptySubtitle": "添加您的第一个食谱开始使用",
+  "recipeAdd": "添加食谱",
+  "recipeEdit": "编辑食谱",
+  "recipeDelete": "删除食谱",
+  "recipeDeleteConfirm": "确定要删除此食谱吗？",
+  "recipeFavorite": "添加到收藏",
+  "recipeUnfavorite": "从收藏移除",
+  "recipePin": "固定食谱",
+  "recipeUnpin": "取消固定",
+  "recipeShare": "分享食谱",
+  "recipePrint": "打印食谱",
+  "recipeDuplicate": "复制食谱",
+  "recipeAddToMealPlan": "添加到餐食计划",
+  "recipeAddToShoppingList": "添加到购物清单",
+  "recipeStartCooking": "开始烹饪",
+  "recipeFieldTitle": "标题",
+  "recipeFieldDescription": "描述",
+  "recipeFieldIngredients": "食材",
+  "recipeFieldInstructions": "做法",
+  "recipeFieldNotes": "备注",
+  "notesTitle": "备注",
+  "recipeFieldServings": "份量",
+  "recipeFieldPrepTime": "准备时间",
+  "recipeFieldCookTime": "烹饪时间",
+  "recipeFieldTotalTime": "总时间",
+  "recipeFieldSource": "来源",
+  "recipeFieldCourse": "课程",
+  "recipeFieldCategory": "类别",
+  "recipeFieldTags": "标签",
+  "recipeFieldRating": "评分",
+  "ratingCommon": "普通",
+  "ratingUncommon": "不常见",
+  "ratingRare": "稀有",
+  "ratingEpic": "史诗",
+  "ratingLegendary": "传奇",
+  "ratingUnrated": "未评分",
+  "minutesAbbrev": "分",
+  "hoursAbbrev": "时",
+  "servingsUnit": "人份",
+  "ingredientsTitle": "食材",
+  "ingredientsEmpty": "未添加食材",
+  "ingredientAdd": "添加食材",
+  "ingredientPlaceholder": "例如：面粉2杯",
+  "instructionsTitle": "做法",
+  "instructionsEmpty": "未添加做法",
+  "instructionAdd": "添加步骤",
+  "instructionPlaceholder": "描述此步骤...",
+  "stepNumber": "步骤 {number}",
+  "@stepNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbooksTitle": "食谱书",
+  "cookbooksEmpty": "没有食谱书",
+  "cookbookAdd": "新建食谱书",
+  "cookbookEdit": "编辑食谱书",
+  "cookbookDelete": "删除食谱书",
+  "cookbookDeleteConfirm": "删除此食谱书及所有食谱吗？",
+  "cookbookRecipeCount": "{count, plural, other{{count}个食谱}}",
+  "@cookbookRecipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingDeli": "熟食",
+  "shoppingCannedGoods": "罐头食品和汤",
+  "shoppingCondiments": "调味料和酱汁",
+  "shoppingGrainsAndPasta": "谷物、面食和米饭",
+  "shoppingCookingAndBaking": "烹饪和烘焙",
+  "shoppingBreakfastCereal": "早餐和谷物",
+  "shoppingBeerWineSpirits": "啤酒、葡萄酒和烈酒",
+  "shoppingBaby": "婴儿用品",
+  "shoppingPet": "宠物用品",
+  "shoppingHousehold": "家居用品",
+  "shoppingPersonalCare": "个人护理",
+  "plannerTitle": "餐食计划",
+  "plannerEmpty": "没有计划餐食",
+  "plannerEmptySubtitle": "点击+添加餐食",
+  "plannerAddMeal": "添加餐食",
+  "plannerToday": "今天",
+  "plannerThisWeek": "本周",
+  "plannerBreakfast": "早餐",
+  "plannerLunch": "午餐",
+  "plannerDinner": "晚餐",
+  "plannerSnack": "零食",
+  "shoppingTitle": "购物清单",
+  "shoppingEmpty": "清单为空",
+  "shoppingEmptySubtitle": "添加商品或从食谱导入",
+  "shoppingAddItem": "添加商品...",
+  "shoppingCheckedItems": "已勾选商品",
+  "shoppingClearChecked": "删除已勾选",
+  "shoppingClearAll": "全部删除",
+  "shoppingCategories": "购物类别",
+  "shoppingUncategorized": "未分类",
+  "shoppingItemCount": "{count, plural, other{{count}件}}",
+  "@shoppingItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsTitle": "设置",
+  "settingsAppearance": "外观",
+  "settingsTheme": "主题",
+  "settingsThemeMode": "主题模式",
+  "settingsThemeModeSystem": "系统",
+  "settingsThemeModeLight": "浅色",
+  "settingsThemeModeDark": "深色",
+  "settingsLanguage": "语言",
+  "settingsMeasurements": "单位",
+  "settingsMeasurementsUS": "美制（杯、盎司）",
+  "settingsMeasurementsMetric": "公制（毫升、克）",
+  "settingsRPGMode": "RPG模式",
+  "settingsRPGModeSubtitle": "启用奇幻风格文字和图像",
+  "settingsRecipes": "食谱",
+  "settingsManageCourses": "管理课程",
+  "settingsManageCategories": "管理类别",
+  "settingsManageTags": "管理标签",
+  "settingsData": "数据",
+  "settingsExport": "导出数据",
+  "settingsExportSubtitle": "备份食谱",
+  "settingsImport": "导入数据",
+  "settingsImportSubtitle": "从备份恢复",
+  "settingsImportFromApps": "从其他应用导入",
+  "settingsImportFromAppsSubtitle": "Paprika、Crouton、Mela等",
+  "settingsAbout": "关于",
+  "settingsVersion": "版本 {version}",
+  "@settingsVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsPrivacy": "隐私政策",
+  "settingsTerms": "服务条款",
+  "settingsFeedback": "发送反馈",
+  "importTitle": "导入",
+  "importCreate": "创建",
+  "importCreateSubtitle": "编写自己的食谱",
+  "importSubtitle": "从URL、图片或文件",
+  "importChooseMethod": "如何添加食谱？",
+  "importProgress": "正在导入食谱...",
+  "importFromURL": "从URL",
+  "importFromImage": "从图片",
+  "importFromFile": "从文件",
+  "importFromText": "从文本导入",
+  "importProcessing": "处理中...",
+  "importSuccess": "食谱导入成功",
+  "importError": "导入食谱失败",
+  "importBulkTitle": "导入食谱",
+  "importBulkFound": "找到{count}个食谱",
+  "@importBulkFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importBulkImportAll": "全部导入",
+  "importBulkImportFirst": "导入第一个",
+  "searchTitle": "搜索",
+  "searchHint": "搜索食谱...",
+  "searchNoResults": "未找到食谱",
+  "searchFilters": "筛选",
+  "actionSave": "保存",
+  "actionCancel": "取消",
+  "actionDelete": "删除",
+  "actionEdit": "编辑",
+  "actionAdd": "添加",
+  "actionDone": "完成",
+  "actionClose": "关闭",
+  "actionConfirm": "确认",
+  "actionUndo": "撤销",
+  "actionRetry": "重试",
+  "actionCopy": "复制",
+  "actionPaste": "粘贴",
+  "actionOk": "确定",
+  "actionShare": "分享",
+  "actionClear": "清空",
+  "errorGeneric": "出现错误",
+  "errorNetwork": "网络错误。请检查连接。",
+  "errorNotFound": "未找到",
+  "errorInvalidURL": "无效的URL",
+  "successSaved": "保存成功",
+  "successDeleted": "删除成功",
+  "successCopied": "已复制到剪贴板",
+  "confirmDeleteTitle": "确认删除",
+  "confirmDeleteMessage": "此操作无法撤销。",
+  "emptyStateTitle": "这里还没有内容",
+  "emptyStateSubtitle": "添加第一个项目开始使用",
+  "dateToday": "今天",
+  "dateYesterday": "昨天",
+  "dateTomorrow": "明天",
+  "timeMinutes": "{count, plural, other{{count}分钟}}",
+  "@timeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHours": "{count, plural, other{{count}小时}}",
+  "@timeHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trashTitle": "回收站",
+  "trashEmpty": "回收站为空",
+  "trashEmptySubtitle": "删除的食谱在这里保存30天",
+  "trashRestore": "恢复",
+  "trashRestored": "已恢复",
+  "trashDeletePermanently": "永久删除",
+  "trashEmptyTrash": "清空回收站",
+  "trashEmptyConfirm": "这将永久删除回收站中的所有食谱，此操作无法撤销。",
+  "trashEmptied": "回收站已清空",
+  "trashDeleted": "已删除",
+  "trashDeletedToday": "今天删除",
+  "trashDeletedYesterday": "昨天删除",
+  "trashDeletedDaysAgo": "{days}天前删除",
+  "@trashDeletedDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "trashExpiresToday": "今天到期",
+  "trashDaysLeft": "还剩{days}天",
+  "@trashDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "cookingModeTitle": "烹饪模式",
+  "cookingSetTimer": "设置计时器",
+  "cookingTimerDone": "计时完成！",
+  "cookingTimerFinished": "计时器已结束。",
+  "cookingExitTitle": "退出烹饪模式？",
+  "cookingExitMessage": "您的进度将丢失。",
+  "cookingExit": "退出",
+  "cookingFinish": "完成",
+  "taxonomyAddCourse": "添加课程",
+  "taxonomyEditCourse": "编辑课程",
+  "taxonomyDeleteCourse": "删除课程？",
+  "taxonomyAddCategory": "添加类别",
+  "taxonomyEditCategory": "编辑类别",
+  "taxonomyDeleteCategory": "删除类别？",
+  "taxonomyBuiltIn": "内置",
+  "taxonomyCustom": "自定义",
+  "taxonomyRestoreDefaults": "恢复默认",
+  "taxonomyDefaultsRestored": "自定义项目已删除，默认已恢复",
+  "taxonomyCourseName": "课程名称",
+  "taxonomyCourseNameHint": "例如：早午餐、开胃菜",
+  "taxonomyCategoryName": "类别名称",
+  "taxonomyCategoryNameHint": "例如：无麸质、低碳水",
+  "taxonomyEmojiHint": "点击表情符号字段进行编辑",
+  "taxonomyDeleteCourseMessage": "删除\"{name}\"？此课程的食谱将变为未分类。",
+  "@taxonomyDeleteCourseMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "taxonomyDeleteCategoryMessage": "删除\"{name}\"？此类别的食谱将变为未分类。",
+  "@taxonomyDeleteCategoryMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsQuickAccess": "快速访问",
+  "settingsPlaceholders": "默认图片",
+  "actionView": "查看",
+  "browseViewAll": "查看所有食谱",
+  "browseRecipesTotal": "共{count}个食谱",
+  "@browseRecipesTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "browseCourses": "课程",
+  "browseCategories": "类别",
+  "browseNoCourse": "无课程",
+  "browseUncategorized": "未分类",
+  "favoritesTitle": "收藏",
+  "favoritesEmpty": "没有收藏食谱",
+  "favoritesEmptySubtitle": "点击食谱的星标将其添加到这里",
+  "favoritesRemoved": "已从收藏移除",
+  "recentTitle": "最近浏览",
+  "recentEmpty": "没有最近食谱",
+  "recentEmptySubtitle": "浏览过的食谱会显示在这里",
+  "recentJustNow": "刚刚",
+  "recentMinutesAgo": "{count}分钟前",
+  "@recentMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recentHoursAgo": "{count}小时前",
+  "@recentHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recentYesterday": "昨天",
+  "recentDaysAgo": "{count}天前",
+  "@recentDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importFromUrl": "从URL导入",
+  "importUrlHint": "食谱URL",
+  "importUrlPlaceholder": "https://example.com/recipe",
+  "importFetch": "获取食谱",
+  "importFetching": "获取中...",
+  "importPreview": "预览",
+  "importRecipeFound": "找到食谱！",
+  "importReviewSave": "查看并保存",
+  "importEditBeforeSave": "保存前可以编辑食谱",
+  "importSupportedSites": "支持的网站",
+  "importSupportedSitesInfo": "适用于大多数食谱网站！",
+  "importFromScan": "扫描食谱",
+  "importFromPdf": "从PDF导入",
+  "cookbookNew": "新建食谱书",
+  "cookbookNameLabel": "食谱书名称",
+  "cookbookNameHint": "例如：家庭食谱",
+  "cookbookDescLabel": "描述",
+  "cookbookDescHint": "食谱合集...",
+  "cookbookAddCover": "添加封面",
+  "cookbookTapToAdd": "点击添加封面图片",
+  "cookbookDeleteTitle": "删除食谱书？",
+  "cookbookDeleteMessage": "此食谱书包含{count}个食谱，将移至回收站。",
+  "@cookbookDeleteMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbookCannotDelete": "不能删除唯一的食谱书",
+  "fontSizeTitle": "字体大小",
+  "fontSizeReset": "恢复默认",
+  "fontSizeSmaller": "缩小文字",
+  "fontSizeLarger": "放大文字",
+  "defaultCookbookName": "我的食谱",
+  "defaultCookbookDescription": "个人食谱合集",
+  "defaultShoppingListName": "购物清单",
+  "courseBreakfast": "早餐",
+  "courseLunch": "午餐",
+  "courseDinner": "晚餐",
+  "courseAppetizer": "开胃菜",
+  "courseSoup": "汤",
+  "courseSalad": "沙拉",
+  "courseMain": "主菜",
+  "courseSide": "配菜",
+  "courseDessert": "甜点",
+  "courseSnack": "零食",
+  "courseBeverage": "饮料",
+  "categoryQuick": "快手菜",
+  "categoryHealthy": "健康",
+  "categoryComfort": "家常菜",
+  "categoryVegetarian": "素食",
+  "categoryVegan": "纯素",
+  "categoryGlutenFree": "无麸质",
+  "categoryDairyFree": "无乳制品",
+  "categoryLowCarb": "低碳水",
+  "categorySpicy": "辣味",
+  "categoryFamilyFriendly": "适合全家",
+  "categoryParty": "派对",
+  "categoryHoliday": "节日",
+  "categoryBbq": "烧烤",
+  "categoryBaking": "烘焙",
+  "shoppingProduce": "果蔬",
+  "shoppingDairy": "乳制品和鸡蛋",
+  "shoppingMeat": "肉类和禽类",
+  "shoppingSeafood": "海鲜",
+  "shoppingBakery": "烘焙食品",
+  "shoppingFrozen": "冷冻食品",
+  "shoppingPantry": "食品储藏室",
+  "shoppingSpices": "香料和调味料",
+  "shoppingBeverages": "饮料",
+  "shoppingSnacks": "零食",
+  "shoppingInternational": "进口食品",
+  "shoppingOther": "其他",
+  "unitCup": "杯",
+  "unitCups": "杯",
+  "unitTablespoon": "大勺",
+  "unitTablespoonAbbrev": "大勺",
+  "unitTeaspoon": "茶匙",
+  "unitTeaspoonAbbrev": "茶匙",
+  "unitFluidOunce": "液体盎司",
+  "unitFluidOunceAbbrev": "fl oz",
+  "unitPint": "品脱",
+  "unitQuart": "夸脱",
+  "unitGallon": "加仑",
+  "unitMilliliter": "毫升",
+  "unitMilliliterAbbrev": "ml",
+  "unitLiter": "升",
+  "unitLiterAbbrev": "L",
+  "unitOunce": "盎司",
+  "unitOunceAbbrev": "oz",
+  "unitPound": "磅",
+  "unitPoundAbbrev": "lb",
+  "unitGram": "克",
+  "unitGramAbbrev": "g",
+  "unitKilogram": "千克",
+  "unitKilogramAbbrev": "kg",
+  "unitPinch": "少许",
+  "unitDash": "微量",
+  "unitClove": "瓣",
+  "unitCloves": "瓣",
+  "unitHead": "头",
+  "unitBunch": "束",
+  "unitCan": "罐",
+  "unitPackage": "包",
+  "unitSlice": "片",
+  "unitSlices": "片",
+  "unitPiece": "个",
+  "unitPieces": "个",
+  "unitWhole": "整个",
+  "unitLarge": "大",
+  "unitMedium": "中",
+  "unitSmall": "小",
+  "unitFahrenheit": "°F",
+  "unitCelsius": "°C",
+  "unitInch": "英寸",
+  "unitInches": "英寸",
+  "unitInchAbbrev": "in",
+  "unitCentimeter": "厘米",
+  "unitCentimeterAbbrev": "cm",
+  "unitMillimeter": "毫米",
+  "unitMillimeterAbbrev": "mm",
+  "convertUnitsTitle": "换算单位",
+  "convertMetricToImperial": "公制 → 英制",
+  "convertMetricToImperialDesc": "ml → fl oz, g → oz, kg → lb",
+  "convertImperialToMetric": "英制 → 公制",
+  "convertImperialToMetricDesc": "杯 → ml, oz → g, 茶匙 → ml",
+  "convertResetToOriginal": "恢复原始",
+  "settingsRecipeLayout": "食谱布局",
+  "settingsRecipeLayoutDescription": "选择食材和做法的显示方式",
+  "settingsRecipeDisplay": "食谱显示",
+  "layoutStacked": "堆叠",
+  "layoutStackedDescription": "所有内容在可滚动列表中显示",
+  "layoutTabbed": "选项卡",
+  "layoutTabbedDescription": "在食材和做法之间滑动切换",
+  "recipeSwipeHint": "滑动切换部分",
+  "recipeIngredients": "食材",
+  "recipeInstructions": "做法",
+  "dateNextWeek": "下周",
+  "timeJustNow": "刚刚",
+  "timeMinutesAgo": "{count, plural, other{{count}分钟前}}",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHoursAgo": "{count, plural, other{{count}小时前}}",
+  "@timeHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeDaysAgo": "{count, plural, other{{count}天前}}",
+  "@timeDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeWeeksAgo": "{count, plural, other{{count}周前}}",
+  "@timeWeeksAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeMonthsAgo": "{count, plural, other{{count}个月前}}",
+  "@timeMonthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeYearsAgo": "{count, plural, other{{count}年前}}",
+  "@timeYearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeInMinutes": "{count, plural, other{{count}分钟后}}",
+  "@timeInMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeInHours": "{count, plural, other{{count}小时后}}",
+  "@timeInHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationMinutes": "{count}分钟",
+  "@durationMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHours": "{count, plural, other{{count}小时}}",
+  "@durationHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHoursMinutes": "{hours}小时{minutes}分钟",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipes": "{count, plural, other{{count}个食谱}}",
+  "@countRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countIngredients": "{count, plural, other{{count}种食材}}",
+  "@countIngredients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countSteps": "{count, plural, other{{count}个步骤}}",
+  "@countSteps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countItems": "{count, plural, other{{count}件}}",
+  "@countItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countSelected": "已选{count}项",
+  "@countSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorGenericTitle": "错误",
+  "errorGenericMessage": "出现错误，请重试。",
+  "errorNetworkTitle": "连接错误",
+  "errorNetworkMessage": "请检查网络连接并重试。",
+  "errorNotFoundTitle": "未找到",
+  "errorNotFoundMessage": "找不到请求的内容。",
+  "errorInvalidUrlTitle": "无效URL",
+  "errorInvalidUrlMessage": "请输入以http://或https://开头的有效URL",
+  "errorPermissionDenied": "访问被拒绝",
+  "errorStorageFull": "存储空间已满",
+  "errorFileNotFound": "找不到文件",
+  "errorUnsupportedFormat": "不支持的文件格式",
+  "errorParsingFailed": "处理内容失败",
+  "errorSaveFailed": "保存失败",
+  "errorLoadFailed": "加载失败",
+  "errorDeleteFailed": "删除失败",
+  "errorImportFailed": "导入失败",
+  "errorExportFailed": "导出失败",
+  "errorCameraAccess": "无法访问相机",
+  "errorGalleryAccess": "无法访问相册",
+  "errorTimeout": "请求超时",
+  "errorServerError": "服务器错误，请稍后重试。",
+  "errorNoRecipeFound": "此页面未找到食谱",
+  "errorInvalidRecipe": "无效的食谱数据",
+  "errorDuplicateRecipe": "此食谱已存在",
+  "validationRequired": "此字段为必填项",
+  "validationTooShort": "至少需要{min}个字符",
+  "@validationTooShort": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "validationTooLong": "需少于{max}个字符",
+  "@validationTooLong": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "validationInvalidEmail": "请输入有效的电子邮件地址",
+  "validationInvalidUrl": "请输入有效的URL",
+  "validationInvalidNumber": "请输入有效数字",
+  "validationMinValue": "至少为{min}",
+  "@validationMinValue": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "validationMaxValue": "至多为{max}",
+  "@validationMaxValue": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "photoTakePhoto": "拍照",
+  "photoChooseFromGallery": "从相册选择",
+  "photoRemoveImage": "删除图片",
+  "shareAsText": "文字",
+  "shareAsImage": "图片",
+  "shareAsFile": "作为文件分享",
+  "shareQrCode": "食谱二维码",
+  "languageSystem": "系统默认",
+  "languageEnglish": "English",
+  "languageSpanish": "Español",
+  "languageGerman": "Deutsch",
+  "scalingOriginal": "原始",
+  "scalingHalf": "一半",
+  "scalingDouble": "两倍",
+  "scalingTriple": "三倍",
+  "scalingCustom": "自定义",
+  "scalingServings": "{count, plural, other{{count}人份}}",
+  "@scalingServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importRecipe": "Import Recipe",
+  "importFile": "File",
+  "importImage": "Image",
+  "importPaste": "Paste",
+  "importPasteUrl": "Paste recipe URL",
+  "importOr": "OR",
+  "importSupportsFormats": "Supports Paprika, Mela, JSON, ZIP exports",
+  "importFromSocialMedia": "Import your recipes from any social media platform or website.",
+  "tagsTitle": "标签",
+  "tagsSelect": "选择标签",
+  "tagsNoTags": "没有标签",
+  "tagsCreate": "创建标签",
+  "tagsCreateNew": "创建新标签",
+  "tagsEnterName": "标签名称",
+  "tagsSearch": "搜索标签...",
+  "tagsSuggested": "推荐标签",
+  "tagsRecent": "最近使用",
+  "tagsAll": "所有标签",
+  "tagVegetarian": "素食",
+  "tagVegan": "纯素",
+  "tagGlutenFree": "无麸质",
+  "tagDairyFree": "无乳制品",
+  "tagNutFree": "无坚果",
+  "tagLowCarb": "低碳水",
+  "tagKeto": "生酮",
+  "tagPaleo": "旧石器",
+  "tagWhole30": "Whole30",
+  "tagQuick": "快手",
+  "tagEasy": "简单",
+  "tagHealthy": "健康",
+  "tagComfortFood": "家常菜",
+  "tagFamilyFriendly": "适合全家",
+  "tagKidFriendly": "适合儿童",
+  "tagMealPrep": "备餐",
+  "tagOnePot": "一锅烩",
+  "tagInstantPot": "电压力锅",
+  "tagSlowCooker": "慢炖锅",
+  "tagAirFryer": "空气炸锅",
+  "tagGrill": "烧烤",
+  "tagBBQ": "BBQ",
+  "tagHoliday": "节日",
+  "tagParty": "派对",
+  "tagBudget": "经济实惠",
+  "tagSpicy": "辣味",
+  "tagSweet": "甜味",
+  "tagSavory": "咸鲜",
+  "tagLight": "清淡",
+  "tagHearty": "丰盛",
+  "tagSummer": "夏季",
+  "tagWinter": "冬季",
+  "tagFall": "秋季",
+  "tagSpring": "春季",
+  "settingsImagePlaceholders": "默认图片",
+  "settingsImagePlaceholdersSubtitle": "选择没有图片时显示的内容",
+  "settingsQuickAccessSubtitle": "配置快速访问",
+  "settingsManageCoursesSubtitle": "添加、编辑或删除课程",
+  "settingsManageCategoriesSubtitle": "添加、编辑或删除类别",
+  "settingsShoppingCategories": "购物类别",
+  "settingsShoppingCategoriesSubtitle": "按通道整理商品",
+  "shoppingIngredientMappings": "食材映射",
+  "shoppingPriority": "优先级：{priority}",
+  "shoppingAddCategory": "添加类别",
+  "shoppingEditCategory": "编辑类别",
+  "shoppingDeleteCategory": "删除类别？",
+  "shoppingDeleteCategoryMessage": "删除\"{name}\"？商品将变为未分类。",
+  "@shoppingDeleteCategoryMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingCategoryName": "名称",
+  "shoppingSearchIngredients": "搜索食材...",
+  "shoppingMappingsInfo": "点击类别更改位置。（{count}个映射）",
+  "@shoppingMappingsInfo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingCategoryFor": "\"{ingredient}\"的类别",
+  "@shoppingCategoryFor": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingMovedTo": "\"{ingredient}\"已移至{category}",
+  "@shoppingMovedTo": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingResetToDefault": "\"{ingredient}\"已重置为默认",
+  "@shoppingResetToDefault": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "actionReset": "重置",
+  "@shoppingPriority": {
+    "placeholders": {
+      "priority": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingMappingMoved": "\"{ingredient}\"已移至{category}",
+  "@shoppingMappingMoved": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingMappingReset": "\"{ingredient}\"已重置为默认",
+  "@shoppingMappingReset": {
+    "placeholders": {
+      "ingredient": {
+        "type": "String"
+      }
+    }
+  },
+  "addPhoto": "添加照片",
+  "addPhotoSubtitle": "点击从相册或相机选择",
+  "viewAllRecipes": "查看所有食谱",
+  "recipesTotal": "共{count}个食谱",
+  "@recipesTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "coursesTitle": "课程",
+  "categoriesTitle": "类别",
+  "courseBrunch": "早午餐",
+  "courseMainDish": "主菜",
+  "courseSideDish": "配菜",
+  "courseSauce": "酱汁",
+  "courseBread": "面包",
+  "categoryBean": "豆类",
+  "categoryBread": "面包",
+  "categoryBurritoTaco": "墨西哥卷",
+  "categoryCasserole": "砂锅",
+  "categoryChickenSteakMeat": "鸡肉/牛排/肉类",
+  "categoryDessert": "甜点",
+  "categoryFish": "鱼类",
+  "categoryFruit": "水果",
+  "categoryPasta": "面食",
+  "categoryPizza": "披萨",
+  "categoryPork": "猪肉",
+  "categoryRice": "米饭",
+  "categorySandwich": "三明治",
+  "categorySeafood": "海鲜",
+  "categorySoup": "汤",
+  "categoryVegetable": "蔬菜",
+  "or": "或",
+  "and": "和",
+  "wordOf": "的",
+  "items": "件",
+  "more": "更多",
+  "less": "更少",
+  "all": "全部",
+  "none": "无",
+  "other": "其他",
+  "custom": "自定义",
+  "defaultValue": "默认",
+  "required": "必填",
+  "optional": "可选",
+  "photoChooseGallery": "从相册选择",
+  "importFirstRecipe": "Import First",
+  "importAllRecipes": "Import All",
+  "parseRecipe": "Parse Recipe",
+  "shareRecipe": "分享食谱",
+  "shareExport": "导出",
+  "shareServings": "{count}人份",
+  "@shareServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharePrep": "准备：{minutes}分钟",
+  "@sharePrep": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shareCook": "烹饪：{minutes}分钟",
+  "@shareCook": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "shareFromApp": "从Recipe Spellbook分享 ✨",
+  "shareCreatingCard": "正在创建食谱卡片...",
+  "shareCheckRecipe": "查看此食谱：{title}",
+  "@shareCheckRecipe": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "shareErrorImage": "创建图片出错：{error}",
+  "@shareErrorImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "editItem": "编辑商品",
+  "selectAll": "全选",
+  "selectNone": "取消选择",
+  "viewPlanner": "View Planner",
+  "planNow": "Plan Now",
+  "loadingText": "加载中...",
+  "errorText": "错误",
+  "errorLoadingMeals": "加载餐食出错",
+  "readingImage": "正在读取图片...",
+  "parsingRecipe": "正在处理食谱...",
+  "noTextInImage": "图片中未找到文字",
+  "failedProcessImage": "处理图片失败：{error}",
+  "@failedProcessImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cookingModeExit": "退出烹饪模式",
+  "cookingModeStep": "第{current}步 / 共{total}步",
+  "@cookingModeStep": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cookingModePrevious": "上一步",
+  "cookingModeNext": "下一步",
+  "cookingModeFinish": "完成",
+  "cookingModeCompleted": "食谱完成！",
+  "cookingModeGreatJob": "做得好！请享用。",
+  "mealPlanBreakfast": "早餐",
+  "mealPlanLunch": "午餐",
+  "mealPlanDinner": "晚餐",
+  "mealPlanSnack": "零食",
+  "mealPlanAddMeal": "添加餐食",
+  "mealPlanRemove": "从计划移除",
+  "mealPlanNoMeals": "没有计划餐食",
+  "mealPlanTapToAdd": "点击+添加餐食",
+  "thisWeek": "本周",
+  "itemName": "商品名称",
+  "addToShoppingList": "添加到购物清单",
+  "addToList": "添加到清单",
+  "addedItemsToList": "已向清单添加{count}件",
+  "@addedItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scanToImport": "扫描导入食谱",
+  "xOfY": "共{total}个中的第{current}个",
+  "@xOfY": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "addItems": "添加{count}件",
+  "@addItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToParse": "处理失败：{error}",
+  "@failedToParse": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToImport": "导入失败：{error}",
+  "groupBy": "分组方式",
+  "@failedToImport": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cookbookHint": "点击选择 • 长按编辑",
+  "rename": "重命名",
+  "renameCookbook": "重命名食谱书",
+  "seeAll": "查看全部",
+  "imagePlaceholders": "Image Placeholders",
+  "imagePlaceholdersSubtitle": "Choose what shows when images are missing",
+  "homeScreenSection": "Home Screen",
+  "quickAccessSubtitle": "Configure what appears in Quick Access",
+  "manageCoursesSubtitle": "Add, edit, or remove courses",
+  "manageCategoriesSubtitle": "Add, edit, or remove categories",
+  "shoppingCategoriesSubtitle": "Organize items by aisle",
+  "syncSection": "同步",
+  "cloudSync": "云端同步",
+  "comingSoon": "即将推出",
+  "resetApp": "重置应用",
+  "resetAppSubtitle": "永久删除所有数据",
+  "trashSubtitle": "已删除食谱（保留30天）",
+  "importRecipeTitle": "导入食谱",
+  "importSocialMedia": "从社交媒体或任何网站导入食谱。",
+  "pasteRecipeUrl": "粘贴食谱URL",
+  "orDivider": "或",
+  "fileOption": "文件",
+  "imageOption": "图片",
+  "pasteOption": "粘贴",
+  "supportedFormats": "支持Paprika、Mela、JSON、ZIP",
+  "pasteRecipeTitle": "粘贴食谱",
+  "pasteRecipeHint": "在此粘贴食谱...",
+  "quickAccessHelpIntro": "这些徽章表示食谱出现在这里的原因：",
+  "quickAccessHelpMealPlan": "今天的计划",
+  "quickAccessHelpPinned": "您固定了此食谱",
+  "quickAccessHelpRecent": "最近浏览",
+  "openCalendar": "打开日历",
+  "editNotes": "编辑备注",
+  "addNotesHint": "添加备注...",
+  "moveToAnotherDay": "移到另一天",
+  "addToPlan": "添加到计划",
+  "importBulkQuestion": "导入全部{count}个食谱还是逐个选择？",
+  "@importBulkQuestion": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importingRecipes": "正在导入食谱...",
+  "importedRecipesCount": "已导入{count}个食谱",
+  "@importedRecipesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "extractingArchive": "正在解压缩...",
+  "themeSpellbook": "魔法书",
+  "themeForest": "森林",
+  "themeOcean": "海洋",
+  "themeSunset": "日落",
+  "themeMidnight": "午夜",
+  "themeRose": "玫瑰",
+  "colorTheme": "颜色主题",
+  "colorThemeSubtitle": "选择配色方案",
+  "preview": "预览",
+  "previewPrimary": "主色",
+  "previewSecondary": "辅色",
+  "previewTertiary": "第三色",
+  "previewError": "错误",
+  "placeholderDescription": "选择食谱或食谱书没有图片时显示的内容。",
+  "recipePlaceholders": "食谱图片",
+  "cookbookPlaceholders": "食谱书图片",
+  "defaultImages": "默认图片",
+  "defaultImagesDescription": "随RPG模式变化的插图",
+  "themeBased": "基于主题",
+  "themeBasedDescription": "带有主题logo的渐变色",
+  "placeholderRpgInfo": "默认图片在普通和RPG变体之间切换。",
+  "groupBySection": "按通道",
+  "groupByRecipe": "按食谱",
+  "groupByUngrouped": "不分组",
+  "copyAsText": "复制为文本",
+  "printList": "打印清单",
+  "manageLists": "管理清单",
+  "newList": "新建",
+  "newShoppingList": "新建购物清单",
+  "listNameHint": "List name",
+  "recipeLayoutSetting": "布局",
+  "recipeLayoutSettingSubtitle": "选择食谱显示方式",
+  "layoutTabbedOption": "选项卡视图",
+  "layoutStackedOption": "堆叠视图",
+  "nutrientsTitle": "营养素",
+  "nutrientsSubtitle": "每份营养信息",
+  "addNutrients": "添加营养信息",
+  "calculateNutrients": "从食材计算",
+  "nutrientsDisclaimer": "营养数值为估算值。",
+  "calories": "卡路里",
+  "protein": "蛋白质",
+  "carbohydrates": "碳水化合物",
+  "fat": "脂肪",
+  "fiber": "膳食纤维",
+  "sugar": "糖",
+  "sodium": "钠",
+  "cholesterol": "胆固醇",
+  "saturatedFat": "饱和脂肪",
+  "transFat": "反式脂肪",
+  "servingSize": "每份用量",
+  "perServing": "每份",
+  "calculatingNutrients": "正在计算营养素...",
+  "nutrientsCalculated": "营养素已计算",
+  "nutrientsFailed": "营养素计算失败：{error}",
+  "@nutrientsFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "premiumFeature": "高级功能",
+  "premiumNutrientsDescription": "自动营养素计算需要高级订阅",
+  "exportCurrentCookbook": "导出当前食谱书",
+  "exporting": "导出中...",
+  "exportAllCookbooks": "导出所有食谱书",
+  "importing": "导入中...",
+  "importFromJson": "从JSON导入",
+  "importFromJsonSubtitle": "选择备份文件",
+  "aboutDescription": "您整理、计划和烹饪美味餐食的魔法伴侣。",
+  "madeWithLove": "用❤️为全世界的厨师制作",
+  "resetAppWarning": "这将永久删除所有食谱、餐食计划、购物清单和设置。",
+  "actionContinue": "继续",
+  "finalConfirmation": "最终确认",
+  "typeDeleteToConfirm": "输入\"删除\"以确认",
+  "typeDeleteHint": "删除",
+  "resetEverything": "重置所有",
+  "resettingApp": "重置中...",
+  "appResetSuccess": "应用已重置",
+  "resetFailed": "重置失败",
+  "successAdded": "添加成功",
+  "selectToday": "选择今天",
+  "selectTomorrow": "选择明天",
+  "addedManually": "手动添加",
+  "unknownRecipe": "未知食谱",
+  "shoppingListEmpty": "购物清单为空",
+  "shoppingListEmptyHint": "添加商品或从食谱导入",
+  "settingsRPGModeActive": "召唤魔法文字...",
+  "shoppingCheckAll": "全部勾选",
+  "shoppingUncheckAll": "取消全部勾选",
+  "shoppingManageLists": "管理清单",
+  "shoppingNewList": "新建购物清单",
+  "shoppingListName": "清单名称",
+  "shoppingLists": "购物清单",
+  "shoppingRenameList": "重命名清单",
+  "shoppingDeleteList": "删除清单？",
+  "categoryProduce": "果蔬",
+  "categoryDairy": "乳制品",
+  "categoryMeat": "肉类",
+  "categoryBakery": "烘焙食品",
+  "categoryFrozen": "冷冻食品",
+  "categoryBeverages": "饮料",
+  "categoryPantry": "食品储藏室",
+  "categorySpices": "香料",
+  "categoryInternational": "进口食品",
+  "categorySnacks": "零食",
+  "categoryOther": "其他",
+  "from": "来自",
+  "deleted": "已删除",
+  "currently": "当前",
+  "autoDetect": "自动检测",
+  "category": "类别",
+  "actionNew": "新建",
+  "actionCreate": "创建",
+  "tagsAdd": "添加标签",
+  "tagsSearchOrCreate": "搜索或创建标签...",
+  "tagsNoResults": "未找到标签",
+  "color": "颜色",
+  "icon": "图标",
+  "nutritionTitle": "营养信息",
+  "nutritionEmpty": "没有营养数据",
+  "nutritionEmptyHint": "编辑此食谱并从食材计算营养素",
+  "scaled": "已调整",
+  "nutritionCalculate": "计算营养素",
+  "nutritionCalculating": "计算中...",
+  "nutritionMatchingIngredients": "正在与USDA数据库匹配食材",
+  "nutritionCalculationFailed": "营养素计算失败",
+  "nutritionDisclaimer": "营养数值基于USDA数据估算。",
+  "nutritionPerServing": "每份",
+  "nutritionServings": "{count}人份",
+  "@nutritionServings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionIngredientBreakdown": "按食材细分",
+  "nutritionIngredientsMatched": "已匹配食材",
+  "nutritionMatchedCount": "{total}个中匹配{matched}个",
+  "@nutritionMatchedCount": {
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionUncertainCount": "{count}个待确认",
+  "@nutritionUncertainCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nutritionUncertain": "确认匹配",
+  "nutritionNotFound": "无匹配 — 点击搜索",
+  "nutritionRecalculate": "重新计算",
+  "nutritionOverwriteTitle": "覆盖营养数据？",
+  "nutritionOverwriteMessage": "此食谱已有营养数据，重新计算吗？",
+  "nutritionCalculated": "营养素计算成功",
+  "nutritionSave": "保存营养素",
+  "nutritionSelectFood": "选择USDA食品",
+  "nutritionSearchFood": "搜索食品...",
+  "nutritionNoResults": "无结果",
+  "nutritionCalories": "卡路里",
+  "nutritionProtein": "蛋白质",
+  "nutritionCarbs": "碳水化合物",
+  "nutritionFat": "总脂肪",
+  "nutritionSaturatedFat": "饱和脂肪",
+  "nutritionTransFat": "反式脂肪",
+  "nutritionFiber": "膳食纤维",
+  "nutritionSugar": "糖类",
+  "nutritionCholesterol": "胆固醇",
+  "nutritionSodium": "钠",
+  "nutritionPotassium": "钾",
+  "nutritionCalcium": "钙",
+  "nutritionIron": "铁",
+  "nutritionVitaminA": "维生素A",
+  "nutritionVitaminC": "维生素C",
+  "nutritionVitaminD": "维生素D",
+  "layoutInfoText": "营养数据在两种布局中均显示。",
+  "settingsManageTagsSubtitle": "创建和整理标签",
+  "nutritionTotal": "合计",
+  "nutritionAutoCalculate": "自动计算",
+  "nutritionManualEntry": "手动输入",
+  "nutritionManualEntryTitle": "输入已知数值",
+  "nutritionManualEntryDescription": "如果您知道确切数值，请在此输入。",
+  "nutritionMainNutrients": "主要营养素",
+  "nutritionOtherNutrients": "其他营养素",
+  "nutritionEnterAtLeastOne": "请至少输入卡路里或一种宏量营养素",
+  "nutritionHowToFix": "如何修复",
+  "nutritionHowToImproveAccuracy": "如何提高准确性",
+  "nutritionEditIngredient": "编辑食材",
+  "nutritionSearchUsda": "搜索USDA",
+  "nutritionEnterManually": "手动输入",
+  "nutritionManualIngredientHint": "输入此食材的营养数值。",
+  "nutritionApplyManual": "应用手动数值",
+  "nutritionTotalRecipe": "食谱总营养信息",
+  "nutritionMatchRate": "匹配率",
+  "allergySettingsTitle": "过敏设置",
+  "allergyInfoText": "选择您的过敏原。Recipe Spellbook将在食谱含有这些成分时提醒您。",
+  "allergySelectedCount": "已选{count}种过敏原",
+  "@allergySelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "allergySelectAll": "全选",
+  "allergyClearAll": "全部清除",
+  "allergyMajorTitle": "主要过敏原",
+  "allergyMajorSubtitle": "FDA认定食品过敏原",
+  "allergyAdditionalTitle": "其他过敏原",
+  "allergyAdditionalSubtitle": "其他常见食物不耐受",
+  "allergyWillWarn": "将提醒您注意此过敏原",
+  "allergyWarningTitle": "⚠️ 过敏警告",
+  "allergyWarningTitlePossible": "⚠️ 可能的过敏原",
+  "allergyContains": "含有：",
+  "allergyMayContain": "可能含有：",
+  "allergyContainsAllergens": "含有过敏原",
+  "allergyManageSettings": "管理过敏设置",
+  "allergyDetailsTitle": "过敏原详情",
+  "settingsAllergies": "过敏",
+  "settingsAllergiesSubtitle": "设置过敏原警告",
+  "allergenMilk": "牛奶/乳制品",
+  "allergenEggs": "鸡蛋",
+  "allergenFish": "鱼类",
+  "allergenShellfish": "甲壳类",
+  "allergenTreeNuts": "坚果",
+  "allergenPeanuts": "花生",
+  "allergenWheat": "小麦/麸质",
+  "allergenSoy": "大豆",
+  "allergenSesame": "芝麻",
+  "allergenMustard": "芥末",
+  "allergenCelery": "芹菜",
+  "allergenLupin": "羽扇豆",
+  "allergenMollusks": "软体动物",
+  "allergenSulfites": "亚硫酸盐",
+  "allergenCorn": "玉米",
+  "allergenNightshades": "茄科植物",
+  "nutritionCopyFromAuto": "从自动计算复制",
+  "nutritionEstimatedDisclaimer": "基于USDA数据的估算值",
+  "actionDiscard": "放弃",
+  "unsavedChangesTitle": "有未保存的更改",
+  "unsavedChangesMessage": "您有未保存的更改，要保存吗？",
+  "tagsEmptyTitle": "没有标签",
+  "tagsEmptySubtitle": "创建标签来整理食谱。",
+  "tagsLoadDefaults": "加载默认标签",
+  "tagsAddNew": "添加标签",
+  "tagsEdit": "编辑标签",
+  "tagsDelete": "删除标签",
+  "tagsDeleteConfirm": "确定要删除\"{name}\"吗？",
+  "@tagsDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsNameLabel": "标签名称",
+  "tagsIconLabel": "图标（表情符号）",
+  "tagsColorLabel": "颜色",
+  "settingsRpgAnimations": "稀有度动画",
+  "settingsRpgAnimationsSubtitle": "史诗和传奇食谱的光泽效果",
+  "settingsRpgSounds": "音效",
+  "settingsRpgSoundsSubtitle": "成就和升级音效",
+  "settingsRpgAchievements": "成就",
+  "settingsRpgAchievementsSubtitle": "查看已解锁成就",
+  "settingsRpgStats": "烹饪统计",
+  "settingsRpgStatsSubtitle": "查看烹饪统计",
+  "settingsRpgModeEnabled": "Transform your cooking into an adventure!",
+  "settingsRecipeLayoutSubtitle": "自定义食谱显示",
+  "rarityCommon": "普通",
+  "rarityCommonDesc": "简单的日常食谱",
+  "rarityUncommon": "特别",
+  "rarityUncommonDesc": "有独特风味的美味食谱",
+  "rarityRare": "稀有",
+  "rarityRareDesc": "值得掌握的特别食谱",
+  "rarityEpic": "史诗",
+  "rarityEpicDesc": "具有强大力量的史诗食谱！",
+  "rarityLegendary": "传奇",
+  "rarityLegendaryDesc": "配得上神灵的传奇食谱！",
+  "shareLink": "链接",
+  "shareDocument": "PDF",
+  "sharePrint": "打印",
+  "shareLinkDescription": "分享链接让他人查看此食谱。",
+  "shareLinkNote": "接收者需要Recipe Spellbook或可在网页查看。",
+  "shareCreatingDocument": "正在创建文档...",
+  "editLayoutTitle": "编辑布局",
+  "editLayoutStacked": "堆叠",
+  "editLayoutTabbed": "选项卡",
+  "editLayoutStackedDesc": "所有部分在可滚动视图中",
+  "editLayoutTabbedDesc": "详情、食材、做法各有独立选项卡",
+  "tabDetails": "详情",
+  "tabIngredients": "食材",
+  "tabInstructions": "做法",
+  "stepImageAdd": "添加图片",
+  "stepImageChange": "更换图片",
+  "stepImageRemove": "删除图片",
+  "stepTimer": "计时器",
+  "stepTimerMinutes": "{minutes}分钟",
+  "@stepTimerMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeAddToCookbook": "添加到食谱书",
+  "recipeMoveToTrash": "移至回收站",
+  "tagsEmpty": "没有标签",
+  "nutritionPerServingLabel": "每份",
+  "nutritionTotalLabel": "整个食谱",
+  "trendingRecipes": "热门食谱",
+  "addShortcut": "添加Recipe Spellbook快捷方式",
+  "addShortcutSubtitle": "一个手势导入食谱",
+  "importGuides": "阅读导入指南",
+  "useOnDesktop": "在电脑上使用Recipe Spellbook",
+  "inviteFriends": "邀请好友",
+  "inviteFriendsTitle": "分享Recipe Spellbook",
+  "inviteFriendsSubtitle": "邀请朋友和家人一起烹饪！",
+  "shareApp": "分享应用",
+  "maybeLater": "以后再说",
+  "createAccount": "创建账户",
+  "upgradeToPremium": "升级到高级版",
+  "premiumSubtitle": "解锁同步、无限食谱等功能",
+  "rpgMode": "RPG模式",
+  "leaderboards": "排行榜",
+  "achievements": "成就",
+  "cookingStats": "烹饪统计",
+  "stepByStepGuides": "分步指南",
+  "importGuidesSubtitle": "了解如何从您喜欢的应用和网站导入",
+  "importFromOtherApps": "从其他应用导入",
+  "orderOnline": "在线订购",
+  "helpTitle": "帮助",
+  "navMenu": "菜单",
+  "mealPlanTitle": "我的餐食计划",
+  "noRecipesYet": "没有食谱",
+  "breakfast": "早餐",
+  "lunch": "午餐",
+  "dinner": "晚餐",
+  "snack": "零食",
+  "allergenGluten": "麸质",
+  "allergenChocolate": "巧克力和可可",
+  "allergenCaffeine": "咖啡因",
+  "allergenAlcohol": "酒精",
+  "allergenCitrus": "柑橘类",
+  "allergenStoneFruits": "核果类",
+  "allergenCoconut": "椰子",
+  "allergenGarlic": "大蒜",
+  "allergenOnion": "洋葱",
+  "allergenMushrooms": "蘑菇",
+  "allergenAvocado": "牛油果",
+  "allergenBanana": "香蕉",
+  "allergenKiwi": "猕猴桃",
+  "allergenLatexFoods": "乳胶交叉反应",
+  "allergenFodmap": "高FODMAP",
+  "allergenHistamine": "高组胺",
+  "allergenSalicylates": "水杨酸盐",
+  "allergenMsg": "味精",
+  "allergenRedMeat": "红肉（α-半乳糖）",
+  "allergenGelatin": "明胶",
+  "allergyWarningContains": "含有",
+  "allergyDismissForRecipe": "在此食谱中隐藏",
+  "allergyDismissUndo": "撤销",
+  "allergyWarningDismissed": "已隐藏此食谱的警告",
+  "scaleCustom": "自定义",
+  "scaleCustomTitle": "自定义倍数",
+  "scaleCustomHint": "输入数字（例如3/4输入0.75，2.5输入2.5）",
+  "scaleApply": "应用",
+  "addStep": "添加步骤",
+  "noInstructionsYet": "没有做法",
+  "addFirstStep": "添加第一步",
+  "enterInstruction": "输入做法...",
+  "addStepImage": "为步骤添加图片",
+  "removeStep": "删除步骤",
+  "plannerNoMeals": "没有计划餐食",
+  "plannerAddMealHint": "点击+添加餐食",
+  "plannerMealAdded": "已将{recipe}添加到{mealType}",
+  "@plannerMealAdded": {
+    "placeholders": {
+      "recipe": {
+        "type": "String"
+      },
+      "mealType": {
+        "type": "String"
+      }
+    }
+  },
+  "plannerShareMealPlan": "分享餐食计划",
+  "plannerAddWeekToShopping": "将本周添加到购物清单",
+  "plannerClearWeek": "清空本周",
+  "plannerClearWeekConfirm": "将删除本周所有计划餐食。",
+  "plannerWeekCleared": "本周已清空",
+  "plannerGoToToday": "跳转到今天",
+  "plannerAddAnother": "再添加一餐",
+  "plannerSearchRecipes": "搜索食谱...",
+  "mealTypeBreakfast": "早餐",
+  "mealTypeLunch": "午餐",
+  "mealTypeDinner": "晚餐",
+  "mealTypeSnack": "零食",
+  "shoppingItems": "{count, plural, other{{count}件}}",
+  "@shoppingItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingBySection": "按通道",
+  "shoppingByRecipe": "按食谱",
+  "shoppingUngrouped": "不分组",
+  "shoppingOrderOnline": "在线订购",
+  "shoppingEditItem": "编辑商品",
+  "shoppingItemName": "商品名称",
+  "shoppingSelectCategory": "选择类别",
+  "shoppingAddedManually": "手动添加",
+  "shoppingEmptyList": "清单为空",
+  "shoppingEmptyHint": "点击+添加商品",
+  "shoppingAddHint": "按回车键添加，然后输入下一个",
+  "categoryDeli": "Deli",
+  "categoryBreakfast": "Breakfast & Cereal",
+  "categoryCanned": "Canned Goods & Soups",
+  "categoryCondiments": "Condiments, Sauces & Spices",
+  "categoryAlcohol": "Beer, Wine & Spirits",
+  "categoryBaby": "Baby",
+  "categoryBeauty": "Beauty & Personal Care",
+  "categoryHousehold": "Housewares",
+  "categoryPet": "Pet",
+  "importFromPlatform": "从{platform}导入",
+  "@importFromPlatform": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "importFromApp": "从{app}导入",
+  "@importFromApp": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "helpAddingRecipes": "添加食谱",
+  "helpAddingRecipesDesc": "在任意食谱书中点击+添加食谱。",
+  "helpImporting": "从应用导入",
+  "helpImportingDesc": "从Instagram、TikTok或任何网站分享食谱。",
+  "helpMealPlanning": "餐食计划",
+  "helpMealPlanningDesc": "点击计划选项卡规划每周餐食。",
+  "helpShopping": "购物清单",
+  "helpShoppingDesc": "向清单添加食材，商品按通道整理。",
+  "helpSyncing": "同步",
+  "helpSyncingDesc": "云端同步即将推出！",
+  "helpContactUs": "联系我们",
+  "helpContactUsDesc": "有问题？请发邮件至support@recipespellbook.com",
+  "navCommunity": "社区",
+  "navComingSoon": "即将推出",
+  "mealPlanButton": "餐食计划",
+  "groceriesButton": "购物",
+  "shareButton": "分享",
+  "scaleRecipeButton": "调整",
+  "convertUnitsButton": "换算",
+  "allergyDismissTooltip": "隐藏警告",
+  "allergyDisablePrompt": "永久禁用此食谱的警告？",
+  "allergyDisabledForRecipe": "已禁用此食谱的警告",
+  "allergyRestoreWarnings": "恢复警告",
+  "recipeDuplicated": "食谱已复制",
+  "recipeDeleted": "食谱已移至回收站",
+  "deleteRecipeTitle": "删除食谱",
+  "deleteRecipeConfirm": "确定要删除此食谱吗？将移至回收站。",
+  "addToShoppingListTitle": "添加到购物清单",
+  "viewList": "查看清单",
+  "selectItems": "选择商品",
+  "addToListCount": "添加{count}件",
+  "@addToListCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yes": "是",
+  "no": "否",
+  "cancel": "取消",
+  "delete": "删除",
+  "save": "保存",
+  "restore": "恢复",
+  "unselectAll": "取消选择",
+  "deleteStep": "删除步骤",
+  "deleteSteps": "删除步骤",
+  "deleteStepConfirm": "删除此步骤？",
+  "deleteStepsConfirm": "删除{count}个步骤？",
+  "@deleteStepsConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stepSelected": "已选{count}个",
+  "@stepSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectAllSteps": "全选",
+  "gradientBased": "基于渐变",
+  "gradientBasedDescription": "主题的颜色渐变",
+  "startCooking": "开始烹饪",
+  "fontSizeLabel": "字体大小",
+  "krogerLoginDenied": "Kroger登录被拒绝：{error}",
+  "@krogerLoginDenied": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "krogerNoAuthCode": "未从Kroger收到授权码。",
+  "krogerConnected": "Kroger已连接！您可以直接将商品发送到购物车。",
+  "krogerConnectFailed": "连接Kroger失败。",
+  "krogerConnecting": "正在连接Kroger…",
+  "krogerExchanging": "交换授权中...",
+  "krogerConnectedTitle": "已连接！",
+  "krogerConnectionFailed": "连接失败",
+  "goToShoppingList": "前往购物清单",
+  "tryAgain": "重试",
+  "skipForNow": "暂时跳过",
+  "skipDuplicates": "跳过重复",
+  "deselectAll": "取消选择",
+  "duplicate": "复制",
+  "recipesImported": "{count, plural, other{已导入{count}个食谱}}",
+  "@recipesImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importCountRecipes": "{count, plural, other{导入{count}个食谱}}",
+  "@importCountRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productNotFound": "找不到产品",
+  "barcodeNotFound": "找不到条形码的产品：\n{barcode}",
+  "@barcodeNotFound": {
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "manualEntryHint": "您可以手动输入产品名称。",
+  "scanAgain": "重新扫描",
+  "enterManually": "手动输入",
+  "enterProductName": "输入产品名称",
+  "productName": "产品名称",
+  "scanBarcode": "扫描条形码",
+  "lookingUpProduct": "正在查找产品...",
+  "pointCameraBarcode": "将相机对准条形码",
+  "unknownProduct": "未知产品",
+  "nutritionPer100g": "营养成分（每100克）",
+  "findRecipesWithThis": "查找含此食材的食谱",
+  "scanAnother": "再扫一个",
+  "exportFormat": "导出格式",
+  "gotIt": "明白了",
+  "calendar": "日历",
+  "today": "今天",
+  "shareMealPlan": "分享餐食计划",
+  "addWeekToShoppingList": "将本周添加到清单",
+  "clearThisWeek": "清空本周？",
+  "clearWeekWarning": "将删除本周所有计划餐食。",
+  "goToToday": "跳转到今天",
+  "addAnotherMeal": "再添加一餐",
+  "meal": "餐食",
+  "noMealsPlanned": "没有计划餐食",
+  "tapToAddMeal": "点击+添加",
+  "addMeal": "添加餐食",
+  "addToDay": "添加到{dayName}",
+  "@addToDay": {
+    "placeholders": {
+      "dayName": {
+        "type": "String"
+      }
+    }
+  },
+  "searchRecipes": "搜索食谱...",
+  "noRecipesFound": "未找到食谱",
+  "exitShoppingListGenerator": "退出清单生成器？",
+  "actionExit": "退出",
+  "shoppingListGenerator": "购物清单生成器",
+  "reviewAndAdd": "查看并添加（{count}件）",
+  "@reviewAndAdd": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addItemsToList": "向清单添加{count}件",
+  "@addItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedItemsToShoppingList": "已向购物清单添加{count}件",
+  "@addedItemsToShoppingList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "createNewList": "创建新清单",
+  "listName": "清单名称",
+  "manage": "管理",
+  "myPantry": "我的储藏室",
+  "itemsAlwaysOnHand": "随时备用的商品",
+  "whatToDelete": "要删除什么？",
+  "localData": "本地数据",
+  "localDataDesc": "此设备上的食谱、食谱书、餐食计划、购物清单",
+  "cloudData": "云端数据",
+  "cloudDataDesc": "即将推出 — 云端同步尚不可用",
+  "allData": "所有数据",
+  "allDataDesc": "本地数据和设置 — 完全重置",
+  "permanentDeleteWarning": "这将永久删除{scope}，此操作无法撤销。",
+  "@permanentDeleteWarning": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "dataResetComplete": "数据已重置",
+  "noThanks": "不，谢谢",
+  "importFailed": "导入失败：{error}",
+  "@importFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "yesAddThem": "是，添加",
+  "nutritionDisplay": "营养显示",
+  "nutritionDisplaySubtitle": "图表样式、可见营养素",
+  "storeIntegrations": "商店集成",
+  "instacart": "Instacart",
+  "kroger": "Kroger",
+  "connected": "已连接",
+  "setCustomApiKey": "设置自定义API密钥",
+  "useOwnInstacartKey": "使用自己的Instacart Connect密钥",
+  "instacartApiKey": "Instacart API密钥",
+  "resetToDefaultKey": "重置为默认密钥",
+  "removeCustomKey": "删除自定义密钥",
+  "signInToKroger": "登录Kroger",
+  "connectToAddItems": "连接以将商品添加到购物车",
+  "setPreferredStore": "设置首选门店",
+  "searchByZipCode": "按邮政编码搜索",
+  "disconnect": "断开连接",
+  "apiKeySaved": "API密钥已保存",
+  "findYourKrogerStore": "查找Kroger门店",
+  "enterZipCode": "输入邮政编码",
+  "storeSet": "已设置门店：{name}",
+  "@storeSet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "menuImportSubtitle": "Instagram、TikTok、网站...",
+  "menuSyncToMobile": "同步到手机",
+  "menuSyncToDesktop": "同步到电脑",
+  "menuTransferToPhone": "将数据传输到手机",
+  "menuTransferToDevice": "将数据传输到其他设备",
+  "menuProfile": "个人资料",
+  "menuProfileSubtitle": "查看统计和进度",
+  "menuAchievementsSubtitle": "解锁奖励",
+  "menuCosmetics": "外观",
+  "menuCosmeticsSubtitle": "自定义您的外观",
+  "menuLeaderboardsSubtitle": "与他人竞争",
+  "menuBossBattles": "Boss战",
+  "menuBossBattlesSubtitle": "史诗级烹饪挑战",
+  "menuImportRecipes": "导入食谱",
+  "menuHelpSupport": "帮助与支持",
+  "menuAppVersion": "Recipe Spellbook v{version}",
+  "@menuAppVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "menuShareApp": "分享Recipe Spellbook",
+  "menuShareSubtitle": "邀请朋友和家人一起烹饪！",
+  "menuShareMessage": "来看看Recipe Spellbook——最棒的食谱应用！https://recipespellbook.app",
+  "signIn": "登录",
+  "helpFromWebsite": "从网站",
+  "helpFromWebsiteDesc": "在任意食谱书中点击+，然后粘贴食谱URL。",
+  "helpFromSocial": "从Instagram或TikTok",
+  "helpFromSocialDesc": "复制食谱帖子的链接，点击+并粘贴。",
+  "helpFromPhoto": "从照片",
+  "helpFromPhotoDesc": "拍摄书中食谱的照片，点击+选择图片。",
+  "helpFromPdf": "从PDF",
+  "helpFromPdfDesc": "点击+选择文件导入PDF。",
+  "helpFromText": "从文本",
+  "helpFromTextDesc": "复制食谱文本，点击+然后选择粘贴。",
+  "helpFromPaprika": "从Paprika",
+  "helpFromPaprikaDesc": "在Paprika中进入导出，选择HTML格式。",
+  "helpFromOtherApps": "从其他应用",
+  "helpFromOtherAppsDesc": "大多数食谱应用都可以导出为HTML或文本格式。",
+  "helpCloudSync": "云端同步",
+  "helpCloudSyncDesc": "订阅云端同步，在所有设备上同步食谱。",
+  "accountTitle": "账户",
+  "signInToSync": "登录以同步",
+  "signInSyncDesc": "备份食谱、在多设备同步并解锁高级功能。",
+  "continueWithGoogle": "使用Google继续",
+  "continueWithApple": "使用Apple继续",
+  "signOut": "登出",
+  "signOutQuestion": "登出？",
+  "signOutDesc": "食谱将保留在此设备上。",
+  "deleteAccount": "删除账户",
+  "deleteAccountQuestion": "删除账户？",
+  "deleteAccountDesc": "这将永久删除您的账户和所有同步数据。\n\n本地保存的食谱不会被删除。",
+  "deletePermanently": "永久删除",
+  "deleteAccountFailed": "删除账户失败。",
+  "signInToApp": "登录Recipe Spellbook",
+  "signInSyncLong": "同步食谱、解锁云端备份并访问Pro功能。",
+  "recipesStayOnDevice": "即使没有账户，食谱也会保留在此设备上。",
+  "upgradeToPro": "升级到Pro",
+  "subscriptionDot": "订阅 · {tier}",
+  "@subscriptionDot": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "affluentLabsPro": "Affluent Labs Pro",
+  "cancelledAccessUntil": "已取消 — 访问至{date}",
+  "@cancelledAccessUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "lifetimeNeverExpires": "终身 — 永不过期",
+  "renewsDate": "续订日期 {date}",
+  "@renewsDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "manageSubscription": "管理订阅",
+  "tierPremium": "高级",
+  "tierStandard": "标准",
+  "tierBasic": "基础",
+  "tierFree": "免费",
+  "tierPlan": "{tier}方案",
+  "@tierPlan": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "upgradeArrow": "升级 →",
+  "syncNow": "立即同步",
+  "syncing": "同步中...",
+  "lastSynced": "上次同步 {time}",
+  "@lastSynced": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "notYetSynced": "尚未同步",
+  "cloudSyncSection": "云端同步",
+  "noRecipesPlannedThisWeek": "本周没有计划食谱",
+  "todayBadge": "今天",
+  "noCourseAssigned": "无课程",
+  "uncategorized": "未分类",
+  "allRecipesHaveCourse": "所有食谱都已设置课程！",
+  "allRecipesCategorized": "所有食谱都已分类！",
+  "greatJobOrganizing": "整理得很好！",
+  "countOfTotal": "共{total}个中的{count}个",
+  "@countOfTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "tapToAssignCourse": "点击分配课程",
+  "tapToAssignCategory": "点击分配类别",
+  "deleteCountRecipes": "删除{count, plural, other{{count}个食谱}}？",
+  "@deleteCountRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipesMovedToTrash": "{count, plural, other{{count}个食谱}}已移至回收站",
+  "@countRecipesMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "setCourse": "设置课程",
+  "setCategory": "设置类别",
+  "courseSetForCount": "已为{count, plural, other{{count}个食谱}}设置课程",
+  "@courseSetForCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categorySetForCount": "已为{count, plural, other{{count}个食谱}}设置类别",
+  "@categorySetForCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "countRecipesFavorited": "{count, plural, other{{count}个食谱}}已添加到收藏",
+  "@countRecipesFavorited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkCourse": "课程",
+  "bulkCategory": "类别",
+  "bulkFavorite": "收藏",
+  "aiImportTitle": "AI导入",
+  "aiCopyPrompt": "复制提示词",
+  "aiCopyPromptSubtitle": "将此提示词连同食谱粘贴到ChatGPT、Claude、Gemini或任何AI中。",
+  "aiCopied": "已复制！",
+  "aiCopyToClipboard": "复制提示词",
+  "aiPreviewPrompt": "预览提示词",
+  "aiPasteOutput": "粘贴AI输出",
+  "aiPasteSubtitle": "粘贴AI的JSON或导入.json文件。",
+  "aiPasteFirst": "请先粘贴或加载JSON。",
+  "aiFailedReadFile": "读取文件失败：{error}",
+  "@aiFailedReadFile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "aiUntitledRecipe": "无标题食谱",
+  "aiImporting": "导入中...",
+  "aiImportToCookbook": "导入到食谱书",
+  "aiImportSuccess": "食谱导入成功！",
+  "aiPreviewImport": "预览并导入",
+  "aiPromptCopied": "提示词已复制！将其连同食谱粘贴到任何AI中。",
+  "aiLoadJsonFile": "加载.json文件",
+  "aiPaste": "粘贴",
+  "aiTipsTitle": "提示",
+  "aiTip1": "适用于ChatGPT、Claude、Gemini、Copilot或任何AI",
+  "aiTip2": "您也可以拍摄食谱照片并与提示词一起粘贴",
+  "aiTip3": "AI可以转换手写、打印或网页食谱",
+  "aiTip4": "如果JSON有错误，请让AI修正它",
+  "aiServingsLabel": "{count}人份",
+  "@aiServingsLabel": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "aiPrepLabel": "{minutes}分钟准备",
+  "@aiPrepLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "aiCookLabel": "{minutes}分钟烹饪",
+  "@aiCookLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "aiIngredientsCount": "食材（{count}种）",
+  "@aiIngredientsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aiStepsCount": "步骤（{count}个）",
+  "@aiStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreAllWarnings": "恢复所有警告",
+  "warningsRestoredForRecipe": "此食谱的警告已恢复",
+  "restoreAllWarningsQuestion": "恢复所有警告？",
+  "restoreAll": "全部恢复",
+  "allWarningsRestored": "所有警告已恢复",
+  "dismissedWarnings": "{count}个已隐藏",
+  "@dismissedWarnings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restoringPurchases": "正在恢复购买...",
+  "restorePurchases": "恢复",
+  "compareAllPlans": "比较所有方案",
+  "oneTimeTab": "一次性",
+  "subscriptionTab": "订阅",
+  "payOnceKeepForever": "一次付费，永久使用",
+  "cloudSyncFeature": "云端同步",
+  "cloudSyncPlusFeature": "云端同步+",
+  "unableToLoadProducts": "无法加载产品。",
+  "noOfferingsAvailable": "没有可用的产品。",
+  "purchaseFailed": "购买失败：{error}",
+  "@purchaseFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "hintProductExample": "例如：有机番茄酱",
+  "previewPhoto": "预览照片",
+  "retake": "重拍",
+  "usePhoto": "使用此照片",
+  "takePhoto": "拍照",
+  "chooseFromGallery": "从相册选择",
+  "removeImage": "删除图片",
+  "tipsPlaceholder": "提示、变体、存储说明...",
+  "totalCalories": "总卡路里",
+  "caloriesPerServing": "卡路里/份",
+  "totalNutrition": "合计",
+  "linkRecipe": "关联食谱",
+  "addIngredient": "添加食材",
+  "searchRecipesToLink": "搜索要关联的食谱...",
+  "linkToIngredient": "关联到\"{name}\"",
+  "@linkToIngredient": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "errorSavingRecipe": "保存出错：{error}",
+  "@errorSavingRecipe": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteSelectedCount": "删除{count}个",
+  "@deleteSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "takeAPhoto": "拍照",
+  "defaultLabel": "默认",
+  "scaleRecipe": "调整食谱比例",
+  "scaleHint": "例如：2.5",
+  "badgePinned": "已固定",
+  "badgeRecentlyViewed": "最近浏览",
+  "displayOptions": "显示选项",
+  "showMealPlan": "显示餐食计划",
+  "showMealPlanSubtitle": "显示今天计划的食谱",
+  "showPinnedRecipes": "显示固定食谱",
+  "showPinnedSubtitle": "显示固定食谱",
+  "showRecentHistory": "显示最近记录",
+  "showRecentSubtitle": "显示最近浏览的食谱",
+  "versionLabel": "版本 {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "measurementsUS": "杯、勺、盎司、°F",
+  "measurementsMetric": "毫升、克、°C",
+  "defaultRecipesImported": "已导入{count}个默认食谱！",
+  "@defaultRecipesImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingListGeneratorTitle": "购物清单生成器",
+  "exitShoppingListGeneratorQuestion": "退出生成器？",
+  "reviewAndAddItems": "查看并添加（{count}件）",
+  "@reviewAndAddItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedTotalItemsToList": "已向清单添加{count}件",
+  "@addedTotalItemsToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scaleMultiplier": "{scale}倍",
+  "@scaleMultiplier": {
+    "placeholders": {
+      "scale": {
+        "type": "String"
+      }
+    }
+  },
+  "printIngredients": "食材",
+  "printInstructions": "做法",
+  "printNotes": "备注",
+  "printPrep": "准备：{minutes}分钟",
+  "@printPrep": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "printCook": "烹饪：{minutes}分钟",
+  "@printCook": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "printFooter": "从Recipe Spellbook打印",
+  "printPage": "第{current}/{total}页",
+  "@printPage": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "menuNavigation": "导航",
+  "menuImport": "导入",
+  "menuRpgMode": "RPG模式",
+  "menuSocial": "社交",
+  "menuApp": "应用",
+  "historyCount": "历史数量",
+  "historyCountSubtitle": "显示最近食谱的最大数量",
+  "restoreAllWarningsDesc": "这将重新激活所有食谱的过敏警告。",
+  "signInToContinue": "登录继续",
+  "signInForPurchaseDesc": "购买前需要账户。",
+  "menuAchievements": "成就",
+  "menuLeaderboards": "排行榜",
+  "requiresPremium": "需要高级版",
+  "deleteCount": "删除{count}个",
+  "@deleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tapToSelectPhoto": "点击从相册或相机选择",
+  "rating": "评分",
+  "usUnits": "cups, tablespoons, ounces, °F",
+  "metricUnits": "milliliters, grams, °C",
+  "selectedCount": "已选{count}个",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteRecipesConfirm": "删除{count}个食谱？",
+  "@deleteRecipesConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "courseSetForRecipes": "已为{count}个食谱设置课程",
+  "@courseSetForRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@recipesFavorited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeImportedSuccess": "食谱导入成功！",
+  "promptCopied": "提示词已复制！将其连同食谱粘贴到任何AI中。",
+  "importFromAI": "AI导入",
+  "paste": "粘贴",
+  "previewAndImport": "预览并导入",
+  "signInDescription": "保存食谱，在多设备同步。",
+  "signOutConfirmTitle": "登出？",
+  "signOutConfirmMessage": "食谱将保留在此设备上。",
+  "deleteAccountConfirmTitle": "删除账户？",
+  "deleteAccountConfirmMessage": "这将永久删除您的账户。\n\n本地食谱不会被删除。",
+  "planLabel": "{label}方案",
+  "@planLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "permanentlyDeleteWarning": "这将永久删除{scope}，此操作无法撤销。",
+  "@permanentlyDeleteWarning": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "recipesMovedToTrash": "{count}个食谱已移至回收站",
+  "@recipesMovedToTrash": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipesFavorited": "{count}个食谱已添加到收藏",
+  "upgradeRecipeSpellbook": "升级Recipe Spellbook",
+  "choosePlanSubtitle": "选择适合您厨房的方案",
+  "premiumInfoNotice": "高级版是一次性购买，提升您的免费体验。",
+  "bestValue": "最佳价值",
+  "billedMonthly": "按月计费",
+  "save16Yearly": "节省16% — 仅$2.50/月",
+  "save16Badge": "节省16%",
+  "save17Yearly": "节省17% — 仅$4.17/月",
+  "subscriptionsIncludePremium": "所有订阅均包含高级版的所有内容。",
+  "monthly": "月付",
+  "yearly": "年付",
+  "purchasePremiumCta": "购买高级版 — $6.99",
+  "subscribeCloudSyncMonthlyCta": "订阅 — $2.99/月",
+  "subscribeCloudSyncYearlyCta": "订阅 — $29.99/年",
+  "subscribeCloudSyncPlusMonthlyCta": "订阅 — $4.99/月",
+  "subscribeCloudSyncPlusYearlyCta": "订阅 — $49.99/年",
+  "signInRequiredBeforePurchase": "购买前需要登录",
+  "terms": "条款",
+  "privacy": "隐私",
+  "comparePlans": "比较方案",
+  "featureCloudSyncPersonal": "云端同步（个人）",
+  "featurePhotosOnSteps": "步骤照片",
+  "featurePhotoStorage250": "照片存储250MB（约500张）",
+  "featureRpgCosmeticsStarter": "RPG外观入门包",
+  "featureSupporterBadge": "高级支持者徽章",
+  "featureExtraPolish": "UI和功能改进",
+  "featureFamilySharing5": "家庭共享（5人）",
+  "featurePhotoStorage1gb": "照片存储1GB（约2,000张）",
+  "featureSharedLists": "共享购物清单",
+  "featureSharedCookbooks": "共享食谱书",
+  "featureSharedMealPlan": "共享餐食计划",
+  "featureEncryptedBackups": "加密备份+历史",
+  "featureFamilySharing10": "家庭共享（10人）",
+  "featurePhotoStorage5gb": "照片存储5GB（约10,000张）",
+  "featureExtendedVersionHistory": "扩展历史",
+  "featurePrioritySync": "优先同步",
+  "featureFutureAdvanced": "包含未来高级功能",
+  "tierCloudSync": "云端\n同步",
+  "tierCloudSyncPlus": "云端\n同步+",
+  "comparePrice": "价格",
+  "priceFree": "$0",
+  "pricePremium": "$6.99\n一次性",
+  "priceCloudSync": "$2.99\n/月",
+  "priceCloudSyncPlus": "$4.99\n/月",
+  "compareDeviceTransfer": "设备传输",
+  "qrCode": "二维码",
+  "cloud": "云端",
+  "comparePhotoStorage": "照片存储",
+  "compareStepPhotos": "步骤照片",
+  "compareFamilySharing": "家庭共享",
+  "compareSharedLists": "共享清单",
+  "compareSharedCookbooks": "共享食谱书",
+  "compareSharedMealPlan": "共享餐食计划",
+  "compareBackups": "备份",
+  "compareVersionHistory": "历史",
+  "light": "轻量",
+  "extended": "扩展",
+  "compareRpgCosmetics": "RPG外观",
+  "basic": "基础",
+  "starterPack": "入门\n套餐",
+  "compareSupporterBadge": "支持者徽章",
+  "printOf": "/",
+  "printRecipe": "打印",
+  "stackedLayout": "堆叠布局",
+  "tabbedLayout": "选项卡布局",
+  "printLabelIngredients": "食材",
+  "printLabelInstructions": "做法",
+  "printLabelNotes": "备注",
+  "printLabelPrep": "准备",
+  "printLabelCook": "烹饪",
+  "printLabelFooter": "从Recipe Spellbook打印",
+  "printLabelPage": "页",
+  "printLabelOf": "/",
+  "smallerText": "缩小文字",
+  "largerText": "放大文字",
+  "textSize": "字体大小",
+  "ingredientPreview": "食材预览",
+  "resetToDefault": "Reset to Default",
+  "smartImportSuccess": "AI已重新分析食谱",
+  "smartImportSuccessWithRemaining": "AI已分析食谱 • 本月剩余{remaining}次",
+  "@smartImportSuccessWithRemaining": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "smartImportLimitTitle": "已达到智能导入限制",
+  "smartImportLimitMessage": "您已使用本月{limit}次智能导入。",
+  "@smartImportLimitMessage": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "smartImportUpgradeHint": "升级到高级版获得每月200次导入。",
+  "smartImportParsing": "AI分析中...",
+  "smartImportFix": "用智能导入修复 ✨",
+  "smartImportRemaining": "本月剩余{remaining}/{limit}次智能导入",
+  "@smartImportRemaining": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "smartImportHintTitle": "导入看起来不正确？",
+  "smartImportHintSubtitle": "订阅智能导入 — AI食谱分析",
+  "learnMore": "了解更多",
+  "retry": "重试",
+  "upgrade": "升级",
+  "cookingMode": "烹饪模式",
+  "mealTypeDessert": "甜点",
+  "noContentToSave": "没有内容可保存",
+  "recipeSaved": "食谱已保存！",
+  "qrScanningMobileOnly": "二维码扫描仅在移动端可用。",
+  "notEnoughMana": "法力不足！通过食谱获得经验值来恢复。",
+  "communityComingSoon": "社区功能即将推出！",
+  "somethingWentWrong": "出现错误：{error}",
+  "@somethingWentWrong": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "starterRecipesAdded": "已添加{count}个入门食谱！🎉",
+  "@starterRecipesAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enterAtLeastOneNutrient": "请至少输入卡路里或一种宏量营养素",
+  "addedToMealPlan": "已添加到{date}的{mealType}",
+  "@addedToMealPlan": {
+    "placeholders": {
+      "mealType": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noItemsFoundInText": "文本中未找到商品",
+  "noTextFoundInImage": "图片中未找到文字",
+  "addDayToShoppingList": "将今天添加到清单",
+  "sendDayToShoppingList": "将今天发送到清单",
+  "removeMeal": "删除餐食",
+  "removeMealConfirm": "从今天删除{recipeName}？",
+  "@removeMealConfirm": {
+    "placeholders": {
+      "recipeName": {
+        "type": "String"
+      }
+    }
+  },
+  "actionRemove": "移除",
+  "plannerMealRemoved": "餐食已删除",
+  "weekStartsOn": "周起始日",
+  "monday": "周一",
+  "saturday": "周六",
+  "sunday": "周日",
+  "ingredientHeader": "标题",
+  "ingredientHeaderHint": "例如：酱汁用",
+  "settingsWeekStartDay": "周起始日",
+  "tuesday": "周二",
+  "wednesday": "周三",
+  "thursday": "周四",
+  "friday": "周五",
+  "shoppingAddedToList": "已向\"{listName}\"添加{count}件",
+  "@shoppingAddedToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingAddedAndCombined": "已向\"{listName}\"添加{added}件，合并{combined}件",
+  "@shoppingAddedAndCombined": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "combined": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingItemsUpdated": "已更新\"{listName}\"中的{count}件",
+  "@shoppingItemsUpdated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingAddError": "错误：{message}",
+  "@shoppingAddError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "editCookbook": "编辑食谱书",
+  "newCookbook": "新建食谱书",
+  "tapToAddCoverImage": "点击添加封面图片",
+  "cookbookDescriptionLabel": "描述",
+  "cookbookDescriptionHint": "食谱合集...",
+  "cookbookNameRequired": "请输入名称",
+  "addCover": "添加封面",
+  "recipeCount": "{count, plural, other{{count}个食谱}}",
+  "@recipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbookDeleteWithRecipes": "此食谱书包含{count, plural, other{{count}个食谱}}，将移至回收站。\n\n确定要删除\"{name}\"吗？",
+  "@cookbookDeleteWithRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cookbookDeleteConfirmNamed": "确定要删除\"{name}\"吗？",
+  "@cookbookDeleteConfirmNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shareCookbook": "分享食谱书",
+  "cookbookEmpty": "此食谱书没有可分享的食谱",
+  "recipes": "食谱",
+  "sendSuggestion": "发送建议",
+  "sendSuggestionSubtitle": "帮助我们改进Recipe Spellbook",
+  "reportBug": "报告错误",
+  "reportBugSubtitle": "有什么不正常吗？",
+  "joinDiscord": "加入Discord",
+  "joinDiscordSubtitle": "获得帮助并分享食谱",
+  "actionSend": "发送",
+  "suggestionDescription": "我们期待您的想法！您的建议将直接发送给我们的团队。",
+  "suggestionTitleLabel": "建议标题",
+  "suggestionTitleHint": "例如：为烹饪添加深色模式",
+  "suggestionDetailsLabel": "详情",
+  "suggestionDetailsHint": "详细描述您的想法...",
+  "contactOptionalLabel": "联系方式（可选）",
+  "contactOptionalHint": "邮箱或Discord名称",
+  "suggestionSent": "感谢您！建议已发送 💡",
+  "bugDescription": "发现错误？告诉我们，我们会修复它。",
+  "bugTitleLabel": "错误标题",
+  "bugTitleHint": "例如：导入PDF时应用崩溃",
+  "bugDetailsLabel": "发生了什么？",
+  "bugDetailsHint": "描述出了什么问题...",
+  "bugStepsLabel": "重现步骤（可选）",
+  "bugStepsHint": "1. 打开食谱\n2. 点击分享\n3. 应用崩溃",
+  "bugReportSent": "感谢您！错误报告已发送 🐛",
+  "feedbackFieldsRequired": "请填写标题和详情",
+  "feedbackSendError": "无法发送反馈，请检查连接。",
+  "mealTypeAppetizer": "开胃菜",
+  "allergenContains": "Contains",
+  "settingsIngredientLayout": "食材布局",
+  "ingredientLayoutInline": "内联 — 黄油1茶匙",
+  "ingredientLayoutColumnar": "列式 — 对齐用量",
+  "settingsIngredientLayoutDescription": "选择食材用量和名称的显示方式。",
+  "ingredientLayoutInlineDescription": "用量、单位和名称按自然顺序排列",
+  "ingredientLayoutColumnarDescription": "用量在固定列中对齐",
+  "ingredientLayoutInfoText": "此设置适用于食谱视图、清单生成器和打印食谱。",
+  "searchCookbooks": "搜索食谱书...",
+  "aboutWebsite": "网站",
+  "aboutPrivacyPolicy": "隐私政策",
+  "aboutPrivacyPolicySub": "我们如何处理您的数据",
+  "aboutTermsOfService": "服务条款",
+  "aboutTermsOfServiceSub": "使用条件",
+  "aboutCommunity": "社区",
+  "aboutCommunitySub": "加入我们的Discord服务器",
+  "aboutReportBug": "报告错误",
+  "aboutReportBugSub": "帮助我们改进应用",
+  "aboutRateApp": "评价应用",
+  "aboutRateAppSub": "在商店留下评价",
+  "aboutLicenses": "开源许可证",
+  "aboutLicensesSub": "使用的第三方软件",
+  "sortOrder": "排序方式",
+  "ingredientAddHeader": "添加标题"
+}
