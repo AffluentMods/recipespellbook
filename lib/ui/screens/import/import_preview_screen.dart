@@ -1,6 +1,10 @@
+import 'dart:io';
 import 'package:drift/drift.dart' as drift;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/imported_recipe.dart';
@@ -109,6 +113,12 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
       try {
         final recipeId = 'recipe_${DateTime.now().millisecondsSinceEpoch}_$idx';
 
+        // Download recipe image if available
+        String? localImagePath;
+        if (recipe.imageUrl != null && recipe.imageUrl!.isNotEmpty) {
+          localImagePath = await _downloadRecipeImage(recipe.imageUrl!);
+        }
+
         await recipeDao.insertRecipe(RecipesCompanion.insert(
           id: recipeId,
           cookbookId: widget.cookbookId,
@@ -121,6 +131,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
           courseId: drift.Value(recipe.suggestedCourse),
           categoryId: drift.Value(recipe.suggestedCategory),
           notes: drift.Value(recipe.notes),
+          imagePath: drift.Value(localImagePath),
         ));
 
         for (var i = 0; i < recipe.ingredients.length; i++) {
@@ -164,6 +175,58 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
         ),
       );
     }
+  }
+
+  /// Downloads a recipe image from a URL and saves it to local app storage.
+  /// Returns the local file path, or null on failure.
+  static Future<String?> _downloadRecipeImage(String imageUrl) async {
+    try {
+      final response = await http.get(
+        Uri.parse(imageUrl),
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
+          'Accept': 'image/*,*/*;q=0.8',
+        },
+      ).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode != 200 || response.bodyBytes.isEmpty) return null;
+
+      // Skip tiny images (likely tracking pixels or icons)
+      if (response.bodyBytes.length < 1024) return null;
+
+      final dir = await getApplicationDocumentsDirectory();
+      final imageDir = Directory('${dir.path}/recipe_images');
+      if (!await imageDir.exists()) {
+        await imageDir.create(recursive: true);
+      }
+
+      final ext = _guessImageExtension(
+        response.headers['content-type'],
+        imageUrl,
+      );
+      final filename = 'img_${DateTime.now().millisecondsSinceEpoch}$ext';
+      final file = File('${imageDir.path}/$filename');
+      await file.writeAsBytes(response.bodyBytes);
+
+      debugPrint('[Import] Downloaded recipe image: ${file.path} (${response.bodyBytes.length} bytes)');
+      return file.path;
+    } catch (e) {
+      debugPrint('[Import] Failed to download recipe image: $e');
+      return null;
+    }
+  }
+
+  static String _guessImageExtension(String? contentType, String url) {
+    if (contentType != null) {
+      if (contentType.contains('png')) return '.png';
+      if (contentType.contains('webp')) return '.webp';
+      if (contentType.contains('gif')) return '.gif';
+    }
+    final lower = url.toLowerCase().split('?').first;
+    if (lower.endsWith('.png')) return '.png';
+    if (lower.endsWith('.webp')) return '.webp';
+    if (lower.endsWith('.gif')) return '.gif';
+    return '.jpg';
   }
 
   @override

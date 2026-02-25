@@ -2571,5 +2571,13 @@
   "aboutLicenses": "Licenças de código aberto",
   "aboutLicensesSub": "Softwares de terceiros usados",
   "sortOrder": "Ordem de classificação",
-  "ingredientAddHeader": "Adicionar cabeçalho"
+  "ingredientAddHeader": "Adicionar cabeçalho",
+  "saveAsRecipe": "Salvar como receita",
+  "exportFullBackup": "Backup completo",
+  "exportCookbooksRecipes": "Livros de receitas e receitas",
+  "exportShoppingLists": "Listas de compras",
+  "exportMealPlans": "Planos de refeição",
+  "exportTags": "Etiquetas",
+  "exportCategories": "Categorias personalizadas",
+  "exportCourses": "Cursos personalizados"
 }

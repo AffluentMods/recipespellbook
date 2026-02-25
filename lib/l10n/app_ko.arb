@@ -2571,5 +2571,13 @@
   "aboutLicenses": "오픈 소스 라이선스",
   "aboutLicensesSub": "사용된 타사 소프트웨어",
   "sortOrder": "정렬 순서",
-  "ingredientAddHeader": "제목 추가"
+  "ingredientAddHeader": "제목 추가",
+  "saveAsRecipe": "레시피로 저장",
+  "exportFullBackup": "전체 백업",
+  "exportCookbooksRecipes": "요리책 및 레시피",
+  "exportShoppingLists": "쇼핑 목록",
+  "exportMealPlans": "식사 계획",
+  "exportTags": "태그",
+  "exportCategories": "사용자 지정 카테고리",
+  "exportCourses": "사용자 지정 코스"
 }

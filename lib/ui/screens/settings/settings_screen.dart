@@ -252,47 +252,24 @@ class SettingsScreen extends ConsumerWidget {
 
     showModalBottomSheet(
       context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                l10n.settingsExport,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.menu_book),
-              title: Text(l10n.exportCurrentCookbook),
-              onTap: () async {
-                Navigator.pop(context);
-                _showLoadingSnackbar(context, l10n.exporting);
-                final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
-                final data = await service.exportCookbook(cookbookId);
-                await service.shareExport(data, 'cookbook_export.json');
-                if (context.mounted) {
-                  AppSnackbar.dismiss(context);
-                }
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.library_books),
-              title: Text(l10n.exportAllCookbooks),
-              onTap: () async {
-                Navigator.pop(context);
-                _showLoadingSnackbar(context, l10n.exporting);
-                final data = await service.exportAll();
-                await service.shareExport(data, 'recipe_spellbook_backup.json');
-                if (context.mounted) {
-                  AppSnackbar.dismiss(context);
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
+      isScrollControlled: true,
+      builder: (context) => _ExportOptionsSheet(
+        l10n: l10n,
+        onExportCookbook: () async {
+          Navigator.pop(context);
+          _showLoadingSnackbar(context, l10n.exporting);
+          final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
+          final data = await service.exportCookbook(cookbookId);
+          await service.shareExport(data, 'cookbook_export.json');
+          if (context.mounted) AppSnackbar.dismiss(context);
+        },
+        onExportSelective: (options) async {
+          Navigator.pop(context);
+          _showLoadingSnackbar(context, l10n.exporting);
+          final data = await service.exportSelective(options);
+          await service.shareExport(data, 'recipe_spellbook_backup.json');
+          if (context.mounted) AppSnackbar.dismiss(context);
+        },
       ),
     );
   }
@@ -2146,6 +2123,128 @@ class AdvancedSettingsScreen extends StatelessWidget {
           const SizedBox(height: 32),
         ],
       ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════
+//  EXPORT OPTIONS SHEET
+// ════════════════════════════════════════════
+
+class _ExportOptionsSheet extends StatefulWidget {
+  final AppLocalizations l10n;
+  final VoidCallback onExportCookbook;
+  final ValueChanged<ExportOptions> onExportSelective;
+
+  const _ExportOptionsSheet({
+    required this.l10n,
+    required this.onExportCookbook,
+    required this.onExportSelective,
+  });
+
+  @override
+  State<_ExportOptionsSheet> createState() => _ExportOptionsSheetState();
+}
+
+class _ExportOptionsSheetState extends State<_ExportOptionsSheet> {
+  bool _cookbooks = true;
+  bool _shoppingLists = true;
+  bool _mealPlans = true;
+  bool _tags = true;
+  bool _customCategories = true;
+  bool _customCourses = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = widget.l10n;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              l10n.settingsExport,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+
+            // Quick option: current cookbook only
+            ListTile(
+              leading: const Icon(Icons.menu_book),
+              title: Text(l10n.exportCurrentCookbook),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: widget.onExportCookbook,
+            ),
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Text(
+                l10n.exportFullBackup,
+                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ),
+
+            // Checkboxes
+            _ExportCheckbox(title: l10n.exportCookbooksRecipes, value: _cookbooks,
+                onChanged: (v) => setState(() => _cookbooks = v ?? true)),
+            _ExportCheckbox(title: l10n.exportShoppingLists, value: _shoppingLists,
+                onChanged: (v) => setState(() => _shoppingLists = v ?? false)),
+            _ExportCheckbox(title: l10n.exportMealPlans, value: _mealPlans,
+                onChanged: (v) => setState(() => _mealPlans = v ?? false)),
+            _ExportCheckbox(title: l10n.exportTags, value: _tags,
+                onChanged: (v) => setState(() => _tags = v ?? false)),
+            _ExportCheckbox(title: l10n.exportCategories, value: _customCategories,
+                onChanged: (v) => setState(() => _customCategories = v ?? false)),
+            _ExportCheckbox(title: l10n.exportCourses, value: _customCourses,
+                onChanged: (v) => setState(() => _customCourses = v ?? false)),
+
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => widget.onExportSelective(ExportOptions(
+                  cookbooks: _cookbooks,
+                  shoppingLists: _shoppingLists,
+                  mealPlans: _mealPlans,
+                  tags: _tags,
+                  customCategories: _customCategories,
+                  customCourses: _customCourses,
+                )),
+                icon: const Icon(Icons.download),
+                label: Text(l10n.exportFullBackup),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ExportCheckbox extends StatelessWidget {
+  final String title;
+  final bool value;
+  final ValueChanged<bool?> onChanged;
+
+  const _ExportCheckbox({
+    required this.title,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CheckboxListTile(
+      title: Text(title),
+      value: value,
+      onChanged: onChanged,
+      dense: true,
+      controlAffinity: ListTileControlAffinity.leading,
+      contentPadding: EdgeInsets.zero,
     );
   }
 }

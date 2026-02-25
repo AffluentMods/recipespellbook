@@ -2571,5 +2571,13 @@
   "aboutLicenses": "Open-source licenties",
   "aboutLicensesSub": "Gebruikte software van derden",
   "sortOrder": "Sorteervolgorde",
-  "ingredientAddHeader": "Koptekst toevoegen"
+  "ingredientAddHeader": "Koptekst toevoegen",
+  "saveAsRecipe": "Opslaan als recept",
+  "exportFullBackup": "Volledige back-up",
+  "exportCookbooksRecipes": "Kookboeken en recepten",
+  "exportShoppingLists": "Boodschappenlijsten",
+  "exportMealPlans": "Maaltijdplannen",
+  "exportTags": "Labels",
+  "exportCategories": "Aangepaste categorieën",
+  "exportCourses": "Aangepaste gangen"
 }

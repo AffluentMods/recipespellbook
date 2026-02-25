@@ -5094,4 +5094,31 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ingredientAddHeader => '見出しを追加';
+
+  @override
+  String get saveAsRecipe => 'レシピとして保存';
+
+  @override
+  String get exportFullBackup => '完全バックアップ';
+
+  @override
+  String get exportCookbooksRecipes => 'レシピ本とレシピ';
+
+  @override
+  String get exportShoppingLists => '買い物リスト';
+
+  @override
+  String get exportMealPlans => '食事プラン';
+
+  @override
+  String get exportTags => 'タグ';
+
+  @override
+  String get exportCategories => 'カスタムカテゴリ';
+
+  @override
+  String get exportCourses => 'カスタムコース';
+
+  @override
+  String get createRecipeManually => 'Or create a recipe manually';
 }

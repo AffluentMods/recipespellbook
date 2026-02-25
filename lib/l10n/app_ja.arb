@@ -2571,5 +2571,13 @@
   "aboutLicenses": "オープンソースライセンス",
   "aboutLicensesSub": "使用しているサードパーティソフトウェア",
   "sortOrder": "並び順",
-  "ingredientAddHeader": "見出しを追加"
+  "ingredientAddHeader": "見出しを追加",
+  "saveAsRecipe": "レシピとして保存",
+  "exportFullBackup": "完全バックアップ",
+  "exportCookbooksRecipes": "レシピ本とレシピ",
+  "exportShoppingLists": "買い物リスト",
+  "exportMealPlans": "食事プラン",
+  "exportTags": "タグ",
+  "exportCategories": "カスタムカテゴリ",
+  "exportCourses": "カスタムコース"
 }

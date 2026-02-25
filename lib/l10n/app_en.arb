@@ -2480,5 +2480,14 @@
   "aboutLicenses": "Open Source Licenses",
   "aboutLicensesSub": "Third-party software used",
   "sortOrder": "Sort Order",
-  "ingredientAddHeader": "Add Header"
+  "ingredientAddHeader": "Add Header",
+  "saveAsRecipe": "Save as Recipe",
+  "exportFullBackup": "Full Backup",
+  "exportCookbooksRecipes": "Cookbooks & Recipes",
+  "exportShoppingLists": "Shopping Lists",
+  "exportMealPlans": "Meal Plans",
+  "exportTags": "Tags",
+  "exportCategories": "Custom Categories",
+  "exportCourses": "Custom Courses",
+  "createRecipeManually": "Or create a recipe manually"
 }

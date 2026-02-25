@@ -127,6 +127,37 @@ class ProductInfo {
     }
     return name ?? brand ?? 'Unknown Product';
   }
+
+  /// Convert to recipe-compatible data map for saving as a pantry recipe.
+  Map<String, dynamic> toRecipeData() {
+    // Build nutrition JSON matching the app's convention (TOTAL values)
+    String? nutritionJson;
+    if (nutrition != null) {
+      final n = nutrition!;
+      // Store per-serving values as "total" with calculatedServings=1
+      nutritionJson = jsonEncode({
+        'calories': n['calories']?.toDouble(),
+        'protein': n['protein']?.toDouble(),
+        'carbs': n['carbs']?.toDouble(),
+        'fat': n['fat']?.toDouble(),
+        'fiber': n['fiber']?.toDouble(),
+        'sugar': n['sugar']?.toDouble(),
+        'sodium': n['sodium']?.toDouble(),
+        'saturatedFat': n['saturatedFat']?.toDouble(),
+        'calculatedServings': 1,
+      });
+    }
+
+    return {
+      'title': displayName,
+      'description': brand != null ? 'Scanned product from $brand' : 'Scanned product',
+      'servings': servingSize ?? '1 serving',
+      'imageUrl': imageUrl,
+      'nutritionJson': nutritionJson,
+      'ingredients': ingredients ?? [],
+      'category': category,
+    };
+  }
 }
 
 /// Barcode scanner screen widget
@@ -168,13 +199,24 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen> {
     if (barcode.rawValue == null) return;
     if (barcode.rawValue == _lastScannedBarcode) return;
 
+    final value = barcode.rawValue!;
+
     setState(() {
       _isProcessing = true;
-      _lastScannedBarcode = barcode.rawValue;
+      _lastScannedBarcode = value;
     });
 
-    // Look up product
-    final product = await BarcodeScannerService.lookupProduct(barcode.rawValue!);
+    // QR codes containing URLs → route to recipe import
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+        Navigator.pop(context, {'action': 'importFromUrl', 'url': value});
+      }
+      return;
+    }
+
+    // Standard barcode → product lookup
+    final product = await BarcodeScannerService.lookupProduct(value);
 
     if (mounted) {
       setState(() {
@@ -185,7 +227,7 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen> {
       if (product != null) {
         _showProductSheet(product);
       } else {
-        _showNotFoundDialog(barcode.rawValue!);
+        _showNotFoundDialog(value);
       }
     }
   }
@@ -199,6 +241,7 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen> {
         product: product,
         onAddToShopping: () => _addToShopping(product),
         onSearchRecipes: () => _searchRecipes(product),
+        onSaveAsRecipe: () => _saveAsRecipe(product),
         onScanAnother: () {
           Navigator.pop(ctx);
           setState(() {
@@ -291,6 +334,11 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen> {
     // Add to shopping list
     Navigator.pop(context); // Close sheet
     Navigator.pop(context, {'action': 'addToShopping', 'product': product});
+  }
+
+  void _saveAsRecipe(ProductInfo product) {
+    Navigator.pop(context); // Close sheet
+    Navigator.pop(context, {'action': 'saveAsRecipe', 'product': product});
   }
 
   void _addManualProductToShopping(String name) {
@@ -464,12 +512,14 @@ class _ProductInfoSheet extends StatelessWidget {
   final ProductInfo product;
   final VoidCallback onAddToShopping;
   final VoidCallback onSearchRecipes;
+  final VoidCallback onSaveAsRecipe;
   final VoidCallback onScanAnother;
 
   const _ProductInfoSheet({
     required this.product,
     required this.onAddToShopping,
     required this.onSearchRecipes,
+    required this.onSaveAsRecipe,
     required this.onScanAnother,
   });
 
@@ -611,6 +661,15 @@ class _ProductInfoSheet extends StatelessWidget {
                       onPressed: onSearchRecipes,
                       icon: const Icon(Icons.search),
                       label: Text(l10n.findRecipesWithThis),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 48),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: onSaveAsRecipe,
+                      icon: const Icon(Icons.menu_book),
+                      label: Text(l10n.saveAsRecipe),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 48),
                       ),

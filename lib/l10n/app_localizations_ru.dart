@@ -5208,4 +5208,31 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ingredientAddHeader => 'Добавить заголовок';
+
+  @override
+  String get saveAsRecipe => 'Сохранить как рецепт';
+
+  @override
+  String get exportFullBackup => 'Полная резервная копия';
+
+  @override
+  String get exportCookbooksRecipes => 'Кулинарные книги и рецепты';
+
+  @override
+  String get exportShoppingLists => 'Списки покупок';
+
+  @override
+  String get exportMealPlans => 'Планы питания';
+
+  @override
+  String get exportTags => 'Теги';
+
+  @override
+  String get exportCategories => 'Пользовательские категории';
+
+  @override
+  String get exportCourses => 'Пользовательские курсы';
+
+  @override
+  String get createRecipeManually => 'Or create a recipe manually';
 }

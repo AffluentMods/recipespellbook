@@ -5146,4 +5146,31 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get ingredientAddHeader => 'Koptekst toevoegen';
+
+  @override
+  String get saveAsRecipe => 'Opslaan als recept';
+
+  @override
+  String get exportFullBackup => 'Volledige back-up';
+
+  @override
+  String get exportCookbooksRecipes => 'Kookboeken en recepten';
+
+  @override
+  String get exportShoppingLists => 'Boodschappenlijsten';
+
+  @override
+  String get exportMealPlans => 'Maaltijdplannen';
+
+  @override
+  String get exportTags => 'Labels';
+
+  @override
+  String get exportCategories => 'Aangepaste categorieën';
+
+  @override
+  String get exportCourses => 'Aangepaste gangen';
+
+  @override
+  String get createRecipeManually => 'Or create a recipe manually';
 }

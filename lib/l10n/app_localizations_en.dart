@@ -3555,7 +3555,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productName => 'Product name';
 
   @override
-  String get scanBarcode => 'Scan Barcode';
+  String get scanBarcode => 'Scan';
 
   @override
   String get lookingUpProduct => 'Looking up product...';
@@ -5146,4 +5146,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ingredientAddHeader => 'Add Header';
+
+  @override
+  String get saveAsRecipe => 'Save as Recipe';
+
+  @override
+  String get exportFullBackup => 'Full Backup';
+
+  @override
+  String get exportCookbooksRecipes => 'Cookbooks & Recipes';
+
+  @override
+  String get exportShoppingLists => 'Shopping Lists';
+
+  @override
+  String get exportMealPlans => 'Meal Plans';
+
+  @override
+  String get exportTags => 'Tags';
+
+  @override
+  String get exportCategories => 'Custom Categories';
+
+  @override
+  String get exportCourses => 'Custom Courses';
+
+  @override
+  String get createRecipeManually => 'Or create a recipe manually';
 }

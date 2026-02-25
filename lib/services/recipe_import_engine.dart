@@ -85,9 +85,11 @@ class RecipeImportEngine {
           'Accept-Language': 'en-US,en;q=0.9',
         };
       case _Platform.pinterest:
+      // Pinterest also serves better content to mobile UAs
         return {
-          'User-Agent': _userAgent,
+          'User-Agent': _mobileUserAgent,
           'Accept': 'text/html,application/xhtml+xml',
+          'Accept-Language': 'en-US,en;q=0.9',
         };
       default:
         return {'User-Agent': _userAgent};
@@ -192,15 +194,264 @@ class RecipeImportEngine {
     'turn', 'using', 'warm', 'wash', 'weigh', 'whip', 'whisk', 'wrap',
   ];
 
+  // ========== SHORT URL / OEMBED HELPERS ==========
+
+  /// Whether a URL is a known short-link that needs redirect resolution.
+  static bool _isShortUrl(String url) {
+    final lower = url.toLowerCase();
+    return lower.contains('vm.tiktok.com') ||
+        lower.contains('vt.tiktok.com') ||
+        lower.contains('pin.it') ||
+        lower.contains('bit.ly') ||
+        lower.contains('tinyurl.com');
+  }
+
+  /// Resolve a short URL to its final destination by following redirects.
+  /// Uses a HEAD request with manual redirect handling to avoid downloading
+  /// full JS-rendered pages.
+  static Future<String?> _resolveShortUrl(String url) async {
+    try {
+      final client = http.Client();
+      try {
+        var currentUrl = url;
+        for (var i = 0; i < 10; i++) {
+          final request = http.Request('GET', Uri.parse(currentUrl))
+            ..followRedirects = false
+            ..headers.addAll({
+              'User-Agent': _mobileUserAgent,
+              'Accept': 'text/html',
+            });
+          final streamed = await client.send(request).timeout(const Duration(seconds: 10));
+          // Drain the response body to free resources
+          await streamed.stream.drain();
+
+          if (streamed.statusCode >= 300 && streamed.statusCode < 400) {
+            final location = streamed.headers['location'];
+            if (location == null) break;
+            // Handle relative redirects
+            currentUrl = Uri.parse(currentUrl).resolve(location).toString();
+          } else {
+            // Got a non-redirect response — this is the final URL
+            return currentUrl;
+          }
+        }
+        return currentUrl;
+      } finally {
+        client.close();
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Try oEmbed API for platforms that support it.
+  /// Returns a recipe parsed from oEmbed data, or null.
+  static Future<ImportedRecipe?> _tryOEmbed(String url, _Platform platform) async {
+    try {
+      String oembedUrl;
+      switch (platform) {
+        case _Platform.tiktok:
+          oembedUrl = 'https://www.tiktok.com/oembed?url=${Uri.encodeComponent(url)}';
+          break;
+        case _Platform.pinterest:
+          oembedUrl = 'https://www.pinterest.com/oembed.json?url=${Uri.encodeComponent(url)}';
+          break;
+        default:
+          return null;
+      }
+
+      final response = await http.get(
+        Uri.parse(oembedUrl),
+        headers: {'User-Agent': _userAgent, 'Accept': 'application/json'},
+      ).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode != 200) return null;
+
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      final thumbnail = json['thumbnail_url']?.toString();
+
+      if (platform == _Platform.tiktok) {
+        return _parseTiktokOEmbed(json, url, thumbnail);
+      } else if (platform == _Platform.pinterest) {
+        return _parsePinterestOEmbed(json, url, thumbnail);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Parse TikTok oEmbed response.
+  /// The `title` field contains the full video caption (which has the recipe).
+  static ImportedRecipe? _parseTiktokOEmbed(
+      Map<String, dynamic> json, String url, String? thumbnail) {
+    final caption = json['title']?.toString();
+    if (caption == null || caption.length < 30) return null;
+
+    final authorName = json['author_name']?.toString() ?? '';
+
+    // Try structured text parsing on the caption
+    final parsed = _parseStructuredText(caption);
+    if (parsed.ingredients.isNotEmpty || parsed.instructions.isNotEmpty) {
+      // Clean up the title (caption's first line or author-based)
+      final cleanTitle = _extractSocialTitle(caption)
+          ?? _cleanSocialTitle(parsed.title.isNotEmpty ? parsed.title : 'TikTok Recipe');
+      parsed.title = cleanTitle;
+      parsed.imageUrl = thumbnail;
+      parsed.sourceUrl = url;
+      return parsed;
+    }
+
+    // Fall back to social caption parser
+    final title = json['author_name'] != null
+        ? '${json['author_name']}\'s Recipe'
+        : 'TikTok Recipe';
+    final result = _parseSocialCaption(caption, title, thumbnail);
+    if (result != null) {
+      result.sourceUrl = url;
+      return result;
+    }
+
+    // Last resort: return the caption as a single-instruction recipe
+    // so the user can at least see the text and use Smart Import
+    return ImportedRecipe(
+      title: _cleanSocialTitle(authorName.isNotEmpty ? '$authorName\'s Recipe' : 'TikTok Recipe'),
+      ingredients: [],
+      instructions: [caption],
+      imageUrl: thumbnail,
+      sourceUrl: url,
+    );
+  }
+
+  /// Parse Pinterest oEmbed response.
+  /// May contain a description with recipe text, plus a link to the original source.
+  static ImportedRecipe? _parsePinterestOEmbed(
+      Map<String, dynamic> json, String url, String? thumbnail) {
+    final title = json['title']?.toString() ?? 'Pinterest Recipe';
+    final description = json['description']?.toString();
+
+    // Pinterest oEmbed sometimes includes the original source URL in the description
+    // or we can try to extract it from the pin page later
+    String? originalSourceUrl;
+    if (description != null) {
+      final urlMatch = RegExp(r'https?://[^\s<>"{}|\\^`\[\]]+', caseSensitive: false)
+          .firstMatch(description);
+      if (urlMatch != null) {
+        final found = urlMatch.group(0)!;
+        // Only follow if it's not a Pinterest URL (avoid loops)
+        if (!found.contains('pinterest.com') && !found.contains('pin.it')) {
+          originalSourceUrl = found;
+        }
+      }
+    }
+
+    if (description != null && description.length > 50) {
+      final parsed = _parseStructuredText(description);
+      if (parsed.ingredients.isNotEmpty || parsed.instructions.isNotEmpty) {
+        parsed.title = _cleanSocialTitle(title);
+        parsed.imageUrl = thumbnail;
+        parsed.sourceUrl = url;
+        return parsed;
+      }
+
+      final result = _parseSocialCaption(description, title, thumbnail);
+      if (result != null) {
+        result.sourceUrl = url;
+        return result;
+      }
+    }
+
+    // Return a minimal recipe with the original source URL if found
+    // The caller can try to follow the source URL for better data
+    return ImportedRecipe(
+      title: _cleanSocialTitle(title),
+      description: description,
+      ingredients: [],
+      instructions: [],
+      imageUrl: thumbnail,
+      sourceUrl: originalSourceUrl ?? url,
+    );
+  }
+
+  /// Try to extract the original recipe source URL from a Pinterest pin page.
+  /// Pinterest pins often link to the original recipe blog/website.
+  static String? _extractPinterestSourceUrl(Document document) {
+    // Look for the "Visit" or source link
+    for (final selector in [
+      'a[data-test-id="pin-action-link"]',
+      'a[rel="nofollow noopener"][target="_blank"]',
+      'a.linkModuleActionButton',
+    ]) {
+      final el = document.querySelector(selector);
+      final href = el?.attributes['href'];
+      if (href != null && !href.contains('pinterest.com')) {
+        // Pinterest often wraps URLs in a redirect: /redirect/?url=...
+        if (href.contains('/redirect/') && href.contains('url=')) {
+          final uri = Uri.tryParse(href);
+          final redirectUrl = uri?.queryParameters['url'];
+          if (redirectUrl != null) return Uri.decodeComponent(redirectUrl);
+        }
+        return href;
+      }
+    }
+    return null;
+  }
+
   // ========== PUBLIC API ==========
 
-  /// Scrape a recipe from a URL. Tries JSON-LD → microdata → CSS selectors → platform-specific → generic HTML.
-  static Future<ImportedRecipe> parseFromUrl(String url) async {
+  /// Scrape a recipe from a URL. Tries oEmbed → JSON-LD → microdata → CSS selectors → platform-specific → generic HTML.
+  static Future<ImportedRecipe> parseFromUrl(String url, {bool isRecursiveCall = false}) async {
     try {
-      final normalized = _normalizeUrl(url);
-      final platform = _detectPlatform(normalized);
-      final headers = _headersForPlatform(platform);
+      var normalized = _normalizeUrl(url);
+      var platform = _detectPlatform(normalized);
 
+      // 1. Resolve short URLs to their final destination
+      if (_isShortUrl(normalized)) {
+        final resolved = await _resolveShortUrl(normalized);
+        if (resolved != null && resolved != normalized) {
+          normalized = _normalizeUrl(resolved);
+          platform = _detectPlatform(normalized);
+        }
+      }
+
+      // 2. Try oEmbed for social platforms (works even when HTML scraping fails)
+      if (platform == _Platform.tiktok || platform == _Platform.pinterest) {
+        final oembedRecipe = await _tryOEmbed(normalized, platform);
+        if (oembedRecipe != null) {
+          // Pinterest: if we found an original source URL, try scraping that for a real recipe
+          if (platform == _Platform.pinterest && !isRecursiveCall) {
+            final sourceUrl = oembedRecipe.sourceUrl;
+            if (sourceUrl != null &&
+                !sourceUrl.contains('pinterest.com') &&
+                !sourceUrl.contains('pin.it')) {
+              try {
+                final sourceRecipe = await parseFromUrl(sourceUrl, isRecursiveCall: true);
+                if (sourceRecipe.ingredients.isNotEmpty) {
+                  // Use the full recipe from the source, but keep Pinterest image as fallback
+                  sourceRecipe.imageUrl ??= oembedRecipe.imageUrl;
+                  sourceRecipe.sourceUrl = normalized; // Keep Pinterest as the share source
+                  _detectCourseAndCategory(sourceRecipe);
+                  return sourceRecipe;
+                }
+              } catch (_) {
+                // Source scrape failed — use oEmbed data
+              }
+            }
+          }
+
+          // For TikTok or Pinterest without a followable source: use oEmbed data directly
+          if (oembedRecipe.ingredients.isNotEmpty || oembedRecipe.instructions.isNotEmpty) {
+            oembedRecipe.sourceUrl = normalized;
+            _detectCourseAndCategory(oembedRecipe);
+            return oembedRecipe;
+          }
+          // oEmbed returned a shell (title + image only) — fall through to try HTML scraping,
+          // but remember the image/title for later
+        }
+      }
+
+      // 3. Standard HTML scraping pipeline
+      final headers = _headersForPlatform(platform);
       final response = await http
           .get(Uri.parse(normalized), headers: headers)
           .timeout(const Duration(seconds: 20));
@@ -219,6 +470,23 @@ class RecipeImportEngine {
       // Platform-specific fallbacks (social media extracts from meta tags)
       if (recipe == null || (recipe.ingredients.isEmpty && recipe.instructions.isEmpty)) {
         recipe = _tryPlatformSpecific(document, platform) ?? recipe;
+      }
+
+      // Pinterest HTML fallback: try to find and follow the original recipe URL
+      if (platform == _Platform.pinterest && !isRecursiveCall &&
+          (recipe == null || recipe.ingredients.isEmpty)) {
+        final sourceUrl = _extractPinterestSourceUrl(document);
+        if (sourceUrl != null) {
+          try {
+            final sourceRecipe = await parseFromUrl(sourceUrl, isRecursiveCall: true);
+            if (sourceRecipe.ingredients.isNotEmpty) {
+              sourceRecipe.imageUrl ??= _findBestImage(document);
+              sourceRecipe.sourceUrl = normalized;
+              _detectCourseAndCategory(sourceRecipe);
+              return sourceRecipe;
+            }
+          } catch (_) {}
+        }
       }
 
       recipe ??= _tryGenericHtml(document);

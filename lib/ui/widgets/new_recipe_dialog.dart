@@ -17,6 +17,7 @@ import '../../services/recipe_import_engine.dart';
 import '../screens/import/ai_import_screen.dart';
 import '../screens/import/import_preview_screen.dart';
 import 'app_snackbar.dart';
+import '../../services/barcode_scanner_service.dart';
 
 /// Shows the MODERN add recipe dialog with 2 options
 Future<void> showNewRecipeDialog(BuildContext context, String cookbookId) {
@@ -207,6 +208,51 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedToImport(e.toString().replaceFirst("Exception: ", "")));
+    }
+  }
+
+  // ========== BARCODE / QR IMPORT ==========
+  Future<void> _importFromBarcode() async {
+    final l10n = AppLocalizations.of(context)!;
+
+    final result = await Navigator.of(context).push<Map<String, dynamic>>(
+      MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+    );
+    if (result == null || !mounted) return;
+
+    final action = result['action'] as String?;
+
+    switch (action) {
+      case 'importFromUrl':
+      // QR code with a URL → run through recipe import engine
+        final url = result['url'] as String;
+        _urlController.text = url;
+        _importFromUrl();
+        break;
+
+      case 'saveAsRecipe':
+      // Barcode product → create a quick pantry recipe
+        final product = result['product'] as ProductInfo;
+        final data = product.toRecipeData();
+        final recipe = ImportedRecipe(
+          title: data['title'] as String,
+          description: data['description'] as String?,
+          servings: data['servings'] as String?,
+          ingredients: List<String>.from(data['ingredients'] as List),
+          instructions: [],
+          imageUrl: data['imageUrl'] as String?,
+        );
+        // Attach nutrition if available
+        if (data['nutritionJson'] != null) {
+          recipe.notes = 'Nutrition data available from product scan.';
+        }
+        _showImportPreview([recipe]);
+        break;
+
+      case 'addToShopping':
+      // User chose shopping list action — just close, shopping screen handles this
+        Navigator.of(context).pop();
+        break;
     }
   }
 
@@ -722,11 +768,21 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                         Navigator.push(context,
                             MaterialPageRoute(builder: (_) => const AiImportScreen()));
                       }),
-                      _CircleOptionButton(icon: Icons.edit_note, label: l10n.importCreate, onTap: _createManually),
+                      _CircleOptionButton(icon: Icons.qr_code_scanner, label: l10n.scanBarcode, onTap: _importFromBarcode),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Text(l10n.supportedFormats, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+                  GestureDetector(
+                    onTap: _createManually,
+                    child: Text(
+                      l10n.createRecipeManually,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        decoration: TextDecoration.underline,
+                        decorationColor: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

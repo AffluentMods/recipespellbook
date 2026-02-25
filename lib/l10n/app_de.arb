@@ -2084,5 +2084,13 @@
   "aboutLicenses": "Open-Source-Lizenzen",
   "aboutLicensesSub": "Verwendete Drittanbieter-Software",
   "sortOrder": "Sortieren",
-  "ingredientAddHeader": "Überschrift"
+  "ingredientAddHeader": "Überschrift",
+  "saveAsRecipe": "Als Rezept speichern",
+  "exportFullBackup": "Vollständiges Backup",
+  "exportCookbooksRecipes": "Kochbücher und Rezepte",
+  "exportShoppingLists": "Einkaufslisten",
+  "exportMealPlans": "Mahlzeitenpläne",
+  "exportTags": "Tags",
+  "exportCategories": "Benutzerdefinierte Kategorien",
+  "exportCourses": "Benutzerdefinierte Gänge"
 }

@@ -1564,5 +1564,13 @@
   "shoppingBaby": "Prodotti per bambini",
   "shoppingPet": "Prodotti per animali",
   "shoppingHousehold": "Casa",
-  "shoppingPersonalCare": "Cura personale"
+  "shoppingPersonalCare": "Cura personale",
+  "saveAsRecipe": "Salva come ricetta",
+  "exportFullBackup": "Backup completo",
+  "exportCookbooksRecipes": "Libri di ricette e ricette",
+  "exportShoppingLists": "Liste della spesa",
+  "exportMealPlans": "Piani pasto",
+  "exportTags": "Etichette",
+  "exportCategories": "Categorie personalizzate",
+  "exportCourses": "Portate personalizzate"
 }

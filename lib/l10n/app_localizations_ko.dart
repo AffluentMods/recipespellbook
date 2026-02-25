@@ -5094,4 +5094,31 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ingredientAddHeader => '제목 추가';
+
+  @override
+  String get saveAsRecipe => '레시피로 저장';
+
+  @override
+  String get exportFullBackup => '전체 백업';
+
+  @override
+  String get exportCookbooksRecipes => '요리책 및 레시피';
+
+  @override
+  String get exportShoppingLists => '쇼핑 목록';
+
+  @override
+  String get exportMealPlans => '식사 계획';
+
+  @override
+  String get exportTags => '태그';
+
+  @override
+  String get exportCategories => '사용자 지정 카테고리';
+
+  @override
+  String get exportCourses => '사용자 지정 코스';
+
+  @override
+  String get createRecipeManually => 'Or create a recipe manually';
 }

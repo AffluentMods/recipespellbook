@@ -5146,4 +5146,31 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get ingredientAddHeader => 'Añadir Sección';
+
+  @override
+  String get saveAsRecipe => 'Guardar como receta';
+
+  @override
+  String get exportFullBackup => 'Copia de seguridad completa';
+
+  @override
+  String get exportCookbooksRecipes => 'Libros de cocina y recetas';
+
+  @override
+  String get exportShoppingLists => 'Listas de compras';
+
+  @override
+  String get exportMealPlans => 'Planes de comidas';
+
+  @override
+  String get exportTags => 'Etiquetas';
+
+  @override
+  String get exportCategories => 'Categorías personalizadas';
+
+  @override
+  String get exportCourses => 'Cursos personalizados';
+
+  @override
+  String get createRecipeManually => 'Or create a recipe manually';
 }

@@ -6634,7 +6634,7 @@ abstract class AppLocalizations {
   /// No description provided for @scanBarcode.
   ///
   /// In en, this message translates to:
-  /// **'Scan Barcode'**
+  /// **'Scan'**
   String get scanBarcode;
 
   /// No description provided for @lookingUpProduct.
@@ -9456,6 +9456,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Header'**
   String get ingredientAddHeader;
+
+  /// No description provided for @saveAsRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as Recipe'**
+  String get saveAsRecipe;
+
+  /// No description provided for @exportFullBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Backup'**
+  String get exportFullBackup;
+
+  /// No description provided for @exportCookbooksRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookbooks & Recipes'**
+  String get exportCookbooksRecipes;
+
+  /// No description provided for @exportShoppingLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping Lists'**
+  String get exportShoppingLists;
+
+  /// No description provided for @exportMealPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal Plans'**
+  String get exportMealPlans;
+
+  /// No description provided for @exportTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get exportTags;
+
+  /// No description provided for @exportCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Categories'**
+  String get exportCategories;
+
+  /// No description provided for @exportCourses.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Courses'**
+  String get exportCourses;
+
+  /// No description provided for @createRecipeManually.
+  ///
+  /// In en, this message translates to:
+  /// **'Or create a recipe manually'**
+  String get createRecipeManually;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

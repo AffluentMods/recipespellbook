@@ -2571,5 +2571,13 @@
   "aboutLicenses": "Лицензии с открытым исходным кодом",
   "aboutLicensesSub": "Используемые сторонние программы",
   "sortOrder": "Порядок сортировки",
-  "ingredientAddHeader": "Добавить заголовок"
+  "ingredientAddHeader": "Добавить заголовок",
+  "saveAsRecipe": "Сохранить как рецепт",
+  "exportFullBackup": "Полная резервная копия",
+  "exportCookbooksRecipes": "Кулинарные книги и рецепты",
+  "exportShoppingLists": "Списки покупок",
+  "exportMealPlans": "Планы питания",
+  "exportTags": "Теги",
+  "exportCategories": "Пользовательские категории",
+  "exportCourses": "Пользовательские курсы"
 }

@@ -5094,4 +5094,31 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ingredientAddHeader => '添加标题';
+
+  @override
+  String get saveAsRecipe => '保存为食谱';
+
+  @override
+  String get exportFullBackup => '完整备份';
+
+  @override
+  String get exportCookbooksRecipes => '食谱书和食谱';
+
+  @override
+  String get exportShoppingLists => '购物清单';
+
+  @override
+  String get exportMealPlans => '餐食计划';
+
+  @override
+  String get exportTags => '标签';
+
+  @override
+  String get exportCategories => '自定义类别';
+
+  @override
+  String get exportCourses => '自定义课程';
+
+  @override
+  String get createRecipeManually => 'Or create a recipe manually';
 }
