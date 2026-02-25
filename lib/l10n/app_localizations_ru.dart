@@ -5234,5 +5234,5 @@ class AppLocalizationsRu extends AppLocalizations {
   String get exportCourses => 'Пользовательские курсы';
 
   @override
-  String get createRecipeManually => 'Or create a recipe manually';
+  String get createRecipeManually => 'Или создайте рецепт вручную';
 }

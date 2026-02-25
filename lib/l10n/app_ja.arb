@@ -2579,5 +2579,6 @@
   "exportMealPlans": "食事プラン",
   "exportTags": "タグ",
   "exportCategories": "カスタムカテゴリ",
-  "exportCourses": "カスタムコース"
+  "exportCourses": "カスタムコース",
+  "createRecipeManually": "またはレシピを手動で作成"
 }

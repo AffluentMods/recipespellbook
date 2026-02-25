@@ -6634,7 +6634,7 @@ abstract class AppLocalizations {
   /// No description provided for @scanBarcode.
   ///
   /// In en, this message translates to:
-  /// **'Scan'**
+  /// **'Scan Barcode'**
   String get scanBarcode;
 
   /// No description provided for @lookingUpProduct.

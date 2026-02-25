@@ -2579,5 +2579,6 @@
   "exportMealPlans": "Maaltijdplannen",
   "exportTags": "Labels",
   "exportCategories": "Aangepaste categorieën",
-  "exportCourses": "Aangepaste gangen"
+  "exportCourses": "Aangepaste gangen",
+  "createRecipeManually": "Of maak een recept handmatig"
 }

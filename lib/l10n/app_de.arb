@@ -2092,5 +2092,6 @@
   "exportMealPlans": "Mahlzeitenpläne",
   "exportTags": "Tags",
   "exportCategories": "Benutzerdefinierte Kategorien",
-  "exportCourses": "Benutzerdefinierte Gänge"
+  "exportCourses": "Benutzerdefinierte Gänge",
+  "createRecipeManually": "Oder Rezept manuell erstellen"
 }

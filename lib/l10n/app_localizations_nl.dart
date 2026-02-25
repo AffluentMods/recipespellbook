@@ -5172,5 +5172,5 @@ class AppLocalizationsNl extends AppLocalizations {
   String get exportCourses => 'Aangepaste gangen';
 
   @override
-  String get createRecipeManually => 'Or create a recipe manually';
+  String get createRecipeManually => 'Of maak een recept handmatig';
 }

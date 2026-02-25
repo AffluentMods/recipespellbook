@@ -2579,5 +2579,6 @@
   "exportMealPlans": "Plany posiłków",
   "exportTags": "Tagi",
   "exportCategories": "Niestandardowe kategorie",
-  "exportCourses": "Niestandardowe dania"
+  "exportCourses": "Niestandardowe dania",
+  "createRecipeManually": "Lub utwórz przepis ręcznie"
 }

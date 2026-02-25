@@ -2052,5 +2052,6 @@
   "exportMealPlans": "Planes de comidas",
   "exportTags": "Etiquetas",
   "exportCategories": "Categorías personalizadas",
-  "exportCourses": "Cursos personalizados"
+  "exportCourses": "Cursos personalizados",
+  "createRecipeManually": "O crear una receta manualmente"
 }

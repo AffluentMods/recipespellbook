@@ -2579,5 +2579,6 @@
   "exportMealPlans": "Планы питания",
   "exportTags": "Теги",
   "exportCategories": "Пользовательские категории",
-  "exportCourses": "Пользовательские курсы"
+  "exportCourses": "Пользовательские курсы",
+  "createRecipeManually": "Или создайте рецепт вручную"
 }

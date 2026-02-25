@@ -5120,5 +5120,5 @@ class AppLocalizationsKo extends AppLocalizations {
   String get exportCourses => '사용자 지정 코스';
 
   @override
-  String get createRecipeManually => 'Or create a recipe manually';
+  String get createRecipeManually => '또는 레시피를 직접 만들기';
 }

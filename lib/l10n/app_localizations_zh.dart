@@ -5120,5 +5120,5 @@ class AppLocalizationsZh extends AppLocalizations {
   String get exportCourses => '自定义课程';
 
   @override
-  String get createRecipeManually => 'Or create a recipe manually';
+  String get createRecipeManually => '或手动创建食谱';
 }

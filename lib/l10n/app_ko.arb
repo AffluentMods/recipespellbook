@@ -2579,5 +2579,6 @@
   "exportMealPlans": "식사 계획",
   "exportTags": "태그",
   "exportCategories": "사용자 지정 카테고리",
-  "exportCourses": "사용자 지정 코스"
+  "exportCourses": "사용자 지정 코스",
+  "createRecipeManually": "또는 레시피를 직접 만들기"
 }

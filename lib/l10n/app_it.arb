@@ -1572,5 +1572,6 @@
   "exportMealPlans": "Piani pasto",
   "exportTags": "Etichette",
   "exportCategories": "Categorie personalizzate",
-  "exportCourses": "Portate personalizzate"
+  "exportCourses": "Portate personalizzate",
+  "createRecipeManually": "O crea una ricetta manualmente"
 }

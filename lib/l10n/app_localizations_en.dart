@@ -3555,7 +3555,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productName => 'Product name';
 
   @override
-  String get scanBarcode => 'Scan';
+  String get scanBarcode => 'Scan Barcode';
 
   @override
   String get lookingUpProduct => 'Looking up product...';

@@ -2579,5 +2579,6 @@
   "exportMealPlans": "餐食计划",
   "exportTags": "标签",
   "exportCategories": "自定义类别",
-  "exportCourses": "自定义课程"
+  "exportCourses": "自定义课程",
+  "createRecipeManually": "或手动创建食谱"
 }

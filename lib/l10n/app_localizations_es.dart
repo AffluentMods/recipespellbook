@@ -5172,5 +5172,5 @@ class AppLocalizationsEs extends AppLocalizations {
   String get exportCourses => 'Cursos personalizados';
 
   @override
-  String get createRecipeManually => 'Or create a recipe manually';
+  String get createRecipeManually => 'O crear una receta manualmente';
 }
