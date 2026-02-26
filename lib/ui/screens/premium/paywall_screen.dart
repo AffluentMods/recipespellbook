@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:purchases_flutter/models/package_wrapper.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/subscription_provider.dart';
@@ -685,15 +686,34 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       }
 
       final packages = current.availablePackages;
-      final matchIdx = packages.indexWhere(
-            (p) => p.storeProduct.identifier == productId,
-      );
+
+      // Match by PackageType first (most reliable across platforms),
+      // then fall back to product ID string match.
+      PackageType? targetType;
+      if (_isOnPremiumTab) {
+        targetType = PackageType.lifetime;
+      } else {
+        targetType = _billingCycle == 0 ? PackageType.monthly : PackageType.annual;
+      }
+
+      var matchIdx = packages.indexWhere((p) => p.packageType == targetType);
+
+      // Fallback: match by store product identifier
+      if (matchIdx < 0) {
+        matchIdx = packages.indexWhere(
+              (p) => p.storeProduct.identifier == productId,
+        );
+      }
+
+      debugPrint('[Paywall] Looking for productId=$productId type=$targetType '
+          'in ${packages.map((p) => '${p.packageType}:${p.storeProduct.identifier}').toList()}');
 
       if (matchIdx >= 0) {
         await service.purchasePackage(packages[matchIdx]);
         await ref.read(subscriptionProvider.notifier).refreshStatus();
         if (mounted) Navigator.pop(context);
       } else {
+        debugPrint('[Paywall] No match found, falling back to RC native paywall');
         await ref.read(subscriptionProvider.notifier).presentPaywall();
         if (mounted) Navigator.pop(context);
       }

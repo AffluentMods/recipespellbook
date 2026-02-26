@@ -163,6 +163,24 @@ String normalizeIngredientName(String name) {
   for (final desc in descriptors) {
     name = name.replaceAll(RegExp('\\b$desc\\b'), '').trim();
   }
+  // Strip unit-like words that may appear in the name portion
+  // e.g. "garlic cloves" → "garlic", "onion heads" → "onion"
+  // Only strip if the name has multiple words (don't strip "cloves" the spice)
+  final unitWords = [
+    'cloves?', 'heads?', 'stalks?', 'bunche?s?', 'sprigs?', 'leaves?',
+    'slices?', 'pieces?', 'cans?', 'jars?', 'bottles?', 'packages?', 'pkgs?',
+    'bags?', 'boxes?', 'cups?', 'handfuls?',
+    // Spanish
+    'dientes?', 'cabezas?', 'manojos?', 'latas?', 'paquetes?', 'rebanadas?', 'piezas?',
+    // German
+    'zehen?', 'köpfe?', 'bund', 'dosen?', 'packungen?', 'scheiben?', 'stück',
+  ];
+  if (name.contains(' ')) {
+    for (final u in unitWords) {
+      final stripped = name.replaceAll(RegExp('\\b$u\\b', caseSensitive: false), '').replaceAll(RegExp(r'\s+'), ' ').trim();
+      if (stripped.isNotEmpty) name = stripped;
+    }
+  }
   name = name.replaceAll(RegExp(r'\s+'), ' ').trim();
   name = name.replaceAll(RegExp(r'\([^)]*\)'), '').trim();
   return name;

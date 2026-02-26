@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../l10n/app_localizations.dart';
 import '../services/barcode_scanner_service.dart';
 import '../ui/screens/cookbooks/cookbook_edit_screen.dart';
 import '../ui/screens/cookbooks/cookbooks_screen.dart';
@@ -36,6 +37,7 @@ import '../ui/screens/settings/quick_access_settings_screen.dart';
 import '../ui/screens/settings/recipe_layout_settings_screen.dart';
 import '../ui/screens/settings/ingredient_layout_settings_screen.dart';
 import '../ui/screens/settings/settings_screen.dart';
+import '../ui/screens/premium/family_screen.dart';
 import '../ui/screens/settings/trash_screen.dart';
 import '../ui/screens/shopping/kroger_callback_screen.dart';
 import '../ui/screens/shopping/shopping_screen.dart';
@@ -68,8 +70,9 @@ final router = GoRouter(
         final courseId = state.uri.queryParameters['course'];
         final categoryId = state.uri.queryParameters['category'];
         final cookbookId = state.uri.queryParameters['cookbook'] ?? 'starter';
+        final l10n = AppLocalizations.of(context)!;
         return RecipeListScreen(
-          title: 'Recipes',
+          title: l10n.recipesTitle,
           cookbookId: cookbookId,
           courseId: courseId,
           categoryId: categoryId,
@@ -97,8 +100,9 @@ final router = GoRouter(
       name: 'all-recipes',
       builder: (context, state) {
         final cookbookId = state.uri.queryParameters['cookbook'] ?? 'starter';
+        final l10n = AppLocalizations.of(context)!;
         return RecipeListScreen(
-          title: 'All Recipes',
+          title: l10n.browseViewAll,
           cookbookId: cookbookId,
         );
       },
@@ -354,6 +358,11 @@ final router = GoRouter(
       path: '/settings/trash',
       name: 'trash',
       builder: (context, state) => const TrashScreen(),
+    ),
+    GoRoute(
+      path: '/settings/family',
+      name: 'family',
+      builder: (context, state) => const FamilyScreen(),
     ),
     // Recipe edit (existing recipe)
     GoRoute(

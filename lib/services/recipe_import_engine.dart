@@ -25,7 +25,6 @@ class RecipeImportEngine {
     if (lower.contains('instagram.com') || lower.contains('instagr.am')) return _Platform.instagram;
     if (lower.contains('tiktok.com') || lower.contains('vm.tiktok.com')) return _Platform.tiktok;
     if (lower.contains('pinterest.com') || lower.contains('pin.it')) return _Platform.pinterest;
-    if (lower.contains('facebook.com') || lower.contains('fb.watch')) return _Platform.facebook;
     if (lower.contains('youtube.com') || lower.contains('youtu.be')) return _Platform.youtube;
     if (lower.contains('squarespace.com') || lower.contains('.squarespace.')) return _Platform.squarespace;
     return _Platform.generic;
@@ -77,7 +76,6 @@ class RecipeImportEngine {
     switch (platform) {
       case _Platform.instagram:
       case _Platform.tiktok:
-      case _Platform.facebook:
       // Social media often serves better meta tags to mobile user agents
         return {
           'User-Agent': _mobileUserAgent,
@@ -891,8 +889,6 @@ class RecipeImportEngine {
         return _tryPinterest(document);
       case _Platform.youtube:
         return _tryYoutube(document);
-      case _Platform.facebook:
-        return _tryFacebook(document);
       case _Platform.squarespace:
         return _trySquarespace(document);
       case _Platform.generic:
@@ -1013,16 +1009,6 @@ class RecipeImportEngine {
     return parsed;
   }
 
-  /// Facebook: Limited access but try meta tags
-  static ImportedRecipe? _tryFacebook(Document document) {
-    final caption = _getMetaContent(document, 'og:description');
-    final title = _getMetaContent(document, 'og:title') ?? 'Facebook Recipe';
-    final image = _getMetaContent(document, 'og:image');
-
-    if (caption == null || caption.length < 50) return null;
-    return _parseSocialCaption(caption, title, image);
-  }
-
   /// Squarespace: Try specific Squarespace blog patterns when JSON-LD and standard selectors miss
   static ImportedRecipe? _trySquarespace(Document document) {
     // Squarespace recipe blogs often use plain content blocks
@@ -1112,8 +1098,8 @@ class RecipeImportEngine {
   /// Clean a social media title (remove "on Instagram", "| TikTok", etc.)
   static String _cleanSocialTitle(String title) {
     return title
-        .replaceAll(RegExp(r'\s*[|–—]\s*(Instagram|TikTok|Pinterest|Facebook|YouTube).*$', caseSensitive: false), '')
-        .replaceAll(RegExp(r'\s*on\s+(Instagram|TikTok|Pinterest|Facebook).*$', caseSensitive: false), '')
+        .replaceAll(RegExp(r'\s*[|–—]\s*(Instagram|TikTok|Pinterest|YouTube).*$', caseSensitive: false), '')
+        .replaceAll(RegExp(r'\s*on\s+(Instagram|TikTok|Pinterest).*$', caseSensitive: false), '')
         .replaceAll(RegExp(r'^(Instagram|TikTok|Pinterest)\s*[|–—:]\s*', caseSensitive: false), '')
         .replaceAll(RegExp(r'#\w+'), '') // Remove hashtags
         .replaceAll(RegExp(r'@\w+'), '') // Remove mentions
@@ -1138,7 +1124,7 @@ class RecipeImportEngine {
 
     // Pattern: "Username on Platform: ..." or "@username ..."
     final socialPrefixMatch = RegExp(
-      r'^(?:@\w[\w.]*|[\w.][\w.]*\s+on\s+(?:Instagram|TikTok|Facebook|Pinterest))\s*[:\-–]\s*["""\u201C]?(.+)',
+      r'^(?:@\w[\w.]*|[\w.][\w.]*\s+on\s+(?:Instagram|TikTok|Pinterest))\s*[:\-–]\s*["""\u201C]?(.+)',
       caseSensitive: false,
     ).firstMatch(text);
     if (socialPrefixMatch != null) {
@@ -2722,7 +2708,7 @@ class RecipeImportEngine {
 
 enum _Section { unknown, ingredients, instructions, notes, description }
 
-enum _Platform { instagram, tiktok, pinterest, facebook, youtube, squarespace, generic }
+enum _Platform { instagram, tiktok, pinterest, youtube, squarespace, generic }
 
 class _Metadata {
   final String? servings;

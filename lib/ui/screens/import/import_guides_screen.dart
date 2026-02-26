@@ -297,59 +297,6 @@ class ImportGuidesScreen extends StatelessWidget {
               ),
             ],
           ),
-          _ImportGuide(
-            id: 'facebook',
-            icon: Icons.facebook_rounded,
-            color: const Color(0xFF1877F2),
-            title: 'Facebook',
-            subtitle: 'Import from posts, groups & Reels',
-            difficulty: 'Medium',
-            timeEstimate: '1 min',
-            webSlug: 'facebook',
-            steps: [
-              _GuideStep(
-                title: 'Find a recipe post',
-                description: 'Open Facebook and find a recipe post, Reel, or video in a cooking group.',
-                icon: Icons.search,
-                asset: _StepAsset(
-                  type: _AssetType.screenshot,
-                  description: 'Facebook recipe post in a cooking group with the three-dot menu visible',
-                  filename: 'fb_recipe_post.png',
-                ),
-              ),
-              _GuideStep(
-                title: 'Copy the link',
-                description: 'Tap the three dots (•••) on the post and select "Copy link". For Reels, use the share button.',
-                icon: Icons.more_horiz,
-                asset: _StepAsset(
-                  type: _AssetType.screenshot,
-                  description: 'Facebook post menu showing "Copy link" option highlighted',
-                  filename: 'fb_copy_link.png',
-                ),
-                tip: 'If the post is in a private group, copy the recipe text directly instead.',
-              ),
-              _GuideStep(
-                title: 'Paste in Recipe Spellbook',
-                description: 'Open Recipe Spellbook, tap + > "From Website/Link" and paste. If from a private group, use "From Text" instead and paste the recipe text.',
-                icon: Icons.paste,
-                asset: _StepAsset(
-                  type: _AssetType.screenshot,
-                  description: 'Recipe Spellbook URL input with a Facebook link pasted',
-                  filename: 'fb_paste_url.png',
-                ),
-              ),
-              _GuideStep(
-                title: 'Review & save',
-                description: 'Check the extracted recipe and save to your cookbook.',
-                icon: Icons.check_circle_outline,
-                asset: _StepAsset(
-                  type: _AssetType.screenshot,
-                  description: 'Import preview showing extracted Facebook recipe',
-                  filename: 'fb_import_preview.png',
-                ),
-              ),
-            ],
-          ),
         ],
       ),
 

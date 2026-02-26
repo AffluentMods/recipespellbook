@@ -384,7 +384,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
             behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.green,
             action: SnackBarAction(
-              label: 'View',
+              label: l10n.actionView,
               textColor: Colors.white,
               onPressed: () => context.push('/recipe/$recipeId'),
             ),
@@ -444,7 +444,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
           // ── Step 1: Get the prompt ──
           _SectionCard(
             number: '1',
-            title: 'Copy the prompt',
+            title: l10n.aiCopyPrompt,
             subtitle:
             'Paste this into ChatGPT, Claude, Gemini, or any AI along with your recipe.',
             child: Column(
@@ -503,8 +503,8 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
           // ── Step 2: Paste or load JSON ──
           _SectionCard(
             number: '2',
-            title: 'Paste the AI output',
-            subtitle: 'Paste the JSON the AI gave you, or import a .json file.',
+            title: l10n.aiPasteOutput,
+            subtitle: l10n.aiPasteSubtitle,
             child: Column(
               children: [
                 TextField(

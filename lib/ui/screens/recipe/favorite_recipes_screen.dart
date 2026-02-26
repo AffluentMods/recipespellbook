@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../data/course_category_data.dart';
 import '../../../database/database.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/default_recipe_images.dart';
@@ -22,14 +23,15 @@ class FavoriteRecipesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final recipesAsync = ref.watch(favoriteRecipesProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.star, size: 24, color: Colors.amber),
-            SizedBox(width: 10),
-            Text('Favorites'),
+            const Icon(Icons.star, size: 24, color: Colors.amber),
+            const SizedBox(width: 10),
+            Text(l10n.favoritesTitle),
           ],
         ),
         actions: [
@@ -57,13 +59,13 @@ class FavoriteRecipesScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'No favorite recipes yet',
+                      l10n.favoritesEmpty,
                       style: theme.textTheme.titleLarge,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Tap the star on any recipe to add it here',
+                      l10n.favoritesEmptySubtitle,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.outline,
                       ),
@@ -101,6 +103,7 @@ class _RecipeItem extends ConsumerWidget {
     final hasTime = recipe.prepTimeMinutes != null || recipe.cookTimeMinutes != null;
     final totalTime = (recipe.prepTimeMinutes ?? 0) + (recipe.cookTimeMinutes ?? 0);
     final course = recipe.courseId != null ? CourseData.getById(recipe.courseId!) : null;
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -188,9 +191,9 @@ class _RecipeItem extends ConsumerWidget {
                     ref.read(recipeDaoProvider).toggleFavorite(recipe.id, false);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: const Text('Removed from favorites'),
+                        content: Text(l10n.favoritesRemoved),
                         action: SnackBarAction(
-                          label: 'Undo',
+                          label: l10n.actionUndo,
                           onPressed: () {
                             ref.read(recipeDaoProvider).toggleFavorite(recipe.id, true);
                           },

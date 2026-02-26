@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
 import 'app_snackbar.dart';
 
 /// Model for recipe tags/collections
@@ -113,6 +114,7 @@ class _ManageTagsSheetState extends ConsumerState<_ManageTagsSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       children: [
@@ -134,14 +136,14 @@ class _ManageTagsSheetState extends ConsumerState<_ManageTagsSheet> {
               Icon(Icons.label, color: theme.colorScheme.primary),
               const SizedBox(width: 12),
               Text(
-                'Manage Tags',
+                l10n.manageTags,
                 style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const Spacer(),
               TextButton.icon(
                 onPressed: () => _showCreateTagDialog(context),
                 icon: const Icon(Icons.add, size: 18),
-                label: const Text('New Tag'),
+                label: Text(l10n.tagsAddNew),
               ),
             ],
           ),
@@ -181,10 +183,11 @@ class _ManageTagsSheetState extends ConsumerState<_ManageTagsSheet> {
             width: double.infinity,
             child: FilledButton(
               onPressed: () {
+                final l10n = AppLocalizations.of(context)!;
                 Navigator.pop(context);
-                AppSnackbar.info(context, '${_selectedTags.length} tags applied');
+                AppSnackbar.info(context, l10n.tagsApplied(_selectedTags.length));
               },
-              child: const Text('Save Tags'),
+              child: Text(AppLocalizations.of(context)!.tagsSave),
             ),
           ),
         ),
@@ -200,131 +203,136 @@ class _ManageTagsSheetState extends ConsumerState<_ManageTagsSheet> {
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Create New Tag'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Tag Name',
-                    hintText: 'e.g., Date Night',
+        builder: (context, setDialogState) {
+          final l10n = AppLocalizations.of(context)!;
+          return AlertDialog(
+            title: Text(l10n.tagsCreateNew),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      labelText: l10n.tagsNameLabel,
+                      hintText: l10n.tagsEnterName,
+                    ),
+                    autofocus: true,
                   ),
-                  autofocus: true,
-                ),
-                const SizedBox(height: 20),
-                const Text('Color'),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _tagColors.map((color) {
-                    final isSelected = color == selectedColor;
-                    return GestureDetector(
-                      onTap: () => setDialogState(() => selectedColor = color),
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
-                          border: isSelected
-                              ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 3)
+                  const SizedBox(height: 20),
+                  Text(l10n.color),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _tagColors.map((color) {
+                      final isSelected = color == selectedColor;
+                      return GestureDetector(
+                        onTap: () => setDialogState(() => selectedColor = color),
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                            border: isSelected
+                                ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 3)
+                                : null,
+                          ),
+                          child: isSelected
+                              ? const Icon(Icons.check, color: Colors.white, size: 20)
                               : null,
                         ),
-                        child: isSelected
-                            ? const Icon(Icons.check, color: Colors.white, size: 20)
-                            : null,
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 20),
-                const Text('Icon'),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _tagIcons.map((icon) {
-                    final isSelected = icon == selectedIcon;
-                    return GestureDetector(
-                      onTap: () => setDialogState(() => selectedIcon = icon),
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? selectedColor.withValues(alpha: 0.2)
-                              : Theme.of(context).colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(8),
-                          border: isSelected
-                              ? Border.all(color: selectedColor, width: 2)
-                              : null,
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(l10n.icon),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _tagIcons.map((icon) {
+                      final isSelected = icon == selectedIcon;
+                      return GestureDetector(
+                        onTap: () => setDialogState(() => selectedIcon = icon),
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? selectedColor.withValues(alpha: 0.2)
+                                : Theme.of(context).colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(8),
+                            border: isSelected
+                                ? Border.all(color: selectedColor, width: 2)
+                                : null,
+                          ),
+                          child: Icon(
+                            icon,
+                            color: isSelected ? selectedColor : Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                         ),
-                        child: Icon(
-                          icon,
-                          color: isSelected ? selectedColor : Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                if (nameController.text.trim().isNotEmpty) {
-                  // TODO: Save to database
-                  Navigator.pop(ctx);
-                  setState(() {
-                    _allTags.add(RecipeTag(
-                      id: 'tag_${DateTime.now().millisecondsSinceEpoch}',
-                      name: nameController.text.trim(),
-                      color: selectedColor,
-                      icon: selectedIcon,
-                    ));
-                  });
-                }
-              },
-              child: const Text('Create'),
-            ),
-          ],
-        ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(l10n.actionCancel),
+              ),
+              FilledButton(
+                onPressed: () {
+                  if (nameController.text.trim().isNotEmpty) {
+                    // TODO: Save to database
+                    Navigator.pop(ctx);
+                    setState(() {
+                      _allTags.add(RecipeTag(
+                        id: 'tag_${DateTime.now().millisecondsSinceEpoch}',
+                        name: nameController.text.trim(),
+                        color: selectedColor,
+                        icon: selectedIcon,
+                      ));
+                    });
+                  }
+                },
+                child: Text(l10n.actionCreate),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
   void _showEditTagDialog(BuildContext context, RecipeTag tag) {
-    // Similar to create but pre-filled
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Edit "${tag.name}"'),
-        content: const Text('Tag editing coming soon!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              // TODO: Delete tag
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete Tag'),
-          ),
-        ],
-      ),
+      builder: (ctx) {
+        final l10n = AppLocalizations.of(ctx)!;
+        return AlertDialog(
+          title: Text(l10n.tagsEditTitle(tag.name)),
+          content: Text(l10n.tagsEditComingSoon),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(l10n.actionCancel),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                // TODO: Delete tag
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: Text(l10n.tagsDelete),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -380,7 +388,7 @@ class _TagListItem extends StatelessWidget {
                       ),
                       if (tag.recipeCount > 0)
                         Text(
-                          '${tag.recipeCount} recipes',
+                          AppLocalizations.of(context)!.tagsRecipeCount(tag.recipeCount),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.outline,
                           ),

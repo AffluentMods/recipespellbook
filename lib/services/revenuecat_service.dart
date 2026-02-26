@@ -30,15 +30,33 @@ class RCConfig {
   ///
   /// **Google Play note:** For subscriptions with base plans, the store product
   /// identifier format is `subscription_id:base_plan_id` (e.g. `rs_cloud_sync:monthly`).
-  /// The paywall falls back to RC's native paywall if no match is found, so this
-  /// works cross-platform. Update these if your store IDs differ.
-  ///
   /// **App Store:** Product IDs are flat strings matching what you create in ASC.
+  ///
+  /// Prefer matching packages by [PackageType] (monthly, annual, lifetime) rather
+  /// than raw store IDs when possible — the RC SDK handles platform differences.
   static const String premiumLifetimeId = 'rs_premium_lifetime';
-  static const String cloudSyncMonthlyId = 'rs_cloud_sync_monthly';
-  static const String cloudSyncYearlyId = 'rs_cloud_sync_yearly';
-  static const String cloudSyncPlusMonthlyId = 'rs_cloud_sync_plus_monthly';
-  static const String cloudSyncPlusYearlyId = 'rs_cloud_sync_plus_yearly';
+
+  // — Cloud Sync (per-platform) —
+  static String get cloudSyncMonthlyId =>
+      defaultTargetPlatform == TargetPlatform.android
+          ? 'rs_cloud_sync:monthly'
+          : 'rs_cloud_sync_monthly';
+
+  static String get cloudSyncYearlyId =>
+      defaultTargetPlatform == TargetPlatform.android
+          ? 'rs_cloud_sync:yearly'
+          : 'rs_cloud_sync_yearly';
+
+  // — Cloud Sync Plus (create these in RC + stores when ready) —
+  static String get cloudSyncPlusMonthlyId =>
+      defaultTargetPlatform == TargetPlatform.android
+          ? 'rs_cloud_sync_plus:monthly'
+          : 'rs_cloud_sync_plus_monthly';
+
+  static String get cloudSyncPlusYearlyId =>
+      defaultTargetPlatform == TargetPlatform.android
+          ? 'rs_cloud_sync_plus:yearly'
+          : 'rs_cloud_sync_plus_yearly';
 }
 
 // ════════════════════════════════════════════════════════════════

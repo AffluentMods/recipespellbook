@@ -5,6 +5,16 @@ import 'package:printing/printing.dart';
 import '../../data/course_category_data.dart';
 import '../../database/database.dart'; // Keep Step from here
 
+/// Strip emoji characters that PDF fonts can't render
+String _stripEmoji(String text) {
+  return text.replaceAll(RegExp(
+    r'[\u{1F000}-\u{1FFFF}]|[\u{2600}-\u{27BF}]|[\u{FE00}-\u{FE0F}]|'
+    r'[\u{200D}]|[\u{20E3}]|[\u{E0020}-\u{E007F}]|[\u{2300}-\u{23FF}]|'
+    r'[\u{2B05}-\u{2B55}]|[\u{3030}]|[\u{303D}]|[\u{3297}]|[\u{3299}]',
+    unicode: true,
+  ), '').replaceAll(RegExp(r'\s{2,}'), ' ').trim();
+}
+
 /// Service for printing recipes
 class RecipePrintService {
   /// Print a recipe
@@ -61,7 +71,7 @@ class RecipePrintService {
           // Description
           if (recipe.description != null && recipe.description!.isNotEmpty) ...[
             pw.Text(
-              recipe.description!,
+              _stripEmoji(recipe.description!),
               style: pw.TextStyle(
                 fontSize: 11,
                 fontStyle: pw.FontStyle.italic,
@@ -105,7 +115,7 @@ class RecipePrintService {
           children: [
             pw.Expanded(
               child: pw.Text(
-                recipe.title,
+                _stripEmoji(recipe.title),
                 style: pw.TextStyle(
                   fontSize: 24,
                   fontWeight: pw.FontWeight.bold,
@@ -119,11 +129,11 @@ class RecipePrintService {
           pw.Row(
             children: [
               if (course != null)
-                _buildTag('${course.emoji} ${course.name}'),
+                _buildTag(course.name),
               if (course != null && category != null)
                 pw.SizedBox(width: 8),
               if (category != null)
-                _buildTag('${category.emoji} ${category.name}'),
+                _buildTag(category.name),
             ],
           ),
         ],
@@ -154,22 +164,22 @@ class RecipePrintService {
     // Total time
     final totalTime = (recipe.prepTimeMinutes ?? 0) + (recipe.cookTimeMinutes ?? 0);
     if (totalTime > 0) {
-      items.add(_buildMetaItem('⏱️', _formatTime(totalTime)));
+      items.add(_buildMetaItem(_formatTime(totalTime)));
     }
 
     // Servings
     if (recipe.servings != null) {
-      items.add(_buildMetaItem('👥', recipe.servings!));
+      items.add(_buildMetaItem('Serves ${recipe.servings!}'));
     }
 
     // Prep time
     if (recipe.prepTimeMinutes != null) {
-      items.add(_buildMetaItem('🔪', '${labels['prep'] ?? 'Prep'}: ${recipe.prepTimeMinutes} min'));
+      items.add(_buildMetaItem('${labels['prep'] ?? 'Prep'}: ${recipe.prepTimeMinutes} min'));
     }
 
     // Cook time
     if (recipe.cookTimeMinutes != null) {
-      items.add(_buildMetaItem('🔥', '${labels['cook'] ?? 'Cook'}: ${recipe.cookTimeMinutes} min'));
+      items.add(_buildMetaItem('${labels['cook'] ?? 'Cook'}: ${recipe.cookTimeMinutes} min'));
     }
 
     if (items.isEmpty) return pw.SizedBox.shrink();
@@ -181,12 +191,10 @@ class RecipePrintService {
     );
   }
 
-  static pw.Widget _buildMetaItem(String icon, String text) {
+  static pw.Widget _buildMetaItem(String text) {
     return pw.Row(
       mainAxisSize: pw.MainAxisSize.min,
       children: [
-        pw.Text(icon, style: const pw.TextStyle(fontSize: 10)),
-        pw.SizedBox(width: 4),
         pw.Text(text, style: const pw.TextStyle(fontSize: 10)),
       ],
     );
@@ -235,6 +243,7 @@ class RecipePrintService {
   static pw.Widget _buildIngredientItem(Ingredient ingredient, double scale, bool columnarLayout) {
     final scaledAmount = _scaleAmount(ingredient.amount, scale);
     final amountUnit = '${scaledAmount ?? ''} ${ingredient.unit ?? ''}'.trim();
+    final name = _stripEmoji(ingredient.name);
 
     return pw.SizedBox(
       width: 240, // Half page width roughly
@@ -260,7 +269,7 @@ class RecipePrintService {
             ),
             pw.SizedBox(width: 4),
             pw.Expanded(
-              child: pw.Text(ingredient.name, style: const pw.TextStyle(fontSize: 10)),
+              child: pw.Text(name, style: const pw.TextStyle(fontSize: 10)),
             ),
           ] else ...[
             // Inline: amount unit name flowing together
@@ -269,7 +278,7 @@ class RecipePrintService {
               pw.SizedBox(width: 6),
             ],
             pw.Expanded(
-              child: pw.Text(ingredient.name, style: const pw.TextStyle(fontSize: 10)),
+              child: pw.Text(name, style: const pw.TextStyle(fontSize: 10)),
             ),
           ],
         ],
@@ -321,7 +330,7 @@ class RecipePrintService {
           pw.SizedBox(width: 12),
           pw.Expanded(
             child: pw.Text(
-              step.instruction,
+              _stripEmoji(step.instruction),
               style: const pw.TextStyle(fontSize: 11),
             ),
           ),
@@ -343,8 +352,6 @@ class RecipePrintService {
         children: [
           pw.Row(
             children: [
-              pw.Text('📝', style: const pw.TextStyle(fontSize: 12)),
-              pw.SizedBox(width: 4),
               pw.Text(
                 labels['notes'] ?? 'Notes',
                 style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
@@ -352,7 +359,7 @@ class RecipePrintService {
             ],
           ),
           pw.SizedBox(height: 4),
-          pw.Text(notes, style: const pw.TextStyle(fontSize: 10)),
+          pw.Text(_stripEmoji(notes), style: const pw.TextStyle(fontSize: 10)),
         ],
       ),
     );

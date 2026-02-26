@@ -4577,7 +4577,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get featureCloudSyncPersonal => 'Sync cloud (personnel)';
 
   @override
-  String get featurePhotosOnSteps => 'Photos sur les étapes';
+  String get featurePhotosOnSteps => 'Photo dans les instructions';
 
   @override
   String get featurePhotoStorage250 => '250 Mo de stockage photo (~500 photos)';
@@ -5161,4 +5161,463 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get createRecipeManually => 'Ou créer une recette manuellement';
+
+  @override
+  String get transferYourRecipes => 'Transfer your recipes';
+
+  @override
+  String get transferUpgradeBanner => 'Want automatic sync? Upgrade to Premium for cloud sync across all your devices.';
+
+  @override
+  String get transferCodeLength => 'Code must be 6 characters';
+
+  @override
+  String get transferItemRecipes => 'All recipes';
+
+  @override
+  String get transferItemCookbooks => 'Cookbooks & categories';
+
+  @override
+  String get transferItemMealPlans => 'Meal plans';
+
+  @override
+  String get transferItemShoppingLists => 'Shopping lists';
+
+  @override
+  String get transferItemSettings => 'App settings';
+
+  @override
+  String get transferItemAccount => 'Account sign-in (if sender is logged in)';
+
+  @override
+  String get codeCopied => 'Code copied!';
+
+  @override
+  String get transferTitle => 'Transfer Data';
+
+  @override
+  String get transferReceiveSubtitle => 'Enter a code or scan QR from the sending device';
+
+  @override
+  String get transferPreparing => 'Preparing your data...';
+
+  @override
+  String get transferFailed => 'Transfer failed';
+
+  @override
+  String get transferScanDesc => 'Scan this QR on your other device, or enter the code below.';
+
+  @override
+  String get transferReady => 'Ready to transfer';
+
+  @override
+  String get transferCodeExpires => 'This code expires in 15 minutes';
+
+  @override
+  String get transferComplete => 'Transfer complete!';
+
+  @override
+  String get transferAccountSynced => 'Account signed in from sender';
+
+  @override
+  String get transferScanQr => 'Scan QR Code';
+
+  @override
+  String get transferScanQrDesc => 'Point your camera at the QR on the other device';
+
+  @override
+  String get transferEnterCode => 'Enter transfer code';
+
+  @override
+  String get transferWhatMoves => 'What gets transferred:';
+
+  @override
+  String get transferMergeNote => 'Existing data on this device will be merged. Duplicates are skipped.';
+
+  @override
+  String get transferPointCamera => 'Point at the QR code on the sending device';
+
+  @override
+  String get labelPrepMin => 'Prep (min)';
+
+  @override
+  String get labelCookMin => 'Cook (min)';
+
+  @override
+  String get labelTotalCal => 'Total cal';
+
+  @override
+  String get labelCalPerServing => 'Cal/serving';
+
+  @override
+  String get tooltipViewSize => 'View size';
+
+  @override
+  String get pantryClearTitle => 'Clear pantry?';
+
+  @override
+  String get pantryAddHint => 'Add item to pantry...';
+
+  @override
+  String get pantryAddStaples => 'Add all staples';
+
+  @override
+  String get pantrySearchHint => 'Search pantry...';
+
+  @override
+  String get settingsRecipesShopping => 'Recipes & Shopping';
+
+  @override
+  String get settingsAdvanced => 'Advanced Settings';
+
+  @override
+  String get settingsAdvancedSubtitle => 'Tags, courses, categories & more';
+
+  @override
+  String get settingsDeleteData => 'Delete Data';
+
+  @override
+  String get settingsDeleteDataSubtitle => 'Erase app or cloud data';
+
+  @override
+  String get settingsUpgradeSubtitle => 'Cloud sync, photos & more';
+
+  @override
+  String get settingsTextSizeSubtitle => 'Adjust text size across the entire app';
+
+  @override
+  String get settingsGoogleOrApple => 'Google or Apple';
+
+  @override
+  String get alwaysVisible => 'Always visible';
+
+  @override
+  String get chartNumbers => 'Numbers';
+
+  @override
+  String get chartDonut => 'Donut';
+
+  @override
+  String get chartBars => 'Bars';
+
+  @override
+  String get unitKcal => 'kcal';
+
+  @override
+  String get nutritionCustomScale => 'Custom Scale';
+
+  @override
+  String get nutritionScaleLabel => 'Scale multiplier';
+
+  @override
+  String get nutritionScaleHint => 'e.g. 0.5, 1.5, 3.0';
+
+  @override
+  String get nutritionSet => 'Set';
+
+  @override
+  String get nutritionApplyRecalculate => 'Apply & Recalculate';
+
+  @override
+  String get calAbbrev => 'Cal';
+
+  @override
+  String get nutritionServingSizeHint => 'e.g., 1 cup, 100g';
+
+  @override
+  String get shoppingExportList => 'Export list';
+
+  @override
+  String get shoppingExportListSubtitle => 'Share as a text file or backup';
+
+  @override
+  String get shoppingImportList => 'Import list';
+
+  @override
+  String get shoppingImportListSubtitle => 'Add items from a file, photo, or text';
+
+  @override
+  String get shoppingScanBarcodeSubtitle => 'Look up a product to add';
+
+  @override
+  String get exportBackupFile => 'Backup file';
+
+  @override
+  String get exportBackupFileSubtitle => 'For transferring to another device or app';
+
+  @override
+  String get exportFormattedList => 'Formatted list';
+
+  @override
+  String get exportFormattedListSubtitle => 'With checkboxes — great for notes apps';
+
+  @override
+  String get exportPlainText => 'Plain text';
+
+  @override
+  String get exportPlainTextSubtitle => 'Simple list — paste anywhere';
+
+  @override
+  String get importFromBackupFile => 'From backup file';
+
+  @override
+  String get importFromBackupSubtitle => 'Import a Recipe Spellbook backup';
+
+  @override
+  String get importFromTextShoppingSubtitle => 'Paste or type a list of items';
+
+  @override
+  String get importFromPhotoOcrSubtitle => 'OCR scan a handwritten or printed list';
+
+  @override
+  String get importFromPhotoGallerySubtitle => 'Take a photo or pick from gallery';
+
+  @override
+  String get shoppingSendToStore => 'Send to store';
+
+  @override
+  String get shoppingSendToCart => 'Send to cart';
+
+  @override
+  String get shoppingCopyToClipboard => 'Copy list to clipboard';
+
+  @override
+  String get shoppingGoToCart => 'Go to cart';
+
+  @override
+  String get shoppingAddItems => 'Add items';
+
+  @override
+  String get shoppingAddItemHintLong => 'e.g. 2 cups flour, chicken breast...';
+
+  @override
+  String get importReviewItems => 'Review items';
+
+  @override
+  String get importNoItemsDetected => 'No items detected';
+
+  @override
+  String get mealPlanDate => 'Date';
+
+  @override
+  String get mealPlanThisWeekend => 'This Weekend';
+
+  @override
+  String get menuRpgProfile => 'RPG Profile';
+
+  @override
+  String get menuTools => 'Tools';
+
+  @override
+  String get menuSupport => 'Support';
+
+  @override
+  String get menuHowCanWeHelp => 'How can we help?';
+
+  @override
+  String get menuGetInTouch => 'Get in touch or browse our guides.';
+
+  @override
+  String get menuVisitWebsite => 'Visit our Website';
+
+  @override
+  String get feedbackTitleLabel => 'Title';
+
+  @override
+  String get feedbackDetailsLabel => 'Details';
+
+  @override
+  String get feedbackDescriptionLabel => 'Description';
+
+  @override
+  String get menuSigningIn => 'Signing in…';
+
+  @override
+  String get menuSignInSync => 'Sign in to sync & back up';
+
+  @override
+  String get tagsSave => 'Save Tags';
+
+  @override
+  String get recipeFieldCategories => 'Categories';
+
+  @override
+  String get selectCategories => 'Select categories';
+
+  @override
+  String get searchOrCreateNew => 'Search or create new...';
+
+  @override
+  String get noMatchesFound => 'No matches found';
+
+  @override
+  String get taxonomyAddCategoryNew => 'Add as new category';
+
+  @override
+  String get ingredientSubstitutionsTitle => 'Ingredient Substitutions';
+
+  @override
+  String get ingredientSubstitutionsSearch => 'Search for an ingredient...';
+
+  @override
+  String get ingredientSubstitutionsSearchAll => 'Search all substitutions';
+
+  @override
+  String get ingredientName => 'Ingredient Name';
+
+  @override
+  String get ingredientNameHint => 'e.g. turmeric, tahini, miso';
+
+  @override
+  String get ingredientBulkHint => 'Enter one ingredient per line:\n\n2 cups flour\n1 tsp salt\n3 eggs';
+
+  @override
+  String get viewPlans => 'View Plans';
+
+  @override
+  String get renewsLabel => 'Renews';
+
+  @override
+  String get upgradeToProUnlock => 'Upgrade to Pro to unlock';
+
+  @override
+  String get rpgFightAgain => 'Fight Again';
+
+  @override
+  String get rpgAwesome => 'Awesome!';
+
+  @override
+  String get rpgPurchase => 'Purchase';
+
+  @override
+  String get rpgEquipped => 'Equipped';
+
+  @override
+  String get rpgClaim => 'Claim';
+
+  @override
+  String get rpgGuild => 'Guild';
+
+  @override
+  String get rpgDmg => 'DMG';
+
+  @override
+  String get rpgMana => 'Mana';
+
+  @override
+  String get rpgLevel => 'Level';
+
+  @override
+  String get rpgTotalXp => 'Total XP';
+
+  @override
+  String get rpgLoginStreak => 'Login Streak';
+
+  @override
+  String get rpgGoldEarned => 'Gold Earned';
+
+  @override
+  String get rpgGemsEarned => 'Gems Earned';
+
+  @override
+  String get rpgNextLevel => 'Next Level';
+
+  @override
+  String get rpgNotifyMe => 'Notify Me';
+
+  @override
+  String get rpgGold => 'Gold';
+
+  @override
+  String get rpgGems => 'Gems';
+
+  @override
+  String get rpgLottery => 'Gem Lottery';
+
+  @override
+  String get rpgClasses => 'Classes';
+
+  @override
+  String get rpgDisplayName => 'Display Name';
+
+  @override
+  String get rpgResetProgress => 'Reset Progress';
+
+  @override
+  String get rpgResetProgressSubtitle => 'Start over from level 1';
+
+  @override
+  String get rpgRecipeRarity => 'Recipe Rarity';
+
+  @override
+  String get settingsNoMatchingSettings => 'No matching settings';
+
+  @override
+  String get settingsSearchHint => 'Search settings...';
+
+  @override
+  String get textSizeSmall => 'Small';
+
+  @override
+  String get textSizeDefault => 'Default';
+
+  @override
+  String get textSizeMedium => 'Medium';
+
+  @override
+  String get textSizeLarge => 'Large';
+
+  @override
+  String get textSizeExtraLarge => 'Extra Large';
+
+  @override
+  String get resetDataClearedDesc => 'All data has been cleared successfully.\n\nWould you like to import the 10 default starter recipes?';
+
+  @override
+  String get importingDefaultRecipes => 'Importing default recipes...';
+
+  @override
+  String get checking => 'Checking...';
+
+  @override
+  String get connectedTapToManage => 'Connected • Tap to manage';
+
+  @override
+  String get notConnected => 'Not connected';
+
+  @override
+  String get tapToSignIn => 'Tap to sign in';
+
+  @override
+  String get noneSelected => 'None Selected';
+
+  @override
+  String get partialBackup => 'Partial Backup';
+
+  @override
+  String get settingsShopping => 'Shopping & Planning';
+
+  @override
+  String get settingsManage => 'Manage';
+
+  @override
+  String get manageTags => 'Manage Tags';
+
+  @override
+  String tagsApplied(int count) {
+    return '$count tags applied';
+  }
+
+  @override
+  String tagsEditTitle(String name) {
+    return 'Edit \"$name\"';
+  }
+
+  @override
+  String get tagsEditComingSoon => 'Tag editing coming soon!';
+
+  @override
+  String tagsRecipeCount(int count) {
+    return '$count recipes';
+  }
 }

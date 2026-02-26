@@ -101,21 +101,21 @@ class AboutScreen extends StatelessWidget {
                   icon: Icons.language,
                   title: l10n.aboutWebsite,
                   subtitle: 'recipespellbook.app',
-                  onTap: () => _launchUrl('https://recipespellbook.app'),
+                  onTap: () => _launchUrl('https://recipespellbook.app', context),
                 ),
                 _divider(theme),
                 _AboutTile(
                   icon: Icons.privacy_tip_outlined,
                   title: l10n.aboutPrivacyPolicy,
                   subtitle: l10n.aboutPrivacyPolicySub,
-                  onTap: () => _launchUrl('https://recipespellbook.app/privacy'),
+                  onTap: () => _launchUrl('https://recipespellbook.app/privacy', context),
                 ),
                 _divider(theme),
                 _AboutTile(
                   icon: Icons.article_outlined,
                   title: l10n.aboutTermsOfService,
                   subtitle: l10n.aboutTermsOfServiceSub,
-                  onTap: () => _launchUrl('https://recipespellbook.app/terms'),
+                  onTap: () => _launchUrl('https://recipespellbook.app/terms', context),
                 ),
               ],
             ),
@@ -129,23 +129,21 @@ class AboutScreen extends StatelessWidget {
                   icon: Icons.discord,
                   title: l10n.aboutCommunity,
                   subtitle: l10n.aboutCommunitySub,
-                  onTap: () => _launchUrl('https://discord.gg/recipespellbook'),
+                  onTap: () => _launchUrl('https://discord.gg/recipespellbook', context),
                 ),
                 _divider(theme),
                 _AboutTile(
                   icon: Icons.bug_report_outlined,
                   title: l10n.aboutReportBug,
                   subtitle: l10n.aboutReportBugSub,
-                  onTap: () => _launchUrl('https://discord.gg/recipespellbook'),
+                  onTap: () => _launchUrl('https://discord.gg/recipespellbook', context),
                 ),
                 _divider(theme),
                 _AboutTile(
                   icon: Icons.star_outline,
                   title: l10n.aboutRateApp,
                   subtitle: l10n.aboutRateAppSub,
-                  onTap: () {
-                    // TODO: Replace with actual store URLs when published
-                  },
+                  onTap: () => _launchUrl('https://play.google.com/store/apps/details?id=app.recipespellbook', context),
                 ),
               ],
             ),
@@ -210,10 +208,21 @@ class AboutScreen extends StatelessWidget {
     color: theme.colorScheme.outline.withValues(alpha: 0.1),
   );
 
-  Future<void> _launchUrl(String url) async {
+  Future<void> _launchUrl(String url, BuildContext context) async {
     final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    try {
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open $url'), behavior: SnackBarBehavior.floating),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open $url'), behavior: SnackBarBehavior.floating),
+        );
+      }
     }
   }
 }

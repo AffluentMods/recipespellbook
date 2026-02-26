@@ -63,9 +63,10 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transfer Data'),
+        title: Text(l10n.transferTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -81,10 +82,10 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           child: _step == 0
-              ? _buildModePicker(theme)
+              ? _buildModePicker(theme, l10n)
               : _step == 1
-              ? _buildSendMode(theme)
-              : _buildReceiveMode(theme),
+              ? _buildSendMode(theme, l10n)
+              : _buildReceiveMode(theme, l10n),
         ),
       ),
     );
@@ -94,7 +95,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
   //  MODE PICKER
   // ════════════════════════════════════════════════════════════════
 
-  Widget _buildModePicker(ThemeData theme) {
+  Widget _buildModePicker(ThemeData theme, AppLocalizations l10n) {
     return Padding(
       key: const ValueKey('picker'),
       padding: const EdgeInsets.all(24),
@@ -104,7 +105,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
           Icon(Icons.swap_horiz_rounded, size: 64, color: theme.colorScheme.primary),
           const SizedBox(height: 20),
           Text(
-            'Transfer your recipes',
+            l10n.transferYourRecipes,
             style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
@@ -132,7 +133,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
           _ModeCard(
             icon: Icons.download_rounded,
             title: 'Receive on $_currentDevice',
-            subtitle: 'Enter a code or scan QR from the sending device',
+            subtitle: l10n.transferReceiveSubtitle,
             color: theme.colorScheme.tertiary,
             theme: theme,
             onTap: () => setState(() => _step = 2),
@@ -151,7 +152,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Want automatic sync? Upgrade to Premium for cloud sync across all your devices.',
+                    l10n.transferUpgradeBanner,
                     style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                 ),
@@ -192,7 +193,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
     }
   }
 
-  Widget _buildSendMode(ThemeData theme) {
+  Widget _buildSendMode(ThemeData theme, AppLocalizations l10n) {
     final isDark = theme.brightness == Brightness.dark;
     return SingleChildScrollView(
       key: const ValueKey('send'),
@@ -204,16 +205,16 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
             const SizedBox(height: 60),
             CircularProgressIndicator(color: theme.colorScheme.primary),
             const SizedBox(height: 24),
-            Text('Preparing your data...', style: theme.textTheme.titleMedium),
+            Text(l10n.transferPreparing, style: theme.textTheme.titleMedium),
           ] else if (_sendError != null) ...[
             const SizedBox(height: 40),
             Icon(Icons.error_outline, size: 56, color: theme.colorScheme.error),
             const SizedBox(height: 16),
-            Text('Transfer failed', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            Text(l10n.transferFailed, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Text(_sendError!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant), textAlign: TextAlign.center),
             const SizedBox(height: 24),
-            FilledButton.icon(onPressed: _prepareSend, icon: const Icon(Icons.refresh), label: const Text('Try Again')),
+            FilledButton.icon(onPressed: _prepareSend, icon: const Icon(Icons.refresh), label: Text(l10n.tryAgain)),
           ] else if (_sendReady) ...[
             // ── Real QR Code ──
             Container(
@@ -231,7 +232,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Text('Scan this QR on your other device,\nor enter the code below.',
+            Text(l10n.transferScanDesc,
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline), textAlign: TextAlign.center),
             const SizedBox(height: 24),
             Container(
@@ -249,10 +250,10 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                   IconButton(
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: _transferCode ?? ''));
-                      AppSnackbar.success(context, 'Code copied!');
+                      AppSnackbar.success(context, l10n.codeCopied);
                     },
                     icon: const Icon(Icons.copy, size: 20),
-                    tooltip: 'Copy code',
+                    tooltip: l10n.actionCopy,
                   ),
                 ],
               ),
@@ -267,13 +268,13 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
               ),
               child: Column(
                 children: [
-                  Text('Ready to transfer', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(l10n.transferReady, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _dataStat(Icons.restaurant, '$_recipesCount', 'Recipes', theme),
-                      _dataStat(Icons.menu_book, '$_cookbooksCount', 'Cookbooks', theme),
+                      _dataStat(Icons.restaurant, '$_recipesCount', l10n.recipesTitle, theme),
+                      _dataStat(Icons.menu_book, '$_cookbooksCount', l10n.cookbooksTitle, theme),
                     ],
                   ),
                 ],
@@ -285,7 +286,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
               children: [
                 Icon(Icons.schedule, size: 16, color: theme.colorScheme.outline),
                 const SizedBox(width: 6),
-                Text('This code expires in 15 minutes',
+                Text(l10n.transferCodeExpires,
                     style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
               ],
             ),
@@ -310,7 +311,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
   //  RECEIVE MODE
   // ════════════════════════════════════════════════════════════════
 
-  Widget _buildReceiveMode(ThemeData theme) {
+  Widget _buildReceiveMode(ThemeData theme, AppLocalizations l10n) {
     final isDark = theme.brightness == Brightness.dark;
 
     if (_receiveSuccess) {
@@ -327,7 +328,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                 child: const Icon(Icons.check, size: 48, color: Colors.green),
               ),
               const SizedBox(height: 24),
-              Text('Transfer complete!', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+              Text(l10n.transferComplete, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               Text('$_importedCount items imported successfully.',
                   style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
@@ -338,13 +339,13 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                   children: [
                     Icon(Icons.account_circle, size: 16, color: theme.colorScheme.primary),
                     const SizedBox(width: 6),
-                    Text('Account signed in from sender',
+                    Text(l10n.transferAccountSynced,
                         style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary)),
                   ],
                 ),
               ],
               const SizedBox(height: 32),
-              FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Done')),
+              FilledButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionDone)),
             ],
           ),
         ),
@@ -370,9 +371,9 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                   children: [
                     Icon(Icons.qr_code_scanner, size: 56, color: theme.colorScheme.primary),
                     const SizedBox(height: 12),
-                    Text('Scan QR Code', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(l10n.transferScanQr, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    Text('Point your camera at the QR on the other device',
+                    Text(l10n.transferScanQrDesc,
                         style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
                   ],
                 ),
@@ -391,7 +392,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
             ],
           ),
           const SizedBox(height: 24),
-          Text('Enter transfer code', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+          Text(l10n.transferEnterCode, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           TextField(
             controller: _codeController,
@@ -420,7 +421,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
               onPressed: _isReceiving ? null : _submitCode,
               child: _isReceiving
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('Import Data'),
+                  : Text(l10n.settingsImport),
             ),
           ),
           const SizedBox(height: 24),
@@ -433,14 +434,14 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('What gets transferred:', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                Text(l10n.transferWhatMoves, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                _transferItem(Icons.restaurant, 'All recipes', theme),
-                _transferItem(Icons.menu_book, 'Cookbooks & categories', theme),
-                _transferItem(Icons.calendar_month, 'Meal plans', theme),
-                _transferItem(Icons.shopping_cart, 'Shopping lists', theme),
-                _transferItem(Icons.settings, 'App settings', theme),
-                _transferItem(Icons.account_circle, 'Account sign-in (if sender is logged in)', theme),
+                _transferItem(Icons.restaurant, l10n.transferItemRecipes, theme),
+                _transferItem(Icons.menu_book, l10n.transferItemCookbooks, theme),
+                _transferItem(Icons.calendar_month, l10n.transferItemMealPlans, theme),
+                _transferItem(Icons.shopping_cart, l10n.transferItemShoppingLists, theme),
+                _transferItem(Icons.settings, l10n.transferItemSettings, theme),
+                _transferItem(Icons.account_circle, l10n.transferItemAccount, theme),
               ],
             ),
           ),
@@ -456,7 +457,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
                 Icon(Icons.warning_amber_rounded, size: 18, color: theme.colorScheme.error),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text('Existing data on this device will be merged. Duplicates are skipped.',
+                  child: Text(l10n.transferMergeNote,
                       style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ),
               ],
@@ -504,9 +505,10 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
   }
 
   Future<void> _submitCode() async {
+    final l10n = AppLocalizations.of(context)!;
     final code = _codeController.text.trim().toUpperCase();
     if (code.length != 6) {
-      setState(() => _receiveError = 'Code must be 6 characters');
+      setState(() => _receiveError = l10n.transferCodeLength);
       return;
     }
     await _receiveData(code);
@@ -579,6 +581,7 @@ class _QRScannerPageState extends State<_QRScannerPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -613,7 +616,7 @@ class _QRScannerPageState extends State<_QRScannerPage> {
           // Bottom label
           Positioned(
             bottom: 80, left: 0, right: 0,
-            child: Text('Point at the QR code on the sending device',
+            child: Text(l10n.transferPointCamera,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70)),
           ),

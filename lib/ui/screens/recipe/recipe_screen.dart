@@ -76,26 +76,49 @@ enum _UnitConversion { none, toImperial, toMetric }
 class _UnitConverter {
   static const Map<String, _ConversionRule> _metricToImperial = {
     'ml': _ConversionRule('fl oz', 0.033814),
+    'milliliter': _ConversionRule('fl oz', 0.033814),
+    'milliliters': _ConversionRule('fl oz', 0.033814),
     'l': _ConversionRule('qt', 1.05669),
+    'liter': _ConversionRule('qt', 1.05669),
+    'liters': _ConversionRule('qt', 1.05669),
     'g': _ConversionRule('oz', 0.035274),
+    'gram': _ConversionRule('oz', 0.035274),
+    'grams': _ConversionRule('oz', 0.035274),
     'kg': _ConversionRule('lb', 2.20462),
+    'kilogram': _ConversionRule('lb', 2.20462),
+    'kilograms': _ConversionRule('lb', 2.20462),
     'cm': _ConversionRule('in', 0.393701),
     'mm': _ConversionRule('in', 0.0393701),
   };
   static const Map<String, _ConversionRule> _imperialToMetric = {
     'oz': _ConversionRule('g', 28.3495),
+    'ounce': _ConversionRule('g', 28.3495),
+    'ounces': _ConversionRule('g', 28.3495),
     'lb': _ConversionRule('kg', 0.453592),
+    'lbs': _ConversionRule('kg', 0.453592),
+    'pound': _ConversionRule('kg', 0.453592),
+    'pounds': _ConversionRule('kg', 0.453592),
     'cup': _ConversionRule('ml', 236.588),
     'cups': _ConversionRule('ml', 236.588),
     'fl oz': _ConversionRule('ml', 29.5735),
     'qt': _ConversionRule('l', 0.946353),
+    'quart': _ConversionRule('l', 0.946353),
+    'quarts': _ConversionRule('l', 0.946353),
     'gal': _ConversionRule('l', 3.78541),
     'gallon': _ConversionRule('l', 3.78541),
+    'gallons': _ConversionRule('l', 3.78541),
     'tsp': _ConversionRule('ml', 4.92892),
+    'teaspoon': _ConversionRule('ml', 4.92892),
+    'teaspoons': _ConversionRule('ml', 4.92892),
     'tbsp': _ConversionRule('ml', 14.7868),
+    'tablespoon': _ConversionRule('ml', 14.7868),
+    'tablespoons': _ConversionRule('ml', 14.7868),
     'in': _ConversionRule('cm', 2.54),
+    'inch': _ConversionRule('cm', 2.54),
+    'inches': _ConversionRule('cm', 2.54),
     'pt': _ConversionRule('ml', 473.176),
     'pint': _ConversionRule('ml', 473.176),
+    'pints': _ConversionRule('ml', 473.176),
   };
 
   static ({String amount, String unit}) convert(
@@ -454,9 +477,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 _SectionHeader(title: rpg.nutritionTitle),
                 const SizedBox(height: 12),
                 NutritionWidget(
-                  nutrition: _scaleFactor != 1.0 && _nutrition != null
-                      ? _nutrition!.scaled(_scaleFactor)
-                      : _nutrition,
+                  nutrition: _nutrition,
                   scaleFactor: _scaleFactor,
                   servings: _recipe!.servings,
                   chartStyle: ref.watch(settingsProvider).nutritionChartStyle,
@@ -571,9 +592,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: NutritionWidget(
-              nutrition: _scaleFactor != 1.0 && _nutrition != null
-                  ? _nutrition!.scaled(_scaleFactor)
-                  : _nutrition,
+              nutrition: _nutrition,
               scaleFactor: _scaleFactor,
               servings: _recipe!.servings,
               chartStyle: ref.watch(settingsProvider).nutritionChartStyle,

@@ -127,6 +127,7 @@ class _AppShellState extends ConsumerState<AppShell> {
 
 // ═══════════════════════════════════════════════════════════════════
 // NOTCH NAV BAR — notch slides, icons stay in place (no lift)
+// Bar background extends into system nav area for full coverage.
 // ═══════════════════════════════════════════════════════════════════
 
 class _NotchNavBar extends StatefulWidget {
@@ -197,6 +198,7 @@ class _NotchNavBarState extends State<_NotchNavBar>
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final isDark = theme.brightness == Brightness.dark;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     final barBg = isDark
         ? Color.lerp(theme.colorScheme.surface, theme.colorScheme.primary, 0.06)!
@@ -210,66 +212,68 @@ class _NotchNavBarState extends State<_NotchNavBar>
       _NavDef(Icons.menu_rounded, Icons.menu_rounded, l10n.navMenu),
     ];
 
-    return Container(
-      color: Colors.transparent,
-      child: SafeArea(
-        child: SizedBox(
-          height: _barHeight,
-          child: AnimatedBuilder(
-            animation: _animation,
-            builder: (context, _) {
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  final itemWidth = constraints.maxWidth / _navItemCount;
-                  final notchCenterX = (_animation.value * itemWidth) + (itemWidth / 2);
+    // Total height = bar content + system nav bar padding
+    final totalHeight = _barHeight + bottomPadding;
 
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      // ── Bar with notch ──
-                      Positioned.fill(
-                        child: CustomPaint(
-                          painter: _NotchBarPainter(
-                            notchCenterX: widget.currentIndex < _lastNavIndex ? notchCenterX : -200,
-                            notchRadius: _notchRadius,
-                            notchDepth: _notchDepth,
-                            barColor: barBg,
-                            borderColor: theme.colorScheme.outlineVariant.withValues(alpha: 0.15),
-                            shadowColor: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
+    return SizedBox(
+      height: totalHeight,
+      child: AnimatedBuilder(
+        animation: _animation,
+        builder: (context, _) {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final itemWidth = constraints.maxWidth / _navItemCount;
+              final notchCenterX = (_animation.value * itemWidth) + (itemWidth / 2);
+
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // ── Bar with notch — fills entire height including system area ──
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: _NotchBarPainter(
+                        notchCenterX: widget.currentIndex < _lastNavIndex ? notchCenterX : -200,
+                        notchRadius: _notchRadius,
+                        notchDepth: _notchDepth,
+                        barColor: barBg,
+                        borderColor: theme.colorScheme.outlineVariant.withValues(alpha: 0.15),
+                        shadowColor: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
+                      ),
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
+
+                  // ── Nav items — positioned in top _barHeight area only ──
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: _barHeight,
+                    child: Row(
+                      children: List.generate(_navItemCount, (i) {
+                        final isSelected = i == widget.currentIndex && i < _lastNavIndex;
+                        final badge = i == 3 ? widget.shoppingBadge : null;
+
+                        return Expanded(
+                          child: GestureDetector(
+                            onTap: () => widget.onTap(i),
+                            behavior: HitTestBehavior.opaque,
+                            child: _NavItem(
+                              theme: theme,
+                              def: items[i],
+                              isSelected: isSelected,
+                              badge: badge,
+                            ),
                           ),
-                          child: const SizedBox.expand(),
-                        ),
-                      ),
-
-                      // ── Nav items — NO lift, just icon size change ──
-                      Positioned.fill(
-                        child: Row(
-                          children: List.generate(_navItemCount, (i) {
-                            final isSelected = i == widget.currentIndex && i < _lastNavIndex;
-                            final badge = i == 3 ? widget.shoppingBadge : null;
-
-                            return Expanded(
-                              child: GestureDetector(
-                                onTap: () => widget.onTap(i),
-                                behavior: HitTestBehavior.opaque,
-                                child: _NavItem(
-                                  theme: theme,
-                                  def: items[i],
-                                  isSelected: isSelected,
-                                  badge: badge,
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                    ],
-                  );
-                },
+                        );
+                      }),
+                    ),
+                  ),
+                ],
               );
             },
-          ),
-        ),
+          );
+        },
       ),
     );
   }

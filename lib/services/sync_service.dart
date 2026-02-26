@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../database/database.dart';
 import '../services/auth_service.dart';
+import 'family_service.dart';
 
 // ════════════════════════════════════════════
 //  SYNC RESULT
@@ -125,10 +126,22 @@ class SyncService {
           ? DateTime.parse(syncedAtStr)
           : DateTime.now().toUtc();
 
-      final pulledCount = await _applyServerData(serverData);
+      var pulledCount = await _applyServerData(serverData);
 
       debugPrint('[Sync] Pulled $pulledCount entities, syncedAt: $syncedAtStr');
       await _saveLastSyncAt(syncedAt);
+
+      // Pull family shared content
+      try {
+        final familyData = await FamilyService.instance.getSharedContent(since: lastSyncAt);
+        if (familyData != null) {
+          final familyPulled = await _applyServerData(familyData);
+          debugPrint('[Sync] Pulled $familyPulled shared family entities');
+          pulledCount += familyPulled;
+        }
+      } catch (e) {
+        debugPrint('[Sync] Family pull failed (non-fatal): $e');
+      }
 
       return SyncResult(
         success: true,

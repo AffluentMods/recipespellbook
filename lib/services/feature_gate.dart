@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/subscription_provider.dart';
 import '../services/revenuecat_service.dart';
 
@@ -131,6 +132,7 @@ class _DefaultLockedWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -166,7 +168,7 @@ class _DefaultLockedWidget extends StatelessWidget {
           FilledButton.tonalIcon(
             onPressed: () => context.push('/upgrade'),
             icon: const Icon(Icons.star, size: 16),
-            label: const Text('Upgrade'),
+            label: Text(l10n.upgrade),
           ),
         ],
       ),
@@ -216,7 +218,7 @@ bool checkFeatureAccess(
     GatedFeature feature,
     ) {
   final tier = ref.read(subscriptionProvider).tier;
-
+  final l10n = AppLocalizations.of(context)!;
   if (feature.isUnlockedFor(tier)) return true;
 
   // Show upgrade prompt
@@ -261,7 +263,7 @@ bool checkFeatureAccess(
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(ctx),
-                    child: const Text('Not now'),
+                    child: Text(l10n.noThanks),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -272,7 +274,7 @@ bool checkFeatureAccess(
                       context.push('/upgrade');
                     },
                     icon: const Icon(Icons.star, size: 18),
-                    label: const Text('Upgrade'),
+                    label: Text(l10n.upgrade),
                   ),
                 ),
               ],
@@ -298,6 +300,7 @@ bool checkStorageLimit(
     }) {
   final tier = ref.read(subscriptionProvider).tier;
   final maxBytes = tier.maxStorageBytes;
+  final l10n = AppLocalizations.of(context)!;
 
   if (currentUsageBytes + newPhotoBytes <= maxBytes) return true;
 
@@ -344,7 +347,7 @@ bool checkStorageLimit(
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(ctx),
-                    child: const Text('Got it'),
+                    child: Text(l10n.gotIt),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -355,7 +358,7 @@ bool checkStorageLimit(
                       context.push('/upgrade');
                     },
                     icon: const Icon(Icons.star, size: 18),
-                    label: const Text('Get more'),
+                    label: Text(l10n.learnMore),
                   ),
                 ),
               ],

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
@@ -114,19 +115,30 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionStatus> {
     try {
       final user = AuthService.instance.currentUser;
 
+      debugPrint('[Sub] Initializing RevenueCat, userId=${user?.id}');
+
       // Initialize RevenueCat SDK
       await RevenueCatService.instance.initialize(
         userId: user?.id,
       );
 
-      // Also set from backend as fallback
+      debugPrint('[Sub] RC initialized, isInitialized=${RevenueCatService.instance.isInitialized}');
+
+      // Login if user exists (ensures RC knows about this user)
       if (user != null) {
+        await RevenueCatService.instance.login(user.id);
+        debugPrint('[Sub] RC login complete, tier from RC=${RevenueCatService.instance.currentTier}');
+
+        // Backend tier as fallback (overrides RC if RC can't verify)
         RevenueCatService.instance.setTierFromBackend(user.tier);
+        debugPrint('[Sub] Backend tier=${user.tier}, final tier=${RevenueCatService.instance.currentTier}');
       }
 
       _syncState();
       state = state.copyWith(isLoading: false);
+      debugPrint('[Sub] Final state: tier=${state.tier}');
     } catch (e) {
+      debugPrint('[Sub] Init error: $e');
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to load subscription: $e',

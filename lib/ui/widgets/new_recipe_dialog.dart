@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:archive/archive.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,8 +12,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:pdfx/pdfx.dart';
+import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/imported_recipe.dart';
+import '../../providers/database_provider.dart';
 import '../../services/recipe_import_engine.dart';
 import '../screens/import/ai_import_screen.dart';
 import '../screens/import/import_preview_screen.dart';
@@ -250,8 +253,38 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
         break;
 
       case 'addToShopping':
-      // User chose shopping list action — just close, shopping screen handles this
-        Navigator.of(context).pop();
+      // Add scanned product to default shopping list
+        final product = result['product'] as ProductInfo?;
+        final manualName = result['name'] as String?;
+        final itemName = product?.displayName ?? manualName;
+
+        if (itemName != null && itemName.isNotEmpty) {
+          try {
+            final shoppingDao = ref.read(shoppingDaoProvider);
+            final itemId = 'item_${DateTime.now().millisecondsSinceEpoch}';
+            await shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
+              id: itemId,
+              listId: 'list_default',
+              name: itemName,
+              sortOrder: const drift.Value(0),
+            ));
+            if (mounted) {
+              _showSuccess('Added to shopping list: $itemName');
+            }
+          } catch (e) {
+            if (mounted) {
+              _showError('Failed to add to shopping list: $e');
+            }
+          }
+        }
+        break;
+
+      case 'searchRecipes':
+      // Navigate to search screen
+        if (mounted) {
+          Navigator.of(context).pop(); // Close import sheet
+          context.push('/search');
+        }
         break;
     }
   }
@@ -756,7 +789,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                   ]),
                   const SizedBox(height: 20),
 
-                  // Option buttons
+                  // Option buttons — fixed-width children for even spacing
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -852,15 +885,24 @@ class _CircleOptionButton extends StatelessWidget {
     final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Container(
-          width: 56, height: 56,
-          decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, shape: BoxShape.circle),
-          child: Icon(icon, color: theme.colorScheme.onSurfaceVariant, size: 24),
-        ),
-        const SizedBox(height: 8),
-        Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-      ]),
+      child: SizedBox(
+        width: 56,
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Container(
+            width: 56, height: 56,
+            decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, shape: BoxShape.circle),
+            child: Icon(icon, color: theme.colorScheme.onSurfaceVariant, size: 24),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ]),
+      ),
     );
   }
 }

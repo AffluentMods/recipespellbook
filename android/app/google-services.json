@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "37618075189-tplp7tns4tiavippuorq51on5brkb2e7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.affluentlabs.recipespellbook",
+            "certificate_hash": "774bec1537ed8cf2d1887b7cf2768bf82b7d8680"
+          }
+        },
+        {
           "client_id": "37618075189-003tm8gs83qelruo1jkuadf70ur9drr7.apps.googleusercontent.com",
           "client_type": 3
         }

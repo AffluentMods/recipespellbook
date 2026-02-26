@@ -13,6 +13,7 @@ import '../../router/router.dart';
 import '../../services/auth_service.dart';
 import '../../services/feedback_service.dart';
 import '../../services/revenuecat_service.dart';
+import '../../services/sync_service.dart';
 import '../../ui/screens/import/import_guides_screen.dart';
 import 'app_snackbar.dart';
 
@@ -86,6 +87,15 @@ class AppMenuDrawer extends ConsumerWidget {
                     });
                   },
                 ),
+                if (authState.isSignedIn && subStatus.tier.hasCloudSync)
+                  _DrawerItem(
+                    icon: Icons.cloud_sync_rounded,
+                    label: 'Sync now',
+                    onTap: () {
+                      Navigator.pop(context);
+                      _triggerSync(context);
+                    },
+                  ),
                 _DrawerItem(
                   icon: Icons.person_add_rounded,
                   label: l10n.inviteFriends,
@@ -198,6 +208,20 @@ class AppMenuDrawer extends ConsumerWidget {
     width: 40, height: 4,
     decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2)),
   );
+
+  static Future<void> _triggerSync(BuildContext context) async {
+    AppSnackbar.loading(context, 'Syncing…');
+    final result = await SyncService.instance.sync();
+    if (!context.mounted) return;
+    AppSnackbar.dismiss(context);
+    if (result.success) {
+      final pushed = result.pushedCount;
+      final pulled = result.pulledCount;
+      AppSnackbar.success(context, 'Synced! ↑$pushed ↓$pulled');
+    } else {
+      AppSnackbar.error(context, result.error ?? 'Sync failed');
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════

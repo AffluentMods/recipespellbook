@@ -306,29 +306,36 @@ class _NutritionWidgetState extends State<NutritionWidget> {
     return match != null ? int.tryParse(match.group(1)!) : null;
   }
 
+  int? _effectiveServings() {
+    final base = _parseServings();
+    if (base == null) return null;
+    if (widget.scaleFactor == 1.0) return base;
+    return (base * widget.scaleFactor).round();
+  }
+
   NutritionData _getDisplayNutrition() {
     var n = widget.nutrition!;
-    final currentServings = _parseServings() ?? 1;
+    final originalServings = _parseServings() ?? 1;
     final calcServings = n.calculatedServings;
+    final scale = widget.scaleFactor;
 
     if (calcServings != null) {
       // New format: stored values are TOTAL for the whole recipe
-      if (_showPerServing && currentServings > 1) {
-        // Divide total by current servings for per-serving view
-        n = n.scaled(1.0 / currentServings);
+      if (_showPerServing && originalServings > 1) {
+        // Per-serving = total / original servings (unaffected by recipe scale)
+        n = n.scaled(1.0 / originalServings);
+      } else if (!_showPerServing && scale != 1.0) {
+        // Total = stored total × scale factor
+        n = n.scaled(scale);
       }
-      // If !_showPerServing, values are already total — show as-is
     } else {
       // Legacy format: stored values are per-serving
-      if (!_showPerServing && currentServings > 1) {
-        // Multiply per-serving by servings for total view
-        n = n.scaled(currentServings.toDouble());
+      if (!_showPerServing) {
+        // Total = per-serving × original servings × scale
+        n = n.scaled(originalServings.toDouble() * scale);
       }
-      // If _showPerServing, values are already per-serving — show as-is
+      // Per-serving stays as-is regardless of scale
     }
-
-    // Apply scale factor (from recipe scaling slider)
-    if (widget.scaleFactor != 1.0) n = n.scaled(widget.scaleFactor);
 
     return n;
   }
@@ -481,13 +488,15 @@ class _NutritionWidgetState extends State<NutritionWidget> {
   // ─── HEADER with per-serving toggle ───
 
   Widget _buildHeader(ThemeData theme, bool canToggle, int? servings) {
+    final effective = _effectiveServings() ?? servings;
+
     return Row(
       children: [
         Icon(Icons.local_fire_department, color: theme.colorScheme.primary),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            _showPerServing && canToggle ? 'Per Serving Nutrition' : 'Total Recipe Nutrition',
+            _showPerServing && canToggle ? 'Per Serving' : 'Total Nutrition',
             style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
@@ -504,7 +513,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    _showPerServing ? '1 serving' : '$servings servings',
+                    _showPerServing ? '1 of $effective' : 'All $effective',
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.w600,
@@ -524,7 +533,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
 
   Widget _buildNumbersView(ThemeData theme, NutritionData n) {
     final enabled = widget.enabledNutrients;
-    final servings = _parseServings();
+    final servings = _effectiveServings() ?? _parseServings();
 
     return Column(
       children: [

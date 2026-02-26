@@ -13,6 +13,16 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
 import 'app_snackbar.dart';
 
+/// Strip emoji characters that PDF fonts can't render
+String _stripEmoji(String text) {
+  return text.replaceAll(RegExp(
+    r'[\u{1F000}-\u{1FFFF}]|[\u{2600}-\u{27BF}]|[\u{FE00}-\u{FE0F}]|'
+    r'[\u{200D}]|[\u{20E3}]|[\u{E0020}-\u{E007F}]|[\u{2300}-\u{23FF}]|'
+    r'[\u{2B05}-\u{2B55}]|[\u{3030}]|[\u{303D}]|[\u{3297}]|[\u{3299}]',
+    unicode: true,
+  ), '').replaceAll(RegExp(r'\s{2,}'), ' ').trim();
+}
+
 /// Shows a share sheet for a recipe with multiple options
 void showRecipeShareSheet(
     BuildContext context,
@@ -205,8 +215,10 @@ class _RecipeShareSheet extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     Navigator.pop(context);
 
-    final ingredients = await ref.read(recipeDaoProvider).getIngredientsForRecipe(recipe.id);
-    final steps = await ref.read(recipeDaoProvider).getStepsForRecipe(recipe.id);
+    final dao = ref.read(recipeDaoProvider);
+    final ingredients = await dao.getIngredientsForRecipe(recipe.id);
+    final steps = await dao.getStepsForRecipe(recipe.id);
+    final linkedRecipes = await dao.getLinkedRecipes(recipe.id);
 
     final buffer = StringBuffer();
     buffer.writeln('\u{1F4D6} ${recipe.title}');
@@ -249,9 +261,38 @@ class _RecipeShareSheet extends StatelessWidget {
     if (recipe.notes != null && recipe.notes!.isNotEmpty) {
       buffer.writeln('\u{1F4A1} ${l10n.notesTitle}:');
       buffer.writeln(recipe.notes);
+      buffer.writeln();
     }
 
-    buffer.writeln();
+    // Include linked recipes
+    if (linkedRecipes.isNotEmpty) {
+      buffer.writeln('─────────────────────');
+      buffer.writeln('\u{1F517} Linked Recipes:');
+      buffer.writeln();
+      for (final linked in linkedRecipes) {
+        buffer.writeln('\u{1F4D6} ${linked.title}');
+        final linkedIngs = await dao.getIngredientsForRecipe(linked.id);
+        final linkedSteps = await dao.getStepsForRecipe(linked.id);
+        if (linkedIngs.isNotEmpty) {
+          buffer.writeln('\u{1F955} ${l10n.ingredientsTitle}:');
+          for (final ing in linkedIngs) {
+            final parts = <String>[];
+            if (ing.amount != null) parts.add(ing.amount!);
+            if (ing.unit != null) parts.add(ing.unit!);
+            parts.add(ing.name);
+            buffer.writeln('\u2022 ${parts.join(' ')}');
+          }
+        }
+        if (linkedSteps.isNotEmpty) {
+          buffer.writeln('\u{1F4DD} ${l10n.instructionsTitle}:');
+          for (var i = 0; i < linkedSteps.length; i++) {
+            buffer.writeln('${i + 1}. ${linkedSteps[i].instruction}');
+          }
+        }
+        buffer.writeln();
+      }
+    }
+
     buffer.writeln(l10n.shareFromApp);
 
     await Share.share(buffer.toString(), subject: recipe.title);
@@ -264,10 +305,20 @@ class _RecipeShareSheet extends StatelessWidget {
     AppSnackbar.info(context, l10n.shareCreatingDocument);
 
     try {
-      final ingredients = await ref.read(recipeDaoProvider).getIngredientsForRecipe(recipe.id);
-      final steps = await ref.read(recipeDaoProvider).getStepsForRecipe(recipe.id);
+      final dao = ref.read(recipeDaoProvider);
+      final ingredients = await dao.getIngredientsForRecipe(recipe.id);
+      final steps = await dao.getStepsForRecipe(recipe.id);
+      final linkedRecipes = await dao.getLinkedRecipes(recipe.id);
 
-      final pdf = await _createRecipePdf(recipe, ingredients, steps, l10n);
+      // Load linked recipe data
+      final linkedData = <_LinkedRecipeData>[];
+      for (final linked in linkedRecipes) {
+        final ings = await dao.getIngredientsForRecipe(linked.id);
+        final sts = await dao.getStepsForRecipe(linked.id);
+        linkedData.add(_LinkedRecipeData(recipe: linked, ingredients: ings, steps: sts));
+      }
+
+      final pdf = await _createRecipePdf(recipe, ingredients, steps, l10n, linkedRecipes: linkedData);
 
       final dir = await getTemporaryDirectory();
       final filename = recipe.title.replaceAll(RegExp(r'[^\w\s-]'), '').replaceAll(' ', '_').toLowerCase();
@@ -290,10 +341,20 @@ class _RecipeShareSheet extends StatelessWidget {
     Navigator.pop(context);
 
     try {
-      final ingredients = await ref.read(recipeDaoProvider).getIngredientsForRecipe(recipe.id);
-      final steps = await ref.read(recipeDaoProvider).getStepsForRecipe(recipe.id);
+      final dao = ref.read(recipeDaoProvider);
+      final ingredients = await dao.getIngredientsForRecipe(recipe.id);
+      final steps = await dao.getStepsForRecipe(recipe.id);
+      final linkedRecipes = await dao.getLinkedRecipes(recipe.id);
 
-      final pdf = await _createRecipePdf(recipe, ingredients, steps, l10n);
+      // Load linked recipe data
+      final linkedData = <_LinkedRecipeData>[];
+      for (final linked in linkedRecipes) {
+        final ings = await dao.getIngredientsForRecipe(linked.id);
+        final sts = await dao.getStepsForRecipe(linked.id);
+        linkedData.add(_LinkedRecipeData(recipe: linked, ingredients: ings, steps: sts));
+      }
+
+      final pdf = await _createRecipePdf(recipe, ingredients, steps, l10n, linkedRecipes: linkedData);
 
       await Printing.layoutPdf(
         onLayout: (_) => pdf.save(),
@@ -309,8 +370,10 @@ class _RecipeShareSheet extends StatelessWidget {
   Future<void> _exportRecipe(BuildContext context) async {
     Navigator.pop(context);
 
-    final ingredients = await ref.read(recipeDaoProvider).getIngredientsForRecipe(recipe.id);
-    final steps = await ref.read(recipeDaoProvider).getStepsForRecipe(recipe.id);
+    final dao = ref.read(recipeDaoProvider);
+    final ingredients = await dao.getIngredientsForRecipe(recipe.id);
+    final steps = await dao.getStepsForRecipe(recipe.id);
+    final linkedRecipes = await dao.getLinkedRecipes(recipe.id);
 
     final data = {
       'title': recipe.title,
@@ -347,6 +410,27 @@ class _RecipeShareSheet extends StatelessWidget {
           'durationMinutes': duration,
         };
       }).toList(),
+      'linkedRecipes': await Future.wait(linkedRecipes.map((linked) async {
+        final linkedIngs = await dao.getIngredientsForRecipe(linked.id);
+        final linkedSteps = await dao.getStepsForRecipe(linked.id);
+        return {
+          'title': linked.title,
+          'description': linked.description,
+          'servings': linked.servings,
+          'prepTimeMinutes': linked.prepTimeMinutes,
+          'cookTimeMinutes': linked.cookTimeMinutes,
+          'notes': linked.notes,
+          'ingredients': linkedIngs.map((i) => {
+            'amount': i.amount,
+            'unit': i.unit,
+            'name': i.name,
+            'notes': i.notes,
+          }).toList(),
+          'instructions': linkedSteps.map((s) => {
+            'instruction': s.instruction,
+          }).toList(),
+        };
+      })),
       'exportedFrom': 'Recipe Spellbook',
       'exportDate': DateTime.now().toIso8601String(),
       'version': '2.0',
@@ -369,8 +453,9 @@ class _RecipeShareSheet extends StatelessWidget {
       Recipe recipe,
       List<Ingredient> ingredients,
       List<Step> steps,
-      AppLocalizations l10n,
-      ) async {
+      AppLocalizations l10n, {
+        List<_LinkedRecipeData> linkedRecipes = const [],
+      }) async {
     final pdf = pw.Document();
 
     pdf.addPage(
@@ -382,13 +467,13 @@ class _RecipeShareSheet extends StatelessWidget {
             pw.Header(
               level: 0,
               child: pw.Text(
-                recipe.title,
+                _stripEmoji(recipe.title),
                 style: pw.TextStyle(fontSize: 28, fontWeight: pw.FontWeight.bold),
               ),
             ),
             if (recipe.description != null && recipe.description!.isNotEmpty)
               pw.Paragraph(
-                text: recipe.description!,
+                text: _stripEmoji(recipe.description!),
                 style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
               ),
             pw.SizedBox(height: 16),
@@ -396,11 +481,11 @@ class _RecipeShareSheet extends StatelessWidget {
               mainAxisAlignment: pw.MainAxisAlignment.start,
               children: [
                 if (recipe.servings != null)
-                  _pdfMetaItem('\u{1F37D}\uFE0F', '${recipe.servings} servings'),
+                  _pdfMetaItem('${recipe.servings} servings'),
                 if (recipe.prepTimeMinutes != null)
-                  _pdfMetaItem('\u23F1\uFE0F', '${recipe.prepTimeMinutes} min prep'),
+                  _pdfMetaItem('${recipe.prepTimeMinutes} min prep'),
                 if (recipe.cookTimeMinutes != null)
-                  _pdfMetaItem('\u{1F525}', '${recipe.cookTimeMinutes} min cook'),
+                  _pdfMetaItem('${recipe.cookTimeMinutes} min cook'),
               ],
             ),
             pw.SizedBox(height: 24),
@@ -416,7 +501,7 @@ class _RecipeShareSheet extends StatelessWidget {
                   final parts = <String>[];
                   if (ing.amount != null) parts.add(ing.amount!);
                   if (ing.unit != null) parts.add(ing.unit!);
-                  parts.add(ing.name);
+                  parts.add(_stripEmoji(ing.name));
                   return pw.Padding(
                     padding: const pw.EdgeInsets.symmetric(vertical: 2),
                     child: pw.Row(
@@ -460,7 +545,7 @@ class _RecipeShareSheet extends StatelessWidget {
                         ),
                         pw.SizedBox(width: 12),
                         pw.Expanded(
-                          child: pw.Text(entry.value.instruction,
+                          child: pw.Text(_stripEmoji(entry.value.instruction),
                               style: const pw.TextStyle(fontSize: 12)),
                         ),
                       ],
@@ -482,9 +567,23 @@ class _RecipeShareSheet extends StatelessWidget {
                   color: PdfColors.grey100,
                   borderRadius: pw.BorderRadius.circular(8),
                 ),
-                child: pw.Text(recipe.notes!, style: const pw.TextStyle(fontSize: 11)),
+                child: pw.Text(_stripEmoji(recipe.notes!), style: const pw.TextStyle(fontSize: 11)),
               ),
             ],
+
+            // ─── LINKED RECIPES ───
+            if (linkedRecipes.isNotEmpty) ...[
+              pw.SizedBox(height: 32),
+              pw.Divider(color: PdfColors.grey400, thickness: 2),
+              pw.SizedBox(height: 16),
+              pw.Text(
+                'Linked Recipes',
+                style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
+              ),
+              pw.SizedBox(height: 16),
+              ...linkedRecipes.expand((linked) => _buildLinkedRecipePdf(linked, l10n)),
+            ],
+
             pw.SizedBox(height: 32),
             pw.Divider(color: PdfColors.grey300),
             pw.SizedBox(height: 8),
@@ -498,7 +597,67 @@ class _RecipeShareSheet extends StatelessWidget {
     return pdf;
   }
 
-  pw.Widget _pdfMetaItem(String emoji, String text) {
+  /// Build PDF widgets for a single linked recipe
+  List<pw.Widget> _buildLinkedRecipePdf(_LinkedRecipeData data, AppLocalizations l10n) {
+    return [
+      pw.Container(
+        padding: const pw.EdgeInsets.all(12),
+        margin: const pw.EdgeInsets.only(bottom: 16),
+        decoration: pw.BoxDecoration(
+          border: pw.Border.all(color: PdfColors.grey300),
+          borderRadius: pw.BorderRadius.circular(8),
+        ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text(
+              _stripEmoji(data.recipe.title),
+              style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+            ),
+            if (data.recipe.description != null && data.recipe.description!.isNotEmpty) ...[
+              pw.SizedBox(height: 4),
+              pw.Text(
+                _stripEmoji(data.recipe.description!),
+                style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+              ),
+            ],
+            if (data.ingredients.isNotEmpty) ...[
+              pw.SizedBox(height: 12),
+              pw.Text(l10n.ingredientsTitle,
+                  style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 4),
+              ...data.ingredients.map((ing) {
+                final parts = <String>[];
+                if (ing.amount != null) parts.add(ing.amount!);
+                if (ing.unit != null) parts.add(ing.unit!);
+                parts.add(_stripEmoji(ing.name));
+                return pw.Padding(
+                  padding: const pw.EdgeInsets.symmetric(vertical: 1),
+                  child: pw.Text('\u2022 ${parts.join(' ')}',
+                      style: const pw.TextStyle(fontSize: 10)),
+                );
+              }),
+            ],
+            if (data.steps.isNotEmpty) ...[
+              pw.SizedBox(height: 12),
+              pw.Text(l10n.instructionsTitle,
+                  style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 4),
+              ...data.steps.asMap().entries.map((entry) => pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(vertical: 2),
+                child: pw.Text(
+                  '${entry.key + 1}. ${_stripEmoji(entry.value.instruction)}',
+                  style: const pw.TextStyle(fontSize: 10),
+                ),
+              )),
+            ],
+          ],
+        ),
+      ),
+    ];
+  }
+
+  pw.Widget _pdfMetaItem(String text) {
     return pw.Container(
       margin: const pw.EdgeInsets.only(right: 16),
       padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -506,9 +665,22 @@ class _RecipeShareSheet extends StatelessWidget {
         color: PdfColors.grey100,
         borderRadius: pw.BorderRadius.circular(4),
       ),
-      child: pw.Text('$emoji $text', style: const pw.TextStyle(fontSize: 10)),
+      child: pw.Text(text, style: const pw.TextStyle(fontSize: 10)),
     );
   }
+}
+
+/// Data class for linked recipe with its ingredients and steps
+class _LinkedRecipeData {
+  final Recipe recipe;
+  final List<Ingredient> ingredients;
+  final List<Step> steps;
+
+  const _LinkedRecipeData({
+    required this.recipe,
+    required this.ingredients,
+    required this.steps,
+  });
 }
 
 class _ShareOption extends StatelessWidget {

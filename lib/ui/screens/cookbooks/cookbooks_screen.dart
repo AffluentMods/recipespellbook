@@ -11,6 +11,7 @@ import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../shell/app_shell.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/family_share_sheet.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../../utils/responsive_utils.dart';
 
@@ -227,7 +228,7 @@ class _CookbookGrid extends ConsumerWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.edit),
-              title: const Text('Edit'),
+              title: Text(l10n.actionEdit),
               onTap: () {
                 Navigator.pop(ctx);
                 context.push('/cookbook/${cookbook.id}/edit');
@@ -236,9 +237,24 @@ class _CookbookGrid extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.share),
               title: Text(l10n.shareCookbook),
+              subtitle: const Text('Share as text'),
               onTap: () {
                 Navigator.pop(ctx);
                 _shareCookbook(context, ref, cookbook);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.family_restroom),
+              title: const Text('Family Share'),
+              subtitle: const Text('Share with family or one-time link'),
+              onTap: () {
+                Navigator.pop(ctx);
+                showResourceShareSheet(
+                  context,
+                  resourceType: 'cookbook',
+                  resourceId: cookbook.id,
+                  resourceName: cookbook.name,
+                );
               },
             ),
             ListTile(

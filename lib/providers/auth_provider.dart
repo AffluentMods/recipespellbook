@@ -139,15 +139,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final user = _service.currentUser;
     if (jwt != null) {
       SmartImportService.instance.setAuthToken(jwt);
-      // Add other services here as you build them:
-      // SyncService.instance.setAuthToken(jwt);
-      // ImageService.instance.setAuthToken(jwt);
     }
-    // Sync subscription tier from backend user profile
     if (user != null) {
-      RevenueCatService.instance.setTierFromBackend(user.tier);
-      // Identify user in RevenueCat
-      RevenueCatService.instance.login(user.id);
+      // Identify user in RevenueCat first, THEN set backend tier.
+      // login() may reset tier to free if RC can't verify purchases,
+      // so setTierFromBackend() must come after to override.
+      RevenueCatService.instance.login(user.id).then((_) {
+        RevenueCatService.instance.setTierFromBackend(user.tier);
+      });
     }
   }
 

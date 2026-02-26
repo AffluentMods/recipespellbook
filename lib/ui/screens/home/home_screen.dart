@@ -50,16 +50,9 @@ class HomeScreen extends ConsumerWidget {
               // App bar
               SliverAppBar(
                 floating: true,
-                title: Row(
-                  children: [
-                    const Text('✨ ', style: TextStyle(fontSize: 24)),
-                    Expanded(
-                      child: Text(
-                        cookbook?.name ?? l10n.appTitle,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+                title: _CookbookDropdown(
+                  currentCookbook: cookbook,
+                  appTitle: l10n.appTitle,
                 ),
                 actions: [
                   IconButton(

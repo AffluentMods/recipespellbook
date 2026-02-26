@@ -21,6 +21,7 @@ import '../../../services/ingredient_suggestion_service.dart';
 import '../../../services/shopping_list_service.dart';
 import '../../../utils/ingredient_utils.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/family_share_sheet.dart';
 import '../../widgets/rpg/rpg_navigation_shell.dart';
 
 /// Provider to track shopping list item count (for nav badge)
@@ -240,6 +241,19 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
+                            icon: const Icon(Icons.family_restroom, size: 20),
+                            tooltip: 'Family Share',
+                            onPressed: () {
+                              Navigator.pop(context);
+                              showResourceShareSheet(
+                                context,
+                                resourceType: 'shopping_list',
+                                resourceId: list.id,
+                                resourceName: list.name,
+                              );
+                            },
+                          ),
+                          IconButton(
                             icon: const Icon(Icons.edit, size: 20),
                             onPressed: () => _renameList(context, list),
                           ),
@@ -441,6 +455,21 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   onTap: () {
                     Navigator.pop(ctx);
                     _openBarcodeScanner();
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.family_restroom),
+                  title: const Text('Family Share'),
+                  subtitle: const Text('Share list with family or one-time link'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    showResourceShareSheet(
+                      context,
+                      resourceType: 'shopping_list',
+                      resourceId: _currentListId,
+                      resourceName: _currentListName,
+                    );
                   },
                 ),
                 const Divider(),
@@ -940,6 +969,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
   static const _providerData = <GroceryProvider, _ProviderDisplay>{
     GroceryProvider.instacart: _ProviderDisplay(
       emoji: '\u{1F955}',
+      assetIcon: 'assets/images/3rd-party/instacart_carrot.png',
       name: 'Instacart',
       color: Color(0xFF43B02A),
       subtitle: 'Costco, Publix, Safeway, Aldi, Sprouts & 1,500+ retailers',
@@ -1134,11 +1164,13 @@ class _SectionLabel extends StatelessWidget {
 /// Provider display metadata
 class _ProviderDisplay {
   final String emoji;
+  final String? assetIcon;
   final String name;
   final Color color;
   final String subtitle;
   const _ProviderDisplay({
     required this.emoji,
+    this.assetIcon,
     required this.name,
     required this.color,
     required this.subtitle,
@@ -1172,7 +1204,10 @@ class _ProviderTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
-              Text(display.emoji, style: const TextStyle(fontSize: 26)),
+              if (display.assetIcon != null)
+                Image.asset(display.assetIcon!, width: 26, height: 26)
+              else
+                Text(display.emoji, style: const TextStyle(fontSize: 26)),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -1207,7 +1242,9 @@ class _ProviderTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       isConfigured
-                          ? 'Tap to add items directly to your cart'
+                          ? (display.name == 'Instacart'
+                          ? 'Tap to create a shoppable list'
+                          : 'Tap to add items directly to your cart')
                           : display.subtitle,
                       style: theme.textTheme.bodySmall
                           ?.copyWith(color: theme.colorScheme.outline, fontSize: 11),
@@ -1270,6 +1307,7 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
     final result = await GroceryService.sendToStore(
       provider: widget.provider,
       ingredientNames: widget.itemNames,
+      listTitle: 'Recipe Spellbook Shopping List',
       onProgress: (current, total, item) {
         debugPrint('[SendToStore] Progress $current/$total: "$item"');
         if (mounted) {
@@ -1315,20 +1353,24 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
               width: 48,
               height: 48,
               child: CircularProgressIndicator(
-                value: _total > 0 ? _current / _total : null,
+                value: _total > 1 ? _current / _total : null,
                 strokeWidth: 3,
                 color: const Color(0xFFE88B00),
               ),
             ),
             const SizedBox(height: 16),
             Text(
-              'Adding to ${widget.providerName}\u2026',
+              _total <= 1
+                  ? 'Creating list on ${widget.providerName}\u2026'
+                  : 'Adding to ${widget.providerName}\u2026',
               style: theme.textTheme.titleSmall
                   ?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
-              '$_current of $_total items',
+              _total <= 1
+                  ? '${widget.itemNames.length} items'
+                  : '$_current of $_total items',
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
             ),
             if (_currentItem.isNotEmpty) ...[
@@ -1352,14 +1394,20 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
             ),
             const SizedBox(height: 12),
             Text(
-              _result?.success == true ? 'Items added!' : 'Partially added',
+              _result?.success == true
+                  ? (widget.provider == GroceryProvider.instacart
+                  ? 'Shopping list ready!'
+                  : 'Items added!')
+                  : 'Partially added',
               style: theme.textTheme.titleSmall
                   ?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 4),
             Text(
               _result?.success == true
-                  ? '${_result!.itemsAdded} items in your ${widget.providerName} cart'
+                  ? (widget.provider == GroceryProvider.instacart
+                  ? '${_result!.itemsAdded} items on your Instacart list'
+                  : '${_result!.itemsAdded} items in your ${widget.providerName} cart')
                   : '${_result?.itemsAdded ?? 0} added, ${_result?.itemsFailed ?? 0} not found',
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
               textAlign: TextAlign.center,
@@ -1403,7 +1451,48 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (_result?.checkoutUrl != null)
-                  FilledButton.icon(
+                  widget.provider == GroceryProvider.instacart
+                  // Instacart branded CTA per design guidelines
+                      ? GestureDetector(
+                    onTap: () async {
+                      Navigator.pop(context);
+                      debugPrint('[SendToStore] Opening checkout: ${_result!.checkoutUrl}');
+                      final url = Uri.parse(_result!.checkoutUrl!);
+                      try {
+                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                      } catch (e) {
+                        debugPrint('[SendToStore] Failed to open checkout: $e');
+                      }
+                    },
+                    child: Container(
+                      height: 46,
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF003D29),
+                        borderRadius: BorderRadius.circular(23),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            'assets/images/3rd-party/instacart_carrot.png',
+                            height: 22,
+                            width: 22,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Shop on Instacart',
+                            style: TextStyle(
+                              color: Color(0xFFFAF1E5),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                      : FilledButton.icon(
                     onPressed: () async {
                       Navigator.pop(context);
                       debugPrint('[SendToStore] Opening checkout: ${_result!.checkoutUrl}');

@@ -70,8 +70,8 @@ class GroceryService {
   static const _defaultKrogerClientId = '***REMOVED***';
   static const _defaultKrogerSecret = '***REMOVED***';
 
-  // Instacart Connect production endpoint
-  static const _instacartBase = 'https://connect.instacart.com';
+  // Instacart Developer Platform (IDP) endpoint
+  static const _instacartIdpBase = 'https://connect.instacart.com/idp/v1';
 
   // Kroger OAuth
   static const _krogerRedirectUri = 'recipespellbook://kroger-callback';
@@ -103,7 +103,7 @@ class GroceryService {
   //  CONFIGURATION STATUS
   // ────────────────────────────────────────────
 
-  /// Instacart: always true (embedded key, swap to prod when ready).
+  /// Instacart: always true (embedded key).
   /// Kroger: true only after user completes OAuth login.
   static Future<bool> isConfigured(GroceryProvider provider) async {
     switch (provider) {
@@ -161,104 +161,235 @@ class GroceryService {
   }
 
   // ════════════════════════════════════════════
-  //  INSTACART  (Connect API — production)
+  //  INSTACART  (Developer Platform — IDP API)
+  //
+  //  Uses the Create Shopping List Page and
+  //  Create Recipe Page endpoints to generate
+  //  hosted landing pages on Instacart Marketplace.
+  //  Instacart handles all product matching.
   // ════════════════════════════════════════════
 
-  static Future<List<GroceryProduct>> instacartSearch(String query) async {
+  /// Create a Shopping List page on Instacart Marketplace.
+  /// Returns the hosted URL or null on failure.
+  ///
+  /// Docs: https://docs.instacart.com/developer_platform_api/api/products/create_shopping_list_page/
+  static Future<String?> instacartCreateShoppingListPage({
+    required String title,
+    required List<Map<String, dynamic>> lineItems,
+    String? imageUrl,
+    String? partnerLinkbackUrl,
+    bool enablePantryItems = true,
+    int expiresInDays = 7,
+  }) async {
     final apiKey = await _getInstacartKey();
     try {
-      final uri = Uri.parse(
-        '$_instacartBase/v2/fulfillment/catalog'
-            '?query=${Uri.encodeComponent(query)}&limit=5',
-      );
-      debugPrint('[Instacart] Search "$query"');
-      final resp = await http.get(uri, headers: {
-        'Authorization': 'Bearer $apiKey',
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      });
-      debugPrint('[Instacart] → ${resp.statusCode} (${resp.body.length}b)');
+      final body = <String, dynamic>{
+        'title': title,
+        'link_type': 'shopping_list',
+        'expires_in': expiresInDays,
+        'line_items': lineItems,
+        'landing_page_configuration': {
+          'enable_pantry_items': enablePantryItems,
+          if (partnerLinkbackUrl != null)
+            'partner_linkback_url': partnerLinkbackUrl,
+        },
+        if (imageUrl != null) 'image_url': imageUrl,
+      };
 
-      if (resp.statusCode == 200) {
-        final body = jsonDecode(resp.body);
-        final List items =
-            body['catalog_items'] ?? body['items'] ?? body['products'] ?? [];
-        debugPrint('[Instacart] ${items.length} results for "$query"');
-        return items
-            .map((i) => GroceryProduct(
-          id: (i['id'] ?? i['product_id'] ?? '').toString(),
-          name: i['name'] ?? i['title'] ?? query,
-          brand: i['brand'] ?? i['brand_name'],
-          imageUrl: i['image_url'] ?? i['thumbnail_url'],
-          price: (i['price'] as num?)?.toDouble() ??
-              (i['base_price'] as num?)?.toDouble(),
-          size: i['size'] ?? i['unit_size'],
-          available: i['available'] ?? i['in_stock'] ?? true,
-        ))
-            .toList();
-      }
-      _logResponse('[Instacart]', resp);
-    } catch (e) {
-      debugPrint('[Instacart] Search error: $e');
-    }
-    return [];
-  }
+      debugPrint('[Instacart IDP] Creating shopping list page: '
+          '${lineItems.length} items, title="$title"');
 
-  static Future<CartAddResult> instacartAddToCart(
-      List<Map<String, dynamic>> items) async {
-    final apiKey = await _getInstacartKey();
-    try {
-      final lineItems = items.asMap().entries.map((e) => {
-        'line_num': (e.key + 1).toString(),
-        'product_id': e.value['product_id']?.toString() ?? '',
-        'quantity': e.value['quantity'] ?? 1,
-      }).toList();
-
-      debugPrint('[Instacart] Creating order with ${lineItems.length} items');
       final resp = await http.post(
-        Uri.parse('$_instacartBase/v2/fulfillment/orders'),
+        Uri.parse('$_instacartIdpBase/products/products_link'),
         headers: {
           'Authorization': 'Bearer $apiKey',
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: jsonEncode({
-          'order': {'line_items': lineItems, 'order_type': 'delivery'},
-        }),
+        body: jsonEncode(body),
       );
-      debugPrint('[Instacart] Order → ${resp.statusCode}');
+
+      debugPrint('[Instacart IDP] Shopping list → ${resp.statusCode}');
 
       if (resp.statusCode == 200 || resp.statusCode == 201) {
         final data = jsonDecode(resp.body);
-        final url = data['checkout_url'] ??
-            data['order']?['checkout_url'] ??
-            data['order']?['url'] ??
-            data['url'];
-        return CartAddResult(
-          success: true,
-          itemsAdded: items.length,
-          checkoutUrl: url?.toString(),
-          message: url != null ? 'Order created' : 'Items added',
-        );
+        final url = data['products_link_url']?.toString();
+        debugPrint('[Instacart IDP] URL: $url');
+        return url;
       }
-      _logResponse('[Instacart]', resp);
 
-      // Fallback: open store search for first product
-      if (items.isNotEmpty) {
-        final name = items.first['name']?.toString() ?? '';
-        return CartAddResult(
-          success: false,
-          itemsFailed: items.length,
-          message: 'API ${resp.statusCode}',
-          checkoutUrl: deepLinkUrl(GroceryProvider.instacart, name).toString(),
-        );
-      }
-      return CartAddResult(
-          success: false, itemsFailed: items.length, message: 'API ${resp.statusCode}');
+      _logResponse('[Instacart IDP]', resp);
     } catch (e) {
-      debugPrint('[Instacart] Order error: $e');
-      return CartAddResult(success: false, message: '$e');
+      debugPrint('[Instacart IDP] Shopping list error: $e');
     }
+    return null;
+  }
+
+  /// Create a Recipe page on Instacart Marketplace.
+  /// Returns the hosted URL or null on failure.
+  ///
+  /// Docs: https://docs.instacart.com/developer_platform_api/api/products/create_recipe_page/
+  static Future<String?> instacartCreateRecipePage({
+    required String title,
+    required List<Map<String, dynamic>> ingredients,
+    List<String>? instructions,
+    String? imageUrl,
+    String? author,
+    int? servings,
+    int? cookingTimeMinutes,
+    String? partnerLinkbackUrl,
+    bool enablePantryItems = true,
+    int expiresInDays = 30,
+  }) async {
+    final apiKey = await _getInstacartKey();
+    try {
+      final body = <String, dynamic>{
+        'title': title,
+        'expires_in': expiresInDays,
+        'ingredients': ingredients,
+        'landing_page_configuration': {
+          'enable_pantry_items': enablePantryItems,
+          if (partnerLinkbackUrl != null)
+            'partner_linkback_url': partnerLinkbackUrl,
+        },
+        if (imageUrl != null) 'image_url': imageUrl,
+        if (author != null) 'author': author,
+        if (servings != null) 'servings': servings,
+        if (cookingTimeMinutes != null) 'cooking_time': cookingTimeMinutes,
+        if (instructions != null && instructions.isNotEmpty)
+          'instructions': instructions,
+      };
+
+      debugPrint('[Instacart IDP] Creating recipe page: '
+          '${ingredients.length} ingredients, title="$title"');
+
+      final resp = await http.post(
+        Uri.parse('$_instacartIdpBase/products/recipe'),
+        headers: {
+          'Authorization': 'Bearer $apiKey',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(body),
+      );
+
+      debugPrint('[Instacart IDP] Recipe page → ${resp.statusCode}');
+
+      if (resp.statusCode == 200 || resp.statusCode == 201) {
+        final data = jsonDecode(resp.body);
+        final url = data['products_link_url']?.toString();
+        debugPrint('[Instacart IDP] URL: $url');
+        return url;
+      }
+
+      _logResponse('[Instacart IDP]', resp);
+    } catch (e) {
+      debugPrint('[Instacart IDP] Recipe page error: $e');
+    }
+    return null;
+  }
+
+  /// Build a line_item for the Shopping List API from an ingredient string.
+  /// Parses "2 cups flour" into {name: "flour", measurements: [...], display_text: "2 cups flour"}.
+  static Map<String, dynamic> buildInstacartLineItem(String ingredientText) {
+    final cleaned = cleanForSearch(ingredientText);
+    final item = <String, dynamic>{
+      'name': cleaned,
+      'display_text': ingredientText.trim(),
+    };
+
+    // Try to extract quantity and unit from the original text
+    final match = RegExp(
+      r'^([\d½¼¾⅓⅔⅛⅜⅝⅞/.]+)\s*'
+      r'(cups?|tbsp|tsp|tablespoons?|teaspoons?|'
+      r'oz|ounces?|lbs?|pounds?|g|kg|ml|l|liters?|'
+      r'quarts?|pints?|gallons?)\s+',
+      caseSensitive: false,
+    ).firstMatch(ingredientText.trim());
+
+    if (match != null) {
+      final qtyStr = match.group(1)!;
+      final unitStr = match.group(2)!;
+
+      double? qty;
+      if (qtyStr.contains('½')) qty = 0.5;
+      else if (qtyStr.contains('¼')) qty = 0.25;
+      else if (qtyStr.contains('¾')) qty = 0.75;
+      else if (qtyStr.contains('⅓')) qty = 0.33;
+      else if (qtyStr.contains('⅔')) qty = 0.67;
+      else if (qtyStr.contains('⅛')) qty = 0.125;
+      else qty = double.tryParse(qtyStr);
+
+      final unit = _normalizeInstacartUnit(unitStr);
+
+      if (qty != null && unit != null) {
+        item['line_item_measurements'] = [
+          {'quantity': qty, 'unit': unit},
+        ];
+      }
+    }
+
+    return item;
+  }
+
+  /// Build an ingredient object for the Recipe Page API.
+  static Map<String, dynamic> buildInstacartIngredient(String ingredientText) {
+    final cleaned = cleanForSearch(ingredientText);
+    final item = <String, dynamic>{
+      'name': cleaned,
+      'display_text': ingredientText.trim(),
+    };
+
+    final match = RegExp(
+      r'^([\d½¼¾⅓⅔⅛⅜⅝⅞/.]+)\s*'
+      r'(cups?|tbsp|tsp|tablespoons?|teaspoons?|'
+      r'oz|ounces?|lbs?|pounds?|g|kg|ml|l|liters?|'
+      r'quarts?|pints?|gallons?)\s+',
+      caseSensitive: false,
+    ).firstMatch(ingredientText.trim());
+
+    if (match != null) {
+      final qtyStr = match.group(1)!;
+      final unitStr = match.group(2)!;
+
+      double? qty;
+      if (qtyStr.contains('½')) qty = 0.5;
+      else if (qtyStr.contains('¼')) qty = 0.25;
+      else if (qtyStr.contains('¾')) qty = 0.75;
+      else if (qtyStr.contains('⅓')) qty = 0.33;
+      else if (qtyStr.contains('⅔')) qty = 0.67;
+      else if (qtyStr.contains('⅛')) qty = 0.125;
+      else qty = double.tryParse(qtyStr);
+
+      final unit = _normalizeInstacartUnit(unitStr);
+
+      if (qty != null && unit != null) {
+        item['measurements'] = [
+          {'quantity': qty, 'unit': unit},
+        ];
+      }
+    }
+
+    return item;
+  }
+
+  /// Normalize unit strings to Instacart's accepted values.
+  /// See: https://docs.instacart.com/developer_platform_api/api/units_of_measurement/
+  static String? _normalizeInstacartUnit(String raw) {
+    final u = raw.toLowerCase().trim();
+    if (u.startsWith('cup')) return 'cup';
+    if (u.startsWith('tbsp') || u.startsWith('tablespoon')) return 'tbsp';
+    if (u.startsWith('tsp') || u.startsWith('teaspoon')) return 'tsp';
+    if (u == 'oz' || u.startsWith('ounce')) return 'oz';
+    if (u == 'lb' || u == 'lbs' || u.startsWith('pound')) return 'lb';
+    if (u == 'g') return 'g';
+    if (u == 'kg') return 'kg';
+    if (u == 'ml') return 'ml';
+    if (u == 'l' || u.startsWith('liter')) return 'l';
+    if (u.startsWith('quart')) return 'qt';
+    if (u.startsWith('pint')) return 'pt';
+    if (u.startsWith('gallon')) return 'gal';
+    return null;
   }
 
   // ════════════════════════════════════════════
@@ -296,7 +427,6 @@ class GroceryService {
 
   // ── Cart auth (authorization_code — user login) ──
 
-  /// Opens browser → Kroger login → redirects to recipespellbook://kroger-callback?code=XXX
   static Future<bool> krogerStartOAuthLogin() async {
     final clientId = await _getKrogerClientId();
     final authUri = Uri.parse(_krogerAuthUrl).replace(queryParameters: {
@@ -314,7 +444,6 @@ class GroceryService {
     }
   }
 
-  /// Exchange auth code from callback for tokens.
   static Future<bool> krogerExchangeAuthCode(String authCode) async {
     final clientId = await _getKrogerClientId();
     final clientSecret = await _getKrogerSecret();
@@ -647,6 +776,7 @@ class GroceryService {
   static Future<CartAddResult> sendToStore({
     required GroceryProvider provider,
     required List<String> ingredientNames,
+    String? listTitle,
     void Function(int current, int total, String item)? onProgress,
   }) async {
     if (ingredientNames.isEmpty) {
@@ -657,19 +787,68 @@ class GroceryService {
     debugPrint('[SendToStore] ${provider.name} configured=$configured '
         'items=${ingredientNames.length}');
 
-    if (configured) {
-      return _sendViaApi(
-        provider: provider,
-        ingredientNames: ingredientNames,
-        onProgress: onProgress,
-      );
+    switch (provider) {
+      case GroceryProvider.instacart:
+      // IDP API — single call, Instacart handles product matching
+        return _sendViaInstacartIdp(
+          ingredientNames: ingredientNames,
+          title: listTitle ?? 'Shopping List',
+          onProgress: onProgress,
+        );
+      case GroceryProvider.kroger:
+        if (configured) {
+          return _sendViaKrogerApi(
+            ingredientNames: ingredientNames,
+            onProgress: onProgress,
+          );
+        }
+        return _sendViaDeepLink(
+            provider: provider, ingredientNames: ingredientNames);
     }
-    return _sendViaDeepLink(
-        provider: provider, ingredientNames: ingredientNames);
   }
 
-  static Future<CartAddResult> _sendViaApi({
-    required GroceryProvider provider,
+  /// Instacart IDP flow: build line items → create page → open URL
+  static Future<CartAddResult> _sendViaInstacartIdp({
+    required List<String> ingredientNames,
+    required String title,
+    void Function(int current, int total, String item)? onProgress,
+  }) async {
+    onProgress?.call(0, 1, 'Creating shopping list on Instacart...');
+
+    final lineItems = ingredientNames
+        .map((name) => buildInstacartLineItem(name))
+        .toList();
+
+    final url = await instacartCreateShoppingListPage(
+      title: title,
+      lineItems: lineItems,
+    );
+
+    if (url != null) {
+      try {
+        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      } catch (e) {
+        debugPrint('[SendToStore] Failed to open Instacart URL: $e');
+      }
+
+      return CartAddResult(
+        success: true,
+        itemsAdded: ingredientNames.length,
+        checkoutUrl: url,
+        message: 'Shopping list created on Instacart',
+      );
+    }
+
+    // Fallback: deep link
+    debugPrint('[SendToStore] IDP failed, falling back to deep link');
+    return _sendViaDeepLink(
+      provider: GroceryProvider.instacart,
+      ingredientNames: ingredientNames,
+    );
+  }
+
+  /// Kroger flow: search per-ingredient → add to cart
+  static Future<CartAddResult> _sendViaKrogerApi({
     required List<String> ingredientNames,
     void Function(int current, int total, String item)? onProgress,
   }) async {
@@ -681,15 +860,7 @@ class GroceryService {
       final name = cleanForSearch(ingredientNames[i]);
       onProgress?.call(i + 1, ingredientNames.length, name);
 
-      List<GroceryProduct> results;
-      switch (provider) {
-        case GroceryProvider.instacart:
-          results = await instacartSearch(name);
-          break;
-        case GroceryProvider.kroger:
-          results = await krogerSearch(name);
-          break;
-      }
+      final results = await krogerSearch(name);
 
       if (results.isNotEmpty) {
         consecutiveEmpty = 0;
@@ -703,12 +874,10 @@ class GroceryService {
         consecutiveEmpty++;
         failed.add(name);
 
-        // Safety: if first 3 all miss and nothing matched yet,
-        // API probably can't find products → bail to deep link
         if (consecutiveEmpty >= 3 && matched.isEmpty) {
           debugPrint('[SendToStore] 3 consecutive misses, 0 matches → deep link');
           return _sendViaDeepLink(
-            provider: provider,
+            provider: GroceryProvider.kroger,
             ingredientNames: ingredientNames,
           );
         }
@@ -718,22 +887,14 @@ class GroceryService {
     if (matched.isEmpty) {
       debugPrint('[SendToStore] 0 matches → deep link');
       return _sendViaDeepLink(
-        provider: provider,
+        provider: GroceryProvider.kroger,
         ingredientNames: ingredientNames,
       );
     }
 
     debugPrint('[SendToStore] ${matched.length} matched, ${failed.length} failed → cart');
 
-    CartAddResult result;
-    switch (provider) {
-      case GroceryProvider.instacart:
-        result = await instacartAddToCart(matched);
-        break;
-      case GroceryProvider.kroger:
-        result = await krogerAddToCart(matched);
-        break;
-    }
+    final result = await krogerAddToCart(matched);
 
     return CartAddResult(
       success: result.success,

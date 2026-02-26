@@ -3,12 +3,14 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/imported_recipe.dart';
 import '../../../providers/database_provider.dart';
+import '../../widgets/app_snackbar.dart';
 import '../../widgets/smart_import_button.dart';
 
 /// Full-screen import preview — lets users review, select/deselect, and spot
@@ -39,6 +41,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
   bool _loading = false;
   bool _checkedDuplicates = false;
   int _importedCount = 0;
+  String? _lastImportedRecipeId;
   double _progress = 0;
 
   @override
@@ -104,6 +107,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
       _loading = true;
       _progress = 0;
       _importedCount = 0;
+      _lastImportedRecipeId = null;
     });
 
     final recipeDao = ref.read(recipeDaoProvider);
@@ -132,7 +136,6 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
           categoryId: drift.Value(recipe.suggestedCategory),
           notes: drift.Value(recipe.notes),
           imagePath: drift.Value(localImagePath),
-          lastViewedAt: drift.Value(DateTime.now()),
         ));
 
         for (var i = 0; i < recipe.ingredients.length; i++) {
@@ -154,6 +157,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
         }
 
         _importedCount++;
+        _lastImportedRecipeId = recipeId;
       } catch (_) {}
 
       if (mounted) {
@@ -162,19 +166,21 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     }
 
     if (mounted) {
+      final router = GoRouter.of(context);
+      final lastId = _lastImportedRecipeId;
+
+      if (_importedCount == 1 && lastId != null) {
+        AppSnackbar.successWithAction(
+          context,
+          '${_importedCount} recipe imported',
+          actionLabel: l10n.actionView,
+          onAction: () => router.push('/recipe/$lastId'),
+        );
+      } else {
+        AppSnackbar.success(context, '$_importedCount recipes imported');
+      }
+
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('$_importedCount ${_importedCount == 1 ? 'recipe' : 'recipes'} imported'),
-          duration: const Duration(seconds: 3),
-          action: SnackBarAction(
-            label: l10n.actionView,
-            onPressed: () {
-              // Already on the cookbook screen after pop
-            },
-          ),
-        ),
-      );
     }
   }
 

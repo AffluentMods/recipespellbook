@@ -2,7 +2,7 @@ name: recipespellbook
 description: "An advanced recipe app for all uses."
 publish_to: 'none'
 
-version: 1.0.4+1
+version: 1.0.4+7
 
 environment:
   sdk: ^3.10.7
@@ -101,3 +101,5 @@ flutter:
     - assets/images/cookbook_placeholder_rpg.png
     - assets/images/recipe_placeholder_normal.png
     - assets/images/recipe_placeholder_rpg.png
+    - assets/images/3rd-party/instacart_carrot.png
+    - assets/images/3rd-party/instacart_carrot_white.png

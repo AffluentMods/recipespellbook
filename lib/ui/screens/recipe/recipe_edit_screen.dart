@@ -1028,7 +1028,15 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       await tagsDao.setTagsForRecipe(recipeId, _selectedTagIds);
 
       if (mounted) {
-        AppSnackbar.info(context, _isEditing ? 'Recipe updated!' : l10n.successSaved);
+        // Capture router before popping so the View callback works
+        final router = GoRouter.of(context);
+
+        AppSnackbar.successWithAction(
+          context,
+          _isEditing ? 'Recipe updated!' : l10n.successSaved,
+          actionLabel: l10n.actionView,
+          onAction: () => router.push('/recipe/$recipeId'),
+        );
 
         // RPG XP - only for new recipes
         if (!_isEditing) {
