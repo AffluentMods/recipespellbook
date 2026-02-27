@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/rpg/rpg_achievements.dart';
 import '../../../data/rpg/rpg_cosmetics.dart';
 import '../../../data/rpg/rpg_models.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/rpg_provider.dart';
 
 // ============ RPG AVATAR WIDGET ============
@@ -137,7 +138,7 @@ class RpgAvatarWidget extends StatelessWidget {
                   ],
                 ),
                 child: Text(
-                  'Lv.$level',
+                  AppLocalizations.of(context)!.rpgLv(level!),
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -229,7 +230,7 @@ class RpgXpBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Level $level',
+                  AppLocalizations.of(context)!.rpgLevelN(level!),
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -327,7 +328,7 @@ class RpgCompactXpBar extends ConsumerWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
-              'Lv.${profile.level}',
+              AppLocalizations.of(context)!.rpgLv(profile.level),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -417,7 +418,7 @@ class RpgXpGainToast extends StatelessWidget {
                   ),
                   if (event.multiplier > 1.0)
                     Text(
-                      '${event.multiplier}x Class Bonus!',
+                      AppLocalizations.of(context)!.rpgClassBonus('${event.multiplier}x'),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: Colors.amber,
                       ),
@@ -489,7 +490,7 @@ class RpgLevelUpDialog extends StatelessWidget {
                 const Text('✨', style: TextStyle(fontSize: 24)),
                 const SizedBox(width: 8),
                 Text(
-                  'LEVEL UP!',
+                  AppLocalizations.of(context)!.rpgLevelUp,
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.amber,
@@ -526,7 +527,7 @@ class RpgLevelUpDialog extends StatelessWidget {
                   const Icon(Icons.monetization_on, color: Colors.amber),
                   const SizedBox(width: 8),
                   Text(
-                    '+${event.goldReward} Gold',
+                    '+${event.goldReward} ${AppLocalizations.of(context)!.rpgGold}',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Colors.amber,
@@ -538,14 +539,14 @@ class RpgLevelUpDialog extends StatelessWidget {
             if (event.unlockedItems.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
-                'Unlocked: ${event.unlockedItems.join(", ")}',
+                '${AppLocalizations.of(context)!.rpgUnlocked}: ${event.unlockedItems.join(", ")}',
                 style: theme.textTheme.bodySmall,
               ),
             ],
             const SizedBox(height: 24),
             FilledButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Awesome!'),
+              child: Text(AppLocalizations.of(context)!.rpgAwesome),
             ),
           ],
         ),
@@ -627,7 +628,7 @@ class RpgAchievementUnlockDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '🏆 Achievement Unlocked!',
+              AppLocalizations.of(context)!.rpgAchievementUnlocked,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -710,7 +711,7 @@ class RpgAchievementUnlockDialog extends StatelessWidget {
             const SizedBox(height: 24),
             FilledButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Claim!'),
+              child: Text(AppLocalizations.of(context)!.rpgClaim),
             ),
           ],
         ),

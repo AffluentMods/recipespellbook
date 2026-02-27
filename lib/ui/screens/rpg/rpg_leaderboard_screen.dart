@@ -21,14 +21,14 @@ enum LeaderboardCategory {
 }
 
 extension LeaderboardCategoryExtension on LeaderboardCategory {
-  String get displayName {
+  String displayName(AppLocalizations l10n) {
     switch (this) {
-      case LeaderboardCategory.level: return 'Level';
-      case LeaderboardCategory.totalXp: return 'Total XP';
-      case LeaderboardCategory.recipesCreated: return 'Recipes';
-      case LeaderboardCategory.recipesCook: return 'Cooked';
-      case LeaderboardCategory.streak: return 'Streak';
-      case LeaderboardCategory.bossKills: return 'Boss Damage';
+      case LeaderboardCategory.level: return l10n.rpgLevel;
+      case LeaderboardCategory.totalXp: return l10n.rpgTotalXp;
+      case LeaderboardCategory.recipesCreated: return l10n.rpgRecipes;
+      case LeaderboardCategory.recipesCook: return l10n.rpgCooked;
+      case LeaderboardCategory.streak: return l10n.rpgStreak;
+      case LeaderboardCategory.bossKills: return l10n.rpgBossDamage;
     }
   }
 
@@ -101,14 +101,16 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
     final theme = Theme.of(context);
     final profile = ref.watch(rpgProvider).profile;
 
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('🏆 Leaderboard'),
+        title: Text(l10n.rpgLeaderboard),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Your Stats'),
-            Tab(text: 'Community'),
+          tabs: [
+            Tab(text: l10n.rpgYourStats),
+            Tab(text: l10n.rpgCommunity),
           ],
         ),
       ),
@@ -125,6 +127,7 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
   }
 
   Widget _buildYourStatsTab(ThemeData theme, PlayerProfile profile) {
+    final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -137,7 +140,7 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
 
           // Stats grid
           Text(
-            'Your Statistics',
+            l10n.rpgYourStatistics,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -154,37 +157,37 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
             children: [
               _StatCard(
                 icon: Icons.military_tech,
-                label: 'Level',
+                label: l10n.rpgLevel,
                 value: profile.level.toString(),
                 color: Colors.amber,
               ),
               _StatCard(
                 icon: Icons.auto_awesome,
-                label: 'Total XP',
+                label: l10n.rpgTotalXp,
                 value: _formatNumber(profile.totalXp),
                 color: Colors.purple,
               ),
               _StatCard(
                 icon: Icons.local_fire_department,
-                label: 'Login Streak',
-                value: '${profile.loginStreak} days',
+                label: l10n.rpgLoginStreak,
+                value: l10n.rpgDaysCount(profile.loginStreak),
                 color: Colors.orange,
               ),
               _StatCard(
                 icon: Icons.emoji_events,
-                label: 'Achievements',
+                label: l10n.rpgAchievements,
                 value: '${profile.completedAchievements.length}',
                 color: Colors.green,
               ),
               _StatCard(
                 icon: Icons.monetization_on,
-                label: 'Gold Earned',
+                label: l10n.rpgGoldEarned,
                 value: _formatNumber(profile.gold),
                 color: Colors.amber,
               ),
               _StatCard(
                 icon: Icons.diamond,
-                label: 'Gems Earned',
+                label: l10n.rpgGemsEarned,
                 value: _formatNumber(profile.gems),
                 color: Colors.blue,
               ),
@@ -195,7 +198,7 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
 
           // Milestones
           Text(
-            'Milestones',
+            l10n.rpgMilestones,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -203,7 +206,7 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
           const SizedBox(height: 12),
 
           _MilestoneCard(
-            title: 'Next Level',
+            title: l10n.rpgNextLevel,
             current: profile.currentXp,
             target: profile.xpForNextLevel,
             icon: Icons.arrow_upward,
@@ -211,7 +214,7 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
           ),
           const SizedBox(height: 8),
           _MilestoneCard(
-            title: 'Level 10',
+            title: l10n.rpgLevelN(10),
             current: profile.level,
             target: 10,
             icon: Icons.military_tech,
@@ -220,7 +223,7 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
           ),
           const SizedBox(height: 8),
           _MilestoneCard(
-            title: 'Level 25',
+            title: l10n.rpgLevelN(25),
             current: profile.level,
             target: 25,
             icon: Icons.military_tech,
@@ -229,7 +232,7 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
           ),
           const SizedBox(height: 8),
           _MilestoneCard(
-            title: 'Level 50',
+            title: l10n.rpgLevelN(50),
             current: profile.level,
             target: 50,
             icon: Icons.military_tech,
@@ -254,7 +257,7 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
                     Icon(Icons.insights, color: theme.colorScheme.primary),
                     const SizedBox(width: 8),
                     Text(
-                      'How You Compare',
+                      l10n.rpgHowYouCompare,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -263,19 +266,19 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
                 ),
                 const SizedBox(height: 12),
                 _ComparisonRow(
-                  label: 'Level',
+                  label: l10n.rpgLevel,
                   yourValue: profile.level,
                   avgValue: 8,
                   isHigherBetter: true,
                 ),
                 _ComparisonRow(
-                  label: 'Login Streak',
+                  label: l10n.rpgLoginStreak,
                   yourValue: profile.loginStreak,
                   avgValue: 5,
                   isHigherBetter: true,
                 ),
                 _ComparisonRow(
-                  label: 'Achievements',
+                  label: l10n.rpgAchievements,
                   yourValue: profile.completedAchievements.length,
                   avgValue: 12,
                   isHigherBetter: true,
@@ -289,6 +292,7 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
   }
 
   Widget _buildCommunityTab(ThemeData theme, PlayerProfile profile) {
+    final l10n = AppLocalizations.of(context)!;
     // For now, show placeholder until backend is ready
     return Center(
       child: Padding(
@@ -310,14 +314,14 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
             ),
             const SizedBox(height: 24),
             Text(
-              'Community Leaderboard',
+              l10n.rpgCommunityLeaderboard,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Coming Soon!',
+              l10n.rpgComingSoon,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -325,7 +329,7 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'Compete with other avatars worldwide.\nSee who has the most recipes, highest level, and longest streaks!',
+              l10n.rpgCommunityDescription,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.outline,
@@ -365,7 +369,7 @@ class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
                 AppSnackbar.info(context, AppLocalizations.of(context)!.communityComingSoon);
               },
               icon: const Icon(Icons.notifications_active),
-              label: const Text('Notify Me'),
+              label: Text(l10n.rpgNotifyMe),
             ),
           ],
         ),
@@ -467,7 +471,7 @@ class _PlayerCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    'Level ${profile.level}',
+                    AppLocalizations.of(context)!.rpgLevelN(profile.level),
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

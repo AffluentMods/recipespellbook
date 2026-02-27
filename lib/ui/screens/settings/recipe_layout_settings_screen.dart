@@ -203,7 +203,7 @@ class _StackedPreview extends StatelessWidget {
           // Ingredients Section
           _PreviewSection(
             icon: Icons.checklist,
-            title: 'Ingredients',
+            title: AppLocalizations.of(context)!.ingredientsTitle,
             color: theme.colorScheme.primary,
             child: Column(
               children: List.generate(3, (i) => Padding(
@@ -238,7 +238,7 @@ class _StackedPreview extends StatelessWidget {
           // Instructions Section
           _PreviewSection(
             icon: Icons.format_list_numbered,
-            title: 'Instructions',
+            title: AppLocalizations.of(context)!.instructionsTitle,
             color: theme.colorScheme.secondary,
             child: Column(
               children: List.generate(2, (i) => Padding(
@@ -279,7 +279,7 @@ class _StackedPreview extends StatelessWidget {
           // Nutrition Section
           _PreviewSection(
             icon: Icons.local_fire_department,
-            title: 'Nutrition',
+            title: AppLocalizations.of(context)!.nutritionTitle,
             color: Colors.orange,
             child: _NutritionPreviewContent(),
           ),
@@ -317,10 +317,11 @@ class _TabbedPreviewState extends State<_TabbedPreview> with SingleTickerProvide
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final l10n = AppLocalizations.of(context)!;
     final tabs = [
-      _TabInfo(icon: Icons.local_fire_department, label: 'Nutrition', color: Colors.orange),
-      _TabInfo(icon: Icons.checklist, label: 'Ingredients', color: theme.colorScheme.primary),
-      _TabInfo(icon: Icons.format_list_numbered, label: 'Instructions', color: theme.colorScheme.secondary),
+      _TabInfo(icon: Icons.local_fire_department, label: l10n.nutritionTitle, color: Colors.orange),
+      _TabInfo(icon: Icons.checklist, label: l10n.tabIngredients, color: theme.colorScheme.primary),
+      _TabInfo(icon: Icons.format_list_numbered, label: l10n.tabInstructions, color: theme.colorScheme.secondary),
     ];
 
     return Column(
@@ -391,7 +392,7 @@ class _TabbedPreviewState extends State<_TabbedPreview> with SingleTickerProvide
             Icon(Icons.swipe, size: 10, color: theme.colorScheme.outline),
             const SizedBox(width: 4),
             Text(
-              'Swipe to switch',
+              l10n.swipeToSwitch,
               style: TextStyle(
                 fontSize: 8,
                 color: theme.colorScheme.outline,
@@ -569,9 +570,9 @@ class _NutritionPreviewContent extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _MacroChipPreview(label: 'Protein', value: '32g', color: Colors.blue),
-            _MacroChipPreview(label: 'Carbs', value: '45g', color: Colors.green),
-            _MacroChipPreview(label: 'Fat', value: '18g', color: Colors.orange),
+            _MacroChipPreview(label: AppLocalizations.of(context)!.protein, value: '32g', color: Colors.blue),
+            _MacroChipPreview(label: AppLocalizations.of(context)!.carbohydrates, value: '45g', color: Colors.green),
+            _MacroChipPreview(label: AppLocalizations.of(context)!.fat, value: '18g', color: Colors.orange),
           ],
         ),
       ],

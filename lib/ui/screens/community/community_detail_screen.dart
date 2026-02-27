@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../../../database/database.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../services/community_service.dart';
@@ -47,7 +48,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     try {
       final result = await _community.download(widget.publicationId);
       if (result == null || result.recipes.isEmpty) {
-        if (mounted) AppSnackbar.error(context, 'Download failed');
+        if (mounted) AppSnackbar.error(context, AppLocalizations.of(context)!.communityDownloadFailed);
         return;
       }
 
@@ -105,27 +106,30 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
       ref.invalidate(cookbooksProvider);
 
       if (mounted) {
-        AppSnackbar.success(context, 'Downloaded "${result.title}" — ${result.recipes.length} recipes added!');
+        AppSnackbar.success(context, AppLocalizations.of(context)!.communityDownloadSuccess(result.title, result.recipes.length));
       }
     } catch (e) {
-      if (mounted) AppSnackbar.error(context, 'Download failed: $e');
+      if (mounted) AppSnackbar.error(context, AppLocalizations.of(context)!.communityDownloadFailedError(e.toString()));
     } finally {
       if (mounted) setState(() => _downloading = false);
     }
   }
 
   void _showReportSheet() {
+    final l10n = AppLocalizations.of(context)!;
+
     final reasons = [
-      ('spam', 'Spam or low quality'),
-      ('inappropriate', 'Inappropriate content'),
-      ('stolen', 'Stolen / copied recipes'),
-      ('other', 'Other'),
+      ('spam', l10n.communityReportSpam),
+      ('inappropriate', l10n.communityReportInappropriate),
+      ('stolen', l10n.communityReportStolen),
+      ('other', l10n.communityReportOther),
     ];
 
     showModalBottomSheet(
       context: context,
       builder: (ctx) {
         final theme = Theme.of(ctx);
+        final sl10n = AppLocalizations.of(ctx)!;
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -137,7 +141,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               )),
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text('Report this cookbook', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                child: Text(sl10n.communityReportTitle, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
               ),
               ...reasons.map((r) => ListTile(
                 leading: const Icon(Icons.flag_outlined),
@@ -147,9 +151,9 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                   final ok = await _community.report(widget.publicationId, r.$1);
                   if (mounted) {
                     if (ok) {
-                      AppSnackbar.success(context, 'Report submitted. Thank you!');
+                      AppSnackbar.success(context, l10n.communityReportSuccess);
                     } else {
-                      AppSnackbar.error(context, 'Sign in to report content');
+                      AppSnackbar.error(context, l10n.communitySignInToReport);
                     }
                   }
                 },
@@ -165,6 +169,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     if (_loading) {
       return Scaffold(
@@ -176,7 +181,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     if (_detail == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: const Center(child: Text('Publication not found')),
+        body: Center(child: Text(l10n.communityPublicationNotFound)),
       );
     }
 
@@ -186,7 +191,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
       appBar: AppBar(
         title: Text(d.title, maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
-          IconButton(icon: const Icon(Icons.flag_outlined), tooltip: 'Report', onPressed: _showReportSheet),
+          IconButton(icon: const Icon(Icons.flag_outlined), tooltip: l10n.communityReport, onPressed: _showReportSheet),
         ],
       ),
       body: ListView(
@@ -215,7 +220,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                             : null,
                       ),
                       const SizedBox(width: 8),
-                      Text('by ${d.publisher.displayName}', style: TextStyle(fontSize: 13, color: theme.colorScheme.outline)),
+                      Text(l10n.communityByPublisher(d.publisher.displayName), style: TextStyle(fontSize: 13, color: theme.colorScheme.outline)),
                       const Spacer(),
                       Text(timeago.format(d.createdAt), style: TextStyle(fontSize: 12, color: theme.colorScheme.outline)),
                     ],
@@ -223,9 +228,9 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      _StatBadge(icon: Icons.restaurant_menu, label: '${d.recipeCount} recipes'),
+                      _StatBadge(icon: Icons.restaurant_menu, label: l10n.communityRecipeCount(d.recipeCount)),
                       const SizedBox(width: 12),
-                      _StatBadge(icon: Icons.download, label: '${d.downloadCount} downloads'),
+                      _StatBadge(icon: Icons.download, label: l10n.communityDownloadCount(d.downloadCount)),
                     ],
                   ),
                 ],
@@ -244,14 +249,14 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               icon: _downloading
                   ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.download),
-              label: Text(_downloading ? 'Downloading...' : 'Download to My Cookbooks'),
+              label: Text(_downloading ? l10n.communityDownloading : l10n.communityDownloadToMyCookbooks),
             ),
           ),
 
           const SizedBox(height: 24),
 
           // ── Recipe list preview ──
-          Text('Recipes', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Text(l10n.recipesTitle, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
 
           ...d.recipes.asMap().entries.map((entry) {
@@ -300,11 +305,15 @@ class _RecipePreviewTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final parts = <String>[];
-    if (recipe.prepTimeMinutes != null) parts.add('${recipe.prepTimeMinutes}m prep');
-    if (recipe.cookTimeMinutes != null) parts.add('${recipe.cookTimeMinutes}m cook');
-    if (recipe.servings != null) parts.add('${recipe.servings} servings');
-    if (recipe.ingredients.isNotEmpty) parts.add('${recipe.ingredients.length} ingredients');
+    if (recipe.prepTimeMinutes != null) parts.add(l10n.communityPrepTime(recipe.prepTimeMinutes!));
+    if (recipe.cookTimeMinutes != null) parts.add(l10n.communityCookTime(recipe.cookTimeMinutes!));
+    if (recipe.servings != null) {
+      final s = int.tryParse(recipe.servings!);
+      if (s != null) parts.add(l10n.communityServingsCount(s));
+    }
+    if (recipe.ingredients.isNotEmpty) parts.add(l10n.communityIngredientCount(recipe.ingredients.length));
 
     return ListTile(
       contentPadding: EdgeInsets.zero,

@@ -35,8 +35,10 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
     return Platform.isMacOS || Platform.isWindows || Platform.isLinux;
   }
 
-  static String get _targetDevice => _isDesktop ? 'mobile app' : 'desktop';
-  static String get _currentDevice => _isDesktop ? 'desktop' : 'this device';
+  static String _targetDevice(AppLocalizations l10n) =>
+      _isDesktop ? l10n.transferDeviceMobileApp : l10n.transferDeviceDesktop;
+  static String _currentDevice(AppLocalizations l10n) =>
+      _isDesktop ? l10n.transferDeviceDesktop : l10n.transferDeviceThisDevice;
 
   // SEND state
   String? _transferCode;
@@ -111,17 +113,15 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Move all your recipes, cookbooks, and meal plans '
-                'from $_currentDevice to your $_targetDevice. '
-                'This is a one-time copy, not a sync.',
+            l10n.transferExplanation(_currentDevice(l10n), _targetDevice(l10n)),
             style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 40),
           _ModeCard(
             icon: Icons.upload_rounded,
-            title: 'Send from $_currentDevice',
-            subtitle: 'Generate a code for your $_targetDevice to receive',
+            title: l10n.transferSendFrom(_currentDevice(l10n)),
+            subtitle: l10n.transferSendSubtitle(_targetDevice(l10n)),
             color: theme.colorScheme.primary,
             theme: theme,
             onTap: () {
@@ -132,7 +132,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
           const SizedBox(height: 16),
           _ModeCard(
             icon: Icons.download_rounded,
-            title: 'Receive on $_currentDevice',
+            title: l10n.transferReceiveOn(_currentDevice(l10n)),
             subtitle: l10n.transferReceiveSubtitle,
             color: theme.colorScheme.tertiary,
             theme: theme,
@@ -330,7 +330,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
               const SizedBox(height: 24),
               Text(l10n.transferComplete, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Text('$_importedCount items imported successfully.',
+              Text(l10n.transferImportedSuccess(_importedCount),
                   style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
               if (_didRestoreAuth) ...[
                 const SizedBox(height: 8),
@@ -386,7 +386,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
               Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text('OR', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline, letterSpacing: 1.5)),
+                child: Text(l10n.transferOr, style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline, letterSpacing: 1.5)),
               ),
               Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
             ],

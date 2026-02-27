@@ -483,7 +483,7 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
               TextButton.icon(
                 onPressed: _addCustomIngredient,
                 icon: const Icon(Icons.add, size: 18),
-                label: const Text('Add Ingredient'),
+                label: Text(l10n.shoppingAddIngredient),
               ),
             ],
           ),
@@ -502,7 +502,7 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
                 leading: Text(emoji, style: const TextStyle(fontSize: 20)),
                 title: Text(mapping.ingredient),
                 subtitle: !mapping.isBuiltIn
-                    ? Text('Custom', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary))
+                    ? Text(l10n.custom, style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary))
                     : null,
                 trailing: InkWell(
                   onTap: () => _showCategoryPicker(mapping),
@@ -541,17 +541,17 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Add Ingredient'),
+          title: Text(l10n.shoppingAddIngredient),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameController,
                 autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Ingredient Name',
-                  hintText: 'e.g. turmeric, tahini, miso',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.shoppingIngredientName,
+                  hintText: l10n.shoppingIngredientHint,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
@@ -566,7 +566,7 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(16),
-                            child: Text('Select Category', style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                            child: Text(l10n.shoppingSelectCategory, style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                           ),
                           ...categories.map((cat) => ListTile(
                             leading: Text(getCategoryEmoji(cat), style: const TextStyle(fontSize: 20)),
@@ -582,9 +582,9 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
                   }
                 },
                 child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Category',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.category,
+                    border: const OutlineInputBorder(),
                   ),
                   child: Row(
                     children: [

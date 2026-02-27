@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/rpg/rpg_achievements.dart';
 import '../../../data/rpg/rpg_models.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/rpg_provider.dart';
 
 class RpgAchievementsScreen extends ConsumerStatefulWidget {
@@ -43,12 +44,12 @@ class _RpgAchievementsScreenState extends ConsumerState<RpgAchievementsScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('🏆 Achievements'),
+        title: Text(AppLocalizations.of(context)!.rpgAchievements),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
           tabs: [
-            const Tab(text: 'All'),
+            Tab(text: AppLocalizations.of(context)!.all),
             ...AchievementCategory.values.map((cat) => Tab(
               text: cat.displayName,
               icon: Icon(cat.icon, size: 16),
@@ -119,7 +120,7 @@ class _RpgAchievementsScreenState extends ConsumerState<RpgAchievementsScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'No achievements in this category',
+              AppLocalizations.of(context)!.rpgNoAchievementsInCategory,
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.outline,
               ),
@@ -294,7 +295,7 @@ class _AchievementCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'Unlocks item',
+                            AppLocalizations.of(context)!.rpgUnlocksItem(achievement.unlocksItemId!),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.tertiary,
                             ),
@@ -363,7 +364,7 @@ class _AchievementCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Category: ${achievement.category.displayName}',
+              '${AppLocalizations.of(context)!.rpgCategory}: ${achievement.category.displayName}',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.outline,
               ),
@@ -389,14 +390,14 @@ class _AchievementCard extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             if (isCompleted)
-              const Chip(
-                avatar: Icon(Icons.check, color: Colors.green),
-                label: Text('Completed!'),
+              Chip(
+                avatar: const Icon(Icons.check, color: Colors.green),
+                label: Text(AppLocalizations.of(context)!.rpgCompleted),
                 backgroundColor: Colors.green,
               )
             else
               Text(
-                'Progress: $progress / ${achievement.targetValue}',
+                '${AppLocalizations.of(context)!.rpgProgress}: $progress / ${achievement.targetValue}',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

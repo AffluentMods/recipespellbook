@@ -5237,461 +5237,2139 @@ class AppLocalizationsRu extends AppLocalizations {
   String get createRecipeManually => 'Или создайте рецепт вручную';
 
   @override
-  String get transferYourRecipes => 'Transfer your recipes';
+  String get transferYourRecipes => 'Перенесите свои рецепты';
 
   @override
-  String get transferUpgradeBanner => 'Want automatic sync? Upgrade to Premium for cloud sync across all your devices.';
+  String get transferUpgradeBanner => 'Хотите автоматическую синхронизацию? Перейдите на Premium для облачной синхронизации на всех устройствах.';
 
   @override
-  String get transferCodeLength => 'Code must be 6 characters';
+  String get transferCodeLength => 'Код должен содержать 6 символов';
 
   @override
-  String get transferItemRecipes => 'All recipes';
+  String get transferItemRecipes => 'Все рецепты';
 
   @override
-  String get transferItemCookbooks => 'Cookbooks & categories';
+  String get transferItemCookbooks => 'Кулинарные книги и категории';
 
   @override
-  String get transferItemMealPlans => 'Meal plans';
+  String get transferItemMealPlans => 'Планы питания';
 
   @override
-  String get transferItemShoppingLists => 'Shopping lists';
+  String get transferItemShoppingLists => 'Списки покупок';
 
   @override
-  String get transferItemSettings => 'App settings';
+  String get transferItemSettings => 'Настройки приложения';
 
   @override
-  String get transferItemAccount => 'Account sign-in (if sender is logged in)';
+  String get transferItemAccount => 'Вход в аккаунт (если отправитель вошёл)';
 
   @override
-  String get codeCopied => 'Code copied!';
+  String get codeCopied => 'Код скопирован!';
 
   @override
-  String get transferTitle => 'Transfer Data';
+  String get transferTitle => 'Передача данных';
 
   @override
-  String get transferReceiveSubtitle => 'Enter a code or scan QR from the sending device';
+  String get transferReceiveSubtitle => 'Введите код или отсканируйте QR с отправляющего устройства';
 
   @override
-  String get transferPreparing => 'Preparing your data...';
+  String get transferPreparing => 'Подготовка данных...';
 
   @override
-  String get transferFailed => 'Transfer failed';
+  String get transferFailed => 'Передача не удалась';
 
   @override
-  String get transferScanDesc => 'Scan this QR on your other device, or enter the code below.';
+  String get transferScanDesc => 'Отсканируйте этот QR на другом устройстве или введите код ниже.';
 
   @override
-  String get transferReady => 'Ready to transfer';
+  String get transferReady => 'Готов к передаче';
 
   @override
-  String get transferCodeExpires => 'This code expires in 15 minutes';
+  String get transferCodeExpires => 'Этот код истекает через 15 минут';
 
   @override
-  String get transferComplete => 'Transfer complete!';
+  String get transferComplete => 'Передача завершена!';
 
   @override
-  String get transferAccountSynced => 'Account signed in from sender';
+  String get transferAccountSynced => 'Аккаунт вошёл от отправителя';
 
   @override
-  String get transferScanQr => 'Scan QR Code';
+  String get transferScanQr => 'Сканировать QR-код';
 
   @override
-  String get transferScanQrDesc => 'Point your camera at the QR on the other device';
+  String get transferScanQrDesc => 'Наведите камеру на QR-код на другом устройстве';
 
   @override
-  String get transferEnterCode => 'Enter transfer code';
+  String get transferEnterCode => 'Введите код передачи';
 
   @override
-  String get transferWhatMoves => 'What gets transferred:';
+  String get transferWhatMoves => 'Что будет перенесено:';
 
   @override
-  String get transferMergeNote => 'Existing data on this device will be merged. Duplicates are skipped.';
+  String get transferMergeNote => 'Существующие данные на этом устройстве будут объединены. Дубликаты пропускаются.';
 
   @override
-  String get transferPointCamera => 'Point at the QR code on the sending device';
+  String get transferPointCamera => 'Наведите на QR-код на отправляющем устройстве';
 
   @override
-  String get labelPrepMin => 'Prep (min)';
+  String get labelPrepMin => 'Подготовка (мин)';
 
   @override
-  String get labelCookMin => 'Cook (min)';
+  String get labelCookMin => 'Готовка (мин)';
 
   @override
-  String get labelTotalCal => 'Total cal';
+  String get labelTotalCal => 'Всего ккал';
 
   @override
-  String get labelCalPerServing => 'Cal/serving';
+  String get labelCalPerServing => 'Ккал/порция';
 
   @override
-  String get tooltipViewSize => 'View size';
+  String get tooltipViewSize => 'Размер отображения';
 
   @override
-  String get pantryClearTitle => 'Clear pantry?';
+  String get pantryClearTitle => 'Очистить кладовую?';
 
   @override
-  String get pantryAddHint => 'Add item to pantry...';
+  String get pantryAddHint => 'Добавить товар в кладовую...';
 
   @override
-  String get pantryAddStaples => 'Add all staples';
+  String get pantryAddStaples => 'Добавить все основные продукты';
 
   @override
-  String get pantrySearchHint => 'Search pantry...';
+  String get pantrySearchHint => 'Поиск в кладовой...';
 
   @override
-  String get settingsRecipesShopping => 'Recipes & Shopping';
+  String get settingsRecipesShopping => 'Рецепты и покупки';
 
   @override
-  String get settingsAdvanced => 'Advanced Settings';
+  String get settingsAdvanced => 'Расширенные настройки';
 
   @override
-  String get settingsAdvancedSubtitle => 'Tags, courses, categories & more';
+  String get settingsAdvancedSubtitle => 'Теги, блюда, категории и другое';
 
   @override
-  String get settingsDeleteData => 'Delete Data';
+  String get settingsDeleteData => 'Удалить данные';
 
   @override
-  String get settingsDeleteDataSubtitle => 'Erase app or cloud data';
+  String get settingsDeleteDataSubtitle => 'Стереть данные приложения или облака';
 
   @override
-  String get settingsUpgradeSubtitle => 'Cloud sync, photos & more';
+  String get settingsUpgradeSubtitle => 'Облачная синхронизация, фото и другое';
 
   @override
-  String get settingsTextSizeSubtitle => 'Adjust text size across the entire app';
+  String get settingsTextSizeSubtitle => 'Настроить размер текста во всём приложении';
 
   @override
-  String get settingsGoogleOrApple => 'Google or Apple';
+  String get settingsGoogleOrApple => 'Google или Apple';
 
   @override
-  String get alwaysVisible => 'Always visible';
+  String get alwaysVisible => 'Всегда видно';
 
   @override
-  String get chartNumbers => 'Numbers';
+  String get chartNumbers => 'Числа';
 
   @override
-  String get chartDonut => 'Donut';
+  String get chartDonut => 'Кольцо';
 
   @override
-  String get chartBars => 'Bars';
+  String get chartBars => 'Столбцы';
 
   @override
   String get unitKcal => 'kcal';
 
   @override
-  String get nutritionCustomScale => 'Custom Scale';
+  String get nutritionCustomScale => 'Пользовательский масштаб';
 
   @override
-  String get nutritionScaleLabel => 'Scale multiplier';
+  String get nutritionScaleLabel => 'Множитель масштаба';
 
   @override
-  String get nutritionScaleHint => 'e.g. 0.5, 1.5, 3.0';
+  String get nutritionScaleHint => 'напр. 0,5, 1,5, 3,0';
 
   @override
-  String get nutritionSet => 'Set';
+  String get nutritionSet => 'Установить';
 
   @override
-  String get nutritionApplyRecalculate => 'Apply & Recalculate';
+  String get nutritionApplyRecalculate => 'Применить и пересчитать';
 
   @override
-  String get calAbbrev => 'Cal';
+  String get calAbbrev => 'Ккал';
 
   @override
-  String get nutritionServingSizeHint => 'e.g., 1 cup, 100g';
+  String get nutritionServingSizeHint => 'напр. 1 стакан, 100г';
 
   @override
-  String get shoppingExportList => 'Export list';
+  String get shoppingExportList => 'Экспорт списка';
 
   @override
-  String get shoppingExportListSubtitle => 'Share as a text file or backup';
+  String get shoppingExportListSubtitle => 'Поделиться текстовым файлом или резервной копией';
 
   @override
-  String get shoppingImportList => 'Import list';
+  String get shoppingImportList => 'Импорт списка';
 
   @override
-  String get shoppingImportListSubtitle => 'Add items from a file, photo, or text';
+  String get shoppingImportListSubtitle => 'Добавить товары из файла, фото или текста';
 
   @override
-  String get shoppingScanBarcodeSubtitle => 'Look up a product to add';
+  String get shoppingScanBarcodeSubtitle => 'Найти товар для добавления';
 
   @override
-  String get exportBackupFile => 'Backup file';
+  String get exportBackupFile => 'Файл резервной копии';
 
   @override
-  String get exportBackupFileSubtitle => 'For transferring to another device or app';
+  String get exportBackupFileSubtitle => 'Для переноса на другое устройство или приложение';
 
   @override
-  String get exportFormattedList => 'Formatted list';
+  String get exportFormattedList => 'Форматированный список';
 
   @override
-  String get exportFormattedListSubtitle => 'With checkboxes — great for notes apps';
+  String get exportFormattedListSubtitle => 'С галочками — отлично для заметок';
 
   @override
-  String get exportPlainText => 'Plain text';
+  String get exportPlainText => 'Простой текст';
 
   @override
-  String get exportPlainTextSubtitle => 'Simple list — paste anywhere';
+  String get exportPlainTextSubtitle => 'Простой список — вставьте куда угодно';
 
   @override
-  String get importFromBackupFile => 'From backup file';
+  String get importFromBackupFile => 'Из файла резервной копии';
 
   @override
-  String get importFromBackupSubtitle => 'Import a Recipe Spellbook backup';
+  String get importFromBackupSubtitle => 'Импортировать резервную копию Recipe Spellbook';
 
   @override
-  String get importFromTextShoppingSubtitle => 'Paste or type a list of items';
+  String get importFromTextShoppingSubtitle => 'Вставьте или введите список товаров';
 
   @override
-  String get importFromPhotoOcrSubtitle => 'OCR scan a handwritten or printed list';
+  String get importFromPhotoOcrSubtitle => 'OCR-сканирование рукописного или печатного списка';
 
   @override
-  String get importFromPhotoGallerySubtitle => 'Take a photo or pick from gallery';
+  String get importFromPhotoGallerySubtitle => 'Сделать фото или выбрать из галереи';
 
   @override
-  String get shoppingSendToStore => 'Send to store';
+  String get shoppingSendToStore => 'Отправить в магазин';
 
   @override
-  String get shoppingSendToCart => 'Send to cart';
+  String get shoppingSendToCart => 'Отправить в корзину';
 
   @override
-  String get shoppingCopyToClipboard => 'Copy list to clipboard';
+  String get shoppingCopyToClipboard => 'Копировать список в буфер';
 
   @override
-  String get shoppingGoToCart => 'Go to cart';
+  String get shoppingGoToCart => 'Перейти в корзину';
 
   @override
-  String get shoppingAddItems => 'Add items';
+  String get shoppingAddItems => 'Добавить товары';
 
   @override
-  String get shoppingAddItemHintLong => 'e.g. 2 cups flour, chicken breast...';
+  String get shoppingAddItemHintLong => 'напр. 2 стакана муки, куриная грудка...';
 
   @override
-  String get importReviewItems => 'Review items';
+  String get importReviewItems => 'Просмотр товаров';
 
   @override
-  String get importNoItemsDetected => 'No items detected';
+  String get importNoItemsDetected => 'Товары не обнаружены';
 
   @override
-  String get mealPlanDate => 'Date';
+  String get mealPlanDate => 'Дата';
 
   @override
-  String get mealPlanThisWeekend => 'This Weekend';
+  String get mealPlanThisWeekend => 'В эти выходные';
 
   @override
-  String get menuRpgProfile => 'RPG Profile';
+  String get menuRpgProfile => 'Профиль RPG';
 
   @override
-  String get menuTools => 'Tools';
+  String get menuTools => 'Инструменты';
 
   @override
-  String get menuSupport => 'Support';
+  String get menuSupport => 'Поддержка';
 
   @override
-  String get menuHowCanWeHelp => 'How can we help?';
+  String get menuHowCanWeHelp => 'Чем можем помочь?';
 
   @override
-  String get menuGetInTouch => 'Get in touch or browse our guides.';
+  String get menuGetInTouch => 'Свяжитесь с нами или просмотрите наши руководства.';
 
   @override
-  String get menuVisitWebsite => 'Visit our Website';
+  String get menuVisitWebsite => 'Посетить наш сайт';
 
   @override
-  String get feedbackTitleLabel => 'Title';
+  String get feedbackTitleLabel => 'Заголовок';
 
   @override
-  String get feedbackDetailsLabel => 'Details';
+  String get feedbackDetailsLabel => 'Подробности';
 
   @override
-  String get feedbackDescriptionLabel => 'Description';
+  String get feedbackDescriptionLabel => 'Описание';
 
   @override
-  String get menuSigningIn => 'Signing in…';
+  String get menuSigningIn => 'Вход…';
 
   @override
-  String get menuSignInSync => 'Sign in to sync & back up';
+  String get menuSignInSync => 'Войдите для синхронизации и резервного копирования';
 
   @override
-  String get tagsSave => 'Save Tags';
+  String get tagsSave => 'Сохранить теги';
 
   @override
-  String get recipeFieldCategories => 'Categories';
+  String get recipeFieldCategories => 'Категории';
 
   @override
-  String get selectCategories => 'Select categories';
+  String get selectCategories => 'Выбрать категории';
 
   @override
-  String get searchOrCreateNew => 'Search or create new...';
+  String get searchOrCreateNew => 'Поиск или создание нового...';
 
   @override
-  String get noMatchesFound => 'No matches found';
+  String get noMatchesFound => 'Совпадений не найдено';
 
   @override
-  String get taxonomyAddCategoryNew => 'Add as new category';
+  String get taxonomyAddCategoryNew => 'Добавить как новую категорию';
 
   @override
-  String get ingredientSubstitutionsTitle => 'Ingredient Substitutions';
+  String get ingredientSubstitutionsTitle => 'Замены ингредиентов';
 
   @override
-  String get ingredientSubstitutionsSearch => 'Search for an ingredient...';
+  String get ingredientSubstitutionsSearch => 'Поиск ингредиента...';
 
   @override
-  String get ingredientSubstitutionsSearchAll => 'Search all substitutions';
+  String get ingredientSubstitutionsSearchAll => 'Искать все замены';
 
   @override
-  String get ingredientName => 'Ingredient Name';
+  String get ingredientName => 'Название ингредиента';
 
   @override
-  String get ingredientNameHint => 'e.g. turmeric, tahini, miso';
+  String get ingredientNameHint => 'напр. куркума, тахини, мисо';
 
   @override
-  String get ingredientBulkHint => 'Enter one ingredient per line:\n\n2 cups flour\n1 tsp salt\n3 eggs';
+  String get ingredientBulkHint => 'Введите по одному ингредиенту на строку:\n\n2 стакана муки\n1 ч. л. соли\n3 яйца';
 
   @override
-  String get viewPlans => 'View Plans';
+  String get viewPlans => 'Просмотр планов';
 
   @override
-  String get renewsLabel => 'Renews';
+  String get renewsLabel => 'Обновляется';
 
   @override
-  String get upgradeToProUnlock => 'Upgrade to Pro to unlock';
+  String get upgradeToProUnlock => 'Перейдите на Pro для разблокировки';
 
   @override
-  String get rpgFightAgain => 'Fight Again';
+  String get rpgFightAgain => 'Сражаться снова';
 
   @override
-  String get rpgAwesome => 'Awesome!';
+  String get rpgAwesome => 'Отлично!';
 
   @override
-  String get rpgPurchase => 'Purchase';
+  String get rpgPurchase => 'Купить';
 
   @override
-  String get rpgEquipped => 'Equipped';
+  String get rpgEquipped => 'Экипировано';
 
   @override
-  String get rpgClaim => 'Claim';
+  String get rpgClaim => 'Забрать';
 
   @override
-  String get rpgGuild => 'Guild';
+  String get rpgGuild => 'Гильдия';
 
   @override
   String get rpgDmg => 'DMG';
 
   @override
-  String get rpgMana => 'Mana';
+  String get rpgMana => 'Мана';
 
   @override
-  String get rpgLevel => 'Level';
+  String get rpgLevel => 'Уровень';
 
   @override
-  String get rpgTotalXp => 'Total XP';
+  String get rpgTotalXp => 'Всего XP';
 
   @override
-  String get rpgLoginStreak => 'Login Streak';
+  String get rpgLoginStreak => 'Серия входов';
 
   @override
-  String get rpgGoldEarned => 'Gold Earned';
+  String get rpgGoldEarned => 'Заработано золота';
 
   @override
-  String get rpgGemsEarned => 'Gems Earned';
+  String get rpgGemsEarned => 'Заработано самоцветов';
 
   @override
-  String get rpgNextLevel => 'Next Level';
+  String get rpgNextLevel => 'Следующий уровень';
 
   @override
-  String get rpgNotifyMe => 'Notify Me';
+  String get rpgNotifyMe => 'Уведомить меня';
 
   @override
-  String get rpgGold => 'Gold';
+  String get rpgGold => 'Золото';
 
   @override
-  String get rpgGems => 'Gems';
+  String get rpgGems => 'Самоцветы';
 
   @override
-  String get rpgLottery => 'Gem Lottery';
+  String get rpgLottery => 'Лотерея самоцветов';
 
   @override
-  String get rpgClasses => 'Classes';
+  String get rpgClasses => 'Классы';
 
   @override
-  String get rpgDisplayName => 'Display Name';
+  String get rpgDisplayName => 'Отображаемое имя';
 
   @override
-  String get rpgResetProgress => 'Reset Progress';
+  String get rpgResetProgress => 'Сбросить прогресс';
 
   @override
-  String get rpgResetProgressSubtitle => 'Start over from level 1';
+  String get rpgResetProgressSubtitle => 'Начать заново с 1 уровня';
 
   @override
-  String get rpgRecipeRarity => 'Recipe Rarity';
+  String get rpgRecipeRarity => 'Редкость рецепта';
 
   @override
-  String get settingsNoMatchingSettings => 'No matching settings';
+  String get settingsNoMatchingSettings => 'Нет подходящих настроек';
 
   @override
-  String get settingsSearchHint => 'Search settings...';
+  String get settingsSearchHint => 'Поиск настроек...';
 
   @override
-  String get textSizeSmall => 'Small';
+  String get textSizeSmall => 'Маленький';
 
   @override
-  String get textSizeDefault => 'Default';
+  String get textSizeDefault => 'По умолчанию';
 
   @override
-  String get textSizeMedium => 'Medium';
+  String get textSizeMedium => 'Средний';
 
   @override
-  String get textSizeLarge => 'Large';
+  String get textSizeLarge => 'Большой';
 
   @override
-  String get textSizeExtraLarge => 'Extra Large';
+  String get textSizeExtraLarge => 'Очень большой';
 
   @override
-  String get resetDataClearedDesc => 'All data has been cleared successfully.\n\nWould you like to import the 10 default starter recipes?';
+  String get resetDataClearedDesc => 'Все данные успешно очищены.\n\nХотите импортировать 10 стартовых рецептов по умолчанию?';
 
   @override
-  String get importingDefaultRecipes => 'Importing default recipes...';
+  String get importingDefaultRecipes => 'Импорт рецептов по умолчанию...';
 
   @override
-  String get checking => 'Checking...';
+  String get checking => 'Проверка...';
 
   @override
-  String get connectedTapToManage => 'Connected • Tap to manage';
+  String get connectedTapToManage => 'Подключено • Нажмите для управления';
 
   @override
-  String get notConnected => 'Not connected';
+  String get notConnected => 'Не подключено';
 
   @override
-  String get tapToSignIn => 'Tap to sign in';
+  String get tapToSignIn => 'Нажмите для входа';
 
   @override
-  String get noneSelected => 'None Selected';
+  String get noneSelected => 'Ничего не выбрано';
 
   @override
-  String get partialBackup => 'Partial Backup';
+  String get partialBackup => 'Частичная резервная копия';
 
   @override
-  String get settingsShopping => 'Shopping & Planning';
+  String get settingsShopping => 'Покупки и планирование';
 
   @override
-  String get settingsManage => 'Manage';
+  String get settingsManage => 'Управление';
 
   @override
-  String get manageTags => 'Manage Tags';
+  String get manageTags => 'Управление тегами';
 
   @override
   String tagsApplied(int count) {
-    return '$count tags applied';
+    return '$count тегов применено';
   }
 
   @override
   String tagsEditTitle(String name) {
-    return 'Edit \"$name\"';
+    return 'Редактировать \"$name\"';
   }
 
   @override
-  String get tagsEditComingSoon => 'Tag editing coming soon!';
+  String get tagsEditComingSoon => 'Редактирование тегов скоро!';
 
   @override
   String tagsRecipeCount(int count) {
-    return '$count recipes';
+    return '$count рецептов';
+  }
+
+  @override
+  String get communityMyPublications => 'Мои публикации';
+
+  @override
+  String get communitySearchCookbooks => 'Поиск кулинарных книг...';
+
+  @override
+  String get communitySortRecent => 'Новые';
+
+  @override
+  String get communitySortPopular => 'Популярные';
+
+  @override
+  String get communitySortMostDownloaded => 'Самые скачиваемые';
+
+  @override
+  String communityNoResultsFor(String query) {
+    return 'Нет результатов для \"$query\"';
+  }
+
+  @override
+  String get communityNoCookbooksYet => 'Пока нет кулинарных книг';
+
+  @override
+  String get communityClearSearch => 'Очистить поиск';
+
+  @override
+  String get communityPublish => 'Опубликовать';
+
+  @override
+  String communityByPublisher(String name) {
+    return 'от $name';
+  }
+
+  @override
+  String communityRecipeCount(int count) {
+    return '$count рецептов';
+  }
+
+  @override
+  String get communityPublishCookbook => 'Опубликовать кулинарную книгу';
+
+  @override
+  String get communitySignInToPublish => 'Войдите для публикации';
+
+  @override
+  String get communitySignInToPublishMessage => 'Для публикации кулинарных книг в сообщество нужен аккаунт.';
+
+  @override
+  String get communityGoToSettings => 'Перейти в настройки';
+
+  @override
+  String get communityNoCookbooksToPublish => 'Нет книг для публикации';
+
+  @override
+  String get communityPublishInfo => 'Для публикации в книге должно быть минимум 10 рецептов. Ваши рецепты будут опубликованы как снимок — обновления не синхронизируются.';
+
+  @override
+  String get communitySelectCookbook => 'Выберите книгу для публикации';
+
+  @override
+  String communityNeedMinRecipes(int count) {
+    return 'Нужно минимум 10 рецептов для публикации (сейчас $count)';
+  }
+
+  @override
+  String get communityPublishConfirmTitle => 'Опубликовать в сообщество?';
+
+  @override
+  String communityPublishConfirmMessage(String name, int count) {
+    return '\"$name\" ($count рецептов) станет публичной. Любой сможет просматривать и скачивать.\n\nВы можете отменить публикацию в любое время.';
+  }
+
+  @override
+  String communityPublishSuccess(String name) {
+    return '\"$name\" опубликовано в сообществе!';
+  }
+
+  @override
+  String get communityPublishFailed => 'Публикация не удалась';
+
+  @override
+  String communityRecipeCountNeedMore(int count) {
+    return '$count рецептов (нужно 10+)';
+  }
+
+  @override
+  String get communityNoPublicationsYet => 'Пока нет публикаций';
+
+  @override
+  String get communityNoPublicationsMessage => 'Опубликуйте кулинарную книгу, чтобы поделиться ей с сообществом.';
+
+  @override
+  String get communityUnpublish => 'Снять с публикации';
+
+  @override
+  String get communityUnpublishConfirmTitle => 'Снять с публикации?';
+
+  @override
+  String communityUnpublishConfirmMessage(String title) {
+    return 'Удалить \"$title\" из сообщества? Те, кто уже скачал, сохранят свою копию.';
+  }
+
+  @override
+  String communityUnpublishSuccess(String title) {
+    return '\"$title\" снято с публикации';
+  }
+
+  @override
+  String get communityUnpublishFailed => 'Не удалось снять с публикации';
+
+  @override
+  String get communityRemovedByModeration => 'Удалено модерацией';
+
+  @override
+  String communityPublicationStats(int recipeCount, int downloadCount, String timeAgo) {
+    return '$recipeCount рецептов · $downloadCount скачиваний · $timeAgo';
+  }
+
+  @override
+  String get communityPublicationNotFound => 'Публикация не найдена';
+
+  @override
+  String get communityReport => 'Пожаловаться';
+
+  @override
+  String get communityReportTitle => 'Пожаловаться на эту книгу';
+
+  @override
+  String get communityReportSpam => 'Спам или низкое качество';
+
+  @override
+  String get communityReportInappropriate => 'Неприемлемый контент';
+
+  @override
+  String get communityReportStolen => 'Украденные / скопированные рецепты';
+
+  @override
+  String get communityReportOther => 'Другое';
+
+  @override
+  String get communityReportSuccess => 'Жалоба отправлена. Спасибо!';
+
+  @override
+  String get communitySignInToReport => 'Войдите, чтобы пожаловаться на контент';
+
+  @override
+  String get communityDownloadFailed => 'Скачивание не удалось';
+
+  @override
+  String communityDownloadSuccess(String title, int count) {
+    return 'Скачано \"$title\" — добавлено $count рецептов!';
+  }
+
+  @override
+  String communityDownloadFailedError(String error) {
+    return 'Скачивание не удалось: $error';
+  }
+
+  @override
+  String communityDownloadCount(int count) {
+    return '$count скачиваний';
+  }
+
+  @override
+  String get communityDownloading => 'Скачивание...';
+
+  @override
+  String get communityDownloadToMyCookbooks => 'Скачать в мои книги';
+
+  @override
+  String communityPrepTime(int minutes) {
+    return '$minutesм подготовки';
+  }
+
+  @override
+  String communityCookTime(int minutes) {
+    return '$minutesм готовки';
+  }
+
+  @override
+  String communityServingsCount(int count) {
+    return '$count порций';
+  }
+
+  @override
+  String communityIngredientCount(int count) {
+    return '$count ингредиентов';
+  }
+
+  @override
+  String get deleteRecipesTrashMessage => 'Рецепты будут перемещены в корзину. Вы сможете восстановить их позже.';
+
+  @override
+  String get hintTitleExample => 'напр. Бабушкин яблочный пирог';
+
+  @override
+  String get hintDescription => 'Краткое описание рецепта';
+
+  @override
+  String get hintServingsExample => 'напр. 4';
+
+  @override
+  String get prepMin => 'Подготовка (мин)';
+
+  @override
+  String get cookMin => 'Готовка (мин)';
+
+  @override
+  String get hintNotes => 'Советы, варианты, инструкции хранения...';
+
+  @override
+  String get pinchToZoomCropped => 'Сведите пальцы для увеличения · Обрезанная область будет сохранена';
+
+  @override
+  String get pinchToZoomOrUseAsIs => 'Сведите пальцы для увеличения и обрезки · Или используйте как есть';
+
+  @override
+  String get savingLabel => 'Сохранение...';
+
+  @override
+  String get emptyHeader => '(пустой заголовок)';
+
+  @override
+  String get emptyIngredient => '(пустой ингредиент)';
+
+  @override
+  String get recipeUpdated => 'Рецепт обновлён!';
+
+  @override
+  String get nutritionLessInfo => 'Меньше информации';
+
+  @override
+  String get nutritionMoreInfo => 'Больше информации';
+
+  @override
+  String scaleOriginal(String servings) {
+    return 'Оригинал: $servings';
+  }
+
+  @override
+  String get scaleAdjustQuantities => 'Настроить количества ингредиентов';
+
+  @override
+  String get scaleOriginalLabel => '1x (Оригинал)';
+
+  @override
+  String get stepWillBeRemoved => 'Этот шаг будет безвозвратно удалён.';
+
+  @override
+  String stepsWillBeRemoved(int count) {
+    return 'Эти $count шагов будут безвозвратно удалены.';
+  }
+
+  @override
+  String stepCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count шага',
+      many: '$count шагов',
+      few: '$count шага',
+      one: '1 шаг',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get instructionsNoSteps => 'Пока нет инструкций';
+
+  @override
+  String get instructionsAddStepsGuide => 'Добавьте шаги для пошагового руководства';
+
+  @override
+  String get pinchToZoomPreview => 'Сведите пальцы для увеличения · Так будет выглядеть ваше фото';
+
+  @override
+  String ingredientCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ингредиента',
+      many: '$count ингредиентов',
+      few: '$count ингредиента',
+      one: '1 ингредиент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ingredientPerLineHint => 'Введите по одному ингредиенту на строку:\n\n2 стакана муки\n1 ч. л. соли\n3 яйца';
+
+  @override
+  String get ingredientTip => 'Совет: Вводите по одному ингредиенту на строку. Нажимайте Enter после каждого ингредиента.';
+
+  @override
+  String get cookbookEditSubtitle => 'Переименовать, фото обложки';
+
+  @override
+  String get shareCookbookSubtitle => 'Ссылка, семья или сообщество';
+
+  @override
+  String shareNamedCookbook(String name) {
+    return 'Поделиться \"$name\"';
+  }
+
+  @override
+  String get oneTimeLink => 'Одноразовая ссылка';
+
+  @override
+  String get oneTimeLinkDescription => 'Бесплатно • Истекает через 24ч • Любой может скачать';
+
+  @override
+  String get familyShare => 'Семейный доступ';
+
+  @override
+  String get familyShareDescription => 'Синхронизация в реальном времени с членами семьи';
+
+  @override
+  String get postToCommunity => 'Опубликовать в сообществе';
+
+  @override
+  String get postToCommunityDescription => 'Опубликуйте, чтобы все могли найти и скачать';
+
+  @override
+  String get signInToShare => 'Войдите для создания ссылок';
+
+  @override
+  String get generatingLink => 'Создание ссылки...';
+
+  @override
+  String get failedToCreateLink => 'Не удалось создать ссылку';
+
+  @override
+  String get linkCreated => 'Ссылка создана!';
+
+  @override
+  String get expiresIn24Hours => 'Истекает через 24 часа';
+
+  @override
+  String get linkCopied => 'Ссылка скопирована!';
+
+  @override
+  String unlockFeature(String feature) {
+    return 'Разблокировать $feature';
+  }
+
+  @override
+  String get notNow => 'Не сейчас';
+
+  @override
+  String get upgradeButton => 'Улучшить';
+
+  @override
+  String publishMinRecipes(int count) {
+    return 'Нужно минимум 10 рецептов для публикации (сейчас $count)';
+  }
+
+  @override
+  String get publishConfirmTitle => 'Опубликовать в сообщество?';
+
+  @override
+  String publishConfirmMessage(String name, int count) {
+    return '\"$name\" ($count рецептов) будет публично видна. Любой сможет просматривать и скачивать.\n\nВы можете удалить её в любое время из Сообщество → Мои публикации.';
+  }
+
+  @override
+  String get publishButton => 'Опубликовать';
+
+  @override
+  String get selectCourse => 'Выбрать блюдо';
+
+  @override
+  String get selectCategory => 'Выбрать категорию';
+
+  @override
+  String get taxonomyNone => 'Нет';
+
+  @override
+  String createTaxonomy(String name) {
+    return 'Создать \"$name\"';
+  }
+
+  @override
+  String get addAsNewCourse => 'Добавить как новое блюдо';
+
+  @override
+  String get addAsNewCategory => 'Добавить как новую категорию';
+
+  @override
+  String doneWithCount(int count) {
+    return 'Готово ($count)';
+  }
+
+  @override
+  String get quickAccessEmptyAll => 'Пока нет рецептов в быстром доступе';
+
+  @override
+  String get quickAccessEmptyMealPlan => 'Нет запланированных блюд';
+
+  @override
+  String get quickAccessEmptyPinned => 'Нет закреплённых рецептов';
+
+  @override
+  String get quickAccessEmptyRecent => 'Нет недавних рецептов';
+
+  @override
+  String get importingRecipe => 'Импорт рецепта…';
+
+  @override
+  String errorWithMessage(String message) {
+    return 'Ошибка: $message';
+  }
+
+  @override
+  String get minutesPrepSuffix => 'м подготовки';
+
+  @override
+  String get minutesCookSuffix => 'м готовки';
+
+  @override
+  String get couldNotOpenBrowser => 'Не удалось открыть браузер';
+
+  @override
+  String couldNotOpenUrl(String url) {
+    return 'Не удалось открыть $url';
+  }
+
+  @override
+  String get discord => 'Discord';
+
+  @override
+  String get discordLinkAccount => 'Привязать аккаунт Discord';
+
+  @override
+  String get discordLinkSubtitle => 'Подключите Discord для функций сообщества';
+
+  @override
+  String get discordSignInFirst => 'Сначала войдите, чтобы привязать Discord';
+
+  @override
+  String get discordUnlink => 'Отвязать Discord';
+
+  @override
+  String get discordUnlinkFailed => 'Не удалось отвязать Discord';
+
+  @override
+  String get discordUnlinkSubtitle => 'Удалить связь с Discord';
+
+  @override
+  String get discordUnlinked => 'Discord отвязан';
+
+  @override
+  String get familyCodeCopied => 'Код приглашения скопирован!';
+
+  @override
+  String get familyCopyLink => 'Копировать ссылку';
+
+  @override
+  String get familyCreate => 'Создать семью';
+
+  @override
+  String get familyCreateFailed => 'Не удалось создать семью';
+
+  @override
+  String get familyCreateTitle => 'Создать семью';
+
+  @override
+  String get familyCreated => 'Семья создана!';
+
+  @override
+  String get familyDelete => 'Удалить семью';
+
+  @override
+  String get familyDeleteConfirm => 'Вы уверены, что хотите удалить эту семью? Все участники будут удалены.';
+
+  @override
+  String get familyDeleted => 'Семья удалена';
+
+  @override
+  String get familyEnterInviteCode => 'Введите код приглашения';
+
+  @override
+  String get familyInvite => 'Пригласить участников';
+
+  @override
+  String get familyJoinAction => 'Присоединиться';
+
+  @override
+  String get familyJoinFailed => 'Не удалось присоединиться к семье';
+
+  @override
+  String get familyJoinTitle => 'Присоединиться к семье';
+
+  @override
+  String get familyJoinWithCode => 'Присоединиться по коду';
+
+  @override
+  String familyJoined(String familyName) {
+    return 'Вы присоединились к $familyName!';
+  }
+
+  @override
+  String get familyLeave => 'Покинуть семью';
+
+  @override
+  String get familyLeaveAction => 'Покинуть';
+
+  @override
+  String get familyLeaveConfirm => 'Вы уверены, что хотите покинуть эту семью?';
+
+  @override
+  String get familyLeft => 'Семья покинута';
+
+  @override
+  String get familyLinkCopied => 'Ссылка-приглашение скопирована!';
+
+  @override
+  String get familyManage => 'Управление семьёй';
+
+  @override
+  String familyMemberRemoved(String displayName) {
+    return '$displayName удалён';
+  }
+
+  @override
+  String get familyMembers => 'Участники';
+
+  @override
+  String familyMembersCount(int current, int max) {
+    return '$current из $max участников';
+  }
+
+  @override
+  String get familyNameHint => 'Название семьи';
+
+  @override
+  String get familyNewCodeGenerated => 'Новый код приглашения создан';
+
+  @override
+  String get familyOwner => 'ВЛАДЕЛЕЦ';
+
+  @override
+  String get familyRegenerateCode => 'Сгенерировать новый код';
+
+  @override
+  String get familyRemoveMember => 'Удалить участника';
+
+  @override
+  String familyRemoveMemberConfirm(String displayName) {
+    return 'Удалить $displayName из семьи?';
+  }
+
+  @override
+  String get familyRename => 'Переименовать семью';
+
+  @override
+  String familyShareMessage(String inviteCode, String shareLink) {
+    return 'Присоединяйтесь к моей семье в Recipe Spellbook! Код: $inviteCode или используйте ссылку: $shareLink';
+  }
+
+  @override
+  String get familyShareSubject => 'Присоединяйтесь к моей семье в Recipe Spellbook';
+
+  @override
+  String get familyShareUpgradeMessage => 'Перейдите на более высокий план, чтобы делиться кулинарными книгами с семьёй в реальном времени.';
+
+  @override
+  String get familySharing => 'Семейный доступ';
+
+  @override
+  String get familySharingDescription => 'Делитесь кулинарными книгами, списками покупок и планами питания с семьёй.';
+
+  @override
+  String get familySharingSubtitle => 'Делитесь книгами, списками и планами питания';
+
+  @override
+  String ingredientSubstitutesFor(String ingredientName) {
+    return 'Замены для $ingredientName';
+  }
+
+  @override
+  String get ingredientSubstitutionsNoResults => 'Замены не найдены';
+
+  @override
+  String ingredientSubstitutionsNotFound(String ingredientName) {
+    return 'Замены не найдены для $ingredientName';
+  }
+
+  @override
+  String get ingredientSubstitutionsTryDifferent => 'Попробуйте другой ингредиент';
+
+  @override
+  String get integrationsChecking => 'Проверка...';
+
+  @override
+  String get integrationsConnectedManage => 'Подключено – Нажмите для управления';
+
+  @override
+  String get integrationsLinked => 'Привязано';
+
+  @override
+  String get integrationsLinkedManage => 'Привязано – Нажмите для управления';
+
+  @override
+  String get integrationsNotConnected => 'Не подключено';
+
+  @override
+  String get integrationsTapToLink => 'Нажмите для привязки';
+
+  @override
+  String get integrationsTapToSignIn => 'Нажмите для входа';
+
+  @override
+  String get nutritionCalculateFromEdit => 'Рассчитать из экрана редактирования';
+
+  @override
+  String get nutritionCaloriesAlwaysShow => 'Всегда показывать калории';
+
+  @override
+  String get nutritionChartStyle => 'Стиль графика';
+
+  @override
+  String get nutritionResetDefaults => 'Сбросить по умолчанию';
+
+  @override
+  String get nutritionSettingsLink => 'Настройки питательности';
+
+  @override
+  String get nutritionTapToCalculate => 'Нажмите для расчёта питательности';
+
+  @override
+  String get nutritionVisibleNutrients => 'Видимые питательные вещества';
+
+  @override
+  String pantryAddedStaples(int count) {
+    return 'Добавлено $count основных продуктов в кладовую';
+  }
+
+  @override
+  String get pantryClearAll => 'Очистить всё';
+
+  @override
+  String get pantryClearMessage => 'Удалить все товары из кладовой?';
+
+  @override
+  String get pantryCommonStaples => 'Основные продукты';
+
+  @override
+  String get pantryEmpty => 'Ваша кладовая пуста';
+
+  @override
+  String get pantryEmptySubtitle => 'Добавьте продукты, которые всегда под рукой';
+
+  @override
+  String get pantryInfoMessage => 'Продукты в кладовой будут исключены из списков покупок при добавлении ингредиентов рецепта.';
+
+  @override
+  String pantryItemCount(int count) {
+    return '$count товаров';
+  }
+
+  @override
+  String get rpgAchievements => 'Достижения';
+
+  @override
+  String get rpgAttack => 'Атака! (10 маны)';
+
+  @override
+  String get rpgBattleArena => '⚔️ Арена битв';
+
+  @override
+  String get rpgBoss => 'БОСС';
+
+  @override
+  String get rpgBossDamage => 'Урон босса';
+
+  @override
+  String get rpgBossDefeated => 'Босс побеждён!';
+
+  @override
+  String get rpgBossFight => 'Битва с боссом';
+
+  @override
+  String get rpgChooseYourClass => 'Выберите свой класс';
+
+  @override
+  String get rpgClassBonusSubtitle => 'Каждый класс даёт уникальные бонусы';
+
+  @override
+  String get rpgClassBonusesList => 'Бонусы классов';
+
+  @override
+  String get rpgClassBonusesTitle => 'Бонусы классов';
+
+  @override
+  String get rpgComingSoon => 'Скоро!';
+
+  @override
+  String get rpgCommunity => 'Сообщество';
+
+  @override
+  String get rpgCommunityDescription => 'Соревнуйтесь с другими кулинарами по всему миру!';
+
+  @override
+  String get rpgCommunityLeaderboard => 'Таблица лидеров сообщества';
+
+  @override
+  String get rpgCooked => 'Приготовлено';
+
+  @override
+  String get rpgCosmetics => 'Косметика';
+
+  @override
+  String get rpgCrit => 'КРИТ!';
+
+  @override
+  String rpgDaysAgo(int count) {
+    return '$count дней назад';
+  }
+
+  @override
+  String rpgDaysCount(int count) {
+    return '$count дней';
+  }
+
+  @override
+  String get rpgGemLottery => 'Лотерея самоцветов';
+
+  @override
+  String rpgGemsAvailable(int count) {
+    return '$count самоцветов доступно';
+  }
+
+  @override
+  String rpgHoursAgo(int count) {
+    return '$count часов назад';
+  }
+
+  @override
+  String get rpgHowYouCompare => 'Ваше сравнение';
+
+  @override
+  String get rpgHp => 'HP';
+
+  @override
+  String get rpgJustNow => 'Только что';
+
+  @override
+  String get rpgKeepEarningXp => 'Зарабатывайте XP, чтобы разблокировать этого врага!';
+
+  @override
+  String rpgKillStreak(int count) {
+    return 'Серия побед: $count 🔥';
+  }
+
+  @override
+  String get rpgLeaderboard => 'Таблица лидеров';
+
+  @override
+  String rpgLevelN(int level) {
+    return 'Уровень $level';
+  }
+
+  @override
+  String rpgLevelRequired(int level) {
+    return 'Требуется уровень $level';
+  }
+
+  @override
+  String get rpgLotteryCost => 'Стоимость 1 самоцвет за вращение';
+
+  @override
+  String rpgLotteryResultGems(int amount) {
+    return 'Вы выиграли $amount самоцветов!';
+  }
+
+  @override
+  String rpgLotteryResultGold(int amount) {
+    return 'Вы выиграли $amount золота!';
+  }
+
+  @override
+  String get rpgLotteryResultNothing => 'Повезёт в следующий раз!';
+
+  @override
+  String get rpgLotteryResultRarePet => 'Вы нашли редкого питомца!';
+
+  @override
+  String rpgLotteryResultXp(int amount) {
+    return 'Вы заработали $amount XP!';
+  }
+
+  @override
+  String get rpgManaHint => 'Получайте XP из рецептов для восстановления маны • Повышайте уровень для полного восстановления';
+
+  @override
+  String get rpgMilestones => 'Вехи';
+
+  @override
+  String rpgMinutesAgo(int count) {
+    return '$count минут назад';
+  }
+
+  @override
+  String get rpgNoMana => 'Нет маны!';
+
+  @override
+  String get rpgProfileSettings => 'Настройки профиля';
+
+  @override
+  String get rpgQuickActions => 'Быстрые действия';
+
+  @override
+  String get rpgRecipes => 'Рецепты';
+
+  @override
+  String get rpgReset => 'Сбросить';
+
+  @override
+  String get rpgResetProgressConfirmMessage => 'Это сбросит весь ваш прогресс RPG, включая уровень, XP, золото и самоцветы. Это нельзя отменить.';
+
+  @override
+  String get rpgResetProgressConfirmTitle => 'Сбросить прогресс?';
+
+  @override
+  String rpgResetsInHours(int count) {
+    return 'Сброс через $count часов';
+  }
+
+  @override
+  String rpgResetsInMinutes(int count) {
+    return 'Сброс через $count минут';
+  }
+
+  @override
+  String get rpgSpin => 'Крутить!';
+
+  @override
+  String get rpgStreak => 'Серия';
+
+  @override
+  String get rpgVictory => 'Победа!';
+
+  @override
+  String rpgYouDefeated(String name) {
+    return 'Вы победили $name!';
+  }
+
+  @override
+  String get rpgYourStatistics => 'Ваша статистика';
+
+  @override
+  String get rpgYourStats => 'Ваши показатели';
+
+  @override
+  String get settingsBrowseCommunity => 'Обзор сообщества';
+
+  @override
+  String get settingsBrowseCommunitySubtitle => 'Откройте публичные кулинарные книги';
+
+  @override
+  String get settingsCommunity => 'Сообщество';
+
+  @override
+  String get settingsFamily => 'Семья';
+
+  @override
+  String get settingsIntegrations => 'Интеграции';
+
+  @override
+  String get settingsMyPublications => 'Мои публикации';
+
+  @override
+  String get settingsMyPublicationsSubtitle => 'Управление опубликованными книгами';
+
+  @override
+  String get settingsShoppingPlanning => 'Покупки и планирование';
+
+  @override
+  String shoppingAddCountItems(int count) {
+    return 'Добавить $count товаров';
+  }
+
+  @override
+  String get shoppingAddIngredient => 'Добавить ингредиент';
+
+  @override
+  String shoppingAddedItemName(String name) {
+    return 'Добавлено \"$name\"';
+  }
+
+  @override
+  String shoppingAddedNotFound(int added, int failed) {
+    return '$added добавлено, $failed не найдено';
+  }
+
+  @override
+  String shoppingAddingTo(String provider) {
+    return 'Добавление в $provider…';
+  }
+
+  @override
+  String get shoppingCamera => 'камера';
+
+  @override
+  String shoppingCheckedItemsCount(int count) {
+    return 'Отмеченные товары ($count)';
+  }
+
+  @override
+  String shoppingCouldNotAccessSource(String source) {
+    return 'Не удалось получить доступ к $source';
+  }
+
+  @override
+  String shoppingCountAdded(int count) {
+    return '$count добавлено';
+  }
+
+  @override
+  String shoppingCreatingListOn(String provider) {
+    return 'Создание списка на $provider…';
+  }
+
+  @override
+  String shoppingCurrentOfTotal(int current, int total) {
+    return '$current из $total товаров';
+  }
+
+  @override
+  String shoppingDeleteListConfirm(String name) {
+    return 'Вы уверены, что хотите удалить \"$name\"?';
+  }
+
+  @override
+  String shoppingErrorReadingImage(String error) {
+    return 'Ошибка чтения изображения: $error';
+  }
+
+  @override
+  String shoppingExportFailed(String error) {
+    return 'Экспорт не удался: $error';
+  }
+
+  @override
+  String shoppingExportTitle(String name) {
+    return 'Экспорт \"$name\"';
+  }
+
+  @override
+  String get shoppingFamilyShare => 'Семейный доступ';
+
+  @override
+  String get shoppingFamilyShareSubtitle => 'Поделиться списком с семьёй или одноразовой ссылкой';
+
+  @override
+  String get shoppingFromPhoto => 'Из фото';
+
+  @override
+  String get shoppingFromText => 'Из текста';
+
+  @override
+  String get shoppingGallery => 'галерея';
+
+  @override
+  String get shoppingImportItems => 'Импорт товаров';
+
+  @override
+  String get shoppingImportShoppingList => 'Импорт списка покупок';
+
+  @override
+  String get shoppingImportTextHint => '2 стакана муки\nкуриная грудка\n1 фунт говяжьего фарша\nмолоко\n...';
+
+  @override
+  String get shoppingImportedList => 'Импортированный список';
+
+  @override
+  String get shoppingIngredientHint => 'напр. куриная грудка, оливковое масло';
+
+  @override
+  String get shoppingIngredientName => 'Название ингредиента';
+
+  @override
+  String shoppingIngredientsAvailable(int count) {
+    return '$count ингредиентов доступно';
+  }
+
+  @override
+  String shoppingItemsAddedCount(int count) {
+    return '$count товаров добавлено';
+  }
+
+  @override
+  String get shoppingItemsAddedSuccess => 'Товары добавлены!';
+
+  @override
+  String shoppingItemsCopiedToClipboard(int count) {
+    return '$count товаров скопировано в буфер';
+  }
+
+  @override
+  String shoppingItemsInCart(int count, String provider) {
+    return '$count товаров в корзине $provider';
+  }
+
+  @override
+  String shoppingItemsOnInstacartList(int count) {
+    return '$count товаров в списке Instacart';
+  }
+
+  @override
+  String get shoppingJustAdded => 'Только что добавлено';
+
+  @override
+  String shoppingListCopiedOpening(String name) {
+    return 'Список скопирован! Открываем $name...';
+  }
+
+  @override
+  String get shoppingListReady => 'Список покупок готов!';
+
+  @override
+  String shoppingNotFoundItems(String items) {
+    return 'Не найдено: $items';
+  }
+
+  @override
+  String get shoppingOneItemPerLine => 'Один товар на строку';
+
+  @override
+  String get shoppingPartiallyAdded => 'Частично добавлено';
+
+  @override
+  String get shoppingProviderConnected => 'Подключено';
+
+  @override
+  String get shoppingRemoveFromList => 'Удалить из списка';
+
+  @override
+  String get shoppingStartTyping => 'Начните вводить для подсказок';
+
+  @override
+  String get shoppingTapToAddToCart => 'Нажмите для добавления товаров прямо в корзину';
+
+  @override
+  String get shoppingTapToCreateShoppableList => 'Нажмите для создания списка покупок';
+
+  @override
+  String get swipeToSwitch => 'Проведите для смены раздела';
+
+  @override
+  String get syncFailed => 'Синхронизация не удалась';
+
+  @override
+  String syncSuccess(int pushed, int pulled) {
+    return 'Синхронизировано: $pushed отправлено, $pulled получено';
+  }
+
+  @override
+  String get textSizePreview => 'Предпросмотр';
+
+  @override
+  String get transferDeviceDesktop => 'компьютер';
+
+  @override
+  String get transferDeviceMobileApp => 'мобильное приложение';
+
+  @override
+  String get transferDeviceThisDevice => 'это устройство';
+
+  @override
+  String transferExplanation(String currentDevice, String targetDevice) {
+    return 'Перенесите все рецепты, кулинарные книги и планы питания с $currentDevice на $targetDevice. Это одноразовое копирование, не синхронизация.';
+  }
+
+  @override
+  String transferImportedSuccess(int count) {
+    return '$count элементов успешно импортировано.';
+  }
+
+  @override
+  String get transferOr => 'ИЛИ';
+
+  @override
+  String transferReceiveOn(String device) {
+    return 'Принять на $device';
+  }
+
+  @override
+  String transferSendFrom(String device) {
+    return 'Отправить с $device';
+  }
+
+  @override
+  String transferSendSubtitle(String device) {
+    return 'Сгенерируйте код, чтобы $device мог принять';
+  }
+
+  @override
+  String get importGuidesTitle => 'Руководства по импорту';
+
+  @override
+  String get importGuidesOpenInBrowser => 'Открыть руководства в браузере';
+
+  @override
+  String get importGuideHeroTitle => 'Перенесите рецепты откуда угодно';
+
+  @override
+  String get importGuideHeroSubtitle => 'Нажмите любое руководство ниже для пошаговых инструкций со скриншотами.';
+
+  @override
+  String get importGuideQuickTipLabel => 'Быстрый совет';
+
+  @override
+  String get importGuideQuickTipText => 'Самый быстрый способ? Скопируйте любую ссылку на рецепт и поделитесь ею в Recipe Spellbook — работает почти из любого приложения.';
+
+  @override
+  String get importGuideWebButton => 'Web';
+
+  @override
+  String get importGuideFollowInBrowser => 'Следуйте в браузере';
+
+  @override
+  String get importGuideTagPopular => 'Популярное';
+
+  @override
+  String get importGuideTagEasiest => 'Самое простое';
+
+  @override
+  String get importGuideDifficultyEasy => 'Легко';
+
+  @override
+  String get importGuideDifficultyMedium => 'Средне';
+
+  @override
+  String get importGuideTime15Sec => '15 сек';
+
+  @override
+  String get importGuideTime30Sec => '30 сек';
+
+  @override
+  String get importGuideTime1Min => '1 мин';
+
+  @override
+  String get importGuideTime2To5Min => '2–5 мин';
+
+  @override
+  String importGuideStepsCount(int count) {
+    return '$count шагов';
+  }
+
+  @override
+  String get importGuideCategorySocial => 'Социальные сети';
+
+  @override
+  String get importGuideCategoryWebsites => 'Веб-сайты';
+
+  @override
+  String get importGuideCategoryPhotos => 'Фото и файлы';
+
+  @override
+  String get importGuideCategoryOtherApps => 'Другие приложения для рецептов';
+
+  @override
+  String get importGuideScreenshotNeeded => 'Нужен скриншот';
+
+  @override
+  String get importGuideGifNeeded => 'Нужен GIF';
+
+  @override
+  String get importGuideVideoNeeded => 'Нужно видео';
+
+  @override
+  String get importGuideInstagramTitle => 'Instagram';
+
+  @override
+  String get importGuideInstagramSubtitle => 'Импорт из Reels, постов и историй';
+
+  @override
+  String get importGuideInstagramStep1Title => 'Найдите пост или Reel с рецептом';
+
+  @override
+  String get importGuideInstagramStep1Desc => 'Откройте Instagram и найдите рецепт, который хотите сохранить. Работает с постами, Reels и каруселями.';
+
+  @override
+  String get importGuideInstagramStep2Title => 'Нажмите кнопку поделиться';
+
+  @override
+  String get importGuideInstagramStep2Desc => 'Нажмите на иконку самолёта (поделиться) под постом.';
+
+  @override
+  String get importGuideInstagramStep3Title => 'Поделиться в Recipe Spellbook';
+
+  @override
+  String get importGuideInstagramStep3Desc => 'Прокрутите ряд приложений и нажмите Recipe Spellbook. Если не видите, нажмите \"Ещё\" и найдите в списке.';
+
+  @override
+  String get importGuideInstagramStep3Tip => 'На Android также можно скопировать ссылку и вставить её в приложение.';
+
+  @override
+  String get importGuideInstagramStep4Title => 'Просмотрите извлечённый рецепт';
+
+  @override
+  String get importGuideInstagramStep4Desc => 'Наш AI читает описание, хэштеги и текст на изображении для создания рецепта. Проверьте ингредиенты и шаги, затем сохраните.';
+
+  @override
+  String get importGuideInstagramStep5Title => 'Выберите книгу и сохраните';
+
+  @override
+  String get importGuideInstagramStep5Desc => 'Выберите в какую книгу сохранить, добавьте теги и нажмите Сохранить. Готово!';
+
+  @override
+  String get importGuideTiktokTitle => 'TikTok';
+
+  @override
+  String get importGuideTiktokSubtitle => 'Сохраняйте рецепты из кулинарных видео';
+
+  @override
+  String get importGuideTiktokStep1Title => 'Найдите TikTok с рецептом';
+
+  @override
+  String get importGuideTiktokStep1Desc => 'Откройте TikTok и найдите кулинарное видео, которое хотите сохранить.';
+
+  @override
+  String get importGuideTiktokStep2Title => 'Нажмите стрелку поделиться';
+
+  @override
+  String get importGuideTiktokStep2Desc => 'Нажмите иконку стрелки справа от видео.';
+
+  @override
+  String get importGuideTiktokStep3Title => 'Выберите \"Копировать ссылку\" или поделитесь напрямую';
+
+  @override
+  String get importGuideTiktokStep3Desc => 'Нажмите \"Копировать ссылку\" и вставьте в Recipe Spellbook, или найдите Recipe Spellbook в вариантах отправки.';
+
+  @override
+  String get importGuideTiktokStep3Tip => '\"Копировать ссылку\" часто самый надёжный способ для TikTok.';
+
+  @override
+  String get importGuideTiktokStep4Title => 'Вставьте ссылку в Recipe Spellbook';
+
+  @override
+  String get importGuideTiktokStep4Desc => 'Откройте Recipe Spellbook, нажмите +, выберите \"С сайта/ссылки\" и вставьте URL TikTok.';
+
+  @override
+  String get importGuideTiktokStep5Title => 'Проверьте и сохраните';
+
+  @override
+  String get importGuideTiktokStep5Desc => 'AI извлекает рецепт из описания видео и комментариев. Проверьте и сохраните в книгу.';
+
+  @override
+  String get importGuideYoutubeTitle => 'YouTube';
+
+  @override
+  String get importGuideYoutubeSubtitle => 'Импорт из кулинарных каналов и Shorts';
+
+  @override
+  String get importGuideYoutubeStep1Title => 'Найдите видео с рецептом';
+
+  @override
+  String get importGuideYoutubeStep1Desc => 'Откройте YouTube и найдите кулинарное видео. Работает с обычными видео, Shorts и повторами трансляций.';
+
+  @override
+  String get importGuideYoutubeStep2Title => 'Нажмите Поделиться';
+
+  @override
+  String get importGuideYoutubeStep2Desc => 'Нажмите кнопку Поделиться под названием видео.';
+
+  @override
+  String get importGuideYoutubeStep3Title => 'Скопируйте ссылку или поделитесь в приложение';
+
+  @override
+  String get importGuideYoutubeStep3Desc => 'Нажмите \"Копировать ссылку\" или найдите Recipe Spellbook в меню отправки.';
+
+  @override
+  String get importGuideYoutubeStep3Tip => 'Многие создатели YouTube размещают полный рецепт в описании видео — это повышает точность извлечения.';
+
+  @override
+  String get importGuideYoutubeStep4Title => 'Вставьте и импортируйте';
+
+  @override
+  String get importGuideYoutubeStep4Desc => 'В Recipe Spellbook нажмите + > \"С сайта/ссылки\" и вставьте. AI читает описание видео для поиска ингредиентов и шагов.';
+
+  @override
+  String get importGuidePinterestTitle => 'Pinterest';
+
+  @override
+  String get importGuidePinterestSubtitle => 'Сохраните закреплённые рецепты в книгу';
+
+  @override
+  String get importGuidePinterestStep1Title => 'Откройте пин с рецептом';
+
+  @override
+  String get importGuidePinterestStep1Desc => 'Нажмите на пин с рецептом, чтобы открыть его. Большинство пинов ведут на оригинальный сайт с рецептом.';
+
+  @override
+  String get importGuidePinterestStep2Title => 'Нажмите на ссылку источника';
+
+  @override
+  String get importGuidePinterestStep2Desc => 'Нажмите ссылку вверху или внизу пина, чтобы перейти на оригинальную страницу рецепта.';
+
+  @override
+  String get importGuidePinterestStep2Tip => 'Если у пина нет ссылки на источник, попробуйте метод ниже.';
+
+  @override
+  String get importGuidePinterestStep3Title => 'Скопируйте URL сайта';
+
+  @override
+  String get importGuidePinterestStep3Desc => 'Когда сайт с рецептом откроется в браузере, скопируйте URL из адресной строки.';
+
+  @override
+  String get importGuidePinterestStep4Title => 'Импортируйте в Recipe Spellbook';
+
+  @override
+  String get importGuidePinterestStep4Desc => 'Нажмите + > \"С сайта/ссылки\", вставьте URL, и рецепт будет извлечён автоматически.';
+
+  @override
+  String get importGuideWebsiteTitle => 'Любой сайт с рецептами';
+
+  @override
+  String get importGuideWebsiteSubtitle => 'AllRecipes, Food Network, BBC, блоги и другие';
+
+  @override
+  String get importGuideWebsiteStep1Title => 'Откройте страницу рецепта';
+
+  @override
+  String get importGuideWebsiteStep1Desc => 'Перейдите к любому рецепту на сайтах AllRecipes, Food Network, BBC Good Food, Serious Eats, NYT Cooking или любом кулинарном блоге.';
+
+  @override
+  String get importGuideWebsiteStep2Title => 'Скопируйте URL';
+
+  @override
+  String get importGuideWebsiteStep2Desc => 'Нажмите на адресную строку и скопируйте полный URL рецепта.';
+
+  @override
+  String get importGuideWebsiteStep3Title => 'Нажмите + в Recipe Spellbook';
+
+  @override
+  String get importGuideWebsiteStep3Desc => 'Откройте приложение и нажмите кнопку + для добавления нового рецепта.';
+
+  @override
+  String get importGuideWebsiteStep4Title => 'Выберите \"С сайта/ссылки\"';
+
+  @override
+  String get importGuideWebsiteStep4Desc => 'Выберите опцию импорта с сайта и вставьте скопированный URL.';
+
+  @override
+  String get importGuideWebsiteStep5Title => 'Проверьте и сохраните';
+
+  @override
+  String get importGuideWebsiteStep5Desc => 'Рецепт извлекается мгновенно — название, ингредиенты, шаги, время готовки и даже фото. Проверьте и сохраните.';
+
+  @override
+  String get importGuideWebsiteStep5Tip => 'Работает с более чем 10 000 сайтов рецептов. Если извлечение не удастся, попробуйте метод \"Из текста\".';
+
+  @override
+  String get importGuidePhotoTitle => 'Фото / Камера';
+
+  @override
+  String get importGuidePhotoSubtitle => 'Сканируйте рецепты из книг, журналов или рукописных карточек';
+
+  @override
+  String get importGuidePhotoStep1Title => 'Сфотографируйте рецепт';
+
+  @override
+  String get importGuidePhotoStep1Desc => 'Сделайте чёткое, хорошо освещённое фото рецепта из кулинарной книги, журнала или рукописной карточки. Убедитесь, что весь текст читаем.';
+
+  @override
+  String get importGuidePhotoStep1Tip => 'Для лучших результатов: хорошее освещение, устойчивая рука и весь рецепт в кадре. Избегайте теней.';
+
+  @override
+  String get importGuidePhotoStep2Title => 'Нажмите + затем \"Из фото\"';
+
+  @override
+  String get importGuidePhotoStep2Desc => 'Откройте Recipe Spellbook, нажмите + и выберите \"Из фото\". Выберите фото из галереи или сделайте новое.';
+
+  @override
+  String get importGuidePhotoStep3Title => 'AI сканирует текст';
+
+  @override
+  String get importGuidePhotoStep3Desc => 'Технология OCR считывает текст с фото, а AI интеллектуально разделяет название, ингредиенты и инструкции.';
+
+  @override
+  String get importGuidePhotoStep4Title => 'Проверьте и исправьте ошибки';
+
+  @override
+  String get importGuidePhotoStep4Desc => 'Проверьте извлечённый рецепт. OCR иногда ошибается — \"1/2\" может стать \"1l2\". Исправьте ошибки и сохраните.';
+
+  @override
+  String get importGuidePhotoStep4Tip => 'Рукописные рецепты тоже работают, но печатный текст даёт лучшие результаты.';
+
+  @override
+  String get importGuidePdfTitle => 'Документ PDF';
+
+  @override
+  String get importGuidePdfSubtitle => 'Импорт из PDF-книг или загруженных файлов';
+
+  @override
+  String get importGuidePdfStep1Title => 'Подготовьте PDF с рецептом';
+
+  @override
+  String get importGuidePdfStep1Desc => 'Работает со скачанными PDF-рецептами, электронными кулинарными книгами, сканированными документами или PDF, полученными по email.';
+
+  @override
+  String get importGuidePdfStep2Title => 'Нажмите + затем \"Из PDF\"';
+
+  @override
+  String get importGuidePdfStep2Desc => 'Откройте Recipe Spellbook, нажмите +, выберите \"Из PDF\" и выберите файл.';
+
+  @override
+  String get importGuidePdfStep3Title => 'Выберите страницу с рецептом';
+
+  @override
+  String get importGuidePdfStep3Desc => 'Если в PDF несколько страниц, выберите которая содержит рецепт для импорта.';
+
+  @override
+  String get importGuidePdfStep4Title => 'Проверьте и сохраните';
+
+  @override
+  String get importGuidePdfStep4Desc => 'Рецепт извлекается из PDF. Проверьте ингредиенты и шаги, затем сохраните в книгу.';
+
+  @override
+  String get importGuideTextTitle => 'Текст / Вставка';
+
+  @override
+  String get importGuideTextSubtitle => 'Вставьте рецепт из сообщений, email или заметок';
+
+  @override
+  String get importGuideTextStep1Title => 'Скопируйте текст рецепта';
+
+  @override
+  String get importGuideTextStep1Desc => 'Скопируйте текст рецепта из сообщения, email, заметок, WhatsApp или любого другого места.';
+
+  @override
+  String get importGuideTextStep2Title => 'Нажмите + затем \"Из текста\"';
+
+  @override
+  String get importGuideTextStep2Desc => 'Откройте Recipe Spellbook, нажмите + и выберите \"Из текста\".';
+
+  @override
+  String get importGuideTextStep3Title => 'Вставьте свой рецепт';
+
+  @override
+  String get importGuideTextStep3Desc => 'Вставьте скопированный текст в текстовое поле. AI автоматически разделит название, ингредиенты и шаги.';
+
+  @override
+  String get importGuideTextStep3Tip => 'Работает даже с неформатированным текстом — AI отлично распознаёт количества ингредиентов и инструкции шагов.';
+
+  @override
+  String get importGuideTextStep4Title => 'Проверьте и сохраните';
+
+  @override
+  String get importGuideTextStep4Desc => 'Проверьте обработанный рецепт, внесите правки и сохраните.';
+
+  @override
+  String get importGuidePaprikaTitle => 'Paprika Recipe Manager';
+
+  @override
+  String get importGuidePaprikaSubtitle => 'Массовый импорт всей библиотеки Paprika';
+
+  @override
+  String get importGuidePaprikaStep1Title => 'Экспортируйте из Paprika';
+
+  @override
+  String get importGuidePaprikaStep1Desc => 'В Paprika перейдите в Настройки (значок шестерёнки) > Экспорт. Выберите \"Экспорт всех рецептов\" и сохраните как файл .paprikarecipes.';
+
+  @override
+  String get importGuidePaprikaStep2Title => 'Отправьте файл на устройство';
+
+  @override
+  String get importGuidePaprikaStep2Desc => 'Отправьте файл себе по email, сохраните в iCloud/Google Drive или используйте AirDrop для передачи.';
+
+  @override
+  String get importGuidePaprikaStep3Title => 'Импортируйте в Recipe Spellbook';
+
+  @override
+  String get importGuidePaprikaStep3Desc => 'Откройте Recipe Spellbook, перейдите в Настройки > Данные > Импорт и выберите файл .paprikarecipes.';
+
+  @override
+  String get importGuidePaprikaStep4Title => 'Дождитесь импорта';
+
+  @override
+  String get importGuidePaprikaStep4Desc => 'Все рецепты Paprika импортируются с ингредиентами, шагами, заметками, фото и категориями.';
+
+  @override
+  String get importGuidePaprikaStep4Tip => 'Большие библиотеки (100+ рецептов) могут занять минуту. Приложение остаётся отзывчивым во время импорта.';
+
+  @override
+  String get importGuideOtherAppsTitle => 'Другие приложения для рецептов';
+
+  @override
+  String get importGuideOtherAppsSubtitle => 'Mealime, CopyMeThat, AnyList, Cookmate и др.';
+
+  @override
+  String get importGuideOtherAppsStep1Title => 'Экспортируйте из текущего приложения';
+
+  @override
+  String get importGuideOtherAppsStep1Desc => 'Большинство приложений для рецептов поддерживают экспорт в JSON, HTML или текст. Проверьте раздел Настройки > Экспорт или Резервная копия.';
+
+  @override
+  String get importGuideOtherAppsStep1Tip => 'Популярные форматы: JSON (лучший), HTML, PDF или текст. JSON сохраняет больше данных.';
+
+  @override
+  String get importGuideOtherAppsStep2Title => 'Перенесите файл на устройство';
+
+  @override
+  String get importGuideOtherAppsStep2Desc => 'Сохраните или перенесите экспортированный файл на телефон через email, облачное хранилище или другой метод передачи.';
+
+  @override
+  String get importGuideOtherAppsStep3Title => 'Импортируйте через Настройки';
+
+  @override
+  String get importGuideOtherAppsStep3Desc => 'В Recipe Spellbook перейдите в Настройки > Данные > Импорт и выберите экспортированный файл. Приложение поддерживает JSON, HTML и популярные форматы рецептов.';
+
+  @override
+  String get importGuideOtherAppsStep4Title => 'Проверьте свои рецепты';
+
+  @override
+  String get importGuideOtherAppsStep4Desc => 'Импортированные рецепты появляются в книге по умолчанию. Вы можете распределить их по разным книгам позже.';
+
+  @override
+  String get importGuideDeviceTransferTitle => 'Передача между устройствами';
+
+  @override
+  String get importGuideDeviceTransferSubtitle => 'Перенос рецептов между телефонами без аккаунта';
+
+  @override
+  String get importGuideDeviceTransferStep1Title => 'Откройте Передачу на СТАРОМ устройстве';
+
+  @override
+  String get importGuideDeviceTransferStep1Desc => 'На старом телефоне откройте Recipe Spellbook и перейдите в Меню > Передача данных > Отправить.';
+
+  @override
+  String get importGuideDeviceTransferStep2Title => 'Получите код передачи';
+
+  @override
+  String get importGuideDeviceTransferStep2Desc => 'Генерируется 6-символьный код. Код действителен 15 минут.';
+
+  @override
+  String get importGuideDeviceTransferStep3Title => 'Введите код на НОВОМ устройстве';
+
+  @override
+  String get importGuideDeviceTransferStep3Desc => 'На новом телефоне установите Recipe Spellbook и перейдите в Меню > Передача данных > Получить. Введите код.';
+
+  @override
+  String get importGuideDeviceTransferStep4Title => 'Рецепты перенесены!';
+
+  @override
+  String get importGuideDeviceTransferStep4Desc => 'Все рецепты, кулинарные книги, списки покупок и планы питания перенесены на новое устройство.';
+
+  @override
+  String get importGuideDeviceTransferStep4Tip => 'Есть платный аккаунт? Просто войдите на новом устройстве и всё синхронизируется автоматически.';
+
+  @override
+  String get themeFrost => 'Мороз';
+
+  @override
+  String get themeEmber => 'Уголь';
+
+  @override
+  String get themeSpring => 'Весна';
+
+  @override
+  String get themeAlchemist => 'Алхимик';
+
+  @override
+  String get rpgNoAchievementsInCategory => 'Нет достижений в этой категории';
+
+  @override
+  String rpgUnlocksItem(String item) {
+    return 'Открывает: $item';
+  }
+
+  @override
+  String get rpgCategory => 'Категория';
+
+  @override
+  String get rpgCompleted => 'Завершено';
+
+  @override
+  String get rpgProgress => 'Прогресс';
+
+  @override
+  String rpgDefeatedEnemy(String name) {
+    return 'Побеждён $name!';
+  }
+
+  @override
+  String get rpgAvatars => 'Аватары';
+
+  @override
+  String get rpgFrames => 'Рамки';
+
+  @override
+  String get rpgPets => 'Питомцы';
+
+  @override
+  String get rpgTitles => 'Титулы';
+
+  @override
+  String rpgPurchaseItem(String item) {
+    return 'Купить $item?';
+  }
+
+  @override
+  String get rpgUnlockedViaAchievement => 'Разблокировано через достижение';
+
+  @override
+  String get rpgPrice => 'Цена';
+
+  @override
+  String get rpgNotEnoughGold => 'Недостаточно золота';
+
+  @override
+  String get rpgNotEnoughGems => 'Недостаточно самоцветов';
+
+  @override
+  String rpgPurchased(String item) {
+    return 'Куплено $item!';
+  }
+
+  @override
+  String get rpgOwned => 'В наличии';
+
+  @override
+  String get rpgDailyQuests => 'Ежедневные задания';
+
+  @override
+  String rpgQuestsCompleted(int completed, int total) {
+    return '$completed из $total выполнено';
+  }
+
+  @override
+  String get rpgWeeklyChallenge => 'Еженедельное испытание';
+
+  @override
+  String get rpgQuestsSubtitle => 'Выполняйте задания, чтобы получать XP и награды';
+
+  @override
+  String get rpgRecentXp => 'Недавний XP';
+
+  @override
+  String get rpgNoAchievementsYet => 'Пока нет достижений';
+
+  @override
+  String rpgLv(int level) {
+    return 'Ур.$level';
+  }
+
+  @override
+  String rpgClassBonus(String className) {
+    return 'Бонус $className';
+  }
+
+  @override
+  String get rpgLevelUp => 'Новый уровень!';
+
+  @override
+  String get rpgUnlocked => 'Разблокировано!';
+
+  @override
+  String get rpgAchievementUnlocked => 'Достижение разблокировано!';
+
+  @override
+  String get mealPlanAddTitle => 'Добавить в план питания';
+
+  @override
+  String get mealPlanMealLabel => 'Приём пищи';
+
+  @override
+  String get mealPlanAdding => 'Добавление...';
+
+  @override
+  String mealPlanDateFormat(String weekday, String month, int day) {
+    return '$weekday, $day $month';
   }
 }

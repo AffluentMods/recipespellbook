@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 // ═══════════════════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════════
@@ -17,15 +19,16 @@ class ImportGuidesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final categories = _buildCategories();
+    final l10n = AppLocalizations.of(context)!;
+    final categories = _buildCategories(l10n);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Import Guides'),
+        title: Text(l10n.importGuidesTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.open_in_browser, size: 22),
-            tooltip: 'Open guides in browser',
+            tooltip: l10n.importGuidesOpenInBrowser,
             onPressed: () => _launchUrl('$_kWebGuideBaseUrl'),
           ),
         ],
@@ -56,70 +59,70 @@ class ImportGuidesScreen extends StatelessWidget {
     );
   }
 
-  List<_GuideCategory> _buildCategories() {
+  List<_GuideCategory> _buildCategories(AppLocalizations l10n) {
     return [
       // ── SOCIAL MEDIA ──
       _GuideCategory(
-        title: 'Social Media',
+        title: l10n.importGuideCategorySocial,
         icon: Icons.share_rounded,
         guides: [
           _ImportGuide(
             id: 'instagram',
             icon: Icons.camera_alt_rounded,
             color: const Color(0xFFE1306C),
-            title: 'Instagram',
-            subtitle: 'Import from Reels, posts, and stories',
-            tag: 'Popular',
-            difficulty: 'Easy',
-            timeEstimate: '30 sec',
+            title: l10n.importGuideInstagramTitle,
+            subtitle: l10n.importGuideInstagramSubtitle,
+            tag: l10n.importGuideTagPopular,
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime30Sec,
             webSlug: 'instagram',
             steps: [
               _GuideStep(
-                title: 'Find a recipe post or Reel',
-                description: 'Open Instagram and find a recipe you want to save. This works with feed posts, Reels, and carousels.',
+                title: l10n.importGuideInstagramStep1Title,
+                description: l10n.importGuideInstagramStep1Desc,
                 icon: Icons.search,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Instagram Reel showing a recipe video with the share button visible',
                   filename: 'ig_recipe_reel.png',
                 ),
               ),
               _GuideStep(
-                title: 'Tap the share button',
-                description: 'Tap the paper plane icon (share) below the post.',
+                title: l10n.importGuideInstagramStep2Title,
+                description: l10n.importGuideInstagramStep2Desc,
                 icon: Icons.send,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Instagram share button highlighted/circled on a recipe post',
                   filename: 'ig_share_button.png',
                 ),
               ),
               _GuideStep(
-                title: 'Share to Recipe Spellbook',
-                description: 'Scroll the app row and tap Recipe Spellbook. If you don\'t see it, tap "More" and find it in the list.',
+                title: l10n.importGuideInstagramStep3Title,
+                description: l10n.importGuideInstagramStep3Desc,
                 icon: Icons.apps,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'iOS/Android share sheet with Recipe Spellbook icon visible in the app row',
                   filename: 'ig_share_sheet.png',
                 ),
-                tip: 'On Android, you can also copy the link and paste it in the app.',
+                tip: l10n.importGuideInstagramStep3Tip,
               ),
               _GuideStep(
-                title: 'Review the extracted recipe',
-                description: 'Our AI reads the caption, hashtags, and any text in the image to build your recipe. Check ingredients and steps, then save.',
+                title: l10n.importGuideInstagramStep4Title,
+                description: l10n.importGuideInstagramStep4Desc,
                 icon: Icons.auto_awesome,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Recipe Spellbook import preview screen showing an extracted recipe from Instagram with ingredients and steps populated',
                   filename: 'ig_import_preview.png',
                 ),
               ),
               _GuideStep(
-                title: 'Pick a cookbook & save',
-                description: 'Choose which cookbook to save to, add any tags, and tap Save. Done!',
+                title: l10n.importGuideInstagramStep5Title,
+                description: l10n.importGuideInstagramStep5Desc,
                 icon: Icons.bookmark_add,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Save recipe dialog showing cookbook picker dropdown and save button',
                   filename: 'ig_save_dialog.png',
@@ -131,59 +134,59 @@ class ImportGuidesScreen extends StatelessWidget {
             id: 'tiktok',
             icon: Icons.music_note_rounded,
             color: const Color(0xFF000000),
-            title: 'TikTok',
-            subtitle: 'Save recipes from cooking videos',
-            tag: 'Popular',
-            difficulty: 'Easy',
-            timeEstimate: '30 sec',
+            title: l10n.importGuideTiktokTitle,
+            subtitle: l10n.importGuideTiktokSubtitle,
+            tag: l10n.importGuideTagPopular,
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime30Sec,
             webSlug: 'tiktok',
             steps: [
               _GuideStep(
-                title: 'Find a recipe TikTok',
-                description: 'Open TikTok and find a cooking video you want to save.',
+                title: l10n.importGuideTiktokStep1Title,
+                description: l10n.importGuideTiktokStep1Desc,
                 icon: Icons.search,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'TikTok video of someone cooking with the share arrow visible on the right side',
                   filename: 'tt_recipe_video.png',
                 ),
               ),
               _GuideStep(
-                title: 'Tap the share arrow',
-                description: 'Tap the arrow icon on the right side of the video.',
+                title: l10n.importGuideTiktokStep2Title,
+                description: l10n.importGuideTiktokStep2Desc,
                 icon: Icons.arrow_forward,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'TikTok share arrow button highlighted on the right sidebar',
                   filename: 'tt_share_arrow.png',
                 ),
               ),
               _GuideStep(
-                title: 'Choose "Copy link" or share directly',
-                description: 'Either tap "Copy link" and paste in Recipe Spellbook, or find Recipe Spellbook in the share options.',
+                title: l10n.importGuideTiktokStep3Title,
+                description: l10n.importGuideTiktokStep3Desc,
                 icon: Icons.link,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'TikTok share menu showing Copy Link button and other share options',
                   filename: 'tt_copy_link.png',
                 ),
-                tip: '"Copy link" is often the most reliable method for TikTok.',
+                tip: l10n.importGuideTiktokStep3Tip,
               ),
               _GuideStep(
-                title: 'Paste the link in Recipe Spellbook',
-                description: 'Open Recipe Spellbook, tap +, choose "From Website/Link", and paste the TikTok URL.',
+                title: l10n.importGuideTiktokStep4Title,
+                description: l10n.importGuideTiktokStep4Desc,
                 icon: Icons.paste,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Recipe Spellbook URL input field with a TikTok link pasted',
                   filename: 'tt_paste_url.png',
                 ),
               ),
               _GuideStep(
-                title: 'Review & save',
-                description: 'The AI extracts the recipe from the video description and comments. Review and save to your cookbook.',
+                title: l10n.importGuideTiktokStep5Title,
+                description: l10n.importGuideTiktokStep5Desc,
                 icon: Icons.check_circle_outline,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Import preview showing extracted TikTok recipe with title, ingredients, and steps',
                   filename: 'tt_import_preview.png',
@@ -195,48 +198,48 @@ class ImportGuidesScreen extends StatelessWidget {
             id: 'youtube',
             icon: Icons.play_circle_filled,
             color: const Color(0xFFFF0000),
-            title: 'YouTube',
-            subtitle: 'Import from cooking channels & Shorts',
-            difficulty: 'Easy',
-            timeEstimate: '30 sec',
+            title: l10n.importGuideYoutubeTitle,
+            subtitle: l10n.importGuideYoutubeSubtitle,
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime30Sec,
             webSlug: 'youtube',
             steps: [
               _GuideStep(
-                title: 'Find a recipe video',
-                description: 'Open YouTube and find a cooking video. Works with regular videos, Shorts, and livestream replays.',
+                title: l10n.importGuideYoutubeStep1Title,
+                description: l10n.importGuideYoutubeStep1Desc,
                 icon: Icons.ondemand_video,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'YouTube video player showing a recipe/cooking video with the share button visible below',
                   filename: 'yt_recipe_video.png',
                 ),
               ),
               _GuideStep(
-                title: 'Tap Share',
-                description: 'Tap the Share button below the video title.',
+                title: l10n.importGuideYoutubeStep2Title,
+                description: l10n.importGuideYoutubeStep2Desc,
                 icon: Icons.share,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'YouTube share button highlighted below the video, above comments',
                   filename: 'yt_share_button.png',
                 ),
               ),
               _GuideStep(
-                title: 'Copy link or share to app',
-                description: 'Tap "Copy link" or find Recipe Spellbook in the share sheet.',
+                title: l10n.importGuideYoutubeStep3Title,
+                description: l10n.importGuideYoutubeStep3Desc,
                 icon: Icons.content_copy,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'YouTube share options showing Copy Link and app sharing options',
                   filename: 'yt_copy_link.png',
                 ),
-                tip: 'Many YouTube creators put the full recipe in the video description — this makes extraction more accurate.',
+                tip: l10n.importGuideYoutubeStep3Tip,
               ),
               _GuideStep(
-                title: 'Paste & import',
-                description: 'In Recipe Spellbook, tap + > "From Website/Link" and paste. The AI reads the video description for ingredients and steps.',
+                title: l10n.importGuideYoutubeStep4Title,
+                description: l10n.importGuideYoutubeStep4Desc,
                 icon: Icons.auto_awesome,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Recipe Spellbook import preview from a YouTube video with recipe extracted',
                   filename: 'yt_import_preview.png',
@@ -248,48 +251,48 @@ class ImportGuidesScreen extends StatelessWidget {
             id: 'pinterest',
             icon: Icons.push_pin_rounded,
             color: const Color(0xFFE60023),
-            title: 'Pinterest',
-            subtitle: 'Save pinned recipes to your cookbook',
-            difficulty: 'Easy',
-            timeEstimate: '30 sec',
+            title: l10n.importGuidePinterestTitle,
+            subtitle: l10n.importGuidePinterestSubtitle,
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime30Sec,
             webSlug: 'pinterest',
             steps: [
               _GuideStep(
-                title: 'Open a recipe pin',
-                description: 'Tap a recipe pin to open it. Most pins link to the original recipe website.',
+                title: l10n.importGuidePinterestStep1Title,
+                description: l10n.importGuidePinterestStep1Desc,
                 icon: Icons.open_in_new,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Pinterest pin showing a recipe with the visit/source button visible',
                   filename: 'pin_recipe_pin.png',
                 ),
               ),
               _GuideStep(
-                title: 'Tap the source link',
-                description: 'Tap the link at the top or bottom of the pin to visit the original recipe page.',
+                title: l10n.importGuidePinterestStep2Title,
+                description: l10n.importGuidePinterestStep2Desc,
                 icon: Icons.link,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Pinterest pin detail showing the source URL/website link highlighted',
                   filename: 'pin_source_link.png',
                 ),
-                tip: 'If the pin doesn\'t have a source link, try the share method below instead.',
+                tip: l10n.importGuidePinterestStep2Tip,
               ),
               _GuideStep(
-                title: 'Copy the website URL',
-                description: 'Once the recipe website opens in your browser, copy the URL from the address bar.',
+                title: l10n.importGuidePinterestStep3Title,
+                description: l10n.importGuidePinterestStep3Desc,
                 icon: Icons.content_copy,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Browser address bar showing a recipe website URL being copied',
                   filename: 'pin_copy_url.png',
                 ),
               ),
               _GuideStep(
-                title: 'Import in Recipe Spellbook',
-                description: 'Tap + > "From Website/Link", paste the URL, and the recipe is extracted automatically.',
+                title: l10n.importGuidePinterestStep4Title,
+                description: l10n.importGuidePinterestStep4Desc,
                 icon: Icons.download_rounded,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Recipe Spellbook import preview from a Pinterest-sourced recipe',
                   filename: 'pin_import_preview.png',
@@ -302,70 +305,70 @@ class ImportGuidesScreen extends StatelessWidget {
 
       // ── WEBSITES ──
       _GuideCategory(
-        title: 'Websites',
+        title: l10n.importGuideCategoryWebsites,
         icon: Icons.language_rounded,
         guides: [
           _ImportGuide(
             id: 'website',
             icon: Icons.link_rounded,
             color: const Color(0xFF2196F3),
-            title: 'Any Recipe Website',
-            subtitle: 'AllRecipes, Food Network, BBC, blogs & more',
-            tag: 'Easiest',
-            difficulty: 'Easy',
-            timeEstimate: '15 sec',
+            title: l10n.importGuideWebsiteTitle,
+            subtitle: l10n.importGuideWebsiteSubtitle,
+            tag: l10n.importGuideTagEasiest,
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime15Sec,
             webSlug: 'website',
             steps: [
               _GuideStep(
-                title: 'Open the recipe page',
-                description: 'Navigate to any recipe on sites like AllRecipes, Food Network, BBC Good Food, Serious Eats, NYT Cooking, or any food blog.',
+                title: l10n.importGuideWebsiteStep1Title,
+                description: l10n.importGuideWebsiteStep1Desc,
                 icon: Icons.travel_explore,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'A recipe website (e.g. AllRecipes) showing a recipe page with the URL visible in the browser bar',
                   filename: 'web_recipe_page.png',
                 ),
               ),
               _GuideStep(
-                title: 'Copy the URL',
-                description: 'Tap the address bar and copy the full URL to the recipe.',
+                title: l10n.importGuideWebsiteStep2Title,
+                description: l10n.importGuideWebsiteStep2Desc,
                 icon: Icons.content_copy,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Browser address bar selected with the recipe URL highlighted and copy option showing',
                   filename: 'web_copy_url.png',
                 ),
               ),
               _GuideStep(
-                title: 'Tap + in Recipe Spellbook',
-                description: 'Open the app and tap the + button to start adding a new recipe.',
+                title: l10n.importGuideWebsiteStep3Title,
+                description: l10n.importGuideWebsiteStep3Desc,
                 icon: Icons.add_circle_outline,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Recipe Spellbook home screen with the + FAB button highlighted',
                   filename: 'web_add_button.png',
                 ),
               ),
               _GuideStep(
-                title: 'Choose "From Website/Link"',
-                description: 'Select the website import option and paste your copied URL.',
+                title: l10n.importGuideWebsiteStep4Title,
+                description: l10n.importGuideWebsiteStep4Desc,
                 icon: Icons.paste,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Recipe Spellbook add recipe menu showing "From Website/Link" option and URL paste field',
                   filename: 'web_paste_field.png',
                 ),
               ),
               _GuideStep(
-                title: 'Review & save',
-                description: 'The recipe is extracted instantly — title, ingredients, steps, cook times, and even the photo. Review and save.',
+                title: l10n.importGuideWebsiteStep5Title,
+                description: l10n.importGuideWebsiteStep5Desc,
                 icon: Icons.check_circle_outline,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Import preview showing a fully extracted recipe with image, ingredients list, steps, and prep/cook times',
                   filename: 'web_import_preview.png',
                 ),
-                tip: 'Works with 10,000+ recipe sites. If extraction fails, try the "From Text" method.',
+                tip: l10n.importGuideWebsiteStep5Tip,
               ),
             ],
           ),
@@ -374,60 +377,60 @@ class ImportGuidesScreen extends StatelessWidget {
 
       // ── PHOTOS & FILES ──
       _GuideCategory(
-        title: 'Photos & Files',
+        title: l10n.importGuideCategoryPhotos,
         icon: Icons.photo_library_rounded,
         guides: [
           _ImportGuide(
             id: 'photo',
             icon: Icons.camera_alt_outlined,
             color: const Color(0xFF9C27B0),
-            title: 'Photo / Camera',
-            subtitle: 'Scan recipes from books, magazines, or handwritten cards',
-            difficulty: 'Easy',
-            timeEstimate: '30 sec',
+            title: l10n.importGuidePhotoTitle,
+            subtitle: l10n.importGuidePhotoSubtitle,
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime30Sec,
             webSlug: 'photo',
             steps: [
               _GuideStep(
-                title: 'Photograph the recipe',
-                description: 'Take a clear, well-lit photo of a recipe from a cookbook, magazine page, or handwritten recipe card. Make sure all text is readable.',
+                title: l10n.importGuidePhotoStep1Title,
+                description: l10n.importGuidePhotoStep1Desc,
                 icon: Icons.camera_alt,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Camera viewfinder pointed at an open cookbook page showing a recipe, with good lighting and the text clearly visible',
                   filename: 'photo_capture.png',
                 ),
-                tip: 'For best results: use good lighting, hold steady, and make sure the entire recipe is in frame. Avoid shadows.',
+                tip: l10n.importGuidePhotoStep1Tip,
               ),
               _GuideStep(
-                title: 'Tap + then "From Photo"',
-                description: 'Open Recipe Spellbook, tap +, and choose "From Photo". Select the photo from your gallery or take a new one.',
+                title: l10n.importGuidePhotoStep2Title,
+                description: l10n.importGuidePhotoStep2Desc,
                 icon: Icons.add_photo_alternate,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Recipe Spellbook add menu showing "From Photo" option, then the photo picker/camera prompt',
                   filename: 'photo_select.png',
                 ),
               ),
               _GuideStep(
-                title: 'AI scans the text',
-                description: 'OCR technology reads the text in your photo and AI intelligently separates the title, ingredients, and instructions.',
+                title: l10n.importGuidePhotoStep3Title,
+                description: l10n.importGuidePhotoStep3Desc,
                 icon: Icons.document_scanner,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Loading/processing screen showing "Scanning recipe..." with a progress indicator',
                   filename: 'photo_scanning.png',
                 ),
               ),
               _GuideStep(
-                title: 'Review & fix any errors',
-                description: 'Check the extracted recipe. OCR occasionally misreads characters — "1/2" might become "1l2". Fix any errors and save.',
+                title: l10n.importGuidePhotoStep4Title,
+                description: l10n.importGuidePhotoStep4Desc,
                 icon: Icons.edit_note,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Import preview from a photo scan with ingredients and steps, showing editable text fields',
                   filename: 'photo_review.png',
                 ),
-                tip: 'Handwritten recipes work too, but printed text gives the best results.',
+                tip: l10n.importGuidePhotoStep4Tip,
               ),
             ],
           ),
@@ -435,47 +438,47 @@ class ImportGuidesScreen extends StatelessWidget {
             id: 'pdf',
             icon: Icons.picture_as_pdf_outlined,
             color: const Color(0xFFFF5722),
-            title: 'PDF Document',
-            subtitle: 'Import from PDF cookbooks or downloads',
-            difficulty: 'Easy',
-            timeEstimate: '30 sec',
+            title: l10n.importGuidePdfTitle,
+            subtitle: l10n.importGuidePdfSubtitle,
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime30Sec,
             webSlug: 'pdf',
             steps: [
               _GuideStep(
-                title: 'Have a recipe PDF ready',
-                description: 'This works with downloaded recipe PDFs, ebook cookbooks, scanned documents, or PDFs shared via email.',
+                title: l10n.importGuidePdfStep1Title,
+                description: l10n.importGuidePdfStep1Desc,
                 icon: Icons.description,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Files app or email showing a recipe PDF file ready to be selected',
                   filename: 'pdf_file_ready.png',
                 ),
               ),
               _GuideStep(
-                title: 'Tap + then "From PDF"',
-                description: 'Open Recipe Spellbook, tap +, choose "From PDF", and select your file.',
+                title: l10n.importGuidePdfStep2Title,
+                description: l10n.importGuidePdfStep2Desc,
                 icon: Icons.file_open,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'File picker showing PDF files with one selected',
                   filename: 'pdf_file_picker.png',
                 ),
               ),
               _GuideStep(
-                title: 'Select the recipe page',
-                description: 'If the PDF has multiple pages, choose which page contains the recipe you want to import.',
+                title: l10n.importGuidePdfStep3Title,
+                description: l10n.importGuidePdfStep3Desc,
                 icon: Icons.checklist,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Page selector showing thumbnail previews of PDF pages with recipe pages highlighted',
                   filename: 'pdf_page_select.png',
                 ),
               ),
               _GuideStep(
-                title: 'Review & save',
-                description: 'The recipe is extracted from the PDF. Review the ingredients and steps, then save to your cookbook.',
+                title: l10n.importGuidePdfStep4Title,
+                description: l10n.importGuidePdfStep4Desc,
                 icon: Icons.check_circle_outline,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Import preview showing recipe extracted from PDF with all fields populated',
                   filename: 'pdf_import_preview.png',
@@ -487,48 +490,48 @@ class ImportGuidesScreen extends StatelessWidget {
             id: 'text',
             icon: Icons.text_snippet_outlined,
             color: const Color(0xFF607D8B),
-            title: 'Text / Paste',
-            subtitle: 'Paste a recipe from messages, email, or notes',
-            difficulty: 'Easy',
-            timeEstimate: '30 sec',
+            title: l10n.importGuideTextTitle,
+            subtitle: l10n.importGuideTextSubtitle,
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime30Sec,
             webSlug: 'text',
             steps: [
               _GuideStep(
-                title: 'Copy recipe text',
-                description: 'Copy the recipe text from a text message, email, notes app, WhatsApp, or anywhere else.',
+                title: l10n.importGuideTextStep1Title,
+                description: l10n.importGuideTextStep1Desc,
                 icon: Icons.content_copy,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Messages/email app with recipe text selected and "Copy" button visible',
                   filename: 'text_copy_source.png',
                 ),
               ),
               _GuideStep(
-                title: 'Tap + then "From Text"',
-                description: 'Open Recipe Spellbook, tap +, and choose "From Text".',
+                title: l10n.importGuideTextStep2Title,
+                description: l10n.importGuideTextStep2Desc,
                 icon: Icons.add_circle_outline,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Add recipe menu with "From Text" option highlighted',
                   filename: 'text_add_menu.png',
                 ),
               ),
               _GuideStep(
-                title: 'Paste your recipe',
-                description: 'Paste the copied text into the text field. The AI will automatically separate the title, ingredients, and steps.',
+                title: l10n.importGuideTextStep3Title,
+                description: l10n.importGuideTextStep3Desc,
                 icon: Icons.paste,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Text import screen with recipe text pasted in the input field and an "Import" button below',
                   filename: 'text_paste_field.png',
                 ),
-                tip: 'This works even with unformatted text — the AI is smart about parsing ingredient amounts and step instructions.',
+                tip: l10n.importGuideTextStep3Tip,
               ),
               _GuideStep(
-                title: 'Review & save',
-                description: 'Check the parsed recipe, make any adjustments, and save.',
+                title: l10n.importGuideTextStep4Title,
+                description: l10n.importGuideTextStep4Desc,
                 icon: Icons.check_circle_outline,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Import preview from pasted text showing properly parsed ingredients and steps',
                   filename: 'text_import_preview.png',
@@ -541,59 +544,59 @@ class ImportGuidesScreen extends StatelessWidget {
 
       // ── OTHER APPS ──
       _GuideCategory(
-        title: 'Other Recipe Apps',
+        title: l10n.importGuideCategoryOtherApps,
         icon: Icons.swap_horiz_rounded,
         guides: [
           _ImportGuide(
             id: 'paprika',
             icon: Icons.swap_horiz_rounded,
             color: const Color(0xFFFF9800),
-            title: 'Paprika Recipe Manager',
-            subtitle: 'Bulk import your entire Paprika library',
-            difficulty: 'Medium',
-            timeEstimate: '2–5 min',
+            title: l10n.importGuidePaprikaTitle,
+            subtitle: l10n.importGuidePaprikaSubtitle,
+            difficulty: l10n.importGuideDifficultyMedium,
+            timeEstimate: l10n.importGuideTime2To5Min,
             webSlug: 'paprika',
             steps: [
               _GuideStep(
-                title: 'Export from Paprika',
-                description: 'In Paprika, go to Settings (gear icon) > Export. Choose "Export All Recipes" and save as a .paprikarecipes file.',
+                title: l10n.importGuidePaprikaStep1Title,
+                description: l10n.importGuidePaprikaStep1Desc,
                 icon: Icons.file_download,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Paprika app settings screen showing the Export option, then the export dialog',
                   filename: 'paprika_export.png',
                 ),
               ),
               _GuideStep(
-                title: 'Send the file to your device',
-                description: 'Email the file to yourself, save to iCloud/Google Drive, or use AirDrop to transfer it.',
+                title: l10n.importGuidePaprikaStep2Title,
+                description: l10n.importGuidePaprikaStep2Desc,
                 icon: Icons.send,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Share/save dialog for the .paprikarecipes export file',
                   filename: 'paprika_transfer.png',
                 ),
               ),
               _GuideStep(
-                title: 'Import in Recipe Spellbook',
-                description: 'Open Recipe Spellbook, go to Settings > Data > Import and select the .paprikarecipes file.',
+                title: l10n.importGuidePaprikaStep3Title,
+                description: l10n.importGuidePaprikaStep3Desc,
                 icon: Icons.file_open,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Recipe Spellbook Settings > Data > Import screen with file picker open showing the Paprika export file',
                   filename: 'paprika_import.png',
                 ),
               ),
               _GuideStep(
-                title: 'Wait for import',
-                description: 'All your Paprika recipes are imported with ingredients, steps, notes, photos, and categories preserved.',
+                title: l10n.importGuidePaprikaStep4Title,
+                description: l10n.importGuidePaprikaStep4Desc,
                 icon: Icons.hourglass_bottom,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Import progress indicator followed by success message showing "Imported 47 recipes"',
                   filename: 'paprika_success.png',
                 ),
-                tip: 'Large libraries (100+ recipes) may take a minute. The app stays responsive while importing.',
+                tip: l10n.importGuidePaprikaStep4Tip,
               ),
             ],
           ),
@@ -601,48 +604,48 @@ class ImportGuidesScreen extends StatelessWidget {
             id: 'other-apps',
             icon: Icons.apps_rounded,
             color: const Color(0xFF4CAF50),
-            title: 'Other Recipe Apps',
-            subtitle: 'Mealime, CopyMeThat, AnyList, Cookmate, etc.',
-            difficulty: 'Medium',
-            timeEstimate: '2–5 min',
+            title: l10n.importGuideOtherAppsTitle,
+            subtitle: l10n.importGuideOtherAppsSubtitle,
+            difficulty: l10n.importGuideDifficultyMedium,
+            timeEstimate: l10n.importGuideTime2To5Min,
             webSlug: 'other-apps',
             steps: [
               _GuideStep(
-                title: 'Export from your current app',
-                description: 'Most recipe apps support exporting to JSON, HTML, or text. Check their Settings > Export or Backup section.',
+                title: l10n.importGuideOtherAppsStep1Title,
+                description: l10n.importGuideOtherAppsStep1Desc,
                 icon: Icons.file_download,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Generic settings/export screen from a recipe app (illustration style, not a specific app)',
                   filename: 'other_export.png',
                 ),
-                tip: 'Common formats: JSON (best), HTML, PDF, or plain text. JSON preserves the most data.',
+                tip: l10n.importGuideOtherAppsStep1Tip,
               ),
               _GuideStep(
-                title: 'Get the file on your device',
-                description: 'Save or transfer the exported file to your phone using email, cloud storage, or a file transfer method.',
+                title: l10n.importGuideOtherAppsStep2Title,
+                description: l10n.importGuideOtherAppsStep2Desc,
                 icon: Icons.cloud_download,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Files app showing a downloaded recipe export file (JSON or HTML)',
                   filename: 'other_file_ready.png',
                 ),
               ),
               _GuideStep(
-                title: 'Import via Settings',
-                description: 'In Recipe Spellbook, go to Settings > Data > Import and select the exported file. The app handles JSON, HTML, and common recipe formats.',
+                title: l10n.importGuideOtherAppsStep3Title,
+                description: l10n.importGuideOtherAppsStep3Desc,
                 icon: Icons.settings,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Recipe Spellbook Settings > Data > Import with file picker',
                   filename: 'other_import.png',
                 ),
               ),
               _GuideStep(
-                title: 'Check your recipes',
-                description: 'Imported recipes appear in your default cookbook. You can reorganize them into different cookbooks afterward.',
+                title: l10n.importGuideOtherAppsStep4Title,
+                description: l10n.importGuideOtherAppsStep4Desc,
                 icon: Icons.library_books,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Cookbook view showing newly imported recipes from another app',
                   filename: 'other_success.png',
@@ -654,52 +657,52 @@ class ImportGuidesScreen extends StatelessWidget {
             id: 'device-transfer',
             icon: Icons.phone_android,
             color: const Color(0xFF795548),
-            title: 'Device Transfer',
-            subtitle: 'Move recipes between phones without an account',
-            difficulty: 'Easy',
-            timeEstimate: '1 min',
+            title: l10n.importGuideDeviceTransferTitle,
+            subtitle: l10n.importGuideDeviceTransferSubtitle,
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime1Min,
             webSlug: 'device-transfer',
             steps: [
               _GuideStep(
-                title: 'Open Transfer on the OLD device',
-                description: 'On your old phone, open Recipe Spellbook and go to Menu > Device Transfer > Send.',
+                title: l10n.importGuideDeviceTransferStep1Title,
+                description: l10n.importGuideDeviceTransferStep1Desc,
                 icon: Icons.phone_android,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Recipe Spellbook device transfer screen showing "Send" tab with a generated 6-character code',
                   filename: 'transfer_send.png',
                 ),
               ),
               _GuideStep(
-                title: 'Get the transfer code',
-                description: 'A 6-character code is generated. This code is valid for 15 minutes.',
+                title: l10n.importGuideDeviceTransferStep2Title,
+                description: l10n.importGuideDeviceTransferStep2Desc,
                 icon: Icons.pin,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Transfer screen showing a large, clear 6-character code with a 15-minute countdown timer',
                   filename: 'transfer_code.png',
                 ),
               ),
               _GuideStep(
-                title: 'Enter code on NEW device',
-                description: 'On your new phone, install Recipe Spellbook and go to Menu > Device Transfer > Receive. Enter the code.',
+                title: l10n.importGuideDeviceTransferStep3Title,
+                description: l10n.importGuideDeviceTransferStep3Desc,
                 icon: Icons.input,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Transfer receive screen with code input field on the new device',
                   filename: 'transfer_receive.png',
                 ),
               ),
               _GuideStep(
-                title: 'Recipes transferred!',
-                description: 'All your recipes, cookbooks, shopping lists, and meal plans are transferred to the new device.',
+                title: l10n.importGuideDeviceTransferStep4Title,
+                description: l10n.importGuideDeviceTransferStep4Desc,
                 icon: Icons.check_circle,
-                asset: _StepAsset(
+                asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Success screen showing "Transfer complete — X recipes, X cookbooks imported"',
                   filename: 'transfer_success.png',
                 ),
-                tip: 'Have a paid account? Just sign in on the new device and everything syncs automatically.',
+                tip: l10n.importGuideDeviceTransferStep4Tip,
               ),
             ],
           ),
@@ -786,6 +789,7 @@ class _HeroBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(20),
@@ -808,13 +812,13 @@ class _HeroBanner extends StatelessWidget {
           Icon(Icons.auto_awesome, size: 36, color: theme.colorScheme.primary),
           const SizedBox(height: 12),
           Text(
-            'Bring your recipes from anywhere',
+            l10n.importGuideHeroTitle,
             style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 6),
           Text(
-            'Tap any guide below for step-by-step instructions with screenshots.',
+            l10n.importGuideHeroSubtitle,
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             textAlign: TextAlign.center,
           ),
@@ -834,6 +838,7 @@ class _QuickTipCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -857,12 +862,12 @@ class _QuickTipCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Quick tip',
+                Text(l10n.importGuideQuickTipLabel,
                     style: theme.textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.w600, color: Colors.amber.shade800)),
                 const SizedBox(height: 2),
                 Text(
-                  'The fastest way? Copy any recipe link and share it to Recipe Spellbook — works from almost any app.',
+                  l10n.importGuideQuickTipText,
                   style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                 ),
               ],
@@ -1021,6 +1026,7 @@ class _GuideDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -1029,7 +1035,7 @@ class _GuideDetailScreen extends StatelessWidget {
           TextButton.icon(
             onPressed: () => _launchUrl('$_kWebGuideBaseUrl/${guide.webSlug}'),
             icon: const Icon(Icons.open_in_browser, size: 18),
-            label: const Text('Web'),
+            label: Text(l10n.importGuideWebButton),
           ),
         ],
       ),
@@ -1078,7 +1084,7 @@ class _GuideDetailScreen extends StatelessWidget {
                     const SizedBox(width: 8),
                     _MetaPill(icon: Icons.signal_cellular_alt, label: guide.difficulty, color: guide.color),
                     const SizedBox(width: 8),
-                    _MetaPill(icon: Icons.format_list_numbered, label: '${guide.steps.length} steps', color: guide.color),
+                    _MetaPill(icon: Icons.format_list_numbered, label: l10n.importGuideStepsCount(guide.steps.length), color: guide.color),
                   ],
                 ),
               ],
@@ -1100,7 +1106,7 @@ class _GuideDetailScreen extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: () => _launchUrl('$_kWebGuideBaseUrl/${guide.webSlug}'),
             icon: const Icon(Icons.open_in_browser, size: 18),
-            label: const Text('Follow along in browser'),
+            label: Text(l10n.importGuideFollowInBrowser),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1286,22 +1292,23 @@ class _AssetPlaceholder extends StatelessWidget {
         child: Image.asset(
           assetPath,
           fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => _buildPlaceholder(theme),
+          errorBuilder: (_, __, ___) => _buildPlaceholder(context, theme),
         ),
       ),
     );
   }
 
-  Widget _buildPlaceholder(ThemeData theme) {
+  Widget _buildPlaceholder(BuildContext context, ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     final typeIcon = switch (asset.type) {
       _AssetType.screenshot => Icons.phone_android,
       _AssetType.gif => Icons.gif_box_outlined,
       _AssetType.video => Icons.play_circle_outline,
     };
     final typeLabel = switch (asset.type) {
-      _AssetType.screenshot => 'Screenshot needed',
-      _AssetType.gif => 'GIF needed',
-      _AssetType.video => 'Video needed',
+      _AssetType.screenshot => l10n.importGuideScreenshotNeeded,
+      _AssetType.gif => l10n.importGuideGifNeeded,
+      _AssetType.video => l10n.importGuideVideoNeeded,
     };
 
     return Container(

@@ -172,6 +172,7 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     final cookbookId = cookbookAsync.valueOrNull?.id ?? 'starter';
 
     // Show a loading overlay
+    final l10n = AppLocalizations.of(nav.context)!;
     showDialog(
       context: nav.context,
       barrierDismissible: false,
@@ -181,14 +182,14 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
           child: Card(
             margin: const EdgeInsets.all(32),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Importing recipe…', style: TextStyle(fontWeight: FontWeight.w500)),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(l10n.importingRecipe, style: const TextStyle(fontWeight: FontWeight.w500))
                 ],
               ),
             ),
@@ -223,7 +224,7 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
       if (ctx.mounted) {
         ScaffoldMessenger.of(ctx).showSnackBar(
           SnackBar(
-            content: Text('Failed to import: ${e.toString().replaceFirst("Exception: ", "")}'),
+            content: Text(l10n.failedToImport(e.toString().replaceFirst("Exception: ", ""))),
             backgroundColor: Colors.red,
           ),
         );

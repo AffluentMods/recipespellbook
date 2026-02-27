@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
@@ -50,11 +51,25 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
   String _selectedMealType = 'Dinner';
   bool _isSaving = false;
 
-  final _mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
+  static const _mealTypeKeys = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Appetizer', 'Dessert'];
+
+  String _localizedMealType(BuildContext context, String type) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (type) {
+      case 'Breakfast': return l10n.mealTypeBreakfast;
+      case 'Lunch': return l10n.mealTypeLunch;
+      case 'Dinner': return l10n.mealTypeDinner;
+      case 'Snack': return l10n.mealTypeSnack;
+      case 'Appetizer': return l10n.mealTypeAppetizer;
+      case 'Dessert': return l10n.mealTypeDessert;
+      default: return type;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -73,7 +88,7 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Add to Meal Plan',
+                    l10n.mealPlanAddTitle,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -114,7 +129,7 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
             const SizedBox(height: 20),
 
             // Date picker
-            Text('Date', style: theme.textTheme.labelLarge),
+            Text(l10n.mealPlanDate, style: theme.textTheme.labelLarge),
             const SizedBox(height: 8),
             InkWell(
               onTap: _pickDate,
@@ -142,19 +157,19 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
             Row(
               children: [
                 _QuickDateButton(
-                  label: 'Today',
+                  label: l10n.today,
                   isSelected: _isToday(_selectedDate),
                   onTap: () => setState(() => _selectedDate = DateTime.now()),
                 ),
                 const SizedBox(width: 8),
                 _QuickDateButton(
-                  label: 'Tomorrow',
+                  label: l10n.dateTomorrow,
                   isSelected: _isTomorrow(_selectedDate),
                   onTap: () => setState(() => _selectedDate = DateTime.now().add(const Duration(days: 1))),
                 ),
                 const SizedBox(width: 8),
                 _QuickDateButton(
-                  label: 'This Weekend',
+                  label: l10n.mealPlanThisWeekend,
                   isSelected: false,
                   onTap: () => setState(() => _selectedDate = _nextWeekend()),
                 ),
@@ -163,12 +178,12 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
             const SizedBox(height: 20),
 
             // Meal type
-            Text('Meal', style: theme.textTheme.labelLarge),
+            Text(l10n.mealPlanMealLabel, style: theme.textTheme.labelLarge),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: _mealTypes.map((type) {
+              children: _mealTypeKeys.map((type) {
                 final isSelected = type == _selectedMealType;
                 return ChoiceChip(
                   label: Row(
@@ -180,7 +195,7 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
                         color: isSelected ? theme.colorScheme.onPrimaryContainer : null,
                       ),
                       const SizedBox(width: 6),
-                      Text(type),
+                      Text(_localizedMealType(context, type)),
                     ],
                   ),
                   selected: isSelected,
@@ -202,7 +217,7 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
                     : const Icon(Icons.add),
-                label: Text(_isSaving ? 'Adding...' : 'Add to Meal Plan'),
+                label: Text(_isSaving ? l10n.mealPlanAdding : l10n.mealPlanAddTitle),
               ),
             ),
             const SizedBox(height: 8),
@@ -250,7 +265,7 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
       }
     } catch (e) {
       if (mounted) {
-        AppSnackbar.info(context, 'Error: $e');
+        AppSnackbar.info(context, AppLocalizations.of(context)!.errorWithMessage(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -260,19 +275,21 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
   }
 
   String _formatDate(DateTime date) {
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final tomorrow = today.add(const Duration(days: 1));
     final dateOnly = DateTime(date.year, date.month, date.day);
 
     if (dateOnly == today) {
-      return 'Today';
+      return l10n.today;
     } else if (dateOnly == tomorrow) {
-      return 'Tomorrow';
+      return l10n.dateTomorrow;
     } else {
-      final weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      return '${weekdays[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}';
+      final weekday = DateFormat('EEEE', locale).format(date);
+      final month = DateFormat('MMM', locale).format(date);
+      return l10n.mealPlanDateFormat(weekday, month, date.day);
     }
   }
 
@@ -302,6 +319,10 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
         return Icons.dinner_dining;
       case 'Snack':
         return Icons.cookie;
+      case 'Appetizer':
+        return Icons.tapas;
+      case 'Dessert':
+        return Icons.cake;
       default:
         return Icons.restaurant;
     }

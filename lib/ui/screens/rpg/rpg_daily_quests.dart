@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipespellbook/data/rpg/rpg_models.dart';
 import 'package:recipespellbook/data/rpg/rpg_quests.dart';
 import 'package:recipespellbook/providers/rpg_provider.dart';
+import '../../../l10n/app_localizations.dart';
 
 // ============ QUESTS PROVIDER ============
 
@@ -169,13 +170,13 @@ class RpgDailyQuestsCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Daily Quests',
+                      AppLocalizations.of(context)!.rpgDailyQuests,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
-                      '$completedCount/${quests.length} completed',
+                      AppLocalizations.of(context)!.rpgQuestsCompleted(completedCount, quests.length),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.outline,
                       ),
@@ -190,9 +191,9 @@ class RpgDailyQuestsCard extends ConsumerWidget {
                     color: Colors.amber,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Text(
-                    'Claim!',
-                    style: TextStyle(
+                  child: Text(
+                    AppLocalizations.of(context)!.rpgClaim,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
@@ -223,14 +224,14 @@ class RpgDailyQuestsCard extends ConsumerWidget {
           child: Row(
             children: [
               Text(
-                '📋 Daily Quests',
+                AppLocalizations.of(context)!.rpgDailyQuests,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const Spacer(),
               Text(
-                _getTimeUntilReset(),
+                _getTimeUntilReset(context),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.outline,
                 ),
@@ -254,15 +255,16 @@ class RpgDailyQuestsCard extends ConsumerWidget {
     );
   }
 
-  String _getTimeUntilReset() {
+  String _getTimeUntilReset(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final tomorrow = DateTime(now.year, now.month, now.day + 1);
     final remaining = tomorrow.difference(now);
 
     if (remaining.inHours > 0) {
-      return 'Resets in ${remaining.inHours}h';
+      return l10n.rpgResetsInHours(remaining.inHours);
     }
-    return 'Resets in ${remaining.inMinutes}m';
+    return l10n.rpgResetsInMinutes(remaining.inMinutes);
   }
 
   void _showQuestsSheet(BuildContext context, WidgetRef ref) {
@@ -402,7 +404,7 @@ class _QuestTile extends StatelessWidget {
                   backgroundColor: Colors.amber,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                 ),
-                child: const Text('Claim'),
+                child: Text(AppLocalizations.of(context)!.rpgClaim),
               )
             else if (quest.isClaimed)
               const Icon(Icons.check_circle, color: Colors.green)
@@ -477,7 +479,7 @@ class _WeeklyChallengeCard extends StatelessWidget {
               const Icon(Icons.emoji_events, color: Colors.purple),
               const SizedBox(width: 8),
               Text(
-                'Weekly Challenge',
+                AppLocalizations.of(context)!.rpgWeeklyChallenge,
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Colors.purple,
@@ -612,7 +614,7 @@ class RpgDailyQuestsSheet extends ConsumerWidget {
           Row(
             children: [
               Text(
-                '📋 Daily Quests',
+                AppLocalizations.of(context)!.rpgDailyQuests,
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -636,7 +638,7 @@ class RpgDailyQuestsSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Complete quests to earn bonus XP and gold!',
+            AppLocalizations.of(context)!.rpgQuestsSubtitle,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.outline,
             ),

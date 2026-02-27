@@ -262,7 +262,7 @@ class _CookbookGrid extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.edit),
               title: Text(l10n.actionEdit),
-              subtitle: const Text('Rename, cover photo'),
+              subtitle: Text(l10n.cookbookEditSubtitle),
               onTap: () {
                 Navigator.pop(ctx);
                 context.push('/cookbook/${cookbook.id}/edit');
@@ -270,8 +270,8 @@ class _CookbookGrid extends ConsumerWidget {
             ),
             ListTile(
               leading: const Icon(Icons.share),
-              title: const Text('Share Cookbook'),
-              subtitle: const Text('Link, family, or community'),
+              title: Text(l10n.shareCookbook),
+              subtitle: Text(l10n.shareCookbookSubtitle),
               onTap: () {
                 Navigator.pop(ctx);
                 _showShareSheet(context, ref, cookbook);
@@ -293,6 +293,7 @@ class _CookbookGrid extends ConsumerWidget {
 
   void _showShareSheet(BuildContext context, WidgetRef ref, Cookbook cookbook) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     showModalBottomSheet(
       context: context,
@@ -307,15 +308,15 @@ class _CookbookGrid extends ConsumerWidget {
             )),
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text('Share "${cookbook.name}"',
+              child: Text(l10n.shareNamedCookbook(cookbook.name),
                   style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
             ),
 
             // ── One-Time Link ──
             ListTile(
               leading: const Icon(Icons.link),
-              title: const Text('One-Time Link'),
-              subtitle: const Text('Free • 24h expiry • Anyone can download'),
+              title: Text(l10n.oneTimeLink),
+              subtitle: Text(l10n.oneTimeLinkDescription),
               onTap: () {
                 Navigator.pop(ctx);
                 _createOneTimeLink(context, ref, cookbook);
@@ -325,16 +326,16 @@ class _CookbookGrid extends ConsumerWidget {
             // ── Family Share ──
             ListTile(
               leading: const Icon(Icons.family_restroom),
-              title: const Text('Family Share'),
-              subtitle: const Text('Real-time sync with family members'),
+              title: Text(l10n.familyShare),
+              subtitle: Text(l10n.familyShareDescription),
               trailing: _isFamilyTierUnlocked(ref)
                   ? null
                   : Icon(Icons.star, size: 16, color: Colors.amber.shade600),
               onTap: () {
                 Navigator.pop(ctx);
                 if (!_isFamilyTierUnlocked(ref)) {
-                  _showUpgradePrompt(context, 'Family Share',
-                      'Upgrade to Cloud Sync to share cookbooks with your family in real-time.');
+                  _showUpgradePrompt(context, l10n.familyShare,
+                      l10n.familyShareUpgradeMessage);
                   return;
                 }
                 showResourceShareSheet(
@@ -350,8 +351,8 @@ class _CookbookGrid extends ConsumerWidget {
             // ── Post to Community ──
             ListTile(
               leading: const Icon(Icons.public),
-              title: const Text('Post to Community'),
-              subtitle: const Text('Publish for anyone to discover & download'),
+              title: Text(l10n.postToCommunity),
+              subtitle: Text(l10n.postToCommunityDescription),
               onTap: () {
                 Navigator.pop(ctx);
                 _publishToCommunity(context, ref, cookbook);
@@ -368,11 +369,11 @@ class _CookbookGrid extends ConsumerWidget {
   Future<void> _createOneTimeLink(BuildContext context, WidgetRef ref, Cookbook cookbook) async {
     final auth = AuthService.instance;
     if (!auth.isSignedIn) {
-      AppSnackbar.info(context, 'Sign in to create share links');
+      AppSnackbar.info(context, AppLocalizations.of(context)!.signInToShare);
       return;
     }
 
-    AppSnackbar.loading(context, 'Generating link...');
+    AppSnackbar.loading(context, AppLocalizations.of(context)!.generatingLink);
 
     try {
       final link = await FamilyService.instance.createShareLink(
@@ -384,7 +385,7 @@ class _CookbookGrid extends ConsumerWidget {
       if (link != null) {
         _showLinkResult(context, link);
       } else {
-        AppSnackbar.error(context, 'Failed to create link');
+        AppSnackbar.error(context, AppLocalizations.of(context)!.failedToCreateLink);
       }
     } catch (e) {
       if (context.mounted) {
@@ -396,6 +397,7 @@ class _CookbookGrid extends ConsumerWidget {
 
   void _showLinkResult(BuildContext context, ShareLinkInfo link) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       builder: (ctx) => SafeArea(
@@ -411,9 +413,9 @@ class _CookbookGrid extends ConsumerWidget {
               const SizedBox(height: 20),
               const Icon(Icons.check_circle, size: 48, color: Colors.green),
               const SizedBox(height: 12),
-              Text('Link Created!', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              Text(l10n.linkCreated, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
-              Text('Expires in 24 hours', style: TextStyle(color: theme.colorScheme.outline, fontSize: 13)),
+              Text(l10n.expiresIn24Hours, style: TextStyle(color: theme.colorScheme.outline, fontSize: 13)),
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -428,7 +430,7 @@ class _CookbookGrid extends ConsumerWidget {
                     icon: const Icon(Icons.copy, size: 20),
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: link.url));
-                      AppSnackbar.success(context, 'Link copied!');
+                      AppSnackbar.success(context, l10n.linkCopied);
                     },
                   ),
                 ]),
@@ -437,7 +439,7 @@ class _CookbookGrid extends ConsumerWidget {
               Row(children: [
                 Expanded(child: OutlinedButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Done'),
+                  child: Text(l10n.actionDone),
                 )),
                 const SizedBox(width: 12),
                 Expanded(child: FilledButton.icon(
@@ -445,7 +447,7 @@ class _CookbookGrid extends ConsumerWidget {
                     Share.share(link.url, subject: 'Shared from Recipe Spellbook');
                   },
                   icon: const Icon(Icons.share, size: 18),
-                  label: const Text('Share'),
+                  label: Text(l10n.actionShare),
                 )),
               ]),
               const SizedBox(height: 8),
@@ -463,6 +465,7 @@ class _CookbookGrid extends ConsumerWidget {
 
   void _showUpgradePrompt(BuildContext context, String featureName, String message) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       builder: (ctx) => SafeArea(
@@ -478,7 +481,7 @@ class _CookbookGrid extends ConsumerWidget {
               const SizedBox(height: 24),
               const Icon(Icons.star, size: 48, color: Colors.amber),
               const SizedBox(height: 16),
-              Text('Unlock $featureName',
+              Text(l10n.unlockFeature(featureName),
                   style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               Text(message,
@@ -488,13 +491,13 @@ class _CookbookGrid extends ConsumerWidget {
               Row(children: [
                 Expanded(child: OutlinedButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Not now'),
+                  child: Text(l10n.notNow),
                 )),
                 const SizedBox(width: 12),
                 Expanded(child: FilledButton.icon(
                   onPressed: () { Navigator.pop(ctx); context.push('/upgrade'); },
                   icon: const Icon(Icons.star, size: 18),
-                  label: const Text('Upgrade'),
+                  label: Text(l10n.upgradeButton),
                 )),
               ]),
               const SizedBox(height: 16),
@@ -510,26 +513,23 @@ class _CookbookGrid extends ConsumerWidget {
     final recipeCount = await ref.read(recipeDaoProvider).getRecipeCountForCookbook(cookbook.id);
     if (recipeCount < 10) {
       if (context.mounted) {
-        AppSnackbar.error(context, 'Need at least 10 recipes to publish (has $recipeCount)');
+        AppSnackbar.error(context, AppLocalizations.of(context)!.publishMinRecipes(recipeCount));
       }
       return;
     }
 
     if (!context.mounted) return;
 
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         icon: const Icon(Icons.public),
-        title: const Text('Post to Community?'),
-        content: Text(
-          '"${cookbook.name}" ($recipeCount recipes) will be publicly visible. '
-              'Anyone can browse and download it.\n\n'
-              'You can remove it anytime from Community → My Publications.',
-        ),
+        title: Text(l10n.publishConfirmTitle),
+        content: Text(l10n.publishConfirmMessage(cookbook.name, recipeCount)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Publish')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.actionCancel)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.publishButton)),
         ],
       ),
     );

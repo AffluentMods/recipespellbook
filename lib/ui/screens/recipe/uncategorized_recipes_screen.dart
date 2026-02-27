@@ -89,7 +89,7 @@ class _UncategorizedRecipesScreenState
         ],
       )
           : AppBar(
-        title: Text(isCourse ? 'No Course Assigned' : 'Uncategorized'),
+        title: Text(isCourse ? l10n.noCourseAssigned : l10n.uncategorized),
       ),
       body: StreamBuilder<List<Recipe>>(
         stream: recipeDao.watchRecipesForCookbook(cookbookId),
@@ -139,14 +139,14 @@ class _UncategorizedRecipesScreenState
                     const SizedBox(height: 16),
                     Text(
                       isCourse
-                          ? 'All recipes have a course!'
-                          : 'All recipes are categorized!',
+                          ? l10n.allRecipesHaveCourse
+                          : l10n.allRecipesCategorized,
                       style: theme.textTheme.titleMedium,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Great job organizing your recipes.',
+                      l10n.greatJobOrganizing,
                       style: theme.textTheme.bodyMedium
                           ?.copyWith(color: theme.colorScheme.outline),
                       textAlign: TextAlign.center,
@@ -243,8 +243,7 @@ class _UncategorizedRecipesScreenState
       builder: (ctx) => AlertDialog(
         icon: const Icon(Icons.delete_outline, size: 32, color: Colors.red),
         title: Text(l10n.deleteRecipesConfirm(count)),
-        content: const Text(
-            'Recipes will be moved to trash. You can restore them later.'),
+        content: Text(l10n.deleteRecipesTrashMessage),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
@@ -366,7 +365,7 @@ class _UncategorizedRecipesScreenState
 
     if (mounted) {
       final count = _selectedIds.length;
-      AppSnackbar.info(context, 'Category set for $count recipe${count == 1 ? '' : 's'}');
+      AppSnackbar.info(context, l10n.categorySetForCount(count));
       _exitSelection();
     }
   }
@@ -407,6 +406,7 @@ class _RecipeListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final hasImage =
         recipe.imagePath != null && File(recipe.imagePath!).existsSync();
     final defaultAsset = defaultRecipeImageAsset(recipe.id);
@@ -502,8 +502,8 @@ class _RecipeListTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       isCourse
-                          ? 'Tap to assign a course'
-                          : 'Tap to assign a category',
+                          ? l10n.tapToAssignCourse
+                          : l10n.tapToAssignCategory,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.outline.withValues(alpha: 0.7),
                         fontSize: 11,
@@ -554,6 +554,7 @@ class _BulkActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -570,22 +571,22 @@ class _BulkActionBar extends StatelessWidget {
         children: [
           _ActionButton(
             icon: Icons.restaurant_menu,
-            label: 'Course',
+            label: l10n.bulkCourse,
             onTap: onSetCourse,
           ),
           _ActionButton(
             icon: Icons.category,
-            label: 'Category',
+            label: l10n.bulkCategory,
             onTap: onSetCategory,
           ),
           _ActionButton(
             icon: Icons.star_outline,
-            label: 'Favorite',
+            label: l10n.bulkFavorite,
             onTap: onFavorite,
           ),
           _ActionButton(
             icon: Icons.delete_outline,
-            label: 'Delete',
+            label: l10n.actionDelete,
             onTap: onDelete,
             color: Colors.red,
           ),

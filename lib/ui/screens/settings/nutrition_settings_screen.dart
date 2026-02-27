@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/nutrition_data.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/settings_provider.dart';
 
 // ============================================================
@@ -110,10 +111,11 @@ class NutritionSettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nutrition Display'),
+        title: Text(l10n.nutritionDisplay),
       ),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 40),
@@ -136,7 +138,7 @@ class NutritionSettingsScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text(
-              'Chart Style',
+              l10n.nutritionChartStyle,
               style: theme.textTheme.titleSmall?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -146,21 +148,21 @@ class NutritionSettingsScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: SegmentedButton<NutritionChartStyle>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: NutritionChartStyle.numbers,
-                  label: Text('Numbers'),
-                  icon: Icon(Icons.tag, size: 18),
+                  label: Text(l10n.chartNumbers),
+                  icon: const Icon(Icons.tag, size: 18),
                 ),
                 ButtonSegment(
                   value: NutritionChartStyle.donut,
-                  label: Text('Donut'),
-                  icon: Icon(Icons.donut_large, size: 18),
+                  label: Text(l10n.chartDonut),
+                  icon: const Icon(Icons.donut_large, size: 18),
                 ),
                 ButtonSegment(
                   value: NutritionChartStyle.bars,
-                  label: Text('Bars'),
-                  icon: Icon(Icons.bar_chart, size: 18),
+                  label: Text(l10n.chartBars),
+                  icon: const Icon(Icons.bar_chart, size: 18),
                 ),
               ],
               selected: {settings.nutritionChartStyle},
@@ -179,7 +181,7 @@ class NutritionSettingsScreen extends ConsumerWidget {
             child: Row(
               children: [
                 Text(
-                  'Visible Nutrients',
+                  l10n.nutritionVisibleNutrients,
                   style: theme.textTheme.titleSmall?.copyWith(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
@@ -192,7 +194,7 @@ class NutritionSettingsScreen extends ConsumerWidget {
                       AppSettings.defaultEnabledNutrients,
                     );
                   },
-                  child: const Text('Reset defaults'),
+                  child: Text(l10n.nutritionResetDefaults),
                 ),
               ],
             ),
@@ -200,7 +202,7 @@ class NutritionSettingsScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              'Calories always show. Toggle others on/off.',
+              l10n.nutritionCaloriesAlwaysShow,
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
             ),
           ),
@@ -215,6 +217,7 @@ class NutritionSettingsScreen extends ConsumerWidget {
 
   List<Widget> _buildNutrientToggleGroups(BuildContext context, WidgetRef ref, AppSettings settings) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final widgets = <Widget>[];
     String? lastCategory;
 
@@ -257,7 +260,7 @@ class NutritionSettingsScreen extends ConsumerWidget {
             ),
           ),
           subtitle: isCalories
-              ? Text('Always visible', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline))
+              ? Text(l10n.alwaysVisible, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline))
               : null,
         ),
       );
@@ -383,6 +386,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final n = widget.nutrition;
 
     if (n == null || n.isEmpty) {
@@ -424,7 +428,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
                   MaterialPageRoute(builder: (_) => const _NutritionSettingsRoute()),
                 ),
                 child: Text(
-                  'Nutrition settings',
+                  l10n.nutritionSettingsLink,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.primary,
                     decoration: TextDecoration.underline,
@@ -440,6 +444,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
   }
 
   Widget _buildEmptyState(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     final child = Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -462,12 +467,12 @@ class _NutritionWidgetState extends State<NutritionWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('No nutrition data', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.outline)),
+                Text(l10n.nutritionEmpty, style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.outline)),
                 const SizedBox(height: 4),
                 Text(
                   widget.onEmptyTap != null
-                      ? 'Tap to calculate nutrition from ingredients'
-                      : 'Calculate nutrition from the edit screen',
+                      ? l10n.nutritionTapToCalculate
+                      : l10n.nutritionCalculateFromEdit,
                   style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
                 ),
               ],
@@ -488,6 +493,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
   // ─── HEADER with per-serving toggle ───
 
   Widget _buildHeader(ThemeData theme, bool canToggle, int? servings) {
+    final l10n = AppLocalizations.of(context)!;
     final effective = _effectiveServings() ?? servings;
 
     return Row(
@@ -496,7 +502,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            _showPerServing && canToggle ? 'Per Serving' : 'Total Nutrition',
+            _showPerServing && canToggle ? l10n.nutritionPerServing : l10n.nutritionTotalLabel,
             style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),

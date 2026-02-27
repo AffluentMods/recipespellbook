@@ -5123,461 +5123,2135 @@ class AppLocalizationsZh extends AppLocalizations {
   String get createRecipeManually => '或手动创建食谱';
 
   @override
-  String get transferYourRecipes => 'Transfer your recipes';
+  String get transferYourRecipes => '转移你的食谱';
 
   @override
-  String get transferUpgradeBanner => 'Want automatic sync? Upgrade to Premium for cloud sync across all your devices.';
+  String get transferUpgradeBanner => '想要自动同步？升级到高级版即可在所有设备上云同步。';
 
   @override
-  String get transferCodeLength => 'Code must be 6 characters';
+  String get transferCodeLength => '代码必须为6个字符';
 
   @override
-  String get transferItemRecipes => 'All recipes';
+  String get transferItemRecipes => '所有食谱';
 
   @override
-  String get transferItemCookbooks => 'Cookbooks & categories';
+  String get transferItemCookbooks => '食谱书和分类';
 
   @override
-  String get transferItemMealPlans => 'Meal plans';
+  String get transferItemMealPlans => '餐食计划';
 
   @override
-  String get transferItemShoppingLists => 'Shopping lists';
+  String get transferItemShoppingLists => '购物清单';
 
   @override
-  String get transferItemSettings => 'App settings';
+  String get transferItemSettings => '应用设置';
 
   @override
-  String get transferItemAccount => 'Account sign-in (if sender is logged in)';
+  String get transferItemAccount => '账户登录（如果发送方已登录）';
 
   @override
-  String get codeCopied => 'Code copied!';
+  String get codeCopied => '代码已复制！';
 
   @override
-  String get transferTitle => 'Transfer Data';
+  String get transferTitle => '传输数据';
 
   @override
-  String get transferReceiveSubtitle => 'Enter a code or scan QR from the sending device';
+  String get transferReceiveSubtitle => '输入代码或扫描发送设备上的QR码';
 
   @override
-  String get transferPreparing => 'Preparing your data...';
+  String get transferPreparing => '正在准备你的数据...';
 
   @override
-  String get transferFailed => 'Transfer failed';
+  String get transferFailed => '传输失败';
 
   @override
-  String get transferScanDesc => 'Scan this QR on your other device, or enter the code below.';
+  String get transferScanDesc => '在另一台设备上扫描此QR码，或输入下方代码。';
 
   @override
-  String get transferReady => 'Ready to transfer';
+  String get transferReady => '准备传输';
 
   @override
-  String get transferCodeExpires => 'This code expires in 15 minutes';
+  String get transferCodeExpires => '此代码将在15分钟后过期';
 
   @override
-  String get transferComplete => 'Transfer complete!';
+  String get transferComplete => '传输完成！';
 
   @override
-  String get transferAccountSynced => 'Account signed in from sender';
+  String get transferAccountSynced => '已从发送方登录账户';
 
   @override
-  String get transferScanQr => 'Scan QR Code';
+  String get transferScanQr => '扫描QR码';
 
   @override
-  String get transferScanQrDesc => 'Point your camera at the QR on the other device';
+  String get transferScanQrDesc => '将相机对准另一台设备上的QR码';
 
   @override
-  String get transferEnterCode => 'Enter transfer code';
+  String get transferEnterCode => '输入传输代码';
 
   @override
-  String get transferWhatMoves => 'What gets transferred:';
+  String get transferWhatMoves => '将传输的内容：';
 
   @override
-  String get transferMergeNote => 'Existing data on this device will be merged. Duplicates are skipped.';
+  String get transferMergeNote => '此设备上的现有数据将被合并。重复项将被跳过。';
 
   @override
-  String get transferPointCamera => 'Point at the QR code on the sending device';
+  String get transferPointCamera => '对准发送设备上的QR码';
 
   @override
-  String get labelPrepMin => 'Prep (min)';
+  String get labelPrepMin => '准备（分钟）';
 
   @override
-  String get labelCookMin => 'Cook (min)';
+  String get labelCookMin => '烹饪（分钟）';
 
   @override
-  String get labelTotalCal => 'Total cal';
+  String get labelTotalCal => '总卡路里';
 
   @override
-  String get labelCalPerServing => 'Cal/serving';
+  String get labelCalPerServing => '每份卡路里';
 
   @override
-  String get tooltipViewSize => 'View size';
+  String get tooltipViewSize => '查看大小';
 
   @override
-  String get pantryClearTitle => 'Clear pantry?';
+  String get pantryClearTitle => '清空食材柜？';
 
   @override
-  String get pantryAddHint => 'Add item to pantry...';
+  String get pantryAddHint => '添加物品到食材柜...';
 
   @override
-  String get pantryAddStaples => 'Add all staples';
+  String get pantryAddStaples => '添加所有常备食材';
 
   @override
-  String get pantrySearchHint => 'Search pantry...';
+  String get pantrySearchHint => '搜索食材柜...';
 
   @override
-  String get settingsRecipesShopping => 'Recipes & Shopping';
+  String get settingsRecipesShopping => '食谱和购物';
 
   @override
-  String get settingsAdvanced => 'Advanced Settings';
+  String get settingsAdvanced => '高级设置';
 
   @override
-  String get settingsAdvancedSubtitle => 'Tags, courses, categories & more';
+  String get settingsAdvancedSubtitle => '标签、课程、分类等';
 
   @override
-  String get settingsDeleteData => 'Delete Data';
+  String get settingsDeleteData => '删除数据';
 
   @override
-  String get settingsDeleteDataSubtitle => 'Erase app or cloud data';
+  String get settingsDeleteDataSubtitle => '清除应用或云数据';
 
   @override
-  String get settingsUpgradeSubtitle => 'Cloud sync, photos & more';
+  String get settingsUpgradeSubtitle => '云同步、照片等';
 
   @override
-  String get settingsTextSizeSubtitle => 'Adjust text size across the entire app';
+  String get settingsTextSizeSubtitle => '调整整个应用的文字大小';
 
   @override
-  String get settingsGoogleOrApple => 'Google or Apple';
+  String get settingsGoogleOrApple => 'Google或Apple';
 
   @override
-  String get alwaysVisible => 'Always visible';
+  String get alwaysVisible => '始终显示';
 
   @override
-  String get chartNumbers => 'Numbers';
+  String get chartNumbers => '数字';
 
   @override
-  String get chartDonut => 'Donut';
+  String get chartDonut => '甜甜圈图';
 
   @override
-  String get chartBars => 'Bars';
+  String get chartBars => '柱状图';
 
   @override
   String get unitKcal => 'kcal';
 
   @override
-  String get nutritionCustomScale => 'Custom Scale';
+  String get nutritionCustomScale => '自定义比例';
 
   @override
-  String get nutritionScaleLabel => 'Scale multiplier';
+  String get nutritionScaleLabel => '比例倍数';
 
   @override
-  String get nutritionScaleHint => 'e.g. 0.5, 1.5, 3.0';
+  String get nutritionScaleHint => '例如 0.5、1.5、3.0';
 
   @override
-  String get nutritionSet => 'Set';
+  String get nutritionSet => '设定';
 
   @override
-  String get nutritionApplyRecalculate => 'Apply & Recalculate';
+  String get nutritionApplyRecalculate => '应用并重新计算';
 
   @override
-  String get calAbbrev => 'Cal';
+  String get calAbbrev => '卡';
 
   @override
-  String get nutritionServingSizeHint => 'e.g., 1 cup, 100g';
+  String get nutritionServingSizeHint => '例如 1杯、100g';
 
   @override
-  String get shoppingExportList => 'Export list';
+  String get shoppingExportList => '导出清单';
 
   @override
-  String get shoppingExportListSubtitle => 'Share as a text file or backup';
+  String get shoppingExportListSubtitle => '以文本文件分享或备份';
 
   @override
-  String get shoppingImportList => 'Import list';
+  String get shoppingImportList => '导入清单';
 
   @override
-  String get shoppingImportListSubtitle => 'Add items from a file, photo, or text';
+  String get shoppingImportListSubtitle => '从文件、照片或文本添加项目';
 
   @override
-  String get shoppingScanBarcodeSubtitle => 'Look up a product to add';
+  String get shoppingScanBarcodeSubtitle => '查找要添加的产品';
 
   @override
-  String get exportBackupFile => 'Backup file';
+  String get exportBackupFile => '备份文件';
 
   @override
-  String get exportBackupFileSubtitle => 'For transferring to another device or app';
+  String get exportBackupFileSubtitle => '用于转移到另一台设备或应用';
 
   @override
-  String get exportFormattedList => 'Formatted list';
+  String get exportFormattedList => '格式化清单';
 
   @override
-  String get exportFormattedListSubtitle => 'With checkboxes — great for notes apps';
+  String get exportFormattedListSubtitle => '带复选框——适合笔记应用';
 
   @override
-  String get exportPlainText => 'Plain text';
+  String get exportPlainText => '纯文本';
 
   @override
-  String get exportPlainTextSubtitle => 'Simple list — paste anywhere';
+  String get exportPlainTextSubtitle => '简单列表——可粘贴到任何地方';
 
   @override
-  String get importFromBackupFile => 'From backup file';
+  String get importFromBackupFile => '从备份文件';
 
   @override
-  String get importFromBackupSubtitle => 'Import a Recipe Spellbook backup';
+  String get importFromBackupSubtitle => '导入Recipe Spellbook备份';
 
   @override
-  String get importFromTextShoppingSubtitle => 'Paste or type a list of items';
+  String get importFromTextShoppingSubtitle => '粘贴或输入项目列表';
 
   @override
-  String get importFromPhotoOcrSubtitle => 'OCR scan a handwritten or printed list';
+  String get importFromPhotoOcrSubtitle => 'OCR扫描手写或打印的清单';
 
   @override
-  String get importFromPhotoGallerySubtitle => 'Take a photo or pick from gallery';
+  String get importFromPhotoGallerySubtitle => '拍照或从相册选择';
 
   @override
-  String get shoppingSendToStore => 'Send to store';
+  String get shoppingSendToStore => '发送到商店';
 
   @override
-  String get shoppingSendToCart => 'Send to cart';
+  String get shoppingSendToCart => '发送到购物车';
 
   @override
-  String get shoppingCopyToClipboard => 'Copy list to clipboard';
+  String get shoppingCopyToClipboard => '复制清单到剪贴板';
 
   @override
-  String get shoppingGoToCart => 'Go to cart';
+  String get shoppingGoToCart => '前往购物车';
 
   @override
-  String get shoppingAddItems => 'Add items';
+  String get shoppingAddItems => '添加物品';
 
   @override
-  String get shoppingAddItemHintLong => 'e.g. 2 cups flour, chicken breast...';
+  String get shoppingAddItemHintLong => '例如 2杯面粉、鸡胸肉...';
 
   @override
-  String get importReviewItems => 'Review items';
+  String get importReviewItems => '审核项目';
 
   @override
-  String get importNoItemsDetected => 'No items detected';
+  String get importNoItemsDetected => '未检测到项目';
 
   @override
-  String get mealPlanDate => 'Date';
+  String get mealPlanDate => '日期';
 
   @override
-  String get mealPlanThisWeekend => 'This Weekend';
+  String get mealPlanThisWeekend => '本周末';
 
   @override
-  String get menuRpgProfile => 'RPG Profile';
+  String get menuRpgProfile => 'RPG资料';
 
   @override
-  String get menuTools => 'Tools';
+  String get menuTools => '工具';
 
   @override
-  String get menuSupport => 'Support';
+  String get menuSupport => '支持';
 
   @override
-  String get menuHowCanWeHelp => 'How can we help?';
+  String get menuHowCanWeHelp => '我们能帮您什么？';
 
   @override
-  String get menuGetInTouch => 'Get in touch or browse our guides.';
+  String get menuGetInTouch => '联系我们或浏览指南。';
 
   @override
-  String get menuVisitWebsite => 'Visit our Website';
+  String get menuVisitWebsite => '访问我们的网站';
 
   @override
-  String get feedbackTitleLabel => 'Title';
+  String get feedbackTitleLabel => '标题';
 
   @override
-  String get feedbackDetailsLabel => 'Details';
+  String get feedbackDetailsLabel => '详情';
 
   @override
-  String get feedbackDescriptionLabel => 'Description';
+  String get feedbackDescriptionLabel => '描述';
 
   @override
-  String get menuSigningIn => 'Signing in…';
+  String get menuSigningIn => '正在登录…';
 
   @override
-  String get menuSignInSync => 'Sign in to sync & back up';
+  String get menuSignInSync => '登录以同步和备份';
 
   @override
-  String get tagsSave => 'Save Tags';
+  String get tagsSave => '保存标签';
 
   @override
-  String get recipeFieldCategories => 'Categories';
+  String get recipeFieldCategories => '分类';
 
   @override
-  String get selectCategories => 'Select categories';
+  String get selectCategories => '选择分类';
 
   @override
-  String get searchOrCreateNew => 'Search or create new...';
+  String get searchOrCreateNew => '搜索或创建新的...';
 
   @override
-  String get noMatchesFound => 'No matches found';
+  String get noMatchesFound => '未找到匹配项';
 
   @override
-  String get taxonomyAddCategoryNew => 'Add as new category';
+  String get taxonomyAddCategoryNew => '添加为新分类';
 
   @override
-  String get ingredientSubstitutionsTitle => 'Ingredient Substitutions';
+  String get ingredientSubstitutionsTitle => '食材替代';
 
   @override
-  String get ingredientSubstitutionsSearch => 'Search for an ingredient...';
+  String get ingredientSubstitutionsSearch => '搜索食材...';
 
   @override
-  String get ingredientSubstitutionsSearchAll => 'Search all substitutions';
+  String get ingredientSubstitutionsSearchAll => '搜索所有替代';
 
   @override
-  String get ingredientName => 'Ingredient Name';
+  String get ingredientName => '食材名称';
 
   @override
-  String get ingredientNameHint => 'e.g. turmeric, tahini, miso';
+  String get ingredientNameHint => '例如 姜黄、芝麻酱、味噌';
 
   @override
-  String get ingredientBulkHint => 'Enter one ingredient per line:\n\n2 cups flour\n1 tsp salt\n3 eggs';
+  String get ingredientBulkHint => '每行输入一种食材：\n\n2杯面粉\n1茶匙盐\n3个鸡蛋';
 
   @override
-  String get viewPlans => 'View Plans';
+  String get viewPlans => '查看方案';
 
   @override
-  String get renewsLabel => 'Renews';
+  String get renewsLabel => '续订';
 
   @override
-  String get upgradeToProUnlock => 'Upgrade to Pro to unlock';
+  String get upgradeToProUnlock => '升级到Pro版解锁';
 
   @override
-  String get rpgFightAgain => 'Fight Again';
+  String get rpgFightAgain => '再战一次';
 
   @override
-  String get rpgAwesome => 'Awesome!';
+  String get rpgAwesome => '太棒了！';
 
   @override
-  String get rpgPurchase => 'Purchase';
+  String get rpgPurchase => '购买';
 
   @override
-  String get rpgEquipped => 'Equipped';
+  String get rpgEquipped => '已装备';
 
   @override
-  String get rpgClaim => 'Claim';
+  String get rpgClaim => '领取';
 
   @override
-  String get rpgGuild => 'Guild';
+  String get rpgGuild => '公会';
 
   @override
   String get rpgDmg => 'DMG';
 
   @override
-  String get rpgMana => 'Mana';
+  String get rpgMana => '法力';
 
   @override
-  String get rpgLevel => 'Level';
+  String get rpgLevel => '等级';
 
   @override
-  String get rpgTotalXp => 'Total XP';
+  String get rpgTotalXp => '总XP';
 
   @override
-  String get rpgLoginStreak => 'Login Streak';
+  String get rpgLoginStreak => '连续登录';
 
   @override
-  String get rpgGoldEarned => 'Gold Earned';
+  String get rpgGoldEarned => '获得的金币';
 
   @override
-  String get rpgGemsEarned => 'Gems Earned';
+  String get rpgGemsEarned => '获得的宝石';
 
   @override
-  String get rpgNextLevel => 'Next Level';
+  String get rpgNextLevel => '下一级';
 
   @override
-  String get rpgNotifyMe => 'Notify Me';
+  String get rpgNotifyMe => '通知我';
 
   @override
-  String get rpgGold => 'Gold';
+  String get rpgGold => '金币';
 
   @override
-  String get rpgGems => 'Gems';
+  String get rpgGems => '宝石';
 
   @override
-  String get rpgLottery => 'Gem Lottery';
+  String get rpgLottery => '宝石抽奖';
 
   @override
-  String get rpgClasses => 'Classes';
+  String get rpgClasses => '职业';
 
   @override
-  String get rpgDisplayName => 'Display Name';
+  String get rpgDisplayName => '显示名称';
 
   @override
-  String get rpgResetProgress => 'Reset Progress';
+  String get rpgResetProgress => '重置进度';
 
   @override
-  String get rpgResetProgressSubtitle => 'Start over from level 1';
+  String get rpgResetProgressSubtitle => '从1级重新开始';
 
   @override
-  String get rpgRecipeRarity => 'Recipe Rarity';
+  String get rpgRecipeRarity => '食谱稀有度';
 
   @override
-  String get settingsNoMatchingSettings => 'No matching settings';
+  String get settingsNoMatchingSettings => '没有匹配的设置';
 
   @override
-  String get settingsSearchHint => 'Search settings...';
+  String get settingsSearchHint => '搜索设置...';
 
   @override
-  String get textSizeSmall => 'Small';
+  String get textSizeSmall => '小';
 
   @override
-  String get textSizeDefault => 'Default';
+  String get textSizeDefault => '默认';
 
   @override
-  String get textSizeMedium => 'Medium';
+  String get textSizeMedium => '中';
 
   @override
-  String get textSizeLarge => 'Large';
+  String get textSizeLarge => '大';
 
   @override
-  String get textSizeExtraLarge => 'Extra Large';
+  String get textSizeExtraLarge => '特大';
 
   @override
-  String get resetDataClearedDesc => 'All data has been cleared successfully.\n\nWould you like to import the 10 default starter recipes?';
+  String get resetDataClearedDesc => '所有数据已成功清除。\n\n你想导入10个默认的入门食谱吗？';
 
   @override
-  String get importingDefaultRecipes => 'Importing default recipes...';
+  String get importingDefaultRecipes => '正在导入默认食谱...';
 
   @override
-  String get checking => 'Checking...';
+  String get checking => '检查中...';
 
   @override
-  String get connectedTapToManage => 'Connected • Tap to manage';
+  String get connectedTapToManage => '已连接 · 点击管理';
 
   @override
-  String get notConnected => 'Not connected';
+  String get notConnected => '未连接';
 
   @override
-  String get tapToSignIn => 'Tap to sign in';
+  String get tapToSignIn => '点击登录';
 
   @override
-  String get noneSelected => 'None Selected';
+  String get noneSelected => '未选择';
 
   @override
-  String get partialBackup => 'Partial Backup';
+  String get partialBackup => '部分备份';
 
   @override
-  String get settingsShopping => 'Shopping & Planning';
+  String get settingsShopping => '购物和计划';
 
   @override
-  String get settingsManage => 'Manage';
+  String get settingsManage => '管理';
 
   @override
-  String get manageTags => 'Manage Tags';
+  String get manageTags => '管理标签';
 
   @override
   String tagsApplied(int count) {
-    return '$count tags applied';
+    return '$count个标签已应用';
   }
 
   @override
   String tagsEditTitle(String name) {
-    return 'Edit \"$name\"';
+    return '编辑\"$name\"';
   }
 
   @override
-  String get tagsEditComingSoon => 'Tag editing coming soon!';
+  String get tagsEditComingSoon => '标签编辑即将推出！';
 
   @override
   String tagsRecipeCount(int count) {
-    return '$count recipes';
+    return '$count个食谱';
+  }
+
+  @override
+  String get communityMyPublications => '我的发布';
+
+  @override
+  String get communitySearchCookbooks => '搜索食谱书...';
+
+  @override
+  String get communitySortRecent => '最新';
+
+  @override
+  String get communitySortPopular => '热门';
+
+  @override
+  String get communitySortMostDownloaded => '下载最多';
+
+  @override
+  String communityNoResultsFor(String query) {
+    return '没有\"$query\"的结果';
+  }
+
+  @override
+  String get communityNoCookbooksYet => '还没有食谱书';
+
+  @override
+  String get communityClearSearch => '清除搜索';
+
+  @override
+  String get communityPublish => '发布';
+
+  @override
+  String communityByPublisher(String name) {
+    return '由$name发布';
+  }
+
+  @override
+  String communityRecipeCount(int count) {
+    return '$count个食谱';
+  }
+
+  @override
+  String get communityPublishCookbook => '发布食谱书';
+
+  @override
+  String get communitySignInToPublish => '登录以发布';
+
+  @override
+  String get communitySignInToPublishMessage => '你需要一个账户才能与社区分享食谱书。';
+
+  @override
+  String get communityGoToSettings => '前往设置';
+
+  @override
+  String get communityNoCookbooksToPublish => '没有可发布的食谱书';
+
+  @override
+  String get communityPublishInfo => '食谱书至少需要10个食谱才能发布。你的食谱将作为快照分享——更新不会同步。';
+
+  @override
+  String get communitySelectCookbook => '选择要发布的食谱书';
+
+  @override
+  String communityNeedMinRecipes(int count) {
+    return '至少需要10个食谱才能发布（当前有$count个）';
+  }
+
+  @override
+  String get communityPublishConfirmTitle => '发布到社区？';
+
+  @override
+  String communityPublishConfirmMessage(String name, int count) {
+    return '这将公开分享\"$name\"（$count个食谱）。任何人都可以浏览和下载。\n\n你可以随时取消发布。';
+  }
+
+  @override
+  String communityPublishSuccess(String name) {
+    return '\"$name\"已发布到社区！';
+  }
+
+  @override
+  String get communityPublishFailed => '发布失败';
+
+  @override
+  String communityRecipeCountNeedMore(int count) {
+    return '$count个食谱（需要10个以上）';
+  }
+
+  @override
+  String get communityNoPublicationsYet => '还没有发布';
+
+  @override
+  String get communityNoPublicationsMessage => '发布食谱书与社区分享。';
+
+  @override
+  String get communityUnpublish => '取消发布';
+
+  @override
+  String get communityUnpublishConfirmTitle => '取消发布？';
+
+  @override
+  String communityUnpublishConfirmMessage(String title) {
+    return '从社区移除\"$title\"？已下载的用户将保留他们的副本。';
+  }
+
+  @override
+  String communityUnpublishSuccess(String title) {
+    return '\"$title\"已取消发布';
+  }
+
+  @override
+  String get communityUnpublishFailed => '取消发布失败';
+
+  @override
+  String get communityRemovedByModeration => '已被审核移除';
+
+  @override
+  String communityPublicationStats(int recipeCount, int downloadCount, String timeAgo) {
+    return '$recipeCount个食谱 · $downloadCount次下载 · $timeAgo';
+  }
+
+  @override
+  String get communityPublicationNotFound => '未找到发布内容';
+
+  @override
+  String get communityReport => '举报';
+
+  @override
+  String get communityReportTitle => '举报此食谱书';
+
+  @override
+  String get communityReportSpam => '垃圾信息或低质量';
+
+  @override
+  String get communityReportInappropriate => '不当内容';
+
+  @override
+  String get communityReportStolen => '盗用/抄袭食谱';
+
+  @override
+  String get communityReportOther => '其他';
+
+  @override
+  String get communityReportSuccess => '举报已提交，谢谢！';
+
+  @override
+  String get communitySignInToReport => '登录以举报内容';
+
+  @override
+  String get communityDownloadFailed => '下载失败';
+
+  @override
+  String communityDownloadSuccess(String title, int count) {
+    return '已下载\"$title\"——添加了$count个食谱！';
+  }
+
+  @override
+  String communityDownloadFailedError(String error) {
+    return '下载失败：$error';
+  }
+
+  @override
+  String communityDownloadCount(int count) {
+    return '$count次下载';
+  }
+
+  @override
+  String get communityDownloading => '正在下载...';
+
+  @override
+  String get communityDownloadToMyCookbooks => '下载到我的食谱书';
+
+  @override
+  String communityPrepTime(int minutes) {
+    return '$minutes分钟准备';
+  }
+
+  @override
+  String communityCookTime(int minutes) {
+    return '$minutes分钟烹饪';
+  }
+
+  @override
+  String communityServingsCount(int count) {
+    return '$count份';
+  }
+
+  @override
+  String communityIngredientCount(int count) {
+    return '$count种食材';
+  }
+
+  @override
+  String get deleteRecipesTrashMessage => '食谱将移至回收站。你可以稍后恢复。';
+
+  @override
+  String get hintTitleExample => '例如 奶奶的苹果派';
+
+  @override
+  String get hintDescription => '食谱的简要描述';
+
+  @override
+  String get hintServingsExample => '例如 4';
+
+  @override
+  String get prepMin => '准备（分钟）';
+
+  @override
+  String get cookMin => '烹饪（分钟）';
+
+  @override
+  String get hintNotes => '技巧、变化、保存说明...';
+
+  @override
+  String get pinchToZoomCropped => '捏合缩放 · 裁剪区域将被保存';
+
+  @override
+  String get pinchToZoomOrUseAsIs => '捏合缩放裁剪 · 或直接使用';
+
+  @override
+  String get savingLabel => '正在保存...';
+
+  @override
+  String get emptyHeader => '（空标题）';
+
+  @override
+  String get emptyIngredient => '（空食材）';
+
+  @override
+  String get recipeUpdated => '食谱已更新！';
+
+  @override
+  String get nutritionLessInfo => '更少信息';
+
+  @override
+  String get nutritionMoreInfo => '更多信息';
+
+  @override
+  String scaleOriginal(String servings) {
+    return '原始：$servings';
+  }
+
+  @override
+  String get scaleAdjustQuantities => '调整食材用量';
+
+  @override
+  String get scaleOriginalLabel => '1倍（原始）';
+
+  @override
+  String get stepWillBeRemoved => '此步骤将被永久删除。';
+
+  @override
+  String stepsWillBeRemoved(int count) {
+    return '这$count个步骤将被永久删除。';
+  }
+
+  @override
+  String stepCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count个步骤',
+      one: '1个步骤',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get instructionsNoSteps => '还没有步骤';
+
+  @override
+  String get instructionsAddStepsGuide => '添加步骤来指导食谱制作';
+
+  @override
+  String get pinchToZoomPreview => '捏合缩放 · 这是你的照片效果预览';
+
+  @override
+  String ingredientCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count种食材',
+      one: '1种食材',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ingredientPerLineHint => '每行输入一种食材：\n\n2杯面粉\n1茶匙盐\n3个鸡蛋';
+
+  @override
+  String get ingredientTip => '提示：每行输入一种食材。每种食材后按回车键。';
+
+  @override
+  String get cookbookEditSubtitle => '重命名、封面照片';
+
+  @override
+  String get shareCookbookSubtitle => '链接、家庭或社区';
+
+  @override
+  String shareNamedCookbook(String name) {
+    return '分享\"$name\"';
+  }
+
+  @override
+  String get oneTimeLink => '一次性链接';
+
+  @override
+  String get oneTimeLinkDescription => '免费 · 24小时过期 · 任何人可下载';
+
+  @override
+  String get familyShare => '家庭分享';
+
+  @override
+  String get familyShareDescription => '与家庭成员实时同步';
+
+  @override
+  String get postToCommunity => '发布到社区';
+
+  @override
+  String get postToCommunityDescription => '发布供所有人发现和下载';
+
+  @override
+  String get signInToShare => '登录以创建分享链接';
+
+  @override
+  String get generatingLink => '正在生成链接...';
+
+  @override
+  String get failedToCreateLink => '创建链接失败';
+
+  @override
+  String get linkCreated => '链接已创建！';
+
+  @override
+  String get expiresIn24Hours => '24小时后过期';
+
+  @override
+  String get linkCopied => '链接已复制！';
+
+  @override
+  String unlockFeature(String feature) {
+    return '解锁$feature';
+  }
+
+  @override
+  String get notNow => '暂时不要';
+
+  @override
+  String get upgradeButton => '升级';
+
+  @override
+  String publishMinRecipes(int count) {
+    return '至少需要10个食谱才能发布（当前有$count个）';
+  }
+
+  @override
+  String get publishConfirmTitle => '发布到社区？';
+
+  @override
+  String publishConfirmMessage(String name, int count) {
+    return '\"$name\"（$count个食谱）将公开显示。任何人都可以浏览和下载。\n\n你可以随时从社区→我的发布中移除。';
+  }
+
+  @override
+  String get publishButton => '发布';
+
+  @override
+  String get selectCourse => '选择课程';
+
+  @override
+  String get selectCategory => '选择分类';
+
+  @override
+  String get taxonomyNone => '无';
+
+  @override
+  String createTaxonomy(String name) {
+    return '创建\"$name\"';
+  }
+
+  @override
+  String get addAsNewCourse => '添加为新课程';
+
+  @override
+  String get addAsNewCategory => '添加为新分类';
+
+  @override
+  String doneWithCount(int count) {
+    return '完成（$count）';
+  }
+
+  @override
+  String get quickAccessEmptyAll => '还没有快速访问的食谱';
+
+  @override
+  String get quickAccessEmptyMealPlan => '没有计划的餐食';
+
+  @override
+  String get quickAccessEmptyPinned => '没有固定的食谱';
+
+  @override
+  String get quickAccessEmptyRecent => '没有最近的食谱';
+
+  @override
+  String get importingRecipe => '正在导入食谱…';
+
+  @override
+  String errorWithMessage(String message) {
+    return '错误：$message';
+  }
+
+  @override
+  String get minutesPrepSuffix => '分钟准备';
+
+  @override
+  String get minutesCookSuffix => '分钟烹饪';
+
+  @override
+  String get couldNotOpenBrowser => '无法打开浏览器';
+
+  @override
+  String couldNotOpenUrl(String url) {
+    return '无法打开$url';
+  }
+
+  @override
+  String get discord => 'Discord';
+
+  @override
+  String get discordLinkAccount => '关联Discord账户';
+
+  @override
+  String get discordLinkSubtitle => '连接你的Discord以使用社区功能';
+
+  @override
+  String get discordSignInFirst => '请先登录以关联Discord';
+
+  @override
+  String get discordUnlink => '取消关联Discord';
+
+  @override
+  String get discordUnlinkFailed => '取消关联Discord失败';
+
+  @override
+  String get discordUnlinkSubtitle => '移除你的Discord连接';
+
+  @override
+  String get discordUnlinked => 'Discord已取消关联';
+
+  @override
+  String get familyCodeCopied => '邀请码已复制！';
+
+  @override
+  String get familyCopyLink => '复制链接';
+
+  @override
+  String get familyCreate => '创建家庭';
+
+  @override
+  String get familyCreateFailed => '创建家庭失败';
+
+  @override
+  String get familyCreateTitle => '创建家庭';
+
+  @override
+  String get familyCreated => '家庭已创建！';
+
+  @override
+  String get familyDelete => '删除家庭';
+
+  @override
+  String get familyDeleteConfirm => '确定要删除此家庭吗？所有成员将被移除。';
+
+  @override
+  String get familyDeleted => '家庭已删除';
+
+  @override
+  String get familyEnterInviteCode => '输入邀请码';
+
+  @override
+  String get familyInvite => '邀请成员';
+
+  @override
+  String get familyJoinAction => '加入';
+
+  @override
+  String get familyJoinFailed => '加入家庭失败';
+
+  @override
+  String get familyJoinTitle => '加入家庭';
+
+  @override
+  String get familyJoinWithCode => '使用代码加入';
+
+  @override
+  String familyJoined(String familyName) {
+    return '已加入$familyName！';
+  }
+
+  @override
+  String get familyLeave => '离开家庭';
+
+  @override
+  String get familyLeaveAction => '离开';
+
+  @override
+  String get familyLeaveConfirm => '确定要离开此家庭吗？';
+
+  @override
+  String get familyLeft => '已离开家庭';
+
+  @override
+  String get familyLinkCopied => '邀请链接已复制！';
+
+  @override
+  String get familyManage => '管理你的家庭';
+
+  @override
+  String familyMemberRemoved(String displayName) {
+    return '$displayName已移除';
+  }
+
+  @override
+  String get familyMembers => '成员';
+
+  @override
+  String familyMembersCount(int current, int max) {
+    return '$current/$max名成员';
+  }
+
+  @override
+  String get familyNameHint => '家庭名称';
+
+  @override
+  String get familyNewCodeGenerated => '新邀请码已生成';
+
+  @override
+  String get familyOwner => '拥有者';
+
+  @override
+  String get familyRegenerateCode => '重新生成代码';
+
+  @override
+  String get familyRemoveMember => '移除成员';
+
+  @override
+  String familyRemoveMemberConfirm(String displayName) {
+    return '从家庭中移除$displayName？';
+  }
+
+  @override
+  String get familyRename => '重命名家庭';
+
+  @override
+  String familyShareMessage(String inviteCode, String shareLink) {
+    return '加入我在Recipe Spellbook上的家庭！代码：$inviteCode或使用此链接：$shareLink';
+  }
+
+  @override
+  String get familyShareSubject => '加入我的Recipe Spellbook家庭';
+
+  @override
+  String get familyShareUpgradeMessage => '升级以实时与家庭成员分享食谱书。';
+
+  @override
+  String get familySharing => '家庭分享';
+
+  @override
+  String get familySharingDescription => '与家人分享食谱书、购物清单和餐食计划。';
+
+  @override
+  String get familySharingSubtitle => '分享食谱书、清单和餐食计划';
+
+  @override
+  String ingredientSubstitutesFor(String ingredientName) {
+    return '$ingredientName的替代品';
+  }
+
+  @override
+  String get ingredientSubstitutionsNoResults => '未找到替代品';
+
+  @override
+  String ingredientSubstitutionsNotFound(String ingredientName) {
+    return '未找到$ingredientName的替代品';
+  }
+
+  @override
+  String get ingredientSubstitutionsTryDifferent => '试试其他食材';
+
+  @override
+  String get integrationsChecking => '检查中...';
+
+  @override
+  String get integrationsConnectedManage => '已连接 - 点击管理';
+
+  @override
+  String get integrationsLinked => '已关联';
+
+  @override
+  String get integrationsLinkedManage => '已关联 - 点击管理';
+
+  @override
+  String get integrationsNotConnected => '未连接';
+
+  @override
+  String get integrationsTapToLink => '点击关联';
+
+  @override
+  String get integrationsTapToSignIn => '点击登录';
+
+  @override
+  String get nutritionCalculateFromEdit => '从编辑界面计算';
+
+  @override
+  String get nutritionCaloriesAlwaysShow => '始终显示卡路里';
+
+  @override
+  String get nutritionChartStyle => '图表样式';
+
+  @override
+  String get nutritionResetDefaults => '重置为默认';
+
+  @override
+  String get nutritionSettingsLink => '营养设置';
+
+  @override
+  String get nutritionTapToCalculate => '点击计算营养';
+
+  @override
+  String get nutritionVisibleNutrients => '可见营养素';
+
+  @override
+  String pantryAddedStaples(int count) {
+    return '已添加$count种常备食材到食材柜';
+  }
+
+  @override
+  String get pantryClearAll => '全部清除';
+
+  @override
+  String get pantryClearMessage => '从食材柜中移除所有物品？';
+
+  @override
+  String get pantryCommonStaples => '常备食材';
+
+  @override
+  String get pantryEmpty => '你的食材柜是空的';
+
+  @override
+  String get pantryEmptySubtitle => '添加你常备的食材';
+
+  @override
+  String get pantryInfoMessage => '食材柜中的物品在添加食谱食材时将从购物清单中排除。';
+
+  @override
+  String pantryItemCount(int count) {
+    return '$count个物品';
+  }
+
+  @override
+  String get rpgAchievements => '成就';
+
+  @override
+  String get rpgAttack => '攻击！（10法力）';
+
+  @override
+  String get rpgBattleArena => '⚔️ 战斗竞技场';
+
+  @override
+  String get rpgBoss => 'BOSS';
+
+  @override
+  String get rpgBossDamage => 'Boss伤害';
+
+  @override
+  String get rpgBossDefeated => 'Boss已击败！';
+
+  @override
+  String get rpgBossFight => 'Boss战';
+
+  @override
+  String get rpgChooseYourClass => '选择你的职业';
+
+  @override
+  String get rpgClassBonusSubtitle => '每个职业都有独特的加成';
+
+  @override
+  String get rpgClassBonusesList => '职业加成';
+
+  @override
+  String get rpgClassBonusesTitle => '职业加成';
+
+  @override
+  String get rpgComingSoon => '即将推出！';
+
+  @override
+  String get rpgCommunity => '社区';
+
+  @override
+  String get rpgCommunityDescription => '与世界各地的厨师竞争！';
+
+  @override
+  String get rpgCommunityLeaderboard => '社区排行榜';
+
+  @override
+  String get rpgCooked => '已烹饪';
+
+  @override
+  String get rpgCosmetics => '装饰品';
+
+  @override
+  String get rpgCrit => '暴击！';
+
+  @override
+  String rpgDaysAgo(int count) {
+    return '$count天前';
+  }
+
+  @override
+  String rpgDaysCount(int count) {
+    return '$count天';
+  }
+
+  @override
+  String get rpgGemLottery => '宝石抽奖';
+
+  @override
+  String rpgGemsAvailable(int count) {
+    return '$count颗宝石可用';
+  }
+
+  @override
+  String rpgHoursAgo(int count) {
+    return '$count小时前';
+  }
+
+  @override
+  String get rpgHowYouCompare => '你的排名对比';
+
+  @override
+  String get rpgHp => 'HP';
+
+  @override
+  String get rpgJustNow => '刚刚';
+
+  @override
+  String get rpgKeepEarningXp => '继续赚取XP来解锁此敌人！';
+
+  @override
+  String rpgKillStreak(int count) {
+    return '连杀：$count 🔥';
+  }
+
+  @override
+  String get rpgLeaderboard => '排行榜';
+
+  @override
+  String rpgLevelN(int level) {
+    return '等级$level';
+  }
+
+  @override
+  String rpgLevelRequired(int level) {
+    return '需要等级$level';
+  }
+
+  @override
+  String get rpgLotteryCost => '每次旋转花费1颗宝石';
+
+  @override
+  String rpgLotteryResultGems(int amount) {
+    return '你赢得了$amount颗宝石！';
+  }
+
+  @override
+  String rpgLotteryResultGold(int amount) {
+    return '你赢得了$amount金币！';
+  }
+
+  @override
+  String get rpgLotteryResultNothing => '下次好运！';
+
+  @override
+  String get rpgLotteryResultRarePet => '你发现了一只稀有宠物！';
+
+  @override
+  String rpgLotteryResultXp(int amount) {
+    return '你获得了$amount XP！';
+  }
+
+  @override
+  String get rpgManaHint => '通过食谱赚取XP来恢复法力 · 升级可完全补充';
+
+  @override
+  String get rpgMilestones => '里程碑';
+
+  @override
+  String rpgMinutesAgo(int count) {
+    return '$count分钟前';
+  }
+
+  @override
+  String get rpgNoMana => '没有法力！';
+
+  @override
+  String get rpgProfileSettings => '资料设置';
+
+  @override
+  String get rpgQuickActions => '快速操作';
+
+  @override
+  String get rpgRecipes => '食谱';
+
+  @override
+  String get rpgReset => '重置';
+
+  @override
+  String get rpgResetProgressConfirmMessage => '这将重置你所有的RPG进度，包括等级、XP、金币和宝石。此操作无法撤销。';
+
+  @override
+  String get rpgResetProgressConfirmTitle => '重置进度？';
+
+  @override
+  String rpgResetsInHours(int count) {
+    return '$count小时后重置';
+  }
+
+  @override
+  String rpgResetsInMinutes(int count) {
+    return '$count分钟后重置';
+  }
+
+  @override
+  String get rpgSpin => '旋转！';
+
+  @override
+  String get rpgStreak => '连续';
+
+  @override
+  String get rpgVictory => '胜利！';
+
+  @override
+  String rpgYouDefeated(String name) {
+    return '你击败了$name！';
+  }
+
+  @override
+  String get rpgYourStatistics => '你的统计数据';
+
+  @override
+  String get rpgYourStats => '你的状态';
+
+  @override
+  String get settingsBrowseCommunity => '浏览社区';
+
+  @override
+  String get settingsBrowseCommunitySubtitle => '发现公开的食谱书';
+
+  @override
+  String get settingsCommunity => '社区';
+
+  @override
+  String get settingsFamily => '家庭';
+
+  @override
+  String get settingsIntegrations => '集成';
+
+  @override
+  String get settingsMyPublications => '我的发布';
+
+  @override
+  String get settingsMyPublicationsSubtitle => '管理你已发布的食谱书';
+
+  @override
+  String get settingsShoppingPlanning => '购物和计划';
+
+  @override
+  String shoppingAddCountItems(int count) {
+    return '添加$count个物品';
+  }
+
+  @override
+  String get shoppingAddIngredient => '添加食材';
+
+  @override
+  String shoppingAddedItemName(String name) {
+    return '已添加\"$name\"';
+  }
+
+  @override
+  String shoppingAddedNotFound(int added, int failed) {
+    return '$added个已添加，$failed个未找到';
+  }
+
+  @override
+  String shoppingAddingTo(String provider) {
+    return '正在添加到$provider…';
+  }
+
+  @override
+  String get shoppingCamera => '相机';
+
+  @override
+  String shoppingCheckedItemsCount(int count) {
+    return '已勾选物品（$count）';
+  }
+
+  @override
+  String shoppingCouldNotAccessSource(String source) {
+    return '无法访问$source';
+  }
+
+  @override
+  String shoppingCountAdded(int count) {
+    return '$count个已添加';
+  }
+
+  @override
+  String shoppingCreatingListOn(String provider) {
+    return '正在$provider上创建清单…';
+  }
+
+  @override
+  String shoppingCurrentOfTotal(int current, int total) {
+    return '$current/$total个物品';
+  }
+
+  @override
+  String shoppingDeleteListConfirm(String name) {
+    return '确定要删除\"$name\"吗？';
+  }
+
+  @override
+  String shoppingErrorReadingImage(String error) {
+    return '读取图片错误：$error';
+  }
+
+  @override
+  String shoppingExportFailed(String error) {
+    return '导出失败：$error';
+  }
+
+  @override
+  String shoppingExportTitle(String name) {
+    return '导出\"$name\"';
+  }
+
+  @override
+  String get shoppingFamilyShare => '家庭分享';
+
+  @override
+  String get shoppingFamilyShareSubtitle => '与家人或通过一次性链接分享清单';
+
+  @override
+  String get shoppingFromPhoto => '从照片';
+
+  @override
+  String get shoppingFromText => '从文本';
+
+  @override
+  String get shoppingGallery => '相册';
+
+  @override
+  String get shoppingImportItems => '导入物品';
+
+  @override
+  String get shoppingImportShoppingList => '导入购物清单';
+
+  @override
+  String get shoppingImportTextHint => '2杯面粉\n鸡胸肉\n1磅牛肉末\n牛奶\n...';
+
+  @override
+  String get shoppingImportedList => '导入的清单';
+
+  @override
+  String get shoppingIngredientHint => '例如 鸡胸肉、橄榄油';
+
+  @override
+  String get shoppingIngredientName => '食材名称';
+
+  @override
+  String shoppingIngredientsAvailable(int count) {
+    return '$count种食材可用';
+  }
+
+  @override
+  String shoppingItemsAddedCount(int count) {
+    return '$count个物品已添加';
+  }
+
+  @override
+  String get shoppingItemsAddedSuccess => '物品已添加！';
+
+  @override
+  String shoppingItemsCopiedToClipboard(int count) {
+    return '$count个物品已复制到剪贴板';
+  }
+
+  @override
+  String shoppingItemsInCart(int count, String provider) {
+    return '$count个物品在你的$provider购物车中';
+  }
+
+  @override
+  String shoppingItemsOnInstacartList(int count) {
+    return '$count个物品在你的Instacart清单上';
+  }
+
+  @override
+  String get shoppingJustAdded => '刚刚添加';
+
+  @override
+  String shoppingListCopiedOpening(String name) {
+    return '清单已复制！正在打开$name...';
+  }
+
+  @override
+  String get shoppingListReady => '购物清单已准备好！';
+
+  @override
+  String shoppingNotFoundItems(String items) {
+    return '未找到：$items';
+  }
+
+  @override
+  String get shoppingOneItemPerLine => '每行一个物品';
+
+  @override
+  String get shoppingPartiallyAdded => '部分添加';
+
+  @override
+  String get shoppingProviderConnected => '已连接';
+
+  @override
+  String get shoppingRemoveFromList => '从清单中移除';
+
+  @override
+  String get shoppingStartTyping => '开始输入查看建议';
+
+  @override
+  String get shoppingTapToAddToCart => '点击将物品直接添加到购物车';
+
+  @override
+  String get shoppingTapToCreateShoppableList => '点击创建可购物清单';
+
+  @override
+  String get swipeToSwitch => '滑动切换分区';
+
+  @override
+  String get syncFailed => '同步失败';
+
+  @override
+  String syncSuccess(int pushed, int pulled) {
+    return '已同步：$pushed个已推送，$pulled个已拉取';
+  }
+
+  @override
+  String get textSizePreview => '预览';
+
+  @override
+  String get transferDeviceDesktop => '桌面端';
+
+  @override
+  String get transferDeviceMobileApp => '移动应用';
+
+  @override
+  String get transferDeviceThisDevice => '此设备';
+
+  @override
+  String transferExplanation(String currentDevice, String targetDevice) {
+    return '将所有食谱、食谱书和餐食计划从$currentDevice移至$targetDevice。这是一次性复制，不是同步。';
+  }
+
+  @override
+  String transferImportedSuccess(int count) {
+    return '$count个项目导入成功。';
+  }
+
+  @override
+  String get transferOr => '或';
+
+  @override
+  String transferReceiveOn(String device) {
+    return '在$device上接收';
+  }
+
+  @override
+  String transferSendFrom(String device) {
+    return '从$device发送';
+  }
+
+  @override
+  String transferSendSubtitle(String device) {
+    return '生成一个代码给你的$device接收';
+  }
+
+  @override
+  String get importGuidesTitle => '导入指南';
+
+  @override
+  String get importGuidesOpenInBrowser => '在浏览器中打开指南';
+
+  @override
+  String get importGuideHeroTitle => '从任何地方导入你的食谱';
+
+  @override
+  String get importGuideHeroSubtitle => '点击下方任意指南查看带截图的分步说明。';
+
+  @override
+  String get importGuideQuickTipLabel => '快速提示';
+
+  @override
+  String get importGuideQuickTipText => '最快的方法？复制任何食谱链接并分享到Recipe Spellbook——几乎适用于任何应用。';
+
+  @override
+  String get importGuideWebButton => '网页';
+
+  @override
+  String get importGuideFollowInBrowser => '在浏览器中跟随操作';
+
+  @override
+  String get importGuideTagPopular => '热门';
+
+  @override
+  String get importGuideTagEasiest => '最简单';
+
+  @override
+  String get importGuideDifficultyEasy => '简单';
+
+  @override
+  String get importGuideDifficultyMedium => '中等';
+
+  @override
+  String get importGuideTime15Sec => '15秒';
+
+  @override
+  String get importGuideTime30Sec => '30秒';
+
+  @override
+  String get importGuideTime1Min => '1分钟';
+
+  @override
+  String get importGuideTime2To5Min => '2–5分钟';
+
+  @override
+  String importGuideStepsCount(int count) {
+    return '$count个步骤';
+  }
+
+  @override
+  String get importGuideCategorySocial => '社交媒体';
+
+  @override
+  String get importGuideCategoryWebsites => '网站';
+
+  @override
+  String get importGuideCategoryPhotos => '照片和文件';
+
+  @override
+  String get importGuideCategoryOtherApps => '其他食谱应用';
+
+  @override
+  String get importGuideScreenshotNeeded => '需要截图';
+
+  @override
+  String get importGuideGifNeeded => '需要GIF';
+
+  @override
+  String get importGuideVideoNeeded => '需要视频';
+
+  @override
+  String get importGuideInstagramTitle => 'Instagram';
+
+  @override
+  String get importGuideInstagramSubtitle => '从Reels、帖子和快拍导入';
+
+  @override
+  String get importGuideInstagramStep1Title => '找到一个食谱帖子或Reel';
+
+  @override
+  String get importGuideInstagramStep1Desc => '打开Instagram找到你想保存的食谱。适用于信息流帖子、Reels和轮播。';
+
+  @override
+  String get importGuideInstagramStep2Title => '点击分享按钮';
+
+  @override
+  String get importGuideInstagramStep2Desc => '点击帖子下方的纸飞机图标（分享）。';
+
+  @override
+  String get importGuideInstagramStep3Title => '分享到Recipe Spellbook';
+
+  @override
+  String get importGuideInstagramStep3Desc => '滑动应用行并点击Recipe Spellbook。如果看不到，点击\"更多\"在列表中找到它。';
+
+  @override
+  String get importGuideInstagramStep3Tip => '在Android上，你也可以复制链接并在应用中粘贴。';
+
+  @override
+  String get importGuideInstagramStep4Title => '查看提取的食谱';
+
+  @override
+  String get importGuideInstagramStep4Desc => '我们的AI会读取说明文字、标签和图片中的文字来构建你的食谱。检查食材和步骤，然后保存。';
+
+  @override
+  String get importGuideInstagramStep5Title => '选择食谱书并保存';
+
+  @override
+  String get importGuideInstagramStep5Desc => '选择保存到哪本食谱书，添加标签，然后点击保存。完成！';
+
+  @override
+  String get importGuideTiktokTitle => 'TikTok';
+
+  @override
+  String get importGuideTiktokSubtitle => '从烹饪视频保存食谱';
+
+  @override
+  String get importGuideTiktokStep1Title => '找到一个食谱TikTok';
+
+  @override
+  String get importGuideTiktokStep1Desc => '打开TikTok找到你想保存的烹饪视频。';
+
+  @override
+  String get importGuideTiktokStep2Title => '点击分享箭头';
+
+  @override
+  String get importGuideTiktokStep2Desc => '点击视频右侧的箭头图标。';
+
+  @override
+  String get importGuideTiktokStep3Title => '选择\"复制链接\"或直接分享';
+
+  @override
+  String get importGuideTiktokStep3Desc => '点击\"复制链接\"并在Recipe Spellbook中粘贴，或在分享选项中找到Recipe Spellbook。';
+
+  @override
+  String get importGuideTiktokStep3Tip => '\"复制链接\"通常是TikTok最可靠的方法。';
+
+  @override
+  String get importGuideTiktokStep4Title => '在Recipe Spellbook中粘贴链接';
+
+  @override
+  String get importGuideTiktokStep4Desc => '打开Recipe Spellbook，点击+，选择\"从网站/链接\"，粘贴TikTok网址。';
+
+  @override
+  String get importGuideTiktokStep5Title => '查看并保存';
+
+  @override
+  String get importGuideTiktokStep5Desc => 'AI会从视频描述和评论中提取食谱。查看并保存到你的食谱书。';
+
+  @override
+  String get importGuideYoutubeTitle => 'YouTube';
+
+  @override
+  String get importGuideYoutubeSubtitle => '从烹饪频道和Shorts导入';
+
+  @override
+  String get importGuideYoutubeStep1Title => '找到一个食谱视频';
+
+  @override
+  String get importGuideYoutubeStep1Desc => '打开YouTube找到一个烹饪视频。适用于普通视频、Shorts和直播回放。';
+
+  @override
+  String get importGuideYoutubeStep2Title => '点击分享';
+
+  @override
+  String get importGuideYoutubeStep2Desc => '点击视频标题下方的分享按钮。';
+
+  @override
+  String get importGuideYoutubeStep3Title => '复制链接或分享到应用';
+
+  @override
+  String get importGuideYoutubeStep3Desc => '点击\"复制链接\"或在分享面板中找到Recipe Spellbook。';
+
+  @override
+  String get importGuideYoutubeStep3Tip => '许多YouTube创作者会在视频描述中放完整食谱——这使提取更准确。';
+
+  @override
+  String get importGuideYoutubeStep4Title => '粘贴并导入';
+
+  @override
+  String get importGuideYoutubeStep4Desc => '在Recipe Spellbook中，点击+ > \"从网站/链接\"并粘贴。AI会读取视频描述中的食材和步骤。';
+
+  @override
+  String get importGuidePinterestTitle => 'Pinterest';
+
+  @override
+  String get importGuidePinterestSubtitle => '将收藏的食谱保存到食谱书';
+
+  @override
+  String get importGuidePinterestStep1Title => '打开一个食谱图钉';
+
+  @override
+  String get importGuidePinterestStep1Desc => '点击食谱图钉打开它。大多数图钉链接到原始食谱网站。';
+
+  @override
+  String get importGuidePinterestStep2Title => '点击来源链接';
+
+  @override
+  String get importGuidePinterestStep2Desc => '点击图钉顶部或底部的链接访问原始食谱页面。';
+
+  @override
+  String get importGuidePinterestStep2Tip => '如果图钉没有来源链接，请尝试下面的分享方法。';
+
+  @override
+  String get importGuidePinterestStep3Title => '复制网站网址';
+
+  @override
+  String get importGuidePinterestStep3Desc => '食谱网站在浏览器中打开后，从地址栏复制网址。';
+
+  @override
+  String get importGuidePinterestStep4Title => '在Recipe Spellbook中导入';
+
+  @override
+  String get importGuidePinterestStep4Desc => '点击+ > \"从网站/链接\"，粘贴网址，食谱会自动提取。';
+
+  @override
+  String get importGuideWebsiteTitle => '任意食谱网站';
+
+  @override
+  String get importGuideWebsiteSubtitle => 'AllRecipes、Food Network、BBC、博客等';
+
+  @override
+  String get importGuideWebsiteStep1Title => '打开食谱页面';
+
+  @override
+  String get importGuideWebsiteStep1Desc => '浏览AllRecipes、Food Network、BBC Good Food、Serious Eats、NYT Cooking或任何美食博客上的食谱。';
+
+  @override
+  String get importGuideWebsiteStep2Title => '复制网址';
+
+  @override
+  String get importGuideWebsiteStep2Desc => '点击地址栏并复制食谱的完整网址。';
+
+  @override
+  String get importGuideWebsiteStep3Title => '在Recipe Spellbook中点击+';
+
+  @override
+  String get importGuideWebsiteStep3Desc => '打开应用并点击+按钮开始添加新食谱。';
+
+  @override
+  String get importGuideWebsiteStep4Title => '选择\"从网站/链接\"';
+
+  @override
+  String get importGuideWebsiteStep4Desc => '选择网站导入选项并粘贴复制的网址。';
+
+  @override
+  String get importGuideWebsiteStep5Title => '查看并保存';
+
+  @override
+  String get importGuideWebsiteStep5Desc => '食谱会立即提取——标题、食材、步骤、烹饪时间甚至照片。查看并保存。';
+
+  @override
+  String get importGuideWebsiteStep5Tip => '支持10,000+个食谱网站。如果提取失败，请尝试\"从文本\"方法。';
+
+  @override
+  String get importGuidePhotoTitle => '照片/相机';
+
+  @override
+  String get importGuidePhotoSubtitle => '从书籍、杂志或手写卡片扫描食谱';
+
+  @override
+  String get importGuidePhotoStep1Title => '拍摄食谱照片';
+
+  @override
+  String get importGuidePhotoStep1Desc => '拍摄食谱书、杂志页面或手写食谱卡的清晰、光线充足的照片。确保所有文字清晰可读。';
+
+  @override
+  String get importGuidePhotoStep1Tip => '最佳效果：使用良好光线，保持稳定，确保整个食谱在画面内。避免阴影。';
+
+  @override
+  String get importGuidePhotoStep2Title => '点击+然后\"从照片\"';
+
+  @override
+  String get importGuidePhotoStep2Desc => '打开Recipe Spellbook，点击+，选择\"从照片\"。从相册选择照片或拍摄新照片。';
+
+  @override
+  String get importGuidePhotoStep3Title => 'AI扫描文字';
+
+  @override
+  String get importGuidePhotoStep3Desc => 'OCR技术读取照片中的文字，AI智能分离标题、食材和步骤。';
+
+  @override
+  String get importGuidePhotoStep4Title => '查看并修正错误';
+
+  @override
+  String get importGuidePhotoStep4Desc => '检查提取的食谱。OCR偶尔会误读字符——\"1/2\"可能变成\"1l2\"。修正错误并保存。';
+
+  @override
+  String get importGuidePhotoStep4Tip => '手写食谱也可以，但打印文字效果最佳。';
+
+  @override
+  String get importGuidePdfTitle => 'PDF文档';
+
+  @override
+  String get importGuidePdfSubtitle => '从PDF食谱书或下载文件导入';
+
+  @override
+  String get importGuidePdfStep1Title => '准备好食谱PDF';
+
+  @override
+  String get importGuidePdfStep1Desc => '适用于下载的食谱PDF、电子食谱书、扫描文档或通过邮件分享的PDF。';
+
+  @override
+  String get importGuidePdfStep2Title => '点击+然后\"从PDF\"';
+
+  @override
+  String get importGuidePdfStep2Desc => '打开Recipe Spellbook，点击+，选择\"从PDF\"，然后选择你的文件。';
+
+  @override
+  String get importGuidePdfStep3Title => '选择食谱页面';
+
+  @override
+  String get importGuidePdfStep3Desc => '如果PDF有多页，选择包含你要导入食谱的页面。';
+
+  @override
+  String get importGuidePdfStep4Title => '查看并保存';
+
+  @override
+  String get importGuidePdfStep4Desc => '从PDF中提取食谱。查看食材和步骤，然后保存到你的食谱书。';
+
+  @override
+  String get importGuideTextTitle => '文本/粘贴';
+
+  @override
+  String get importGuideTextSubtitle => '从消息、邮件或笔记粘贴食谱';
+
+  @override
+  String get importGuideTextStep1Title => '复制食谱文本';
+
+  @override
+  String get importGuideTextStep1Desc => '从短信、邮件、笔记应用、WhatsApp或其他任何地方复制食谱文本。';
+
+  @override
+  String get importGuideTextStep2Title => '点击+然后\"从文本\"';
+
+  @override
+  String get importGuideTextStep2Desc => '打开Recipe Spellbook，点击+，选择\"从文本\"。';
+
+  @override
+  String get importGuideTextStep3Title => '粘贴你的食谱';
+
+  @override
+  String get importGuideTextStep3Desc => '将复制的文本粘贴到文本框中。AI会自动分离标题、食材和步骤。';
+
+  @override
+  String get importGuideTextStep3Tip => '即使是未格式化的文本也可以——AI能智能解析食材用量和步骤说明。';
+
+  @override
+  String get importGuideTextStep4Title => '查看并保存';
+
+  @override
+  String get importGuideTextStep4Desc => '检查解析的食谱，进行调整，然后保存。';
+
+  @override
+  String get importGuidePaprikaTitle => 'Paprika Recipe Manager';
+
+  @override
+  String get importGuidePaprikaSubtitle => '批量导入你的整个Paprika库';
+
+  @override
+  String get importGuidePaprikaStep1Title => '从Paprika导出';
+
+  @override
+  String get importGuidePaprikaStep1Desc => '在Paprika中，前往设置（齿轮图标）> 导出。选择\"导出所有食谱\"并保存为.paprikarecipes文件。';
+
+  @override
+  String get importGuidePaprikaStep2Title => '将文件发送到你的设备';
+
+  @override
+  String get importGuidePaprikaStep2Desc => '通过邮件发送给自己，保存到iCloud/Google Drive，或使用AirDrop传输。';
+
+  @override
+  String get importGuidePaprikaStep3Title => '在Recipe Spellbook中导入';
+
+  @override
+  String get importGuidePaprikaStep3Desc => '打开Recipe Spellbook，前往设置 > 数据 > 导入，选择.paprikarecipes文件。';
+
+  @override
+  String get importGuidePaprikaStep4Title => '等待导入';
+
+  @override
+  String get importGuidePaprikaStep4Desc => '你所有的Paprika食谱都会导入，保留食材、步骤、笔记、照片和分类。';
+
+  @override
+  String get importGuidePaprikaStep4Tip => '大型库（100+食谱）可能需要一分钟。导入期间应用保持响应。';
+
+  @override
+  String get importGuideOtherAppsTitle => '其他食谱应用';
+
+  @override
+  String get importGuideOtherAppsSubtitle => 'Mealime、CopyMeThat、AnyList、Cookmate等';
+
+  @override
+  String get importGuideOtherAppsStep1Title => '从你当前的应用导出';
+
+  @override
+  String get importGuideOtherAppsStep1Desc => '大多数食谱应用支持导出为JSON、HTML或文本。查看它们的设置 > 导出或备份部分。';
+
+  @override
+  String get importGuideOtherAppsStep1Tip => '常见格式：JSON（最佳）、HTML、PDF或纯文本。JSON保留最多数据。';
+
+  @override
+  String get importGuideOtherAppsStep2Title => '将文件传到你的设备';
+
+  @override
+  String get importGuideOtherAppsStep2Desc => '使用邮件、云存储或文件传输方式将导出文件保存或传输到你的手机。';
+
+  @override
+  String get importGuideOtherAppsStep3Title => '通过设置导入';
+
+  @override
+  String get importGuideOtherAppsStep3Desc => '在Recipe Spellbook中，前往设置 > 数据 > 导入，选择导出的文件。应用支持JSON、HTML和常见食谱格式。';
+
+  @override
+  String get importGuideOtherAppsStep4Title => '检查你的食谱';
+
+  @override
+  String get importGuideOtherAppsStep4Desc => '导入的食谱会出现在默认食谱书中。之后你可以将它们重新整理到不同的食谱书中。';
+
+  @override
+  String get importGuideDeviceTransferTitle => '设备传输';
+
+  @override
+  String get importGuideDeviceTransferSubtitle => '无需账户在手机之间移动食谱';
+
+  @override
+  String get importGuideDeviceTransferStep1Title => '在旧设备上打开传输';
+
+  @override
+  String get importGuideDeviceTransferStep1Desc => '在旧手机上，打开Recipe Spellbook并前往菜单 > 设备传输 > 发送。';
+
+  @override
+  String get importGuideDeviceTransferStep2Title => '获取传输代码';
+
+  @override
+  String get importGuideDeviceTransferStep2Desc => '会生成一个6位字符的代码。此代码在15分钟内有效。';
+
+  @override
+  String get importGuideDeviceTransferStep3Title => '在新设备上输入代码';
+
+  @override
+  String get importGuideDeviceTransferStep3Desc => '在新手机上，安装Recipe Spellbook并前往菜单 > 设备传输 > 接收。输入代码。';
+
+  @override
+  String get importGuideDeviceTransferStep4Title => '食谱已传输！';
+
+  @override
+  String get importGuideDeviceTransferStep4Desc => '你所有的食谱、食谱书、购物清单和餐食计划都已传输到新设备。';
+
+  @override
+  String get importGuideDeviceTransferStep4Tip => '有付费账户？只需在新设备上登录，一切会自动同步。';
+
+  @override
+  String get themeFrost => '冰霜';
+
+  @override
+  String get themeEmber => '余烬';
+
+  @override
+  String get themeSpring => '春天';
+
+  @override
+  String get themeAlchemist => '炼金术士';
+
+  @override
+  String get rpgNoAchievementsInCategory => '此分类中没有成就';
+
+  @override
+  String rpgUnlocksItem(String item) {
+    return '解锁：$item';
+  }
+
+  @override
+  String get rpgCategory => '分类';
+
+  @override
+  String get rpgCompleted => '已完成';
+
+  @override
+  String get rpgProgress => '进度';
+
+  @override
+  String rpgDefeatedEnemy(String name) {
+    return '击败了$name！';
+  }
+
+  @override
+  String get rpgAvatars => '头像';
+
+  @override
+  String get rpgFrames => '边框';
+
+  @override
+  String get rpgPets => '宠物';
+
+  @override
+  String get rpgTitles => '称号';
+
+  @override
+  String rpgPurchaseItem(String item) {
+    return '购买$item？';
+  }
+
+  @override
+  String get rpgUnlockedViaAchievement => '通过成就解锁';
+
+  @override
+  String get rpgPrice => '价格';
+
+  @override
+  String get rpgNotEnoughGold => '金币不足';
+
+  @override
+  String get rpgNotEnoughGems => '宝石不足';
+
+  @override
+  String rpgPurchased(String item) {
+    return '已购买$item！';
+  }
+
+  @override
+  String get rpgOwned => '已拥有';
+
+  @override
+  String get rpgDailyQuests => '每日任务';
+
+  @override
+  String rpgQuestsCompleted(int completed, int total) {
+    return '$completed/$total已完成';
+  }
+
+  @override
+  String get rpgWeeklyChallenge => '每周挑战';
+
+  @override
+  String get rpgQuestsSubtitle => '完成任务赚取XP和奖励';
+
+  @override
+  String get rpgRecentXp => '最近的XP';
+
+  @override
+  String get rpgNoAchievementsYet => '还没有成就';
+
+  @override
+  String rpgLv(int level) {
+    return 'Lv.$level';
+  }
+
+  @override
+  String rpgClassBonus(String className) {
+    return '$className加成';
+  }
+
+  @override
+  String get rpgLevelUp => '升级！';
+
+  @override
+  String get rpgUnlocked => '已解锁！';
+
+  @override
+  String get rpgAchievementUnlocked => '成就已解锁！';
+
+  @override
+  String get mealPlanAddTitle => '添加到餐食计划';
+
+  @override
+  String get mealPlanMealLabel => '餐食';
+
+  @override
+  String get mealPlanAdding => '添加中...';
+
+  @override
+  String mealPlanDateFormat(String weekday, String month, int day) {
+    return '$month$day日 $weekday';
   }
 }

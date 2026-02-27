@@ -125,7 +125,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
             Expanded(
               child: mealPlansAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text('Error: $e')),
+                error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
                 data: (plans) => plans.isEmpty
                     ? _EmptyDayState(
                   date: selectedDate,
@@ -771,8 +771,8 @@ class _MealTile extends ConsumerWidget {
           subtitle: recipe != null
               ? Text(
             [
-              if (recipe.prepTimeMinutes != null) '${recipe.prepTimeMinutes}m prep',
-              if (recipe.cookTimeMinutes != null) '${recipe.cookTimeMinutes}m cook',
+              if (recipe.prepTimeMinutes != null) '${recipe.prepTimeMinutes}${l10n.minutesPrepSuffix}',
+              if (recipe.cookTimeMinutes != null) '${recipe.cookTimeMinutes}${l10n.minutesCookSuffix}',
             ].join(' • '),
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
           )
@@ -1058,6 +1058,7 @@ class _RecipeSelectTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
@@ -1077,8 +1078,8 @@ class _RecipeSelectTile extends StatelessWidget {
       title: Text(recipe.title, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Text(
         [
-          if (recipe.prepTimeMinutes != null) '${recipe.prepTimeMinutes}m prep',
-          if (recipe.cookTimeMinutes != null) '${recipe.cookTimeMinutes}m cook',
+          if (recipe.prepTimeMinutes != null) '${recipe.prepTimeMinutes}${l10n.minutesPrepSuffix}',
+          if (recipe.cookTimeMinutes != null) '${recipe.cookTimeMinutes}${l10n.minutesCookSuffix}',
         ].join(' • '),
         style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
       ),

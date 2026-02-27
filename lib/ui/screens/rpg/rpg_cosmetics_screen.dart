@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../ui/widgets/rpg/rpg_widgets.dart';
 import '../../../data/rpg/rpg_cosmetics.dart';
 import '../../../data/rpg/rpg_models.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/rpg_provider.dart';
 import '../../widgets/app_snackbar.dart';
 
@@ -37,7 +38,7 @@ class _RpgCosmeticsScreenState extends ConsumerState<RpgCosmeticsScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('🎨 Cosmetics'),
+        title: Text(AppLocalizations.of(context)!.rpgCosmetics),
         actions: [
           // Currency display
           Padding(
@@ -47,11 +48,11 @@ class _RpgCosmeticsScreenState extends ConsumerState<RpgCosmeticsScreen>
         ],
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.person), text: 'Avatars'),
-            Tab(icon: Icon(Icons.filter_frames), text: 'Frames'),
-            Tab(icon: Icon(Icons.pets), text: 'Pets'),
-            Tab(icon: Icon(Icons.badge), text: 'Titles'),
+          tabs: [
+            Tab(icon: const Icon(Icons.person), text: AppLocalizations.of(context)!.rpgAvatars),
+            Tab(icon: const Icon(Icons.filter_frames), text: AppLocalizations.of(context)!.rpgFrames),
+            Tab(icon: const Icon(Icons.pets), text: AppLocalizations.of(context)!.rpgPets),
+            Tab(icon: const Icon(Icons.badge), text: AppLocalizations.of(context)!.rpgTitles),
           ],
         ),
       ),
@@ -346,7 +347,7 @@ class _RpgCosmeticsScreenState extends ConsumerState<RpgCosmeticsScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Purchase ${item.name}?'),
+        title: Text(AppLocalizations.of(context)!.rpgPurchaseItem(item.name)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -409,7 +410,7 @@ class _RpgCosmeticsScreenState extends ConsumerState<RpgCosmeticsScreen>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Unlocked via achievement',
+                      AppLocalizations.of(context)!.rpgUnlockedViaAchievement,
                       style: TextStyle(
                         color: theme.colorScheme.onErrorContainer,
                       ),
@@ -421,7 +422,7 @@ class _RpgCosmeticsScreenState extends ConsumerState<RpgCosmeticsScreen>
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Price: ', style: theme.textTheme.titleMedium),
+                  Text('${AppLocalizations.of(context)!.rpgPrice}: ', style: theme.textTheme.titleMedium),
                   Icon(
                     item.currency == CurrencyType.gold
                         ? Icons.monetization_on
@@ -445,7 +446,9 @@ class _RpgCosmeticsScreenState extends ConsumerState<RpgCosmeticsScreen>
             if (item.isPurchasable && !canAfford) ...[
               const SizedBox(height: 8),
               Text(
-                'Not enough ${item.currency == CurrencyType.gold ? "gold" : "gems"}!',
+                item.currency == CurrencyType.gold
+                    ? AppLocalizations.of(context)!.rpgNotEnoughGold
+                    : AppLocalizations.of(context)!.rpgNotEnoughGems,
                 style: TextStyle(
                   color: theme.colorScheme.error,
                   fontWeight: FontWeight.bold,
@@ -457,7 +460,7 @@ class _RpgCosmeticsScreenState extends ConsumerState<RpgCosmeticsScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.actionCancel),
           ),
           if (item.isPurchasable)
             FilledButton(
@@ -470,11 +473,11 @@ class _RpgCosmeticsScreenState extends ConsumerState<RpgCosmeticsScreen>
                     : await ref.read(rpgProvider.notifier)
                     .purchaseWithGems(item);
                 if (success && context.mounted) {
-                  AppSnackbar.success(context, 'Purchased ${item.name}!');
+                  AppSnackbar.success(context, AppLocalizations.of(context)!.rpgPurchased(item.name));
                 }
               }
                   : null,
-              child: const Text('Purchase'),
+              child: Text(AppLocalizations.of(context)!.rpgPurchase),
             ),
         ],
       ),
@@ -592,7 +595,7 @@ class _CosmeticCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       if (isOwned)
                         Text(
-                          isEquipped ? 'Equipped' : 'Owned',
+                          isEquipped ? AppLocalizations.of(context)!.rpgEquipped : AppLocalizations.of(context)!.rpgOwned,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: isEquipped
                                 ? item.rarity.color
@@ -749,7 +752,7 @@ class _TitleCard extends StatelessWidget {
         ),
         trailing: isEquipped
             ? Chip(
-          label: const Text('Equipped'),
+          label: Text(AppLocalizations.of(context)!.rpgEquipped),
           backgroundColor: title.rarity.color.withValues(alpha: 0.3),
         )
             : isLocked

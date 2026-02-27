@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 /// Recipe rarity levels for RPG mode
 enum RecipeRarity {
-  common(1, 'Common', Color(0xFF9E9E9E), '⚪'),
-  uncommon(2, 'Uncommon', Color(0xFF4CAF50), '🟢'),
-  rare(3, 'Rare', Color(0xFF2196F3), '🔵'),
-  epic(4, 'Epic', Color(0xFF9C27B0), '🟣'),
-  legendary(5, 'Legendary', Color(0xFFFF9800), '🟠');
+  common(1, Color(0xFF9E9E9E), '⚪'),
+  uncommon(2, Color(0xFF4CAF50), '🟢'),
+  rare(3, Color(0xFF2196F3), '🔵'),
+  epic(4, Color(0xFF9C27B0), '🟣'),
+  legendary(5, Color(0xFFFF9800), '🟠');
 
   final int value;
-  final String label;
   final Color color;
   final String icon;
 
-  const RecipeRarity(this.value, this.label, this.color, this.icon);
+  const RecipeRarity(this.value, this.color, this.icon);
 
   static RecipeRarity fromRating(int rating) {
     return RecipeRarity.values.firstWhere(
@@ -22,18 +23,33 @@ enum RecipeRarity {
     );
   }
 
-  String get description {
+  String label(AppLocalizations l10n) {
     switch (this) {
       case RecipeRarity.common:
-        return 'A simple everyday recipe';
+        return l10n.rarityCommon;
       case RecipeRarity.uncommon:
-        return 'A tasty recipe with a twist';
+        return l10n.rarityUncommon;
       case RecipeRarity.rare:
-        return 'A special recipe worth mastering';
+        return l10n.rarityRare;
       case RecipeRarity.epic:
-        return 'An epic recipe of great power!';
+        return l10n.rarityEpic;
       case RecipeRarity.legendary:
-        return 'A legendary recipe worthy of the gods!';
+        return l10n.rarityLegendary;
+    }
+  }
+
+  String description(AppLocalizations l10n) {
+    switch (this) {
+      case RecipeRarity.common:
+        return l10n.rarityCommonDesc;
+      case RecipeRarity.uncommon:
+        return l10n.rarityUncommonDesc;
+      case RecipeRarity.rare:
+        return l10n.rarityRareDesc;
+      case RecipeRarity.epic:
+        return l10n.rarityEpicDesc;
+      case RecipeRarity.legendary:
+        return l10n.rarityLegendaryDesc;
     }
   }
 }
@@ -158,10 +174,11 @@ class _RpgRarityPickerState extends State<RpgRarityPicker>
   }
 
   Widget _buildFull(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Recipe Rarity', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+        Text(l10n.rpgRecipeRarity, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -212,7 +229,7 @@ class _RpgRarityPickerState extends State<RpgRarityPicker>
                           Text(rarity.icon, style: const TextStyle(fontSize: 16)),
                           const SizedBox(width: 6),
                           Text(
-                            rarity.label,
+                            rarity.label(l10n),
                             style: TextStyle(
                               color: isSelected ? rarity.color : theme.colorScheme.onSurface,
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -246,7 +263,7 @@ class _RpgRarityPickerState extends State<RpgRarityPicker>
                 ],
                 Expanded(
                   child: Text(
-                    _selected.description,
+                    _selected.description(l10n),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: _selected.color,
                       fontStyle: FontStyle.italic,
@@ -279,6 +296,7 @@ class RarityBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final rarity = RecipeRarity.fromRating(rating);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -302,7 +320,7 @@ class RarityBadge extends StatelessWidget {
           if (showLabel) ...[
             const SizedBox(width: 4),
             Text(
-              rarity.label,
+              rarity.label(l10n),
               style: theme.textTheme.labelSmall?.copyWith(
                 color: rarity.color,
                 fontWeight: FontWeight.bold,

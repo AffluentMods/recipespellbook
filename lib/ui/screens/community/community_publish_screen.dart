@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../database/database.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/auth_provider.dart';
@@ -28,12 +29,13 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final auth = ref.watch(authProvider);
     final cookbooksAsync = ref.watch(cookbooksProvider);
 
     if (!auth.isSignedIn) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Publish Cookbook')),
+        appBar: AppBar(title: Text(l10n.communityPublishCookbook)),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(32),
@@ -42,15 +44,15 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
               children: [
                 Icon(Icons.login, size: 48, color: theme.colorScheme.outline),
                 const SizedBox(height: 16),
-                Text('Sign in to publish', style: theme.textTheme.titleMedium),
+                Text(l10n.communitySignInToPublish, style: theme.textTheme.titleMedium),
                 const SizedBox(height: 8),
-                Text('You need an account to share cookbooks with the community.',
+                Text(l10n.communitySignInToPublishMessage,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: theme.colorScheme.outline)),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () => context.push('/settings'),
-                  child: const Text('Go to Settings'),
+                  child: Text(l10n.communityGoToSettings),
                 ),
               ],
             ),
@@ -60,7 +62,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Publish Cookbook')),
+      appBar: AppBar(title: Text(l10n.communityPublishCookbook)),
       body: cookbooksAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
@@ -72,7 +74,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                 children: [
                   Icon(Icons.menu_book_outlined, size: 48, color: theme.colorScheme.outline),
                   const SizedBox(height: 16),
-                  Text('No cookbooks to publish', style: theme.textTheme.titleMedium),
+                  Text(l10n.communityNoCookbooksToPublish, style: theme.textTheme.titleMedium),
                 ],
               ),
             );
@@ -94,14 +96,14 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                     Icon(Icons.info_outline, size: 20, color: theme.colorScheme.primary),
                     const SizedBox(width: 12),
                     Expanded(child: Text(
-                      'Cookbooks need at least 10 recipes to publish. Your recipes will be shared as a snapshot — updates won\'t sync.',
+                      l10n.communityPublishInfo,
                       style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurface),
                     )),
                   ],
                 ),
               ),
 
-              Text('Select a cookbook to publish', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              Text(l10n.communitySelectCookbook, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
 
               ...cookbooks.map((cb) => _CookbookPublishTile(
@@ -119,11 +121,13 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
   Future<void> _publish(Cookbook cookbook) async {
     if (_publishing) return;
 
+    final l10n = AppLocalizations.of(context)!;
+
     // Check recipe count locally first
     final recipeCount = await ref.read(recipeDaoProvider).getRecipeCountForCookbook(cookbook.id);
     if (recipeCount < 10) {
       if (mounted) {
-        AppSnackbar.error(context, 'Need at least 10 recipes to publish (has $recipeCount)');
+        AppSnackbar.error(context, l10n.communityNeedMinRecipes(recipeCount));
       }
       return;
     }
@@ -131,19 +135,20 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
     // Confirm
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        icon: const Icon(Icons.publish),
-        title: const Text('Publish to Community?'),
-        content: Text(
-          'This will share "${cookbook.name}" ($recipeCount recipes) publicly. '
-              'Anyone can browse and download it.\n\n'
-              'You can unpublish it anytime.',
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Publish')),
-        ],
-      ),
+      builder: (ctx) {
+        final dl10n = AppLocalizations.of(ctx)!;
+        return AlertDialog(
+          icon: const Icon(Icons.publish),
+          title: Text(dl10n.communityPublishConfirmTitle),
+          content: Text(
+            dl10n.communityPublishConfirmMessage(cookbook.name, recipeCount),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(dl10n.actionCancel)),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(dl10n.communityPublish)),
+          ],
+        );
+      },
     );
 
     if (confirmed != true) return;
@@ -155,10 +160,10 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
     if (mounted) {
       setState(() { _publishing = false; _publishingId = null; });
       if (result.success) {
-        AppSnackbar.success(context, '"${cookbook.name}" published to the community!');
+        AppSnackbar.success(context, l10n.communityPublishSuccess(cookbook.name));
         context.pop();
       } else {
-        AppSnackbar.error(context, result.error ?? 'Publish failed');
+        AppSnackbar.error(context, result.error ?? l10n.communityPublishFailed);
       }
     }
   }
@@ -182,6 +187,7 @@ class _CookbookPublishTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return FutureBuilder<int>(
       future: ref.read(recipeDaoProvider).getRecipeCountForCookbook(cookbook.id),
@@ -198,7 +204,7 @@ class _CookbookPublishTile extends ConsumerWidget {
             ),
             title: Text(cookbook.name, style: const TextStyle(fontWeight: FontWeight.w500)),
             subtitle: Text(
-              '$count recipes${canPublish ? '' : ' (need 10+)'}',
+              canPublish ? l10n.communityRecipeCount(count) : l10n.communityRecipeCountNeedMore(count),
               style: TextStyle(
                 fontSize: 12,
                 color: canPublish ? theme.colorScheme.outline : theme.colorScheme.error,
@@ -208,7 +214,7 @@ class _CookbookPublishTile extends ConsumerWidget {
                 ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
                 : FilledButton.tonal(
               onPressed: canPublish ? onPublish : null,
-              child: const Text('Publish', style: TextStyle(fontSize: 12)),
+              child: Text(l10n.communityPublish, style: const TextStyle(fontSize: 12)),
             ),
           ),
         );

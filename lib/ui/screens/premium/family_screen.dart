@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/family_service.dart';
 import '../../widgets/app_snackbar.dart';
 
@@ -34,8 +35,9 @@ class _FamilyScreenState extends State<FamilyScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Family Sharing')),
+      appBar: AppBar(title: Text(l10n.familySharing)),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _info == null
@@ -49,6 +51,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
   // ════════════════════════════════════════════
 
   Widget _buildNoFamily(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -57,10 +60,10 @@ class _FamilyScreenState extends State<FamilyScreen> {
           children: [
             Icon(Icons.family_restroom, size: 72, color: theme.colorScheme.primary.withValues(alpha: 0.3)),
             const SizedBox(height: 24),
-            Text('Family Sharing', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+            Text(l10n.familySharing, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Text(
-              'Share cookbooks, shopping lists, and meal plans with your family.',
+              l10n.familySharingDescription,
               textAlign: TextAlign.center,
               style: TextStyle(color: theme.colorScheme.outline, fontSize: 15),
             ),
@@ -70,7 +73,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
               child: FilledButton.icon(
                 onPressed: () => _showCreateDialog(),
                 icon: const Icon(Icons.add),
-                label: const Text('Create a Family'),
+                label: Text(l10n.familyCreate),
               ),
             ),
             const SizedBox(height: 12),
@@ -79,7 +82,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
               child: OutlinedButton.icon(
                 onPressed: () => _showJoinDialog(),
                 icon: const Icon(Icons.group_add),
-                label: const Text('Join with Invite Code'),
+                label: Text(l10n.familyJoinWithCode),
               ),
             ),
           ],
@@ -93,6 +96,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
   // ════════════════════════════════════════════
 
   Widget _buildFamilyView(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     final info = _info!;
     return RefreshIndicator(
       onRefresh: _load,
@@ -126,7 +130,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
                   ]),
                   const SizedBox(height: 8),
                   Text(
-                    '${info.members.length} / ${info.maxMembers} members',
+                    l10n.familyMembersCount(info.members.length, info.maxMembers),
                     style: TextStyle(color: theme.colorScheme.outline, fontSize: 14),
                   ),
                 ],
@@ -142,7 +146,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Invite', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                  Text(l10n.familyInvite, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 12),
                   // Code display
                   Container(
@@ -164,7 +168,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
                           icon: const Icon(Icons.copy, size: 20),
                           onPressed: () {
                             Clipboard.setData(ClipboardData(text: info.inviteCode));
-                            AppSnackbar.success(context, 'Code copied!');
+                            AppSnackbar.success(context, l10n.familyCodeCopied);
                           },
                         ),
                       ],
@@ -177,10 +181,10 @@ class _FamilyScreenState extends State<FamilyScreen> {
                       child: OutlinedButton.icon(
                         onPressed: () {
                           Clipboard.setData(ClipboardData(text: info.shareLink));
-                          AppSnackbar.success(context, 'Link copied!');
+                          AppSnackbar.success(context, l10n.familyLinkCopied);
                         },
                         icon: const Icon(Icons.link, size: 18),
-                        label: const Text('Copy Link'),
+                        label: Text(l10n.familyCopyLink),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -188,14 +192,12 @@ class _FamilyScreenState extends State<FamilyScreen> {
                       child: FilledButton.icon(
                         onPressed: () {
                           Share.share(
-                            'Join my family on Recipe Spellbook!\n\n'
-                                'Code: ${info.inviteCode}\n'
-                                'Or tap: ${info.shareLink}',
-                            subject: 'Join my Recipe Spellbook family',
+                            l10n.familyShareMessage(info.inviteCode, info.shareLink),
+                            subject: l10n.familyShareSubject,
                           );
                         },
                         icon: const Icon(Icons.share, size: 18),
-                        label: const Text('Share'),
+                        label: Text(l10n.actionShare),
                       ),
                     ),
                   ]),
@@ -205,9 +207,9 @@ class _FamilyScreenState extends State<FamilyScreen> {
                       child: TextButton(
                         onPressed: () async {
                           final code = await _family.regenerateInviteCode();
-                          if (code != null) { await _load(); if (mounted) AppSnackbar.success(context, 'New code generated'); }
+                          if (code != null) { await _load(); if (mounted) AppSnackbar.success(context, l10n.familyNewCodeGenerated); }
                         },
-                        child: const Text('Regenerate Code', style: TextStyle(fontSize: 12)),
+                        child: Text(l10n.familyRegenerateCode, style: const TextStyle(fontSize: 12)),
                       ),
                     ),
                   ],
@@ -226,7 +228,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                    child: Text('Members', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                    child: Text(l10n.familyMembers, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
                   ),
                   ...info.members.map((member) => ListTile(
                     leading: CircleAvatar(
@@ -245,7 +247,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
                             color: Colors.amber.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Text('Owner', style: TextStyle(fontSize: 10, color: Colors.amber, fontWeight: FontWeight.w600)),
+                          child: Text(l10n.familyOwner, style: const TextStyle(fontSize: 10, color: Colors.amber, fontWeight: FontWeight.w600)),
                         ),
                       ],
                     ]),
@@ -268,7 +270,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
             OutlinedButton.icon(
               onPressed: () => _showRenameDialog(),
               icon: const Icon(Icons.edit, size: 18),
-              label: const Text('Rename Family'),
+              label: Text(l10n.familyRename),
             ),
             const SizedBox(height: 8),
           ],
@@ -276,14 +278,14 @@ class _FamilyScreenState extends State<FamilyScreen> {
             OutlinedButton.icon(
               onPressed: () => _confirmDelete(),
               icon: Icon(Icons.delete_forever, size: 18, color: theme.colorScheme.error),
-              label: Text('Delete Family', style: TextStyle(color: theme.colorScheme.error)),
+              label: Text(l10n.familyDelete, style: TextStyle(color: theme.colorScheme.error)),
               style: OutlinedButton.styleFrom(side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.3))),
             )
           else
             OutlinedButton.icon(
               onPressed: () => _confirmLeave(),
               icon: Icon(Icons.exit_to_app, size: 18, color: theme.colorScheme.error),
-              label: Text('Leave Family', style: TextStyle(color: theme.colorScheme.error)),
+              label: Text(l10n.familyLeave, style: TextStyle(color: theme.colorScheme.error)),
               style: OutlinedButton.styleFrom(side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.3))),
             ),
           const SizedBox(height: 32),
@@ -297,17 +299,18 @@ class _FamilyScreenState extends State<FamilyScreen> {
   // ════════════════════════════════════════════
 
   void _showCreateDialog() {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
     showDialog(context: context, builder: (ctx) => AlertDialog(
-      title: const Text('Create Family'),
+      title: Text(l10n.familyCreateTitle),
       content: TextField(
         controller: controller,
-        decoration: const InputDecoration(hintText: 'Family name', border: OutlineInputBorder()),
+        decoration: InputDecoration(hintText: l10n.familyNameHint, border: const OutlineInputBorder()),
         autofocus: true,
         textCapitalization: TextCapitalization.words,
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
         FilledButton(onPressed: () async {
           final name = controller.text.trim();
           if (name.isEmpty) return;
@@ -315,27 +318,28 @@ class _FamilyScreenState extends State<FamilyScreen> {
           final result = await _family.createFamily(name);
           if (result != null) {
             await _load();
-            if (mounted) AppSnackbar.success(context, 'Family created!');
+            if (mounted) AppSnackbar.success(context, l10n.familyCreated);
           } else {
-            if (mounted) AppSnackbar.error(context, 'Failed — Cloud Sync tier required');
+            if (mounted) AppSnackbar.error(context, l10n.familyCreateFailed);
           }
-        }, child: const Text('Create')),
+        }, child: Text(l10n.actionCreate)),
       ],
     ));
   }
 
   void _showJoinDialog() {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
     showDialog(context: context, builder: (ctx) => AlertDialog(
-      title: const Text('Join Family'),
+      title: Text(l10n.familyJoinTitle),
       content: TextField(
         controller: controller,
-        decoration: const InputDecoration(hintText: 'Enter invite code', border: OutlineInputBorder()),
+        decoration: InputDecoration(hintText: l10n.familyEnterInviteCode, border: const OutlineInputBorder()),
         autofocus: true,
         textCapitalization: TextCapitalization.characters,
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
         FilledButton(onPressed: () async {
           final code = controller.text.trim();
           if (code.isEmpty) return;
@@ -343,19 +347,20 @@ class _FamilyScreenState extends State<FamilyScreen> {
           final result = await _family.joinFamily(code);
           if (result.success) {
             await _load();
-            if (mounted) AppSnackbar.success(context, 'Joined ${result.familyName}!');
+            if (mounted) AppSnackbar.success(context, l10n.familyJoined(result.familyName ?? ''));
           } else {
-            if (mounted) AppSnackbar.error(context, result.error ?? 'Failed to join');
+            if (mounted) AppSnackbar.error(context, result.error ?? l10n.familyJoinFailed);
           }
-        }, child: const Text('Join')),
+        }, child: Text(l10n.familyJoinAction)),
       ],
     ));
   }
 
   void _showRenameDialog() {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController(text: _info?.name);
     showDialog(context: context, builder: (ctx) => AlertDialog(
-      title: const Text('Rename Family'),
+      title: Text(l10n.familyRename),
       content: TextField(
         controller: controller,
         decoration: const InputDecoration(border: OutlineInputBorder()),
@@ -363,70 +368,73 @@ class _FamilyScreenState extends State<FamilyScreen> {
         textCapitalization: TextCapitalization.words,
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
         FilledButton(onPressed: () async {
           final name = controller.text.trim();
           if (name.isEmpty) return;
           Navigator.pop(ctx);
           await _family.updateName(name);
           await _load();
-        }, child: const Text('Save')),
+        }, child: Text(l10n.actionSave)),
       ],
     ));
   }
 
   void _confirmKick(FamilyMemberInfo member) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(context: context, builder: (ctx) => AlertDialog(
-      title: const Text('Remove Member'),
-      content: Text('Remove ${member.displayName} from the family?'),
+      title: Text(l10n.familyRemoveMember),
+      content: Text(l10n.familyRemoveMemberConfirm(member.displayName)),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
         FilledButton(
           onPressed: () async {
             Navigator.pop(ctx);
             final ok = await _family.removeMember(member.userId);
-            if (ok) { await _load(); if (mounted) AppSnackbar.success(context, '${member.displayName} removed'); }
+            if (ok) { await _load(); if (mounted) AppSnackbar.success(context, l10n.familyMemberRemoved(member.displayName)); }
           },
           style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-          child: const Text('Remove'),
+          child: Text(l10n.actionRemove),
         ),
       ],
     ));
   }
 
   void _confirmLeave() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(context: context, builder: (ctx) => AlertDialog(
-      title: const Text('Leave Family'),
-      content: const Text('You will lose access to shared cookbooks, lists, and meal plans.'),
+      title: Text(l10n.familyLeave),
+      content: Text(l10n.familyLeaveConfirm),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
         FilledButton(
           onPressed: () async {
             Navigator.pop(ctx);
             final ok = await _family.leaveFamily();
-            if (ok) { await _load(); if (mounted) AppSnackbar.success(context, 'Left family'); }
+            if (ok) { await _load(); if (mounted) AppSnackbar.success(context, l10n.familyLeft); }
           },
           style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-          child: const Text('Leave'),
+          child: Text(l10n.familyLeaveAction),
         ),
       ],
     ));
   }
 
   void _confirmDelete() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(context: context, builder: (ctx) => AlertDialog(
-      title: const Text('Delete Family'),
-      content: const Text('This will remove all members and cannot be undone.'),
+      title: Text(l10n.familyDelete),
+      content: Text(l10n.familyDeleteConfirm),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
         FilledButton(
           onPressed: () async {
             Navigator.pop(ctx);
             final ok = await _family.deleteFamily();
-            if (ok) { await _load(); if (mounted) AppSnackbar.success(context, 'Family deleted'); }
+            if (ok) { await _load(); if (mounted) AppSnackbar.success(context, l10n.familyDeleted); }
           },
           style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-          child: const Text('Delete'),
+          child: Text(l10n.actionDelete),
         ),
       ],
     ));

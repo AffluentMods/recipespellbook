@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/course_category_data.dart';
 import '../../database/database.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/cookbook_provider.dart';
 import '../../providers/database_provider.dart';
 import 'app_snackbar.dart';
@@ -124,6 +125,7 @@ class _CoursePickerState extends ConsumerState<CoursePicker> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final selectedItem = _resolvedItem;
 
     return InkWell(
@@ -134,14 +136,14 @@ class _CoursePickerState extends ConsumerState<CoursePicker> {
       borderRadius: BorderRadius.circular(12),
       child: InputDecorator(
         decoration: InputDecoration(
-          labelText: 'Course',
+          labelText: l10n.recipeFieldCourse,
           prefixIcon: selectedItem != null
               ? Padding(padding: const EdgeInsets.all(12), child: Text(selectedItem.emoji, style: const TextStyle(fontSize: 20)))
               : const Icon(Icons.restaurant_menu),
           suffixIcon: const Icon(Icons.arrow_drop_down),
         ),
         child: Text(
-          selectedItem?.name ?? 'Select course',
+          selectedItem?.name ?? l10n.selectCourse,
           style: selectedItem != null ? theme.textTheme.bodyLarge : theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline),
         ),
       ),
@@ -218,6 +220,7 @@ class _CategoryPickerState extends ConsumerState<CategoryPicker> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final selectedItems = _resolvedItems;
 
     return InkWell(
@@ -230,14 +233,14 @@ class _CategoryPickerState extends ConsumerState<CategoryPicker> {
       borderRadius: BorderRadius.circular(12),
       child: InputDecorator(
         decoration: InputDecoration(
-          labelText: 'Categories',
+          labelText: l10n.recipeFieldCategory,
           prefixIcon: selectedItems.isNotEmpty
               ? Padding(padding: const EdgeInsets.all(12), child: Text(selectedItems.first.emoji, style: const TextStyle(fontSize: 20)))
               : const Icon(Icons.label_outline),
           suffixIcon: const Icon(Icons.arrow_drop_down),
         ),
         child: selectedItems.isEmpty
-            ? Text('Select categories', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline))
+            ? Text(l10n.selectCategories, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline))
             : Wrap(
           spacing: 6,
           runSpacing: 4,
@@ -256,16 +259,18 @@ class _CategoryPickerState extends ConsumerState<CategoryPicker> {
 // ============ PICKER DIALOGS ============
 
 Future<String?> showCoursePickerDialog(BuildContext context, WidgetRef ref, String? currentSelection) {
+  final l10n = AppLocalizations.of(context)!;
   return showModalBottomSheet<String>(
     context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-    builder: (context) => _TaxonomyPickerSheet(title: 'Select Course', type: _TaxonomyType.course, currentSelection: currentSelection),
+    builder: (context) => _TaxonomyPickerSheet(title: l10n.selectCourse, type: _TaxonomyType.course, currentSelection: currentSelection),
   );
 }
 
 Future<String?> showCategoryPickerDialog(BuildContext context, WidgetRef ref, String? currentSelection) {
+  final l10n = AppLocalizations.of(context)!;
   return showModalBottomSheet<String>(
     context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-    builder: (context) => _TaxonomyPickerSheet(title: 'Select Category', type: _TaxonomyType.category, currentSelection: currentSelection),
+    builder: (context) => _TaxonomyPickerSheet(title: l10n.selectCategory, type: _TaxonomyType.category, currentSelection: currentSelection),
   );
 }
 
@@ -374,6 +379,7 @@ class _TaxonomyPickerSheetState extends ConsumerState<_TaxonomyPickerSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
     final query = _searchController.text.trim();
     final canCreate = query.isNotEmpty && !_allItems.any((i) => i.name.toLowerCase() == query.toLowerCase());
@@ -393,7 +399,7 @@ class _TaxonomyPickerSheetState extends ConsumerState<_TaxonomyPickerSheet> {
               child: Row(children: [
                 Text(widget.title, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                 const Spacer(),
-                TextButton(onPressed: () => Navigator.of(context).pop(''), child: const Text('None')),
+                TextButton(onPressed: () => Navigator.of(context).pop(''), child: Text(l10n.taxonomyNone)),
               ]),
             ),
             Padding(
@@ -401,7 +407,7 @@ class _TaxonomyPickerSheetState extends ConsumerState<_TaxonomyPickerSheet> {
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  hintText: 'Search or create new...', prefixIcon: const Icon(Icons.search),
+                  hintText: l10n.searchOrCreateNew, prefixIcon: const Icon(Icons.search),
                   filled: true, fillColor: theme.colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
@@ -425,8 +431,8 @@ class _TaxonomyPickerSheetState extends ConsumerState<_TaxonomyPickerSheet> {
                         ),
                         const SizedBox(width: 12),
                         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text('Create "${getSuggestedEmoji(query)} $query"', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: theme.colorScheme.onPrimaryContainer)),
-                          Text('Add as new ${widget.type == _TaxonomyType.course ? 'course' : 'category'}', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7))),
+                          Text(l10n.createTaxonomy('${getSuggestedEmoji(query)} $query'), style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: theme.colorScheme.onPrimaryContainer)),
+                          Text(widget.type == _TaxonomyType.course ? l10n.addAsNewCourse : l10n.addAsNewCategory, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7))),
                         ])),
                       ]),
                     ),
@@ -438,7 +444,7 @@ class _TaxonomyPickerSheetState extends ConsumerState<_TaxonomyPickerSheet> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _filteredItems.isEmpty
-                  ? Center(child: Padding(padding: const EdgeInsets.all(32), child: Text('No matches found', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline))))
+                  ? Center(child: Padding(padding: const EdgeInsets.all(32), child: Text(l10n.noMatchesFound, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline))))
                   : ListView.builder(
                 shrinkWrap: true, padding: const EdgeInsets.fromLTRB(20, 0, 20, 20), itemCount: _filteredItems.length,
                 itemBuilder: (context, index) {
@@ -460,7 +466,7 @@ class _TaxonomyPickerSheetState extends ConsumerState<_TaxonomyPickerSheet> {
                             if (item.isCustom) Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
-                              child: Text('Custom', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline)),
+                              child: Text(AppLocalizations.of(context)!.taxonomyCustom, style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline)),
                             ),
                             if (isSelected) Padding(padding: const EdgeInsets.only(left: 8), child: Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20)),
                           ]),
@@ -566,6 +572,7 @@ class _MultiCategoryPickerSheetState extends ConsumerState<_MultiCategoryPickerS
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
     final query = _searchController.text.trim();
     final canCreate = query.isNotEmpty && !_allItems.any((i) => i.name.toLowerCase() == query.toLowerCase());
@@ -584,13 +591,13 @@ class _MultiCategoryPickerSheetState extends ConsumerState<_MultiCategoryPickerS
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: Row(children: [
                 Expanded(
-                  child: Text('Select Categories', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                  child: Text(l10n.selectCategories, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
                 ),
                 if (_selectedIds.isNotEmpty)
-                  TextButton(onPressed: () => setState(() => _selectedIds.clear()), child: const Text('Clear')),
+                  TextButton(onPressed: () => setState(() => _selectedIds.clear()), child: Text(l10n.actionClear)),
                 FilledButton(
                   onPressed: () => Navigator.of(context).pop(_selectedIds.toList()),
-                  child: Text('Done${_selectedIds.isNotEmpty ? ' (${_selectedIds.length})' : ''}'),
+                  child: Text(_selectedIds.isNotEmpty ? l10n.doneWithCount(_selectedIds.length) : l10n.actionDone),
                 ),
               ]),
             ),
@@ -620,7 +627,7 @@ class _MultiCategoryPickerSheetState extends ConsumerState<_MultiCategoryPickerS
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  hintText: 'Search or create new...', prefixIcon: const Icon(Icons.search),
+                  hintText: l10n.searchOrCreateNew, prefixIcon: const Icon(Icons.search),
                   filled: true, fillColor: theme.colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
@@ -644,8 +651,8 @@ class _MultiCategoryPickerSheetState extends ConsumerState<_MultiCategoryPickerS
                         ),
                         const SizedBox(width: 12),
                         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text('Create "${getSuggestedEmoji(query)} $query"', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: theme.colorScheme.onPrimaryContainer)),
-                          Text('Add as new category', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7))),
+                          Text(l10n.createTaxonomy('${getSuggestedEmoji(query)} $query'), style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: theme.colorScheme.onPrimaryContainer)),
+                          Text(l10n.addAsNewCategory, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7))),
                         ])),
                       ]),
                     ),
@@ -657,7 +664,7 @@ class _MultiCategoryPickerSheetState extends ConsumerState<_MultiCategoryPickerS
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _filteredItems.isEmpty
-                  ? Center(child: Padding(padding: const EdgeInsets.all(32), child: Text('No matches found', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline))))
+                  ? Center(child: Padding(padding: const EdgeInsets.all(32), child: Text(l10n.noMatchesFound, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline))))
                   : ListView.builder(
                 shrinkWrap: true, padding: const EdgeInsets.fromLTRB(20, 0, 20, 20), itemCount: _filteredItems.length,
                 itemBuilder: (context, index) {
@@ -679,7 +686,7 @@ class _MultiCategoryPickerSheetState extends ConsumerState<_MultiCategoryPickerS
                             if (item.isCustom) Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
-                              child: Text('Custom', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline)),
+                              child: Text(AppLocalizations.of(context)!.taxonomyCustom, style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline)),
                             ),
                             if (isSelected) Padding(padding: const EdgeInsets.only(left: 8), child: Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20)),
                           ]),

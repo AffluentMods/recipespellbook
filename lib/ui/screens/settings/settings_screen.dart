@@ -82,7 +82,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           currentLanguage: s.languageCode,
           onLanguageSelected: (c) => ref.read(settingsProvider.notifier).setLanguage(c),
         ) : null,
-        _m('Text Size', 'accessibility font') ? _TextScaleTile(
+        _m(l10n.textSize, 'accessibility font') ? _TextScaleTile(
           currentScale: s.textScaleFactor,
           onScaleChanged: (v) => ref.read(settingsProvider.notifier).setTextScaleFactor(v),
         ) : null,
@@ -125,8 +125,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ]),
 
       // ─── SHOPPING & PLANNING ───
-      // TODO: replace with l10n.settingsShopping once arb key is added
-      _section(title: 'Shopping & Planning', icon: Icons.shopping_cart_outlined, children: [
+      _section(title: l10n.settingsShoppingPlanning, icon: Icons.shopping_cart_outlined, children: [
         _m(l10n.myPantry, 'always on hand') ? _Tile(
           icon: Icons.kitchen, title: l10n.myPantry, subtitle: l10n.itemsAlwaysOnHand,
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PantryScreen())),
@@ -142,8 +141,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ]),
 
       // ─── MANAGE ───
-      // TODO: replace with l10n.settingsManage once arb key is added
-      _section(title: 'Manage', icon: Icons.tune, children: [
+      _section(title: l10n.settingsManage, icon: Icons.tune, children: [
         _m(l10n.settingsManageTags, 'tag label') ? _Tile(
           icon: Icons.local_offer_outlined, title: l10n.settingsManageTags, subtitle: l10n.settingsManageTagsSubtitle,
           onTap: () => context.push('/settings/tags'),
@@ -163,28 +161,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const _IntegrationsSection(),
 
       // ─── FAMILY ───
-      if (_query.isEmpty || _m('Family', 'sharing invite members household'))
-        _section(title: 'Family', icon: Icons.family_restroom, children: [
-          _m('Family Sharing', 'invite share cookbook list') ? _Tile(
-            icon: Icons.family_restroom, title: 'Family Sharing',
+      if (_query.isEmpty || _m(l10n.settingsFamily, 'sharing invite members household'))
+        _section(title: l10n.settingsFamily, icon: Icons.family_restroom, children: [
+          _m(l10n.familySharing, 'invite share cookbook list') ? _Tile(
+            icon: Icons.family_restroom, title: l10n.familySharing,
             subtitle: FamilyService.instance.isInFamily
-                ? 'Manage your family'
-                : 'Share cookbooks, lists & meal plans',
+                ? l10n.familyManage
+                : l10n.familySharingSubtitle,
             onTap: () => context.push('/settings/family'),
           ) : null,
         ]),
 
       // ─── COMMUNITY ───
-      if (_query.isEmpty || _m('Community', 'browse publish download cookbooks public'))
-        _section(title: 'Community', icon: Icons.explore, children: [
-          _m('Browse Community', 'public download') ? _Tile(
-            icon: Icons.explore, title: 'Browse Community',
-            subtitle: 'Discover & download public cookbooks',
+      if (_query.isEmpty || _m(l10n.settingsCommunity, 'browse publish download cookbooks public'))
+        _section(title: l10n.settingsCommunity, icon: Icons.explore, children: [
+          _m(l10n.settingsBrowseCommunity, 'public download') ? _Tile(
+            icon: Icons.explore, title: l10n.settingsBrowseCommunity,
+            subtitle: l10n.settingsBrowseCommunitySubtitle,
             onTap: () => context.push('/community'),
           ) : null,
-          _m('My Publications', 'published upload') ? _Tile(
-            icon: Icons.upload_outlined, title: 'My Publications',
-            subtitle: 'Manage your published cookbooks',
+          _m(l10n.settingsMyPublications, 'published upload') ? _Tile(
+            icon: Icons.upload_outlined, title: l10n.settingsMyPublications,
+            subtitle: l10n.settingsMyPublicationsSubtitle,
             onTap: () => context.push('/community/my-publications'),
           ) : null,
         ]),
@@ -199,8 +197,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           icon: Icons.file_download_outlined, title: l10n.settingsImport, subtitle: l10n.settingsImportSubtitle,
           onTap: () => _showImportOptions(context, ref),
         ) : null,
-        _m('Delete Data', 'erase reset') ? _Tile(
-          icon: Icons.delete_forever_outlined, title: 'Delete Data', subtitle: 'Erase app or cloud data',
+        _m(l10n.settingsDeleteData, 'erase reset') ? _Tile(
+          icon: Icons.delete_forever_outlined, title: l10n.settingsDeleteData, subtitle: l10n.settingsDeleteDataSubtitle,
           titleColor: theme.colorScheme.error,
           onTap: () => _showResetConfirmation(context, ref),
         ) : null,
@@ -249,7 +247,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   children: [
                     Icon(Icons.search_off, size: 48, color: theme.colorScheme.outline),
                     const SizedBox(height: 12),
-                    Text('No matching settings',
+                    Text(l10n.settingsNoMatchingSettings,
                         style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)),
                   ],
                 ),
@@ -382,12 +380,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     showDialog(context: context, barrierDismissible: false, builder: (context) => AlertDialog(
       icon: const Icon(Icons.auto_awesome, size: 48, color: Colors.amber),
       title: Text(l10n.dataResetComplete),
-      content: const Text('All data has been cleared successfully.\n\nWould you like to import the 10 default starter recipes?'),
+      content: Text(l10n.resetDataClearedDesc),
       actions: [
         TextButton(onPressed: () { Navigator.pop(context); AppSnackbar.success(context, l10n.appResetSuccess); context.go('/'); }, child: Text(l10n.noThanks)),
         FilledButton(onPressed: () async {
           Navigator.pop(context);
-          AppSnackbar.loading(context, 'Importing default recipes...');
+          AppSnackbar.loading(context, l10n.importingDefaultRecipes);
           try {
             final count = await OnboardingService.seedDefaultRecipes(ref.read(databaseProvider));
             if (context.mounted) { AppSnackbar.dismiss(context); AppSnackbar.success(context, l10n.defaultRecipesImported(count)); context.go('/'); }
@@ -417,7 +415,7 @@ class _SearchField extends StatelessWidget {
       controller: controller, focusNode: focusNode, onChanged: onChanged,
       style: theme.textTheme.bodyMedium,
       decoration: InputDecoration(
-        hintText: 'Search settings...',
+        hintText: AppLocalizations.of(context)!.settingsSearchHint,
         hintStyle: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
         prefixIcon: Icon(Icons.search, size: 20, color: theme.colorScheme.outline),
         suffixIcon: controller.text.isNotEmpty
@@ -446,6 +444,7 @@ class _AccountCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isIn = authState.isSignedIn;
     final user = authState.user;
 
@@ -474,15 +473,15 @@ class _AccountCard extends ConsumerWidget {
                 const SizedBox(width: 14),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Row(children: [
-                    Flexible(child: Text(isIn ? (user?.displayName ?? 'User') : 'Sign In', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                    Flexible(child: Text(isIn ? (user?.displayName ?? 'User') : l10n.signIn, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis)),
                     const SizedBox(width: 8),
                     const _TierBadge(),
                   ]),
                   const SizedBox(height: 2),
-                  Text(isIn ? (user?.email ?? '') : 'Sync recipes and back up your data', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(isIn ? (user?.email ?? '') : l10n.signInDescription, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline), maxLines: 1, overflow: TextOverflow.ellipsis),
                 ])),
                 if (isIn)
-                  IconButton(icon: Icon(Icons.logout, size: 20, color: theme.colorScheme.error), tooltip: 'Sign out', onPressed: () => ref.read(authProvider.notifier).signOut())
+                  IconButton(icon: Icon(Icons.logout, size: 20, color: theme.colorScheme.error), tooltip: l10n.signOut, onPressed: () => ref.read(authProvider.notifier).signOut())
                 else
                   Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline),
               ]),
@@ -502,8 +501,8 @@ class _AccountCard extends ConsumerWidget {
                 child: Row(children: [
                   Icon(Icons.star_rounded, size: 18, color: Colors.amber.shade700),
                   const SizedBox(width: 10),
-                  Expanded(child: Text('Upgrade to Pro', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.amber.shade700))),
-                  Text('Cloud sync, photos & more', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+                  Expanded(child: Text(l10n.upgradeToPro, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.amber.shade700))),
+                  Text(l10n.settingsUpgradeSubtitle, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
                   const SizedBox(width: 4),
                   Icon(Icons.chevron_right, size: 18, color: theme.colorScheme.outline),
                 ]),
@@ -522,6 +521,7 @@ class _AccountCard extends ConsumerWidget {
 
   static void _showSignInSheet(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final auth = ref.read(authProvider.notifier);
     showModalBottomSheet(context: context, builder: (ctx) => SafeArea(child: Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
@@ -530,9 +530,9 @@ class _AccountCard extends ConsumerWidget {
         const SizedBox(height: 20),
         Icon(Icons.account_circle_outlined, size: 48, color: theme.colorScheme.primary),
         const SizedBox(height: 12),
-        Text('Sign In', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+        Text(l10n.signIn, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text('Sync recipes and back up your data', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+        Text(l10n.signInDescription, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
         const SizedBox(height: 24),
         SizedBox(width: double.infinity, child: OutlinedButton(
           onPressed: () { Navigator.pop(ctx); auth.signInWithGoogle(); },
@@ -540,14 +540,14 @@ class _AccountCard extends ConsumerWidget {
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Text('G', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
             const SizedBox(width: 10),
-            Text('Continue with Google', style: TextStyle(fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface)),
+            Text(l10n.continueWithGoogle, style: TextStyle(fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface)),
           ]),
         )),
         const SizedBox(height: 10),
         SizedBox(width: double.infinity, child: FilledButton(
           onPressed: () { Navigator.pop(ctx); auth.signInWithApple(); },
           style: FilledButton.styleFrom(backgroundColor: theme.brightness == Brightness.dark ? Colors.white : Colors.black, foregroundColor: theme.brightness == Brightness.dark ? Colors.black : Colors.white, padding: const EdgeInsets.symmetric(vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-          child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.apple, size: 20), SizedBox(width: 10), Text('Continue with Apple', style: TextStyle(fontWeight: FontWeight.w500))]),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.apple, size: 20), const SizedBox(width: 10), Text(l10n.continueWithApple, style: const TextStyle(fontWeight: FontWeight.w500))]),
         )),
         const SizedBox(height: 16),
       ]),
@@ -571,10 +571,11 @@ class _SyncRowState extends State<_SyncRow> {
     final result = await SyncService.instance.sync();
     if (!mounted) return;
     setState(() => _syncing = false);
+    final l10n = AppLocalizations.of(context)!;
     if (result.success) {
-      AppSnackbar.success(context, 'Synced! ↑${result.pushedCount} ↓${result.pulledCount}');
+      AppSnackbar.success(context, l10n.syncSuccess(result.pushedCount, result.pulledCount));
     } else {
-      AppSnackbar.error(context, result.error ?? 'Sync failed');
+      AppSnackbar.error(context, result.error ?? l10n.syncFailed);
     }
   }
 
@@ -588,7 +589,7 @@ class _SyncRowState extends State<_SyncRow> {
         child: Row(children: [
           Icon(Icons.cloud_sync_rounded, size: 18, color: theme.colorScheme.primary),
           const SizedBox(width: 10),
-          Expanded(child: Text('Cloud Sync', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500))),
+          Expanded(child: Text(AppLocalizations.of(context)!.cloudSync, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500))),
           if (_syncing)
             SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.primary))
           else
@@ -716,22 +717,23 @@ class _TextScaleTile extends StatelessWidget {
   final ValueChanged<double> onScaleChanged;
   const _TextScaleTile({required this.currentScale, required this.onScaleChanged});
 
-  String get _label {
-    if (currentScale <= 0.85) return 'Small';
-    if (currentScale <= 0.95) return 'Default';
-    if (currentScale <= 1.05) return 'Medium';
-    if (currentScale <= 1.15) return 'Large';
-    return 'Extra Large';
+  String _label(AppLocalizations l10n) {
+    if (currentScale <= 0.85) return l10n.textSizeSmall;
+    if (currentScale <= 0.95) return l10n.textSizeDefault;
+    if (currentScale <= 1.05) return l10n.textSizeMedium;
+    if (currentScale <= 1.15) return l10n.textSizeLarge;
+    return l10n.textSizeExtraLarge;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
       leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(Icons.text_fields_rounded, size: 20, color: theme.colorScheme.primary)),
-      title: const Text('Text Size', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-      subtitle: Text(_label, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
+      title: Text(l10n.textSize, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+      subtitle: Text(_label(l10n), style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
       onTap: () => _showPicker(context),
     );
@@ -739,6 +741,7 @@ class _TextScaleTile extends StatelessWidget {
 
   void _showPicker(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     double temp = currentScale;
     showModalBottomSheet(context: context, isScrollControlled: true, builder: (ctx) => StatefulBuilder(
       builder: (ctx, ss) => SafeArea(child: SingleChildScrollView(
@@ -746,15 +749,15 @@ class _TextScaleTile extends StatelessWidget {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: 20),
-          const Text('Text Size', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(l10n.textSize, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          Text('Adjust text size across the entire app', style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
+          Text(l10n.settingsTextSizeSubtitle, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
           const SizedBox(height: 24),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHigh, borderRadius: BorderRadius.circular(12)),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Preview', style: TextStyle(fontSize: 12 * temp, color: theme.colorScheme.outline)),
+              Text(l10n.textSizePreview, style: TextStyle(fontSize: 12 * temp, color: theme.colorScheme.outline)),
               const SizedBox(height: 4),
               Text('Grandma\'s Famous Chocolate Cake', style: TextStyle(fontSize: 16 * temp, fontWeight: FontWeight.bold)),
               const SizedBox(height: 2),
@@ -794,10 +797,10 @@ class _ThemeSelectionTile extends StatelessWidget {
       AppColorTheme.sunset => l.themeSunset,
       AppColorTheme.midnight => l.themeMidnight,
       AppColorTheme.rose => l.themeRose,
-      AppColorTheme.frost => 'Frost',
-      AppColorTheme.ember => 'Ember',
-      AppColorTheme.spring => 'Spring',
-      AppColorTheme.alchemist => 'Alchemist',
+      AppColorTheme.frost => l.themeFrost,
+      AppColorTheme.ember => l.themeEmber,
+      AppColorTheme.spring => l.themeSpring,
+      AppColorTheme.alchemist => l.themeAlchemist,
     };
   }
 
@@ -1168,13 +1171,13 @@ class _IntegrationsSectionState extends ConsumerState<_IntegrationsSection> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    return _Section(title: 'Integrations', icon: Icons.extension_outlined, children: [
+    return _Section(title: l10n.settingsIntegrations, icon: Icons.extension_outlined, children: [
       ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
         leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: const Color(0xFF5865F2).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
             child: const Center(child: Icon(Icons.forum_outlined, size: 20, color: Color(0xFF5865F2)))),
-        title: const Text('Discord', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-        subtitle: Text(_loading ? 'Checking...' : _discordLinked ? 'Linked \u2022 Tap to manage' : 'Tap to link your account',
+        title: Text(l10n.discord, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+        subtitle: Text(_loading ? l10n.integrationsChecking : _discordLinked ? l10n.integrationsLinkedManage : l10n.integrationsTapToLink,
             style: TextStyle(fontSize: 13, color: _discordLinked ? const Color(0xFF43B02A) : theme.colorScheme.outline)),
         trailing: _discordLinked ? const Icon(Icons.check_circle, color: Color(0xFF43B02A), size: 20) : Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
         onTap: () => _showDiscordOptions(context),
@@ -1184,7 +1187,7 @@ class _IntegrationsSectionState extends ConsumerState<_IntegrationsSection> {
         leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: const Color(0xFF43B02A).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
             child: const Center(child: Text('\u{1F955}', style: TextStyle(fontSize: 18)))),
         title: Text(l10n.instacart, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-        subtitle: Text(_loading ? 'Checking...' : _instacartConfigured ? 'Connected \u2022 Tap to manage' : 'Not connected',
+        subtitle: Text(_loading ? l10n.integrationsChecking : _instacartConfigured ? l10n.integrationsConnectedManage : l10n.integrationsNotConnected,
             style: TextStyle(fontSize: 13, color: _instacartConfigured ? const Color(0xFF43B02A) : theme.colorScheme.outline)),
         trailing: _instacartConfigured ? const Icon(Icons.check_circle, color: Color(0xFF43B02A), size: 20) : Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
         onTap: () => _showInstacartOptions(context),
@@ -1194,7 +1197,7 @@ class _IntegrationsSectionState extends ConsumerState<_IntegrationsSection> {
         leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: const Color(0xFF0068B5).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
             child: const Center(child: Text('\u{1F3EA}', style: TextStyle(fontSize: 18)))),
         title: Text(l10n.kroger, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-        subtitle: Text(_loading ? 'Checking...' : _krogerConfigured ? 'Connected \u2022 Tap to manage' : 'Tap to sign in',
+        subtitle: Text(_loading ? l10n.integrationsChecking : _krogerConfigured ? l10n.integrationsConnectedManage : l10n.integrationsTapToSignIn,
             style: TextStyle(fontSize: 13, color: _krogerConfigured ? const Color(0xFF43B02A) : theme.colorScheme.outline)),
         trailing: _krogerConfigured ? const Icon(Icons.check_circle, color: Color(0xFF43B02A), size: 20) : Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
         onTap: () => _showKrogerOptions(context),
@@ -1204,30 +1207,31 @@ class _IntegrationsSectionState extends ConsumerState<_IntegrationsSection> {
 
   void _showDiscordOptions(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final auth = AuthService.instance;
     showModalBottomSheet(context: context, builder: (ctx) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
       Padding(padding: const EdgeInsets.all(16), child: Row(children: [
         const Icon(Icons.forum, size: 24, color: Color(0xFF5865F2)), const SizedBox(width: 12),
-        Text('Discord', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+        Text(l10n.discord, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
         if (_discordLinked) ...[const SizedBox(width: 8), Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           decoration: BoxDecoration(color: const Color(0xFF43B02A).withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)),
-          child: const Text('Linked', style: TextStyle(color: Color(0xFF43B02A), fontSize: 11, fontWeight: FontWeight.w600)),
+          child: Text(l10n.integrationsLinked, style: const TextStyle(color: Color(0xFF43B02A), fontSize: 11, fontWeight: FontWeight.w600)),
         )],
       ])),
       if (!_discordLinked)
-        ListTile(leading: const Icon(Icons.link), title: const Text('Link Discord Account'), subtitle: const Text('Connect for roles & community features'), onTap: () async {
+        ListTile(leading: const Icon(Icons.link), title: Text(l10n.discordLinkAccount), subtitle: Text(l10n.discordLinkSubtitle), onTap: () async {
           Navigator.pop(ctx);
-          if (!auth.isSignedIn) { if (context.mounted) AppSnackbar.error(context, 'Sign in first to link Discord'); return; }
+          if (!auth.isSignedIn) { if (context.mounted) AppSnackbar.error(context, l10n.discordSignInFirst); return; }
           final url = Uri.parse(auth.discordLinkUrl);
-          try { await launchUrl(url, mode: LaunchMode.externalApplication); } catch (e) { if (context.mounted) AppSnackbar.error(context, 'Could not open browser'); }
+          try { await launchUrl(url, mode: LaunchMode.externalApplication); } catch (e) { if (context.mounted) AppSnackbar.error(context, l10n.couldNotOpenBrowser); }
         }),
       if (_discordLinked)
-        ListTile(leading: Icon(Icons.link_off, color: theme.colorScheme.error), title: Text('Unlink Discord', style: TextStyle(color: theme.colorScheme.error)), subtitle: const Text('Remove Discord connection'), onTap: () async {
+        ListTile(leading: Icon(Icons.link_off, color: theme.colorScheme.error), title: Text(l10n.discordUnlink, style: TextStyle(color: theme.colorScheme.error)), subtitle: Text(l10n.discordUnlinkSubtitle), onTap: () async {
           Navigator.pop(ctx);
           final success = await auth.unlinkDiscord();
-          if (success) { _checkStoreStatus(); if (context.mounted) AppSnackbar.success(context, 'Discord unlinked'); }
-          else { if (context.mounted) AppSnackbar.error(context, 'Failed to unlink Discord'); }
+          if (success) { _checkStoreStatus(); if (context.mounted) AppSnackbar.success(context, l10n.discordUnlinked); }
+          else { if (context.mounted) AppSnackbar.error(context, l10n.discordUnlinkFailed); }
         }),
       const SizedBox(height: 16),
     ])));

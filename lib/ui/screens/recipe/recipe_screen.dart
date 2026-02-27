@@ -847,6 +847,7 @@ class _ModernScaleConvertButtons extends StatelessWidget {
 
   void _showScaleDialog(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final presets = [0.5, 1.0, 1.5, 2.0, 3.0, 4.0];
     final controller = TextEditingController();
 
@@ -860,10 +861,10 @@ class _ModernScaleConvertButtons extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Scale Recipe', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              Text(l10n.scaleRecipe, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               Text(
-                servings != null ? 'Original: $servings' : 'Adjust ingredient quantities',
+                servings != null ? l10n.scaleOriginal(servings!) : l10n.scaleAdjustQuantities,
                 style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
               ),
               const SizedBox(height: 20),
@@ -871,7 +872,7 @@ class _ModernScaleConvertButtons extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: presets.map((preset) => _ScaleChip(
-                  label: preset == 1.0 ? '1x (Original)' : '${preset}x',
+                  label: preset == 1.0 ? l10n.scaleOriginalLabel : '${preset}x',
                   isSelected: currentScale == preset,
                   onTap: () {
                     onScaleChanged(preset);
@@ -884,7 +885,7 @@ class _ModernScaleConvertButtons extends StatelessWidget {
                 controller: controller,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
-                  labelText: 'Custom scale',
+                  labelText: l10n.scaleCustom,
                   hintText: 'e.g., 2.5',
                   suffixText: 'x',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -903,7 +904,7 @@ class _ModernScaleConvertButtons extends StatelessWidget {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx),
-                    child: const Text('Cancel'),
+                    child: Text(l10n.actionCancel),
                   ),
                 ],
               ),

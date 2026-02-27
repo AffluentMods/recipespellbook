@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/community_service.dart';
 import '../../widgets/app_snackbar.dart';
 
@@ -82,14 +83,15 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Community'),
+        title: Text(l10n.navCommunity),
         actions: [
           IconButton(
             icon: const Icon(Icons.upload_outlined),
-            tooltip: 'My Publications',
+            tooltip: l10n.communityMyPublications,
             onPressed: () => context.push('/community/my-publications'),
           ),
         ],
@@ -102,7 +104,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search cookbooks...',
+                hintText: l10n.communitySearchCookbooks,
                 prefixIcon: const Icon(Icons.search, size: 20),
                 suffixIcon: _query.isNotEmpty
                     ? IconButton(
@@ -131,11 +133,11 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: Row(
               children: [
-                _SortChip(label: 'Recent', value: 'recent', selected: _sort, onSelected: _onSortChanged),
+                _SortChip(label: l10n.communitySortRecent, value: 'recent', selected: _sort, onSelected: _onSortChanged),
                 const SizedBox(width: 8),
-                _SortChip(label: 'Popular', value: 'popular', selected: _sort, onSelected: _onSortChanged),
+                _SortChip(label: l10n.communitySortPopular, value: 'popular', selected: _sort, onSelected: _onSortChanged),
                 const SizedBox(width: 8),
-                _SortChip(label: 'Most Downloaded', value: 'downloads', selected: _sort, onSelected: _onSortChanged),
+                _SortChip(label: l10n.communitySortMostDownloaded, value: 'downloads', selected: _sort, onSelected: _onSortChanged),
               ],
             ),
           ),
@@ -150,13 +152,13 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                   Icon(Icons.menu_book_outlined, size: 64, color: theme.colorScheme.outline),
                   const SizedBox(height: 16),
                   Text(
-                    _query.isNotEmpty ? 'No results for "$_query"' : 'No cookbooks yet',
+                    _query.isNotEmpty ? l10n.communityNoResultsFor(_query) : l10n.communityNoCookbooksYet,
                     style: TextStyle(color: theme.colorScheme.outline, fontSize: 16),
                   ),
                   if (_query.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     TextButton(onPressed: () { _searchController.clear(); setState(() => _query = ''); _load(); },
-                        child: const Text('Clear search')),
+                        child: Text(l10n.communityClearSearch)),
                   ],
                 ],
               ),
@@ -184,7 +186,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/community/publish'),
         icon: const Icon(Icons.publish),
-        label: const Text('Publish'),
+        label: Text(l10n.communityPublish),
       ),
     );
   }
@@ -236,6 +238,7 @@ class _CommunityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -266,7 +269,7 @@ class _CommunityCard extends StatelessWidget {
                         Text(item.title,
                             style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                             maxLines: 1, overflow: TextOverflow.ellipsis),
-                        Text('by ${item.publisher.displayName}',
+                        Text(l10n.communityByPublisher(item.publisher.displayName),
                             style: TextStyle(fontSize: 12, color: theme.colorScheme.outline)),
                       ],
                     ),
@@ -287,7 +290,7 @@ class _CommunityCard extends StatelessWidget {
                 children: [
                   Icon(Icons.restaurant_menu, size: 14, color: theme.colorScheme.outline),
                   const SizedBox(width: 4),
-                  Text('${item.recipeCount} recipes', style: TextStyle(fontSize: 12, color: theme.colorScheme.outline)),
+                  Text(l10n.communityRecipeCount(item.recipeCount), style: TextStyle(fontSize: 12, color: theme.colorScheme.outline)),
                   const SizedBox(width: 16),
                   Icon(Icons.download, size: 14, color: theme.colorScheme.outline),
                   const SizedBox(width: 4),

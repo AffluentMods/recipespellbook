@@ -189,6 +189,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 
   void _showListSwitcher(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.read(shoppingDaoProvider);
 
     showModalBottomSheet(
@@ -208,7 +209,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Text('Shopping Lists', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(l10n.shoppingLists, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                   const Spacer(),
                   TextButton.icon(
                     onPressed: () {
@@ -216,7 +217,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                       _createNewList(context);
                     },
                     icon: const Icon(Icons.add),
-                    label: const Text('New'),
+                    label: Text(l10n.actionNew),
                   ),
                 ],
               ),
@@ -242,7 +243,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.family_restroom, size: 20),
-                            tooltip: 'Family Share',
+                            tooltip: l10n.shoppingFamilyShare,
                             onPressed: () {
                               Navigator.pop(context);
                               showResourceShareSheet(
@@ -285,19 +286,20 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 
   void _createNewList(BuildContext context) {
     final controller = TextEditingController();
+    final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.read(shoppingDaoProvider);
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('New List'),
+        title: Text(l10n.shoppingNewList),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(hintText: 'List name'),
+          decoration: InputDecoration(hintText: l10n.shoppingListName),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
           FilledButton(
             onPressed: () {
               if (controller.text.trim().isNotEmpty) {
@@ -313,7 +315,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 Navigator.pop(ctx);
               }
             },
-            child: const Text('Create'),
+            child: Text(l10n.actionCreate),
           ),
         ],
       ),
@@ -322,15 +324,16 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 
   void _renameList(BuildContext context, ShoppingList list) {
     final controller = TextEditingController(text: list.name);
+    final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.read(shoppingDaoProvider);
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Rename List'),
+        title: Text(l10n.shoppingRenameList),
         content: TextField(controller: controller, autofocus: true),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
           FilledButton(
             onPressed: () {
               if (controller.text.trim().isNotEmpty) {
@@ -341,7 +344,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 Navigator.pop(ctx);
               }
             },
-            child: const Text('Save'),
+            child: Text(l10n.actionSave),
           ),
         ],
       ),
@@ -349,15 +352,16 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   }
 
   void _deleteList(BuildContext context, ShoppingList list) {
+    final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.read(shoppingDaoProvider);
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete List?'),
-        content: Text('Are you sure you want to delete "${list.name}"?'),
+        title: Text(l10n.shoppingDeleteList),
+        content: Text(l10n.shoppingDeleteListConfirm(list.name)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
           FilledButton(
             onPressed: () {
               shoppingDao.deleteList(list.id);
@@ -370,7 +374,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
               Navigator.pop(ctx);
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(l10n.actionDelete),
           ),
         ],
       ),
@@ -432,8 +436,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.upload_file),
-                  title: const Text('Export list'),
-                  subtitle: const Text('Share as a text file or backup'),
+                  title: Text(l10n.shoppingExportList),
+                  subtitle: Text(l10n.shoppingExportListSubtitle),
                   onTap: () {
                     Navigator.pop(ctx);
                     _showExportSheet(context);
@@ -441,8 +445,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.download),
-                  title: const Text('Import list'),
-                  subtitle: const Text('Add items from a file, photo, or text'),
+                  title: Text(l10n.shoppingImportList),
+                  subtitle: Text(l10n.shoppingImportListSubtitle),
                   onTap: () {
                     Navigator.pop(ctx);
                     _showImportSheet(context);
@@ -450,8 +454,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.qr_code_scanner),
-                  title: const Text('Scan barcode'),
-                  subtitle: const Text('Look up a product to add'),
+                  title: Text(l10n.scanBarcode),
+                  subtitle: Text(l10n.shoppingScanBarcodeSubtitle),
                   onTap: () {
                     Navigator.pop(ctx);
                     _openBarcodeScanner();
@@ -460,8 +464,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.family_restroom),
-                  title: const Text('Family Share'),
-                  subtitle: const Text('Share list with family or one-time link'),
+                  title: Text(l10n.shoppingFamilyShare),
+                  subtitle: Text(l10n.shoppingFamilyShareSubtitle),
                   onTap: () {
                     Navigator.pop(ctx);
                     showResourceShareSheet(
@@ -526,7 +530,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
         sortOrder: const drift.Value(0),
       ));
       if (!mounted) return;
-      AppSnackbar.info(context, 'Added "$itemName"');
+      final l10n = AppLocalizations.of(context)!;
+      AppSnackbar.info(context, l10n.shoppingAddedItemName(itemName));
     } else if (action == 'searchRecipes') {
       // Navigate to search — user can search for the scanned product
       context.push('/search');
@@ -537,6 +542,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 
   void _showExportSheet(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     showModalBottomSheet(
       context: context,
@@ -556,7 +562,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
-                  'Export "$_currentListName"',
+                  l10n.shoppingExportTitle(_currentListName),
                   style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -570,8 +576,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   ),
                   child: const Center(child: Text('{ }', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
                 ),
-                title: const Text('Backup file'),
-                subtitle: const Text('For transferring to another device or app'),
+                title: Text(l10n.exportBackupFile),
+                subtitle: Text(l10n.exportBackupFileSubtitle),
                 onTap: () {
                   Navigator.pop(ctx);
                   _exportAs('json');
@@ -586,8 +592,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   ),
                   child: Icon(Icons.description_outlined, color: theme.colorScheme.primary),
                 ),
-                title: const Text('Formatted list'),
-                subtitle: const Text('With checkboxes — great for notes apps'),
+                title: Text(l10n.exportFormattedList),
+                subtitle: Text(l10n.exportFormattedListSubtitle),
                 onTap: () {
                   Navigator.pop(ctx);
                   _exportAs('md');
@@ -602,8 +608,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   ),
                   child: Icon(Icons.text_snippet_outlined, color: theme.colorScheme.primary),
                 ),
-                title: const Text('Plain text'),
-                subtitle: const Text('Simple list — paste anywhere'),
+                title: Text(l10n.exportPlainText),
+                subtitle: Text(l10n.exportPlainTextSubtitle),
                 onTap: () {
                   Navigator.pop(ctx);
                   _exportAs('txt');
@@ -624,7 +630,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       await service.shareAsFile(_currentListId, format: format);
     } catch (e) {
       if (mounted) {
-        AppSnackbar.info(context, 'Export failed: $e');
+        final l10n = AppLocalizations.of(context)!;
+        AppSnackbar.info(context, l10n.shoppingExportFailed(e.toString()));
       }
     }
   }
@@ -633,6 +640,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 
   void _showImportSheet(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     showModalBottomSheet(
       context: context,
@@ -652,7 +660,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
-                  'Import shopping list',
+                  l10n.shoppingImportShoppingList,
                   style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -666,8 +674,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   ),
                   child: const Center(child: Text('{ }', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
                 ),
-                title: const Text('From backup file'),
-                subtitle: const Text('Import a Recipe Spellbook backup'),
+                title: Text(l10n.importFromBackupFile),
+                subtitle: Text(l10n.importFromBackupSubtitle),
                 onTap: () {
                   Navigator.pop(ctx);
                   _importFromJsonFile();
@@ -682,8 +690,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   ),
                   child: Icon(Icons.text_snippet_outlined, color: theme.colorScheme.primary),
                 ),
-                title: const Text('From text'),
-                subtitle: const Text('Paste or type a list of items'),
+                title: Text(l10n.shoppingFromText),
+                subtitle: Text(l10n.importFromTextShoppingSubtitle),
                 onTap: () {
                   Navigator.pop(ctx);
                   _showAddItemSheet(context);
@@ -699,8 +707,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   ),
                   child: Icon(Icons.camera_alt_outlined, color: theme.colorScheme.primary),
                 ),
-                title: const Text('From photo'),
-                subtitle: const Text('OCR scan a handwritten or printed list'),
+                title: Text(l10n.shoppingFromPhoto),
+                subtitle: Text(l10n.importFromPhotoOcrSubtitle),
                 onTap: () {
                   Navigator.pop(ctx);
                   _showAddItemSheet(context);
@@ -734,19 +742,21 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       final importResult = await service.importFromJson(data);
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         if (importResult.success && importResult.listId != null) {
           setState(() {
             _currentListId = importResult.listId!;
-            _currentListName = importResult.listName ?? 'Imported List';
+            _currentListName = importResult.listName ?? l10n.shoppingImportedList;
           });
-          AppSnackbar.info(context, '✅ ${importResult.message}');
+          AppSnackbar.info(context, importResult.message);
         } else {
           AppSnackbar.info(context, importResult.message);
         }
       }
     } catch (e) {
       if (mounted) {
-        AppSnackbar.info(context, 'Import failed: $e');
+        final l10n = AppLocalizations.of(context)!;
+        AppSnackbar.info(context, l10n.importFailed(e.toString()));
       }
     }
   }
@@ -806,6 +816,7 @@ class _ModernHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 12, 8),
@@ -838,7 +849,7 @@ class _ModernHeader extends StatelessWidget {
           Row(
             children: [
               Text(
-                '$itemCount ${itemCount == 1 ? 'item' : 'items'}',
+                l10n.shoppingItemCount(itemCount),
                 style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline),
               ),
               const Spacer(),
@@ -854,7 +865,7 @@ class _ModernHeader extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(_getGroupModeLabel(groupMode), style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+                      Text(_getGroupModeLabel(groupMode, l10n), style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
                       const SizedBox(width: 4),
                       Icon(Icons.arrow_drop_down, size: 20, color: theme.colorScheme.onSurface),
                     ],
@@ -867,7 +878,7 @@ class _ModernHeader extends StatelessWidget {
                         children: [
                           Icon(mode.icon, size: 20, color: groupMode == mode ? theme.colorScheme.primary : null),
                           const SizedBox(width: 12),
-                          Text(_getGroupModeLabel(mode)),
+                          Text(_getGroupModeLabel(mode, l10n)),
                           if (groupMode == mode) ...[const Spacer(), Icon(Icons.check, size: 18, color: theme.colorScheme.primary)],
                         ],
                       ),
@@ -882,11 +893,11 @@ class _ModernHeader extends StatelessWidget {
     );
   }
 
-  String _getGroupModeLabel(ShoppingGroupMode mode) {
+  String _getGroupModeLabel(ShoppingGroupMode mode, AppLocalizations l10n) {
     switch (mode) {
-      case ShoppingGroupMode.section: return 'By Section';
-      case ShoppingGroupMode.recipe: return 'By Recipe';
-      case ShoppingGroupMode.ungrouped: return 'Ungrouped';
+      case ShoppingGroupMode.section: return l10n.shoppingBySection;
+      case ShoppingGroupMode.recipe: return l10n.shoppingByRecipe;
+      case ShoppingGroupMode.ungrouped: return l10n.shoppingUngrouped;
     }
   }
 }
@@ -900,6 +911,7 @@ class _OrderOnlineButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
@@ -923,7 +935,7 @@ class _OrderOnlineButton extends StatelessWidget {
                 Icon(Icons.shopping_cart_outlined,
                     color: const Color(0xFFE88B00), size: 22),
                 const SizedBox(width: 10),
-                Text('Order online',
+                Text(l10n.shoppingOrderOnline,
                     style: theme.textTheme.titleMedium
                         ?.copyWith(fontWeight: FontWeight.w600)),
               ],
@@ -999,6 +1011,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       decoration: BoxDecoration(
@@ -1023,11 +1036,11 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
               const SizedBox(height: 20),
 
               // Title
-              Text('Send to store',
+              Text(l10n.shoppingSendToStore,
                   style: theme.textTheme.titleLarge
                       ?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
-              Text('${widget.itemCount} items',
+              Text(l10n.shoppingItems(widget.itemCount),
                   style: theme.textTheme.bodyMedium
                       ?.copyWith(color: theme.colorScheme.outline)),
               const SizedBox(height: 20),
@@ -1035,7 +1048,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
               // Providers
               _SectionLabel(
                 icon: Icons.bolt,
-                label: 'Send to cart',
+                label: l10n.shoppingSendToCart,
                 color: const Color(0xFFE88B00),
               ),
               const SizedBox(height: 8),
@@ -1066,7 +1079,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
                     children: [
                       Icon(Icons.copy, size: 18, color: theme.colorScheme.outline),
                       const SizedBox(width: 8),
-                      Text('Copy list to clipboard',
+                      Text(l10n.shoppingCopyToClipboard,
                           style: theme.textTheme.bodyMedium
                               ?.copyWith(color: theme.colorScheme.outline)),
                     ],
@@ -1103,7 +1116,8 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
       }
       if (mounted) {
         final name = _providerData[provider]?.name ?? 'store';
-        AppSnackbar.info(context, 'List copied! Opening $name...');
+        final l10n = AppLocalizations.of(context)!;
+        AppSnackbar.info(context, l10n.shoppingListCopiedOpening(name));
       }
     }
   }
@@ -1130,7 +1144,8 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
         text: GroceryService.formatForClipboard(widget.itemNames),
       ),
     );
-    AppSnackbar.info(context, '${widget.itemCount} items copied to clipboard');
+    final l10n = AppLocalizations.of(context)!;
+    AppSnackbar.info(context, l10n.shoppingItemsCopiedToClipboard(widget.itemCount));
   }
 }
 
@@ -1194,6 +1209,7 @@ class _ProviderTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Material(
       color: display.color.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(14),
@@ -1228,7 +1244,7 @@ class _ProviderTile extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              'Connected',
+                              l10n.shoppingProviderConnected,
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: const Color(0xFF43B02A),
                                 fontWeight: FontWeight.w600,
@@ -1243,8 +1259,8 @@ class _ProviderTile extends StatelessWidget {
                     Text(
                       isConfigured
                           ? (display.name == 'Instacart'
-                          ? 'Tap to create a shoppable list'
-                          : 'Tap to add items directly to your cart')
+                          ? l10n.shoppingTapToCreateShoppableList
+                          : l10n.shoppingTapToAddToCart)
                           : display.subtitle,
                       style: theme.textTheme.bodySmall
                           ?.copyWith(color: theme.colorScheme.outline, fontSize: 11),
@@ -1341,6 +1357,7 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -1361,16 +1378,16 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
             const SizedBox(height: 16),
             Text(
               _total <= 1
-                  ? 'Creating list on ${widget.providerName}\u2026'
-                  : 'Adding to ${widget.providerName}\u2026',
+                  ? l10n.shoppingCreatingListOn(widget.providerName)
+                  : l10n.shoppingAddingTo(widget.providerName),
               style: theme.textTheme.titleSmall
                   ?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
               _total <= 1
-                  ? '${widget.itemNames.length} items'
-                  : '$_current of $_total items',
+                  ? l10n.shoppingItems(widget.itemNames.length)
+                  : l10n.shoppingCurrentOfTotal(_current, _total),
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
             ),
             if (_currentItem.isNotEmpty) ...[
@@ -1396,9 +1413,9 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
             Text(
               _result?.success == true
                   ? (widget.provider == GroceryProvider.instacart
-                  ? 'Shopping list ready!'
-                  : 'Items added!')
-                  : 'Partially added',
+                  ? l10n.shoppingListReady
+                  : l10n.shoppingItemsAddedSuccess)
+                  : l10n.shoppingPartiallyAdded,
               style: theme.textTheme.titleSmall
                   ?.copyWith(fontWeight: FontWeight.w600),
             ),
@@ -1406,9 +1423,9 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
             Text(
               _result?.success == true
                   ? (widget.provider == GroceryProvider.instacart
-                  ? '${_result!.itemsAdded} items on your Instacart list'
-                  : '${_result!.itemsAdded} items in your ${widget.providerName} cart')
-                  : '${_result?.itemsAdded ?? 0} added, ${_result?.itemsFailed ?? 0} not found',
+                  ? l10n.shoppingItemsOnInstacartList(_result!.itemsAdded)
+                  : l10n.shoppingItemsInCart(_result!.itemsAdded, widget.providerName))
+                  : l10n.shoppingAddedNotFound(_result?.itemsAdded ?? 0, _result?.itemsFailed ?? 0),
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
               textAlign: TextAlign.center,
             ),
@@ -1437,7 +1454,7 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
                 constraints: const BoxConstraints(maxHeight: 100),
                 child: SingleChildScrollView(
                   child: Text(
-                    'Not found: ${_result!.failedItems.join(", ")}',
+                    l10n.shoppingNotFoundItems(_result!.failedItems.join(", ")),
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 11,
                       color: isDark ? theme.colorScheme.tertiary : Colors.orange.shade700,
@@ -1504,18 +1521,18 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
                       }
                     },
                     icon: const Icon(Icons.shopping_cart_checkout, size: 18),
-                    label: const Text('Go to cart'),
+                    label: Text(l10n.shoppingGoToCart),
                   )
                 else
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Done'),
+                    child: Text(l10n.actionDone),
                   ),
                 if (_result?.checkoutUrl != null) ...[
                   const SizedBox(width: 8),
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Close'),
+                    child: Text(l10n.actionClose),
                   ),
                 ],
               ],
@@ -1687,6 +1704,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isDark = theme.brightness == Brightness.dark;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
@@ -1701,7 +1719,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Add Items',
+          l10n.shoppingAddItems,
           style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         centerTitle: false,
@@ -1717,7 +1735,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    '${_recentlyAdded.length} added',
+                    l10n.shoppingCountAdded(_recentlyAdded.length),
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.w600,
@@ -1729,7 +1747,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
           TextButton.icon(
             onPressed: () => _showImportOptions(context),
             icon: const Icon(Icons.download_outlined, size: 20),
-            label: const Text('Import'),
+            label: Text(l10n.importTitle),
             style: TextButton.styleFrom(
               foregroundColor: theme.colorScheme.primary,
             ),
@@ -1758,7 +1776,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                   autofocus: true,
                   style: theme.textTheme.bodyLarge,
                   decoration: InputDecoration(
-                    hintText: 'e.g. 2 cups flour, chicken breast...',
+                    hintText: l10n.shoppingAddItemHintLong,
                     hintStyle: theme.textTheme.bodyLarge?.copyWith(
                       color: theme.colorScheme.outline.withValues(alpha: 0.5),
                     ),
@@ -1816,7 +1834,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Tap send or press Enter — keyboard stays open for the next item',
+                  l10n.shoppingAddHint,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.outline.withValues(alpha: 0.6),
                   ),
@@ -1879,6 +1897,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
   }
 
   Widget _buildRecentlyAdded(ThemeData theme, bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return ListView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       padding: const EdgeInsets.all(16),
@@ -1889,7 +1908,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                 size: 18, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Text(
-              'Just added',
+              l10n.shoppingJustAdded,
               style: theme.textTheme.titleSmall?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.w600,
@@ -1927,7 +1946,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                         icon: Icon(Icons.close, size: 18,
                             color: theme.colorScheme.outline),
                         visualDensity: VisualDensity.compact,
-                        tooltip: 'Remove from list',
+                        tooltip: l10n.shoppingRemoveFromList,
                         onPressed: () => _removeRecentItem(idx, item),
                       ),
                     ],
@@ -1945,11 +1964,12 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
   void _editRecentItem(int index, String currentName) {
     final editController = TextEditingController(text: currentName);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Edit item'),
+        title: Text(l10n.shoppingEditItem),
         content: TextField(
           controller: editController,
           autofocus: true,
@@ -1963,12 +1983,12 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.actionCancel),
           ),
           FilledButton(
             onPressed: () => _applyRecentEdit(
                 ctx, index, currentName, editController.text.trim()),
-            child: const Text('Save'),
+            child: Text(l10n.actionSave),
           ),
         ],
       ),
@@ -2016,6 +2036,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
 
   void _showImportOptions(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     showModalBottomSheet(
       context: context,
@@ -2041,7 +2062,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
-                  'Import items',
+                  l10n.shoppingImportItems,
                   style: theme.textTheme.titleLarge
                       ?.copyWith(fontWeight: FontWeight.bold),
                 ),
@@ -2057,8 +2078,8 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                   child: Icon(Icons.text_snippet_outlined,
                       color: theme.colorScheme.primary),
                 ),
-                title: const Text('From text'),
-                subtitle: const Text('Paste or type a list of items'),
+                title: Text(l10n.shoppingFromText),
+                subtitle: Text(l10n.importFromTextShoppingSubtitle),
                 onTap: () {
                   Navigator.pop(ctx);
                   _importFromText();
@@ -2074,8 +2095,8 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                   child: Icon(Icons.camera_alt_outlined,
                       color: theme.colorScheme.primary),
                 ),
-                title: const Text('From photo'),
-                subtitle: const Text('Take a photo or pick from gallery'),
+                title: Text(l10n.shoppingFromPhoto),
+                subtitle: Text(l10n.importFromPhotoGallerySubtitle),
                 onTap: () {
                   Navigator.pop(ctx);
                   _showPhotoSourcePicker();
@@ -2092,11 +2113,12 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
   void _importFromText() {
     final textController = TextEditingController();
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Import from text'),
+        title: Text(l10n.importFromText),
         content: SizedBox(
           width: double.maxFinite,
           child: Column(
@@ -2104,7 +2126,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'One item per line',
+                l10n.shoppingOneItemPerLine,
                 style: theme.textTheme.bodySmall
                     ?.copyWith(color: theme.colorScheme.outline),
               ),
@@ -2115,7 +2137,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                 maxLines: 8,
                 minLines: 4,
                 decoration: InputDecoration(
-                  hintText: '2 cups flour\nchicken breast\n1 lb ground beef\nmilk\n...',
+                  hintText: l10n.shoppingImportTextHint,
                   hintStyle: TextStyle(
                     color: theme.colorScheme.outline.withValues(alpha: 0.4),
                   ),
@@ -2130,7 +2152,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.actionCancel),
           ),
           FilledButton.icon(
             onPressed: () {
@@ -2138,7 +2160,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
               _processImportedLines(textController.text);
             },
             icon: const Icon(Icons.add, size: 18),
-            label: const Text('Add items'),
+            label: Text(l10n.shoppingAddItems),
           ),
         ],
       ),
@@ -2147,6 +2169,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
 
   void _showPhotoSourcePicker() {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     showModalBottomSheet(
       context: context,
@@ -2171,7 +2194,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: const Text('Take photo'),
+                title: Text(l10n.photoTakePhoto),
                 onTap: () {
                   Navigator.pop(ctx);
                   _importFromPhoto(ImageSource.camera);
@@ -2179,7 +2202,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: const Text('Choose from gallery'),
+                title: Text(l10n.photoChooseFromGallery),
                 onTap: () {
                   Navigator.pop(ctx);
                   _importFromPhoto(ImageSource.gallery);
@@ -2200,7 +2223,8 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
       image = await picker.pickImage(source: source, imageQuality: 85);
     } catch (e) {
       if (mounted) {
-        AppSnackbar.info(context, 'Could not access ${source == ImageSource.camera ? "camera" : "gallery"}');
+        final l10n = AppLocalizations.of(context)!;
+        AppSnackbar.info(context, l10n.shoppingCouldNotAccessSource(source == ImageSource.camera ? l10n.shoppingCamera : l10n.shoppingGallery));
       }
       return;
     }
@@ -2234,7 +2258,8 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     } catch (e) {
       if (mounted) Navigator.pop(context);
       if (mounted) {
-        AppSnackbar.info(context, 'Error reading image: $e');
+        final l10n = AppLocalizations.of(context)!;
+        AppSnackbar.info(context, l10n.shoppingErrorReadingImage(e.toString()));
       }
     }
   }
@@ -2244,6 +2269,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     final lines = _parseTextToLines(rawText);
     final selected = List<bool>.filled(lines.length, true);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     showDialog(
       context: context,
@@ -2251,7 +2277,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
         builder: (ctx, setDialogState) => AlertDialog(
           title: Row(
             children: [
-              const Expanded(child: Text('Review items')),
+              Expanded(child: Text(l10n.importReviewItems)),
               TextButton(
                 onPressed: () {
                   final allSelected = selected.every((s) => s);
@@ -2261,7 +2287,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                     }
                   });
                 },
-                child: Text(selected.every((s) => s) ? 'Deselect all' : 'Select all'),
+                child: Text(selected.every((s) => s) ? l10n.deselectAll : l10n.selectAll),
               ),
             ],
           ),
@@ -2270,7 +2296,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
             height: 350,
             child: lines.isEmpty
                 ? Center(
-              child: Text('No items detected',
+              child: Text(l10n.importNoItemsDetected,
                   style: theme.textTheme.bodyMedium
                       ?.copyWith(color: theme.colorScheme.outline)),
             )
@@ -2289,7 +2315,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
+              child: Text(l10n.actionCancel),
             ),
             FilledButton.icon(
               onPressed: () {
@@ -2302,7 +2328,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
               },
               icon: const Icon(Icons.add, size: 18),
               label: Text(
-                'Add ${selected.where((s) => s).length} items',
+                l10n.shoppingAddCountItems(selected.where((s) => s).length),
               ),
             ),
           ],
@@ -2366,11 +2392,13 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
       while (_recentlyAdded.length > 30) _recentlyAdded.removeLast();
     });
 
-    AppSnackbar.info(context, '${items.length} items added');
+    final l10n = AppLocalizations.of(context)!;
+    AppSnackbar.info(context, l10n.shoppingItemsAddedCount(items.length));
     _ensureKeyboardVisible();
   }
 
   Widget _buildEmptyHint(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -2384,7 +2412,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'Start typing to see suggestions',
+              l10n.shoppingStartTyping,
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.outline.withValues(alpha: 0.6),
               ),
@@ -2392,7 +2420,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
             if (_serviceReady) ...[
               const SizedBox(height: 4),
               Text(
-                '${IngredientSuggestionService.instance.count} ingredients available',
+                l10n.shoppingIngredientsAvailable(IngredientSuggestionService.instance.count),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.outline.withValues(alpha: 0.4),
                 ),
@@ -2472,7 +2500,7 @@ class _SuggestionTile extends StatelessWidget {
                   color: theme.colorScheme.primary, size: 22),
               visualDensity: VisualDensity.compact,
               onPressed: onAdd,
-              tooltip: 'Add to list',
+              tooltip: AppLocalizations.of(context)!.addToList,
             ),
           ],
         ),
@@ -2731,7 +2759,7 @@ class _RecipeGroupedList extends ConsumerWidget {
             future: recipeId != null ? recipeDao.getRecipeById(recipeId) : Future.value(null),
             builder: (context, snapshot) {
               final recipe = snapshot.data;
-              final title = recipe?.title ?? 'Added manually';
+              final title = recipe?.title ?? AppLocalizations.of(context)!.shoppingAddedManually;
 
               return Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 16, 4),
@@ -3030,6 +3058,7 @@ class _ShoppingItemTile extends ConsumerWidget {
 
   void _showItemOptions(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.read(shoppingDaoProvider);
     final controller = TextEditingController(text: item.name);
 
@@ -3051,13 +3080,13 @@ class _ShoppingItemTile extends ConsumerWidget {
             children: [
               Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)))),
               const SizedBox(height: 20),
-              Text('Edit Item', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              Text(l10n.shoppingEditItem, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
 
               TextField(
                 controller: controller,
                 decoration: InputDecoration(
-                  labelText: 'Item name',
+                  labelText: l10n.shoppingItemName,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
@@ -3081,7 +3110,7 @@ class _ShoppingItemTile extends ConsumerWidget {
                         Navigator.pop(ctx);
                       },
                       icon: Icon(Icons.delete, color: theme.colorScheme.error),
-                      label: Text('Delete', style: TextStyle(color: theme.colorScheme.error)),
+                      label: Text(l10n.actionDelete, style: TextStyle(color: theme.colorScheme.error)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -3093,7 +3122,7 @@ class _ShoppingItemTile extends ConsumerWidget {
                         }
                         Navigator.pop(ctx);
                       },
-                      child: const Text('Save'),
+                      child: Text(l10n.actionSave),
                     ),
                   ),
                 ],
@@ -3118,6 +3147,7 @@ class _CategoryDropdown extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.watch(shoppingDaoProvider);
 
     return StreamBuilder<List<ShoppingCategory>>(
@@ -3150,7 +3180,7 @@ class _CategoryDropdown extends ConsumerWidget {
               hint: Text(
                 currentCategoryId.isNotEmpty && !validIds.contains(currentCategoryId)
                     ? _formatCategoryName(currentCategoryId)
-                    : 'Select category',
+                    : l10n.shoppingSelectCategory,
               ),
               items: [
                 if (currentCategoryId.isNotEmpty && !validIds.contains(currentCategoryId) && currentCategoryId != 'other')
@@ -3168,13 +3198,13 @@ class _CategoryDropdown extends ConsumerWidget {
                     ],
                   ),
                 )),
-                const DropdownMenuItem(
+                DropdownMenuItem(
                   value: 'other',
                   child: Row(
                     children: [
-                      Text('📦'),
-                      SizedBox(width: 8),
-                      Text('Other'),
+                      const Text('📦'),
+                      const SizedBox(width: 8),
+                      Text(l10n.shoppingOther),
                     ],
                   ),
                 ),
@@ -3244,6 +3274,7 @@ class _CheckedSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.read(shoppingDaoProvider);
 
     return Column(
@@ -3257,7 +3288,7 @@ class _CheckedSection extends ConsumerWidget {
               Icon(Icons.check_circle, size: 20, color: theme.colorScheme.outline),
               const SizedBox(width: 8),
               Text(
-                'Checked items (${items.length})',
+                l10n.shoppingCheckedItemsCount(items.length),
                 style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.outline),
               ),
               const Spacer(),
@@ -3266,7 +3297,7 @@ class _CheckedSection extends ConsumerWidget {
                   shoppingDao.deleteCheckedItems(listId);
                   RpgIntegration.onShoppingListCompleted(ref);
                 },
-                child: const Text('Clear all'),
+                child: Text(l10n.shoppingClearAll),
               ),
             ],
           ),
@@ -3284,6 +3315,7 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Center(
       child: Padding(
@@ -3293,10 +3325,10 @@ class _EmptyState extends StatelessWidget {
           children: [
             Icon(Icons.shopping_cart_outlined, size: 80, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
             const SizedBox(height: 24),
-            Text('Your list is empty', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+            Text(l10n.shoppingEmptyList, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             Text(
-              'Tap + to add items or add ingredients from your recipes',
+              l10n.shoppingEmptyHint,
               style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
               textAlign: TextAlign.center,
             ),

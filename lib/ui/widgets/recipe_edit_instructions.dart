@@ -101,11 +101,11 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(count == 1 ? 'Delete Step?' : 'Delete $count Steps?'),
+        title: Text(count == 1 ? l10n.deleteStep : l10n.deleteSteps),
         content: Text(
           count == 1
-              ? 'This step will be permanently removed.'
-              : 'These $count steps will be permanently removed.',
+              ? l10n.stepWillBeRemoved
+              : l10n.stepsWillBeRemoved(count),
         ),
         actions: [
           TextButton(
@@ -300,7 +300,7 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
               visualDensity: VisualDensity.compact,
             ),
             Text(
-              '${_selectedStepIds.length} selected',
+              l10n.selectedCount(_selectedStepIds.length),
               style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const Spacer(),
@@ -322,7 +322,7 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
         ),
         const Spacer(),
         Text(
-          '${_steps.length} ${_steps.length == 1 ? 'step' : 'steps'}',
+          l10n.stepCount(_steps.length),
           style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
         ),
       ],
@@ -508,7 +508,7 @@ class _StepCard extends StatelessWidget {
                       maxLines: null,
                       minLines: 1,
                       decoration: InputDecoration(
-                        hintText: 'Enter instruction...',
+                        hintText: AppLocalizations.of(context)!.enterInstruction,
                         hintStyle: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.outline.withValues(alpha: 0.4),
                         ),
@@ -749,7 +749,7 @@ class _AddStepImageButton extends StatelessWidget {
               Icon(Icons.add_photo_alternate_outlined, size: 20, color: theme.colorScheme.outline),
               const SizedBox(width: 8),
               Text(
-                'Add step image',
+                AppLocalizations.of(context)!.addStepImage,
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
               ),
             ],
@@ -832,7 +832,7 @@ class _AddStepImageButton extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                'Pinch to zoom · This is how your photo will look',
+                l10n.pinchToZoomPreview,
                 style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
                 textAlign: TextAlign.center,
               ),
@@ -899,12 +899,12 @@ class _EmptyStepsState extends StatelessWidget {
           Icon(Icons.format_list_numbered, size: 48, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
           const SizedBox(height: 12),
           Text(
-            'No instructions yet',
+            l10n.instructionsNoSteps,
             style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
           Text(
-            'Add steps to guide through the recipe',
+            l10n.instructionsAddStepsGuide,
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
           ),
           const SizedBox(height: 16),
@@ -987,7 +987,7 @@ class _IngredientsEditorState extends State<IngredientsEditor> {
             ),
             const Spacer(),
             Text(
-              '$count ${count == 1 ? 'ingredient' : 'ingredients'}',
+              l10n.ingredientCount(count),
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
             ),
           ],
@@ -1005,7 +1005,7 @@ class _IngredientsEditorState extends State<IngredientsEditor> {
             maxLines: null,
             minLines: 5,
             decoration: InputDecoration(
-              hintText: 'Enter one ingredient per line:\n\n2 cups flour\n1 tsp salt\n3 eggs',
+              hintText: l10n.ingredientPerLineHint,
               border: InputBorder.none,
               contentPadding: const EdgeInsets.all(16),
               hintStyle: theme.textTheme.bodyMedium?.copyWith(
@@ -1017,7 +1017,7 @@ class _IngredientsEditorState extends State<IngredientsEditor> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Tip: Enter one ingredient per line. Press Enter after each ingredient.',
+          l10n.ingredientTip,
           style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
         ),
       ],

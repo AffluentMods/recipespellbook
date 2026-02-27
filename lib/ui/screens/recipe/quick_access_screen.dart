@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../database/database.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/default_recipe_images.dart';
@@ -138,16 +139,17 @@ class _QuickAccessScreenState extends ConsumerState<QuickAccessScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final items = _filteredAndSortedItems;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quick Access'),
+        title: Text(l10n.settingsQuickAccess),
         actions: [
           // View size
           PopupMenuButton<_ViewSize>(
             icon: Icon(_viewSize.icon),
-            tooltip: 'View size',
+            tooltip: l10n.tooltipViewSize,
             onSelected: (size) => setState(() => _viewSize = size),
             itemBuilder: (ctx) => _ViewSize.values.map((size) {
               return PopupMenuItem(
@@ -168,7 +170,7 @@ class _QuickAccessScreenState extends ConsumerState<QuickAccessScreen> {
               Icons.filter_list,
               color: _filter != _FilterMode.all ? theme.colorScheme.primary : null,
             ),
-            tooltip: 'Filter',
+            tooltip: l10n.searchFilters,
             onSelected: (filter) => setState(() => _filter = filter),
             itemBuilder: (ctx) => _FilterMode.values.map((filter) {
               return PopupMenuItem(
@@ -186,7 +188,7 @@ class _QuickAccessScreenState extends ConsumerState<QuickAccessScreen> {
           // Sort
           PopupMenuButton<_SortMode>(
             icon: const Icon(Icons.sort),
-            tooltip: 'Sort',
+            tooltip: l10n.sortOrder,
             onSelected: (sort) => setState(() => _sort = sort),
             itemBuilder: (ctx) => _SortMode.values.map((sort) {
               return PopupMenuItem(
@@ -296,7 +298,7 @@ class _SmallListView extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           subtitle: Text(
-            _getSubtitle(item),
+            _getSubtitle(context, item),
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
           ),
           trailing: Row(
@@ -314,14 +316,15 @@ class _SmallListView extends StatelessWidget {
     );
   }
 
-  String _getSubtitle(_QuickRecipeItem item) {
+  String _getSubtitle(BuildContext context, _QuickRecipeItem item) {
+    final l10n = AppLocalizations.of(context)!;
     switch (item.source) {
       case _Source.mealPlan:
-        return 'Planned for today';
+        return l10n.quickAccessHelpMealPlan;
       case _Source.pinned:
-        return 'Pinned';
+        return l10n.badgePinned;
       case _Source.recent:
-        return 'Recently viewed';
+        return l10n.badgeRecentlyViewed;
     }
   }
 }
@@ -561,7 +564,7 @@ class _LargeCard extends StatelessWidget {
                             Icon(Icons.restaurant, size: 14, color: theme.colorScheme.outline),
                             const SizedBox(width: 4),
                             Text(
-                              '${item.recipe.servings} servings',
+                              '${item.recipe.servings} ${AppLocalizations.of(context)!.servingsUnit}',
                               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
                             ),
                           ],
@@ -689,21 +692,23 @@ class _EmptyState extends StatelessWidget {
     String message;
     IconData icon;
 
+    final l10n = AppLocalizations.of(context)!;
+
     switch (filter) {
       case _FilterMode.all:
-        message = 'No quick access recipes yet.\nView some recipes or pin your favorites!';
+        message = l10n.quickAccessEmptyAll;
         icon = Icons.restaurant_menu;
         break;
       case _FilterMode.mealPlan:
-        message = 'No meals planned for today.\nAdd recipes to your meal plan!';
+        message = l10n.quickAccessEmptyMealPlan;
         icon = Icons.calendar_today;
         break;
       case _FilterMode.pinned:
-        message = 'No pinned recipes.\nPin recipes for quick access!';
+        message = l10n.quickAccessEmptyPinned;
         icon = Icons.push_pin;
         break;
       case _FilterMode.recent:
-        message = 'No recently viewed recipes.\nStart exploring your cookbook!';
+        message = l10n.quickAccessEmptyRecent;
         icon = Icons.history;
         break;
     }

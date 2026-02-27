@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../data/rpg/rpg_achievements.dart';
 import '../../../data/rpg/rpg_models.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/rpg_provider.dart';
 import '../../../ui/screens/rpg/rpg_daily_quests.dart';
 import '../../../ui/widgets/rpg/rpg_widgets.dart';
@@ -149,13 +150,14 @@ class RpgProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildStatsRow(BuildContext context, PlayerProfile profile, ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
         Expanded(
           child: _StatCard(
             icon: Icons.monetization_on,
             iconColor: Colors.amber,
-            label: 'Gold',
+            label: l10n.rpgGold,
             value: _formatNumber(profile.gold),
           ),
         ),
@@ -164,7 +166,7 @@ class RpgProfileScreen extends ConsumerWidget {
           child: _StatCard(
             icon: Icons.diamond,
             iconColor: Colors.purple,
-            label: 'Gems',
+            label: l10n.rpgGems,
             value: _formatNumber(profile.gems),
           ),
         ),
@@ -173,7 +175,7 @@ class RpgProfileScreen extends ConsumerWidget {
           child: _StatCard(
             icon: Icons.auto_awesome,
             iconColor: Colors.blue,
-            label: 'Mana',
+            label: l10n.rpgMana,
             value: '${profile.mana}/${profile.calculatedMaxMana}',
           ),
         ),
@@ -182,6 +184,7 @@ class RpgProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildQuickActionsGrid(BuildContext context, WidgetRef ref, ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -189,7 +192,7 @@ class RpgProfileScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '⚔️ Quick Actions',
+              l10n.rpgQuickActions,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -200,7 +203,7 @@ class RpgProfileScreen extends ConsumerWidget {
                 Expanded(
                   child: _QuickActionButton(
                     icon: Icons.emoji_events,
-                    label: 'Achievements',
+                    label: l10n.rpgAchievements,
                     color: Colors.amber,
                     onTap: () => context.push('/rpg/achievements'),
                   ),
@@ -209,7 +212,7 @@ class RpgProfileScreen extends ConsumerWidget {
                 Expanded(
                   child: _QuickActionButton(
                     icon: Icons.face,
-                    label: 'Cosmetics',
+                    label: l10n.rpgCosmetics,
                     color: Colors.purple,
                     onTap: () => context.push('/rpg/cosmetics'),
                   ),
@@ -222,7 +225,7 @@ class RpgProfileScreen extends ConsumerWidget {
                 Expanded(
                   child: _QuickActionButton(
                     icon: Icons.leaderboard,
-                    label: 'Leaderboard',
+                    label: l10n.rpgLeaderboard,
                     color: Colors.green,
                     onTap: () => context.push('/rpg/leaderboard'),
                   ),
@@ -231,7 +234,7 @@ class RpgProfileScreen extends ConsumerWidget {
                 Expanded(
                   child: _QuickActionButton(
                     icon: Icons.casino,
-                    label: 'Lottery',
+                    label: l10n.rpgLottery,
                     color: Colors.pink,
                     onTap: () => _showLotteryDialog(context, ref),
                   ),
@@ -244,7 +247,7 @@ class RpgProfileScreen extends ConsumerWidget {
                 Expanded(
                   child: _QuickActionButton(
                     icon: Icons.sports_martial_arts,
-                    label: 'Boss Fight',
+                    label: l10n.rpgBossFight,
                     color: Colors.red,
                     onTap: () => context.push('/rpg/boss'),
                   ),
@@ -253,7 +256,7 @@ class RpgProfileScreen extends ConsumerWidget {
                 Expanded(
                   child: _QuickActionButton(
                     icon: Icons.school,
-                    label: 'Classes',
+                    label: l10n.rpgClasses,
                     color: Colors.blue,
                     onTap: () => _showClassSelector(context, ref),
                   ),
@@ -280,7 +283,7 @@ class RpgProfileScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '✨ Recent XP',
+              AppLocalizations.of(context)!.rpgRecentXp,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -302,7 +305,7 @@ class RpgProfileScreen extends ConsumerWidget {
               ),
               title: Text(event.description ?? event.actionType.displayName),
               subtitle: Text(
-                _formatTimeAgo(event.timestamp),
+                _formatTimeAgo(context, event.timestamp),
                 style: theme.textTheme.bodySmall,
               ),
               trailing: event.multiplier > 1.0
@@ -337,7 +340,7 @@ class RpgProfileScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '🏆 Achievements',
+                  AppLocalizations.of(context)!.rpgAchievements,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -364,7 +367,7 @@ class RpgProfileScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'No achievements yet!\nStart earning XP to unlock achievements.',
+                        AppLocalizations.of(context)!.rpgNoAchievementsYet,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.outline,
@@ -431,14 +434,15 @@ class RpgProfileScreen extends ConsumerWidget {
     return number.toString();
   }
 
-  String _formatTimeAgo(DateTime dateTime) {
+  String _formatTimeAgo(BuildContext context, DateTime dateTime) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final diff = now.difference(dateTime);
 
-    if (diff.inMinutes < 1) return 'Just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    return '${diff.inDays}d ago';
+    if (diff.inMinutes < 1) return l10n.rpgJustNow;
+    if (diff.inMinutes < 60) return l10n.rpgMinutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.rpgHoursAgo(diff.inHours);
+    return l10n.rpgDaysAgo(diff.inDays);
   }
 }
 
@@ -557,6 +561,7 @@ class _ProfileSettingsSheetState extends ConsumerState<_ProfileSettingsSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -570,15 +575,15 @@ class _ProfileSettingsSheetState extends ConsumerState<_ProfileSettingsSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Profile Settings',
+            l10n.rpgProfileSettings,
             style: theme.textTheme.titleLarge,
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'Display Name',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.rpgDisplayName,
+              border: const OutlineInputBorder(),
             ),
             onSubmitted: (value) {
               if (value.isNotEmpty) {
@@ -593,7 +598,7 @@ class _ProfileSettingsSheetState extends ConsumerState<_ProfileSettingsSheet> {
                 child: OutlinedButton.icon(
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Icons.close),
-                  label: const Text('Cancel'),
+                  label: Text(l10n.actionCancel),
                 ),
               ),
               const SizedBox(width: 12),
@@ -607,7 +612,7 @@ class _ProfileSettingsSheetState extends ConsumerState<_ProfileSettingsSheet> {
                     Navigator.pop(context);
                   },
                   icon: const Icon(Icons.save),
-                  label: const Text('Save'),
+                  label: Text(l10n.actionSave),
                 ),
               ),
             ],
@@ -615,8 +620,8 @@ class _ProfileSettingsSheetState extends ConsumerState<_ProfileSettingsSheet> {
           const SizedBox(height: 16),
           ListTile(
             leading: const Icon(Icons.refresh, color: Colors.red),
-            title: const Text('Reset Progress'),
-            subtitle: const Text('Start over from level 1'),
+            title: Text(l10n.rpgResetProgress),
+            subtitle: Text(l10n.rpgResetProgressSubtitle),
             onTap: () => _confirmReset(context),
           ),
         ],
@@ -625,17 +630,16 @@ class _ProfileSettingsSheetState extends ConsumerState<_ProfileSettingsSheet> {
   }
 
   void _confirmReset(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reset Progress?'),
-        content: const Text(
-          'This will reset all your XP, level, gold, gems, achievements, and cosmetics. This cannot be undone!',
-        ),
+        title: Text(l10n.rpgResetProgressConfirmTitle),
+        content: Text(l10n.rpgResetProgressConfirmMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.actionCancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
@@ -644,7 +648,7 @@ class _ProfileSettingsSheetState extends ConsumerState<_ProfileSettingsSheet> {
               Navigator.pop(ctx);
               Navigator.pop(context);
             },
-            child: const Text('Reset'),
+            child: Text(l10n.rpgReset),
           ),
         ],
       ),
@@ -662,6 +666,7 @@ class _ClassSelectorSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final currentClass = ref.watch(rpgProvider).profile.playerClass;
 
     return ListView(
@@ -669,14 +674,14 @@ class _ClassSelectorSheet extends ConsumerWidget {
       padding: const EdgeInsets.all(16),
       children: [
         Text(
-          'Choose Your Class',
+          l10n.rpgChooseYourClass,
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          'Each class provides bonus XP for specific actions',
+          l10n.rpgClassBonusSubtitle,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.outline,
           ),
@@ -732,18 +737,14 @@ class _ClassSelectorSheet extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '💡 Class Bonuses',
+                  l10n.rpgClassBonusesTitle,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '• Ranger: +50% XP for importing recipes\n'
-                      '• Warrior: +50% XP for cooking recipes\n'
-                      '• Mage: +50% XP for adding nutrition\n'
-                      '• Alchemist: +50% XP for creating recipes\n'
-                      '• Bard: +50% XP for uploading cookbooks',
+                  l10n.rpgClassBonusesList,
                   style: theme.textTheme.bodySmall,
                 ),
               ],
@@ -790,11 +791,13 @@ class _LotteryDialogState extends ConsumerState<_LotteryDialog>
     final theme = Theme.of(context);
     final gems = ref.watch(rpgProvider).profile.gems;
 
+    final l10n = AppLocalizations.of(context)!;
+
     return AlertDialog(
-      title: const Row(
+      title: Row(
         children: [
-          Text('🎰 '),
-          Text('Gem Lottery'),
+          const Text('🎰 '),
+          Text(l10n.rpgGemLottery),
         ],
       ),
       content: SizedBox(
@@ -875,14 +878,14 @@ class _LotteryDialogState extends ConsumerState<_LotteryDialog>
                 Icon(Icons.diamond, color: Colors.purple, size: 20),
                 const SizedBox(width: 4),
                 Text(
-                  '$gems gems available',
+                  l10n.rpgGemsAvailable(gems),
                   style: theme.textTheme.bodyMedium,
                 ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
-              'Cost: 10 gems per spin',
+              l10n.rpgLotteryCost,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.outline,
               ),
@@ -893,12 +896,12 @@ class _LotteryDialogState extends ConsumerState<_LotteryDialog>
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Close'),
+          child: Text(l10n.actionClose),
         ),
         FilledButton.icon(
           onPressed: gems >= 10 && !_isSpinning ? _spin : null,
           icon: const Icon(Icons.casino),
-          label: const Text('Spin! (10 💎)'),
+          label: Text(l10n.rpgSpin),
         ),
       ],
     );
@@ -923,18 +926,19 @@ class _LotteryDialogState extends ConsumerState<_LotteryDialog>
 
   String _getResultText() {
     if (_result == null) return '';
+    final l10n = AppLocalizations.of(context)!;
 
     switch (_result!.type) {
       case LotteryRewardType.xp:
-        return '+${_result!.amount} XP!';
+        return l10n.rpgLotteryResultXp(_result!.amount);
       case LotteryRewardType.gold:
-        return '+${_result!.amount} Gold!';
+        return l10n.rpgLotteryResultGold(_result!.amount);
       case LotteryRewardType.gems:
-        return '+${_result!.amount} Gems!';
+        return l10n.rpgLotteryResultGems(_result!.amount);
       case LotteryRewardType.rarePet:
-        return '🎉 RARE PET! 🎉';
+        return l10n.rpgLotteryResultRarePet;
       case LotteryRewardType.nothing:
-        return 'Better luck next time!';
+        return l10n.rpgLotteryResultNothing;
     }
   }
 

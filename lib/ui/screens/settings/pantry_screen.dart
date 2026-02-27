@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../services/pantry_service.dart';
 
 /// Settings screen for managing pantry items.
@@ -66,10 +67,11 @@ class _PantryScreenState extends State<PantryScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Pantry'),
+        title: Text(l10n.myPantry),
         actions: [
           if (_items.isNotEmpty)
             PopupMenuButton<String>(
@@ -78,17 +80,16 @@ class _PantryScreenState extends State<PantryScreen> {
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                      title: const Text('Clear pantry?'),
-                      content: const Text(
-                          'Remove all items from your pantry?'),
+                      title: Text(l10n.pantryClearTitle),
+                      content: Text(l10n.pantryClearMessage),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(ctx, false),
-                          child: const Text('Cancel'),
+                          child: Text(l10n.actionCancel),
                         ),
                         FilledButton(
                           onPressed: () => Navigator.pop(ctx, true),
-                          child: const Text('Clear'),
+                          child: Text(l10n.actionClear),
                         ),
                       ],
                     ),
@@ -100,13 +101,13 @@ class _PantryScreenState extends State<PantryScreen> {
                 }
               },
               itemBuilder: (_) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'clear',
                   child: Row(
                     children: [
-                      Icon(Icons.delete_sweep, size: 18),
-                      SizedBox(width: 8),
-                      Text('Clear all'),
+                      const Icon(Icons.delete_sweep, size: 18),
+                      const SizedBox(width: 8),
+                      Text(l10n.pantryClearAll),
                     ],
                   ),
                 ),
@@ -134,9 +135,7 @@ class _PantryScreenState extends State<PantryScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Items in your pantry will be unchecked by '
-                              'default in the shopping list generator, '
-                              'since you likely already have them.',
+                          l10n.pantryInfoMessage,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurface,
                           ),
@@ -158,7 +157,7 @@ class _PantryScreenState extends State<PantryScreen> {
                 controller: _addController,
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(
-                  hintText: 'Add item to pantry...',
+                  hintText: l10n.pantryAddHint,
                   prefixIcon: const Icon(Icons.add, size: 20),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
@@ -180,7 +179,7 @@ class _PantryScreenState extends State<PantryScreen> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
                 child: Text(
-                  'Common staples',
+                  l10n.pantryCommonStaples,
                   style: theme.textTheme.labelMedium
                       ?.copyWith(color: theme.colorScheme.outline),
                 ),
@@ -217,13 +216,13 @@ class _PantryScreenState extends State<PantryScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                                'Added ${_suggestedStaples.length} staples'),
+                                l10n.pantryAddedStaples(_suggestedStaples.length)),
                             behavior: SnackBarBehavior.floating,
                           ),
                         );
                       }
                     },
-                    child: const Text('Add all staples'),
+                    child: Text(l10n.pantryAddStaples),
                   ),
                 ),
               ),
@@ -249,7 +248,7 @@ class _PantryScreenState extends State<PantryScreen> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: 'Search pantry...',
+                      hintText: l10n.pantrySearchHint,
                       prefixIcon:
                       const Icon(Icons.search, size: 20),
                       border: OutlineInputBorder(
@@ -269,7 +268,7 @@ class _PantryScreenState extends State<PantryScreen> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                 child: Text(
-                  '${_items.length} items in pantry',
+                  l10n.pantryItemCount(_items.length),
                   style: theme.textTheme.labelMedium
                       ?.copyWith(color: theme.colorScheme.outline),
                 ),
@@ -329,13 +328,13 @@ class _PantryScreenState extends State<PantryScreen> {
                             .withValues(alpha: 0.3)),
                     const SizedBox(height: 12),
                     Text(
-                      'Your pantry is empty',
+                      l10n.pantryEmpty,
                       style: theme.textTheme.titleSmall?.copyWith(
                           color: theme.colorScheme.outline),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Add staples you always have on hand',
+                      l10n.pantryEmptySubtitle,
                       style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.outline),
                     ),

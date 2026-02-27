@@ -2647,4 +2647,967 @@
   "tagsRecipeCount": "{count} recipes",
   "@tagsRecipeCount": { "placeholders": { "count": { "type": "int" } } },
 
+  "communityMyPublications": "My Publications",
+  "communitySearchCookbooks": "Search cookbooks...",
+  "communitySortRecent": "Recent",
+  "communitySortPopular": "Popular",
+  "communitySortMostDownloaded": "Most Downloaded",
+  "communityNoResultsFor": "No results for \"{query}\"",
+  "@communityNoResultsFor": {
+    "placeholders": {
+      "query": { "type": "String" }
+    }
+  },
+  "communityNoCookbooksYet": "No cookbooks yet",
+  "communityClearSearch": "Clear search",
+  "communityPublish": "Publish",
+  "communityByPublisher": "by {name}",
+  "@communityByPublisher": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "communityRecipeCount": "{count} recipes",
+  "@communityRecipeCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "communityPublishCookbook": "Publish Cookbook",
+  "communitySignInToPublish": "Sign in to publish",
+  "communitySignInToPublishMessage": "You need an account to share cookbooks with the community.",
+  "communityGoToSettings": "Go to Settings",
+  "communityNoCookbooksToPublish": "No cookbooks to publish",
+  "communityPublishInfo": "Cookbooks need at least 10 recipes to publish. Your recipes will be shared as a snapshot — updates won't sync.",
+  "communitySelectCookbook": "Select a cookbook to publish",
+  "communityNeedMinRecipes": "Need at least 10 recipes to publish (has {count})",
+  "@communityNeedMinRecipes": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "communityPublishConfirmTitle": "Publish to Community?",
+  "communityPublishConfirmMessage": "This will share \"{name}\" ({count} recipes) publicly. Anyone can browse and download it.\n\nYou can unpublish it anytime.",
+  "@communityPublishConfirmMessage": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "communityPublishSuccess": "\"{name}\" published to the community!",
+  "@communityPublishSuccess": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "communityPublishFailed": "Publish failed",
+  "communityRecipeCountNeedMore": "{count} recipes (need 10+)",
+  "@communityRecipeCountNeedMore": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "communityNoPublicationsYet": "No publications yet",
+  "communityNoPublicationsMessage": "Publish a cookbook to share it with the community.",
+  "communityUnpublish": "Unpublish",
+  "communityUnpublishConfirmTitle": "Unpublish?",
+  "communityUnpublishConfirmMessage": "Remove \"{title}\" from the community? People who already downloaded it will keep their copy.",
+  "@communityUnpublishConfirmMessage": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "communityUnpublishSuccess": "\"{title}\" unpublished",
+  "@communityUnpublishSuccess": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "communityUnpublishFailed": "Failed to unpublish",
+  "communityRemovedByModeration": "Removed by moderation",
+  "communityPublicationStats": "{recipeCount} recipes · {downloadCount} downloads · {timeAgo}",
+  "@communityPublicationStats": {
+    "placeholders": {
+      "recipeCount": { "type": "int" },
+      "downloadCount": { "type": "int" },
+      "timeAgo": { "type": "String" }
+    }
+  },
+  "communityPublicationNotFound": "Publication not found",
+  "communityReport": "Report",
+  "communityReportTitle": "Report this cookbook",
+  "communityReportSpam": "Spam or low quality",
+  "communityReportInappropriate": "Inappropriate content",
+  "communityReportStolen": "Stolen / copied recipes",
+  "communityReportOther": "Other",
+  "communityReportSuccess": "Report submitted. Thank you!",
+  "communitySignInToReport": "Sign in to report content",
+  "communityDownloadFailed": "Download failed",
+  "communityDownloadSuccess": "Downloaded \"{title}\" — {count} recipes added!",
+  "@communityDownloadSuccess": {
+    "placeholders": {
+      "title": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "communityDownloadFailedError": "Download failed: {error}",
+  "@communityDownloadFailedError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "communityDownloadCount": "{count} downloads",
+  "@communityDownloadCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "communityDownloading": "Downloading...",
+  "communityDownloadToMyCookbooks": "Download to My Cookbooks",
+  "communityPrepTime": "{minutes}m prep",
+  "@communityPrepTime": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "communityCookTime": "{minutes}m cook",
+  "@communityCookTime": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "communityServingsCount": "{count} servings",
+  "@communityServingsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "communityIngredientCount": "{count} ingredients",
+  "@communityIngredientCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "deleteRecipesTrashMessage": "Recipes will be moved to trash. You can restore them later.",
+
+  "hintTitleExample": "e.g., Grandma's Apple Pie",
+  "hintDescription": "A brief description of the recipe",
+  "hintServingsExample": "e.g., 4",
+  "prepMin": "Prep (min)",
+  "cookMin": "Cook (min)",
+  "hintNotes": "Tips, variations, storage instructions...",
+  "pinchToZoomCropped": "Pinch to zoom \u00b7 Cropped area will be saved",
+  "pinchToZoomOrUseAsIs": "Pinch to zoom and crop \u00b7 Or use as-is",
+  "savingLabel": "Saving...",
+  "emptyHeader": "(empty header)",
+  "emptyIngredient": "(empty ingredient)",
+  "recipeUpdated": "Recipe updated!",
+  "nutritionLessInfo": "Less info",
+  "nutritionMoreInfo": "More info",
+
+  "scaleOriginal": "Original: {servings}",
+  "@scaleOriginal": {
+    "placeholders": {
+      "servings": { "type": "String" }
+    }
+  },
+  "scaleAdjustQuantities": "Adjust ingredient quantities",
+  "scaleOriginalLabel": "1x (Original)",
+
+  "stepWillBeRemoved": "This step will be permanently removed.",
+  "stepsWillBeRemoved": "These {count} steps will be permanently removed.",
+  "@stepsWillBeRemoved": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "stepCount": "{count, plural, =1{1 step} other{{count} steps}}",
+  "@stepCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "instructionsNoSteps": "No instructions yet",
+  "instructionsAddStepsGuide": "Add steps to guide through the recipe",
+  "pinchToZoomPreview": "Pinch to zoom \u00b7 This is how your photo will look",
+  "ingredientCount": "{count, plural, =1{1 ingredient} other{{count} ingredients}}",
+  "@ingredientCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "ingredientPerLineHint": "Enter one ingredient per line:\n\n2 cups flour\n1 tsp salt\n3 eggs",
+  "ingredientTip": "Tip: Enter one ingredient per line. Press Enter after each ingredient.",
+
+  "cookbookEditSubtitle": "Rename, cover photo",
+  "shareCookbookSubtitle": "Link, family, or community",
+  "shareNamedCookbook": "Share \"{name}\"",
+  "@shareNamedCookbook": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "oneTimeLink": "One-Time Link",
+  "oneTimeLinkDescription": "Free \u2022 24h expiry \u2022 Anyone can download",
+  "familyShare": "Family Share",
+  "familyShareDescription": "Real-time sync with family members",
+  "postToCommunity": "Post to Community",
+  "postToCommunityDescription": "Publish for anyone to discover & download",
+  "signInToShare": "Sign in to create share links",
+  "generatingLink": "Generating link...",
+  "failedToCreateLink": "Failed to create link",
+  "linkCreated": "Link Created!",
+  "expiresIn24Hours": "Expires in 24 hours",
+  "linkCopied": "Link copied!",
+  "unlockFeature": "Unlock {feature}",
+  "@unlockFeature": {
+    "placeholders": {
+      "feature": { "type": "String" }
+    }
+  },
+  "notNow": "Not now",
+  "upgradeButton": "Upgrade",
+  "publishMinRecipes": "Need at least 10 recipes to publish (has {count})",
+  "@publishMinRecipes": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "publishConfirmTitle": "Post to Community?",
+  "publishConfirmMessage": "\"{name}\" ({count} recipes) will be publicly visible. Anyone can browse and download it.\n\nYou can remove it anytime from Community \u2192 My Publications.",
+  "@publishConfirmMessage": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "publishButton": "Publish",
+
+  "selectCourse": "Select Course",
+  "selectCategory": "Select Category",
+  "taxonomyNone": "None",
+  "createTaxonomy": "Create \"{name}\"",
+  "@createTaxonomy": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "addAsNewCourse": "Add as new course",
+  "addAsNewCategory": "Add as new category",
+  "doneWithCount": "Done ({count})",
+  "@doneWithCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "quickAccessEmptyAll": "No quick access recipes yet",
+  "quickAccessEmptyMealPlan": "No meals planned",
+  "quickAccessEmptyPinned": "No pinned recipes",
+  "quickAccessEmptyRecent": "No recent recipes",
+
+  "importingRecipe": "Importing recipe\u2026",
+  "failedToImport": "Failed to import: {error}",
+  "@failedToImport": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "errorWithMessage": "Error: {message}",
+  "@errorWithMessage": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
+  "minutesPrepSuffix": "m prep",
+  "minutesCookSuffix": "m cook",
+
+  "couldNotOpenBrowser": "Could not open browser",
+  "couldNotOpenUrl": "Could not open {url}",
+  "@couldNotOpenUrl": {
+    "placeholders": {
+      "url": { "type": "String" }
+    }
+  },
+
+  "discord": "Discord",
+  "discordLinkAccount": "Link Discord Account",
+  "discordLinkSubtitle": "Connect your Discord for community features",
+  "discordSignInFirst": "Sign in first to link Discord",
+  "discordUnlink": "Unlink Discord",
+  "discordUnlinkFailed": "Failed to unlink Discord",
+  "discordUnlinkSubtitle": "Remove your Discord connection",
+  "discordUnlinked": "Discord unlinked",
+
+  "familyCodeCopied": "Invite code copied!",
+  "familyCopyLink": "Copy Link",
+  "familyCreate": "Create Family",
+  "familyCreateFailed": "Failed to create family",
+  "familyCreateTitle": "Create Family",
+  "familyCreated": "Family created!",
+  "familyDelete": "Delete Family",
+  "familyDeleteConfirm": "Are you sure you want to delete this family? All members will be removed.",
+  "familyDeleted": "Family deleted",
+  "familyEnterInviteCode": "Enter invite code",
+  "familyInvite": "Invite Members",
+  "familyJoinAction": "Join",
+  "familyJoinFailed": "Failed to join family",
+  "familyJoinTitle": "Join Family",
+  "familyJoinWithCode": "Join with Code",
+  "familyJoined": "Joined {familyName}!",
+  "@familyJoined": {
+    "placeholders": {
+      "familyName": { "type": "String" }
+    }
+  },
+  "familyLeave": "Leave Family",
+  "familyLeaveAction": "Leave",
+  "familyLeaveConfirm": "Are you sure you want to leave this family?",
+  "familyLeft": "Left family",
+  "familyLinkCopied": "Invite link copied!",
+  "familyManage": "Manage your family",
+  "familyMemberRemoved": "{displayName} removed",
+  "@familyMemberRemoved": {
+    "placeholders": {
+      "displayName": { "type": "String" }
+    }
+  },
+  "familyMembers": "Members",
+  "familyMembersCount": "{current} of {max} members",
+  "@familyMembersCount": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
+  "familyNameHint": "Family name",
+  "familyNewCodeGenerated": "New invite code generated",
+  "familyOwner": "OWNER",
+  "familyRegenerateCode": "Regenerate Code",
+  "familyRemoveMember": "Remove Member",
+  "familyRemoveMemberConfirm": "Remove {displayName} from the family?",
+  "@familyRemoveMemberConfirm": {
+    "placeholders": {
+      "displayName": { "type": "String" }
+    }
+  },
+  "familyRename": "Rename Family",
+  "familyShareMessage": "Join my family on Recipe Spellbook! Code: {inviteCode} or use this link: {shareLink}",
+  "@familyShareMessage": {
+    "placeholders": {
+      "inviteCode": { "type": "String" },
+      "shareLink": { "type": "String" }
+    }
+  },
+  "familyShareSubject": "Join my Recipe Spellbook family",
+  "familyShareUpgradeMessage": "Upgrade to share cookbooks with family members in real-time.",
+  "familySharing": "Family Sharing",
+  "familySharingDescription": "Share cookbooks, shopping lists, and meal plans with your family.",
+  "familySharingSubtitle": "Share cookbooks, lists & meal plans",
+
+  "ingredientSubstitutesFor": "Substitutes for {ingredientName}",
+  "@ingredientSubstitutesFor": {
+    "placeholders": {
+      "ingredientName": { "type": "String" }
+    }
+  },
+  "ingredientSubstitutionsNoResults": "No substitutions found",
+  "ingredientSubstitutionsNotFound": "No substitutions found for {ingredientName}",
+  "@ingredientSubstitutionsNotFound": {
+    "placeholders": {
+      "ingredientName": { "type": "String" }
+    }
+  },
+  "ingredientSubstitutionsTryDifferent": "Try a different ingredient",
+
+  "integrationsChecking": "Checking...",
+  "integrationsConnectedManage": "Connected - Tap to manage",
+  "integrationsLinked": "Linked",
+  "integrationsLinkedManage": "Linked - Tap to manage",
+  "integrationsNotConnected": "Not connected",
+  "integrationsTapToLink": "Tap to link",
+  "integrationsTapToSignIn": "Tap to sign in",
+
+  "nutritionCalculateFromEdit": "Calculate from the edit screen",
+  "nutritionCaloriesAlwaysShow": "Always show calories",
+  "nutritionChartStyle": "Chart Style",
+  "nutritionResetDefaults": "Reset to Defaults",
+  "nutritionSettingsLink": "Nutrition settings",
+  "nutritionTapToCalculate": "Tap to calculate nutrition",
+  "nutritionVisibleNutrients": "Visible Nutrients",
+
+  "pantryAddedStaples": "Added {count} staples to pantry",
+  "@pantryAddedStaples": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "pantryClearAll": "Clear All",
+  "pantryClearMessage": "Remove all items from your pantry?",
+  "pantryCommonStaples": "Common Staples",
+  "pantryEmpty": "Your pantry is empty",
+  "pantryEmptySubtitle": "Add items you always have on hand",
+  "pantryInfoMessage": "Items in your pantry will be excluded from shopping lists when adding recipe ingredients.",
+  "pantryItemCount": "{count} items",
+  "@pantryItemCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "rpgAchievements": "Achievements",
+  "rpgAttack": "Attack! (10 Mana)",
+  "rpgAwesome": "Awesome!",
+  "rpgBattleArena": "\u2694\uFE0F Battle Arena",
+  "rpgBoss": "BOSS",
+  "rpgBossDamage": "Boss Damage",
+  "rpgBossDefeated": "Boss Defeated!",
+  "rpgBossFight": "Boss Fight",
+  "rpgChooseYourClass": "Choose Your Class",
+  "rpgClassBonusSubtitle": "Each class grants unique bonuses",
+  "rpgClassBonusesList": "Class Bonuses",
+  "rpgClassBonusesTitle": "Class Bonuses",
+  "rpgComingSoon": "Coming soon!",
+  "rpgCommunity": "Community",
+  "rpgCommunityDescription": "Compete with other cooks around the world!",
+  "rpgCommunityLeaderboard": "Community Leaderboard",
+  "rpgCooked": "Cooked",
+  "rpgCosmetics": "Cosmetics",
+  "rpgCrit": "CRIT!",
+  "rpgDaysAgo": "{count} days ago",
+  "@rpgDaysAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "rpgDaysCount": "{count} days",
+  "@rpgDaysCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "rpgDmg": "DMG",
+  "rpgFightAgain": "Fight Again",
+  "rpgGemLottery": "Gem Lottery",
+  "rpgGemsAvailable": "{count} gems available",
+  "@rpgGemsAvailable": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "rpgGold": "Gold",
+  "rpgHoursAgo": "{count} hours ago",
+  "@rpgHoursAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "rpgHowYouCompare": "How You Compare",
+  "rpgHp": "HP",
+  "rpgJustNow": "Just now",
+  "rpgKeepEarningXp": "Keep earning XP to unlock this enemy!",
+  "rpgKillStreak": "Kill streak: {count} \uD83D\uDD25",
+  "@rpgKillStreak": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "rpgLeaderboard": "Leaderboard",
+  "rpgLevel": "Level",
+  "rpgLevelN": "Level {level}",
+  "@rpgLevelN": {
+    "placeholders": {
+      "level": { "type": "int" }
+    }
+  },
+  "rpgLevelRequired": "Level {level} Required",
+  "@rpgLevelRequired": {
+    "placeholders": {
+      "level": { "type": "int" }
+    }
+  },
+  "rpgLotteryCost": "Costs 1 gem per spin",
+  "rpgLotteryResultGems": "You won {amount} gems!",
+  "@rpgLotteryResultGems": {
+    "placeholders": {
+      "amount": { "type": "int" }
+    }
+  },
+  "rpgLotteryResultGold": "You won {amount} gold!",
+  "@rpgLotteryResultGold": {
+    "placeholders": {
+      "amount": { "type": "int" }
+    }
+  },
+  "rpgLotteryResultNothing": "Better luck next time!",
+  "rpgLotteryResultRarePet": "You found a rare pet!",
+  "rpgLotteryResultXp": "You earned {amount} XP!",
+  "@rpgLotteryResultXp": {
+    "placeholders": {
+      "amount": { "type": "int" }
+    }
+  },
+  "rpgMana": "Mana",
+  "rpgManaHint": "Earn XP from recipes to regenerate mana \u2022 Level up for full refill",
+  "rpgMilestones": "Milestones",
+  "rpgMinutesAgo": "{count} minutes ago",
+  "@rpgMinutesAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "rpgNoMana": "No Mana!",
+  "rpgProfileSettings": "Profile Settings",
+  "rpgQuickActions": "Quick Actions",
+  "rpgRecipes": "Recipes",
+  "rpgReset": "Reset",
+  "rpgResetProgressConfirmMessage": "This will reset all your RPG progress including level, XP, gold, and gems. This cannot be undone.",
+  "rpgResetProgressConfirmTitle": "Reset Progress?",
+  "rpgResetsInHours": "Resets in {count} hours",
+  "@rpgResetsInHours": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "rpgResetsInMinutes": "Resets in {count} minutes",
+  "@rpgResetsInMinutes": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "rpgSpin": "Spin!",
+  "rpgStreak": "Streak",
+  "rpgVictory": "Victory!",
+  "rpgYouDefeated": "You defeated {name}!",
+  "@rpgYouDefeated": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "rpgYourStatistics": "Your Statistics",
+  "rpgYourStats": "Your Stats",
+
+  "settingsBrowseCommunity": "Browse Community",
+  "settingsBrowseCommunitySubtitle": "Discover public cookbooks",
+  "settingsCommunity": "Community",
+  "settingsFamily": "Family",
+  "settingsIntegrations": "Integrations",
+  "settingsManage": "Manage",
+  "settingsMyPublications": "My Publications",
+  "settingsMyPublicationsSubtitle": "Manage your published cookbooks",
+  "settingsShoppingPlanning": "Shopping & Planning",
+
+  "shoppingAddCountItems": "Add {count} items",
+  "@shoppingAddCountItems": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "shoppingAddIngredient": "Add Ingredient",
+  "shoppingAddedItemName": "Added \"{name}\"",
+  "@shoppingAddedItemName": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "shoppingAddedNotFound": "{added} added, {failed} not found",
+  "@shoppingAddedNotFound": {
+    "placeholders": {
+      "added": { "type": "int" },
+      "failed": { "type": "int" }
+    }
+  },
+  "shoppingAddingTo": "Adding to {provider}\u2026",
+  "@shoppingAddingTo": {
+    "placeholders": {
+      "provider": { "type": "String" }
+    }
+  },
+  "shoppingCamera": "camera",
+  "shoppingCheckedItemsCount": "Checked items ({count})",
+  "@shoppingCheckedItemsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "shoppingCouldNotAccessSource": "Could not access {source}",
+  "@shoppingCouldNotAccessSource": {
+    "placeholders": {
+      "source": { "type": "String" }
+    }
+  },
+  "shoppingCountAdded": "{count} added",
+  "@shoppingCountAdded": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "shoppingCreatingListOn": "Creating list on {provider}\u2026",
+  "@shoppingCreatingListOn": {
+    "placeholders": {
+      "provider": { "type": "String" }
+    }
+  },
+  "shoppingCurrentOfTotal": "{current} of {total} items",
+  "@shoppingCurrentOfTotal": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "shoppingDeleteListConfirm": "Are you sure you want to delete \"{name}\"?",
+  "@shoppingDeleteListConfirm": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "shoppingErrorReadingImage": "Error reading image: {error}",
+  "@shoppingErrorReadingImage": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "shoppingExportFailed": "Export failed: {error}",
+  "@shoppingExportFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "shoppingExportTitle": "Export \"{name}\"",
+  "@shoppingExportTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "shoppingFamilyShare": "Family Share",
+  "shoppingFamilyShareSubtitle": "Share list with family or one-time link",
+  "shoppingFromPhoto": "From photo",
+  "shoppingFromText": "From text",
+  "shoppingGallery": "gallery",
+  "shoppingImportItems": "Import items",
+  "shoppingImportShoppingList": "Import shopping list",
+  "shoppingImportTextHint": "2 cups flour\nchicken breast\n1 lb ground beef\nmilk\n...",
+  "shoppingImportedList": "Imported List",
+  "shoppingIngredientHint": "e.g., chicken breast, olive oil",
+  "shoppingIngredientName": "Ingredient Name",
+  "shoppingIngredientsAvailable": "{count} ingredients available",
+  "@shoppingIngredientsAvailable": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "shoppingItemsAddedCount": "{count} items added",
+  "@shoppingItemsAddedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "shoppingItemsAddedSuccess": "Items added!",
+  "shoppingItemsCopiedToClipboard": "{count} items copied to clipboard",
+  "@shoppingItemsCopiedToClipboard": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "shoppingItemsInCart": "{count} items in your {provider} cart",
+  "@shoppingItemsInCart": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "provider": { "type": "String" }
+    }
+  },
+  "shoppingItemsOnInstacartList": "{count} items on your Instacart list",
+  "@shoppingItemsOnInstacartList": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "shoppingJustAdded": "Just added",
+  "shoppingListCopiedOpening": "List copied! Opening {name}...",
+  "@shoppingListCopiedOpening": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "shoppingListReady": "Shopping list ready!",
+  "shoppingNotFoundItems": "Not found: {items}",
+  "@shoppingNotFoundItems": {
+    "placeholders": {
+      "items": { "type": "String" }
+    }
+  },
+  "shoppingOneItemPerLine": "One item per line",
+  "shoppingPartiallyAdded": "Partially added",
+  "shoppingProviderConnected": "Connected",
+  "shoppingRemoveFromList": "Remove from list",
+  "shoppingStartTyping": "Start typing to see suggestions",
+  "shoppingTapToAddToCart": "Tap to add items directly to your cart",
+  "shoppingTapToCreateShoppableList": "Tap to create a shoppable list",
+
+  "swipeToSwitch": "Swipe to switch sections",
+  "syncFailed": "Sync failed",
+  "syncSuccess": "Synced: {pushed} pushed, {pulled} pulled",
+  "@syncSuccess": {
+    "placeholders": {
+      "pushed": { "type": "int" },
+      "pulled": { "type": "int" }
+    }
+  },
+  "textSizePreview": "Preview",
+
+  "transferDeviceDesktop": "desktop",
+  "transferDeviceMobileApp": "mobile app",
+  "transferDeviceThisDevice": "this device",
+  "transferExplanation": "Move all your recipes, cookbooks, and meal plans from {currentDevice} to your {targetDevice}. This is a one-time copy, not a sync.",
+  "@transferExplanation": {
+    "placeholders": {
+      "currentDevice": { "type": "String" },
+      "targetDevice": { "type": "String" }
+    }
+  },
+  "transferImportedSuccess": "{count} items imported successfully.",
+  "@transferImportedSuccess": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "transferOr": "OR",
+  "transferReceiveOn": "Receive on {device}",
+  "@transferReceiveOn": {
+    "placeholders": {
+      "device": { "type": "String" }
+    }
+  },
+  "transferSendFrom": "Send from {device}",
+  "@transferSendFrom": {
+    "placeholders": {
+      "device": { "type": "String" }
+    }
+  },
+  "transferSendSubtitle": "Generate a code for your {device} to receive",
+  "@transferSendSubtitle": {
+    "placeholders": {
+      "device": { "type": "String" }
+    }
+  },
+
+  "importGuidesTitle": "Import Guides",
+  "importGuidesOpenInBrowser": "Open guides in browser",
+  "importGuideHeroTitle": "Bring your recipes from anywhere",
+  "importGuideHeroSubtitle": "Tap any guide below for step-by-step instructions with screenshots.",
+  "importGuideQuickTipLabel": "Quick tip",
+  "importGuideQuickTipText": "The fastest way? Copy any recipe link and share it to Recipe Spellbook \u2014 works from almost any app.",
+  "importGuideWebButton": "Web",
+  "importGuideFollowInBrowser": "Follow along in browser",
+
+  "importGuideTagPopular": "Popular",
+  "importGuideTagEasiest": "Easiest",
+  "importGuideDifficultyEasy": "Easy",
+  "importGuideDifficultyMedium": "Medium",
+  "importGuideTime15Sec": "15 sec",
+  "importGuideTime30Sec": "30 sec",
+  "importGuideTime1Min": "1 min",
+  "importGuideTime2To5Min": "2\u20135 min",
+
+  "importGuideStepsCount": "{count} steps",
+  "@importGuideStepsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "importGuideCategorySocial": "Social Media",
+  "importGuideCategoryWebsites": "Websites",
+  "importGuideCategoryPhotos": "Photos & Files",
+  "importGuideCategoryOtherApps": "Other Recipe Apps",
+
+  "importGuideScreenshotNeeded": "Screenshot needed",
+  "importGuideGifNeeded": "GIF needed",
+  "importGuideVideoNeeded": "Video needed",
+
+  "importGuideInstagramTitle": "Instagram",
+  "importGuideInstagramSubtitle": "Import from Reels, posts, and stories",
+  "importGuideInstagramStep1Title": "Find a recipe post or Reel",
+  "importGuideInstagramStep1Desc": "Open Instagram and find a recipe you want to save. This works with feed posts, Reels, and carousels.",
+  "importGuideInstagramStep2Title": "Tap the share button",
+  "importGuideInstagramStep2Desc": "Tap the paper plane icon (share) below the post.",
+  "importGuideInstagramStep3Title": "Share to Recipe Spellbook",
+  "importGuideInstagramStep3Desc": "Scroll the app row and tap Recipe Spellbook. If you don't see it, tap \"More\" and find it in the list.",
+  "importGuideInstagramStep3Tip": "On Android, you can also copy the link and paste it in the app.",
+  "importGuideInstagramStep4Title": "Review the extracted recipe",
+  "importGuideInstagramStep4Desc": "Our AI reads the caption, hashtags, and any text in the image to build your recipe. Check ingredients and steps, then save.",
+  "importGuideInstagramStep5Title": "Pick a cookbook & save",
+  "importGuideInstagramStep5Desc": "Choose which cookbook to save to, add any tags, and tap Save. Done!",
+
+  "importGuideTiktokTitle": "TikTok",
+  "importGuideTiktokSubtitle": "Save recipes from cooking videos",
+  "importGuideTiktokStep1Title": "Find a recipe TikTok",
+  "importGuideTiktokStep1Desc": "Open TikTok and find a cooking video you want to save.",
+  "importGuideTiktokStep2Title": "Tap the share arrow",
+  "importGuideTiktokStep2Desc": "Tap the arrow icon on the right side of the video.",
+  "importGuideTiktokStep3Title": "Choose \"Copy link\" or share directly",
+  "importGuideTiktokStep3Desc": "Either tap \"Copy link\" and paste in Recipe Spellbook, or find Recipe Spellbook in the share options.",
+  "importGuideTiktokStep3Tip": "\"Copy link\" is often the most reliable method for TikTok.",
+  "importGuideTiktokStep4Title": "Paste the link in Recipe Spellbook",
+  "importGuideTiktokStep4Desc": "Open Recipe Spellbook, tap +, choose \"From Website/Link\", and paste the TikTok URL.",
+  "importGuideTiktokStep5Title": "Review & save",
+  "importGuideTiktokStep5Desc": "The AI extracts the recipe from the video description and comments. Review and save to your cookbook.",
+
+  "importGuideYoutubeTitle": "YouTube",
+  "importGuideYoutubeSubtitle": "Import from cooking channels & Shorts",
+  "importGuideYoutubeStep1Title": "Find a recipe video",
+  "importGuideYoutubeStep1Desc": "Open YouTube and find a cooking video. Works with regular videos, Shorts, and livestream replays.",
+  "importGuideYoutubeStep2Title": "Tap Share",
+  "importGuideYoutubeStep2Desc": "Tap the Share button below the video title.",
+  "importGuideYoutubeStep3Title": "Copy link or share to app",
+  "importGuideYoutubeStep3Desc": "Tap \"Copy link\" or find Recipe Spellbook in the share sheet.",
+  "importGuideYoutubeStep3Tip": "Many YouTube creators put the full recipe in the video description \u2014 this makes extraction more accurate.",
+  "importGuideYoutubeStep4Title": "Paste & import",
+  "importGuideYoutubeStep4Desc": "In Recipe Spellbook, tap + > \"From Website/Link\" and paste. The AI reads the video description for ingredients and steps.",
+
+  "importGuidePinterestTitle": "Pinterest",
+  "importGuidePinterestSubtitle": "Save pinned recipes to your cookbook",
+  "importGuidePinterestStep1Title": "Open a recipe pin",
+  "importGuidePinterestStep1Desc": "Tap a recipe pin to open it. Most pins link to the original recipe website.",
+  "importGuidePinterestStep2Title": "Tap the source link",
+  "importGuidePinterestStep2Desc": "Tap the link at the top or bottom of the pin to visit the original recipe page.",
+  "importGuidePinterestStep2Tip": "If the pin doesn't have a source link, try the share method below instead.",
+  "importGuidePinterestStep3Title": "Copy the website URL",
+  "importGuidePinterestStep3Desc": "Once the recipe website opens in your browser, copy the URL from the address bar.",
+  "importGuidePinterestStep4Title": "Import in Recipe Spellbook",
+  "importGuidePinterestStep4Desc": "Tap + > \"From Website/Link\", paste the URL, and the recipe is extracted automatically.",
+
+  "importGuideWebsiteTitle": "Any Recipe Website",
+  "importGuideWebsiteSubtitle": "AllRecipes, Food Network, BBC, blogs & more",
+  "importGuideWebsiteStep1Title": "Open the recipe page",
+  "importGuideWebsiteStep1Desc": "Navigate to any recipe on sites like AllRecipes, Food Network, BBC Good Food, Serious Eats, NYT Cooking, or any food blog.",
+  "importGuideWebsiteStep2Title": "Copy the URL",
+  "importGuideWebsiteStep2Desc": "Tap the address bar and copy the full URL to the recipe.",
+  "importGuideWebsiteStep3Title": "Tap + in Recipe Spellbook",
+  "importGuideWebsiteStep3Desc": "Open the app and tap the + button to start adding a new recipe.",
+  "importGuideWebsiteStep4Title": "Choose \"From Website/Link\"",
+  "importGuideWebsiteStep4Desc": "Select the website import option and paste your copied URL.",
+  "importGuideWebsiteStep5Title": "Review & save",
+  "importGuideWebsiteStep5Desc": "The recipe is extracted instantly \u2014 title, ingredients, steps, cook times, and even the photo. Review and save.",
+  "importGuideWebsiteStep5Tip": "Works with 10,000+ recipe sites. If extraction fails, try the \"From Text\" method.",
+
+  "importGuidePhotoTitle": "Photo / Camera",
+  "importGuidePhotoSubtitle": "Scan recipes from books, magazines, or handwritten cards",
+  "importGuidePhotoStep1Title": "Photograph the recipe",
+  "importGuidePhotoStep1Desc": "Take a clear, well-lit photo of a recipe from a cookbook, magazine page, or handwritten recipe card. Make sure all text is readable.",
+  "importGuidePhotoStep1Tip": "For best results: use good lighting, hold steady, and make sure the entire recipe is in frame. Avoid shadows.",
+  "importGuidePhotoStep2Title": "Tap + then \"From Photo\"",
+  "importGuidePhotoStep2Desc": "Open Recipe Spellbook, tap +, and choose \"From Photo\". Select the photo from your gallery or take a new one.",
+  "importGuidePhotoStep3Title": "AI scans the text",
+  "importGuidePhotoStep3Desc": "OCR technology reads the text in your photo and AI intelligently separates the title, ingredients, and instructions.",
+  "importGuidePhotoStep4Title": "Review & fix any errors",
+  "importGuidePhotoStep4Desc": "Check the extracted recipe. OCR occasionally misreads characters \u2014 \"1/2\" might become \"1l2\". Fix any errors and save.",
+  "importGuidePhotoStep4Tip": "Handwritten recipes work too, but printed text gives the best results.",
+
+  "importGuidePdfTitle": "PDF Document",
+  "importGuidePdfSubtitle": "Import from PDF cookbooks or downloads",
+  "importGuidePdfStep1Title": "Have a recipe PDF ready",
+  "importGuidePdfStep1Desc": "This works with downloaded recipe PDFs, ebook cookbooks, scanned documents, or PDFs shared via email.",
+  "importGuidePdfStep2Title": "Tap + then \"From PDF\"",
+  "importGuidePdfStep2Desc": "Open Recipe Spellbook, tap +, choose \"From PDF\", and select your file.",
+  "importGuidePdfStep3Title": "Select the recipe page",
+  "importGuidePdfStep3Desc": "If the PDF has multiple pages, choose which page contains the recipe you want to import.",
+  "importGuidePdfStep4Title": "Review & save",
+  "importGuidePdfStep4Desc": "The recipe is extracted from the PDF. Review the ingredients and steps, then save to your cookbook.",
+
+  "importGuideTextTitle": "Text / Paste",
+  "importGuideTextSubtitle": "Paste a recipe from messages, email, or notes",
+  "importGuideTextStep1Title": "Copy recipe text",
+  "importGuideTextStep1Desc": "Copy the recipe text from a text message, email, notes app, WhatsApp, or anywhere else.",
+  "importGuideTextStep2Title": "Tap + then \"From Text\"",
+  "importGuideTextStep2Desc": "Open Recipe Spellbook, tap +, and choose \"From Text\".",
+  "importGuideTextStep3Title": "Paste your recipe",
+  "importGuideTextStep3Desc": "Paste the copied text into the text field. The AI will automatically separate the title, ingredients, and steps.",
+  "importGuideTextStep3Tip": "This works even with unformatted text \u2014 the AI is smart about parsing ingredient amounts and step instructions.",
+  "importGuideTextStep4Title": "Review & save",
+  "importGuideTextStep4Desc": "Check the parsed recipe, make any adjustments, and save.",
+
+  "importGuidePaprikaTitle": "Paprika Recipe Manager",
+  "importGuidePaprikaSubtitle": "Bulk import your entire Paprika library",
+  "importGuidePaprikaStep1Title": "Export from Paprika",
+  "importGuidePaprikaStep1Desc": "In Paprika, go to Settings (gear icon) > Export. Choose \"Export All Recipes\" and save as a .paprikarecipes file.",
+  "importGuidePaprikaStep2Title": "Send the file to your device",
+  "importGuidePaprikaStep2Desc": "Email the file to yourself, save to iCloud/Google Drive, or use AirDrop to transfer it.",
+  "importGuidePaprikaStep3Title": "Import in Recipe Spellbook",
+  "importGuidePaprikaStep3Desc": "Open Recipe Spellbook, go to Settings > Data > Import and select the .paprikarecipes file.",
+  "importGuidePaprikaStep4Title": "Wait for import",
+  "importGuidePaprikaStep4Desc": "All your Paprika recipes are imported with ingredients, steps, notes, photos, and categories preserved.",
+  "importGuidePaprikaStep4Tip": "Large libraries (100+ recipes) may take a minute. The app stays responsive while importing.",
+
+  "importGuideOtherAppsTitle": "Other Recipe Apps",
+  "importGuideOtherAppsSubtitle": "Mealime, CopyMeThat, AnyList, Cookmate, etc.",
+  "importGuideOtherAppsStep1Title": "Export from your current app",
+  "importGuideOtherAppsStep1Desc": "Most recipe apps support exporting to JSON, HTML, or text. Check their Settings > Export or Backup section.",
+  "importGuideOtherAppsStep1Tip": "Common formats: JSON (best), HTML, PDF, or plain text. JSON preserves the most data.",
+  "importGuideOtherAppsStep2Title": "Get the file on your device",
+  "importGuideOtherAppsStep2Desc": "Save or transfer the exported file to your phone using email, cloud storage, or a file transfer method.",
+  "importGuideOtherAppsStep3Title": "Import via Settings",
+  "importGuideOtherAppsStep3Desc": "In Recipe Spellbook, go to Settings > Data > Import and select the exported file. The app handles JSON, HTML, and common recipe formats.",
+  "importGuideOtherAppsStep4Title": "Check your recipes",
+  "importGuideOtherAppsStep4Desc": "Imported recipes appear in your default cookbook. You can reorganize them into different cookbooks afterward.",
+
+  "importGuideDeviceTransferTitle": "Device Transfer",
+  "importGuideDeviceTransferSubtitle": "Move recipes between phones without an account",
+  "importGuideDeviceTransferStep1Title": "Open Transfer on the OLD device",
+  "importGuideDeviceTransferStep1Desc": "On your old phone, open Recipe Spellbook and go to Menu > Device Transfer > Send.",
+  "importGuideDeviceTransferStep2Title": "Get the transfer code",
+  "importGuideDeviceTransferStep2Desc": "A 6-character code is generated. This code is valid for 15 minutes.",
+  "importGuideDeviceTransferStep3Title": "Enter code on NEW device",
+  "importGuideDeviceTransferStep3Desc": "On your new phone, install Recipe Spellbook and go to Menu > Device Transfer > Receive. Enter the code.",
+  "importGuideDeviceTransferStep4Title": "Recipes transferred!",
+  "importGuideDeviceTransferStep4Desc": "All your recipes, cookbooks, shopping lists, and meal plans are transferred to the new device.",
+  "importGuideDeviceTransferStep4Tip": "Have a paid account? Just sign in on the new device and everything syncs automatically.",
+
+  "themeFrost": "Frost",
+  "themeEmber": "Ember",
+  "themeSpring": "Spring",
+  "themeAlchemist": "Alchemist",
+
+  "rpgNoAchievementsInCategory": "No achievements in this category",
+  "rpgUnlocksItem": "Unlocks: {item}",
+  "@rpgUnlocksItem": { "placeholders": { "item": { "type": "String" } } },
+  "rpgCategory": "Category",
+  "rpgCompleted": "Completed",
+  "rpgProgress": "Progress",
+  "rpgDefeatedEnemy": "Defeated {name}!",
+  "@rpgDefeatedEnemy": { "placeholders": { "name": { "type": "String" } } },
+  "rpgAvatars": "Avatars",
+  "rpgFrames": "Frames",
+  "rpgPets": "Pets",
+  "rpgTitles": "Titles",
+  "rpgPurchaseItem": "Purchase {item}?",
+  "@rpgPurchaseItem": { "placeholders": { "item": { "type": "String" } } },
+  "rpgUnlockedViaAchievement": "Unlocked via achievement",
+  "rpgPrice": "Price",
+  "rpgNotEnoughGold": "Not enough gold",
+  "rpgNotEnoughGems": "Not enough gems",
+  "rpgPurchased": "Purchased {item}!",
+  "@rpgPurchased": { "placeholders": { "item": { "type": "String" } } },
+  "rpgOwned": "Owned",
+  "rpgDailyQuests": "Daily Quests",
+  "rpgQuestsCompleted": "{completed} of {total} completed",
+  "@rpgQuestsCompleted": { "placeholders": { "completed": { "type": "int" }, "total": { "type": "int" } } },
+  "rpgWeeklyChallenge": "Weekly Challenge",
+  "rpgQuestsSubtitle": "Complete quests to earn XP and rewards",
+  "rpgRecentXp": "Recent XP",
+  "rpgNoAchievementsYet": "No achievements yet",
+  "rpgLv": "Lv.{level}",
+  "@rpgLv": { "placeholders": { "level": { "type": "int" } } },
+  "rpgClassBonus": "{className} Bonus",
+  "@rpgClassBonus": { "placeholders": { "className": { "type": "String" } } },
+  "rpgLevelUp": "Level Up!",
+  "rpgUnlocked": "Unlocked!",
+  "rpgAchievementUnlocked": "Achievement Unlocked!",
+  "settingsManage": "Manage",
+  "mealPlanAddTitle": "Add to Meal Plan",
+  "mealPlanMealLabel": "Meal",
+  "mealPlanAdding": "Adding...",
+  "mealPlanDateFormat": "{weekday}, {month} {day}",
+  "@mealPlanDateFormat": { "placeholders": { "weekday": { "type": "String" }, "month": { "type": "String" }, "day": { "type": "int" } } }
 }

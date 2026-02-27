@@ -10416,6 +10416,2982 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} recipes'**
   String tagsRecipeCount(int count);
+
+  /// No description provided for @communityMyPublications.
+  ///
+  /// In en, this message translates to:
+  /// **'My Publications'**
+  String get communityMyPublications;
+
+  /// No description provided for @communitySearchCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Search cookbooks...'**
+  String get communitySearchCookbooks;
+
+  /// No description provided for @communitySortRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get communitySortRecent;
+
+  /// No description provided for @communitySortPopular.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get communitySortPopular;
+
+  /// No description provided for @communitySortMostDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Downloaded'**
+  String get communitySortMostDownloaded;
+
+  /// No description provided for @communityNoResultsFor.
+  ///
+  /// In en, this message translates to:
+  /// **'No results for \"{query}\"'**
+  String communityNoResultsFor(String query);
+
+  /// No description provided for @communityNoCookbooksYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No cookbooks yet'**
+  String get communityNoCookbooksYet;
+
+  /// No description provided for @communityClearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get communityClearSearch;
+
+  /// No description provided for @communityPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get communityPublish;
+
+  /// No description provided for @communityByPublisher.
+  ///
+  /// In en, this message translates to:
+  /// **'by {name}'**
+  String communityByPublisher(String name);
+
+  /// No description provided for @communityRecipeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recipes'**
+  String communityRecipeCount(int count);
+
+  /// No description provided for @communityPublishCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish Cookbook'**
+  String get communityPublishCookbook;
+
+  /// No description provided for @communitySignInToPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to publish'**
+  String get communitySignInToPublish;
+
+  /// No description provided for @communitySignInToPublishMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You need an account to share cookbooks with the community.'**
+  String get communitySignInToPublishMessage;
+
+  /// No description provided for @communityGoToSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Settings'**
+  String get communityGoToSettings;
+
+  /// No description provided for @communityNoCookbooksToPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'No cookbooks to publish'**
+  String get communityNoCookbooksToPublish;
+
+  /// No description provided for @communityPublishInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookbooks need at least 10 recipes to publish. Your recipes will be shared as a snapshot — updates won\'t sync.'**
+  String get communityPublishInfo;
+
+  /// No description provided for @communitySelectCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a cookbook to publish'**
+  String get communitySelectCookbook;
+
+  /// No description provided for @communityNeedMinRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Need at least 10 recipes to publish (has {count})'**
+  String communityNeedMinRecipes(int count);
+
+  /// No description provided for @communityPublishConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish to Community?'**
+  String get communityPublishConfirmTitle;
+
+  /// No description provided for @communityPublishConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will share \"{name}\" ({count} recipes) publicly. Anyone can browse and download it.\n\nYou can unpublish it anytime.'**
+  String communityPublishConfirmMessage(String name, int count);
+
+  /// No description provided for @communityPublishSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" published to the community!'**
+  String communityPublishSuccess(String name);
+
+  /// No description provided for @communityPublishFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish failed'**
+  String get communityPublishFailed;
+
+  /// No description provided for @communityRecipeCountNeedMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recipes (need 10+)'**
+  String communityRecipeCountNeedMore(int count);
+
+  /// No description provided for @communityNoPublicationsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No publications yet'**
+  String get communityNoPublicationsYet;
+
+  /// No description provided for @communityNoPublicationsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish a cookbook to share it with the community.'**
+  String get communityNoPublicationsMessage;
+
+  /// No description provided for @communityUnpublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpublish'**
+  String get communityUnpublish;
+
+  /// No description provided for @communityUnpublishConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpublish?'**
+  String get communityUnpublishConfirmTitle;
+
+  /// No description provided for @communityUnpublishConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove \"{title}\" from the community? People who already downloaded it will keep their copy.'**
+  String communityUnpublishConfirmMessage(String title);
+
+  /// No description provided for @communityUnpublishSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{title}\" unpublished'**
+  String communityUnpublishSuccess(String title);
+
+  /// No description provided for @communityUnpublishFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to unpublish'**
+  String get communityUnpublishFailed;
+
+  /// No description provided for @communityRemovedByModeration.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed by moderation'**
+  String get communityRemovedByModeration;
+
+  /// No description provided for @communityPublicationStats.
+  ///
+  /// In en, this message translates to:
+  /// **'{recipeCount} recipes · {downloadCount} downloads · {timeAgo}'**
+  String communityPublicationStats(int recipeCount, int downloadCount, String timeAgo);
+
+  /// No description provided for @communityPublicationNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Publication not found'**
+  String get communityPublicationNotFound;
+
+  /// No description provided for @communityReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get communityReport;
+
+  /// No description provided for @communityReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report this cookbook'**
+  String get communityReportTitle;
+
+  /// No description provided for @communityReportSpam.
+  ///
+  /// In en, this message translates to:
+  /// **'Spam or low quality'**
+  String get communityReportSpam;
+
+  /// No description provided for @communityReportInappropriate.
+  ///
+  /// In en, this message translates to:
+  /// **'Inappropriate content'**
+  String get communityReportInappropriate;
+
+  /// No description provided for @communityReportStolen.
+  ///
+  /// In en, this message translates to:
+  /// **'Stolen / copied recipes'**
+  String get communityReportStolen;
+
+  /// No description provided for @communityReportOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get communityReportOther;
+
+  /// No description provided for @communityReportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Report submitted. Thank you!'**
+  String get communityReportSuccess;
+
+  /// No description provided for @communitySignInToReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to report content'**
+  String get communitySignInToReport;
+
+  /// No description provided for @communityDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed'**
+  String get communityDownloadFailed;
+
+  /// No description provided for @communityDownloadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded \"{title}\" — {count} recipes added!'**
+  String communityDownloadSuccess(String title, int count);
+
+  /// No description provided for @communityDownloadFailedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed: {error}'**
+  String communityDownloadFailedError(String error);
+
+  /// No description provided for @communityDownloadCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} downloads'**
+  String communityDownloadCount(int count);
+
+  /// No description provided for @communityDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading...'**
+  String get communityDownloading;
+
+  /// No description provided for @communityDownloadToMyCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Download to My Cookbooks'**
+  String get communityDownloadToMyCookbooks;
+
+  /// No description provided for @communityPrepTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m prep'**
+  String communityPrepTime(int minutes);
+
+  /// No description provided for @communityCookTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m cook'**
+  String communityCookTime(int minutes);
+
+  /// No description provided for @communityServingsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} servings'**
+  String communityServingsCount(int count);
+
+  /// No description provided for @communityIngredientCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} ingredients'**
+  String communityIngredientCount(int count);
+
+  /// No description provided for @deleteRecipesTrashMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes will be moved to trash. You can restore them later.'**
+  String get deleteRecipesTrashMessage;
+
+  /// No description provided for @hintTitleExample.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Grandma\'s Apple Pie'**
+  String get hintTitleExample;
+
+  /// No description provided for @hintDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'A brief description of the recipe'**
+  String get hintDescription;
+
+  /// No description provided for @hintServingsExample.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., 4'**
+  String get hintServingsExample;
+
+  /// No description provided for @prepMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Prep (min)'**
+  String get prepMin;
+
+  /// No description provided for @cookMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Cook (min)'**
+  String get cookMin;
+
+  /// No description provided for @hintNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips, variations, storage instructions...'**
+  String get hintNotes;
+
+  /// No description provided for @pinchToZoomCropped.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinch to zoom · Cropped area will be saved'**
+  String get pinchToZoomCropped;
+
+  /// No description provided for @pinchToZoomOrUseAsIs.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinch to zoom and crop · Or use as-is'**
+  String get pinchToZoomOrUseAsIs;
+
+  /// No description provided for @savingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get savingLabel;
+
+  /// No description provided for @emptyHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'(empty header)'**
+  String get emptyHeader;
+
+  /// No description provided for @emptyIngredient.
+  ///
+  /// In en, this message translates to:
+  /// **'(empty ingredient)'**
+  String get emptyIngredient;
+
+  /// No description provided for @recipeUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe updated!'**
+  String get recipeUpdated;
+
+  /// No description provided for @nutritionLessInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Less info'**
+  String get nutritionLessInfo;
+
+  /// No description provided for @nutritionMoreInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'More info'**
+  String get nutritionMoreInfo;
+
+  /// No description provided for @scaleOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Original: {servings}'**
+  String scaleOriginal(String servings);
+
+  /// No description provided for @scaleAdjustQuantities.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust ingredient quantities'**
+  String get scaleAdjustQuantities;
+
+  /// No description provided for @scaleOriginalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'1x (Original)'**
+  String get scaleOriginalLabel;
+
+  /// No description provided for @stepWillBeRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'This step will be permanently removed.'**
+  String get stepWillBeRemoved;
+
+  /// No description provided for @stepsWillBeRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'These {count} steps will be permanently removed.'**
+  String stepsWillBeRemoved(int count);
+
+  /// No description provided for @stepCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 step} other{{count} steps}}'**
+  String stepCount(int count);
+
+  /// No description provided for @instructionsNoSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'No instructions yet'**
+  String get instructionsNoSteps;
+
+  /// No description provided for @instructionsAddStepsGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Add steps to guide through the recipe'**
+  String get instructionsAddStepsGuide;
+
+  /// No description provided for @pinchToZoomPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinch to zoom · This is how your photo will look'**
+  String get pinchToZoomPreview;
+
+  /// No description provided for @ingredientCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 ingredient} other{{count} ingredients}}'**
+  String ingredientCount(int count);
+
+  /// No description provided for @ingredientPerLineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter one ingredient per line:\n\n2 cups flour\n1 tsp salt\n3 eggs'**
+  String get ingredientPerLineHint;
+
+  /// No description provided for @ingredientTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Enter one ingredient per line. Press Enter after each ingredient.'**
+  String get ingredientTip;
+
+  /// No description provided for @cookbookEditSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename, cover photo'**
+  String get cookbookEditSubtitle;
+
+  /// No description provided for @shareCookbookSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Link, family, or community'**
+  String get shareCookbookSubtitle;
+
+  /// No description provided for @shareNamedCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Share \"{name}\"'**
+  String shareNamedCookbook(String name);
+
+  /// No description provided for @oneTimeLink.
+  ///
+  /// In en, this message translates to:
+  /// **'One-Time Link'**
+  String get oneTimeLink;
+
+  /// No description provided for @oneTimeLinkDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Free • 24h expiry • Anyone can download'**
+  String get oneTimeLinkDescription;
+
+  /// No description provided for @familyShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Share'**
+  String get familyShare;
+
+  /// No description provided for @familyShareDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Real-time sync with family members'**
+  String get familyShareDescription;
+
+  /// No description provided for @postToCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Post to Community'**
+  String get postToCommunity;
+
+  /// No description provided for @postToCommunityDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish for anyone to discover & download'**
+  String get postToCommunityDescription;
+
+  /// No description provided for @signInToShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to create share links'**
+  String get signInToShare;
+
+  /// No description provided for @generatingLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating link...'**
+  String get generatingLink;
+
+  /// No description provided for @failedToCreateLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create link'**
+  String get failedToCreateLink;
+
+  /// No description provided for @linkCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Link Created!'**
+  String get linkCreated;
+
+  /// No description provided for @expiresIn24Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in 24 hours'**
+  String get expiresIn24Hours;
+
+  /// No description provided for @linkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied!'**
+  String get linkCopied;
+
+  /// No description provided for @unlockFeature.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock {feature}'**
+  String unlockFeature(String feature);
+
+  /// No description provided for @notNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get notNow;
+
+  /// No description provided for @upgradeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade'**
+  String get upgradeButton;
+
+  /// No description provided for @publishMinRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Need at least 10 recipes to publish (has {count})'**
+  String publishMinRecipes(int count);
+
+  /// No description provided for @publishConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Post to Community?'**
+  String get publishConfirmTitle;
+
+  /// No description provided for @publishConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" ({count} recipes) will be publicly visible. Anyone can browse and download it.\n\nYou can remove it anytime from Community → My Publications.'**
+  String publishConfirmMessage(String name, int count);
+
+  /// No description provided for @publishButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get publishButton;
+
+  /// No description provided for @selectCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Course'**
+  String get selectCourse;
+
+  /// No description provided for @selectCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Category'**
+  String get selectCategory;
+
+  /// No description provided for @taxonomyNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get taxonomyNone;
+
+  /// No description provided for @createTaxonomy.
+  ///
+  /// In en, this message translates to:
+  /// **'Create \"{name}\"'**
+  String createTaxonomy(String name);
+
+  /// No description provided for @addAsNewCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'Add as new course'**
+  String get addAsNewCourse;
+
+  /// No description provided for @addAsNewCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add as new category'**
+  String get addAsNewCategory;
+
+  /// No description provided for @doneWithCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Done ({count})'**
+  String doneWithCount(int count);
+
+  /// No description provided for @quickAccessEmptyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'No quick access recipes yet'**
+  String get quickAccessEmptyAll;
+
+  /// No description provided for @quickAccessEmptyMealPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'No meals planned'**
+  String get quickAccessEmptyMealPlan;
+
+  /// No description provided for @quickAccessEmptyPinned.
+  ///
+  /// In en, this message translates to:
+  /// **'No pinned recipes'**
+  String get quickAccessEmptyPinned;
+
+  /// No description provided for @quickAccessEmptyRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent recipes'**
+  String get quickAccessEmptyRecent;
+
+  /// No description provided for @importingRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing recipe…'**
+  String get importingRecipe;
+
+  /// No description provided for @errorWithMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {message}'**
+  String errorWithMessage(String message);
+
+  /// No description provided for @minutesPrepSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'m prep'**
+  String get minutesPrepSuffix;
+
+  /// No description provided for @minutesCookSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'m cook'**
+  String get minutesCookSuffix;
+
+  /// No description provided for @couldNotOpenBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open browser'**
+  String get couldNotOpenBrowser;
+
+  /// No description provided for @couldNotOpenUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open {url}'**
+  String couldNotOpenUrl(String url);
+
+  /// No description provided for @discord.
+  ///
+  /// In en, this message translates to:
+  /// **'Discord'**
+  String get discord;
+
+  /// No description provided for @discordLinkAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Link Discord Account'**
+  String get discordLinkAccount;
+
+  /// No description provided for @discordLinkSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect your Discord for community features'**
+  String get discordLinkSubtitle;
+
+  /// No description provided for @discordSignInFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in first to link Discord'**
+  String get discordSignInFirst;
+
+  /// No description provided for @discordUnlink.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink Discord'**
+  String get discordUnlink;
+
+  /// No description provided for @discordUnlinkFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to unlink Discord'**
+  String get discordUnlinkFailed;
+
+  /// No description provided for @discordUnlinkSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove your Discord connection'**
+  String get discordUnlinkSubtitle;
+
+  /// No description provided for @discordUnlinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Discord unlinked'**
+  String get discordUnlinked;
+
+  /// No description provided for @familyCodeCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code copied!'**
+  String get familyCodeCopied;
+
+  /// No description provided for @familyCopyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Link'**
+  String get familyCopyLink;
+
+  /// No description provided for @familyCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Family'**
+  String get familyCreate;
+
+  /// No description provided for @familyCreateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create family'**
+  String get familyCreateFailed;
+
+  /// No description provided for @familyCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Family'**
+  String get familyCreateTitle;
+
+  /// No description provided for @familyCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Family created!'**
+  String get familyCreated;
+
+  /// No description provided for @familyDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Family'**
+  String get familyDelete;
+
+  /// No description provided for @familyDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this family? All members will be removed.'**
+  String get familyDeleteConfirm;
+
+  /// No description provided for @familyDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Family deleted'**
+  String get familyDeleted;
+
+  /// No description provided for @familyEnterInviteCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter invite code'**
+  String get familyEnterInviteCode;
+
+  /// No description provided for @familyInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite Members'**
+  String get familyInvite;
+
+  /// No description provided for @familyJoinAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get familyJoinAction;
+
+  /// No description provided for @familyJoinFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to join family'**
+  String get familyJoinFailed;
+
+  /// No description provided for @familyJoinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Family'**
+  String get familyJoinTitle;
+
+  /// No description provided for @familyJoinWithCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with Code'**
+  String get familyJoinWithCode;
+
+  /// No description provided for @familyJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined {familyName}!'**
+  String familyJoined(String familyName);
+
+  /// No description provided for @familyLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave Family'**
+  String get familyLeave;
+
+  /// No description provided for @familyLeaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get familyLeaveAction;
+
+  /// No description provided for @familyLeaveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to leave this family?'**
+  String get familyLeaveConfirm;
+
+  /// No description provided for @familyLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Left family'**
+  String get familyLeft;
+
+  /// No description provided for @familyLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite link copied!'**
+  String get familyLinkCopied;
+
+  /// No description provided for @familyManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your family'**
+  String get familyManage;
+
+  /// No description provided for @familyMemberRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{displayName} removed'**
+  String familyMemberRemoved(String displayName);
+
+  /// No description provided for @familyMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get familyMembers;
+
+  /// No description provided for @familyMembersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {max} members'**
+  String familyMembersCount(int current, int max);
+
+  /// No description provided for @familyNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Family name'**
+  String get familyNameHint;
+
+  /// No description provided for @familyNewCodeGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'New invite code generated'**
+  String get familyNewCodeGenerated;
+
+  /// No description provided for @familyOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'OWNER'**
+  String get familyOwner;
+
+  /// No description provided for @familyRegenerateCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate Code'**
+  String get familyRegenerateCode;
+
+  /// No description provided for @familyRemoveMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Member'**
+  String get familyRemoveMember;
+
+  /// No description provided for @familyRemoveMemberConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {displayName} from the family?'**
+  String familyRemoveMemberConfirm(String displayName);
+
+  /// No description provided for @familyRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename Family'**
+  String get familyRename;
+
+  /// No description provided for @familyShareMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Join my family on Recipe Spellbook! Code: {inviteCode} or use this link: {shareLink}'**
+  String familyShareMessage(String inviteCode, String shareLink);
+
+  /// No description provided for @familyShareSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Join my Recipe Spellbook family'**
+  String get familyShareSubject;
+
+  /// No description provided for @familyShareUpgradeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to share cookbooks with family members in real-time.'**
+  String get familyShareUpgradeMessage;
+
+  /// No description provided for @familySharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Sharing'**
+  String get familySharing;
+
+  /// No description provided for @familySharingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Share cookbooks, shopping lists, and meal plans with your family.'**
+  String get familySharingDescription;
+
+  /// No description provided for @familySharingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share cookbooks, lists & meal plans'**
+  String get familySharingSubtitle;
+
+  /// No description provided for @ingredientSubstitutesFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Substitutes for {ingredientName}'**
+  String ingredientSubstitutesFor(String ingredientName);
+
+  /// No description provided for @ingredientSubstitutionsNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No substitutions found'**
+  String get ingredientSubstitutionsNoResults;
+
+  /// No description provided for @ingredientSubstitutionsNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No substitutions found for {ingredientName}'**
+  String ingredientSubstitutionsNotFound(String ingredientName);
+
+  /// No description provided for @ingredientSubstitutionsTryDifferent.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different ingredient'**
+  String get ingredientSubstitutionsTryDifferent;
+
+  /// No description provided for @integrationsChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking...'**
+  String get integrationsChecking;
+
+  /// No description provided for @integrationsConnectedManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected - Tap to manage'**
+  String get integrationsConnectedManage;
+
+  /// No description provided for @integrationsLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked'**
+  String get integrationsLinked;
+
+  /// No description provided for @integrationsLinkedManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked - Tap to manage'**
+  String get integrationsLinkedManage;
+
+  /// No description provided for @integrationsNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected'**
+  String get integrationsNotConnected;
+
+  /// No description provided for @integrationsTapToLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to link'**
+  String get integrationsTapToLink;
+
+  /// No description provided for @integrationsTapToSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to sign in'**
+  String get integrationsTapToSignIn;
+
+  /// No description provided for @nutritionCalculateFromEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculate from the edit screen'**
+  String get nutritionCalculateFromEdit;
+
+  /// No description provided for @nutritionCaloriesAlwaysShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Always show calories'**
+  String get nutritionCaloriesAlwaysShow;
+
+  /// No description provided for @nutritionChartStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chart Style'**
+  String get nutritionChartStyle;
+
+  /// No description provided for @nutritionResetDefaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to Defaults'**
+  String get nutritionResetDefaults;
+
+  /// No description provided for @nutritionSettingsLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition settings'**
+  String get nutritionSettingsLink;
+
+  /// No description provided for @nutritionTapToCalculate.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to calculate nutrition'**
+  String get nutritionTapToCalculate;
+
+  /// No description provided for @nutritionVisibleNutrients.
+  ///
+  /// In en, this message translates to:
+  /// **'Visible Nutrients'**
+  String get nutritionVisibleNutrients;
+
+  /// No description provided for @pantryAddedStaples.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {count} staples to pantry'**
+  String pantryAddedStaples(int count);
+
+  /// No description provided for @pantryClearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All'**
+  String get pantryClearAll;
+
+  /// No description provided for @pantryClearMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove all items from your pantry?'**
+  String get pantryClearMessage;
+
+  /// No description provided for @pantryCommonStaples.
+  ///
+  /// In en, this message translates to:
+  /// **'Common Staples'**
+  String get pantryCommonStaples;
+
+  /// No description provided for @pantryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Your pantry is empty'**
+  String get pantryEmpty;
+
+  /// No description provided for @pantryEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add items you always have on hand'**
+  String get pantryEmptySubtitle;
+
+  /// No description provided for @pantryInfoMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Items in your pantry will be excluded from shopping lists when adding recipe ingredients.'**
+  String get pantryInfoMessage;
+
+  /// No description provided for @pantryItemCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String pantryItemCount(int count);
+
+  /// No description provided for @rpgAchievements.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements'**
+  String get rpgAchievements;
+
+  /// No description provided for @rpgAttack.
+  ///
+  /// In en, this message translates to:
+  /// **'Attack! (10 Mana)'**
+  String get rpgAttack;
+
+  /// No description provided for @rpgBattleArena.
+  ///
+  /// In en, this message translates to:
+  /// **'⚔️ Battle Arena'**
+  String get rpgBattleArena;
+
+  /// No description provided for @rpgBoss.
+  ///
+  /// In en, this message translates to:
+  /// **'BOSS'**
+  String get rpgBoss;
+
+  /// No description provided for @rpgBossDamage.
+  ///
+  /// In en, this message translates to:
+  /// **'Boss Damage'**
+  String get rpgBossDamage;
+
+  /// No description provided for @rpgBossDefeated.
+  ///
+  /// In en, this message translates to:
+  /// **'Boss Defeated!'**
+  String get rpgBossDefeated;
+
+  /// No description provided for @rpgBossFight.
+  ///
+  /// In en, this message translates to:
+  /// **'Boss Fight'**
+  String get rpgBossFight;
+
+  /// No description provided for @rpgChooseYourClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Your Class'**
+  String get rpgChooseYourClass;
+
+  /// No description provided for @rpgClassBonusSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Each class grants unique bonuses'**
+  String get rpgClassBonusSubtitle;
+
+  /// No description provided for @rpgClassBonusesList.
+  ///
+  /// In en, this message translates to:
+  /// **'Class Bonuses'**
+  String get rpgClassBonusesList;
+
+  /// No description provided for @rpgClassBonusesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Class Bonuses'**
+  String get rpgClassBonusesTitle;
+
+  /// No description provided for @rpgComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon!'**
+  String get rpgComingSoon;
+
+  /// No description provided for @rpgCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Community'**
+  String get rpgCommunity;
+
+  /// No description provided for @rpgCommunityDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Compete with other cooks around the world!'**
+  String get rpgCommunityDescription;
+
+  /// No description provided for @rpgCommunityLeaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Community Leaderboard'**
+  String get rpgCommunityLeaderboard;
+
+  /// No description provided for @rpgCooked.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooked'**
+  String get rpgCooked;
+
+  /// No description provided for @rpgCosmetics.
+  ///
+  /// In en, this message translates to:
+  /// **'Cosmetics'**
+  String get rpgCosmetics;
+
+  /// No description provided for @rpgCrit.
+  ///
+  /// In en, this message translates to:
+  /// **'CRIT!'**
+  String get rpgCrit;
+
+  /// No description provided for @rpgDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days ago'**
+  String rpgDaysAgo(int count);
+
+  /// No description provided for @rpgDaysCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days'**
+  String rpgDaysCount(int count);
+
+  /// No description provided for @rpgGemLottery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gem Lottery'**
+  String get rpgGemLottery;
+
+  /// No description provided for @rpgGemsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} gems available'**
+  String rpgGemsAvailable(int count);
+
+  /// No description provided for @rpgHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} hours ago'**
+  String rpgHoursAgo(int count);
+
+  /// No description provided for @rpgHowYouCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'How You Compare'**
+  String get rpgHowYouCompare;
+
+  /// No description provided for @rpgHp.
+  ///
+  /// In en, this message translates to:
+  /// **'HP'**
+  String get rpgHp;
+
+  /// No description provided for @rpgJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get rpgJustNow;
+
+  /// No description provided for @rpgKeepEarningXp.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep earning XP to unlock this enemy!'**
+  String get rpgKeepEarningXp;
+
+  /// No description provided for @rpgKillStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Kill streak: {count} 🔥'**
+  String rpgKillStreak(int count);
+
+  /// No description provided for @rpgLeaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaderboard'**
+  String get rpgLeaderboard;
+
+  /// No description provided for @rpgLevelN.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level}'**
+  String rpgLevelN(int level);
+
+  /// No description provided for @rpgLevelRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level} Required'**
+  String rpgLevelRequired(int level);
+
+  /// No description provided for @rpgLotteryCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Costs 1 gem per spin'**
+  String get rpgLotteryCost;
+
+  /// No description provided for @rpgLotteryResultGems.
+  ///
+  /// In en, this message translates to:
+  /// **'You won {amount} gems!'**
+  String rpgLotteryResultGems(int amount);
+
+  /// No description provided for @rpgLotteryResultGold.
+  ///
+  /// In en, this message translates to:
+  /// **'You won {amount} gold!'**
+  String rpgLotteryResultGold(int amount);
+
+  /// No description provided for @rpgLotteryResultNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Better luck next time!'**
+  String get rpgLotteryResultNothing;
+
+  /// No description provided for @rpgLotteryResultRarePet.
+  ///
+  /// In en, this message translates to:
+  /// **'You found a rare pet!'**
+  String get rpgLotteryResultRarePet;
+
+  /// No description provided for @rpgLotteryResultXp.
+  ///
+  /// In en, this message translates to:
+  /// **'You earned {amount} XP!'**
+  String rpgLotteryResultXp(int amount);
+
+  /// No description provided for @rpgManaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn XP from recipes to regenerate mana • Level up for full refill'**
+  String get rpgManaHint;
+
+  /// No description provided for @rpgMilestones.
+  ///
+  /// In en, this message translates to:
+  /// **'Milestones'**
+  String get rpgMilestones;
+
+  /// No description provided for @rpgMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} minutes ago'**
+  String rpgMinutesAgo(int count);
+
+  /// No description provided for @rpgNoMana.
+  ///
+  /// In en, this message translates to:
+  /// **'No Mana!'**
+  String get rpgNoMana;
+
+  /// No description provided for @rpgProfileSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Settings'**
+  String get rpgProfileSettings;
+
+  /// No description provided for @rpgQuickActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Actions'**
+  String get rpgQuickActions;
+
+  /// No description provided for @rpgRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get rpgRecipes;
+
+  /// No description provided for @rpgReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get rpgReset;
+
+  /// No description provided for @rpgResetProgressConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will reset all your RPG progress including level, XP, gold, and gems. This cannot be undone.'**
+  String get rpgResetProgressConfirmMessage;
+
+  /// No description provided for @rpgResetProgressConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Progress?'**
+  String get rpgResetProgressConfirmTitle;
+
+  /// No description provided for @rpgResetsInHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Resets in {count} hours'**
+  String rpgResetsInHours(int count);
+
+  /// No description provided for @rpgResetsInMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Resets in {count} minutes'**
+  String rpgResetsInMinutes(int count);
+
+  /// No description provided for @rpgSpin.
+  ///
+  /// In en, this message translates to:
+  /// **'Spin!'**
+  String get rpgSpin;
+
+  /// No description provided for @rpgStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak'**
+  String get rpgStreak;
+
+  /// No description provided for @rpgVictory.
+  ///
+  /// In en, this message translates to:
+  /// **'Victory!'**
+  String get rpgVictory;
+
+  /// No description provided for @rpgYouDefeated.
+  ///
+  /// In en, this message translates to:
+  /// **'You defeated {name}!'**
+  String rpgYouDefeated(String name);
+
+  /// No description provided for @rpgYourStatistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Statistics'**
+  String get rpgYourStatistics;
+
+  /// No description provided for @rpgYourStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Stats'**
+  String get rpgYourStats;
+
+  /// No description provided for @settingsBrowseCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Community'**
+  String get settingsBrowseCommunity;
+
+  /// No description provided for @settingsBrowseCommunitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover public cookbooks'**
+  String get settingsBrowseCommunitySubtitle;
+
+  /// No description provided for @settingsCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Community'**
+  String get settingsCommunity;
+
+  /// No description provided for @settingsFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get settingsFamily;
+
+  /// No description provided for @settingsIntegrations.
+  ///
+  /// In en, this message translates to:
+  /// **'Integrations'**
+  String get settingsIntegrations;
+
+  /// No description provided for @settingsMyPublications.
+  ///
+  /// In en, this message translates to:
+  /// **'My Publications'**
+  String get settingsMyPublications;
+
+  /// No description provided for @settingsMyPublicationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your published cookbooks'**
+  String get settingsMyPublicationsSubtitle;
+
+  /// No description provided for @settingsShoppingPlanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping & Planning'**
+  String get settingsShoppingPlanning;
+
+  /// No description provided for @shoppingAddCountItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {count} items'**
+  String shoppingAddCountItems(int count);
+
+  /// No description provided for @shoppingAddIngredient.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Ingredient'**
+  String get shoppingAddIngredient;
+
+  /// No description provided for @shoppingAddedItemName.
+  ///
+  /// In en, this message translates to:
+  /// **'Added \"{name}\"'**
+  String shoppingAddedItemName(String name);
+
+  /// No description provided for @shoppingAddedNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'{added} added, {failed} not found'**
+  String shoppingAddedNotFound(int added, int failed);
+
+  /// No description provided for @shoppingAddingTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding to {provider}…'**
+  String shoppingAddingTo(String provider);
+
+  /// No description provided for @shoppingCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'camera'**
+  String get shoppingCamera;
+
+  /// No description provided for @shoppingCheckedItemsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked items ({count})'**
+  String shoppingCheckedItemsCount(int count);
+
+  /// No description provided for @shoppingCouldNotAccessSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not access {source}'**
+  String shoppingCouldNotAccessSource(String source);
+
+  /// No description provided for @shoppingCountAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} added'**
+  String shoppingCountAdded(int count);
+
+  /// No description provided for @shoppingCreatingListOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating list on {provider}…'**
+  String shoppingCreatingListOn(String provider);
+
+  /// No description provided for @shoppingCurrentOfTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {total} items'**
+  String shoppingCurrentOfTotal(int current, int total);
+
+  /// No description provided for @shoppingDeleteListConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"?'**
+  String shoppingDeleteListConfirm(String name);
+
+  /// No description provided for @shoppingErrorReadingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Error reading image: {error}'**
+  String shoppingErrorReadingImage(String error);
+
+  /// No description provided for @shoppingExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed: {error}'**
+  String shoppingExportFailed(String error);
+
+  /// No description provided for @shoppingExportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export \"{name}\"'**
+  String shoppingExportTitle(String name);
+
+  /// No description provided for @shoppingFamilyShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Share'**
+  String get shoppingFamilyShare;
+
+  /// No description provided for @shoppingFamilyShareSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share list with family or one-time link'**
+  String get shoppingFamilyShareSubtitle;
+
+  /// No description provided for @shoppingFromPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'From photo'**
+  String get shoppingFromPhoto;
+
+  /// No description provided for @shoppingFromText.
+  ///
+  /// In en, this message translates to:
+  /// **'From text'**
+  String get shoppingFromText;
+
+  /// No description provided for @shoppingGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'gallery'**
+  String get shoppingGallery;
+
+  /// No description provided for @shoppingImportItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Import items'**
+  String get shoppingImportItems;
+
+  /// No description provided for @shoppingImportShoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'Import shopping list'**
+  String get shoppingImportShoppingList;
+
+  /// No description provided for @shoppingImportTextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'2 cups flour\nchicken breast\n1 lb ground beef\nmilk\n...'**
+  String get shoppingImportTextHint;
+
+  /// No description provided for @shoppingImportedList.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported List'**
+  String get shoppingImportedList;
+
+  /// No description provided for @shoppingIngredientHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., chicken breast, olive oil'**
+  String get shoppingIngredientHint;
+
+  /// No description provided for @shoppingIngredientName.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredient Name'**
+  String get shoppingIngredientName;
+
+  /// No description provided for @shoppingIngredientsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} ingredients available'**
+  String shoppingIngredientsAvailable(int count);
+
+  /// No description provided for @shoppingItemsAddedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items added'**
+  String shoppingItemsAddedCount(int count);
+
+  /// No description provided for @shoppingItemsAddedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Items added!'**
+  String get shoppingItemsAddedSuccess;
+
+  /// No description provided for @shoppingItemsCopiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items copied to clipboard'**
+  String shoppingItemsCopiedToClipboard(int count);
+
+  /// No description provided for @shoppingItemsInCart.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items in your {provider} cart'**
+  String shoppingItemsInCart(int count, String provider);
+
+  /// No description provided for @shoppingItemsOnInstacartList.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items on your Instacart list'**
+  String shoppingItemsOnInstacartList(int count);
+
+  /// No description provided for @shoppingJustAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Just added'**
+  String get shoppingJustAdded;
+
+  /// No description provided for @shoppingListCopiedOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'List copied! Opening {name}...'**
+  String shoppingListCopiedOpening(String name);
+
+  /// No description provided for @shoppingListReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping list ready!'**
+  String get shoppingListReady;
+
+  /// No description provided for @shoppingNotFoundItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Not found: {items}'**
+  String shoppingNotFoundItems(String items);
+
+  /// No description provided for @shoppingOneItemPerLine.
+  ///
+  /// In en, this message translates to:
+  /// **'One item per line'**
+  String get shoppingOneItemPerLine;
+
+  /// No description provided for @shoppingPartiallyAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Partially added'**
+  String get shoppingPartiallyAdded;
+
+  /// No description provided for @shoppingProviderConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get shoppingProviderConnected;
+
+  /// No description provided for @shoppingRemoveFromList.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from list'**
+  String get shoppingRemoveFromList;
+
+  /// No description provided for @shoppingStartTyping.
+  ///
+  /// In en, this message translates to:
+  /// **'Start typing to see suggestions'**
+  String get shoppingStartTyping;
+
+  /// No description provided for @shoppingTapToAddToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to add items directly to your cart'**
+  String get shoppingTapToAddToCart;
+
+  /// No description provided for @shoppingTapToCreateShoppableList.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to create a shoppable list'**
+  String get shoppingTapToCreateShoppableList;
+
+  /// No description provided for @swipeToSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe to switch sections'**
+  String get swipeToSwitch;
+
+  /// No description provided for @syncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed'**
+  String get syncFailed;
+
+  /// No description provided for @syncSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced: {pushed} pushed, {pulled} pulled'**
+  String syncSuccess(int pushed, int pulled);
+
+  /// No description provided for @textSizePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get textSizePreview;
+
+  /// No description provided for @transferDeviceDesktop.
+  ///
+  /// In en, this message translates to:
+  /// **'desktop'**
+  String get transferDeviceDesktop;
+
+  /// No description provided for @transferDeviceMobileApp.
+  ///
+  /// In en, this message translates to:
+  /// **'mobile app'**
+  String get transferDeviceMobileApp;
+
+  /// No description provided for @transferDeviceThisDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'this device'**
+  String get transferDeviceThisDevice;
+
+  /// No description provided for @transferExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Move all your recipes, cookbooks, and meal plans from {currentDevice} to your {targetDevice}. This is a one-time copy, not a sync.'**
+  String transferExplanation(String currentDevice, String targetDevice);
+
+  /// No description provided for @transferImportedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items imported successfully.'**
+  String transferImportedSuccess(int count);
+
+  /// No description provided for @transferOr.
+  ///
+  /// In en, this message translates to:
+  /// **'OR'**
+  String get transferOr;
+
+  /// No description provided for @transferReceiveOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive on {device}'**
+  String transferReceiveOn(String device);
+
+  /// No description provided for @transferSendFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Send from {device}'**
+  String transferSendFrom(String device);
+
+  /// No description provided for @transferSendSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a code for your {device} to receive'**
+  String transferSendSubtitle(String device);
+
+  /// No description provided for @importGuidesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Guides'**
+  String get importGuidesTitle;
+
+  /// No description provided for @importGuidesOpenInBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Open guides in browser'**
+  String get importGuidesOpenInBrowser;
+
+  /// No description provided for @importGuideHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring your recipes from anywhere'**
+  String get importGuideHeroTitle;
+
+  /// No description provided for @importGuideHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap any guide below for step-by-step instructions with screenshots.'**
+  String get importGuideHeroSubtitle;
+
+  /// No description provided for @importGuideQuickTipLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick tip'**
+  String get importGuideQuickTipLabel;
+
+  /// No description provided for @importGuideQuickTipText.
+  ///
+  /// In en, this message translates to:
+  /// **'The fastest way? Copy any recipe link and share it to Recipe Spellbook — works from almost any app.'**
+  String get importGuideQuickTipText;
+
+  /// No description provided for @importGuideWebButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Web'**
+  String get importGuideWebButton;
+
+  /// No description provided for @importGuideFollowInBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow along in browser'**
+  String get importGuideFollowInBrowser;
+
+  /// No description provided for @importGuideTagPopular.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get importGuideTagPopular;
+
+  /// No description provided for @importGuideTagEasiest.
+  ///
+  /// In en, this message translates to:
+  /// **'Easiest'**
+  String get importGuideTagEasiest;
+
+  /// No description provided for @importGuideDifficultyEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get importGuideDifficultyEasy;
+
+  /// No description provided for @importGuideDifficultyMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get importGuideDifficultyMedium;
+
+  /// No description provided for @importGuideTime15Sec.
+  ///
+  /// In en, this message translates to:
+  /// **'15 sec'**
+  String get importGuideTime15Sec;
+
+  /// No description provided for @importGuideTime30Sec.
+  ///
+  /// In en, this message translates to:
+  /// **'30 sec'**
+  String get importGuideTime30Sec;
+
+  /// No description provided for @importGuideTime1Min.
+  ///
+  /// In en, this message translates to:
+  /// **'1 min'**
+  String get importGuideTime1Min;
+
+  /// No description provided for @importGuideTime2To5Min.
+  ///
+  /// In en, this message translates to:
+  /// **'2–5 min'**
+  String get importGuideTime2To5Min;
+
+  /// No description provided for @importGuideStepsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} steps'**
+  String importGuideStepsCount(int count);
+
+  /// No description provided for @importGuideCategorySocial.
+  ///
+  /// In en, this message translates to:
+  /// **'Social Media'**
+  String get importGuideCategorySocial;
+
+  /// No description provided for @importGuideCategoryWebsites.
+  ///
+  /// In en, this message translates to:
+  /// **'Websites'**
+  String get importGuideCategoryWebsites;
+
+  /// No description provided for @importGuideCategoryPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos & Files'**
+  String get importGuideCategoryPhotos;
+
+  /// No description provided for @importGuideCategoryOtherApps.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Recipe Apps'**
+  String get importGuideCategoryOtherApps;
+
+  /// No description provided for @importGuideScreenshotNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot needed'**
+  String get importGuideScreenshotNeeded;
+
+  /// No description provided for @importGuideGifNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'GIF needed'**
+  String get importGuideGifNeeded;
+
+  /// No description provided for @importGuideVideoNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Video needed'**
+  String get importGuideVideoNeeded;
+
+  /// No description provided for @importGuideInstagramTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Instagram'**
+  String get importGuideInstagramTitle;
+
+  /// No description provided for @importGuideInstagramSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Reels, posts, and stories'**
+  String get importGuideInstagramSubtitle;
+
+  /// No description provided for @importGuideInstagramStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a recipe post or Reel'**
+  String get importGuideInstagramStep1Title;
+
+  /// No description provided for @importGuideInstagramStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Instagram and find a recipe you want to save. This works with feed posts, Reels, and carousels.'**
+  String get importGuideInstagramStep1Desc;
+
+  /// No description provided for @importGuideInstagramStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the share button'**
+  String get importGuideInstagramStep2Title;
+
+  /// No description provided for @importGuideInstagramStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the paper plane icon (share) below the post.'**
+  String get importGuideInstagramStep2Desc;
+
+  /// No description provided for @importGuideInstagramStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Share to Recipe Spellbook'**
+  String get importGuideInstagramStep3Title;
+
+  /// No description provided for @importGuideInstagramStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll the app row and tap Recipe Spellbook. If you don\'t see it, tap \"More\" and find it in the list.'**
+  String get importGuideInstagramStep3Desc;
+
+  /// No description provided for @importGuideInstagramStep3Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'On Android, you can also copy the link and paste it in the app.'**
+  String get importGuideInstagramStep3Tip;
+
+  /// No description provided for @importGuideInstagramStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the extracted recipe'**
+  String get importGuideInstagramStep4Title;
+
+  /// No description provided for @importGuideInstagramStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Our AI reads the caption, hashtags, and any text in the image to build your recipe. Check ingredients and steps, then save.'**
+  String get importGuideInstagramStep4Desc;
+
+  /// No description provided for @importGuideInstagramStep5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a cookbook & save'**
+  String get importGuideInstagramStep5Title;
+
+  /// No description provided for @importGuideInstagramStep5Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which cookbook to save to, add any tags, and tap Save. Done!'**
+  String get importGuideInstagramStep5Desc;
+
+  /// No description provided for @importGuideTiktokTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'TikTok'**
+  String get importGuideTiktokTitle;
+
+  /// No description provided for @importGuideTiktokSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save recipes from cooking videos'**
+  String get importGuideTiktokSubtitle;
+
+  /// No description provided for @importGuideTiktokStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a recipe TikTok'**
+  String get importGuideTiktokStep1Title;
+
+  /// No description provided for @importGuideTiktokStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Open TikTok and find a cooking video you want to save.'**
+  String get importGuideTiktokStep1Desc;
+
+  /// No description provided for @importGuideTiktokStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the share arrow'**
+  String get importGuideTiktokStep2Title;
+
+  /// No description provided for @importGuideTiktokStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the arrow icon on the right side of the video.'**
+  String get importGuideTiktokStep2Desc;
+
+  /// No description provided for @importGuideTiktokStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose \"Copy link\" or share directly'**
+  String get importGuideTiktokStep3Title;
+
+  /// No description provided for @importGuideTiktokStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Either tap \"Copy link\" and paste in Recipe Spellbook, or find Recipe Spellbook in the share options.'**
+  String get importGuideTiktokStep3Desc;
+
+  /// No description provided for @importGuideTiktokStep3Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'\"Copy link\" is often the most reliable method for TikTok.'**
+  String get importGuideTiktokStep3Tip;
+
+  /// No description provided for @importGuideTiktokStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the link in Recipe Spellbook'**
+  String get importGuideTiktokStep4Title;
+
+  /// No description provided for @importGuideTiktokStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Recipe Spellbook, tap +, choose \"From Website/Link\", and paste the TikTok URL.'**
+  String get importGuideTiktokStep4Desc;
+
+  /// No description provided for @importGuideTiktokStep5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Review & save'**
+  String get importGuideTiktokStep5Title;
+
+  /// No description provided for @importGuideTiktokStep5Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'The AI extracts the recipe from the video description and comments. Review and save to your cookbook.'**
+  String get importGuideTiktokStep5Desc;
+
+  /// No description provided for @importGuideYoutubeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube'**
+  String get importGuideYoutubeTitle;
+
+  /// No description provided for @importGuideYoutubeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from cooking channels & Shorts'**
+  String get importGuideYoutubeSubtitle;
+
+  /// No description provided for @importGuideYoutubeStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a recipe video'**
+  String get importGuideYoutubeStep1Title;
+
+  /// No description provided for @importGuideYoutubeStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Open YouTube and find a cooking video. Works with regular videos, Shorts, and livestream replays.'**
+  String get importGuideYoutubeStep1Desc;
+
+  /// No description provided for @importGuideYoutubeStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Share'**
+  String get importGuideYoutubeStep2Title;
+
+  /// No description provided for @importGuideYoutubeStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the Share button below the video title.'**
+  String get importGuideYoutubeStep2Desc;
+
+  /// No description provided for @importGuideYoutubeStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link or share to app'**
+  String get importGuideYoutubeStep3Title;
+
+  /// No description provided for @importGuideYoutubeStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap \"Copy link\" or find Recipe Spellbook in the share sheet.'**
+  String get importGuideYoutubeStep3Desc;
+
+  /// No description provided for @importGuideYoutubeStep3Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'Many YouTube creators put the full recipe in the video description — this makes extraction more accurate.'**
+  String get importGuideYoutubeStep3Tip;
+
+  /// No description provided for @importGuideYoutubeStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste & import'**
+  String get importGuideYoutubeStep4Title;
+
+  /// No description provided for @importGuideYoutubeStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'In Recipe Spellbook, tap + > \"From Website/Link\" and paste. The AI reads the video description for ingredients and steps.'**
+  String get importGuideYoutubeStep4Desc;
+
+  /// No description provided for @importGuidePinterestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinterest'**
+  String get importGuidePinterestTitle;
+
+  /// No description provided for @importGuidePinterestSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save pinned recipes to your cookbook'**
+  String get importGuidePinterestSubtitle;
+
+  /// No description provided for @importGuidePinterestStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a recipe pin'**
+  String get importGuidePinterestStep1Title;
+
+  /// No description provided for @importGuidePinterestStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a recipe pin to open it. Most pins link to the original recipe website.'**
+  String get importGuidePinterestStep1Desc;
+
+  /// No description provided for @importGuidePinterestStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the source link'**
+  String get importGuidePinterestStep2Title;
+
+  /// No description provided for @importGuidePinterestStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the link at the top or bottom of the pin to visit the original recipe page.'**
+  String get importGuidePinterestStep2Desc;
+
+  /// No description provided for @importGuidePinterestStep2Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'If the pin doesn\'t have a source link, try the share method below instead.'**
+  String get importGuidePinterestStep2Tip;
+
+  /// No description provided for @importGuidePinterestStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the website URL'**
+  String get importGuidePinterestStep3Title;
+
+  /// No description provided for @importGuidePinterestStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Once the recipe website opens in your browser, copy the URL from the address bar.'**
+  String get importGuidePinterestStep3Desc;
+
+  /// No description provided for @importGuidePinterestStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Import in Recipe Spellbook'**
+  String get importGuidePinterestStep4Title;
+
+  /// No description provided for @importGuidePinterestStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + > \"From Website/Link\", paste the URL, and the recipe is extracted automatically.'**
+  String get importGuidePinterestStep4Desc;
+
+  /// No description provided for @importGuideWebsiteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Any Recipe Website'**
+  String get importGuideWebsiteTitle;
+
+  /// No description provided for @importGuideWebsiteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AllRecipes, Food Network, BBC, blogs & more'**
+  String get importGuideWebsiteSubtitle;
+
+  /// No description provided for @importGuideWebsiteStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the recipe page'**
+  String get importGuideWebsiteStep1Title;
+
+  /// No description provided for @importGuideWebsiteStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigate to any recipe on sites like AllRecipes, Food Network, BBC Good Food, Serious Eats, NYT Cooking, or any food blog.'**
+  String get importGuideWebsiteStep1Desc;
+
+  /// No description provided for @importGuideWebsiteStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the URL'**
+  String get importGuideWebsiteStep2Title;
+
+  /// No description provided for @importGuideWebsiteStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the address bar and copy the full URL to the recipe.'**
+  String get importGuideWebsiteStep2Desc;
+
+  /// No description provided for @importGuideWebsiteStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + in Recipe Spellbook'**
+  String get importGuideWebsiteStep3Title;
+
+  /// No description provided for @importGuideWebsiteStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the app and tap the + button to start adding a new recipe.'**
+  String get importGuideWebsiteStep3Desc;
+
+  /// No description provided for @importGuideWebsiteStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose \"From Website/Link\"'**
+  String get importGuideWebsiteStep4Title;
+
+  /// No description provided for @importGuideWebsiteStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the website import option and paste your copied URL.'**
+  String get importGuideWebsiteStep4Desc;
+
+  /// No description provided for @importGuideWebsiteStep5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Review & save'**
+  String get importGuideWebsiteStep5Title;
+
+  /// No description provided for @importGuideWebsiteStep5Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'The recipe is extracted instantly — title, ingredients, steps, cook times, and even the photo. Review and save.'**
+  String get importGuideWebsiteStep5Desc;
+
+  /// No description provided for @importGuideWebsiteStep5Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'Works with 10,000+ recipe sites. If extraction fails, try the \"From Text\" method.'**
+  String get importGuideWebsiteStep5Tip;
+
+  /// No description provided for @importGuidePhotoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo / Camera'**
+  String get importGuidePhotoTitle;
+
+  /// No description provided for @importGuidePhotoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan recipes from books, magazines, or handwritten cards'**
+  String get importGuidePhotoSubtitle;
+
+  /// No description provided for @importGuidePhotoStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph the recipe'**
+  String get importGuidePhotoStep1Title;
+
+  /// No description provided for @importGuidePhotoStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a clear, well-lit photo of a recipe from a cookbook, magazine page, or handwritten recipe card. Make sure all text is readable.'**
+  String get importGuidePhotoStep1Desc;
+
+  /// No description provided for @importGuidePhotoStep1Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'For best results: use good lighting, hold steady, and make sure the entire recipe is in frame. Avoid shadows.'**
+  String get importGuidePhotoStep1Tip;
+
+  /// No description provided for @importGuidePhotoStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + then \"From Photo\"'**
+  String get importGuidePhotoStep2Title;
+
+  /// No description provided for @importGuidePhotoStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Recipe Spellbook, tap +, and choose \"From Photo\". Select the photo from your gallery or take a new one.'**
+  String get importGuidePhotoStep2Desc;
+
+  /// No description provided for @importGuidePhotoStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'AI scans the text'**
+  String get importGuidePhotoStep3Title;
+
+  /// No description provided for @importGuidePhotoStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'OCR technology reads the text in your photo and AI intelligently separates the title, ingredients, and instructions.'**
+  String get importGuidePhotoStep3Desc;
+
+  /// No description provided for @importGuidePhotoStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Review & fix any errors'**
+  String get importGuidePhotoStep4Title;
+
+  /// No description provided for @importGuidePhotoStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the extracted recipe. OCR occasionally misreads characters — \"1/2\" might become \"1l2\". Fix any errors and save.'**
+  String get importGuidePhotoStep4Desc;
+
+  /// No description provided for @importGuidePhotoStep4Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'Handwritten recipes work too, but printed text gives the best results.'**
+  String get importGuidePhotoStep4Tip;
+
+  /// No description provided for @importGuidePdfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF Document'**
+  String get importGuidePdfTitle;
+
+  /// No description provided for @importGuidePdfSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from PDF cookbooks or downloads'**
+  String get importGuidePdfSubtitle;
+
+  /// No description provided for @importGuidePdfStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Have a recipe PDF ready'**
+  String get importGuidePdfStep1Title;
+
+  /// No description provided for @importGuidePdfStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'This works with downloaded recipe PDFs, ebook cookbooks, scanned documents, or PDFs shared via email.'**
+  String get importGuidePdfStep1Desc;
+
+  /// No description provided for @importGuidePdfStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + then \"From PDF\"'**
+  String get importGuidePdfStep2Title;
+
+  /// No description provided for @importGuidePdfStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Recipe Spellbook, tap +, choose \"From PDF\", and select your file.'**
+  String get importGuidePdfStep2Desc;
+
+  /// No description provided for @importGuidePdfStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the recipe page'**
+  String get importGuidePdfStep3Title;
+
+  /// No description provided for @importGuidePdfStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'If the PDF has multiple pages, choose which page contains the recipe you want to import.'**
+  String get importGuidePdfStep3Desc;
+
+  /// No description provided for @importGuidePdfStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Review & save'**
+  String get importGuidePdfStep4Title;
+
+  /// No description provided for @importGuidePdfStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'The recipe is extracted from the PDF. Review the ingredients and steps, then save to your cookbook.'**
+  String get importGuidePdfStep4Desc;
+
+  /// No description provided for @importGuideTextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Text / Paste'**
+  String get importGuideTextTitle;
+
+  /// No description provided for @importGuideTextSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a recipe from messages, email, or notes'**
+  String get importGuideTextSubtitle;
+
+  /// No description provided for @importGuideTextStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy recipe text'**
+  String get importGuideTextStep1Title;
+
+  /// No description provided for @importGuideTextStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the recipe text from a text message, email, notes app, WhatsApp, or anywhere else.'**
+  String get importGuideTextStep1Desc;
+
+  /// No description provided for @importGuideTextStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + then \"From Text\"'**
+  String get importGuideTextStep2Title;
+
+  /// No description provided for @importGuideTextStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Recipe Spellbook, tap +, and choose \"From Text\".'**
+  String get importGuideTextStep2Desc;
+
+  /// No description provided for @importGuideTextStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste your recipe'**
+  String get importGuideTextStep3Title;
+
+  /// No description provided for @importGuideTextStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the copied text into the text field. The AI will automatically separate the title, ingredients, and steps.'**
+  String get importGuideTextStep3Desc;
+
+  /// No description provided for @importGuideTextStep3Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'This works even with unformatted text — the AI is smart about parsing ingredient amounts and step instructions.'**
+  String get importGuideTextStep3Tip;
+
+  /// No description provided for @importGuideTextStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Review & save'**
+  String get importGuideTextStep4Title;
+
+  /// No description provided for @importGuideTextStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the parsed recipe, make any adjustments, and save.'**
+  String get importGuideTextStep4Desc;
+
+  /// No description provided for @importGuidePaprikaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paprika Recipe Manager'**
+  String get importGuidePaprikaTitle;
+
+  /// No description provided for @importGuidePaprikaSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk import your entire Paprika library'**
+  String get importGuidePaprikaSubtitle;
+
+  /// No description provided for @importGuidePaprikaStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Export from Paprika'**
+  String get importGuidePaprikaStep1Title;
+
+  /// No description provided for @importGuidePaprikaStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'In Paprika, go to Settings (gear icon) > Export. Choose \"Export All Recipes\" and save as a .paprikarecipes file.'**
+  String get importGuidePaprikaStep1Desc;
+
+  /// No description provided for @importGuidePaprikaStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Send the file to your device'**
+  String get importGuidePaprikaStep2Title;
+
+  /// No description provided for @importGuidePaprikaStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Email the file to yourself, save to iCloud/Google Drive, or use AirDrop to transfer it.'**
+  String get importGuidePaprikaStep2Desc;
+
+  /// No description provided for @importGuidePaprikaStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Import in Recipe Spellbook'**
+  String get importGuidePaprikaStep3Title;
+
+  /// No description provided for @importGuidePaprikaStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Recipe Spellbook, go to Settings > Data > Import and select the .paprikarecipes file.'**
+  String get importGuidePaprikaStep3Desc;
+
+  /// No description provided for @importGuidePaprikaStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait for import'**
+  String get importGuidePaprikaStep4Title;
+
+  /// No description provided for @importGuidePaprikaStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'All your Paprika recipes are imported with ingredients, steps, notes, photos, and categories preserved.'**
+  String get importGuidePaprikaStep4Desc;
+
+  /// No description provided for @importGuidePaprikaStep4Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'Large libraries (100+ recipes) may take a minute. The app stays responsive while importing.'**
+  String get importGuidePaprikaStep4Tip;
+
+  /// No description provided for @importGuideOtherAppsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Recipe Apps'**
+  String get importGuideOtherAppsTitle;
+
+  /// No description provided for @importGuideOtherAppsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mealime, CopyMeThat, AnyList, Cookmate, etc.'**
+  String get importGuideOtherAppsSubtitle;
+
+  /// No description provided for @importGuideOtherAppsStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Export from your current app'**
+  String get importGuideOtherAppsStep1Title;
+
+  /// No description provided for @importGuideOtherAppsStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Most recipe apps support exporting to JSON, HTML, or text. Check their Settings > Export or Backup section.'**
+  String get importGuideOtherAppsStep1Desc;
+
+  /// No description provided for @importGuideOtherAppsStep1Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'Common formats: JSON (best), HTML, PDF, or plain text. JSON preserves the most data.'**
+  String get importGuideOtherAppsStep1Tip;
+
+  /// No description provided for @importGuideOtherAppsStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Get the file on your device'**
+  String get importGuideOtherAppsStep2Title;
+
+  /// No description provided for @importGuideOtherAppsStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Save or transfer the exported file to your phone using email, cloud storage, or a file transfer method.'**
+  String get importGuideOtherAppsStep2Desc;
+
+  /// No description provided for @importGuideOtherAppsStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Import via Settings'**
+  String get importGuideOtherAppsStep3Title;
+
+  /// No description provided for @importGuideOtherAppsStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'In Recipe Spellbook, go to Settings > Data > Import and select the exported file. The app handles JSON, HTML, and common recipe formats.'**
+  String get importGuideOtherAppsStep3Desc;
+
+  /// No description provided for @importGuideOtherAppsStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your recipes'**
+  String get importGuideOtherAppsStep4Title;
+
+  /// No description provided for @importGuideOtherAppsStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported recipes appear in your default cookbook. You can reorganize them into different cookbooks afterward.'**
+  String get importGuideOtherAppsStep4Desc;
+
+  /// No description provided for @importGuideDeviceTransferTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Device Transfer'**
+  String get importGuideDeviceTransferTitle;
+
+  /// No description provided for @importGuideDeviceTransferSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move recipes between phones without an account'**
+  String get importGuideDeviceTransferSubtitle;
+
+  /// No description provided for @importGuideDeviceTransferStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Transfer on the OLD device'**
+  String get importGuideDeviceTransferStep1Title;
+
+  /// No description provided for @importGuideDeviceTransferStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'On your old phone, open Recipe Spellbook and go to Menu > Device Transfer > Send.'**
+  String get importGuideDeviceTransferStep1Desc;
+
+  /// No description provided for @importGuideDeviceTransferStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Get the transfer code'**
+  String get importGuideDeviceTransferStep2Title;
+
+  /// No description provided for @importGuideDeviceTransferStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'A 6-character code is generated. This code is valid for 15 minutes.'**
+  String get importGuideDeviceTransferStep2Desc;
+
+  /// No description provided for @importGuideDeviceTransferStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter code on NEW device'**
+  String get importGuideDeviceTransferStep3Title;
+
+  /// No description provided for @importGuideDeviceTransferStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'On your new phone, install Recipe Spellbook and go to Menu > Device Transfer > Receive. Enter the code.'**
+  String get importGuideDeviceTransferStep3Desc;
+
+  /// No description provided for @importGuideDeviceTransferStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes transferred!'**
+  String get importGuideDeviceTransferStep4Title;
+
+  /// No description provided for @importGuideDeviceTransferStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'All your recipes, cookbooks, shopping lists, and meal plans are transferred to the new device.'**
+  String get importGuideDeviceTransferStep4Desc;
+
+  /// No description provided for @importGuideDeviceTransferStep4Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'Have a paid account? Just sign in on the new device and everything syncs automatically.'**
+  String get importGuideDeviceTransferStep4Tip;
+
+  /// No description provided for @themeFrost.
+  ///
+  /// In en, this message translates to:
+  /// **'Frost'**
+  String get themeFrost;
+
+  /// No description provided for @themeEmber.
+  ///
+  /// In en, this message translates to:
+  /// **'Ember'**
+  String get themeEmber;
+
+  /// No description provided for @themeSpring.
+  ///
+  /// In en, this message translates to:
+  /// **'Spring'**
+  String get themeSpring;
+
+  /// No description provided for @themeAlchemist.
+  ///
+  /// In en, this message translates to:
+  /// **'Alchemist'**
+  String get themeAlchemist;
+
+  /// No description provided for @rpgNoAchievementsInCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No achievements in this category'**
+  String get rpgNoAchievementsInCategory;
+
+  /// No description provided for @rpgUnlocksItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocks: {item}'**
+  String rpgUnlocksItem(String item);
+
+  /// No description provided for @rpgCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get rpgCategory;
+
+  /// No description provided for @rpgCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get rpgCompleted;
+
+  /// No description provided for @rpgProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get rpgProgress;
+
+  /// No description provided for @rpgDefeatedEnemy.
+  ///
+  /// In en, this message translates to:
+  /// **'Defeated {name}!'**
+  String rpgDefeatedEnemy(String name);
+
+  /// No description provided for @rpgAvatars.
+  ///
+  /// In en, this message translates to:
+  /// **'Avatars'**
+  String get rpgAvatars;
+
+  /// No description provided for @rpgFrames.
+  ///
+  /// In en, this message translates to:
+  /// **'Frames'**
+  String get rpgFrames;
+
+  /// No description provided for @rpgPets.
+  ///
+  /// In en, this message translates to:
+  /// **'Pets'**
+  String get rpgPets;
+
+  /// No description provided for @rpgTitles.
+  ///
+  /// In en, this message translates to:
+  /// **'Titles'**
+  String get rpgTitles;
+
+  /// No description provided for @rpgPurchaseItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase {item}?'**
+  String rpgPurchaseItem(String item);
+
+  /// No description provided for @rpgUnlockedViaAchievement.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked via achievement'**
+  String get rpgUnlockedViaAchievement;
+
+  /// No description provided for @rpgPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get rpgPrice;
+
+  /// No description provided for @rpgNotEnoughGold.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough gold'**
+  String get rpgNotEnoughGold;
+
+  /// No description provided for @rpgNotEnoughGems.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough gems'**
+  String get rpgNotEnoughGems;
+
+  /// No description provided for @rpgPurchased.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchased {item}!'**
+  String rpgPurchased(String item);
+
+  /// No description provided for @rpgOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'Owned'**
+  String get rpgOwned;
+
+  /// No description provided for @rpgDailyQuests.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Quests'**
+  String get rpgDailyQuests;
+
+  /// No description provided for @rpgQuestsCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {total} completed'**
+  String rpgQuestsCompleted(int completed, int total);
+
+  /// No description provided for @rpgWeeklyChallenge.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Challenge'**
+  String get rpgWeeklyChallenge;
+
+  /// No description provided for @rpgQuestsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete quests to earn XP and rewards'**
+  String get rpgQuestsSubtitle;
+
+  /// No description provided for @rpgRecentXp.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent XP'**
+  String get rpgRecentXp;
+
+  /// No description provided for @rpgNoAchievementsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No achievements yet'**
+  String get rpgNoAchievementsYet;
+
+  /// No description provided for @rpgLv.
+  ///
+  /// In en, this message translates to:
+  /// **'Lv.{level}'**
+  String rpgLv(int level);
+
+  /// No description provided for @rpgClassBonus.
+  ///
+  /// In en, this message translates to:
+  /// **'{className} Bonus'**
+  String rpgClassBonus(String className);
+
+  /// No description provided for @rpgLevelUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Level Up!'**
+  String get rpgLevelUp;
+
+  /// No description provided for @rpgUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked!'**
+  String get rpgUnlocked;
+
+  /// No description provided for @rpgAchievementUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievement Unlocked!'**
+  String get rpgAchievementUnlocked;
+
+  /// No description provided for @mealPlanAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Meal Plan'**
+  String get mealPlanAddTitle;
+
+  /// No description provided for @mealPlanMealLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal'**
+  String get mealPlanMealLabel;
+
+  /// No description provided for @mealPlanAdding.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding...'**
+  String get mealPlanAdding;
+
+  /// No description provided for @mealPlanDateFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'{weekday}, {month} {day}'**
+  String mealPlanDateFormat(String weekday, String month, int day);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

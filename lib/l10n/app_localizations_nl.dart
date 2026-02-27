@@ -5175,340 +5175,340 @@ class AppLocalizationsNl extends AppLocalizations {
   String get createRecipeManually => 'Of maak een recept handmatig';
 
   @override
-  String get transferYourRecipes => 'Transfer your recipes';
+  String get transferYourRecipes => 'Je recepten overzetten';
 
   @override
-  String get transferUpgradeBanner => 'Want automatic sync? Upgrade to Premium for cloud sync across all your devices.';
+  String get transferUpgradeBanner => 'Automatische synchronisatie gewenst? Upgrade naar Premium voor cloud-sync op al je apparaten.';
 
   @override
-  String get transferCodeLength => 'Code must be 6 characters';
+  String get transferCodeLength => 'Code moet 6 tekens zijn';
 
   @override
-  String get transferItemRecipes => 'All recipes';
+  String get transferItemRecipes => 'Alle recepten';
 
   @override
-  String get transferItemCookbooks => 'Cookbooks & categories';
+  String get transferItemCookbooks => 'Kookboeken & categorieën';
 
   @override
-  String get transferItemMealPlans => 'Meal plans';
+  String get transferItemMealPlans => 'Maaltijdplannen';
 
   @override
-  String get transferItemShoppingLists => 'Shopping lists';
+  String get transferItemShoppingLists => 'Boodschappenlijsten';
 
   @override
-  String get transferItemSettings => 'App settings';
+  String get transferItemSettings => 'App-instellingen';
 
   @override
-  String get transferItemAccount => 'Account sign-in (if sender is logged in)';
+  String get transferItemAccount => 'Accountaanmelding (als afzender is ingelogd)';
 
   @override
-  String get codeCopied => 'Code copied!';
+  String get codeCopied => 'Code gekopieerd!';
 
   @override
-  String get transferTitle => 'Transfer Data';
+  String get transferTitle => 'Gegevens overzetten';
 
   @override
-  String get transferReceiveSubtitle => 'Enter a code or scan QR from the sending device';
+  String get transferReceiveSubtitle => 'Voer een code in of scan de QR van het verzendende apparaat';
 
   @override
-  String get transferPreparing => 'Preparing your data...';
+  String get transferPreparing => 'Je gegevens worden voorbereid...';
 
   @override
-  String get transferFailed => 'Transfer failed';
+  String get transferFailed => 'Overdracht mislukt';
 
   @override
-  String get transferScanDesc => 'Scan this QR on your other device, or enter the code below.';
+  String get transferScanDesc => 'Scan deze QR op je andere apparaat, of voer de code hieronder in.';
 
   @override
-  String get transferReady => 'Ready to transfer';
+  String get transferReady => 'Klaar voor overdracht';
 
   @override
-  String get transferCodeExpires => 'This code expires in 15 minutes';
+  String get transferCodeExpires => 'Deze code verloopt over 15 minuten';
 
   @override
-  String get transferComplete => 'Transfer complete!';
+  String get transferComplete => 'Overdracht voltooid!';
 
   @override
-  String get transferAccountSynced => 'Account signed in from sender';
+  String get transferAccountSynced => 'Account ingelogd van afzender';
 
   @override
-  String get transferScanQr => 'Scan QR Code';
+  String get transferScanQr => 'QR-code scannen';
 
   @override
-  String get transferScanQrDesc => 'Point your camera at the QR on the other device';
+  String get transferScanQrDesc => 'Richt je camera op de QR op het andere apparaat';
 
   @override
-  String get transferEnterCode => 'Enter transfer code';
+  String get transferEnterCode => 'Overdrachtscode invoeren';
 
   @override
-  String get transferWhatMoves => 'What gets transferred:';
+  String get transferWhatMoves => 'Wat wordt overgezet:';
 
   @override
-  String get transferMergeNote => 'Existing data on this device will be merged. Duplicates are skipped.';
+  String get transferMergeNote => 'Bestaande gegevens op dit apparaat worden samengevoegd. Duplicaten worden overgeslagen.';
 
   @override
-  String get transferPointCamera => 'Point at the QR code on the sending device';
+  String get transferPointCamera => 'Richt op de QR-code van het verzendende apparaat';
 
   @override
   String get labelPrepMin => 'Prep (min)';
 
   @override
-  String get labelCookMin => 'Cook (min)';
+  String get labelCookMin => 'Koken (min)';
 
   @override
-  String get labelTotalCal => 'Total cal';
+  String get labelTotalCal => 'Totaal cal';
 
   @override
-  String get labelCalPerServing => 'Cal/serving';
+  String get labelCalPerServing => 'Cal/portie';
 
   @override
-  String get tooltipViewSize => 'View size';
+  String get tooltipViewSize => 'Weergavegrootte';
 
   @override
-  String get pantryClearTitle => 'Clear pantry?';
+  String get pantryClearTitle => 'Voorraadkast legen?';
 
   @override
-  String get pantryAddHint => 'Add item to pantry...';
+  String get pantryAddHint => 'Item toevoegen aan voorraadkast...';
 
   @override
-  String get pantryAddStaples => 'Add all staples';
+  String get pantryAddStaples => 'Alle basisproducten toevoegen';
 
   @override
-  String get pantrySearchHint => 'Search pantry...';
+  String get pantrySearchHint => 'Voorraadkast doorzoeken...';
 
   @override
-  String get settingsRecipesShopping => 'Recipes & Shopping';
+  String get settingsRecipesShopping => 'Recepten & Boodschappen';
 
   @override
-  String get settingsAdvanced => 'Advanced Settings';
+  String get settingsAdvanced => 'Geavanceerde instellingen';
 
   @override
-  String get settingsAdvancedSubtitle => 'Tags, courses, categories & more';
+  String get settingsAdvancedSubtitle => 'Labels, gangen, categorieën & meer';
 
   @override
-  String get settingsDeleteData => 'Delete Data';
+  String get settingsDeleteData => 'Gegevens verwijderen';
 
   @override
-  String get settingsDeleteDataSubtitle => 'Erase app or cloud data';
+  String get settingsDeleteDataSubtitle => 'App- of cloudgegevens wissen';
 
   @override
-  String get settingsUpgradeSubtitle => 'Cloud sync, photos & more';
+  String get settingsUpgradeSubtitle => 'Cloud-sync, foto\'s & meer';
 
   @override
-  String get settingsTextSizeSubtitle => 'Adjust text size across the entire app';
+  String get settingsTextSizeSubtitle => 'Tekstgrootte in de hele app aanpassen';
 
   @override
-  String get settingsGoogleOrApple => 'Google or Apple';
+  String get settingsGoogleOrApple => 'Google of Apple';
 
   @override
-  String get alwaysVisible => 'Always visible';
+  String get alwaysVisible => 'Altijd zichtbaar';
 
   @override
-  String get chartNumbers => 'Numbers';
+  String get chartNumbers => 'Getallen';
 
   @override
   String get chartDonut => 'Donut';
 
   @override
-  String get chartBars => 'Bars';
+  String get chartBars => 'Staafdiagram';
 
   @override
   String get unitKcal => 'kcal';
 
   @override
-  String get nutritionCustomScale => 'Custom Scale';
+  String get nutritionCustomScale => 'Aangepaste schaal';
 
   @override
-  String get nutritionScaleLabel => 'Scale multiplier';
+  String get nutritionScaleLabel => 'Schaalmultiplicator';
 
   @override
-  String get nutritionScaleHint => 'e.g. 0.5, 1.5, 3.0';
+  String get nutritionScaleHint => 'bijv. 0,5, 1,5, 3,0';
 
   @override
-  String get nutritionSet => 'Set';
+  String get nutritionSet => 'Instellen';
 
   @override
-  String get nutritionApplyRecalculate => 'Apply & Recalculate';
+  String get nutritionApplyRecalculate => 'Toepassen & Herberekenen';
 
   @override
   String get calAbbrev => 'Cal';
 
   @override
-  String get nutritionServingSizeHint => 'e.g., 1 cup, 100g';
+  String get nutritionServingSizeHint => 'bijv. 1 kopje, 100g';
 
   @override
-  String get shoppingExportList => 'Export list';
+  String get shoppingExportList => 'Lijst exporteren';
 
   @override
-  String get shoppingExportListSubtitle => 'Share as a text file or backup';
+  String get shoppingExportListSubtitle => 'Delen als tekstbestand of back-up';
 
   @override
-  String get shoppingImportList => 'Import list';
+  String get shoppingImportList => 'Lijst importeren';
 
   @override
-  String get shoppingImportListSubtitle => 'Add items from a file, photo, or text';
+  String get shoppingImportListSubtitle => 'Items toevoegen vanuit bestand, foto of tekst';
 
   @override
-  String get shoppingScanBarcodeSubtitle => 'Look up a product to add';
+  String get shoppingScanBarcodeSubtitle => 'Een product opzoeken om toe te voegen';
 
   @override
-  String get exportBackupFile => 'Backup file';
+  String get exportBackupFile => 'Back-upbestand';
 
   @override
-  String get exportBackupFileSubtitle => 'For transferring to another device or app';
+  String get exportBackupFileSubtitle => 'Voor overdracht naar een ander apparaat of app';
 
   @override
-  String get exportFormattedList => 'Formatted list';
+  String get exportFormattedList => 'Opgemaakte lijst';
 
   @override
-  String get exportFormattedListSubtitle => 'With checkboxes — great for notes apps';
+  String get exportFormattedListSubtitle => 'Met selectievakjes — ideaal voor notitie-apps';
 
   @override
-  String get exportPlainText => 'Plain text';
+  String get exportPlainText => 'Platte tekst';
 
   @override
-  String get exportPlainTextSubtitle => 'Simple list — paste anywhere';
+  String get exportPlainTextSubtitle => 'Eenvoudige lijst — overal plakken';
 
   @override
-  String get importFromBackupFile => 'From backup file';
+  String get importFromBackupFile => 'Van back-upbestand';
 
   @override
-  String get importFromBackupSubtitle => 'Import a Recipe Spellbook backup';
+  String get importFromBackupSubtitle => 'Een Recipe Spellbook-back-up importeren';
 
   @override
-  String get importFromTextShoppingSubtitle => 'Paste or type a list of items';
+  String get importFromTextShoppingSubtitle => 'Plak of typ een lijst met items';
 
   @override
-  String get importFromPhotoOcrSubtitle => 'OCR scan a handwritten or printed list';
+  String get importFromPhotoOcrSubtitle => 'OCR-scan van een handgeschreven of gedrukte lijst';
 
   @override
-  String get importFromPhotoGallerySubtitle => 'Take a photo or pick from gallery';
+  String get importFromPhotoGallerySubtitle => 'Maak een foto of kies uit galerij';
 
   @override
-  String get shoppingSendToStore => 'Send to store';
+  String get shoppingSendToStore => 'Naar winkel sturen';
 
   @override
-  String get shoppingSendToCart => 'Send to cart';
+  String get shoppingSendToCart => 'Naar winkelwagen sturen';
 
   @override
-  String get shoppingCopyToClipboard => 'Copy list to clipboard';
+  String get shoppingCopyToClipboard => 'Lijst kopiëren naar klembord';
 
   @override
-  String get shoppingGoToCart => 'Go to cart';
+  String get shoppingGoToCart => 'Naar winkelwagen';
 
   @override
-  String get shoppingAddItems => 'Add items';
+  String get shoppingAddItems => 'Items toevoegen';
 
   @override
-  String get shoppingAddItemHintLong => 'e.g. 2 cups flour, chicken breast...';
+  String get shoppingAddItemHintLong => 'bijv. 2 kopjes bloem, kipfilet...';
 
   @override
-  String get importReviewItems => 'Review items';
+  String get importReviewItems => 'Items bekijken';
 
   @override
-  String get importNoItemsDetected => 'No items detected';
+  String get importNoItemsDetected => 'Geen items gedetecteerd';
 
   @override
-  String get mealPlanDate => 'Date';
+  String get mealPlanDate => 'Datum';
 
   @override
-  String get mealPlanThisWeekend => 'This Weekend';
+  String get mealPlanThisWeekend => 'Dit weekend';
 
   @override
-  String get menuRpgProfile => 'RPG Profile';
+  String get menuRpgProfile => 'RPG-profiel';
 
   @override
-  String get menuTools => 'Tools';
+  String get menuTools => 'Hulpmiddelen';
 
   @override
-  String get menuSupport => 'Support';
+  String get menuSupport => 'Ondersteuning';
 
   @override
-  String get menuHowCanWeHelp => 'How can we help?';
+  String get menuHowCanWeHelp => 'Hoe kunnen we helpen?';
 
   @override
-  String get menuGetInTouch => 'Get in touch or browse our guides.';
+  String get menuGetInTouch => 'Neem contact op of bekijk onze gidsen.';
 
   @override
-  String get menuVisitWebsite => 'Visit our Website';
+  String get menuVisitWebsite => 'Bezoek onze website';
 
   @override
-  String get feedbackTitleLabel => 'Title';
+  String get feedbackTitleLabel => 'Titel';
 
   @override
   String get feedbackDetailsLabel => 'Details';
 
   @override
-  String get feedbackDescriptionLabel => 'Description';
+  String get feedbackDescriptionLabel => 'Beschrijving';
 
   @override
-  String get menuSigningIn => 'Signing in…';
+  String get menuSigningIn => 'Bezig met inloggen…';
 
   @override
-  String get menuSignInSync => 'Sign in to sync & back up';
+  String get menuSignInSync => 'Inloggen om te synchroniseren & back-uppen';
 
   @override
-  String get tagsSave => 'Save Tags';
+  String get tagsSave => 'Labels opslaan';
 
   @override
-  String get recipeFieldCategories => 'Categories';
+  String get recipeFieldCategories => 'Categorieën';
 
   @override
-  String get selectCategories => 'Select categories';
+  String get selectCategories => 'Categorieën selecteren';
 
   @override
-  String get searchOrCreateNew => 'Search or create new...';
+  String get searchOrCreateNew => 'Zoeken of nieuwe aanmaken...';
 
   @override
-  String get noMatchesFound => 'No matches found';
+  String get noMatchesFound => 'Geen overeenkomsten gevonden';
 
   @override
-  String get taxonomyAddCategoryNew => 'Add as new category';
+  String get taxonomyAddCategoryNew => 'Toevoegen als nieuwe categorie';
 
   @override
-  String get ingredientSubstitutionsTitle => 'Ingredient Substitutions';
+  String get ingredientSubstitutionsTitle => 'Ingrediëntvervangers';
 
   @override
-  String get ingredientSubstitutionsSearch => 'Search for an ingredient...';
+  String get ingredientSubstitutionsSearch => 'Zoek een ingrediënt...';
 
   @override
-  String get ingredientSubstitutionsSearchAll => 'Search all substitutions';
+  String get ingredientSubstitutionsSearchAll => 'Alle vervangers doorzoeken';
 
   @override
-  String get ingredientName => 'Ingredient Name';
+  String get ingredientName => 'Ingrediëntnaam';
 
   @override
-  String get ingredientNameHint => 'e.g. turmeric, tahini, miso';
+  String get ingredientNameHint => 'bijv. kurkuma, tahini, miso';
 
   @override
-  String get ingredientBulkHint => 'Enter one ingredient per line:\n\n2 cups flour\n1 tsp salt\n3 eggs';
+  String get ingredientBulkHint => 'Voer één ingrediënt per regel in:\n\n2 kopjes bloem\n1 tl zout\n3 eieren';
 
   @override
-  String get viewPlans => 'View Plans';
+  String get viewPlans => 'Plannen bekijken';
 
   @override
-  String get renewsLabel => 'Renews';
+  String get renewsLabel => 'Verlengt op';
 
   @override
-  String get upgradeToProUnlock => 'Upgrade to Pro to unlock';
+  String get upgradeToProUnlock => 'Upgrade naar Pro om te ontgrendelen';
 
   @override
-  String get rpgFightAgain => 'Fight Again';
+  String get rpgFightAgain => 'Opnieuw vechten';
 
   @override
-  String get rpgAwesome => 'Awesome!';
+  String get rpgAwesome => 'Geweldig!';
 
   @override
-  String get rpgPurchase => 'Purchase';
+  String get rpgPurchase => 'Kopen';
 
   @override
-  String get rpgEquipped => 'Equipped';
+  String get rpgEquipped => 'Uitgerust';
 
   @override
-  String get rpgClaim => 'Claim';
+  String get rpgClaim => 'Claimen';
 
   @override
-  String get rpgGuild => 'Guild';
+  String get rpgGuild => 'Gilde';
 
   @override
   String get rpgDmg => 'DMG';
@@ -5517,119 +5517,1793 @@ class AppLocalizationsNl extends AppLocalizations {
   String get rpgMana => 'Mana';
 
   @override
-  String get rpgLevel => 'Level';
+  String get rpgLevel => 'Niveau';
 
   @override
-  String get rpgTotalXp => 'Total XP';
+  String get rpgTotalXp => 'Totaal XP';
 
   @override
-  String get rpgLoginStreak => 'Login Streak';
+  String get rpgLoginStreak => 'Inlogreeks';
 
   @override
-  String get rpgGoldEarned => 'Gold Earned';
+  String get rpgGoldEarned => 'Verdiend goud';
 
   @override
-  String get rpgGemsEarned => 'Gems Earned';
+  String get rpgGemsEarned => 'Verdiende edelstenen';
 
   @override
-  String get rpgNextLevel => 'Next Level';
+  String get rpgNextLevel => 'Volgend niveau';
 
   @override
-  String get rpgNotifyMe => 'Notify Me';
+  String get rpgNotifyMe => 'Meld mij';
 
   @override
-  String get rpgGold => 'Gold';
+  String get rpgGold => 'Goud';
 
   @override
-  String get rpgGems => 'Gems';
+  String get rpgGems => 'Edelstenen';
 
   @override
-  String get rpgLottery => 'Gem Lottery';
+  String get rpgLottery => 'Edelsteen-loterij';
 
   @override
-  String get rpgClasses => 'Classes';
+  String get rpgClasses => 'Klassen';
 
   @override
-  String get rpgDisplayName => 'Display Name';
+  String get rpgDisplayName => 'Weergavenaam';
 
   @override
-  String get rpgResetProgress => 'Reset Progress';
+  String get rpgResetProgress => 'Voortgang resetten';
 
   @override
-  String get rpgResetProgressSubtitle => 'Start over from level 1';
+  String get rpgResetProgressSubtitle => 'Opnieuw beginnen vanaf niveau 1';
 
   @override
-  String get rpgRecipeRarity => 'Recipe Rarity';
+  String get rpgRecipeRarity => 'Receptzeldzaamheid';
 
   @override
-  String get settingsNoMatchingSettings => 'No matching settings';
+  String get settingsNoMatchingSettings => 'Geen overeenkomende instellingen';
 
   @override
-  String get settingsSearchHint => 'Search settings...';
+  String get settingsSearchHint => 'Instellingen zoeken...';
 
   @override
-  String get textSizeSmall => 'Small';
+  String get textSizeSmall => 'Klein';
 
   @override
-  String get textSizeDefault => 'Default';
+  String get textSizeDefault => 'Standaard';
 
   @override
-  String get textSizeMedium => 'Medium';
+  String get textSizeMedium => 'Gemiddeld';
 
   @override
-  String get textSizeLarge => 'Large';
+  String get textSizeLarge => 'Groot';
 
   @override
-  String get textSizeExtraLarge => 'Extra Large';
+  String get textSizeExtraLarge => 'Extra groot';
 
   @override
-  String get resetDataClearedDesc => 'All data has been cleared successfully.\n\nWould you like to import the 10 default starter recipes?';
+  String get resetDataClearedDesc => 'Alle gegevens zijn succesvol gewist.\n\nWil je de 10 standaard startersrecepten importeren?';
 
   @override
-  String get importingDefaultRecipes => 'Importing default recipes...';
+  String get importingDefaultRecipes => 'Standaardrecepten importeren...';
 
   @override
-  String get checking => 'Checking...';
+  String get checking => 'Controleren...';
 
   @override
-  String get connectedTapToManage => 'Connected • Tap to manage';
+  String get connectedTapToManage => 'Verbonden • Tik om te beheren';
 
   @override
-  String get notConnected => 'Not connected';
+  String get notConnected => 'Niet verbonden';
 
   @override
-  String get tapToSignIn => 'Tap to sign in';
+  String get tapToSignIn => 'Tik om in te loggen';
 
   @override
-  String get noneSelected => 'None Selected';
+  String get noneSelected => 'Geen selectie';
 
   @override
-  String get partialBackup => 'Partial Backup';
+  String get partialBackup => 'Gedeeltelijke back-up';
 
   @override
-  String get settingsShopping => 'Shopping & Planning';
+  String get settingsShopping => 'Boodschappen & Planning';
 
   @override
-  String get settingsManage => 'Manage';
+  String get settingsManage => 'Beheren';
 
   @override
-  String get manageTags => 'Manage Tags';
+  String get manageTags => 'Labels beheren';
 
   @override
   String tagsApplied(int count) {
-    return '$count tags applied';
+    return '$count labels toegepast';
   }
 
   @override
   String tagsEditTitle(String name) {
-    return 'Edit \"$name\"';
+    return '\"$name\" bewerken';
   }
 
   @override
-  String get tagsEditComingSoon => 'Tag editing coming soon!';
+  String get tagsEditComingSoon => 'Labels bewerken binnenkort beschikbaar!';
 
   @override
   String tagsRecipeCount(int count) {
-    return '$count recipes';
+    return '$count recepten';
+  }
+
+  @override
+  String get communityMyPublications => 'Mijn publicaties';
+
+  @override
+  String get communitySearchCookbooks => 'Kookboeken zoeken...';
+
+  @override
+  String get communitySortRecent => 'Recent';
+
+  @override
+  String get communitySortPopular => 'Populair';
+
+  @override
+  String get communitySortMostDownloaded => 'Meest gedownload';
+
+  @override
+  String communityNoResultsFor(String query) {
+    return 'Geen resultaten voor \"$query\"';
+  }
+
+  @override
+  String get communityNoCookbooksYet => 'Nog geen kookboeken';
+
+  @override
+  String get communityClearSearch => 'Zoekopdracht wissen';
+
+  @override
+  String get communityPublish => 'Publiceren';
+
+  @override
+  String communityByPublisher(String name) {
+    return 'door $name';
+  }
+
+  @override
+  String communityRecipeCount(int count) {
+    return '$count recepten';
+  }
+
+  @override
+  String get communityPublishCookbook => 'Kookboek publiceren';
+
+  @override
+  String get communitySignInToPublish => 'Inloggen om te publiceren';
+
+  @override
+  String get communitySignInToPublishMessage => 'Je hebt een account nodig om kookboeken te delen met de community.';
+
+  @override
+  String get communityGoToSettings => 'Naar instellingen';
+
+  @override
+  String get communityNoCookbooksToPublish => 'Geen kookboeken om te publiceren';
+
+  @override
+  String get communityPublishInfo => 'Kookboeken moeten minimaal 10 recepten bevatten om te publiceren. Je recepten worden gedeeld als momentopname — wijzigingen worden niet gesynchroniseerd.';
+
+  @override
+  String get communitySelectCookbook => 'Selecteer een kookboek om te publiceren';
+
+  @override
+  String communityNeedMinRecipes(int count) {
+    return 'Minimaal 10 recepten nodig (heeft $count)';
+  }
+
+  @override
+  String get communityPublishConfirmTitle => 'Publiceren naar Community?';
+
+  @override
+  String communityPublishConfirmMessage(String name, int count) {
+    return '\"$name\" ($count recepten) wordt openbaar gedeeld. Iedereen kan het bekijken en downloaden.\n\nJe kunt het op elk moment ongedaan maken.';
+  }
+
+  @override
+  String communityPublishSuccess(String name) {
+    return '\"$name\" gepubliceerd naar de community!';
+  }
+
+  @override
+  String get communityPublishFailed => 'Publiceren mislukt';
+
+  @override
+  String communityRecipeCountNeedMore(int count) {
+    return '$count recepten (10+ nodig)';
+  }
+
+  @override
+  String get communityNoPublicationsYet => 'Nog geen publicaties';
+
+  @override
+  String get communityNoPublicationsMessage => 'Publiceer een kookboek om het te delen met de community.';
+
+  @override
+  String get communityUnpublish => 'Publicatie ongedaan maken';
+
+  @override
+  String get communityUnpublishConfirmTitle => 'Publicatie ongedaan maken?';
+
+  @override
+  String communityUnpublishConfirmMessage(String title) {
+    return '\"$title\" verwijderen uit de community? Mensen die het al gedownload hebben behouden hun kopie.';
+  }
+
+  @override
+  String communityUnpublishSuccess(String title) {
+    return '\"$title\" publicatie ongedaan gemaakt';
+  }
+
+  @override
+  String get communityUnpublishFailed => 'Publicatie ongedaan maken mislukt';
+
+  @override
+  String get communityRemovedByModeration => 'Verwijderd door moderatie';
+
+  @override
+  String communityPublicationStats(int recipeCount, int downloadCount, String timeAgo) {
+    return '$recipeCount recepten · $downloadCount downloads · $timeAgo';
+  }
+
+  @override
+  String get communityPublicationNotFound => 'Publicatie niet gevonden';
+
+  @override
+  String get communityReport => 'Rapporteren';
+
+  @override
+  String get communityReportTitle => 'Dit kookboek rapporteren';
+
+  @override
+  String get communityReportSpam => 'Spam of lage kwaliteit';
+
+  @override
+  String get communityReportInappropriate => 'Ongepaste inhoud';
+
+  @override
+  String get communityReportStolen => 'Gestolen / gekopieerde recepten';
+
+  @override
+  String get communityReportOther => 'Anders';
+
+  @override
+  String get communityReportSuccess => 'Melding ingediend. Bedankt!';
+
+  @override
+  String get communitySignInToReport => 'Inloggen om inhoud te rapporteren';
+
+  @override
+  String get communityDownloadFailed => 'Downloaden mislukt';
+
+  @override
+  String communityDownloadSuccess(String title, int count) {
+    return '\"$title\" gedownload — $count recepten toegevoegd!';
+  }
+
+  @override
+  String communityDownloadFailedError(String error) {
+    return 'Downloaden mislukt: $error';
+  }
+
+  @override
+  String communityDownloadCount(int count) {
+    return '$count downloads';
+  }
+
+  @override
+  String get communityDownloading => 'Downloaden...';
+
+  @override
+  String get communityDownloadToMyCookbooks => 'Downloaden naar Mijn kookboeken';
+
+  @override
+  String communityPrepTime(int minutes) {
+    return '${minutes}m prep';
+  }
+
+  @override
+  String communityCookTime(int minutes) {
+    return '${minutes}m koken';
+  }
+
+  @override
+  String communityServingsCount(int count) {
+    return '$count porties';
+  }
+
+  @override
+  String communityIngredientCount(int count) {
+    return '$count ingrediënten';
+  }
+
+  @override
+  String get deleteRecipesTrashMessage => 'Recepten worden naar de prullenbak verplaatst. Je kunt ze later herstellen.';
+
+  @override
+  String get hintTitleExample => 'bijv. Oma\'s appeltaart';
+
+  @override
+  String get hintDescription => 'Een korte beschrijving van het recept';
+
+  @override
+  String get hintServingsExample => 'bijv. 4';
+
+  @override
+  String get prepMin => 'Prep (min)';
+
+  @override
+  String get cookMin => 'Koken (min)';
+
+  @override
+  String get hintNotes => 'Tips, variaties, bewaarinstructies...';
+
+  @override
+  String get pinchToZoomCropped => 'Knijp om te zoomen · Bijgesneden gebied wordt opgeslagen';
+
+  @override
+  String get pinchToZoomOrUseAsIs => 'Knijp om te zoomen en bij te snijden · Of gebruik zoals het is';
+
+  @override
+  String get savingLabel => 'Opslaan...';
+
+  @override
+  String get emptyHeader => '(lege koptekst)';
+
+  @override
+  String get emptyIngredient => '(leeg ingrediënt)';
+
+  @override
+  String get recipeUpdated => 'Recept bijgewerkt!';
+
+  @override
+  String get nutritionLessInfo => 'Minder info';
+
+  @override
+  String get nutritionMoreInfo => 'Meer info';
+
+  @override
+  String scaleOriginal(String servings) {
+    return 'Origineel: $servings';
+  }
+
+  @override
+  String get scaleAdjustQuantities => 'Ingrediënthoeveelheden aanpassen';
+
+  @override
+  String get scaleOriginalLabel => '1x (Origineel)';
+
+  @override
+  String get stepWillBeRemoved => 'Deze stap wordt permanent verwijderd.';
+
+  @override
+  String stepsWillBeRemoved(int count) {
+    return 'Deze $count stappen worden permanent verwijderd.';
+  }
+
+  @override
+  String stepCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stappen',
+      one: '1 stap',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get instructionsNoSteps => 'Nog geen instructies';
+
+  @override
+  String get instructionsAddStepsGuide => 'Voeg stappen toe om door het recept te leiden';
+
+  @override
+  String get pinchToZoomPreview => 'Knijp om te zoomen · Zo ziet je foto eruit';
+
+  @override
+  String ingredientCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ingrediënten',
+      one: '1 ingrediënt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ingredientPerLineHint => 'Voer één ingrediënt per regel in:\n\n2 kopjes bloem\n1 tl zout\n3 eieren';
+
+  @override
+  String get ingredientTip => 'Tip: Voer één ingrediënt per regel in. Druk na elk ingrediënt op Enter.';
+
+  @override
+  String get cookbookEditSubtitle => 'Hernoemen, omslagfoto';
+
+  @override
+  String get shareCookbookSubtitle => 'Link, familie of community';
+
+  @override
+  String shareNamedCookbook(String name) {
+    return '\"$name\" delen';
+  }
+
+  @override
+  String get oneTimeLink => 'Eenmalige link';
+
+  @override
+  String get oneTimeLinkDescription => 'Gratis • 24 uur geldig • Iedereen kan downloaden';
+
+  @override
+  String get familyShare => 'Gezinsdeling';
+
+  @override
+  String get familyShareDescription => 'Realtime synchronisatie met gezinsleden';
+
+  @override
+  String get postToCommunity => 'Publiceren naar Community';
+
+  @override
+  String get postToCommunityDescription => 'Publiceer zodat iedereen het kan ontdekken en downloaden';
+
+  @override
+  String get signInToShare => 'Inloggen om deellinks te maken';
+
+  @override
+  String get generatingLink => 'Link wordt gegenereerd...';
+
+  @override
+  String get failedToCreateLink => 'Link aanmaken mislukt';
+
+  @override
+  String get linkCreated => 'Link aangemaakt!';
+
+  @override
+  String get expiresIn24Hours => 'Verloopt over 24 uur';
+
+  @override
+  String get linkCopied => 'Link gekopieerd!';
+
+  @override
+  String unlockFeature(String feature) {
+    return '$feature ontgrendelen';
+  }
+
+  @override
+  String get notNow => 'Niet nu';
+
+  @override
+  String get upgradeButton => 'Upgraden';
+
+  @override
+  String publishMinRecipes(int count) {
+    return 'Minimaal 10 recepten nodig (heeft $count)';
+  }
+
+  @override
+  String get publishConfirmTitle => 'Publiceren naar Community?';
+
+  @override
+  String publishConfirmMessage(String name, int count) {
+    return '\"$name\" ($count recepten) wordt openbaar zichtbaar. Iedereen kan het bekijken en downloaden.\n\nJe kunt het altijd verwijderen via Community → Mijn publicaties.';
+  }
+
+  @override
+  String get publishButton => 'Publiceren';
+
+  @override
+  String get selectCourse => 'Gang selecteren';
+
+  @override
+  String get selectCategory => 'Categorie selecteren';
+
+  @override
+  String get taxonomyNone => 'Geen';
+
+  @override
+  String createTaxonomy(String name) {
+    return '\"$name\" aanmaken';
+  }
+
+  @override
+  String get addAsNewCourse => 'Toevoegen als nieuwe gang';
+
+  @override
+  String get addAsNewCategory => 'Toevoegen als nieuwe categorie';
+
+  @override
+  String doneWithCount(int count) {
+    return 'Klaar ($count)';
+  }
+
+  @override
+  String get quickAccessEmptyAll => 'Nog geen snelle-toegangsrecepten';
+
+  @override
+  String get quickAccessEmptyMealPlan => 'Geen maaltijden gepland';
+
+  @override
+  String get quickAccessEmptyPinned => 'Geen vastgezette recepten';
+
+  @override
+  String get quickAccessEmptyRecent => 'Geen recente recepten';
+
+  @override
+  String get importingRecipe => 'Recept importeren…';
+
+  @override
+  String errorWithMessage(String message) {
+    return 'Fout: $message';
+  }
+
+  @override
+  String get minutesPrepSuffix => 'm prep';
+
+  @override
+  String get minutesCookSuffix => 'm koken';
+
+  @override
+  String get couldNotOpenBrowser => 'Kan browser niet openen';
+
+  @override
+  String couldNotOpenUrl(String url) {
+    return 'Kan $url niet openen';
+  }
+
+  @override
+  String get discord => 'Discord';
+
+  @override
+  String get discordLinkAccount => 'Discord-account koppelen';
+
+  @override
+  String get discordLinkSubtitle => 'Koppel je Discord voor communityfuncties';
+
+  @override
+  String get discordSignInFirst => 'Log eerst in om Discord te koppelen';
+
+  @override
+  String get discordUnlink => 'Discord ontkoppelen';
+
+  @override
+  String get discordUnlinkFailed => 'Discord ontkoppelen mislukt';
+
+  @override
+  String get discordUnlinkSubtitle => 'Je Discord-verbinding verwijderen';
+
+  @override
+  String get discordUnlinked => 'Discord ontkoppeld';
+
+  @override
+  String get familyCodeCopied => 'Uitnodigingscode gekopieerd!';
+
+  @override
+  String get familyCopyLink => 'Link kopiëren';
+
+  @override
+  String get familyCreate => 'Gezin aanmaken';
+
+  @override
+  String get familyCreateFailed => 'Gezin aanmaken mislukt';
+
+  @override
+  String get familyCreateTitle => 'Gezin aanmaken';
+
+  @override
+  String get familyCreated => 'Gezin aangemaakt!';
+
+  @override
+  String get familyDelete => 'Gezin verwijderen';
+
+  @override
+  String get familyDeleteConfirm => 'Weet je zeker dat je dit gezin wilt verwijderen? Alle leden worden verwijderd.';
+
+  @override
+  String get familyDeleted => 'Gezin verwijderd';
+
+  @override
+  String get familyEnterInviteCode => 'Uitnodigingscode invoeren';
+
+  @override
+  String get familyInvite => 'Leden uitnodigen';
+
+  @override
+  String get familyJoinAction => 'Deelnemen';
+
+  @override
+  String get familyJoinFailed => 'Deelnemen aan gezin mislukt';
+
+  @override
+  String get familyJoinTitle => 'Gezin bijtreden';
+
+  @override
+  String get familyJoinWithCode => 'Met code deelnemen';
+
+  @override
+  String familyJoined(String familyName) {
+    return 'Aangesloten bij $familyName!';
+  }
+
+  @override
+  String get familyLeave => 'Gezin verlaten';
+
+  @override
+  String get familyLeaveAction => 'Verlaten';
+
+  @override
+  String get familyLeaveConfirm => 'Weet je zeker dat je dit gezin wilt verlaten?';
+
+  @override
+  String get familyLeft => 'Gezin verlaten';
+
+  @override
+  String get familyLinkCopied => 'Uitnodigingslink gekopieerd!';
+
+  @override
+  String get familyManage => 'Je gezin beheren';
+
+  @override
+  String familyMemberRemoved(String displayName) {
+    return '$displayName verwijderd';
+  }
+
+  @override
+  String get familyMembers => 'Leden';
+
+  @override
+  String familyMembersCount(int current, int max) {
+    return '$current van $max leden';
+  }
+
+  @override
+  String get familyNameHint => 'Gezinsnaam';
+
+  @override
+  String get familyNewCodeGenerated => 'Nieuwe uitnodigingscode gegenereerd';
+
+  @override
+  String get familyOwner => 'EIGENAAR';
+
+  @override
+  String get familyRegenerateCode => 'Code opnieuw genereren';
+
+  @override
+  String get familyRemoveMember => 'Lid verwijderen';
+
+  @override
+  String familyRemoveMemberConfirm(String displayName) {
+    return '$displayName uit het gezin verwijderen?';
+  }
+
+  @override
+  String get familyRename => 'Gezin hernoemen';
+
+  @override
+  String familyShareMessage(String inviteCode, String shareLink) {
+    return 'Doe mee met mijn gezin op Recipe Spellbook! Code: $inviteCode of gebruik deze link: $shareLink';
+  }
+
+  @override
+  String get familyShareSubject => 'Doe mee met mijn Recipe Spellbook-gezin';
+
+  @override
+  String get familyShareUpgradeMessage => 'Upgrade om kookboeken in realtime te delen met gezinsleden.';
+
+  @override
+  String get familySharing => 'Gezinsdeling';
+
+  @override
+  String get familySharingDescription => 'Deel kookboeken, boodschappenlijsten en maaltijdplannen met je gezin.';
+
+  @override
+  String get familySharingSubtitle => 'Kookboeken, lijsten & maaltijdplannen delen';
+
+  @override
+  String ingredientSubstitutesFor(String ingredientName) {
+    return 'Vervangers voor $ingredientName';
+  }
+
+  @override
+  String get ingredientSubstitutionsNoResults => 'Geen vervangers gevonden';
+
+  @override
+  String ingredientSubstitutionsNotFound(String ingredientName) {
+    return 'Geen vervangers gevonden voor $ingredientName';
+  }
+
+  @override
+  String get ingredientSubstitutionsTryDifferent => 'Probeer een ander ingrediënt';
+
+  @override
+  String get integrationsChecking => 'Controleren...';
+
+  @override
+  String get integrationsConnectedManage => 'Verbonden – Tik om te beheren';
+
+  @override
+  String get integrationsLinked => 'Gekoppeld';
+
+  @override
+  String get integrationsLinkedManage => 'Gekoppeld – Tik om te beheren';
+
+  @override
+  String get integrationsNotConnected => 'Niet verbonden';
+
+  @override
+  String get integrationsTapToLink => 'Tik om te koppelen';
+
+  @override
+  String get integrationsTapToSignIn => 'Tik om in te loggen';
+
+  @override
+  String get nutritionCalculateFromEdit => 'Berekenen vanuit het bewerkingsscherm';
+
+  @override
+  String get nutritionCaloriesAlwaysShow => 'Calorieën altijd tonen';
+
+  @override
+  String get nutritionChartStyle => 'Grafiekstijl';
+
+  @override
+  String get nutritionResetDefaults => 'Standaardwaarden herstellen';
+
+  @override
+  String get nutritionSettingsLink => 'Voedingsinstellingen';
+
+  @override
+  String get nutritionTapToCalculate => 'Tik om voeding te berekenen';
+
+  @override
+  String get nutritionVisibleNutrients => 'Zichtbare voedingsstoffen';
+
+  @override
+  String pantryAddedStaples(int count) {
+    return '$count basisproducten toegevoegd aan voorraadkast';
+  }
+
+  @override
+  String get pantryClearAll => 'Alles wissen';
+
+  @override
+  String get pantryClearMessage => 'Alle items uit je voorraadkast verwijderen?';
+
+  @override
+  String get pantryCommonStaples => 'Veel voorkomende basisproducten';
+
+  @override
+  String get pantryEmpty => 'Je voorraadkast is leeg';
+
+  @override
+  String get pantryEmptySubtitle => 'Voeg items toe die je altijd in huis hebt';
+
+  @override
+  String get pantryInfoMessage => 'Items in je voorraadkast worden uitgesloten van boodschappenlijsten wanneer je receptingrediënten toevoegt.';
+
+  @override
+  String pantryItemCount(int count) {
+    return '$count items';
+  }
+
+  @override
+  String get rpgAchievements => 'Prestaties';
+
+  @override
+  String get rpgAttack => 'Aanval! (10 Mana)';
+
+  @override
+  String get rpgBattleArena => '⚔️ Gevechtsarena';
+
+  @override
+  String get rpgBoss => 'BOSS';
+
+  @override
+  String get rpgBossDamage => 'Bossschade';
+
+  @override
+  String get rpgBossDefeated => 'Boss verslagen!';
+
+  @override
+  String get rpgBossFight => 'Bossgevecht';
+
+  @override
+  String get rpgChooseYourClass => 'Kies je klasse';
+
+  @override
+  String get rpgClassBonusSubtitle => 'Elke klasse geeft unieke bonussen';
+
+  @override
+  String get rpgClassBonusesList => 'Klassebonussen';
+
+  @override
+  String get rpgClassBonusesTitle => 'Klassebonussen';
+
+  @override
+  String get rpgComingSoon => 'Binnenkort beschikbaar!';
+
+  @override
+  String get rpgCommunity => 'Community';
+
+  @override
+  String get rpgCommunityDescription => 'Neem het op tegen andere koks over de hele wereld!';
+
+  @override
+  String get rpgCommunityLeaderboard => 'Community-ranglijst';
+
+  @override
+  String get rpgCooked => 'Gekookt';
+
+  @override
+  String get rpgCosmetics => 'Cosmetica';
+
+  @override
+  String get rpgCrit => 'KRIT!';
+
+  @override
+  String rpgDaysAgo(int count) {
+    return '$count dagen geleden';
+  }
+
+  @override
+  String rpgDaysCount(int count) {
+    return '$count dagen';
+  }
+
+  @override
+  String get rpgGemLottery => 'Edelsteen-loterij';
+
+  @override
+  String rpgGemsAvailable(int count) {
+    return '$count edelstenen beschikbaar';
+  }
+
+  @override
+  String rpgHoursAgo(int count) {
+    return '$count uur geleden';
+  }
+
+  @override
+  String get rpgHowYouCompare => 'Hoe je je verhoudt';
+
+  @override
+  String get rpgHp => 'HP';
+
+  @override
+  String get rpgJustNow => 'Zojuist';
+
+  @override
+  String get rpgKeepEarningXp => 'Blijf XP verdienen om deze vijand te ontgrendelen!';
+
+  @override
+  String rpgKillStreak(int count) {
+    return 'Overwinningsreeks: $count 🔥';
+  }
+
+  @override
+  String get rpgLeaderboard => 'Ranglijst';
+
+  @override
+  String rpgLevelN(int level) {
+    return 'Niveau $level';
+  }
+
+  @override
+  String rpgLevelRequired(int level) {
+    return 'Niveau $level vereist';
+  }
+
+  @override
+  String get rpgLotteryCost => 'Kost 1 edelsteen per draai';
+
+  @override
+  String rpgLotteryResultGems(int amount) {
+    return 'Je hebt $amount edelstenen gewonnen!';
+  }
+
+  @override
+  String rpgLotteryResultGold(int amount) {
+    return 'Je hebt $amount goud gewonnen!';
+  }
+
+  @override
+  String get rpgLotteryResultNothing => 'Meer geluk de volgende keer!';
+
+  @override
+  String get rpgLotteryResultRarePet => 'Je hebt een zeldzaam huisdier gevonden!';
+
+  @override
+  String rpgLotteryResultXp(int amount) {
+    return 'Je hebt $amount XP verdiend!';
+  }
+
+  @override
+  String get rpgManaHint => 'Verdien XP van recepten om mana te regenereren • Niveauverhoging voor volledige herlading';
+
+  @override
+  String get rpgMilestones => 'Mijlpalen';
+
+  @override
+  String rpgMinutesAgo(int count) {
+    return '$count minuten geleden';
+  }
+
+  @override
+  String get rpgNoMana => 'Geen Mana!';
+
+  @override
+  String get rpgProfileSettings => 'Profielinstellingen';
+
+  @override
+  String get rpgQuickActions => 'Snelle acties';
+
+  @override
+  String get rpgRecipes => 'Recepten';
+
+  @override
+  String get rpgReset => 'Resetten';
+
+  @override
+  String get rpgResetProgressConfirmMessage => 'Dit reset al je RPG-voortgang inclusief niveau, XP, goud en edelstenen. Dit kan niet ongedaan worden gemaakt.';
+
+  @override
+  String get rpgResetProgressConfirmTitle => 'Voortgang resetten?';
+
+  @override
+  String rpgResetsInHours(int count) {
+    return 'Reset over $count uur';
+  }
+
+  @override
+  String rpgResetsInMinutes(int count) {
+    return 'Reset over $count minuten';
+  }
+
+  @override
+  String get rpgSpin => 'Draaien!';
+
+  @override
+  String get rpgStreak => 'Reeks';
+
+  @override
+  String get rpgVictory => 'Overwinning!';
+
+  @override
+  String rpgYouDefeated(String name) {
+    return 'Je hebt $name verslagen!';
+  }
+
+  @override
+  String get rpgYourStatistics => 'Je statistieken';
+
+  @override
+  String get rpgYourStats => 'Je stats';
+
+  @override
+  String get settingsBrowseCommunity => 'Community verkennen';
+
+  @override
+  String get settingsBrowseCommunitySubtitle => 'Openbare kookboeken ontdekken';
+
+  @override
+  String get settingsCommunity => 'Community';
+
+  @override
+  String get settingsFamily => 'Gezin';
+
+  @override
+  String get settingsIntegrations => 'Integraties';
+
+  @override
+  String get settingsMyPublications => 'Mijn publicaties';
+
+  @override
+  String get settingsMyPublicationsSubtitle => 'Gepubliceerde kookboeken beheren';
+
+  @override
+  String get settingsShoppingPlanning => 'Boodschappen & Planning';
+
+  @override
+  String shoppingAddCountItems(int count) {
+    return '$count items toevoegen';
+  }
+
+  @override
+  String get shoppingAddIngredient => 'Ingrediënt toevoegen';
+
+  @override
+  String shoppingAddedItemName(String name) {
+    return '\"$name\" toegevoegd';
+  }
+
+  @override
+  String shoppingAddedNotFound(int added, int failed) {
+    return '$added toegevoegd, $failed niet gevonden';
+  }
+
+  @override
+  String shoppingAddingTo(String provider) {
+    return 'Toevoegen aan $provider…';
+  }
+
+  @override
+  String get shoppingCamera => 'camera';
+
+  @override
+  String shoppingCheckedItemsCount(int count) {
+    return 'Aangevinkte items ($count)';
+  }
+
+  @override
+  String shoppingCouldNotAccessSource(String source) {
+    return 'Kan geen toegang krijgen tot $source';
+  }
+
+  @override
+  String shoppingCountAdded(int count) {
+    return '$count toegevoegd';
+  }
+
+  @override
+  String shoppingCreatingListOn(String provider) {
+    return 'Lijst aanmaken op $provider…';
+  }
+
+  @override
+  String shoppingCurrentOfTotal(int current, int total) {
+    return '$current van $total items';
+  }
+
+  @override
+  String shoppingDeleteListConfirm(String name) {
+    return 'Weet je zeker dat je \"$name\" wilt verwijderen?';
+  }
+
+  @override
+  String shoppingErrorReadingImage(String error) {
+    return 'Fout bij lezen afbeelding: $error';
+  }
+
+  @override
+  String shoppingExportFailed(String error) {
+    return 'Exporteren mislukt: $error';
+  }
+
+  @override
+  String shoppingExportTitle(String name) {
+    return '\"$name\" exporteren';
+  }
+
+  @override
+  String get shoppingFamilyShare => 'Gezinsdeling';
+
+  @override
+  String get shoppingFamilyShareSubtitle => 'Lijst delen met gezin of eenmalige link';
+
+  @override
+  String get shoppingFromPhoto => 'Van foto';
+
+  @override
+  String get shoppingFromText => 'Van tekst';
+
+  @override
+  String get shoppingGallery => 'galerij';
+
+  @override
+  String get shoppingImportItems => 'Items importeren';
+
+  @override
+  String get shoppingImportShoppingList => 'Boodschappenlijst importeren';
+
+  @override
+  String get shoppingImportTextHint => '2 kopjes bloem\nkipfilet\n500g gehakt\nmelk\n...';
+
+  @override
+  String get shoppingImportedList => 'Geïmporteerde lijst';
+
+  @override
+  String get shoppingIngredientHint => 'bijv. kipfilet, olijfolie';
+
+  @override
+  String get shoppingIngredientName => 'Ingrediëntnaam';
+
+  @override
+  String shoppingIngredientsAvailable(int count) {
+    return '$count ingrediënten beschikbaar';
+  }
+
+  @override
+  String shoppingItemsAddedCount(int count) {
+    return '$count items toegevoegd';
+  }
+
+  @override
+  String get shoppingItemsAddedSuccess => 'Items toegevoegd!';
+
+  @override
+  String shoppingItemsCopiedToClipboard(int count) {
+    return '$count items gekopieerd naar klembord';
+  }
+
+  @override
+  String shoppingItemsInCart(int count, String provider) {
+    return '$count items in je $provider-winkelwagen';
+  }
+
+  @override
+  String shoppingItemsOnInstacartList(int count) {
+    return '$count items op je Instacart-lijst';
+  }
+
+  @override
+  String get shoppingJustAdded => 'Zojuist toegevoegd';
+
+  @override
+  String shoppingListCopiedOpening(String name) {
+    return 'Lijst gekopieerd! $name openen...';
+  }
+
+  @override
+  String get shoppingListReady => 'Boodschappenlijst klaar!';
+
+  @override
+  String shoppingNotFoundItems(String items) {
+    return 'Niet gevonden: $items';
+  }
+
+  @override
+  String get shoppingOneItemPerLine => 'Eén item per regel';
+
+  @override
+  String get shoppingPartiallyAdded => 'Gedeeltelijk toegevoegd';
+
+  @override
+  String get shoppingProviderConnected => 'Verbonden';
+
+  @override
+  String get shoppingRemoveFromList => 'Verwijderen van lijst';
+
+  @override
+  String get shoppingStartTyping => 'Begin te typen voor suggesties';
+
+  @override
+  String get shoppingTapToAddToCart => 'Tik om items direct aan je winkelwagen toe te voegen';
+
+  @override
+  String get shoppingTapToCreateShoppableList => 'Tik om een boodschappenlijst te maken';
+
+  @override
+  String get swipeToSwitch => 'Veeg om van sectie te wisselen';
+
+  @override
+  String get syncFailed => 'Synchronisatie mislukt';
+
+  @override
+  String syncSuccess(int pushed, int pulled) {
+    return 'Gesynchroniseerd: $pushed verzonden, $pulled ontvangen';
+  }
+
+  @override
+  String get textSizePreview => 'Voorbeeld';
+
+  @override
+  String get transferDeviceDesktop => 'desktop';
+
+  @override
+  String get transferDeviceMobileApp => 'mobiele app';
+
+  @override
+  String get transferDeviceThisDevice => 'dit apparaat';
+
+  @override
+  String transferExplanation(String currentDevice, String targetDevice) {
+    return 'Verplaats al je recepten, kookboeken en maaltijdplannen van $currentDevice naar je $targetDevice. Dit is een eenmalige kopie, geen synchronisatie.';
+  }
+
+  @override
+  String transferImportedSuccess(int count) {
+    return '$count items succesvol geïmporteerd.';
+  }
+
+  @override
+  String get transferOr => 'OF';
+
+  @override
+  String transferReceiveOn(String device) {
+    return 'Ontvangen op $device';
+  }
+
+  @override
+  String transferSendFrom(String device) {
+    return 'Verzenden vanaf $device';
+  }
+
+  @override
+  String transferSendSubtitle(String device) {
+    return 'Genereer een code die je $device kan ontvangen';
+  }
+
+  @override
+  String get importGuidesTitle => 'Importgidsen';
+
+  @override
+  String get importGuidesOpenInBrowser => 'Gidsen openen in browser';
+
+  @override
+  String get importGuideHeroTitle => 'Breng je recepten van overal';
+
+  @override
+  String get importGuideHeroSubtitle => 'Tik op een gids hieronder voor stap-voor-stap instructies met schermafbeeldingen.';
+
+  @override
+  String get importGuideQuickTipLabel => 'Snelle tip';
+
+  @override
+  String get importGuideQuickTipText => 'De snelste manier? Kopieer een receptlink en deel het met Recipe Spellbook — werkt vanuit bijna elke app.';
+
+  @override
+  String get importGuideWebButton => 'Web';
+
+  @override
+  String get importGuideFollowInBrowser => 'Volg in browser';
+
+  @override
+  String get importGuideTagPopular => 'Populair';
+
+  @override
+  String get importGuideTagEasiest => 'Makkelijkst';
+
+  @override
+  String get importGuideDifficultyEasy => 'Makkelijk';
+
+  @override
+  String get importGuideDifficultyMedium => 'Gemiddeld';
+
+  @override
+  String get importGuideTime15Sec => '15 sec';
+
+  @override
+  String get importGuideTime30Sec => '30 sec';
+
+  @override
+  String get importGuideTime1Min => '1 min';
+
+  @override
+  String get importGuideTime2To5Min => '2–5 min';
+
+  @override
+  String importGuideStepsCount(int count) {
+    return '$count stappen';
+  }
+
+  @override
+  String get importGuideCategorySocial => 'Sociale media';
+
+  @override
+  String get importGuideCategoryWebsites => 'Websites';
+
+  @override
+  String get importGuideCategoryPhotos => 'Foto\'s & Bestanden';
+
+  @override
+  String get importGuideCategoryOtherApps => 'Andere recepten-apps';
+
+  @override
+  String get importGuideScreenshotNeeded => 'Schermafbeelding nodig';
+
+  @override
+  String get importGuideGifNeeded => 'GIF nodig';
+
+  @override
+  String get importGuideVideoNeeded => 'Video nodig';
+
+  @override
+  String get importGuideInstagramTitle => 'Instagram';
+
+  @override
+  String get importGuideInstagramSubtitle => 'Importeren vanuit Reels, berichten en stories';
+
+  @override
+  String get importGuideInstagramStep1Title => 'Zoek een receptbericht of Reel';
+
+  @override
+  String get importGuideInstagramStep1Desc => 'Open Instagram en zoek een recept dat je wilt opslaan. Dit werkt met feedberichten, Reels en carrousels.';
+
+  @override
+  String get importGuideInstagramStep2Title => 'Tik op de deelknop';
+
+  @override
+  String get importGuideInstagramStep2Desc => 'Tik op het papiervliegtuigpictogram (delen) onder het bericht.';
+
+  @override
+  String get importGuideInstagramStep3Title => 'Delen naar Recipe Spellbook';
+
+  @override
+  String get importGuideInstagramStep3Desc => 'Scrol door de app-rij en tik op Recipe Spellbook. Als je het niet ziet, tik op \"Meer\" en zoek het in de lijst.';
+
+  @override
+  String get importGuideInstagramStep3Tip => 'Op Android kun je ook de link kopiëren en in de app plakken.';
+
+  @override
+  String get importGuideInstagramStep4Title => 'Het geëxtraheerde recept bekijken';
+
+  @override
+  String get importGuideInstagramStep4Desc => 'Onze AI leest het bijschrift, hashtags en tekst in de afbeelding om je recept samen te stellen. Controleer ingrediënten en stappen en sla op.';
+
+  @override
+  String get importGuideInstagramStep5Title => 'Kookboek kiezen & opslaan';
+
+  @override
+  String get importGuideInstagramStep5Desc => 'Kies in welk kookboek je wilt opslaan, voeg labels toe en tik op Opslaan. Klaar!';
+
+  @override
+  String get importGuideTiktokTitle => 'TikTok';
+
+  @override
+  String get importGuideTiktokSubtitle => 'Recepten opslaan van kookvideo\'s';
+
+  @override
+  String get importGuideTiktokStep1Title => 'Zoek een recept-TikTok';
+
+  @override
+  String get importGuideTiktokStep1Desc => 'Open TikTok en zoek een kookvideo die je wilt opslaan.';
+
+  @override
+  String get importGuideTiktokStep2Title => 'Tik op de deelpijl';
+
+  @override
+  String get importGuideTiktokStep2Desc => 'Tik op het pijlpictogram rechts van de video.';
+
+  @override
+  String get importGuideTiktokStep3Title => 'Kies \"Link kopiëren\" of deel direct';
+
+  @override
+  String get importGuideTiktokStep3Desc => 'Tik op \"Link kopiëren\" en plak in Recipe Spellbook, of zoek Recipe Spellbook in de deelopties.';
+
+  @override
+  String get importGuideTiktokStep3Tip => '\"Link kopiëren\" is vaak de betrouwbaarste methode voor TikTok.';
+
+  @override
+  String get importGuideTiktokStep4Title => 'Link plakken in Recipe Spellbook';
+
+  @override
+  String get importGuideTiktokStep4Desc => 'Open Recipe Spellbook, tik op +, kies \"Van website/link\" en plak de TikTok-URL.';
+
+  @override
+  String get importGuideTiktokStep5Title => 'Bekijken & opslaan';
+
+  @override
+  String get importGuideTiktokStep5Desc => 'De AI haalt het recept uit de videobeschrijving en reacties. Bekijk en sla op in je kookboek.';
+
+  @override
+  String get importGuideYoutubeTitle => 'YouTube';
+
+  @override
+  String get importGuideYoutubeSubtitle => 'Importeren vanuit kookkanalen & Shorts';
+
+  @override
+  String get importGuideYoutubeStep1Title => 'Zoek een receptvideo';
+
+  @override
+  String get importGuideYoutubeStep1Desc => 'Open YouTube en zoek een kookvideo. Werkt met gewone video\'s, Shorts en livestream-replays.';
+
+  @override
+  String get importGuideYoutubeStep2Title => 'Tik op Delen';
+
+  @override
+  String get importGuideYoutubeStep2Desc => 'Tik op de deelknop onder de videotitel.';
+
+  @override
+  String get importGuideYoutubeStep3Title => 'Link kopiëren of delen naar app';
+
+  @override
+  String get importGuideYoutubeStep3Desc => 'Tik op \"Link kopiëren\" of zoek Recipe Spellbook in het deelmenu.';
+
+  @override
+  String get importGuideYoutubeStep3Tip => 'Veel YouTube-creators zetten het volledige recept in de videobeschrijving — dit maakt extractie nauwkeuriger.';
+
+  @override
+  String get importGuideYoutubeStep4Title => 'Plakken & importeren';
+
+  @override
+  String get importGuideYoutubeStep4Desc => 'Tik in Recipe Spellbook op + > \"Van website/link\" en plak. De AI leest de videobeschrijving voor ingrediënten en stappen.';
+
+  @override
+  String get importGuidePinterestTitle => 'Pinterest';
+
+  @override
+  String get importGuidePinterestSubtitle => 'Vastgepinde recepten opslaan in je kookboek';
+
+  @override
+  String get importGuidePinterestStep1Title => 'Open een receptpin';
+
+  @override
+  String get importGuidePinterestStep1Desc => 'Tik op een receptpin om deze te openen. De meeste pins linken naar de originele receptwebsite.';
+
+  @override
+  String get importGuidePinterestStep2Title => 'Tik op de bronlink';
+
+  @override
+  String get importGuidePinterestStep2Desc => 'Tik op de link boven- of onderaan de pin om de originele receptpagina te bezoeken.';
+
+  @override
+  String get importGuidePinterestStep2Tip => 'Als de pin geen bronlink heeft, probeer dan de deelmethode hieronder.';
+
+  @override
+  String get importGuidePinterestStep3Title => 'Website-URL kopiëren';
+
+  @override
+  String get importGuidePinterestStep3Desc => 'Zodra de receptwebsite in je browser is geopend, kopieer de URL uit de adresbalk.';
+
+  @override
+  String get importGuidePinterestStep4Title => 'Importeren in Recipe Spellbook';
+
+  @override
+  String get importGuidePinterestStep4Desc => 'Tik op + > \"Van website/link\", plak de URL en het recept wordt automatisch geëxtraheerd.';
+
+  @override
+  String get importGuideWebsiteTitle => 'Elke receptwebsite';
+
+  @override
+  String get importGuideWebsiteSubtitle => 'AllRecipes, Food Network, BBC, blogs & meer';
+
+  @override
+  String get importGuideWebsiteStep1Title => 'Open de receptpagina';
+
+  @override
+  String get importGuideWebsiteStep1Desc => 'Navigeer naar een recept op sites zoals AllRecipes, Food Network, BBC Good Food, Serious Eats, NYT Cooking of een foodblog.';
+
+  @override
+  String get importGuideWebsiteStep2Title => 'URL kopiëren';
+
+  @override
+  String get importGuideWebsiteStep2Desc => 'Tik op de adresbalk en kopieer de volledige URL naar het recept.';
+
+  @override
+  String get importGuideWebsiteStep3Title => 'Tik op + in Recipe Spellbook';
+
+  @override
+  String get importGuideWebsiteStep3Desc => 'Open de app en tik op de + knop om een nieuw recept toe te voegen.';
+
+  @override
+  String get importGuideWebsiteStep4Title => 'Kies \"Van website/link\"';
+
+  @override
+  String get importGuideWebsiteStep4Desc => 'Selecteer de website-importoptie en plak je gekopieerde URL.';
+
+  @override
+  String get importGuideWebsiteStep5Title => 'Bekijken & opslaan';
+
+  @override
+  String get importGuideWebsiteStep5Desc => 'Het recept wordt direct geëxtraheerd — titel, ingrediënten, stappen, kooktijden en zelfs de foto. Bekijk en sla op.';
+
+  @override
+  String get importGuideWebsiteStep5Tip => 'Werkt met meer dan 10.000 receptsites. Als extractie mislukt, probeer dan de \"Van tekst\"-methode.';
+
+  @override
+  String get importGuidePhotoTitle => 'Foto / Camera';
+
+  @override
+  String get importGuidePhotoSubtitle => 'Recepten scannen van boeken, tijdschriften of handgeschreven kaarten';
+
+  @override
+  String get importGuidePhotoStep1Title => 'Fotografeer het recept';
+
+  @override
+  String get importGuidePhotoStep1Desc => 'Maak een duidelijke, goed verlichte foto van een recept uit een kookboek, tijdschrift of handgeschreven receptkaart. Zorg dat alle tekst leesbaar is.';
+
+  @override
+  String get importGuidePhotoStep1Tip => 'Voor het beste resultaat: goede verlichting, stilhouden en het hele recept in beeld. Vermijd schaduwen.';
+
+  @override
+  String get importGuidePhotoStep2Title => 'Tik op + dan \"Van foto\"';
+
+  @override
+  String get importGuidePhotoStep2Desc => 'Open Recipe Spellbook, tik op + en kies \"Van foto\". Selecteer de foto uit je galerij of maak een nieuwe.';
+
+  @override
+  String get importGuidePhotoStep3Title => 'AI scant de tekst';
+
+  @override
+  String get importGuidePhotoStep3Desc => 'OCR-technologie leest de tekst in je foto en AI scheidt intelligent de titel, ingrediënten en instructies.';
+
+  @override
+  String get importGuidePhotoStep4Title => 'Bekijken & fouten corrigeren';
+
+  @override
+  String get importGuidePhotoStep4Desc => 'Controleer het geëxtraheerde recept. OCR leest soms tekens verkeerd — \"1/2\" kan \"1l2\" worden. Corrigeer fouten en sla op.';
+
+  @override
+  String get importGuidePhotoStep4Tip => 'Handgeschreven recepten werken ook, maar gedrukte tekst geeft de beste resultaten.';
+
+  @override
+  String get importGuidePdfTitle => 'PDF-document';
+
+  @override
+  String get importGuidePdfSubtitle => 'Importeren vanuit PDF-kookboeken of downloads';
+
+  @override
+  String get importGuidePdfStep1Title => 'Een recept-PDF gereed hebben';
+
+  @override
+  String get importGuidePdfStep1Desc => 'Dit werkt met gedownloade recept-PDF\'s, e-book kookboeken, gescande documenten of PDF\'s gedeeld via e-mail.';
+
+  @override
+  String get importGuidePdfStep2Title => 'Tik op + dan \"Van PDF\"';
+
+  @override
+  String get importGuidePdfStep2Desc => 'Open Recipe Spellbook, tik op +, kies \"Van PDF\" en selecteer je bestand.';
+
+  @override
+  String get importGuidePdfStep3Title => 'Selecteer de receptpagina';
+
+  @override
+  String get importGuidePdfStep3Desc => 'Als de PDF meerdere pagina\'s heeft, kies welke pagina het recept bevat dat je wilt importeren.';
+
+  @override
+  String get importGuidePdfStep4Title => 'Bekijken & opslaan';
+
+  @override
+  String get importGuidePdfStep4Desc => 'Het recept wordt uit de PDF geëxtraheerd. Bekijk de ingrediënten en stappen en sla op in je kookboek.';
+
+  @override
+  String get importGuideTextTitle => 'Tekst / Plakken';
+
+  @override
+  String get importGuideTextSubtitle => 'Een recept plakken van berichten, e-mail of notities';
+
+  @override
+  String get importGuideTextStep1Title => 'Recepttekst kopiëren';
+
+  @override
+  String get importGuideTextStep1Desc => 'Kopieer de recepttekst van een SMS, e-mail, notitie-app, WhatsApp of ergens anders.';
+
+  @override
+  String get importGuideTextStep2Title => 'Tik op + dan \"Van tekst\"';
+
+  @override
+  String get importGuideTextStep2Desc => 'Open Recipe Spellbook, tik op + en kies \"Van tekst\".';
+
+  @override
+  String get importGuideTextStep3Title => 'Je recept plakken';
+
+  @override
+  String get importGuideTextStep3Desc => 'Plak de gekopieerde tekst in het tekstveld. De AI scheidt automatisch de titel, ingrediënten en stappen.';
+
+  @override
+  String get importGuideTextStep3Tip => 'Dit werkt zelfs met onopgemaakte tekst — de AI is slim in het herkennen van hoeveelheden en stapinstructies.';
+
+  @override
+  String get importGuideTextStep4Title => 'Bekijken & opslaan';
+
+  @override
+  String get importGuideTextStep4Desc => 'Controleer het verwerkte recept, pas aan en sla op.';
+
+  @override
+  String get importGuidePaprikaTitle => 'Paprika Recipe Manager';
+
+  @override
+  String get importGuidePaprikaSubtitle => 'Je hele Paprika-bibliotheek importeren';
+
+  @override
+  String get importGuidePaprikaStep1Title => 'Exporteren vanuit Paprika';
+
+  @override
+  String get importGuidePaprikaStep1Desc => 'Ga in Paprika naar Instellingen (tandwielpictogram) > Exporteren. Kies \"Alle recepten exporteren\" en sla op als .paprikarecipes-bestand.';
+
+  @override
+  String get importGuidePaprikaStep2Title => 'Bestand naar je apparaat sturen';
+
+  @override
+  String get importGuidePaprikaStep2Desc => 'Mail het bestand naar jezelf, sla op in iCloud/Google Drive of gebruik AirDrop om het over te zetten.';
+
+  @override
+  String get importGuidePaprikaStep3Title => 'Importeren in Recipe Spellbook';
+
+  @override
+  String get importGuidePaprikaStep3Desc => 'Open Recipe Spellbook, ga naar Instellingen > Gegevens > Importeren en selecteer het .paprikarecipes-bestand.';
+
+  @override
+  String get importGuidePaprikaStep4Title => 'Wachten op import';
+
+  @override
+  String get importGuidePaprikaStep4Desc => 'Al je Paprika-recepten worden geïmporteerd met ingrediënten, stappen, notities, foto\'s en categorieën.';
+
+  @override
+  String get importGuidePaprikaStep4Tip => 'Grote bibliotheken (100+ recepten) kunnen een minuut duren. De app blijft responsief tijdens het importeren.';
+
+  @override
+  String get importGuideOtherAppsTitle => 'Andere recepten-apps';
+
+  @override
+  String get importGuideOtherAppsSubtitle => 'Mealime, CopyMeThat, AnyList, Cookmate enz.';
+
+  @override
+  String get importGuideOtherAppsStep1Title => 'Exporteren vanuit je huidige app';
+
+  @override
+  String get importGuideOtherAppsStep1Desc => 'De meeste recepten-apps ondersteunen exporteren naar JSON, HTML of tekst. Controleer Instellingen > Exporteren of Back-up.';
+
+  @override
+  String get importGuideOtherAppsStep1Tip => 'Veelgebruikte formaten: JSON (het beste), HTML, PDF of platte tekst. JSON behoudt de meeste gegevens.';
+
+  @override
+  String get importGuideOtherAppsStep2Title => 'Bestand op je apparaat krijgen';
+
+  @override
+  String get importGuideOtherAppsStep2Desc => 'Sla het geëxporteerde bestand op of zet het over naar je telefoon via e-mail, cloudopslag of een andere methode.';
+
+  @override
+  String get importGuideOtherAppsStep3Title => 'Importeren via Instellingen';
+
+  @override
+  String get importGuideOtherAppsStep3Desc => 'Ga in Recipe Spellbook naar Instellingen > Gegevens > Importeren en selecteer het geëxporteerde bestand. De app verwerkt JSON, HTML en gangbare receptformaten.';
+
+  @override
+  String get importGuideOtherAppsStep4Title => 'Je recepten controleren';
+
+  @override
+  String get importGuideOtherAppsStep4Desc => 'Geïmporteerde recepten verschijnen in je standaardkookboek. Je kunt ze daarna indelen in verschillende kookboeken.';
+
+  @override
+  String get importGuideDeviceTransferTitle => 'Apparaatoverdracht';
+
+  @override
+  String get importGuideDeviceTransferSubtitle => 'Recepten overzetten tussen telefoons zonder account';
+
+  @override
+  String get importGuideDeviceTransferStep1Title => 'Open Overdracht op het OUDE apparaat';
+
+  @override
+  String get importGuideDeviceTransferStep1Desc => 'Open op je oude telefoon Recipe Spellbook en ga naar Menu > Apparaatoverdracht > Verzenden.';
+
+  @override
+  String get importGuideDeviceTransferStep2Title => 'Overdrachtscode ophalen';
+
+  @override
+  String get importGuideDeviceTransferStep2Desc => 'Een 6-tekencode wordt gegenereerd. Deze code is 15 minuten geldig.';
+
+  @override
+  String get importGuideDeviceTransferStep3Title => 'Code invoeren op NIEUW apparaat';
+
+  @override
+  String get importGuideDeviceTransferStep3Desc => 'Installeer Recipe Spellbook op je nieuwe telefoon en ga naar Menu > Apparaatoverdracht > Ontvangen. Voer de code in.';
+
+  @override
+  String get importGuideDeviceTransferStep4Title => 'Recepten overgezet!';
+
+  @override
+  String get importGuideDeviceTransferStep4Desc => 'Al je recepten, kookboeken, boodschappenlijsten en maaltijdplannen worden overgezet naar het nieuwe apparaat.';
+
+  @override
+  String get importGuideDeviceTransferStep4Tip => 'Een betaald account? Log gewoon in op het nieuwe apparaat en alles wordt automatisch gesynchroniseerd.';
+
+  @override
+  String get themeFrost => 'Vorst';
+
+  @override
+  String get themeEmber => 'Gloed';
+
+  @override
+  String get themeSpring => 'Lente';
+
+  @override
+  String get themeAlchemist => 'Alchemist';
+
+  @override
+  String get rpgNoAchievementsInCategory => 'Geen prestaties in deze categorie';
+
+  @override
+  String rpgUnlocksItem(String item) {
+    return 'Ontgrendelt: $item';
+  }
+
+  @override
+  String get rpgCategory => 'Categorie';
+
+  @override
+  String get rpgCompleted => 'Voltooid';
+
+  @override
+  String get rpgProgress => 'Voortgang';
+
+  @override
+  String rpgDefeatedEnemy(String name) {
+    return '$name verslagen!';
+  }
+
+  @override
+  String get rpgAvatars => 'Avatars';
+
+  @override
+  String get rpgFrames => 'Frames';
+
+  @override
+  String get rpgPets => 'Huisdieren';
+
+  @override
+  String get rpgTitles => 'Titels';
+
+  @override
+  String rpgPurchaseItem(String item) {
+    return '$item kopen?';
+  }
+
+  @override
+  String get rpgUnlockedViaAchievement => 'Ontgrendeld via prestatie';
+
+  @override
+  String get rpgPrice => 'Prijs';
+
+  @override
+  String get rpgNotEnoughGold => 'Niet genoeg goud';
+
+  @override
+  String get rpgNotEnoughGems => 'Niet genoeg edelstenen';
+
+  @override
+  String rpgPurchased(String item) {
+    return '$item gekocht!';
+  }
+
+  @override
+  String get rpgOwned => 'In bezit';
+
+  @override
+  String get rpgDailyQuests => 'Dagelijkse opdrachten';
+
+  @override
+  String rpgQuestsCompleted(int completed, int total) {
+    return '$completed van $total voltooid';
+  }
+
+  @override
+  String get rpgWeeklyChallenge => 'Wekelijkse uitdaging';
+
+  @override
+  String get rpgQuestsSubtitle => 'Voltooi opdrachten om XP en beloningen te verdienen';
+
+  @override
+  String get rpgRecentXp => 'Recente XP';
+
+  @override
+  String get rpgNoAchievementsYet => 'Nog geen prestaties';
+
+  @override
+  String rpgLv(int level) {
+    return 'Nv.$level';
+  }
+
+  @override
+  String rpgClassBonus(String className) {
+    return '$className-bonus';
+  }
+
+  @override
+  String get rpgLevelUp => 'Niveauverhoging!';
+
+  @override
+  String get rpgUnlocked => 'Ontgrendeld!';
+
+  @override
+  String get rpgAchievementUnlocked => 'Prestatie ontgrendeld!';
+
+  @override
+  String get mealPlanAddTitle => 'Toevoegen aan maaltijdplan';
+
+  @override
+  String get mealPlanMealLabel => 'Maaltijd';
+
+  @override
+  String get mealPlanAdding => 'Toevoegen...';
+
+  @override
+  String mealPlanDateFormat(String weekday, String month, int day) {
+    return '$weekday $day $month';
   }
 }

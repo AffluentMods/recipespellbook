@@ -126,7 +126,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
           icon: const Icon(Icons.close),
           onPressed: _exitSelection,
         ),
-        title: Text('${_selectedIds.length} selected'),
+        title: Text(AppLocalizations.of(context)!.selectedCount(_selectedIds.length)),
       )
           : AppBar(
         title: _isSearching
@@ -159,12 +159,12 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
               label: Text('${_selectedTagIds.length}'),
               child: Icon(_showTagFilter ? Icons.label : Icons.label_outline),
             ),
-            tooltip: 'Filter by tags',
+            tooltip: AppLocalizations.of(context)!.recipeFieldTags,
             onPressed: () => setState(() => _showTagFilter = !_showTagFilter),
           ),
           PopupMenuButton<_ViewSize>(
             icon: Icon(_viewSize.icon),
-            tooltip: 'View size',
+            tooltip: AppLocalizations.of(context)!.tooltipViewSize,
             onSelected: (size) => setState(() => _viewSize = size),
             itemBuilder: (ctx) => _ViewSize.values.map((size) {
               return PopupMenuItem(
@@ -179,7 +179,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
           ),
           PopupMenuButton<_SortMode>(
             icon: const Icon(Icons.sort),
-            tooltip: 'Sort',
+            tooltip: AppLocalizations.of(context)!.sortOrder,
             onSelected: (sort) => setState(() => _sort = sort),
             itemBuilder: (ctx) => _SortMode.values.map((sort) {
               return PopupMenuItem(
@@ -346,19 +346,20 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
   // ── Bulk actions ──
 
   Future<void> _bulkDelete(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final count = _selectedIds.length;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         icon: const Icon(Icons.delete_outline, size: 32, color: Colors.red),
-        title: Text('Delete $count recipe${count == 1 ? '' : 's'}?'),
-        content: const Text('Recipes will be moved to trash.'),
+        title: Text(l10n.deleteCountRecipes(count)),
+        content: Text(l10n.confirmDeleteMessage),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.actionCancel)),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(l10n.actionDelete),
           ),
         ],
       ),
@@ -369,12 +370,13 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       await dao.moveToTrash(id);
     }
     if (mounted) {
-      AppSnackbar.info(context, '$count recipe${count == 1 ? '' : 's'} moved to trash');
+      AppSnackbar.info(context, l10n.countRecipesMovedToTrash(count));
       _exitSelection();
     }
   }
 
   Future<void> _bulkSetCourse(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final translator = TaxonomyTranslator.of(context);
     final courses = taxonomy.CourseData.courses;
     final selected = await showModalBottomSheet<String>(
@@ -383,7 +385,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text('Set Course', style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            child: Text(l10n.setCourse, style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           ),
           Flexible(
             child: ListView(shrinkWrap: true, children: courses.map((c) => ListTile(
@@ -401,12 +403,13 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       await dao.updateRecipeFields(id, RecipesCompanion(courseId: Value(selected)));
     }
     if (mounted) {
-      AppSnackbar.info(context, 'Course set for ${_selectedIds.length} recipes');
+      AppSnackbar.info(context, l10n.courseSetForRecipes(_selectedIds.length));
       _exitSelection();
     }
   }
 
   Future<void> _bulkSetCategory(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final translator = TaxonomyTranslator.of(context);
     final categories = taxonomy.CategoryData.categories;
     final selected = await showModalBottomSheet<String>(
@@ -415,7 +418,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text('Set Category', style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            child: Text(l10n.setCategory, style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           ),
           Flexible(
             child: ListView(shrinkWrap: true, children: categories.map((c) => ListTile(
@@ -433,18 +436,19 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       await dao.updateRecipeFields(id, RecipesCompanion(categoryId: Value(selected)));
     }
     if (mounted) {
-      AppSnackbar.info(context, 'Category set for ${_selectedIds.length} recipes');
+      AppSnackbar.info(context, l10n.categorySetForCount(_selectedIds.length));
       _exitSelection();
     }
   }
 
   Future<void> _bulkFavorite() async {
+    final l10n = AppLocalizations.of(context)!;
     final dao = ref.read(recipeDaoProvider);
     for (final id in _selectedIds) {
       await dao.toggleFavorite(id, true);
     }
     if (mounted) {
-      AppSnackbar.info(context, '${_selectedIds.length} recipes favorited');
+      AppSnackbar.info(context, l10n.countRecipesFavorited(_selectedIds.length));
       _exitSelection();
     }
   }
@@ -538,7 +542,7 @@ class _TagFilterBar extends ConsumerWidget {
                 if (tags.isEmpty) {
                   return Center(
                     child: Text(
-                      'No tags created yet',
+                      AppLocalizations.of(context)!.tagsNoTags,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.outline,
                       ),

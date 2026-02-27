@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../data/course_category_data.dart';
 import '../../../database/database.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/default_recipe_images.dart';
@@ -23,14 +24,15 @@ class RecentRecipesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final recipesAsync = ref.watch(allRecentRecipesProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.history, size: 24),
-            SizedBox(width: 10),
-            Text('Recently Viewed'),
+            const Icon(Icons.history, size: 24),
+            const SizedBox(width: 10),
+            Text(l10n.recentTitle),
           ],
         ),
         actions: [
@@ -58,13 +60,13 @@ class RecentRecipesScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'No recently viewed recipes',
+                      l10n.recentEmpty,
                       style: theme.textTheme.titleLarge,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Recipes you view will appear here',
+                      l10n.recentEmptySubtitle,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.outline,
                       ),
@@ -97,6 +99,7 @@ class _RecipeItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final hasImage = recipe.imagePath != null && File(recipe.imagePath!).existsSync();
     final defaultAsset = defaultRecipeImageAsset(recipe.id);
     final course = recipe.courseId != null ? CourseData.getById(recipe.courseId!) : null;
@@ -153,7 +156,7 @@ class _RecipeItem extends ConsumerWidget {
                       if (recipe.lastViewedAt != null) ...[
                         const SizedBox(height: 4),
                         Text(
-                          _formatLastViewed(recipe.lastViewedAt!),
+                          _formatLastViewed(recipe.lastViewedAt!, l10n),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.outline,
                           ),
@@ -173,15 +176,15 @@ class _RecipeItem extends ConsumerWidget {
     );
   }
 
-  String _formatLastViewed(DateTime date) {
+  String _formatLastViewed(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final diff = now.difference(date);
 
-    if (diff.inMinutes < 1) return 'Just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes} min ago';
-    if (diff.inHours < 24) return '${diff.inHours} hours ago';
-    if (diff.inDays == 1) return 'Yesterday';
-    if (diff.inDays < 7) return '${diff.inDays} days ago';
+    if (diff.inMinutes < 1) return l10n.recentJustNow;
+    if (diff.inMinutes < 60) return l10n.recentMinutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.recentHoursAgo(diff.inHours);
+    if (diff.inDays == 1) return l10n.recentYesterday;
+    if (diff.inDays < 7) return l10n.recentDaysAgo(diff.inDays);
     return '${date.month}/${date.day}/${date.year}';
   }
 }

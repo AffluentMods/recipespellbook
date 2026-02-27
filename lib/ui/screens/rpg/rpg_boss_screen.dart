@@ -313,11 +313,12 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
     ref.read(rpgProvider.notifier).awardXp(
       XpActionType.defeatEnemy,
       multiplier: (xpReward / 25).ceil().clamp(1, 100),
-      description: 'Defeated ${_currentEnemy.name}!',
+      description: AppLocalizations.of(context)!.rpgDefeatedEnemy(_currentEnemy.name),
     );
 
     HapticFeedback.heavyImpact();
 
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -325,14 +326,14 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
         title: Row(
           children: [
             const Text('🎉 '),
-            Expanded(child: Text(_currentEnemy.isBoss ? 'Boss Defeated!' : 'Victory!')),
+            Expanded(child: Text(_currentEnemy.isBoss ? l10n.rpgBossDefeated : l10n.rpgVictory)),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'You defeated ${_currentEnemy.name}!',
+              l10n.rpgYouDefeated(_currentEnemy.name),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
@@ -342,7 +343,7 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(Icons.monetization_on, color: Colors.amber, size: 20),
-                Text(' +$goldReward Gold', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(' +$goldReward ${l10n.rpgGold}', style: const TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(width: 16),
                 const Text('✨', style: TextStyle(fontSize: 16)),
                 Text(' +$xpReward XP', style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -351,7 +352,7 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
             if (_killCount > 1) ...[
               const SizedBox(height: 8),
               Text(
-                'Kill streak: $_killCount 🔥',
+                l10n.rpgKillStreak(_killCount),
                 style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
               ),
             ],
@@ -367,7 +368,7 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
                 _damageNumbers.clear();
               });
             },
-            child: const Text('Fight Again'),
+            child: Text(l10n.rpgFightAgain),
           ),
           FilledButton(
             onPressed: () {
@@ -378,7 +379,7 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
                 _damageNumbers.clear();
               });
             },
-            child: const Text('Awesome!'),
+            child: Text(l10n.rpgAwesome),
           ),
         ],
       ),
@@ -393,9 +394,11 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
     final canFight = playerLevel >= _currentEnemy.minLevel;
     final maxMana = PlayerProfile.maxManaForLevel(playerLevel);
 
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('⚔️ Battle Arena'),
+        title: Text(l10n.rpgBattleArena),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
@@ -455,21 +458,21 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
                     children: [
                       _StatChip(
                         icon: Icons.flash_on,
-                        label: 'DMG',
+                        label: l10n.rpgDmg,
                         value: '${playerLevel}x',
                         color: Colors.orange,
                       ),
                       const SizedBox(width: 12),
                       _StatChip(
                         icon: Icons.auto_awesome,
-                        label: 'Mana',
+                        label: l10n.rpgMana,
                         value: '$maxMana',
                         color: Colors.blue,
                       ),
                       const SizedBox(width: 12),
                       _StatChip(
                         icon: Icons.military_tech,
-                        label: 'Level',
+                        label: l10n.rpgLevel,
                         value: '$playerLevel',
                         color: Colors.amber,
                       ),
@@ -489,9 +492,9 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
                       label: Text(
                         canFight
                             ? profile.mana < 10
-                            ? 'No Mana!'
-                            : 'Attack! (10 Mana)'
-                            : 'Level ${_currentEnemy.minLevel} Required',
+                            ? l10n.rpgNoMana
+                            : l10n.rpgAttack
+                            : l10n.rpgLevelRequired(_currentEnemy.minLevel),
                         style: const TextStyle(fontSize: 18),
                       ),
                       style: FilledButton.styleFrom(
@@ -504,7 +507,7 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
 
                   const SizedBox(height: 4),
                   Text(
-                    'Earn XP from recipes to regenerate mana • Level up for full refill',
+                    l10n.rpgManaHint,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.outline,
                       fontSize: 11,
@@ -521,6 +524,7 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
   }
 
   Widget _buildBattleArea(ThemeData theme, PlayerProfile profile) {
+    final l10n = AppLocalizations.of(context)!;
     return AnimatedBuilder(
       animation: _shakeController,
       builder: (context, child) {
@@ -564,7 +568,7 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
                         ),
-                        child: const Text('BOSS', style: TextStyle(
+                        child: Text(l10n.rpgBoss, style: const TextStyle(
                           fontSize: 10, fontWeight: FontWeight.bold, color: Colors.red,
                         )),
                       ),
@@ -633,7 +637,7 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'HP',
+                            l10n.rpgHp,
                             style: theme.textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -667,7 +671,7 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
                 if (_lastDamage != null) ...[
                   const SizedBox(height: 12),
                   Text(
-                    '-$_lastDamage${_lastWasCrit ? ' CRIT!' : ''}',
+                    '-$_lastDamage${_lastWasCrit ? ' ${l10n.rpgCrit}' : ''}',
                     style: theme.textTheme.headlineMedium?.copyWith(
                       color: _lastWasCrit ? Colors.orange : Colors.red,
                       fontWeight: FontWeight.bold,
@@ -710,6 +714,7 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
   }
 
   Widget _buildLockedArea(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -717,14 +722,14 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
           Icon(Icons.lock, size: 64, color: theme.colorScheme.outline),
           const SizedBox(height: 16),
           Text(
-            'Level ${_currentEnemy.minLevel} Required',
+            l10n.rpgLevelRequired(_currentEnemy.minLevel),
             style: theme.textTheme.titleLarge?.copyWith(
               color: theme.colorScheme.outline,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Keep earning XP to unlock this ${_currentEnemy.isBoss ? 'boss' : 'enemy'}!',
+            l10n.rpgKeepEarningXp,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.outline,
             ),
@@ -865,7 +870,7 @@ class _ManaBar extends StatelessWidget {
               children: [
                 const Icon(Icons.auto_awesome, color: Colors.blue, size: 16),
                 const SizedBox(width: 4),
-                Text('Mana', style: theme.textTheme.labelMedium),
+                Text(AppLocalizations.of(context)!.rpgMana, style: theme.textTheme.labelMedium),
               ],
             ),
             Text(

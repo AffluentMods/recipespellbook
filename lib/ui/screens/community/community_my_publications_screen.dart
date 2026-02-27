@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import '../../../l10n/app_localizations.dart';
 import '../../../services/community_service.dart';
 import '../../widgets/app_snackbar.dart';
 
@@ -34,21 +35,26 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
   }
 
   Future<void> _unpublish(MyPublication pub) async {
+    final l10n = AppLocalizations.of(context)!;
+
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
-        title: const Text('Unpublish?'),
-        content: Text('Remove "${pub.title}" from the community? People who already downloaded it will keep their copy.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Unpublish'),
-          ),
-        ],
-      ),
+      builder: (ctx) {
+        final dl10n = AppLocalizations.of(ctx)!;
+        return AlertDialog(
+          icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+          title: Text(dl10n.communityUnpublishConfirmTitle),
+          content: Text(dl10n.communityUnpublishConfirmMessage(pub.title)),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(dl10n.actionCancel)),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(dl10n.communityUnpublish),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed != true) return;
@@ -56,10 +62,10 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
     final ok = await _community.unpublish(pub.id);
     if (mounted) {
       if (ok) {
-        AppSnackbar.success(context, '"${pub.title}" unpublished');
+        AppSnackbar.success(context, l10n.communityUnpublishSuccess(pub.title));
         _load();
       } else {
-        AppSnackbar.error(context, 'Failed to unpublish');
+        AppSnackbar.error(context, l10n.communityUnpublishFailed);
       }
     }
   }
@@ -67,9 +73,10 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Publications')),
+      appBar: AppBar(title: Text(l10n.communityMyPublications)),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _pubs.isEmpty
@@ -79,9 +86,9 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
           children: [
             Icon(Icons.upload_outlined, size: 48, color: theme.colorScheme.outline),
             const SizedBox(height: 16),
-            Text('No publications yet', style: theme.textTheme.titleMedium),
+            Text(l10n.communityNoPublicationsYet, style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
-            Text('Publish a cookbook to share it with the community.',
+            Text(l10n.communityNoPublicationsMessage,
                 style: TextStyle(color: theme.colorScheme.outline)),
           ],
         ),
@@ -110,6 +117,7 @@ class _PublicationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -127,8 +135,8 @@ class _PublicationTile extends StatelessWidget {
         ),
         subtitle: Text(
           pub.isRemoved
-              ? 'Removed by moderation'
-              : '${pub.recipeCount} recipes · ${pub.downloadCount} downloads · ${timeago.format(pub.createdAt)}',
+              ? l10n.communityRemovedByModeration
+              : l10n.communityPublicationStats(pub.recipeCount, pub.downloadCount, timeago.format(pub.createdAt)),
           style: TextStyle(
             fontSize: 12,
             color: pub.isRemoved ? theme.colorScheme.error : theme.colorScheme.outline,
@@ -138,7 +146,7 @@ class _PublicationTile extends StatelessWidget {
             ? null
             : IconButton(
           icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
-          tooltip: 'Unpublish',
+          tooltip: l10n.communityUnpublish,
           onPressed: onUnpublish,
         ),
       ),

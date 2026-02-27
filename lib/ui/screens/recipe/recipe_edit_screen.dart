@@ -143,8 +143,8 @@ class _ImageCropDialogState extends State<_ImageCropDialog> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
               _hasZoomed
-                  ? 'Pinch to zoom · Cropped area will be saved'
-                  : 'Pinch to zoom and crop · Or use as-is',
+                  ? l10n.pinchToZoomCropped
+                  : l10n.pinchToZoomOrUseAsIs,
               style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
@@ -176,7 +176,7 @@ class _ImageCropDialogState extends State<_ImageCropDialog> {
                       icon: _isSaving
                           ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                           : const Icon(Icons.check),
-                      label: Text(_isSaving ? 'Saving...' : 'Use Photo'),
+                      label: Text(_isSaving ? l10n.savingLabel : l10n.usePhoto),
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
@@ -466,14 +466,14 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
             const SizedBox(height: 24),
             TextFormField(
               controller: _titleController,
-              decoration: InputDecoration(labelText: l10n.recipeFieldTitle, hintText: 'e.g., Grandma\'s Apple Pie'),
+              decoration: InputDecoration(labelText: l10n.recipeFieldTitle, hintText: l10n.hintTitleExample),
               textCapitalization: TextCapitalization.words,
               validator: (value) => (value == null || value.trim().isEmpty) ? l10n.errorGeneric : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _descriptionController,
-              decoration: InputDecoration(labelText: l10n.recipeFieldDescription, hintText: 'A brief description of the recipe'),
+              decoration: InputDecoration(labelText: l10n.recipeFieldDescription, hintText: l10n.hintDescription),
               maxLines: 2,
               textCapitalization: TextCapitalization.sentences,
             ),
@@ -495,11 +495,11 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
               _RatingSelector(rating: _rating, onChanged: (r) => setState(() => _rating = r)),
             const SizedBox(height: 20),
             Row(children: [
-              Expanded(child: TextFormField(controller: _servingsController, decoration: InputDecoration(labelText: l10n.recipeFieldServings, hintText: 'e.g., 4'))),
+              Expanded(child: TextFormField(controller: _servingsController, decoration: InputDecoration(labelText: l10n.recipeFieldServings, hintText: l10n.hintServingsExample))),
               const SizedBox(width: 12),
-              Expanded(child: TextFormField(controller: _prepTimeController, decoration: const InputDecoration(labelText: 'Prep (min)'), keyboardType: TextInputType.number)),
+              Expanded(child: TextFormField(controller: _prepTimeController, decoration: InputDecoration(labelText: l10n.prepMin), keyboardType: TextInputType.number)),
               const SizedBox(width: 12),
-              Expanded(child: TextFormField(controller: _cookTimeController, decoration: const InputDecoration(labelText: 'Cook (min)'), keyboardType: TextInputType.number)),
+              Expanded(child: TextFormField(controller: _cookTimeController, decoration: InputDecoration(labelText: l10n.cookMin), keyboardType: TextInputType.number)),
             ]),
             const SizedBox(height: 16),
             TextFormField(controller: _sourceUrlController, decoration: InputDecoration(labelText: l10n.recipeFieldSource, hintText: 'https://...', prefixIcon: const Icon(Icons.link)), keyboardType: TextInputType.url),
@@ -540,7 +540,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
             const SizedBox(height: 12),
             TextFormField(
               controller: _notesController,
-              decoration: InputDecoration(hintText: 'Tips, variations, storage instructions...', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), alignLabelWithHint: true),
+              decoration: InputDecoration(hintText: l10n.hintNotes, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), alignLabelWithHint: true),
               maxLines: 5,
               minLines: 3,
               textCapitalization: TextCapitalization.sentences,
@@ -571,14 +571,14 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _titleController,
-                  decoration: InputDecoration(labelText: l10n.recipeFieldTitle, hintText: 'e.g., Grandma\'s Apple Pie'),
+                  decoration: InputDecoration(labelText: l10n.recipeFieldTitle, hintText: l10n.hintTitleExample),
                   textCapitalization: TextCapitalization.words,
                   validator: (value) => (value == null || value.trim().isEmpty) ? l10n.errorGeneric : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: InputDecoration(labelText: l10n.recipeFieldDescription, hintText: 'A brief description of the recipe'),
+                  decoration: InputDecoration(labelText: l10n.recipeFieldDescription, hintText: l10n.hintDescription),
                   maxLines: 2,
                   textCapitalization: TextCapitalization.sentences,
                 ),
@@ -599,11 +599,11 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
                   _RatingSelector(rating: _rating, onChanged: (r) => setState(() => _rating = r)),
                 const SizedBox(height: 20),
                 Row(children: [
-                  Expanded(child: TextFormField(controller: _servingsController, decoration: InputDecoration(labelText: l10n.recipeFieldServings, hintText: 'e.g., 4'))),
+                  Expanded(child: TextFormField(controller: _servingsController, decoration: InputDecoration(labelText: l10n.recipeFieldServings, hintText: l10n.hintServingsExample))),
                   const SizedBox(width: 12),
-                  Expanded(child: TextFormField(controller: _prepTimeController, decoration: const InputDecoration(labelText: 'Prep (min)'), keyboardType: TextInputType.number)),
+                  Expanded(child: TextFormField(controller: _prepTimeController, decoration: InputDecoration(labelText: l10n.prepMin), keyboardType: TextInputType.number)),
                   const SizedBox(width: 12),
-                  Expanded(child: TextFormField(controller: _cookTimeController, decoration: const InputDecoration(labelText: 'Cook (min)'), keyboardType: TextInputType.number)),
+                  Expanded(child: TextFormField(controller: _cookTimeController, decoration: InputDecoration(labelText: l10n.cookMin), keyboardType: TextInputType.number)),
                 ]),
                 const SizedBox(height: 16),
                 TextFormField(controller: _sourceUrlController, decoration: InputDecoration(labelText: l10n.recipeFieldSource, hintText: 'https://...', prefixIcon: const Icon(Icons.link)), keyboardType: TextInputType.url),
@@ -612,7 +612,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _notesController,
-                  decoration: InputDecoration(hintText: 'Tips, variations, storage instructions...', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), alignLabelWithHint: true),
+                  decoration: InputDecoration(hintText: l10n.hintNotes, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), alignLabelWithHint: true),
                   maxLines: 5,
                   minLines: 3,
                   textCapitalization: TextCapitalization.sentences,
@@ -737,7 +737,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
               decoration: BoxDecoration(color: theme.colorScheme.primary, shape: BoxShape.circle),
             ),
             title: Text(
-              ing.text.isEmpty ? (ing.isHeader ? '(empty header)' : '(empty ingredient)') : ing.text,
+              ing.text.isEmpty ? (ing.isHeader ? l10n.emptyHeader : l10n.emptyIngredient) : ing.text,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: ing.isHeader ? FontWeight.w700 : FontWeight.normal,
@@ -1033,7 +1033,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
 
         AppSnackbar.successWithAction(
           context,
-          _isEditing ? 'Recipe updated!' : l10n.successSaved,
+          _isEditing ? l10n.recipeUpdated : l10n.successSaved,
           actionLabel: l10n.actionView,
           onAction: () => router.push('/recipe/$recipeId'),
         );
@@ -1289,7 +1289,7 @@ class _ImprovedNutritionSectionState extends State<ImprovedNutritionSection> {
                   _isExpanded ? Icons.expand_less : Icons.expand_more,
                   size: 18,
                 ),
-                label: Text(_isExpanded ? 'Less info' : 'More info'),
+                label: Text(_isExpanded ? l10n.nutritionLessInfo : l10n.nutritionMoreInfo),
               ),
               const Spacer(),
               // Recalculate button (no confirmation needed)
@@ -1350,7 +1350,7 @@ class _NutritionSummaryHeader extends StatelessWidget {
         children: [
           _SummaryItem(
             value: servingsCount.toString(),
-            label: 'Servings',
+            label: AppLocalizations.of(context)!.recipeFieldServings,
             icon: Icons.restaurant,
             theme: theme,
           ),
@@ -1361,7 +1361,7 @@ class _NutritionSummaryHeader extends StatelessWidget {
           ),
           _SummaryItem(
             value: '${totalCalories.round()}',
-            label: 'Total cal',
+            label: AppLocalizations.of(context)!.totalCalories,
             icon: Icons.local_fire_department,
             theme: theme,
           ),
@@ -1372,7 +1372,7 @@ class _NutritionSummaryHeader extends StatelessWidget {
           ),
           _SummaryItem(
             value: '${caloriesPerServing.round()}',
-            label: 'Cal/serving',
+            label: AppLocalizations.of(context)!.caloriesPerServing,
             icon: Icons.person,
             theme: theme,
             isPrimary: true,
@@ -1470,7 +1470,7 @@ class _ViewToggle extends StatelessWidget {
           ),
           Expanded(
             child: _ToggleOption(
-              label: 'Total',
+              label: l10n.nutritionTotal,
               isSelected: !showPerServing,
               onTap: () => onChanged(false),
               theme: theme,
@@ -1579,7 +1579,7 @@ class _MacroDonutChart extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'cal',
+                      AppLocalizations.of(context)!.calAbbrev,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.outline,
                       ),
@@ -1598,21 +1598,21 @@ class _MacroDonutChart extends StatelessWidget {
               children: [
                 _LegendItem(
                   color: const Color(0xFF4CAF50),
-                  label: 'Protein',
+                  label: AppLocalizations.of(context)!.nutritionProtein,
                   percentage: (proteinPct * 100).round(),
                   theme: theme,
                 ),
                 const SizedBox(height: 8),
                 _LegendItem(
                   color: const Color(0xFF2196F3),
-                  label: 'Carbs',
+                  label: AppLocalizations.of(context)!.nutritionCarbs,
                   percentage: (carbsPct * 100).round(),
                   theme: theme,
                 ),
                 const SizedBox(height: 8),
                 _LegendItem(
                   color: const Color(0xFFFF9800),
-                  label: 'Fat',
+                  label: AppLocalizations.of(context)!.nutritionFat,
                   percentage: (fatPct * 100).round(),
                   theme: theme,
                 ),

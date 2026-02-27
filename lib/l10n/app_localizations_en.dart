@@ -5632,4 +5632,1678 @@ class AppLocalizationsEn extends AppLocalizations {
   String tagsRecipeCount(int count) {
     return '$count recipes';
   }
+
+  @override
+  String get communityMyPublications => 'My Publications';
+
+  @override
+  String get communitySearchCookbooks => 'Search cookbooks...';
+
+  @override
+  String get communitySortRecent => 'Recent';
+
+  @override
+  String get communitySortPopular => 'Popular';
+
+  @override
+  String get communitySortMostDownloaded => 'Most Downloaded';
+
+  @override
+  String communityNoResultsFor(String query) {
+    return 'No results for \"$query\"';
+  }
+
+  @override
+  String get communityNoCookbooksYet => 'No cookbooks yet';
+
+  @override
+  String get communityClearSearch => 'Clear search';
+
+  @override
+  String get communityPublish => 'Publish';
+
+  @override
+  String communityByPublisher(String name) {
+    return 'by $name';
+  }
+
+  @override
+  String communityRecipeCount(int count) {
+    return '$count recipes';
+  }
+
+  @override
+  String get communityPublishCookbook => 'Publish Cookbook';
+
+  @override
+  String get communitySignInToPublish => 'Sign in to publish';
+
+  @override
+  String get communitySignInToPublishMessage => 'You need an account to share cookbooks with the community.';
+
+  @override
+  String get communityGoToSettings => 'Go to Settings';
+
+  @override
+  String get communityNoCookbooksToPublish => 'No cookbooks to publish';
+
+  @override
+  String get communityPublishInfo => 'Cookbooks need at least 10 recipes to publish. Your recipes will be shared as a snapshot — updates won\'t sync.';
+
+  @override
+  String get communitySelectCookbook => 'Select a cookbook to publish';
+
+  @override
+  String communityNeedMinRecipes(int count) {
+    return 'Need at least 10 recipes to publish (has $count)';
+  }
+
+  @override
+  String get communityPublishConfirmTitle => 'Publish to Community?';
+
+  @override
+  String communityPublishConfirmMessage(String name, int count) {
+    return 'This will share \"$name\" ($count recipes) publicly. Anyone can browse and download it.\n\nYou can unpublish it anytime.';
+  }
+
+  @override
+  String communityPublishSuccess(String name) {
+    return '\"$name\" published to the community!';
+  }
+
+  @override
+  String get communityPublishFailed => 'Publish failed';
+
+  @override
+  String communityRecipeCountNeedMore(int count) {
+    return '$count recipes (need 10+)';
+  }
+
+  @override
+  String get communityNoPublicationsYet => 'No publications yet';
+
+  @override
+  String get communityNoPublicationsMessage => 'Publish a cookbook to share it with the community.';
+
+  @override
+  String get communityUnpublish => 'Unpublish';
+
+  @override
+  String get communityUnpublishConfirmTitle => 'Unpublish?';
+
+  @override
+  String communityUnpublishConfirmMessage(String title) {
+    return 'Remove \"$title\" from the community? People who already downloaded it will keep their copy.';
+  }
+
+  @override
+  String communityUnpublishSuccess(String title) {
+    return '\"$title\" unpublished';
+  }
+
+  @override
+  String get communityUnpublishFailed => 'Failed to unpublish';
+
+  @override
+  String get communityRemovedByModeration => 'Removed by moderation';
+
+  @override
+  String communityPublicationStats(int recipeCount, int downloadCount, String timeAgo) {
+    return '$recipeCount recipes · $downloadCount downloads · $timeAgo';
+  }
+
+  @override
+  String get communityPublicationNotFound => 'Publication not found';
+
+  @override
+  String get communityReport => 'Report';
+
+  @override
+  String get communityReportTitle => 'Report this cookbook';
+
+  @override
+  String get communityReportSpam => 'Spam or low quality';
+
+  @override
+  String get communityReportInappropriate => 'Inappropriate content';
+
+  @override
+  String get communityReportStolen => 'Stolen / copied recipes';
+
+  @override
+  String get communityReportOther => 'Other';
+
+  @override
+  String get communityReportSuccess => 'Report submitted. Thank you!';
+
+  @override
+  String get communitySignInToReport => 'Sign in to report content';
+
+  @override
+  String get communityDownloadFailed => 'Download failed';
+
+  @override
+  String communityDownloadSuccess(String title, int count) {
+    return 'Downloaded \"$title\" — $count recipes added!';
+  }
+
+  @override
+  String communityDownloadFailedError(String error) {
+    return 'Download failed: $error';
+  }
+
+  @override
+  String communityDownloadCount(int count) {
+    return '$count downloads';
+  }
+
+  @override
+  String get communityDownloading => 'Downloading...';
+
+  @override
+  String get communityDownloadToMyCookbooks => 'Download to My Cookbooks';
+
+  @override
+  String communityPrepTime(int minutes) {
+    return '${minutes}m prep';
+  }
+
+  @override
+  String communityCookTime(int minutes) {
+    return '${minutes}m cook';
+  }
+
+  @override
+  String communityServingsCount(int count) {
+    return '$count servings';
+  }
+
+  @override
+  String communityIngredientCount(int count) {
+    return '$count ingredients';
+  }
+
+  @override
+  String get deleteRecipesTrashMessage => 'Recipes will be moved to trash. You can restore them later.';
+
+  @override
+  String get hintTitleExample => 'e.g., Grandma\'s Apple Pie';
+
+  @override
+  String get hintDescription => 'A brief description of the recipe';
+
+  @override
+  String get hintServingsExample => 'e.g., 4';
+
+  @override
+  String get prepMin => 'Prep (min)';
+
+  @override
+  String get cookMin => 'Cook (min)';
+
+  @override
+  String get hintNotes => 'Tips, variations, storage instructions...';
+
+  @override
+  String get pinchToZoomCropped => 'Pinch to zoom · Cropped area will be saved';
+
+  @override
+  String get pinchToZoomOrUseAsIs => 'Pinch to zoom and crop · Or use as-is';
+
+  @override
+  String get savingLabel => 'Saving...';
+
+  @override
+  String get emptyHeader => '(empty header)';
+
+  @override
+  String get emptyIngredient => '(empty ingredient)';
+
+  @override
+  String get recipeUpdated => 'Recipe updated!';
+
+  @override
+  String get nutritionLessInfo => 'Less info';
+
+  @override
+  String get nutritionMoreInfo => 'More info';
+
+  @override
+  String scaleOriginal(String servings) {
+    return 'Original: $servings';
+  }
+
+  @override
+  String get scaleAdjustQuantities => 'Adjust ingredient quantities';
+
+  @override
+  String get scaleOriginalLabel => '1x (Original)';
+
+  @override
+  String get stepWillBeRemoved => 'This step will be permanently removed.';
+
+  @override
+  String stepsWillBeRemoved(int count) {
+    return 'These $count steps will be permanently removed.';
+  }
+
+  @override
+  String stepCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count steps',
+      one: '1 step',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get instructionsNoSteps => 'No instructions yet';
+
+  @override
+  String get instructionsAddStepsGuide => 'Add steps to guide through the recipe';
+
+  @override
+  String get pinchToZoomPreview => 'Pinch to zoom · This is how your photo will look';
+
+  @override
+  String ingredientCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ingredients',
+      one: '1 ingredient',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ingredientPerLineHint => 'Enter one ingredient per line:\n\n2 cups flour\n1 tsp salt\n3 eggs';
+
+  @override
+  String get ingredientTip => 'Tip: Enter one ingredient per line. Press Enter after each ingredient.';
+
+  @override
+  String get cookbookEditSubtitle => 'Rename, cover photo';
+
+  @override
+  String get shareCookbookSubtitle => 'Link, family, or community';
+
+  @override
+  String shareNamedCookbook(String name) {
+    return 'Share \"$name\"';
+  }
+
+  @override
+  String get oneTimeLink => 'One-Time Link';
+
+  @override
+  String get oneTimeLinkDescription => 'Free • 24h expiry • Anyone can download';
+
+  @override
+  String get familyShare => 'Family Share';
+
+  @override
+  String get familyShareDescription => 'Real-time sync with family members';
+
+  @override
+  String get postToCommunity => 'Post to Community';
+
+  @override
+  String get postToCommunityDescription => 'Publish for anyone to discover & download';
+
+  @override
+  String get signInToShare => 'Sign in to create share links';
+
+  @override
+  String get generatingLink => 'Generating link...';
+
+  @override
+  String get failedToCreateLink => 'Failed to create link';
+
+  @override
+  String get linkCreated => 'Link Created!';
+
+  @override
+  String get expiresIn24Hours => 'Expires in 24 hours';
+
+  @override
+  String get linkCopied => 'Link copied!';
+
+  @override
+  String unlockFeature(String feature) {
+    return 'Unlock $feature';
+  }
+
+  @override
+  String get notNow => 'Not now';
+
+  @override
+  String get upgradeButton => 'Upgrade';
+
+  @override
+  String publishMinRecipes(int count) {
+    return 'Need at least 10 recipes to publish (has $count)';
+  }
+
+  @override
+  String get publishConfirmTitle => 'Post to Community?';
+
+  @override
+  String publishConfirmMessage(String name, int count) {
+    return '\"$name\" ($count recipes) will be publicly visible. Anyone can browse and download it.\n\nYou can remove it anytime from Community → My Publications.';
+  }
+
+  @override
+  String get publishButton => 'Publish';
+
+  @override
+  String get selectCourse => 'Select Course';
+
+  @override
+  String get selectCategory => 'Select Category';
+
+  @override
+  String get taxonomyNone => 'None';
+
+  @override
+  String createTaxonomy(String name) {
+    return 'Create \"$name\"';
+  }
+
+  @override
+  String get addAsNewCourse => 'Add as new course';
+
+  @override
+  String get addAsNewCategory => 'Add as new category';
+
+  @override
+  String doneWithCount(int count) {
+    return 'Done ($count)';
+  }
+
+  @override
+  String get quickAccessEmptyAll => 'No quick access recipes yet';
+
+  @override
+  String get quickAccessEmptyMealPlan => 'No meals planned';
+
+  @override
+  String get quickAccessEmptyPinned => 'No pinned recipes';
+
+  @override
+  String get quickAccessEmptyRecent => 'No recent recipes';
+
+  @override
+  String get importingRecipe => 'Importing recipe…';
+
+  @override
+  String errorWithMessage(String message) {
+    return 'Error: $message';
+  }
+
+  @override
+  String get minutesPrepSuffix => 'm prep';
+
+  @override
+  String get minutesCookSuffix => 'm cook';
+
+  @override
+  String get couldNotOpenBrowser => 'Could not open browser';
+
+  @override
+  String couldNotOpenUrl(String url) {
+    return 'Could not open $url';
+  }
+
+  @override
+  String get discord => 'Discord';
+
+  @override
+  String get discordLinkAccount => 'Link Discord Account';
+
+  @override
+  String get discordLinkSubtitle => 'Connect your Discord for community features';
+
+  @override
+  String get discordSignInFirst => 'Sign in first to link Discord';
+
+  @override
+  String get discordUnlink => 'Unlink Discord';
+
+  @override
+  String get discordUnlinkFailed => 'Failed to unlink Discord';
+
+  @override
+  String get discordUnlinkSubtitle => 'Remove your Discord connection';
+
+  @override
+  String get discordUnlinked => 'Discord unlinked';
+
+  @override
+  String get familyCodeCopied => 'Invite code copied!';
+
+  @override
+  String get familyCopyLink => 'Copy Link';
+
+  @override
+  String get familyCreate => 'Create Family';
+
+  @override
+  String get familyCreateFailed => 'Failed to create family';
+
+  @override
+  String get familyCreateTitle => 'Create Family';
+
+  @override
+  String get familyCreated => 'Family created!';
+
+  @override
+  String get familyDelete => 'Delete Family';
+
+  @override
+  String get familyDeleteConfirm => 'Are you sure you want to delete this family? All members will be removed.';
+
+  @override
+  String get familyDeleted => 'Family deleted';
+
+  @override
+  String get familyEnterInviteCode => 'Enter invite code';
+
+  @override
+  String get familyInvite => 'Invite Members';
+
+  @override
+  String get familyJoinAction => 'Join';
+
+  @override
+  String get familyJoinFailed => 'Failed to join family';
+
+  @override
+  String get familyJoinTitle => 'Join Family';
+
+  @override
+  String get familyJoinWithCode => 'Join with Code';
+
+  @override
+  String familyJoined(String familyName) {
+    return 'Joined $familyName!';
+  }
+
+  @override
+  String get familyLeave => 'Leave Family';
+
+  @override
+  String get familyLeaveAction => 'Leave';
+
+  @override
+  String get familyLeaveConfirm => 'Are you sure you want to leave this family?';
+
+  @override
+  String get familyLeft => 'Left family';
+
+  @override
+  String get familyLinkCopied => 'Invite link copied!';
+
+  @override
+  String get familyManage => 'Manage your family';
+
+  @override
+  String familyMemberRemoved(String displayName) {
+    return '$displayName removed';
+  }
+
+  @override
+  String get familyMembers => 'Members';
+
+  @override
+  String familyMembersCount(int current, int max) {
+    return '$current of $max members';
+  }
+
+  @override
+  String get familyNameHint => 'Family name';
+
+  @override
+  String get familyNewCodeGenerated => 'New invite code generated';
+
+  @override
+  String get familyOwner => 'OWNER';
+
+  @override
+  String get familyRegenerateCode => 'Regenerate Code';
+
+  @override
+  String get familyRemoveMember => 'Remove Member';
+
+  @override
+  String familyRemoveMemberConfirm(String displayName) {
+    return 'Remove $displayName from the family?';
+  }
+
+  @override
+  String get familyRename => 'Rename Family';
+
+  @override
+  String familyShareMessage(String inviteCode, String shareLink) {
+    return 'Join my family on Recipe Spellbook! Code: $inviteCode or use this link: $shareLink';
+  }
+
+  @override
+  String get familyShareSubject => 'Join my Recipe Spellbook family';
+
+  @override
+  String get familyShareUpgradeMessage => 'Upgrade to share cookbooks with family members in real-time.';
+
+  @override
+  String get familySharing => 'Family Sharing';
+
+  @override
+  String get familySharingDescription => 'Share cookbooks, shopping lists, and meal plans with your family.';
+
+  @override
+  String get familySharingSubtitle => 'Share cookbooks, lists & meal plans';
+
+  @override
+  String ingredientSubstitutesFor(String ingredientName) {
+    return 'Substitutes for $ingredientName';
+  }
+
+  @override
+  String get ingredientSubstitutionsNoResults => 'No substitutions found';
+
+  @override
+  String ingredientSubstitutionsNotFound(String ingredientName) {
+    return 'No substitutions found for $ingredientName';
+  }
+
+  @override
+  String get ingredientSubstitutionsTryDifferent => 'Try a different ingredient';
+
+  @override
+  String get integrationsChecking => 'Checking...';
+
+  @override
+  String get integrationsConnectedManage => 'Connected - Tap to manage';
+
+  @override
+  String get integrationsLinked => 'Linked';
+
+  @override
+  String get integrationsLinkedManage => 'Linked - Tap to manage';
+
+  @override
+  String get integrationsNotConnected => 'Not connected';
+
+  @override
+  String get integrationsTapToLink => 'Tap to link';
+
+  @override
+  String get integrationsTapToSignIn => 'Tap to sign in';
+
+  @override
+  String get nutritionCalculateFromEdit => 'Calculate from the edit screen';
+
+  @override
+  String get nutritionCaloriesAlwaysShow => 'Always show calories';
+
+  @override
+  String get nutritionChartStyle => 'Chart Style';
+
+  @override
+  String get nutritionResetDefaults => 'Reset to Defaults';
+
+  @override
+  String get nutritionSettingsLink => 'Nutrition settings';
+
+  @override
+  String get nutritionTapToCalculate => 'Tap to calculate nutrition';
+
+  @override
+  String get nutritionVisibleNutrients => 'Visible Nutrients';
+
+  @override
+  String pantryAddedStaples(int count) {
+    return 'Added $count staples to pantry';
+  }
+
+  @override
+  String get pantryClearAll => 'Clear All';
+
+  @override
+  String get pantryClearMessage => 'Remove all items from your pantry?';
+
+  @override
+  String get pantryCommonStaples => 'Common Staples';
+
+  @override
+  String get pantryEmpty => 'Your pantry is empty';
+
+  @override
+  String get pantryEmptySubtitle => 'Add items you always have on hand';
+
+  @override
+  String get pantryInfoMessage => 'Items in your pantry will be excluded from shopping lists when adding recipe ingredients.';
+
+  @override
+  String pantryItemCount(int count) {
+    return '$count items';
+  }
+
+  @override
+  String get rpgAchievements => 'Achievements';
+
+  @override
+  String get rpgAttack => 'Attack! (10 Mana)';
+
+  @override
+  String get rpgBattleArena => '⚔️ Battle Arena';
+
+  @override
+  String get rpgBoss => 'BOSS';
+
+  @override
+  String get rpgBossDamage => 'Boss Damage';
+
+  @override
+  String get rpgBossDefeated => 'Boss Defeated!';
+
+  @override
+  String get rpgBossFight => 'Boss Fight';
+
+  @override
+  String get rpgChooseYourClass => 'Choose Your Class';
+
+  @override
+  String get rpgClassBonusSubtitle => 'Each class grants unique bonuses';
+
+  @override
+  String get rpgClassBonusesList => 'Class Bonuses';
+
+  @override
+  String get rpgClassBonusesTitle => 'Class Bonuses';
+
+  @override
+  String get rpgComingSoon => 'Coming soon!';
+
+  @override
+  String get rpgCommunity => 'Community';
+
+  @override
+  String get rpgCommunityDescription => 'Compete with other cooks around the world!';
+
+  @override
+  String get rpgCommunityLeaderboard => 'Community Leaderboard';
+
+  @override
+  String get rpgCooked => 'Cooked';
+
+  @override
+  String get rpgCosmetics => 'Cosmetics';
+
+  @override
+  String get rpgCrit => 'CRIT!';
+
+  @override
+  String rpgDaysAgo(int count) {
+    return '$count days ago';
+  }
+
+  @override
+  String rpgDaysCount(int count) {
+    return '$count days';
+  }
+
+  @override
+  String get rpgGemLottery => 'Gem Lottery';
+
+  @override
+  String rpgGemsAvailable(int count) {
+    return '$count gems available';
+  }
+
+  @override
+  String rpgHoursAgo(int count) {
+    return '$count hours ago';
+  }
+
+  @override
+  String get rpgHowYouCompare => 'How You Compare';
+
+  @override
+  String get rpgHp => 'HP';
+
+  @override
+  String get rpgJustNow => 'Just now';
+
+  @override
+  String get rpgKeepEarningXp => 'Keep earning XP to unlock this enemy!';
+
+  @override
+  String rpgKillStreak(int count) {
+    return 'Kill streak: $count 🔥';
+  }
+
+  @override
+  String get rpgLeaderboard => 'Leaderboard';
+
+  @override
+  String rpgLevelN(int level) {
+    return 'Level $level';
+  }
+
+  @override
+  String rpgLevelRequired(int level) {
+    return 'Level $level Required';
+  }
+
+  @override
+  String get rpgLotteryCost => 'Costs 1 gem per spin';
+
+  @override
+  String rpgLotteryResultGems(int amount) {
+    return 'You won $amount gems!';
+  }
+
+  @override
+  String rpgLotteryResultGold(int amount) {
+    return 'You won $amount gold!';
+  }
+
+  @override
+  String get rpgLotteryResultNothing => 'Better luck next time!';
+
+  @override
+  String get rpgLotteryResultRarePet => 'You found a rare pet!';
+
+  @override
+  String rpgLotteryResultXp(int amount) {
+    return 'You earned $amount XP!';
+  }
+
+  @override
+  String get rpgManaHint => 'Earn XP from recipes to regenerate mana • Level up for full refill';
+
+  @override
+  String get rpgMilestones => 'Milestones';
+
+  @override
+  String rpgMinutesAgo(int count) {
+    return '$count minutes ago';
+  }
+
+  @override
+  String get rpgNoMana => 'No Mana!';
+
+  @override
+  String get rpgProfileSettings => 'Profile Settings';
+
+  @override
+  String get rpgQuickActions => 'Quick Actions';
+
+  @override
+  String get rpgRecipes => 'Recipes';
+
+  @override
+  String get rpgReset => 'Reset';
+
+  @override
+  String get rpgResetProgressConfirmMessage => 'This will reset all your RPG progress including level, XP, gold, and gems. This cannot be undone.';
+
+  @override
+  String get rpgResetProgressConfirmTitle => 'Reset Progress?';
+
+  @override
+  String rpgResetsInHours(int count) {
+    return 'Resets in $count hours';
+  }
+
+  @override
+  String rpgResetsInMinutes(int count) {
+    return 'Resets in $count minutes';
+  }
+
+  @override
+  String get rpgSpin => 'Spin!';
+
+  @override
+  String get rpgStreak => 'Streak';
+
+  @override
+  String get rpgVictory => 'Victory!';
+
+  @override
+  String rpgYouDefeated(String name) {
+    return 'You defeated $name!';
+  }
+
+  @override
+  String get rpgYourStatistics => 'Your Statistics';
+
+  @override
+  String get rpgYourStats => 'Your Stats';
+
+  @override
+  String get settingsBrowseCommunity => 'Browse Community';
+
+  @override
+  String get settingsBrowseCommunitySubtitle => 'Discover public cookbooks';
+
+  @override
+  String get settingsCommunity => 'Community';
+
+  @override
+  String get settingsFamily => 'Family';
+
+  @override
+  String get settingsIntegrations => 'Integrations';
+
+  @override
+  String get settingsMyPublications => 'My Publications';
+
+  @override
+  String get settingsMyPublicationsSubtitle => 'Manage your published cookbooks';
+
+  @override
+  String get settingsShoppingPlanning => 'Shopping & Planning';
+
+  @override
+  String shoppingAddCountItems(int count) {
+    return 'Add $count items';
+  }
+
+  @override
+  String get shoppingAddIngredient => 'Add Ingredient';
+
+  @override
+  String shoppingAddedItemName(String name) {
+    return 'Added \"$name\"';
+  }
+
+  @override
+  String shoppingAddedNotFound(int added, int failed) {
+    return '$added added, $failed not found';
+  }
+
+  @override
+  String shoppingAddingTo(String provider) {
+    return 'Adding to $provider…';
+  }
+
+  @override
+  String get shoppingCamera => 'camera';
+
+  @override
+  String shoppingCheckedItemsCount(int count) {
+    return 'Checked items ($count)';
+  }
+
+  @override
+  String shoppingCouldNotAccessSource(String source) {
+    return 'Could not access $source';
+  }
+
+  @override
+  String shoppingCountAdded(int count) {
+    return '$count added';
+  }
+
+  @override
+  String shoppingCreatingListOn(String provider) {
+    return 'Creating list on $provider…';
+  }
+
+  @override
+  String shoppingCurrentOfTotal(int current, int total) {
+    return '$current of $total items';
+  }
+
+  @override
+  String shoppingDeleteListConfirm(String name) {
+    return 'Are you sure you want to delete \"$name\"?';
+  }
+
+  @override
+  String shoppingErrorReadingImage(String error) {
+    return 'Error reading image: $error';
+  }
+
+  @override
+  String shoppingExportFailed(String error) {
+    return 'Export failed: $error';
+  }
+
+  @override
+  String shoppingExportTitle(String name) {
+    return 'Export \"$name\"';
+  }
+
+  @override
+  String get shoppingFamilyShare => 'Family Share';
+
+  @override
+  String get shoppingFamilyShareSubtitle => 'Share list with family or one-time link';
+
+  @override
+  String get shoppingFromPhoto => 'From photo';
+
+  @override
+  String get shoppingFromText => 'From text';
+
+  @override
+  String get shoppingGallery => 'gallery';
+
+  @override
+  String get shoppingImportItems => 'Import items';
+
+  @override
+  String get shoppingImportShoppingList => 'Import shopping list';
+
+  @override
+  String get shoppingImportTextHint => '2 cups flour\nchicken breast\n1 lb ground beef\nmilk\n...';
+
+  @override
+  String get shoppingImportedList => 'Imported List';
+
+  @override
+  String get shoppingIngredientHint => 'e.g., chicken breast, olive oil';
+
+  @override
+  String get shoppingIngredientName => 'Ingredient Name';
+
+  @override
+  String shoppingIngredientsAvailable(int count) {
+    return '$count ingredients available';
+  }
+
+  @override
+  String shoppingItemsAddedCount(int count) {
+    return '$count items added';
+  }
+
+  @override
+  String get shoppingItemsAddedSuccess => 'Items added!';
+
+  @override
+  String shoppingItemsCopiedToClipboard(int count) {
+    return '$count items copied to clipboard';
+  }
+
+  @override
+  String shoppingItemsInCart(int count, String provider) {
+    return '$count items in your $provider cart';
+  }
+
+  @override
+  String shoppingItemsOnInstacartList(int count) {
+    return '$count items on your Instacart list';
+  }
+
+  @override
+  String get shoppingJustAdded => 'Just added';
+
+  @override
+  String shoppingListCopiedOpening(String name) {
+    return 'List copied! Opening $name...';
+  }
+
+  @override
+  String get shoppingListReady => 'Shopping list ready!';
+
+  @override
+  String shoppingNotFoundItems(String items) {
+    return 'Not found: $items';
+  }
+
+  @override
+  String get shoppingOneItemPerLine => 'One item per line';
+
+  @override
+  String get shoppingPartiallyAdded => 'Partially added';
+
+  @override
+  String get shoppingProviderConnected => 'Connected';
+
+  @override
+  String get shoppingRemoveFromList => 'Remove from list';
+
+  @override
+  String get shoppingStartTyping => 'Start typing to see suggestions';
+
+  @override
+  String get shoppingTapToAddToCart => 'Tap to add items directly to your cart';
+
+  @override
+  String get shoppingTapToCreateShoppableList => 'Tap to create a shoppable list';
+
+  @override
+  String get swipeToSwitch => 'Swipe to switch sections';
+
+  @override
+  String get syncFailed => 'Sync failed';
+
+  @override
+  String syncSuccess(int pushed, int pulled) {
+    return 'Synced: $pushed pushed, $pulled pulled';
+  }
+
+  @override
+  String get textSizePreview => 'Preview';
+
+  @override
+  String get transferDeviceDesktop => 'desktop';
+
+  @override
+  String get transferDeviceMobileApp => 'mobile app';
+
+  @override
+  String get transferDeviceThisDevice => 'this device';
+
+  @override
+  String transferExplanation(String currentDevice, String targetDevice) {
+    return 'Move all your recipes, cookbooks, and meal plans from $currentDevice to your $targetDevice. This is a one-time copy, not a sync.';
+  }
+
+  @override
+  String transferImportedSuccess(int count) {
+    return '$count items imported successfully.';
+  }
+
+  @override
+  String get transferOr => 'OR';
+
+  @override
+  String transferReceiveOn(String device) {
+    return 'Receive on $device';
+  }
+
+  @override
+  String transferSendFrom(String device) {
+    return 'Send from $device';
+  }
+
+  @override
+  String transferSendSubtitle(String device) {
+    return 'Generate a code for your $device to receive';
+  }
+
+  @override
+  String get importGuidesTitle => 'Import Guides';
+
+  @override
+  String get importGuidesOpenInBrowser => 'Open guides in browser';
+
+  @override
+  String get importGuideHeroTitle => 'Bring your recipes from anywhere';
+
+  @override
+  String get importGuideHeroSubtitle => 'Tap any guide below for step-by-step instructions with screenshots.';
+
+  @override
+  String get importGuideQuickTipLabel => 'Quick tip';
+
+  @override
+  String get importGuideQuickTipText => 'The fastest way? Copy any recipe link and share it to Recipe Spellbook — works from almost any app.';
+
+  @override
+  String get importGuideWebButton => 'Web';
+
+  @override
+  String get importGuideFollowInBrowser => 'Follow along in browser';
+
+  @override
+  String get importGuideTagPopular => 'Popular';
+
+  @override
+  String get importGuideTagEasiest => 'Easiest';
+
+  @override
+  String get importGuideDifficultyEasy => 'Easy';
+
+  @override
+  String get importGuideDifficultyMedium => 'Medium';
+
+  @override
+  String get importGuideTime15Sec => '15 sec';
+
+  @override
+  String get importGuideTime30Sec => '30 sec';
+
+  @override
+  String get importGuideTime1Min => '1 min';
+
+  @override
+  String get importGuideTime2To5Min => '2–5 min';
+
+  @override
+  String importGuideStepsCount(int count) {
+    return '$count steps';
+  }
+
+  @override
+  String get importGuideCategorySocial => 'Social Media';
+
+  @override
+  String get importGuideCategoryWebsites => 'Websites';
+
+  @override
+  String get importGuideCategoryPhotos => 'Photos & Files';
+
+  @override
+  String get importGuideCategoryOtherApps => 'Other Recipe Apps';
+
+  @override
+  String get importGuideScreenshotNeeded => 'Screenshot needed';
+
+  @override
+  String get importGuideGifNeeded => 'GIF needed';
+
+  @override
+  String get importGuideVideoNeeded => 'Video needed';
+
+  @override
+  String get importGuideInstagramTitle => 'Instagram';
+
+  @override
+  String get importGuideInstagramSubtitle => 'Import from Reels, posts, and stories';
+
+  @override
+  String get importGuideInstagramStep1Title => 'Find a recipe post or Reel';
+
+  @override
+  String get importGuideInstagramStep1Desc => 'Open Instagram and find a recipe you want to save. This works with feed posts, Reels, and carousels.';
+
+  @override
+  String get importGuideInstagramStep2Title => 'Tap the share button';
+
+  @override
+  String get importGuideInstagramStep2Desc => 'Tap the paper plane icon (share) below the post.';
+
+  @override
+  String get importGuideInstagramStep3Title => 'Share to Recipe Spellbook';
+
+  @override
+  String get importGuideInstagramStep3Desc => 'Scroll the app row and tap Recipe Spellbook. If you don\'t see it, tap \"More\" and find it in the list.';
+
+  @override
+  String get importGuideInstagramStep3Tip => 'On Android, you can also copy the link and paste it in the app.';
+
+  @override
+  String get importGuideInstagramStep4Title => 'Review the extracted recipe';
+
+  @override
+  String get importGuideInstagramStep4Desc => 'Our AI reads the caption, hashtags, and any text in the image to build your recipe. Check ingredients and steps, then save.';
+
+  @override
+  String get importGuideInstagramStep5Title => 'Pick a cookbook & save';
+
+  @override
+  String get importGuideInstagramStep5Desc => 'Choose which cookbook to save to, add any tags, and tap Save. Done!';
+
+  @override
+  String get importGuideTiktokTitle => 'TikTok';
+
+  @override
+  String get importGuideTiktokSubtitle => 'Save recipes from cooking videos';
+
+  @override
+  String get importGuideTiktokStep1Title => 'Find a recipe TikTok';
+
+  @override
+  String get importGuideTiktokStep1Desc => 'Open TikTok and find a cooking video you want to save.';
+
+  @override
+  String get importGuideTiktokStep2Title => 'Tap the share arrow';
+
+  @override
+  String get importGuideTiktokStep2Desc => 'Tap the arrow icon on the right side of the video.';
+
+  @override
+  String get importGuideTiktokStep3Title => 'Choose \"Copy link\" or share directly';
+
+  @override
+  String get importGuideTiktokStep3Desc => 'Either tap \"Copy link\" and paste in Recipe Spellbook, or find Recipe Spellbook in the share options.';
+
+  @override
+  String get importGuideTiktokStep3Tip => '\"Copy link\" is often the most reliable method for TikTok.';
+
+  @override
+  String get importGuideTiktokStep4Title => 'Paste the link in Recipe Spellbook';
+
+  @override
+  String get importGuideTiktokStep4Desc => 'Open Recipe Spellbook, tap +, choose \"From Website/Link\", and paste the TikTok URL.';
+
+  @override
+  String get importGuideTiktokStep5Title => 'Review & save';
+
+  @override
+  String get importGuideTiktokStep5Desc => 'The AI extracts the recipe from the video description and comments. Review and save to your cookbook.';
+
+  @override
+  String get importGuideYoutubeTitle => 'YouTube';
+
+  @override
+  String get importGuideYoutubeSubtitle => 'Import from cooking channels & Shorts';
+
+  @override
+  String get importGuideYoutubeStep1Title => 'Find a recipe video';
+
+  @override
+  String get importGuideYoutubeStep1Desc => 'Open YouTube and find a cooking video. Works with regular videos, Shorts, and livestream replays.';
+
+  @override
+  String get importGuideYoutubeStep2Title => 'Tap Share';
+
+  @override
+  String get importGuideYoutubeStep2Desc => 'Tap the Share button below the video title.';
+
+  @override
+  String get importGuideYoutubeStep3Title => 'Copy link or share to app';
+
+  @override
+  String get importGuideYoutubeStep3Desc => 'Tap \"Copy link\" or find Recipe Spellbook in the share sheet.';
+
+  @override
+  String get importGuideYoutubeStep3Tip => 'Many YouTube creators put the full recipe in the video description — this makes extraction more accurate.';
+
+  @override
+  String get importGuideYoutubeStep4Title => 'Paste & import';
+
+  @override
+  String get importGuideYoutubeStep4Desc => 'In Recipe Spellbook, tap + > \"From Website/Link\" and paste. The AI reads the video description for ingredients and steps.';
+
+  @override
+  String get importGuidePinterestTitle => 'Pinterest';
+
+  @override
+  String get importGuidePinterestSubtitle => 'Save pinned recipes to your cookbook';
+
+  @override
+  String get importGuidePinterestStep1Title => 'Open a recipe pin';
+
+  @override
+  String get importGuidePinterestStep1Desc => 'Tap a recipe pin to open it. Most pins link to the original recipe website.';
+
+  @override
+  String get importGuidePinterestStep2Title => 'Tap the source link';
+
+  @override
+  String get importGuidePinterestStep2Desc => 'Tap the link at the top or bottom of the pin to visit the original recipe page.';
+
+  @override
+  String get importGuidePinterestStep2Tip => 'If the pin doesn\'t have a source link, try the share method below instead.';
+
+  @override
+  String get importGuidePinterestStep3Title => 'Copy the website URL';
+
+  @override
+  String get importGuidePinterestStep3Desc => 'Once the recipe website opens in your browser, copy the URL from the address bar.';
+
+  @override
+  String get importGuidePinterestStep4Title => 'Import in Recipe Spellbook';
+
+  @override
+  String get importGuidePinterestStep4Desc => 'Tap + > \"From Website/Link\", paste the URL, and the recipe is extracted automatically.';
+
+  @override
+  String get importGuideWebsiteTitle => 'Any Recipe Website';
+
+  @override
+  String get importGuideWebsiteSubtitle => 'AllRecipes, Food Network, BBC, blogs & more';
+
+  @override
+  String get importGuideWebsiteStep1Title => 'Open the recipe page';
+
+  @override
+  String get importGuideWebsiteStep1Desc => 'Navigate to any recipe on sites like AllRecipes, Food Network, BBC Good Food, Serious Eats, NYT Cooking, or any food blog.';
+
+  @override
+  String get importGuideWebsiteStep2Title => 'Copy the URL';
+
+  @override
+  String get importGuideWebsiteStep2Desc => 'Tap the address bar and copy the full URL to the recipe.';
+
+  @override
+  String get importGuideWebsiteStep3Title => 'Tap + in Recipe Spellbook';
+
+  @override
+  String get importGuideWebsiteStep3Desc => 'Open the app and tap the + button to start adding a new recipe.';
+
+  @override
+  String get importGuideWebsiteStep4Title => 'Choose \"From Website/Link\"';
+
+  @override
+  String get importGuideWebsiteStep4Desc => 'Select the website import option and paste your copied URL.';
+
+  @override
+  String get importGuideWebsiteStep5Title => 'Review & save';
+
+  @override
+  String get importGuideWebsiteStep5Desc => 'The recipe is extracted instantly — title, ingredients, steps, cook times, and even the photo. Review and save.';
+
+  @override
+  String get importGuideWebsiteStep5Tip => 'Works with 10,000+ recipe sites. If extraction fails, try the \"From Text\" method.';
+
+  @override
+  String get importGuidePhotoTitle => 'Photo / Camera';
+
+  @override
+  String get importGuidePhotoSubtitle => 'Scan recipes from books, magazines, or handwritten cards';
+
+  @override
+  String get importGuidePhotoStep1Title => 'Photograph the recipe';
+
+  @override
+  String get importGuidePhotoStep1Desc => 'Take a clear, well-lit photo of a recipe from a cookbook, magazine page, or handwritten recipe card. Make sure all text is readable.';
+
+  @override
+  String get importGuidePhotoStep1Tip => 'For best results: use good lighting, hold steady, and make sure the entire recipe is in frame. Avoid shadows.';
+
+  @override
+  String get importGuidePhotoStep2Title => 'Tap + then \"From Photo\"';
+
+  @override
+  String get importGuidePhotoStep2Desc => 'Open Recipe Spellbook, tap +, and choose \"From Photo\". Select the photo from your gallery or take a new one.';
+
+  @override
+  String get importGuidePhotoStep3Title => 'AI scans the text';
+
+  @override
+  String get importGuidePhotoStep3Desc => 'OCR technology reads the text in your photo and AI intelligently separates the title, ingredients, and instructions.';
+
+  @override
+  String get importGuidePhotoStep4Title => 'Review & fix any errors';
+
+  @override
+  String get importGuidePhotoStep4Desc => 'Check the extracted recipe. OCR occasionally misreads characters — \"1/2\" might become \"1l2\". Fix any errors and save.';
+
+  @override
+  String get importGuidePhotoStep4Tip => 'Handwritten recipes work too, but printed text gives the best results.';
+
+  @override
+  String get importGuidePdfTitle => 'PDF Document';
+
+  @override
+  String get importGuidePdfSubtitle => 'Import from PDF cookbooks or downloads';
+
+  @override
+  String get importGuidePdfStep1Title => 'Have a recipe PDF ready';
+
+  @override
+  String get importGuidePdfStep1Desc => 'This works with downloaded recipe PDFs, ebook cookbooks, scanned documents, or PDFs shared via email.';
+
+  @override
+  String get importGuidePdfStep2Title => 'Tap + then \"From PDF\"';
+
+  @override
+  String get importGuidePdfStep2Desc => 'Open Recipe Spellbook, tap +, choose \"From PDF\", and select your file.';
+
+  @override
+  String get importGuidePdfStep3Title => 'Select the recipe page';
+
+  @override
+  String get importGuidePdfStep3Desc => 'If the PDF has multiple pages, choose which page contains the recipe you want to import.';
+
+  @override
+  String get importGuidePdfStep4Title => 'Review & save';
+
+  @override
+  String get importGuidePdfStep4Desc => 'The recipe is extracted from the PDF. Review the ingredients and steps, then save to your cookbook.';
+
+  @override
+  String get importGuideTextTitle => 'Text / Paste';
+
+  @override
+  String get importGuideTextSubtitle => 'Paste a recipe from messages, email, or notes';
+
+  @override
+  String get importGuideTextStep1Title => 'Copy recipe text';
+
+  @override
+  String get importGuideTextStep1Desc => 'Copy the recipe text from a text message, email, notes app, WhatsApp, or anywhere else.';
+
+  @override
+  String get importGuideTextStep2Title => 'Tap + then \"From Text\"';
+
+  @override
+  String get importGuideTextStep2Desc => 'Open Recipe Spellbook, tap +, and choose \"From Text\".';
+
+  @override
+  String get importGuideTextStep3Title => 'Paste your recipe';
+
+  @override
+  String get importGuideTextStep3Desc => 'Paste the copied text into the text field. The AI will automatically separate the title, ingredients, and steps.';
+
+  @override
+  String get importGuideTextStep3Tip => 'This works even with unformatted text — the AI is smart about parsing ingredient amounts and step instructions.';
+
+  @override
+  String get importGuideTextStep4Title => 'Review & save';
+
+  @override
+  String get importGuideTextStep4Desc => 'Check the parsed recipe, make any adjustments, and save.';
+
+  @override
+  String get importGuidePaprikaTitle => 'Paprika Recipe Manager';
+
+  @override
+  String get importGuidePaprikaSubtitle => 'Bulk import your entire Paprika library';
+
+  @override
+  String get importGuidePaprikaStep1Title => 'Export from Paprika';
+
+  @override
+  String get importGuidePaprikaStep1Desc => 'In Paprika, go to Settings (gear icon) > Export. Choose \"Export All Recipes\" and save as a .paprikarecipes file.';
+
+  @override
+  String get importGuidePaprikaStep2Title => 'Send the file to your device';
+
+  @override
+  String get importGuidePaprikaStep2Desc => 'Email the file to yourself, save to iCloud/Google Drive, or use AirDrop to transfer it.';
+
+  @override
+  String get importGuidePaprikaStep3Title => 'Import in Recipe Spellbook';
+
+  @override
+  String get importGuidePaprikaStep3Desc => 'Open Recipe Spellbook, go to Settings > Data > Import and select the .paprikarecipes file.';
+
+  @override
+  String get importGuidePaprikaStep4Title => 'Wait for import';
+
+  @override
+  String get importGuidePaprikaStep4Desc => 'All your Paprika recipes are imported with ingredients, steps, notes, photos, and categories preserved.';
+
+  @override
+  String get importGuidePaprikaStep4Tip => 'Large libraries (100+ recipes) may take a minute. The app stays responsive while importing.';
+
+  @override
+  String get importGuideOtherAppsTitle => 'Other Recipe Apps';
+
+  @override
+  String get importGuideOtherAppsSubtitle => 'Mealime, CopyMeThat, AnyList, Cookmate, etc.';
+
+  @override
+  String get importGuideOtherAppsStep1Title => 'Export from your current app';
+
+  @override
+  String get importGuideOtherAppsStep1Desc => 'Most recipe apps support exporting to JSON, HTML, or text. Check their Settings > Export or Backup section.';
+
+  @override
+  String get importGuideOtherAppsStep1Tip => 'Common formats: JSON (best), HTML, PDF, or plain text. JSON preserves the most data.';
+
+  @override
+  String get importGuideOtherAppsStep2Title => 'Get the file on your device';
+
+  @override
+  String get importGuideOtherAppsStep2Desc => 'Save or transfer the exported file to your phone using email, cloud storage, or a file transfer method.';
+
+  @override
+  String get importGuideOtherAppsStep3Title => 'Import via Settings';
+
+  @override
+  String get importGuideOtherAppsStep3Desc => 'In Recipe Spellbook, go to Settings > Data > Import and select the exported file. The app handles JSON, HTML, and common recipe formats.';
+
+  @override
+  String get importGuideOtherAppsStep4Title => 'Check your recipes';
+
+  @override
+  String get importGuideOtherAppsStep4Desc => 'Imported recipes appear in your default cookbook. You can reorganize them into different cookbooks afterward.';
+
+  @override
+  String get importGuideDeviceTransferTitle => 'Device Transfer';
+
+  @override
+  String get importGuideDeviceTransferSubtitle => 'Move recipes between phones without an account';
+
+  @override
+  String get importGuideDeviceTransferStep1Title => 'Open Transfer on the OLD device';
+
+  @override
+  String get importGuideDeviceTransferStep1Desc => 'On your old phone, open Recipe Spellbook and go to Menu > Device Transfer > Send.';
+
+  @override
+  String get importGuideDeviceTransferStep2Title => 'Get the transfer code';
+
+  @override
+  String get importGuideDeviceTransferStep2Desc => 'A 6-character code is generated. This code is valid for 15 minutes.';
+
+  @override
+  String get importGuideDeviceTransferStep3Title => 'Enter code on NEW device';
+
+  @override
+  String get importGuideDeviceTransferStep3Desc => 'On your new phone, install Recipe Spellbook and go to Menu > Device Transfer > Receive. Enter the code.';
+
+  @override
+  String get importGuideDeviceTransferStep4Title => 'Recipes transferred!';
+
+  @override
+  String get importGuideDeviceTransferStep4Desc => 'All your recipes, cookbooks, shopping lists, and meal plans are transferred to the new device.';
+
+  @override
+  String get importGuideDeviceTransferStep4Tip => 'Have a paid account? Just sign in on the new device and everything syncs automatically.';
+
+  @override
+  String get themeFrost => 'Frost';
+
+  @override
+  String get themeEmber => 'Ember';
+
+  @override
+  String get themeSpring => 'Spring';
+
+  @override
+  String get themeAlchemist => 'Alchemist';
+
+  @override
+  String get rpgNoAchievementsInCategory => 'No achievements in this category';
+
+  @override
+  String rpgUnlocksItem(String item) {
+    return 'Unlocks: $item';
+  }
+
+  @override
+  String get rpgCategory => 'Category';
+
+  @override
+  String get rpgCompleted => 'Completed';
+
+  @override
+  String get rpgProgress => 'Progress';
+
+  @override
+  String rpgDefeatedEnemy(String name) {
+    return 'Defeated $name!';
+  }
+
+  @override
+  String get rpgAvatars => 'Avatars';
+
+  @override
+  String get rpgFrames => 'Frames';
+
+  @override
+  String get rpgPets => 'Pets';
+
+  @override
+  String get rpgTitles => 'Titles';
+
+  @override
+  String rpgPurchaseItem(String item) {
+    return 'Purchase $item?';
+  }
+
+  @override
+  String get rpgUnlockedViaAchievement => 'Unlocked via achievement';
+
+  @override
+  String get rpgPrice => 'Price';
+
+  @override
+  String get rpgNotEnoughGold => 'Not enough gold';
+
+  @override
+  String get rpgNotEnoughGems => 'Not enough gems';
+
+  @override
+  String rpgPurchased(String item) {
+    return 'Purchased $item!';
+  }
+
+  @override
+  String get rpgOwned => 'Owned';
+
+  @override
+  String get rpgDailyQuests => 'Daily Quests';
+
+  @override
+  String rpgQuestsCompleted(int completed, int total) {
+    return '$completed of $total completed';
+  }
+
+  @override
+  String get rpgWeeklyChallenge => 'Weekly Challenge';
+
+  @override
+  String get rpgQuestsSubtitle => 'Complete quests to earn XP and rewards';
+
+  @override
+  String get rpgRecentXp => 'Recent XP';
+
+  @override
+  String get rpgNoAchievementsYet => 'No achievements yet';
+
+  @override
+  String rpgLv(int level) {
+    return 'Lv.$level';
+  }
+
+  @override
+  String rpgClassBonus(String className) {
+    return '$className Bonus';
+  }
+
+  @override
+  String get rpgLevelUp => 'Level Up!';
+
+  @override
+  String get rpgUnlocked => 'Unlocked!';
+
+  @override
+  String get rpgAchievementUnlocked => 'Achievement Unlocked!';
+
+  @override
+  String get mealPlanAddTitle => 'Add to Meal Plan';
+
+  @override
+  String get mealPlanMealLabel => 'Meal';
+
+  @override
+  String get mealPlanAdding => 'Adding...';
+
+  @override
+  String mealPlanDateFormat(String weekday, String month, int day) {
+    return '$weekday, $month $day';
+  }
 }

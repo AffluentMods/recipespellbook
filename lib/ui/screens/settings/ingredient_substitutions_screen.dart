@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../data/ingredient_substitutions.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Standalone ingredient substitutions screen
 /// Accessible from drawer menu and from long-pressing ingredients in recipes
@@ -57,10 +58,11 @@ class _IngredientSubstitutionsScreenState extends State<IngredientSubstitutionsS
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ingredient Substitutions'),
+        title: Text(l10n.ingredientSubstitutionsTitle),
       ),
       body: Column(
         children: [
@@ -72,7 +74,7 @@ class _IngredientSubstitutionsScreenState extends State<IngredientSubstitutionsS
               focusNode: _focusNode,
               onChanged: _onSearch,
               decoration: InputDecoration(
-                hintText: 'Search for an ingredient...',
+                hintText: l10n.ingredientSubstitutionsSearch,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
@@ -128,12 +130,12 @@ class _IngredientSubstitutionsScreenState extends State<IngredientSubstitutionsS
                   Icon(Icons.search_off, size: 48, color: theme.colorScheme.outline),
                   const SizedBox(height: 12),
                   Text(
-                    'No substitutions found',
+                    l10n.ingredientSubstitutionsNoResults,
                     style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.outline),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Try a different search term',
+                    l10n.ingredientSubstitutionsTryDifferent,
                     style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
                   ),
                 ],
@@ -335,6 +337,7 @@ class _SubstituteRow extends StatelessWidget {
 void showIngredientSubsSheet(BuildContext context, String ingredientName) {
   final entry = findSubsFor(ingredientName);
   final theme = Theme.of(context);
+  final l10n = AppLocalizations.of(context)!;
 
   showModalBottomSheet(
     context: context,
@@ -370,7 +373,7 @@ void showIngredientSubsSheet(BuildContext context, String ingredientName) {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Substitutes for $ingredientName',
+                      l10n.ingredientSubstitutesFor(ingredientName),
                       style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -393,7 +396,7 @@ void showIngredientSubsSheet(BuildContext context, String ingredientName) {
                     Icon(Icons.info_outline, size: 40, color: theme.colorScheme.outline),
                     const SizedBox(height: 12),
                     Text(
-                      'No substitutions found for "$ingredientName"',
+                      l10n.ingredientSubstitutionsNotFound(ingredientName),
                       style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
                       textAlign: TextAlign.center,
                     ),
@@ -408,7 +411,7 @@ void showIngredientSubsSheet(BuildContext context, String ingredientName) {
                         );
                       },
                       icon: const Icon(Icons.search, size: 18),
-                      label: const Text('Search all substitutions'),
+                      label: Text(l10n.ingredientSubstitutionsSearchAll),
                     ),
                   ],
                 ),

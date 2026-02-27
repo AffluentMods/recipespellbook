@@ -213,14 +213,16 @@ class AboutScreen extends StatelessWidget {
     try {
       final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
       if (!launched && context.mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open $url'), behavior: SnackBarBehavior.floating),
+          SnackBar(content: Text(l10n.couldNotOpenUrl(url)), behavior: SnackBarBehavior.floating),
         );
       }
     } catch (e) {
       if (context.mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open $url'), behavior: SnackBarBehavior.floating),
+          SnackBar(content: Text(l10n.couldNotOpenUrl(url)), behavior: SnackBarBehavior.floating),
         );
       }
     }

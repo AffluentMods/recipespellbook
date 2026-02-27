@@ -58,7 +58,7 @@ class AppMenuDrawer extends ConsumerWidget {
                 if (isRpgEnabled)
                   _DrawerItem(
                     icon: Icons.sports_esports_rounded,
-                    label: 'RPG Profile',
+                    label: l10n.menuRpgProfile,
                     onTap: () {
                       Navigator.pop(context);
                       context.push('/rpg/profile');
@@ -66,7 +66,7 @@ class AppMenuDrawer extends ConsumerWidget {
                   ),
 
                 const SizedBox(height: 8),
-                _MenuSectionHeader(title: 'Tools'),
+                _MenuSectionHeader(title: l10n.menuTools),
                 _DrawerItem(
                   icon: Icons.download_rounded,
                   label: l10n.importGuides,
@@ -79,7 +79,7 @@ class AppMenuDrawer extends ConsumerWidget {
                 ),
                 _DrawerItem(
                   icon: Icons.swap_horiz_rounded,
-                  label: _isDesktopPlatform ? 'Sync to mobile' : 'Device transfer',
+                  label: _isDesktopPlatform ? l10n.menuSyncToMobile : l10n.transferTitle,
                   onTap: () {
                     Navigator.pop(context);
                     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -90,7 +90,7 @@ class AppMenuDrawer extends ConsumerWidget {
                 if (authState.isSignedIn && subStatus.tier.hasCloudSync)
                   _DrawerItem(
                     icon: Icons.cloud_sync_rounded,
-                    label: 'Sync now',
+                    label: l10n.syncNow,
                     onTap: () {
                       Navigator.pop(context);
                       _triggerSync(context);
@@ -106,7 +106,7 @@ class AppMenuDrawer extends ConsumerWidget {
                 ),
 
                 const SizedBox(height: 8),
-                _MenuSectionHeader(title: 'Support'),
+                _MenuSectionHeader(title: l10n.menuSupport),
                 _DrawerItem(
                   icon: Icons.headset_mic_rounded,
                   label: l10n.helpTitle,
@@ -132,7 +132,7 @@ class AppMenuDrawer extends ConsumerWidget {
                 if (authState.isSignedIn)
                   _DrawerItem(
                     icon: Icons.logout_rounded,
-                    label: 'Log out',
+                    label: l10n.signOut,
                     color: const Color(0xFFEF5350),
                     onTap: () {
                       final authNotifier = ref.read(authProvider.notifier);
@@ -275,11 +275,12 @@ class HelpSupportScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
         leading: _BackButtonCircle(),
-        title: const Text('Help & Support'),
+        title: Text(l10n.menuHelpSupport),
         centerTitle: true,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -303,9 +304,9 @@ class HelpSupportScreen extends StatelessWidget {
               children: [
                 Icon(Icons.support_agent_rounded, size: 48, color: theme.colorScheme.primary),
                 const SizedBox(height: 12),
-                Text('How can we help?', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                Text(l10n.menuHowCanWeHelp, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
-                Text('Get in touch or browse our guides.',
+                Text(l10n.menuGetInTouch,
                     style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                     textAlign: TextAlign.center),
               ],
@@ -316,22 +317,22 @@ class HelpSupportScreen extends StatelessWidget {
           _SupportCard(
             icon: Icons.forum_rounded, // Discord icon alternative (Icons.discord may not exist in older Flutter)
             iconColor: const Color(0xFF5865F2),
-            title: 'Join our Discord',
-            subtitle: 'Chat with the community, report bugs, suggest features',
+            title: l10n.joinDiscord,
+            subtitle: l10n.joinDiscordSubtitle,
             onTap: () => _launchExternalUrl(context, _discordUrl),
           ),
           const SizedBox(height: 10),
           _SupportCard(
             icon: Icons.email_rounded, iconColor: theme.colorScheme.primary,
-            title: 'Email Support',
+            title: l10n.helpContactUs,
             subtitle: _supportEmail,
             onTap: () => _launchEmail(context, _supportEmail, subject: 'Recipe Spellbook — Support Request'),
           ),
           const SizedBox(height: 10),
           _SupportCard(
             icon: Icons.menu_book_rounded, iconColor: Colors.teal,
-            title: 'Import Guides',
-            subtitle: 'Step-by-step guides for importing your recipes',
+            title: l10n.importGuides,
+            subtitle: l10n.stepByStepGuides,
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ImportGuidesScreen()));
             },
@@ -339,28 +340,28 @@ class HelpSupportScreen extends StatelessWidget {
           const SizedBox(height: 10),
           _SupportCard(
             icon: Icons.language_rounded, iconColor: Colors.orange,
-            title: 'Visit our Website',
+            title: l10n.menuVisitWebsite,
             subtitle: _websiteUrl,
             onTap: () => _launchExternalUrl(context, _websiteUrl),
           ),
           const SizedBox(height: 24),
 
           // ── Feedback section ──
-          Text('FEEDBACK',
+          Text(l10n.settingsFeedback.toUpperCase(),
               style: theme.textTheme.labelSmall?.copyWith(
                   color: theme.colorScheme.outline, fontWeight: FontWeight.w600, letterSpacing: 0.8)),
           const SizedBox(height: 10),
           _SupportCard(
             icon: Icons.lightbulb_outline, iconColor: Colors.amber.shade700,
-            title: 'Submit a Suggestion',
-            subtitle: 'Help us improve Recipe Spellbook',
+            title: l10n.sendSuggestion,
+            subtitle: l10n.sendSuggestionSubtitle,
             onTap: () => _showSuggestionDialog(context),
           ),
           const SizedBox(height: 10),
           _SupportCard(
             icon: Icons.bug_report_outlined, iconColor: Colors.red.shade400,
-            title: 'Submit a Bug',
-            subtitle: 'Something not working right?',
+            title: l10n.reportBug,
+            subtitle: l10n.reportBugSubtitle,
             onTap: () => _showBugReportDialog(context),
           ),
           const SizedBox(height: 32),
@@ -375,6 +376,7 @@ class HelpSupportScreen extends StatelessWidget {
     final descriptionController = TextEditingController();
     final contactController = TextEditingController();
 
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -383,19 +385,19 @@ class HelpSupportScreen extends StatelessWidget {
 
           return AlertDialog(
             icon: Icon(Icons.lightbulb, color: theme.colorScheme.primary, size: 32),
-            title: const Text('Send a Suggestion'),
+            title: Text(l10n.sendSuggestion),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('We\'d love to hear your ideas!',
+                  Text(l10n.suggestionDescription,
                       style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
                   const SizedBox(height: 16),
                   TextField(
                     controller: titleController,
                     decoration: InputDecoration(
-                      labelText: 'Title',
-                      hintText: 'Brief summary of your suggestion',
+                      labelText: l10n.suggestionTitleLabel,
+                      hintText: l10n.suggestionTitleHint,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     textCapitalization: TextCapitalization.sentences,
@@ -404,8 +406,8 @@ class HelpSupportScreen extends StatelessWidget {
                   TextField(
                     controller: descriptionController,
                     decoration: InputDecoration(
-                      labelText: 'Details',
-                      hintText: 'Describe your idea in detail...',
+                      labelText: l10n.suggestionDetailsLabel,
+                      hintText: l10n.suggestionDetailsHint,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       alignLabelWithHint: true,
                     ),
@@ -417,8 +419,8 @@ class HelpSupportScreen extends StatelessWidget {
                   TextField(
                     controller: contactController,
                     decoration: InputDecoration(
-                      labelText: 'Contact (optional)',
-                      hintText: 'Email or Discord username',
+                      labelText: l10n.contactOptionalLabel,
+                      hintText: l10n.contactOptionalHint,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     keyboardType: TextInputType.emailAddress,
@@ -427,11 +429,11 @@ class HelpSupportScreen extends StatelessWidget {
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
               FilledButton.icon(
                 onPressed: isSending ? null : () async {
                   if (titleController.text.trim().isEmpty || descriptionController.text.trim().isEmpty) {
-                    AppSnackbar.warning(ctx, 'Please fill in both fields');
+                    AppSnackbar.warning(ctx, l10n.feedbackFieldsRequired);
                     return;
                   }
                   setDialogState(() => isSending = true);
@@ -443,16 +445,16 @@ class HelpSupportScreen extends StatelessWidget {
                   if (ctx.mounted) {
                     Navigator.pop(ctx);
                     if (success) {
-                      AppSnackbar.success(context, 'Suggestion sent! Thank you!');
+                      AppSnackbar.success(context, l10n.suggestionSent);
                     } else {
-                      AppSnackbar.warning(context, 'Couldn\'t send feedback. Check your internet connection.');
+                      AppSnackbar.warning(context, l10n.feedbackSendError);
                     }
                   }
                 },
                 icon: isSending
                     ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                     : const Icon(Icons.send),
-                label: const Text('Send'),
+                label: Text(l10n.actionSend),
               ),
             ],
           );
@@ -468,6 +470,7 @@ class HelpSupportScreen extends StatelessWidget {
     final stepsController = TextEditingController();
     final contactController = TextEditingController();
 
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -476,19 +479,19 @@ class HelpSupportScreen extends StatelessWidget {
 
           return AlertDialog(
             icon: Icon(Icons.bug_report, color: theme.colorScheme.error, size: 32),
-            title: const Text('Report a Bug'),
+            title: Text(l10n.reportBug),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Help us squash bugs!',
+                  Text(l10n.bugDescription,
                       style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
                   const SizedBox(height: 16),
                   TextField(
                     controller: titleController,
                     decoration: InputDecoration(
-                      labelText: 'Title',
-                      hintText: 'Brief summary of the bug',
+                      labelText: l10n.bugTitleLabel,
+                      hintText: l10n.bugTitleHint,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     textCapitalization: TextCapitalization.sentences,
@@ -497,8 +500,8 @@ class HelpSupportScreen extends StatelessWidget {
                   TextField(
                     controller: descriptionController,
                     decoration: InputDecoration(
-                      labelText: 'Description',
-                      hintText: 'What happened?',
+                      labelText: l10n.bugDetailsLabel,
+                      hintText: l10n.bugDetailsHint,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       alignLabelWithHint: true,
                     ),
@@ -509,8 +512,8 @@ class HelpSupportScreen extends StatelessWidget {
                   TextField(
                     controller: stepsController,
                     decoration: InputDecoration(
-                      labelText: 'Steps to Reproduce (optional)',
-                      hintText: '1. Go to...\n2. Tap on...',
+                      labelText: l10n.bugStepsLabel,
+                      hintText: l10n.bugStepsHint,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       alignLabelWithHint: true,
                     ),
@@ -521,8 +524,8 @@ class HelpSupportScreen extends StatelessWidget {
                   TextField(
                     controller: contactController,
                     decoration: InputDecoration(
-                      labelText: 'Contact (optional)',
-                      hintText: 'Email or Discord username',
+                      labelText: l10n.contactOptionalLabel,
+                      hintText: l10n.contactOptionalHint,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     keyboardType: TextInputType.emailAddress,
@@ -531,11 +534,11 @@ class HelpSupportScreen extends StatelessWidget {
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
               FilledButton.icon(
                 onPressed: isSending ? null : () async {
                   if (titleController.text.trim().isEmpty || descriptionController.text.trim().isEmpty) {
-                    AppSnackbar.warning(ctx, 'Please fill in both fields');
+                    AppSnackbar.warning(ctx, l10n.feedbackFieldsRequired);
                     return;
                   }
                   setDialogState(() => isSending = true);
@@ -548,16 +551,16 @@ class HelpSupportScreen extends StatelessWidget {
                   if (ctx.mounted) {
                     Navigator.pop(ctx);
                     if (success) {
-                      AppSnackbar.success(context, 'Bug report sent! Thank you!');
+                      AppSnackbar.success(context, l10n.bugReportSent);
                     } else {
-                      AppSnackbar.warning(context, 'Couldn\'t send feedback. Check your internet connection.');
+                      AppSnackbar.warning(context, l10n.feedbackSendError);
                     }
                   }
                 },
                 icon: isSending
                     ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                     : const Icon(Icons.send),
-                label: const Text('Send'),
+                label: Text(l10n.actionSend),
               ),
             ],
           );
@@ -661,13 +664,14 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
   }
 
   Widget _buildLoading(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
         _buildAppIcon(theme),
         const SizedBox(width: 14),
         SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.primary)),
         const SizedBox(width: 10),
-        Text('Signing in…', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+        Text(l10n.menuSigningIn, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
       ],
     );
   }
@@ -730,7 +734,7 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
                 children: [
                   Text('Recipe Spellbook', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 2),
-                  Text('Sign in to sync & back up',
+                  Text(l10n.menuSignInSync,
                       style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, fontSize: 12)),
                 ],
               ),
@@ -823,6 +827,7 @@ class _BottomSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isPro = subStatus.isPro;
     final version = ref.watch(appVersionProvider).valueOrNull ?? '...';
 
@@ -835,7 +840,7 @@ class _BottomSection extends ConsumerWidget {
         ),
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
-          child: Text('Recipe Spellbook v$version · Beta',
+          child: Text('${l10n.menuAppVersion(version)} · Beta',
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline.withValues(alpha: 0.45), fontSize: 11)),
         ),
       ],
@@ -870,6 +875,7 @@ class _BottomSection extends ConsumerWidget {
   }
 
   Widget _buildUpgradeButton(BuildContext context, ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       width: double.infinity,
       child: Container(
@@ -888,14 +894,14 @@ class _BottomSection extends ConsumerWidget {
                 rootNavigatorKey.currentContext?.push('/upgrade');
               });
             },
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 11),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 11),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.star_rounded, size: 18, color: Colors.white),
-                  SizedBox(width: 6),
-                  Text('Upgrade to Pro', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
+                  const Icon(Icons.star_rounded, size: 18, color: Colors.white),
+                  const SizedBox(width: 6),
+                  Text(l10n.upgradeToPro, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
                 ],
               ),
             ),
@@ -929,7 +935,7 @@ class _BottomSection extends ConsumerWidget {
               child: const Icon(Icons.star, size: 32, color: Colors.white),
             ),
             const SizedBox(height: 16),
-            Text('Affluent Labs Pro', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            Text(l10n.affluentLabsPro, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 4),
             Text(status.tier.displayName, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
             const SizedBox(height: 8),
@@ -941,15 +947,15 @@ class _BottomSection extends ConsumerWidget {
                 child: Row(children: [
                   Icon(Icons.info_outline, size: 16, color: theme.colorScheme.error),
                   const SizedBox(width: 8),
-                  Expanded(child: Text('Cancelled — access until ${_fmtDate(status.expirationDate)}',
+                  Expanded(child: Text(l10n.cancelledAccessUntil(_fmtDate(status.expirationDate)),
                       style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error))),
                 ]),
               ),
             if (status.tier == SubscriptionTier.premium)
-              Text('Lifetime — never expires',
+              Text(l10n.lifetimeNeverExpires,
                   style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w500))
             else if (status.expirationDate != null && !status.isCancelled)
-              Text('Renews ${_fmtDate(status.expirationDate)}',
+              Text(l10n.renewsDate(_fmtDate(status.expirationDate)),
                   style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
             const SizedBox(height: 24),
             SizedBox(
@@ -1047,7 +1053,7 @@ class _ComingSoonChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(color: theme.colorScheme.primaryContainer, borderRadius: BorderRadius.circular(6)),
-      child: Text('Soon', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: theme.colorScheme.primary)),
+      child: Text(AppLocalizations.of(context)!.comingSoon, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: theme.colorScheme.primary)),
     );
   }
 }
@@ -1068,7 +1074,7 @@ class _RateUsRow extends StatelessWidget {
             children: [
               Icon(Icons.favorite_outline, size: 16, color: theme.colorScheme.primary.withValues(alpha: 0.7)),
               const SizedBox(width: 6),
-              Text('Love the app? Rate us', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w500)),
+              Text(AppLocalizations.of(context)!.aboutRateApp, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w500)),
             ],
           ),
         ),

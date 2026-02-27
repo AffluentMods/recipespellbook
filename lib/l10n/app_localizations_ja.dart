@@ -5123,461 +5123,2135 @@ class AppLocalizationsJa extends AppLocalizations {
   String get createRecipeManually => 'またはレシピを手動で作成';
 
   @override
-  String get transferYourRecipes => 'Transfer your recipes';
+  String get transferYourRecipes => 'レシピを転送';
 
   @override
-  String get transferUpgradeBanner => 'Want automatic sync? Upgrade to Premium for cloud sync across all your devices.';
+  String get transferUpgradeBanner => '自動同期をご希望ですか？プレミアムにアップグレードしてすべてのデバイスでクラウド同期。';
 
   @override
-  String get transferCodeLength => 'Code must be 6 characters';
+  String get transferCodeLength => 'コードは6文字でなければなりません';
 
   @override
-  String get transferItemRecipes => 'All recipes';
+  String get transferItemRecipes => 'すべてのレシピ';
 
   @override
-  String get transferItemCookbooks => 'Cookbooks & categories';
+  String get transferItemCookbooks => 'レシピ本とカテゴリ';
 
   @override
-  String get transferItemMealPlans => 'Meal plans';
+  String get transferItemMealPlans => '食事プラン';
 
   @override
-  String get transferItemShoppingLists => 'Shopping lists';
+  String get transferItemShoppingLists => '買い物リスト';
 
   @override
-  String get transferItemSettings => 'App settings';
+  String get transferItemSettings => 'アプリ設定';
 
   @override
-  String get transferItemAccount => 'Account sign-in (if sender is logged in)';
+  String get transferItemAccount => 'アカウントサインイン（送信者がログインしている場合）';
 
   @override
-  String get codeCopied => 'Code copied!';
+  String get codeCopied => 'コードをコピーしました！';
 
   @override
-  String get transferTitle => 'Transfer Data';
+  String get transferTitle => 'データ転送';
 
   @override
-  String get transferReceiveSubtitle => 'Enter a code or scan QR from the sending device';
+  String get transferReceiveSubtitle => '送信デバイスのコードを入力するかQRをスキャン';
 
   @override
-  String get transferPreparing => 'Preparing your data...';
+  String get transferPreparing => 'データを準備中...';
 
   @override
-  String get transferFailed => 'Transfer failed';
+  String get transferFailed => '転送に失敗しました';
 
   @override
-  String get transferScanDesc => 'Scan this QR on your other device, or enter the code below.';
+  String get transferScanDesc => '他のデバイスでこのQRをスキャンするか、下のコードを入力してください。';
 
   @override
-  String get transferReady => 'Ready to transfer';
+  String get transferReady => '転送の準備ができました';
 
   @override
-  String get transferCodeExpires => 'This code expires in 15 minutes';
+  String get transferCodeExpires => 'このコードは15分で期限切れになります';
 
   @override
-  String get transferComplete => 'Transfer complete!';
+  String get transferComplete => '転送完了！';
 
   @override
-  String get transferAccountSynced => 'Account signed in from sender';
+  String get transferAccountSynced => '送信者からアカウントにサインインしました';
 
   @override
-  String get transferScanQr => 'Scan QR Code';
+  String get transferScanQr => 'QRコードをスキャン';
 
   @override
-  String get transferScanQrDesc => 'Point your camera at the QR on the other device';
+  String get transferScanQrDesc => '他のデバイスのQRにカメラを向けてください';
 
   @override
-  String get transferEnterCode => 'Enter transfer code';
+  String get transferEnterCode => '転送コードを入力';
 
   @override
-  String get transferWhatMoves => 'What gets transferred:';
+  String get transferWhatMoves => '転送される内容：';
 
   @override
-  String get transferMergeNote => 'Existing data on this device will be merged. Duplicates are skipped.';
+  String get transferMergeNote => 'このデバイスの既存データは統合されます。重複はスキップされます。';
 
   @override
-  String get transferPointCamera => 'Point at the QR code on the sending device';
+  String get transferPointCamera => '送信デバイスのQRコードにカメラを向けてください';
 
   @override
-  String get labelPrepMin => 'Prep (min)';
+  String get labelPrepMin => '準備（分）';
 
   @override
-  String get labelCookMin => 'Cook (min)';
+  String get labelCookMin => '調理（分）';
 
   @override
-  String get labelTotalCal => 'Total cal';
+  String get labelTotalCal => '合計カロリー';
 
   @override
-  String get labelCalPerServing => 'Cal/serving';
+  String get labelCalPerServing => 'カロリー/1人分';
 
   @override
-  String get tooltipViewSize => 'View size';
+  String get tooltipViewSize => '表示サイズ';
 
   @override
-  String get pantryClearTitle => 'Clear pantry?';
+  String get pantryClearTitle => 'パントリーをクリアしますか？';
 
   @override
-  String get pantryAddHint => 'Add item to pantry...';
+  String get pantryAddHint => 'パントリーに商品を追加...';
 
   @override
-  String get pantryAddStaples => 'Add all staples';
+  String get pantryAddStaples => 'すべての定番を追加';
 
   @override
-  String get pantrySearchHint => 'Search pantry...';
+  String get pantrySearchHint => 'パントリーを検索...';
 
   @override
-  String get settingsRecipesShopping => 'Recipes & Shopping';
+  String get settingsRecipesShopping => 'レシピと買い物';
 
   @override
-  String get settingsAdvanced => 'Advanced Settings';
+  String get settingsAdvanced => '詳細設定';
 
   @override
-  String get settingsAdvancedSubtitle => 'Tags, courses, categories & more';
+  String get settingsAdvancedSubtitle => 'タグ、コース、カテゴリなど';
 
   @override
-  String get settingsDeleteData => 'Delete Data';
+  String get settingsDeleteData => 'データを削除';
 
   @override
-  String get settingsDeleteDataSubtitle => 'Erase app or cloud data';
+  String get settingsDeleteDataSubtitle => 'アプリまたはクラウドデータを消去';
 
   @override
-  String get settingsUpgradeSubtitle => 'Cloud sync, photos & more';
+  String get settingsUpgradeSubtitle => 'クラウド同期、写真など';
 
   @override
-  String get settingsTextSizeSubtitle => 'Adjust text size across the entire app';
+  String get settingsTextSizeSubtitle => 'アプリ全体のテキストサイズを調整';
 
   @override
-  String get settingsGoogleOrApple => 'Google or Apple';
+  String get settingsGoogleOrApple => 'GoogleまたはApple';
 
   @override
-  String get alwaysVisible => 'Always visible';
+  String get alwaysVisible => '常に表示';
 
   @override
-  String get chartNumbers => 'Numbers';
+  String get chartNumbers => '数字';
 
   @override
-  String get chartDonut => 'Donut';
+  String get chartDonut => 'ドーナツ';
 
   @override
-  String get chartBars => 'Bars';
+  String get chartBars => '棒グラフ';
 
   @override
   String get unitKcal => 'kcal';
 
   @override
-  String get nutritionCustomScale => 'Custom Scale';
+  String get nutritionCustomScale => 'カスタムスケール';
 
   @override
-  String get nutritionScaleLabel => 'Scale multiplier';
+  String get nutritionScaleLabel => '倍率';
 
   @override
-  String get nutritionScaleHint => 'e.g. 0.5, 1.5, 3.0';
+  String get nutritionScaleHint => '例：0.5、1.5、3.0';
 
   @override
-  String get nutritionSet => 'Set';
+  String get nutritionSet => '設定';
 
   @override
-  String get nutritionApplyRecalculate => 'Apply & Recalculate';
+  String get nutritionApplyRecalculate => '適用して再計算';
 
   @override
   String get calAbbrev => 'Cal';
 
   @override
-  String get nutritionServingSizeHint => 'e.g., 1 cup, 100g';
+  String get nutritionServingSizeHint => '例：1カップ、100g';
 
   @override
-  String get shoppingExportList => 'Export list';
+  String get shoppingExportList => 'リストをエクスポート';
 
   @override
-  String get shoppingExportListSubtitle => 'Share as a text file or backup';
+  String get shoppingExportListSubtitle => 'テキストファイルとして共有またはバックアップ';
 
   @override
-  String get shoppingImportList => 'Import list';
+  String get shoppingImportList => 'リストをインポート';
 
   @override
-  String get shoppingImportListSubtitle => 'Add items from a file, photo, or text';
+  String get shoppingImportListSubtitle => 'ファイル、写真、またはテキストから商品を追加';
 
   @override
-  String get shoppingScanBarcodeSubtitle => 'Look up a product to add';
+  String get shoppingScanBarcodeSubtitle => '商品を検索して追加';
 
   @override
-  String get exportBackupFile => 'Backup file';
+  String get exportBackupFile => 'バックアップファイル';
 
   @override
-  String get exportBackupFileSubtitle => 'For transferring to another device or app';
+  String get exportBackupFileSubtitle => '別のデバイスやアプリへの転送用';
 
   @override
-  String get exportFormattedList => 'Formatted list';
+  String get exportFormattedList => 'フォーマット付きリスト';
 
   @override
-  String get exportFormattedListSubtitle => 'With checkboxes — great for notes apps';
+  String get exportFormattedListSubtitle => 'チェックボックス付き — メモアプリに最適';
 
   @override
-  String get exportPlainText => 'Plain text';
+  String get exportPlainText => 'プレーンテキスト';
 
   @override
-  String get exportPlainTextSubtitle => 'Simple list — paste anywhere';
+  String get exportPlainTextSubtitle => 'シンプルなリスト — どこにでも貼り付け可';
 
   @override
-  String get importFromBackupFile => 'From backup file';
+  String get importFromBackupFile => 'バックアップファイルから';
 
   @override
-  String get importFromBackupSubtitle => 'Import a Recipe Spellbook backup';
+  String get importFromBackupSubtitle => 'Recipe Spellbookのバックアップをインポート';
 
   @override
-  String get importFromTextShoppingSubtitle => 'Paste or type a list of items';
+  String get importFromTextShoppingSubtitle => '商品リストを貼り付けまたは入力';
 
   @override
-  String get importFromPhotoOcrSubtitle => 'OCR scan a handwritten or printed list';
+  String get importFromPhotoOcrSubtitle => '手書きまたは印刷されたリストをOCRスキャン';
 
   @override
-  String get importFromPhotoGallerySubtitle => 'Take a photo or pick from gallery';
+  String get importFromPhotoGallerySubtitle => '写真を撮るかギャラリーから選択';
 
   @override
-  String get shoppingSendToStore => 'Send to store';
+  String get shoppingSendToStore => 'ストアに送る';
 
   @override
-  String get shoppingSendToCart => 'Send to cart';
+  String get shoppingSendToCart => 'カートに送る';
 
   @override
-  String get shoppingCopyToClipboard => 'Copy list to clipboard';
+  String get shoppingCopyToClipboard => 'リストをクリップボードにコピー';
 
   @override
-  String get shoppingGoToCart => 'Go to cart';
+  String get shoppingGoToCart => 'カートに移動';
 
   @override
-  String get shoppingAddItems => 'Add items';
+  String get shoppingAddItems => '商品を追加';
 
   @override
-  String get shoppingAddItemHintLong => 'e.g. 2 cups flour, chicken breast...';
+  String get shoppingAddItemHintLong => '例：小麦粉2カップ、鶏胸肉...';
 
   @override
-  String get importReviewItems => 'Review items';
+  String get importReviewItems => '商品を確認';
 
   @override
-  String get importNoItemsDetected => 'No items detected';
+  String get importNoItemsDetected => '商品が検出されませんでした';
 
   @override
-  String get mealPlanDate => 'Date';
+  String get mealPlanDate => '日付';
 
   @override
-  String get mealPlanThisWeekend => 'This Weekend';
+  String get mealPlanThisWeekend => '今週末';
 
   @override
-  String get menuRpgProfile => 'RPG Profile';
+  String get menuRpgProfile => 'RPGプロフィール';
 
   @override
-  String get menuTools => 'Tools';
+  String get menuTools => 'ツール';
 
   @override
-  String get menuSupport => 'Support';
+  String get menuSupport => 'サポート';
 
   @override
-  String get menuHowCanWeHelp => 'How can we help?';
+  String get menuHowCanWeHelp => 'お手伝いしましょうか？';
 
   @override
-  String get menuGetInTouch => 'Get in touch or browse our guides.';
+  String get menuGetInTouch => 'お問い合わせやガイドの閲覧。';
 
   @override
-  String get menuVisitWebsite => 'Visit our Website';
+  String get menuVisitWebsite => 'ウェブサイトを見る';
 
   @override
-  String get feedbackTitleLabel => 'Title';
+  String get feedbackTitleLabel => 'タイトル';
 
   @override
-  String get feedbackDetailsLabel => 'Details';
+  String get feedbackDetailsLabel => '詳細';
 
   @override
-  String get feedbackDescriptionLabel => 'Description';
+  String get feedbackDescriptionLabel => '説明';
 
   @override
-  String get menuSigningIn => 'Signing in…';
+  String get menuSigningIn => 'サインイン中…';
 
   @override
-  String get menuSignInSync => 'Sign in to sync & back up';
+  String get menuSignInSync => 'サインインして同期・バックアップ';
 
   @override
-  String get tagsSave => 'Save Tags';
+  String get tagsSave => 'タグを保存';
 
   @override
-  String get recipeFieldCategories => 'Categories';
+  String get recipeFieldCategories => 'カテゴリ';
 
   @override
-  String get selectCategories => 'Select categories';
+  String get selectCategories => 'カテゴリを選択';
 
   @override
-  String get searchOrCreateNew => 'Search or create new...';
+  String get searchOrCreateNew => '検索または新規作成...';
 
   @override
-  String get noMatchesFound => 'No matches found';
+  String get noMatchesFound => '一致するものが見つかりません';
 
   @override
-  String get taxonomyAddCategoryNew => 'Add as new category';
+  String get taxonomyAddCategoryNew => '新しいカテゴリとして追加';
 
   @override
-  String get ingredientSubstitutionsTitle => 'Ingredient Substitutions';
+  String get ingredientSubstitutionsTitle => '食材の代替品';
 
   @override
-  String get ingredientSubstitutionsSearch => 'Search for an ingredient...';
+  String get ingredientSubstitutionsSearch => '食材を検索...';
 
   @override
-  String get ingredientSubstitutionsSearchAll => 'Search all substitutions';
+  String get ingredientSubstitutionsSearchAll => 'すべての代替品を検索';
 
   @override
-  String get ingredientName => 'Ingredient Name';
+  String get ingredientName => '食材名';
 
   @override
-  String get ingredientNameHint => 'e.g. turmeric, tahini, miso';
+  String get ingredientNameHint => '例：ターメリック、タヒニ、味噌';
 
   @override
-  String get ingredientBulkHint => 'Enter one ingredient per line:\n\n2 cups flour\n1 tsp salt\n3 eggs';
+  String get ingredientBulkHint => '1行に1つの食材を入力：\n\n小麦粉2カップ\n塩小さじ1\n卵3個';
 
   @override
-  String get viewPlans => 'View Plans';
+  String get viewPlans => 'プランを見る';
 
   @override
-  String get renewsLabel => 'Renews';
+  String get renewsLabel => '更新日';
 
   @override
-  String get upgradeToProUnlock => 'Upgrade to Pro to unlock';
+  String get upgradeToProUnlock => 'Proにアップグレードしてアンロック';
 
   @override
-  String get rpgFightAgain => 'Fight Again';
+  String get rpgFightAgain => 'もう一度戦う';
 
   @override
-  String get rpgAwesome => 'Awesome!';
+  String get rpgAwesome => 'すごい！';
 
   @override
-  String get rpgPurchase => 'Purchase';
+  String get rpgPurchase => '購入';
 
   @override
-  String get rpgEquipped => 'Equipped';
+  String get rpgEquipped => '装備中';
 
   @override
-  String get rpgClaim => 'Claim';
+  String get rpgClaim => '受け取る';
 
   @override
-  String get rpgGuild => 'Guild';
+  String get rpgGuild => 'ギルド';
 
   @override
   String get rpgDmg => 'DMG';
 
   @override
-  String get rpgMana => 'Mana';
+  String get rpgMana => 'マナ';
 
   @override
-  String get rpgLevel => 'Level';
+  String get rpgLevel => 'レベル';
 
   @override
-  String get rpgTotalXp => 'Total XP';
+  String get rpgTotalXp => '合計XP';
 
   @override
-  String get rpgLoginStreak => 'Login Streak';
+  String get rpgLoginStreak => 'ログイン連続日数';
 
   @override
-  String get rpgGoldEarned => 'Gold Earned';
+  String get rpgGoldEarned => '獲得ゴールド';
 
   @override
-  String get rpgGemsEarned => 'Gems Earned';
+  String get rpgGemsEarned => '獲得ジェム';
 
   @override
-  String get rpgNextLevel => 'Next Level';
+  String get rpgNextLevel => '次のレベル';
 
   @override
-  String get rpgNotifyMe => 'Notify Me';
+  String get rpgNotifyMe => '通知する';
 
   @override
-  String get rpgGold => 'Gold';
+  String get rpgGold => 'ゴールド';
 
   @override
-  String get rpgGems => 'Gems';
+  String get rpgGems => 'ジェム';
 
   @override
-  String get rpgLottery => 'Gem Lottery';
+  String get rpgLottery => 'ジェム抽選';
 
   @override
-  String get rpgClasses => 'Classes';
+  String get rpgClasses => 'クラス';
 
   @override
-  String get rpgDisplayName => 'Display Name';
+  String get rpgDisplayName => '表示名';
 
   @override
-  String get rpgResetProgress => 'Reset Progress';
+  String get rpgResetProgress => '進捗をリセット';
 
   @override
-  String get rpgResetProgressSubtitle => 'Start over from level 1';
+  String get rpgResetProgressSubtitle => 'レベル1からやり直す';
 
   @override
-  String get rpgRecipeRarity => 'Recipe Rarity';
+  String get rpgRecipeRarity => 'レシピのレアリティ';
 
   @override
-  String get settingsNoMatchingSettings => 'No matching settings';
+  String get settingsNoMatchingSettings => '一致する設定がありません';
 
   @override
-  String get settingsSearchHint => 'Search settings...';
+  String get settingsSearchHint => '設定を検索...';
 
   @override
-  String get textSizeSmall => 'Small';
+  String get textSizeSmall => '小';
 
   @override
-  String get textSizeDefault => 'Default';
+  String get textSizeDefault => 'デフォルト';
 
   @override
-  String get textSizeMedium => 'Medium';
+  String get textSizeMedium => '中';
 
   @override
-  String get textSizeLarge => 'Large';
+  String get textSizeLarge => '大';
 
   @override
-  String get textSizeExtraLarge => 'Extra Large';
+  String get textSizeExtraLarge => '特大';
 
   @override
-  String get resetDataClearedDesc => 'All data has been cleared successfully.\n\nWould you like to import the 10 default starter recipes?';
+  String get resetDataClearedDesc => 'すべてのデータが正常にクリアされました。\n\nデフォルトのスターターレシピ10件をインポートしますか？';
 
   @override
-  String get importingDefaultRecipes => 'Importing default recipes...';
+  String get importingDefaultRecipes => 'デフォルトレシピをインポート中...';
 
   @override
-  String get checking => 'Checking...';
+  String get checking => '確認中...';
 
   @override
-  String get connectedTapToManage => 'Connected • Tap to manage';
+  String get connectedTapToManage => '接続済み • タップして管理';
 
   @override
-  String get notConnected => 'Not connected';
+  String get notConnected => '未接続';
 
   @override
-  String get tapToSignIn => 'Tap to sign in';
+  String get tapToSignIn => 'タップしてサインイン';
 
   @override
-  String get noneSelected => 'None Selected';
+  String get noneSelected => '未選択';
 
   @override
-  String get partialBackup => 'Partial Backup';
+  String get partialBackup => '部分バックアップ';
 
   @override
-  String get settingsShopping => 'Shopping & Planning';
+  String get settingsShopping => '買い物と計画';
 
   @override
-  String get settingsManage => 'Manage';
+  String get settingsManage => '管理';
 
   @override
-  String get manageTags => 'Manage Tags';
+  String get manageTags => 'タグを管理';
 
   @override
   String tagsApplied(int count) {
-    return '$count tags applied';
+    return '$count個のタグを適用';
   }
 
   @override
   String tagsEditTitle(String name) {
-    return 'Edit \"$name\"';
+    return '「$name」を編集';
   }
 
   @override
-  String get tagsEditComingSoon => 'Tag editing coming soon!';
+  String get tagsEditComingSoon => 'タグ編集は近日公開！';
 
   @override
   String tagsRecipeCount(int count) {
-    return '$count recipes';
+    return '$count件のレシピ';
+  }
+
+  @override
+  String get communityMyPublications => 'マイ出版物';
+
+  @override
+  String get communitySearchCookbooks => 'レシピ本を検索...';
+
+  @override
+  String get communitySortRecent => '新着';
+
+  @override
+  String get communitySortPopular => '人気';
+
+  @override
+  String get communitySortMostDownloaded => 'ダウンロード数順';
+
+  @override
+  String communityNoResultsFor(String query) {
+    return '「$query」の検索結果がありません';
+  }
+
+  @override
+  String get communityNoCookbooksYet => 'まだレシピ本がありません';
+
+  @override
+  String get communityClearSearch => '検索をクリア';
+
+  @override
+  String get communityPublish => '公開';
+
+  @override
+  String communityByPublisher(String name) {
+    return '$name作';
+  }
+
+  @override
+  String communityRecipeCount(int count) {
+    return '$count件のレシピ';
+  }
+
+  @override
+  String get communityPublishCookbook => 'レシピ本を公開';
+
+  @override
+  String get communitySignInToPublish => '公開するにはサインイン';
+
+  @override
+  String get communitySignInToPublishMessage => 'コミュニティでレシピ本を共有するにはアカウントが必要です。';
+
+  @override
+  String get communityGoToSettings => '設定へ移動';
+
+  @override
+  String get communityNoCookbooksToPublish => '公開するレシピ本がありません';
+
+  @override
+  String get communityPublishInfo => 'レシピ本には公開に10件以上のレシピが必要です。レシピはスナップショットとして共有され、更新は同期されません。';
+
+  @override
+  String get communitySelectCookbook => '公開するレシピ本を選択';
+
+  @override
+  String communityNeedMinRecipes(int count) {
+    return '公開には10件以上のレシピが必要です（現在$count件）';
+  }
+
+  @override
+  String get communityPublishConfirmTitle => 'コミュニティに公開しますか？';
+
+  @override
+  String communityPublishConfirmMessage(String name, int count) {
+    return '「$name」（$count件のレシピ）が公開されます。誰でも閲覧・ダウンロードできます。\n\nいつでも公開を取り消せます。';
+  }
+
+  @override
+  String communityPublishSuccess(String name) {
+    return '「$name」をコミュニティに公開しました！';
+  }
+
+  @override
+  String get communityPublishFailed => '公開に失敗しました';
+
+  @override
+  String communityRecipeCountNeedMore(int count) {
+    return '$count件のレシピ（10件以上必要）';
+  }
+
+  @override
+  String get communityNoPublicationsYet => 'まだ出版物がありません';
+
+  @override
+  String get communityNoPublicationsMessage => 'レシピ本を公開してコミュニティと共有しましょう。';
+
+  @override
+  String get communityUnpublish => '公開を取り消す';
+
+  @override
+  String get communityUnpublishConfirmTitle => '公開を取り消しますか？';
+
+  @override
+  String communityUnpublishConfirmMessage(String title) {
+    return '「$title」をコミュニティから削除しますか？すでにダウンロードした人のコピーは残ります。';
+  }
+
+  @override
+  String communityUnpublishSuccess(String title) {
+    return '「$title」の公開を取り消しました';
+  }
+
+  @override
+  String get communityUnpublishFailed => '公開取り消しに失敗しました';
+
+  @override
+  String get communityRemovedByModeration => 'モデレーションにより削除されました';
+
+  @override
+  String communityPublicationStats(int recipeCount, int downloadCount, String timeAgo) {
+    return '$recipeCount件のレシピ · $downloadCountダウンロード · $timeAgo';
+  }
+
+  @override
+  String get communityPublicationNotFound => '出版物が見つかりません';
+
+  @override
+  String get communityReport => '報告';
+
+  @override
+  String get communityReportTitle => 'このレシピ本を報告';
+
+  @override
+  String get communityReportSpam => 'スパムまたは低品質';
+
+  @override
+  String get communityReportInappropriate => '不適切なコンテンツ';
+
+  @override
+  String get communityReportStolen => '盗用・コピーされたレシピ';
+
+  @override
+  String get communityReportOther => 'その他';
+
+  @override
+  String get communityReportSuccess => '報告を送信しました。ありがとうございます！';
+
+  @override
+  String get communitySignInToReport => 'コンテンツを報告するにはサインイン';
+
+  @override
+  String get communityDownloadFailed => 'ダウンロードに失敗しました';
+
+  @override
+  String communityDownloadSuccess(String title, int count) {
+    return '「$title」をダウンロード — $count件のレシピを追加！';
+  }
+
+  @override
+  String communityDownloadFailedError(String error) {
+    return 'ダウンロードに失敗しました：$error';
+  }
+
+  @override
+  String communityDownloadCount(int count) {
+    return '$countダウンロード';
+  }
+
+  @override
+  String get communityDownloading => 'ダウンロード中...';
+
+  @override
+  String get communityDownloadToMyCookbooks => 'マイレシピ本にダウンロード';
+
+  @override
+  String communityPrepTime(int minutes) {
+    return '$minutes分準備';
+  }
+
+  @override
+  String communityCookTime(int minutes) {
+    return '$minutes分調理';
+  }
+
+  @override
+  String communityServingsCount(int count) {
+    return '$count人分';
+  }
+
+  @override
+  String communityIngredientCount(int count) {
+    return '$count種の材料';
+  }
+
+  @override
+  String get deleteRecipesTrashMessage => 'レシピはゴミ箱に移動されます。後で復元できます。';
+
+  @override
+  String get hintTitleExample => '例：おばあちゃんのアップルパイ';
+
+  @override
+  String get hintDescription => 'レシピの簡単な説明';
+
+  @override
+  String get hintServingsExample => '例：4';
+
+  @override
+  String get prepMin => '準備（分）';
+
+  @override
+  String get cookMin => '調理（分）';
+
+  @override
+  String get hintNotes => 'ヒント、バリエーション、保存方法...';
+
+  @override
+  String get pinchToZoomCropped => 'ピンチでズーム · トリミング部分が保存されます';
+
+  @override
+  String get pinchToZoomOrUseAsIs => 'ピンチでズームしてトリミング · またはそのまま使用';
+
+  @override
+  String get savingLabel => '保存中...';
+
+  @override
+  String get emptyHeader => '（空の見出し）';
+
+  @override
+  String get emptyIngredient => '（空の材料）';
+
+  @override
+  String get recipeUpdated => 'レシピを更新しました！';
+
+  @override
+  String get nutritionLessInfo => '情報を少なく';
+
+  @override
+  String get nutritionMoreInfo => '情報を多く';
+
+  @override
+  String scaleOriginal(String servings) {
+    return 'オリジナル：$servings';
+  }
+
+  @override
+  String get scaleAdjustQuantities => '材料の量を調整';
+
+  @override
+  String get scaleOriginalLabel => '1x（オリジナル）';
+
+  @override
+  String get stepWillBeRemoved => 'このステップは完全に削除されます。';
+
+  @override
+  String stepsWillBeRemoved(int count) {
+    return 'これら$countステップは完全に削除されます。';
+  }
+
+  @override
+  String stepCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countステップ',
+      one: '1ステップ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get instructionsNoSteps => 'まだ手順がありません';
+
+  @override
+  String get instructionsAddStepsGuide => 'レシピのガイドとなるステップを追加';
+
+  @override
+  String get pinchToZoomPreview => 'ピンチでズーム · 写真の仕上がりプレビュー';
+
+  @override
+  String ingredientCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count種の材料',
+      one: '1種の材料',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ingredientPerLineHint => '1行に1つの材料を入力：\n\n小麦粉2カップ\n塩小さじ1\n卵3個';
+
+  @override
+  String get ingredientTip => 'ヒント：1行に1つの材料を入力してください。各材料の後にEnterを押してください。';
+
+  @override
+  String get cookbookEditSubtitle => '名前変更、カバー写真';
+
+  @override
+  String get shareCookbookSubtitle => 'リンク、ファミリー、またはコミュニティ';
+
+  @override
+  String shareNamedCookbook(String name) {
+    return '「$name」を共有';
+  }
+
+  @override
+  String get oneTimeLink => 'ワンタイムリンク';
+
+  @override
+  String get oneTimeLinkDescription => '無料 • 24時間で期限切れ • 誰でもダウンロード可';
+
+  @override
+  String get familyShare => 'ファミリー共有';
+
+  @override
+  String get familyShareDescription => '家族とリアルタイム同期';
+
+  @override
+  String get postToCommunity => 'コミュニティに投稿';
+
+  @override
+  String get postToCommunityDescription => '誰でも発見・ダウンロードできるよう公開';
+
+  @override
+  String get signInToShare => '共有リンクを作成するにはサインイン';
+
+  @override
+  String get generatingLink => 'リンクを生成中...';
+
+  @override
+  String get failedToCreateLink => 'リンクの作成に失敗しました';
+
+  @override
+  String get linkCreated => 'リンクを作成しました！';
+
+  @override
+  String get expiresIn24Hours => '24時間で期限切れ';
+
+  @override
+  String get linkCopied => 'リンクをコピーしました！';
+
+  @override
+  String unlockFeature(String feature) {
+    return '$featureをアンロック';
+  }
+
+  @override
+  String get notNow => '今はしない';
+
+  @override
+  String get upgradeButton => 'アップグレード';
+
+  @override
+  String publishMinRecipes(int count) {
+    return '公開には10件以上のレシピが必要です（現在$count件）';
+  }
+
+  @override
+  String get publishConfirmTitle => 'コミュニティに投稿しますか？';
+
+  @override
+  String publishConfirmMessage(String name, int count) {
+    return '「$name」（$count件のレシピ）が公開されます。誰でも閲覧・ダウンロードできます。\n\nコミュニティ → マイ出版物からいつでも削除できます。';
+  }
+
+  @override
+  String get publishButton => '公開';
+
+  @override
+  String get selectCourse => 'コースを選択';
+
+  @override
+  String get selectCategory => 'カテゴリを選択';
+
+  @override
+  String get taxonomyNone => 'なし';
+
+  @override
+  String createTaxonomy(String name) {
+    return '「$name」を作成';
+  }
+
+  @override
+  String get addAsNewCourse => '新しいコースとして追加';
+
+  @override
+  String get addAsNewCategory => '新しいカテゴリとして追加';
+
+  @override
+  String doneWithCount(int count) {
+    return '完了（$count）';
+  }
+
+  @override
+  String get quickAccessEmptyAll => 'クイックアクセスのレシピがまだありません';
+
+  @override
+  String get quickAccessEmptyMealPlan => '計画された食事がありません';
+
+  @override
+  String get quickAccessEmptyPinned => '固定されたレシピがありません';
+
+  @override
+  String get quickAccessEmptyRecent => '最近のレシピがありません';
+
+  @override
+  String get importingRecipe => 'レシピをインポート中…';
+
+  @override
+  String errorWithMessage(String message) {
+    return 'エラー：$message';
+  }
+
+  @override
+  String get minutesPrepSuffix => '分準備';
+
+  @override
+  String get minutesCookSuffix => '分調理';
+
+  @override
+  String get couldNotOpenBrowser => 'ブラウザを開けませんでした';
+
+  @override
+  String couldNotOpenUrl(String url) {
+    return '$urlを開けませんでした';
+  }
+
+  @override
+  String get discord => 'Discord';
+
+  @override
+  String get discordLinkAccount => 'Discordアカウントを連携';
+
+  @override
+  String get discordLinkSubtitle => 'コミュニティ機能のためにDiscordを接続';
+
+  @override
+  String get discordSignInFirst => 'Discordを連携するにはまずサインイン';
+
+  @override
+  String get discordUnlink => 'Discordの連携を解除';
+
+  @override
+  String get discordUnlinkFailed => 'Discordの連携解除に失敗しました';
+
+  @override
+  String get discordUnlinkSubtitle => 'Discordの接続を解除';
+
+  @override
+  String get discordUnlinked => 'Discordの連携を解除しました';
+
+  @override
+  String get familyCodeCopied => '招待コードをコピーしました！';
+
+  @override
+  String get familyCopyLink => 'リンクをコピー';
+
+  @override
+  String get familyCreate => 'ファミリーを作成';
+
+  @override
+  String get familyCreateFailed => 'ファミリーの作成に失敗しました';
+
+  @override
+  String get familyCreateTitle => 'ファミリーを作成';
+
+  @override
+  String get familyCreated => 'ファミリーを作成しました！';
+
+  @override
+  String get familyDelete => 'ファミリーを削除';
+
+  @override
+  String get familyDeleteConfirm => 'このファミリーを削除してもよろしいですか？すべてのメンバーが削除されます。';
+
+  @override
+  String get familyDeleted => 'ファミリーを削除しました';
+
+  @override
+  String get familyEnterInviteCode => '招待コードを入力';
+
+  @override
+  String get familyInvite => 'メンバーを招待';
+
+  @override
+  String get familyJoinAction => '参加';
+
+  @override
+  String get familyJoinFailed => 'ファミリーへの参加に失敗しました';
+
+  @override
+  String get familyJoinTitle => 'ファミリーに参加';
+
+  @override
+  String get familyJoinWithCode => 'コードで参加';
+
+  @override
+  String familyJoined(String familyName) {
+    return '$familyNameに参加しました！';
+  }
+
+  @override
+  String get familyLeave => 'ファミリーを脱退';
+
+  @override
+  String get familyLeaveAction => '脱退';
+
+  @override
+  String get familyLeaveConfirm => 'このファミリーを脱退してもよろしいですか？';
+
+  @override
+  String get familyLeft => 'ファミリーを脱退しました';
+
+  @override
+  String get familyLinkCopied => '招待リンクをコピーしました！';
+
+  @override
+  String get familyManage => 'ファミリーを管理';
+
+  @override
+  String familyMemberRemoved(String displayName) {
+    return '$displayNameを削除しました';
+  }
+
+  @override
+  String get familyMembers => 'メンバー';
+
+  @override
+  String familyMembersCount(int current, int max) {
+    return '$max人中$current人のメンバー';
+  }
+
+  @override
+  String get familyNameHint => 'ファミリー名';
+
+  @override
+  String get familyNewCodeGenerated => '新しい招待コードを生成しました';
+
+  @override
+  String get familyOwner => 'オーナー';
+
+  @override
+  String get familyRegenerateCode => 'コードを再生成';
+
+  @override
+  String get familyRemoveMember => 'メンバーを削除';
+
+  @override
+  String familyRemoveMemberConfirm(String displayName) {
+    return '$displayNameをファミリーから削除しますか？';
+  }
+
+  @override
+  String get familyRename => 'ファミリー名を変更';
+
+  @override
+  String familyShareMessage(String inviteCode, String shareLink) {
+    return 'Recipe Spellbookのファミリーに参加してください！コード：$inviteCodeまたはこのリンクを使用：$shareLink';
+  }
+
+  @override
+  String get familyShareSubject => 'Recipe Spellbookのファミリーに参加';
+
+  @override
+  String get familyShareUpgradeMessage => 'ファミリーメンバーとリアルタイムでレシピ本を共有するにはアップグレードしてください。';
+
+  @override
+  String get familySharing => 'ファミリー共有';
+
+  @override
+  String get familySharingDescription => 'レシピ本、買い物リスト、食事プランを家族と共有。';
+
+  @override
+  String get familySharingSubtitle => 'レシピ本、リスト、食事プランを共有';
+
+  @override
+  String ingredientSubstitutesFor(String ingredientName) {
+    return '$ingredientNameの代替品';
+  }
+
+  @override
+  String get ingredientSubstitutionsNoResults => '代替品が見つかりません';
+
+  @override
+  String ingredientSubstitutionsNotFound(String ingredientName) {
+    return '$ingredientNameの代替品が見つかりません';
+  }
+
+  @override
+  String get ingredientSubstitutionsTryDifferent => '別の食材を試してください';
+
+  @override
+  String get integrationsChecking => '確認中...';
+
+  @override
+  String get integrationsConnectedManage => '接続済み - タップして管理';
+
+  @override
+  String get integrationsLinked => '連携済み';
+
+  @override
+  String get integrationsLinkedManage => '連携済み - タップして管理';
+
+  @override
+  String get integrationsNotConnected => '未接続';
+
+  @override
+  String get integrationsTapToLink => 'タップして連携';
+
+  @override
+  String get integrationsTapToSignIn => 'タップしてサインイン';
+
+  @override
+  String get nutritionCalculateFromEdit => '編集画面から計算';
+
+  @override
+  String get nutritionCaloriesAlwaysShow => '常にカロリーを表示';
+
+  @override
+  String get nutritionChartStyle => 'チャートスタイル';
+
+  @override
+  String get nutritionResetDefaults => 'デフォルトに戻す';
+
+  @override
+  String get nutritionSettingsLink => '栄養設定';
+
+  @override
+  String get nutritionTapToCalculate => 'タップして栄養素を計算';
+
+  @override
+  String get nutritionVisibleNutrients => '表示する栄養素';
+
+  @override
+  String pantryAddedStaples(int count) {
+    return 'パントリーに$count個の定番を追加しました';
+  }
+
+  @override
+  String get pantryClearAll => 'すべてクリア';
+
+  @override
+  String get pantryClearMessage => 'パントリーからすべての商品を削除しますか？';
+
+  @override
+  String get pantryCommonStaples => '一般的な定番';
+
+  @override
+  String get pantryEmpty => 'パントリーが空です';
+
+  @override
+  String get pantryEmptySubtitle => '常備している商品を追加してください';
+
+  @override
+  String get pantryInfoMessage => 'パントリーの商品は、レシピの材料を追加する際に買い物リストから除外されます。';
+
+  @override
+  String pantryItemCount(int count) {
+    return '$count個の商品';
+  }
+
+  @override
+  String get rpgAchievements => '実績';
+
+  @override
+  String get rpgAttack => '攻撃！（マナ10）';
+
+  @override
+  String get rpgBattleArena => '⚔️ バトルアリーナ';
+
+  @override
+  String get rpgBoss => 'ボス';
+
+  @override
+  String get rpgBossDamage => 'ボスダメージ';
+
+  @override
+  String get rpgBossDefeated => 'ボスを倒した！';
+
+  @override
+  String get rpgBossFight => 'ボス戦';
+
+  @override
+  String get rpgChooseYourClass => 'クラスを選択';
+
+  @override
+  String get rpgClassBonusSubtitle => '各クラスは固有のボーナスを付与';
+
+  @override
+  String get rpgClassBonusesList => 'クラスボーナス';
+
+  @override
+  String get rpgClassBonusesTitle => 'クラスボーナス';
+
+  @override
+  String get rpgComingSoon => '近日公開！';
+
+  @override
+  String get rpgCommunity => 'コミュニティ';
+
+  @override
+  String get rpgCommunityDescription => '世界中の料理人と競争！';
+
+  @override
+  String get rpgCommunityLeaderboard => 'コミュニティランキング';
+
+  @override
+  String get rpgCooked => '調理済み';
+
+  @override
+  String get rpgCosmetics => 'コスメティクス';
+
+  @override
+  String get rpgCrit => 'クリティカル！';
+
+  @override
+  String rpgDaysAgo(int count) {
+    return '$count日前';
+  }
+
+  @override
+  String rpgDaysCount(int count) {
+    return '$count日';
+  }
+
+  @override
+  String get rpgGemLottery => 'ジェム抽選';
+
+  @override
+  String rpgGemsAvailable(int count) {
+    return '$countジェム利用可能';
+  }
+
+  @override
+  String rpgHoursAgo(int count) {
+    return '$count時間前';
+  }
+
+  @override
+  String get rpgHowYouCompare => 'あなたの順位';
+
+  @override
+  String get rpgHp => 'HP';
+
+  @override
+  String get rpgJustNow => 'たった今';
+
+  @override
+  String get rpgKeepEarningXp => 'XPを獲得し続けてこの敵をアンロック！';
+
+  @override
+  String rpgKillStreak(int count) {
+    return '連続撃破：$count 🔥';
+  }
+
+  @override
+  String get rpgLeaderboard => 'ランキング';
+
+  @override
+  String rpgLevelN(int level) {
+    return 'レベル$level';
+  }
+
+  @override
+  String rpgLevelRequired(int level) {
+    return 'レベル$levelが必要';
+  }
+
+  @override
+  String get rpgLotteryCost => '1回のスピンにジェム1個';
+
+  @override
+  String rpgLotteryResultGems(int amount) {
+    return '$amountジェム獲得！';
+  }
+
+  @override
+  String rpgLotteryResultGold(int amount) {
+    return '$amountゴールド獲得！';
+  }
+
+  @override
+  String get rpgLotteryResultNothing => '次はもっと頑張ろう！';
+
+  @override
+  String get rpgLotteryResultRarePet => 'レアペットを見つけた！';
+
+  @override
+  String rpgLotteryResultXp(int amount) {
+    return '${amount}XP獲得！';
+  }
+
+  @override
+  String get rpgManaHint => 'レシピでXPを獲得してマナを回復 • レベルアップで全回復';
+
+  @override
+  String get rpgMilestones => 'マイルストーン';
+
+  @override
+  String rpgMinutesAgo(int count) {
+    return '$count分前';
+  }
+
+  @override
+  String get rpgNoMana => 'マナ不足！';
+
+  @override
+  String get rpgProfileSettings => 'プロフィール設定';
+
+  @override
+  String get rpgQuickActions => 'クイックアクション';
+
+  @override
+  String get rpgRecipes => 'レシピ';
+
+  @override
+  String get rpgReset => 'リセット';
+
+  @override
+  String get rpgResetProgressConfirmMessage => 'レベル、XP、ゴールド、ジェムを含むすべてのRPG進捗がリセットされます。この操作は取り消せません。';
+
+  @override
+  String get rpgResetProgressConfirmTitle => '進捗をリセットしますか？';
+
+  @override
+  String rpgResetsInHours(int count) {
+    return '$count時間後にリセット';
+  }
+
+  @override
+  String rpgResetsInMinutes(int count) {
+    return '$count分後にリセット';
+  }
+
+  @override
+  String get rpgSpin => 'スピン！';
+
+  @override
+  String get rpgStreak => '連続';
+
+  @override
+  String get rpgVictory => '勝利！';
+
+  @override
+  String rpgYouDefeated(String name) {
+    return '$nameを倒した！';
+  }
+
+  @override
+  String get rpgYourStatistics => 'あなたの統計';
+
+  @override
+  String get rpgYourStats => 'あなたのステータス';
+
+  @override
+  String get settingsBrowseCommunity => 'コミュニティを閲覧';
+
+  @override
+  String get settingsBrowseCommunitySubtitle => '公開レシピ本を発見';
+
+  @override
+  String get settingsCommunity => 'コミュニティ';
+
+  @override
+  String get settingsFamily => 'ファミリー';
+
+  @override
+  String get settingsIntegrations => '連携';
+
+  @override
+  String get settingsMyPublications => 'マイ出版物';
+
+  @override
+  String get settingsMyPublicationsSubtitle => '公開したレシピ本を管理';
+
+  @override
+  String get settingsShoppingPlanning => '買い物と計画';
+
+  @override
+  String shoppingAddCountItems(int count) {
+    return '$count個の商品を追加';
+  }
+
+  @override
+  String get shoppingAddIngredient => '材料を追加';
+
+  @override
+  String shoppingAddedItemName(String name) {
+    return '「$name」を追加しました';
+  }
+
+  @override
+  String shoppingAddedNotFound(int added, int failed) {
+    return '$added個追加、$failed個見つかりません';
+  }
+
+  @override
+  String shoppingAddingTo(String provider) {
+    return '$providerに追加中…';
+  }
+
+  @override
+  String get shoppingCamera => 'カメラ';
+
+  @override
+  String shoppingCheckedItemsCount(int count) {
+    return 'チェック済み商品（$count）';
+  }
+
+  @override
+  String shoppingCouldNotAccessSource(String source) {
+    return '$sourceにアクセスできませんでした';
+  }
+
+  @override
+  String shoppingCountAdded(int count) {
+    return '$count個追加済み';
+  }
+
+  @override
+  String shoppingCreatingListOn(String provider) {
+    return '$providerにリストを作成中…';
+  }
+
+  @override
+  String shoppingCurrentOfTotal(int current, int total) {
+    return '$total個中$current個の商品';
+  }
+
+  @override
+  String shoppingDeleteListConfirm(String name) {
+    return '「$name」を削除してもよろしいですか？';
+  }
+
+  @override
+  String shoppingErrorReadingImage(String error) {
+    return '画像の読み取りエラー：$error';
+  }
+
+  @override
+  String shoppingExportFailed(String error) {
+    return 'エクスポートに失敗しました：$error';
+  }
+
+  @override
+  String shoppingExportTitle(String name) {
+    return '「$name」をエクスポート';
+  }
+
+  @override
+  String get shoppingFamilyShare => 'ファミリー共有';
+
+  @override
+  String get shoppingFamilyShareSubtitle => '家族またはワンタイムリンクでリストを共有';
+
+  @override
+  String get shoppingFromPhoto => '写真から';
+
+  @override
+  String get shoppingFromText => 'テキストから';
+
+  @override
+  String get shoppingGallery => 'ギャラリー';
+
+  @override
+  String get shoppingImportItems => '商品をインポート';
+
+  @override
+  String get shoppingImportShoppingList => '買い物リストをインポート';
+
+  @override
+  String get shoppingImportTextHint => '小麦粉2カップ\n鶏胸肉\n牛ひき肉450g\n牛乳\n...';
+
+  @override
+  String get shoppingImportedList => 'インポートしたリスト';
+
+  @override
+  String get shoppingIngredientHint => '例：鶏胸肉、オリーブオイル';
+
+  @override
+  String get shoppingIngredientName => '材料名';
+
+  @override
+  String shoppingIngredientsAvailable(int count) {
+    return '$count種の材料が利用可能';
+  }
+
+  @override
+  String shoppingItemsAddedCount(int count) {
+    return '$count個の商品を追加しました';
+  }
+
+  @override
+  String get shoppingItemsAddedSuccess => '商品を追加しました！';
+
+  @override
+  String shoppingItemsCopiedToClipboard(int count) {
+    return '$count個の商品をクリップボードにコピーしました';
+  }
+
+  @override
+  String shoppingItemsInCart(int count, String provider) {
+    return '$providerのカートに$count個の商品';
+  }
+
+  @override
+  String shoppingItemsOnInstacartList(int count) {
+    return 'Instacartリストに$count個の商品';
+  }
+
+  @override
+  String get shoppingJustAdded => '追加したばかり';
+
+  @override
+  String shoppingListCopiedOpening(String name) {
+    return 'リストをコピーしました！$nameを開いています...';
+  }
+
+  @override
+  String get shoppingListReady => '買い物リストの準備ができました！';
+
+  @override
+  String shoppingNotFoundItems(String items) {
+    return '見つかりません：$items';
+  }
+
+  @override
+  String get shoppingOneItemPerLine => '1行に1商品';
+
+  @override
+  String get shoppingPartiallyAdded => '部分的に追加';
+
+  @override
+  String get shoppingProviderConnected => '接続済み';
+
+  @override
+  String get shoppingRemoveFromList => 'リストから削除';
+
+  @override
+  String get shoppingStartTyping => '入力を始めると候補が表示されます';
+
+  @override
+  String get shoppingTapToAddToCart => 'タップしてカートに直接追加';
+
+  @override
+  String get shoppingTapToCreateShoppableList => 'タップして買い物リストを作成';
+
+  @override
+  String get swipeToSwitch => 'スワイプしてセクションを切り替え';
+
+  @override
+  String get syncFailed => '同期に失敗しました';
+
+  @override
+  String syncSuccess(int pushed, int pulled) {
+    return '同期完了：$pushed件プッシュ、$pulled件プル';
+  }
+
+  @override
+  String get textSizePreview => 'プレビュー';
+
+  @override
+  String get transferDeviceDesktop => 'パソコン';
+
+  @override
+  String get transferDeviceMobileApp => 'モバイルアプリ';
+
+  @override
+  String get transferDeviceThisDevice => 'このデバイス';
+
+  @override
+  String transferExplanation(String currentDevice, String targetDevice) {
+    return '$currentDeviceから$targetDeviceへすべてのレシピ、レシピ本、食事プランを移動します。これは一度きりのコピーであり、同期ではありません。';
+  }
+
+  @override
+  String transferImportedSuccess(int count) {
+    return '$count個のアイテムを正常にインポートしました。';
+  }
+
+  @override
+  String get transferOr => 'または';
+
+  @override
+  String transferReceiveOn(String device) {
+    return '$deviceで受信';
+  }
+
+  @override
+  String transferSendFrom(String device) {
+    return '$deviceから送信';
+  }
+
+  @override
+  String transferSendSubtitle(String device) {
+    return '$deviceが受信するためのコードを生成';
+  }
+
+  @override
+  String get importGuidesTitle => 'インポートガイド';
+
+  @override
+  String get importGuidesOpenInBrowser => 'ガイドをブラウザで開く';
+
+  @override
+  String get importGuideHeroTitle => 'どこからでもレシピを取り込む';
+
+  @override
+  String get importGuideHeroSubtitle => '下のガイドをタップしてスクリーンショット付きの手順を確認。';
+
+  @override
+  String get importGuideQuickTipLabel => 'ヒント';
+
+  @override
+  String get importGuideQuickTipText => '最も簡単な方法は、レシピリンクをコピーしてRecipe Spellbookに共有すること — ほぼすべてのアプリで使えます。';
+
+  @override
+  String get importGuideWebButton => 'Web';
+
+  @override
+  String get importGuideFollowInBrowser => 'ブラウザで手順を確認';
+
+  @override
+  String get importGuideTagPopular => '人気';
+
+  @override
+  String get importGuideTagEasiest => '最も簡単';
+
+  @override
+  String get importGuideDifficultyEasy => '簡単';
+
+  @override
+  String get importGuideDifficultyMedium => '普通';
+
+  @override
+  String get importGuideTime15Sec => '15秒';
+
+  @override
+  String get importGuideTime30Sec => '30秒';
+
+  @override
+  String get importGuideTime1Min => '1分';
+
+  @override
+  String get importGuideTime2To5Min => '2〜5分';
+
+  @override
+  String importGuideStepsCount(int count) {
+    return '$countステップ';
+  }
+
+  @override
+  String get importGuideCategorySocial => 'ソーシャルメディア';
+
+  @override
+  String get importGuideCategoryWebsites => 'ウェブサイト';
+
+  @override
+  String get importGuideCategoryPhotos => '写真とファイル';
+
+  @override
+  String get importGuideCategoryOtherApps => '他のレシピアプリ';
+
+  @override
+  String get importGuideScreenshotNeeded => 'スクリーンショットが必要';
+
+  @override
+  String get importGuideGifNeeded => 'GIFが必要';
+
+  @override
+  String get importGuideVideoNeeded => '動画が必要';
+
+  @override
+  String get importGuideInstagramTitle => 'Instagram';
+
+  @override
+  String get importGuideInstagramSubtitle => 'リール、投稿、ストーリーからインポート';
+
+  @override
+  String get importGuideInstagramStep1Title => 'レシピの投稿またはリールを見つける';
+
+  @override
+  String get importGuideInstagramStep1Desc => 'Instagramを開いて保存したいレシピを見つけます。フィード投稿、リール、カルーセルで動作します。';
+
+  @override
+  String get importGuideInstagramStep2Title => '共有ボタンをタップ';
+
+  @override
+  String get importGuideInstagramStep2Desc => '投稿の下にある紙飛行機アイコン（共有）をタップします。';
+
+  @override
+  String get importGuideInstagramStep3Title => 'Recipe Spellbookに共有';
+
+  @override
+  String get importGuideInstagramStep3Desc => 'アプリの列をスクロールしてRecipe Spellbookをタップ。表示されない場合は「その他」をタップしてリストから探してください。';
+
+  @override
+  String get importGuideInstagramStep3Tip => 'Androidでは、リンクをコピーしてアプリに貼り付けることもできます。';
+
+  @override
+  String get importGuideInstagramStep4Title => '抽出されたレシピを確認';
+
+  @override
+  String get importGuideInstagramStep4Desc => 'AIがキャプション、ハッシュタグ、画像内のテキストを読み取ってレシピを作成します。材料と手順を確認して保存。';
+
+  @override
+  String get importGuideInstagramStep5Title => 'レシピ本を選んで保存';
+
+  @override
+  String get importGuideInstagramStep5Desc => '保存先のレシピ本を選び、タグを追加して保存をタップ。完了！';
+
+  @override
+  String get importGuideTiktokTitle => 'TikTok';
+
+  @override
+  String get importGuideTiktokSubtitle => '料理動画からレシピを保存';
+
+  @override
+  String get importGuideTiktokStep1Title => 'レシピのTikTokを見つける';
+
+  @override
+  String get importGuideTiktokStep1Desc => 'TikTokを開いて保存したい料理動画を見つけます。';
+
+  @override
+  String get importGuideTiktokStep2Title => '共有矢印をタップ';
+
+  @override
+  String get importGuideTiktokStep2Desc => '動画の右側にある矢印アイコンをタップします。';
+
+  @override
+  String get importGuideTiktokStep3Title => '「リンクをコピー」を選択するか直接共有';
+
+  @override
+  String get importGuideTiktokStep3Desc => '「リンクをコピー」をタップしてRecipe Spellbookに貼り付けるか、共有オプションからRecipe Spellbookを見つけてください。';
+
+  @override
+  String get importGuideTiktokStep3Tip => 'TikTokでは「リンクをコピー」が最も確実な方法です。';
+
+  @override
+  String get importGuideTiktokStep4Title => 'Recipe Spellbookにリンクを貼り付け';
+
+  @override
+  String get importGuideTiktokStep4Desc => 'Recipe Spellbookを開き、＋をタップして「ウェブサイト/リンクから」を選び、TikTokのURLを貼り付けます。';
+
+  @override
+  String get importGuideTiktokStep5Title => '確認して保存';
+
+  @override
+  String get importGuideTiktokStep5Desc => 'AIが動画の説明とコメントからレシピを抽出します。確認してレシピ本に保存。';
+
+  @override
+  String get importGuideYoutubeTitle => 'YouTube';
+
+  @override
+  String get importGuideYoutubeSubtitle => '料理チャンネルとショートからインポート';
+
+  @override
+  String get importGuideYoutubeStep1Title => 'レシピ動画を見つける';
+
+  @override
+  String get importGuideYoutubeStep1Desc => 'YouTubeを開いて料理動画を見つけます。通常の動画、ショート、ライブストリームのリプレイで動作します。';
+
+  @override
+  String get importGuideYoutubeStep2Title => '共有をタップ';
+
+  @override
+  String get importGuideYoutubeStep2Desc => '動画タイトルの下にある共有ボタンをタップします。';
+
+  @override
+  String get importGuideYoutubeStep3Title => 'リンクをコピーまたはアプリに共有';
+
+  @override
+  String get importGuideYoutubeStep3Desc => '「リンクをコピー」をタップするか、共有シートからRecipe Spellbookを見つけてください。';
+
+  @override
+  String get importGuideYoutubeStep3Tip => '多くのYouTubeクリエイターは動画の説明にレシピ全文を掲載しています — これにより抽出の精度が上がります。';
+
+  @override
+  String get importGuideYoutubeStep4Title => '貼り付けてインポート';
+
+  @override
+  String get importGuideYoutubeStep4Desc => 'Recipe Spellbookで＋ > 「ウェブサイト/リンクから」をタップして貼り付け。AIが動画の説明から材料と手順を読み取ります。';
+
+  @override
+  String get importGuidePinterestTitle => 'Pinterest';
+
+  @override
+  String get importGuidePinterestSubtitle => 'ピンしたレシピをレシピ本に保存';
+
+  @override
+  String get importGuidePinterestStep1Title => 'レシピのピンを開く';
+
+  @override
+  String get importGuidePinterestStep1Desc => 'レシピのピンをタップして開きます。ほとんどのピンは元のレシピサイトにリンクしています。';
+
+  @override
+  String get importGuidePinterestStep2Title => '元のリンクをタップ';
+
+  @override
+  String get importGuidePinterestStep2Desc => 'ピンの上部または下部にあるリンクをタップして元のレシピページにアクセスします。';
+
+  @override
+  String get importGuidePinterestStep2Tip => 'ピンにソースリンクがない場合は、下の共有方法をお試しください。';
+
+  @override
+  String get importGuidePinterestStep3Title => 'ウェブサイトURLをコピー';
+
+  @override
+  String get importGuidePinterestStep3Desc => 'レシピサイトがブラウザで開いたら、アドレスバーからURLをコピーします。';
+
+  @override
+  String get importGuidePinterestStep4Title => 'Recipe Spellbookにインポート';
+
+  @override
+  String get importGuidePinterestStep4Desc => '＋ > 「ウェブサイト/リンクから」をタップしてURLを貼り付けると、レシピが自動的に抽出されます。';
+
+  @override
+  String get importGuideWebsiteTitle => 'レシピサイト';
+
+  @override
+  String get importGuideWebsiteSubtitle => 'AllRecipes、Food Network、BBC、ブログなど';
+
+  @override
+  String get importGuideWebsiteStep1Title => 'レシピページを開く';
+
+  @override
+  String get importGuideWebsiteStep1Desc => 'AllRecipes、Food Network、BBC Good Food、Serious Eats、NYT Cookingなど、または任意のフードブログのレシピにアクセスします。';
+
+  @override
+  String get importGuideWebsiteStep2Title => 'URLをコピー';
+
+  @override
+  String get importGuideWebsiteStep2Desc => 'アドレスバーをタップしてレシピの完全なURLをコピーします。';
+
+  @override
+  String get importGuideWebsiteStep3Title => 'Recipe Spellbookで＋をタップ';
+
+  @override
+  String get importGuideWebsiteStep3Desc => 'アプリを開いて＋ボタンをタップして新しいレシピの追加を開始します。';
+
+  @override
+  String get importGuideWebsiteStep4Title => '「ウェブサイト/リンクから」を選択';
+
+  @override
+  String get importGuideWebsiteStep4Desc => 'ウェブサイトインポートオプションを選択し、コピーしたURLを貼り付けます。';
+
+  @override
+  String get importGuideWebsiteStep5Title => '確認して保存';
+
+  @override
+  String get importGuideWebsiteStep5Desc => 'レシピが即座に抽出されます — タイトル、材料、手順、調理時間、写真まで。確認して保存。';
+
+  @override
+  String get importGuideWebsiteStep5Tip => '10,000以上のレシピサイトに対応。抽出に失敗した場合は「テキストから」の方法をお試しください。';
+
+  @override
+  String get importGuidePhotoTitle => '写真 / カメラ';
+
+  @override
+  String get importGuidePhotoSubtitle => '本、雑誌、手書きカードからレシピをスキャン';
+
+  @override
+  String get importGuidePhotoStep1Title => 'レシピを撮影';
+
+  @override
+  String get importGuidePhotoStep1Desc => '料理本、雑誌のページ、または手書きのレシピカードの鮮明で明るい写真を撮ります。すべてのテキストが読めることを確認してください。';
+
+  @override
+  String get importGuidePhotoStep1Tip => '最良の結果を得るには：良い照明、手ブレ防止、レシピ全体がフレーム内に。影を避けてください。';
+
+  @override
+  String get importGuidePhotoStep2Title => '＋をタップして「写真から」を選択';
+
+  @override
+  String get importGuidePhotoStep2Desc => 'Recipe Spellbookを開き、＋をタップして「写真から」を選択。ギャラリーから写真を選ぶか新しく撮影します。';
+
+  @override
+  String get importGuidePhotoStep3Title => 'AIがテキストをスキャン';
+
+  @override
+  String get importGuidePhotoStep3Desc => 'OCR技術が写真のテキストを読み取り、AIがタイトル、材料、手順を適切に分離します。';
+
+  @override
+  String get importGuidePhotoStep4Title => '確認してエラーを修正';
+
+  @override
+  String get importGuidePhotoStep4Desc => '抽出されたレシピを確認します。OCRは時々文字を誤読します — 「1/2」が「1l2」になることも。エラーを修正して保存。';
+
+  @override
+  String get importGuidePhotoStep4Tip => '手書きのレシピも対応していますが、印刷されたテキストが最良の結果を得られます。';
+
+  @override
+  String get importGuidePdfTitle => 'PDFドキュメント';
+
+  @override
+  String get importGuidePdfSubtitle => 'PDF料理本やダウンロードからインポート';
+
+  @override
+  String get importGuidePdfStep1Title => 'レシピPDFを用意';
+
+  @override
+  String get importGuidePdfStep1Desc => 'ダウンロードしたレシピPDF、電子書籍の料理本、スキャンした文書、またはメールで共有されたPDFで動作します。';
+
+  @override
+  String get importGuidePdfStep2Title => '＋をタップして「PDFから」を選択';
+
+  @override
+  String get importGuidePdfStep2Desc => 'Recipe Spellbookを開き、＋をタップして「PDFから」を選び、ファイルを選択します。';
+
+  @override
+  String get importGuidePdfStep3Title => 'レシピページを選択';
+
+  @override
+  String get importGuidePdfStep3Desc => 'PDFに複数ページがある場合、インポートしたいレシピのページを選択します。';
+
+  @override
+  String get importGuidePdfStep4Title => '確認して保存';
+
+  @override
+  String get importGuidePdfStep4Desc => 'PDFからレシピが抽出されます。材料と手順を確認してレシピ本に保存。';
+
+  @override
+  String get importGuideTextTitle => 'テキスト / 貼り付け';
+
+  @override
+  String get importGuideTextSubtitle => 'メッセージ、メール、メモからレシピを貼り付け';
+
+  @override
+  String get importGuideTextStep1Title => 'レシピテキストをコピー';
+
+  @override
+  String get importGuideTextStep1Desc => 'テキストメッセージ、メール、メモアプリ、WhatsApp、その他どこからでもレシピテキストをコピーします。';
+
+  @override
+  String get importGuideTextStep2Title => '＋をタップして「テキストから」を選択';
+
+  @override
+  String get importGuideTextStep2Desc => 'Recipe Spellbookを開き、＋をタップして「テキストから」を選択します。';
+
+  @override
+  String get importGuideTextStep3Title => 'レシピを貼り付け';
+
+  @override
+  String get importGuideTextStep3Desc => 'コピーしたテキストをテキストフィールドに貼り付けます。AIが自動的にタイトル、材料、手順を分離します。';
+
+  @override
+  String get importGuideTextStep3Tip => 'フォーマットされていないテキストでも動作します — AIは材料の量や手順の指示を賢く解析します。';
+
+  @override
+  String get importGuideTextStep4Title => '確認して保存';
+
+  @override
+  String get importGuideTextStep4Desc => '解析されたレシピを確認し、調整して保存します。';
+
+  @override
+  String get importGuidePaprikaTitle => 'Paprika Recipe Manager';
+
+  @override
+  String get importGuidePaprikaSubtitle => 'Paprikaライブラリ全体を一括インポート';
+
+  @override
+  String get importGuidePaprikaStep1Title => 'Paprikaからエクスポート';
+
+  @override
+  String get importGuidePaprikaStep1Desc => 'Paprikaで設定（歯車アイコン） > エクスポートに移動。「すべてのレシピをエクスポート」を選び、.paprikarecipesファイルとして保存。';
+
+  @override
+  String get importGuidePaprikaStep2Title => 'ファイルをデバイスに送信';
+
+  @override
+  String get importGuidePaprikaStep2Desc => 'ファイルを自分にメールするか、iCloud/Google Driveに保存するか、AirDropで転送します。';
+
+  @override
+  String get importGuidePaprikaStep3Title => 'Recipe Spellbookでインポート';
+
+  @override
+  String get importGuidePaprikaStep3Desc => 'Recipe Spellbookを開き、設定 > データ > インポートに移動して.paprikarecipesファイルを選択。';
+
+  @override
+  String get importGuidePaprikaStep4Title => 'インポートを待つ';
+
+  @override
+  String get importGuidePaprikaStep4Desc => 'すべてのPaprikaレシピが材料、手順、メモ、写真、カテゴリを保持してインポートされます。';
+
+  @override
+  String get importGuidePaprikaStep4Tip => '大規模なライブラリ（100以上のレシピ）は1分ほどかかる場合があります。インポート中もアプリは操作可能です。';
+
+  @override
+  String get importGuideOtherAppsTitle => '他のレシピアプリ';
+
+  @override
+  String get importGuideOtherAppsSubtitle => 'Mealime、CopyMeThat、AnyList、Cookmateなど';
+
+  @override
+  String get importGuideOtherAppsStep1Title => '現在のアプリからエクスポート';
+
+  @override
+  String get importGuideOtherAppsStep1Desc => 'ほとんどのレシピアプリはJSON、HTML、またはテキストへのエクスポートに対応しています。設定 > エクスポートまたはバックアップを確認してください。';
+
+  @override
+  String get importGuideOtherAppsStep1Tip => '一般的な形式：JSON（最適）、HTML、PDF、またはプレーンテキスト。JSONが最もデータを保持します。';
+
+  @override
+  String get importGuideOtherAppsStep2Title => 'ファイルをデバイスに保存';
+
+  @override
+  String get importGuideOtherAppsStep2Desc => 'エクスポートしたファイルをメール、クラウドストレージ、またはファイル転送方法でスマートフォンに保存または転送します。';
+
+  @override
+  String get importGuideOtherAppsStep3Title => '設定からインポート';
+
+  @override
+  String get importGuideOtherAppsStep3Desc => 'Recipe Spellbookで設定 > データ > インポートに移動してエクスポートしたファイルを選択。アプリはJSON、HTML、一般的なレシピ形式に対応しています。';
+
+  @override
+  String get importGuideOtherAppsStep4Title => 'レシピを確認';
+
+  @override
+  String get importGuideOtherAppsStep4Desc => 'インポートしたレシピはデフォルトのレシピ本に表示されます。後で別のレシピ本に整理できます。';
+
+  @override
+  String get importGuideDeviceTransferTitle => 'デバイス転送';
+
+  @override
+  String get importGuideDeviceTransferSubtitle => 'アカウントなしでスマートフォン間でレシピを移動';
+
+  @override
+  String get importGuideDeviceTransferStep1Title => '古いデバイスで転送を開く';
+
+  @override
+  String get importGuideDeviceTransferStep1Desc => '古いスマートフォンでRecipe Spellbookを開き、メニュー > デバイス転送 > 送信に移動。';
+
+  @override
+  String get importGuideDeviceTransferStep2Title => '転送コードを取得';
+
+  @override
+  String get importGuideDeviceTransferStep2Desc => '6文字のコードが生成されます。このコードは15分間有効です。';
+
+  @override
+  String get importGuideDeviceTransferStep3Title => '新しいデバイスでコードを入力';
+
+  @override
+  String get importGuideDeviceTransferStep3Desc => '新しいスマートフォンにRecipe Spellbookをインストールし、メニュー > デバイス転送 > 受信に移動。コードを入力。';
+
+  @override
+  String get importGuideDeviceTransferStep4Title => 'レシピが転送されました！';
+
+  @override
+  String get importGuideDeviceTransferStep4Desc => 'すべてのレシピ、レシピ本、買い物リスト、食事プランが新しいデバイスに転送されます。';
+
+  @override
+  String get importGuideDeviceTransferStep4Tip => '有料アカウントをお持ちですか？新しいデバイスでサインインするだけで自動的に同期されます。';
+
+  @override
+  String get themeFrost => 'フロスト';
+
+  @override
+  String get themeEmber => 'エンバー';
+
+  @override
+  String get themeSpring => 'スプリング';
+
+  @override
+  String get themeAlchemist => 'アルケミスト';
+
+  @override
+  String get rpgNoAchievementsInCategory => 'このカテゴリに実績がありません';
+
+  @override
+  String rpgUnlocksItem(String item) {
+    return 'アンロック：$item';
+  }
+
+  @override
+  String get rpgCategory => 'カテゴリ';
+
+  @override
+  String get rpgCompleted => '完了';
+
+  @override
+  String get rpgProgress => '進捗';
+
+  @override
+  String rpgDefeatedEnemy(String name) {
+    return '$nameを倒した！';
+  }
+
+  @override
+  String get rpgAvatars => 'アバター';
+
+  @override
+  String get rpgFrames => 'フレーム';
+
+  @override
+  String get rpgPets => 'ペット';
+
+  @override
+  String get rpgTitles => '称号';
+
+  @override
+  String rpgPurchaseItem(String item) {
+    return '$itemを購入しますか？';
+  }
+
+  @override
+  String get rpgUnlockedViaAchievement => '実績でアンロック';
+
+  @override
+  String get rpgPrice => '価格';
+
+  @override
+  String get rpgNotEnoughGold => 'ゴールドが足りません';
+
+  @override
+  String get rpgNotEnoughGems => 'ジェムが足りません';
+
+  @override
+  String rpgPurchased(String item) {
+    return '$itemを購入しました！';
+  }
+
+  @override
+  String get rpgOwned => '所持済み';
+
+  @override
+  String get rpgDailyQuests => 'デイリークエスト';
+
+  @override
+  String rpgQuestsCompleted(int completed, int total) {
+    return '$total中$completed完了';
+  }
+
+  @override
+  String get rpgWeeklyChallenge => 'ウィークリーチャレンジ';
+
+  @override
+  String get rpgQuestsSubtitle => 'クエストを完了してXPと報酬を獲得';
+
+  @override
+  String get rpgRecentXp => '最近のXP';
+
+  @override
+  String get rpgNoAchievementsYet => 'まだ実績がありません';
+
+  @override
+  String rpgLv(int level) {
+    return 'Lv.$level';
+  }
+
+  @override
+  String rpgClassBonus(String className) {
+    return '$classNameボーナス';
+  }
+
+  @override
+  String get rpgLevelUp => 'レベルアップ！';
+
+  @override
+  String get rpgUnlocked => 'アンロック！';
+
+  @override
+  String get rpgAchievementUnlocked => '実績アンロック！';
+
+  @override
+  String get mealPlanAddTitle => '食事プランに追加';
+
+  @override
+  String get mealPlanMealLabel => '食事';
+
+  @override
+  String get mealPlanAdding => '追加中...';
+
+  @override
+  String mealPlanDateFormat(String weekday, String month, int day) {
+    return '$month$day日（$weekday）';
   }
 }
