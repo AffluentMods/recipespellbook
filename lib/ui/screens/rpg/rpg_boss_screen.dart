@@ -23,6 +23,8 @@ class Enemy {
   final bool isBoss;
   final int goldReward;
   final int xpReward;
+  final int attackDamage;   // Base damage the boss deals per turn
+  final int attackVariance; // +/- random variance
 
   const Enemy({
     required this.id,
@@ -37,6 +39,8 @@ class Enemy {
     this.isBoss = false,
     required this.goldReward,
     required this.xpReward,
+    this.attackDamage = 5,
+    this.attackVariance = 3,
   });
 
   Enemy copyWith({int? currentHp}) {
@@ -53,12 +57,16 @@ class Enemy {
       isBoss: isBoss,
       goldReward: goldReward,
       xpReward: xpReward,
+      attackDamage: attackDamage,
+      attackVariance: attackVariance,
     );
   }
 
   double get hpPercent => maxHp > 0 ? (currentHp / maxHp).clamp(0.0, 1.0) : 0.0;
   bool get isDefeated => currentHp <= 0;
 }
+
+enum BattleAction { attack, block, heal }
 
 class EnemyData {
   static List<Enemy> get allEnemies => [
@@ -68,39 +76,33 @@ class EnemyData {
       name: 'Runaway Muffin',
       description: 'A pastry with tiny legs that won\'t stay on the plate!',
       emoji: '🧁',
-      maxHp: 100,
-      currentHp: 100,
+      maxHp: 100, currentHp: 100,
       color: Color(0xFFFF8A65),
       attacks: ['Crumb Toss', 'Sugar Rush'],
-      minLevel: 1,
-      goldReward: 10,
-      xpReward: 25,
+      minLevel: 1, goldReward: 10, xpReward: 25,
+      attackDamage: 5, attackVariance: 3,
     ),
     const Enemy(
       id: 'enemy_stale_cracker',
       name: 'Stale Cracker',
       description: 'Crunchy, unpleasant, and surprisingly hostile.',
       emoji: '🍘',
-      maxHp: 150,
-      currentHp: 150,
+      maxHp: 150, currentHp: 150,
       color: Color(0xFFBCAAA4),
       attacks: ['Crunch', 'Stale Slap'],
-      minLevel: 1,
-      goldReward: 15,
-      xpReward: 35,
+      minLevel: 1, goldReward: 15, xpReward: 35,
+      attackDamage: 8, attackVariance: 4,
     ),
     const Enemy(
       id: 'enemy_angry_egg',
       name: 'Angry Egg',
       description: 'Don\'t let the shell fool you — it\'s furious inside.',
       emoji: '🥚',
-      maxHp: 200,
-      currentHp: 200,
+      maxHp: 200, currentHp: 200,
       color: Color(0xFFFFF9C4),
       attacks: ['Egg Toss', 'Shell Slam', 'Yolk Splash'],
-      minLevel: 1,
-      goldReward: 20,
-      xpReward: 50,
+      minLevel: 1, goldReward: 20, xpReward: 50,
+      attackDamage: 12, attackVariance: 5,
     ),
 
     // ---- BOSSES ----
@@ -109,84 +111,66 @@ class EnemyData {
       name: 'Burnt Toast Terror',
       description: 'A crispy menace that ruins breakfast!',
       emoji: '🍞',
-      maxHp: 500,
-      currentHp: 500,
+      maxHp: 500, currentHp: 500,
       color: Color(0xFF8B4513),
       attacks: ['Smoke Cloud', 'Crumb Attack', 'Charred Slam'],
-      minLevel: 1,
-      isBoss: true,
-      goldReward: 50,
-      xpReward: 100,
+      minLevel: 1, isBoss: true, goldReward: 50, xpReward: 100,
+      attackDamage: 15, attackVariance: 8,
     ),
     const Enemy(
       id: 'boss_soupy_slime',
       name: 'Soupy Slime',
       description: 'A gelatinous glob of overcooked broth',
       emoji: '🍲',
-      maxHp: 750,
-      currentHp: 750,
+      maxHp: 750, currentHp: 750,
       color: Color(0xFF2E7D32),
       attacks: ['Splash', 'Bubble Barrage', 'Steam Blast'],
-      minLevel: 5,
-      isBoss: true,
-      goldReward: 75,
-      xpReward: 150,
+      minLevel: 5, isBoss: true, goldReward: 75, xpReward: 150,
+      attackDamage: 20, attackVariance: 10,
     ),
     const Enemy(
       id: 'boss_pasta_phantom',
       name: 'Pasta Phantom',
       description: 'An ethereal entity of tangled noodles',
       emoji: '🍝',
-      maxHp: 1000,
-      currentHp: 1000,
+      maxHp: 1000, currentHp: 1000,
       color: Color(0xFFFFD54F),
       attacks: ['Noodle Whip', 'Sauce Splash', 'Carb Coma'],
-      minLevel: 10,
-      isBoss: true,
-      goldReward: 100,
-      xpReward: 200,
+      minLevel: 10, isBoss: true, goldReward: 100, xpReward: 200,
+      attackDamage: 30, attackVariance: 12,
     ),
     const Enemy(
       id: 'boss_cake_golem',
       name: 'Cake Golem',
       description: 'A towering monster of frosting and fury',
       emoji: '🎂',
-      maxHp: 1500,
-      currentHp: 1500,
+      maxHp: 1500, currentHp: 1500,
       color: Color(0xFFE91E63),
       attacks: ['Frosting Fist', 'Sugar Rush', 'Layer Slam'],
-      minLevel: 15,
-      isBoss: true,
-      goldReward: 150,
-      xpReward: 300,
+      minLevel: 15, isBoss: true, goldReward: 150, xpReward: 300,
+      attackDamage: 40, attackVariance: 15,
     ),
     const Enemy(
       id: 'boss_pizza_dragon',
       name: 'Pizza Dragon',
       description: 'The legendary beast of melted cheese',
       emoji: '🐉',
-      maxHp: 2500,
-      currentHp: 2500,
+      maxHp: 2500, currentHp: 2500,
       color: Color(0xFFFF5722),
       attacks: ['Cheese Breath', 'Pepperoni Barrage', 'Crust Crush'],
-      minLevel: 25,
-      isBoss: true,
-      goldReward: 250,
-      xpReward: 500,
+      minLevel: 25, isBoss: true, goldReward: 250, xpReward: 500,
+      attackDamage: 55, attackVariance: 20,
     ),
     const Enemy(
       id: 'boss_final_feast',
       name: 'The Final Feast',
       description: 'Ultimate culinary chaos incarnate',
       emoji: '👹',
-      maxHp: 5000,
-      currentHp: 5000,
+      maxHp: 5000, currentHp: 5000,
       color: Color(0xFF9C27B0),
       attacks: ['Flavor Explosion', 'Kitchen Sink', 'Grand Finale'],
-      minLevel: 50,
-      isBoss: true,
-      goldReward: 500,
-      xpReward: 1000,
+      minLevel: 50, isBoss: true, goldReward: 500, xpReward: 1000,
+      attackDamage: 75, attackVariance: 25,
     ),
   ];
 
@@ -214,7 +198,11 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
   late Enemy _currentEnemy;
   int? _lastDamage;
   bool _lastWasCrit = false;
-  String? _bossAttack;
+  String? _bossAttackName;
+  int? _lastBossDamage;
+  bool _isBlocking = false;
+  bool _isBusy = false; // Prevents action spam during turn
+  int? _lastHealAmount;
   final List<_DamageNumber> _damageNumbers = [];
   late AnimationController _shakeController;
   final _random = Random();
@@ -237,68 +225,145 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
     super.dispose();
   }
 
-  Future<void> _attack() async {
-    if (_currentEnemy.isDefeated) return;
+  Future<void> _performAction(BattleAction action) async {
+    if (_currentEnemy.isDefeated || _isBusy) return;
 
     final profile = ref.read(rpgProvider).profile;
-    if (profile.mana < 10) {
-      AppSnackbar.warning(context, AppLocalizations.of(context)!.notEnoughMana);
+    final manaCost = switch (action) {
+      BattleAction.attack => 10,
+      BattleAction.block => 5,
+      BattleAction.heal => 20,
+    };
+
+    if (profile.mana < manaCost) {
+      AppSnackbar.warning(context, AppLocalizations.of(context)!.rpgNotEnoughMana);
       return;
     }
 
-    HapticFeedback.lightImpact();
-
-    // Call provider to deduct mana and calculate damage
-    final result = await ref.read(rpgProvider.notifier).attackBoss();
-
-    if (!result.success) return;
-
-    final damage = result.damage;
-    final isCrit = result.isCrit;
-
-    // Add floating damage number
     setState(() {
-      _lastDamage = damage;
-      _lastWasCrit = isCrit;
-      _damageNumbers.add(_DamageNumber(
-        damage: damage,
-        isCrit: isCrit,
-        x: 0.25 + _random.nextDouble() * 0.5,
-        y: 0.25 + _random.nextDouble() * 0.25,
-        createdAt: DateTime.now(),
-      ));
-      _currentEnemy = _currentEnemy.copyWith(
-        currentHp: (_currentEnemy.currentHp - damage).clamp(0, _currentEnemy.maxHp),
-      );
+      _isBusy = true;
+      _lastBossDamage = null;
+      _lastHealAmount = null;
+      _bossAttackName = null;
     });
 
-    // Shake animation (quick)
-    _shakeController.forward(from: 0);
+    HapticFeedback.lightImpact();
 
-    // Boss counter-attack text (brief flash, doesn't block)
-    if (_currentEnemy.currentHp > 0 && _random.nextDouble() < 0.3) {
-      setState(() {
-        _bossAttack = _currentEnemy.attacks[_random.nextInt(_currentEnemy.attacks.length)];
-      });
-      Future.delayed(const Duration(milliseconds: 600), () {
-        if (mounted) setState(() => _bossAttack = null);
-      });
+    // ---- PLAYER ACTION PHASE ----
+    switch (action) {
+      case BattleAction.attack:
+        final result = await ref.read(rpgProvider.notifier).attackBoss();
+        if (!result.success) {
+          setState(() => _isBusy = false);
+          return;
+        }
+        setState(() {
+          _lastDamage = result.damage;
+          _lastWasCrit = result.isCrit;
+          _isBlocking = false;
+          _damageNumbers.add(_DamageNumber(
+            damage: result.damage,
+            isCrit: result.isCrit,
+            x: 0.25 + _random.nextDouble() * 0.5,
+            y: 0.25 + _random.nextDouble() * 0.25,
+            createdAt: DateTime.now(),
+          ));
+          _currentEnemy = _currentEnemy.copyWith(
+            currentHp: (_currentEnemy.currentHp - result.damage).clamp(0, _currentEnemy.maxHp),
+          );
+        });
+        _shakeController.forward(from: 0);
+        break;
+
+      case BattleAction.block:
+        final success = await ref.read(rpgProvider.notifier).blockAction();
+        if (!success) {
+          setState(() => _isBusy = false);
+          return;
+        }
+        setState(() {
+          _isBlocking = true;
+          _lastDamage = null;
+          _lastWasCrit = false;
+        });
+        break;
+
+      case BattleAction.heal:
+        final oldHp = ref.read(rpgProvider).profile.hp;
+        final success = await ref.read(rpgProvider.notifier).healPlayer();
+        if (!success) {
+          setState(() => _isBusy = false);
+          return;
+        }
+        final newHp = ref.read(rpgProvider).profile.hp;
+        setState(() {
+          _lastHealAmount = newHp - oldHp;
+          _lastDamage = null;
+          _lastWasCrit = false;
+          _isBlocking = false;
+        });
+        break;
     }
 
-    // Check for defeat
+    // Check for boss defeat before counter-attack
     if (_currentEnemy.isDefeated) {
       _killCount++;
+      setState(() => _isBusy = false);
       Future.delayed(const Duration(milliseconds: 200), () {
         if (mounted) _showVictoryDialog();
       });
+      _cleanupDamageNumbers();
+      return;
     }
 
-    // Clean up old damage numbers (non-blocking)
+    // ---- BOSS COUNTER-ATTACK PHASE (always, if boss alive) ----
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (!mounted) return;
+
+    final attackName = _currentEnemy.attacks[_random.nextInt(_currentEnemy.attacks.length)];
+    final bossDamage = await ref.read(rpgProvider.notifier).bossAttacksPlayer(
+      baseDamage: _currentEnemy.attackDamage,
+      variance: _currentEnemy.attackVariance,
+      isBlocking: _isBlocking,
+    );
+
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _bossAttackName = attackName;
+      _lastBossDamage = bossDamage;
+      _isBlocking = false;
+    });
+
+    // Check for player death
+    final currentProfile = ref.read(rpgProvider).profile;
+    if (currentProfile.hp <= 0) {
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (!mounted) return;
+      setState(() => _isBusy = false);
+      _showDeathDialog();
+      return;
+    }
+
+    // Clear boss attack display after a moment
+    Future.delayed(const Duration(milliseconds: 1200), () {
+      if (mounted) {
+        setState(() {
+          _bossAttackName = null;
+          _lastBossDamage = null;
+        });
+      }
+    });
+
+    setState(() => _isBusy = false);
+    _cleanupDamageNumbers();
+  }
+
+  void _cleanupDamageNumbers() {
     Future.delayed(const Duration(milliseconds: 800), () {
       if (mounted) {
         setState(() {
           _damageNumbers.removeWhere((d) =>
-          DateTime.now().difference(d.createdAt).inMilliseconds > 700);
+              DateTime.now().difference(d.createdAt).inMilliseconds > 700);
         });
       }
     });
@@ -386,6 +451,73 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
     );
   }
 
+  void _showDeathDialog() async {
+    final goldLost = await ref.read(rpgProvider.notifier).playerDeath();
+    HapticFeedback.heavyImpact();
+
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            const Text('💀 '),
+            Expanded(child: Text(l10n.rpgPlayerDefeated)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              l10n.rpgPlayerDefeatedDesc(_currentEnemy.name),
+              style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            const Text('😵', style: TextStyle(fontSize: 48)),
+            if (goldLost > 0) ...[
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.monetization_on, color: Colors.red, size: 20),
+                  const SizedBox(width: 4),
+                  Text(
+                    l10n.rpgGoldLost(goldLost),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              setState(() {
+                // Reset the enemy for a new attempt
+                _currentEnemy = _currentEnemy.copyWith(currentHp: _currentEnemy.maxHp);
+                _lastDamage = null;
+                _lastBossDamage = null;
+                _bossAttackName = null;
+                _damageNumbers.clear();
+                _killCount = 0;
+              });
+            },
+            child: Text(l10n.rpgRespawn),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -431,7 +563,8 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
                   _currentEnemy = enemy;
                   _lastDamage = null;
                   _damageNumbers.clear();
-                  _bossAttack = null;
+                  _bossAttackName = null;
+                  _lastBossDamage = null;
                 });
               }
             },
@@ -443,16 +576,20 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
                 : _buildLockedArea(theme),
           ),
 
-          // Attack controls
+          // Battle controls
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
+                  // Player HP bar
+                  _PlayerHpBar(current: profile.hp, max: profile.maxHp),
+                  const SizedBox(height: 6),
+                  // Mana bar
                   _ManaBar(current: profile.mana, max: maxMana),
                   const SizedBox(height: 8),
 
-                  // Level stats
+                  // Level stats row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -480,29 +617,64 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
                   ),
                   const SizedBox(height: 12),
 
-                  // Attack button - NO _isAttacking guard, spam allowed!
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: FilledButton.icon(
-                      onPressed: canFight && profile.mana >= 10 && !_currentEnemy.isDefeated
-                          ? _attack
-                          : null,
-                      icon: const Icon(Icons.flash_on, size: 28),
-                      label: Text(
-                        canFight
-                            ? profile.mana < 10
-                            ? l10n.rpgNoMana
-                            : l10n.rpgAttack
-                            : l10n.rpgLevelRequired(_currentEnemy.minLevel),
-                        style: const TextStyle(fontSize: 18),
+                  // 3-action button row
+                  Row(
+                    children: [
+                      // Attack button
+                      Expanded(
+                        flex: 3,
+                        child: SizedBox(
+                          height: 52,
+                          child: FilledButton.icon(
+                            onPressed: canFight && !_isBusy && profile.mana >= 10 && !_currentEnemy.isDefeated
+                                ? () => _performAction(BattleAction.attack)
+                                : null,
+                            icon: const Icon(Icons.flash_on, size: 22),
+                            label: Text(
+                              canFight
+                                  ? profile.mana < 10 ? l10n.rpgNoMana : l10n.rpgAttack
+                                  : l10n.rpgLevelRequired(_currentEnemy.minLevel),
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: canFight && profile.mana >= 10 && !_isBusy
+                                  ? _currentEnemy.color
+                                  : null,
+                            ),
+                          ),
+                        ),
                       ),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: canFight && profile.mana >= 10
-                            ? _currentEnemy.color
-                            : null,
+                      const SizedBox(width: 8),
+                      // Block button
+                      Expanded(
+                        flex: 2,
+                        child: SizedBox(
+                          height: 52,
+                          child: OutlinedButton.icon(
+                            onPressed: canFight && !_isBusy && profile.mana >= 5 && !_currentEnemy.isDefeated
+                                ? () => _performAction(BattleAction.block)
+                                : null,
+                            icon: const Icon(Icons.shield, size: 20),
+                            label: Text(l10n.rpgBlock, style: const TextStyle(fontSize: 12)),
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      // Heal button
+                      Expanded(
+                        flex: 2,
+                        child: SizedBox(
+                          height: 52,
+                          child: OutlinedButton.icon(
+                            onPressed: canFight && !_isBusy && profile.mana >= 20 && !_currentEnemy.isDefeated && profile.hp < profile.maxHp
+                                ? () => _performAction(BattleAction.heal)
+                                : null,
+                            icon: const Icon(Icons.favorite, size: 20, color: Colors.green),
+                            label: Text(l10n.rpgHeal, style: const TextStyle(fontSize: 12)),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 4),
@@ -606,24 +778,55 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
 
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 150),
-                  child: _bossAttack != null
+                  child: _bossAttackName != null
                       ? Container(
-                    key: ValueKey(_bossAttack),
+                    key: ValueKey('$_bossAttackName$_lastBossDamage'),
                     margin: const EdgeInsets.only(top: 8),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: Colors.red.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text(
-                      '💥 $_bossAttack!',
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '💥 $_bossAttackName!',
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (_lastBossDamage != null)
+                          Text(
+                            '-$_lastBossDamage HP to you',
+                            style: TextStyle(
+                              color: Colors.red.withValues(alpha: 0.8),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                      ],
                     ),
                   )
-                      : const SizedBox(key: ValueKey('empty'), height: 40),
+                      : _lastHealAmount != null
+                          ? Container(
+                              key: ValueKey('heal$_lastHealAmount'),
+                              margin: const EdgeInsets.only(top: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                '💚 +$_lastHealAmount HP',
+                                style: const TextStyle(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            )
+                          : const SizedBox(key: ValueKey('empty'), height: 40),
                 ),
 
                 const SizedBox(height: 16),
@@ -846,6 +1049,59 @@ class _EnemySelector extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class _PlayerHpBar extends StatelessWidget {
+  final int current;
+  final int max;
+
+  const _PlayerHpBar({required this.current, required this.max});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final percent = max > 0 ? (current / max).clamp(0.0, 1.0) : 0.0;
+
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.favorite,
+                  color: percent > 0.5 ? Colors.green : percent > 0.25 ? Colors.orange : Colors.red,
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
+                Text(AppLocalizations.of(context)!.rpgYourHp, style: theme.textTheme.labelMedium),
+              ],
+            ),
+            Text(
+              '$current / $max',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: percent <= 0.25 ? Colors.red : null,
+                fontWeight: percent <= 0.25 ? FontWeight.bold : null,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: percent,
+            minHeight: 10,
+            backgroundColor: theme.colorScheme.surfaceContainerHighest,
+            valueColor: AlwaysStoppedAnimation(
+              percent > 0.5 ? Colors.green : percent > 0.25 ? Colors.orange : Colors.red,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

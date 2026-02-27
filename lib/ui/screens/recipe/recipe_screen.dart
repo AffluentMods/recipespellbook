@@ -25,6 +25,7 @@ import '../../widgets/app_snackbar.dart';
 import '../../widgets/nutrition_calculation_sheet.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_share_sheet.dart';
+import '../../widgets/hint_banner.dart';
 import '../../widgets/recipe_tags_display.dart';
 // ============ DISMISSED ALLERGY WARNINGS ============
 // Canonical provider is in allergy_settings_screen.dart — imported via:
@@ -375,6 +376,8 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           isTabbed: false,
           onToggleLayout: _toggleLayout,
         ),
+        // Contextual hint banner for recipe screen
+        const SliverToBoxAdapter(child: HintBanner(screenName: 'recipe')),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.all(16),

@@ -9,12 +9,12 @@ import 'package:uuid/uuid.dart';
 import '../../../data/rpg/rpg_achievements.dart';
 import '../../../data/rpg/rpg_cosmetics.dart';
 import '../../../data/rpg/rpg_models.dart';
+import 'settings_provider.dart';
 
 // ============ RPG STATE ============
 
 class RpgState {
   final PlayerProfile profile;
-  final bool isEnabled;               // Master toggle for RPG mode
   final List<XpGainEvent> recentXpGains; // Recent XP gains for toast display
   final LevelUpEvent? pendingLevelUp;  // Pending level up notification
   final Achievement? pendingAchievement; // Pending achievement notification
@@ -22,7 +22,6 @@ class RpgState {
 
   const RpgState({
     required this.profile,
-    this.isEnabled = true,
     this.recentXpGains = const [],
     this.pendingLevelUp,
     this.pendingAchievement,
@@ -31,7 +30,6 @@ class RpgState {
 
   RpgState copyWith({
     PlayerProfile? profile,
-    bool? isEnabled,
     List<XpGainEvent>? recentXpGains,
     LevelUpEvent? pendingLevelUp,
     bool clearPendingLevelUp = false,
@@ -41,7 +39,6 @@ class RpgState {
   }) {
     return RpgState(
       profile: profile ?? this.profile,
-      isEnabled: isEnabled ?? this.isEnabled,
       recentXpGains: recentXpGains ?? this.recentXpGains,
       pendingLevelUp: clearPendingLevelUp ? null : (pendingLevelUp ?? this.pendingLevelUp),
       pendingAchievement: clearPendingAchievement ? null : (pendingAchievement ?? this.pendingAchievement),
@@ -54,7 +51,6 @@ class RpgState {
 
 class RpgNotifier extends Notifier<RpgState> {
   static const _profileKey = 'rpg_profile';
-  static const _enabledKey = 'rpg_enabled';
 
   @override
   RpgState build() {
@@ -68,7 +64,6 @@ class RpgNotifier extends Notifier<RpgState> {
   Future<void> _loadState() async {
     final prefs = await SharedPreferences.getInstance();
 
-    final isEnabled = prefs.getBool(_enabledKey) ?? true;
     final profileJson = prefs.getString(_profileKey);
 
     PlayerProfile profile;
@@ -107,6 +102,18 @@ class RpgNotifier extends Notifier<RpgState> {
       );
     }
 
+    // Ensure maxHp matches level (for boss fight rework)
+    final correctMaxHp = PlayerProfile.maxHpForLevel(profile.level);
+    if (profile.maxHp != correctMaxHp) {
+      profile = profile.copyWith(
+        maxHp: correctMaxHp,
+        hp: profile.hp.clamp(1, correctMaxHp),
+      );
+    }
+
+    // Passive HP regeneration: +5% maxHp per 6-minute interval
+    profile = _applyPassiveHpRegen(profile);
+
     // Migration: ensure frame_wooden is unlocked for all existing users
     if (!profile.unlockedFrames.contains('frame_wooden')) {
       profile = profile.copyWith(
@@ -116,7 +123,6 @@ class RpgNotifier extends Notifier<RpgState> {
 
     state = state.copyWith(
       profile: profile,
-      isEnabled: isEnabled,
       isLoading: false,
     );
 
@@ -126,7 +132,6 @@ class RpgNotifier extends Notifier<RpgState> {
   Future<void> _saveProfile() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_profileKey, jsonEncode(state.profile.toJson()));
-    await prefs.setBool(_enabledKey, state.isEnabled);
   }
 
   /// Check and update daily login streak
@@ -170,13 +175,6 @@ class RpgNotifier extends Notifier<RpgState> {
         loginStreak: 1,
       );
     }
-  }
-
-  // ============ TOGGLE RPG MODE ============
-
-  Future<void> setEnabled(bool enabled) async {
-    state = state.copyWith(isEnabled: enabled);
-    await _saveProfile();
   }
 
   // ============ XP SYSTEM ============
@@ -532,6 +530,86 @@ class RpgNotifier extends Notifier<RpgState> {
     }
   }
 
+  // ============ HP SYSTEM (Boss Fights) ============
+
+  /// Passive HP regen: +5% maxHp per 6-minute interval
+  PlayerProfile _applyPassiveHpRegen(PlayerProfile profile) {
+    final maxHp = PlayerProfile.maxHpForLevel(profile.level);
+    if (profile.hp >= maxHp) return profile;
+
+    // Reuse the same lastManaRegenTime for simplicity
+    final lastRegen = profile.lastManaRegenTime ?? profile.createdAt;
+    final elapsed = DateTime.now().difference(lastRegen);
+    final ticks = elapsed.inMinutes ~/ 6;
+
+    if (ticks <= 0) return profile;
+
+    final regenPerTick = (maxHp * 0.05).round().clamp(1, maxHp);
+    final totalRegen = regenPerTick * ticks;
+    final newHp = (profile.hp + totalRegen).clamp(0, maxHp);
+
+    return profile.copyWith(hp: newHp);
+  }
+
+  /// Boss attacks the player. Returns actual damage dealt.
+  Future<int> bossAttacksPlayer({required int baseDamage, int variance = 0, bool isBlocking = false}) async {
+    final profile = state.profile;
+    final rawDamage = baseDamage + (variance > 0 ? Random().nextInt(variance * 2 + 1) - variance : 0);
+    final damage = isBlocking ? (rawDamage * 0.25).round().clamp(1, 9999) : rawDamage.clamp(1, 9999);
+    final newHp = (profile.hp - damage).clamp(0, profile.maxHp);
+
+    state = state.copyWith(
+      profile: profile.copyWith(hp: newHp),
+    );
+    await _saveProfile();
+    return damage;
+  }
+
+  /// Player heals. Costs mana, restores 30% max HP.
+  Future<bool> healPlayer({int manaCost = 20}) async {
+    final profile = state.profile;
+    if (profile.mana < manaCost) return false;
+
+    final healAmount = (profile.maxHp * 0.3).round();
+    final newHp = (profile.hp + healAmount).clamp(0, profile.maxHp);
+
+    state = state.copyWith(
+      profile: profile.copyWith(
+        hp: newHp,
+        mana: profile.mana - manaCost,
+      ),
+    );
+    await _saveProfile();
+    return true;
+  }
+
+  /// Player blocks. Costs mana, next boss attack deals 75% less damage.
+  Future<bool> blockAction({int manaCost = 5}) async {
+    final profile = state.profile;
+    if (profile.mana < manaCost) return false;
+
+    state = state.copyWith(
+      profile: profile.copyWith(mana: profile.mana - manaCost),
+    );
+    await _saveProfile();
+    return true;
+  }
+
+  /// Handle player death: lose some gold, respawn at full HP.
+  Future<int> playerDeath() async {
+    final profile = state.profile;
+    final goldLoss = (profile.gold * 0.1).round().clamp(0, 100);
+
+    state = state.copyWith(
+      profile: profile.copyWith(
+        hp: profile.maxHp,
+        gold: profile.gold - goldLoss,
+      ),
+    );
+    await _saveProfile();
+    return goldLoss;
+  }
+
   // ============ COSMETIC EQUIPPING ============
 
   Future<void> equipAvatar(String? avatarId) async {
@@ -776,7 +854,6 @@ class RpgNotifier extends Notifier<RpgState> {
   Future<void> resetProgress() async {
     state = RpgState(
       profile: PlayerProfile.newPlayer(const Uuid().v4()),
-      isEnabled: state.isEnabled,
       isLoading: false,
     );
     await _saveProfile();
@@ -813,9 +890,9 @@ final rpgProvider = NotifierProvider<RpgNotifier, RpgState>(() {
 
 // ============ CONVENIENCE PROVIDERS ============
 
-/// Quick check if RPG mode is enabled
+/// Quick check if RPG mode is enabled (reads nerdMode from settings)
 final rpgEnabledProvider = Provider<bool>((ref) {
-  return ref.watch(rpgProvider).isEnabled;
+  return ref.watch(settingsProvider.select((s) => s.nerdMode));
 });
 
 /// Quick access to player profile

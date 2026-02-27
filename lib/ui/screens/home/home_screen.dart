@@ -10,11 +10,19 @@ import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../services/onboarding_service.dart';
 import '../../../utils/default_recipe_images.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/new_recipe_dialog.dart';
 import '../../widgets/onboarding_dialog.dart';
+import '../onboarding/spellbook_opening_screen.dart';
 import '../../widgets/placeholder_image.dart';
+import '../../../data/rpg/rpg_companion.dart';
+import '../../../providers/companion_provider.dart';
+import '../../../providers/rpg_provider.dart';
+import '../../widgets/hint_banner.dart';
+import '../../../services/recipe_suggestion_service.dart';
+import '../../widgets/rpg/companion_widget.dart';
 import '../../widgets/rpg/rpg_navigation_shell.dart';
 import '../../../utils/responsive_utils.dart';
 
@@ -22,6 +30,29 @@ class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   static bool _onboardingChecked = false;
+
+  /// Shows the spellbook opening animation for first-time users,
+  /// or falls back to the standard onboarding dialog.
+  static Future<void> _showOnboarding(BuildContext context, WidgetRef ref) async {
+    final offered = await OnboardingService.hasOfferedDefaultRecipes();
+    if (offered) return;
+    if (!context.mounted) return;
+
+    // Use the spellbook animation
+    await Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: true,
+        pageBuilder: (ctx, animation, secondaryAnimation) =>
+            const SpellbookOpeningScreen(),
+        transitionsBuilder: (ctx, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation.drive(CurveTween(curve: Curves.easeOut)),
+            child: child,
+          );
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,13 +64,13 @@ class HomeScreen extends ConsumerWidget {
       data: (cookbook) {
         final cookbookId = cookbook?.id ?? 'starter';
 
-        // Trigger onboarding dialog on first launch (once per app session)
+        // Trigger onboarding on first launch (once per app session)
         if (!_onboardingChecked) {
           _onboardingChecked = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             FlutterNativeSplash.remove();
             if (context.mounted) {
-              showOnboardingDialog(context, ref);
+              _showOnboarding(context, ref);
             }
           });
         }
@@ -89,6 +120,12 @@ class HomeScreen extends ConsumerWidget {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Contextual hint banner
+                        const HintBanner(screenName: 'home'),
+
+                        // "Surprise Me!" card
+                        _SurpriseMeCard(recipes: recipes),
+
                         // Quick Recipes Widget (meal plan + pinned + recent)
                         _QuickRecipesWidget(cookbookId: cookbookId),
 
@@ -111,9 +148,18 @@ class HomeScreen extends ConsumerWidget {
               ),
             ],
           ),
-          floatingActionButton: _ModernFAB(
-            onPressed: () => showNewRecipeDialog(context, cookbookId),
-            label: l10n.recipeAdd,
+          floatingActionButton: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // Floating companion (RPG mode only)
+              const CompanionWidget(size: 64),
+              const SizedBox(height: 8),
+              _ModernFAB(
+                onPressed: () => showNewRecipeDialog(context, cookbookId),
+                label: l10n.recipeAdd,
+              ),
+            ],
           ),
         );
       },
@@ -127,6 +173,123 @@ class HomeScreen extends ConsumerWidget {
         return Scaffold(body: Center(child: Text('${AppLocalizations.of(context)!.errorGeneric}: $e')));
       },
     );
+  }
+}
+
+// ============ SURPRISE ME CARD ============
+
+class _SurpriseMeCard extends ConsumerWidget {
+  final List<Recipe> recipes;
+
+  const _SurpriseMeCard({required this.recipes});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (recipes.length < 3) return const SizedBox.shrink(); // Need at least a few recipes
+
+    final theme = Theme.of(context);
+    final rpgEnabled = ref.watch(rpgEnabledProvider);
+    final companionData = rpgEnabled ? ref.watch(companionDataProvider) : null;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: rpgEnabled
+                ? Colors.amber.withValues(alpha: 0.4)
+                : theme.colorScheme.outline.withValues(alpha: 0.2),
+          ),
+        ),
+        color: rpgEnabled
+            ? Colors.amber.withValues(alpha: 0.08)
+            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => _onSurpriseMe(context, ref),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                // Icon / companion emoji
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: rpgEnabled
+                        ? Colors.amber.withValues(alpha: 0.2)
+                        : theme.colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: rpgEnabled && companionData != null
+                        ? Text(companionData.type.emoji, style: const TextStyle(fontSize: 24))
+                        : Icon(Icons.casino, color: theme.colorScheme.primary, size: 24),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                // Text
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        rpgEnabled && companionData != null
+                            ? 'Ask ${companionData.name}'
+                            : 'Surprise Me!',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'What should I cook?',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.outline,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Arrow
+                Icon(Icons.arrow_forward_ios,
+                    size: 16, color: theme.colorScheme.outline),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _onSurpriseMe(BuildContext context, WidgetRef ref) {
+    // Convert Recipe objects to the map format the suggestion service expects
+    final recipeMaps = recipes.map((r) => <String, dynamic>{
+      'id': r.id,
+      'title': r.title,
+      'course': r.courseId,
+      'rating': r.rating,
+    }).toList();
+
+    final suggestion = RecipeSuggestionService.suggest(
+      recipes: recipeMaps,
+    );
+
+    if (suggestion == null) return;
+
+    final recipeId = suggestion['id'] as String;
+
+    // Show companion reaction in RPG mode
+    final rpgEnabled = ref.read(rpgEnabledProvider);
+    if (rpgEnabled) {
+      final title = suggestion['title'] as String;
+      final notifier = ref.read(companionProvider.notifier);
+      notifier.showMessage(notifier.generateCookingReaction(title));
+    }
+
+    // Navigate to recipe
+    context.push('/recipe/$recipeId');
   }
 }
 

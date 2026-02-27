@@ -7284,6 +7284,49 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String get rpgBlock => 'Block (5 Mana)';
+
+  @override
+  String get rpgHeal => 'Heal (20 Mana)';
+
+  @override
+  String get rpgPlayerDefeated => 'Defeated!';
+
+  @override
+  String rpgPlayerDefeatedDesc(String name) {
+    return 'You were defeated by $name!';
+  }
+
+  @override
+  String rpgGoldLost(int amount) {
+    return 'Lost $amount gold';
+  }
+
+  @override
+  String get rpgRespawn => 'Respawn';
+
+  @override
+  String get rpgYourHp => 'Your HP';
+
+  @override
+  String rpgBossRetaliates(String name) {
+    return '$name retaliates!';
+  }
+
+  @override
+  String rpgBlockedDamage(int damage) {
+    return 'Blocked! Only $damage damage taken';
+  }
+
+  @override
+  String rpgHealedHp(int amount) {
+    return 'Healed $amount HP!';
+  }
+
+  @override
+  String get rpgNotEnoughMana => 'Not enough mana!';
+
+  @override
   String get rpgAvatars => 'Awatary';
 
   @override

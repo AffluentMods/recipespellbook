@@ -6,6 +6,7 @@ import 'package:recipespellbook/ui/screens/settings/pantry_screen.dart';
 import '../../../data/app_enums.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
+import '../../../providers/companion_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../providers/auth_provider.dart';
@@ -204,10 +205,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ) : null,
       ]),
 
-      // ─── SECRET ───
-      if (_query.isEmpty || _m('RPG Mode', 'nerd secret'))
-        _Section(title: s.nerdMode ? '\u{1F3AE} RPG Mode' : '\u2728 Secret', icon: Icons.auto_awesome, children: [
-          _RpgModeTile(isEnabled: s.nerdMode, onChanged: (v) => ref.read(settingsProvider.notifier).setNerdMode(v)),
+      // ─── RPG MODE ───
+      if (_query.isEmpty || _m('RPG Mode', 'nerd rpg companion'))
+        _Section(title: '\u2728 RPG Mode', icon: Icons.auto_awesome, children: [
+          _RpgModeTile(isEnabled: s.nerdMode, onChanged: (v) {
+            ref.read(settingsProvider.notifier).setNerdMode(v);
+            // When enabling RPG for the first time, navigate to companion naming
+            if (v && ref.read(companionDataProvider) == null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (context.mounted) {
+                  context.push('/rpg/companion-naming');
+                }
+              });
+            }
+          }),
         ]),
 
       // ─── ABOUT ───

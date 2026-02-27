@@ -278,6 +278,14 @@ class PlayerProfile {
   /// L1=100, L2=150, L3=200, L10=550, L50=2550
   int get calculatedMaxMana => 100 + (level - 1) * 50;
 
+  /// Max HP scales with level: 100 + (level-1) * 10
+  /// L1=100, L2=110, L5=140, L10=190, L50=590
+  static int maxHpForLevel(int level) => 100 + (level - 1) * 10;
+  int get calculatedMaxHp => 100 + (level - 1) * 10;
+
+  /// HP as a percentage (0.0-1.0)
+  double get hpPercent => maxHp > 0 ? (hp / maxHp).clamp(0.0, 1.0) : 0.0;
+
   /// Base damage scales linearly with level: 10 * level
   /// L1=10, L2=20, L5=50, L10=100, L50=500
   int get baseDamage => 10 * level;

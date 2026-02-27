@@ -305,10 +305,10 @@ class RpgCompactXpBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final rpgState = ref.watch(rpgProvider);
-    if (!rpgState.isEnabled) return const SizedBox.shrink();
+    final rpgEnabled = ref.watch(rpgEnabledProvider);
+    if (!rpgEnabled) return const SizedBox.shrink();
 
-    final profile = rpgState.profile;
+    final profile = ref.watch(rpgProvider).profile;
     final theme = Theme.of(context);
 
     return Container(

@@ -52,8 +52,10 @@ class AppMenuDrawer extends ConsumerWidget {
                 _DrawerItem(
                   icon: Icons.people_rounded,
                   label: l10n.navCommunity,
-                  trailing: _ComingSoonChip(),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push('/community');
+                  },
                 ),
                 if (isRpgEnabled)
                   _DrawerItem(

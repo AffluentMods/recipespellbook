@@ -19,6 +19,7 @@ import '../ui/screens/recipe/recipe_screen.dart';
 import '../ui/screens/recipe/uncategorized_recipes_screen.dart';
 import '../ui/screens/rpg/rpg_achievements_screen.dart';
 import '../ui/screens/rpg/rpg_boss_screen.dart';
+import '../ui/screens/rpg/companion_naming_screen.dart';
 import '../ui/screens/rpg/rpg_cosmetics_screen.dart';
 import '../ui/screens/rpg/rpg_leaderboard_screen.dart';
 // RPG imports
@@ -260,6 +261,11 @@ final router = GoRouter(
       path: '/rpg/boss',
       name: 'rpg-boss',
       builder: (context, state) => const RpgBossScreen(),
+    ),
+    GoRoute(
+      path: '/rpg/companion-naming',
+      name: 'rpg-companion-naming',
+      builder: (context, state) => const CompanionNamingScreen(),
     ),
     // ============ END RPG ROUTES ============
 

@@ -6,8 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../data/rpg/rpg_models.dart';
+import '../../../data/rpg/rpg_quests.dart';
+import '../../../providers/companion_provider.dart';
 import '../../../providers/rpg_provider.dart';
-import '../../../providers/settings_provider.dart';
+import '../../screens/rpg/rpg_daily_quests.dart';
 import 'rpg_widgets.dart';
 
 /// Wraps the main app shell with RPG-specific UI elements
@@ -24,11 +26,7 @@ class RpgNavigationShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final rpgEnabled = ref.watch(rpgEnabledProvider);
-    final nerdMode = ref.watch(settingsProvider).nerdMode;
-
-    // Only show RPG elements if both RPG mode is enabled AND nerd mode is on
-    final showRpgUI = rpgEnabled && nerdMode;
+    final showRpgUI = ref.watch(rpgEnabledProvider);
 
     if (!showRpgUI) {
       return child;
@@ -53,11 +51,7 @@ class RpgBottomNavigationBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final rpgEnabled = ref.watch(rpgEnabledProvider);
-    final nerdMode = ref.watch(settingsProvider).nerdMode;
-    final showRpgUI = rpgEnabled && nerdMode;
-
-    final theme = Theme.of(context);
+    final showRpgUI = ref.watch(rpgEnabledProvider);
 
     // Get RPG-themed labels
     final rpgDestinations = showRpgUI
@@ -178,9 +172,17 @@ class _RpgXpToastOverlayState extends ConsumerState<RpgXpToastOverlay> {
 
 /// Integration helper - call this to award XP from anywhere in the app
 class RpgIntegration {
+  /// Update daily quest progress if RPG mode is enabled
+  static void _questProgress(WidgetRef ref, QuestType type, [int amount = 1]) {
+    if (ref.read(rpgEnabledProvider)) {
+      ref.read(dailyQuestsProvider.notifier).updateQuestProgress(type, amount);
+    }
+  }
+
   static void onRecipeCreated(WidgetRef ref, {int stepCount = 0, int ingredientCount = 0}) {
     final rpgNotifier = ref.read(rpgProvider.notifier);
     rpgNotifier.awardXp(XpActionType.createRecipe, description: 'Created Recipe');
+    _questProgress(ref, QuestType.createRecipe);
 
     if (stepCount > 0) {
       rpgNotifier.awardXp(XpActionType.addSteps,
@@ -200,13 +202,20 @@ class RpgIntegration {
       multiplier: count,
       description: count > 1 ? 'Imported $count recipes' : 'Imported Recipe',
     );
+    _questProgress(ref, QuestType.importRecipe, count);
   }
 
-  static void onRecipeCooked(WidgetRef ref) {
+  static void onRecipeCooked(WidgetRef ref, {String? categoryId, String? courseId}) {
     ref.read(rpgProvider.notifier).awardXp(
       XpActionType.cookRecipe,
       description: 'Cooked a recipe!',
     );
+    _questProgress(ref, QuestType.cookRecipe);
+
+    // Update companion with cooking data for evolution tracking
+    if (ref.read(rpgEnabledProvider)) {
+      ref.read(companionProvider.notifier).onCookingAction(categoryId, courseId);
+    }
   }
 
   static void onPhotoAdded(WidgetRef ref) {
@@ -214,6 +223,7 @@ class RpgIntegration {
       XpActionType.addPhoto,
       description: 'Added photo',
     );
+    _questProgress(ref, QuestType.addPhoto);
   }
 
   static void onNutritionAdded(WidgetRef ref) {
@@ -221,6 +231,7 @@ class RpgIntegration {
       XpActionType.addNutrition,
       description: 'Added nutrition info',
     );
+    _questProgress(ref, QuestType.addNutrition);
   }
 
   static void onMealPlanned(WidgetRef ref) {
@@ -228,6 +239,7 @@ class RpgIntegration {
       XpActionType.planMeal,
       description: 'Planned a meal',
     );
+    _questProgress(ref, QuestType.planMeal);
   }
 
   static void onShoppingListCompleted(WidgetRef ref) {
@@ -235,6 +247,7 @@ class RpgIntegration {
       XpActionType.completeShoppingList,
       description: 'Completed shopping list!',
     );
+    _questProgress(ref, QuestType.completeShoppingList);
   }
 
   static void onCookbookCreated(WidgetRef ref) {
@@ -256,6 +269,7 @@ class RpgIntegration {
       XpActionType.rateRecipe,
       description: 'Rated recipe',
     );
+    _questProgress(ref, QuestType.rateRecipe);
   }
 
   static void onNotesAdded(WidgetRef ref) {

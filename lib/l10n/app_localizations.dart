@@ -13237,6 +13237,72 @@ abstract class AppLocalizations {
   /// **'Defeated {name}!'**
   String rpgDefeatedEnemy(String name);
 
+  /// No description provided for @rpgBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Block (5 Mana)'**
+  String get rpgBlock;
+
+  /// No description provided for @rpgHeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Heal (20 Mana)'**
+  String get rpgHeal;
+
+  /// No description provided for @rpgPlayerDefeated.
+  ///
+  /// In en, this message translates to:
+  /// **'Defeated!'**
+  String get rpgPlayerDefeated;
+
+  /// No description provided for @rpgPlayerDefeatedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You were defeated by {name}!'**
+  String rpgPlayerDefeatedDesc(String name);
+
+  /// No description provided for @rpgGoldLost.
+  ///
+  /// In en, this message translates to:
+  /// **'Lost {amount} gold'**
+  String rpgGoldLost(int amount);
+
+  /// No description provided for @rpgRespawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Respawn'**
+  String get rpgRespawn;
+
+  /// No description provided for @rpgYourHp.
+  ///
+  /// In en, this message translates to:
+  /// **'Your HP'**
+  String get rpgYourHp;
+
+  /// No description provided for @rpgBossRetaliates.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} retaliates!'**
+  String rpgBossRetaliates(String name);
+
+  /// No description provided for @rpgBlockedDamage.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked! Only {damage} damage taken'**
+  String rpgBlockedDamage(int damage);
+
+  /// No description provided for @rpgHealedHp.
+  ///
+  /// In en, this message translates to:
+  /// **'Healed {amount} HP!'**
+  String rpgHealedHp(int amount);
+
+  /// No description provided for @rpgNotEnoughMana.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough mana!'**
+  String get rpgNotEnoughMana;
+
   /// No description provided for @rpgAvatars.
   ///
   /// In en, this message translates to:
