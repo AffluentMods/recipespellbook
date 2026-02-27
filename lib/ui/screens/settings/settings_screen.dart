@@ -174,6 +174,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ) : null,
         ]),
 
+      // ─── COMMUNITY ───
+      if (_query.isEmpty || _m('Community', 'browse publish download cookbooks public'))
+        _section(title: 'Community', icon: Icons.explore, children: [
+          _m('Browse Community', 'public download') ? _Tile(
+            icon: Icons.explore, title: 'Browse Community',
+            subtitle: 'Discover & download public cookbooks',
+            onTap: () => context.push('/community'),
+          ) : null,
+          _m('My Publications', 'published upload') ? _Tile(
+            icon: Icons.upload_outlined, title: 'My Publications',
+            subtitle: 'Manage your published cookbooks',
+            onTap: () => context.push('/community/my-publications'),
+          ) : null,
+        ]),
+
       // ─── DATA ───
       _section(title: l10n.settingsData, icon: Icons.storage_outlined, children: [
         _m(l10n.settingsExport, 'backup') ? _Tile(

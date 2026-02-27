@@ -36,6 +36,7 @@ void showResourceShareSheet(
       required String resourceType, // 'cookbook' | 'shopping_list'
       required String resourceId,
       required String resourceName,
+      bool familyOnly = false,
     }) {
   showModalBottomSheet(
     context: context,
@@ -44,7 +45,7 @@ void showResourceShareSheet(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     builder: (ctx) => DraggableScrollableSheet(
-      initialChildSize: 0.6,
+      initialChildSize: familyOnly ? 0.5 : 0.6,
       minChildSize: 0.3,
       maxChildSize: 0.85,
       expand: false,
@@ -53,6 +54,7 @@ void showResourceShareSheet(
         resourceId: resourceId,
         resourceName: resourceName,
         scrollController: scrollController,
+        familyOnly: familyOnly,
       ),
     ),
   );
@@ -63,12 +65,14 @@ class _ResourceShareSheet extends ConsumerStatefulWidget {
   final String resourceId;
   final String resourceName;
   final ScrollController scrollController;
+  final bool familyOnly;
 
   const _ResourceShareSheet({
     required this.resourceType,
     required this.resourceId,
     required this.resourceName,
     required this.scrollController,
+    this.familyOnly = false,
   });
 
   @override
@@ -165,25 +169,27 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
             padding: const EdgeInsets.all(20),
             children: [
               // ━━━ ONE-TIME LINK ━━━
-              _SectionHeader(icon: Icons.link, title: 'One-Time Link', subtitle: 'Free • 24h expiry • View/download only'),
-              const SizedBox(height: 8),
-              if (_activeLink != null) ...[
-                _LinkCard(link: _activeLink!, onRevoke: () async {
-                  await _family.revokeShareLink(_activeLink!.code);
-                  setState(() => _activeLink = null);
-                }),
-              ] else ...[
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: _createOneTimeLink,
-                    icon: const Icon(Icons.add_link, size: 18),
-                    label: const Text('Generate Link'),
+              if (!widget.familyOnly) ...[
+                _SectionHeader(icon: Icons.link, title: 'One-Time Link', subtitle: 'Free • 24h expiry • View/download only'),
+                const SizedBox(height: 8),
+                if (_activeLink != null) ...[
+                  _LinkCard(link: _activeLink!, onRevoke: () async {
+                    await _family.revokeShareLink(_activeLink!.code);
+                    setState(() => _activeLink = null);
+                  }),
+                ] else ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _createOneTimeLink,
+                      icon: const Icon(Icons.add_link, size: 18),
+                      label: const Text('Generate Link'),
+                    ),
                   ),
-                ),
-              ],
+                ],
 
-              const SizedBox(height: 28),
+                const SizedBox(height: 28),
+              ],
 
               // ━━━ FAMILY SHARE ━━━
               _SectionHeader(

@@ -7,6 +7,7 @@ import '../ui/screens/cookbooks/cookbooks_screen.dart';
 import '../ui/screens/home/home_screen.dart';
 import '../ui/screens/import/transfer_screen.dart';
 import '../ui/screens/planner/planner_screen.dart';
+import '../ui/screens/premium/family_screen.dart';
 import '../ui/screens/premium/paywall_screen.dart';
 import '../ui/screens/recipe/categories_browse_screen.dart';
 import '../ui/screens/recipe/favorite_recipes_screen.dart';
@@ -37,7 +38,10 @@ import '../ui/screens/settings/quick_access_settings_screen.dart';
 import '../ui/screens/settings/recipe_layout_settings_screen.dart';
 import '../ui/screens/settings/ingredient_layout_settings_screen.dart';
 import '../ui/screens/settings/settings_screen.dart';
-import '../ui/screens/premium/family_screen.dart';
+import '../ui/screens/community/community_screen.dart';
+import '../ui/screens/community/community_detail_screen.dart';
+import '../ui/screens/community/community_publish_screen.dart';
+import '../ui/screens/community/community_my_publications_screen.dart';
 import '../ui/screens/settings/trash_screen.dart';
 import '../ui/screens/shopping/kroger_callback_screen.dart';
 import '../ui/screens/shopping/shopping_screen.dart';
@@ -363,6 +367,31 @@ final router = GoRouter(
       path: '/settings/family',
       name: 'family',
       builder: (context, state) => const FamilyScreen(),
+    ),
+
+    // ── Community ──
+    GoRoute(
+      path: '/community',
+      name: 'community',
+      builder: (context, state) => const CommunityScreen(),
+    ),
+    GoRoute(
+      path: '/community/publish',
+      name: 'community-publish',
+      builder: (context, state) => const CommunityPublishScreen(),
+    ),
+    GoRoute(
+      path: '/community/my-publications',
+      name: 'community-my-publications',
+      builder: (context, state) => const CommunityMyPublicationsScreen(),
+    ),
+    GoRoute(
+      path: '/community/:id',
+      name: 'community-detail',
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        return CommunityDetailScreen(publicationId: id);
+      },
     ),
     // Recipe edit (existing recipe)
     GoRoute(

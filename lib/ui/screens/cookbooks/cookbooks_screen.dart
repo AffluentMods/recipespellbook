@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
@@ -9,6 +10,11 @@ import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../providers/subscription_provider.dart';
+import '../../../services/auth_service.dart';
+import '../../../services/community_service.dart';
+import '../../../services/family_service.dart';
+import '../../../services/revenuecat_service.dart';
 import '../../shell/app_shell.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/family_share_sheet.dart';
@@ -24,11 +30,14 @@ class CookbooksScreen extends ConsumerStatefulWidget {
 
 class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
   final _searchController = TextEditingController();
+  final _searchFocus = FocusNode();
   String _query = '';
+  bool _showSearch = false;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocus.dispose();
     super.dispose();
   }
 
@@ -44,6 +53,23 @@ class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(rpg.cookbooksTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: l10n.searchCookbooks,
+            onPressed: () {
+              setState(() => _showSearch = !_showSearch);
+              if (_showSearch) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  FocusScope.of(context).requestFocus(_searchFocus);
+                });
+              } else {
+                _searchController.clear();
+                _query = '';
+              }
+            },
+          ),
+        ],
       ),
       body: cookbooksAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -55,11 +81,12 @@ class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
 
           return Column(
             children: [
-              if (cookbooks.length > 5)
+              if (_showSearch)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                   child: TextField(
                     controller: _searchController,
+                    focusNode: _searchFocus,
                     decoration: InputDecoration(
                       hintText: l10n.searchCookbooks,
                       prefixIcon: const Icon(Icons.search, size: 20),
@@ -226,9 +253,16 @@ class _CookbookGrid extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const SizedBox(height: 8),
+            Container(width: 40, height: 4, decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(2),
+            )),
+            const SizedBox(height: 8),
             ListTile(
               leading: const Icon(Icons.edit),
               title: Text(l10n.actionEdit),
+              subtitle: const Text('Rename, cover photo'),
               onTap: () {
                 Navigator.pop(ctx);
                 context.push('/cookbook/${cookbook.id}/edit');
@@ -236,25 +270,11 @@ class _CookbookGrid extends ConsumerWidget {
             ),
             ListTile(
               leading: const Icon(Icons.share),
-              title: Text(l10n.shareCookbook),
-              subtitle: const Text('Share as text'),
+              title: const Text('Share Cookbook'),
+              subtitle: const Text('Link, family, or community'),
               onTap: () {
                 Navigator.pop(ctx);
-                _shareCookbook(context, ref, cookbook);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.family_restroom),
-              title: const Text('Family Share'),
-              subtitle: const Text('Share with family or one-time link'),
-              onTap: () {
-                Navigator.pop(ctx);
-                showResourceShareSheet(
-                  context,
-                  resourceType: 'cookbook',
-                  resourceId: cookbook.id,
-                  resourceName: cookbook.name,
-                );
+                _showShareSheet(context, ref, cookbook);
               },
             ),
             ListTile(
@@ -271,45 +291,258 @@ class _CookbookGrid extends ConsumerWidget {
     );
   }
 
-  Future<void> _shareCookbook(BuildContext context, WidgetRef ref, Cookbook cookbook) async {
-    final l10n = AppLocalizations.of(context)!;
+  void _showShareSheet(BuildContext context, WidgetRef ref, Cookbook cookbook) {
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(width: 40, height: 4, decoration: BoxDecoration(
+              color: theme.colorScheme.outline.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(2),
+            )),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text('Share "${cookbook.name}"',
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            ),
+
+            // ── One-Time Link ──
+            ListTile(
+              leading: const Icon(Icons.link),
+              title: const Text('One-Time Link'),
+              subtitle: const Text('Free • 24h expiry • Anyone can download'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _createOneTimeLink(context, ref, cookbook);
+              },
+            ),
+
+            // ── Family Share ──
+            ListTile(
+              leading: const Icon(Icons.family_restroom),
+              title: const Text('Family Share'),
+              subtitle: const Text('Real-time sync with family members'),
+              trailing: _isFamilyTierUnlocked(ref)
+                  ? null
+                  : Icon(Icons.star, size: 16, color: Colors.amber.shade600),
+              onTap: () {
+                Navigator.pop(ctx);
+                if (!_isFamilyTierUnlocked(ref)) {
+                  _showUpgradePrompt(context, 'Family Share',
+                      'Upgrade to Cloud Sync to share cookbooks with your family in real-time.');
+                  return;
+                }
+                showResourceShareSheet(
+                  context,
+                  resourceType: 'cookbook',
+                  resourceId: cookbook.id,
+                  resourceName: cookbook.name,
+                  familyOnly: true,
+                );
+              },
+            ),
+
+            // ── Post to Community ──
+            ListTile(
+              leading: const Icon(Icons.public),
+              title: const Text('Post to Community'),
+              subtitle: const Text('Publish for anyone to discover & download'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _publishToCommunity(context, ref, cookbook);
+              },
+            ),
+
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _createOneTimeLink(BuildContext context, WidgetRef ref, Cookbook cookbook) async {
+    final auth = AuthService.instance;
+    if (!auth.isSignedIn) {
+      AppSnackbar.info(context, 'Sign in to create share links');
+      return;
+    }
+
+    AppSnackbar.loading(context, 'Generating link...');
+
     try {
-      final recipeDao = ref.read(recipeDaoProvider);
-      final allRecipes = await recipeDao.getAllRecipes();
-      final recipes = allRecipes.where((r) => r.cookbookId == cookbook.id).toList();
+      final link = await FamilyService.instance.createShareLink(
+        'cookbook', cookbook.id,
+      );
+      if (!context.mounted) return;
+      AppSnackbar.dismiss(context);
 
-      if (recipes.isEmpty) {
-        if (context.mounted) AppSnackbar.info(context, l10n.cookbookEmpty);
-        return;
+      if (link != null) {
+        _showLinkResult(context, link);
+      } else {
+        AppSnackbar.error(context, 'Failed to create link');
       }
-
-      // Build text representation of cookbook
-      final buffer = StringBuffer();
-      buffer.writeln('📖 ${cookbook.name}');
-      if (cookbook.description != null && cookbook.description!.isNotEmpty) {
-        buffer.writeln(cookbook.description);
-      }
-      buffer.writeln('${'─' * 30}');
-      buffer.writeln('${recipes.length} ${l10n.recipes}\n');
-
-      for (final recipe in recipes) {
-        buffer.writeln('🍽️ ${recipe.title}');
-        if (recipe.description != null && recipe.description!.isNotEmpty) {
-          buffer.writeln('   ${recipe.description}');
-        }
-        final parts = <String>[];
-        if (recipe.prepTimeMinutes != null) parts.add('${recipe.prepTimeMinutes}m prep');
-        if (recipe.cookTimeMinutes != null) parts.add('${recipe.cookTimeMinutes}m cook');
-        if (recipe.servings != null) parts.add('${recipe.servings} servings');
-        if (parts.isNotEmpty) buffer.writeln('   ${parts.join(' • ')}');
-        buffer.writeln();
-      }
-
-      buffer.writeln('${l10n.shareFromApp}');
-
-      await Share.share(buffer.toString(), subject: cookbook.name);
     } catch (e) {
-      if (context.mounted) AppSnackbar.info(context, '${l10n.errorGeneric}: $e');
+      if (context.mounted) {
+        AppSnackbar.dismiss(context);
+        AppSnackbar.error(context, 'Error: $e');
+      }
+    }
+  }
+
+  void _showLinkResult(BuildContext context, ShareLinkInfo link) {
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(width: 40, height: 4, decoration: BoxDecoration(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              )),
+              const SizedBox(height: 20),
+              const Icon(Icons.check_circle, size: 48, color: Colors.green),
+              const SizedBox(height: 12),
+              Text('Link Created!', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text('Expires in 24 hours', style: TextStyle(color: theme.colorScheme.outline, fontSize: 13)),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(children: [
+                  Expanded(child: Text(link.url, style: const TextStyle(fontSize: 13, fontFamily: 'monospace'),
+                      maxLines: 2, overflow: TextOverflow.ellipsis)),
+                  IconButton(
+                    icon: const Icon(Icons.copy, size: 20),
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: link.url));
+                      AppSnackbar.success(context, 'Link copied!');
+                    },
+                  ),
+                ]),
+              ),
+              const SizedBox(height: 16),
+              Row(children: [
+                Expanded(child: OutlinedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Done'),
+                )),
+                const SizedBox(width: 12),
+                Expanded(child: FilledButton.icon(
+                  onPressed: () {
+                    Share.share(link.url, subject: 'Shared from Recipe Spellbook');
+                  },
+                  icon: const Icon(Icons.share, size: 18),
+                  label: const Text('Share'),
+                )),
+              ]),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _isFamilyTierUnlocked(WidgetRef ref) {
+    final tier = ref.read(subscriptionProvider).tier;
+    return tier.index >= SubscriptionTier.cloudSync.index;
+  }
+
+  void _showUpgradePrompt(BuildContext context, String featureName, String message) {
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(width: 40, height: 4, decoration: BoxDecoration(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              )),
+              const SizedBox(height: 24),
+              const Icon(Icons.star, size: 48, color: Colors.amber),
+              const SizedBox(height: 16),
+              Text('Unlock $featureName',
+                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text(message,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
+              const SizedBox(height: 24),
+              Row(children: [
+                Expanded(child: OutlinedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Not now'),
+                )),
+                const SizedBox(width: 12),
+                Expanded(child: FilledButton.icon(
+                  onPressed: () { Navigator.pop(ctx); context.push('/upgrade'); },
+                  icon: const Icon(Icons.star, size: 18),
+                  label: const Text('Upgrade'),
+                )),
+              ]),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _publishToCommunity(BuildContext context, WidgetRef ref, Cookbook cookbook) async {
+    // Check recipe count locally first
+    final recipeCount = await ref.read(recipeDaoProvider).getRecipeCountForCookbook(cookbook.id);
+    if (recipeCount < 10) {
+      if (context.mounted) {
+        AppSnackbar.error(context, 'Need at least 10 recipes to publish (has $recipeCount)');
+      }
+      return;
+    }
+
+    if (!context.mounted) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.public),
+        title: const Text('Post to Community?'),
+        content: Text(
+          '"${cookbook.name}" ($recipeCount recipes) will be publicly visible. '
+              'Anyone can browse and download it.\n\n'
+              'You can remove it anytime from Community → My Publications.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Publish')),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    final result = await CommunityService.instance.publish(cookbook.id);
+    if (context.mounted) {
+      if (result.success) {
+        AppSnackbar.success(context, '"${cookbook.name}" published to the community!');
+      } else {
+        AppSnackbar.error(context, result.error ?? 'Publish failed');
+      }
     }
   }
 
