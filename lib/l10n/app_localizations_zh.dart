@@ -4859,6 +4859,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsWeekStartDay => '周起始日';
 
   @override
+  String get settingsSurpriseMe => '显示\'惊喜推荐\'卡片';
+
+  @override
+  String get settingsSurpriseMeSubtitle => '在主屏幕上显示食谱建议卡片';
+
+  @override
   String get tuesday => '周二';
 
   @override
@@ -6243,7 +6249,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rpgAchievements => '成就';
 
   @override
-  String get rpgAttack => '攻击！（10法力）';
+  String get rpgAttack => '攻击';
 
   @override
   String get rpgBattleArena => '⚔️ 战斗竞技场';
@@ -7166,47 +7172,47 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get rpgBlock => 'Block (5 Mana)';
+  String get rpgBlock => '格挡';
 
   @override
-  String get rpgHeal => 'Heal (20 Mana)';
+  String get rpgHeal => '治疗';
 
   @override
-  String get rpgPlayerDefeated => 'Defeated!';
+  String get rpgPlayerDefeated => '战败！';
 
   @override
   String rpgPlayerDefeatedDesc(String name) {
-    return 'You were defeated by $name!';
+    return '你被$name击败了！';
   }
 
   @override
   String rpgGoldLost(int amount) {
-    return 'Lost $amount gold';
+    return '失去了$amount金币';
   }
 
   @override
-  String get rpgRespawn => 'Respawn';
+  String get rpgRespawn => '复活';
 
   @override
-  String get rpgYourHp => 'Your HP';
+  String get rpgYourHp => '你的HP';
 
   @override
   String rpgBossRetaliates(String name) {
-    return '$name retaliates!';
+    return '$name反击！';
   }
 
   @override
   String rpgBlockedDamage(int damage) {
-    return 'Blocked! Only $damage damage taken';
+    return '格挡成功！仅受到$damage点伤害';
   }
 
   @override
   String rpgHealedHp(int amount) {
-    return 'Healed $amount HP!';
+    return '恢复了${amount}HP！';
   }
 
   @override
-  String get rpgNotEnoughMana => 'Not enough mana!';
+  String get rpgNotEnoughMana => '法力不足！';
 
   @override
   String get rpgAvatars => '头像';

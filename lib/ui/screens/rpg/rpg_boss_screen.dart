@@ -518,9 +518,26 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
     );
   }
 
+  void _switchEnemy(int delta) {
+    final enemies = EnemyData.allEnemies;
+    final currentIndex = enemies.indexWhere((e) => e.id == _currentEnemy.id);
+    final newIndex = (currentIndex + delta).clamp(0, enemies.length - 1);
+    final enemy = enemies[newIndex];
+    if (ref.read(rpgProvider).profile.level >= enemy.minLevel) {
+      setState(() {
+        _currentEnemy = enemy;
+        _lastDamage = null;
+        _damageNumbers.clear();
+        _bossAttackName = null;
+        _lastBossDamage = null;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final profile = ref.watch(rpgProvider).profile;
     final playerLevel = profile.level;
     final canFight = playerLevel >= _currentEnemy.minLevel;
@@ -528,390 +545,338 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
 
     final l10n = AppLocalizations.of(context)!;
 
+    // Figure out which wave this is (1-indexed among unlocked enemies)
+    final allEnemies = EnemyData.allEnemies;
+    final unlockedCount = allEnemies.where((e) => playerLevel >= e.minLevel).length;
+    final currentWave = allEnemies.indexWhere((e) => e.id == _currentEnemy.id) + 1;
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(l10n.rpgBattleArena),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(alpha: 0.7),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: theme.colorScheme.onSurface),
+          ),
+        ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Row(
-              children: [
-                const Icon(Icons.auto_awesome, color: Colors.blue, size: 20),
-                const SizedBox(width: 4),
-                Text(
-                  '${profile.mana}/$maxMana',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: profile.mana < 10 ? Colors.red : null,
-                  ),
-                ),
-              ],
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              '$currentWave / $unlockedCount',
+              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Enemy selection tabs
-          _EnemySelector(
-            enemies: EnemyData.allEnemies,
-            selectedEnemy: _currentEnemy,
-            playerLevel: playerLevel,
-            onSelect: (enemy) {
-              if (playerLevel >= enemy.minLevel) {
-                setState(() {
-                  _currentEnemy = enemy;
-                  _lastDamage = null;
-                  _damageNumbers.clear();
-                  _bossAttackName = null;
-                  _lastBossDamage = null;
-                });
-              }
-            },
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              _currentEnemy.color.withValues(alpha: isDark ? 0.15 : 0.08),
+              _currentEnemy.color.withValues(alpha: isDark ? 0.05 : 0.02),
+              theme.colorScheme.surface,
+            ],
+            stops: const [0.0, 0.5, 1.0],
           ),
-
-          Expanded(
-            child: canFight
-                ? _buildBattleArea(theme, profile)
-                : _buildLockedArea(theme),
-          ),
-
-          // Battle controls
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // Player HP bar
-                  _PlayerHpBar(current: profile.hp, max: profile.maxHp),
-                  const SizedBox(height: 6),
-                  // Mana bar
-                  _ManaBar(current: profile.mana, max: maxMana),
-                  const SizedBox(height: 8),
-
-                  // Level stats row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _StatChip(
-                        icon: Icons.flash_on,
-                        label: l10n.rpgDmg,
-                        value: '${playerLevel}x',
-                        color: Colors.orange,
-                      ),
-                      const SizedBox(width: 12),
-                      _StatChip(
-                        icon: Icons.auto_awesome,
-                        label: l10n.rpgMana,
-                        value: '$maxMana',
-                        color: Colors.blue,
-                      ),
-                      const SizedBox(width: 12),
-                      _StatChip(
-                        icon: Icons.military_tech,
-                        label: l10n.rpgLevel,
-                        value: '$playerLevel',
-                        color: Colors.amber,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // 3-action button row
-                  Row(
-                    children: [
-                      // Attack button
-                      Expanded(
-                        flex: 3,
-                        child: SizedBox(
-                          height: 52,
-                          child: FilledButton.icon(
-                            onPressed: canFight && !_isBusy && profile.mana >= 10 && !_currentEnemy.isDefeated
-                                ? () => _performAction(BattleAction.attack)
-                                : null,
-                            icon: const Icon(Icons.flash_on, size: 22),
-                            label: Text(
-                              canFight
-                                  ? profile.mana < 10 ? l10n.rpgNoMana : l10n.rpgAttack
-                                  : l10n.rpgLevelRequired(_currentEnemy.minLevel),
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: canFight && profile.mana >= 10 && !_isBusy
-                                  ? _currentEnemy.color
-                                  : null,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      // Block button
-                      Expanded(
-                        flex: 2,
-                        child: SizedBox(
-                          height: 52,
-                          child: OutlinedButton.icon(
-                            onPressed: canFight && !_isBusy && profile.mana >= 5 && !_currentEnemy.isDefeated
-                                ? () => _performAction(BattleAction.block)
-                                : null,
-                            icon: const Icon(Icons.shield, size: 20),
-                            label: Text(l10n.rpgBlock, style: const TextStyle(fontSize: 12)),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      // Heal button
-                      Expanded(
-                        flex: 2,
-                        child: SizedBox(
-                          height: 52,
-                          child: OutlinedButton.icon(
-                            onPressed: canFight && !_isBusy && profile.mana >= 20 && !_currentEnemy.isDefeated && profile.hp < profile.maxHp
-                                ? () => _performAction(BattleAction.heal)
-                                : null,
-                            icon: const Icon(Icons.favorite, size: 20, color: Colors.green),
-                            label: Text(l10n.rpgHeal, style: const TextStyle(fontSize: 12)),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.rpgManaHint,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.outline,
-                      fontSize: 11,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // ═══ BATTLE AREA (main focus) ═══
+              Expanded(
+                child: canFight
+                    ? _buildBattleArea(theme, profile)
+                    : _buildLockedArea(theme),
               ),
-            ),
+
+              // ═══ PLAYER AREA (bottom) ═══
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Column(
+                  children: [
+                    // Compact HP + Mana row (side by side)
+                    Row(
+                      children: [
+                        Expanded(child: _CompactBar(
+                          icon: Icons.favorite,
+                          current: profile.hp,
+                          max: profile.maxHp,
+                          color: profile.hp / profile.maxHp > 0.5
+                              ? Colors.green
+                              : profile.hp / profile.maxHp > 0.25
+                                  ? Colors.orange
+                                  : Colors.red,
+                        )),
+                        const SizedBox(width: 10),
+                        Expanded(child: _CompactBar(
+                          icon: Icons.auto_awesome,
+                          current: profile.mana,
+                          max: maxMana,
+                          color: profile.mana < 10 ? Colors.red : Colors.blue,
+                        )),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+
+                    // 3 circular action buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Block
+                        _ArenaActionButton(
+                          onPressed: canFight && !_isBusy && profile.mana >= 5 && !_currentEnemy.isDefeated
+                              ? () => _performAction(BattleAction.block)
+                              : null,
+                          icon: Icons.shield_rounded,
+                          label: l10n.rpgBlock,
+                          manaCost: 5,
+                          color: Colors.blue.shade400,
+                          size: 60,
+                        ),
+                        const SizedBox(width: 16),
+                        // Attack (largest, primary)
+                        _ArenaActionButton(
+                          onPressed: canFight && !_isBusy && profile.mana >= 10 && !_currentEnemy.isDefeated
+                              ? () => _performAction(BattleAction.attack)
+                              : null,
+                          icon: Icons.flash_on_rounded,
+                          label: l10n.rpgAttack,
+                          manaCost: 10,
+                          color: _currentEnemy.color,
+                          size: 72,
+                          isPrimary: true,
+                        ),
+                        const SizedBox(width: 16),
+                        // Heal
+                        _ArenaActionButton(
+                          onPressed: canFight && !_isBusy && profile.mana >= 20 && !_currentEnemy.isDefeated && profile.hp < profile.maxHp
+                              ? () => _performAction(BattleAction.heal)
+                              : null,
+                          icon: Icons.favorite_rounded,
+                          label: l10n.rpgHeal,
+                          manaCost: 20,
+                          color: Colors.green,
+                          size: 60,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildBattleArea(ThemeData theme, PlayerProfile profile) {
     final l10n = AppLocalizations.of(context)!;
+    final allEnemies = EnemyData.allEnemies;
+    final currentIndex = allEnemies.indexWhere((e) => e.id == _currentEnemy.id);
+    final canGoLeft = currentIndex > 0;
+    final canGoRight = currentIndex < allEnemies.length - 1 &&
+        profile.level >= allEnemies[currentIndex + 1].minLevel;
+
     return AnimatedBuilder(
       animation: _shakeController,
       builder: (context, child) {
         final shakeOffset = sin(_shakeController.value * pi * 8) *
             (1 - _shakeController.value) * 10;
-
         return Transform.translate(
           offset: Offset(shakeOffset, 0),
           child: child,
         );
       },
-      child: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  _currentEnemy.color.withValues(alpha: 0.1),
-                  theme.colorScheme.surface,
-                ],
-              ),
-            ),
-          ),
-
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Enemy name and type badge
-                Row(
+      child: GestureDetector(
+        onHorizontalDragEnd: (details) {
+          if (details.primaryVelocity != null) {
+            if (details.primaryVelocity! < -200 && canGoRight) {
+              _switchEnemy(1);
+            } else if (details.primaryVelocity! > 200 && canGoLeft) {
+              _switchEnemy(-1);
+            }
+          }
+        },
+        child: Stack(
+          children: [
+            // Main battle content
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // Enemy name above
                     if (_currentEnemy.isBoss)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                        margin: const EdgeInsets.only(bottom: 6),
                         decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
+                          color: Colors.red.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.red.withValues(alpha: 0.4)),
                         ),
                         child: Text(l10n.rpgBoss, style: const TextStyle(
-                          fontSize: 10, fontWeight: FontWeight.bold, color: Colors.red,
+                          fontSize: 11, fontWeight: FontWeight.bold, color: Colors.red,
+                          letterSpacing: 1.5,
                         )),
                       ),
-                    Flexible(
-                      child: Text(
-                        _currentEnemy.name,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: _currentEnemy.color,
-                        ),
-                        overflow: TextOverflow.ellipsis,
+                    Text(
+                      _currentEnemy.name,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
                       ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Large enemy emoji
+                    AnimatedScale(
+                      scale: _shakeController.isAnimating ? 0.88 : 1.0,
+                      duration: const Duration(milliseconds: 80),
+                      child: Text(
+                        _currentEnemy.emoji,
+                        style: TextStyle(fontSize: _currentEnemy.isBoss ? 140 : 120),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Enemy HP bar (clean, directly below enemy)
+                    _EnemyHpBar(
+                      current: _currentEnemy.currentHp,
+                      max: _currentEnemy.maxHp,
+                      color: _currentEnemy.color,
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Action feedback (boss attack / heal)
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 150),
+                      child: _bossAttackName != null
+                          ? Container(
+                              key: ValueKey('$_bossAttackName$_lastBossDamage'),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text('💥 ', style: TextStyle(fontSize: 16)),
+                                  Text(
+                                    '$_bossAttackName! ${_lastBossDamage != null ? "-$_lastBossDamage" : ""}',
+                                    style: const TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : _lastHealAmount != null
+                              ? Container(
+                                  key: ValueKey('heal$_lastHealAmount'),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    '💚 +$_lastHealAmount HP',
+                                    style: const TextStyle(
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                )
+                              : const SizedBox(key: ValueKey('empty'), height: 36),
                     ),
                   ],
                 ),
-                Text(
-                  _currentEnemy.description,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.outline,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
+              ),
+            ),
 
-                AnimatedScale(
-                  scale: _shakeController.isAnimating ? 0.92 : 1.0,
-                  duration: const Duration(milliseconds: 80),
-                  child: Text(
-                    _currentEnemy.emoji,
-                    style: TextStyle(
-                      fontSize: _currentEnemy.isBoss ? 120 : 100,
-                    ),
+            // Arrow buttons flanking for enemy navigation
+            if (canGoLeft)
+              Positioned(
+                left: 4,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: IconButton(
+                    onPressed: () => _switchEnemy(-1),
+                    icon: Icon(Icons.chevron_left_rounded, size: 32,
+                        color: theme.colorScheme.outline.withValues(alpha: 0.5)),
                   ),
                 ),
-
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 150),
-                  child: _bossAttackName != null
-                      ? Container(
-                    key: ValueKey('$_bossAttackName$_lastBossDamage'),
-                    margin: const EdgeInsets.only(top: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '💥 $_bossAttackName!',
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        if (_lastBossDamage != null)
-                          Text(
-                            '-$_lastBossDamage HP to you',
-                            style: TextStyle(
-                              color: Colors.red.withValues(alpha: 0.8),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                      ],
-                    ),
-                  )
-                      : _lastHealAmount != null
-                          ? Container(
-                              key: ValueKey('heal$_lastHealAmount'),
-                              margin: const EdgeInsets.only(top: 8),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.green.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                '💚 +$_lastHealAmount HP',
-                                style: const TextStyle(
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            )
-                          : const SizedBox(key: ValueKey('empty'), height: 40),
+              ),
+            if (canGoRight)
+              Positioned(
+                right: 4,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: IconButton(
+                    onPressed: () => _switchEnemy(1),
+                    icon: Icon(Icons.chevron_right_rounded, size: 32,
+                        color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+                  ),
                 ),
+              ),
 
-                const SizedBox(height: 16),
-
-                // HP bar
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            l10n.rpgHp,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            '${_currentEnemy.currentHp} / ${_currentEnemy.maxHp}',
-                            style: theme.textTheme.titleSmall,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: LinearProgressIndicator(
-                          value: _currentEnemy.hpPercent,
-                          minHeight: 20,
-                          backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                          valueColor: AlwaysStoppedAnimation(
-                            _currentEnemy.hpPercent > 0.5
-                                ? Colors.green
-                                : _currentEnemy.hpPercent > 0.25
-                                ? Colors.orange
-                                : Colors.red,
-                          ),
+            // Floating damage numbers
+            ..._damageNumbers.map((dn) => Positioned(
+              left: MediaQuery.of(context).size.width * dn.x,
+              top: MediaQuery.of(context).size.height * dn.y * 0.4,
+              child: TweenAnimationBuilder<double>(
+                key: ValueKey(dn.createdAt.microsecondsSinceEpoch),
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 700),
+                builder: (context, value, child) {
+                  return Transform.translate(
+                    offset: Offset(0, -60 * value),
+                    child: Opacity(
+                      opacity: (1 - value).clamp(0.0, 1.0),
+                      child: Text(
+                        '-${dn.damage}${dn.isCrit ? '!' : ''}',
+                        style: TextStyle(
+                          fontSize: dn.isCrit ? 36 : 26,
+                          fontWeight: FontWeight.bold,
+                          color: dn.isCrit ? Colors.orange : Colors.red,
+                          shadows: const [
+                            Shadow(color: Colors.black26, blurRadius: 4, offset: Offset(1, 1)),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-
-                if (_lastDamage != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    '-$_lastDamage${_lastWasCrit ? ' ${l10n.rpgCrit}' : ''}',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      color: _lastWasCrit ? Colors.orange : Colors.red,
-                      fontWeight: FontWeight.bold,
                     ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-
-          // Floating damage numbers
-          ..._damageNumbers.map((dn) => Positioned(
-            left: MediaQuery.of(context).size.width * dn.x,
-            top: MediaQuery.of(context).size.height * dn.y * 0.5,
-            child: TweenAnimationBuilder<double>(
-              key: ValueKey(dn.createdAt.microsecondsSinceEpoch),
-              tween: Tween(begin: 0, end: 1),
-              duration: const Duration(milliseconds: 700),
-              builder: (context, value, child) {
-                return Transform.translate(
-                  offset: Offset(0, -50 * value),
-                  child: Opacity(
-                    opacity: (1 - value).clamp(0.0, 1.0),
-                    child: Text(
-                      '-${dn.damage}${dn.isCrit ? '!' : ''}',
-                      style: TextStyle(
-                        fontSize: dn.isCrit ? 32 : 24,
-                        fontWeight: FontWeight.bold,
-                        color: dn.isCrit ? Colors.orange : Colors.red,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          )),
-        ],
+                  );
+                },
+              ),
+            )),
+          ],
+        ),
       ),
     );
   }
@@ -922,7 +887,7 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.lock, size: 64, color: theme.colorScheme.outline),
+          Icon(Icons.lock_rounded, size: 64, color: theme.colorScheme.outline),
           const SizedBox(height: 16),
           Text(
             l10n.rpgLevelRequired(_currentEnemy.minLevel),
@@ -966,232 +931,202 @@ class _DamageNumber {
   });
 }
 
-class _EnemySelector extends StatelessWidget {
-  final List<Enemy> enemies;
-  final Enemy selectedEnemy;
-  final int playerLevel;
-  final Function(Enemy) onSelect;
+// ============ ENEMY HP BAR (clean, under enemy) ============
 
-  const _EnemySelector({
-    required this.enemies,
-    required this.selectedEnemy,
-    required this.playerLevel,
-    required this.onSelect,
+class _EnemyHpBar extends StatelessWidget {
+  final int current;
+  final int max;
+  final Color color;
+
+  const _EnemyHpBar({required this.current, required this.max, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final percent = max > 0 ? (current / max).clamp(0.0, 1.0) : 0.0;
+    final barColor = percent > 0.5
+        ? color
+        : percent > 0.25
+            ? Colors.orange
+            : Colors.red;
+
+    return Column(
+      children: [
+        // HP numbers
+        Text(
+          '$current / $max',
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
+        ),
+        const SizedBox(height: 4),
+        // Bar
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: SizedBox(
+            height: 12,
+            child: LinearProgressIndicator(
+              value: percent,
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              valueColor: AlwaysStoppedAnimation(barColor),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ============ COMPACT BAR (player HP/Mana side-by-side) ============
+
+class _CompactBar extends StatelessWidget {
+  final IconData icon;
+  final int current;
+  final int max;
+  final Color color;
+
+  const _CompactBar({required this.icon, required this.current, required this.max, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final percent = max > 0 ? (current / max).clamp(0.0, 1.0) : 0.0;
+
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: SizedBox(
+                  height: 8,
+                  child: LinearProgressIndicator(
+                    value: percent,
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                    valueColor: AlwaysStoppedAnimation(color),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '$current/$max',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ============ ARENA ACTION BUTTON (circular) ============
+
+class _ArenaActionButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+  final IconData icon;
+  final String label;
+  final int manaCost;
+  final Color color;
+  final double size;
+  final bool isPrimary;
+
+  const _ArenaActionButton({
+    required this.onPressed,
+    required this.icon,
+    required this.label,
+    required this.manaCost,
+    required this.color,
+    this.size = 60,
+    this.isPrimary = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isEnabled = onPressed != null;
+    final effectiveColor = isEnabled ? color : theme.colorScheme.outline.withValues(alpha: 0.3);
 
-    return SizedBox(
-      height: 88,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        itemCount: enemies.length,
-        itemBuilder: (context, index) {
-          final enemy = enemies[index];
-          final isSelected = enemy.id == selectedEnemy.id;
-          final isLocked = playerLevel < enemy.minLevel;
-
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
-              onTap: () => onSelect(enemy),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 72,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? enemy.color.withValues(alpha: 0.2)
-                      : theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSelected ? enemy.color : Colors.transparent,
-                    width: 2,
-                  ),
-                ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Circular button
+        SizedBox(
+          width: size,
+          height: size,
+          child: Material(
+            color: isPrimary
+                ? (isEnabled ? effectiveColor : theme.colorScheme.surfaceContainerHighest)
+                : Colors.transparent,
+            shape: CircleBorder(
+              side: isPrimary
+                  ? BorderSide.none
+                  : BorderSide(color: effectiveColor, width: 2),
+            ),
+            elevation: isPrimary && isEnabled ? 4 : 0,
+            shadowColor: isPrimary ? color.withValues(alpha: 0.4) : Colors.transparent,
+            child: InkWell(
+              onTap: onPressed,
+              customBorder: const CircleBorder(),
+              child: Center(
                 child: Stack(
-                  alignment: Alignment.center,
+                  clipBehavior: Clip.none,
                   children: [
-                    Opacity(
-                      opacity: isLocked ? 0.3 : 1.0,
-                      child: Text(enemy.emoji, style: const TextStyle(fontSize: 36)),
+                    Icon(
+                      icon,
+                      size: isPrimary ? 30 : 24,
+                      color: isPrimary
+                          ? (isEnabled ? Colors.white : theme.colorScheme.outline)
+                          : effectiveColor,
                     ),
-                    if (enemy.isBoss)
-                      Positioned(
-                        top: 2,
-                        right: 2,
-                        child: Opacity(
-                          opacity: isLocked ? 0.3 : 1.0,
-                          child: const Text('👑', style: TextStyle(fontSize: 10)),
+                    // Mana cost badge
+                    Positioned(
+                      top: -8,
+                      right: -12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade700,
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                      ),
-                    if (isLocked)
-                      Positioned(
-                        bottom: 4,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'Lv${enemy.minLevel}',
-                            style: const TextStyle(fontSize: 10, color: Colors.white),
+                        child: Text(
+                          '$manaCost',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
+                    ),
                   ],
                 ),
               ),
             ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _PlayerHpBar extends StatelessWidget {
-  final int current;
-  final int max;
-
-  const _PlayerHpBar({required this.current, required this.max});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final percent = max > 0 ? (current / max).clamp(0.0, 1.0) : 0.0;
-
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.favorite,
-                  color: percent > 0.5 ? Colors.green : percent > 0.25 ? Colors.orange : Colors.red,
-                  size: 16,
-                ),
-                const SizedBox(width: 4),
-                Text(AppLocalizations.of(context)!.rpgYourHp, style: theme.textTheme.labelMedium),
-              ],
-            ),
-            Text(
-              '$current / $max',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: percent <= 0.25 ? Colors.red : null,
-                fontWeight: percent <= 0.25 ? FontWeight.bold : null,
-              ),
-            ),
-          ],
+          ),
         ),
         const SizedBox(height: 4),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: percent,
-            minHeight: 10,
-            backgroundColor: theme.colorScheme.surfaceContainerHighest,
-            valueColor: AlwaysStoppedAnimation(
-              percent > 0.5 ? Colors.green : percent > 0.25 ? Colors.orange : Colors.red,
-            ),
+        // Label below
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: isEnabled
+                ? theme.colorScheme.onSurface.withValues(alpha: 0.7)
+                : theme.colorScheme.outline.withValues(alpha: 0.4),
           ),
         ),
       ],
-    );
-  }
-}
-
-class _ManaBar extends StatelessWidget {
-  final int current;
-  final int max;
-
-  const _ManaBar({required this.current, required this.max});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final percent = max > 0 ? (current / max).clamp(0.0, 1.0) : 0.0;
-
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.auto_awesome, color: Colors.blue, size: 16),
-                const SizedBox(width: 4),
-                Text(AppLocalizations.of(context)!.rpgMana, style: theme.textTheme.labelMedium),
-              ],
-            ),
-            Text(
-              '$current / $max',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: current < 10 ? Colors.red : null,
-                fontWeight: current < 10 ? FontWeight.bold : null,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: percent,
-            minHeight: 8,
-            backgroundColor: theme.colorScheme.surfaceContainerHighest,
-            valueColor: AlwaysStoppedAnimation(
-              current < 10 ? Colors.red : Colors.blue,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _StatChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
-
-  const _StatChip({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 4),
-          Text(
-            '$label: $value',
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

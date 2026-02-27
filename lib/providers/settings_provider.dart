@@ -78,6 +78,9 @@ class AppSettings {
   // Ingredient display layout
   final IngredientLayout ingredientLayout;
 
+  // Surprise Me card visibility (home screen)
+  final bool showSurpriseMe;
+
   /// Default nutrients shown in the nutrition widget
   static const Set<String> defaultEnabledNutrients = {
     'calories', 'protein', 'carbs', 'fat', 'fiber', 'sugar', 'sodium',
@@ -107,6 +110,7 @@ class AppSettings {
     this.textScaleFactor = 1.0,
     this.weekStartDay = 1,
     this.ingredientLayout = IngredientLayout.inline,
+    this.showSurpriseMe = true,
     Set<String>? enabledNutrients,
   }) : seedColor = appTheme.seedColor,
         enabledNutrients = enabledNutrients ?? defaultEnabledNutrients;
@@ -136,6 +140,7 @@ class AppSettings {
     double? textScaleFactor,
     int? weekStartDay,
     IngredientLayout? ingredientLayout,
+    bool? showSurpriseMe,
   }) {
     return AppSettings(
       appTheme: appTheme ?? this.appTheme,
@@ -162,6 +167,7 @@ class AppSettings {
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       weekStartDay: weekStartDay ?? this.weekStartDay,
       ingredientLayout: ingredientLayout ?? this.ingredientLayout,
+      showSurpriseMe: showSurpriseMe ?? this.showSurpriseMe,
     );
   }
 }
@@ -240,6 +246,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
   static const _textScaleKey = 'text_scale_factor';
   static const _weekStartDayKey = 'week_start_day';
   static const _ingredientLayoutKey = 'ingredient_layout';
+  static const _showSurpriseMeKey = 'show_surprise_me';
 
   @override
   AppSettings build() {
@@ -351,6 +358,9 @@ class SettingsNotifier extends Notifier<AppSettings> {
       orElse: () => IngredientLayout.inline,
     );
 
+    // Load Surprise Me visibility
+    final showSurpriseMe = prefs.getBool(_showSurpriseMeKey) ?? true;
+
     state = AppSettings(
       appTheme: appTheme,
       themeMode: themeMode,
@@ -376,7 +386,14 @@ class SettingsNotifier extends Notifier<AppSettings> {
       textScaleFactor: textScaleFactor,
       weekStartDay: weekStartDay,
       ingredientLayout: ingredientLayout,
+      showSurpriseMe: showSurpriseMe,
     );
+  }
+
+  Future<void> setShowSurpriseMe(bool show) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_showSurpriseMeKey, show);
+    state = state.copyWith(showSurpriseMe: show);
   }
 
   Future<void> setDefaultNutritionView(NutritionDisplayMode mode) async {
@@ -589,6 +606,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
     await prefs.remove(_textScaleKey);
     await prefs.remove(_weekStartDayKey);
     await prefs.remove(_ingredientLayoutKey);
+    await prefs.remove(_showSurpriseMeKey);
     state = AppSettings();
   }
 

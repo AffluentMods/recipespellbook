@@ -4943,6 +4943,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsWeekStartDay => 'Неделя начинается с';
 
   @override
+  String get settingsSurpriseMe => 'Показать карточку «Удиви меня»';
+
+  @override
+  String get settingsSurpriseMeSubtitle => 'Показывать карточку с предложением рецепта на главном экране';
+
+  @override
   String get tuesday => 'Вторник';
 
   @override
@@ -6361,7 +6367,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get rpgAchievements => 'Достижения';
 
   @override
-  String get rpgAttack => 'Атака! (10 маны)';
+  String get rpgAttack => 'Атака';
 
   @override
   String get rpgBattleArena => '⚔️ Арена битв';
@@ -7284,47 +7290,47 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get rpgBlock => 'Block (5 Mana)';
+  String get rpgBlock => 'Блок';
 
   @override
-  String get rpgHeal => 'Heal (20 Mana)';
+  String get rpgHeal => 'Лечение';
 
   @override
-  String get rpgPlayerDefeated => 'Defeated!';
+  String get rpgPlayerDefeated => 'Поражение!';
 
   @override
   String rpgPlayerDefeatedDesc(String name) {
-    return 'You were defeated by $name!';
+    return 'Вас победил $name!';
   }
 
   @override
   String rpgGoldLost(int amount) {
-    return 'Lost $amount gold';
+    return 'Потеряно $amount золота';
   }
 
   @override
-  String get rpgRespawn => 'Respawn';
+  String get rpgRespawn => 'Возрождение';
 
   @override
-  String get rpgYourHp => 'Your HP';
+  String get rpgYourHp => 'Ваше HP';
 
   @override
   String rpgBossRetaliates(String name) {
-    return '$name retaliates!';
+    return '$name наносит ответный удар!';
   }
 
   @override
   String rpgBlockedDamage(int damage) {
-    return 'Blocked! Only $damage damage taken';
+    return 'Заблокировано! Получено только $damage урона';
   }
 
   @override
   String rpgHealedHp(int amount) {
-    return 'Healed $amount HP!';
+    return 'Восстановлено $amount HP!';
   }
 
   @override
-  String get rpgNotEnoughMana => 'Not enough mana!';
+  String get rpgNotEnoughMana => 'Недостаточно маны!';
 
   @override
   String get rpgAvatars => 'Аватары';

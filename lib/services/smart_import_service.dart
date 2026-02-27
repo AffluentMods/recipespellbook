@@ -22,7 +22,7 @@ class SmartImportService {
 
   /// Base URL for the smart import API.
   String get _baseUrl =>
-      dotenv.get('SMART_IMPORT_URL', fallback: 'https://smart-import.affluentlabs.dev');
+      dotenv.get('SMART_IMPORT_URL', fallback: 'https://smart-import.recipespellbook.app');
 
   /// Auth token for the current user.
   /// Set this after user login / subscription validation.

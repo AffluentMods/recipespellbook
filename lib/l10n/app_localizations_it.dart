@@ -4879,6 +4879,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get settingsWeekStartDay => 'La settimana inizia';
 
   @override
+  String get settingsSurpriseMe => 'Mostra scheda \'Sorprendimi\'';
+
+  @override
+  String get settingsSurpriseMeSubtitle => 'Mostra scheda suggerimento ricette nella schermata home';
+
+  @override
   String get tuesday => 'Martedì';
 
   @override
@@ -6283,7 +6289,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get rpgAchievements => 'Successi';
 
   @override
-  String get rpgAttack => 'Attacco! (10 Mana)';
+  String get rpgAttack => 'Attacco!';
 
   @override
   String get rpgBattleArena => '⚔️ Arena di combattimento';
@@ -7206,47 +7212,47 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
-  String get rpgBlock => 'Block (5 Mana)';
+  String get rpgBlock => 'Blocca';
 
   @override
-  String get rpgHeal => 'Heal (20 Mana)';
+  String get rpgHeal => 'Cura';
 
   @override
-  String get rpgPlayerDefeated => 'Defeated!';
+  String get rpgPlayerDefeated => 'Sconfitto!';
 
   @override
   String rpgPlayerDefeatedDesc(String name) {
-    return 'You were defeated by $name!';
+    return 'Sei stato sconfitto da $name!';
   }
 
   @override
   String rpgGoldLost(int amount) {
-    return 'Lost $amount gold';
+    return '$amount oro perso';
   }
 
   @override
-  String get rpgRespawn => 'Respawn';
+  String get rpgRespawn => 'Risorgi';
 
   @override
-  String get rpgYourHp => 'Your HP';
+  String get rpgYourHp => 'I tuoi HP';
 
   @override
   String rpgBossRetaliates(String name) {
-    return '$name retaliates!';
+    return '$name contrattacca!';
   }
 
   @override
   String rpgBlockedDamage(int damage) {
-    return 'Blocked! Only $damage damage taken';
+    return 'Bloccato! Solo $damage danni subiti';
   }
 
   @override
   String rpgHealedHp(int amount) {
-    return 'Healed $amount HP!';
+    return '$amount HP guariti!';
   }
 
   @override
-  String get rpgNotEnoughMana => 'Not enough mana!';
+  String get rpgNotEnoughMana => 'Mana insufficiente!';
 
   @override
   String get rpgAvatars => 'Avatar';

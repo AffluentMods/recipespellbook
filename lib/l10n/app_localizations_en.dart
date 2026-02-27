@@ -4891,6 +4891,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsWeekStartDay => 'Week starts on';
 
   @override
+  String get settingsSurpriseMe => 'Show \'Surprise Me\' card';
+
+  @override
+  String get settingsSurpriseMeSubtitle => 'Show recipe suggestion card on home screen';
+
+  @override
   String get tuesday => 'Tuesday';
 
   @override
@@ -6295,7 +6301,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rpgAchievements => 'Achievements';
 
   @override
-  String get rpgAttack => 'Attack! (10 Mana)';
+  String get rpgAttack => 'Attack';
 
   @override
   String get rpgBattleArena => '⚔️ Battle Arena';
@@ -7218,10 +7224,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get rpgBlock => 'Block (5 Mana)';
+  String get rpgBlock => 'Block';
 
   @override
-  String get rpgHeal => 'Heal (20 Mana)';
+  String get rpgHeal => 'Heal';
 
   @override
   String get rpgPlayerDefeated => 'Defeated!';

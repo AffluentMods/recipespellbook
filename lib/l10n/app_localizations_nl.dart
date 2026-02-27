@@ -4891,6 +4891,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settingsWeekStartDay => 'Week begint op';
 
   @override
+  String get settingsSurpriseMe => '\'Verras me\'-kaart tonen';
+
+  @override
+  String get settingsSurpriseMeSubtitle => 'Receptsuggestiekaart op het startscherm tonen';
+
+  @override
   String get tuesday => 'Dinsdag';
 
   @override
@@ -6295,7 +6301,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get rpgAchievements => 'Prestaties';
 
   @override
-  String get rpgAttack => 'Aanval! (10 Mana)';
+  String get rpgAttack => 'Aanval';
 
   @override
   String get rpgBattleArena => '⚔️ Gevechtsarena';
@@ -7218,47 +7224,47 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get rpgBlock => 'Block (5 Mana)';
+  String get rpgBlock => 'Blokkeren';
 
   @override
-  String get rpgHeal => 'Heal (20 Mana)';
+  String get rpgHeal => 'Genezen';
 
   @override
-  String get rpgPlayerDefeated => 'Defeated!';
+  String get rpgPlayerDefeated => 'Verslagen!';
 
   @override
   String rpgPlayerDefeatedDesc(String name) {
-    return 'You were defeated by $name!';
+    return 'Je bent verslagen door $name!';
   }
 
   @override
   String rpgGoldLost(int amount) {
-    return 'Lost $amount gold';
+    return '$amount goud verloren';
   }
 
   @override
-  String get rpgRespawn => 'Respawn';
+  String get rpgRespawn => 'Herleven';
 
   @override
-  String get rpgYourHp => 'Your HP';
+  String get rpgYourHp => 'Jouw HP';
 
   @override
   String rpgBossRetaliates(String name) {
-    return '$name retaliates!';
+    return '$name slaat terug!';
   }
 
   @override
   String rpgBlockedDamage(int damage) {
-    return 'Blocked! Only $damage damage taken';
+    return 'Geblokkeerd! Slechts $damage schade ontvangen';
   }
 
   @override
   String rpgHealedHp(int amount) {
-    return 'Healed $amount HP!';
+    return '$amount HP genezen!';
   }
 
   @override
-  String get rpgNotEnoughMana => 'Not enough mana!';
+  String get rpgNotEnoughMana => 'Niet genoeg mana!';
 
   @override
   String get rpgAvatars => 'Avatars';

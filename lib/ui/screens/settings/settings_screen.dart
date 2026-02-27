@@ -95,6 +95,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           currentDay: s.weekStartDay,
           onDaySelected: (d) => ref.read(settingsProvider.notifier).setWeekStartDay(d),
         ) : null,
+        _m(l10n.settingsSurpriseMe, 'surprise recipe suggestion') ? SwitchListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+          secondary: Container(
+            width: 36, height: 36,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(Icons.auto_fix_high, size: 20, color: theme.colorScheme.primary),
+          ),
+          title: Text(l10n.settingsSurpriseMe, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+          subtitle: Text(l10n.settingsSurpriseMeSubtitle, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
+          value: s.showSurpriseMe,
+          onChanged: (v) => ref.read(settingsProvider.notifier).setShowSurpriseMe(v),
+        ) : null,
       ]),
 
       // ─── RECIPES ───
@@ -170,21 +185,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ? l10n.familyManage
                 : l10n.familySharingSubtitle,
             onTap: () => context.push('/settings/family'),
-          ) : null,
-        ]),
-
-      // ─── COMMUNITY ───
-      if (_query.isEmpty || _m(l10n.settingsCommunity, 'browse publish download cookbooks public'))
-        _section(title: l10n.settingsCommunity, icon: Icons.explore, children: [
-          _m(l10n.settingsBrowseCommunity, 'public download') ? _Tile(
-            icon: Icons.explore, title: l10n.settingsBrowseCommunity,
-            subtitle: l10n.settingsBrowseCommunitySubtitle,
-            onTap: () => context.push('/community'),
-          ) : null,
-          _m(l10n.settingsMyPublications, 'published upload') ? _Tile(
-            icon: Icons.upload_outlined, title: l10n.settingsMyPublications,
-            subtitle: l10n.settingsMyPublicationsSubtitle,
-            onTap: () => context.push('/community/my-publications'),
           ) : null,
         ]),
 

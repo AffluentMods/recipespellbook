@@ -32,119 +32,135 @@ class AppMenuDrawer extends ConsumerWidget {
     final subStatus = ref.watch(subscriptionProvider);
     final authState = ref.watch(authProvider);
     final isRpgEnabled = settings.nerdMode;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Drawer(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: isDark
+          ? theme.colorScheme.surface
+          : theme.colorScheme.surfaceContainerLow,
       child: Column(
         children: [
-          // ═══ Profile header (avatar + name at top with bell) ═══
+          // ═══ Profile header ═══
           _ProfileHeader(authState: authState),
 
           // ═══ Scrollable menu ═══
           Expanded(
             child: ListView(
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.fromLTRB(14, 16, 14, 8),
               children: [
+                // ── Group 1: Community & RPG ──
+                _DrawerGroup(children: [
+                  _DrawerItem(
+                    icon: Icons.people_rounded,
+                    iconColor: const Color(0xFF6366F1),
+                    label: l10n.navCommunity,
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push('/community');
+                    },
+                  ),
+                  if (isRpgEnabled)
+                    _DrawerItem(
+                      icon: Icons.sports_esports_rounded,
+                      iconColor: const Color(0xFF8B5CF6),
+                      label: l10n.menuRpgProfile,
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.push('/rpg/profile');
+                      },
+                    ),
+                ]),
+
                 const SizedBox(height: 12),
 
-                // ── Community at the TOP ──
-                _MenuSectionHeader(title: l10n.navCommunity),
-                _DrawerItem(
-                  icon: Icons.people_rounded,
-                  label: l10n.navCommunity,
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.push('/community');
-                  },
-                ),
-                if (isRpgEnabled)
+                // ── Group 2: Tools ──
+                _DrawerGroup(children: [
                   _DrawerItem(
-                    icon: Icons.sports_esports_rounded,
-                    label: l10n.menuRpgProfile,
+                    icon: Icons.download_rounded,
+                    iconColor: Colors.teal,
+                    label: l10n.importGuides,
                     onTap: () {
                       Navigator.pop(context);
-                      context.push('/rpg/profile');
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const ImportGuidesScreen()),
+                      );
                     },
                   ),
-
-                const SizedBox(height: 8),
-                _MenuSectionHeader(title: l10n.menuTools),
-                _DrawerItem(
-                  icon: Icons.download_rounded,
-                  label: l10n.importGuides,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const ImportGuidesScreen()),
-                    );
-                  },
-                ),
-                _DrawerItem(
-                  icon: Icons.swap_horiz_rounded,
-                  label: _isDesktopPlatform ? l10n.menuSyncToMobile : l10n.transferTitle,
-                  onTap: () {
-                    Navigator.pop(context);
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      rootNavigatorKey.currentContext?.push('/transfer');
-                    });
-                  },
-                ),
-                if (authState.isSignedIn && subStatus.tier.hasCloudSync)
                   _DrawerItem(
-                    icon: Icons.cloud_sync_rounded,
-                    label: l10n.syncNow,
+                    icon: Icons.swap_horiz_rounded,
+                    iconColor: const Color(0xFF0EA5E9),
+                    label: _isDesktopPlatform ? l10n.menuSyncToMobile : l10n.transferTitle,
                     onTap: () {
                       Navigator.pop(context);
-                      _triggerSync(context);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        rootNavigatorKey.currentContext?.push('/transfer');
+                      });
                     },
                   ),
-                _DrawerItem(
-                  icon: Icons.person_add_rounded,
-                  label: l10n.inviteFriends,
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showInviteSheet(context);
-                  },
-                ),
-
-                const SizedBox(height: 8),
-                _MenuSectionHeader(title: l10n.menuSupport),
-                _DrawerItem(
-                  icon: Icons.headset_mic_rounded,
-                  label: l10n.helpTitle,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const HelpSupportScreen()),
-                    );
-                  },
-                ),
-                _DrawerItem(
-                  icon: Icons.settings_outlined,
-                  label: l10n.settingsTitle,
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.push('/settings');
-                  },
-                ),
-
-                const SizedBox(height: 8),
-                _SectionDivider(),
-
-                if (authState.isSignedIn)
+                  if (authState.isSignedIn && subStatus.tier.hasCloudSync)
+                    _DrawerItem(
+                      icon: Icons.cloud_sync_rounded,
+                      iconColor: const Color(0xFF10B981),
+                      label: l10n.syncNow,
+                      onTap: () {
+                        Navigator.pop(context);
+                        _triggerSync(context);
+                      },
+                    ),
                   _DrawerItem(
-                    icon: Icons.logout_rounded,
-                    label: l10n.signOut,
-                    color: const Color(0xFFEF5350),
+                    icon: Icons.person_add_rounded,
+                    iconColor: const Color(0xFFF59E0B),
+                    label: l10n.inviteFriends,
                     onTap: () {
-                      final authNotifier = ref.read(authProvider.notifier);
                       Navigator.pop(context);
-                      authNotifier.signOut();
+                      _showInviteSheet(context);
                     },
                   ),
+                ]),
 
-                const SizedBox(height: 4),
-                _RateUsRow(),
+                const SizedBox(height: 12),
+
+                // ── Group 3: Help & Settings ──
+                _DrawerGroup(children: [
+                  _DrawerItem(
+                    icon: Icons.headset_mic_rounded,
+                    iconColor: const Color(0xFFEC4899),
+                    label: l10n.helpTitle,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const HelpSupportScreen()),
+                      );
+                    },
+                  ),
+                  _DrawerItem(
+                    icon: Icons.settings_rounded,
+                    iconColor: const Color(0xFF6B7280),
+                    label: l10n.settingsTitle,
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push('/settings');
+                    },
+                  ),
+                ]),
+
+                if (authState.isSignedIn) ...[
+                  const SizedBox(height: 12),
+                  _DrawerGroup(children: [
+                    _DrawerItem(
+                      icon: Icons.logout_rounded,
+                      iconColor: const Color(0xFFEF4444),
+                      label: l10n.signOut,
+                      textColor: const Color(0xFFEF4444),
+                      onTap: () {
+                        final authNotifier = ref.read(authProvider.notifier);
+                        Navigator.pop(context);
+                        authNotifier.signOut();
+                      },
+                    ),
+                  ]),
+                ],
+
                 const SizedBox(height: 8),
               ],
             ),
@@ -650,11 +666,15 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: gradientColors, begin: Alignment.topLeft, end: Alignment.bottomRight),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(20),
+          bottomRight: Radius.circular(20),
+        ),
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 12, 20),
+          padding: const EdgeInsets.fromLTRB(20, 16, 16, 24),
           child: isLoading
               ? _buildLoading(theme)
               : isSignedIn
@@ -680,41 +700,70 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
 
   Widget _buildSignedIn(ThemeData theme, AuthState authState) {
     final user = authState.user!;
+    final subStatus = ref.watch(subscriptionProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── Top row: avatar + name | notification bell ──
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _UserAvatar(user: user, radius: 22),
-            const SizedBox(width: 12),
+            // Larger avatar
+            _UserAvatar(user: user, radius: 32),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const SizedBox(height: 4),
                   Text(user.displayName,
-                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 17),
                       maxLines: 1, overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 2),
                   Text(user.email,
-                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, fontSize: 11),
+                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, fontSize: 12),
                       maxLines: 1, overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 6),
+                  // Subscription tier badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: subStatus.isPro
+                          ? Colors.amber.withValues(alpha: 0.2)
+                          : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: subStatus.isPro
+                            ? Colors.amber.withValues(alpha: 0.5)
+                            : theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                        width: 0.5,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (subStatus.isPro)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 4),
+                            child: Icon(Icons.star_rounded, size: 12, color: Colors.amber.shade700),
+                          ),
+                        Text(
+                          subStatus.isPro ? subStatus.tier.displayName : 'Free',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: subStatus.isPro ? Colors.amber.shade700 : theme.colorScheme.outline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
             _NotificationBell(),
           ],
         ),
-
-        // ── Space for future followers / downloads stats ──
-        const SizedBox(height: 16),
-        // Uncomment when community features are ready:
-        // Row(
-        //   children: [
-        //     _StatChip(count: 0, label: 'followers'),
-        //     const SizedBox(width: 16),
-        //     _StatChip(count: 0, label: 'downloads'),
-        //   ],
-        // ),
       ],
     );
   }
@@ -728,7 +777,7 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
       children: [
         Row(
           children: [
-            _buildAppIcon(theme),
+            _buildAppIcon(theme, size: 52),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -795,22 +844,22 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
     );
   }
 
-  Widget _buildAppIcon(ThemeData theme) {
+  Widget _buildAppIcon(ThemeData theme, {double size = 44}) {
     return Container(
-      width: 44, height: 44,
+      width: size, height: size,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(size * 0.27),
         boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.asset('assets/icon/app_icon.png', width: 44, height: 44, fit: BoxFit.cover,
+        borderRadius: BorderRadius.circular(size * 0.27),
+        child: Image.asset('assets/icon/app_icon.png', width: size, height: size, fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(colors: [theme.colorScheme.primary, theme.colorScheme.tertiary], begin: Alignment.topLeft, end: Alignment.bottomRight),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(size * 0.27),
             ),
-            child: Icon(Icons.menu_book_rounded, size: 22, color: theme.colorScheme.onPrimary),
+            child: Icon(Icons.menu_book_rounded, size: size * 0.5, color: theme.colorScheme.onPrimary),
           ),
         ),
       ),
@@ -1000,83 +1049,95 @@ class _NotificationBell extends StatelessWidget {
   }
 }
 
-class _MenuSectionHeader extends StatelessWidget {
-  final String title;
-  const _MenuSectionHeader({required this.title});
+
+class _DrawerGroup extends StatelessWidget {
+  final List<Widget> children;
+  const _DrawerGroup({required this.children});
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-      child: Text(title, style: theme.textTheme.labelSmall?.copyWith(
-          color: theme.colorScheme.outline, fontWeight: FontWeight.w600, letterSpacing: 0.8)),
+    final isDark = theme.brightness == Brightness.dark;
+    final filtered = children.whereType<_DrawerItem>().toList();
+    if (filtered.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? theme.colorScheme.surfaceContainerHigh
+            : theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: isDark ? 0.2 : 0.3),
+          width: 0.5,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          for (int i = 0; i < filtered.length; i++) ...[
+            filtered[i],
+            if (i < filtered.length - 1)
+              Divider(
+                height: 0.5,
+                thickness: 0.5,
+                indent: 56,
+                color: theme.colorScheme.outlineVariant.withValues(alpha: isDark ? 0.2 : 0.3),
+              ),
+          ],
+        ],
+      ),
     );
   }
 }
 
 class _DrawerItem extends StatelessWidget {
   final IconData icon;
+  final Color iconColor;
   final String label;
-  final Color? color;
-  final Widget? trailing;
+  final Color? textColor;
   final VoidCallback onTap;
-  const _DrawerItem({required this.icon, required this.label, this.color, this.trailing, required this.onTap});
+  const _DrawerItem({required this.icon, required this.iconColor, required this.label, this.textColor, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final c = color ?? theme.colorScheme.onSurface;
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-      dense: true,
-      visualDensity: const VisualDensity(vertical: -2),
-      leading: Icon(icon, size: 22, color: c.withValues(alpha: 0.8)),
-      title: Text(label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: c)),
-      trailing: trailing,
-      onTap: onTap,
-    );
-  }
-}
-
-class _SectionDivider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-      child: Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.4)),
-    );
-  }
-}
-
-class _ComingSoonChip extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(color: theme.colorScheme.primaryContainer, borderRadius: BorderRadius.circular(6)),
-      child: Text(AppLocalizations.of(context)!.comingSoon, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: theme.colorScheme.primary)),
-    );
-  }
-}
-
-class _RateUsRow extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+    final c = textColor ?? theme.colorScheme.onSurface;
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
-        onTap: () => AppSnackbar.info(context, 'Thank you! Store link coming soon.'),
-        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.favorite_outline, size: 16, color: theme.colorScheme.primary.withValues(alpha: 0.7)),
-              const SizedBox(width: 6),
-              Text(AppLocalizations.of(context)!.aboutRateApp, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w500)),
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: Icon(icon, size: 19, color: iconColor),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: c,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: theme.colorScheme.outline.withValues(alpha: 0.4),
+              ),
             ],
           ),
         ),
@@ -1084,6 +1145,7 @@ class _RateUsRow extends StatelessWidget {
     );
   }
 }
+
 
 class _UserAvatar extends StatelessWidget {
   final AuthUser user;

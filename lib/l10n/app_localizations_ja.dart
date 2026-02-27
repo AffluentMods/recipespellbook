@@ -4859,6 +4859,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsWeekStartDay => '週の始まり';
 
   @override
+  String get settingsSurpriseMe => '「おまかせ」カードを表示';
+
+  @override
+  String get settingsSurpriseMeSubtitle => 'ホーム画面にレシピ提案カードを表示';
+
+  @override
   String get tuesday => '火曜日';
 
   @override
@@ -6243,7 +6249,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get rpgAchievements => '実績';
 
   @override
-  String get rpgAttack => '攻撃！（マナ10）';
+  String get rpgAttack => '攻撃';
 
   @override
   String get rpgBattleArena => '⚔️ バトルアリーナ';
@@ -7166,47 +7172,47 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get rpgBlock => 'Block (5 Mana)';
+  String get rpgBlock => 'ブロック';
 
   @override
-  String get rpgHeal => 'Heal (20 Mana)';
+  String get rpgHeal => '回復';
 
   @override
-  String get rpgPlayerDefeated => 'Defeated!';
+  String get rpgPlayerDefeated => '敗北！';
 
   @override
   String rpgPlayerDefeatedDesc(String name) {
-    return 'You were defeated by $name!';
+    return '$nameに倒された！';
   }
 
   @override
   String rpgGoldLost(int amount) {
-    return 'Lost $amount gold';
+    return 'ゴールドを$amount失った';
   }
 
   @override
-  String get rpgRespawn => 'Respawn';
+  String get rpgRespawn => '復活';
 
   @override
-  String get rpgYourHp => 'Your HP';
+  String get rpgYourHp => 'あなたのHP';
 
   @override
   String rpgBossRetaliates(String name) {
-    return '$name retaliates!';
+    return '$nameが反撃！';
   }
 
   @override
   String rpgBlockedDamage(int damage) {
-    return 'Blocked! Only $damage damage taken';
+    return 'ブロック成功！$damageダメージだけ受けた';
   }
 
   @override
   String rpgHealedHp(int amount) {
-    return 'Healed $amount HP!';
+    return '${amount}HP回復！';
   }
 
   @override
-  String get rpgNotEnoughMana => 'Not enough mana!';
+  String get rpgNotEnoughMana => 'マナが足りない！';
 
   @override
   String get rpgAvatars => 'アバター';

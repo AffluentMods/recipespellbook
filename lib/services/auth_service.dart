@@ -116,7 +116,7 @@ class AuthService {
 
   /// Base URL for the main Node.js API.
   String get _apiBaseUrl =>
-      dotenv.get('API_URL', fallback: 'https://api.affluentlabs.dev');
+      dotenv.get('API_URL', fallback: 'https://api.recipespellbook.app');
 
   // ── Cached state ──
   AuthUser? _currentUser;

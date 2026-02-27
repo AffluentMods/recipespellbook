@@ -4859,6 +4859,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsWeekStartDay => '주 시작일';
 
   @override
+  String get settingsSurpriseMe => '\'깜짝 추천\' 카드 표시';
+
+  @override
+  String get settingsSurpriseMeSubtitle => '홈 화면에 레시피 추천 카드 표시';
+
+  @override
   String get tuesday => '화요일';
 
   @override
@@ -6243,7 +6249,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get rpgAchievements => '업적';
 
   @override
-  String get rpgAttack => '공격! (마나 10)';
+  String get rpgAttack => '공격';
 
   @override
   String get rpgBattleArena => '⚔️ 배틀 아레나';
@@ -7166,47 +7172,47 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get rpgBlock => 'Block (5 Mana)';
+  String get rpgBlock => '방어';
 
   @override
-  String get rpgHeal => 'Heal (20 Mana)';
+  String get rpgHeal => '치유';
 
   @override
-  String get rpgPlayerDefeated => 'Defeated!';
+  String get rpgPlayerDefeated => '패배!';
 
   @override
   String rpgPlayerDefeatedDesc(String name) {
-    return 'You were defeated by $name!';
+    return '$name에게 패배했습니다!';
   }
 
   @override
   String rpgGoldLost(int amount) {
-    return 'Lost $amount gold';
+    return '골드 $amount 잃음';
   }
 
   @override
-  String get rpgRespawn => 'Respawn';
+  String get rpgRespawn => '부활';
 
   @override
-  String get rpgYourHp => 'Your HP';
+  String get rpgYourHp => '내 HP';
 
   @override
   String rpgBossRetaliates(String name) {
-    return '$name retaliates!';
+    return '$name의 반격!';
   }
 
   @override
   String rpgBlockedDamage(int damage) {
-    return 'Blocked! Only $damage damage taken';
+    return '방어 성공! $damage 피해만 받음';
   }
 
   @override
   String rpgHealedHp(int amount) {
-    return 'Healed $amount HP!';
+    return '$amount HP 회복!';
   }
 
   @override
-  String get rpgNotEnoughMana => 'Not enough mana!';
+  String get rpgNotEnoughMana => '마나가 부족합니다!';
 
   @override
   String get rpgAvatars => '아바타';

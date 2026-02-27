@@ -9031,6 +9031,18 @@ abstract class AppLocalizations {
   /// **'Week starts on'**
   String get settingsWeekStartDay;
 
+  /// No description provided for @settingsSurpriseMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Show \'Surprise Me\' card'**
+  String get settingsSurpriseMe;
+
+  /// No description provided for @settingsSurpriseMeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show recipe suggestion card on home screen'**
+  String get settingsSurpriseMeSubtitle;
+
   /// No description provided for @tuesday.
   ///
   /// In en, this message translates to:
@@ -11566,7 +11578,7 @@ abstract class AppLocalizations {
   /// No description provided for @rpgAttack.
   ///
   /// In en, this message translates to:
-  /// **'Attack! (10 Mana)'**
+  /// **'Attack'**
   String get rpgAttack;
 
   /// No description provided for @rpgBattleArena.
@@ -13240,13 +13252,13 @@ abstract class AppLocalizations {
   /// No description provided for @rpgBlock.
   ///
   /// In en, this message translates to:
-  /// **'Block (5 Mana)'**
+  /// **'Block'**
   String get rpgBlock;
 
   /// No description provided for @rpgHeal.
   ///
   /// In en, this message translates to:
-  /// **'Heal (20 Mana)'**
+  /// **'Heal'**
   String get rpgHeal;
 
   /// No description provided for @rpgPlayerDefeated.

@@ -56,84 +56,96 @@ class _CompanionNamingScreenState
         ),
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              const Spacer(flex: 1),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top -
+                  MediaQuery.of(context).padding.bottom -
+                  kToolbarHeight -
+                  48, // padding
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 24),
 
-              // Companion preview (larger size for naming screen)
-              const CompanionWidget(
-                size: 120,
-                showMessage: false,
-                interactive: false,
-              ),
-
-              const SizedBox(height: 24),
-
-              // Title text
-              Text(
-                'A small flame flickers to life...',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+                // Companion preview (larger size for naming screen)
+                const CompanionWidget(
+                  size: 120,
+                  showMessage: false,
+                  interactive: false,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'This ember spirit will be your cooking companion.\nGive it a name!',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.outline,
-                ),
-                textAlign: TextAlign.center,
-              ),
 
-              const SizedBox(height: 32),
+                const SizedBox(height: 24),
 
-              // Name input
-              TextField(
-                controller: _nameController,
-                focusNode: _focusNode,
-                textAlign: TextAlign.center,
-                maxLength: 20,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Enter a name...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
+                // Title text
+                Text(
+                  'A small flame flickers to life...',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  filled: true,
-                  fillColor: theme.colorScheme.surfaceContainerHighest
-                      .withValues(alpha: 0.5),
-                  counterText: '',
+                  textAlign: TextAlign.center,
                 ),
-                onSubmitted: (_) => _confirmName(),
-              ),
+                const SizedBox(height: 8),
+                Text(
+                  'This ember spirit will be your cooking companion.\nGive it a name!',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.outline,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
 
-              const Spacer(flex: 2),
+                const SizedBox(height: 32),
 
-              // Confirm button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: FilledButton.icon(
-                  onPressed: _isSubmitting
-                      ? null
-                      : () {
-                          if (_nameController.text.trim().isNotEmpty) {
-                            _confirmName();
-                          }
-                        },
-                  icon: const Icon(Icons.local_fire_department),
-                  label: Text(
-                    _isSubmitting ? 'Summoning...' : 'Summon Companion',
-                    style: const TextStyle(fontSize: 18),
+                // Name input
+                TextField(
+                  controller: _nameController,
+                  focusNode: _focusNode,
+                  textAlign: TextAlign.center,
+                  maxLength: 20,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Enter a name...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    filled: true,
+                    fillColor: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.5),
+                    counterText: '',
+                  ),
+                  onSubmitted: (_) => _confirmName(),
+                ),
+
+                const SizedBox(height: 48),
+
+                // Confirm button
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: FilledButton.icon(
+                    onPressed: _isSubmitting
+                        ? null
+                        : () {
+                            if (_nameController.text.trim().isNotEmpty) {
+                              _confirmName();
+                            }
+                          },
+                    icon: const Icon(Icons.local_fire_department),
+                    label: Text(
+                      _isSubmitting ? 'Summoning...' : 'Summon Companion',
+                      style: const TextStyle(fontSize: 18),
+                    ),
                   ),
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),

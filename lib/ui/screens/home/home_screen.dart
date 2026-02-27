@@ -187,8 +187,13 @@ class _SurpriseMeCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (recipes.length < 3) return const SizedBox.shrink(); // Need at least a few recipes
 
-    final theme = Theme.of(context);
     final rpgEnabled = ref.watch(rpgEnabledProvider);
+    final showSurprise = ref.watch(settingsProvider.select((s) => s.showSurpriseMe));
+
+    // Only show if RPG is ON, or if the user has it enabled in settings
+    if (!rpgEnabled && !showSurprise) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
     final companionData = rpgEnabled ? ref.watch(companionDataProvider) : null;
 
     return Padding(
