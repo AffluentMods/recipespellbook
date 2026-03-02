@@ -349,7 +349,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
       enabledNutrients = Set<String>.from(enabledNutrients)
         ..remove('carbs')
         ..add('carbohydrates');
-      prefs.setStringList('enabledNutrients', enabledNutrients.toList());
+      await prefs.setStringList('enabledNutrients', enabledNutrients.toList());
     }
 
     // Load text scale factor

@@ -182,40 +182,48 @@ class NotificationService {
     // Pick channel based on data payload
     final category = message.data['category'] as String? ?? 'community';
     String channelId;
+    String channelName;
     switch (category) {
       case 'cooking':
         channelId = _cookingChannel.id;
+        channelName = _cookingChannel.name;
         break;
       case 'achievement':
       case 'quest':
         channelId = _achievementsChannel.id;
+        channelName = _achievementsChannel.name;
         break;
       default:
         channelId = _communityChannel.id;
+        channelName = _communityChannel.name;
     }
 
-    _localNotifications.show(
-      notification.hashCode,
-      notification.title,
-      notification.body,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          channelId,
-          channelId == _cookingChannel.id
-              ? _cookingChannel.name
-              : channelId == _achievementsChannel.id
-                  ? _achievementsChannel.name
-                  : _communityChannel.name,
-          icon: '@mipmap/launcher_icon',
+    // Use messageId for stable unique ID, fallback to timestamp
+    final notifId = message.messageId?.hashCode ??
+        DateTime.now().millisecondsSinceEpoch % 0x7FFFFFFF;
+
+    try {
+      _localNotifications.show(
+        notifId,
+        notification.title,
+        notification.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            channelId,
+            channelName,
+            icon: '@mipmap/launcher_icon',
+          ),
+          iOS: const DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
         ),
-        iOS: const DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
-      ),
-      payload: jsonEncode(message.data),
-    );
+        payload: jsonEncode(message.data),
+      );
+    } catch (e) {
+      debugPrint('[FCM] Error showing foreground notification: $e');
+    }
   }
 
   // ── Tap handling ──

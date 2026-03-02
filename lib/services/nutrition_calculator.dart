@@ -1073,7 +1073,7 @@ class NutritionCalculator {
         'chili', 'chile', 'herb', 'spice', 'seasoning',
       ];
       if (herbSpiceKeywords.any((kw) => lowerIngredient.contains(kw))) {
-        return count * 2.0; // ~1-2g per "unit" of dried herb/spice
+        return count * 1.0; // ~1g per "unit" of dried herb/spice
       }
     }
 
