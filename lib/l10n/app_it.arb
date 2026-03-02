@@ -1818,6 +1818,13 @@
   "cookbookEditSubtitle": "Rinomina, foto di copertina",
   "shareCookbookSubtitle": "Link, famiglia o community",
   "shareNamedCookbook": "Condividi \"{name}\"",
+  "shareNamedList": "Condividi \"{name}\"",
+  "@shareNamedList": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "shareAsTextDescription": "Invia gli elementi della lista come testo",
   "oneTimeLink": "Link usa e getta",
   "oneTimeLinkDescription": "Gratuito • Scade in 24h • Chiunque può scaricarlo",
   "familyShare": "Condivisione familiare",
@@ -2255,5 +2262,10 @@
   "onboardingDeleteLater": "Potrai sempre eliminarle in seguito.",
   "onboardingAdding": "Aggiunta in corso...",
   "onboardingAddStarter": "Aggiungi ricette di avvio",
-  "onboardingBlankCookbook": "Inizia con un ricettario vuoto"
+  "onboardingBlankCookbook": "Inizia con un ricettario vuoto",
+  "onboardingSpellbookAwaits": "Il tuo libro degli incantesimi ti aspetta",
+  "onboardingYourSpellbookAwaits": "Il tuo libro degli incantesimi ti aspetta...",
+  "onboardingSummoning": "Evocazione...",
+  "onboardingBlankSpellbook": "Inizia con un libro degli incantesimi vuoto",
+  "onboardingSkip": "Salta"
 }

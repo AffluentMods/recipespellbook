@@ -2321,6 +2321,13 @@
   "cookbookEditSubtitle": "Renombrar, foto de portada",
   "shareCookbookSubtitle": "Enlace, familia o comunidad",
   "shareNamedCookbook": "Compartir \"{name}\"",
+  "shareNamedList": "Compartir \"{name}\"",
+  "@shareNamedList": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "shareAsTextDescription": "Enviar los elementos de la lista como texto",
   "oneTimeLink": "Enlace de un solo uso",
   "oneTimeLinkDescription": "Gratis • Expira en 24h • Cualquiera puede descargar",
   "familyShare": "Compartir en Familia",
@@ -2758,5 +2765,10 @@
   "onboardingDeleteLater": "Siempre puedes eliminarlas después.",
   "onboardingAdding": "Añadiendo...",
   "onboardingAddStarter": "Añadir recetas de inicio",
-  "onboardingBlankCookbook": "Comenzar con un libro vacío"
+  "onboardingBlankCookbook": "Comenzar con un libro vacío",
+  "onboardingSpellbookAwaits": "Tu libro de hechizos te espera",
+  "onboardingYourSpellbookAwaits": "Tu libro de hechizos te espera...",
+  "onboardingSummoning": "Invocando...",
+  "onboardingBlankSpellbook": "Empezar con un libro de hechizos vacío",
+  "onboardingSkip": "Omitir"
 }

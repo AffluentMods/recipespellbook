@@ -10975,6 +10975,18 @@ abstract class AppLocalizations {
   /// **'Share \"{name}\"'**
   String shareNamedCookbook(String name);
 
+  /// No description provided for @shareNamedList.
+  ///
+  /// In en, this message translates to:
+  /// **'Share \"{name}\"'**
+  String shareNamedList(String name);
+
+  /// No description provided for @shareAsTextDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Send list items as plain text'**
+  String get shareAsTextDescription;
+
   /// No description provided for @oneTimeLink.
   ///
   /// In en, this message translates to:
@@ -13602,6 +13614,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start with a blank cookbook'**
   String get onboardingBlankCookbook;
+
+  /// No description provided for @onboardingSpellbookAwaits.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Spellbook Awaits'**
+  String get onboardingSpellbookAwaits;
+
+  /// No description provided for @onboardingYourSpellbookAwaits.
+  ///
+  /// In en, this message translates to:
+  /// **'Your spellbook awaits...'**
+  String get onboardingYourSpellbookAwaits;
+
+  /// No description provided for @onboardingSummoning.
+  ///
+  /// In en, this message translates to:
+  /// **'Summoning...'**
+  String get onboardingSummoning;
+
+  /// No description provided for @onboardingBlankSpellbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with a blank spellbook'**
+  String get onboardingBlankSpellbook;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingSkip;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

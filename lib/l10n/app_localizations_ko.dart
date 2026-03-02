@@ -5917,6 +5917,14 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String shareNamedList(String name) {
+    return '\"$name\" 공유';
+  }
+
+  @override
+  String get shareAsTextDescription => '목록 항목을 텍스트로 보내기';
+
+  @override
   String get oneTimeLink => '일회성 링크';
 
   @override
@@ -7369,4 +7377,19 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get onboardingBlankCookbook => '빈 요리책으로 시작';
+
+  @override
+  String get onboardingSpellbookAwaits => '당신의 마법서가 기다리고 있어요';
+
+  @override
+  String get onboardingYourSpellbookAwaits => '당신의 마법서가 기다리고 있어요...';
+
+  @override
+  String get onboardingSummoning => '소환 중...';
+
+  @override
+  String get onboardingBlankSpellbook => '빈 마법서로 시작하기';
+
+  @override
+  String get onboardingSkip => '건너뛰기';
 }

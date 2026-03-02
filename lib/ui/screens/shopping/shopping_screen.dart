@@ -19,6 +19,10 @@ import '../../../services/barcode_scanner_service.dart';
 import '../../../services/grocery_service.dart';
 import '../../../services/ingredient_suggestion_service.dart';
 import '../../../services/shopping_list_service.dart';
+import '../../../providers/subscription_provider.dart';
+import '../../../services/auth_service.dart';
+import '../../../services/family_service.dart';
+import '../../../services/revenuecat_service.dart';
 import '../../../utils/ingredient_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/family_share_sheet.dart';
@@ -47,12 +51,30 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   ShoppingGroupMode _groupMode = ShoppingGroupMode.section;
   Map<String, String> _userMappings = {};
   final Set<String> _recentlyCheckedIds = {};
+  Map<String, int> _sharedListCounts = {}; // listId → share count
 
   @override
   void initState() {
     super.initState();
     _loadUserMappings();
     _loadCurrentListName();
+    _loadSharedStatus();
+  }
+
+  Future<void> _loadSharedStatus() async {
+    final auth = AuthService.instance;
+    if (!auth.isSignedIn) return;
+    try {
+      final allShares = await FamilyService.instance.getAllShares();
+      if (!mounted) return;
+      final counts = <String, int>{};
+      for (final s in allShares.granted) {
+        if (s.isShoppingList) {
+          counts[s.resourceId] = (counts[s.resourceId] ?? 0) + 1;
+        }
+      }
+      setState(() => _sharedListCounts = counts);
+    } catch (_) {}
   }
 
   Future<void> _loadUserMappings() async {
@@ -100,7 +122,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   itemCount: uncheckedItems.length,
                   groupMode: _groupMode,
                   onGroupModeChanged: (mode) => setState(() => _groupMode = mode),
-                  onShare: () => _shareList(items),
+                  onShare: () => _showShareSheet(context),
                   onMoreOptions: () => _showMoreOptions(context),
                   onListTap: () => _showListSwitcher(context),
                 ),
@@ -176,15 +198,232 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     _loadUserMappings();
   }
 
-  Future<void> _shareList(List<ShoppingListItem> items) async {
+  // ────────────────────────────────────
+  //  SHARE SHEET (3 options, like cookbooks)
+  // ────────────────────────────────────
+
+  void _showShareSheet(BuildContext context, {String? listId, String? listName}) {
+    final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final buffer = StringBuffer('$_currentListName\n');
-    buffer.writeln('─' * 20);
-    for (final item in items) {
-      final check = item.isChecked ? '☑' : '☐';
-      buffer.writeln('$check ${item.name}');
+    final id = listId ?? _currentListId;
+    final name = listName ?? _currentListName;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(width: 40, height: 4, decoration: BoxDecoration(
+              color: theme.colorScheme.outline.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(2),
+            )),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.shareNamedList(name),
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            ),
+
+            // ── One-Time Link ──
+            ListTile(
+              leading: const Icon(Icons.link),
+              title: Text(l10n.oneTimeLink),
+              subtitle: Text(l10n.oneTimeLinkDescription),
+              onTap: () {
+                Navigator.pop(ctx);
+                _createOneTimeLink(context, id);
+              },
+            ),
+
+            // ── Family Share ──
+            ListTile(
+              leading: const Icon(Icons.family_restroom),
+              title: Text(l10n.familyShare),
+              subtitle: Text(l10n.familyShareDescription),
+              trailing: _isFamilyTierUnlocked()
+                  ? null
+                  : Icon(Icons.star, size: 16, color: Colors.amber.shade600),
+              onTap: () {
+                Navigator.pop(ctx);
+                if (!_isFamilyTierUnlocked()) {
+                  _showUpgradePrompt(context, l10n.familyShare, l10n.familyShareUpgradeMessage);
+                  return;
+                }
+                showResourceShareSheet(
+                  context,
+                  resourceType: 'shopping_list',
+                  resourceId: id,
+                  resourceName: name,
+                  familyOnly: true,
+                );
+              },
+            ),
+
+            // ── Share as Text ──
+            ListTile(
+              leading: const Icon(Icons.text_snippet),
+              title: Text(l10n.shareAsText),
+              subtitle: Text(l10n.shareAsTextDescription),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final shoppingDao = ref.read(shoppingDaoProvider);
+                final items = await shoppingDao.getItemsForList(id);
+                final buffer = StringBuffer('$name\n');
+                buffer.writeln('─' * 20);
+                for (final item in items) {
+                  final check = item.isChecked ? '☑' : '☐';
+                  buffer.writeln('$check ${item.name}');
+                }
+                await Share.share(buffer.toString(), subject: name);
+              },
+            ),
+
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _createOneTimeLink(BuildContext context, String listId) async {
+    final auth = AuthService.instance;
+    if (!auth.isSignedIn) {
+      AppSnackbar.info(context, AppLocalizations.of(context)!.signInToShare);
+      return;
     }
-    await Share.share(buffer.toString(), subject: _currentListName);
+
+    AppSnackbar.loading(context, AppLocalizations.of(context)!.generatingLink);
+
+    try {
+      final link = await FamilyService.instance.createShareLink('shopping_list', listId);
+      if (!context.mounted) return;
+      AppSnackbar.dismiss(context);
+
+      if (link != null) {
+        _showLinkResult(context, link);
+      } else {
+        AppSnackbar.error(context, AppLocalizations.of(context)!.failedToCreateLink);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppSnackbar.dismiss(context);
+        AppSnackbar.error(context, 'Error: $e');
+      }
+    }
+  }
+
+  void _showLinkResult(BuildContext context, ShareLinkInfo link) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(width: 40, height: 4, decoration: BoxDecoration(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              )),
+              const SizedBox(height: 20),
+              const Icon(Icons.check_circle, size: 48, color: Colors.green),
+              const SizedBox(height: 12),
+              Text(l10n.linkCreated, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text(l10n.expiresIn24Hours, style: TextStyle(color: theme.colorScheme.outline, fontSize: 13)),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(children: [
+                  Expanded(child: Text(link.url, style: const TextStyle(fontSize: 13, fontFamily: 'monospace'),
+                      maxLines: 2, overflow: TextOverflow.ellipsis)),
+                  IconButton(
+                    icon: const Icon(Icons.copy, size: 20),
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: link.url));
+                      AppSnackbar.success(context, l10n.linkCopied);
+                    },
+                  ),
+                ]),
+              ),
+              const SizedBox(height: 16),
+              Row(children: [
+                Expanded(child: OutlinedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(l10n.actionDone),
+                )),
+                const SizedBox(width: 12),
+                Expanded(child: FilledButton.icon(
+                  onPressed: () {
+                    Share.share(link.url, subject: 'Shared from Recipe Spellbook');
+                  },
+                  icon: const Icon(Icons.share, size: 18),
+                  label: Text(l10n.actionShare),
+                )),
+              ]),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _isFamilyTierUnlocked() {
+    final tier = ref.read(subscriptionProvider).tier;
+    return tier.index >= SubscriptionTier.cloudSync.index;
+  }
+
+  void _showUpgradePrompt(BuildContext context, String featureName, String message) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(width: 40, height: 4, decoration: BoxDecoration(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              )),
+              const SizedBox(height: 24),
+              const Icon(Icons.star, size: 48, color: Colors.amber),
+              const SizedBox(height: 16),
+              Text(l10n.unlockFeature(featureName),
+                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text(message,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
+              const SizedBox(height: 24),
+              Row(children: [
+                Expanded(child: OutlinedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(l10n.notNow),
+                )),
+                const SizedBox(width: 12),
+                Expanded(child: FilledButton.icon(
+                  onPressed: () { Navigator.pop(ctx); context.push('/upgrade'); },
+                  icon: const Icon(Icons.star, size: 18),
+                  label: Text(l10n.upgradeButton),
+                )),
+              ]),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _showListSwitcher(BuildContext context) {
@@ -232,26 +471,42 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   itemBuilder: (context, index) {
                     final list = lists[index];
                     final isSelected = list.id == _currentListId;
-                    return ListTile(
+                    final isShared = _sharedListCounts.containsKey(list.id);
+                    return Container(
+                      decoration: isShared ? BoxDecoration(
+                        border: Border(left: BorderSide(color: Colors.amber.shade600, width: 3)),
+                        color: Colors.amber.withValues(alpha: 0.05),
+                      ) : null,
+                      child: ListTile(
                       leading: Icon(
                         isSelected ? Icons.check_circle : Icons.circle_outlined,
                         color: isSelected ? theme.colorScheme.primary : null,
                       ),
-                      title: Text(list.name),
+                      title: Row(
+                        children: [
+                          Flexible(child: Text(list.name)),
+                          if (isShared) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.shade100,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text('Shared', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.amber.shade800)),
+                            ),
+                          ],
+                        ],
+                      ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.family_restroom, size: 20),
-                            tooltip: l10n.shoppingFamilyShare,
+                            icon: const Icon(Icons.share_outlined, size: 20),
+                            tooltip: l10n.actionShare,
                             onPressed: () {
                               Navigator.pop(context);
-                              showResourceShareSheet(
-                                context,
-                                resourceType: 'shopping_list',
-                                resourceId: list.id,
-                                resourceName: list.name,
-                              );
+                              _showShareSheet(context, listId: list.id, listName: list.name);
                             },
                           ),
                           IconButton(
@@ -272,6 +527,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                         });
                         Navigator.pop(ctx);
                       },
+                    ),
                     );
                   },
                 );
@@ -354,16 +610,49 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   void _deleteList(BuildContext context, ShoppingList list) {
     final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.read(shoppingDaoProvider);
+    final shareCount = _sharedListCounts[list.id] ?? 0;
+    final isShared = shareCount > 0;
+
+    String message;
+    if (isShared) {
+      message = 'This list is currently shared with $shareCount ${shareCount == 1 ? 'person' : 'people'}. '
+          'Deleting it will stop syncing for everyone.';
+    } else {
+      message = l10n.shoppingDeleteListConfirm(list.name);
+    }
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.shoppingDeleteList),
-        content: Text(l10n.shoppingDeleteListConfirm(list.name)),
+        content: Text(message),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
+          if (isShared)
+            OutlinedButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                // Stop sharing but keep the list
+                final shares = await FamilyService.instance.getSharesForResource('shopping_list', list.id);
+                for (final s in shares) {
+                  await FamilyService.instance.revokeShare(s.id);
+                }
+                setState(() => _sharedListCounts.remove(list.id));
+                if (context.mounted) AppSnackbar.success(context, 'Sharing stopped');
+              },
+              child: const Text('Stop Sharing Only'),
+            ),
           FilledButton(
-            onPressed: () {
+            onPressed: () async {
+              Navigator.pop(ctx);
+              // If shared, revoke all shares first
+              if (isShared) {
+                final shares = await FamilyService.instance.getSharesForResource('shopping_list', list.id);
+                for (final s in shares) {
+                  await FamilyService.instance.revokeShare(s.id);
+                }
+                _sharedListCounts.remove(list.id);
+              }
               shoppingDao.deleteList(list.id);
               if (list.id == _currentListId) {
                 setState(() {
@@ -371,7 +660,6 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   _loadCurrentListName();
                 });
               }
-              Navigator.pop(ctx);
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: Text(l10n.actionDelete),
@@ -459,21 +747,6 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   onTap: () {
                     Navigator.pop(ctx);
                     _openBarcodeScanner();
-                  },
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.family_restroom),
-                  title: Text(l10n.shoppingFamilyShare),
-                  subtitle: Text(l10n.shoppingFamilyShareSubtitle),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    showResourceShareSheet(
-                      context,
-                      resourceType: 'shopping_list',
-                      resourceId: _currentListId,
-                      resourceName: _currentListName,
-                    );
                   },
                 ),
                 const Divider(),

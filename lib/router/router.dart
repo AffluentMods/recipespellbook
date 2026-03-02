@@ -38,7 +38,9 @@ import '../ui/screens/settings/placeholder_settings_screen.dart';
 import '../ui/screens/settings/quick_access_settings_screen.dart';
 import '../ui/screens/settings/recipe_layout_settings_screen.dart';
 import '../ui/screens/settings/ingredient_layout_settings_screen.dart';
+import '../ui/screens/settings/notification_settings_screen.dart';
 import '../ui/screens/settings/settings_screen.dart';
+import '../ui/screens/notifications/notifications_screen.dart';
 import '../ui/screens/community/community_screen.dart';
 import '../ui/screens/community/community_detail_screen.dart';
 import '../ui/screens/community/community_publish_screen.dart';
@@ -373,6 +375,17 @@ final router = GoRouter(
       path: '/settings/family',
       name: 'family',
       builder: (context, state) => const FamilyScreen(),
+    ),
+    GoRoute(
+      path: '/settings/notifications',
+      name: 'notification-settings',
+      builder: (context, state) => const NotificationSettingsScreen(),
+    ),
+    GoRoute(
+      path: '/notifications',
+      name: 'notifications',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const NotificationsScreen(),
     ),
 
     // ── Community ──

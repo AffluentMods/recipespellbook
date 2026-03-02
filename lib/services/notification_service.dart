@@ -6,6 +6,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../router/router.dart';
 
 /// Top-level handler for background FCM messages (must be top-level function).
@@ -181,6 +182,14 @@ class NotificationService {
     final notification = message.notification;
     if (notification == null) return;
 
+    // Save to local inbox
+    _saveToInbox(
+      title: notification.title ?? 'Notification',
+      body: notification.body ?? '',
+      category: message.data['category'] as String? ?? 'community',
+      data: message.data,
+    );
+
     // Pick channel based on data payload
     final category = message.data['category'] as String? ?? 'community';
     String channelId;
@@ -232,6 +241,15 @@ class NotificationService {
 
   void _handleNotificationTap(RemoteMessage message) {
     debugPrint('[FCM] Notification tapped: ${message.data}');
+    // Save to inbox (may already be saved from foreground, deduped by timestamp proximity)
+    if (message.notification != null) {
+      _saveToInbox(
+        title: message.notification!.title ?? 'Notification',
+        body: message.notification!.body ?? '',
+        category: message.data['category'] as String? ?? 'community',
+        data: message.data,
+      );
+    }
     _navigateFromData(message.data);
   }
 
@@ -271,6 +289,34 @@ class NotificationService {
         }
       default:
         break;
+    }
+  }
+
+  // ── Save to local inbox ──
+
+  Future<void> _saveToInbox({
+    required String title,
+    required String body,
+    required String category,
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getStringList('notification_inbox') ?? [];
+      final entry = jsonEncode({
+        'title': title,
+        'body': body,
+        'category': category,
+        'data': data,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'isRead': false,
+      });
+      raw.insert(0, entry);
+      // Keep max 50
+      if (raw.length > 50) raw.removeRange(50, raw.length);
+      await prefs.setStringList('notification_inbox', raw);
+    } catch (e) {
+      debugPrint('[FCM] Failed to save to inbox: $e');
     }
   }
 }

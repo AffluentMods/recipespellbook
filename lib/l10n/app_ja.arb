@@ -2825,6 +2825,13 @@
   "cookbookEditSubtitle": "名前変更、カバー写真",
   "shareCookbookSubtitle": "リンク、ファミリー、またはコミュニティ",
   "shareNamedCookbook": "「{name}」を共有",
+  "shareNamedList": "「{name}」を共有",
+  "@shareNamedList": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "shareAsTextDescription": "リストの項目をテキストで送信",
   "oneTimeLink": "ワンタイムリンク",
   "oneTimeLinkDescription": "無料 • 24時間で期限切れ • 誰でもダウンロード可",
   "familyShare": "ファミリー共有",
@@ -3262,5 +3269,10 @@
   "onboardingDeleteLater": "あとからいつでも削除できます。",
   "onboardingAdding": "追加中...",
   "onboardingAddStarter": "スターターレシピを追加",
-  "onboardingBlankCookbook": "空のクックブックで始める"
+  "onboardingBlankCookbook": "空のクックブックで始める",
+  "onboardingSpellbookAwaits": "あなたの魔法書が待っています",
+  "onboardingYourSpellbookAwaits": "あなたの魔法書が待っています...",
+  "onboardingSummoning": "召喚中...",
+  "onboardingBlankSpellbook": "空の魔法書で始める",
+  "onboardingSkip": "スキップ"
 }

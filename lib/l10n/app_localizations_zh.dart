@@ -5917,6 +5917,14 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String shareNamedList(String name) {
+    return '分享「$name」';
+  }
+
+  @override
+  String get shareAsTextDescription => '以纯文本发送列表项';
+
+  @override
   String get oneTimeLink => '一次性链接';
 
   @override
@@ -7369,4 +7377,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboardingBlankCookbook => '从空白食谱开始';
+
+  @override
+  String get onboardingSpellbookAwaits => '你的魔法书在等你';
+
+  @override
+  String get onboardingYourSpellbookAwaits => '你的魔法书在等你...';
+
+  @override
+  String get onboardingSummoning => '召唤中...';
+
+  @override
+  String get onboardingBlankSpellbook => '从空白魔法书开始';
+
+  @override
+  String get onboardingSkip => '跳过';
 }

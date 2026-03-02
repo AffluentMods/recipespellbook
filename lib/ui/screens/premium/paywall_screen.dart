@@ -862,7 +862,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 child: SingleChildScrollView(
                   controller: scrollController,
                   padding: const EdgeInsets.all(16),
-                  child: _CompareTable(theme: theme),
+                  child: _CompareTable(theme: theme, showFamily: _showCloudSyncFamily),
                 ),
               ),
             ],
@@ -1123,7 +1123,8 @@ class _Feature {
 
 class _CompareTable extends StatelessWidget {
   final ThemeData theme;
-  const _CompareTable({required this.theme});
+  final bool showFamily;
+  const _CompareTable({required this.theme, required this.showFamily});
 
   @override
   Widget build(BuildContext context) {
@@ -1138,12 +1139,12 @@ class _CompareTable extends StatelessWidget {
     );
 
     return Table(
-      columnWidths: const {
-        0: FlexColumnWidth(2.2),
-        1: FlexColumnWidth(1.4),
-        2: FlexColumnWidth(1.4),
-        3: FlexColumnWidth(1.4),
-        4: FlexColumnWidth(1.4),
+      columnWidths: {
+        0: const FlexColumnWidth(2.2),
+        1: const FlexColumnWidth(1.4),
+        2: const FlexColumnWidth(1.4),
+        3: const FlexColumnWidth(1.4),
+        if (showFamily) 4: const FlexColumnWidth(1.4),
       },
       defaultVerticalAlignment: TableCellVerticalAlignment.middle,
       children: [
@@ -1159,33 +1160,34 @@ class _CompareTable extends StatelessWidget {
             _headerCell(l10n.tierFree, Colors.grey, headerStyle),
             _headerCell(l10n.tierPremium, Colors.amber, headerStyle),
             _headerCell(l10n.tierCloudSync, Colors.blue, headerStyle),
-            _headerCell(
-                l10n.tierCloudSyncPlus, Colors.deepPurple, headerStyle),
+            if (showFamily)
+              _headerCell(
+                  l10n.tierCloudSyncPlus, Colors.deepPurple, headerStyle),
           ],
         ),
         _row(l10n.comparePrice,
-            [l10n.priceFree, l10n.pricePremium, l10n.priceCloudSync, l10n.priceCloudSyncPlus],
+            [l10n.priceFree, l10n.pricePremium, l10n.priceCloudSync, if (showFamily) l10n.priceCloudSyncPlus],
             cellStyle),
         _row(l10n.compareDeviceTransfer,
-            [l10n.qrCode, l10n.cloud, l10n.cloud, l10n.cloud], cellStyle),
+            [l10n.qrCode, l10n.cloud, l10n.cloud, if (showFamily) l10n.cloud], cellStyle),
         _row('Cloud Storage',
-            [_x, '250 MB', '1 GB', '5 GB'], cellStyle),
+            [_x, 'Basic', 'Standard', if (showFamily) 'Extended'], cellStyle),
         _row(l10n.compareStepPhotos,
-            [_x, _check, _check, _check], cellStyle),
+            [_x, _check, _check, if (showFamily) _check], cellStyle),
         _row(l10n.compareFamilySharing,
-            [_x, _x, '5', '10'], cellStyle),
+            [_x, _x, '5', if (showFamily) '10'], cellStyle),
         _row(l10n.compareSharedLists,
-            [_x, _x, _check, _check], cellStyle),
+            [_x, _x, _check, if (showFamily) _check], cellStyle),
         _row(l10n.compareSharedCookbooks,
-            [_x, _x, _check, _check], cellStyle),
+            [_x, _x, _check, if (showFamily) _check], cellStyle),
         _row(l10n.compareSharedMealPlan,
-            [_x, _x, _check, _check], cellStyle),
+            [_x, _x, _check, if (showFamily) _check], cellStyle),
         _row(l10n.compareBackups,
-            [_x, _x, _check, _check], cellStyle),
+            [_x, _x, _check, if (showFamily) _check], cellStyle),
         // Version History removed — not planned for launch
         // RPG Cosmetics removed — RPG system being redesigned
         _row(l10n.compareSupporterBadge,
-            [_x, _check, _check, _check], cellStyle),
+            [_x, _check, _check, if (showFamily) _check], cellStyle),
       ],
     );
   }

@@ -316,11 +316,11 @@ class _FamilyScreenState extends State<FamilyScreen> {
           if (name.isEmpty) return;
           Navigator.pop(ctx);
           final result = await _family.createFamily(name);
-          if (result != null) {
+          if (result.success) {
             await _load();
             if (mounted) AppSnackbar.success(context, l10n.familyCreated);
           } else {
-            if (mounted) AppSnackbar.error(context, l10n.familyCreateFailed);
+            if (mounted) AppSnackbar.error(context, result.error ?? l10n.familyCreateFailed);
           }
         }, child: Text(l10n.actionCreate)),
       ],

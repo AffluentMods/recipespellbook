@@ -5969,6 +5969,14 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String shareNamedList(String name) {
+    return '\"$name\" delen';
+  }
+
+  @override
+  String get shareAsTextDescription => 'Lijstitems als tekst versturen';
+
+  @override
   String get oneTimeLink => 'Eenmalige link';
 
   @override
@@ -7421,4 +7429,19 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get onboardingBlankCookbook => 'Begin met een leeg kookboek';
+
+  @override
+  String get onboardingSpellbookAwaits => 'Je spreukenboek wacht';
+
+  @override
+  String get onboardingYourSpellbookAwaits => 'Je spreukenboek wacht...';
+
+  @override
+  String get onboardingSummoning => 'Oproepen...';
+
+  @override
+  String get onboardingBlankSpellbook => 'Begin met een leeg spreukenboek';
+
+  @override
+  String get onboardingSkip => 'Overslaan';
 }

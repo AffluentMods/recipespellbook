@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/notification_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../router/router.dart';
@@ -1034,17 +1035,33 @@ class _BottomSection extends ConsumerWidget {
 // SHARED WIDGETS
 // ═══════════════════════════════════════════════════════════════════
 
-class _NotificationBell extends StatelessWidget {
+class _NotificationBell extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () => AppSnackbar.info(context, 'Notifications coming soon!'),
-      icon: Icon(Icons.notifications_outlined, size: 22, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
-      style: IconButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
-        padding: const EdgeInsets.all(8),
-        minimumSize: const Size(36, 36),
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unread = ref.watch(unreadNotificationCountProvider);
+    return Stack(
+      children: [
+        IconButton(
+          onPressed: () => context.push('/notifications'),
+          icon: Icon(Icons.notifications_outlined, size: 22, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
+          style: IconButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
+            padding: const EdgeInsets.all(8),
+            minimumSize: const Size(36, 36),
+          ),
+        ),
+        if (unread > 0)
+          Positioned(
+            right: 2,
+            top: 2,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+              child: Text('$unread', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -2825,6 +2825,13 @@
   "cookbookEditSubtitle": "Переименовать, фото обложки",
   "shareCookbookSubtitle": "Ссылка, семья или сообщество",
   "shareNamedCookbook": "Поделиться \"{name}\"",
+  "shareNamedList": "Поделиться \"{name}\"",
+  "@shareNamedList": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "shareAsTextDescription": "Отправить элементы списка как текст",
   "oneTimeLink": "Одноразовая ссылка",
   "oneTimeLinkDescription": "Бесплатно • Истекает через 24ч • Любой может скачать",
   "familyShare": "Семейный доступ",
@@ -3262,5 +3269,10 @@
   "onboardingDeleteLater": "Вы всегда сможете удалить их позже.",
   "onboardingAdding": "Добавление...",
   "onboardingAddStarter": "Добавить стартовые рецепты",
-  "onboardingBlankCookbook": "Начать с пустой книги рецептов"
+  "onboardingBlankCookbook": "Начать с пустой книги рецептов",
+  "onboardingSpellbookAwaits": "Ваша книга заклинаний ждёт",
+  "onboardingYourSpellbookAwaits": "Ваша книга заклинаний ждёт...",
+  "onboardingSummoning": "Призываем...",
+  "onboardingBlankSpellbook": "Начать с пустой книги заклинаний",
+  "onboardingSkip": "Пропустить"
 }

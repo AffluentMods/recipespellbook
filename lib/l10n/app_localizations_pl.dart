@@ -6035,6 +6035,14 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String shareNamedList(String name) {
+    return 'Udostępnij \"$name\"';
+  }
+
+  @override
+  String get shareAsTextDescription => 'Wyślij elementy listy jako tekst';
+
+  @override
   String get oneTimeLink => 'Jednorazowy link';
 
   @override
@@ -7487,4 +7495,19 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get onboardingBlankCookbook => 'Zacznij z pustą książką kucharską';
+
+  @override
+  String get onboardingSpellbookAwaits => 'Twoja księga czarów czeka';
+
+  @override
+  String get onboardingYourSpellbookAwaits => 'Twoja księga czarów czeka...';
+
+  @override
+  String get onboardingSummoning => 'Przywoływanie...';
+
+  @override
+  String get onboardingBlankSpellbook => 'Zacznij z pustą księgą czarów';
+
+  @override
+  String get onboardingSkip => 'Pomiń';
 }

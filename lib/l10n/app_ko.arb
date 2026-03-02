@@ -2825,6 +2825,13 @@
   "cookbookEditSubtitle": "이름 바꾸기, 표지 사진",
   "shareCookbookSubtitle": "링크, 가족 또는 커뮤니티",
   "shareNamedCookbook": "\"{name}\" 공유",
+  "shareNamedList": "\"{name}\" 공유",
+  "@shareNamedList": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "shareAsTextDescription": "목록 항목을 텍스트로 보내기",
   "oneTimeLink": "일회성 링크",
   "oneTimeLinkDescription": "무료 • 24시간 만료 • 누구나 다운로드 가능",
   "familyShare": "가족 공유",
@@ -3262,5 +3269,10 @@
   "onboardingDeleteLater": "나중에 언제든 삭제할 수 있습니다.",
   "onboardingAdding": "추가 중...",
   "onboardingAddStarter": "스타터 레시피 추가",
-  "onboardingBlankCookbook": "빈 요리책으로 시작"
+  "onboardingBlankCookbook": "빈 요리책으로 시작",
+  "onboardingSpellbookAwaits": "당신의 마법서가 기다리고 있어요",
+  "onboardingYourSpellbookAwaits": "당신의 마법서가 기다리고 있어요...",
+  "onboardingSummoning": "소환 중...",
+  "onboardingBlankSpellbook": "빈 마법서로 시작하기",
+  "onboardingSkip": "건너뛰기"
 }

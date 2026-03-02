@@ -5917,6 +5917,14 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String shareNamedList(String name) {
+    return '「$name」を共有';
+  }
+
+  @override
+  String get shareAsTextDescription => 'リストの項目をテキストで送信';
+
+  @override
   String get oneTimeLink => 'ワンタイムリンク';
 
   @override
@@ -7369,4 +7377,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get onboardingBlankCookbook => '空のクックブックで始める';
+
+  @override
+  String get onboardingSpellbookAwaits => 'あなたの魔法書が待っています';
+
+  @override
+  String get onboardingYourSpellbookAwaits => 'あなたの魔法書が待っています...';
+
+  @override
+  String get onboardingSummoning => '召喚中...';
+
+  @override
+  String get onboardingBlankSpellbook => '空の魔法書で始める';
+
+  @override
+  String get onboardingSkip => 'スキップ';
 }

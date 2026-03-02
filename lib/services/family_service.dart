@@ -166,15 +166,15 @@ class FamilyService {
     return null;
   }
 
-  Future<FamilyInfo?> createFamily(String name) async {
+  Future<({bool success, String? error, FamilyInfo? family})> createFamily(String name) async {
     try {
       final response = await _auth.post('/v1/family', {'name': name});
       if (response.statusCode == 201) {
         _cachedFamily = FamilyInfo.fromJson(jsonDecode(response.body)['family']);
-        return _cachedFamily;
+        return (success: true, error: null, family: _cachedFamily);
       }
-    } catch (e) { debugPrint('[Family] create: $e'); }
-    return null;
+      return (success: false, error: _parseError(response), family: null);
+    } catch (e) { return (success: false, error: 'Connection error', family: null); }
   }
 
   Future<({bool success, String? error, String? familyName})> joinFamily(String inviteCode) async {

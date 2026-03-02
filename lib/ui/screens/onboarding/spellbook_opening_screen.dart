@@ -237,7 +237,7 @@ class _SpellbookOpeningScreenState
                         _sequenceController.value = 1.0;
                         setState(() => _pagesReady = true);
                       },
-                      child: const Text('Skip', style: TextStyle(color: Colors.white54)),
+                      child: Text(AppLocalizations.of(context)!.onboardingSkip, style: const TextStyle(color: Colors.white54)),
                     ),
                   ),
                 ),
@@ -347,7 +347,7 @@ class _SpellbookOpeningScreenState
             Padding(
               padding: const EdgeInsets.only(top: 24, bottom: 8),
               child: Text(
-                'Your Spellbook Awaits',
+                AppLocalizations.of(context)!.onboardingSpellbookAwaits,
                 style: GoogleFonts.uncialAntiqua(
                   fontSize: 24,
                   color: const Color(0xFF3E2723),
@@ -422,6 +422,7 @@ class _SpellbookOpeningScreenState
   }
 
   Widget _buildFinalPage(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
@@ -430,7 +431,7 @@ class _SpellbookOpeningScreenState
           const Text('✨', style: TextStyle(fontSize: 48)),
           const SizedBox(height: 16),
           Text(
-            'Your spellbook awaits...',
+            l10n.onboardingYourSpellbookAwaits,
             style: GoogleFonts.uncialAntiqua(
               fontSize: 22,
               color: const Color(0xFF3E2723),
@@ -439,7 +440,7 @@ class _SpellbookOpeningScreenState
           ),
           const SizedBox(height: 8),
           Text(
-            '10 handpicked recipes from around the world to get you started.',
+            l10n.onboardingDescription,
             style: GoogleFonts.cormorantGaramond(
               fontSize: 16,
               color: const Color(0xFF5D4037),
@@ -462,7 +463,7 @@ class _SpellbookOpeningScreenState
                     )
                   : const Icon(Icons.auto_fix_high_rounded, size: 20),
               label: Text(
-                _loading ? 'Summoning...' : 'Add starter recipes',
+                _loading ? l10n.onboardingSummoning : l10n.onboardingAddStarter,
                 style: const TextStyle(fontSize: 16),
               ),
               style: FilledButton.styleFrom(
@@ -478,9 +479,9 @@ class _SpellbookOpeningScreenState
           // Start empty button
           TextButton(
             onPressed: _loading ? null : _startEmpty,
-            child: const Text(
-              'Start with a blank spellbook',
-              style: TextStyle(color: Color(0xFF5D4037), fontSize: 15),
+            child: Text(
+              l10n.onboardingBlankSpellbook,
+              style: const TextStyle(color: Color(0xFF5D4037), fontSize: 15),
             ),
           ),
         ],

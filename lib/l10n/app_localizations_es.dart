@@ -5969,6 +5969,14 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String shareNamedList(String name) {
+    return 'Compartir \"$name\"';
+  }
+
+  @override
+  String get shareAsTextDescription => 'Enviar los elementos de la lista como texto';
+
+  @override
   String get oneTimeLink => 'Enlace de un solo uso';
 
   @override
@@ -7421,4 +7429,19 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get onboardingBlankCookbook => 'Comenzar con un libro vacío';
+
+  @override
+  String get onboardingSpellbookAwaits => 'Tu libro de hechizos te espera';
+
+  @override
+  String get onboardingYourSpellbookAwaits => 'Tu libro de hechizos te espera...';
+
+  @override
+  String get onboardingSummoning => 'Invocando...';
+
+  @override
+  String get onboardingBlankSpellbook => 'Empezar con un libro de hechizos vacío';
+
+  @override
+  String get onboardingSkip => 'Omitir';
 }

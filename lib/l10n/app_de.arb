@@ -2356,6 +2356,13 @@
   "cookbookEditSubtitle": "Umbenennen, Titelbild",
   "shareCookbookSubtitle": "Link, Familie oder Community",
   "shareNamedCookbook": "\"{name}\" teilen",
+  "shareNamedList": "\"{name}\" teilen",
+  "@shareNamedList": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "shareAsTextDescription": "Listeneinträge als Text senden",
   "oneTimeLink": "Einmaliger Link",
   "oneTimeLinkDescription": "Kostenlos • 24h Ablauf • Jeder kann herunterladen",
   "familyShare": "Familienfreigabe",
@@ -2793,5 +2800,10 @@
   "onboardingDeleteLater": "Du kannst sie jederzeit wieder löschen.",
   "onboardingAdding": "Wird hinzugefügt...",
   "onboardingAddStarter": "Starterrezepte hinzufügen",
-  "onboardingBlankCookbook": "Mit leerem Kochbuch starten"
+  "onboardingBlankCookbook": "Mit leerem Kochbuch starten",
+  "onboardingSpellbookAwaits": "Dein Zauberbuch wartet",
+  "onboardingYourSpellbookAwaits": "Dein Zauberbuch wartet...",
+  "onboardingSummoning": "Beschwöre...",
+  "onboardingBlankSpellbook": "Mit einem leeren Zauberbuch starten",
+  "onboardingSkip": "Überspringen"
 }

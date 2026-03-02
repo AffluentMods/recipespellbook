@@ -2859,6 +2859,13 @@
       "name": { "type": "String" }
     }
   },
+  "shareNamedList": "Share \"{name}\"",
+  "@shareNamedList": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "shareAsTextDescription": "Send list items as plain text",
   "oneTimeLink": "One-Time Link",
   "oneTimeLinkDescription": "Free \u2022 24h expiry \u2022 Anyone can download",
   "familyShare": "Family Share",
@@ -3649,5 +3656,10 @@
   "onboardingDeleteLater": "You can always delete them later.",
   "onboardingAdding": "Adding...",
   "onboardingAddStarter": "Add starter recipes",
-  "onboardingBlankCookbook": "Start with a blank cookbook"
+  "onboardingBlankCookbook": "Start with a blank cookbook",
+  "onboardingSpellbookAwaits": "Your Spellbook Awaits",
+  "onboardingYourSpellbookAwaits": "Your spellbook awaits...",
+  "onboardingSummoning": "Summoning...",
+  "onboardingBlankSpellbook": "Start with a blank spellbook",
+  "onboardingSkip": "Skip"
 }

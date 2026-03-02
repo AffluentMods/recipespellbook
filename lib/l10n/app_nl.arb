@@ -2825,6 +2825,13 @@
   "cookbookEditSubtitle": "Hernoemen, omslagfoto",
   "shareCookbookSubtitle": "Link, familie of community",
   "shareNamedCookbook": "\"{name}\" delen",
+  "shareNamedList": "\"{name}\" delen",
+  "@shareNamedList": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "shareAsTextDescription": "Lijstitems als tekst versturen",
   "oneTimeLink": "Eenmalige link",
   "oneTimeLinkDescription": "Gratis • 24 uur geldig • Iedereen kan downloaden",
   "familyShare": "Gezinsdeling",
@@ -3262,5 +3269,10 @@
   "onboardingDeleteLater": "Je kunt ze later altijd verwijderen.",
   "onboardingAdding": "Toevoegen...",
   "onboardingAddStarter": "Startrecepten toevoegen",
-  "onboardingBlankCookbook": "Begin met een leeg kookboek"
+  "onboardingBlankCookbook": "Begin met een leeg kookboek",
+  "onboardingSpellbookAwaits": "Je spreukenboek wacht",
+  "onboardingYourSpellbookAwaits": "Je spreukenboek wacht...",
+  "onboardingSummoning": "Oproepen...",
+  "onboardingBlankSpellbook": "Begin met een leeg spreukenboek",
+  "onboardingSkip": "Overslaan"
 }

@@ -1819,6 +1819,13 @@
   "cookbookEditSubtitle": "Renommer, photo de couverture",
   "shareCookbookSubtitle": "Lien, famille ou communauté",
   "shareNamedCookbook": "Partager « {name} »",
+  "shareNamedList": "Partager \"{name}\"",
+  "@shareNamedList": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "shareAsTextDescription": "Envoyer les éléments de la liste en texte brut",
   "oneTimeLink": "Lien unique",
   "oneTimeLinkDescription": "Gratuit • Expire en 24h • Téléchargeable par tous",
   "familyShare": "Partage familial",
@@ -2256,5 +2263,10 @@
   "onboardingDeleteLater": "Vous pourrez toujours les supprimer plus tard.",
   "onboardingAdding": "Ajout en cours...",
   "onboardingAddStarter": "Ajouter des recettes de démarrage",
-  "onboardingBlankCookbook": "Commencer avec un livre vide"
+  "onboardingBlankCookbook": "Commencer avec un livre vide",
+  "onboardingSpellbookAwaits": "Votre grimoire vous attend",
+  "onboardingYourSpellbookAwaits": "Votre grimoire vous attend...",
+  "onboardingSummoning": "Invocation...",
+  "onboardingBlankSpellbook": "Commencer avec un grimoire vide",
+  "onboardingSkip": "Passer"
 }

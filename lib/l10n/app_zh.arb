@@ -2825,6 +2825,13 @@
   "cookbookEditSubtitle": "重命名、封面照片",
   "shareCookbookSubtitle": "链接、家庭或社区",
   "shareNamedCookbook": "分享\"{name}\"",
+  "shareNamedList": "分享「{name}」",
+  "@shareNamedList": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "shareAsTextDescription": "以纯文本发送列表项",
   "oneTimeLink": "一次性链接",
   "oneTimeLinkDescription": "免费 · 24小时过期 · 任何人可下载",
   "familyShare": "家庭分享",
@@ -3262,5 +3269,10 @@
   "onboardingDeleteLater": "你可以随时删除它们。",
   "onboardingAdding": "添加中...",
   "onboardingAddStarter": "添加入门食谱",
-  "onboardingBlankCookbook": "从空白食谱开始"
+  "onboardingBlankCookbook": "从空白食谱开始",
+  "onboardingSpellbookAwaits": "你的魔法书在等你",
+  "onboardingYourSpellbookAwaits": "你的魔法书在等你...",
+  "onboardingSummoning": "召唤中...",
+  "onboardingBlankSpellbook": "从空白魔法书开始",
+  "onboardingSkip": "跳过"
 }
