@@ -112,7 +112,9 @@ class ShoppingListService {
       }
 
       for (final entry in grouped.entries) {
-        final catName = entry.key[0].toUpperCase() + entry.key.substring(1);
+        final catName = entry.key.isNotEmpty
+            ? entry.key[0].toUpperCase() + entry.key.substring(1)
+            : 'Other';
         buffer.writeln('## $catName');
         for (final item in entry.value) {
           final qty = item.quantity != null ? '${item.quantity} ' : '';

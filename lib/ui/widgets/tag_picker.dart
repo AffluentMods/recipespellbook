@@ -72,6 +72,9 @@ class _TagPickerState extends ConsumerState<TagPicker> {
         StreamBuilder<List<Tag>>(
           stream: tagsDao.watchAllTags(),
           builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return const SizedBox(height: 40);
+            }
             if (!snapshot.hasData) {
               return const SizedBox(height: 40);
             }
@@ -326,6 +329,9 @@ class _TagSelectorSheetState extends ConsumerState<_TagSelectorSheet> {
               child: StreamBuilder<List<Tag>>(
                 stream: tagsDao.watchAllTags(),
                 builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const SizedBox.shrink();
+                  }
                   if (!snapshot.hasData) {
                     return const Center(child: CircularProgressIndicator());
                   }

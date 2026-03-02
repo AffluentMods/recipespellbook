@@ -12,6 +12,7 @@
 .swiftpm/
 migrate_working_dir/
 .env
+.env.flutter
 android/key.properties
 android/upload-keystore.jks
 

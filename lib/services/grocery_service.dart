@@ -65,10 +65,12 @@ class GroceryService {
   static const _krogerLocationId = 'grocery_kroger_location_id';
   static const _krogerTokenExpiry = 'grocery_kroger_token_expiry';
 
-  static const _defaultInstacartKey =
-      '***REMOVED***';
-  static const _defaultKrogerClientId = '***REMOVED***';
-  static const _defaultKrogerSecret = '***REMOVED***';
+  static const _defaultInstacartKey = String.fromEnvironment(
+      'INSTACART_API_KEY');
+  static const _defaultKrogerClientId = String.fromEnvironment(
+      'KROGER_CLIENT_ID');
+  static const _defaultKrogerSecret = String.fromEnvironment(
+      'KROGER_CLIENT_SECRET');
 
   // Instacart Developer Platform (IDP) endpoint
   static const _instacartIdpBase = 'https://connect.instacart.com/idp/v1';

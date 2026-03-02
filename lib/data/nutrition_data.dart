@@ -119,7 +119,8 @@ class NutritionData {
           vitaminB5 != null ||
           vitaminB6 != null ||
           vitaminB12 != null ||
-          folate != null;
+          folate != null ||
+          choline != null;
 
   bool get hasMinerals =>
       calcium != null ||

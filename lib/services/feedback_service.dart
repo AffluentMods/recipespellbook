@@ -4,36 +4,31 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 
-/// Service for sending user feedback to Discord via webhooks
+/// Service for sending user feedback via the backend API
 class FeedbackService {
-  static const _suggestionsWebhook =
-      '***REMOVED***';
-  static const _bugReportsWebhook =
-      '***REMOVED***';
+  static const _apiBaseUrl = String.fromEnvironment(
+    'API_URL',
+    defaultValue: 'https://api.recipespellbook.app',
+  );
 
   /// Discord invite link for your server
   static const discordInviteUrl = 'https://discord.gg/fqtrekcKFt';
 
-  /// Send a suggestion to the #suggestions channel
+  /// Send a suggestion via the backend API
   static Future<bool> sendSuggestion({
     required String title,
     required String description,
     String? contactInfo,
   }) async {
-    return _sendToWebhook(
-      webhookUrl: _suggestionsWebhook,
-      embedColor: 0x4CAF50, // green
-      embedTitle: '💡 New Suggestion',
-      fields: [
-        {'name': '📌 Title', 'value': title, 'inline': false},
-        {'name': '📝 Details', 'value': description, 'inline': false},
-        if (contactInfo != null && contactInfo.isNotEmpty)
-          {'name': '📧 Contact', 'value': contactInfo, 'inline': true},
-      ],
+    return _postFeedback(
+      type: 'suggestion',
+      title: title,
+      description: description,
+      email: contactInfo,
     );
   }
 
-  /// Send a bug report to the #bug-reports channel
+  /// Send a bug report via the backend API
   static Future<bool> sendBugReport({
     required String title,
     required String description,
@@ -41,47 +36,46 @@ class FeedbackService {
     String? contactInfo,
   }) async {
     final deviceInfo = await _getDeviceInfo();
-    return _sendToWebhook(
-      webhookUrl: _bugReportsWebhook,
-      embedColor: 0xF44336, // red
-      embedTitle: '🐛 Bug Report',
-      fields: [
-        {'name': '📌 Title', 'value': title, 'inline': false},
-        {'name': '📝 Description', 'value': description, 'inline': false},
-        if (stepsToReproduce != null && stepsToReproduce.isNotEmpty)
-          {'name': '🔄 Steps to Reproduce', 'value': stepsToReproduce, 'inline': false},
-        {'name': '📱 Device', 'value': deviceInfo, 'inline': true},
-        if (contactInfo != null && contactInfo.isNotEmpty)
-          {'name': '📧 Contact', 'value': contactInfo, 'inline': true},
-      ],
+    final fullDescription = stepsToReproduce != null && stepsToReproduce.isNotEmpty
+        ? '$description\n\nSteps to reproduce:\n$stepsToReproduce\n\nDevice: $deviceInfo'
+        : '$description\n\nDevice: $deviceInfo';
+
+    return _postFeedback(
+      type: 'bug',
+      title: title,
+      description: fullDescription,
+      email: contactInfo,
     );
   }
 
-  static Future<bool> _sendToWebhook({
-    required String webhookUrl,
-    required int embedColor,
-    required String embedTitle,
-    required List<Map<String, dynamic>> fields,
+  static Future<bool> _postFeedback({
+    required String type,
+    required String title,
+    required String description,
+    String? email,
   }) async {
     try {
+      String platform;
+      if (Platform.isIOS) {
+        platform = 'ios';
+      } else if (Platform.isAndroid) {
+        platform = 'android';
+      } else {
+        platform = Platform.operatingSystem;
+      }
+
       final client = HttpClient();
-      final uri = Uri.parse(webhookUrl);
+      final uri = Uri.parse('$_apiBaseUrl/v1/feedback');
       final request = await client.postUrl(uri);
 
       request.headers.set('Content-Type', 'application/json');
 
       final body = jsonEncode({
-        'embeds': [
-          {
-            'title': embedTitle,
-            'color': embedColor,
-            'fields': fields,
-            'timestamp': DateTime.now().toUtc().toIso8601String(),
-            'footer': {
-              'text': 'Recipe Spellbook · In-App Feedback',
-            },
-          },
-        ],
+        'type': type,
+        'title': title,
+        'description': description,
+        if (email != null && email.isNotEmpty) 'email': email,
+        'platform': platform,
       });
 
       request.write(body);

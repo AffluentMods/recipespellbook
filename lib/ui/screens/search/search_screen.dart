@@ -77,34 +77,34 @@ final searchResultsProvider = FutureProvider<List<Recipe>>((ref) async {
 });
 
 Recipe _rowToRecipe(QueryRow row) {
+  final data = row.data;
   return Recipe(
-    id: row.data['id'] as String,
-    cookbookId: row.data['cookbook_id'] as String,
-    title: row.data['title'] as String,
-    description: row.data['description'] as String?,
-    servings: row.data['servings'] as String?,
-    prepTimeMinutes: row.data['prep_time_minutes'] as int?,
-    cookTimeMinutes: row.data['cook_time_minutes'] as int?,
-    imagePath: row.data['image_path'] as String?,
-    sourceUrl: row.data['source_url'] as String?,
-    courseId: row.data['course_id'] as String?,
-    categoryId: row.data['category_id'] as String?,
-    rating: row.data['rating'] as int?,
-    notes: row.data['notes'] as String?,
-    isFavorite: (row.data['is_favorite'] as int?) == 1,
-    isPinned: (row.data['is_pinned'] as int?) == 1,
-    lastViewedAt: row.data['last_viewed_at'] != null
-        ? DateTime.fromMillisecondsSinceEpoch(row.data['last_viewed_at'] as int)
+    id: data['id'] as String? ?? '',
+    cookbookId: data['cookbook_id'] as String? ?? '',
+    title: data['title'] as String? ?? '',
+    description: data['description'] as String?,
+    servings: data['servings'] as String?,
+    prepTimeMinutes: data['prep_time_minutes'] as int?,
+    cookTimeMinutes: data['cook_time_minutes'] as int?,
+    imagePath: data['image_path'] as String?,
+    sourceUrl: data['source_url'] as String?,
+    courseId: data['course_id'] as String?,
+    categoryId: data['category_id'] as String?,
+    rating: data['rating'] as int?,
+    notes: data['notes'] as String?,
+    isFavorite: (data['is_favorite'] as int?) == 1,
+    isPinned: (data['is_pinned'] as int?) == 1,
+    lastViewedAt: data['last_viewed_at'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(data['last_viewed_at'] as int)
         : null,
-    // FIX: Handle potentially null created_at with fallback to DateTime.now()
-    createdAt: row.data['created_at'] != null
-        ? DateTime.fromMillisecondsSinceEpoch(row.data['created_at'] as int)
+    createdAt: data['created_at'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(data['created_at'] as int)
         : DateTime.now(),
-    updatedAt: row.data['updated_at'] != null
-        ? DateTime.fromMillisecondsSinceEpoch(row.data['updated_at'] as int)
+    updatedAt: data['updated_at'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(data['updated_at'] as int)
         : DateTime.now(),
-    deletedAt: row.data['deleted_at'] != null
-        ? DateTime.fromMillisecondsSinceEpoch(row.data['deleted_at'] as int)
+    deletedAt: data['deleted_at'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(data['deleted_at'] as int)
         : null,
   );
 }

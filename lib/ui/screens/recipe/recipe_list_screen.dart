@@ -646,6 +646,7 @@ class _SmallListView extends StatelessWidget {
         final isSelected = selectedIds.contains(recipe.id);
 
         return Container(
+          key: ValueKey(recipe.id),
           color: isSelected ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3) : null,
           child: ListTile(
             leading: Row(
@@ -742,6 +743,7 @@ class _MediumGridView extends StatelessWidget {
       ),
       itemCount: recipes.length,
       itemBuilder: (context, index) => _MediumCard(
+        key: ValueKey(recipes[index].id),
         recipe: recipes[index], tagsDao: tagsDao,
         isSelecting: isSelecting,
         isSelected: selectedIds.contains(recipes[index].id),
@@ -761,6 +763,7 @@ class _MediumCard extends StatelessWidget {
   final VoidCallback onLongPress;
 
   const _MediumCard({
+    super.key,
     required this.recipe, required this.tagsDao,
     required this.isSelecting, required this.isSelected,
     required this.onTap, required this.onLongPress,
@@ -933,6 +936,7 @@ class _LargeCardView extends StatelessWidget {
       padding: const EdgeInsets.all(12).copyWith(bottom: 80),
       itemCount: recipes.length,
       itemBuilder: (context, index) => _LargeCard(
+        key: ValueKey(recipes[index].id),
         recipe: recipes[index], tagsDao: tagsDao,
         isSelecting: isSelecting,
         isSelected: selectedIds.contains(recipes[index].id),
@@ -952,6 +956,7 @@ class _LargeCard extends StatelessWidget {
   final VoidCallback onLongPress;
 
   const _LargeCard({
+    super.key,
     required this.recipe, required this.tagsDao,
     required this.isSelecting, required this.isSelected,
     required this.onTap, required this.onLongPress,

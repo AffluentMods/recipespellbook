@@ -801,10 +801,11 @@ class RpgNotifier extends Notifier<RpgState> {
     );
 
     if (newProgress >= achievement.targetValue) {
+      // _unlockAchievement already calls _saveProfile
       await _unlockAchievement(achievementId);
+    } else {
+      await _saveProfile();
     }
-
-    await _saveProfile();
   }
 
   /// Called from external sources to update achievement progress

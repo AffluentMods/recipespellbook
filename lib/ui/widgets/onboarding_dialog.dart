@@ -88,7 +88,7 @@ class _OnboardingScreenState extends State<_OnboardingScreen> {
 
                 // Title
                 Text(
-                  'Welcome to',
+                  'Welcome to', // TODO: localize
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w300,
                     color: theme.colorScheme.onSurface,
@@ -96,7 +96,7 @@ class _OnboardingScreenState extends State<_OnboardingScreen> {
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  'Recipe Spellbook!',
+                  'Recipe Spellbook!', // TODO: localize
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.onSurface,
@@ -107,7 +107,7 @@ class _OnboardingScreenState extends State<_OnboardingScreen> {
 
                 // Description
                 Text(
-                  '10 handpicked recipes from around the world to get you started.',
+                  '10 handpicked recipes from around the world to get you started.', // TODO: localize
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -137,7 +137,7 @@ class _OnboardingScreenState extends State<_OnboardingScreen> {
 
                 // Subtitle
                 Text(
-                  'You can always delete them later.',
+                  'You can always delete them later.', // TODO: localize
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.outline,
                     fontStyle: FontStyle.italic,
@@ -162,7 +162,7 @@ class _OnboardingScreenState extends State<_OnboardingScreen> {
                     )
                         : const Icon(Icons.auto_fix_high_rounded, size: 20),
                     label: Text(
-                      _loading ? 'Adding...' : 'Add starter recipes',
+                      _loading ? 'Adding...' : 'Add starter recipes', // TODO: localize
                       style: const TextStyle(fontSize: 16),
                     ),
                     style: FilledButton.styleFrom(
@@ -181,7 +181,7 @@ class _OnboardingScreenState extends State<_OnboardingScreen> {
                   child: TextButton(
                     onPressed: _loading ? null : _startEmpty,
                     child: Text(
-                      'Start with a blank cookbook',
+                      'Start with a blank cookbook', // TODO: localize
                       style: TextStyle(
                         color: theme.colorScheme.outline,
                         fontSize: 15,

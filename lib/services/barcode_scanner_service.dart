@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
 import '../../../l10n/app_localizations.dart';
@@ -13,7 +12,7 @@ class BarcodeScannerService {
     try {
       // Use Open Food Facts API (free, no API key required)
       final url = 'https://world.openfoodfacts.org/api/v0/product/$barcode.json';
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -34,7 +33,7 @@ class BarcodeScannerService {
     try {
       // UPC Database API (limited free tier)
       final url = 'https://api.upcitemdb.com/prod/trial/lookup?upc=$barcode';
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -161,14 +160,14 @@ class ProductInfo {
 }
 
 /// Barcode scanner screen widget
-class BarcodeScannerScreen extends ConsumerStatefulWidget {
+class BarcodeScannerScreen extends StatefulWidget {
   const BarcodeScannerScreen({super.key});
 
   @override
-  ConsumerState<BarcodeScannerScreen> createState() => _BarcodeScannerScreenState();
+  State<BarcodeScannerScreen> createState() => _BarcodeScannerScreenState();
 }
 
-class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen> {
+class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   MobileScannerController? _controller;
   bool _isProcessing = false;
   String? _lastScannedBarcode;

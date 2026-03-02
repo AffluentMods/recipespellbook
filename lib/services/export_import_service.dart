@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -461,7 +462,9 @@ class ExportImportService {
           final imageFile = File(p.join(imagesDir.path, '$newRecipeId.jpg'));
           await imageFile.writeAsBytes(imageBytes);
           imagePath = imageFile.path;
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('[Import] Failed to decode/save recipe image: $e');
+        }
       }
 
       await db.into(db.recipes).insert(RecipesCompanion.insert(

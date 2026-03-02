@@ -479,7 +479,7 @@ class _NutritionEditSheetState extends State<NutritionEditSheet> {
                       controller: _servingSizeController,
                       decoration: InputDecoration(
                         labelText: l10n.servingSize,
-                        hintText: 'e.g., 1 cup, 100g',
+                        hintText: 'e.g., 1 cup, 100g', // TODO: localize
                         prefixIcon: const Icon(Icons.restaurant),
                       ),
                     ),
@@ -487,7 +487,7 @@ class _NutritionEditSheetState extends State<NutritionEditSheet> {
 
                     // Main macros
                     Text(
-                      'Main Nutrients',
+                      'Main Nutrients', // TODO: localize
                       style: theme.textTheme.titleSmall?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,
@@ -515,7 +515,7 @@ class _NutritionEditSheetState extends State<NutritionEditSheet> {
 
                     // Additional nutrients
                     Text(
-                      'Additional Nutrients',
+                      'Additional Nutrients', // TODO: localize
                       style: theme.textTheme.titleSmall?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,

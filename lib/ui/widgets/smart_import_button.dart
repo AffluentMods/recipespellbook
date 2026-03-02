@@ -224,7 +224,7 @@ class _SmartImportButtonState extends ConsumerState<SmartImportButton> {
             const SizedBox(width: 10),
             const Expanded(
               child: Text(
-                'Re-parsed by AI — review the updated recipe above',
+                'Re-parsed by AI — review the updated recipe above', // TODO: localize
                 style: TextStyle(color: Colors.green, fontSize: 13),
               ),
             ),

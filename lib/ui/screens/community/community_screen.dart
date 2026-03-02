@@ -174,6 +174,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                     return const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()));
                   }
                   return _CommunityCard(
+                    key: ValueKey(_items[i].id),
                     item: _items[i],
                     onTap: () => context.push('/community/${_items[i].id}'),
                   );
@@ -233,7 +234,7 @@ class _CommunityCard extends StatelessWidget {
   final CommunityListItem item;
   final VoidCallback onTap;
 
-  const _CommunityCard({required this.item, required this.onTap});
+  const _CommunityCard({super.key, required this.item, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

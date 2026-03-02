@@ -267,7 +267,7 @@ class _SplashScreenState extends State<SplashScreen>
         child: Column(
           children: [
             Text(
-              'Recipe',
+              'Recipe', // TODO: localize
               style: GoogleFonts.uncialAntiqua(
                 fontSize: 44,
                 fontWeight: FontWeight.bold,
@@ -284,7 +284,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
             ),
             Text(
-              'Spellbook',
+              'Spellbook', // TODO: localize
               style: GoogleFonts.uncialAntiqua(
                 fontSize: 44,
                 fontWeight: FontWeight.bold,

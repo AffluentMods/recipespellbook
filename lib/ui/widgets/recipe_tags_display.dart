@@ -19,6 +19,7 @@ class RecipeTagsDisplay extends ConsumerWidget {
     final tagsDao = ref.watch(tagsDaoProvider);
 
     return FutureBuilder<List<Tag>>(
+      key: ValueKey('tags_$recipeId'),
       future: tagsDao.getTagsForRecipe(recipeId),
       builder: (context, snapshot) {
         final tags = snapshot.data ?? [];
