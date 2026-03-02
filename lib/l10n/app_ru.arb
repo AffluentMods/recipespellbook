@@ -2037,7 +2037,7 @@
   "subscriptionTab": "Подписка",
   "payOnceKeepForever": "Заплатите один раз, пользуйтесь всегда",
   "cloudSyncFeature": "Cloud Sync",
-  "cloudSyncPlusFeature": "Cloud Sync+",
+  "cloudSyncFamilyFeature": "Cloud Sync+",
   "unableToLoadProducts": "Не удалось загрузить продукты.",
   "noOfferingsAvailable": "Нет доступных предложений.",
   "purchaseFailed": "Покупка не удалась: {error}",
@@ -3249,5 +3249,18 @@
   "mealPlanAddTitle": "Добавить в план питания",
   "mealPlanMealLabel": "Приём пищи",
   "mealPlanAdding": "Добавление...",
-  "mealPlanDateFormat": "{weekday}, {day} {month}"
+  "mealPlanDateFormat": "{weekday}, {day} {month}",
+  "splashRecipe": "Рецепт",
+  "splashSpellbook": "Книга заклинаний",
+  "smartImportReparsed": "Повторно проанализировано ИИ — проверьте обновлённый рецепт выше",
+  "servingSizeHint": "напр., 1 стакан, 100г",
+  "mainNutrients": "Основные нутриенты",
+  "additionalNutrients": "Дополнительные нутриенты",
+  "onboardingWelcomeTo": "Добро пожаловать в",
+  "onboardingAppName": "Recipe Spellbook!",
+  "onboardingDescription": "10 отборных рецептов со всего мира для вашего старта.",
+  "onboardingDeleteLater": "Вы всегда сможете удалить их позже.",
+  "onboardingAdding": "Добавление...",
+  "onboardingAddStarter": "Добавить стартовые рецепты",
+  "onboardingBlankCookbook": "Начать с пустой книги рецептов"
 }

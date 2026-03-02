@@ -1326,7 +1326,7 @@
   "subscriptionTab": "Abonnement",
   "payOnceKeepForever": "Payez une fois, gardez pour toujours",
   "cloudSyncFeature": "Sync Cloud",
-  "cloudSyncPlusFeature": "Sync Cloud+",
+  "cloudSyncFamilyFeature": "Sync Cloud+",
   "unableToLoadProducts": "Impossible de charger les produits.",
   "noOfferingsAvailable": "Aucune offre disponible.",
   "purchaseFailed": "Achat échoué : {error}",
@@ -2243,5 +2243,18 @@
   "mealPlanAddTitle": "Ajouter au plan de repas",
   "mealPlanMealLabel": "Repas",
   "mealPlanAdding": "Ajout en cours...",
-  "mealPlanDateFormat": "{weekday} {day} {month}"
+  "mealPlanDateFormat": "{weekday} {day} {month}",
+  "splashRecipe": "Recette",
+  "splashSpellbook": "Grimoire",
+  "smartImportReparsed": "Ré-analysé par l'IA — vérifiez la recette mise à jour ci-dessus",
+  "servingSizeHint": "ex. 1 tasse, 100g",
+  "mainNutrients": "Nutriments principaux",
+  "additionalNutrients": "Nutriments supplémentaires",
+  "onboardingWelcomeTo": "Bienvenue sur",
+  "onboardingAppName": "Recipe Spellbook!",
+  "onboardingDescription": "10 recettes triées sur le volet du monde entier pour bien démarrer.",
+  "onboardingDeleteLater": "Vous pourrez toujours les supprimer plus tard.",
+  "onboardingAdding": "Ajout en cours...",
+  "onboardingAddStarter": "Ajouter des recettes de démarrage",
+  "onboardingBlankCookbook": "Commencer avec un livre vide"
 }

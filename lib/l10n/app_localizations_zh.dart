@@ -4199,7 +4199,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cloudSyncFeature => '云端同步';
 
   @override
-  String get cloudSyncPlusFeature => '云端同步+';
+  String get cloudSyncFamilyFeature => '云端同步+';
 
   @override
   String get unableToLoadProducts => '无法加载产品。';
@@ -7330,4 +7330,43 @@ class AppLocalizationsZh extends AppLocalizations {
   String mealPlanDateFormat(String weekday, String month, int day) {
     return '$month$day日 $weekday';
   }
+
+  @override
+  String get splashRecipe => '食谱';
+
+  @override
+  String get splashSpellbook => '魔法书';
+
+  @override
+  String get smartImportReparsed => '已由AI重新解析 — 请查看上方更新后的食谱';
+
+  @override
+  String get servingSizeHint => '例如：1杯、100克';
+
+  @override
+  String get mainNutrients => '主要营养素';
+
+  @override
+  String get additionalNutrients => '其他营养素';
+
+  @override
+  String get onboardingWelcomeTo => '欢迎使用';
+
+  @override
+  String get onboardingAppName => 'Recipe Spellbook!';
+
+  @override
+  String get onboardingDescription => '来自世界各地的10道精选食谱，助你轻松起步。';
+
+  @override
+  String get onboardingDeleteLater => '你可以随时删除它们。';
+
+  @override
+  String get onboardingAdding => '添加中...';
+
+  @override
+  String get onboardingAddStarter => '添加入门食谱';
+
+  @override
+  String get onboardingBlankCookbook => '从空白食谱开始';
 }

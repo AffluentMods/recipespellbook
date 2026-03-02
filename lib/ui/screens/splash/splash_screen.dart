@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../l10n/app_localizations.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -260,6 +261,7 @@ class _SplashScreenState extends State<SplashScreen>
   // ─── "Recipe Spellbook" title ───
 
   Widget _buildTitle() {
+    final l10n = AppLocalizations.of(context)!;
     return Opacity(
       opacity: _titleFade.value,
       child: Transform.translate(
@@ -267,7 +269,7 @@ class _SplashScreenState extends State<SplashScreen>
         child: Column(
           children: [
             Text(
-              'Recipe', // TODO: localize
+              l10n.splashRecipe,
               style: GoogleFonts.uncialAntiqua(
                 fontSize: 44,
                 fontWeight: FontWeight.bold,
@@ -284,7 +286,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
             ),
             Text(
-              'Spellbook', // TODO: localize
+              l10n.splashSpellbook,
               style: GoogleFonts.uncialAntiqua(
                 fontSize: 44,
                 fontWeight: FontWeight.bold,

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/smart_import_service.dart';
 
@@ -169,7 +170,7 @@ class _SmartImportButtonState extends ConsumerState<SmartImportButton> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
-            if (_usage?.tier == 'standard')
+            if (_usage?.tier == 'cloudSync')
               Text(
                 l10n.smartImportUpgradeHint,
                 textAlign: TextAlign.center,
@@ -182,11 +183,11 @@ class _SmartImportButtonState extends ConsumerState<SmartImportButton> {
             onPressed: () => Navigator.pop(ctx),
             child: Text(l10n.actionOk),
           ),
-          if (_usage?.tier == 'standard')
+          if (_usage?.tier == 'cloudSync')
             FilledButton(
               onPressed: () {
                 Navigator.pop(ctx);
-                // TODO: Navigate to subscription/upgrade screen
+                context.push('/upgrade');
               },
               child: Text(l10n.upgrade),
             ),
@@ -222,10 +223,10 @@ class _SmartImportButtonState extends ConsumerState<SmartImportButton> {
           children: [
             const Icon(Icons.check_circle, color: Colors.green, size: 20),
             const SizedBox(width: 10),
-            const Expanded(
+            Expanded(
               child: Text(
-                'Re-parsed by AI — review the updated recipe above', // TODO: localize
-                style: TextStyle(color: Colors.green, fontSize: 13),
+                l10n.smartImportReparsed,
+                style: const TextStyle(color: Colors.green, fontSize: 13),
               ),
             ),
             TextButton(
@@ -331,9 +332,7 @@ class _SubscribeHint extends StatelessWidget {
             ),
           ),
           TextButton(
-            onPressed: () {
-              // TODO: Navigate to subscription screen
-            },
+            onPressed: () => context.push('/upgrade'),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               minimumSize: Size.zero,

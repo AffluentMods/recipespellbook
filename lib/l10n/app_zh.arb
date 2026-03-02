@@ -2037,7 +2037,7 @@
   "subscriptionTab": "订阅",
   "payOnceKeepForever": "一次付费，永久使用",
   "cloudSyncFeature": "云端同步",
-  "cloudSyncPlusFeature": "云端同步+",
+  "cloudSyncFamilyFeature": "云端同步+",
   "unableToLoadProducts": "无法加载产品。",
   "noOfferingsAvailable": "没有可用的产品。",
   "purchaseFailed": "购买失败：{error}",
@@ -3249,5 +3249,18 @@
   "mealPlanAddTitle": "添加到餐食计划",
   "mealPlanMealLabel": "餐食",
   "mealPlanAdding": "添加中...",
-  "mealPlanDateFormat": "{month}{day}日 {weekday}"
+  "mealPlanDateFormat": "{month}{day}日 {weekday}",
+  "splashRecipe": "食谱",
+  "splashSpellbook": "魔法书",
+  "smartImportReparsed": "已由AI重新解析 — 请查看上方更新后的食谱",
+  "servingSizeHint": "例如：1杯、100克",
+  "mainNutrients": "主要营养素",
+  "additionalNutrients": "其他营养素",
+  "onboardingWelcomeTo": "欢迎使用",
+  "onboardingAppName": "Recipe Spellbook!",
+  "onboardingDescription": "来自世界各地的10道精选食谱，助你轻松起步。",
+  "onboardingDeleteLater": "你可以随时删除它们。",
+  "onboardingAdding": "添加中...",
+  "onboardingAddStarter": "添加入门食谱",
+  "onboardingBlankCookbook": "从空白食谱开始"
 }

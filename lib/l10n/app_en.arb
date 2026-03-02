@@ -2014,7 +2014,7 @@
   "subscriptionTab": "Subscription",
   "payOnceKeepForever": "Pay once, keep forever",
   "cloudSyncFeature": "Cloud Sync",
-  "cloudSyncPlusFeature": "Cloud Sync+",
+  "cloudSyncFamilyFeature": "Cloud Sync Family",
   "unableToLoadProducts": "Unable to load products. Try again.",
   "noOfferingsAvailable": "No offerings available. Try again later.",
   "purchaseFailed": "Purchase failed: {error}",
@@ -3636,5 +3636,18 @@
   "mealPlanMealLabel": "Meal",
   "mealPlanAdding": "Adding...",
   "mealPlanDateFormat": "{weekday}, {month} {day}",
-  "@mealPlanDateFormat": { "placeholders": { "weekday": { "type": "String" }, "month": { "type": "String" }, "day": { "type": "int" } } }
+  "@mealPlanDateFormat": { "placeholders": { "weekday": { "type": "String" }, "month": { "type": "String" }, "day": { "type": "int" } } },
+  "splashRecipe": "Recipe",
+  "splashSpellbook": "Spellbook",
+  "smartImportReparsed": "Re-parsed by AI — review the updated recipe above",
+  "servingSizeHint": "e.g., 1 cup, 100g",
+  "mainNutrients": "Main Nutrients",
+  "additionalNutrients": "Additional Nutrients",
+  "onboardingWelcomeTo": "Welcome to",
+  "onboardingAppName": "Recipe Spellbook!",
+  "onboardingDescription": "10 handpicked recipes from around the world to get you started.",
+  "onboardingDeleteLater": "You can always delete them later.",
+  "onboardingAdding": "Adding...",
+  "onboardingAddStarter": "Add starter recipes",
+  "onboardingBlankCookbook": "Start with a blank cookbook"
 }

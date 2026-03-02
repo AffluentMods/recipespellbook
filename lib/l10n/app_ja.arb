@@ -2037,7 +2037,7 @@
   "subscriptionTab": "サブスクリプション",
   "payOnceKeepForever": "一度払えばずっと使える",
   "cloudSyncFeature": "Cloud Sync",
-  "cloudSyncPlusFeature": "Cloud Sync+",
+  "cloudSyncFamilyFeature": "Cloud Sync+",
   "unableToLoadProducts": "製品を読み込めません。",
   "noOfferingsAvailable": "利用可能なオファーがありません。",
   "purchaseFailed": "購入に失敗しました：{error}",
@@ -3249,5 +3249,18 @@
   "mealPlanAddTitle": "食事プランに追加",
   "mealPlanMealLabel": "食事",
   "mealPlanAdding": "追加中...",
-  "mealPlanDateFormat": "{month}{day}日（{weekday}）"
+  "mealPlanDateFormat": "{month}{day}日（{weekday}）",
+  "splashRecipe": "レシピ",
+  "splashSpellbook": "魔法書",
+  "smartImportReparsed": "AIが再解析しました — 上の更新されたレシピを確認してください",
+  "servingSizeHint": "例: 1カップ、100g",
+  "mainNutrients": "主要栄養素",
+  "additionalNutrients": "その他の栄養素",
+  "onboardingWelcomeTo": "ようこそ",
+  "onboardingAppName": "Recipe Spellbook!",
+  "onboardingDescription": "世界中から厳選した10のレシピで始めましょう。",
+  "onboardingDeleteLater": "あとからいつでも削除できます。",
+  "onboardingAdding": "追加中...",
+  "onboardingAddStarter": "スターターレシピを追加",
+  "onboardingBlankCookbook": "空のクックブックで始める"
 }

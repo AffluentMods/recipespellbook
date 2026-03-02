@@ -4231,7 +4231,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cloudSyncFeature => 'Sincronización en la Nube';
 
   @override
-  String get cloudSyncPlusFeature => 'Sincronización+';
+  String get cloudSyncFamilyFeature => 'Sincronización+';
 
   @override
   String get unableToLoadProducts => 'No se pudieron cargar los productos. Inténtalo de nuevo.';
@@ -7382,4 +7382,43 @@ class AppLocalizationsEs extends AppLocalizations {
   String mealPlanDateFormat(String weekday, String month, int day) {
     return '$weekday, $day de $month';
   }
+
+  @override
+  String get splashRecipe => 'Receta';
+
+  @override
+  String get splashSpellbook => 'Grimorio';
+
+  @override
+  String get smartImportReparsed => 'Re-analizado por IA — revisa la receta actualizada arriba';
+
+  @override
+  String get servingSizeHint => 'ej., 1 taza, 100g';
+
+  @override
+  String get mainNutrients => 'Nutrientes principales';
+
+  @override
+  String get additionalNutrients => 'Nutrientes adicionales';
+
+  @override
+  String get onboardingWelcomeTo => 'Bienvenido a';
+
+  @override
+  String get onboardingAppName => 'Recipe Spellbook!';
+
+  @override
+  String get onboardingDescription => '10 recetas seleccionadas de todo el mundo para comenzar.';
+
+  @override
+  String get onboardingDeleteLater => 'Siempre puedes eliminarlas después.';
+
+  @override
+  String get onboardingAdding => 'Añadiendo...';
+
+  @override
+  String get onboardingAddStarter => 'Añadir recetas de inicio';
+
+  @override
+  String get onboardingBlankCookbook => 'Comenzar con un libro vacío';
 }

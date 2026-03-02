@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../router/router.dart';
 
 /// Top-level handler for background FCM messages (must be top-level function).
 @pragma('vm:entry-point')
@@ -230,11 +232,45 @@ class NotificationService {
 
   void _handleNotificationTap(RemoteMessage message) {
     debugPrint('[FCM] Notification tapped: ${message.data}');
-    // TODO: Navigate to relevant screen based on message.data['type']
+    _navigateFromData(message.data);
   }
 
   void _onNotificationTap(NotificationResponse response) {
     debugPrint('[FCM] Local notification tapped: ${response.payload}');
-    // TODO: Parse payload and navigate
+    if (response.payload == null) return;
+    try {
+      final data = jsonDecode(response.payload!) as Map<String, dynamic>;
+      _navigateFromData(data);
+    } catch (e) {
+      debugPrint('[FCM] Failed to parse notification payload: $e');
+    }
+  }
+
+  void _navigateFromData(Map<String, dynamic> data) {
+    final context = rootNavigatorKey.currentContext;
+    if (context == null) return;
+
+    final category = data['category'] as String?;
+    final resourceId = data['resourceId'] as String?;
+
+    switch (category) {
+      case 'cooking':
+        if (resourceId != null) {
+          context.push('/recipe/$resourceId');
+        } else {
+          context.go('/planner');
+        }
+      case 'achievement':
+      case 'quest':
+        context.push('/rpg/achievements');
+      case 'community':
+        if (resourceId != null) {
+          context.push('/community/$resourceId');
+        } else {
+          context.go('/community');
+        }
+      default:
+        break;
+    }
   }
 }

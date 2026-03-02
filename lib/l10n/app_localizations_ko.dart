@@ -4199,7 +4199,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cloudSyncFeature => 'Cloud Sync';
 
   @override
-  String get cloudSyncPlusFeature => 'Cloud Sync+';
+  String get cloudSyncFamilyFeature => 'Cloud Sync+';
 
   @override
   String get unableToLoadProducts => '제품을 로드할 수 없습니다.';
@@ -7330,4 +7330,43 @@ class AppLocalizationsKo extends AppLocalizations {
   String mealPlanDateFormat(String weekday, String month, int day) {
     return '$month $day일 $weekday';
   }
+
+  @override
+  String get splashRecipe => '레시피';
+
+  @override
+  String get splashSpellbook => '마법서';
+
+  @override
+  String get smartImportReparsed => 'AI가 다시 분석했습니다 — 위의 업데이트된 레시피를 확인하세요';
+
+  @override
+  String get servingSizeHint => '예: 1컵, 100g';
+
+  @override
+  String get mainNutrients => '주요 영양소';
+
+  @override
+  String get additionalNutrients => '추가 영양소';
+
+  @override
+  String get onboardingWelcomeTo => '환영합니다';
+
+  @override
+  String get onboardingAppName => 'Recipe Spellbook!';
+
+  @override
+  String get onboardingDescription => '전 세계에서 엄선한 10가지 레시피로 시작하세요.';
+
+  @override
+  String get onboardingDeleteLater => '나중에 언제든 삭제할 수 있습니다.';
+
+  @override
+  String get onboardingAdding => '추가 중...';
+
+  @override
+  String get onboardingAddStarter => '스타터 레시피 추가';
+
+  @override
+  String get onboardingBlankCookbook => '빈 요리책으로 시작';
 }

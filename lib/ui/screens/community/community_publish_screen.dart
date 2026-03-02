@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../database/database.dart';
+import '../../../database/daos/tags_dao.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
@@ -155,7 +156,50 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
 
     setState(() { _publishing = true; _publishingId = cookbook.id; });
 
-    final result = await _community.publish(cookbook.id);
+    // Build inline recipe data from local DB
+    final recipeDao = ref.read(recipeDaoProvider);
+    final tagsDao = TagsDao(ref.read(databaseProvider));
+    final recipes = await recipeDao.getRecipesForCookbook(cookbook.id);
+
+    final recipeMaps = <Map<String, dynamic>>[];
+    for (final r in recipes) {
+      final ingredients = await recipeDao.getIngredientsForRecipe(r.id);
+      final steps = await recipeDao.getStepsForRecipe(r.id);
+      final tags = await tagsDao.getTagsForRecipe(r.id);
+
+      recipeMaps.add({
+        'title': r.title,
+        'description': r.description,
+        'servings': r.servings,
+        'prepTimeMinutes': r.prepTimeMinutes,
+        'cookTimeMinutes': r.cookTimeMinutes,
+        'sourceUrl': r.sourceUrl,
+        'imagePath': r.imagePath,
+        'rating': r.rating,
+        'notes': r.notes,
+        'nutritionJson': r.nutritionJson,
+        'ingredients': ingredients.map((i) => {
+          'sortOrder': i.sortOrder,
+          'amount': i.amount,
+          'unit': i.unit,
+          'name': i.name,
+          'notes': i.notes,
+        }).toList(),
+        'steps': steps.map((s) => {
+          'sortOrder': s.sortOrder,
+          'instruction': s.instruction,
+          'durationMinutes': s.durationMinutes,
+        }).toList(),
+        'tags': tags.map((t) => t.name).toList(),
+      });
+    }
+
+    final result = await _community.publish(
+      title: cookbook.name,
+      description: cookbook.description,
+      imagePath: cookbook.imagePath,
+      recipes: recipeMaps,
+    );
 
     if (mounted) {
       setState(() { _publishing = false; _publishingId = null; });

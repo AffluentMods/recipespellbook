@@ -306,9 +306,23 @@ class CommunityService {
   // ────────────────────────────────────
 
   /// Publish a cookbook to the community feed.
-  Future<({bool success, String? error, String? publicationId})> publish(String cookbookId) async {
+  ///
+  /// Sends all cookbook + recipe data inline so the server doesn't need to
+  /// look anything up.  [title] is required; [recipes] must be a JSON-ready
+  /// list of maps (see CommunityPublishScreen for how they're built).
+  Future<({bool success, String? error, String? publicationId})> publish({
+    required String title,
+    String? description,
+    String? imagePath,
+    required List<Map<String, dynamic>> recipes,
+  }) async {
     try {
-      final r = await _auth.post('/v1/community', {'cookbookId': cookbookId});
+      final r = await _auth.post('/v1/community', {
+        'title': title,
+        if (description != null) 'description': description,
+        if (imagePath != null) 'imagePath': imagePath,
+        'recipes': recipes,
+      });
       if (r.statusCode == 201) {
         final data = jsonDecode(r.body);
         return (success: true, error: null, publicationId: data['id'] as String?);

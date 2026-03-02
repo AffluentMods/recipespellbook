@@ -187,8 +187,20 @@ class SyncService {
           ? DateTime.parse(syncedAtStr)
           : DateTime.now().toUtc();
 
-      final pulledCount = await _applyServerData(serverData);
+      var pulledCount = await _applyServerData(serverData);
       await _saveLastSyncAt(syncedAt);
+
+      // Pull family shared content (non-fatal)
+      try {
+        final familyData = await FamilyService.instance.getSharedContent();
+        if (familyData != null) {
+          final familyPulled = await _applyServerData(familyData);
+          debugPrint('[Sync] Pulled $familyPulled shared family entities');
+          pulledCount += familyPulled;
+        }
+      } catch (e) {
+        debugPrint('[Sync] Family pull failed (non-fatal): $e');
+      }
 
       return SyncResult(
         success: true,
@@ -339,6 +351,7 @@ class SyncService {
     'imagePath': cb.imagePath,
     'createdAt': _iso(cb.createdAt),
     'updatedAt': _iso(cb.updatedAt),
+    'deletedAt': _iso(cb.deletedAt),
   };
 
   Map<String, dynamic> _serializeRecipe(Recipe r) => {
@@ -399,6 +412,7 @@ class SyncService {
     'isDefault': c.isDefault,
     'isHidden': c.isHidden,
     'createdAt': _iso(c.createdAt),
+    'deletedAt': _iso(c.deletedAt),
   };
 
   Map<String, dynamic> _serializeCustomCategory(CustomCategory cc) => {
@@ -408,6 +422,7 @@ class SyncService {
     'emoji': cc.emoji,
     'sortOrder': cc.sortOrder,
     'createdAt': _iso(cc.createdAt),
+    'deletedAt': _iso(cc.deletedAt),
   };
 
   Map<String, dynamic> _serializeCustomCourse(CustomCourse cc) => {
@@ -417,6 +432,7 @@ class SyncService {
     'emoji': cc.emoji,
     'sortOrder': cc.sortOrder,
     'createdAt': _iso(cc.createdAt),
+    'deletedAt': _iso(cc.deletedAt),
   };
 
   Map<String, dynamic> _serializeTag(Tag t) => {
@@ -427,6 +443,7 @@ class SyncService {
     'sortOrder': t.sortOrder,
     'isBuiltIn': t.isBuiltIn,
     'createdAt': _iso(t.createdAt),
+    'deletedAt': _iso(t.deletedAt),
   };
 
   Map<String, dynamic> _serializeMealPlan(MealPlan mp) => {
@@ -442,6 +459,7 @@ class SyncService {
     'alertSent': mp.alertSent,
     'createdAt': _iso(mp.createdAt),
     'updatedAt': _iso(mp.updatedAt),
+    'deletedAt': _iso(mp.deletedAt),
   };
 
   Map<String, dynamic> _serializeShoppingList(ShoppingList sl) => {
@@ -451,6 +469,7 @@ class SyncService {
     'isDefault': sl.isDefault,
     'createdAt': _iso(sl.createdAt),
     'updatedAt': _iso(sl.updatedAt),
+    'deletedAt': _iso(sl.deletedAt),
   };
 
   Map<String, dynamic> _serializeShoppingListItem(ShoppingListItem si) => {
@@ -468,6 +487,7 @@ class SyncService {
     'recipeId': si.recipeId,
     'createdAt': _iso(si.createdAt),
     'updatedAt': _iso(si.updatedAt),
+    'deletedAt': _iso(si.deletedAt),
   };
 
   Map<String, dynamic> _serializeShoppingCategory(ShoppingCategory sc) => {
@@ -478,6 +498,7 @@ class SyncService {
     'isDefault': sc.isDefault,
     'isHidden': sc.isHidden,
     'createdAt': _iso(sc.createdAt),
+    'deletedAt': _iso(sc.deletedAt),
   };
 
   // ════════════════════════════════════════════
@@ -497,6 +518,7 @@ class SyncService {
           imagePath: Value(d['imagePath'] as String?),
           createdAt: Value(_parseDate(d['createdAt'])),
           updatedAt: Value(_parseDateNullable(d['updatedAt'])),
+          deletedAt: Value(_parseDateNullable(d['deletedAt'])),
         ),
       );
     }
@@ -516,6 +538,7 @@ class SyncService {
           isDefault: Value(d['isDefault'] as bool? ?? false),
           isHidden: Value(d['isHidden'] as bool? ?? false),
           createdAt: Value(_parseDate(d['createdAt'])),
+          deletedAt: Value(_parseDateNullable(d['deletedAt'])),
         ),
       );
     }
@@ -535,6 +558,7 @@ class SyncService {
           emoji: Value(d['emoji'] as String? ?? '🏷️'),
           sortOrder: Value(d['sortOrder'] as int? ?? 0),
           createdAt: Value(_parseDate(d['createdAt'])),
+          deletedAt: Value(_parseDateNullable(d['deletedAt'])),
         ),
       );
     }
@@ -554,6 +578,7 @@ class SyncService {
           emoji: Value(d['emoji'] as String? ?? '🍽️'),
           sortOrder: Value(d['sortOrder'] as int? ?? 0),
           createdAt: Value(_parseDate(d['createdAt'])),
+          deletedAt: Value(_parseDateNullable(d['deletedAt'])),
         ),
       );
     }
@@ -574,6 +599,7 @@ class SyncService {
           sortOrder: Value(d['sortOrder'] as int? ?? 0),
           isBuiltIn: Value(d['isBuiltIn'] as bool? ?? false),
           createdAt: Value(_parseDate(d['createdAt'])),
+          deletedAt: Value(_parseDateNullable(d['deletedAt'])),
         ),
       );
     }
@@ -594,6 +620,7 @@ class SyncService {
           isDefault: Value(d['isDefault'] as bool? ?? false),
           isHidden: Value(d['isHidden'] as bool? ?? false),
           createdAt: Value(_parseDate(d['createdAt'])),
+          deletedAt: Value(_parseDateNullable(d['deletedAt'])),
         ),
       );
     }
@@ -731,6 +758,7 @@ class SyncService {
           alertSent: Value(d['alertSent'] as bool? ?? false),
           createdAt: Value(_parseDate(d['createdAt'])),
           updatedAt: Value(_parseDate(d['updatedAt'])),
+          deletedAt: Value(_parseDateNullable(d['deletedAt'])),
         ),
       );
     }
@@ -750,6 +778,7 @@ class SyncService {
           isDefault: Value(d['isDefault'] as bool? ?? false),
           createdAt: Value(_parseDate(d['createdAt'])),
           updatedAt: Value(_parseDate(d['updatedAt'])),
+          deletedAt: Value(_parseDateNullable(d['deletedAt'])),
         ),
       );
     }
@@ -777,6 +806,7 @@ class SyncService {
           recipeId: Value(d['recipeId'] as String?),
           createdAt: Value(_parseDate(d['createdAt'])),
           updatedAt: Value(_parseDate(d['updatedAt'])),
+          deletedAt: Value(_parseDateNullable(d['deletedAt'])),
         ),
       );
     }

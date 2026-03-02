@@ -4283,7 +4283,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get cloudSyncFeature => 'Cloud Sync';
 
   @override
-  String get cloudSyncPlusFeature => 'Cloud Sync+';
+  String get cloudSyncFamilyFeature => 'Cloud Sync+';
 
   @override
   String get unableToLoadProducts => 'Не удалось загрузить продукты.';
@@ -7448,4 +7448,43 @@ class AppLocalizationsRu extends AppLocalizations {
   String mealPlanDateFormat(String weekday, String month, int day) {
     return '$weekday, $day $month';
   }
+
+  @override
+  String get splashRecipe => 'Рецепт';
+
+  @override
+  String get splashSpellbook => 'Книга заклинаний';
+
+  @override
+  String get smartImportReparsed => 'Повторно проанализировано ИИ — проверьте обновлённый рецепт выше';
+
+  @override
+  String get servingSizeHint => 'напр., 1 стакан, 100г';
+
+  @override
+  String get mainNutrients => 'Основные нутриенты';
+
+  @override
+  String get additionalNutrients => 'Дополнительные нутриенты';
+
+  @override
+  String get onboardingWelcomeTo => 'Добро пожаловать в';
+
+  @override
+  String get onboardingAppName => 'Recipe Spellbook!';
+
+  @override
+  String get onboardingDescription => '10 отборных рецептов со всего мира для вашего старта.';
+
+  @override
+  String get onboardingDeleteLater => 'Вы всегда сможете удалить их позже.';
+
+  @override
+  String get onboardingAdding => 'Добавление...';
+
+  @override
+  String get onboardingAddStarter => 'Добавить стартовые рецепты';
+
+  @override
+  String get onboardingBlankCookbook => 'Начать с пустой книги рецептов';
 }

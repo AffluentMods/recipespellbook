@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -81,10 +82,11 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
 
     // Load nutrition if available
     NutritionData? nutrition;
-    // TODO: Load from recipe.nutritionJson when database field is added
-    // if (recipe.nutritionJson != null) {
-    //   nutrition = NutritionData.fromJson(jsonDecode(recipe.nutritionJson!));
-    // }
+    if (recipe.nutritionJson != null) {
+      try {
+        nutrition = NutritionData.fromJson(jsonDecode(recipe.nutritionJson!));
+      } catch (_) {}
+    }
 
     setState(() {
       _recipe = recipe;

@@ -39,7 +39,7 @@ enum GatedFeature {
   versionHistory(SubscriptionTier.cloudSync, 'Version History', Icons.history),
 
   /// Extended version history
-  extendedVersionHistory(SubscriptionTier.cloudSyncPlus, 'Extended History', Icons.history_toggle_off),
+  extendedVersionHistory(SubscriptionTier.cloudSyncFamily, 'Extended History', Icons.history_toggle_off),
 
   /// Community creator page
   creatorPage(SubscriptionTier.cloudSync, 'Creator Page', Icons.storefront),
@@ -189,9 +189,8 @@ extension SubscriptionStatusX on SubscriptionStatus {
       currentUsageBytes < tier.maxStorageBytes;
 
   /// Bytes remaining for photo storage.
-  int get storageRemaining =>
-      (tier.maxStorageBytes - 0).clamp(0, tier.maxStorageBytes);
-  // TODO: Replace 0 with actual usage from storage tracking service
+  int storageRemaining(int usedBytes) =>
+      (tier.maxStorageBytes - usedBytes).clamp(0, tier.maxStorageBytes);
 
   /// Human-readable storage used / total.
   String storageUsageLabel(int usedBytes) {

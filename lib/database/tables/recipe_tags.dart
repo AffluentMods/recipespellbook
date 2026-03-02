@@ -23,6 +23,8 @@ class Tags extends Table {
   /// When this tag was created
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

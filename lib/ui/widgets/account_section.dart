@@ -269,9 +269,10 @@ class _TierBadge extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     final (label, color, icon) = switch (tier) {
-      'premium' => ('Premium', Colors.amber.shade700, Icons.star),
-      'standard' => ('Standard', Colors.blue, Icons.workspace_premium),
-      'basic' => ('Basic', Colors.green, Icons.check_circle_outline),
+      'creator' || 'admin' => ('Creator', Colors.amber.shade700, Icons.star),
+      'cloudSyncFamily' => ('Cloud Sync Family', Colors.deepPurple, Icons.family_restroom),
+      'cloudSync' => ('Cloud Sync', Colors.blue, Icons.cloud_sync),
+      'premium' => ('Premium', Colors.green, Icons.check_circle_outline),
       _ => ('Free', theme.colorScheme.outline, Icons.person_outline),
     };
 
@@ -288,7 +289,7 @@ class _TierBadge extends StatelessWidget {
           const SizedBox(width: 8),
           Text(l10n.planLabel(label), style: TextStyle(fontWeight: FontWeight.w600, color: color, fontSize: 13)),
           const Spacer(),
-          if (tier == 'free' || tier == 'basic')
+          if (tier == 'free')
             Text(l10n.upgradeArrow, style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w500)),
         ],
       ),

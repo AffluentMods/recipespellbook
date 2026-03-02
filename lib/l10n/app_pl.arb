@@ -2037,7 +2037,7 @@
   "subscriptionTab": "Subskrypcja",
   "payOnceKeepForever": "Zapłać raz, zachowaj na zawsze",
   "cloudSyncFeature": "Cloud Sync",
-  "cloudSyncPlusFeature": "Cloud Sync+",
+  "cloudSyncFamilyFeature": "Cloud Sync+",
   "unableToLoadProducts": "Nie można załadować produktów.",
   "noOfferingsAvailable": "Brak dostępnych ofert.",
   "purchaseFailed": "Zakup nie powiódł się: {error}",
@@ -3249,5 +3249,18 @@
   "mealPlanAddTitle": "Dodaj do planu posiłków",
   "mealPlanMealLabel": "Posiłek",
   "mealPlanAdding": "Dodawanie...",
-  "mealPlanDateFormat": "{weekday}, {day} {month}"
+  "mealPlanDateFormat": "{weekday}, {day} {month}",
+  "splashRecipe": "Przepis",
+  "splashSpellbook": "Księga Zaklęć",
+  "smartImportReparsed": "Ponownie przeanalizowane przez AI — sprawdź zaktualizowany przepis powyżej",
+  "servingSizeHint": "np. 1 szklanka, 100g",
+  "mainNutrients": "Główne składniki odżywcze",
+  "additionalNutrients": "Dodatkowe składniki odżywcze",
+  "onboardingWelcomeTo": "Witaj w",
+  "onboardingAppName": "Recipe Spellbook!",
+  "onboardingDescription": "10 starannie wybranych przepisów z całego świata na dobry początek.",
+  "onboardingDeleteLater": "Zawsze możesz je później usunąć.",
+  "onboardingAdding": "Dodawanie...",
+  "onboardingAddStarter": "Dodaj przepisy na start",
+  "onboardingBlankCookbook": "Zacznij z pustą książką kucharską"
 }

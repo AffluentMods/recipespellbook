@@ -51,8 +51,8 @@ class AuthUser {
     'createdAt': createdAt?.toIso8601String(),
   };
 
-  bool get isSubscribed => tier == 'standard' || tier == 'premium';
-  bool get isPremium => tier == 'premium';
+  bool get isSubscribed => tier != 'free';
+  bool get isPremium => tier == 'cloudSyncFamily' || tier == 'creator' || tier == 'admin';
   bool get hasDiscord => discordId != null && discordId!.isNotEmpty;
 
   String get displayName => name ?? email.split('@').first;
@@ -370,6 +370,10 @@ class AuthService {
   Future<http.Response> put(String path, Map<String, dynamic> body) =>
       _authRequest('PUT', path, body: body);
 
+  /// Make an authenticated PATCH request to the main API.
+  Future<http.Response> patch(String path, Map<String, dynamic> body) =>
+      _authRequest('PATCH', path, body: body);
+
   /// Make an authenticated DELETE request to the main API.
   Future<http.Response> delete(String path) => _authRequest('DELETE', path);
 
@@ -471,6 +475,9 @@ class AuthService {
             .timeout(const Duration(seconds: 15));
       case 'PUT':
         return http.put(uri, headers: headers, body: body != null ? jsonEncode(body) : null)
+            .timeout(const Duration(seconds: 15));
+      case 'PATCH':
+        return http.patch(uri, headers: headers, body: body != null ? jsonEncode(body) : null)
             .timeout(const Duration(seconds: 15));
       case 'DELETE':
         return http.delete(uri, headers: headers).timeout(const Duration(seconds: 15));

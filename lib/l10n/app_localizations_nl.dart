@@ -4231,7 +4231,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get cloudSyncFeature => 'Cloud Sync';
 
   @override
-  String get cloudSyncPlusFeature => 'Cloud Sync+';
+  String get cloudSyncFamilyFeature => 'Cloud Sync+';
 
   @override
   String get unableToLoadProducts => 'Kan producten niet laden.';
@@ -7382,4 +7382,43 @@ class AppLocalizationsNl extends AppLocalizations {
   String mealPlanDateFormat(String weekday, String month, int day) {
     return '$weekday $day $month';
   }
+
+  @override
+  String get splashRecipe => 'Recept';
+
+  @override
+  String get splashSpellbook => 'Spreukenboek';
+
+  @override
+  String get smartImportReparsed => 'Opnieuw geanalyseerd door AI — controleer het bijgewerkte recept hierboven';
+
+  @override
+  String get servingSizeHint => 'bijv. 1 kopje, 100g';
+
+  @override
+  String get mainNutrients => 'Hoofdvoedingsstoffen';
+
+  @override
+  String get additionalNutrients => 'Overige voedingsstoffen';
+
+  @override
+  String get onboardingWelcomeTo => 'Welkom bij';
+
+  @override
+  String get onboardingAppName => 'Recipe Spellbook!';
+
+  @override
+  String get onboardingDescription => '10 zorgvuldig geselecteerde recepten van over de hele wereld om mee te beginnen.';
+
+  @override
+  String get onboardingDeleteLater => 'Je kunt ze later altijd verwijderen.';
+
+  @override
+  String get onboardingAdding => 'Toevoegen...';
+
+  @override
+  String get onboardingAddStarter => 'Startrecepten toevoegen';
+
+  @override
+  String get onboardingBlankCookbook => 'Begin met een leeg kookboek';
 }

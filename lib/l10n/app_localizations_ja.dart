@@ -4199,7 +4199,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get cloudSyncFeature => 'Cloud Sync';
 
   @override
-  String get cloudSyncPlusFeature => 'Cloud Sync+';
+  String get cloudSyncFamilyFeature => 'Cloud Sync+';
 
   @override
   String get unableToLoadProducts => '製品を読み込めません。';
@@ -7330,4 +7330,43 @@ class AppLocalizationsJa extends AppLocalizations {
   String mealPlanDateFormat(String weekday, String month, int day) {
     return '$month$day日（$weekday）';
   }
+
+  @override
+  String get splashRecipe => 'レシピ';
+
+  @override
+  String get splashSpellbook => '魔法書';
+
+  @override
+  String get smartImportReparsed => 'AIが再解析しました — 上の更新されたレシピを確認してください';
+
+  @override
+  String get servingSizeHint => '例: 1カップ、100g';
+
+  @override
+  String get mainNutrients => '主要栄養素';
+
+  @override
+  String get additionalNutrients => 'その他の栄養素';
+
+  @override
+  String get onboardingWelcomeTo => 'ようこそ';
+
+  @override
+  String get onboardingAppName => 'Recipe Spellbook!';
+
+  @override
+  String get onboardingDescription => '世界中から厳選した10のレシピで始めましょう。';
+
+  @override
+  String get onboardingDeleteLater => 'あとからいつでも削除できます。';
+
+  @override
+  String get onboardingAdding => '追加中...';
+
+  @override
+  String get onboardingAddStarter => 'スターターレシピを追加';
+
+  @override
+  String get onboardingBlankCookbook => '空のクックブックで始める';
 }

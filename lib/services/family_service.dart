@@ -215,8 +215,7 @@ class FamilyService {
 
   Future<bool> updateName(String name) async {
     try {
-      // API uses PATCH but we send via PUT — works the same
-      final r = await _auth.put('/v1/family', {'name': name});
+      final r = await _auth.patch('/v1/family', {'name': name});
       if (r.statusCode == 200) { await getFamily(); return true; }
     } catch (_) {}
     return false;
@@ -288,8 +287,7 @@ class FamilyService {
   /// Update permission on an existing share.
   Future<bool> updateSharePermission(String shareId, String permission) async {
     try {
-      // API uses PATCH — send via PUT
-      final r = await _auth.put('/v1/family/shares/$shareId', {'permission': permission});
+      final r = await _auth.patch('/v1/family/shares/$shareId', {'permission': permission});
       return r.statusCode == 200;
     } catch (_) {}
     return false;

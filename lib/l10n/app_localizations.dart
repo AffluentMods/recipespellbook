@@ -7819,11 +7819,11 @@ abstract class AppLocalizations {
   /// **'Cloud Sync'**
   String get cloudSyncFeature;
 
-  /// No description provided for @cloudSyncPlusFeature.
+  /// No description provided for @cloudSyncFamilyFeature.
   ///
   /// In en, this message translates to:
-  /// **'Cloud Sync+'**
-  String get cloudSyncPlusFeature;
+  /// **'Cloud Sync Family'**
+  String get cloudSyncFamilyFeature;
 
   /// No description provided for @unableToLoadProducts.
   ///
@@ -13524,6 +13524,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{weekday}, {month} {day}'**
   String mealPlanDateFormat(String weekday, String month, int day);
+
+  /// No description provided for @splashRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe'**
+  String get splashRecipe;
+
+  /// No description provided for @splashSpellbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Spellbook'**
+  String get splashSpellbook;
+
+  /// No description provided for @smartImportReparsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-parsed by AI — review the updated recipe above'**
+  String get smartImportReparsed;
+
+  /// No description provided for @servingSizeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., 1 cup, 100g'**
+  String get servingSizeHint;
+
+  /// No description provided for @mainNutrients.
+  ///
+  /// In en, this message translates to:
+  /// **'Main Nutrients'**
+  String get mainNutrients;
+
+  /// No description provided for @additionalNutrients.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional Nutrients'**
+  String get additionalNutrients;
+
+  /// No description provided for @onboardingWelcomeTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to'**
+  String get onboardingWelcomeTo;
+
+  /// No description provided for @onboardingAppName.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe Spellbook!'**
+  String get onboardingAppName;
+
+  /// No description provided for @onboardingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'10 handpicked recipes from around the world to get you started.'**
+  String get onboardingDescription;
+
+  /// No description provided for @onboardingDeleteLater.
+  ///
+  /// In en, this message translates to:
+  /// **'You can always delete them later.'**
+  String get onboardingDeleteLater;
+
+  /// No description provided for @onboardingAdding.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding...'**
+  String get onboardingAdding;
+
+  /// No description provided for @onboardingAddStarter.
+  ///
+  /// In en, this message translates to:
+  /// **'Add starter recipes'**
+  String get onboardingAddStarter;
+
+  /// No description provided for @onboardingBlankCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with a blank cookbook'**
+  String get onboardingBlankCookbook;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

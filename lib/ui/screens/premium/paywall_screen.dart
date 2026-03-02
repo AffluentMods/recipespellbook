@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/models/package_wrapper.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/subscription_provider.dart';
@@ -23,13 +24,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   int _tabIndex = 0;
   // For Cloud Sync: 0 = monthly, 1 = yearly
   int _billingCycle = 1; // default yearly (better value)
-  // Which subscription tier is selected: 0 = Cloud Sync, 1 = Cloud Sync+
+  // Which subscription tier is selected: 0 = Cloud Sync, 1 = Cloud Sync Family
   int _subTierIndex = 0;
   bool _purchasing = false;
 
-  /// Set to true to show Cloud Sync+ in the subscription tab.
+  /// Set to true to show Cloud Sync Family in the subscription tab.
   /// Hidden for now until launch — all wiring is in place.
-  static const _showCloudSyncPlus = false;
+  static const _showCloudSyncFamily = false;
 
   @override
   void initState() {
@@ -356,10 +357,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         ),
         const SizedBox(height: 12),
 
-        // Cloud Sync+ (hidden until launch — flip _showCloudSyncPlus)
-        if (_showCloudSyncPlus) ...[
+        // Cloud Sync Family (hidden until launch — flip _showCloudSyncFamily)
+        if (_showCloudSyncFamily) ...[
           _PlanCard(
-            title: l10n.cloudSyncPlusFeature,
+            title: l10n.cloudSyncFamilyFeature,
             price: _billingCycle == 0 ? '\$4.99/mo' : '\$49.99/yr',
             subtitle:
             _billingCycle == 1 ? l10n.save17Yearly : l10n.billedMonthly,
@@ -621,7 +622,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   Widget _legalLink(String label, ThemeData theme) {
     return GestureDetector(
       onTap: () {
-        // TODO: open Terms / Privacy URL
+        final url = label == AppLocalizations.of(context)!.terms
+            ? 'https://recipespellbook.app/terms'
+            : 'https://recipespellbook.app/privacy';
+        launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
       },
       child: Text(
         label,
@@ -663,8 +667,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             : RCConfig.cloudSyncYearlyId;
       } else {
         productId = _billingCycle == 0
-            ? RCConfig.cloudSyncPlusMonthlyId
-            : RCConfig.cloudSyncPlusYearlyId;
+            ? RCConfig.cloudSyncFamilyMonthlyId
+            : RCConfig.cloudSyncFamilyYearlyId;
       }
 
       final service = RevenueCatService.instance;

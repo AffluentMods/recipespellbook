@@ -2037,7 +2037,7 @@
   "subscriptionTab": "구독",
   "payOnceKeepForever": "한 번 결제, 영원히 사용",
   "cloudSyncFeature": "Cloud Sync",
-  "cloudSyncPlusFeature": "Cloud Sync+",
+  "cloudSyncFamilyFeature": "Cloud Sync+",
   "unableToLoadProducts": "제품을 로드할 수 없습니다.",
   "noOfferingsAvailable": "사용 가능한 오퍼가 없습니다.",
   "purchaseFailed": "구매 실패: {error}",
@@ -3249,5 +3249,18 @@
   "mealPlanAddTitle": "식단에 추가",
   "mealPlanMealLabel": "식사",
   "mealPlanAdding": "추가 중...",
-  "mealPlanDateFormat": "{month} {day}일 {weekday}"
+  "mealPlanDateFormat": "{month} {day}일 {weekday}",
+  "splashRecipe": "레시피",
+  "splashSpellbook": "마법서",
+  "smartImportReparsed": "AI가 다시 분석했습니다 — 위의 업데이트된 레시피를 확인하세요",
+  "servingSizeHint": "예: 1컵, 100g",
+  "mainNutrients": "주요 영양소",
+  "additionalNutrients": "추가 영양소",
+  "onboardingWelcomeTo": "환영합니다",
+  "onboardingAppName": "Recipe Spellbook!",
+  "onboardingDescription": "전 세계에서 엄선한 10가지 레시피로 시작하세요.",
+  "onboardingDeleteLater": "나중에 언제든 삭제할 수 있습니다.",
+  "onboardingAdding": "추가 중...",
+  "onboardingAddStarter": "스타터 레시피 추가",
+  "onboardingBlankCookbook": "빈 요리책으로 시작"
 }

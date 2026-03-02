@@ -1,6 +1,9 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/database_provider.dart';
 import 'app_snackbar.dart';
 
 /// Model for recipe tags/collections
@@ -288,12 +291,19 @@ class _ManageTagsSheetState extends ConsumerState<_ManageTagsSheet> {
               FilledButton(
                 onPressed: () {
                   if (nameController.text.trim().isNotEmpty) {
-                    // TODO: Save to database
+                    final tagId = 'tag_${DateTime.now().millisecondsSinceEpoch}';
+                    final name = nameController.text.trim();
                     Navigator.pop(ctx);
+                    ref.read(tagsDaoProvider).insertTag(TagsCompanion.insert(
+                      id: tagId,
+                      name: name,
+                      color: Value('#${selectedColor.value.toRadixString(16).substring(2).toUpperCase()}'),
+                      icon: Value(selectedIcon.codePoint.toString()),
+                    ));
                     setState(() {
                       _allTags.add(RecipeTag(
-                        id: 'tag_${DateTime.now().millisecondsSinceEpoch}',
-                        name: nameController.text.trim(),
+                        id: tagId,
+                        name: name,
                         color: selectedColor,
                         icon: selectedIcon,
                       ));
@@ -325,7 +335,8 @@ class _ManageTagsSheetState extends ConsumerState<_ManageTagsSheet> {
             TextButton(
               onPressed: () {
                 Navigator.pop(ctx);
-                // TODO: Delete tag
+                ref.read(tagsDaoProvider).deleteTag(tag.id);
+                setState(() => _allTags.removeWhere((t) => t.id == tag.id));
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               child: Text(l10n.tagsDelete),

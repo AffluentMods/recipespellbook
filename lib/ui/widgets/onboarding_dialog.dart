@@ -45,6 +45,7 @@ class _OnboardingScreenState extends State<_OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -88,7 +89,7 @@ class _OnboardingScreenState extends State<_OnboardingScreen> {
 
                 // Title
                 Text(
-                  'Welcome to', // TODO: localize
+                  l10n.onboardingWelcomeTo,
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w300,
                     color: theme.colorScheme.onSurface,
@@ -96,7 +97,7 @@ class _OnboardingScreenState extends State<_OnboardingScreen> {
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  'Recipe Spellbook!', // TODO: localize
+                  l10n.onboardingAppName,
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.onSurface,
@@ -107,7 +108,7 @@ class _OnboardingScreenState extends State<_OnboardingScreen> {
 
                 // Description
                 Text(
-                  '10 handpicked recipes from around the world to get you started.', // TODO: localize
+                  l10n.onboardingDescription,
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -137,7 +138,7 @@ class _OnboardingScreenState extends State<_OnboardingScreen> {
 
                 // Subtitle
                 Text(
-                  'You can always delete them later.', // TODO: localize
+                  l10n.onboardingDeleteLater,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.outline,
                     fontStyle: FontStyle.italic,
@@ -162,7 +163,7 @@ class _OnboardingScreenState extends State<_OnboardingScreen> {
                     )
                         : const Icon(Icons.auto_fix_high_rounded, size: 20),
                     label: Text(
-                      _loading ? 'Adding...' : 'Add starter recipes', // TODO: localize
+                      _loading ? l10n.onboardingAdding : l10n.onboardingAddStarter,
                       style: const TextStyle(fontSize: 16),
                     ),
                     style: FilledButton.styleFrom(
@@ -181,7 +182,7 @@ class _OnboardingScreenState extends State<_OnboardingScreen> {
                   child: TextButton(
                     onPressed: _loading ? null : _startEmpty,
                     child: Text(
-                      'Start with a blank cookbook', // TODO: localize
+                      l10n.onboardingBlankCookbook,
                       style: TextStyle(
                         color: theme.colorScheme.outline,
                         fontSize: 15,

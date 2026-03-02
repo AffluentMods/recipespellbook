@@ -2037,7 +2037,7 @@
   "subscriptionTab": "Abonnement",
   "payOnceKeepForever": "Eén keer betalen, voor altijd behouden",
   "cloudSyncFeature": "Cloud Sync",
-  "cloudSyncPlusFeature": "Cloud Sync+",
+  "cloudSyncFamilyFeature": "Cloud Sync+",
   "unableToLoadProducts": "Kan producten niet laden.",
   "noOfferingsAvailable": "Geen aanbiedingen beschikbaar.",
   "purchaseFailed": "Aankoop mislukt: {error}",
@@ -3249,5 +3249,18 @@
   "mealPlanAddTitle": "Toevoegen aan maaltijdplan",
   "mealPlanMealLabel": "Maaltijd",
   "mealPlanAdding": "Toevoegen...",
-  "mealPlanDateFormat": "{weekday} {day} {month}"
+  "mealPlanDateFormat": "{weekday} {day} {month}",
+  "splashRecipe": "Recept",
+  "splashSpellbook": "Spreukenboek",
+  "smartImportReparsed": "Opnieuw geanalyseerd door AI — controleer het bijgewerkte recept hierboven",
+  "servingSizeHint": "bijv. 1 kopje, 100g",
+  "mainNutrients": "Hoofdvoedingsstoffen",
+  "additionalNutrients": "Overige voedingsstoffen",
+  "onboardingWelcomeTo": "Welkom bij",
+  "onboardingAppName": "Recipe Spellbook!",
+  "onboardingDescription": "10 zorgvuldig geselecteerde recepten van over de hele wereld om mee te beginnen.",
+  "onboardingDeleteLater": "Je kunt ze later altijd verwijderen.",
+  "onboardingAdding": "Toevoegen...",
+  "onboardingAddStarter": "Startrecepten toevoegen",
+  "onboardingBlankCookbook": "Begin met een leeg kookboek"
 }

@@ -1829,7 +1829,7 @@
   "subscriptionTab": "Abo",
   "payOnceKeepForever": "Einmal zahlen, für immer behalten",
   "cloudSyncFeature": "Cloud-Sync",
-  "cloudSyncPlusFeature": "Cloud-Sync+",
+  "cloudSyncFamilyFeature": "Cloud-Sync+",
   "unableToLoadProducts": "Produkte konnten nicht geladen werden. Erneut versuchen.",
   "noOfferingsAvailable": "Keine Angebote verfügbar. Später erneut versuchen.",
   "purchaseFailed": "Kauf fehlgeschlagen: {error}",
@@ -2780,5 +2780,18 @@
   "mealPlanAddTitle": "Zum Speiseplan hinzufügen",
   "mealPlanMealLabel": "Mahlzeit",
   "mealPlanAdding": "Wird hinzugefügt...",
-  "mealPlanDateFormat": "{weekday}, {day}. {month}"
+  "mealPlanDateFormat": "{weekday}, {day}. {month}",
+  "splashRecipe": "Rezept",
+  "splashSpellbook": "Zauberbuch",
+  "smartImportReparsed": "Von KI neu analysiert — überprüfe das aktualisierte Rezept oben",
+  "servingSizeHint": "z.B. 1 Tasse, 100g",
+  "mainNutrients": "Hauptnährstoffe",
+  "additionalNutrients": "Weitere Nährstoffe",
+  "onboardingWelcomeTo": "Willkommen bei",
+  "onboardingAppName": "Recipe Spellbook!",
+  "onboardingDescription": "10 handverlesene Rezepte aus aller Welt für deinen Start.",
+  "onboardingDeleteLater": "Du kannst sie jederzeit wieder löschen.",
+  "onboardingAdding": "Wird hinzugefügt...",
+  "onboardingAddStarter": "Starterrezepte hinzufügen",
+  "onboardingBlankCookbook": "Mit leerem Kochbuch starten"
 }

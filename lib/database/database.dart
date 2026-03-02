@@ -74,7 +74,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
 
   // Accessors for DAOs
@@ -110,6 +110,18 @@ class AppDatabase extends _$AppDatabase {
           );
           // Update default links with proper scale values
           await _updateDefaultLinkScales();
+        }
+        if (from < 4) {
+          // Add deletedAt column to all tables that support soft delete sync
+          const tables = [
+            'cookbooks', 'categories', 'custom_categories', 'custom_courses',
+            'tags', 'shopping_categories', 'shopping_lists', 'shopping_list_items', 'meal_plans',
+          ];
+          for (final table in tables) {
+            await customStatement(
+              'ALTER TABLE $table ADD COLUMN deleted_at INTEGER',
+            );
+          }
         }
       },
     );

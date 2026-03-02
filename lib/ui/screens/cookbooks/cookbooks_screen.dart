@@ -7,6 +7,7 @@ import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../data/rpg/rpg_text.dart';
 import '../../../database/database.dart';
+import '../../../database/daos/tags_dao.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
@@ -536,7 +537,52 @@ class _CookbookGrid extends ConsumerWidget {
 
     if (confirmed != true || !context.mounted) return;
 
-    final result = await CommunityService.instance.publish(cookbook.id);
+    // Build inline recipe data from local DB
+    final recipeDao = ref.read(recipeDaoProvider);
+    final tagsDao = TagsDao(ref.read(databaseProvider));
+    final recipes = await recipeDao.getRecipesForCookbook(cookbook.id);
+
+    final recipeMaps = <Map<String, dynamic>>[];
+    for (final r in recipes) {
+      final ingredients = await recipeDao.getIngredientsForRecipe(r.id);
+      final steps = await recipeDao.getStepsForRecipe(r.id);
+      final tags = await tagsDao.getTagsForRecipe(r.id);
+
+      recipeMaps.add({
+        'title': r.title,
+        'description': r.description,
+        'servings': r.servings,
+        'prepTimeMinutes': r.prepTimeMinutes,
+        'cookTimeMinutes': r.cookTimeMinutes,
+        'sourceUrl': r.sourceUrl,
+        'imagePath': r.imagePath,
+        'rating': r.rating,
+        'notes': r.notes,
+        'nutritionJson': r.nutritionJson,
+        'ingredients': ingredients.map((i) => {
+          'sortOrder': i.sortOrder,
+          'amount': i.amount,
+          'unit': i.unit,
+          'name': i.name,
+          'notes': i.notes,
+        }).toList(),
+        'steps': steps.map((s) => {
+          'sortOrder': s.sortOrder,
+          'instruction': s.instruction,
+          'durationMinutes': s.durationMinutes,
+        }).toList(),
+        'tags': tags.map((t) => t.name).toList(),
+      });
+    }
+
+    if (!context.mounted) return;
+
+    final result = await CommunityService.instance.publish(
+      title: cookbook.name,
+      description: cookbook.description,
+      imagePath: cookbook.imagePath,
+      recipes: recipeMaps,
+    );
     if (context.mounted) {
       if (result.success) {
         AppSnackbar.success(context, '"${cookbook.name}" published to the community!');

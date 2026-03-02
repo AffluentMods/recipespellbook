@@ -645,7 +645,7 @@ class _TierBadge extends ConsumerWidget {
       SubscriptionTier.free => ('FREE', Theme.of(context).colorScheme.outline),
       SubscriptionTier.premium => ('PREMIUM', Colors.amber.shade700),
       SubscriptionTier.cloudSync => ('CLOUD SYNC', Colors.blue),
-      SubscriptionTier.cloudSyncPlus => ('SYNC+', Colors.deepPurple),
+      SubscriptionTier.cloudSyncFamily => ('FAMILY', Colors.deepPurple),
       SubscriptionTier.creator => ('CREATOR', Colors.deepPurple),
     };
     return Container(
