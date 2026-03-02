@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -13,6 +15,7 @@ import 'providers/subscription_provider.dart';
 import 'providers/sync_provider.dart';
 import 'router/router.dart';
 import 'services/ingredient_suggestion_service.dart';
+import 'services/notification_service.dart';
 import 'services/recipe_import_engine.dart';
 import 'services/sync_service.dart';
 import 'services/transfer_service.dart';
@@ -25,6 +28,8 @@ final sharedRecipeProvider = StateProvider<Map<String, dynamic>?>((ref) => null)
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   IngredientSuggestionService.instance.preload();
   runApp(const ProviderScope(child: RecipeSpellbookApp()));
@@ -117,15 +122,18 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     // 3. Initialize subscription state from auth/backend tier
     await ref.read(subscriptionProvider.notifier).initialize();
 
-    // 4. Remove splash screen
+    // 4. Initialize push notifications (FCM)
+    await NotificationService.instance.initialize();
+
+    // 5. Remove splash screen
     FlutterNativeSplash.remove();
 
     _initialized = true;
 
-    // 5. Auto-sync on launch if eligible
+    // 6. Auto-sync on launch if eligible
     ref.read(syncProvider.notifier).autoSync();
 
-    // 6. Wire up share intent handling
+    // 7. Wire up share intent handling
     _initShareHandler();
   }
 

@@ -9043,6 +9043,60 @@ abstract class AppLocalizations {
   /// **'Show recipe suggestion card on home screen'**
   String get settingsSurpriseMeSubtitle;
 
+  /// No description provided for @settingsNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get settingsNotifications;
+
+  /// No description provided for @settingsNotifCooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking Reminders'**
+  String get settingsNotifCooking;
+
+  /// No description provided for @settingsNotifCookingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal plan alerts and cooking reminders'**
+  String get settingsNotifCookingSubtitle;
+
+  /// No description provided for @settingsNotifCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Community Updates'**
+  String get settingsNotifCommunity;
+
+  /// No description provided for @settingsNotifCommunitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads, ratings, and comments on your recipes'**
+  String get settingsNotifCommunitySubtitle;
+
+  /// No description provided for @settingsNotifAchievements.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements'**
+  String get settingsNotifAchievements;
+
+  /// No description provided for @settingsNotifAchievementsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievement unlocks and milestone alerts'**
+  String get settingsNotifAchievementsSubtitle;
+
+  /// No description provided for @settingsNotifQuests.
+  ///
+  /// In en, this message translates to:
+  /// **'Quest Reminders'**
+  String get settingsNotifQuests;
+
+  /// No description provided for @settingsNotifQuestsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily quest resets and XP reminders'**
+  String get settingsNotifQuestsSubtitle;
+
   /// No description provided for @tuesday.
   ///
   /// In en, this message translates to:

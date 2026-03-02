@@ -491,9 +491,6 @@ Rules:
 - "note" is for extra details like "organic", "large", brand preferences, etc.
 - Combine duplicate items (e.g. if "eggs" appears twice, combine into one entry)
 - Output valid JSON only — no markdown, no backticks, no commentary
-
-Here is the shopping list:
-
 ''';
   }
 
@@ -517,6 +514,12 @@ Here is the shopping list:
   "notes": "",
   "ingredients": [
     {
+      "amount": null,
+      "unit": null,
+      "name": "For the dough",
+      "notes": "__header__"
+    },
+    {
       "amount": "2",
       "unit": "cups",
       "name": "all-purpose flour",
@@ -525,25 +528,24 @@ Here is the shopping list:
   ],
   "steps": [
     {
-      "instruction": "Preheat the oven to 375°F (190°C).",
+      "instruction": "Preheat the oven to 375\u00b0F (190\u00b0C).",
       "durationMinutes": 5
     }
   ]
 }
 
 Rules:
-- "amount" is a string (supports fractions like "1/2", "1 1/2")
+- "amount" is a string (supports fractions like "1/2", "1 1/2") or null
 - "unit" is a string (cups, tbsp, tsp, oz, lb, g, kg, ml, etc.) or null if not applicable (e.g. "3 eggs")
 - "notes" on ingredients is for prep details like "diced", "room temperature", "melted"
+- HEADERS: If the recipe has ingredient sections (e.g. "For the sauce", "For the dough"), add a header ingredient with "notes": "__header__" and "name" set to the section title. Set amount and unit to null for headers.
+- Only add headers if the recipe clearly has separate sections. Do NOT add headers if there is only one group of ingredients.
 - "durationMinutes" on steps is optional (null if not specified)
 - "course" must be one of: Appetizer, Beverage, Breakfast, Brunch, Dessert, Main Dish, Sauce, Side Dish, Snack
 - "category" must be one of: Bean, Beverage, Bread, Burrito/Taco, Casserole, Chicken/Steak/Meat, Dessert, Fish, Fruit, Muffin, Pasta, Rice, Salad, Sandwich, Sauce, Soup, Vegetable
 - Pick the single best-matching course and category for the recipe
 - Keep step instructions clear and concise
 - Output valid JSON only — no markdown, no backticks, no commentary
-
-Here is the recipe:
-
 ''';
   }
 }

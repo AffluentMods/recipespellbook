@@ -319,6 +319,9 @@ class IngredientResolverService {
       final linkedRefs = <LinkedIngredientRef>[];
 
       for (final ing in ingredients) {
+        // Skip headers — they are display-only dividers, not real ingredients
+        if (ing.notes == '__header__') continue;
+
         final links = linksMap[ing.id] ?? [];
 
         if (links.isEmpty) {

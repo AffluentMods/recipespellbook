@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/auth_service.dart';
+import '../services/notification_service.dart';
 import '../services/revenuecat_service.dart';
 import '../services/smart_import_service.dart';
 
@@ -139,6 +140,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final user = _service.currentUser;
     if (jwt != null) {
       SmartImportService.instance.setAuthToken(jwt);
+      NotificationService.instance.registerOnLogin(jwt);
     }
     if (user != null) {
       // Identify user in RevenueCat first, THEN set backend tier.
@@ -152,8 +154,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   void _clearAuthFromServices() {
     SmartImportService.instance.clearAuth();
-    // SyncService.instance.clearAuth();
-    // ImageService.instance.clearAuth();
+    NotificationService.instance.clearAuth();
     RevenueCatService.instance.logout();
     RevenueCatService.instance.reset();
   }

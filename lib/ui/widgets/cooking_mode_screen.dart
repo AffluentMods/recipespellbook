@@ -406,6 +406,7 @@ class _StepView extends ConsumerWidget {
 
   /// Fuzzy-match ingredients mentioned in the step instruction.
   /// Uses stemming, bidirectional token matching, and smart thresholds.
+  /// Skips header ingredients (notes == '__header__').
   List<Ingredient> _matchIngredients() {
     final instruction = step.instruction.toLowerCase();
     final instructionTokens = instruction
@@ -416,6 +417,9 @@ class _StepView extends ConsumerWidget {
     final matched = <Ingredient>[];
 
     for (final ing in allIngredients) {
+      // Skip section headers — they are display-only dividers
+      if (ing.notes == '__header__') continue;
+
       final name = ing.name.toLowerCase().trim();
       if (name.isEmpty) continue;
 
@@ -472,7 +476,53 @@ class _StepView extends ConsumerWidget {
       }
     }
 
+    // ── Header-based context boost ──
+    // If the step mentions a section keyword (e.g., "dough", "filling", "sauce")
+    // that matches a header name, include all non-matched ingredients from that section.
+    // This helps when a step says "combine the dough ingredients" without listing each one.
+    final headerSections = _buildHeaderSections();
+    for (final section in headerSections.entries) {
+      final headerName = section.key.toLowerCase();
+      // Extract keywords from header (strip "for the", "para el", etc.)
+      final headerKeywords = headerName
+          .replaceAll(RegExp(r'^(for\s+the\s+|para\s+(el|la|los|las)\s+|für\s+(den|die|das)\s+)', caseSensitive: false), '')
+          .split(RegExp(r'[\s,]+'))
+          .where((w) => w.length > 2)
+          .map(_stem)
+          .toSet();
+
+      // Check if instruction mentions any header keyword
+      final mentionsSection = headerKeywords.any((kw) =>
+          instructionTokens.contains(kw) || instruction.contains(kw));
+
+      if (mentionsSection) {
+        for (final ing in section.value) {
+          if (!matched.contains(ing)) {
+            matched.add(ing);
+          }
+        }
+      }
+    }
+
     return matched;
+  }
+
+  /// Build a map of header name → ingredients in that section.
+  /// Only returns sections that actually have headers.
+  Map<String, List<Ingredient>> _buildHeaderSections() {
+    final sections = <String, List<Ingredient>>{};
+    String? currentHeader;
+
+    for (final ing in allIngredients) {
+      if (ing.notes == '__header__') {
+        currentHeader = ing.name;
+        sections[currentHeader] = [];
+      } else if (currentHeader != null) {
+        sections[currentHeader]!.add(ing);
+      }
+    }
+
+    return sections;
   }
 
   /// Basic English/multilingual stemmer — strips common suffixes to normalize

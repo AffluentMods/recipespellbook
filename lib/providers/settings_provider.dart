@@ -83,7 +83,7 @@ class AppSettings {
 
   /// Default nutrients shown in the nutrition widget
   static const Set<String> defaultEnabledNutrients = {
-    'calories', 'protein', 'carbs', 'fat', 'fiber', 'sugar', 'sodium',
+    'calories', 'protein', 'carbohydrates', 'fat', 'fiber', 'sugar', 'sodium',
   };
 
   AppSettings({
@@ -341,9 +341,16 @@ class SettingsNotifier extends Notifier<AppSettings> {
 
     // Load enabled nutrients
     final enabledNutrientsStrings = prefs.getStringList('enabledNutrients');
-    final enabledNutrients = enabledNutrientsStrings != null
+    var enabledNutrients = enabledNutrientsStrings != null
         ? enabledNutrientsStrings.toSet()
         : AppSettings.defaultEnabledNutrients;
+    // Migrate legacy key: 'carbs' → 'carbohydrates'
+    if (enabledNutrients.contains('carbs')) {
+      enabledNutrients = Set<String>.from(enabledNutrients)
+        ..remove('carbs')
+        ..add('carbohydrates');
+      prefs.setStringList('enabledNutrients', enabledNutrients.toList());
+    }
 
     // Load text scale factor
     final textScaleFactor = (prefs.getDouble(_textScaleKey) ?? 1.0).clamp(0.8, 1.3);

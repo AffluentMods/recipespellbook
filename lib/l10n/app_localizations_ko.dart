@@ -4865,6 +4865,33 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsSurpriseMeSubtitle => '홈 화면에 레시피 추천 카드 표시';
 
   @override
+  String get settingsNotifications => '알림';
+
+  @override
+  String get settingsNotifCooking => '요리 알림';
+
+  @override
+  String get settingsNotifCookingSubtitle => '식단 계획 알림 및 요리 리마인더';
+
+  @override
+  String get settingsNotifCommunity => '커뮤니티 업데이트';
+
+  @override
+  String get settingsNotifCommunitySubtitle => '레시피 다운로드, 평가 및 댓글';
+
+  @override
+  String get settingsNotifAchievements => '업적';
+
+  @override
+  String get settingsNotifAchievementsSubtitle => '업적 달성 및 마일스톤 알림';
+
+  @override
+  String get settingsNotifQuests => '퀘스트 알림';
+
+  @override
+  String get settingsNotifQuestsSubtitle => '일일 퀘스트 초기화 및 XP 리마인더';
+
+  @override
   String get tuesday => '화요일';
 
   @override

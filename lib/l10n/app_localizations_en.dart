@@ -4897,6 +4897,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSurpriseMeSubtitle => 'Show recipe suggestion card on home screen';
 
   @override
+  String get settingsNotifications => 'Notifications';
+
+  @override
+  String get settingsNotifCooking => 'Cooking Reminders';
+
+  @override
+  String get settingsNotifCookingSubtitle => 'Meal plan alerts and cooking reminders';
+
+  @override
+  String get settingsNotifCommunity => 'Community Updates';
+
+  @override
+  String get settingsNotifCommunitySubtitle => 'Downloads, ratings, and comments on your recipes';
+
+  @override
+  String get settingsNotifAchievements => 'Achievements';
+
+  @override
+  String get settingsNotifAchievementsSubtitle => 'Achievement unlocks and milestone alerts';
+
+  @override
+  String get settingsNotifQuests => 'Quest Reminders';
+
+  @override
+  String get settingsNotifQuestsSubtitle => 'Daily quest resets and XP reminders';
+
+  @override
   String get tuesday => 'Tuesday';
 
   @override

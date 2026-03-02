@@ -14,12 +14,10 @@ import '../../widgets/app_snackbar.dart';
 
 /// Screen for importing recipes from AI-generated JSON.
 ///
-/// Two input methods:
-///   1. Paste JSON directly into a text field
-///   2. Pick a .json file from device storage
-///
-/// Also provides a "Copy Prompt" button so users can easily
-/// get the prompt template into their AI of choice.
+/// Redesigned flow:
+///   1. Hero area with Copy Prompt button
+///   2. Paste / load response area
+///   3. Preview & Import
 class AiImportScreen extends ConsumerStatefulWidget {
   const AiImportScreen({super.key});
 
@@ -33,6 +31,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
   String? _fileName;
   bool _importing = false;
   bool _promptCopied = false;
+  bool _showPromptPreview = false;
 
   @override
   void dispose() {
@@ -61,10 +60,21 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
     }
   }
 
+  Future<void> _pasteFromClipboard() async {
+    final data = await Clipboard.getData('text/plain');
+    if (data?.text != null) {
+      setState(() {
+        _jsonController.text = data!.text!;
+        _error = null;
+        _fileName = null;
+      });
+    }
+  }
+
   void _validateAndPreview() {
     final text = _jsonController.text.trim();
     if (text.isEmpty) {
-      setState(() => _error = 'Paste or load JSON first.');
+      setState(() => _error = 'Paste or load the AI response first.');
       return;
     }
 
@@ -75,10 +85,10 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
     }
 
     setState(() => _error = null);
-    _showPreviewAndImport(text);
+    _showPreviewSheet(text);
   }
 
-  void _showPreviewAndImport(String jsonString) {
+  void _showPreviewSheet(String jsonString) {
     final data = _parsePreview(jsonString);
     if (data == null) return;
 
@@ -98,15 +108,16 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
         builder: (ctx, scrollController) => Container(
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(20)),
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
             children: [
               // Handle
               const SizedBox(height: 8),
               Container(
-                width: 40, height: 4,
+                width: 40,
+                height: 4,
                 decoration: BoxDecoration(
                   color: theme.colorScheme.outline.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
@@ -127,8 +138,8 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                         children: [
                           Text(
                             data['title'] ?? 'Untitled Recipe',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold),
+                            style: theme.textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           if (data['description'] != null)
                             Text(
@@ -170,8 +181,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                           label: data['course']),
                     if (data['category'] != null)
                       _MetaChip(
-                          icon: Icons.category,
-                          label: data['category']),
+                          icon: Icons.category, label: data['category']),
                   ],
                 ),
               ),
@@ -179,7 +189,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
               const SizedBox(height: 8),
               Divider(
                   color:
-                  theme.colorScheme.outline.withValues(alpha: 0.1)),
+                      theme.colorScheme.outline.withValues(alpha: 0.1)),
 
               // Scrollable content
               Expanded(
@@ -189,7 +199,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                   children: [
                     // Ingredients
                     Text(
-                      'Ingredients (${ingredients.length})',
+                      'Ingredients (${ingredients.where((i) => (i['notes'] ?? '') != '__header__').length})',
                       style: theme.textTheme.labelLarge?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,
@@ -197,10 +207,25 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                     ),
                     const SizedBox(height: 8),
                     ...ingredients.map((ing) {
-                      final amount = ing['amount'] ?? '';
-                      final unit = ing['unit'] ?? '';
                       final name = ing['name'] ?? '';
                       final notes = ing['notes'] ?? '';
+                      final isHeader = notes == '__header__';
+
+                      if (isHeader) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 12, bottom: 4),
+                          child: Text(
+                            name,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        );
+                      }
+
+                      final amount = ing['amount'] ?? '';
+                      final unit = ing['unit'] ?? '';
                       final amountStr = [amount, unit]
                           .where((s) => s.toString().isNotEmpty)
                           .join(' ');
@@ -217,15 +242,15 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                               width: 72,
                               child: amountStr.isNotEmpty
                                   ? Text(amountStr,
-                                  style: theme.textTheme.bodyMedium
-                                      ?.copyWith(
-                                      fontWeight: FontWeight.w600))
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.w600))
                                   : null,
                             ),
                             Expanded(
                               child: Text.rich(
                                 TextSpan(
-                                  text: '$name',
+                                  text: name,
                                   children: [
                                     if (notes.toString().isNotEmpty)
                                       TextSpan(
@@ -275,10 +300,11 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                               alignment: Alignment.center,
                               child: Text(
                                 '${i + 1}',
-                                style: theme.textTheme.labelSmall?.copyWith(
+                                style:
+                                    theme.textTheme.labelSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme
-                                      .onPrimaryContainer,
+                                  color: theme
+                                      .colorScheme.onPrimaryContainer,
                                 ),
                               ),
                             ),
@@ -286,7 +312,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                             Expanded(
                               child: Column(
                                 crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                                    CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     step['instruction'] ?? '',
@@ -295,13 +321,13 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                                   if (dur != null)
                                     Padding(
                                       padding:
-                                      const EdgeInsets.only(top: 2),
+                                          const EdgeInsets.only(top: 2),
                                       child: Text(
                                         '${dur}m',
                                         style: theme.textTheme.bodySmall
                                             ?.copyWith(
                                           color:
-                                          theme.colorScheme.outline,
+                                              theme.colorScheme.outline,
                                         ),
                                       ),
                                     ),
@@ -336,14 +362,13 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                         : () => _doImport(ctx, jsonString),
                     icon: _importing
                         ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white))
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white))
                         : const Icon(Icons.add),
-                    label: Text(_importing
-                        ? 'Importing...'
-                        : 'Import to Cookbook'),
+                    label: Text(
+                        _importing ? 'Importing...' : 'Import to Cookbook'),
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
@@ -378,19 +403,16 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
       if (sheetContext.mounted) Navigator.pop(sheetContext);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.recipeImportedSuccess),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.green,
-            action: SnackBarAction(
-              label: l10n.actionView,
-              textColor: Colors.white,
-              onPressed: () => context.push('/recipe/$recipeId'),
-            ),
-          ),
-        );
-        Navigator.of(context).pop(); // Close AI import screen
+        Navigator.of(context).pop();
+        await Future.delayed(const Duration(milliseconds: 100));
+        if (context.mounted) {
+          AppSnackbar.successWithAction(
+            context,
+            l10n.recipeImportedSuccess,
+            actionLabel: l10n.actionView,
+            onAction: () => context.push('/recipe/$recipeId'),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -433,54 +455,102 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    final hasInput = _jsonController.text.trim().isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.importFromAI),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // ── Step 1: Get the prompt ──
-          _SectionCard(
-            number: '1',
-            title: l10n.aiCopyPrompt,
-            subtitle:
-            'Paste this into ChatGPT, Claude, Gemini, or any AI along with your recipe.',
-            child: Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: _copyPrompt,
-                    icon: Icon(
-                      _promptCopied ? Icons.check : Icons.copy,
-                      size: 18,
-                    ),
-                    label: Text(
-                        _promptCopied ? 'Copied!' : 'Copy Prompt to Clipboard'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          children: [
+            // ── Hero: Copy Prompt ──
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    theme.colorScheme.primaryContainer,
+                    theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                const SizedBox(height: 8),
-                // Collapsible prompt preview
-                ExpansionTile(
-                  tilePadding: EdgeInsets.zero,
-                  title: Text(
-                    'Preview prompt',
-                    style: theme.textTheme.labelMedium
-                        ?.copyWith(color: theme.colorScheme.outline),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.auto_awesome,
+                    size: 36,
+                    color: theme.colorScheme.primary,
                   ),
-                  children: [
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.aiCopyPrompt,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Copy this prompt, paste it into any AI (ChatGPT, Claude, Gemini) along with your recipe, then paste the response below.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: _copyPrompt,
+                      icon: Icon(
+                        _promptCopied ? Icons.check : Icons.copy,
+                        size: 18,
+                      ),
+                      label: Text(_promptCopied
+                          ? 'Copied!'
+                          : 'Copy Prompt'),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => setState(() => _showPromptPreview = !_showPromptPreview),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          _showPromptPreview ? 'Hide prompt' : 'View prompt',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                        Icon(
+                          _showPromptPreview
+                              ? Icons.expand_less
+                              : Icons.expand_more,
+                          size: 16,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (_showPromptPreview) ...[
+                    const SizedBox(height: 10),
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest,
+                        color: theme.colorScheme.surface,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: SelectableText(
@@ -493,89 +563,94 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                       ),
                     ),
                   ],
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 20),
 
-          // ── Step 2: Paste or load JSON ──
-          _SectionCard(
-            number: '2',
-            title: l10n.aiPasteOutput,
-            subtitle: l10n.aiPasteSubtitle,
-            child: Column(
+            // ── Paste AI Response ──
+            Text(
+              'Paste AI Response',
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _jsonController,
+              maxLines: 8,
+              minLines: 4,
+              onChanged: (_) => setState(() {}),
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontFamily: 'monospace',
+                fontSize: 12,
+              ),
+              decoration: InputDecoration(
+                hintText:
+                    '{\n  "title": "...",\n  "ingredients": [...],\n  "steps": [...]\n}',
+                hintStyle: TextStyle(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.4),
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                ),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                contentPadding: const EdgeInsets.all(12),
+                suffixIcon: hasInput
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, size: 18),
+                        onPressed: () => setState(() {
+                          _jsonController.clear();
+                          _fileName = null;
+                          _error = null;
+                        }),
+                      )
+                    : null,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Action row: Paste + File
+            Row(
               children: [
-                TextField(
-                  controller: _jsonController,
-                  maxLines: 10,
-                  minLines: 5,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontFamily: 'monospace',
-                    fontSize: 12,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: '{\n  "title": "...",\n  "ingredients": [...],\n  "steps": [...]\n}',
-                    hintStyle: TextStyle(
-                      color: theme.colorScheme.outline.withValues(alpha: 0.4),
-                      fontFamily: 'monospace',
-                      fontSize: 12,
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _pasteFromClipboard,
+                    icon: const Icon(Icons.paste, size: 18),
+                    label: Text(l10n.paste),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
                     ),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    contentPadding: const EdgeInsets.all(12),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _pickJsonFile,
-                        icon: const Icon(Icons.file_open, size: 18),
-                        label: Text(_fileName ?? 'Load .json file'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                        ),
-                      ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _pickJsonFile,
+                    icon: const Icon(Icons.file_open, size: 18),
+                    label: Text(_fileName ?? 'Load file'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
                     ),
-                    const SizedBox(width: 8),
-                    OutlinedButton.icon(
-                      onPressed: () async {
-                        final data = await Clipboard.getData('text/plain');
-                        if (data?.text != null) {
-                          setState(() {
-                            _jsonController.text = data!.text!;
-                            _error = null;
-                            _fileName = null;
-                          });
-                        }
-                      },
-                      icon: const Icon(Icons.paste, size: 18),
-                      label: Text(l10n.paste),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 16),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),
-          ),
 
-          // Error display
-          if (_error != null) ...[
-            const SizedBox(height: 12),
-            Card(
-              color: theme.colorScheme.errorContainer,
-              child: Padding(
+            // Error
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              Container(
                 padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 child: Row(
                   children: [
                     Icon(Icons.error_outline,
@@ -592,133 +667,61 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
 
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          // ── Step 3: Import ──
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: _validateAndPreview,
-              icon: const Icon(Icons.auto_awesome),
-              label: Text(l10n.previewAndImport),
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                backgroundColor: const Color(0xFFE8A860),
+            // ── Import Button ──
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: hasInput ? _validateAndPreview : null,
+                icon: const Icon(Icons.auto_awesome),
+                label: Text(l10n.previewAndImport),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  backgroundColor: const Color(0xFFE8A860),
+                  disabledBackgroundColor:
+                      theme.colorScheme.surfaceContainerHighest,
+                ),
               ),
             ),
-          ),
 
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-          // Tips
-          Card(
-            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.lightbulb_outline,
-                          size: 18, color: theme.colorScheme.primary),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Tips',
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  const _TipRow('Works with ChatGPT, Claude, Gemini, Copilot, or any AI'),
-                  const _TipRow('You can also take a photo of a recipe and paste it with the prompt'),
-                  const _TipRow('The AI will convert handwritten, printed, or web recipes'),
-                  const _TipRow('If the JSON has errors, try telling the AI to fix it'),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Helper widgets ──
-
-class _SectionCard extends StatelessWidget {
-  final String number;
-  final String title;
-  final String subtitle;
-  final Widget child;
-
-  const _SectionCard({
-    required this.number,
-    required this.title,
-    required this.subtitle,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+            // ── Tips (compact) ──
             Row(
               children: [
-                Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    number,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title,
-                          style: theme.textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.bold)),
-                      Text(subtitle,
-                          style: theme.textTheme.bodySmall
-                              ?.copyWith(color: theme.colorScheme.outline)),
-                    ],
+                Icon(Icons.lightbulb_outline,
+                    size: 16, color: theme.colorScheme.outline),
+                const SizedBox(width: 6),
+                Text(
+                  'Tips',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.outline,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            child,
+            const SizedBox(height: 6),
+            Text(
+              'Works with any AI. You can also take a photo of a recipe and paste it with the prompt. If the JSON has errors, ask the AI to fix it.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.outline,
+              ),
+            ),
+            const SizedBox(height: 32),
           ],
         ),
       ),
     );
   }
 }
+
+// ── Helper widgets ──
 
 class _MetaChip extends StatelessWidget {
   final IconData icon;
@@ -742,28 +745,6 @@ class _MetaChip extends StatelessWidget {
           Text(label,
               style: theme.textTheme.labelSmall
                   ?.copyWith(color: theme.colorScheme.onSurface)),
-        ],
-      ),
-    );
-  }
-}
-
-class _TipRow extends StatelessWidget {
-  final String text;
-  const _TipRow(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('•  ', style: TextStyle(fontSize: 12)),
-          Expanded(
-            child: Text(text,
-                style: Theme.of(context).textTheme.bodySmall),
-          ),
         ],
       ),
     );

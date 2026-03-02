@@ -4897,6 +4897,33 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsSurpriseMeSubtitle => 'Mostrar tarjeta de sugerencia de recetas en la pantalla de inicio';
 
   @override
+  String get settingsNotifications => 'Notificaciones';
+
+  @override
+  String get settingsNotifCooking => 'Recordatorios de cocina';
+
+  @override
+  String get settingsNotifCookingSubtitle => 'Alertas del plan de comidas y recordatorios de cocina';
+
+  @override
+  String get settingsNotifCommunity => 'Novedades de la comunidad';
+
+  @override
+  String get settingsNotifCommunitySubtitle => 'Descargas, valoraciones y comentarios en tus recetas';
+
+  @override
+  String get settingsNotifAchievements => 'Logros';
+
+  @override
+  String get settingsNotifAchievementsSubtitle => 'Logros desbloqueados y alertas de hitos';
+
+  @override
+  String get settingsNotifQuests => 'Recordatorios de misiones';
+
+  @override
+  String get settingsNotifQuestsSubtitle => 'Reinicio de misiones diarias y recordatorios de XP';
+
+  @override
   String get tuesday => 'Martes';
 
   @override

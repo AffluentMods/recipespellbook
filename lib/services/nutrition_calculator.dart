@@ -150,6 +150,8 @@ class NutritionCalculator {
       'noodle': 'noodle egg cooked',
       'bread': 'bread white commercial',
       'tortilla': 'tortilla flour',
+      'tostada': 'tortilla corn crispy fried',
+      'tostadas': 'tortilla corn crispy fried',
       'chocolate': 'chocolate dark',
       'cocoa': 'cocoa powder unsweetened',
       'coconut': 'coconut meat raw',
@@ -244,15 +246,20 @@ class NutritionCalculator {
     final notes = (ingredient.notes ?? '').toLowerCase();
     final unit = (ingredient.unit ?? '').toLowerCase();
 
-    // "To taste" items — negligible regardless of what they are
-    final isToTaste = notes.contains('to taste') ||
+    // "To taste" items — only negligible if they are typical seasonings/spices
+    // Substantial ingredients "to taste" (e.g., cilantro, sugar) should go through
+    // normal calculation with a small estimated amount.
+    final hasToTaste = notes.contains('to taste') ||
         lower.contains('to taste') ||
         unit.contains('to taste');
+    final isToTaste = hasToTaste && _isToTasteSeasoning(lower);
 
     // Bones — used for stock/broth, not eaten
-    final isBone = lower.contains('bone') ||
-        lower.contains('carcass') ||
-        lower.contains('marrow bone');
+    // Must NOT match "bone-in" or "boneless" (those are cut descriptors, not bone ingredients)
+    final isBone = (RegExp(r'\bbone\b(?!-in)').hasMatch(lower) &&
+        !lower.contains('boneless') &&
+        !lower.contains('bone-in')) ||
+        lower.contains('carcass');
 
     // Water & ice — zero calories
     final isWater = lower == 'water' || lower == 'ice' ||
@@ -313,6 +320,36 @@ class NutritionCalculator {
     final smallUnits = {'pinch', 'pinches', 'dash', 'tsp', 'teaspoon',
       'teaspoons', 'tbsp', 'tablespoon', 'tablespoons', ''};
     return smallUnits.contains(unit.toLowerCase().trim());
+  }
+
+  /// Check if an ingredient with "to taste" is a typical seasoning/spice
+  /// that would contribute negligible calories in normal "to taste" amounts.
+  /// Returns false for substantial ingredients like sugar, cilantro, etc.
+  bool _isToTasteSeasoning(String lower) {
+    // Exact matches: salt, pepper, and simple seasonings
+    const exactSeasonings = {
+      'salt', 'sea salt', 'kosher salt', 'table salt', 'flaky salt',
+      'pepper', 'black pepper', 'white pepper', 'ground pepper',
+      'cracked pepper', 'peppercorn', 'peppercorns',
+      'msg', 'monosodium glutamate',
+    };
+    if (exactSeasonings.contains(lower)) return true;
+
+    // Keyword matches: dried herbs, ground spices, chili flakes, etc.
+    const seasoningKeywords = [
+      'cumin', 'paprika', 'cayenne', 'chili powder', 'chile powder',
+      'chili flake', 'red pepper flake', 'crushed red pepper',
+      'oregano', 'thyme', 'basil', 'rosemary', 'sage', 'parsley',
+      'dill', 'tarragon', 'marjoram', 'bay leaf', 'bay leaves',
+      'cinnamon', 'nutmeg', 'allspice', 'clove', 'cardamom',
+      'coriander', 'turmeric', 'ginger powder', 'ground ginger',
+      'garlic powder', 'onion powder', 'smoked paprika',
+      'curry powder', 'garam masala', 'five spice', 'za\'atar',
+      'sumac', 'saffron', 'fennel seed', 'celery seed', 'mustard seed',
+      'caraway', 'anise', 'star anise', 'fenugreek',
+      'seasoning', 'spice blend', 'herb',
+    ];
+    return seasoningKeywords.any((kw) => lower.contains(kw));
   }
 
   /// Calculate nutrition for a single ingredient
@@ -822,6 +859,16 @@ class NutritionCalculator {
       return count * 3.0; // assume garlic clove if unit is "clove"
     }
 
+    // "leaf/leaves" of herbs (bay leaves, kaffir lime, etc.)
+    if (lowerUnit.contains('leaf') || lowerUnit.contains('leaves')) {
+      if (lowerIngredient.contains('bay')) return count * 0.6; // bay leaf ~0.6g
+      if (lowerIngredient.contains('kaffir') || lowerIngredient.contains('lime leaf')) return count * 1.0;
+      if (lowerIngredient.contains('basil')) return count * 0.5;
+      if (lowerIngredient.contains('mint')) return count * 0.5;
+      if (lowerIngredient.contains('sage')) return count * 0.7;
+      return count * 0.5; // generic herb leaf
+    }
+
     // "sprig" of herbs
     if (lowerUnit.contains('sprig')) {
       return count * 2.0;
@@ -973,10 +1020,28 @@ class NutritionCalculator {
       MapEntry('broccoli', 150.0), // 1 crown/head-like piece
       MapEntry('cauliflower', 100.0), // floret cluster
 
+      // Herbs & leaves (count-based: "2 bay leaves", "4 sage leaves")
+      MapEntry('bay leaf', 0.6),
+      MapEntry('bay leaves', 0.6),
+      MapEntry('kaffir lime leaf', 1.0),
+      MapEntry('kaffir lime leaves', 1.0),
+
+      // Dried herbs — prevent 100g default (1 "dried oregano" ≈ 1 tsp = 1g)
+      MapEntry('dried oregano', 1.0),
+      MapEntry('dried basil', 1.0),
+      MapEntry('dried thyme', 1.0),
+      MapEntry('dried rosemary', 1.0),
+      MapEntry('dried parsley', 1.0),
+      MapEntry('dried dill', 1.0),
+      MapEntry('dried sage', 1.0),
+      MapEntry('dried tarragon', 1.0),
+      MapEntry('dried marjoram', 1.0),
+
       // Eggs
       MapEntry('egg', 50.0),
 
       // Bread / tortilla
+      MapEntry('tostada', 25.0),  // fried corn tortilla shell
       MapEntry('tortilla', 45.0),
       MapEntry('pita', 60.0),
       MapEntry('bagel', 105.0),
@@ -992,6 +1057,23 @@ class NutritionCalculator {
     for (final entry in ingredientWeights) {
       if (lowerIngredient.contains(entry.key)) {
         return count * entry.value;
+      }
+    }
+
+    // Dried herbs/spices safety net — prevent 100g default for any dried herb
+    // that wasn't caught by the specific entries above
+    if (lowerIngredient.contains('dried') || lowerIngredient.contains('ground') ||
+        lowerIngredient.contains('powder')) {
+      const herbSpiceKeywords = [
+        'oregano', 'basil', 'thyme', 'rosemary', 'parsley', 'dill', 'sage',
+        'tarragon', 'marjoram', 'cilantro', 'chive', 'mint', 'cumin',
+        'paprika', 'cayenne', 'cinnamon', 'nutmeg', 'allspice', 'clove',
+        'cardamom', 'coriander', 'turmeric', 'ginger', 'fennel', 'anise',
+        'fenugreek', 'mustard', 'celery seed', 'caraway', 'saffron',
+        'chili', 'chile', 'herb', 'spice', 'seasoning',
+      ];
+      if (herbSpiceKeywords.any((kw) => lowerIngredient.contains(kw))) {
+        return count * 2.0; // ~1-2g per "unit" of dried herb/spice
       }
     }
 

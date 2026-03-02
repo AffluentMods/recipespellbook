@@ -4949,6 +4949,33 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsSurpriseMeSubtitle => 'Показывать карточку с предложением рецепта на главном экране';
 
   @override
+  String get settingsNotifications => 'Уведомления';
+
+  @override
+  String get settingsNotifCooking => 'Напоминания о готовке';
+
+  @override
+  String get settingsNotifCookingSubtitle => 'Оповещения о плане питания и напоминания о готовке';
+
+  @override
+  String get settingsNotifCommunity => 'Обновления сообщества';
+
+  @override
+  String get settingsNotifCommunitySubtitle => 'Загрузки, оценки и комментарии к вашим рецептам';
+
+  @override
+  String get settingsNotifAchievements => 'Достижения';
+
+  @override
+  String get settingsNotifAchievementsSubtitle => 'Разблокированные достижения и оповещения о вехах';
+
+  @override
+  String get settingsNotifQuests => 'Напоминания о заданиях';
+
+  @override
+  String get settingsNotifQuestsSubtitle => 'Сброс ежедневных заданий и напоминания об XP';
+
+  @override
   String get tuesday => 'Вторник';
 
   @override

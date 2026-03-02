@@ -7,6 +7,7 @@ import '../../../data/app_enums.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/companion_provider.dart';
+import '../../../providers/notification_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../providers/auth_provider.dart';
@@ -153,6 +154,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _m(l10n.trashTitle, 'deleted') ? _Tile(
           icon: Icons.delete_outline, title: l10n.trashTitle, subtitle: l10n.trashSubtitle,
           onTap: () => context.push('/settings/trash'),
+        ) : null,
+      ]),
+
+      // ─── NOTIFICATIONS ───
+      _section(title: l10n.settingsNotifications, icon: Icons.notifications_outlined, children: [
+        _m(l10n.settingsNotifCooking, 'meal plan reminder') ? _NotifToggle(
+          icon: Icons.schedule, title: l10n.settingsNotifCooking, subtitle: l10n.settingsNotifCookingSubtitle,
+          value: ref.watch(notificationPrefsProvider).cookingReminders,
+          onChanged: (v) => ref.read(notificationPrefsProvider.notifier).setCookingReminders(v),
+        ) : null,
+        _m(l10n.settingsNotifCommunity, 'download rating comment') ? _NotifToggle(
+          icon: Icons.people_outline, title: l10n.settingsNotifCommunity, subtitle: l10n.settingsNotifCommunitySubtitle,
+          value: ref.watch(notificationPrefsProvider).communityUpdates,
+          onChanged: (v) => ref.read(notificationPrefsProvider.notifier).setCommunityUpdates(v),
+        ) : null,
+        _m(l10n.settingsNotifAchievements, 'unlock trophy') ? _NotifToggle(
+          icon: Icons.emoji_events_outlined, title: l10n.settingsNotifAchievements, subtitle: l10n.settingsNotifAchievementsSubtitle,
+          value: ref.watch(notificationPrefsProvider).achievementAlerts,
+          onChanged: (v) => ref.read(notificationPrefsProvider.notifier).setAchievementAlerts(v),
+        ) : null,
+        _m(l10n.settingsNotifQuests, 'daily quest xp') ? _NotifToggle(
+          icon: Icons.assignment_outlined, title: l10n.settingsNotifQuests, subtitle: l10n.settingsNotifQuestsSubtitle,
+          value: ref.watch(notificationPrefsProvider).questReminders,
+          onChanged: (v) => ref.read(notificationPrefsProvider.notifier).setQuestReminders(v),
         ) : null,
       ]),
 
@@ -692,6 +717,32 @@ class _Tile extends StatelessWidget {
       subtitle: Text(subtitle, style: TextStyle(fontSize: 13, color: enabled ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.outline)),
       trailing: enabled ? Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)) : null,
       onTap: enabled ? onTap : null,
+    );
+  }
+}
+
+class _NotifToggle extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  const _NotifToggle({required this.icon, required this.title, required this.subtitle, required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SwitchListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      secondary: Container(
+        width: 36, height: 36,
+        decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+        child: Icon(icon, size: 20, color: theme.colorScheme.primary),
+      ),
+      title: Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+      subtitle: Text(subtitle, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
+      value: value,
+      onChanged: onChanged,
     );
   }
 }

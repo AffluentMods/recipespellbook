@@ -4897,6 +4897,33 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settingsSurpriseMeSubtitle => 'Receptsuggestiekaart op het startscherm tonen';
 
   @override
+  String get settingsNotifications => 'Meldingen';
+
+  @override
+  String get settingsNotifCooking => 'Kookherinneringen';
+
+  @override
+  String get settingsNotifCookingSubtitle => 'Maaltijdplan-meldingen en kookherinneringen';
+
+  @override
+  String get settingsNotifCommunity => 'Community-updates';
+
+  @override
+  String get settingsNotifCommunitySubtitle => 'Downloads, beoordelingen en reacties op je recepten';
+
+  @override
+  String get settingsNotifAchievements => 'Prestaties';
+
+  @override
+  String get settingsNotifAchievementsSubtitle => 'Ontgrendelde prestaties en mijlpaalmeldingen';
+
+  @override
+  String get settingsNotifQuests => 'Questherinneringen';
+
+  @override
+  String get settingsNotifQuestsSubtitle => 'Dagelijkse quest-resets en XP-herinneringen';
+
+  @override
   String get tuesday => 'Dinsdag';
 
   @override

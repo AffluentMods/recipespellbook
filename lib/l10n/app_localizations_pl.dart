@@ -4949,6 +4949,33 @@ class AppLocalizationsPl extends AppLocalizations {
   String get settingsSurpriseMeSubtitle => 'Pokaż kartę z sugestią przepisu na ekranie głównym';
 
   @override
+  String get settingsNotifications => 'Powiadomienia';
+
+  @override
+  String get settingsNotifCooking => 'Przypomnienia o gotowaniu';
+
+  @override
+  String get settingsNotifCookingSubtitle => 'Alerty planu posilkow i przypomnienia o gotowaniu';
+
+  @override
+  String get settingsNotifCommunity => 'Aktualizacje spolecznosci';
+
+  @override
+  String get settingsNotifCommunitySubtitle => 'Pobrania, oceny i komentarze do twoich przepisow';
+
+  @override
+  String get settingsNotifAchievements => 'Osiagniecia';
+
+  @override
+  String get settingsNotifAchievementsSubtitle => 'Odblokowane osiagniecia i alerty kamieni milowych';
+
+  @override
+  String get settingsNotifQuests => 'Przypomnienia o zadaniach';
+
+  @override
+  String get settingsNotifQuestsSubtitle => 'Codzienne resety zadan i przypomnienia o XP';
+
+  @override
   String get tuesday => 'Wtorek';
 
   @override

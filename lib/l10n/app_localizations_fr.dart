@@ -4885,6 +4885,33 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsSurpriseMeSubtitle => 'Afficher la carte de suggestion de recette sur l\'écran d\'accueil';
 
   @override
+  String get settingsNotifications => 'Notifications';
+
+  @override
+  String get settingsNotifCooking => 'Rappels de cuisine';
+
+  @override
+  String get settingsNotifCookingSubtitle => 'Alertes du plan de repas et rappels de cuisine';
+
+  @override
+  String get settingsNotifCommunity => 'Mises a jour communautaires';
+
+  @override
+  String get settingsNotifCommunitySubtitle => 'Telechargements, notes et commentaires sur vos recettes';
+
+  @override
+  String get settingsNotifAchievements => 'Succes';
+
+  @override
+  String get settingsNotifAchievementsSubtitle => 'Succes debloques et alertes de jalons';
+
+  @override
+  String get settingsNotifQuests => 'Rappels de quetes';
+
+  @override
+  String get settingsNotifQuestsSubtitle => 'Reinitialisation des quetes quotidiennes et rappels d\'XP';
+
+  @override
   String get tuesday => 'Mardi';
 
   @override

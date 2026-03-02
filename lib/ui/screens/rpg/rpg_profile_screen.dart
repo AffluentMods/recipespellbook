@@ -1,10 +1,11 @@
 // lib/ui/screens/rpg/rpg_profile_screen.dart
-// Main RPG Profile Screen for Recipe Spellbook
+// Main RPG Profile Screen for Recipe Spellbook – "Adventure Card" redesign
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../data/rpg/rpg_achievements.dart';
+import '../../../data/rpg/rpg_cosmetics.dart';
 import '../../../data/rpg/rpg_models.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/rpg_provider.dart';
@@ -19,378 +20,77 @@ class RpgProfileScreen extends ConsumerWidget {
     final rpgState = ref.watch(rpgProvider);
     final profile = rpgState.profile;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark
+          ? theme.colorScheme.surface
+          : theme.colorScheme.surfaceContainerLow,
       body: CustomScrollView(
         slivers: [
-          // Fancy RPG Header
+          // ── Transparent pinned AppBar ──
           SliverAppBar(
-            expandedHeight: 280,
             pinned: true,
-            backgroundColor: theme.colorScheme.primaryContainer,
-            flexibleSpace: FlexibleSpaceBar(
-              background: _buildProfileHeader(context, profile, theme),
+            expandedHeight: 0,
+            backgroundColor: profile.playerClass.color.withValues(alpha: 0.95),
+            foregroundColor: Colors.white,
+            elevation: 0,
+            title: Text(
+              profile.displayName,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.settings),
+                icon: const Icon(Icons.settings_outlined),
                 onPressed: () => _showProfileSettings(context, ref, profile),
               ),
             ],
           ),
 
-          // Stats Cards
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverToBoxAdapter(
-              child: _buildStatsRow(context, profile, theme),
+          // ── Adventure Card header ──
+          SliverToBoxAdapter(
+            child: _AdventureCard(profile: profile),
+          ),
+
+          // ── Adventurer's Pouch (horizontal stats) ──
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: _AdventurerPouch(profile: profile),
             ),
           ),
 
-          // Quick Actions Grid
+          // ── Quick Actions 2×2 grid ──
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
             sliver: SliverToBoxAdapter(
-              child: _buildQuickActionsGrid(context, ref, theme),
+              child: _QuickActionsGrid(
+                onBoss: () => context.push('/rpg/boss'),
+                onAchievements: () => context.push('/rpg/achievements'),
+                onCosmetics: () => context.push('/rpg/cosmetics'),
+                onClasses: () => _showClassSelector(context, ref),
+              ),
             ),
           ),
 
-          // Daily Quests
+          // ── Quest Board (parchment style) ──
           SliverPadding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
             sliver: SliverToBoxAdapter(
-              child: RpgDailyQuestsCard(compact: false),
+              child: _QuestBoard(),
             ),
           ),
 
-          // Recent Activity
+          // ── Achievement Showcase ──
           SliverPadding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
             sliver: SliverToBoxAdapter(
-              child: _buildRecentActivity(context, rpgState, theme),
-            ),
-          ),
-
-          // Achievement Showcase
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverToBoxAdapter(
-              child: _buildAchievementShowcase(context, profile, theme),
+              child: _AchievementShowcase(profile: profile),
             ),
           ),
 
           const SliverPadding(padding: EdgeInsets.only(bottom: 100)),
         ],
-      ),
-    );
-  }
-
-  Widget _buildProfileHeader(BuildContext context, PlayerProfile profile, ThemeData theme) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            profile.playerClass.color.withValues(alpha: 0.8),
-            theme.colorScheme.primaryContainer,
-          ],
-        ),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Avatar with frame and pet
-              RpgAvatarWidget(
-                avatarId: profile.avatarId ?? 'avatar_default',
-                frameId: profile.frameId ?? 'frame_default',
-                petId: profile.petId,
-                size: 100,
-                level: profile.level,
-              ),
-              const SizedBox(height: 12),
-
-              // Name and title
-              Text(
-                profile.displayName,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withValues(alpha: 0.5),
-                      blurRadius: 4,
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                '${profile.playerClass.icon} ${profile.displayTitle}',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.9),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // XP Bar
-              RpgXpBar(
-                currentXp: profile.currentXp,
-                maxXp: profile.xpForNextLevel - profile.xpForCurrentLevel,
-                level: profile.level,
-                showLabel: true,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatsRow(BuildContext context, PlayerProfile profile, ThemeData theme) {
-    final l10n = AppLocalizations.of(context)!;
-    return Row(
-      children: [
-        Expanded(
-          child: _StatCard(
-            icon: Icons.monetization_on,
-            iconColor: Colors.amber,
-            label: l10n.rpgGold,
-            value: _formatNumber(profile.gold),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _StatCard(
-            icon: Icons.diamond,
-            iconColor: Colors.purple,
-            label: l10n.rpgGems,
-            value: _formatNumber(profile.gems),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _StatCard(
-            icon: Icons.auto_awesome,
-            iconColor: Colors.blue,
-            label: l10n.rpgMana,
-            value: '${profile.mana}/${profile.calculatedMaxMana}',
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuickActionsGrid(BuildContext context, WidgetRef ref, ThemeData theme) {
-    final l10n = AppLocalizations.of(context)!;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.rpgQuickActions,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _QuickActionButton(
-                    icon: Icons.emoji_events,
-                    label: l10n.rpgAchievements,
-                    color: Colors.amber,
-                    onTap: () => context.push('/rpg/achievements'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _QuickActionButton(
-                    icon: Icons.face,
-                    label: l10n.rpgCosmetics,
-                    color: Colors.purple,
-                    onTap: () => context.push('/rpg/cosmetics'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: _QuickActionButton(
-                    icon: Icons.leaderboard,
-                    label: l10n.rpgLeaderboard,
-                    color: Colors.green,
-                    onTap: () => context.push('/rpg/leaderboard'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _QuickActionButton(
-                    icon: Icons.casino,
-                    label: l10n.rpgLottery,
-                    color: Colors.pink,
-                    onTap: () => _showLotteryDialog(context, ref),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: _QuickActionButton(
-                    icon: Icons.sports_martial_arts,
-                    label: l10n.rpgBossFight,
-                    color: Colors.red,
-                    onTap: () => context.push('/rpg/boss'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _QuickActionButton(
-                    icon: Icons.school,
-                    label: l10n.rpgClasses,
-                    color: Colors.blue,
-                    onTap: () => _showClassSelector(context, ref),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecentActivity(BuildContext context, RpgState rpgState, ThemeData theme) {
-    final recentXp = rpgState.recentXpGains;
-
-    if (recentXp.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppLocalizations.of(context)!.rpgRecentXp,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            ...recentXp.take(3).map((event) => ListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              leading: CircleAvatar(
-                backgroundColor: theme.colorScheme.primaryContainer,
-                child: Text(
-                  '+${event.totalXp}',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onPrimaryContainer,
-                  ),
-                ),
-              ),
-              title: Text(event.description ?? event.actionType.displayName),
-              subtitle: Text(
-                _formatTimeAgo(context, event.timestamp),
-                style: theme.textTheme.bodySmall,
-              ),
-              trailing: event.multiplier > 1.0
-                  ? Chip(
-                label: Text('${event.multiplier}x'),
-                backgroundColor: Colors.amber.withValues(alpha: 0.2),
-                labelStyle: const TextStyle(fontSize: 10),
-                padding: EdgeInsets.zero,
-              )
-                  : null,
-            )),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAchievementShowcase(BuildContext context, PlayerProfile profile, ThemeData theme) {
-    final recentAchievements = profile.completedAchievements
-        .take(4)
-        .map((id) => RpgAchievements.getById(id))
-        .whereType<Achievement>()
-        .toList();
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.rpgAchievements,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => context.push('/rpg/achievements'),
-                  child: Text(
-                    '${profile.completedAchievements.length}/${RpgAchievements.all.length}',
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            if (recentAchievements.isEmpty)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.emoji_events_outlined,
-                        size: 48,
-                        color: theme.colorScheme.outline,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        AppLocalizations.of(context)!.rpgNoAchievementsYet,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.outline,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: recentAchievements.map((achievement) {
-                  return Chip(
-                    avatar: Text(achievement.icon),
-                    label: Text(achievement.name),
-                    backgroundColor: achievement.tier.color.withValues(alpha: 0.2),
-                  );
-                }).toList(),
-              ),
-          ],
-        ),
       ),
     );
   }
@@ -417,72 +117,127 @@ class RpgProfileScreen extends ConsumerWidget {
       ),
     );
   }
-
-  void _showLotteryDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => const _LotteryDialog(),
-    );
-  }
-
-  String _formatNumber(int number) {
-    if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(1)}M';
-    } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}K';
-    }
-    return number.toString();
-  }
-
-  String _formatTimeAgo(BuildContext context, DateTime dateTime) {
-    final l10n = AppLocalizations.of(context)!;
-    final now = DateTime.now();
-    final diff = now.difference(dateTime);
-
-    if (diff.inMinutes < 1) return l10n.rpgJustNow;
-    if (diff.inMinutes < 60) return l10n.rpgMinutesAgo(diff.inMinutes);
-    if (diff.inHours < 24) return l10n.rpgHoursAgo(diff.inHours);
-    return l10n.rpgDaysAgo(diff.inDays);
-  }
 }
 
-// ============ HELPER WIDGETS ============
+// ════════════════════════════════════════════════════════════════════
+//  ADVENTURE CARD  –  Full-width hero header
+// ════════════════════════════════════════════════════════════════════
 
-class _StatCard extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String label;
-  final String value;
-
-  const _StatCard({
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-    required this.value,
-  });
+class _AdventureCard extends StatelessWidget {
+  final PlayerProfile profile;
+  const _AdventureCard({required this.profile});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
+    final isDark = theme.brightness == Brightness.dark;
+    final pet = profile.petId != null ? RpgPets.getById(profile.petId!) : null;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            profile.playerClass.color.withValues(alpha: 0.85),
+            profile.playerClass.color.withValues(alpha: 0.55),
+            isDark ? theme.colorScheme.surface : theme.colorScheme.surfaceContainerLow,
+          ],
+          stops: const [0.0, 0.6, 1.0],
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
         child: Column(
           children: [
-            Icon(icon, color: iconColor, size: 28),
-            const SizedBox(height: 4),
+            // ── Avatar row: companion + avatar + level ──
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Companion pet (left side)
+                if (pet != null) ...[
+                  _CompanionBubble(pet: pet, size: 56),
+                  const SizedBox(width: 12),
+                ] else
+                  const SizedBox(width: 68), // spacer for alignment
+
+                // Main avatar
+                RpgAvatarWidget(
+                  avatarId: profile.avatarId ?? 'avatar_default',
+                  frameId: profile.frameId ?? 'frame_default',
+                  petId: null, // We show pet separately now
+                  size: 80,
+                  level: profile.level,
+                ),
+
+                // Class badge (right side)
+                const SizedBox(width: 12),
+                _ClassBadge(playerClass: profile.playerClass),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // ── Name + title ──
             Text(
-              value,
-              style: theme.textTheme.titleMedium?.copyWith(
+              profile.displayName,
+              style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withValues(alpha: 0.4),
+                    blurRadius: 6,
+                  ),
+                ],
               ),
             ),
+            const SizedBox(height: 2),
             Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.outline,
+              '${profile.playerClass.icon}  ${profile.displayTitle}',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: Colors.white.withValues(alpha: 0.85),
+                fontWeight: FontWeight.w500,
               ),
             ),
+
+            const SizedBox(height: 14),
+
+            // ── XP bar ──
+            RpgXpBar(
+              currentXp: profile.currentXp,
+              maxXp: profile.xpForNextLevel - profile.xpForCurrentLevel,
+              level: profile.level,
+              showLabel: true,
+              height: 10,
+            ),
+
+            // ── Login streak pill ──
+            if (profile.loginStreak > 1) ...[
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('🔥', style: TextStyle(fontSize: 13)),
+                    const SizedBox(width: 4),
+                    Text(
+                      AppLocalizations.of(context)!.rpgDaysAgo(profile.loginStreak),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -490,14 +245,325 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-class _QuickActionButton extends StatelessWidget {
+// ── Companion pet bubble ──
+class _CompanionBubble extends StatelessWidget {
+  final CosmeticItem pet;
+  final double size;
+  const _CompanionBubble({required this.pet, required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: theme.colorScheme.surface,
+        border: Border.all(color: pet.rarity.color, width: 2.5),
+        boxShadow: [
+          BoxShadow(
+            color: pet.rarity.color.withValues(alpha: 0.35),
+            blurRadius: 8,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: ClipOval(
+        child: Image.asset(
+          pet.assetPath,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Center(
+            child: Text('🐾', style: TextStyle(fontSize: size * 0.4)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Class badge (icon in colored circle) ──
+class _ClassBadge extends StatelessWidget {
+  final PlayerClass playerClass;
+  const _ClassBadge({required this.playerClass});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 68,
+      child: Column(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.2),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.5),
+                width: 2,
+              ),
+            ),
+            child: Center(
+              child: Text(
+                playerClass.icon,
+                style: const TextStyle(fontSize: 22),
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            playerClass.displayName.split(' ').last, // "Warrior", "Mage", etc.
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.8),
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  ADVENTURER'S POUCH  –  Horizontal scroll of circular stats
+// ════════════════════════════════════════════════════════════════════
+
+class _AdventurerPouch extends StatelessWidget {
+  final PlayerProfile profile;
+  const _AdventurerPouch({required this.profile});
+
+  String _fmt(int n) {
+    if (n >= 1000000) return '${(n / 1000000).toStringAsFixed(1)}M';
+    if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}K';
+    return n.toString();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return SizedBox(
+      height: 100,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        children: [
+          _CircleStat(
+            emoji: '🪙',
+            value: _fmt(profile.gold),
+            label: l10n.rpgGold,
+            ringColor: Colors.amber,
+            progress: 1.0, // always full – not a bar
+          ),
+          const SizedBox(width: 16),
+          _CircleStat(
+            emoji: '💎',
+            value: _fmt(profile.gems),
+            label: l10n.rpgGems,
+            ringColor: Colors.purple,
+            progress: 1.0,
+          ),
+          const SizedBox(width: 16),
+          _CircleStat(
+            emoji: '🔮',
+            value: '${profile.mana}',
+            label: l10n.rpgMana,
+            ringColor: Colors.blue,
+            progress: profile.calculatedMaxMana > 0
+                ? profile.mana / profile.calculatedMaxMana
+                : 0.0,
+          ),
+          const SizedBox(width: 16),
+          _CircleStat(
+            emoji: '❤️',
+            value: '${profile.hp}',
+            label: 'HP',
+            ringColor: Colors.red,
+            progress: profile.calculatedMaxHp > 0
+                ? profile.hp / profile.calculatedMaxHp
+                : 0.0,
+          ),
+          const SizedBox(width: 16),
+          _CircleStat(
+            emoji: '⚔️',
+            value: '${profile.baseDamage}',
+            label: 'ATK',
+            ringColor: Colors.orange,
+            progress: 1.0,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CircleStat extends StatelessWidget {
+  final String emoji;
+  final String value;
+  final String label;
+  final Color ringColor;
+  final double progress;
+
+  const _CircleStat({
+    required this.emoji,
+    required this.value,
+    required this.label,
+    required this.ringColor,
+    required this.progress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return SizedBox(
+      width: 72,
+      child: Column(
+        children: [
+          // Circular progress ring
+          SizedBox(
+            width: 56,
+            height: 56,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Background ring
+                SizedBox.expand(
+                  child: CircularProgressIndicator(
+                    value: 1.0,
+                    strokeWidth: 3.5,
+                    backgroundColor: Colors.transparent,
+                    valueColor: AlwaysStoppedAnimation(
+                      ringColor.withValues(alpha: isDark ? 0.15 : 0.12),
+                    ),
+                  ),
+                ),
+                // Progress ring
+                SizedBox.expand(
+                  child: CircularProgressIndicator(
+                    value: progress.clamp(0.0, 1.0),
+                    strokeWidth: 3.5,
+                    backgroundColor: Colors.transparent,
+                    valueColor: AlwaysStoppedAnimation(ringColor),
+                    strokeCap: StrokeCap.round,
+                  ),
+                ),
+                // Emoji center
+                Text(emoji, style: const TextStyle(fontSize: 20)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  QUICK ACTIONS  –  2×2 illustrated card grid
+// ════════════════════════════════════════════════════════════════════
+
+class _QuickActionsGrid extends StatelessWidget {
+  final VoidCallback onBoss;
+  final VoidCallback onAchievements;
+  final VoidCallback onCosmetics;
+  final VoidCallback onClasses;
+
+  const _QuickActionsGrid({
+    required this.onBoss,
+    required this.onAchievements,
+    required this.onCosmetics,
+    required this.onClasses,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _ActionCard(
+                icon: Icons.sports_martial_arts,
+                emoji: '⚔️',
+                label: l10n.rpgBossFight,
+                color: Colors.red,
+                onTap: onBoss,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _ActionCard(
+                icon: Icons.emoji_events,
+                emoji: '🏆',
+                label: l10n.rpgAchievements,
+                color: Colors.amber,
+                onTap: onAchievements,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _ActionCard(
+                icon: Icons.face,
+                emoji: '✨',
+                label: l10n.rpgCosmetics,
+                color: Colors.purple,
+                onTap: onCosmetics,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _ActionCard(
+                icon: Icons.school,
+                emoji: '📖',
+                label: l10n.rpgClasses,
+                color: Colors.blue,
+                onTap: onClasses,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionCard extends StatelessWidget {
   final IconData icon;
+  final String emoji;
   final String label;
   final Color color;
   final VoidCallback onTap;
 
-  const _QuickActionButton({
+  const _ActionCard({
     required this.icon,
+    required this.emoji,
     required this.label,
     required this.color,
     required this.onTap,
@@ -506,23 +572,48 @@ class _QuickActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Material(
-      color: color.withValues(alpha: 0.1),
-      borderRadius: BorderRadius.circular(12),
+      color: isDark
+          ? theme.colorScheme.surfaceContainerHigh
+          : theme.colorScheme.surface,
+      borderRadius: BorderRadius.circular(16),
+      elevation: isDark ? 0 : 1,
+      shadowColor: color.withValues(alpha: 0.2),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: color.withValues(alpha: isDark ? 0.2 : 0.12),
+              width: 1,
+            ),
+          ),
           child: Column(
             children: [
-              Icon(icon, color: color, size: 28),
-              const SizedBox(height: 4),
+              // Colored icon container
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Center(
+                  child: Text(emoji, style: const TextStyle(fontSize: 24)),
+                ),
+              ),
+              const SizedBox(height: 10),
               Text(
                 label,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w500,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
@@ -532,7 +623,201 @@ class _QuickActionButton extends StatelessWidget {
   }
 }
 
-// ============ PROFILE SETTINGS SHEET ============
+// ════════════════════════════════════════════════════════════════════
+//  QUEST BOARD  –  Parchment-styled daily quests
+// ════════════════════════════════════════════════════════════════════
+
+class _QuestBoard extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? theme.colorScheme.surfaceContainerHigh
+            : const Color(0xFFFFF8E7), // warm parchment
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark
+              ? theme.colorScheme.outlineVariant.withValues(alpha: 0.2)
+              : const Color(0xFFE8D5B0), // parchment edge
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Board header
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.amber.withValues(alpha: 0.08)
+                  : const Color(0xFFF5E6C8),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Text('📜', style: TextStyle(fontSize: 20)),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.rpgDailyQuests,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: theme.colorScheme.onSurfaceVariant,
+                  size: 22,
+                ),
+              ],
+            ),
+          ),
+
+          // Quests content
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+            child: RpgDailyQuestsCard(compact: false),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  ACHIEVEMENT SHOWCASE  –  Recent unlocks
+// ════════════════════════════════════════════════════════════════════
+
+class _AchievementShowcase extends StatelessWidget {
+  final PlayerProfile profile;
+  const _AchievementShowcase({required this.profile});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
+
+    final recentAchievements = profile.completedAchievements
+        .take(4)
+        .map((id) => RpgAchievements.getById(id))
+        .whereType<Achievement>()
+        .toList();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark
+            ? theme.colorScheme.surfaceContainerHigh
+            : theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(
+            alpha: isDark ? 0.2 : 0.3,
+          ),
+          width: 0.5,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Text('🏅', style: TextStyle(fontSize: 18)),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.rpgAchievements,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              TextButton(
+                onPressed: () => context.push('/rpg/achievements'),
+                child: Text(
+                  '${profile.completedAchievements.length}/${RpgAchievements.all.length}',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (recentAchievements.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.emoji_events_outlined,
+                      size: 42,
+                      color: theme.colorScheme.outline,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.rpgNoAchievementsYet,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.outline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: recentAchievements.map((achievement) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: achievement.tier.color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: achievement.tier.color.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(achievement.icon, style: const TextStyle(fontSize: 16)),
+                      const SizedBox(width: 6),
+                      Text(
+                        achievement.name,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  PROFILE SETTINGS SHEET  (kept from original)
+// ════════════════════════════════════════════════════════════════════
 
 class _ProfileSettingsSheet extends ConsumerStatefulWidget {
   final PlayerProfile profile;
@@ -656,7 +941,9 @@ class _ProfileSettingsSheetState extends ConsumerState<_ProfileSettingsSheet> {
   }
 }
 
-// ============ CLASS SELECTOR SHEET ============
+// ════════════════════════════════════════════════════════════════════
+//  CLASS SELECTOR SHEET  (kept from original)
+// ════════════════════════════════════════════════════════════════════
 
 class _ClassSelectorSheet extends ConsumerWidget {
   final ScrollController scrollController;
@@ -756,7 +1043,9 @@ class _ClassSelectorSheet extends ConsumerWidget {
   }
 }
 
-// ============ LOTTERY DIALOG ============
+// ════════════════════════════════════════════════════════════════════
+//  LOTTERY DIALOG  (kept from original)
+// ════════════════════════════════════════════════════════════════════
 
 class _LotteryDialog extends ConsumerStatefulWidget {
   const _LotteryDialog();

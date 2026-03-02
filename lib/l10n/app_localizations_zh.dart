@@ -4865,6 +4865,33 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsSurpriseMeSubtitle => '在主屏幕上显示食谱建议卡片';
 
   @override
+  String get settingsNotifications => '通知';
+
+  @override
+  String get settingsNotifCooking => '烹饪提醒';
+
+  @override
+  String get settingsNotifCookingSubtitle => '膳食计划提醒和烹饪提醒';
+
+  @override
+  String get settingsNotifCommunity => '社区动态';
+
+  @override
+  String get settingsNotifCommunitySubtitle => '你的食谱的下载、评分和评论';
+
+  @override
+  String get settingsNotifAchievements => '成就';
+
+  @override
+  String get settingsNotifAchievementsSubtitle => '成就解锁和里程碑提醒';
+
+  @override
+  String get settingsNotifQuests => '任务提醒';
+
+  @override
+  String get settingsNotifQuestsSubtitle => '每日任务重置和经验值提醒';
+
+  @override
   String get tuesday => '周二';
 
   @override

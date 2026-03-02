@@ -4865,6 +4865,33 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsSurpriseMeSubtitle => 'ホーム画面にレシピ提案カードを表示';
 
   @override
+  String get settingsNotifications => '通知';
+
+  @override
+  String get settingsNotifCooking => '料理リマインダー';
+
+  @override
+  String get settingsNotifCookingSubtitle => '食事計画のアラートと料理リマインダー';
+
+  @override
+  String get settingsNotifCommunity => 'コミュニティ更新';
+
+  @override
+  String get settingsNotifCommunitySubtitle => 'あなたのレシピへのダウンロード、評価、コメント';
+
+  @override
+  String get settingsNotifAchievements => '実績';
+
+  @override
+  String get settingsNotifAchievementsSubtitle => '実績解除とマイルストーンアラート';
+
+  @override
+  String get settingsNotifQuests => 'クエストリマインダー';
+
+  @override
+  String get settingsNotifQuestsSubtitle => 'デイリークエストリセットとXPリマインダー';
+
+  @override
   String get tuesday => '火曜日';
 
   @override
