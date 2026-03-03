@@ -59,7 +59,7 @@ dependencies:
   url_launcher: ^6.2.1
   app_links: ^3.4.0
   share_handler: ^0.0.21
-  mobile_scanner: ^6.0.0
+  mobile_scanner: ^7.0.0
   purchases_flutter: ^8.11.0
   purchases_ui_flutter: ^8.11.0
   timeago: ^3.7.1

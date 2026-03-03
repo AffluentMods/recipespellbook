@@ -13,6 +13,7 @@ import '../../../providers/subscription_provider.dart';
 import '../../../providers/auth_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../services/auth_service.dart';
+import 'dart:io' show Platform;
 import '../../../services/export_import_service.dart';
 import '../../../services/family_service.dart';
 import '../../../services/grocery_service.dart';
@@ -565,12 +566,14 @@ class _AccountCard extends ConsumerWidget {
             Text(l10n.continueWithGoogle, style: TextStyle(fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface)),
           ]),
         )),
-        const SizedBox(height: 10),
-        SizedBox(width: double.infinity, child: FilledButton(
-          onPressed: () { Navigator.pop(ctx); auth.signInWithApple(); },
-          style: FilledButton.styleFrom(backgroundColor: theme.brightness == Brightness.dark ? Colors.white : Colors.black, foregroundColor: theme.brightness == Brightness.dark ? Colors.black : Colors.white, padding: const EdgeInsets.symmetric(vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.apple, size: 20), const SizedBox(width: 10), Text(l10n.continueWithApple, style: const TextStyle(fontWeight: FontWeight.w500))]),
-        )),
+        if (Platform.isIOS || Platform.isMacOS) ...[
+          const SizedBox(height: 10),
+          SizedBox(width: double.infinity, child: FilledButton(
+            onPressed: () { Navigator.pop(ctx); auth.signInWithApple(); },
+            style: FilledButton.styleFrom(backgroundColor: theme.brightness == Brightness.dark ? Colors.white : Colors.black, foregroundColor: theme.brightness == Brightness.dark ? Colors.black : Colors.white, padding: const EdgeInsets.symmetric(vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.apple, size: 20), const SizedBox(width: 10), Text(l10n.continueWithApple, style: const TextStyle(fontWeight: FontWeight.w500))]),
+          )),
+        ],
         const SizedBox(height: 16),
       ]),
     )));
