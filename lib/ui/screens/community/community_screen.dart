@@ -121,6 +121,16 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       appBar: AppBar(
         title: Text(l10n.navCommunity),
         actions: [
+          // Tag filter icon
+          IconButton(
+            icon: Badge(
+              isLabelVisible: _selectedTags.isNotEmpty || _filterHasImages,
+              label: Text('${_selectedTags.length + (_filterHasImages ? 1 : 0)}'),
+              child: const Icon(Icons.filter_list),
+            ),
+            tooltip: l10n.communityPublishTags,
+            onPressed: _showFilterSheet,
+          ),
           // View mode toggle
           IconButton(
             icon: Icon(_viewMode == _ViewMode.grid ? Icons.view_list : Icons.grid_view),
@@ -184,80 +194,63 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                   _SortChip(label: l10n.communitySortMostDownloaded, value: 'downloads', selected: _sort, onSelected: _onSortChanged),
                   const SizedBox(width: 8),
                   _SortChip(label: l10n.communitySortTopRated, value: 'top_rated', selected: _sort, onSelected: _onSortChanged),
-                  const SizedBox(width: 8),
-                  FilterChip(
-                    avatar: const Icon(Icons.image, size: 14),
-                    label: Text(l10n.communityHasImages, style: const TextStyle(fontSize: 12)),
-                    selected: _filterHasImages,
-                    onSelected: (v) { setState(() => _filterHasImages = v); _load(); },
-                    showCheckmark: false,
-                    visualDensity: VisualDensity.compact,
-                  ),
                 ],
               ),
             ),
           ),
 
-          // ── Tag filter bar ──
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-            child: SizedBox(
-              height: 32,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: communityTags.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 6),
-                itemBuilder: (_, i) {
-                  final tag = communityTags[i];
-                  final isSelected = _selectedTags.contains(tag.id);
-                  return FilterChip(
-                    avatar: Text(tag.emoji, style: const TextStyle(fontSize: 12)),
-                    label: Text(tag.name, style: const TextStyle(fontSize: 11)),
-                    selected: isSelected,
-                    onSelected: (_) {
-                      setState(() {
-                        if (isSelected) {
-                          _selectedTags.remove(tag.id);
-                        } else {
-                          _selectedTags.add(tag.id);
-                        }
-                      });
-                      _load();
-                    },
-                    showCheckmark: false,
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  );
-                },
+          // ── Active filter indicator ──
+          if (_selectedTags.isNotEmpty || _filterHasImages)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: [
+                  if (_filterHasImages)
+                    _ActiveFilterChip(
+                      label: l10n.communityHasImages,
+                      icon: Icons.image,
+                      onRemove: () { setState(() => _filterHasImages = false); _load(); },
+                    ),
+                  ..._selectedTags.map((tagId) {
+                    final tagData = communityTags.where((t) => t.id == tagId).firstOrNull;
+                    return _ActiveFilterChip(
+                      label: tagData != null ? '${tagData.emoji} ${tagData.name}' : tagId,
+                      onRemove: () { setState(() => _selectedTags.remove(tagId)); _load(); },
+                    );
+                  }),
+                ],
               ),
             ),
-          ),
 
           // ── Feed ──
           Expanded(
-            child: _items.isEmpty && !_loading
-                ? Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+            child: RefreshIndicator(
+              onRefresh: () async => _load(),
+              child: _items.isEmpty && !_loading
+                  ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 children: [
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.2),
                   Icon(Icons.menu_book_outlined, size: 64, color: theme.colorScheme.outline),
                   const SizedBox(height: 16),
-                  Text(
-                    _query.isNotEmpty ? l10n.communityNoResultsFor(_query) : l10n.communityNoCookbooksYet,
-                    style: TextStyle(color: theme.colorScheme.outline, fontSize: 16),
+                  Center(
+                    child: Text(
+                      _query.isNotEmpty ? l10n.communityNoResultsFor(_query) : l10n.communityNoCookbooksYet,
+                      style: TextStyle(color: theme.colorScheme.outline, fontSize: 16),
+                    ),
                   ),
                   if (_query.isNotEmpty) ...[
                     const SizedBox(height: 8),
-                    TextButton(onPressed: () { _searchController.clear(); setState(() => _query = ''); _load(); },
-                        child: Text(l10n.communityClearSearch)),
+                    Center(
+                      child: TextButton(onPressed: () { _searchController.clear(); setState(() => _query = ''); _load(); },
+                          child: Text(l10n.communityClearSearch)),
+                    ),
                   ],
                 ],
-              ),
-            )
-                : RefreshIndicator(
-              onRefresh: () async => _load(),
-              child: _viewMode == _ViewMode.grid
+              )
+                  : _viewMode == _ViewMode.grid
                   ? _buildGridView(context)
                   : _buildListView(context),
             ),
@@ -277,6 +270,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
     return GridView.builder(
       controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(12),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: columns,
@@ -300,6 +294,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   Widget _buildListView(BuildContext context) {
     return ListView.builder(
       controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(12),
       itemCount: _items.length + (_loading ? 1 : 0),
       itemBuilder: (ctx, i) {
@@ -317,6 +312,152 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   void _onSortChanged(String value) {
     setState(() => _sort = value);
     _load();
+  }
+
+  void _showFilterSheet() {
+    final l10n = AppLocalizations.of(context)!;
+    // Take a snapshot of current state for the sheet
+    final sheetTags = Set<String>.from(_selectedTags);
+    bool sheetHasImages = _filterHasImages;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) {
+          final theme = Theme.of(ctx);
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(width: 40, height: 4, decoration: BoxDecoration(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  )),
+                ),
+                const SizedBox(height: 16),
+                Text(l10n.communityPublishTags, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: communityTags.map((tag) {
+                    final isSelected = sheetTags.contains(tag.id);
+                    return FilterChip(
+                      avatar: Text(tag.emoji, style: const TextStyle(fontSize: 14)),
+                      label: Text(tag.name, style: const TextStyle(fontSize: 12)),
+                      selected: isSelected,
+                      onSelected: (_) {
+                        setSheetState(() {
+                          if (isSelected) {
+                            sheetTags.remove(tag.id);
+                          } else {
+                            sheetTags.add(tag.id);
+                          }
+                        });
+                      },
+                      showCheckmark: false,
+                      visualDensity: VisualDensity.compact,
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 16),
+                // Has images toggle
+                SwitchListTile(
+                  title: Text(l10n.communityHasImages, style: const TextStyle(fontSize: 14)),
+                  secondary: const Icon(Icons.image_outlined),
+                  value: sheetHasImages,
+                  onChanged: (v) => setSheetState(() => sheetHasImages = v),
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          setSheetState(() {
+                            sheetTags.clear();
+                            sheetHasImages = false;
+                          });
+                        },
+                        child: Text(l10n.communityClearSearch),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          setState(() {
+                            _selectedTags
+                              ..clear()
+                              ..addAll(sheetTags);
+                            _filterHasImages = sheetHasImages;
+                          });
+                          _load();
+                        },
+                        child: Text(l10n.actionConfirm),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════
+//  ACTIVE FILTER CHIP (dismissible)
+// ════════════════════════════════════════════
+
+class _ActiveFilterChip extends StatelessWidget {
+  final String label;
+  final IconData? icon;
+  final VoidCallback onRemove;
+
+  const _ActiveFilterChip({required this.label, this.icon, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.only(left: 8, right: 2, top: 2, bottom: 2),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 12, color: theme.colorScheme.primary),
+            const SizedBox(width: 4),
+          ],
+          Text(label, style: TextStyle(fontSize: 11, color: theme.colorScheme.primary, fontWeight: FontWeight.w500)),
+          InkWell(
+            onTap: onRemove,
+            borderRadius: BorderRadius.circular(10),
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: Icon(Icons.close, size: 12, color: theme.colorScheme.primary),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

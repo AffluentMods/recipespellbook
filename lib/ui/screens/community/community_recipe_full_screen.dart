@@ -31,37 +31,81 @@ class CommunityRecipeFullScreen extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // ── Hero image header ──
+          // ── Hero image header — always shows (placeholder if no image) ──
           SliverAppBar(
-            expandedHeight: hasImage ? 260 : 0,
+            expandedHeight: 280,
             pinned: true,
-            flexibleSpace: hasImage
-                ? FlexibleSpaceBar(
-                    background: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        CommunityImage(
-                          publicationId: publicationId,
-                          imagePath: recipe.imagePath,
-                          fit: BoxFit.cover,
+            leading: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.3),
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                recipe.title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  shadows: [Shadow(color: Colors.black54, blurRadius: 8)],
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              titlePadding: const EdgeInsets.only(left: 56, bottom: 16, right: 56),
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (hasImage)
+                    CommunityImage(
+                      publicationId: publicationId,
+                      imagePath: recipe.imagePath,
+                      fit: BoxFit.cover,
+                    )
+                  else
+                    // Gradient placeholder when no image
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            theme.colorScheme.primaryContainer,
+                            theme.colorScheme.primary,
+                          ],
                         ),
-                        // Bottom gradient
-                        Positioned(
-                          bottom: 0, left: 0, right: 0, height: 80,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [Colors.transparent, Colors.black.withValues(alpha: 0.6)],
-                              ),
-                            ),
-                          ),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.restaurant,
+                          size: 64,
+                          color: Colors.white.withValues(alpha: 0.4),
                         ),
-                      ],
+                      ),
                     ),
-                  )
-                : null,
+                  // Gradient overlays for text readability
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: 0.4),
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.6),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
 
           // ── Content ──
@@ -71,7 +115,7 @@ class CommunityRecipeFullScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title
+                  // Title (large, below header for when it's collapsed)
                   Text(
                     recipe.title,
                     style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),

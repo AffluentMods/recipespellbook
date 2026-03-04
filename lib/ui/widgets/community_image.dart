@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../services/community_service.dart';
 
 /// Displays a community image from the server with caching, loading shimmer,
-/// and error fallback.
+/// and error fallback with gradient placeholder.
 ///
 /// Usage:
 /// ```dart
@@ -91,13 +91,22 @@ class CommunityImage extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: borderRadius,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            theme.colorScheme.primaryContainer,
+            theme.colorScheme.primary.withValues(alpha: 0.7),
+          ],
+        ),
       ),
-      child: Icon(
-        Icons.menu_book_outlined,
-        size: 32,
-        color: theme.colorScheme.outline.withValues(alpha: 0.5),
+      child: Center(
+        child: Icon(
+          Icons.menu_book_outlined,
+          size: (height != null && height! < 80) ? 24 : 40,
+          color: Colors.white.withValues(alpha: 0.8),
+        ),
       ),
     );
   }
