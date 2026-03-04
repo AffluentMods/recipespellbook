@@ -120,25 +120,37 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     SyncService.instance.setDatabase(db);
     TransferService.instance.setDatabase(db);
 
-    // 2. Restore auth session (also syncs JWT to services)
+    // 2. Restore auth session (must be first — determines signed-in state)
     await ref.read(authProvider.notifier).initialize();
 
-    // 3. Initialize subscription state from auth/backend tier
-    await ref.read(subscriptionProvider.notifier).initialize();
-
-    // 4. Initialize push notifications (FCM)
-    await NotificationService.instance.initialize();
-
-    // 5. Remove splash screen
+    // 3. Remove splash screen — show the app while the rest loads in background
     FlutterNativeSplash.remove();
 
     _initialized = true;
 
-    // 6. Auto-sync on launch if eligible
+    // 4. Initialize subscription + notifications in parallel (non-blocking).
+    //    Subscription defaults to free tier and updates once RevenueCat responds.
+    //    Notification service sets up channels and foreground listeners.
+    _initBackground();
+
+    // 5. Auto-sync on launch if eligible
     ref.read(syncProvider.notifier).autoSync();
 
-    // 7. Wire up share intent handling
+    // 6. Wire up share intent handling
     _initShareHandler();
+  }
+
+  /// Initialize subscription + notifications in background (non-blocking).
+  /// These don't need to complete before the user sees the app.
+  Future<void> _initBackground() async {
+    try {
+      await Future.wait([
+        ref.read(subscriptionProvider.notifier).initialize(),
+        NotificationService.instance.initialize(),
+      ]);
+    } catch (e) {
+      debugPrint('[Init] Background init error: $e');
+    }
   }
 
   // ── Share intent handling ──────────────────────────────────────────

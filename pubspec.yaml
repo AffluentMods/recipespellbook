@@ -63,6 +63,8 @@ dependencies:
   purchases_flutter: ^8.11.0
   purchases_ui_flutter: ^8.11.0
   timeago: ^3.7.1
+  cached_network_image: ^3.4.1
+  video_player: ^2.9.2
 
 dev_dependencies:
   flutter_test:
@@ -109,3 +111,4 @@ flutter:
     - assets/images/recipe_placeholder_rpg.png
     - assets/images/3rd-party/instacart_carrot.png
     - assets/images/3rd-party/instacart_carrot_white.png
+    - assets/animations/

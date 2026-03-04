@@ -118,6 +118,9 @@ class AuthService {
   String get _apiBaseUrl =>
       dotenv.get('API_URL', fallback: 'https://api.recipespellbook.app');
 
+  /// Public accessor for API base URL (used by CommunityService for image URLs).
+  String get apiBaseUrl => _apiBaseUrl;
+
   // ── Cached state ──
   AuthUser? _currentUser;
   String? _currentJwt;

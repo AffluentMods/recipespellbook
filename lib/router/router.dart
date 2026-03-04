@@ -45,6 +45,8 @@ import '../ui/screens/community/community_screen.dart';
 import '../ui/screens/community/community_detail_screen.dart';
 import '../ui/screens/community/community_publish_screen.dart';
 import '../ui/screens/community/community_my_publications_screen.dart';
+import '../ui/screens/community/community_recipe_full_screen.dart';
+import '../services/community_service.dart' show CommunityRecipe;
 import '../ui/screens/settings/trash_screen.dart';
 import '../ui/screens/shopping/kroger_callback_screen.dart';
 import '../ui/screens/shopping/shopping_screen.dart';
@@ -410,6 +412,18 @@ final router = GoRouter(
       builder: (context, state) {
         final id = state.pathParameters['id']!;
         return CommunityDetailScreen(publicationId: id);
+      },
+    ),
+    GoRoute(
+      path: '/community/:id/recipe/:index',
+      name: 'community-recipe',
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        final recipe = state.extra as CommunityRecipe;
+        return CommunityRecipeFullScreen(
+          publicationId: id,
+          recipe: recipe,
+        );
       },
     ),
     // Recipe edit (existing recipe)

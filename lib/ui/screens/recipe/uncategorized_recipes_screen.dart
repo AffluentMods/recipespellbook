@@ -6,8 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../data/course_category_data.dart' as taxonomy;
 import '../../../database/database.dart';
+import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
-import '../../../providers/settings_provider.dart';
 import '../../../utils/default_recipe_images.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/app_snackbar.dart';
@@ -26,6 +26,29 @@ class _UncategorizedRecipesScreenState
   // ── Selection state ──
   bool _isSelecting = false;
   final Set<String> _selectedIds = {};
+
+  // ── Custom taxonomy ──
+  Set<String> _customCourseIds = {};
+  Set<String> _customCategoryIds = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCustomIds();
+  }
+
+  Future<void> _loadCustomIds() async {
+    final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
+    final dao = ref.read(customTaxonomyDaoProvider);
+    final courses = await dao.getCustomCourses(cookbookId);
+    final categories = await dao.getCustomCategories(cookbookId);
+    if (mounted) {
+      setState(() {
+        _customCourseIds = courses.map((c) => c.id).toSet();
+        _customCategoryIds = categories.map((c) => c.id).toSet();
+      });
+    }
+  }
 
   void _toggleSelection(String id) {
     setState(() {
@@ -62,8 +85,7 @@ class _UncategorizedRecipesScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final settings = ref.watch(settingsProvider);
-    final cookbookId = settings.currentCookbookId ?? 'starter';
+    final cookbookId = ref.watch(selectedCookbookIdProvider) ?? 'starter';
     final recipeDao = ref.watch(recipeDaoProvider);
 
     final uri = GoRouterState.of(context).uri;
@@ -110,13 +132,20 @@ class _UncategorizedRecipesScreenState
           bool matchesCourse(String? courseId) {
             if (courseId == null || courseId.isEmpty) return false;
             final lower = courseId.toLowerCase();
-            return knownCourseIds.contains(lower) || knownCourseNames.contains(lower);
+            return knownCourseIds.contains(lower) || knownCourseNames.contains(lower) || _customCourseIds.contains(courseId);
           }
 
           bool matchesCategory(String? categoryId) {
             if (categoryId == null || categoryId.isEmpty) return false;
-            final lower = categoryId.toLowerCase();
-            return knownCategoryIds.contains(lower) || knownCategoryNames.contains(lower);
+            // categoryId can be comma-separated (multi-select)
+            final ids = categoryId.split(',').where((s) => s.isNotEmpty);
+            for (final rawId in ids) {
+              final lower = rawId.toLowerCase();
+              if (knownCategoryIds.contains(lower) || knownCategoryNames.contains(lower) || _customCategoryIds.contains(rawId)) {
+                return true;
+              }
+            }
+            return false;
           }
 
           final uncategorized = allRecipes.where((r) {

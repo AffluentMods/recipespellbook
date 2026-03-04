@@ -61,7 +61,7 @@ class FeedbackService {
       } else if (Platform.isAndroid) {
         platform = 'android';
       } else {
-        platform = Platform.operatingSystem;
+        platform = 'web'; // Desktop/other platforms report as 'web'
       }
 
       final client = HttpClient();

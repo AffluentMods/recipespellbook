@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import '../services/auth_service.dart';
 
 // ════════════════════════════════════════════
@@ -182,6 +184,99 @@ class ImageService {
     } catch (e) {
       debugPrint('[ImageService] Delete error: $e');
       return false;
+    }
+  }
+
+  // ════════════════════════════════════════════
+  //  COMMUNITY UPLOAD (with SafeSearch scanning)
+  // ════════════════════════════════════════════
+
+  /// Upload a local image file for community publishing.
+  /// Uses the /community-upload endpoint which includes SafeSearch scanning.
+  /// Returns null if rejected by moderation, user not signed in, or upload fails.
+  Future<ImageUploadResult?> communityUploadFile(File file) async {
+    if (!_auth.isSignedIn) {
+      debugPrint('[ImageService] Not signed in — cannot upload');
+      return null;
+    }
+
+    try {
+      final bytes = await file.readAsBytes();
+
+      if (bytes.length > maxFileSize) {
+        debugPrint('[ImageService] File too large: ${bytes.length} bytes');
+        return null;
+      }
+
+      final base64Data = base64Encode(bytes);
+      final contentType = _contentTypeFromPath(file.path);
+
+      debugPrint('[ImageService] Community uploading ${bytes.length} bytes as $contentType');
+
+      final response = await _auth.post('/v1/images/community-upload', {
+        'base64': base64Data,
+        'contentType': contentType,
+      });
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final result = ImageUploadResult.fromJson(data);
+        debugPrint('[ImageService] Community uploaded: ${result.path}');
+        return result;
+      }
+
+      if (response.statusCode == 422) {
+        // Rejected by SafeSearch
+        debugPrint('[ImageService] Image rejected by moderation: ${response.body}');
+        return null;
+      }
+
+      debugPrint('[ImageService] Community upload failed: ${response.statusCode} ${response.body}');
+      return null;
+    } catch (e) {
+      debugPrint('[ImageService] Community upload error: $e');
+      return null;
+    }
+  }
+
+  /// Upload a local image file by path for community publishing.
+  /// Convenience wrapper around [communityUploadFile].
+  Future<ImageUploadResult?> communityUploadLocalPath(String localPath) async {
+    final file = File(localPath);
+    if (!await file.exists()) {
+      debugPrint('[ImageService] Local file not found: $localPath');
+      return null;
+    }
+    return communityUploadFile(file);
+  }
+
+  // ════════════════════════════════════════════
+  //  COMMUNITY DOWNLOAD (save image to local)
+  // ════════════════════════════════════════════
+
+  /// Download an image from a URL and save it locally.
+  /// Returns the local file path, or null on failure.
+  Future<String?> downloadAndSaveImage(String url, String filename) async {
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode != 200) {
+        debugPrint('[ImageService] Download failed: ${response.statusCode}');
+        return null;
+      }
+
+      final appDir = await getApplicationDocumentsDirectory();
+      final communityDir = Directory('${appDir.path}/images/community');
+      if (!await communityDir.exists()) {
+        await communityDir.create(recursive: true);
+      }
+
+      final localFile = File('${communityDir.path}/$filename');
+      await localFile.writeAsBytes(response.bodyBytes);
+      debugPrint('[ImageService] Downloaded to: ${localFile.path}');
+      return localFile.path;
+    } catch (e) {
+      debugPrint('[ImageService] Download error: $e');
+      return null;
     }
   }
 

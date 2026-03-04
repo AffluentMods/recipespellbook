@@ -1,18 +1,22 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import '../../../data/community_tags_data.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../services/community_service.dart';
+import '../../../services/image_service.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/community_image.dart';
+import 'community_recipe_preview_dialog.dart';
+import 'community_screen.dart'; // StarRating
 
 // ════════════════════════════════════════════
-//  COMMUNITY DETAIL — View & Download
+//  COMMUNITY DETAIL — View, Rate & Download
 // ════════════════════════════════════════════
 
 class CommunityDetailScreen extends ConsumerStatefulWidget {
@@ -29,6 +33,13 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   CommunityDetail? _detail;
   bool _loading = true;
   bool _downloading = false;
+  String _downloadStatus = '';
+
+  // Rating
+  int _myRating = 0;
+  double _displayRating = 0;
+  int _displayRatingCount = 0;
+  bool _ratingLoading = false;
 
   @override
   void initState() {
@@ -38,12 +49,46 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 
   Future<void> _load() async {
     final detail = await _community.getPublication(widget.publicationId);
-    if (mounted) setState(() { _detail = detail; _loading = false; });
+    if (mounted) {
+      setState(() {
+        _detail = detail;
+        _loading = false;
+        _displayRating = detail?.averageRating ?? 0;
+        _displayRatingCount = detail?.ratingCount ?? 0;
+      });
+    }
+    // Load user's own rating
+    if (detail != null) {
+      final myRating = await _community.getMyRating(widget.publicationId);
+      if (mounted && myRating != null) {
+        setState(() => _myRating = myRating);
+      }
+    }
   }
 
-  Future<void> _download() async {
+  Future<void> _rate(int stars) async {
+    if (_ratingLoading) return;
+    setState(() {
+      _ratingLoading = true;
+      _myRating = stars; // Optimistic
+    });
+
+    final result = await _community.rate(widget.publicationId, stars);
+    if (mounted) {
+      if (result != null) {
+        setState(() {
+          _displayRating = result.averageRating;
+          _displayRatingCount = result.ratingCount;
+          _myRating = result.yourRating;
+        });
+      }
+      setState(() => _ratingLoading = false);
+    }
+  }
+
+  Future<void> _download({bool withImages = true}) async {
     if (_downloading) return;
-    setState(() => _downloading = true);
+    setState(() { _downloading = true; _downloadStatus = 'Downloading cookbook...'; });
 
     try {
       final result = await _community.download(widget.publicationId);
@@ -52,7 +97,6 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         return;
       }
 
-      // Create a new cookbook locally with the downloaded recipes
       final db = ref.read(databaseProvider);
       final cookbookId = 'community_${DateTime.now().millisecondsSinceEpoch}';
 
@@ -62,8 +106,21 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         description: drift.Value(result.description),
       ));
 
+      final totalRecipes = result.recipes.length;
+      int recipesDone = 0;
+
       for (final recipe in result.recipes) {
+        recipesDone++;
         final recipeId = 'cr_${DateTime.now().microsecondsSinceEpoch}';
+
+        // Download recipe image if requested and available
+        String? localImagePath;
+        if (withImages && recipe.imagePath != null && recipe.imagePath!.isNotEmpty) {
+          if (mounted) setState(() => _downloadStatus = 'Downloading images... ($recipesDone/$totalRecipes)');
+          final url = CommunityService.communityImageUrl(widget.publicationId, recipe.imagePath!);
+          final filename = 'community_${widget.publicationId}_${recipeId}_cover.jpg';
+          localImagePath = await ImageService.instance.downloadAndSaveImage(url, filename);
+        }
 
         await db.into(db.recipes).insert(RecipesCompanion.insert(
           id: recipeId,
@@ -74,9 +131,12 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
           prepTimeMinutes: drift.Value(recipe.prepTimeMinutes),
           cookTimeMinutes: drift.Value(recipe.cookTimeMinutes),
           sourceUrl: drift.Value(recipe.sourceUrl),
+          categoryId: drift.Value(recipe.categoryId),
+          courseId: drift.Value(recipe.courseId),
           rating: drift.Value(recipe.rating),
           notes: drift.Value(recipe.notes),
           nutritionJson: drift.Value(recipe.nutritionJson),
+          imagePath: drift.Value(localImagePath),
         ));
 
         for (final ing in recipe.ingredients) {
@@ -92,17 +152,25 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         }
 
         for (final step in recipe.steps) {
+          // Download step image if requested
+          String? stepImagePath;
+          if (withImages && step.imagePath != null && step.imagePath!.isNotEmpty) {
+            final url = CommunityService.communityImageUrl(widget.publicationId, step.imagePath!);
+            final filename = 'community_${widget.publicationId}_${recipeId}_step${step.sortOrder}.jpg';
+            stepImagePath = await ImageService.instance.downloadAndSaveImage(url, filename);
+          }
+
           await db.into(db.steps).insert(StepsCompanion.insert(
             id: 'cs_${DateTime.now().microsecondsSinceEpoch}',
             recipeId: recipeId,
             sortOrder: step.sortOrder,
             instruction: step.instruction,
             durationMinutes: drift.Value(step.durationMinutes),
+            imagePath: drift.Value(stepImagePath),
           ));
         }
       }
 
-      // Invalidate cookbook provider to refresh list
       ref.invalidate(cookbooksProvider);
 
       if (mounted) {
@@ -111,8 +179,47 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     } catch (e) {
       if (mounted) AppSnackbar.error(context, AppLocalizations.of(context)!.communityDownloadFailedError(e.toString()));
     } finally {
-      if (mounted) setState(() => _downloading = false);
+      if (mounted) setState(() { _downloading = false; _downloadStatus = ''; });
     }
+  }
+
+  void _showDownloadChoice() {
+    final d = _detail!;
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(width: 40, height: 4, decoration: BoxDecoration(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              )),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text('Download Options', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              ),
+              ListTile(
+                leading: const Icon(Icons.image),
+                title: Text('With images (${d.downloadSizeLabel})'),
+                subtitle: Text('${d.imageCount} images included'),
+                onTap: () { Navigator.pop(ctx); _download(withImages: true); },
+              ),
+              ListTile(
+                leading: const Icon(Icons.text_snippet),
+                title: const Text('Text only'),
+                subtitle: const Text('Faster download, no images'),
+                onTap: () { Navigator.pop(ctx); _download(withImages: false); },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _showReportSheet() {
@@ -188,91 +295,237 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     final d = _detail!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(d.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-        actions: [
-          IconButton(icon: const Icon(Icons.flag_outlined), tooltip: l10n.communityReport, onPressed: _showReportSheet),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // ── Header card ──
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: CustomScrollView(
+        slivers: [
+          // ── Cover image header ──
+          SliverAppBar(
+            expandedHeight: 220,
+            pinned: true,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.flag_outlined),
+                tooltip: l10n.communityReport,
+                onPressed: _showReportSheet,
+              ),
+            ],
+            flexibleSpace: FlexibleSpaceBar(
+              background: Stack(
+                fit: StackFit.expand,
                 children: [
-                  Text(d.title, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-                  if (d.description != null && d.description!.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Text(d.description!, style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
-                  ],
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 14,
-                        backgroundImage: d.publisher.avatarUrl != null ? NetworkImage(d.publisher.avatarUrl!) : null,
-                        child: d.publisher.avatarUrl == null
-                            ? Text(d.publisher.displayName[0].toUpperCase(), style: const TextStyle(fontSize: 10))
-                            : null,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(l10n.communityByPublisher(d.publisher.displayName), style: TextStyle(fontSize: 13, color: theme.colorScheme.outline)),
-                      const Spacer(),
-                      Text(timeago.format(d.createdAt), style: TextStyle(fontSize: 12, color: theme.colorScheme.outline)),
-                    ],
+                  CommunityImage(
+                    publicationId: d.id,
+                    imagePath: d.imagePath,
+                    fit: BoxFit.cover,
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      _StatBadge(icon: Icons.restaurant_menu, label: l10n.communityRecipeCount(d.recipeCount)),
-                      const SizedBox(width: 12),
-                      _StatBadge(icon: Icons.download, label: l10n.communityDownloadCount(d.downloadCount)),
-                    ],
+                  // Gradient at bottom
+                  Positioned(
+                    bottom: 0, left: 0, right: 0, height: 120,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.transparent, Colors.black.withValues(alpha: 0.75)],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Title + publisher
+                  Positioned(
+                    bottom: 50, left: 16, right: 16,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          d.title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            shadows: [Shadow(blurRadius: 6, color: Colors.black54)],
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            if (d.publisher.avatarUrl != null)
+                              CircleAvatar(
+                                radius: 10,
+                                backgroundImage: NetworkImage(d.publisher.avatarUrl!),
+                              )
+                            else
+                              CircleAvatar(
+                                radius: 10,
+                                child: Text(d.publisher.displayName[0].toUpperCase(), style: const TextStyle(fontSize: 8)),
+                              ),
+                            const SizedBox(width: 6),
+                            Text(
+                              d.publisher.displayName,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                fontSize: 13,
+                                shadows: const [Shadow(blurRadius: 4, color: Colors.black54)],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '·  ${timeago.format(d.createdAt)}',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.7),
+                                fontSize: 12,
+                                shadows: const [Shadow(blurRadius: 4, color: Colors.black54)],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
           ),
 
-          const SizedBox(height: 16),
+          // ── Content ──
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Description ──
+                  if (d.description != null && d.description!.isNotEmpty) ...[
+                    Text(
+                      d.description!,
+                      style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurfaceVariant, height: 1.4),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
 
-          // ── Download button ──
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: FilledButton.icon(
-              onPressed: _downloading ? null : _download,
-              icon: _downloading
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Icon(Icons.download),
-              label: Text(_downloading ? l10n.communityDownloading : l10n.communityDownloadToMyCookbooks),
+                  // ── Stats row ──
+                  _StatsRow(
+                    recipeCount: d.recipeCount,
+                    downloadCount: d.downloadCount,
+                    imageCount: d.imageCount,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // ── Rating section ──
+                  _RatingSection(
+                    averageRating: _displayRating,
+                    ratingCount: _displayRatingCount,
+                    myRating: _myRating,
+                    loading: _ratingLoading,
+                    onRate: _rate,
+                  ),
+                  const SizedBox(height: 12),
+
+                  // ── Tags ──
+                  if (d.tagList.isNotEmpty) ...[
+                    _DetailTagChips(tags: d.tagList),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // ── Download section ──
+                  _DownloadSection(
+                    detail: d,
+                    downloading: _downloading,
+                    downloadStatus: _downloadStatus,
+                    onDownload: () {
+                      if (d.imageCount > 30) {
+                        _showDownloadChoice();
+                      } else if (d.hasImages) {
+                        _download(withImages: true);
+                      } else {
+                        _download(withImages: false);
+                      }
+                    },
+                    onDownloadChoice: _showDownloadChoice,
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // ── Recipe list header ──
+                  Text(
+                    l10n.recipesTitle,
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Tap a recipe to preview',
+                    style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ),
             ),
           ),
 
-          const SizedBox(height: 24),
-
-          // ── Recipe list preview ──
-          Text(l10n.recipesTitle, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-
-          ...d.recipes.asMap().entries.map((entry) {
-            final i = entry.key;
-            final r = entry.value;
-            return _RecipePreviewTile(index: i + 1, recipe: r);
-          }),
+          // ── Recipe grid ──
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, i) {
+                  final recipe = d.recipes[i];
+                  return _RecipePreviewCard(
+                    index: i,
+                    recipe: recipe,
+                    publicationId: d.id,
+                    onTap: () => _showRecipePreview(i),
+                  );
+                },
+                childCount: d.recipes.length,
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  void _showRecipePreview(int index) {
+    showDialog(
+      context: context,
+      builder: (_) => CommunityRecipePreviewDialog(
+        recipe: _detail!.recipes[index],
+        publicationId: _detail!.id,
+        recipeIndex: index,
       ),
     );
   }
 }
 
 // ════════════════════════════════════════════
-//  SUB-WIDGETS
+//  STATS ROW
 // ════════════════════════════════════════════
+
+class _StatsRow extends StatelessWidget {
+  final int recipeCount;
+  final int downloadCount;
+  final int imageCount;
+
+  const _StatsRow({required this.recipeCount, required this.downloadCount, required this.imageCount});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Row(
+      children: [
+        _StatBadge(icon: Icons.restaurant_menu, label: l10n.communityRecipeCount(recipeCount)),
+        const SizedBox(width: 10),
+        _StatBadge(icon: Icons.download, label: l10n.communityDownloadCount(downloadCount)),
+        if (imageCount > 0) ...[
+          const SizedBox(width: 10),
+          _StatBadge(icon: Icons.image, label: '$imageCount images'),
+        ],
+      ],
+    );
+  }
+}
 
 class _StatBadge extends StatelessWidget {
   final IconData icon;
@@ -283,29 +536,248 @@ class _StatBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(icon, size: 14, color: theme.colorScheme.primary),
-        const SizedBox(width: 4),
-        Text(label, style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface)),
+        const SizedBox(width: 5),
+        Text(label, style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface, fontWeight: FontWeight.w500)),
       ]),
     );
   }
 }
 
-class _RecipePreviewTile extends StatelessWidget {
-  final int index;
-  final CommunityRecipe recipe;
-  const _RecipePreviewTile({required this.index, required this.recipe});
+// ════════════════════════════════════════════
+//  INTERACTIVE RATING
+// ════════════════════════════════════════════
+
+class _RatingSection extends StatelessWidget {
+  final double averageRating;
+  final int ratingCount;
+  final int myRating;
+  final bool loading;
+  final ValueChanged<int> onRate;
+
+  const _RatingSection({
+    required this.averageRating,
+    required this.ratingCount,
+    required this.myRating,
+    required this.loading,
+    required this.onRate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Average rating display
+          Row(
+            children: [
+              StarRating(rating: averageRating, count: ratingCount, size: 18),
+              const Spacer(),
+              if (averageRating > 0)
+                Text(
+                  averageRating.toStringAsFixed(1),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          // My rating — interactive
+          Row(
+            children: [
+              Text(
+                myRating > 0 ? 'Your rating:' : 'Rate this cookbook:',
+                style: TextStyle(fontSize: 13, color: theme.colorScheme.outline),
+              ),
+              const SizedBox(width: 8),
+              ...List.generate(5, (i) {
+                final star = i + 1;
+                return GestureDetector(
+                  onTap: loading ? null : () => onRate(star),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: Icon(
+                      star <= myRating ? Icons.star : Icons.star_border,
+                      size: 28,
+                      color: star <= myRating ? Colors.amber : theme.colorScheme.outline.withValues(alpha: 0.4),
+                    ),
+                  ),
+                );
+              }),
+              if (loading) ...[
+                const SizedBox(width: 8),
+                const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════
+//  TAG CHIPS (detail)
+// ════════════════════════════════════════════
+
+class _DetailTagChips extends StatelessWidget {
+  final List<String> tags;
+  const _DetailTagChips({required this.tags});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      children: tags.map((tag) {
+        // Find emoji from known tags
+        String? emoji;
+        String displayName = tag;
+        try {
+          final known = communityTags.firstWhere((t) => t.id == tag);
+          emoji = known.emoji;
+          displayName = known.name;
+        } catch (_) {}
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            emoji != null ? '$emoji $displayName' : displayName,
+            style: TextStyle(fontSize: 12, color: theme.colorScheme.onPrimaryContainer),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+// ════════════════════════════════════════════
+//  DOWNLOAD SECTION
+// ════════════════════════════════════════════
+
+class _DownloadSection extends StatelessWidget {
+  final CommunityDetail detail;
+  final bool downloading;
+  final String downloadStatus;
+  final VoidCallback onDownload;
+  final VoidCallback onDownloadChoice;
+
+  const _DownloadSection({
+    required this.detail,
+    required this.downloading,
+    required this.downloadStatus,
+    required this.onDownload,
+    required this.onDownloadChoice,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Size info
+        if (detail.hasImages)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Icon(Icons.storage, size: 14, color: theme.colorScheme.outline),
+                const SizedBox(width: 6),
+                Text(
+                  '${detail.downloadSizeLabel} with images',
+                  style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
+                ),
+              ],
+            ),
+          ),
+
+        // Download button
+        Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: 48,
+                child: FilledButton.icon(
+                  onPressed: downloading ? null : onDownload,
+                  icon: downloading
+                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Icon(Icons.download),
+                  label: Text(
+                    downloading
+                        ? downloadStatus
+                        : l10n.communityDownloadToMyCookbooks,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ),
+            // Show choices button if many images
+            if (detail.hasImages && !downloading) ...[
+              const SizedBox(width: 8),
+              SizedBox(
+                height: 48,
+                child: OutlinedButton(
+                  onPressed: onDownloadChoice,
+                  child: const Icon(Icons.expand_more),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ════════════════════════════════════════════
+//  RECIPE PREVIEW CARD (tappable)
+// ════════════════════════════════════════════
+
+class _RecipePreviewCard extends StatelessWidget {
+  final int index;
+  final CommunityRecipe recipe;
+  final String publicationId;
+  final VoidCallback onTap;
+
+  const _RecipePreviewCard({
+    required this.index,
+    required this.recipe,
+    required this.publicationId,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
     final parts = <String>[];
     if (recipe.prepTimeMinutes != null) parts.add(l10n.communityPrepTime(recipe.prepTimeMinutes!));
     if (recipe.cookTimeMinutes != null) parts.add(l10n.communityCookTime(recipe.cookTimeMinutes!));
@@ -315,15 +787,70 @@ class _RecipePreviewTile extends StatelessWidget {
     }
     if (recipe.ingredients.isNotEmpty) parts.add(l10n.communityIngredientCount(recipe.ingredients.length));
 
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(
-        radius: 16,
-        backgroundColor: theme.colorScheme.primaryContainer,
-        child: Text('$index', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
+    final hasImage = recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              // Thumbnail
+              if (hasImage) ...[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: CommunityImage(
+                    publicationId: publicationId,
+                    imagePath: recipe.imagePath,
+                    width: 56,
+                    height: 56,
+                    fit: BoxFit.cover,
+                    memCacheWidth: 112,
+                    memCacheHeight: 112,
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ] else ...[
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor: theme.colorScheme.primaryContainer,
+                  child: Text('${index + 1}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
+                ),
+                const SizedBox(width: 12),
+              ],
+
+              // Content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      recipe.title,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (parts.isNotEmpty)
+                      Text(
+                        parts.join(' · '),
+                        style: TextStyle(fontSize: 11, color: theme.colorScheme.outline),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  ],
+                ),
+              ),
+
+              // Chevron
+              Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline),
+            ],
+          ),
+        ),
       ),
-      title: Text(recipe.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-      subtitle: parts.isNotEmpty ? Text(parts.join(' · '), style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)) : null,
     );
   }
 }

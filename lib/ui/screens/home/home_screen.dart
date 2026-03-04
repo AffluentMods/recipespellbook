@@ -15,6 +15,7 @@ import '../../../utils/default_recipe_images.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/new_recipe_dialog.dart';
 import '../../widgets/onboarding_dialog.dart';
+import '../onboarding/book_intro_screen.dart';
 import '../onboarding/spellbook_opening_screen.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../../data/rpg/rpg_companion.dart';
@@ -38,12 +39,12 @@ class HomeScreen extends ConsumerWidget {
     if (offered) return;
     if (!context.mounted) return;
 
-    // Use the spellbook animation
+    // Use the book intro animation + recipe viewer
     await Navigator.of(context).push(
       PageRouteBuilder(
         opaque: true,
         pageBuilder: (ctx, animation, secondaryAnimation) =>
-            const SpellbookOpeningScreen(),
+            const BookIntroScreen(),
         transitionsBuilder: (ctx, animation, secondaryAnimation, child) {
           return FadeTransition(
             opacity: animation.drive(CurveTween(curve: Curves.easeOut)),
@@ -1021,6 +1022,8 @@ class _UncategorizedRecipeChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final hasImage = recipe.imagePath != null && File(recipe.imagePath!).existsSync();
+    final defaultAsset = defaultRecipeImageAsset(recipe.id);
 
     return GestureDetector(
       onTap: () => context.push('/recipe/${recipe.id}'),
@@ -1029,6 +1032,7 @@ class _UncategorizedRecipeChip extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         child: Card(
           margin: EdgeInsets.zero,
+          clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
             side: BorderSide(
@@ -1037,22 +1041,38 @@ class _UncategorizedRecipeChip extends StatelessWidget {
                   : theme.colorScheme.outline.withValues(alpha: 0.12),
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.restaurant_menu, color: theme.colorScheme.primary),
-                const SizedBox(height: 4),
-                Text(
-                  recipe.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
-                  textAlign: TextAlign.center,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Image area
+              Expanded(
+                flex: 3,
+                child: hasImage
+                    ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
+                    : defaultAsset != null
+                        ? Image.asset(defaultAsset, fit: BoxFit.cover)
+                        : Container(
+                            color: theme.colorScheme.primaryContainer,
+                            child: Icon(Icons.restaurant_menu, color: theme.colorScheme.primary, size: 28),
+                          ),
+              ),
+              // Title area
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  child: Center(
+                    child: Text(
+                      recipe.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
