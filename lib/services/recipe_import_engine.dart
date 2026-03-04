@@ -399,6 +399,15 @@ class RecipeImportEngine {
 
   /// Scrape a recipe from a URL. Tries oEmbed → JSON-LD → microdata → CSS selectors → platform-specific → generic HTML.
   static Future<ImportedRecipe> parseFromUrl(String url, {bool isRecursiveCall = false}) async {
+    return Future(() async {
+      return _parseFromUrlInternal(url, isRecursiveCall: isRecursiveCall);
+    }).timeout(
+      const Duration(seconds: 30),
+      onTimeout: () => throw Exception('Import timed out — the website took too long to respond.'),
+    );
+  }
+
+  static Future<ImportedRecipe> _parseFromUrlInternal(String url, {bool isRecursiveCall = false}) async {
     try {
       var normalized = _normalizeUrl(url);
       var platform = _detectPlatform(normalized);
@@ -582,9 +591,71 @@ class RecipeImportEngine {
   }
 
   /// Parse OCR text with extra cleanup for camera/scan artifacts.
+  /// Returns recipe with confidence scoring for quality assessment.
   static ImportedRecipe parseOcrText(String text) {
     final cleaned = _cleanOcrText(text);
-    return _parseStructuredText(cleaned);
+    final recipe = _parseStructuredText(cleaned);
+
+    // Score parse confidence
+    final confidence = _scoreParseConfidence(recipe, cleaned);
+    recipe.parseConfidence = confidence;
+    recipe.rawOcrText = text; // Keep original for Smart Import fallback
+
+    return recipe;
+  }
+
+  /// Score parse confidence from 0.0 to 1.0 based on quality signals.
+  static double _scoreParseConfidence(ImportedRecipe recipe, String cleanedText) {
+    double score = 0.0;
+
+    // Section headers found (+0.15) — means the text has clear structure
+    final hasIngredientHeader = RegExp(
+      r'(ingredients?|what you.?ll need)',
+      caseSensitive: false,
+    ).hasMatch(cleanedText);
+    final hasInstructionHeader = RegExp(
+      r'(instructions?|directions?|method|steps?|preparation|how to make)',
+      caseSensitive: false,
+    ).hasMatch(cleanedText);
+    if (hasIngredientHeader) score += 0.1;
+    if (hasInstructionHeader) score += 0.1;
+
+    // Title identified vs defaulted (+0.1)
+    if (recipe.title != 'Untitled Recipe' &&
+        recipe.title != 'Imported Recipe' &&
+        recipe.title.isNotEmpty) {
+      score += 0.1;
+    }
+
+    // Ingredients have measurements (+0.2)
+    if (recipe.ingredients.isNotEmpty) {
+      final withMeasurement = recipe.ingredients.where((ing) {
+        return RegExp(r'\d').hasMatch(ing) ||
+               RegExp(r'[½¼¾⅓⅔⅛⅜⅝⅞]').hasMatch(ing);
+      }).length;
+      final measureRatio = withMeasurement / recipe.ingredients.length;
+      score += 0.2 * measureRatio;
+    }
+
+    // Ratio of classified vs unclassified lines (+0.25)
+    final totalLines = cleanedText.split('\n').where((l) => l.trim().isNotEmpty).length;
+    final classifiedLines = recipe.ingredients.length + recipe.instructions.length;
+    if (totalLines > 0) {
+      final classifyRatio = (classifiedLines / totalLines).clamp(0.0, 1.0);
+      score += 0.25 * classifyRatio;
+    }
+
+    // Reasonable ingredient count 2-50 (+0.15)
+    if (recipe.ingredients.length >= 2 && recipe.ingredients.length <= 50) {
+      score += 0.15;
+    }
+
+    // Has at least one instruction (+0.1)
+    if (recipe.instructions.isNotEmpty) {
+      score += 0.1;
+    }
+
+    return score.clamp(0.0, 1.0);
   }
 
   /// Parse HTML content and return ALL recipes found (for bulk import).
@@ -1511,6 +1582,21 @@ class RecipeImportEngine {
     if (json.containsKey('whpiRecipeId') || json.containsKey('recipeItems')) {
       return _parseSamsungFoodRecipe(json);
     }
+    // Mela format
+    if (json.containsKey('text') && (json.containsKey('title') || json.containsKey('name'))) {
+      final text = json['text']?.toString() ?? '';
+      if (text.contains('---') || json.containsKey('images') || json.containsKey('categories')) {
+        return parseMelaRecipe(json);
+      }
+    }
+    // Generic recipe JSON detection — catches exports from lesser-known apps
+    final hasTitle = json.containsKey('title') || json.containsKey('name');
+    final hasIngredients = json.containsKey('ingredients') || json.containsKey('recipeIngredient');
+    final hasInstructions = json.containsKey('instructions') || json.containsKey('directions') ||
+        json.containsKey('steps') || json.containsKey('recipeInstructions');
+    if (hasTitle && hasIngredients && hasInstructions) {
+      return _buildRecipeFromJsonMap(json);
+    }
     return null;
   }
 
@@ -1754,6 +1840,138 @@ class RecipeImportEngine {
       imageUrl: json['image']?.toString() ?? json['imageUrl']?.toString() ?? json['photo']?.toString(),
       sourceUrl: json['url']?.toString() ?? json['sourceUrl']?.toString(),
       sourceApp: 'samsungfood',
+    );
+  }
+
+  /// Parse Paprika recipe JSON format.
+  /// Each Paprika recipe JSON has: name, ingredients (newline-separated),
+  /// directions (newline-separated), photo_data (base64), prep_time, cook_time,
+  /// source, categories (newline-separated), notes, rating (0-5).
+  static ImportedRecipe parsePaprikaRecipe(Map<String, dynamic> json) {
+    final ingredientsRaw = json['ingredients']?.toString() ?? '';
+    final directionsRaw = json['directions']?.toString() ?? '';
+
+    final ingredients = ingredientsRaw
+        .split('\n')
+        .map((l) => l.trim())
+        .where((l) => l.isNotEmpty)
+        .toList();
+
+    final instructions = directionsRaw
+        .split('\n')
+        .map((l) => l.trim())
+        .where((l) => l.isNotEmpty)
+        .toList();
+
+    // Parse time strings like "30 min", "1 hr 15 min", "45 minutes"
+    int? parseTimeString(String? time) {
+      if (time == null || time.trim().isEmpty) return null;
+      final t = time.trim().toLowerCase();
+      int minutes = 0;
+      final hrMatch = RegExp(r'(\d+)\s*(?:hr|hour)s?').firstMatch(t);
+      if (hrMatch != null) minutes += (int.tryParse(hrMatch.group(1)!) ?? 0) * 60;
+      final minMatch = RegExp(r'(\d+)\s*(?:min|minute)s?').firstMatch(t);
+      if (minMatch != null) minutes += int.tryParse(minMatch.group(1)!) ?? 0;
+      // If just a number, assume minutes
+      if (minutes == 0) {
+        final plain = int.tryParse(t);
+        if (plain != null) minutes = plain;
+      }
+      return minutes > 0 ? minutes : null;
+    }
+
+    // Parse categories (newline-separated in Paprika)
+    final categoriesRaw = json['categories']?.toString() ?? '';
+    final tags = categoriesRaw
+        .split('\n')
+        .map((l) => l.trim())
+        .where((l) => l.isNotEmpty)
+        .toList();
+
+    // Rating: Paprika uses 0-5, we store 0-5
+    final rating = json['rating'] is int ? json['rating'] as int :
+        (json['rating'] is double ? (json['rating'] as double).round() : null);
+
+    return ImportedRecipe(
+      title: json['name']?.toString() ?? json['title']?.toString() ?? 'Paprika Recipe',
+      description: json['description']?.toString(),
+      ingredients: ingredients,
+      instructions: instructions,
+      prepTimeMinutes: parseTimeString(json['prep_time']?.toString()),
+      cookTimeMinutes: parseTimeString(json['cook_time']?.toString()),
+      servings: json['servings']?.toString(),
+      sourceUrl: json['source']?.toString() ?? json['source_url']?.toString(),
+      notes: json['notes']?.toString(),
+      imageUrl: json['image_url']?.toString(),
+      imageData: json['photo_data']?.toString(), // Base64 photo
+      tags: tags.isNotEmpty ? tags : null,
+      rating: rating,
+      sourceApp: 'paprika',
+    );
+  }
+
+  /// Parse Mela recipe JSON format.
+  /// Mela uses: title, text (markdown with --- separator), images (base64 array), link, categories.
+  static ImportedRecipe parseMelaRecipe(Map<String, dynamic> json) {
+    final title = json['title']?.toString() ?? 'Mela Recipe';
+    final text = json['text']?.toString() ?? '';
+    final link = json['link']?.toString();
+
+    // Parse text: ingredients and instructions separated by ---
+    List<String> ingredients = [];
+    List<String> instructions = [];
+
+    if (text.contains('---')) {
+      final parts = text.split('---');
+      if (parts.length >= 2) {
+        ingredients = parts[0]
+            .split('\n')
+            .map((l) => l.trim())
+            .where((l) => l.isNotEmpty && l != '-')
+            .map((l) => l.startsWith('- ') ? l.substring(2) : l)
+            .toList();
+        instructions = parts.sublist(1).join('\n')
+            .split('\n')
+            .map((l) => l.trim())
+            .where((l) => l.isNotEmpty)
+            .map((l) {
+              // Remove markdown numbering
+              final numMatch = RegExp(r'^\d+\.\s*').firstMatch(l);
+              return numMatch != null ? l.substring(numMatch.end) : l;
+            })
+            .toList();
+      }
+    } else {
+      // No separator — try structured text parsing
+      final parsed = _parseStructuredText(text);
+      ingredients = parsed.ingredients;
+      instructions = parsed.instructions;
+    }
+
+    // Images: take the first one as base64 image data
+    String? imageData;
+    if (json['images'] is List && (json['images'] as List).isNotEmpty) {
+      imageData = (json['images'] as List).first?.toString();
+    }
+
+    // Categories as tags
+    List<String>? tags;
+    if (json['categories'] is List) {
+      tags = (json['categories'] as List)
+          .map((c) => c.toString().trim())
+          .where((c) => c.isNotEmpty)
+          .toList();
+      if (tags.isEmpty) tags = null;
+    }
+
+    return ImportedRecipe(
+      title: title,
+      ingredients: ingredients,
+      instructions: instructions,
+      imageData: imageData,
+      sourceUrl: link,
+      tags: tags,
+      sourceApp: 'mela',
     );
   }
 
@@ -2577,32 +2795,92 @@ class RecipeImportEngine {
     try {
       final json = jsonDecode(text);
       if (json is Map) {
-        return ImportedRecipe(
-          title: json['title']?.toString() ??
-              json['name']?.toString() ??
-              'Imported Recipe',
-          description: json['description']?.toString(),
-          ingredients: _toStringList(
-              json['ingredients'] ?? json['recipeIngredient'] ?? []),
-          instructions: _toStringList(json['instructions'] ??
-              json['recipeInstructions'] ??
-              json['directions'] ??
-              json['steps'] ??
-              []),
-          servings:
-          json['servings']?.toString() ?? json['yield']?.toString(),
-          prepTimeMinutes:
-          _parseTimeValue(json['prepTime'] ?? json['prep_time']),
-          cookTimeMinutes:
-          _parseTimeValue(json['cookTime'] ?? json['cook_time']),
-          imageUrl: json['image']?.toString() ?? json['imageUrl']?.toString(),
-          sourceUrl: json['url']?.toString() ?? json['sourceUrl']?.toString(),
-        );
+        return _buildRecipeFromJsonMap(json);
       }
     } catch (e) {
-      // Not valid JSON
+      // Try cleaning common JSON artifacts and retry
+      try {
+        final cleaned = _cleanJsonText(text);
+        if (cleaned != text) {
+          final json = jsonDecode(cleaned);
+          if (json is Map) {
+            return _buildRecipeFromJsonMap(json);
+          }
+        }
+      } catch (_) {}
     }
     return null;
+  }
+
+  /// Clean common JSON artifacts (trailing commas, comments, etc.)
+  static String _cleanJsonText(String text) {
+    var s = text.trim();
+
+    // Strip markdown code fences
+    if (s.startsWith('```')) {
+      final firstNewline = s.indexOf('\n');
+      if (firstNewline != -1) s = s.substring(firstNewline + 1);
+      if (s.endsWith('```')) s = s.substring(0, s.length - 3);
+      s = s.trim();
+    }
+
+    // Strip single-line comments (// ...)
+    s = s.replaceAll(RegExp(r'//[^\n]*'), '');
+
+    // Strip block comments (/* ... */)
+    s = s.replaceAll(RegExp(r'/\*.*?\*/', dotAll: true), '');
+
+    // Remove trailing commas before } or ]
+    s = s.replaceAll(RegExp(r',\s*([}\]])'), r'$1');
+
+    // Extract JSON if there's text before/after
+    final firstBrace = s.indexOf('{');
+    final firstBracket = s.indexOf('[');
+    if (firstBrace > 0 || firstBracket > 0) {
+      final start = (firstBrace >= 0 && firstBracket >= 0)
+          ? (firstBrace < firstBracket ? firstBrace : firstBracket)
+          : (firstBrace >= 0 ? firstBrace : firstBracket);
+      if (start > 0) {
+        s = s.substring(start);
+        // Find matching end
+        final isArray = s.startsWith('[');
+        final endChar = isArray ? ']' : '}';
+        final lastEnd = s.lastIndexOf(endChar);
+        if (lastEnd > 0) s = s.substring(0, lastEnd + 1);
+      }
+    }
+
+    // Try replacing single quotes with double quotes as last resort
+    // Only if no double quotes exist (to avoid breaking valid JSON)
+    if (!s.contains('"') && s.contains("'")) {
+      s = s.replaceAll("'", '"');
+    }
+
+    return s;
+  }
+
+  static ImportedRecipe _buildRecipeFromJsonMap(Map json) {
+    return ImportedRecipe(
+      title: json['title']?.toString() ??
+          json['name']?.toString() ??
+          'Imported Recipe',
+      description: json['description']?.toString(),
+      ingredients: _toStringList(
+          json['ingredients'] ?? json['recipeIngredient'] ?? []),
+      instructions: _toStringList(json['instructions'] ??
+          json['recipeInstructions'] ??
+          json['directions'] ??
+          json['steps'] ??
+          []),
+      servings:
+      json['servings']?.toString() ?? json['yield']?.toString(),
+      prepTimeMinutes:
+      _parseTimeValue(json['prepTime'] ?? json['prep_time']),
+      cookTimeMinutes:
+      _parseTimeValue(json['cookTime'] ?? json['cook_time']),
+      imageUrl: json['image']?.toString() ?? json['imageUrl']?.toString(),
+      sourceUrl: json['url']?.toString() ?? json['sourceUrl']?.toString(),
+    );
   }
 
   static List<String> _toStringList(dynamic data) {

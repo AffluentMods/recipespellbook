@@ -7,15 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:pdfx/pdfx.dart';
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/imported_recipe.dart';
 import '../../providers/database_provider.dart';
+import '../../services/ocr_service.dart';
 import '../../services/recipe_import_engine.dart';
 import '../screens/import/ai_import_screen.dart';
 import '../screens/import/import_preview_screen.dart';
@@ -302,59 +301,33 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     final l10n = AppLocalizations.of(context)!;
     _showLoading(l10n.readingImage);
     try {
-      final document = await PdfDocument.openFile(path);
-      final tempDir = await getTemporaryDirectory();
-      final allLines = <String>[];
-      final textRecognizer = TextRecognizer();
+      final result = await OcrService.instance.processPdf(path, onProgress: (current, total) {
+        if (mounted) _showLoading('Scanning page $current of $total...');
+      });
 
-      try {
-        for (int pageNum = 1; pageNum <= document.pagesCount; pageNum++) {
-          final page = await document.getPage(pageNum);
-          final pageImage = await page.render(
-            width: page.width * 2,
-            height: page.height * 2,
-            format: PdfPageImageFormat.png,
-          );
-          await page.close();
-
-          if (pageImage != null) {
-            final imagePath = p.join(tempDir.path, 'pdf_page_$pageNum.png');
-            final file = File(imagePath);
-            await file.writeAsBytes(pageImage.bytes);
-
-            final inputImage = InputImage.fromFilePath(imagePath);
-            final recognized = await textRecognizer.processImage(inputImage);
-
-            for (final block in recognized.blocks) {
-              for (final line in block.lines) {
-                allLines.add(line.text);
-              }
-              allLines.add('');
-            }
-
-            await file.delete();
-          }
-        }
-      } finally {
-        await textRecognizer.close();
-        await document.close();
+      if (result.isEmpty) {
+        _hideLoading();
+        _showError('No text found in PDF. Try using a clearer scan or the Text paste option instead.');
+        return;
       }
 
-      final ocrText = allLines.join('\n');
-      if (ocrText.trim().isEmpty) {
+      if (result.text.trim().length < 20) {
         _hideLoading();
-        _showError(l10n.noTextInImage);
+        _showError('Very little text detected in PDF (${result.text.trim().length} characters). '
+            'The scan may be too blurry. Try a higher quality PDF, or use the Text paste option instead.');
         return;
       }
 
       _showLoading(l10n.parsingRecipe);
-      final recipe = RecipeImportEngine.parseOcrText(ocrText);
+      final recipe = RecipeImportEngine.parseOcrText(result.text);
+      recipe.parseConfidence = result.confidence;
+      recipe.rawOcrText = result.text;
       // Use filename as fallback title
       if (recipe.title.isEmpty || recipe.title == 'Untitled Recipe') {
         recipe.title = p.basenameWithoutExtension(path).replaceAll(RegExp(r'[-_]'), ' ');
       }
       _hideLoading();
-      _showImportPreview([recipe], sourceText: ocrText);
+      _showImportPreview([recipe], sourceText: result.text);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedToImport(e.toString()));
@@ -368,42 +341,70 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       context: context,
       builder: (ctx) => SafeArea(
         child: Wrap(children: [
-          ListTile(leading: const Icon(Icons.camera_alt), title: Text(l10n.photoTakePhoto), onTap: () => Navigator.pop(ctx, ImageSource.camera)),
-          ListTile(leading: const Icon(Icons.photo_library), title: Text(l10n.photoChooseGallery), onTap: () => Navigator.pop(ctx, ImageSource.gallery)),
+          ListTile(
+            leading: const Icon(Icons.camera_alt),
+            title: Text(l10n.photoTakePhoto),
+            onTap: () => Navigator.pop(ctx, ImageSource.camera),
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo_library),
+            title: Text(l10n.photoChooseGallery),
+            subtitle: const Text('Select multiple pages'),
+            onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+          ),
         ]),
       ),
     );
     if (source == null) return;
 
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: source);
-    if (image == null) return;
-    _processImage(image.path);
+    final ocr = OcrService.instance;
+
+    if (source == ImageSource.gallery) {
+      // Multi-image selection
+      final images = await ocr.pickMultipleFromGallery();
+      if (images.isEmpty) return;
+      _processMultipleImages(images.map((f) => f.path).toList());
+    } else {
+      // Camera — single shot
+      final image = await ocr.pickFromCamera();
+      if (image == null) return;
+      _processMultipleImages([image.path]);
+    }
   }
 
-  Future<void> _processImage(String imagePath) async {
+  Future<void> _processMultipleImages(List<String> imagePaths) async {
     final l10n = AppLocalizations.of(context)!;
-    _showLoading(l10n.readingImage);
+    _showLoading(imagePaths.length > 1
+        ? 'Scanning page 1 of ${imagePaths.length}...'
+        : l10n.readingImage);
     try {
-      final inputImage = InputImage.fromFilePath(imagePath);
-      final textRecognizer = TextRecognizer();
-      final recognizedText = await textRecognizer.processImage(inputImage);
-      await textRecognizer.close();
+      final result = await OcrService.instance.processMultipleImages(
+        imagePaths,
+        onProgress: (current, total) {
+          if (mounted) _showLoading('Scanning page $current of $total...');
+        },
+      );
 
-      if (recognizedText.text.isEmpty) { _hideLoading(); _showError(l10n.noTextInImage); return; }
+      if (result.isEmpty) {
+        _hideLoading();
+        _showError('No text found in image. Try taking the photo in better lighting, or use the Text paste option instead.');
+        return;
+      }
 
-      final lines = <String>[];
-      for (final block in recognizedText.blocks) {
-        for (final line in block.lines) { lines.add(line.text); }
-        lines.add('');
+      if (result.text.trim().length < 20) {
+        _hideLoading();
+        _showError('Very little text detected (${result.text.trim().length} characters). '
+            'Try a clearer photo with better lighting, or use the Text paste option instead.');
+        return;
       }
 
       _showLoading(l10n.parsingRecipe);
-      final ocrText = lines.join('\n');
-      final recipe = RecipeImportEngine.parseOcrText(ocrText);
-      recipe.imageUrl = imagePath;
+      final recipe = RecipeImportEngine.parseOcrText(result.text);
+      recipe.imageUrl = imagePaths.first; // Use first image as recipe cover
+      recipe.parseConfidence = result.confidence;
+      recipe.rawOcrText = result.text;
       _hideLoading();
-      _showImportPreview([recipe], sourceText: ocrText);
+      _showImportPreview([recipe], sourceText: result.text);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedProcessImage(e.toString()));
@@ -435,14 +436,12 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   static const _supportedExtensions = {
     'pdf', 'txt', 'md', 'json', 'zip', 'html', 'htm',
     'mela', 'melarecipes', 'melarecipe',
+    'paprikarecipes', 'paprikarecipe',
     'crumb', 'fdx', 'mmf', 'mk', 'rcb', 'mx2', 'mcx',
   };
 
   // Extensions that need user action before importing
-  static const _redirectExtensions = {
-    'paprikarecipes': 'Paprika files can\'t be imported directly. In Paprika, go to Export and choose "HTML" format instead, then import that file here.',
-    'paprikarecipe': 'Paprika files can\'t be imported directly. In Paprika, go to Export and choose "HTML" format instead, then import that file here.',
-  };
+  static const _redirectExtensions = <String, String>{};
 
   Future<void> _importFromFile() async {
     final l10n = AppLocalizations.of(context)!;
@@ -472,7 +471,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
         break;
       case 'zip': case 'mela': case 'melarecipes':
       case 'melarecipe': case 'crumb': case 'fdx': case 'rcb':
-      case 'mx2': case 'mcx':
+      case 'mx2': case 'mcx': case 'paprikarecipes': case 'paprikarecipe':
       _processZipFile(path);
       break;
       case 'html': case 'htm':
@@ -636,7 +635,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
         suggestedCategory: r['categoryId'] as String?,
         suggestedCourse: r['courseId'] as String?,
         notes: r['notes'] as String?,
-        imageUrl: r['imageBase64'] != null ? null : null, // Images handled separately on final import
+        imageData: r['imageBase64'] as String?,
       );
     }).toList();
 
@@ -679,39 +678,117 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   Future<void> _processZipFile(String path) async {
     final l10n = AppLocalizations.of(context)!;
     _showLoading(l10n.extractingArchive);
+    final errors = <String>[];
     try {
       final bytes = await File(path).readAsBytes();
+      final ext = path.toLowerCase().split('.').last;
+
+      // Paprika format: gzip-compressed archive of individual gzip-compressed JSON files
+      if (ext == 'paprikarecipes' || ext == 'paprikarecipe') {
+        final recipes = await _processPaprikaBytes(bytes, errors);
+        _hideLoading();
+        if (recipes.isEmpty) {
+          _showError(errors.isNotEmpty ? errors.join('\n') : l10n.errorNoRecipeFound);
+          return;
+        }
+        _showImportPreview(recipes);
+        return;
+      }
+
       final archive = ZipDecoder().decodeBytes(bytes);
       final recipes = <ImportedRecipe>[];
 
       for (final file in archive) {
         if (!file.isFile) continue;
         final name = file.name.toLowerCase();
-        final content = utf8.decode(file.content as List<int>, allowMalformed: true);
 
-        if (name.endsWith('.json')) {
-          try {
+        try {
+          final content = utf8.decode(file.content as List<int>, allowMalformed: true);
+
+          if (name.endsWith('.json')) {
             final bulkRecipes = RecipeImportEngine.parseFromFileBulk(content, file.name);
             recipes.addAll(bulkRecipes);
-          } catch (_) {}
-        } else if (name.endsWith('.html') || name.endsWith('.htm')) {
-          recipes.addAll(RecipeImportEngine.parseFromHtml(content));
-        } else if (name.endsWith('.md') || name.endsWith('.txt') || name.endsWith('.mmf') || name.endsWith('.mk')) {
-          try {
+          } else if (name.endsWith('.html') || name.endsWith('.htm')) {
+            recipes.addAll(RecipeImportEngine.parseFromHtml(content));
+          } else if (name.endsWith('.md') || name.endsWith('.txt') || name.endsWith('.mmf') || name.endsWith('.mk')) {
             final bulkText = RecipeImportEngine.parseFromFileBulk(content, file.name);
             recipes.addAll(bulkText);
-          } catch (_) {}
+          }
+        } catch (e) {
+          errors.add('${file.name}: $e');
         }
       }
 
       _hideLoading();
-      if (recipes.isEmpty) { _showError(l10n.errorNoRecipeFound); return; }
-      // All imports route through preview for Smart Import fallback
+      if (recipes.isEmpty) {
+        _showError(errors.isNotEmpty
+            ? '${l10n.errorNoRecipeFound}\n${errors.length} files had errors.'
+            : l10n.errorNoRecipeFound);
+        return;
+      }
+      if (errors.isNotEmpty) {
+        debugPrint('[Import] ZIP: ${recipes.length} recipes found, ${errors.length} errors: $errors');
+      }
       _showImportPreview(recipes);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedToImport(e.toString()));
     }
+  }
+
+  /// Process Paprika format: gzip-compressed archive containing
+  /// individual gzip-compressed JSON recipe files.
+  Future<List<ImportedRecipe>> _processPaprikaBytes(List<int> bytes, List<String> errors) async {
+    final recipes = <ImportedRecipe>[];
+    try {
+      // First decompress the outer gzip to get the inner archive
+      final decompressed = GZipDecoder().decodeBytes(bytes);
+      final archive = ZipDecoder().decodeBytes(decompressed);
+
+      for (final file in archive) {
+        if (!file.isFile) continue;
+        try {
+          // Each file inside is also gzip-compressed JSON
+          List<int> recipeBytes;
+          try {
+            recipeBytes = GZipDecoder().decodeBytes(file.content as List<int>);
+          } catch (_) {
+            // Some Paprika exports don't double-compress
+            recipeBytes = file.content as List<int>;
+          }
+
+          final jsonStr = utf8.decode(recipeBytes, allowMalformed: true);
+          final json = jsonDecode(jsonStr) as Map<String, dynamic>;
+          recipes.add(RecipeImportEngine.parsePaprikaRecipe(json));
+        } catch (e) {
+          errors.add('${file.name}: $e');
+        }
+      }
+    } catch (_) {
+      // The outer format might be a plain zip (not gzip-wrapped)
+      try {
+        final archive = ZipDecoder().decodeBytes(bytes);
+        for (final file in archive) {
+          if (!file.isFile) continue;
+          try {
+            List<int> recipeBytes;
+            try {
+              recipeBytes = GZipDecoder().decodeBytes(file.content as List<int>);
+            } catch (_) {
+              recipeBytes = file.content as List<int>;
+            }
+            final jsonStr = utf8.decode(recipeBytes, allowMalformed: true);
+            final json = jsonDecode(jsonStr) as Map<String, dynamic>;
+            recipes.add(RecipeImportEngine.parsePaprikaRecipe(json));
+          } catch (e) {
+            errors.add('${file.name}: $e');
+          }
+        }
+      } catch (e) {
+        errors.add('Failed to read Paprika archive: $e');
+      }
+    }
+    return recipes;
   }
 
   @override

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/foundation.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/imported_recipe.dart';
@@ -97,6 +99,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
 
   Future<void> _importSelected() async {
     final l10n = AppLocalizations.of(context)!;
+    const uuid = Uuid();
     final selectedRecipes = <ImportedRecipe>[];
     for (var i = 0; i < _recipes.length; i++) {
       if (_selected[i]) selectedRecipes.add(_recipes[i]);
@@ -110,58 +113,98 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
       _lastImportedRecipeId = null;
     });
 
-    final recipeDao = ref.read(recipeDaoProvider);
+    final db = ref.read(databaseProvider);
+    final errors = <String>[];
 
+    // Phase 1: Download all images in parallel (max 5 concurrent)
+    final imageResults = <int, String?>{};
+    final imageIndices = <int>[];
+    for (var i = 0; i < selectedRecipes.length; i++) {
+      final r = selectedRecipes[i];
+      if ((r.imageUrl != null && r.imageUrl!.isNotEmpty) || (r.imageData != null && r.imageData!.isNotEmpty)) {
+        imageIndices.add(i);
+      }
+    }
+
+    // Download in batches of 5
+    for (var batch = 0; batch < imageIndices.length; batch += 5) {
+      final end = (batch + 5).clamp(0, imageIndices.length);
+      final batchIndices = imageIndices.sublist(batch, end);
+      final futures = batchIndices.map((i) async {
+        final r = selectedRecipes[i];
+        // Try URL download first, then base64 decode
+        if (r.imageUrl != null && r.imageUrl!.isNotEmpty) {
+          return MapEntry(i, await _downloadRecipeImage(r.imageUrl!));
+        } else if (r.imageData != null && r.imageData!.isNotEmpty) {
+          return MapEntry(i, await _saveBase64Image(r.imageData!));
+        }
+        return MapEntry(i, null as String?);
+      });
+      final results = await Future.wait(futures);
+      for (final entry in results) {
+        imageResults[entry.key] = entry.value;
+      }
+      if (mounted) {
+        setState(() => _progress = (batch + batchIndices.length) / (selectedRecipes.length * 2));
+      }
+    }
+
+    // Phase 2: Insert all recipes in DB with transactions
     for (var idx = 0; idx < selectedRecipes.length; idx++) {
       final recipe = selectedRecipes[idx];
+      final recipeId = 'recipe_${uuid.v4()}';
+
       try {
-        final recipeId = 'recipe_${DateTime.now().millisecondsSinceEpoch}_$idx';
-
-        // Download recipe image if available
-        String? localImagePath;
-        if (recipe.imageUrl != null && recipe.imageUrl!.isNotEmpty) {
-          localImagePath = await _downloadRecipeImage(recipe.imageUrl!);
-        }
-
-        await recipeDao.insertRecipe(RecipesCompanion.insert(
-          id: recipeId,
-          cookbookId: widget.cookbookId,
-          title: recipe.title,
-          description: drift.Value(recipe.description),
-          servings: drift.Value(recipe.servings),
-          prepTimeMinutes: drift.Value(recipe.prepTimeMinutes),
-          cookTimeMinutes: drift.Value(recipe.cookTimeMinutes),
-          sourceUrl: drift.Value(recipe.sourceUrl),
-          courseId: drift.Value(recipe.suggestedCourse),
-          categoryId: drift.Value(recipe.suggestedCategory),
-          notes: drift.Value(recipe.notes),
-          imagePath: drift.Value(localImagePath),
-        ));
-
-        for (var i = 0; i < recipe.ingredients.length; i++) {
-          await recipeDao.insertIngredient(IngredientsCompanion.insert(
-            id: '${recipeId}_ing_$i',
-            recipeId: recipeId,
-            sortOrder: i,
-            name: recipe.ingredients[i],
+        await db.transaction(() async {
+          await db.into(db.recipes).insert(RecipesCompanion.insert(
+            id: recipeId,
+            cookbookId: widget.cookbookId,
+            title: recipe.title,
+            description: drift.Value(recipe.description),
+            servings: drift.Value(recipe.servings),
+            prepTimeMinutes: drift.Value(recipe.prepTimeMinutes),
+            cookTimeMinutes: drift.Value(recipe.cookTimeMinutes),
+            sourceUrl: drift.Value(recipe.sourceUrl),
+            courseId: drift.Value(recipe.suggestedCourse),
+            categoryId: drift.Value(recipe.suggestedCategory),
+            notes: drift.Value(recipe.notes),
+            imagePath: drift.Value(imageResults[idx]),
           ));
-        }
 
-        for (var i = 0; i < recipe.instructions.length; i++) {
-          await recipeDao.insertStep(StepsCompanion.insert(
-            id: '${recipeId}_step_$i',
-            recipeId: recipeId,
-            sortOrder: i,
-            instruction: recipe.instructions[i],
-          ));
-        }
+          // Batch insert ingredients
+          await db.batch((batch) {
+            for (var i = 0; i < recipe.ingredients.length; i++) {
+              batch.insert(db.ingredients, IngredientsCompanion.insert(
+                id: 'ing_${uuid.v4()}',
+                recipeId: recipeId,
+                sortOrder: i,
+                name: recipe.ingredients[i],
+              ));
+            }
+          });
+
+          // Batch insert steps
+          await db.batch((batch) {
+            for (var i = 0; i < recipe.instructions.length; i++) {
+              batch.insert(db.steps, StepsCompanion.insert(
+                id: 'step_${uuid.v4()}',
+                recipeId: recipeId,
+                sortOrder: i,
+                instruction: recipe.instructions[i],
+              ));
+            }
+          });
+        });
 
         _importedCount++;
         _lastImportedRecipeId = recipeId;
-      } catch (_) {}
+      } catch (e) {
+        errors.add('${recipe.title}: $e');
+        debugPrint('[Import] Failed to import "${recipe.title}": $e');
+      }
 
       if (mounted) {
-        setState(() => _progress = (idx + 1) / selectedRecipes.length);
+        setState(() => _progress = 0.5 + ((idx + 1) / selectedRecipes.length) * 0.5);
       }
     }
 
@@ -169,7 +212,14 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
       final router = GoRouter.of(context);
       final lastId = _lastImportedRecipeId;
 
-      if (_importedCount == 1 && lastId != null) {
+      if (errors.isNotEmpty) {
+        AppSnackbar.errorWithAction(
+          context,
+          '$_importedCount imported, ${errors.length} failed',
+          actionLabel: 'Details',
+          onAction: () => _showErrorDetails(errors),
+        );
+      } else if (_importedCount == 1 && lastId != null) {
         AppSnackbar.successWithAction(
           context,
           '${_importedCount} recipe imported',
@@ -181,6 +231,36 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
       }
 
       Navigator.of(context).pop();
+    }
+  }
+
+  /// Decodes a base64-encoded image and saves it to local storage.
+  static Future<String?> _saveBase64Image(String base64Data) async {
+    try {
+      // Strip data URI prefix if present (data:image/jpeg;base64,...)
+      var data = base64Data;
+      if (data.contains(',')) {
+        data = data.split(',').last;
+      }
+
+      final bytes = base64Decode(data);
+      if (bytes.length < 1024) return null; // Skip tiny images
+
+      final dir = await getApplicationDocumentsDirectory();
+      final imageDir = Directory('${dir.path}/recipe_images');
+      if (!await imageDir.exists()) {
+        await imageDir.create(recursive: true);
+      }
+
+      final filename = 'img_${const Uuid().v4()}.jpg';
+      final file = File('${imageDir.path}/$filename');
+      await file.writeAsBytes(bytes);
+
+      debugPrint('[Import] Saved base64 image: ${file.path} (${bytes.length} bytes)');
+      return file.path;
+    } catch (e) {
+      debugPrint('[Import] Failed to save base64 image: $e');
+      return null;
     }
   }
 
@@ -211,7 +291,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
         response.headers['content-type'],
         imageUrl,
       );
-      final filename = 'img_${DateTime.now().millisecondsSinceEpoch}$ext';
+      final filename = 'img_${const Uuid().v4()}$ext';
       final file = File('${imageDir.path}/$filename');
       await file.writeAsBytes(response.bodyBytes);
 
@@ -234,6 +314,50 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     if (lower.endsWith('.webp')) return '.webp';
     if (lower.endsWith('.gif')) return '.gif';
     return '.jpg';
+  }
+
+  void _showErrorDetails(List<String> errors) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.amber[700]),
+            const SizedBox(width: 8),
+            const Text('Import Issues'),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: errors.length,
+            itemBuilder: (_, i) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.error_outline, size: 16, color: Colors.red[400]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      errors[i],
+                      style: Theme.of(ctx).textTheme.bodySmall,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -587,6 +711,33 @@ class _RecipePreviewCard extends StatelessWidget {
                 ),
               ),
             ),
+
+            // Low confidence warning
+            if (recipe.parseConfidence != null && recipe.parseConfidence! < 0.5)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                margin: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber[700]),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'OCR quality is low — tap "Fix with AI" for better results',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.amber[800],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
             // ── Expanded content ──
             AnimatedCrossFade(

@@ -47,6 +47,23 @@ class AppSnackbar {
     );
   }
 
+  /// Error snackbar with an action button
+  static void errorWithAction(
+      BuildContext context,
+      String message, {
+        required String actionLabel,
+        required VoidCallback onAction,
+        Duration duration = const Duration(seconds: 5),
+      }) {
+    _show(
+      context, message,
+      Icons.error_rounded, const Color(0xFFC62828), const Color(0xFFFFEBEE),
+      duration: duration,
+      actionLabel: actionLabel,
+      onAction: onAction,
+    );
+  }
+
   /// Loading snackbar with spinner — stays until manually dismissed
   static void loading(BuildContext context, String message) {
     _show(

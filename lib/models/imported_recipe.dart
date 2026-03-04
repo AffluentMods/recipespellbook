@@ -22,6 +22,10 @@ class ImportedRecipe {
   String? sourceApp; // "paprika", "recipekeeper", "crouton", etc.
   String? sourceFile; // Original filename
 
+  // OCR quality metadata
+  double? parseConfidence; // 0.0 - 1.0 confidence score from OCR/parsing
+  String? rawOcrText; // Original OCR text for Smart Import fallback
+
   ImportedRecipe({
     required this.title,
     this.description,
@@ -41,6 +45,8 @@ class ImportedRecipe {
     this.rating,
     this.sourceApp,
     this.sourceFile,
+    this.parseConfidence,
+    this.rawOcrText,
   });
 
   /// Convert to the Map format expected by RecipeEditScreen's importedData param.

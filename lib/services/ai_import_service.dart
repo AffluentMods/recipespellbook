@@ -196,7 +196,33 @@ class AiImportService {
       }
     }
 
-    return s;
+    // Strip single-line comments (// ...)
+    s = s.replaceAll(RegExp(r'//[^\n]*'), '');
+
+    // Strip block comments (/* ... */)
+    s = s.replaceAll(RegExp(r'/\*.*?\*/', dotAll: true), '');
+
+    // Remove trailing commas before } or ]
+    s = s.replaceAll(RegExp(r',\s*([}\]])'), r'$1');
+
+    // Extract JSON if AI added text before/after (find first { or [)
+    if (!s.startsWith('{') && !s.startsWith('[')) {
+      final firstBrace = s.indexOf('{');
+      final firstBracket = s.indexOf('[');
+      if (firstBrace >= 0 || firstBracket >= 0) {
+        final start = (firstBrace >= 0 && firstBracket >= 0)
+            ? (firstBrace < firstBracket ? firstBrace : firstBracket)
+            : (firstBrace >= 0 ? firstBrace : firstBracket);
+        s = s.substring(start);
+        // Find matching closing character
+        final isArray = s.startsWith('[');
+        final endChar = isArray ? ']' : '}';
+        final lastEnd = s.lastIndexOf(endChar);
+        if (lastEnd > 0) s = s.substring(0, lastEnd + 1);
+      }
+    }
+
+    return s.trim();
   }
 
   static String? _optString(dynamic value) {
