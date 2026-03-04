@@ -827,12 +827,9 @@ class GroceryService {
     );
 
     if (url != null) {
-      try {
-        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-      } catch (e) {
-        debugPrint('[SendToStore] Failed to open Instacart URL: $e');
-      }
-
+      // Don't auto-open — let the dialog's branded CTA button handle the redirect.
+      // This ensures the user taps the Instacart-branded button to visit
+      // the Shopping List / Recipe landing page URL (per Instacart guidelines).
       return CartAddResult(
         success: true,
         itemsAdded: ingredientNames.length,

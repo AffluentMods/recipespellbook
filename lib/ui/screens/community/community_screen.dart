@@ -124,7 +124,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           // View mode toggle
           IconButton(
             icon: Icon(_viewMode == _ViewMode.grid ? Icons.view_list : Icons.grid_view),
-            tooltip: _viewMode == _ViewMode.grid ? 'List view' : 'Grid view',
+            tooltip: _viewMode == _ViewMode.grid ? l10n.communityListView : l10n.communityGridView,
             onPressed: () {
               final newMode = _viewMode == _ViewMode.grid ? _ViewMode.list : _ViewMode.grid;
               setState(() => _viewMode = newMode);
@@ -183,11 +183,11 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                   const SizedBox(width: 8),
                   _SortChip(label: l10n.communitySortMostDownloaded, value: 'downloads', selected: _sort, onSelected: _onSortChanged),
                   const SizedBox(width: 8),
-                  _SortChip(label: 'Top Rated', value: 'top_rated', selected: _sort, onSelected: _onSortChanged),
+                  _SortChip(label: l10n.communitySortTopRated, value: 'top_rated', selected: _sort, onSelected: _onSortChanged),
                   const SizedBox(width: 8),
                   FilterChip(
                     avatar: const Icon(Icons.image, size: 14),
-                    label: const Text('Has Images', style: TextStyle(fontSize: 12)),
+                    label: Text(l10n.communityHasImages, style: const TextStyle(fontSize: 12)),
                     selected: _filterHasImages,
                     onSelected: (v) { setState(() => _filterHasImages = v); _load(); },
                     showCheckmark: false,

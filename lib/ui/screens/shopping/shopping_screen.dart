@@ -1759,7 +1759,7 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
                       padding: const EdgeInsets.symmetric(horizontal: 18),
                       decoration: BoxDecoration(
                         color: const Color(0xFF003D29),
-                        borderRadius: BorderRadius.circular(23),
+                        borderRadius: BorderRadius.circular(29.5),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,

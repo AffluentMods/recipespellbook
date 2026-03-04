@@ -13644,6 +13644,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Skip'**
   String get onboardingSkip;
+
+  /// No description provided for @communitySortTopRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Rated'**
+  String get communitySortTopRated;
+
+  /// No description provided for @communityHasImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Has Images'**
+  String get communityHasImages;
+
+  /// No description provided for @communityListView.
+  ///
+  /// In en, this message translates to:
+  /// **'List view'**
+  String get communityListView;
+
+  /// No description provided for @communityGridView.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid view'**
+  String get communityGridView;
+
+  /// No description provided for @communityDownloadOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Options'**
+  String get communityDownloadOptions;
+
+  /// No description provided for @communityDownloadWithImages.
+  ///
+  /// In en, this message translates to:
+  /// **'With images ({size})'**
+  String communityDownloadWithImages(String size);
+
+  /// No description provided for @communityDownloadImagesIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images included'**
+  String communityDownloadImagesIncluded(int count);
+
+  /// No description provided for @communityDownloadTextOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Text only'**
+  String get communityDownloadTextOnly;
+
+  /// No description provided for @communityDownloadTextOnlySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Faster download, no images'**
+  String get communityDownloadTextOnlySubtitle;
+
+  /// No description provided for @communityTapToPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a recipe to preview'**
+  String get communityTapToPreview;
+
+  /// No description provided for @communityImageCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images'**
+  String communityImageCountLabel(int count);
+
+  /// No description provided for @communityYourRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rating:'**
+  String get communityYourRating;
+
+  /// No description provided for @communityRateThis.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate this cookbook:'**
+  String get communityRateThis;
+
+  /// No description provided for @communityDownloadingImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading images... {current}/{total}'**
+  String communityDownloadingImages(int current, int total);
+
+  /// No description provided for @communityViewFullRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'View Full Recipe'**
+  String get communityViewFullRecipe;
+
+  /// No description provided for @communityMoreIngredients.
+  ///
+  /// In en, this message translates to:
+  /// **'+ {count} more'**
+  String communityMoreIngredients(int count);
+
+  /// No description provided for @communityStepCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} steps'**
+  String communityStepCount(int count);
+
+  /// No description provided for @communityNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get communityNotes;
+
+  /// No description provided for @communityStatPrep.
+  ///
+  /// In en, this message translates to:
+  /// **'Prep'**
+  String get communityStatPrep;
+
+  /// No description provided for @communityStatCook.
+  ///
+  /// In en, this message translates to:
+  /// **'Cook'**
+  String get communityStatCook;
+
+  /// No description provided for @communityStatTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get communityStatTotal;
+
+  /// No description provided for @communityStatServings.
+  ///
+  /// In en, this message translates to:
+  /// **'Servings'**
+  String get communityStatServings;
+
+  /// No description provided for @communityStepDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String communityStepDuration(int minutes);
+
+  /// No description provided for @communityEditPublication.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Publication'**
+  String get communityEditPublication;
+
+  /// No description provided for @communityEditDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get communityEditDescription;
+
+  /// No description provided for @communityEditDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell people about this cookbook...'**
+  String get communityEditDescriptionHint;
+
+  /// No description provided for @communityEditTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get communityEditTags;
+
+  /// No description provided for @communityEditSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Publication updated!'**
+  String get communityEditSuccess;
+
+  /// No description provided for @communityEditFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update publication'**
+  String get communityEditFailed;
+
+  /// No description provided for @communityNoRatingsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No ratings yet'**
+  String get communityNoRatingsYet;
+
+  /// No description provided for @communityStatusPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get communityStatusPublished;
+
+  /// No description provided for @communityStatusUnderReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Under Review'**
+  String get communityStatusUnderReview;
+
+  /// No description provided for @communityStatusRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed'**
+  String get communityStatusRemoved;
+
+  /// No description provided for @communityUnderReview.
+  ///
+  /// In en, this message translates to:
+  /// **'This cookbook is under review by our moderation team.'**
+  String get communityUnderReview;
+
+  /// No description provided for @communityPublishPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing cookbook...'**
+  String get communityPublishPreparing;
+
+  /// No description provided for @communityPublishUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading images ({current}/{total})'**
+  String communityPublishUploading(int current, int total);
+
+  /// No description provided for @communityPublishPublishing.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing to community...'**
+  String get communityPublishPublishing;
+
+  /// No description provided for @communityPublishBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'You can leave this screen — publishing continues in the background.'**
+  String get communityPublishBackground;
+
+  /// No description provided for @communityPublishDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Published!'**
+  String get communityPublishDone;
+
+  /// No description provided for @communityPublishImagesSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images were skipped (rejected by moderation)'**
+  String communityPublishImagesSkipped(int count);
+
+  /// No description provided for @communityPublishRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} rejected by moderation'**
+  String communityPublishRejected(int count);
+
+  /// No description provided for @communityConfigurePublication.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure Publication'**
+  String get communityConfigurePublication;
+
+  /// No description provided for @communityPublishTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get communityPublishTitle;
+
+  /// No description provided for @communityPublishTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookbook title'**
+  String get communityPublishTitleHint;
+
+  /// No description provided for @communityPublishDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get communityPublishDescription;
+
+  /// No description provided for @communityPublishDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell people about this cookbook...'**
+  String get communityPublishDescriptionHint;
+
+  /// No description provided for @communityPublishTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get communityPublishTags;
+
+  /// No description provided for @communityPublishIncludeImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Include images'**
+  String get communityPublishIncludeImages;
+
+  /// No description provided for @communityPublishIncludeImagesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload recipe images with this cookbook. Images are scanned for safety.'**
+  String get communityPublishIncludeImagesSubtitle;
+
+  /// No description provided for @communityPublishSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get communityPublishSummary;
+
+  /// No description provided for @communityPublishRecipesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recipes'**
+  String communityPublishRecipesSummary(int count);
+
+  /// No description provided for @communityPublishImagesWillUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Images will be uploaded'**
+  String get communityPublishImagesWillUpload;
+
+  /// No description provided for @communityPublishTextOnlyNoImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Text only (no images)'**
+  String get communityPublishTextOnlyNoImages;
+
+  /// No description provided for @communityPublishTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get communityPublishTryAgain;
+
+  /// No description provided for @communityPublishUploadInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing in progress... ({current}/{total} images)'**
+  String communityPublishUploadInProgress(int current, int total);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

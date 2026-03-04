@@ -7392,4 +7392,193 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboardingSkip => '跳过';
+
+  @override
+  String get communitySortTopRated => 'Top Rated';
+
+  @override
+  String get communityHasImages => 'Has Images';
+
+  @override
+  String get communityListView => 'List view';
+
+  @override
+  String get communityGridView => 'Grid view';
+
+  @override
+  String get communityDownloadOptions => 'Download Options';
+
+  @override
+  String communityDownloadWithImages(String size) {
+    return 'With images ($size)';
+  }
+
+  @override
+  String communityDownloadImagesIncluded(int count) {
+    return '$count images included';
+  }
+
+  @override
+  String get communityDownloadTextOnly => 'Text only';
+
+  @override
+  String get communityDownloadTextOnlySubtitle => 'Faster download, no images';
+
+  @override
+  String get communityTapToPreview => 'Tap a recipe to preview';
+
+  @override
+  String communityImageCountLabel(int count) {
+    return '$count images';
+  }
+
+  @override
+  String get communityYourRating => 'Your rating:';
+
+  @override
+  String get communityRateThis => 'Rate this cookbook:';
+
+  @override
+  String communityDownloadingImages(int current, int total) {
+    return 'Downloading images... $current/$total';
+  }
+
+  @override
+  String get communityViewFullRecipe => 'View Full Recipe';
+
+  @override
+  String communityMoreIngredients(int count) {
+    return '+ $count more';
+  }
+
+  @override
+  String communityStepCount(int count) {
+    return '$count steps';
+  }
+
+  @override
+  String get communityNotes => 'Notes';
+
+  @override
+  String get communityStatPrep => 'Prep';
+
+  @override
+  String get communityStatCook => 'Cook';
+
+  @override
+  String get communityStatTotal => 'Total';
+
+  @override
+  String get communityStatServings => 'Servings';
+
+  @override
+  String communityStepDuration(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String get communityEditPublication => 'Edit Publication';
+
+  @override
+  String get communityEditDescription => 'Description';
+
+  @override
+  String get communityEditDescriptionHint => 'Tell people about this cookbook...';
+
+  @override
+  String get communityEditTags => 'Tags';
+
+  @override
+  String get communityEditSuccess => 'Publication updated!';
+
+  @override
+  String get communityEditFailed => 'Failed to update publication';
+
+  @override
+  String get communityNoRatingsYet => 'No ratings yet';
+
+  @override
+  String get communityStatusPublished => 'Published';
+
+  @override
+  String get communityStatusUnderReview => 'Under Review';
+
+  @override
+  String get communityStatusRemoved => 'Removed';
+
+  @override
+  String get communityUnderReview => 'This cookbook is under review by our moderation team.';
+
+  @override
+  String get communityPublishPreparing => 'Preparing cookbook...';
+
+  @override
+  String communityPublishUploading(int current, int total) {
+    return 'Uploading images ($current/$total)';
+  }
+
+  @override
+  String get communityPublishPublishing => 'Publishing to community...';
+
+  @override
+  String get communityPublishBackground => 'You can leave this screen — publishing continues in the background.';
+
+  @override
+  String get communityPublishDone => 'Published!';
+
+  @override
+  String communityPublishImagesSkipped(int count) {
+    return '$count images were skipped (rejected by moderation)';
+  }
+
+  @override
+  String communityPublishRejected(int count) {
+    return '$count rejected by moderation';
+  }
+
+  @override
+  String get communityConfigurePublication => 'Configure Publication';
+
+  @override
+  String get communityPublishTitle => 'Title';
+
+  @override
+  String get communityPublishTitleHint => 'Cookbook title';
+
+  @override
+  String get communityPublishDescription => 'Description';
+
+  @override
+  String get communityPublishDescriptionHint => 'Tell people about this cookbook...';
+
+  @override
+  String get communityPublishTags => 'Tags';
+
+  @override
+  String get communityPublishIncludeImages => 'Include images';
+
+  @override
+  String get communityPublishIncludeImagesSubtitle => 'Upload recipe images with this cookbook. Images are scanned for safety.';
+
+  @override
+  String get communityPublishSummary => 'Summary';
+
+  @override
+  String communityPublishRecipesSummary(int count) {
+    return '$count recipes';
+  }
+
+  @override
+  String get communityPublishImagesWillUpload => 'Images will be uploaded';
+
+  @override
+  String get communityPublishTextOnlyNoImages => 'Text only (no images)';
+
+  @override
+  String get communityPublishTryAgain => 'Try Again';
+
+  @override
+  String communityPublishUploadInProgress(int current, int total) {
+    return 'Publishing in progress... ($current/$total images)';
+  }
 }

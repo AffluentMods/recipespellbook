@@ -200,18 +200,18 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               )),
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text('Download Options', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                child: Text(AppLocalizations.of(ctx)!.communityDownloadOptions, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
               ),
               ListTile(
                 leading: const Icon(Icons.image),
-                title: Text('With images (${d.downloadSizeLabel})'),
-                subtitle: Text('${d.imageCount} images included'),
+                title: Text(AppLocalizations.of(ctx)!.communityDownloadWithImages(d.downloadSizeLabel)),
+                subtitle: Text(AppLocalizations.of(ctx)!.communityDownloadImagesIncluded(d.imageCount)),
                 onTap: () { Navigator.pop(ctx); _download(withImages: true); },
               ),
               ListTile(
                 leading: const Icon(Icons.text_snippet),
-                title: const Text('Text only'),
-                subtitle: const Text('Faster download, no images'),
+                title: Text(AppLocalizations.of(ctx)!.communityDownloadTextOnly),
+                subtitle: Text(AppLocalizations.of(ctx)!.communityDownloadTextOnlySubtitle),
                 onTap: () { Navigator.pop(ctx); _download(withImages: false); },
               ),
               const SizedBox(height: 16),
@@ -454,7 +454,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Tap a recipe to preview',
+                    l10n.communityTapToPreview,
                     style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
                   ),
                   const SizedBox(height: 12),
@@ -520,7 +520,7 @@ class _StatsRow extends StatelessWidget {
         _StatBadge(icon: Icons.download, label: l10n.communityDownloadCount(downloadCount)),
         if (imageCount > 0) ...[
           const SizedBox(width: 10),
-          _StatBadge(icon: Icons.image, label: '$imageCount images'),
+          _StatBadge(icon: Icons.image, label: AppLocalizations.of(context)!.communityImageCountLabel(imageCount)),
         ],
       ],
     );
@@ -572,6 +572,7 @@ class _RatingSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -603,7 +604,7 @@ class _RatingSection extends StatelessWidget {
           Row(
             children: [
               Text(
-                myRating > 0 ? 'Your rating:' : 'Rate this cookbook:',
+                myRating > 0 ? l10n.communityYourRating : l10n.communityRateThis,
                 style: TextStyle(fontSize: 13, color: theme.colorScheme.outline),
               ),
               const SizedBox(width: 8),

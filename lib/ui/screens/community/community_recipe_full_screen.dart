@@ -108,7 +108,7 @@ class CommunityRecipeFullScreen extends StatelessWidget {
                   if (recipe.steps.isNotEmpty) ...[
                     _SectionHeader(
                       icon: Icons.format_list_numbered,
-                      title: '${recipe.steps.length} Steps',
+                      title: l10n.communityStepCount(recipe.steps.length),
                     ),
                     const SizedBox(height: 12),
                     ...recipe.steps.asMap().entries.map((entry) => _StepCard(
@@ -121,7 +121,7 @@ class CommunityRecipeFullScreen extends StatelessWidget {
 
                   // ── Notes ──
                   if (recipe.notes != null && recipe.notes!.isNotEmpty) ...[
-                    _SectionHeader(icon: Icons.sticky_note_2_outlined, title: 'Notes'),
+                    _SectionHeader(icon: Icons.sticky_note_2_outlined, title: l10n.communityNotes),
                     const SizedBox(height: 8),
                     Container(
                       width: double.infinity,
@@ -181,17 +181,19 @@ class _StatsBar extends StatelessWidget {
     final theme = Theme.of(context);
     final items = <_StatItem>[];
 
+    final l10n = AppLocalizations.of(context)!;
+
     if (recipe.prepTimeMinutes != null) {
-      items.add(_StatItem(icon: Icons.timer_outlined, label: 'Prep', value: '${recipe.prepTimeMinutes}m'));
+      items.add(_StatItem(icon: Icons.timer_outlined, label: l10n.communityStatPrep, value: '${recipe.prepTimeMinutes}m'));
     }
     if (recipe.cookTimeMinutes != null) {
-      items.add(_StatItem(icon: Icons.local_fire_department_outlined, label: 'Cook', value: '${recipe.cookTimeMinutes}m'));
+      items.add(_StatItem(icon: Icons.local_fire_department_outlined, label: l10n.communityStatCook, value: '${recipe.cookTimeMinutes}m'));
     }
     if (recipe.prepTimeMinutes != null && recipe.cookTimeMinutes != null) {
-      items.add(_StatItem(icon: Icons.schedule, label: 'Total', value: '${recipe.prepTimeMinutes! + recipe.cookTimeMinutes!}m'));
+      items.add(_StatItem(icon: Icons.schedule, label: l10n.communityStatTotal, value: '${recipe.prepTimeMinutes! + recipe.cookTimeMinutes!}m'));
     }
     if (recipe.servings != null && recipe.servings!.isNotEmpty) {
-      items.add(_StatItem(icon: Icons.people_outline, label: 'Servings', value: recipe.servings!));
+      items.add(_StatItem(icon: Icons.people_outline, label: l10n.communityStatServings, value: recipe.servings!));
     }
 
     if (items.isEmpty) return const SizedBox.shrink();
@@ -355,7 +357,7 @@ class _StepCard extends StatelessWidget {
                     children: [
                       Icon(Icons.timer_outlined, size: 12, color: theme.colorScheme.outline),
                       const SizedBox(width: 4),
-                      Text('${step.durationMinutes} min', style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
+                      Text(AppLocalizations.of(context)!.communityStepDuration(step.durationMinutes!), style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
                     ],
                   ),
                 ],

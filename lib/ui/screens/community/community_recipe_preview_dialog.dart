@@ -77,7 +77,7 @@ class CommunityRecipePreviewDialog extends StatelessWidget {
                             ),
                             IconButton(
                               icon: const Icon(Icons.open_in_full, color: Colors.white, size: 20),
-                              tooltip: 'View full recipe',
+                              tooltip: l10n.communityViewFullRecipe,
                               onPressed: () {
                                 Navigator.pop(context);
                                 context.push(
@@ -106,7 +106,7 @@ class CommunityRecipePreviewDialog extends StatelessWidget {
                     ),
                     IconButton(
                       icon: const Icon(Icons.open_in_full, size: 20),
-                      tooltip: 'View full recipe',
+                      tooltip: l10n.communityViewFullRecipe,
                       onPressed: () {
                         Navigator.pop(context);
                         context.push(
@@ -173,7 +173,7 @@ class CommunityRecipePreviewDialog extends StatelessWidget {
                       if (recipe.ingredients.length > 5) ...[
                         const SizedBox(height: 4),
                         Text(
-                          '+ ${recipe.ingredients.length - 5} more',
+                          l10n.communityMoreIngredients(recipe.ingredients.length - 5),
                           style: TextStyle(fontSize: 12, color: theme.colorScheme.outline, fontStyle: FontStyle.italic),
                         ),
                       ],
@@ -183,7 +183,7 @@ class CommunityRecipePreviewDialog extends StatelessWidget {
                     if (recipe.steps.isNotEmpty) ...[
                       const SizedBox(height: 12),
                       Text(
-                        '${recipe.steps.length} steps',
+                        l10n.communityStepCount(recipe.steps.length),
                         style: TextStyle(fontSize: 13, color: theme.colorScheme.outline),
                       ),
                     ],
@@ -202,7 +202,7 @@ class CommunityRecipePreviewDialog extends StatelessWidget {
                           );
                         },
                         icon: const Icon(Icons.open_in_full, size: 16),
-                        label: const Text('View Full Recipe'),
+                        label: Text(l10n.communityViewFullRecipe),
                       ),
                     ),
                   ],

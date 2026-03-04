@@ -85,7 +85,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_step == 1 ? l10n.communityPublishCookbook : 'Configure Publication'),
+        title: Text(_step == 1 ? l10n.communityPublishCookbook : l10n.communityConfigurePublication),
         leading: _step > 1 && !_isPublishing
             ? IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => setState(() => _step = 1))
             : null,
@@ -105,7 +105,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
 
     return cookbooksAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
       data: (cookbooks) {
         if (cookbooks.isEmpty) {
           return Center(
@@ -160,7 +160,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                         const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
                         const SizedBox(width: 12),
                         Expanded(child: Text(
-                          'Publishing in progress... (${progress.uploadedImages}/${progress.totalImages} images)',
+                          l10n.communityPublishUploadInProgress(progress.uploadedImages, progress.totalImages),
                           style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurface),
                         )),
                       ],
@@ -210,12 +210,12 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
       padding: const EdgeInsets.all(16),
       children: [
         // Title
-        Text('Title', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+        Text(l10n.communityPublishTitle, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         TextField(
           controller: _titleController,
           decoration: InputDecoration(
-            hintText: 'Cookbook title',
+            hintText: l10n.communityPublishTitleHint,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
@@ -223,14 +223,14 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         const SizedBox(height: 16),
 
         // Description
-        Text('Description', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+        Text(l10n.communityPublishDescription, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         TextField(
           controller: _descController,
           maxLines: 3,
           maxLength: 2000,
           decoration: InputDecoration(
-            hintText: 'Tell people about this cookbook...',
+            hintText: l10n.communityPublishDescriptionHint,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
@@ -238,7 +238,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         const SizedBox(height: 16),
 
         // Tags
-        Text('Tags', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+        Text(l10n.communityPublishTags, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         CommunityTagPicker(
           selectedTags: _selectedTags,
@@ -250,9 +250,9 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         // Include images toggle
         Card(
           child: SwitchListTile(
-            title: const Text('Include images', style: TextStyle(fontWeight: FontWeight.w500)),
+            title: Text(l10n.communityPublishIncludeImages, style: const TextStyle(fontWeight: FontWeight.w500)),
             subtitle: Text(
-              'Upload recipe images with this cookbook. Images are scanned for safety.',
+              l10n.communityPublishIncludeImagesSubtitle,
               style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
             ),
             value: _includeImages,
@@ -270,14 +270,14 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Summary', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                Text(l10n.communityPublishSummary, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                _SummaryRow(icon: Icons.restaurant_menu, label: '$_recipeCount recipes'),
+                _SummaryRow(icon: Icons.restaurant_menu, label: l10n.communityPublishRecipesSummary(_recipeCount)),
                 if (_selectedTags.isNotEmpty)
                   _SummaryRow(icon: Icons.tag, label: '${_selectedTags.length} tags'),
                 _SummaryRow(
                   icon: Icons.image,
-                  label: _includeImages ? 'Images will be uploaded' : 'Text only (no images)',
+                  label: _includeImages ? l10n.communityPublishImagesWillUpload : l10n.communityPublishTextOnlyNoImages,
                 ),
               ],
             ),
@@ -317,35 +317,35 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                 if (status == 'done') ...[
                   Icon(Icons.check_circle, size: 64, color: theme.colorScheme.primary),
                   const SizedBox(height: 16),
-                  Text('Published!', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(l10n.communityPublishDone, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                   if ((progress?.skippedImages ?? 0) > 0) ...[
                     const SizedBox(height: 8),
                     Text(
-                      '${progress!.skippedImages} images were skipped (rejected by moderation)',
+                      l10n.communityPublishImagesSkipped(progress!.skippedImages),
                       style: TextStyle(color: theme.colorScheme.error, fontSize: 13),
                       textAlign: TextAlign.center,
                     ),
                   ],
                   const SizedBox(height: 24),
-                  FilledButton(onPressed: () => context.pop(), child: const Text('Done')),
+                  FilledButton(onPressed: () => context.pop(), child: Text(l10n.actionDone)),
                 ] else if (status == 'error') ...[
                   Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
                   const SizedBox(height: 16),
-                  Text('Publish Failed', style: theme.textTheme.headlineSmall),
+                  Text(l10n.communityPublishFailed, style: theme.textTheme.headlineSmall),
                   const SizedBox(height: 8),
                   Text(progress?.errorMessage ?? 'Unknown error',
                       style: TextStyle(color: theme.colorScheme.error), textAlign: TextAlign.center),
                   const SizedBox(height: 24),
-                  FilledButton(onPressed: () => setState(() { _step = 2; _isPublishing = false; }), child: const Text('Try Again')),
+                  FilledButton(onPressed: () => setState(() { _step = 2; _isPublishing = false; }), child: Text(l10n.communityPublishTryAgain)),
                 ] else ...[
                   const CircularProgressIndicator(),
                   const SizedBox(height: 24),
                   Text(
                     status == 'preparing'
-                        ? 'Preparing cookbook...'
+                        ? l10n.communityPublishPreparing
                         : status == 'uploading'
-                        ? 'Uploading images (${progress?.uploadedImages ?? 0}/${progress?.totalImages ?? 0})'
-                        : 'Publishing to community...',
+                        ? l10n.communityPublishUploading(progress?.uploadedImages ?? 0, progress?.totalImages ?? 0)
+                        : l10n.communityPublishPublishing,
                     style: theme.textTheme.titleMedium,
                   ),
                   if (status == 'uploading' && (progress?.totalImages ?? 0) > 0) ...[
@@ -356,13 +356,13 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                     const SizedBox(height: 8),
                     if ((progress?.skippedImages ?? 0) > 0)
                       Text(
-                        '${progress!.skippedImages} rejected by moderation',
+                        l10n.communityPublishRejected(progress!.skippedImages),
                         style: TextStyle(fontSize: 12, color: theme.colorScheme.error),
                       ),
                   ],
                   const SizedBox(height: 16),
                   Text(
-                    'You can leave this screen — publishing continues in the background.',
+                    l10n.communityPublishBackground,
                     style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
                     textAlign: TextAlign.center,
                   ),
