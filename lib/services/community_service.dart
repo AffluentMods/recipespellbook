@@ -422,12 +422,17 @@ class CommunityService {
       if (minRating != null && minRating > 0) params['minRating'] = minRating.toString();
 
       final queryString = params.entries.map((e) => '${e.key}=${Uri.encodeComponent(e.value)}').join('&');
+      debugPrint('[Community] browse: /v1/community?$queryString');
       final r = await _auth.get('/v1/community?$queryString');
 
       if (r.statusCode == 200) {
         final data = jsonDecode(r.body);
+        final pubs = data['publications'] as List;
+        for (final p in pubs) {
+          debugPrint('[Community] browse item "${p['title']}" tags="${p['tags']}"');
+        }
         return CommunityFeedResult(
-          publications: (data['publications'] as List)
+          publications: pubs
               .map((p) => CommunityListItem.fromJson(p as Map<String, dynamic>))
               .toList(),
           page: data['page'] as int? ?? 1,
@@ -446,7 +451,9 @@ class CommunityService {
     try {
       final r = await _auth.get('/v1/community/$id');
       if (r.statusCode == 200) {
-        return CommunityDetail.fromJson(jsonDecode(r.body));
+        final json = jsonDecode(r.body);
+        debugPrint('[Community] getPublication tags="${json['tags']}" (type=${json['tags']?.runtimeType})');
+        return CommunityDetail.fromJson(json);
       }
     } catch (e) {
       debugPrint('[Community] getPublication: $e');
@@ -519,6 +526,7 @@ class CommunityService {
     String? tags,
   }) async {
     try {
+      debugPrint('[Community] publish: title=$title, tags=$tags, recipes=${recipes.length}');
       final r = await _auth.post('/v1/community', {
         'title': title,
         if (description != null) 'description': description,
@@ -556,6 +564,7 @@ class CommunityService {
       final r = await _auth.post('/v1/community/$publicationId/rate', {
         'rating': rating,
       });
+      debugPrint('[Community] rate response: ${r.statusCode} ${r.body}');
       if (r.statusCode == 200) {
         final data = jsonDecode(r.body);
         return (
@@ -564,8 +573,9 @@ class CommunityService {
           yourRating: data['yourRating'] as int,
         );
       }
+      debugPrint('[Community] rate failed: ${r.statusCode} ${r.body}');
     } catch (e) {
-      debugPrint('[Community] rate: $e');
+      debugPrint('[Community] rate error: $e');
     }
     return null;
   }
@@ -588,16 +598,23 @@ class CommunityService {
   //  Update publication
   // ────────────────────────────────────
 
-  /// Update a publication's description and/or tags.
-  Future<bool> updatePublication(String publicationId, {String? description, String? tags}) async {
+  /// Update a publication's title, description and/or tags.
+  /// Pass empty string for [tags] to clear all tags.
+  /// Pass empty string for [description] to clear description.
+  Future<bool> updatePublication(String publicationId, {String? title, String? description, String? tags}) async {
     try {
       final body = <String, dynamic>{};
+      if (title != null) body['title'] = title;
       if (description != null) body['description'] = description;
       if (tags != null) body['tags'] = tags;
 
+      debugPrint('[Community] updatePublication: $body');
       final r = await _auth.patch('/v1/community/$publicationId', body);
+      debugPrint('[Community] updatePublication response: ${r.statusCode} ${r.body}');
       return r.statusCode == 200;
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('[Community] updatePublication error: $e');
+    }
     return false;
   }
 

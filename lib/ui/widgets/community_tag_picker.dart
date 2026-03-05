@@ -79,24 +79,49 @@ class _CommunityTagPickerState extends State<CommunityTagPicker> {
           runSpacing: 4,
           children: [
             // Predefined tags
-            ...communityTags.map((tag) => FilterChip(
-              avatar: Text(tag.emoji, style: const TextStyle(fontSize: 14)),
-              label: Text(tag.name, style: const TextStyle(fontSize: 12)),
-              selected: _selected.contains(tag.id),
-              onSelected: (_) => _toggle(tag.id),
-              showCheckmark: true,
-              selectedColor: Theme.of(context).colorScheme.primaryContainer,
-              visualDensity: VisualDensity.compact,
-            )),
+            ...communityTags.map((tag) {
+              final isSelected = _selected.contains(tag.id);
+              return FilterChip(
+                avatar: Text(tag.emoji, style: TextStyle(fontSize: isSelected ? 16 : 14)),
+                label: Text(
+                  tag.name,
+                  style: TextStyle(
+                    fontSize: isSelected ? 13 : 12,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: isSelected ? theme.colorScheme.onPrimary : null,
+                  ),
+                ),
+                selected: isSelected,
+                onSelected: (_) => _toggle(tag.id),
+                showCheckmark: false,
+                selectedColor: theme.colorScheme.primary,
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                side: isSelected
+                    ? BorderSide(color: theme.colorScheme.primary, width: 2)
+                    : BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isSelected ? 10 : 8,
+                  vertical: isSelected ? 6 : 4,
+                ),
+                elevation: isSelected ? 2 : 0,
+              );
+            }),
 
             // Custom tags
             ...customTags.map((tag) => FilterChip(
-              label: Text(tag, style: const TextStyle(fontSize: 12)),
+              label: Text(tag, style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onPrimary,
+              )),
               selected: true,
               onSelected: (_) => _toggle(tag),
-              deleteIcon: const Icon(Icons.close, size: 14),
+              showCheckmark: false,
+              selectedColor: theme.colorScheme.primary,
+              deleteIcon: Icon(Icons.close, size: 14, color: theme.colorScheme.onPrimary),
               onDeleted: () => _toggle(tag),
-              visualDensity: VisualDensity.compact,
+              side: BorderSide(color: theme.colorScheme.primary, width: 2),
+              elevation: 2,
             )),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart' as drift;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -9,10 +10,12 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
+import '../../../services/auth_service.dart';
 import '../../../services/community_service.dart';
 import '../../../services/image_service.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/community_image.dart';
+import '../../widgets/community_tag_picker.dart';
 import 'community_recipe_preview_dialog.dart';
 import 'community_screen.dart'; // StarRating
 
@@ -75,6 +78,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     });
 
     final result = await _community.rate(widget.publicationId, stars);
+    debugPrint('[Community] rate($stars) result: $result');
     if (mounted) {
       if (result != null) {
         setState(() {
@@ -82,6 +86,10 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
           _displayRatingCount = result.ratingCount;
           _myRating = result.yourRating;
         });
+      } else {
+        // Rating failed — revert optimistic update
+        setState(() => _myRating = 0);
+        AppSnackbar.error(context, 'Failed to save rating. Please try again.');
       }
       setState(() => _ratingLoading = false);
     }
@@ -319,6 +327,91 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     );
   }
 
+  void _showEditSheet() {
+    final d = _detail!;
+    final titleCtrl = TextEditingController(text: d.title);
+    final descCtrl = TextEditingController(text: d.description ?? '');
+    var editTags = List<String>.from(d.tagList);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            final theme = Theme.of(ctx);
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 16, right: 16, top: 16,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(width: 40, height: 4, margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)),
+                  ),
+                  Text('Edit Cookbook', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: titleCtrl,
+                    decoration: InputDecoration(
+                      labelText: 'Title',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: descCtrl,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      labelText: 'Description',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text('Tags', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  CommunityTagPicker(
+                    selectedTags: editTags,
+                    onChanged: (tags) => setSheetState(() => editTags = tags),
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: () async {
+                      Navigator.pop(ctx);
+                      final newTitle = titleCtrl.text.trim();
+                      final newDesc = descCtrl.text.trim();
+                      final newTags = editTags.join(','); // empty string clears tags
+
+                      final success = await _community.updatePublication(
+                        d.id,
+                        title: newTitle.isNotEmpty && newTitle != d.title ? newTitle : null,
+                        description: newDesc != (d.description ?? '') ? newDesc : null,
+                        tags: newTags,
+                      );
+
+                      if (mounted) {
+                        if (success) {
+                          AppSnackbar.success(context, 'Cookbook updated');
+                          _load(); // Refresh
+                        } else {
+                          AppSnackbar.error(context, 'Failed to update');
+                        }
+                      }
+                    },
+                    child: const Text('Save Changes'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -348,6 +441,12 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
             expandedHeight: 220,
             pinned: true,
             actions: [
+              if (AuthService.instance.currentUser?.id == d.publisher.id)
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  tooltip: 'Edit',
+                  onPressed: () => _showEditSheet(),
+                ),
               IconButton(
                 icon: const Icon(Icons.flag_outlined),
                 tooltip: l10n.communityReport,
@@ -450,6 +549,12 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                     const SizedBox(height: 16),
                   ],
 
+                  // ── Tags ──
+                  if (d.tagList.isNotEmpty) ...[
+                    _DetailTagChips(tags: d.tagList),
+                    const SizedBox(height: 12),
+                  ],
+
                   // ── Stats row ──
                   _StatsRow(
                     recipeCount: d.recipeCount,
@@ -465,31 +570,28 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                     myRating: _myRating,
                     loading: _ratingLoading,
                     onRate: _rate,
+                    isOwnPublication: AuthService.instance.currentUser?.id == d.publisher.id,
                   ),
                   const SizedBox(height: 12),
 
-                  // ── Tags ──
-                  if (d.tagList.isNotEmpty) ...[
-                    _DetailTagChips(tags: d.tagList),
-                    const SizedBox(height: 16),
+                  // ── Download section (hidden for own cookbook) ──
+                  if (AuthService.instance.currentUser?.id != d.publisher.id) ...[
+                    _DownloadSection(
+                      detail: d,
+                      downloading: _downloading,
+                      downloadStatus: _downloadStatus,
+                      onDownload: () {
+                        if (d.imageCount > 30) {
+                          _showDownloadChoice();
+                        } else if (d.hasImages) {
+                          _download(withImages: true);
+                        } else {
+                          _download(withImages: false);
+                        }
+                      },
+                      onDownloadChoice: _showDownloadChoice,
+                    ),
                   ],
-
-                  // ── Download section ──
-                  _DownloadSection(
-                    detail: d,
-                    downloading: _downloading,
-                    downloadStatus: _downloadStatus,
-                    onDownload: () {
-                      if (d.imageCount > 30) {
-                        _showDownloadChoice();
-                      } else if (d.hasImages) {
-                        _download(withImages: true);
-                      } else {
-                        _download(withImages: false);
-                      }
-                    },
-                    onDownloadChoice: _showDownloadChoice,
-                  ),
 
                   const SizedBox(height: 24),
 
@@ -606,6 +708,7 @@ class _RatingSection extends StatelessWidget {
   final int myRating;
   final bool loading;
   final ValueChanged<int> onRate;
+  final bool isOwnPublication;
 
   const _RatingSection({
     required this.averageRating,
@@ -613,6 +716,7 @@ class _RatingSection extends StatelessWidget {
     required this.myRating,
     required this.loading,
     required this.onRate,
+    this.isOwnPublication = false,
   });
 
   @override
@@ -646,34 +750,40 @@ class _RatingSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          // My rating — interactive
-          Row(
-            children: [
-              Text(
-                myRating > 0 ? l10n.communityYourRating : l10n.communityRateThis,
-                style: TextStyle(fontSize: 13, color: theme.colorScheme.outline),
-              ),
-              const SizedBox(width: 8),
-              ...List.generate(5, (i) {
-                final star = i + 1;
-                return GestureDetector(
-                  onTap: loading ? null : () => onRate(star),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2),
-                    child: Icon(
-                      star <= myRating ? Icons.star : Icons.star_border,
-                      size: 28,
-                      color: star <= myRating ? Colors.amber : theme.colorScheme.outline.withValues(alpha: 0.4),
-                    ),
-                  ),
-                );
-              }),
-              if (loading) ...[
+          // My rating — interactive (hidden for own cookbook)
+          if (isOwnPublication)
+            Text(
+              'You cannot rate your own cookbook',
+              style: TextStyle(fontSize: 13, color: theme.colorScheme.outline, fontStyle: FontStyle.italic),
+            )
+          else
+            Row(
+              children: [
+                Text(
+                  myRating > 0 ? l10n.communityYourRating : l10n.communityRateThis,
+                  style: TextStyle(fontSize: 13, color: theme.colorScheme.outline),
+                ),
                 const SizedBox(width: 8),
-                const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                ...List.generate(5, (i) {
+                  final star = i + 1;
+                  return GestureDetector(
+                    onTap: loading ? null : () => onRate(star),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: Icon(
+                        star <= myRating ? Icons.star : Icons.star_border,
+                        size: 28,
+                        color: star <= myRating ? Colors.amber : theme.colorScheme.outline.withValues(alpha: 0.4),
+                      ),
+                    ),
+                  );
+                }),
+                if (loading) ...[
+                  const SizedBox(width: 8),
+                  const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                ],
               ],
-            ],
-          ),
+            ),
         ],
       ),
     );

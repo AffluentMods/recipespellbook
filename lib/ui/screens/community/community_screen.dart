@@ -351,8 +351,15 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                   children: communityTags.map((tag) {
                     final isSelected = sheetTags.contains(tag.id);
                     return FilterChip(
-                      avatar: Text(tag.emoji, style: const TextStyle(fontSize: 14)),
-                      label: Text(tag.name, style: const TextStyle(fontSize: 12)),
+                      avatar: Text(tag.emoji, style: TextStyle(fontSize: isSelected ? 16 : 14)),
+                      label: Text(
+                        tag.name,
+                        style: TextStyle(
+                          fontSize: isSelected ? 13 : 12,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                          color: isSelected ? theme.colorScheme.onPrimary : null,
+                        ),
+                      ),
                       selected: isSelected,
                       onSelected: (_) {
                         setSheetState(() {
@@ -364,6 +371,16 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                         });
                       },
                       showCheckmark: false,
+                      selectedColor: theme.colorScheme.primary,
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      side: isSelected
+                          ? BorderSide(color: theme.colorScheme.primary, width: 2)
+                          : BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isSelected ? 10 : 8,
+                        vertical: isSelected ? 6 : 4,
+                      ),
+                      elevation: isSelected ? 2 : 0,
                       visualDensity: VisualDensity.compact,
                     );
                   }).toList(),

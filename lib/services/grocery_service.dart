@@ -73,7 +73,11 @@ class GroceryService {
       'KROGER_CLIENT_SECRET');
 
   // Instacart Developer Platform (IDP) endpoint
-  static const _instacartIdpBase = 'https://connect.instacart.com/idp/v1';
+  // Development: https://connect.dev.instacart.tools/idp/v1
+  // Production:  https://connect.instacart.com/idp/v1
+  static const _instacartIdpBase = String.fromEnvironment(
+      'INSTACART_IDP_BASE',
+      defaultValue: 'https://connect.instacart.com/idp/v1');
 
   // Kroger OAuth
   static const _krogerRedirectUri = 'recipespellbook://kroger-callback';
