@@ -117,6 +117,7 @@ class OnboardingService {
           isFavorite: const Value(false),
           isPinned: const Value(false),
           nutritionJson: Value(nutritionJson),
+          lastViewedAt: Value(DateTime.now()),
         ));
 
         // Insert ingredients (headers stored with notes='__header__')

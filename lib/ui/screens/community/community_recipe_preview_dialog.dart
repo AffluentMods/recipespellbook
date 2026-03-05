@@ -251,12 +251,39 @@ class _QuickStats extends StatelessWidget {
       }
     }
 
+    if (recipe.rating != null && recipe.rating! > 0) {
+      items.add(_MiniRating(rating: recipe.rating!));
+    }
+
     if (items.isEmpty) return const SizedBox.shrink();
 
     return Wrap(
       spacing: 12,
       runSpacing: 4,
       children: items,
+    );
+  }
+}
+
+class _MiniRating extends StatelessWidget {
+  final int rating;
+  const _MiniRating({required this.rating});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ...List.generate(5, (i) {
+          final star = i + 1;
+          return Icon(
+            star <= rating ? Icons.star : Icons.star_border,
+            size: 14,
+            color: star <= rating ? Colors.amber : theme.colorScheme.outline.withValues(alpha: 0.3),
+          );
+        }),
+      ],
     );
   }
 }

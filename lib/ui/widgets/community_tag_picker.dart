@@ -84,7 +84,8 @@ class _CommunityTagPickerState extends State<CommunityTagPicker> {
               label: Text(tag.name, style: const TextStyle(fontSize: 12)),
               selected: _selected.contains(tag.id),
               onSelected: (_) => _toggle(tag.id),
-              showCheckmark: false,
+              showCheckmark: true,
+              selectedColor: Theme.of(context).colorScheme.primaryContainer,
               visualDensity: VisualDensity.compact,
             )),
 

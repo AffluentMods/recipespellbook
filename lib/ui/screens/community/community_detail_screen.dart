@@ -170,6 +170,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
             notes: drift.Value(recipe.notes),
             nutritionJson: drift.Value(recipe.nutritionJson),
             imagePath: drift.Value(coverImages[i]),
+            lastViewedAt: drift.Value(DateTime.now()),
           ));
 
           // Insert ingredients
@@ -886,6 +887,21 @@ class _RecipePreviewCard extends StatelessWidget {
                         style: TextStyle(fontSize: 11, color: theme.colorScheme.outline),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                      ),
+                    if (recipe.rating != null && recipe.rating! > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(5, (i) {
+                            final star = i + 1;
+                            return Icon(
+                              star <= recipe.rating! ? Icons.star : Icons.star_border,
+                              size: 14,
+                              color: star <= recipe.rating! ? Colors.amber : theme.colorScheme.outline.withValues(alpha: 0.3),
+                            );
+                          }),
+                        ),
                       ),
                   ],
                 ),

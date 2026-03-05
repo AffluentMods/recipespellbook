@@ -483,6 +483,7 @@ class ExportImportService {
         isFavorite: Value(recipe['isFavorite'] as bool? ?? false),
         imagePath: Value(imagePath),
         nutritionJson: Value(recipe['nutritionJson'] as String?),
+        lastViewedAt: Value(DateTime.now()),
       ));
 
       // Ingredients

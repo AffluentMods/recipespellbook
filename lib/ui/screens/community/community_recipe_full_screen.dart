@@ -69,25 +69,12 @@ class CommunityRecipeFullScreen extends StatelessWidget {
                       fit: BoxFit.cover,
                     )
                   else
-                    // Gradient placeholder when no image
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            theme.colorScheme.primaryContainer,
-                            theme.colorScheme.primary,
-                          ],
-                        ),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.restaurant,
-                          size: 64,
-                          color: Colors.white.withValues(alpha: 0.4),
-                        ),
-                      ),
+                    // Default recipe placeholder when no image
+                    Image.asset(
+                      'assets/images/recipe_placeholder_normal.png',
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
                     ),
                   // Gradient overlays for text readability
                   Container(
@@ -134,6 +121,32 @@ class CommunityRecipeFullScreen extends StatelessWidget {
 
                   // ── Quick stats bar ──
                   _StatsBar(recipe: recipe),
+
+                  // ── Rating ──
+                  if (recipe.rating != null && recipe.rating! > 0) ...[
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        ...List.generate(5, (i) {
+                          final star = i + 1;
+                          return Icon(
+                            star <= recipe.rating! ? Icons.star : Icons.star_border,
+                            size: 20,
+                            color: star <= recipe.rating! ? Colors.amber : theme.colorScheme.outline.withValues(alpha: 0.3),
+                          );
+                        }),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${recipe.rating}/5',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
 
                   const SizedBox(height: 24),
 

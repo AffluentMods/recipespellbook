@@ -169,6 +169,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
             categoryId: drift.Value(recipe.suggestedCategory),
             notes: drift.Value(recipe.notes),
             imagePath: drift.Value(imageResults[idx]),
+            lastViewedAt: drift.Value(DateTime.now()),
           ));
 
           // Batch insert ingredients

@@ -86,6 +86,23 @@ class CommunityImage extends StatelessWidget {
   }
 
   Widget _placeholder(BuildContext context) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: ClipRRect(
+        borderRadius: borderRadius ?? BorderRadius.zero,
+        child: Image.asset(
+          'assets/images/recipe_placeholder_normal.png',
+          width: width,
+          height: height,
+          fit: fit,
+          errorBuilder: (_, __, ___) => _gradientFallback(context),
+        ),
+      ),
+    );
+  }
+
+  Widget _gradientFallback(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
       width: width,
@@ -103,7 +120,7 @@ class CommunityImage extends StatelessWidget {
       ),
       child: Center(
         child: Icon(
-          Icons.menu_book_outlined,
+          Icons.restaurant,
           size: (height != null && height! < 80) ? 24 : 40,
           color: Colors.white.withValues(alpha: 0.8),
         ),

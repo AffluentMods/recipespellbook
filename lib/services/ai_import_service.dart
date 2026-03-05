@@ -138,6 +138,7 @@ class AiImportService {
       notes: Value(notes),
       createdAt: Value(now),
       updatedAt: Value(now),
+      lastViewedAt: Value(now),
     ));
 
     // ── Ingredients ──
