@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../services/feature_gate.dart';
+import 'recipe_image.dart';
 
 /// Step data model for editing
 class EditableStep {
@@ -368,7 +369,7 @@ class _StepCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final hasImage = step.imagePath != null &&
         step.imagePath!.isNotEmpty &&
-        File(step.imagePath!).existsSync();
+        FileExistsCache.exists(step.imagePath!);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -443,6 +444,8 @@ class _StepCard extends StatelessWidget {
                                 ? Image.file(
                               File(step.imagePath!),
                               fit: BoxFit.cover,
+                              cacheWidth: 76,
+                              cacheHeight: 76,
                             )
                                 : Icon(
                               Icons.camera_alt_outlined,
@@ -693,6 +696,7 @@ class _StepImagePreview extends StatelessWidget {
               height: 120,
               width: double.infinity,
               fit: BoxFit.cover,
+              cacheHeight: 240,
             ),
           ),
           Positioned(
@@ -825,7 +829,12 @@ class _AddStepImageButton extends StatelessWidget {
                 minScale: 0.5,
                 maxScale: 4.0,
                 child: Center(
-                  child: Image.file(File(imagePath), fit: BoxFit.contain),
+                  child: Image.file(
+                    File(imagePath),
+                    fit: BoxFit.contain,
+                    cacheWidth: 600,
+                    cacheHeight: 600,
+                  ),
                 ),
               ),
             ),

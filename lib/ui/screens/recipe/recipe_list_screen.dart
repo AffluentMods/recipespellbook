@@ -15,6 +15,7 @@ import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/new_recipe_dialog.dart';
 import '../../widgets/placeholder_image.dart';
+import '../../widgets/recipe_image.dart';
 import '../../../utils/responsive_utils.dart';
 
 /// Generic recipe list screen with filtering by course/category/tags
@@ -772,8 +773,6 @@ class _MediumCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasImage = recipe.imagePath != null && File(recipe.imagePath!).existsSync();
-    final defaultAsset = defaultRecipeImageAsset(recipe.id);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -797,11 +796,10 @@ class _MediumCard extends StatelessWidget {
                 children: [
                   Container(
                     color: theme.colorScheme.primaryContainer,
-                    child: hasImage
-                        ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
-                        : defaultAsset != null
-                        ? Image.asset(defaultAsset, fit: BoxFit.cover)
-                        : const RecipePlaceholderImage(height: double.infinity, width: double.infinity),
+                    child: RecipeImage.medium(
+                      imagePath: recipe.imagePath,
+                      recipeId: recipe.id,
+                    ),
                   ),
                   // Selection indicator
                   if (isSelecting)
@@ -965,8 +963,6 @@ class _LargeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasImage = recipe.imagePath != null && File(recipe.imagePath!).existsSync();
-    final defaultAsset = defaultRecipeImageAsset(recipe.id);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -988,11 +984,11 @@ class _LargeCard extends StatelessWidget {
               // Background image or placeholder
               Container(
                 color: theme.colorScheme.primaryContainer,
-                child: hasImage
-                    ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
-                    : defaultAsset != null
-                    ? Image.asset(defaultAsset, fit: BoxFit.cover)
-                    : const RecipePlaceholderImage(height: 200, width: double.infinity),
+                child: RecipeImage.large(
+                  imagePath: recipe.imagePath,
+                  recipeId: recipe.id,
+                  height: 200,
+                ),
               ),
               // Gradient overlay
               Container(
@@ -1219,8 +1215,6 @@ class _RecipeThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasImage = recipe.imagePath != null && File(recipe.imagePath!).existsSync();
-    final defaultAsset = defaultRecipeImageAsset(recipe.id);
 
     return Container(
       width: size,
@@ -1230,16 +1224,11 @@ class _RecipeThumbnail extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       clipBehavior: Clip.antiAlias,
-      child: hasImage
-          ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
-          : defaultAsset != null
-          ? Image.asset(defaultAsset, fit: BoxFit.cover)
-          : Center(
-        child: Icon(
-          Icons.restaurant_menu,
-          size: size * 0.5,
-          color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
-        ),
+      child: RecipeImage.thumbnail(
+        imagePath: recipe.imagePath,
+        recipeId: recipe.id,
+        width: size,
+        height: size,
       ),
     );
   }

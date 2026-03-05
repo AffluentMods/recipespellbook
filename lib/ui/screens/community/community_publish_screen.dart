@@ -13,6 +13,7 @@ import '../../../services/community_service.dart';
 import '../../../services/image_service.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/community_tag_picker.dart';
+import '../../widgets/recipe_image.dart';
 
 // ════════════════════════════════════════════
 //  PUBLISH SCREEN — Select cookbook → Configure → Publish
@@ -452,7 +453,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
       if (_includeImages) {
         // Filter to unique existing local files
         final uniquePaths = localImagePaths.toSet().where((p) {
-          return !ImageService.isServerPath(p) && File(p).existsSync();
+          return !ImageService.isServerPath(p) && FileExistsCache.exists(p);
         }).toList();
 
         publishProgressNotifier.value = PublishProgress(

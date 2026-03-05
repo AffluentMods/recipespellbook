@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,8 +5,7 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
-import '../../../utils/default_recipe_images.dart';
-import '../../widgets/placeholder_image.dart';
+import '../../widgets/recipe_image.dart';
 
 /// Screen showing all quick access recipes (meal plan + pinned + recent)
 /// with filtering, sorting, and view size options
@@ -360,9 +358,6 @@ class _MediumCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasImage = item.recipe.imagePath != null && File(item.recipe.imagePath!).existsSync();
-    final defaultAsset = defaultRecipeImageAsset(item.recipe.id);
-
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -378,11 +373,12 @@ class _MediumCard extends StatelessWidget {
                 children: [
                   Container(
                     color: theme.colorScheme.primaryContainer,
-                    child: hasImage
-                        ? Image.file(File(item.recipe.imagePath!), fit: BoxFit.cover)
-                        : defaultAsset != null
-                        ? Image.asset(defaultAsset, fit: BoxFit.cover)
-                        : const RecipePlaceholderImage(height: double.infinity, width: double.infinity),
+                    child: RecipeImage.thumbnail(
+                      imagePath: item.recipe.imagePath,
+                      recipeId: item.recipe.id,
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
                   ),
                   // Source badge
                   Positioned(
@@ -478,9 +474,6 @@ class _LargeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasImage = item.recipe.imagePath != null && File(item.recipe.imagePath!).existsSync();
-    final defaultAsset = defaultRecipeImageAsset(item.recipe.id);
-
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       clipBehavior: Clip.antiAlias,
@@ -498,11 +491,12 @@ class _LargeCard extends StatelessWidget {
                   children: [
                     Container(
                       color: theme.colorScheme.primaryContainer,
-                      child: hasImage
-                          ? Image.file(File(item.recipe.imagePath!), fit: BoxFit.cover)
-                          : defaultAsset != null
-                          ? Image.asset(defaultAsset, fit: BoxFit.cover)
-                          : const RecipePlaceholderImage(height: double.infinity, width: double.infinity),
+                      child: RecipeImage.thumbnail(
+                        imagePath: item.recipe.imagePath,
+                        recipeId: item.recipe.id,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ),
                     ),
                     // Source badge
                     Positioned(

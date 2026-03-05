@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,9 +7,9 @@ import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/ingredient_resolver_service.dart';
 import '../../../services/pantry_service.dart';
-import '../../../utils/default_recipe_images.dart';
 import '../../../utils/ingredient_utils.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/recipe_image.dart';
 
 // ═══════════════════════════════════════════════════════════════════
 // SHOPPING LIST GENERATOR SCREEN
@@ -1638,35 +1637,14 @@ class _RecipeThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final hasImage = imagePath != null &&
-        imagePath!.isNotEmpty &&
-        File(imagePath!).existsSync();
-    final defaultAsset = defaultRecipeImageAsset(recipeId);
-
     return ClipRRect(
       borderRadius: BorderRadius.circular(size * 0.25),
-      child: SizedBox(
+      child: RecipeImage.thumbnail(
+        imagePath: imagePath,
+        recipeId: recipeId,
         width: size,
         height: size,
-        child: hasImage
-            ? Image.file(File(imagePath!),
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => _placeholder(theme))
-            : defaultAsset != null
-            ? Image.asset(defaultAsset,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => _placeholder(theme))
-            : _placeholder(theme),
       ),
-    );
-  }
-
-  Widget _placeholder(ThemeData theme) {
-    return Container(
-      color: theme.colorScheme.surfaceContainerHighest,
-      child: Icon(Icons.restaurant_menu,
-          size: size * 0.5, color: theme.colorScheme.outline),
     );
   }
 }

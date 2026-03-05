@@ -336,75 +336,89 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
             final theme = Theme.of(ctx);
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 16, right: 16, top: 16,
-                bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(width: 40, height: 4, margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)),
+            return DraggableScrollableSheet(
+              initialChildSize: 0.85,
+              minChildSize: 0.4,
+              maxChildSize: 0.95,
+              expand: false,
+              builder: (ctx, scrollController) {
+                return Padding(
+                  padding: EdgeInsets.only(
+                    left: 16, right: 16, top: 16,
+                    bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
                   ),
-                  Text('Edit Cookbook', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: titleCtrl,
-                    decoration: InputDecoration(
-                      labelText: 'Title',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: descCtrl,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: 'Description',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text('Tags', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  CommunityTagPicker(
-                    selectedTags: editTags,
-                    onChanged: (tags) => setSheetState(() => editTags = tags),
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: () async {
-                      Navigator.pop(ctx);
-                      final newTitle = titleCtrl.text.trim();
-                      final newDesc = descCtrl.text.trim();
-                      final newTags = editTags.join(','); // empty string clears tags
+                  child: ListView(
+                    controller: scrollController,
+                    children: [
+                      Center(
+                        child: Container(width: 40, height: 4, margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)),
+                        ),
+                      ),
+                      Text('Edit Cookbook', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: titleCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'Title',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: descCtrl,
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          labelText: 'Description',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text('Tags', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      CommunityTagPicker(
+                        selectedTags: editTags,
+                        onChanged: (tags) => setSheetState(() => editTags = tags),
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton(
+                        onPressed: () async {
+                          Navigator.pop(ctx);
+                          final newTitle = titleCtrl.text.trim();
+                          final newDesc = descCtrl.text.trim();
+                          final newTags = editTags.join(','); // empty string clears tags
 
-                      final success = await _community.updatePublication(
-                        d.id,
-                        title: newTitle.isNotEmpty && newTitle != d.title ? newTitle : null,
-                        description: newDesc != (d.description ?? '') ? newDesc : null,
-                        tags: newTags,
-                      );
+                          final success = await _community.updatePublication(
+                            d.id,
+                            title: newTitle.isNotEmpty && newTitle != d.title ? newTitle : null,
+                            description: newDesc != (d.description ?? '') ? newDesc : null,
+                            tags: newTags,
+                          );
 
-                      if (mounted) {
-                        if (success) {
-                          AppSnackbar.success(context, 'Cookbook updated');
-                          _load(); // Refresh
-                        } else {
-                          AppSnackbar.error(context, 'Failed to update');
-                        }
-                      }
-                    },
-                    child: const Text('Save Changes'),
+                          if (mounted) {
+                            if (success) {
+                              AppSnackbar.success(context, 'Cookbook updated');
+                              _load(); // Refresh
+                            } else {
+                              AppSnackbar.error(context, 'Failed to update');
+                            }
+                          }
+                        },
+                        child: const Text('Save Changes'),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             );
           },
         );

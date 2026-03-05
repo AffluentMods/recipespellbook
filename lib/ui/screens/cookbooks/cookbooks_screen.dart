@@ -20,6 +20,7 @@ import '../../shell/app_shell.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/family_share_sheet.dart';
 import '../../widgets/placeholder_image.dart';
+import '../../widgets/recipe_image.dart';
 import '../../../utils/responsive_utils.dart';
 
 class CookbooksScreen extends ConsumerStatefulWidget {
@@ -682,8 +683,11 @@ class _CookbookCard extends StatelessWidget {
           children: [
             // Cover image or placeholder
             Positioned.fill(
-              child: cookbook.imagePath != null && File(cookbook.imagePath!).existsSync()
-                  ? Image.file(File(cookbook.imagePath!), fit: BoxFit.cover)
+              child: cookbook.imagePath != null &&
+                  cookbook.imagePath!.isNotEmpty &&
+                  FileExistsCache.exists(cookbook.imagePath!)
+                  ? Image.file(File(cookbook.imagePath!), fit: BoxFit.cover,
+                      cacheWidth: 400, cacheHeight: 400)
                   : const CookbookPlaceholderImage(height: double.infinity),
             ),
             // Gradient overlay

@@ -108,6 +108,7 @@ class AuthService {
   static const _keyJwt = 'auth_jwt';
   static const _keyUser = 'auth_user';
   static const _keyProvider = 'auth_provider'; // 'google' or 'apple'
+  static const _keyLastBoundUserId = 'last_bound_user_id';
 
   final _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
@@ -497,6 +498,26 @@ class AuthService {
     await _storage.delete(key: _keyJwt);
     await _storage.delete(key: _keyUser);
     await _storage.delete(key: _keyProvider);
+    // Note: _keyLastBoundUserId is NOT cleared — it persists across sign-outs
+    // so we can detect account switches on the next sign-in.
+  }
+
+  // ── Account-switch detection ──
+
+  /// Get the last user ID that was bound to this device's local data.
+  /// Returns null if no user has ever signed in on this device.
+  Future<String?> getLastBoundUserId() async {
+    return await _storage.read(key: _keyLastBoundUserId);
+  }
+
+  /// Save the user ID as the "owner" of the current local data.
+  Future<void> saveLastBoundUserId(String userId) async {
+    await _storage.write(key: _keyLastBoundUserId, value: userId);
+  }
+
+  /// Clear the last bound user ID (used when user chooses "start fresh").
+  Future<void> clearLastBoundUserId() async {
+    await _storage.delete(key: _keyLastBoundUserId);
   }
 
   String _friendlyError(dynamic e) {

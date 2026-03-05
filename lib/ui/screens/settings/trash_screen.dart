@@ -6,6 +6,7 @@ import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/recipe_image.dart';
 
 // Provider for deleted recipes
 final deletedRecipesProvider = StreamProvider<List<Recipe>>((ref) {
@@ -205,7 +206,9 @@ class _DeletedRecipeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final hasImage = recipe.imagePath != null;
+    final hasImage = recipe.imagePath != null &&
+        recipe.imagePath!.isNotEmpty &&
+        FileExistsCache.exists(recipe.imagePath!);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -255,6 +258,8 @@ class _DeletedRecipeCard extends StatelessWidget {
                     ? Image.file(
                   File(recipe.imagePath!),
                   fit: BoxFit.cover,
+                  cacheWidth: 128,
+                  cacheHeight: 128,
                   errorBuilder: (_, __, ___) => Icon(
                     Icons.restaurant,
                     color: theme.colorScheme.outline,

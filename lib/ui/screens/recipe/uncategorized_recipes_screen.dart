@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,10 +7,9 @@ import '../../../data/course_category_data.dart' as taxonomy;
 import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
-import '../../../utils/default_recipe_images.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/app_snackbar.dart';
-import '../../widgets/placeholder_image.dart';
+import '../../widgets/recipe_image.dart';
 
 class UncategorizedRecipesScreen extends ConsumerStatefulWidget {
   const UncategorizedRecipesScreen({super.key});
@@ -436,9 +434,6 @@ class _RecipeListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final hasImage =
-        recipe.imagePath != null && File(recipe.imagePath!).existsSync();
-    final defaultAsset = defaultRecipeImageAsset(recipe.id);
     final course = recipe.courseId != null
         ? taxonomy.CourseData.getById(recipe.courseId!)
         : null;
@@ -479,13 +474,12 @@ class _RecipeListTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: hasImage
-                    ? Image.file(File(recipe.imagePath!),
-                    fit: BoxFit.cover)
-                    : defaultAsset != null
-                    ? Image.asset(defaultAsset, fit: BoxFit.cover)
-                    : const RecipePlaceholderImage(
-                    height: 64, width: 64),
+                child: RecipeImage.thumbnail(
+                  imagePath: recipe.imagePath,
+                  recipeId: recipe.id,
+                  width: 64,
+                  height: 64,
+                ),
               ),
               const SizedBox(width: 14),
 

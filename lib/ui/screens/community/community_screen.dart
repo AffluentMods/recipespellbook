@@ -144,7 +144,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           IconButton(
             icon: const Icon(Icons.upload_outlined),
             tooltip: l10n.communityMyPublications,
-            onPressed: () => context.push('/community/my-publications'),
+            onPressed: () => context.push('/community/my-publications').then((_) { if (mounted) _load(); }),
           ),
         ],
       ),
@@ -258,7 +258,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/community/publish'),
+        onPressed: () => context.push('/community/publish').then((_) { if (mounted) _load(); }),
         icon: const Icon(Icons.publish),
         label: Text(l10n.communityPublish),
       ),
@@ -285,7 +285,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
         }
         return _CommunityGridCard(
           item: _items[i],
-          onTap: () => context.push('/community/${_items[i].id}'),
+          onTap: () => context.push('/community/${_items[i].id}').then((_) { if (mounted) _load(); }),
         );
       },
     );
@@ -303,7 +303,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
         }
         return _CommunityListCard(
           item: _items[i],
-          onTap: () => context.push('/community/${_items[i].id}'),
+          onTap: () => context.push('/community/${_items[i].id}').then((_) { if (mounted) _load(); }),
         );
       },
     );

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,7 +6,7 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
-import '../../../utils/default_recipe_images.dart';
+import '../../widgets/recipe_image.dart';
 
 /// Provider for favorite recipes
 final favoriteRecipesProvider = StreamProvider<List<Recipe>>((ref) {
@@ -98,8 +97,6 @@ class _RecipeItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final hasImage = recipe.imagePath != null && File(recipe.imagePath!).existsSync();
-    final defaultAsset = defaultRecipeImageAsset(recipe.id);
     final hasTime = recipe.prepTimeMinutes != null || recipe.cookTimeMinutes != null;
     final totalTime = (recipe.prepTimeMinutes ?? 0) + (recipe.cookTimeMinutes ?? 0);
     final course = recipe.courseId != null ? CourseData.getById(recipe.courseId!) : null;
@@ -129,15 +126,11 @@ class _RecipeItem extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   clipBehavior: Clip.antiAlias,
-                  child: hasImage
-                      ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
-                      : defaultAsset != null
-                      ? Image.asset(defaultAsset, fit: BoxFit.cover)
-                      : Center(
-                    child: Text(
-                      course?.emoji ?? '🍽️',
-                      style: const TextStyle(fontSize: 28),
-                    ),
+                  child: RecipeImage.thumbnail(
+                    imagePath: recipe.imagePath,
+                    recipeId: recipe.id,
+                    width: 64,
+                    height: 64,
                   ),
                 ),
                 const SizedBox(width: 14),

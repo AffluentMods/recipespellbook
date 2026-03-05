@@ -26,6 +26,7 @@ import '../../widgets/nutrition_calculation_sheet.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_share_sheet.dart';
 import '../../widgets/hint_banner.dart';
+import '../../widgets/recipe_image.dart';
 import '../../widgets/recipe_tags_display.dart';
 // ============ DISMISSED ALLERGY WARNINGS ============
 // Canonical provider is in allergy_settings_screen.dart — imported via:
@@ -1320,7 +1321,7 @@ class _RecipeAppBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final isServer = ImageService.isServerPath(recipe.imagePath);
     final hasImage = recipe.imagePath != null &&
-        (isServer || File(recipe.imagePath!).existsSync());
+        (isServer || FileExistsCache.exists(recipe.imagePath!));
     final defaultAsset = defaultRecipeImageAsset(recipe.id);
 
     // Get rarity color for border glow
@@ -1354,7 +1355,7 @@ class _RecipeAppBar extends StatelessWidget {
                   tag: 'recipe_image_${recipe.id}',
                   child: isServer
                       ? _ServerImage(path: recipe.imagePath!)
-                      : Image.file(File(recipe.imagePath!), fit: BoxFit.cover),
+                      : Image.file(File(recipe.imagePath!), fit: BoxFit.cover, cacheWidth: 800, cacheHeight: 800),
                 ),
               )
             else if (defaultAsset != null)
@@ -1655,10 +1656,6 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
             ]),
             // Linked recipes for this ingredient (with thumbnails)
             ...linkedRecipes.map((linkedRecipe) {
-              final hasLinkedImage = linkedRecipe.imagePath != null &&
-                  linkedRecipe.imagePath!.isNotEmpty &&
-                  File(linkedRecipe.imagePath!).existsSync();
-              final defaultAsset = defaultRecipeImageAsset(linkedRecipe.id);
               return Padding(
                 padding: const EdgeInsets.only(left: 20, top: 4),
                 child: GestureDetector(
@@ -1672,19 +1669,12 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(6),
                         child: SizedBox(
                           width: 24, height: 24,
-                          child: hasLinkedImage
-                              ? Image.file(
-                            File(linkedRecipe.imagePath!),
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _linkedPlaceholder(theme),
-                          )
-                              : defaultAsset != null
-                              ? Image.asset(
-                            defaultAsset,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _linkedPlaceholder(theme),
-                          )
-                              : _linkedPlaceholder(theme),
+                          child: RecipeImage.thumbnail(
+                            imagePath: linkedRecipe.imagePath,
+                            recipeId: linkedRecipe.id,
+                            width: 24,
+                            height: 24,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -1723,7 +1713,7 @@ class _InstructionStep extends StatelessWidget {
     final theme = Theme.of(context);
     final hasImage = step.imagePath != null &&
         step.imagePath!.isNotEmpty &&
-        File(step.imagePath!).existsSync();
+        FileExistsCache.exists(step.imagePath!);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -1770,6 +1760,8 @@ class _InstructionStep extends StatelessWidget {
                       width: double.infinity,
                       height: 180,
                       fit: BoxFit.cover,
+                      cacheWidth: 600,
+                      cacheHeight: 600,
                     ),
                   ),
                 ),

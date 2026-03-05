@@ -18,6 +18,7 @@ import '../../widgets/onboarding_dialog.dart';
 import '../onboarding/book_intro_screen.dart';
 import '../onboarding/spellbook_opening_screen.dart';
 import '../../widgets/placeholder_image.dart';
+import '../../widgets/recipe_image.dart';
 import '../../../data/rpg/rpg_companion.dart';
 import '../../../providers/companion_provider.dart';
 import '../../../providers/rpg_provider.dart';
@@ -563,9 +564,6 @@ class _QuickRecipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasImage = item.recipe.imagePath != null && File(item.recipe.imagePath!).existsSync();
-    final defaultAsset = defaultRecipeImageAsset(item.recipe.id);
-
     final isDark = theme.brightness == Brightness.dark;
 
     return GestureDetector(
@@ -589,15 +587,15 @@ class _QuickRecipeCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Image
+                  // Image — cached existence check + thumbnail-sized decode
                   SizedBox(
                     height: 90,
                     width: double.infinity,
-                    child: hasImage
-                        ? Image.file(File(item.recipe.imagePath!), fit: BoxFit.cover)
-                        : defaultAsset != null
-                        ? Image.asset(defaultAsset, fit: BoxFit.cover)
-                        : const RecipePlaceholderImage(height: 90),
+                    child: RecipeImage.thumbnail(
+                      imagePath: item.recipe.imagePath,
+                      recipeId: item.recipe.id,
+                      height: 90,
+                    ),
                   ),
                   // Title
                   Padding(
@@ -1022,8 +1020,6 @@ class _UncategorizedRecipeChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final hasImage = recipe.imagePath != null && File(recipe.imagePath!).existsSync();
-    final defaultAsset = defaultRecipeImageAsset(recipe.id);
 
     return GestureDetector(
       onTap: () => context.push('/recipe/${recipe.id}'),
@@ -1044,17 +1040,13 @@ class _UncategorizedRecipeChip extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Image area
+              // Image area — cached existence check + thumbnail-sized decode
               Expanded(
                 flex: 3,
-                child: hasImage
-                    ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
-                    : defaultAsset != null
-                        ? Image.asset(defaultAsset, fit: BoxFit.cover)
-                        : Container(
-                            color: theme.colorScheme.primaryContainer,
-                            child: Icon(Icons.restaurant_menu, color: theme.colorScheme.primary, size: 28),
-                          ),
+                child: RecipeImage.thumbnail(
+                  imagePath: recipe.imagePath,
+                  recipeId: recipe.id,
+                ),
               ),
               // Title area
               Expanded(
@@ -1304,9 +1296,12 @@ class _CookbookDropdown extends ConsumerWidget {
                           : null,
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: cookbook.imagePath != null
+                    child: cookbook.imagePath != null &&
+                            cookbook.imagePath!.isNotEmpty &&
+                            FileExistsCache.exists(cookbook.imagePath!)
                         ? Image.file(File(cookbook.imagePath!), fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const CookbookPlaceholderImage())
+                            cacheWidth: 80, cacheHeight: 80,
+                            errorBuilder: (_, __, ___) => const CookbookPlaceholderImage())
                         : const CookbookPlaceholderImage(),
                   ),
                   title: Text(

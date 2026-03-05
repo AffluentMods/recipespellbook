@@ -8,6 +8,7 @@ import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/default_recipe_images.dart';
+import '../../widgets/recipe_image.dart';
 
 /// Search query provider
 final searchQueryProvider = StateProvider<String>((ref) => '');
@@ -343,10 +344,6 @@ class _SearchResultImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasImage = recipe.imagePath != null &&
-        recipe.imagePath!.isNotEmpty &&
-        File(recipe.imagePath!).existsSync();
-    final defaultAsset = defaultRecipeImageAsset(recipe.id);
 
     return Container(
       width: size,
@@ -356,24 +353,11 @@ class _SearchResultImage extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       clipBehavior: Clip.antiAlias,
-      child: hasImage
-          ? Image.file(
-        File(recipe.imagePath!),
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _placeholder(theme),
-      )
-          : defaultAsset != null
-          ? Image.asset(defaultAsset, fit: BoxFit.cover)
-          : _placeholder(theme),
-    );
-  }
-
-  Widget _placeholder(ThemeData theme) {
-    return Center(
-      child: Icon(
-        Icons.restaurant_menu,
-        size: size * 0.4,
-        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+      child: RecipeImage.thumbnail(
+        imagePath: recipe.imagePath,
+        recipeId: recipe.id,
+        width: size,
+        height: size,
       ),
     );
   }

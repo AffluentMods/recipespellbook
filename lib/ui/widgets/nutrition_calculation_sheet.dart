@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,8 +10,8 @@ import '../../providers/database_provider.dart';
 import '../../providers/usda_provider.dart';
 import '../../services/nutrition_calculator.dart';
 import '../../services/usda_service.dart';
-import '../../utils/default_recipe_images.dart';
 import 'app_snackbar.dart';
+import 'recipe_image.dart';
 
 /// Shows the nutrition calculation process and results
 class NutritionCalculationSheet extends ConsumerStatefulWidget {
@@ -1938,11 +1937,6 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
                     final recipe = linkInfo.recipe;
                     final isSelected = recipe.id == _selectedId;
                     final recipeNutrition = _parseNutrition(recipe);
-                    final hasImage = recipe.imagePath != null &&
-                        recipe.imagePath!.isNotEmpty &&
-                        File(recipe.imagePath!).existsSync();
-                    final defaultAsset = defaultRecipeImageAsset(recipe.id);
-
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Material(
@@ -1972,21 +1966,11 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
                                 // Recipe image
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(10),
-                                  child: SizedBox(
-                                    width: 52, height: 52,
-                                    child: hasImage
-                                        ? Image.file(
-                                      File(recipe.imagePath!),
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => _placeholderImage(theme),
-                                    )
-                                        : defaultAsset != null
-                                        ? Image.asset(
-                                      defaultAsset,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => _placeholderImage(theme),
-                                    )
-                                        : _placeholderImage(theme),
+                                  child: RecipeImage.thumbnail(
+                                    imagePath: recipe.imagePath,
+                                    recipeId: recipe.id,
+                                    width: 52,
+                                    height: 52,
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -2230,17 +2214,6 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
           ],
         );
       },
-    );
-  }
-
-  Widget _placeholderImage(ThemeData theme) {
-    return Container(
-      color: theme.colorScheme.surfaceContainerHighest,
-      child: Icon(
-        Icons.restaurant_menu,
-        color: theme.colorScheme.outline.withValues(alpha: 0.5),
-        size: 24,
-      ),
     );
   }
 

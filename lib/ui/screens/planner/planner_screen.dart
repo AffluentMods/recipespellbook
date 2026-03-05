@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,9 +9,8 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/shopping_list_generator.dart';
-import '../../../utils/default_recipe_images.dart';
 import '../../widgets/app_snackbar.dart';
-import '../../widgets/placeholder_image.dart';
+import '../../widgets/recipe_image.dart';
 
 // ============ PROVIDERS ============
 
@@ -756,12 +754,12 @@ class _MealTile extends ConsumerWidget {
             child: SizedBox(
               width: 56,
               height: 56,
-              child: recipe?.imagePath != null && File(recipe!.imagePath!).existsSync()
-                  ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
-                  : defaultRecipeImageAsset(recipe?.id ?? '') != null
-                  ? Image.asset(defaultRecipeImageAsset(recipe!.id)!, fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const RecipePlaceholderImage(height: 56, width: 56))
-                  : const RecipePlaceholderImage(height: 56, width: 56),
+              child: RecipeImage.thumbnail(
+                imagePath: recipe?.imagePath,
+                recipeId: recipe?.id,
+                width: 56,
+                height: 56,
+              ),
             ),
           ),
           title: Text(
@@ -1067,12 +1065,12 @@ class _RecipeSelectTile extends StatelessWidget {
         child: SizedBox(
           width: 56,
           height: 56,
-          child: recipe.imagePath != null && File(recipe.imagePath!).existsSync()
-              ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
-              : defaultRecipeImageAsset(recipe.id) != null
-              ? Image.asset(defaultRecipeImageAsset(recipe.id)!, fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const RecipePlaceholderImage(height: 56, width: 56))
-              : const RecipePlaceholderImage(height: 56, width: 56),
+          child: RecipeImage.thumbnail(
+            imagePath: recipe.imagePath,
+            recipeId: recipe.id,
+            width: 56,
+            height: 56,
+          ),
         ),
       ),
       title: Text(recipe.title, maxLines: 1, overflow: TextOverflow.ellipsis),

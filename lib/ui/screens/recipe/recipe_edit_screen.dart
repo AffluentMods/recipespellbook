@@ -30,6 +30,7 @@ import '../../../services/image_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/recipe_image.dart';
 
 // ============ IMAGE PREVIEW/CONFIRM HELPER ============
 
@@ -2198,14 +2199,12 @@ class _IngredientRow extends StatelessWidget {
   }
 
   Widget _buildRecipeThumb(Recipe recipe, double size) {
-    final hasImage = recipe.imagePath != null && File(recipe.imagePath!).existsSync();
-    final defaultAsset = defaultRecipeImageAsset(recipe.id);
-    if (hasImage) {
-      return Image.file(File(recipe.imagePath!), width: size, height: size, fit: BoxFit.cover);
-    } else if (defaultAsset != null) {
-      return Image.asset(defaultAsset, width: size, height: size, fit: BoxFit.cover);
-    }
-    return SizedBox(width: size, height: size);
+    return RecipeImage.thumbnail(
+      imagePath: recipe.imagePath,
+      recipeId: recipe.id,
+      width: size,
+      height: size,
+    );
   }
 }
 
@@ -2598,11 +2597,6 @@ class _LinkedRecipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasImage = recipe.imagePath != null &&
-        recipe.imagePath!.isNotEmpty &&
-        File(recipe.imagePath!).existsSync();
-    final defaultAsset = defaultRecipeImageAsset(recipe.id);
-
     return Container(
       width: 140,
       margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -2620,16 +2614,9 @@ class _LinkedRecipeCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: hasImage
-                    ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
-                    : defaultAsset != null
-                    ? Image.asset(defaultAsset, fit: BoxFit.cover)
-                    : Container(
-                  color: theme.colorScheme.primaryContainer,
-                  child: Icon(
-                    Icons.restaurant_menu,
-                    color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
-                  ),
+                child: RecipeImage.medium(
+                  imagePath: recipe.imagePath,
+                  recipeId: recipe.id,
                 ),
               ),
               Padding(
@@ -2675,10 +2662,6 @@ class _AvailableRecipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasImage = recipe.imagePath != null &&
-        recipe.imagePath!.isNotEmpty &&
-        File(recipe.imagePath!).existsSync();
-    final defaultAsset = defaultRecipeImageAsset(recipe.id);
     final totalTime = (recipe.prepTimeMinutes ?? 0) + (recipe.cookTimeMinutes ?? 0);
 
     return Container(
@@ -2703,16 +2686,11 @@ class _AvailableRecipeCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: hasImage
-                    ? Image.file(File(recipe.imagePath!), fit: BoxFit.cover)
-                    : defaultAsset != null
-                    ? Image.asset(defaultAsset, fit: BoxFit.cover)
-                    : Center(
-                  child: Icon(
-                    Icons.restaurant_menu,
-                    size: 24,
-                    color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
-                  ),
+                child: RecipeImage.medium(
+                  imagePath: recipe.imagePath,
+                  recipeId: recipe.id,
+                  width: 56,
+                  height: 56,
                 ),
               ),
               const SizedBox(width: 12),

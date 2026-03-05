@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,7 +6,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../widgets/app_snackbar.dart';
-import '../../widgets/placeholder_image.dart';
+import '../../widgets/recipe_image.dart';
 
 /// Provider for dismissed allergy warnings
 /// Stores recipe IDs where user has permanently dismissed warnings
@@ -640,8 +639,6 @@ class _DisabledRecipeTile extends ConsumerWidget {
       builder: (context, snapshot) {
         final recipe = snapshot.data;
         final recipeName = recipe?.title ?? recipeId;
-        final hasImage = recipe?.imagePath != null &&
-            File(recipe!.imagePath!).existsSync();
 
         // Allergen names list
         final allergenNames = dismissedAllergens
@@ -664,18 +661,11 @@ class _DisabledRecipeTile extends ConsumerWidget {
                 // Recipe image
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: SizedBox(
+                  child: RecipeImage.thumbnail(
+                    imagePath: recipe?.imagePath,
+                    recipeId: recipeId,
                     width: 56,
                     height: 56,
-                    child: hasImage
-                        ? Image.file(
-                      File(recipe!.imagePath!),
-                      fit: BoxFit.cover,
-                    )
-                        : const RecipePlaceholderImage(
-                      height: 56,
-                      width: 56,
-                    ),
                   ),
                 ),
                 const SizedBox(width: 12),

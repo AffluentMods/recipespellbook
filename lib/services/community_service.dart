@@ -422,17 +422,12 @@ class CommunityService {
       if (minRating != null && minRating > 0) params['minRating'] = minRating.toString();
 
       final queryString = params.entries.map((e) => '${e.key}=${Uri.encodeComponent(e.value)}').join('&');
-      debugPrint('[Community] browse: /v1/community?$queryString');
       final r = await _auth.get('/v1/community?$queryString');
 
       if (r.statusCode == 200) {
         final data = jsonDecode(r.body);
-        final pubs = data['publications'] as List;
-        for (final p in pubs) {
-          debugPrint('[Community] browse item "${p['title']}" tags="${p['tags']}"');
-        }
         return CommunityFeedResult(
-          publications: pubs
+          publications: (data['publications'] as List)
               .map((p) => CommunityListItem.fromJson(p as Map<String, dynamic>))
               .toList(),
           page: data['page'] as int? ?? 1,
@@ -451,9 +446,7 @@ class CommunityService {
     try {
       final r = await _auth.get('/v1/community/$id');
       if (r.statusCode == 200) {
-        final json = jsonDecode(r.body);
-        debugPrint('[Community] getPublication tags="${json['tags']}" (type=${json['tags']?.runtimeType})');
-        return CommunityDetail.fromJson(json);
+        return CommunityDetail.fromJson(jsonDecode(r.body));
       }
     } catch (e) {
       debugPrint('[Community] getPublication: $e');
@@ -526,7 +519,6 @@ class CommunityService {
     String? tags,
   }) async {
     try {
-      debugPrint('[Community] publish: title=$title, tags=$tags, recipes=${recipes.length}');
       final r = await _auth.post('/v1/community', {
         'title': title,
         if (description != null) 'description': description,
@@ -564,7 +556,6 @@ class CommunityService {
       final r = await _auth.post('/v1/community/$publicationId/rate', {
         'rating': rating,
       });
-      debugPrint('[Community] rate response: ${r.statusCode} ${r.body}');
       if (r.statusCode == 200) {
         final data = jsonDecode(r.body);
         return (
@@ -573,9 +564,8 @@ class CommunityService {
           yourRating: data['yourRating'] as int,
         );
       }
-      debugPrint('[Community] rate failed: ${r.statusCode} ${r.body}');
     } catch (e) {
-      debugPrint('[Community] rate error: $e');
+      debugPrint('[Community] rate: $e');
     }
     return null;
   }
@@ -608,12 +598,10 @@ class CommunityService {
       if (description != null) body['description'] = description;
       if (tags != null) body['tags'] = tags;
 
-      debugPrint('[Community] updatePublication: $body');
       final r = await _auth.patch('/v1/community/$publicationId', body);
-      debugPrint('[Community] updatePublication response: ${r.statusCode} ${r.body}');
       return r.statusCode == 200;
     } catch (e) {
-      debugPrint('[Community] updatePublication error: $e');
+      debugPrint('[Community] updatePublication: $e');
     }
     return false;
   }

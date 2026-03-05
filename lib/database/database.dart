@@ -178,6 +178,32 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
+  /// Delete ALL user-created data (for account switching "start fresh").
+  /// Preserves USDA nutrition reference data and default shopping categories.
+  /// Re-seeds default cookbook, categories, shopping list after clearing.
+  Future<void> deleteAllUserData() async {
+    // Delete in dependency order (children first)
+    await delete(recipeLinks).go();
+    await delete(recipeTags).go();
+    await delete(ingredients).go();
+    await delete(steps).go();
+    await delete(mealPlans).go();
+    await delete(shoppingListItems).go();
+    await delete(shoppingLists).go();
+    await delete(recipes).go();
+    await delete(cookbooks).go();
+    await delete(categories).go();
+    await delete(tags).go();
+    await delete(customCourses).go();
+    await delete(customCategories).go();
+    await delete(shoppingCategories).go();
+    await delete(userIngredientMappings).go();
+    // Note: UsdaFoods + IngredientUsdaMappings are reference data — keep them
+
+    // Re-seed defaults so the app isn't empty
+    await _seedDefaultData();
+  }
+
   Future<void> _seedDefaultData() async {
     // Default cookbook
     await into(cookbooks).insert(CookbooksCompanion.insert(
