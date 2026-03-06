@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import '../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

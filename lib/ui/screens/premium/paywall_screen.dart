@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:purchases_flutter/models/package_wrapper.dart';
+import '../../../services/revenuecat_stub.dart' if (dart.library.io) '../../../services/revenuecat_native.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/auth_provider.dart';

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -188,9 +187,11 @@ class SyncService {
         pulledCount: pulledCount,
         syncedAt: syncedAt,
       );
-    } on SocketException {
-      return const SyncResult.failure('No internet connection');
     } catch (e) {
+      final msg = e.toString();
+      if (msg.contains('SocketException') || msg.contains('Failed to fetch') || msg.contains('NetworkError')) {
+        return const SyncResult.failure('No internet connection');
+      }
       debugPrint('[Sync] Error: $e');
       return SyncResult.failure('Sync failed: ${_friendlyError(e)}');
     } finally {
@@ -249,9 +250,11 @@ class SyncService {
         pulledCount: pulledCount,
         syncedAt: syncedAt,
       );
-    } on SocketException {
-      return const SyncResult.failure('No internet connection');
     } catch (e) {
+      final msg = e.toString();
+      if (msg.contains('SocketException') || msg.contains('Failed to fetch') || msg.contains('NetworkError')) {
+        return const SyncResult.failure('No internet connection');
+      }
       debugPrint('[Sync] Pull error: $e');
       return SyncResult.failure('Pull failed: ${_friendlyError(e)}');
     } finally {

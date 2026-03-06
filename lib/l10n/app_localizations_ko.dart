@@ -5567,6 +5567,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get resetDataClearedDesc => '모든 데이터가 성공적으로 삭제되었습니다.\n\n기본 스타터 레시피 10개를 가져오시겠습니까?';
 
   @override
+  String get yesImport => '예, 가져오기';
+
+  @override
   String get importingDefaultRecipes => '기본 레시피 가져오는 중...';
 
   @override

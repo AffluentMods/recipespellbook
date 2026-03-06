@@ -589,20 +589,29 @@ class _RecipePage extends StatelessWidget {
                     ),
                   ),
                 ),
+                // Clearance for Roman numeral page number
+                const SizedBox(height: 28),
               ],
             ),
           ),
 
           // Roman numeral page number — bottom right
           Positioned(
-            bottom: 4,
-            right: 4,
-            child: Text(
-              _toRoman(pageNumber),
-              style: GoogleFonts.cormorantGaramond(
-                fontSize: 16,
-                color: const Color(0xFF8B6914).withValues(alpha: 0.5),
-                fontStyle: FontStyle.italic,
+            bottom: 8,
+            right: 12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5E6C8).withValues(alpha: 0.85),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                _toRoman(pageNumber),
+                style: GoogleFonts.cormorantGaramond(
+                  fontSize: 16,
+                  color: const Color(0xFF8B6914).withValues(alpha: 0.6),
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ),
           ),

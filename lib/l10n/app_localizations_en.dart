@@ -5619,6 +5619,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetDataClearedDesc => 'All data has been cleared successfully.\n\nWould you like to import the 10 default starter recipes?';
 
   @override
+  String get yesImport => 'Yes, Import';
+
+  @override
   String get importingDefaultRecipes => 'Importing default recipes...';
 
   @override

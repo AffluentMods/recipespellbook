@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

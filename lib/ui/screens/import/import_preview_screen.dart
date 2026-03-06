@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'services/notification_stub.dart' if (dart.library.io) 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:share_handler/share_handler.dart';
+import 'utils/share_handler_stub.dart' if (dart.library.io) 'package:share_handler/share_handler.dart';
 import 'l10n/app_localizations.dart';
+import 'utils/platform_utils.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cookbook_provider.dart';
 import 'providers/database_provider.dart';
@@ -35,12 +36,16 @@ Future<void> main() async {
     };
 
     try {
-      await Firebase.initializeApp();
-      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+      if (supportsFirebaseMessaging) {
+        await Firebase.initializeApp();
+        FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+      }
     } catch (e) {
       debugPrint('[Firebase] Initialization failed: $e');
     }
-    FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+    if (supportsNativeSplash) {
+      FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+    }
 
     // Preload ingredient suggestions (fire-and-forget with error handling)
     try {
@@ -140,7 +145,7 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     await ref.read(authProvider.notifier).initialize();
 
     // 3. Remove splash screen — show the app while the rest loads in background
-    FlutterNativeSplash.remove();
+    if (supportsNativeSplash) FlutterNativeSplash.remove();
 
     _initialized = true;
 
@@ -164,10 +169,13 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
   /// These don't need to complete before the user sees the app.
   Future<void> _initBackground() async {
     try {
-      await Future.wait([
+      final futures = <Future>[
         ref.read(subscriptionProvider.notifier).initialize(),
-        NotificationService.instance.initialize(),
-      ]);
+      ];
+      if (supportsFirebaseMessaging) {
+        futures.add(NotificationService.instance.initialize());
+      }
+      await Future.wait(futures);
     } catch (e) {
       debugPrint('[Init] Background init error: $e');
     }
@@ -175,6 +183,7 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
 
   // ── Share intent handling ──────────────────────────────────────────
   void _initShareHandler() {
+    if (!supportsShareHandler) return;
     final handler = ShareHandlerPlatform.instance;
 
     // Cold start — app was launched via share

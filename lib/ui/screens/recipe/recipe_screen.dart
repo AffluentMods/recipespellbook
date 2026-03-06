@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:drift/drift.dart' as drift;
+import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
+import '../../../utils/native_file_image.dart';
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -1344,14 +1345,14 @@ class _RecipeAppBar extends StatelessWidget {
                   context,
                   imageProvider: isServer
                       ? NetworkImage(recipe.imagePath!) as ImageProvider
-                      : FileImage(File(recipe.imagePath!)),
+                      : buildFileImageProvider(recipe.imagePath!),
                   heroTag: 'recipe_image_${recipe.id}',
                 ),
                 child: Hero(
                   tag: 'recipe_image_${recipe.id}',
                   child: isServer
                       ? _ServerImage(path: recipe.imagePath!)
-                      : Image.file(File(recipe.imagePath!), fit: BoxFit.cover, cacheHeight: 800),
+                      : buildFileImage(recipe.imagePath!, fit: BoxFit.cover, cacheHeight: 800),
                 ),
               )
             else if (defaultAsset != null)
@@ -1744,15 +1745,15 @@ class _InstructionStep extends StatelessWidget {
               child: GestureDetector(
                 onTap: () => _FullScreenImageViewer.show(
                   context,
-                  imageProvider: FileImage(File(step.imagePath!)),
+                  imageProvider: buildFileImageProvider(step.imagePath!),
                   heroTag: 'step_image_${step.imagePath}',
                 ),
                 child: Hero(
                   tag: 'step_image_${step.imagePath}',
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.file(
-                      File(step.imagePath!),
+                    child: buildFileImage(
+                      step.imagePath!,
                       width: double.infinity,
                       height: 180,
                       fit: BoxFit.cover,

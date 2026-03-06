@@ -2729,6 +2729,7 @@
   "textSizeLarge": "Grande",
   "textSizeExtraLarge": "Extra Grande",
   "resetDataClearedDesc": "Todos os dados foram limpos com sucesso.\n\nGostaria de importar as 10 receitas iniciais padrão?",
+  "yesImport": "Sim, importar",
   "importingDefaultRecipes": "Importando receitas padrão...",
   "checking": "Verificando...",
   "connectedTapToManage": "Conectado • Toque para gerenciar",

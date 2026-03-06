@@ -1,8 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'notification_stub.dart' if (dart.library.io) 'notification_native.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import '../utils/platform_utils.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -169,7 +168,7 @@ class NotificationService {
         },
         body: jsonEncode({
           'token': _fcmToken,
-          'platform': Platform.isIOS ? 'ios' : 'android',
+          'platform': isIOS ? 'ios' : 'android',
         }),
       );
       debugPrint('[FCM] Token registered with backend');

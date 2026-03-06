@@ -13,11 +13,12 @@ import '../../../providers/subscription_provider.dart';
 import '../../../providers/auth_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../services/auth_service.dart';
-import 'dart:io' show Platform;
+import '../../../utils/platform_utils.dart';
 import '../../../services/export_import_service.dart';
 import '../../../services/family_service.dart';
 import '../../../services/grocery_service.dart';
 import '../../../services/onboarding_service.dart';
+import '../home/home_screen.dart';
 import '../../../services/revenuecat_service.dart';
 import '../../../services/sync_service.dart';
 import '../../widgets/app_snackbar.dart';
@@ -392,29 +393,54 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       await db.customStatement('DELETE FROM custom_courses');
       await db.customStatement('DELETE FROM custom_categories');
       if (scope == _ResetScope.all) ref.read(settingsProvider.notifier).resetToDefaults();
-      if (context.mounted) { Navigator.pop(context); _showReimportDefaultsDialog(context, ref, l10n); }
+
+      // Reset onboarding so the intro flow triggers again
+      await OnboardingService.resetOnboarding();
+      HomeScreen.resetOnboardingCheck();
+
+      if (context.mounted) {
+        Navigator.pop(context);
+        _showRestartDialog(context);
+      }
     } catch (e) {
       if (context.mounted) { Navigator.pop(context); AppSnackbar.error(context, '${l10n.resetFailed}: $e'); }
     }
   }
 
-  void _showReimportDefaultsDialog(BuildContext context, WidgetRef ref, AppLocalizations l10n) {
-    showDialog(context: context, barrierDismissible: false, builder: (context) => AlertDialog(
-      icon: const Icon(Icons.auto_awesome, size: 48, color: Colors.amber),
+  void _showRestartDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(context: context, barrierDismissible: false, builder: (ctx) => AlertDialog(
+      icon: const Icon(Icons.check_circle_outline, size: 48, color: Colors.green),
       title: Text(l10n.dataResetComplete),
       content: Text(l10n.resetDataClearedDesc),
       actions: [
-        TextButton(onPressed: () { Navigator.pop(context); AppSnackbar.success(context, l10n.appResetSuccess); context.go('/'); }, child: Text(l10n.noThanks)),
-        FilledButton(onPressed: () async {
-          Navigator.pop(context);
-          AppSnackbar.loading(context, l10n.importingDefaultRecipes);
-          try {
-            final count = await OnboardingService.seedDefaultRecipes(ref.read(databaseProvider));
-            if (context.mounted) { AppSnackbar.dismiss(context); AppSnackbar.success(context, l10n.defaultRecipesImported(count)); context.go('/'); }
-          } catch (e) {
-            if (context.mounted) { AppSnackbar.dismiss(context); AppSnackbar.error(context, '${l10n.importFailed}: $e'); context.go('/'); }
-          }
-        }, child: Text(l10n.yesAddThem)),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(ctx);
+            context.go('/splash');
+          },
+          child: Text(l10n.noThanks),
+        ),
+        FilledButton(
+          onPressed: () async {
+            Navigator.pop(ctx);
+            // Show importing indicator
+            if (context.mounted) {
+              AppSnackbar.info(context, l10n.importingDefaultRecipes);
+            }
+            try {
+              final db = ref.read(databaseProvider);
+              final count = await OnboardingService.seedDefaultRecipes(db);
+              if (context.mounted) {
+                AppSnackbar.success(context, l10n.starterRecipesAdded(count));
+              }
+            } catch (_) {}
+            if (context.mounted) {
+              context.go('/splash');
+            }
+          },
+          child: Text(l10n.yesImport),
+        ),
       ],
     ));
   }
@@ -566,7 +592,7 @@ class _AccountCard extends ConsumerWidget {
             Text(l10n.continueWithGoogle, style: TextStyle(fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface)),
           ]),
         )),
-        if (Platform.isIOS || Platform.isMacOS) ...[
+        if (supportsAppleSignIn) ...[
           const SizedBox(height: 10),
           SizedBox(width: double.infinity, child: FilledButton(
             onPressed: () { Navigator.pop(ctx); auth.signInWithApple(); },

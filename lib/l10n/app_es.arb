@@ -2225,6 +2225,7 @@
   "textSizeLarge": "Grande",
   "textSizeExtraLarge": "Extra Grande",
   "resetDataClearedDesc": "Todos los datos se han borrado correctamente.\n\n¿Te gustaría importar las 10 recetas iniciales predeterminadas?",
+  "yesImport": "Sí, importar",
   "importingDefaultRecipes": "Importando recetas predeterminadas...",
   "checking": "Verificando...",
   "connectedTapToManage": "Conectado • Toca para gestionar",

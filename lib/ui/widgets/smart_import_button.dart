@@ -1,4 +1,4 @@
-import 'dart:io';
+import '../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

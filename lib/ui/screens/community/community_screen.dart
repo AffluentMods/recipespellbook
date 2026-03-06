@@ -649,11 +649,14 @@ class _CommunityGridCard extends StatelessWidget {
                         Text('${item.recipeCount}', style: TextStyle(fontSize: 10, color: theme.colorScheme.outline)),
                       ],
                     ),
-                    // Tags (show first 2)
-                    if (item.tagList.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      _TagChips(tags: item.tagList, maxShow: 2),
-                    ],
+                    // Tags (show first 1 — grid cards have limited space)
+                    if (item.tagList.isNotEmpty)
+                      Flexible(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: _TagChips(tags: item.tagList, maxShow: 1),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -784,6 +787,7 @@ class _TagChips extends StatelessWidget {
     return Wrap(
       spacing: 4,
       runSpacing: 2,
+      clipBehavior: Clip.hardEdge,
       children: [
         ...shown.map((tag) {
           final emoji = emojiForTag(tag);

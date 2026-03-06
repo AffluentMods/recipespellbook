@@ -1,5 +1,4 @@
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import '../../../utils/platform_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,10 +29,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
   // 0 = pick mode, 1 = sending, 2 = receiving
   int _step = 0;
 
-  static bool get _isDesktop {
-    if (kIsWeb) return false;
-    return Platform.isMacOS || Platform.isWindows || Platform.isLinux;
-  }
+  static bool get _isDesktop => isDesktop;
 
   static String _targetDevice(AppLocalizations l10n) =>
       _isDesktop ? l10n.transferDeviceMobileApp : l10n.transferDeviceDesktop;

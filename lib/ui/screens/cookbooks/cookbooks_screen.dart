@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../../utils/native_file_image.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -652,7 +652,7 @@ class _CookbookCard extends StatelessWidget {
               child: cookbook.imagePath != null &&
                   cookbook.imagePath!.isNotEmpty &&
                   FileExistsCache.exists(cookbook.imagePath!)
-                  ? Image.file(File(cookbook.imagePath!), fit: BoxFit.cover,
+                  ? buildFileImage(cookbook.imagePath!, fit: BoxFit.cover,
                       cacheHeight: 400)
                   : const CookbookPlaceholderImage(height: double.infinity),
             ),

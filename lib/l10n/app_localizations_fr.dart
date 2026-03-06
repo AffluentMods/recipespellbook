@@ -5607,6 +5607,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get resetDataClearedDesc => 'Toutes les données ont été effacées avec succès.\n\nSouhaitez-vous importer les 10 recettes de démarrage par défaut ?';
 
   @override
+  String get yesImport => 'Oui, importer';
+
+  @override
   String get importingDefaultRecipes => 'Importation des recettes par défaut...';
 
   @override

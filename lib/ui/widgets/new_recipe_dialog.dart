@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import '../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:file_picker/file_picker.dart';
@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../utils/platform_utils.dart';
 import 'package:path/path.dart' as p;
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
@@ -325,11 +326,12 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       context: context,
       builder: (ctx) => SafeArea(
         child: Wrap(children: [
-          ListTile(
-            leading: const Icon(Icons.camera_alt),
-            title: Text(l10n.photoTakePhoto),
-            onTap: () => Navigator.pop(ctx, ImageSource.camera),
-          ),
+          if (supportsCamera)
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: Text(l10n.photoTakePhoto),
+              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+            ),
           ListTile(
             leading: const Icon(Icons.photo_library),
             title: Text(l10n.photoChooseGallery),
@@ -855,7 +857,8 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _CircleOptionButton(icon: Icons.folder_open, label: l10n.fileOption, onTap: _importFromFile),
-                      _CircleOptionButton(icon: Icons.image, label: l10n.imageOption, onTap: _importFromImage),
+                      if (supportsOcr)
+                        _CircleOptionButton(icon: Icons.image, label: l10n.imageOption, onTap: _importFromImage),
                       _CircleOptionButton(icon: Icons.text_snippet, label: l10n.pasteOption, onTap: _importFromText),
                       _CircleOptionButton(icon: Icons.auto_awesome, label: 'AI', onTap: () {
                         Navigator.pop(context);

@@ -2729,6 +2729,7 @@
   "textSizeLarge": "大",
   "textSizeExtraLarge": "特大",
   "resetDataClearedDesc": "所有数据已成功清除。\n\n你想导入10个默认的入门食谱吗？",
+  "yesImport": "是的，导入",
   "importingDefaultRecipes": "正在导入默认食谱...",
   "checking": "检查中...",
   "connectedTapToManage": "已连接 · 点击管理",

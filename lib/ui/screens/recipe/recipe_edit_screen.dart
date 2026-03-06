@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math' as math;
+import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
+import '../../../utils/native_file_image.dart';
 import 'dart:ui' as ui;
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:flutter/material.dart' hide Step;
@@ -8,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../utils/platform_utils.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -129,8 +131,8 @@ class _ImageCropDialogState extends State<_ImageCropDialog> {
                   minScale: 0.5,
                   maxScale: 4.0,
                   child: Center(
-                    child: Image.file(
-                      File(widget.imagePath),
+                    child: buildFileImage(
+                      widget.imagePath,
                       fit: BoxFit.contain,
                     ),
                   ),
@@ -1956,7 +1958,7 @@ class _PhotoPicker extends StatelessWidget {
         // Server-hosted image — we'll show it via a FutureBuilder below
         decorationImage = null; // handled separately
       } else {
-        decorationImage = DecorationImage(image: FileImage(File(imagePath!)), fit: BoxFit.cover);
+        decorationImage = DecorationImage(image: buildFileImageProvider(imagePath!), fit: BoxFit.cover);
       }
     } else if (hasAsset) {
       decorationImage = DecorationImage(image: AssetImage(defaultAssetPath!), fit: BoxFit.cover);
@@ -1992,7 +1994,7 @@ class _PhotoPicker extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(context: context, builder: (ctx) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
       ListTile(leading: const Icon(Icons.photo_library), title: Text(l10n.chooseFromGallery), onTap: () { Navigator.pop(ctx); _pickImageWithPreview(context, ImageSource.gallery); }),
-      ListTile(leading: const Icon(Icons.camera_alt), title: Text(l10n.takePhoto), onTap: () { Navigator.pop(ctx); _pickImageWithPreview(context, ImageSource.camera); }),
+      if (supportsCamera) ListTile(leading: const Icon(Icons.camera_alt), title: Text(l10n.takePhoto), onTap: () { Navigator.pop(ctx); _pickImageWithPreview(context, ImageSource.camera); }),
     ])));
   }
   Future<void> _pickImageWithPreview(BuildContext context, ImageSource source) async {

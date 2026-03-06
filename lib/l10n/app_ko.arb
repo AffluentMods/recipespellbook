@@ -2729,6 +2729,7 @@
   "textSizeLarge": "크게",
   "textSizeExtraLarge": "매우 크게",
   "resetDataClearedDesc": "모든 데이터가 성공적으로 삭제되었습니다.\n\n기본 스타터 레시피 10개를 가져오시겠습니까?",
+  "yesImport": "예, 가져오기",
   "importingDefaultRecipes": "기본 레시피 가져오는 중...",
   "checking": "확인 중...",
   "connectedTapToManage": "연결됨 • 탭하여 관리",

@@ -44,6 +44,13 @@ class OnboardingService {
     await prefs.setBool(_keyOnboardingComplete, true);
   }
 
+  /// Reset onboarding state so the intro flow shows again on next launch
+  static Future<void> resetOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyOnboardingComplete);
+    await prefs.remove(_keyDefaultRecipesOffered);
+  }
+
   /// Seed default recipes into the database
   static Future<int> seedDefaultRecipes(AppDatabase db) async {
     final dao = db.recipeDao;

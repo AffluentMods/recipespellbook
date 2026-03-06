@@ -1,5 +1,6 @@
-import 'dart:io';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
+import '../utils/platform_utils.dart';
+import 'ocr_stub.dart' if (dart.library.io) 'ocr_native.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:path/path.dart' as p;
@@ -62,6 +63,9 @@ class OcrService {
   Future<OcrResult> processMultipleImages(List<String> imagePaths, {
     void Function(int current, int total)? onProgress,
   }) async {
+    if (!supportsOcr) {
+      return const OcrResult(text: '', confidence: 0);
+    }
     final textRecognizer = TextRecognizer();
     try {
       final allLines = <String>[];
@@ -114,6 +118,9 @@ class OcrService {
   Future<OcrResult> processPdf(String pdfPath, {
     void Function(int current, int total)? onProgress,
   }) async {
+    if (!supportsOcr) {
+      return const OcrResult(text: '', confidence: 0);
+    }
     final document = await PdfDocument.openFile(pdfPath);
     final tempDir = await getTemporaryDirectory();
     final textRecognizer = TextRecognizer();

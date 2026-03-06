@@ -1,11 +1,12 @@
 import 'dart:convert';
-import 'dart:io';
+import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import '../services/auth_service.dart';
+import '../utils/platform_utils.dart';
 
 // ════════════════════════════════════════════
 //  IMAGE RESULT
@@ -242,6 +243,7 @@ class ImageService {
   /// Upload a local image file by path for community publishing.
   /// Convenience wrapper around [communityUploadFile].
   Future<ImageUploadResult?> communityUploadLocalPath(String localPath) async {
+    if (!supportsLocalFileSystem) return null;
     final file = File(localPath);
     if (!await file.exists()) {
       debugPrint('[ImageService] Local file not found: $localPath');
@@ -257,6 +259,7 @@ class ImageService {
   /// Download an image from a URL and save it locally.
   /// Returns the local file path, or null on failure.
   Future<String?> downloadAndSaveImage(String url, String filename) async {
+    if (!supportsLocalFileSystem) return null;
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode != 200) {

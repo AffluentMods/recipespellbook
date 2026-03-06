@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
-import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
+import 'revenuecat_stub.dart' if (dart.library.io) 'revenuecat_native.dart';
+import '../utils/platform_utils.dart' show supportsRevenueCatSdk;
 
 // ════════════════════════════════════════════════════════════════
 //  REVENUECAT CONFIG
@@ -220,6 +220,14 @@ class RevenueCatService {
   Future<void> initialize({String? userId}) async {
     if (_initialized) return;
 
+    if (!supportsRevenueCatSdk) {
+      // Desktop/web: skip SDK initialization.
+      // Subscription status comes from backend via setTierFromBackend().
+      _initialized = true;
+      debugPrint('[RevenueCat] Desktop/web mode — using backend-only tier validation');
+      return;
+    }
+
     try {
       late PurchasesConfiguration config;
 
@@ -251,6 +259,7 @@ class RevenueCatService {
 
   /// Refresh subscription status from RevenueCat.
   Future<void> refreshStatus() async {
+    if (!supportsRevenueCatSdk) return;
     try {
       final info = await Purchases.getCustomerInfo();
       _syncFromCustomerInfo(info);
@@ -261,7 +270,7 @@ class RevenueCatService {
 
   /// Identify user in RevenueCat (call after sign-in).
   Future<void> login(String userId) async {
-    if (!_initialized) return;
+    if (!_initialized || !supportsRevenueCatSdk) return;
     try {
       final result = await Purchases.logIn(userId);
       _syncFromCustomerInfo(result.customerInfo);
@@ -273,7 +282,7 @@ class RevenueCatService {
 
   /// Log out of RevenueCat (call on sign-out). Creates anonymous user.
   Future<void> logout() async {
-    if (!_initialized) return;
+    if (!_initialized || !supportsRevenueCatSdk) return;
     try {
       final info = await Purchases.logOut();
       _syncFromCustomerInfo(info);
@@ -314,7 +323,7 @@ class RevenueCatService {
 
   /// Get available offerings (raw RC object — use .current for default offering).
   Future<Offerings?> getOfferings() async {
-    if (!_initialized) return null;
+    if (!_initialized || !supportsRevenueCatSdk) return null;
 
     try {
       return await Purchases.getOfferings();
@@ -326,6 +335,7 @@ class RevenueCatService {
 
   /// Convenience: get packages from the current/default offering.
   Future<List<RCPackageInfo>> getPackages() async {
+    if (!supportsRevenueCatSdk) return [];
     final offerings = await getOfferings();
     final current = offerings?.current;
     if (current == null) return [];
@@ -345,6 +355,7 @@ class RevenueCatService {
 
   /// Purchase a specific package.
   Future<SubscriptionTier?> purchasePackage(Package package) async {
+    if (!supportsRevenueCatSdk) return null;
     try {
       final customerInfo = await Purchases.purchasePackage(package);
       _syncFromCustomerInfo(customerInfo);
@@ -360,11 +371,13 @@ class RevenueCatService {
 
   /// Show the RevenueCat native paywall.
   Future<PaywallResult> presentPaywall({Offering? offering}) async {
+    if (!supportsRevenueCatSdk) return PaywallResult.cancelled;
     return await RevenueCatUI.presentPaywall(offering: offering);
   }
 
   /// Show the RevenueCat customer center (manage subscriptions).
   Future<void> presentCustomerCenter() async {
+    if (!supportsRevenueCatSdk) return;
     try {
       await RevenueCatUI.presentCustomerCenter();
     } catch (e) {
@@ -374,6 +387,7 @@ class RevenueCatService {
 
   /// Restore previous purchases.
   Future<SubscriptionTier> restorePurchases() async {
+    if (!supportsRevenueCatSdk) return _currentTier;
     try {
       final info = await Purchases.restorePurchases();
       _syncFromCustomerInfo(info);

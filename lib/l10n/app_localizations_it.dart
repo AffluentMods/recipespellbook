@@ -5607,6 +5607,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get resetDataClearedDesc => 'Tutti i dati sono stati cancellati con successo.\n\nVuoi importare le 10 ricette iniziali predefinite?';
 
   @override
+  String get yesImport => 'Sì, importa';
+
+  @override
   String get importingDefaultRecipes => 'Importazione ricette predefinite...';
 
   @override

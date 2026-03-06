@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../../utils/native_file_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
@@ -255,11 +255,11 @@ class _DeletedRecipeCard extends StatelessWidget {
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: hasImage
-                    ? Image.file(
-                  File(recipe.imagePath!),
+                    ? buildFileImage(
+                  recipe.imagePath!,
                   fit: BoxFit.cover,
                   cacheHeight: 128,
-                  errorBuilder: (_, __, ___) => Icon(
+                  errorWidget: Icon(
                     Icons.restaurant,
                     color: theme.colorScheme.outline,
                   ),

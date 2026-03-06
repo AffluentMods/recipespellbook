@@ -5619,6 +5619,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get resetDataClearedDesc => 'Alle gegevens zijn succesvol gewist.\n\nWil je de 10 standaard startersrecepten importeren?';
 
   @override
+  String get yesImport => 'Ja, importeren';
+
+  @override
   String get importingDefaultRecipes => 'Standaardrecepten importeren...';
 
   @override

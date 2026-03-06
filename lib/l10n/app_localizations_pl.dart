@@ -5681,6 +5681,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get resetDataClearedDesc => 'Wszystkie dane zostały pomyślnie wyczyszczone.\n\nCzy chcesz zaimportować 10 domyślnych przepisów startowych?';
 
   @override
+  String get yesImport => 'Tak, importuj';
+
+  @override
   String get importingDefaultRecipes => 'Importowanie domyślnych przepisów...';
 
   @override

@@ -1,4 +1,4 @@
-import 'dart:io';
+import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';

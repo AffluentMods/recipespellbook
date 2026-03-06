@@ -10399,6 +10399,12 @@ abstract class AppLocalizations {
   /// **'All data has been cleared successfully.\n\nWould you like to import the 10 default starter recipes?'**
   String get resetDataClearedDesc;
 
+  /// No description provided for @yesImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, Import'**
+  String get yesImport;
+
   /// No description provided for @importingDefaultRecipes.
   ///
   /// In en, this message translates to:

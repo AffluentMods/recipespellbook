@@ -1723,6 +1723,7 @@
   "textSizeLarge": "Grand",
   "textSizeExtraLarge": "Très grand",
   "resetDataClearedDesc": "Toutes les données ont été effacées avec succès.\n\nSouhaitez-vous importer les 10 recettes de démarrage par défaut ?",
+  "yesImport": "Oui, importer",
   "importingDefaultRecipes": "Importation des recettes par défaut...",
   "checking": "Vérification...",
   "connectedTapToManage": "Connecté • Appuyez pour gérer",

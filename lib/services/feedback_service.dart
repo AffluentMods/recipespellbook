@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import '../utils/platform_utils.dart';
 
 /// Service for sending user feedback via the backend API
 class FeedbackService {
@@ -55,32 +56,18 @@ class FeedbackService {
     String? email,
   }) async {
     try {
-      String platform;
-      if (Platform.isIOS) {
-        platform = 'ios';
-      } else if (Platform.isAndroid) {
-        platform = 'android';
-      } else {
-        platform = 'web'; // Desktop/other platforms report as 'web'
-      }
-
-      final client = HttpClient();
       final uri = Uri.parse('$_apiBaseUrl/v1/feedback');
-      final request = await client.postUrl(uri);
-
-      request.headers.set('Content-Type', 'application/json');
-
-      final body = jsonEncode({
-        'type': type,
-        'title': title,
-        'description': description,
-        if (email != null && email.isNotEmpty) 'email': email,
-        'platform': platform,
-      });
-
-      request.write(body);
-      final response = await request.close();
-      await response.drain();
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'type': type,
+          'title': title,
+          'description': description,
+          if (email != null && email.isNotEmpty) 'email': email,
+          'platform': platformName,
+        }),
+      );
 
       return response.statusCode >= 200 && response.statusCode < 300;
     } catch (e) {
@@ -92,14 +79,23 @@ class FeedbackService {
   static Future<String> _getDeviceInfo() async {
     try {
       final deviceInfo = DeviceInfoPlugin();
-      if (Platform.isAndroid) {
+      if (isAndroid) {
         final info = await deviceInfo.androidInfo;
         return '${info.brand} ${info.model} · Android ${info.version.release}';
-      } else if (Platform.isIOS) {
+      } else if (isIOS) {
         final info = await deviceInfo.iosInfo;
         return '${info.name} · iOS ${info.systemVersion}';
+      } else if (isWindows) {
+        final info = await deviceInfo.windowsInfo;
+        return '${info.computerName} · Windows ${info.majorVersion}.${info.minorVersion} (Build ${info.buildNumber})';
+      } else if (isMacOS) {
+        final info = await deviceInfo.macOsInfo;
+        return '${info.computerName} · macOS ${info.osRelease}';
+      } else if (isWeb) {
+        final info = await deviceInfo.webBrowserInfo;
+        return '${info.browserName.name} · Web';
       }
     } catch (_) {}
-    return Platform.operatingSystem;
+    return platformName;
   }
 }

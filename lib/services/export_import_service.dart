@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:typed_data';
+import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -8,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../database/database.dart';
+import '../utils/platform_utils.dart';
 
 // ════════════════════════════════════════════
 //  EXPORT / IMPORT OPTIONS
@@ -247,13 +249,35 @@ class ExportImportService {
   // ──────────────────────────────────────────
 
   Future<void> shareExport(Map<String, dynamic> data, String filename) async {
-    final dir = await getTemporaryDirectory();
-    final file = File(p.join(dir.path, filename));
-    await file.writeAsString(const JsonEncoder.withIndent('  ').convert(data));
-    await Share.shareXFiles([XFile(file.path)], subject: 'Recipe Spellbook Export');
+    final jsonStr = const JsonEncoder.withIndent('  ').convert(data);
+    if (isWeb) {
+      // On web, share as XFile from bytes (no local filesystem)
+      final bytes = utf8.encode(jsonStr);
+      await Share.shareXFiles(
+        [XFile.fromData(Uint8List.fromList(bytes), name: filename, mimeType: 'application/json')],
+        subject: 'Recipe Spellbook Export',
+      );
+    } else {
+      final dir = await getTemporaryDirectory();
+      final file = File(p.join(dir.path, filename));
+      await file.writeAsString(jsonStr);
+      await Share.shareXFiles([XFile(file.path)], subject: 'Recipe Spellbook Export');
+    }
   }
 
   Future<bool> saveExport(Map<String, dynamic> data, String defaultName) async {
+    final jsonStr = const JsonEncoder.withIndent('  ').convert(data);
+    if (isWeb) {
+      // On web, FilePicker.saveFile returns null; use bytes param instead
+      final result = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save recipes',
+        fileName: defaultName,
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+        bytes: Uint8List.fromList(utf8.encode(jsonStr)),
+      );
+      return result != null;
+    }
     final result = await FilePicker.platform.saveFile(
       dialogTitle: 'Save recipes',
       fileName: defaultName,
@@ -262,7 +286,7 @@ class ExportImportService {
     );
     if (result != null) {
       final file = File(result);
-      await file.writeAsString(const JsonEncoder.withIndent('  ').convert(data));
+      await file.writeAsString(jsonStr);
       return true;
     }
     return false;
@@ -276,13 +300,22 @@ class ExportImportService {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['json'],
+      withData: isWeb, // On web, read bytes directly since path is unavailable
     );
     if (result == null || result.files.isEmpty) {
       return ImportResult(success: false, message: 'No file selected');
     }
     try {
-      final file = File(result.files.single.path!);
-      final content = await file.readAsString();
+      String content;
+      final pickedFile = result.files.single;
+      if (pickedFile.bytes != null) {
+        // Web: bytes are available directly
+        content = utf8.decode(pickedFile.bytes!);
+      } else {
+        // Native: read from file path
+        final file = File(pickedFile.path!);
+        content = await file.readAsString();
+      }
       final data = jsonDecode(content) as Map<String, dynamic>;
       return await importData(data);
     } catch (e) {

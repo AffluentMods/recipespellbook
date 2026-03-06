@@ -213,6 +213,14 @@ Win32Window::MessageHandler(HWND hwnd,
       }
       return 0;
 
+    case WM_GETMINMAXINFO: {
+      MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lparam);
+      // Enforce minimum window size of 400x600 physical pixels.
+      info->ptMinTrackSize.x = 400;
+      info->ptMinTrackSize.y = 600;
+      return 0;
+    }
+
     case WM_DWMCOLORIZATIONCOLORCHANGED:
       UpdateTheme(hwnd);
       return 0;

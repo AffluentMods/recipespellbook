@@ -2640,6 +2640,7 @@
   "textSizeLarge": "Large",
   "textSizeExtraLarge": "Extra Large",
   "resetDataClearedDesc": "All data has been cleared successfully.\n\nWould you like to import the 10 default starter recipes?",
+  "yesImport": "Yes, Import",
   "importingDefaultRecipes": "Importing default recipes...",
   "checking": "Checking...",
   "connectedTapToManage": "Connected • Tap to manage",

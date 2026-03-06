@@ -1,9 +1,11 @@
-import 'dart:io';
 import 'package:drift/drift.dart' as drift;
+import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
+import '../../../utils/native_file_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../utils/platform_utils.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
@@ -70,11 +72,12 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: Text(l10n.takePhoto),
-              onTap: () => Navigator.pop(ctx, ImageSource.camera),
-            ),
+            if (supportsCamera)
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: Text(l10n.takePhoto),
+                onTap: () => Navigator.pop(ctx, ImageSource.camera),
+              ),
             ListTile(
               leading: const Icon(Icons.photo_library),
               title: Text(l10n.chooseFromGallery),
@@ -262,10 +265,10 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
                       ? Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.file(
-                        File(_imagePath!),
+                      buildFileImage(
+                        _imagePath!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _imagePlaceholder(theme, l10n),
+                        errorWidget: _imagePlaceholder(theme, l10n),
                       ),
                       Positioned(
                         bottom: 8,

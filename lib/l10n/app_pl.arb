@@ -2729,6 +2729,7 @@
   "textSizeLarge": "Duży",
   "textSizeExtraLarge": "Bardzo duży",
   "resetDataClearedDesc": "Wszystkie dane zostały pomyślnie wyczyszczone.\n\nCzy chcesz zaimportować 10 domyślnych przepisów startowych?",
+  "yesImport": "Tak, importuj",
   "importingDefaultRecipes": "Importowanie domyślnych przepisów...",
   "checking": "Sprawdzanie...",
   "connectedTapToManage": "Połączono • Dotknij, aby zarządzać",

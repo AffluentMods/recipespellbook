@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/auth_service.dart';
@@ -6,6 +5,7 @@ import '../services/notification_service.dart';
 import '../services/revenuecat_service.dart';
 import '../services/smart_import_service.dart';
 import '../services/sync_service.dart';
+import '../utils/platform_utils.dart';
 
 // ════════════════════════════════════════════
 //  PROVIDERS
@@ -167,7 +167,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final user = _service.currentUser;
     if (jwt != null) {
       SmartImportService.instance.setAuthToken(jwt);
-      NotificationService.instance.registerOnLogin(jwt);
+      if (supportsFirebaseMessaging) {
+        NotificationService.instance.registerOnLogin(jwt);
+      }
     }
     if (user != null) {
       // Identify user in RevenueCat first, THEN set backend tier.
@@ -181,7 +183,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   void _clearAuthFromServices() {
     SmartImportService.instance.clearAuth();
-    NotificationService.instance.clearAuth();
+    if (supportsFirebaseMessaging) {
+      NotificationService.instance.clearAuth();
+    }
     RevenueCatService.instance.logout();
     RevenueCatService.instance.reset();
   }
@@ -192,11 +196,5 @@ class AuthNotifier extends StateNotifier<AuthState> {
 // ════════════════════════════════════════════
 
 /// Apple Sign-In is only available on iOS 13+ and macOS 10.15+.
-/// On Android/web, only show Google.
-bool get isAppleSignInAvailable {
-  try {
-    return Platform.isIOS || Platform.isMacOS;
-  } catch (_) {
-    return false; // Web
-  }
-}
+/// On Android/web/Windows, only show Google.
+bool get isAppleSignInAvailable => supportsAppleSignIn;

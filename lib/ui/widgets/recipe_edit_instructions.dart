@@ -1,8 +1,9 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../utils/native_file_image.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../utils/platform_utils.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../services/feature_gate.dart';
@@ -484,8 +485,8 @@ class _StepCardState extends State<_StepCard> {
                             ),
                             clipBehavior: Clip.antiAlias,
                             child: hasImage
-                                ? Image.file(
-                              File(step.imagePath!),
+                                ? buildFileImage(
+                              step.imagePath!,
                               fit: BoxFit.cover,
                               cacheHeight: 76,
                             )
@@ -611,32 +612,33 @@ class _StepCardState extends State<_StepCard> {
                   onImageChanged(null);
                 },
               ),
-            ListTile(
-              leading: Icon(
-                Icons.camera_alt,
-                color: hasStepPhotoAccess ? null : Theme.of(context).disabledColor,
-              ),
-              title: Text(l10n.takePhoto),
-              subtitle: hasStepPhotoAccess
-                  ? null
-                  : Text(l10n.requiresPremium,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.outline,
-                  )),
-              onTap: hasStepPhotoAccess
-                  ? () async {
-                Navigator.pop(ctx);
-                final image = await picker.pickImage(source: ImageSource.camera);
-                if (image != null && context.mounted) {
-                  onImageChanged(image.path);
+            if (supportsCamera)
+              ListTile(
+                leading: Icon(
+                  Icons.camera_alt,
+                  color: hasStepPhotoAccess ? null : Theme.of(context).disabledColor,
+                ),
+                title: Text(l10n.takePhoto),
+                subtitle: hasStepPhotoAccess
+                    ? null
+                    : Text(l10n.requiresPremium,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.outline,
+                    )),
+                onTap: hasStepPhotoAccess
+                    ? () async {
+                  Navigator.pop(ctx);
+                  final image = await picker.pickImage(source: ImageSource.camera);
+                  if (image != null && context.mounted) {
+                    onImageChanged(image.path);
+                  }
                 }
-              }
-                  : () {
-                Navigator.pop(ctx);
-                onImageGateCheck(); // Shows upgrade sheet
-              },
-            ),
+                    : () {
+                  Navigator.pop(ctx);
+                  onImageGateCheck(); // Shows upgrade sheet
+                },
+              ),
             ListTile(
               leading: Icon(
                 Icons.photo_library,

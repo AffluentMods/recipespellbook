@@ -1722,6 +1722,7 @@
   "textSizeLarge": "Grande",
   "textSizeExtraLarge": "Molto grande",
   "resetDataClearedDesc": "Tutti i dati sono stati cancellati con successo.\n\nVuoi importare le 10 ricette iniziali predefinite?",
+  "yesImport": "Sì, importa",
   "importingDefaultRecipes": "Importazione ricette predefinite...",
   "checking": "Verifica...",
   "connectedTapToManage": "Connesso • Tocca per gestire",

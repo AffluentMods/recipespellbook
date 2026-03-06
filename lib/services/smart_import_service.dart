@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 

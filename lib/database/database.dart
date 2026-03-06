@@ -1,8 +1,5 @@
-import 'dart:io';
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import 'connection.dart';
 import 'daos/category_dao.dart';
 import 'daos/cookbook_dao.dart';
 import 'daos/custom_taxonomy_dao.dart';
@@ -315,10 +312,4 @@ class AppDatabase extends _$AppDatabase {
   }
 }
 
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'recipespellbook.sqlite'));
-    return NativeDatabase.createInBackground(file);
-  });
-}
+QueryExecutor _openConnection() => openConnection();

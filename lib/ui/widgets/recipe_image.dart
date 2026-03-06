@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../utils/default_recipe_images.dart';
+import '../../utils/native_file_image.dart';
 import 'placeholder_image.dart';
 
 /// In-memory cache for file existence checks.
@@ -13,7 +13,8 @@ class FileExistsCache {
 
   /// Returns true if the file exists (cached after first check).
   static bool exists(String path) {
-    return _cache[path] ??= File(path).existsSync();
+    if (path.startsWith('http://') || path.startsWith('https://')) return true;
+    return _cache[path] ??= localFileExists(path);
   }
 
   /// Invalidate a path (e.g. after saving a new image).
@@ -89,14 +90,14 @@ class RecipeImage extends StatelessWidget {
         FileExistsCache.exists(imagePath!);
 
     if (hasImage) {
-      return Image.file(
-        File(imagePath!),
+      return buildFileImage(
+        imagePath!,
         width: width,
         height: height,
         fit: fit,
         cacheWidth: memCacheWidth,
         cacheHeight: memCacheHeight,
-        errorBuilder: (_, __, ___) => _fallback(),
+        errorWidget: _fallback(),
       );
     }
 

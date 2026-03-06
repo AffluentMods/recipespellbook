@@ -2729,6 +2729,7 @@
   "textSizeLarge": "大",
   "textSizeExtraLarge": "特大",
   "resetDataClearedDesc": "すべてのデータが正常にクリアされました。\n\nデフォルトのスターターレシピ10件をインポートしますか？",
+  "yesImport": "はい、インポート",
   "importingDefaultRecipes": "デフォルトレシピをインポート中...",
   "checking": "確認中...",
   "connectedTapToManage": "接続済み • タップして管理",

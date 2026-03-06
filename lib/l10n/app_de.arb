@@ -2260,6 +2260,7 @@
   "textSizeLarge": "Groß",
   "textSizeExtraLarge": "Sehr groß",
   "resetDataClearedDesc": "Alle Daten wurden erfolgreich gelöscht.\n\nMöchtest du die 10 Standard-Starterrezepte importieren?",
+  "yesImport": "Ja, importieren",
   "importingDefaultRecipes": "Standardrezepte werden importiert...",
   "checking": "Wird überprüft...",
   "connectedTapToManage": "Verbunden • Zum Verwalten tippen",

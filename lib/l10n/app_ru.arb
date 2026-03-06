@@ -2729,6 +2729,7 @@
   "textSizeLarge": "Большой",
   "textSizeExtraLarge": "Очень большой",
   "resetDataClearedDesc": "Все данные успешно очищены.\n\nХотите импортировать 10 стартовых рецептов по умолчанию?",
+  "yesImport": "Да, импортировать",
   "importingDefaultRecipes": "Импорт рецептов по умолчанию...",
   "checking": "Проверка...",
   "connectedTapToManage": "Подключено • Нажмите для управления",

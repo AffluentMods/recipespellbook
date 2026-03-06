@@ -2729,6 +2729,7 @@
   "textSizeLarge": "Groot",
   "textSizeExtraLarge": "Extra groot",
   "resetDataClearedDesc": "Alle gegevens zijn succesvol gewist.\n\nWil je de 10 standaard startersrecepten importeren?",
+  "yesImport": "Ja, importeren",
   "importingDefaultRecipes": "Standaardrecepten importeren...",
   "checking": "Controleren...",
   "connectedTapToManage": "Verbonden • Tik om te beheren",

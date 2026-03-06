@@ -1,5 +1,4 @@
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import '../../utils/platform_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -174,10 +173,7 @@ class AppMenuDrawer extends ConsumerWidget {
     );
   }
 
-  static bool get _isDesktopPlatform {
-    if (kIsWeb) return false;
-    return Platform.isMacOS || Platform.isWindows || Platform.isLinux;
-  }
+  static bool get _isDesktopPlatform => isDesktop;
 
   void _showInviteSheet(BuildContext context) {
     final theme = Theme.of(context);

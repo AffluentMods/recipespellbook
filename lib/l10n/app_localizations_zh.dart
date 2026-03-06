@@ -5567,6 +5567,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get resetDataClearedDesc => '所有数据已成功清除。\n\n你想导入10个默认的入门食谱吗？';
 
   @override
+  String get yesImport => '是的，导入';
+
+  @override
   String get importingDefaultRecipes => '正在导入默认食谱...';
 
   @override

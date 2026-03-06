@@ -5619,6 +5619,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get resetDataClearedDesc => 'Todos los datos se han borrado correctamente.\n\n¿Te gustaría importar las 10 recetas iniciales predeterminadas?';
 
   @override
+  String get yesImport => 'Sí, importar';
+
+  @override
   String get importingDefaultRecipes => 'Importando recetas predeterminadas...';
 
   @override

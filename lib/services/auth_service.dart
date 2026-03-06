@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -435,9 +434,11 @@ class AuthService {
       } catch (_) {}
 
       return AuthState(error: errorMsg);
-    } on SocketException {
-      return const AuthState(error: 'No internet connection');
     } catch (e) {
+      final msg = e.toString();
+      if (msg.contains('SocketException') || msg.contains('Failed to fetch') || msg.contains('NetworkError')) {
+        return const AuthState(error: 'No internet connection');
+      }
       return AuthState(error: 'Sign-in failed: ${_friendlyError(e)}');
     }
   }
@@ -464,10 +465,12 @@ class AuthService {
 
       // Server responded but JWT is invalid/expired
       return (user: null, reachable: true);
-    } on SocketException {
-      debugPrint('Refresh user failed: no internet');
-      return (user: null, reachable: false);
     } catch (e) {
+      final msg = e.toString();
+      if (msg.contains('SocketException') || msg.contains('Failed to fetch') || msg.contains('NetworkError')) {
+        debugPrint('Refresh user failed: no internet');
+        return (user: null, reachable: false);
+      }
       debugPrint('Refresh user failed: $e');
       // Timeout or other network error — treat as unreachable
       return (user: null, reachable: false);

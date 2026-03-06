@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../../utils/native_file_image.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +29,9 @@ class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   static bool _onboardingChecked = false;
+
+  /// Reset the onboarding guard so it triggers again on next build.
+  static void resetOnboardingCheck() => _onboardingChecked = false;
 
   /// Shows the spellbook opening animation for first-time users,
   /// or falls back to the standard onboarding dialog.
@@ -126,7 +129,7 @@ class HomeScreen extends ConsumerWidget {
                         _SurpriseMeCard(recipes: recipes),
 
                         // Quick Recipes Widget (meal plan + pinned + recent)
-                        _QuickRecipesWidget(cookbookId: cookbookId),
+                        _QuickRecipesWidget(cookbookId: cookbookId, recipeCount: recipes.length),
 
                         const SizedBox(height: 8),
 
@@ -301,8 +304,9 @@ class _SurpriseMeCard extends ConsumerWidget {
 
 class _QuickRecipesWidget extends ConsumerStatefulWidget {
   final String cookbookId;
+  final int recipeCount;
 
-  const _QuickRecipesWidget({required this.cookbookId});
+  const _QuickRecipesWidget({required this.cookbookId, required this.recipeCount});
 
   @override
   ConsumerState<_QuickRecipesWidget> createState() => _QuickRecipesWidgetState();
@@ -311,12 +315,14 @@ class _QuickRecipesWidget extends ConsumerStatefulWidget {
 class _QuickRecipesWidgetState extends ConsumerState<_QuickRecipesWidget> {
   Future<List<_QuickRecipeItem>>? _itemsFuture;
   String? _lastCookbookId;
+  int? _lastRecipeCount;
 
   void _refreshItems() {
     final recipeDao = ref.read(recipeDaoProvider);
     final mealPlanDao = ref.read(mealPlanDaoProvider);
     final settings = ref.read(settingsProvider);
     _lastCookbookId = widget.cookbookId;
+    _lastRecipeCount = widget.recipeCount;
     _itemsFuture = _loadItems(recipeDao, mealPlanDao, settings);
   }
 
@@ -324,14 +330,10 @@ class _QuickRecipesWidgetState extends ConsumerState<_QuickRecipesWidget> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-
-    // Watch providers so we rebuild when data changes, then refresh the future
-    ref.watch(recipeDaoProvider);
-    ref.watch(mealPlanDaoProvider);
     final settings = ref.watch(settingsProvider);
 
-    // Rebuild the future only when cookbook changes or on first build
-    if (_itemsFuture == null || _lastCookbookId != widget.cookbookId) {
+    // Refresh when cookbook changes, recipe count changes, or on first build
+    if (_itemsFuture == null || _lastCookbookId != widget.cookbookId || _lastRecipeCount != widget.recipeCount) {
       _refreshItems();
     }
 
@@ -1317,9 +1319,9 @@ class _CookbookDropdown extends ConsumerWidget {
                     child: cookbook.imagePath != null &&
                             cookbook.imagePath!.isNotEmpty &&
                             FileExistsCache.exists(cookbook.imagePath!)
-                        ? Image.file(File(cookbook.imagePath!), fit: BoxFit.cover,
+                        ? buildFileImage(cookbook.imagePath!, fit: BoxFit.cover,
                             cacheHeight: 80,
-                            errorBuilder: (_, __, ___) => const CookbookPlaceholderImage())
+                            errorWidget: const CookbookPlaceholderImage())
                         : const CookbookPlaceholderImage(),
                   ),
                   title: Text(

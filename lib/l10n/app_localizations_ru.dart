@@ -5681,6 +5681,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get resetDataClearedDesc => 'Все данные успешно очищены.\n\nХотите импортировать 10 стартовых рецептов по умолчанию?';
 
   @override
+  String get yesImport => 'Да, импортировать';
+
+  @override
   String get importingDefaultRecipes => 'Импорт рецептов по умолчанию...';
 
   @override

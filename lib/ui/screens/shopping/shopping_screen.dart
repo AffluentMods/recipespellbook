@@ -1,13 +1,14 @@
 import 'dart:convert';
-import 'dart:io';
+import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:drift/drift.dart' as drift;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import '../../../services/ocr_stub.dart' if (dart.library.io) '../../../services/ocr_native.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../utils/platform_utils.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -2354,23 +2355,24 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                   _importFromText();
                 },
               ),
-              ListTile(
-                leading: Container(
-                  width: 44, height: 44,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(12),
+              if (supportsOcr)
+                ListTile(
+                  leading: Container(
+                    width: 44, height: 44,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.camera_alt_outlined,
+                        color: theme.colorScheme.primary),
                   ),
-                  child: Icon(Icons.camera_alt_outlined,
-                      color: theme.colorScheme.primary),
+                  title: Text(l10n.shoppingFromPhoto),
+                  subtitle: Text(l10n.importFromPhotoGallerySubtitle),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _showPhotoSourcePicker();
+                  },
                 ),
-                title: Text(l10n.shoppingFromPhoto),
-                subtitle: Text(l10n.importFromPhotoGallerySubtitle),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _showPhotoSourcePicker();
-                },
-              ),
               const SizedBox(height: 16),
             ],
           ),
@@ -2461,14 +2463,15 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                 ),
               ),
               const SizedBox(height: 16),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: Text(l10n.photoTakePhoto),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _importFromPhoto(ImageSource.camera);
-                },
-              ),
+              if (supportsCamera)
+                ListTile(
+                  leading: const Icon(Icons.camera_alt),
+                  title: Text(l10n.photoTakePhoto),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _importFromPhoto(ImageSource.camera);
+                  },
+                ),
               ListTile(
                 leading: const Icon(Icons.photo_library),
                 title: Text(l10n.photoChooseFromGallery),
