@@ -160,17 +160,20 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
       ),
     );
 
-    if (result != true) {
+    // Capture text before disposal — the bottom sheet dismiss animation
+    // may still reference the controller for one more frame.
+    final descText = descController.text.trim();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       descController.dispose();
-      return;
-    }
+    });
+
+    if (result != true) return;
 
     final ok = await _community.updatePublication(
       pub.id,
-      description: descController.text.trim(),
+      description: descText,
       tags: selectedTags.join(','),
     );
-    descController.dispose();
 
     if (mounted) {
       if (ok) {
