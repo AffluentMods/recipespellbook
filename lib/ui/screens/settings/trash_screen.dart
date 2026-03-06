@@ -124,30 +124,30 @@ class TrashScreen extends ConsumerWidget {
     }
   }
 
-  void _showPermanentDeleteConfirmation(BuildContext context, WidgetRef ref, Recipe recipe) {
-    final l10n = AppLocalizations.of(context)!;
+  void _showPermanentDeleteConfirmation(BuildContext screenContext, WidgetRef ref, Recipe recipe) {
+    final l10n = AppLocalizations.of(screenContext)!;
     showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+      context: screenContext,
+      builder: (dialogContext) => AlertDialog(
+        icon: Icon(Icons.delete_forever, color: Theme.of(dialogContext).colorScheme.error),
         title: Text(l10n.trashDeletePermanently),
         content: Text(
           '${l10n.confirmDeleteMessage}\n\n"${recipe.title}"',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text(l10n.actionCancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
+              backgroundColor: Theme.of(dialogContext).colorScheme.error,
             ),
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               await ref.read(recipeDaoProvider).permanentlyDeleteRecipe(recipe.id);
-              if (context.mounted) {
-                AppSnackbar.info(context, l10n.successDeleted);
+              if (screenContext.mounted) {
+                AppSnackbar.info(screenContext, l10n.successDeleted);
               }
             },
             child: Text(l10n.actionDelete),

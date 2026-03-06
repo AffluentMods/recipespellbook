@@ -7394,191 +7394,191 @@ class AppLocalizationsKo extends AppLocalizations {
   String get onboardingSkip => '건너뛰기';
 
   @override
-  String get communitySortTopRated => 'Top Rated';
+  String get communitySortTopRated => '평점 높은 순';
 
   @override
-  String get communityHasImages => 'Has Images';
+  String get communityHasImages => '이미지 포함';
 
   @override
-  String get communityListView => 'List view';
+  String get communityListView => '목록 보기';
 
   @override
-  String get communityGridView => 'Grid view';
+  String get communityGridView => '그리드 보기';
 
   @override
-  String get communityDownloadOptions => 'Download Options';
+  String get communityDownloadOptions => '다운로드 옵션';
 
   @override
   String communityDownloadWithImages(String size) {
-    return 'With images ($size)';
+    return '이미지 포함 ($size)';
   }
 
   @override
   String communityDownloadImagesIncluded(int count) {
-    return '$count images included';
+    return '이미지 $count개 포함';
   }
 
   @override
-  String get communityDownloadTextOnly => 'Text only';
+  String get communityDownloadTextOnly => '텍스트만';
 
   @override
-  String get communityDownloadTextOnlySubtitle => 'Faster download, no images';
+  String get communityDownloadTextOnlySubtitle => '빠른 다운로드, 이미지 없음';
 
   @override
-  String get communityTapToPreview => 'Tap a recipe to preview';
+  String get communityTapToPreview => '레시피를 탭하여 미리보기';
 
   @override
   String communityImageCountLabel(int count) {
-    return '$count images';
+    return '이미지 $count개';
   }
 
   @override
-  String get communityYourRating => 'Your rating:';
+  String get communityYourRating => '내 평점:';
 
   @override
-  String get communityRateThis => 'Rate this cookbook:';
+  String get communityRateThis => '이 요리책 평가하기:';
 
   @override
   String communityDownloadingImages(int current, int total) {
-    return 'Downloading images... $current/$total';
+    return '이미지 다운로드 중... $current/$total';
   }
 
   @override
-  String get communityViewFullRecipe => 'View Full Recipe';
+  String get communityViewFullRecipe => '전체 레시피 보기';
 
   @override
   String communityMoreIngredients(int count) {
-    return '+ $count more';
+    return '+ $count개 더';
   }
 
   @override
   String communityStepCount(int count) {
-    return '$count steps';
+    return '$count단계';
   }
 
   @override
-  String get communityNotes => 'Notes';
+  String get communityNotes => '메모';
 
   @override
-  String get communityStatPrep => 'Prep';
+  String get communityStatPrep => '준비';
 
   @override
-  String get communityStatCook => 'Cook';
+  String get communityStatCook => '조리';
 
   @override
-  String get communityStatTotal => 'Total';
+  String get communityStatTotal => '합계';
 
   @override
-  String get communityStatServings => 'Servings';
+  String get communityStatServings => '인분';
 
   @override
   String communityStepDuration(int minutes) {
-    return '$minutes min';
+    return '$minutes분';
   }
 
   @override
-  String get communityEditPublication => 'Edit Publication';
+  String get communityEditPublication => '출판 편집';
 
   @override
-  String get communityEditDescription => 'Description';
+  String get communityEditDescription => '설명';
 
   @override
-  String get communityEditDescriptionHint => 'Tell people about this cookbook...';
+  String get communityEditDescriptionHint => '이 요리책에 대해 알려주세요...';
 
   @override
-  String get communityEditTags => 'Tags';
+  String get communityEditTags => '태그';
 
   @override
-  String get communityEditSuccess => 'Publication updated!';
+  String get communityEditSuccess => '출판 정보가 업데이트되었습니다!';
 
   @override
-  String get communityEditFailed => 'Failed to update publication';
+  String get communityEditFailed => '출판 정보 업데이트 실패';
 
   @override
-  String get communityNoRatingsYet => 'No ratings yet';
+  String get communityNoRatingsYet => '아직 평가 없음';
 
   @override
-  String get communityStatusPublished => 'Published';
+  String get communityStatusPublished => '게시됨';
 
   @override
-  String get communityStatusUnderReview => 'Under Review';
+  String get communityStatusUnderReview => '검토 중';
 
   @override
-  String get communityStatusRemoved => 'Removed';
+  String get communityStatusRemoved => '삭제됨';
 
   @override
-  String get communityUnderReview => 'This cookbook is under review by our moderation team.';
+  String get communityUnderReview => '이 요리책은 검토 팀의 심사를 받고 있습니다.';
 
   @override
-  String get communityPublishPreparing => 'Preparing cookbook...';
+  String get communityPublishPreparing => '요리책 준비 중...';
 
   @override
   String communityPublishUploading(int current, int total) {
-    return 'Uploading images ($current/$total)';
+    return '이미지 업로드 중 ($current/$total)';
   }
 
   @override
-  String get communityPublishPublishing => 'Publishing to community...';
+  String get communityPublishPublishing => '커뮤니티에 게시 중...';
 
   @override
-  String get communityPublishBackground => 'You can leave this screen — publishing continues in the background.';
+  String get communityPublishBackground => '이 화면을 떠나도 괜찮습니다. 게시는 백그라운드에서 계속됩니다.';
 
   @override
-  String get communityPublishDone => 'Published!';
+  String get communityPublishDone => '게시 완료!';
 
   @override
   String communityPublishImagesSkipped(int count) {
-    return '$count images were skipped (rejected by moderation)';
+    return '이미지 $count개가 건너뛰어졌습니다 (검토에서 거부됨)';
   }
 
   @override
   String communityPublishRejected(int count) {
-    return '$count rejected by moderation';
+    return '$count개 검토에서 거부됨';
   }
 
   @override
-  String get communityConfigurePublication => 'Configure Publication';
+  String get communityConfigurePublication => '출판 설정';
 
   @override
-  String get communityPublishTitle => 'Title';
+  String get communityPublishTitle => '제목';
 
   @override
-  String get communityPublishTitleHint => 'Cookbook title';
+  String get communityPublishTitleHint => '요리책 제목';
 
   @override
-  String get communityPublishDescription => 'Description';
+  String get communityPublishDescription => '설명';
 
   @override
-  String get communityPublishDescriptionHint => 'Tell people about this cookbook...';
+  String get communityPublishDescriptionHint => '이 요리책에 대해 알려주세요...';
 
   @override
-  String get communityPublishTags => 'Tags';
+  String get communityPublishTags => '태그';
 
   @override
-  String get communityPublishIncludeImages => 'Include images';
+  String get communityPublishIncludeImages => '이미지 포함';
 
   @override
-  String get communityPublishIncludeImagesSubtitle => 'Upload recipe images with this cookbook. Images are scanned for safety.';
+  String get communityPublishIncludeImagesSubtitle => '이 요리책에 레시피 이미지를 업로드합니다. 이미지는 안전성 검사를 받습니다.';
 
   @override
-  String get communityPublishSummary => 'Summary';
+  String get communityPublishSummary => '요약';
 
   @override
   String communityPublishRecipesSummary(int count) {
-    return '$count recipes';
+    return '레시피 $count개';
   }
 
   @override
-  String get communityPublishImagesWillUpload => 'Images will be uploaded';
+  String get communityPublishImagesWillUpload => '이미지가 업로드됩니다';
 
   @override
-  String get communityPublishTextOnlyNoImages => 'Text only (no images)';
+  String get communityPublishTextOnlyNoImages => '텍스트만 (이미지 없음)';
 
   @override
-  String get communityPublishTryAgain => 'Try Again';
+  String get communityPublishTryAgain => '다시 시도';
 
   @override
   String communityPublishUploadInProgress(int current, int total) {
-    return 'Publishing in progress... ($current/$total images)';
+    return '게시 진행 중... (이미지 $current/$total)';
   }
 }

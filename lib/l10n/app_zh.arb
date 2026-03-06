@@ -2828,7 +2828,9 @@
   "shareNamedList": "分享「{name}」",
   "@shareNamedList": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shareAsTextDescription": "以纯文本发送列表项",
@@ -3274,5 +3276,153 @@
   "onboardingYourSpellbookAwaits": "你的魔法书在等你...",
   "onboardingSummoning": "召唤中...",
   "onboardingBlankSpellbook": "从空白魔法书开始",
-  "onboardingSkip": "跳过"
+  "onboardingSkip": "跳过",
+  "communitySortTopRated": "评分最高",
+  "communityHasImages": "包含图片",
+  "communityListView": "列表视图",
+  "communityGridView": "网格视图",
+  "communityDownloadOptions": "下载选项",
+  "communityDownloadWithImages": "包含图片 ({size})",
+  "@communityDownloadWithImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "communityDownloadImagesIncluded": "包含 {count} 张图片",
+  "@communityDownloadImagesIncluded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityDownloadTextOnly": "仅文字",
+  "communityDownloadTextOnlySubtitle": "更快下载，无图片",
+  "communityTapToPreview": "点击食谱预览",
+  "communityImageCountLabel": "{count} 张图片",
+  "@communityImageCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityYourRating": "你的评分：",
+  "communityRateThis": "为这本食谱评分：",
+  "communityDownloadingImages": "正在下载图片... {current}/{total}",
+  "@communityDownloadingImages": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityViewFullRecipe": "查看完整食谱",
+  "communityMoreIngredients": "+ {count} 个更多",
+  "@communityMoreIngredients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityStepCount": "{count} 个步骤",
+  "@communityStepCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityNotes": "备注",
+  "communityStatPrep": "准备",
+  "communityStatCook": "烹饪",
+  "communityStatTotal": "总计",
+  "communityStatServings": "份量",
+  "communityStepDuration": "{minutes} 分钟",
+  "@communityStepDuration": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "communityEditPublication": "编辑发布",
+  "communityEditDescription": "描述",
+  "communityEditDescriptionHint": "介绍一下这本食谱...",
+  "communityEditTags": "标签",
+  "communityEditSuccess": "发布已更新！",
+  "communityEditFailed": "更新发布失败",
+  "communityNoRatingsYet": "暂无评分",
+  "communityStatusPublished": "已发布",
+  "communityStatusUnderReview": "审核中",
+  "communityStatusRemoved": "已移除",
+  "communityUnderReview": "这本食谱正在由我们的审核团队审查。",
+  "communityPublishPreparing": "正在准备食谱...",
+  "communityPublishUploading": "正在上传图片 ({current}/{total})",
+  "@communityPublishUploading": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishPublishing": "正在发布到社区...",
+  "communityPublishBackground": "你可以离开此页面——发布将在后台继续。",
+  "communityPublishDone": "已发布！",
+  "communityPublishImagesSkipped": "{count} 张图片被跳过（被审核拒绝）",
+  "@communityPublishImagesSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishRejected": "{count} 张被审核拒绝",
+  "@communityPublishRejected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityConfigurePublication": "配置发布",
+  "communityPublishTitle": "标题",
+  "communityPublishTitleHint": "食谱标题",
+  "communityPublishDescription": "描述",
+  "communityPublishDescriptionHint": "介绍一下这本食谱...",
+  "communityPublishTags": "标签",
+  "communityPublishIncludeImages": "包含图片",
+  "communityPublishIncludeImagesSubtitle": "上传食谱图片。图片将进行安全检查。",
+  "communityPublishSummary": "摘要",
+  "communityPublishRecipesSummary": "{count} 个食谱",
+  "@communityPublishRecipesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishImagesWillUpload": "图片将被上传",
+  "communityPublishTextOnlyNoImages": "仅文字（无图片）",
+  "communityPublishTryAgain": "重试",
+  "communityPublishUploadInProgress": "发布中... ({current}/{total} 张图片)",
+  "@communityPublishUploadInProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
 }

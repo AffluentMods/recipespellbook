@@ -1,7 +1,7 @@
+import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,21 +23,36 @@ import 'services/transfer_service.dart';
 import 'theme/app_theme.dart';
 import 'ui/screens/import/import_preview_screen.dart';
 
-// Provider to hold shared recipe data (for future share intent)
-final sharedRecipeProvider = StateProvider<Map<String, dynamic>?>((ref) => null);
-
 Future<void> main() async {
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env');
-  try {
-    await Firebase.initializeApp();
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  } catch (e) {
-    debugPrint('[Firebase] Initialization failed: $e');
-  }
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  IngredientSuggestionService.instance.preload();
-  runApp(const ProviderScope(child: RecipeSpellbookApp()));
+  // Global error boundary — catch uncaught async errors
+  runZonedGuarded(() async {
+    WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+    // Catch uncaught Flutter framework errors
+    FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.presentError(details);
+      debugPrint('[FlutterError] ${details.exceptionAsString()}');
+    };
+
+    try {
+      await Firebase.initializeApp();
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    } catch (e) {
+      debugPrint('[Firebase] Initialization failed: $e');
+    }
+    FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+    // Preload ingredient suggestions (fire-and-forget with error handling)
+    try {
+      IngredientSuggestionService.instance.preload();
+    } catch (e) {
+      debugPrint('[Init] Ingredient preload failed: $e');
+    }
+
+    runApp(const ProviderScope(child: RecipeSpellbookApp()));
+  }, (error, stack) {
+    debugPrint('[Uncaught] $error\n$stack');
+  });
 }
 
 class RecipeSpellbookApp extends ConsumerWidget {
@@ -129,15 +144,19 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
 
     _initialized = true;
 
-    // 4. Initialize subscription + notifications in parallel (non-blocking).
-    //    Subscription defaults to free tier and updates once RevenueCat responds.
-    //    Notification service sets up channels and foreground listeners.
-    _initBackground();
+    // 4. Initialize subscription + notifications (must complete before auto-sync
+    //    so subscription tier is known — otherwise sync sees "free" and bails).
+    await _initBackground();
 
-    // 5. Auto-sync on launch if eligible
+    // 5. Auto-sync on launch if eligible (after subscription is resolved)
     ref.read(syncProvider.notifier).autoSync();
 
-    // 6. Wire up share intent handling
+    // 6. Auto-cleanup trashed recipes older than 30 days
+    ref.read(recipeDaoProvider).cleanupOldDeletedRecipes().catchError((e) {
+      debugPrint('[Init] Trash cleanup failed: $e');
+    });
+
+    // 7. Wire up share intent handling
     _initShareHandler();
   }
 

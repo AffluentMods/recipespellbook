@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../router/router.dart';
 
@@ -158,7 +157,10 @@ class NotificationService {
   Future<void> _registerTokenWithBackend() async {
     if (_fcmToken == null || _authToken == null) return;
     try {
-      final baseUrl = dotenv.env['API_URL'] ?? 'https://api.recipespellbook.app';
+      const baseUrl = String.fromEnvironment(
+        'API_URL',
+        defaultValue: 'https://api.recipespellbook.app',
+      );
       await http.post(
         Uri.parse('$baseUrl/v1/notifications/register'),
         headers: {

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
@@ -116,8 +115,11 @@ class AuthService {
   );
 
   /// Base URL for the main Node.js API.
-  String get _apiBaseUrl =>
-      dotenv.get('API_URL', fallback: 'https://api.recipespellbook.app');
+  /// Injected at build time via --dart-define-from-file.
+  static const _apiBaseUrl = String.fromEnvironment(
+    'API_URL',
+    defaultValue: 'https://api.recipespellbook.app',
+  );
 
   /// Public accessor for API base URL (used by CommunityService for image URLs).
   String get apiBaseUrl => _apiBaseUrl;
@@ -142,18 +144,27 @@ class AuthService {
       final userJson = await _storage.read(key: _keyUser);
 
       if (jwt != null && userJson != null) {
-        final _ = AuthUser.fromJson(jsonDecode(userJson));
+        final savedUser = AuthUser.fromJson(jsonDecode(userJson));
 
         // Validate the JWT is still good by calling the API
-        final refreshed = await _refreshUser(jwt);
-        if (refreshed != null) {
+        final result = await _refreshUser(jwt);
+        if (result.user != null) {
+          // Server confirmed the JWT is valid — use refreshed user data
           _currentJwt = jwt;
-          _currentUser = refreshed;
-          await _saveUser(refreshed);
-          return AuthState(user: refreshed, jwt: jwt);
+          _currentUser = result.user;
+          await _saveUser(result.user!);
+          return AuthState(user: result.user, jwt: jwt);
         }
 
-        // JWT expired — clear storage
+        if (!result.reachable) {
+          // Network unreachable — use saved session (offline-friendly)
+          debugPrint('[Auth] Offline — using saved session for ${savedUser.displayName}');
+          _currentJwt = jwt;
+          _currentUser = savedUser;
+          return AuthState(user: savedUser, jwt: jwt);
+        }
+
+        // Server responded but JWT is expired/invalid — clear session
         await _clearStorage();
       }
     } catch (e) {
@@ -265,14 +276,14 @@ class AuthService {
   }) async {
     try {
       // Validate the JWT is still good
-      final refreshed = await _refreshUser(token);
-      if (refreshed != null) {
+      final result = await _refreshUser(token);
+      if (result.user != null) {
         _currentJwt = token;
-        _currentUser = refreshed;
+        _currentUser = result.user;
         await _storage.write(key: _keyJwt, value: token);
-        await _saveUser(refreshed);
+        await _saveUser(result.user!);
         await _storage.write(key: _keyProvider, value: 'transfer');
-        return AuthState(user: refreshed, jwt: token);
+        return AuthState(user: result.user, jwt: token);
       }
 
       // JWT expired — build a user from the bundle info anyway?
@@ -432,7 +443,9 @@ class AuthService {
   }
 
   /// Refresh user data from the API using existing JWT.
-  Future<AuthUser?> _refreshUser(String jwt) async {
+  /// Returns ({AuthUser? user, bool reachable}) to distinguish
+  /// "JWT expired" (reachable=true, user=null) from "offline" (reachable=false).
+  Future<({AuthUser? user, bool reachable})> _refreshUser(String jwt) async {
     try {
       final uri = Uri.parse('$_apiBaseUrl/v1/auth/me');
       final response = await http.get(
@@ -445,17 +458,19 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        // Handle both { user: {...} } and direct user object
         final userJson = data['user'] as Map<String, dynamic>? ?? data;
-        return AuthUser.fromJson(userJson);
+        return (user: AuthUser.fromJson(userJson), reachable: true);
       }
 
-      return null; // JWT invalid/expired
+      // Server responded but JWT is invalid/expired
+      return (user: null, reachable: true);
+    } on SocketException {
+      debugPrint('Refresh user failed: no internet');
+      return (user: null, reachable: false);
     } catch (e) {
       debugPrint('Refresh user failed: $e');
-      // Network error — return null but don't clear session
-      // (user might just be offline)
-      return null;
+      // Timeout or other network error — treat as unreachable
+      return (user: null, reachable: false);
     }
   }
 

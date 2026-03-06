@@ -2828,7 +2828,9 @@
   "shareNamedList": "Udostępnij \"{name}\"",
   "@shareNamedList": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shareAsTextDescription": "Wyślij elementy listy jako tekst",
@@ -3274,5 +3276,153 @@
   "onboardingYourSpellbookAwaits": "Twoja księga czarów czeka...",
   "onboardingSummoning": "Przywoływanie...",
   "onboardingBlankSpellbook": "Zacznij z pustą księgą czarów",
-  "onboardingSkip": "Pomiń"
+  "onboardingSkip": "Pomiń",
+  "communitySortTopRated": "Najwyżej oceniane",
+  "communityHasImages": "Ze zdjęciami",
+  "communityListView": "Widok listy",
+  "communityGridView": "Widok siatki",
+  "communityDownloadOptions": "Opcje pobierania",
+  "communityDownloadWithImages": "Ze zdjęciami ({size})",
+  "@communityDownloadWithImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "communityDownloadImagesIncluded": "{count} zdjęć dołączonych",
+  "@communityDownloadImagesIncluded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityDownloadTextOnly": "Tylko tekst",
+  "communityDownloadTextOnlySubtitle": "Szybsze pobieranie, bez zdjęć",
+  "communityTapToPreview": "Stuknij przepis, aby zobaczyć podgląd",
+  "communityImageCountLabel": "{count} zdjęć",
+  "@communityImageCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityYourRating": "Twoja ocena:",
+  "communityRateThis": "Oceń tę książkę kucharską:",
+  "communityDownloadingImages": "Pobieranie zdjęć... {current}/{total}",
+  "@communityDownloadingImages": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityViewFullRecipe": "Zobacz pełny przepis",
+  "communityMoreIngredients": "+ {count} więcej",
+  "@communityMoreIngredients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityStepCount": "{count} kroków",
+  "@communityStepCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityNotes": "Notatki",
+  "communityStatPrep": "Przygotowanie",
+  "communityStatCook": "Gotowanie",
+  "communityStatTotal": "Łącznie",
+  "communityStatServings": "Porcje",
+  "communityStepDuration": "{minutes} min",
+  "@communityStepDuration": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "communityEditPublication": "Edytuj publikację",
+  "communityEditDescription": "Opis",
+  "communityEditDescriptionHint": "Opowiedz o tej książce kucharskiej...",
+  "communityEditTags": "Tagi",
+  "communityEditSuccess": "Publikacja zaktualizowana!",
+  "communityEditFailed": "Nie udało się zaktualizować publikacji",
+  "communityNoRatingsYet": "Brak ocen",
+  "communityStatusPublished": "Opublikowane",
+  "communityStatusUnderReview": "W trakcie przeglądu",
+  "communityStatusRemoved": "Usunięte",
+  "communityUnderReview": "Ta książka kucharska jest sprawdzana przez nasz zespół moderacji.",
+  "communityPublishPreparing": "Przygotowywanie książki kucharskiej...",
+  "communityPublishUploading": "Przesyłanie zdjęć ({current}/{total})",
+  "@communityPublishUploading": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishPublishing": "Publikowanie w społeczności...",
+  "communityPublishBackground": "Możesz opuścić ten ekran – publikowanie kontynuuje w tle.",
+  "communityPublishDone": "Opublikowano!",
+  "communityPublishImagesSkipped": "{count} zdjęć zostało pominiętych (odrzucone przez moderację)",
+  "@communityPublishImagesSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishRejected": "{count} odrzucone przez moderację",
+  "@communityPublishRejected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityConfigurePublication": "Skonfiguruj publikację",
+  "communityPublishTitle": "Tytuł",
+  "communityPublishTitleHint": "Tytuł książki kucharskiej",
+  "communityPublishDescription": "Opis",
+  "communityPublishDescriptionHint": "Opowiedz o tej książce kucharskiej...",
+  "communityPublishTags": "Tagi",
+  "communityPublishIncludeImages": "Dołącz zdjęcia",
+  "communityPublishIncludeImagesSubtitle": "Prześlij zdjęcia przepisów z tą książką. Zdjęcia są sprawdzane pod kątem bezpieczeństwa.",
+  "communityPublishSummary": "Podsumowanie",
+  "communityPublishRecipesSummary": "{count} przepisów",
+  "@communityPublishRecipesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishImagesWillUpload": "Zdjęcia zostaną przesłane",
+  "communityPublishTextOnlyNoImages": "Tylko tekst (bez zdjęć)",
+  "communityPublishTryAgain": "Spróbuj ponownie",
+  "communityPublishUploadInProgress": "Publikowanie w toku... ({current}/{total} zdjęć)",
+  "@communityPublishUploadInProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
 }

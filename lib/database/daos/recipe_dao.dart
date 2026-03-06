@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../database.dart';
 import '../tables/ingredients.dart';
 import '../tables/recipe_links.dart';
+import '../tables/recipe_tags.dart';
 import '../tables/recipes.dart';
 import '../tables/steps.dart';
 
@@ -15,7 +16,7 @@ class RecipeLinkInfo {
   const RecipeLinkInfo({required this.recipe, this.scale = 1.0});
 }
 
-@DriftAccessor(tables: [Recipes, Ingredients, Steps, RecipeLinks])
+@DriftAccessor(tables: [Recipes, Ingredients, Steps, RecipeLinks, RecipeTags])
 class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
   RecipeDao(AppDatabase db) : super(db);
 
@@ -306,11 +307,17 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
     ));
   }
 
-  /// Permanently delete a recipe and all related data
+  /// Permanently delete a recipe and ALL related data (in a transaction).
   Future<void> permanentlyDeleteRecipe(String recipeId) async {
-    await (delete(ingredients)..where((i) => i.recipeId.equals(recipeId))).go();
-    await (delete(steps)..where((s) => s.recipeId.equals(recipeId))).go();
-    await (delete(recipes)..where((r) => r.id.equals(recipeId))).go();
+    await transaction(() async {
+      await (delete(recipeTags)..where((rt) => rt.recipeId.equals(recipeId))).go();
+      await (delete(recipeLinks)..where((rl) => rl.sourceRecipeId.equals(recipeId))).go();
+      // Also remove links where this recipe is the TARGET of another recipe's link
+      await (delete(recipeLinks)..where((rl) => rl.linkedRecipeId.equals(recipeId))).go();
+      await (delete(ingredients)..where((i) => i.recipeId.equals(recipeId))).go();
+      await (delete(steps)..where((s) => s.recipeId.equals(recipeId))).go();
+      await (delete(recipes)..where((r) => r.id.equals(recipeId))).go();
+    });
   }
 
   /// Delete recipe (soft delete - moves to trash)

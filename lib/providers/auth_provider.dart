@@ -146,8 +146,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
 
     if (result.isSignedIn) {
-      state = result;
-      _syncAuthToServices();
+      // Handle as account switch — clear sync state for new account
+      await _handleSignInResult(result);
       return true;
     } else {
       state = state.copyWith(isLoading: false, error: result.error);

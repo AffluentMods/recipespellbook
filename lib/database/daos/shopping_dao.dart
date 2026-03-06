@@ -40,8 +40,12 @@ class ShoppingDao extends DatabaseAccessor<AppDatabase> with _$ShoppingDaoMixin 
         .write(ShoppingListsCompanion(name: Value(name)));
   }
 
-  Future<void> deleteList(String id) {
-    return (delete(shoppingLists)..where((t) => t.id.equals(id))).go();
+  /// Delete a shopping list and all its items.
+  Future<void> deleteList(String id) async {
+    await transaction(() async {
+      await (delete(shoppingListItems)..where((t) => t.listId.equals(id))).go();
+      await (delete(shoppingLists)..where((t) => t.id.equals(id))).go();
+    });
   }
 
   // ============ SHOPPING LIST ITEMS ============

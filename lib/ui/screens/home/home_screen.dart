@@ -299,21 +299,44 @@ class _SurpriseMeCard extends ConsumerWidget {
 
 // ============ QUICK RECIPES WIDGET (Simple - no filters here) ============
 
-class _QuickRecipesWidget extends ConsumerWidget {
+class _QuickRecipesWidget extends ConsumerStatefulWidget {
   final String cookbookId;
 
   const _QuickRecipesWidget({required this.cookbookId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_QuickRecipesWidget> createState() => _QuickRecipesWidgetState();
+}
+
+class _QuickRecipesWidgetState extends ConsumerState<_QuickRecipesWidget> {
+  Future<List<_QuickRecipeItem>>? _itemsFuture;
+  String? _lastCookbookId;
+
+  void _refreshItems() {
+    final recipeDao = ref.read(recipeDaoProvider);
+    final mealPlanDao = ref.read(mealPlanDaoProvider);
+    final settings = ref.read(settingsProvider);
+    _lastCookbookId = widget.cookbookId;
+    _itemsFuture = _loadItems(recipeDao, mealPlanDao, settings);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final recipeDao = ref.watch(recipeDaoProvider);
-    final mealPlanDao = ref.watch(mealPlanDaoProvider);
+
+    // Watch providers so we rebuild when data changes, then refresh the future
+    ref.watch(recipeDaoProvider);
+    ref.watch(mealPlanDaoProvider);
     final settings = ref.watch(settingsProvider);
 
+    // Rebuild the future only when cookbook changes or on first build
+    if (_itemsFuture == null || _lastCookbookId != widget.cookbookId) {
+      _refreshItems();
+    }
+
     return FutureBuilder<List<_QuickRecipeItem>>(
-      future: _loadItems(recipeDao, mealPlanDao, settings),
+      future: _itemsFuture,
       builder: (context, snapshot) {
         final items = snapshot.data ?? [];
 
@@ -452,7 +475,7 @@ class _QuickRecipesWidget extends ConsumerWidget {
       final todayEnd = todayStart.add(const Duration(days: 1));
 
       try {
-        final todaysMeals = await mealPlanDao.getMealPlansInRange(cookbookId, todayStart, todayEnd);
+        final todaysMeals = await mealPlanDao.getMealPlansInRange(widget.cookbookId, todayStart, todayEnd);
         for (final meal in todaysMeals) {
           if (meal.recipeId != null && meal.recipeId!.isNotEmpty && !seenIds.contains(meal.recipeId)) {
             final recipe = await recipeDao.getRecipeById(meal.recipeId!);
@@ -470,7 +493,7 @@ class _QuickRecipesWidget extends ConsumerWidget {
     // 2. Pinned recipes (if enabled)
     if (settings.quickAccessShowPinned) {
       try {
-        final pinned = await recipeDao.getPinnedRecipes(cookbookId);
+        final pinned = await recipeDao.getPinnedRecipes(widget.cookbookId);
         for (final recipe in pinned) {
           if (!seenIds.contains(recipe.id)) {
             items.add(_QuickRecipeItem(recipe: recipe, source: _Source.pinned));
@@ -485,7 +508,7 @@ class _QuickRecipesWidget extends ConsumerWidget {
     // 3. Recently viewed (if enabled)
     if (settings.quickAccessShowHistory) {
       try {
-        final recent = await recipeDao.watchRecentlyViewed(cookbookId, limit: settings.quickAccessHistoryCount).first;
+        final recent = await recipeDao.watchRecentlyViewed(widget.cookbookId, limit: settings.quickAccessHistoryCount).first;
         for (final recipe in recent) {
           if (!seenIds.contains(recipe.id)) {
             items.add(_QuickRecipeItem(recipe: recipe, source: _Source.recent));

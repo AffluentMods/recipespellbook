@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 /// Service that calls the Smart Import backend to parse recipes using AI.
@@ -21,8 +20,11 @@ class SmartImportService {
   static final instance = SmartImportService._();
 
   /// Base URL for the smart import API.
-  String get _baseUrl =>
-      dotenv.get('SMART_IMPORT_URL', fallback: 'https://smart-import.recipespellbook.app');
+  /// Injected at build time via --dart-define-from-file.
+  static const _baseUrl = String.fromEnvironment(
+    'SMART_IMPORT_URL',
+    defaultValue: 'https://smart-import.recipespellbook.app',
+  );
 
   /// Auth token for the current user.
   /// Set this after user login / subscription validation.

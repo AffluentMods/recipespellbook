@@ -7394,191 +7394,191 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingSkip => '跳过';
 
   @override
-  String get communitySortTopRated => 'Top Rated';
+  String get communitySortTopRated => '评分最高';
 
   @override
-  String get communityHasImages => 'Has Images';
+  String get communityHasImages => '包含图片';
 
   @override
-  String get communityListView => 'List view';
+  String get communityListView => '列表视图';
 
   @override
-  String get communityGridView => 'Grid view';
+  String get communityGridView => '网格视图';
 
   @override
-  String get communityDownloadOptions => 'Download Options';
+  String get communityDownloadOptions => '下载选项';
 
   @override
   String communityDownloadWithImages(String size) {
-    return 'With images ($size)';
+    return '包含图片 ($size)';
   }
 
   @override
   String communityDownloadImagesIncluded(int count) {
-    return '$count images included';
+    return '包含 $count 张图片';
   }
 
   @override
-  String get communityDownloadTextOnly => 'Text only';
+  String get communityDownloadTextOnly => '仅文字';
 
   @override
-  String get communityDownloadTextOnlySubtitle => 'Faster download, no images';
+  String get communityDownloadTextOnlySubtitle => '更快下载，无图片';
 
   @override
-  String get communityTapToPreview => 'Tap a recipe to preview';
+  String get communityTapToPreview => '点击食谱预览';
 
   @override
   String communityImageCountLabel(int count) {
-    return '$count images';
+    return '$count 张图片';
   }
 
   @override
-  String get communityYourRating => 'Your rating:';
+  String get communityYourRating => '你的评分：';
 
   @override
-  String get communityRateThis => 'Rate this cookbook:';
+  String get communityRateThis => '为这本食谱评分：';
 
   @override
   String communityDownloadingImages(int current, int total) {
-    return 'Downloading images... $current/$total';
+    return '正在下载图片... $current/$total';
   }
 
   @override
-  String get communityViewFullRecipe => 'View Full Recipe';
+  String get communityViewFullRecipe => '查看完整食谱';
 
   @override
   String communityMoreIngredients(int count) {
-    return '+ $count more';
+    return '+ $count 个更多';
   }
 
   @override
   String communityStepCount(int count) {
-    return '$count steps';
+    return '$count 个步骤';
   }
 
   @override
-  String get communityNotes => 'Notes';
+  String get communityNotes => '备注';
 
   @override
-  String get communityStatPrep => 'Prep';
+  String get communityStatPrep => '准备';
 
   @override
-  String get communityStatCook => 'Cook';
+  String get communityStatCook => '烹饪';
 
   @override
-  String get communityStatTotal => 'Total';
+  String get communityStatTotal => '总计';
 
   @override
-  String get communityStatServings => 'Servings';
+  String get communityStatServings => '份量';
 
   @override
   String communityStepDuration(int minutes) {
-    return '$minutes min';
+    return '$minutes 分钟';
   }
 
   @override
-  String get communityEditPublication => 'Edit Publication';
+  String get communityEditPublication => '编辑发布';
 
   @override
-  String get communityEditDescription => 'Description';
+  String get communityEditDescription => '描述';
 
   @override
-  String get communityEditDescriptionHint => 'Tell people about this cookbook...';
+  String get communityEditDescriptionHint => '介绍一下这本食谱...';
 
   @override
-  String get communityEditTags => 'Tags';
+  String get communityEditTags => '标签';
 
   @override
-  String get communityEditSuccess => 'Publication updated!';
+  String get communityEditSuccess => '发布已更新！';
 
   @override
-  String get communityEditFailed => 'Failed to update publication';
+  String get communityEditFailed => '更新发布失败';
 
   @override
-  String get communityNoRatingsYet => 'No ratings yet';
+  String get communityNoRatingsYet => '暂无评分';
 
   @override
-  String get communityStatusPublished => 'Published';
+  String get communityStatusPublished => '已发布';
 
   @override
-  String get communityStatusUnderReview => 'Under Review';
+  String get communityStatusUnderReview => '审核中';
 
   @override
-  String get communityStatusRemoved => 'Removed';
+  String get communityStatusRemoved => '已移除';
 
   @override
-  String get communityUnderReview => 'This cookbook is under review by our moderation team.';
+  String get communityUnderReview => '这本食谱正在由我们的审核团队审查。';
 
   @override
-  String get communityPublishPreparing => 'Preparing cookbook...';
+  String get communityPublishPreparing => '正在准备食谱...';
 
   @override
   String communityPublishUploading(int current, int total) {
-    return 'Uploading images ($current/$total)';
+    return '正在上传图片 ($current/$total)';
   }
 
   @override
-  String get communityPublishPublishing => 'Publishing to community...';
+  String get communityPublishPublishing => '正在发布到社区...';
 
   @override
-  String get communityPublishBackground => 'You can leave this screen — publishing continues in the background.';
+  String get communityPublishBackground => '你可以离开此页面——发布将在后台继续。';
 
   @override
-  String get communityPublishDone => 'Published!';
+  String get communityPublishDone => '已发布！';
 
   @override
   String communityPublishImagesSkipped(int count) {
-    return '$count images were skipped (rejected by moderation)';
+    return '$count 张图片被跳过（被审核拒绝）';
   }
 
   @override
   String communityPublishRejected(int count) {
-    return '$count rejected by moderation';
+    return '$count 张被审核拒绝';
   }
 
   @override
-  String get communityConfigurePublication => 'Configure Publication';
+  String get communityConfigurePublication => '配置发布';
 
   @override
-  String get communityPublishTitle => 'Title';
+  String get communityPublishTitle => '标题';
 
   @override
-  String get communityPublishTitleHint => 'Cookbook title';
+  String get communityPublishTitleHint => '食谱标题';
 
   @override
-  String get communityPublishDescription => 'Description';
+  String get communityPublishDescription => '描述';
 
   @override
-  String get communityPublishDescriptionHint => 'Tell people about this cookbook...';
+  String get communityPublishDescriptionHint => '介绍一下这本食谱...';
 
   @override
-  String get communityPublishTags => 'Tags';
+  String get communityPublishTags => '标签';
 
   @override
-  String get communityPublishIncludeImages => 'Include images';
+  String get communityPublishIncludeImages => '包含图片';
 
   @override
-  String get communityPublishIncludeImagesSubtitle => 'Upload recipe images with this cookbook. Images are scanned for safety.';
+  String get communityPublishIncludeImagesSubtitle => '上传食谱图片。图片将进行安全检查。';
 
   @override
-  String get communityPublishSummary => 'Summary';
+  String get communityPublishSummary => '摘要';
 
   @override
   String communityPublishRecipesSummary(int count) {
-    return '$count recipes';
+    return '$count 个食谱';
   }
 
   @override
-  String get communityPublishImagesWillUpload => 'Images will be uploaded';
+  String get communityPublishImagesWillUpload => '图片将被上传';
 
   @override
-  String get communityPublishTextOnlyNoImages => 'Text only (no images)';
+  String get communityPublishTextOnlyNoImages => '仅文字（无图片）';
 
   @override
-  String get communityPublishTryAgain => 'Try Again';
+  String get communityPublishTryAgain => '重试';
 
   @override
   String communityPublishUploadInProgress(int current, int total) {
-    return 'Publishing in progress... ($current/$total images)';
+    return '发布中... ($current/$total 张图片)';
   }
 }

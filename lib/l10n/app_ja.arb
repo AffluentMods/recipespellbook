@@ -2828,7 +2828,9 @@
   "shareNamedList": "「{name}」を共有",
   "@shareNamedList": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shareAsTextDescription": "リストの項目をテキストで送信",
@@ -3274,5 +3276,153 @@
   "onboardingYourSpellbookAwaits": "あなたの魔法書が待っています...",
   "onboardingSummoning": "召喚中...",
   "onboardingBlankSpellbook": "空の魔法書で始める",
-  "onboardingSkip": "スキップ"
+  "onboardingSkip": "スキップ",
+  "communitySortTopRated": "高評価順",
+  "communityHasImages": "画像あり",
+  "communityListView": "リスト表示",
+  "communityGridView": "グリッド表示",
+  "communityDownloadOptions": "ダウンロードオプション",
+  "communityDownloadWithImages": "画像付き ({size})",
+  "@communityDownloadWithImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "communityDownloadImagesIncluded": "{count}枚の画像を含む",
+  "@communityDownloadImagesIncluded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityDownloadTextOnly": "テキストのみ",
+  "communityDownloadTextOnlySubtitle": "高速ダウンロード、画像なし",
+  "communityTapToPreview": "レシピをタップしてプレビュー",
+  "communityImageCountLabel": "{count}枚の画像",
+  "@communityImageCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityYourRating": "あなたの評価：",
+  "communityRateThis": "このクックブックを評価：",
+  "communityDownloadingImages": "画像をダウンロード中... {current}/{total}",
+  "@communityDownloadingImages": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityViewFullRecipe": "レシピ全体を表示",
+  "communityMoreIngredients": "+ {count}個",
+  "@communityMoreIngredients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityStepCount": "{count}ステップ",
+  "@communityStepCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityNotes": "メモ",
+  "communityStatPrep": "下準備",
+  "communityStatCook": "調理",
+  "communityStatTotal": "合計",
+  "communityStatServings": "人前",
+  "communityStepDuration": "{minutes}分",
+  "@communityStepDuration": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "communityEditPublication": "公開を編集",
+  "communityEditDescription": "説明",
+  "communityEditDescriptionHint": "このクックブックについて教えてください...",
+  "communityEditTags": "タグ",
+  "communityEditSuccess": "公開情報を更新しました！",
+  "communityEditFailed": "公開情報の更新に失敗しました",
+  "communityNoRatingsYet": "まだ評価がありません",
+  "communityStatusPublished": "公開中",
+  "communityStatusUnderReview": "審査中",
+  "communityStatusRemoved": "削除済み",
+  "communityUnderReview": "このクックブックはモデレーションチームによる審査中です。",
+  "communityPublishPreparing": "クックブックを準備中...",
+  "communityPublishUploading": "画像をアップロード中 ({current}/{total})",
+  "@communityPublishUploading": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishPublishing": "コミュニティに公開中...",
+  "communityPublishBackground": "この画面を離れても大丈夫です。公開はバックグラウンドで続行されます。",
+  "communityPublishDone": "公開完了！",
+  "communityPublishImagesSkipped": "{count}枚の画像がスキップされました（モデレーションにより拒否）",
+  "@communityPublishImagesSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishRejected": "{count}件がモデレーションにより拒否",
+  "@communityPublishRejected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityConfigurePublication": "公開設定",
+  "communityPublishTitle": "タイトル",
+  "communityPublishTitleHint": "クックブックのタイトル",
+  "communityPublishDescription": "説明",
+  "communityPublishDescriptionHint": "このクックブックについて教えてください...",
+  "communityPublishTags": "タグ",
+  "communityPublishIncludeImages": "画像を含める",
+  "communityPublishIncludeImagesSubtitle": "このクックブックにレシピ画像をアップロードします。画像は安全性チェックされます。",
+  "communityPublishSummary": "概要",
+  "communityPublishRecipesSummary": "{count}個のレシピ",
+  "@communityPublishRecipesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishImagesWillUpload": "画像がアップロードされます",
+  "communityPublishTextOnlyNoImages": "テキストのみ（画像なし）",
+  "communityPublishTryAgain": "再試行",
+  "communityPublishUploadInProgress": "公開中... ({current}/{total}枚の画像)",
+  "@communityPublishUploadInProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -7394,191 +7394,191 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onboardingSkip => 'スキップ';
 
   @override
-  String get communitySortTopRated => 'Top Rated';
+  String get communitySortTopRated => '高評価順';
 
   @override
-  String get communityHasImages => 'Has Images';
+  String get communityHasImages => '画像あり';
 
   @override
-  String get communityListView => 'List view';
+  String get communityListView => 'リスト表示';
 
   @override
-  String get communityGridView => 'Grid view';
+  String get communityGridView => 'グリッド表示';
 
   @override
-  String get communityDownloadOptions => 'Download Options';
+  String get communityDownloadOptions => 'ダウンロードオプション';
 
   @override
   String communityDownloadWithImages(String size) {
-    return 'With images ($size)';
+    return '画像付き ($size)';
   }
 
   @override
   String communityDownloadImagesIncluded(int count) {
-    return '$count images included';
+    return '$count枚の画像を含む';
   }
 
   @override
-  String get communityDownloadTextOnly => 'Text only';
+  String get communityDownloadTextOnly => 'テキストのみ';
 
   @override
-  String get communityDownloadTextOnlySubtitle => 'Faster download, no images';
+  String get communityDownloadTextOnlySubtitle => '高速ダウンロード、画像なし';
 
   @override
-  String get communityTapToPreview => 'Tap a recipe to preview';
+  String get communityTapToPreview => 'レシピをタップしてプレビュー';
 
   @override
   String communityImageCountLabel(int count) {
-    return '$count images';
+    return '$count枚の画像';
   }
 
   @override
-  String get communityYourRating => 'Your rating:';
+  String get communityYourRating => 'あなたの評価：';
 
   @override
-  String get communityRateThis => 'Rate this cookbook:';
+  String get communityRateThis => 'このクックブックを評価：';
 
   @override
   String communityDownloadingImages(int current, int total) {
-    return 'Downloading images... $current/$total';
+    return '画像をダウンロード中... $current/$total';
   }
 
   @override
-  String get communityViewFullRecipe => 'View Full Recipe';
+  String get communityViewFullRecipe => 'レシピ全体を表示';
 
   @override
   String communityMoreIngredients(int count) {
-    return '+ $count more';
+    return '+ $count個';
   }
 
   @override
   String communityStepCount(int count) {
-    return '$count steps';
+    return '$countステップ';
   }
 
   @override
-  String get communityNotes => 'Notes';
+  String get communityNotes => 'メモ';
 
   @override
-  String get communityStatPrep => 'Prep';
+  String get communityStatPrep => '下準備';
 
   @override
-  String get communityStatCook => 'Cook';
+  String get communityStatCook => '調理';
 
   @override
-  String get communityStatTotal => 'Total';
+  String get communityStatTotal => '合計';
 
   @override
-  String get communityStatServings => 'Servings';
+  String get communityStatServings => '人前';
 
   @override
   String communityStepDuration(int minutes) {
-    return '$minutes min';
+    return '$minutes分';
   }
 
   @override
-  String get communityEditPublication => 'Edit Publication';
+  String get communityEditPublication => '公開を編集';
 
   @override
-  String get communityEditDescription => 'Description';
+  String get communityEditDescription => '説明';
 
   @override
-  String get communityEditDescriptionHint => 'Tell people about this cookbook...';
+  String get communityEditDescriptionHint => 'このクックブックについて教えてください...';
 
   @override
-  String get communityEditTags => 'Tags';
+  String get communityEditTags => 'タグ';
 
   @override
-  String get communityEditSuccess => 'Publication updated!';
+  String get communityEditSuccess => '公開情報を更新しました！';
 
   @override
-  String get communityEditFailed => 'Failed to update publication';
+  String get communityEditFailed => '公開情報の更新に失敗しました';
 
   @override
-  String get communityNoRatingsYet => 'No ratings yet';
+  String get communityNoRatingsYet => 'まだ評価がありません';
 
   @override
-  String get communityStatusPublished => 'Published';
+  String get communityStatusPublished => '公開中';
 
   @override
-  String get communityStatusUnderReview => 'Under Review';
+  String get communityStatusUnderReview => '審査中';
 
   @override
-  String get communityStatusRemoved => 'Removed';
+  String get communityStatusRemoved => '削除済み';
 
   @override
-  String get communityUnderReview => 'This cookbook is under review by our moderation team.';
+  String get communityUnderReview => 'このクックブックはモデレーションチームによる審査中です。';
 
   @override
-  String get communityPublishPreparing => 'Preparing cookbook...';
+  String get communityPublishPreparing => 'クックブックを準備中...';
 
   @override
   String communityPublishUploading(int current, int total) {
-    return 'Uploading images ($current/$total)';
+    return '画像をアップロード中 ($current/$total)';
   }
 
   @override
-  String get communityPublishPublishing => 'Publishing to community...';
+  String get communityPublishPublishing => 'コミュニティに公開中...';
 
   @override
-  String get communityPublishBackground => 'You can leave this screen — publishing continues in the background.';
+  String get communityPublishBackground => 'この画面を離れても大丈夫です。公開はバックグラウンドで続行されます。';
 
   @override
-  String get communityPublishDone => 'Published!';
+  String get communityPublishDone => '公開完了！';
 
   @override
   String communityPublishImagesSkipped(int count) {
-    return '$count images were skipped (rejected by moderation)';
+    return '$count枚の画像がスキップされました（モデレーションにより拒否）';
   }
 
   @override
   String communityPublishRejected(int count) {
-    return '$count rejected by moderation';
+    return '$count件がモデレーションにより拒否';
   }
 
   @override
-  String get communityConfigurePublication => 'Configure Publication';
+  String get communityConfigurePublication => '公開設定';
 
   @override
-  String get communityPublishTitle => 'Title';
+  String get communityPublishTitle => 'タイトル';
 
   @override
-  String get communityPublishTitleHint => 'Cookbook title';
+  String get communityPublishTitleHint => 'クックブックのタイトル';
 
   @override
-  String get communityPublishDescription => 'Description';
+  String get communityPublishDescription => '説明';
 
   @override
-  String get communityPublishDescriptionHint => 'Tell people about this cookbook...';
+  String get communityPublishDescriptionHint => 'このクックブックについて教えてください...';
 
   @override
-  String get communityPublishTags => 'Tags';
+  String get communityPublishTags => 'タグ';
 
   @override
-  String get communityPublishIncludeImages => 'Include images';
+  String get communityPublishIncludeImages => '画像を含める';
 
   @override
-  String get communityPublishIncludeImagesSubtitle => 'Upload recipe images with this cookbook. Images are scanned for safety.';
+  String get communityPublishIncludeImagesSubtitle => 'このクックブックにレシピ画像をアップロードします。画像は安全性チェックされます。';
 
   @override
-  String get communityPublishSummary => 'Summary';
+  String get communityPublishSummary => '概要';
 
   @override
   String communityPublishRecipesSummary(int count) {
-    return '$count recipes';
+    return '$count個のレシピ';
   }
 
   @override
-  String get communityPublishImagesWillUpload => 'Images will be uploaded';
+  String get communityPublishImagesWillUpload => '画像がアップロードされます';
 
   @override
-  String get communityPublishTextOnlyNoImages => 'Text only (no images)';
+  String get communityPublishTextOnlyNoImages => 'テキストのみ（画像なし）';
 
   @override
-  String get communityPublishTryAgain => 'Try Again';
+  String get communityPublishTryAgain => '再試行';
 
   @override
   String communityPublishUploadInProgress(int current, int total) {
-    return 'Publishing in progress... ($current/$total images)';
+    return '公開中... ($current/$total枚の画像)';
   }
 }

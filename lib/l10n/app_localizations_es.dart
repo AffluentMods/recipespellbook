@@ -7446,82 +7446,82 @@ class AppLocalizationsEs extends AppLocalizations {
   String get onboardingSkip => 'Omitir';
 
   @override
-  String get communitySortTopRated => 'Top Rated';
+  String get communitySortTopRated => 'Mejor valorados';
 
   @override
-  String get communityHasImages => 'Has Images';
+  String get communityHasImages => 'Con imágenes';
 
   @override
-  String get communityListView => 'List view';
+  String get communityListView => 'Vista de lista';
 
   @override
-  String get communityGridView => 'Grid view';
+  String get communityGridView => 'Vista de cuadrícula';
 
   @override
-  String get communityDownloadOptions => 'Download Options';
+  String get communityDownloadOptions => 'Opciones de descarga';
 
   @override
   String communityDownloadWithImages(String size) {
-    return 'With images ($size)';
+    return 'Con imágenes ($size)';
   }
 
   @override
   String communityDownloadImagesIncluded(int count) {
-    return '$count images included';
+    return '$count imágenes incluidas';
   }
 
   @override
-  String get communityDownloadTextOnly => 'Text only';
+  String get communityDownloadTextOnly => 'Solo texto';
 
   @override
-  String get communityDownloadTextOnlySubtitle => 'Faster download, no images';
+  String get communityDownloadTextOnlySubtitle => 'Descarga más rápida, sin imágenes';
 
   @override
-  String get communityTapToPreview => 'Tap a recipe to preview';
+  String get communityTapToPreview => 'Toca una receta para previsualizarla';
 
   @override
   String communityImageCountLabel(int count) {
-    return '$count images';
+    return '$count imágenes';
   }
 
   @override
-  String get communityYourRating => 'Your rating:';
+  String get communityYourRating => 'Tu valoración:';
 
   @override
-  String get communityRateThis => 'Rate this cookbook:';
+  String get communityRateThis => 'Valora este libro de cocina:';
 
   @override
   String communityDownloadingImages(int current, int total) {
-    return 'Downloading images... $current/$total';
+    return 'Descargando imágenes... $current/$total';
   }
 
   @override
-  String get communityViewFullRecipe => 'View Full Recipe';
+  String get communityViewFullRecipe => 'Ver receta completa';
 
   @override
   String communityMoreIngredients(int count) {
-    return '+ $count more';
+    return '+ $count más';
   }
 
   @override
   String communityStepCount(int count) {
-    return '$count steps';
+    return '$count pasos';
   }
 
   @override
-  String get communityNotes => 'Notes';
+  String get communityNotes => 'Notas';
 
   @override
-  String get communityStatPrep => 'Prep';
+  String get communityStatPrep => 'Preparación';
 
   @override
-  String get communityStatCook => 'Cook';
+  String get communityStatCook => 'Cocción';
 
   @override
   String get communityStatTotal => 'Total';
 
   @override
-  String get communityStatServings => 'Servings';
+  String get communityStatServings => 'Porciones';
 
   @override
   String communityStepDuration(int minutes) {
@@ -7529,108 +7529,108 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get communityEditPublication => 'Edit Publication';
+  String get communityEditPublication => 'Editar publicación';
 
   @override
-  String get communityEditDescription => 'Description';
+  String get communityEditDescription => 'Descripción';
 
   @override
-  String get communityEditDescriptionHint => 'Tell people about this cookbook...';
+  String get communityEditDescriptionHint => 'Cuéntale a la gente sobre este libro de cocina...';
 
   @override
-  String get communityEditTags => 'Tags';
+  String get communityEditTags => 'Etiquetas';
 
   @override
-  String get communityEditSuccess => 'Publication updated!';
+  String get communityEditSuccess => '¡Publicación actualizada!';
 
   @override
-  String get communityEditFailed => 'Failed to update publication';
+  String get communityEditFailed => 'Error al actualizar la publicación';
 
   @override
-  String get communityNoRatingsYet => 'No ratings yet';
+  String get communityNoRatingsYet => 'Sin valoraciones aún';
 
   @override
-  String get communityStatusPublished => 'Published';
+  String get communityStatusPublished => 'Publicado';
 
   @override
-  String get communityStatusUnderReview => 'Under Review';
+  String get communityStatusUnderReview => 'En revisión';
 
   @override
-  String get communityStatusRemoved => 'Removed';
+  String get communityStatusRemoved => 'Eliminado';
 
   @override
-  String get communityUnderReview => 'This cookbook is under review by our moderation team.';
+  String get communityUnderReview => 'Este libro de cocina está siendo revisado por nuestro equipo de moderación.';
 
   @override
-  String get communityPublishPreparing => 'Preparing cookbook...';
+  String get communityPublishPreparing => 'Preparando libro de cocina...';
 
   @override
   String communityPublishUploading(int current, int total) {
-    return 'Uploading images ($current/$total)';
+    return 'Subiendo imágenes ($current/$total)';
   }
 
   @override
-  String get communityPublishPublishing => 'Publishing to community...';
+  String get communityPublishPublishing => 'Publicando en la comunidad...';
 
   @override
-  String get communityPublishBackground => 'You can leave this screen — publishing continues in the background.';
+  String get communityPublishBackground => 'Puedes salir de esta pantalla – la publicación continúa en segundo plano.';
 
   @override
-  String get communityPublishDone => 'Published!';
+  String get communityPublishDone => '¡Publicado!';
 
   @override
   String communityPublishImagesSkipped(int count) {
-    return '$count images were skipped (rejected by moderation)';
+    return '$count imágenes fueron omitidas (rechazadas por moderación)';
   }
 
   @override
   String communityPublishRejected(int count) {
-    return '$count rejected by moderation';
+    return '$count rechazadas por moderación';
   }
 
   @override
-  String get communityConfigurePublication => 'Configure Publication';
+  String get communityConfigurePublication => 'Configurar publicación';
 
   @override
-  String get communityPublishTitle => 'Title';
+  String get communityPublishTitle => 'Título';
 
   @override
-  String get communityPublishTitleHint => 'Cookbook title';
+  String get communityPublishTitleHint => 'Título del libro de cocina';
 
   @override
-  String get communityPublishDescription => 'Description';
+  String get communityPublishDescription => 'Descripción';
 
   @override
-  String get communityPublishDescriptionHint => 'Tell people about this cookbook...';
+  String get communityPublishDescriptionHint => 'Cuéntale a la gente sobre este libro de cocina...';
 
   @override
-  String get communityPublishTags => 'Tags';
+  String get communityPublishTags => 'Etiquetas';
 
   @override
-  String get communityPublishIncludeImages => 'Include images';
+  String get communityPublishIncludeImages => 'Incluir imágenes';
 
   @override
-  String get communityPublishIncludeImagesSubtitle => 'Upload recipe images with this cookbook. Images are scanned for safety.';
+  String get communityPublishIncludeImagesSubtitle => 'Sube imágenes de recetas con este libro. Las imágenes se analizan por seguridad.';
 
   @override
-  String get communityPublishSummary => 'Summary';
+  String get communityPublishSummary => 'Resumen';
 
   @override
   String communityPublishRecipesSummary(int count) {
-    return '$count recipes';
+    return '$count recetas';
   }
 
   @override
-  String get communityPublishImagesWillUpload => 'Images will be uploaded';
+  String get communityPublishImagesWillUpload => 'Se subirán las imágenes';
 
   @override
-  String get communityPublishTextOnlyNoImages => 'Text only (no images)';
+  String get communityPublishTextOnlyNoImages => 'Solo texto (sin imágenes)';
 
   @override
-  String get communityPublishTryAgain => 'Try Again';
+  String get communityPublishTryAgain => 'Intentar de nuevo';
 
   @override
   String communityPublishUploadInProgress(int current, int total) {
-    return 'Publishing in progress... ($current/$total images)';
+    return 'Publicación en progreso... ($current/$total imágenes)';
   }
 }

@@ -7446,82 +7446,82 @@ class AppLocalizationsNl extends AppLocalizations {
   String get onboardingSkip => 'Overslaan';
 
   @override
-  String get communitySortTopRated => 'Top Rated';
+  String get communitySortTopRated => 'Best beoordeeld';
 
   @override
-  String get communityHasImages => 'Has Images';
+  String get communityHasImages => 'Met afbeeldingen';
 
   @override
-  String get communityListView => 'List view';
+  String get communityListView => 'Lijstweergave';
 
   @override
-  String get communityGridView => 'Grid view';
+  String get communityGridView => 'Rasterweergave';
 
   @override
-  String get communityDownloadOptions => 'Download Options';
+  String get communityDownloadOptions => 'Downloadopties';
 
   @override
   String communityDownloadWithImages(String size) {
-    return 'With images ($size)';
+    return 'Met afbeeldingen ($size)';
   }
 
   @override
   String communityDownloadImagesIncluded(int count) {
-    return '$count images included';
+    return '$count afbeeldingen inbegrepen';
   }
 
   @override
-  String get communityDownloadTextOnly => 'Text only';
+  String get communityDownloadTextOnly => 'Alleen tekst';
 
   @override
-  String get communityDownloadTextOnlySubtitle => 'Faster download, no images';
+  String get communityDownloadTextOnlySubtitle => 'Snellere download, geen afbeeldingen';
 
   @override
-  String get communityTapToPreview => 'Tap a recipe to preview';
+  String get communityTapToPreview => 'Tik op een recept voor een voorbeeld';
 
   @override
   String communityImageCountLabel(int count) {
-    return '$count images';
+    return '$count afbeeldingen';
   }
 
   @override
-  String get communityYourRating => 'Your rating:';
+  String get communityYourRating => 'Jouw beoordeling:';
 
   @override
-  String get communityRateThis => 'Rate this cookbook:';
+  String get communityRateThis => 'Beoordeel dit kookboek:';
 
   @override
   String communityDownloadingImages(int current, int total) {
-    return 'Downloading images... $current/$total';
+    return 'Afbeeldingen downloaden... $current/$total';
   }
 
   @override
-  String get communityViewFullRecipe => 'View Full Recipe';
+  String get communityViewFullRecipe => 'Volledig recept bekijken';
 
   @override
   String communityMoreIngredients(int count) {
-    return '+ $count more';
+    return '+ $count meer';
   }
 
   @override
   String communityStepCount(int count) {
-    return '$count steps';
+    return '$count stappen';
   }
 
   @override
-  String get communityNotes => 'Notes';
+  String get communityNotes => 'Notities';
 
   @override
-  String get communityStatPrep => 'Prep';
+  String get communityStatPrep => 'Voorbereiding';
 
   @override
-  String get communityStatCook => 'Cook';
+  String get communityStatCook => 'Koken';
 
   @override
-  String get communityStatTotal => 'Total';
+  String get communityStatTotal => 'Totaal';
 
   @override
-  String get communityStatServings => 'Servings';
+  String get communityStatServings => 'Porties';
 
   @override
   String communityStepDuration(int minutes) {
@@ -7529,108 +7529,108 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get communityEditPublication => 'Edit Publication';
+  String get communityEditPublication => 'Publicatie bewerken';
 
   @override
-  String get communityEditDescription => 'Description';
+  String get communityEditDescription => 'Beschrijving';
 
   @override
-  String get communityEditDescriptionHint => 'Tell people about this cookbook...';
+  String get communityEditDescriptionHint => 'Vertel mensen over dit kookboek...';
 
   @override
   String get communityEditTags => 'Tags';
 
   @override
-  String get communityEditSuccess => 'Publication updated!';
+  String get communityEditSuccess => 'Publicatie bijgewerkt!';
 
   @override
-  String get communityEditFailed => 'Failed to update publication';
+  String get communityEditFailed => 'Bijwerken van publicatie mislukt';
 
   @override
-  String get communityNoRatingsYet => 'No ratings yet';
+  String get communityNoRatingsYet => 'Nog geen beoordelingen';
 
   @override
-  String get communityStatusPublished => 'Published';
+  String get communityStatusPublished => 'Gepubliceerd';
 
   @override
-  String get communityStatusUnderReview => 'Under Review';
+  String get communityStatusUnderReview => 'Wordt beoordeeld';
 
   @override
-  String get communityStatusRemoved => 'Removed';
+  String get communityStatusRemoved => 'Verwijderd';
 
   @override
-  String get communityUnderReview => 'This cookbook is under review by our moderation team.';
+  String get communityUnderReview => 'Dit kookboek wordt beoordeeld door ons moderatieteam.';
 
   @override
-  String get communityPublishPreparing => 'Preparing cookbook...';
+  String get communityPublishPreparing => 'Kookboek voorbereiden...';
 
   @override
   String communityPublishUploading(int current, int total) {
-    return 'Uploading images ($current/$total)';
+    return 'Afbeeldingen uploaden ($current/$total)';
   }
 
   @override
-  String get communityPublishPublishing => 'Publishing to community...';
+  String get communityPublishPublishing => 'Publiceren naar community...';
 
   @override
-  String get communityPublishBackground => 'You can leave this screen — publishing continues in the background.';
+  String get communityPublishBackground => 'Je kunt dit scherm verlaten – het publiceren gaat door op de achtergrond.';
 
   @override
-  String get communityPublishDone => 'Published!';
+  String get communityPublishDone => 'Gepubliceerd!';
 
   @override
   String communityPublishImagesSkipped(int count) {
-    return '$count images were skipped (rejected by moderation)';
+    return '$count afbeeldingen zijn overgeslagen (afgewezen door moderatie)';
   }
 
   @override
   String communityPublishRejected(int count) {
-    return '$count rejected by moderation';
+    return '$count afgewezen door moderatie';
   }
 
   @override
-  String get communityConfigurePublication => 'Configure Publication';
+  String get communityConfigurePublication => 'Publicatie configureren';
 
   @override
-  String get communityPublishTitle => 'Title';
+  String get communityPublishTitle => 'Titel';
 
   @override
-  String get communityPublishTitleHint => 'Cookbook title';
+  String get communityPublishTitleHint => 'Kookboektitel';
 
   @override
-  String get communityPublishDescription => 'Description';
+  String get communityPublishDescription => 'Beschrijving';
 
   @override
-  String get communityPublishDescriptionHint => 'Tell people about this cookbook...';
+  String get communityPublishDescriptionHint => 'Vertel mensen over dit kookboek...';
 
   @override
   String get communityPublishTags => 'Tags';
 
   @override
-  String get communityPublishIncludeImages => 'Include images';
+  String get communityPublishIncludeImages => 'Afbeeldingen toevoegen';
 
   @override
-  String get communityPublishIncludeImagesSubtitle => 'Upload recipe images with this cookbook. Images are scanned for safety.';
+  String get communityPublishIncludeImagesSubtitle => 'Upload receptafbeeldingen bij dit kookboek. Afbeeldingen worden gecontroleerd op veiligheid.';
 
   @override
-  String get communityPublishSummary => 'Summary';
+  String get communityPublishSummary => 'Samenvatting';
 
   @override
   String communityPublishRecipesSummary(int count) {
-    return '$count recipes';
+    return '$count recepten';
   }
 
   @override
-  String get communityPublishImagesWillUpload => 'Images will be uploaded';
+  String get communityPublishImagesWillUpload => 'Afbeeldingen worden geüpload';
 
   @override
-  String get communityPublishTextOnlyNoImages => 'Text only (no images)';
+  String get communityPublishTextOnlyNoImages => 'Alleen tekst (geen afbeeldingen)';
 
   @override
-  String get communityPublishTryAgain => 'Try Again';
+  String get communityPublishTryAgain => 'Opnieuw proberen';
 
   @override
   String communityPublishUploadInProgress(int current, int total) {
-    return 'Publishing in progress... ($current/$total images)';
+    return 'Publicatie bezig... ($current/$total afbeeldingen)';
   }
 }

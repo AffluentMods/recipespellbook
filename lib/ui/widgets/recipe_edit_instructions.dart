@@ -333,7 +333,7 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
 
 // ============ STEP CARD ============
 
-class _StepCard extends StatelessWidget {
+class _StepCard extends StatefulWidget {
   final int index;
   final EditableStep step;
   final FocusNode focusNode;
@@ -362,6 +362,49 @@ class _StepCard extends StatelessWidget {
     required this.hasStepPhotoAccess,
     this.onTap,
   });
+
+  @override
+  State<_StepCard> createState() => _StepCardState();
+}
+
+class _StepCardState extends State<_StepCard> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.step.instruction);
+  }
+
+  @override
+  void didUpdateWidget(_StepCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Only update the controller text if the step identity changed (e.g. reorder)
+    if (oldWidget.step.instruction != widget.step.instruction &&
+        _controller.text != widget.step.instruction) {
+      _controller.text = widget.step.instruction;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  // Forward getters for cleaner access
+  int get index => widget.index;
+  EditableStep get step => widget.step;
+  FocusNode get focusNode => widget.focusNode;
+  bool get isPremium => widget.isPremium;
+  bool get isSelected => widget.isSelected;
+  bool get isSelectionMode => widget.isSelectionMode;
+  ValueChanged<String> get onTextChanged => widget.onTextChanged;
+  ValueChanged<String?> get onImageChanged => widget.onImageChanged;
+  VoidCallback get onLongPress => widget.onLongPress;
+  VoidCallback? get onTap => widget.onTap;
+  bool Function() get onImageGateCheck => widget.onImageGateCheck;
+  bool get hasStepPhotoAccess => widget.hasStepPhotoAccess;
 
   @override
   Widget build(BuildContext context) {
@@ -505,8 +548,7 @@ class _StepCard extends StatelessWidget {
                     absorbing: isSelectionMode,
                     child: TextField(
                       focusNode: focusNode,
-                      controller: TextEditingController(text: step.instruction)
-                        ..selection = TextSelection.collapsed(offset: step.instruction.length),
+                      controller: _controller,
                       maxLines: null,
                       minLines: 1,
                       decoration: InputDecoration(

@@ -2828,7 +2828,9 @@
   "shareNamedList": "Поделиться \"{name}\"",
   "@shareNamedList": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shareAsTextDescription": "Отправить элементы списка как текст",
@@ -3274,5 +3276,153 @@
   "onboardingYourSpellbookAwaits": "Ваша книга заклинаний ждёт...",
   "onboardingSummoning": "Призываем...",
   "onboardingBlankSpellbook": "Начать с пустой книги заклинаний",
-  "onboardingSkip": "Пропустить"
+  "onboardingSkip": "Пропустить",
+  "communitySortTopRated": "Лучшие по оценке",
+  "communityHasImages": "С изображениями",
+  "communityListView": "Список",
+  "communityGridView": "Сетка",
+  "communityDownloadOptions": "Параметры загрузки",
+  "communityDownloadWithImages": "С изображениями ({size})",
+  "@communityDownloadWithImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "communityDownloadImagesIncluded": "{count} изображений включено",
+  "@communityDownloadImagesIncluded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityDownloadTextOnly": "Только текст",
+  "communityDownloadTextOnlySubtitle": "Быстрая загрузка, без изображений",
+  "communityTapToPreview": "Нажмите на рецепт для предпросмотра",
+  "communityImageCountLabel": "{count} изображений",
+  "@communityImageCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityYourRating": "Ваша оценка:",
+  "communityRateThis": "Оцените эту книгу рецептов:",
+  "communityDownloadingImages": "Загрузка изображений... {current}/{total}",
+  "@communityDownloadingImages": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityViewFullRecipe": "Посмотреть полный рецепт",
+  "communityMoreIngredients": "+ ещё {count}",
+  "@communityMoreIngredients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityStepCount": "{count} шагов",
+  "@communityStepCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityNotes": "Заметки",
+  "communityStatPrep": "Подготовка",
+  "communityStatCook": "Готовка",
+  "communityStatTotal": "Итого",
+  "communityStatServings": "Порции",
+  "communityStepDuration": "{minutes} мин",
+  "@communityStepDuration": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "communityEditPublication": "Редактировать публикацию",
+  "communityEditDescription": "Описание",
+  "communityEditDescriptionHint": "Расскажите об этой книге рецептов...",
+  "communityEditTags": "Теги",
+  "communityEditSuccess": "Публикация обновлена!",
+  "communityEditFailed": "Не удалось обновить публикацию",
+  "communityNoRatingsYet": "Пока нет оценок",
+  "communityStatusPublished": "Опубликовано",
+  "communityStatusUnderReview": "На проверке",
+  "communityStatusRemoved": "Удалено",
+  "communityUnderReview": "Эта книга рецептов проходит проверку нашей командой модерации.",
+  "communityPublishPreparing": "Подготовка книги рецептов...",
+  "communityPublishUploading": "Загрузка изображений ({current}/{total})",
+  "@communityPublishUploading": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishPublishing": "Публикация в сообществе...",
+  "communityPublishBackground": "Вы можете покинуть этот экран — публикация продолжается в фоновом режиме.",
+  "communityPublishDone": "Опубликовано!",
+  "communityPublishImagesSkipped": "{count} изображений пропущено (отклонено модерацией)",
+  "@communityPublishImagesSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishRejected": "{count} отклонено модерацией",
+  "@communityPublishRejected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityConfigurePublication": "Настройка публикации",
+  "communityPublishTitle": "Название",
+  "communityPublishTitleHint": "Название книги рецептов",
+  "communityPublishDescription": "Описание",
+  "communityPublishDescriptionHint": "Расскажите об этой книге рецептов...",
+  "communityPublishTags": "Теги",
+  "communityPublishIncludeImages": "Включить изображения",
+  "communityPublishIncludeImagesSubtitle": "Загрузить изображения рецептов вместе с книгой. Изображения проверяются на безопасность.",
+  "communityPublishSummary": "Сводка",
+  "communityPublishRecipesSummary": "{count} рецептов",
+  "@communityPublishRecipesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishImagesWillUpload": "Изображения будут загружены",
+  "communityPublishTextOnlyNoImages": "Только текст (без изображений)",
+  "communityPublishTryAgain": "Попробовать снова",
+  "communityPublishUploadInProgress": "Публикация... ({current}/{total} изображений)",
+  "@communityPublishUploadInProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
 }

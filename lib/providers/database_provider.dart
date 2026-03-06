@@ -99,14 +99,6 @@ final recipeCountProvider = FutureProvider.family<int, String>((ref, cookbookId)
   return dao.getRecipeCountForCookbook(cookbookId);
 });
 
-// ============ COOKBOOK PROVIDERS ============
-
-/// All cookbooks stream
-final allCookbooksProvider = StreamProvider<List<Cookbook>>((ref) {
-  final dao = ref.watch(cookbookDaoProvider);
-  return dao.watchAllCookbooks();
-});
-
 // ============ SHOPPING PROVIDERS ============
 
 /// Shopping lists stream

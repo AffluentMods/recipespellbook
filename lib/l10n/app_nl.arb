@@ -2828,7 +2828,9 @@
   "shareNamedList": "\"{name}\" delen",
   "@shareNamedList": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shareAsTextDescription": "Lijstitems als tekst versturen",
@@ -3274,5 +3276,153 @@
   "onboardingYourSpellbookAwaits": "Je spreukenboek wacht...",
   "onboardingSummoning": "Oproepen...",
   "onboardingBlankSpellbook": "Begin met een leeg spreukenboek",
-  "onboardingSkip": "Overslaan"
+  "onboardingSkip": "Overslaan",
+  "communitySortTopRated": "Best beoordeeld",
+  "communityHasImages": "Met afbeeldingen",
+  "communityListView": "Lijstweergave",
+  "communityGridView": "Rasterweergave",
+  "communityDownloadOptions": "Downloadopties",
+  "communityDownloadWithImages": "Met afbeeldingen ({size})",
+  "@communityDownloadWithImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "communityDownloadImagesIncluded": "{count} afbeeldingen inbegrepen",
+  "@communityDownloadImagesIncluded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityDownloadTextOnly": "Alleen tekst",
+  "communityDownloadTextOnlySubtitle": "Snellere download, geen afbeeldingen",
+  "communityTapToPreview": "Tik op een recept voor een voorbeeld",
+  "communityImageCountLabel": "{count} afbeeldingen",
+  "@communityImageCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityYourRating": "Jouw beoordeling:",
+  "communityRateThis": "Beoordeel dit kookboek:",
+  "communityDownloadingImages": "Afbeeldingen downloaden... {current}/{total}",
+  "@communityDownloadingImages": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityViewFullRecipe": "Volledig recept bekijken",
+  "communityMoreIngredients": "+ {count} meer",
+  "@communityMoreIngredients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityStepCount": "{count} stappen",
+  "@communityStepCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityNotes": "Notities",
+  "communityStatPrep": "Voorbereiding",
+  "communityStatCook": "Koken",
+  "communityStatTotal": "Totaal",
+  "communityStatServings": "Porties",
+  "communityStepDuration": "{minutes} min",
+  "@communityStepDuration": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "communityEditPublication": "Publicatie bewerken",
+  "communityEditDescription": "Beschrijving",
+  "communityEditDescriptionHint": "Vertel mensen over dit kookboek...",
+  "communityEditTags": "Tags",
+  "communityEditSuccess": "Publicatie bijgewerkt!",
+  "communityEditFailed": "Bijwerken van publicatie mislukt",
+  "communityNoRatingsYet": "Nog geen beoordelingen",
+  "communityStatusPublished": "Gepubliceerd",
+  "communityStatusUnderReview": "Wordt beoordeeld",
+  "communityStatusRemoved": "Verwijderd",
+  "communityUnderReview": "Dit kookboek wordt beoordeeld door ons moderatieteam.",
+  "communityPublishPreparing": "Kookboek voorbereiden...",
+  "communityPublishUploading": "Afbeeldingen uploaden ({current}/{total})",
+  "@communityPublishUploading": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishPublishing": "Publiceren naar community...",
+  "communityPublishBackground": "Je kunt dit scherm verlaten – het publiceren gaat door op de achtergrond.",
+  "communityPublishDone": "Gepubliceerd!",
+  "communityPublishImagesSkipped": "{count} afbeeldingen zijn overgeslagen (afgewezen door moderatie)",
+  "@communityPublishImagesSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishRejected": "{count} afgewezen door moderatie",
+  "@communityPublishRejected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityConfigurePublication": "Publicatie configureren",
+  "communityPublishTitle": "Titel",
+  "communityPublishTitleHint": "Kookboektitel",
+  "communityPublishDescription": "Beschrijving",
+  "communityPublishDescriptionHint": "Vertel mensen over dit kookboek...",
+  "communityPublishTags": "Tags",
+  "communityPublishIncludeImages": "Afbeeldingen toevoegen",
+  "communityPublishIncludeImagesSubtitle": "Upload receptafbeeldingen bij dit kookboek. Afbeeldingen worden gecontroleerd op veiligheid.",
+  "communityPublishSummary": "Samenvatting",
+  "communityPublishRecipesSummary": "{count} recepten",
+  "@communityPublishRecipesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishImagesWillUpload": "Afbeeldingen worden geüpload",
+  "communityPublishTextOnlyNoImages": "Alleen tekst (geen afbeeldingen)",
+  "communityPublishTryAgain": "Opnieuw proberen",
+  "communityPublishUploadInProgress": "Publicatie bezig... ({current}/{total} afbeeldingen)",
+  "@communityPublishUploadInProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
 }

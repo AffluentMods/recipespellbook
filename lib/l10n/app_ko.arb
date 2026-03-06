@@ -2828,7 +2828,9 @@
   "shareNamedList": "\"{name}\" 공유",
   "@shareNamedList": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shareAsTextDescription": "목록 항목을 텍스트로 보내기",
@@ -3274,5 +3276,153 @@
   "onboardingYourSpellbookAwaits": "당신의 마법서가 기다리고 있어요...",
   "onboardingSummoning": "소환 중...",
   "onboardingBlankSpellbook": "빈 마법서로 시작하기",
-  "onboardingSkip": "건너뛰기"
+  "onboardingSkip": "건너뛰기",
+  "communitySortTopRated": "평점 높은 순",
+  "communityHasImages": "이미지 포함",
+  "communityListView": "목록 보기",
+  "communityGridView": "그리드 보기",
+  "communityDownloadOptions": "다운로드 옵션",
+  "communityDownloadWithImages": "이미지 포함 ({size})",
+  "@communityDownloadWithImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "communityDownloadImagesIncluded": "이미지 {count}개 포함",
+  "@communityDownloadImagesIncluded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityDownloadTextOnly": "텍스트만",
+  "communityDownloadTextOnlySubtitle": "빠른 다운로드, 이미지 없음",
+  "communityTapToPreview": "레시피를 탭하여 미리보기",
+  "communityImageCountLabel": "이미지 {count}개",
+  "@communityImageCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityYourRating": "내 평점:",
+  "communityRateThis": "이 요리책 평가하기:",
+  "communityDownloadingImages": "이미지 다운로드 중... {current}/{total}",
+  "@communityDownloadingImages": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityViewFullRecipe": "전체 레시피 보기",
+  "communityMoreIngredients": "+ {count}개 더",
+  "@communityMoreIngredients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityStepCount": "{count}단계",
+  "@communityStepCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityNotes": "메모",
+  "communityStatPrep": "준비",
+  "communityStatCook": "조리",
+  "communityStatTotal": "합계",
+  "communityStatServings": "인분",
+  "communityStepDuration": "{minutes}분",
+  "@communityStepDuration": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "communityEditPublication": "출판 편집",
+  "communityEditDescription": "설명",
+  "communityEditDescriptionHint": "이 요리책에 대해 알려주세요...",
+  "communityEditTags": "태그",
+  "communityEditSuccess": "출판 정보가 업데이트되었습니다!",
+  "communityEditFailed": "출판 정보 업데이트 실패",
+  "communityNoRatingsYet": "아직 평가 없음",
+  "communityStatusPublished": "게시됨",
+  "communityStatusUnderReview": "검토 중",
+  "communityStatusRemoved": "삭제됨",
+  "communityUnderReview": "이 요리책은 검토 팀의 심사를 받고 있습니다.",
+  "communityPublishPreparing": "요리책 준비 중...",
+  "communityPublishUploading": "이미지 업로드 중 ({current}/{total})",
+  "@communityPublishUploading": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishPublishing": "커뮤니티에 게시 중...",
+  "communityPublishBackground": "이 화면을 떠나도 괜찮습니다. 게시는 백그라운드에서 계속됩니다.",
+  "communityPublishDone": "게시 완료!",
+  "communityPublishImagesSkipped": "이미지 {count}개가 건너뛰어졌습니다 (검토에서 거부됨)",
+  "@communityPublishImagesSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishRejected": "{count}개 검토에서 거부됨",
+  "@communityPublishRejected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityConfigurePublication": "출판 설정",
+  "communityPublishTitle": "제목",
+  "communityPublishTitleHint": "요리책 제목",
+  "communityPublishDescription": "설명",
+  "communityPublishDescriptionHint": "이 요리책에 대해 알려주세요...",
+  "communityPublishTags": "태그",
+  "communityPublishIncludeImages": "이미지 포함",
+  "communityPublishIncludeImagesSubtitle": "이 요리책에 레시피 이미지를 업로드합니다. 이미지는 안전성 검사를 받습니다.",
+  "communityPublishSummary": "요약",
+  "communityPublishRecipesSummary": "레시피 {count}개",
+  "@communityPublishRecipesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishImagesWillUpload": "이미지가 업로드됩니다",
+  "communityPublishTextOnlyNoImages": "텍스트만 (이미지 없음)",
+  "communityPublishTryAgain": "다시 시도",
+  "communityPublishUploadInProgress": "게시 진행 중... (이미지 {current}/{total})",
+  "@communityPublishUploadInProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
 }

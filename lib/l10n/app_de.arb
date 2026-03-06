@@ -2359,7 +2359,9 @@
   "shareNamedList": "\"{name}\" teilen",
   "@shareNamedList": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shareAsTextDescription": "Listeneinträge als Text senden",
@@ -2805,5 +2807,153 @@
   "onboardingYourSpellbookAwaits": "Dein Zauberbuch wartet...",
   "onboardingSummoning": "Beschwöre...",
   "onboardingBlankSpellbook": "Mit einem leeren Zauberbuch starten",
-  "onboardingSkip": "Überspringen"
+  "onboardingSkip": "Überspringen",
+  "communitySortTopRated": "Bestbewertet",
+  "communityHasImages": "Mit Bildern",
+  "communityListView": "Listenansicht",
+  "communityGridView": "Rasteransicht",
+  "communityDownloadOptions": "Download-Optionen",
+  "communityDownloadWithImages": "Mit Bildern ({size})",
+  "@communityDownloadWithImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "communityDownloadImagesIncluded": "{count} Bilder enthalten",
+  "@communityDownloadImagesIncluded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityDownloadTextOnly": "Nur Text",
+  "communityDownloadTextOnlySubtitle": "Schnellerer Download, keine Bilder",
+  "communityTapToPreview": "Tippe auf ein Rezept zur Vorschau",
+  "communityImageCountLabel": "{count} Bilder",
+  "@communityImageCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityYourRating": "Deine Bewertung:",
+  "communityRateThis": "Dieses Kochbuch bewerten:",
+  "communityDownloadingImages": "Bilder werden heruntergeladen... {current}/{total}",
+  "@communityDownloadingImages": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityViewFullRecipe": "Vollständiges Rezept anzeigen",
+  "communityMoreIngredients": "+ {count} weitere",
+  "@communityMoreIngredients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityStepCount": "{count} Schritte",
+  "@communityStepCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityNotes": "Notizen",
+  "communityStatPrep": "Vorbereitung",
+  "communityStatCook": "Kochen",
+  "communityStatTotal": "Gesamt",
+  "communityStatServings": "Portionen",
+  "communityStepDuration": "{minutes} Min.",
+  "@communityStepDuration": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "communityEditPublication": "Veröffentlichung bearbeiten",
+  "communityEditDescription": "Beschreibung",
+  "communityEditDescriptionHint": "Erzähle anderen über dieses Kochbuch...",
+  "communityEditTags": "Tags",
+  "communityEditSuccess": "Veröffentlichung aktualisiert!",
+  "communityEditFailed": "Aktualisierung der Veröffentlichung fehlgeschlagen",
+  "communityNoRatingsYet": "Noch keine Bewertungen",
+  "communityStatusPublished": "Veröffentlicht",
+  "communityStatusUnderReview": "Wird überprüft",
+  "communityStatusRemoved": "Entfernt",
+  "communityUnderReview": "Dieses Kochbuch wird von unserem Moderationsteam überprüft.",
+  "communityPublishPreparing": "Kochbuch wird vorbereitet...",
+  "communityPublishUploading": "Bilder werden hochgeladen ({current}/{total})",
+  "@communityPublishUploading": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishPublishing": "Wird in der Community veröffentlicht...",
+  "communityPublishBackground": "Du kannst diesen Bildschirm verlassen – die Veröffentlichung läuft im Hintergrund weiter.",
+  "communityPublishDone": "Veröffentlicht!",
+  "communityPublishImagesSkipped": "{count} Bilder wurden übersprungen (von der Moderation abgelehnt)",
+  "@communityPublishImagesSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishRejected": "{count} von der Moderation abgelehnt",
+  "@communityPublishRejected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityConfigurePublication": "Veröffentlichung konfigurieren",
+  "communityPublishTitle": "Titel",
+  "communityPublishTitleHint": "Kochbuchtitel",
+  "communityPublishDescription": "Beschreibung",
+  "communityPublishDescriptionHint": "Erzähle anderen über dieses Kochbuch...",
+  "communityPublishTags": "Tags",
+  "communityPublishIncludeImages": "Bilder einschließen",
+  "communityPublishIncludeImagesSubtitle": "Rezeptbilder mit diesem Kochbuch hochladen. Bilder werden auf Sicherheit geprüft.",
+  "communityPublishSummary": "Zusammenfassung",
+  "communityPublishRecipesSummary": "{count} Rezepte",
+  "@communityPublishRecipesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishImagesWillUpload": "Bilder werden hochgeladen",
+  "communityPublishTextOnlyNoImages": "Nur Text (keine Bilder)",
+  "communityPublishTryAgain": "Erneut versuchen",
+  "communityPublishUploadInProgress": "Veröffentlichung läuft... ({current}/{total} Bilder)",
+  "@communityPublishUploadInProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
 }

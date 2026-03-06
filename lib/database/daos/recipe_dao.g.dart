@@ -9,4 +9,5 @@ mixin _$RecipeDaoMixin on DatabaseAccessor<AppDatabase> {
   $IngredientsTable get ingredients => attachedDatabase.ingredients;
   $StepsTable get steps => attachedDatabase.steps;
   $RecipeLinksTable get recipeLinks => attachedDatabase.recipeLinks;
+  $RecipeTagsTable get recipeTags => attachedDatabase.recipeTags;
 }

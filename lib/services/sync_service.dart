@@ -94,10 +94,10 @@ class SyncService {
     return iso != null ? DateTime.tryParse(iso) : null;
   }
 
-  Future<void> _saveLastSyncAt(DateTime dt) async {
+  Future<void> _saveLastSyncAt(DateTime dt, [String? userId]) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
-      _syncKeyForUser(),
+      _syncKeyForUser(userId),
       dt.toUtc().toIso8601String(),
     );
   }
@@ -125,8 +125,12 @@ class SyncService {
 
     _isSyncing = true;
 
+    // Capture user ID at sync start — if account switches mid-flight,
+    // we must not write the old account's timestamp under the new user.
+    final syncUserId = _auth.currentUser!.id;
+
     try {
-      final lastSyncAt = fullSync ? null : await getLastSyncAt();
+      final lastSyncAt = fullSync ? null : await getLastSyncAt(syncUserId);
       final localData = await _collectLocalData(lastSyncAt);
       final pushBody = <String, dynamic>{
         'lastSyncAt': lastSyncAt?.toUtc().toIso8601String(),
@@ -157,8 +161,14 @@ class SyncService {
 
       var pulledCount = await _applyServerData(serverData);
 
-      debugPrint('[Sync] Pulled $pulledCount entities, syncedAt: $syncedAtStr');
-      await _saveLastSyncAt(syncedAt);
+      // Only save timestamp if the same user is still signed in
+      final currentUserId = _auth.currentUser?.id;
+      if (currentUserId != syncUserId) {
+        debugPrint('[Sync] Account switched during sync ($syncUserId → $currentUserId), discarding timestamp');
+      } else {
+        debugPrint('[Sync] Pulled $pulledCount entities, syncedAt: $syncedAtStr');
+        await _saveLastSyncAt(syncedAt, syncUserId);
+      }
 
       // Pull family shared content
       try {
@@ -196,9 +206,10 @@ class SyncService {
     if (_isSyncing) return const SyncResult.failure('Sync already in progress');
 
     _isSyncing = true;
+    final syncUserId = _auth.currentUser!.id;
 
     try {
-      final lastSyncAt = await getLastSyncAt();
+      final lastSyncAt = await getLastSyncAt(syncUserId);
       final sinceParam = lastSyncAt?.toUtc().toIso8601String() ?? '';
       final path = sinceParam.isNotEmpty
           ? '/v1/sync/pull?since=$sinceParam'
@@ -217,7 +228,9 @@ class SyncService {
           : DateTime.now().toUtc();
 
       var pulledCount = await _applyServerData(serverData);
-      await _saveLastSyncAt(syncedAt);
+      if (_auth.currentUser?.id == syncUserId) {
+        await _saveLastSyncAt(syncedAt, syncUserId);
+      }
 
       // Pull family shared content (non-fatal)
       try {

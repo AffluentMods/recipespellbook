@@ -2828,7 +2828,9 @@
   "shareNamedList": "Compartilhar \"{name}\"",
   "@shareNamedList": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shareAsTextDescription": "Enviar itens da lista como texto",
@@ -3274,5 +3276,153 @@
   "onboardingYourSpellbookAwaits": "Seu livro de feitiços te espera...",
   "onboardingSummoning": "Invocando...",
   "onboardingBlankSpellbook": "Começar com um livro de feitiços vazio",
-  "onboardingSkip": "Pular"
+  "onboardingSkip": "Pular",
+  "communitySortTopRated": "Mais bem avaliados",
+  "communityHasImages": "Com imagens",
+  "communityListView": "Vista de lista",
+  "communityGridView": "Vista de grelha",
+  "communityDownloadOptions": "Opções de download",
+  "communityDownloadWithImages": "Com imagens ({size})",
+  "@communityDownloadWithImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "communityDownloadImagesIncluded": "{count} imagens incluídas",
+  "@communityDownloadImagesIncluded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityDownloadTextOnly": "Apenas texto",
+  "communityDownloadTextOnlySubtitle": "Download mais rápido, sem imagens",
+  "communityTapToPreview": "Toque numa receita para pré-visualizar",
+  "communityImageCountLabel": "{count} imagens",
+  "@communityImageCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityYourRating": "A sua avaliação:",
+  "communityRateThis": "Avalie este livro de receitas:",
+  "communityDownloadingImages": "A descarregar imagens... {current}/{total}",
+  "@communityDownloadingImages": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityViewFullRecipe": "Ver receita completa",
+  "communityMoreIngredients": "+ {count} mais",
+  "@communityMoreIngredients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityStepCount": "{count} passos",
+  "@communityStepCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityNotes": "Notas",
+  "communityStatPrep": "Preparação",
+  "communityStatCook": "Cozinhar",
+  "communityStatTotal": "Total",
+  "communityStatServings": "Porções",
+  "communityStepDuration": "{minutes} min",
+  "@communityStepDuration": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "communityEditPublication": "Editar publicação",
+  "communityEditDescription": "Descrição",
+  "communityEditDescriptionHint": "Conte às pessoas sobre este livro de receitas...",
+  "communityEditTags": "Tags",
+  "communityEditSuccess": "Publicação atualizada!",
+  "communityEditFailed": "Falha ao atualizar a publicação",
+  "communityNoRatingsYet": "Ainda sem avaliações",
+  "communityStatusPublished": "Publicado",
+  "communityStatusUnderReview": "Em revisão",
+  "communityStatusRemoved": "Removido",
+  "communityUnderReview": "Este livro de receitas está a ser revisto pela nossa equipa de moderação.",
+  "communityPublishPreparing": "A preparar livro de receitas...",
+  "communityPublishUploading": "A enviar imagens ({current}/{total})",
+  "@communityPublishUploading": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishPublishing": "A publicar na comunidade...",
+  "communityPublishBackground": "Pode sair deste ecrã – a publicação continua em segundo plano.",
+  "communityPublishDone": "Publicado!",
+  "communityPublishImagesSkipped": "{count} imagens foram ignoradas (rejeitadas pela moderação)",
+  "@communityPublishImagesSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishRejected": "{count} rejeitadas pela moderação",
+  "@communityPublishRejected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityConfigurePublication": "Configurar publicação",
+  "communityPublishTitle": "Título",
+  "communityPublishTitleHint": "Título do livro de receitas",
+  "communityPublishDescription": "Descrição",
+  "communityPublishDescriptionHint": "Conte às pessoas sobre este livro de receitas...",
+  "communityPublishTags": "Tags",
+  "communityPublishIncludeImages": "Incluir imagens",
+  "communityPublishIncludeImagesSubtitle": "Enviar imagens de receitas com este livro. As imagens são verificadas para segurança.",
+  "communityPublishSummary": "Resumo",
+  "communityPublishRecipesSummary": "{count} receitas",
+  "@communityPublishRecipesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishImagesWillUpload": "As imagens serão enviadas",
+  "communityPublishTextOnlyNoImages": "Apenas texto (sem imagens)",
+  "communityPublishTryAgain": "Tentar novamente",
+  "communityPublishUploadInProgress": "Publicação em progresso... ({current}/{total} imagens)",
+  "@communityPublishUploadInProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
 }

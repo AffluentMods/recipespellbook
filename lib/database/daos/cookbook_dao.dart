@@ -1,10 +1,11 @@
 import 'package:drift/drift.dart';
 import '../database.dart';
 import '../tables/cookbooks.dart';
+import '../tables/recipes.dart';
 
 part 'cookbook_dao.g.dart';
 
-@DriftAccessor(tables: [Cookbooks])
+@DriftAccessor(tables: [Cookbooks, Recipes])
 class CookbookDao extends DatabaseAccessor<AppDatabase> with _$CookbookDaoMixin {
   CookbookDao(AppDatabase db) : super(db);
 
@@ -57,10 +58,17 @@ class CookbookDao extends DatabaseAccessor<AppDatabase> with _$CookbookDaoMixin 
     ));
   }
 
-  /// Delete a cookbook
-  /// Note: This does NOT delete recipes - they should be handled separately
-  Future<int> deleteCookbook(String id) {
-    return (delete(cookbooks)..where((c) => c.id.equals(id))).go();
+  /// Delete a cookbook and soft-delete all its recipes (move to trash).
+  Future<void> deleteCookbook(String id) async {
+    await transaction(() async {
+      // Soft-delete all recipes in this cookbook
+      await (update(recipes)..where((r) => r.cookbookId.equals(id)))
+          .write(RecipesCompanion(
+        deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ));
+      await (delete(cookbooks)..where((c) => c.id.equals(id))).go();
+    });
   }
 
   /// Get the default/first cookbook

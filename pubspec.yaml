@@ -24,7 +24,6 @@ dependencies:
   # State Management
   flutter_riverpod: ^2.6.1
   flutter_secure_storage: ^9.2.4
-  flutter_dotenv: ^5.2.1
   package_info_plus: ^9.0.0
 
   # Navigation
@@ -95,7 +94,6 @@ flutter:
   generate: true
 
   assets:
-    - .env
     - assets/data/common_ingredients.json
     - assets/images/
     - assets/images/default_recipes/

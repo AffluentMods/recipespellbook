@@ -74,7 +74,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
 
   // Accessors for DAOs
@@ -122,6 +122,42 @@ class AppDatabase extends _$AppDatabase {
               'ALTER TABLE $table ADD COLUMN deleted_at INTEGER',
             );
           }
+        }
+        if (from < 5) {
+          // Add indices for common query patterns
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_recipes_cookbook_deleted ON recipes (cookbook_id, deleted_at)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_recipes_favorite ON recipes (is_favorite) WHERE is_favorite = 1',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_recipes_updated ON recipes (updated_at)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_recipes_deleted_at ON recipes (deleted_at) WHERE deleted_at IS NOT NULL',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_ingredients_recipe ON ingredients (recipe_id)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_steps_recipe ON steps (recipe_id)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_recipe_tags_recipe ON recipe_tags (recipe_id)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_recipe_links_source ON recipe_links (source_recipe_id)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_recipe_links_linked ON recipe_links (linked_recipe_id)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_shopping_items_list ON shopping_list_items (list_id)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_meal_plans_date ON meal_plans (date)',
+          );
         }
       },
     );
@@ -178,30 +214,32 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// Delete ALL user-created data (for account switching "start fresh").
-  /// Preserves USDA nutrition reference data and default shopping categories.
+  /// Delete ALL user-created data (for "Delete Account" feature).
+  /// Preserves USDA nutrition reference data.
   /// Re-seeds default cookbook, categories, shopping list after clearing.
   Future<void> deleteAllUserData() async {
-    // Delete in dependency order (children first)
-    await delete(recipeLinks).go();
-    await delete(recipeTags).go();
-    await delete(ingredients).go();
-    await delete(steps).go();
-    await delete(mealPlans).go();
-    await delete(shoppingListItems).go();
-    await delete(shoppingLists).go();
-    await delete(recipes).go();
-    await delete(cookbooks).go();
-    await delete(categories).go();
-    await delete(tags).go();
-    await delete(customCourses).go();
-    await delete(customCategories).go();
-    await delete(shoppingCategories).go();
-    await delete(userIngredientMappings).go();
-    // Note: UsdaFoods + IngredientUsdaMappings are reference data — keep them
+    await transaction(() async {
+      // Delete in dependency order (children first)
+      await delete(recipeLinks).go();
+      await delete(recipeTags).go();
+      await delete(ingredients).go();
+      await delete(steps).go();
+      await delete(mealPlans).go();
+      await delete(shoppingListItems).go();
+      await delete(shoppingLists).go();
+      await delete(recipes).go();
+      await delete(cookbooks).go();
+      await delete(categories).go();
+      await delete(tags).go();
+      await delete(customCourses).go();
+      await delete(customCategories).go();
+      await delete(shoppingCategories).go();
+      await delete(userIngredientMappings).go();
+      // Note: UsdaFoods + IngredientUsdaMappings are reference data — keep them
 
-    // Re-seed defaults so the app isn't empty
-    await _seedDefaultData();
+      // Re-seed defaults so the app isn't empty
+      await _seedDefaultData();
+    });
   }
 
   Future<void> _seedDefaultData() async {
