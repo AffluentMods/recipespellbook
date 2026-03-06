@@ -821,7 +821,6 @@ class _BottomActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -1221,7 +1220,6 @@ class _IngredientRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isColumnar = ref.watch(settingsProvider).ingredientLayout == IngredientLayout.columnar;
     final rawAmt = ingredient.scaledAmount;

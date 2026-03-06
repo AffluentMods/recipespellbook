@@ -25,30 +25,11 @@ class AccountSection extends ConsumerStatefulWidget {
 }
 
 class _AccountSectionState extends ConsumerState<AccountSection> {
-  bool _dialogShown = false;
-
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-
-    // ── Account-switch detection (works whether signed in or out) ──
-    final authNotifier = ref.read(authProvider.notifier);
-    if (authNotifier.hasPendingAccountSwitch && !_dialogShown) {
-      _dialogShown = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _showAccountSwitchSheet(
-            context,
-            ref,
-            authNotifier.pendingAccountEmail ?? 'new account',
-          );
-        }
-      });
-    } else if (!authNotifier.hasPendingAccountSwitch) {
-      _dialogShown = false;
-    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,152 +54,6 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
     );
   }
 
-  /// Modern bottom sheet for account-switch confirmation.
-  void _showAccountSwitchSheet(BuildContext context, WidgetRef ref, String newEmail) {
-    final theme = Theme.of(context);
-
-    showModalBottomSheet(
-      context: context,
-      isDismissible: false,
-      enableDrag: false,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Handle bar
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Icon
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.swap_horiz_rounded,
-                  color: theme.colorScheme.onPrimaryContainer,
-                  size: 28,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Title
-              Text(
-                'Switch Account?',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Description
-              Text(
-                'You\'re signing in as a different account ($newEmail). '
-                'What would you like to do with your existing local recipes?',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-
-              // Option 1: Keep Recipes (primary)
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    ref.read(authProvider.notifier).confirmAccountSwitch(keepLocalData: true);
-                  },
-                  icon: const Icon(Icons.bookmark_added_outlined, size: 20),
-                  label: const Text('Keep My Recipes'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Helper text for keep
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  'Your local recipes stay on this device and sync with the new account.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.outline,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Option 2: Start Fresh
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    ref.read(authProvider.notifier).confirmAccountSwitch(keepLocalData: false);
-                  },
-                  icon: const Icon(Icons.restart_alt_rounded, size: 20),
-                  label: const Text('Start Fresh'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    foregroundColor: theme.colorScheme.error,
-                    side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.5)),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Helper text for fresh
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  'Clear all local data and start with a clean slate.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.outline,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Cancel link
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  ref.read(authProvider.notifier).cancelAccountSwitch();
-                },
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(color: theme.colorScheme.outline),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 // ════════════════════════════════════════════

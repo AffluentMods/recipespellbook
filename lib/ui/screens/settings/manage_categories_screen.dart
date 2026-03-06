@@ -35,7 +35,7 @@ class _ManageCategoriesScreenState extends ConsumerState<ManageCategoriesScreen>
       cats.add(_CategoryItem(id: c.id, name: c.name, emoji: c.emoji, isBuiltIn: true));
     }
     for (final c in custom) {
-      cats.add(_CategoryItem(id: c.id, name: c.name, emoji: c.emoji ?? '📁', isBuiltIn: false));
+      cats.add(_CategoryItem(id: c.id, name: c.name, emoji: c.emoji, isBuiltIn: false));
     }
     setState(() { _categories = cats; _isLoading = false; });
   }

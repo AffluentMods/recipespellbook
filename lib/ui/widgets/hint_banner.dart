@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/rpg/rpg_companion.dart';
-import '../../data/rpg/rpg_hints.dart';
 import '../../providers/companion_provider.dart';
 import '../../providers/hint_provider.dart';
 import '../../providers/rpg_provider.dart';

@@ -68,8 +68,8 @@ class RecipeImage extends StatelessWidget {
     this.width,
     this.height,
     this.fit = BoxFit.cover,
-  })  : memCacheWidth = 240,
-        memCacheHeight = 240;
+  })  : memCacheWidth = null,
+        memCacheHeight = 240; // Only set height — Flutter preserves aspect ratio
 
   /// Large image (e.g. detail header ~300px).
   const RecipeImage.large({
@@ -79,8 +79,8 @@ class RecipeImage extends StatelessWidget {
     this.width,
     this.height,
     this.fit = BoxFit.cover,
-  })  : memCacheWidth = 600,
-        memCacheHeight = 600;
+  })  : memCacheWidth = null,
+        memCacheHeight = 600; // Only set height — Flutter preserves aspect ratio
 
   @override
   Widget build(BuildContext context) {

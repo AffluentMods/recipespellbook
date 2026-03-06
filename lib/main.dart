@@ -174,8 +174,8 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     if (media.attachments != null && media.attachments!.isNotEmpty) {
       final imagePaths = <String>[];
       for (final a in media.attachments!) {
-        if (a != null && a.path != null && _isImagePath(a.path!)) {
-          imagePaths.add(a.path!);
+        if (a != null && _isImagePath(a.path)) {
+          imagePaths.add(a.path);
         }
       }
       if (imagePaths.isNotEmpty) {

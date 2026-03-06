@@ -9,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/imported_recipe.dart';
@@ -185,12 +184,6 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     AppSnackbar.success(context, message);
   }
 
-  void _navigateToEdit(ImportedRecipe recipe) {
-    if (!mounted) return;
-    Navigator.of(context).pop();
-    context.push('/cookbook/${widget.cookbookId}/new-recipe', extra: recipe.toImportData());
-  }
-
   // ========== URL IMPORT ==========
   Future<void> _importFromUrl() async {
     final l10n = AppLocalizations.of(context)!;
@@ -215,7 +208,6 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
   // ========== BARCODE / QR IMPORT ==========
   Future<void> _importFromBarcode() async {
-    final l10n = AppLocalizations.of(context)!;
 
     final result = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
@@ -289,14 +281,6 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   }
 
   // ========== PDF IMPORT ==========
-  Future<void> _importFromPdf() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
-    if (result == null || result.files.isEmpty) return;
-    final path = result.files.first.path;
-    if (path == null) return;
-    _processPdfFile(path);
-  }
-
   Future<void> _processPdfFile(String path) async {
     final l10n = AppLocalizations.of(context)!;
     _showLoading(l10n.readingImage);

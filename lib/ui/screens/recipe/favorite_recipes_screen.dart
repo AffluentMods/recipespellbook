@@ -4,13 +4,11 @@ import 'package:go_router/go_router.dart';
 import '../../../data/course_category_data.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../widgets/recipe_image.dart';
 
 /// Provider for favorite recipes
 final favoriteRecipesProvider = StreamProvider<List<Recipe>>((ref) {
-  final cookbookId = ref.watch(selectedCookbookIdProvider) ?? 'starter';
   final dao = ref.watch(recipeDaoProvider);
   return dao.watchFavoriteRecipes();
 });

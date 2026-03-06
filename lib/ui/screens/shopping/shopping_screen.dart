@@ -98,9 +98,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.watch(shoppingDaoProvider);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -1979,7 +1977,6 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final isDark = theme.brightness == Brightness.dark;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -2236,7 +2233,6 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
   /// Edit a recently-added item's name
   void _editRecentItem(int index, String currentName) {
     final editController = TextEditingController(text: currentName);
-    final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
     showDialog(

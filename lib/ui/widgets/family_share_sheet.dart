@@ -274,7 +274,6 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
   List<Widget> _buildMemberPicker(ThemeData theme) {
     final myId = _auth.currentUser?.id;
     final members = _familyInfo?.members.where((m) => m.userId != myId).toList() ?? [];
-    final alreadySharedIds = _existingShares.map((s) => s.sharedWithName).toSet();
 
     // Filter to members not yet shared with
     final unsharedMembers = members.where((m) {

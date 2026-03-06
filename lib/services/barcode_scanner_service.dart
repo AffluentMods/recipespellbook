@@ -171,7 +171,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   MobileScannerController? _controller;
   bool _isProcessing = false;
   String? _lastScannedBarcode;
-  ProductInfo? _scannedProduct;
   bool _torchEnabled = false;
 
   @override
@@ -219,7 +218,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
 
     if (mounted) {
       setState(() {
-        _scannedProduct = product;
         _isProcessing = false;
       });
 
@@ -245,7 +243,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
           Navigator.pop(ctx);
           setState(() {
             _lastScannedBarcode = null;
-            _scannedProduct = null;
           });
         },
       ),

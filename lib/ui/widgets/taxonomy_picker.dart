@@ -113,7 +113,7 @@ class _CoursePickerState extends ConsumerState<CoursePicker> {
       final customDao = ref.read(customTaxonomyDaoProvider);
       final custom = await customDao.getCustomCourseById(id);
       if (custom != null) {
-        if (mounted) setState(() => _resolvedItem = TaxonomyItem(id: custom.id, name: custom.name, emoji: custom.emoji ?? '🍽️', isCustom: true));
+        if (mounted) setState(() => _resolvedItem = TaxonomyItem(id: custom.id, name: custom.name, emoji: custom.emoji, isCustom: true));
         return;
       }
     } catch (_) {}
@@ -204,7 +204,7 @@ class _CategoryPickerState extends ConsumerState<CategoryPicker> {
         try {
           final custom = await customDao.getCustomCategoryById(id);
           if (custom != null) {
-            items.add(TaxonomyItem(id: custom.id, name: custom.name, emoji: custom.emoji ?? '🏷️', isCustom: true));
+            items.add(TaxonomyItem(id: custom.id, name: custom.name, emoji: custom.emoji, isCustom: true));
           } else {
             items.add(TaxonomyItem(id: id, name: id, emoji: '🏷️', isCustom: true));
           }

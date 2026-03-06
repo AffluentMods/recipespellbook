@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,11 +9,9 @@ import '../../../database/daos/tags_dao.dart';
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
-import '../../../utils/default_recipe_images.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/new_recipe_dialog.dart';
-import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
 import '../../../utils/responsive_utils.dart';
 
@@ -324,10 +321,10 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         sorted.sort((a, b) => b.title.toLowerCase().compareTo(a.title.toLowerCase()));
         break;
       case _SortMode.newest:
-        sorted.sort((a, b) => (b.createdAt ?? DateTime(1970)).compareTo(a.createdAt ?? DateTime(1970)));
+        sorted.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         break;
       case _SortMode.oldest:
-        sorted.sort((a, b) => (a.createdAt ?? DateTime(1970)).compareTo(b.createdAt ?? DateTime(1970)));
+        sorted.sort((a, b) => a.createdAt.compareTo(b.createdAt));
         break;
       case _SortMode.rating:
         sorted.sort((a, b) => (b.rating ?? 0).compareTo(a.rating ?? 0));

@@ -392,9 +392,9 @@ class NutritionCalculator {
             protein: per100g.protein * scale,
             fat: per100g.fat * scale,
             carbohydrates: per100g.carbs * scale,
-            fiber: (per100g.fiber ?? 0) * scale,
-            sugar: (per100g.sugar ?? 0) * scale,
-            sodium: (per100g.sodium ?? 0) * scale,
+            fiber: per100g.fiber * scale,
+            sugar: per100g.sugar * scale,
+            sodium: per100g.sodium * scale,
           );
           debugPrint('Local match for "${ingredient.name}" → "$matchedKey": ${grams.toStringAsFixed(0)}g → ${(nutrition.calories ?? 0).toStringAsFixed(0)} cal');
           return IngredientNutritionResult(

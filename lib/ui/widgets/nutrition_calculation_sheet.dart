@@ -1290,19 +1290,6 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
     );
   }
 
-  Widget _linkedNutritionRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
-        ],
-      ),
-    );
-  }
-
   Future<void> _showIngredientEditDialog(IngredientNutritionResult item) async {
     final usdaService = ref.read(usdaServiceProvider);
 

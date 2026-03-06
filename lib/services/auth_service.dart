@@ -142,7 +142,7 @@ class AuthService {
       final userJson = await _storage.read(key: _keyUser);
 
       if (jwt != null && userJson != null) {
-        final user = AuthUser.fromJson(jsonDecode(userJson));
+        final _ = AuthUser.fromJson(jsonDecode(userJson));
 
         // Validate the JWT is still good by calling the API
         final refreshed = await _refreshUser(jwt);
@@ -502,22 +502,18 @@ class AuthService {
     // so we can detect account switches on the next sign-in.
   }
 
-  // ── Account-switch detection ──
+  // ── Account tracking ──
 
-  /// Get the last user ID that was bound to this device's local data.
-  /// Returns null if no user has ever signed in on this device.
+  /// Get the last user ID that signed in on this device.
+  /// Used to detect account switches and manage per-account sync state.
   Future<String?> getLastBoundUserId() async {
     return await _storage.read(key: _keyLastBoundUserId);
   }
 
-  /// Save the user ID as the "owner" of the current local data.
+  /// Save the current user's ID. Persists across sign-outs so we can
+  /// detect account switches on the next sign-in.
   Future<void> saveLastBoundUserId(String userId) async {
     await _storage.write(key: _keyLastBoundUserId, value: userId);
-  }
-
-  /// Clear the last bound user ID (used when user chooses "start fresh").
-  Future<void> clearLastBoundUserId() async {
-    await _storage.delete(key: _keyLastBoundUserId);
   }
 
   String _friendlyError(dynamic e) {

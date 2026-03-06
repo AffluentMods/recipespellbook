@@ -103,7 +103,7 @@ class _CategoriesBrowseScreenState extends ConsumerState<CategoriesBrowseScreen>
             ..._customCourses.map((c) => _BrowseEntry(
               id: c.id,
               name: c.name,
-              emoji: c.emoji ?? '📁',
+              emoji: c.emoji,
             )),
           ];
           _sortEntries(allCourses, courseCounts);
@@ -118,7 +118,7 @@ class _CategoriesBrowseScreenState extends ConsumerState<CategoriesBrowseScreen>
             ..._customCategories.map((c) => _BrowseEntry(
               id: c.id,
               name: c.name,
-              emoji: c.emoji ?? '📁',
+              emoji: c.emoji,
             )),
           ];
           _sortEntries(allCategories, categoryCounts);

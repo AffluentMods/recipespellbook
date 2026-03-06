@@ -38,7 +38,7 @@ class _ManageCoursesScreenState extends ConsumerState<ManageCoursesScreen> {
     }
     // Add custom courses (editable) - use saved emoji
     for (final c in custom) {
-      courses.add(_CourseItem(id: c.id, name: c.name, emoji: c.emoji ?? '🍽️', isBuiltIn: false));
+      courses.add(_CourseItem(id: c.id, name: c.name, emoji: c.emoji, isBuiltIn: false));
     }
     setState(() { _courses = courses; _isLoading = false; });
   }

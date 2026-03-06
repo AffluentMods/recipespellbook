@@ -172,7 +172,6 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   List<Ingredient> _ingredients = [];
   List<Step> _steps = [];
   NutritionData? _nutrition;
-  List<Recipe> _linkedRecipes = [];
   Map<String, List<RecipeLinkInfo>> _ingredientLinksMap = {};
   bool _isLoading = true;
   double _scaleFactor = 1.0;
@@ -211,7 +210,6 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
 
     final ingredients = await dao.getIngredientsForRecipe(widget.recipeId);
     final steps = await dao.getStepsForRecipe(widget.recipeId);
-    final linkedRecipes = await dao.getLinkedRecipes(widget.recipeId);
     final ingredientLinksMap = await dao.getIngredientLinksMap(widget.recipeId);
 
     // Parse nutrition from nutritionJson field
@@ -230,7 +228,6 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
       _ingredients = ingredients;
       _steps = steps;
       _nutrition = nutrition;
-      _linkedRecipes = linkedRecipes;
       _ingredientLinksMap = ingredientLinksMap;
       _isLoading = false;
     });
@@ -634,7 +631,6 @@ class _ModernQuickActionsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final rpg = RpgText.of(l10n, nerdMode);
-    final theme = Theme.of(context);
 
     return Row(
       children: [
@@ -1355,7 +1351,7 @@ class _RecipeAppBar extends StatelessWidget {
                   tag: 'recipe_image_${recipe.id}',
                   child: isServer
                       ? _ServerImage(path: recipe.imagePath!)
-                      : Image.file(File(recipe.imagePath!), fit: BoxFit.cover, cacheWidth: 800, cacheHeight: 800),
+                      : Image.file(File(recipe.imagePath!), fit: BoxFit.cover, cacheHeight: 800),
                 ),
               )
             else if (defaultAsset != null)
@@ -1760,7 +1756,6 @@ class _InstructionStep extends StatelessWidget {
                       width: double.infinity,
                       height: 180,
                       fit: BoxFit.cover,
-                      cacheWidth: 600,
                       cacheHeight: 600,
                     ),
                   ),
@@ -1787,13 +1782,6 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
 }
 
 // ============ RECIPE LINK PICKER ============
-
-Widget _linkedPlaceholder(ThemeData theme) {
-  return Container(
-    color: theme.colorScheme.surfaceContainerHighest,
-    child: Icon(Icons.restaurant_menu, size: 14, color: theme.colorScheme.outline),
-  );
-}
 
 // ============ FULL-SCREEN IMAGE VIEWER ============
 

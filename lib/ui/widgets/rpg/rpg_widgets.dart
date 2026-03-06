@@ -230,7 +230,7 @@ class RpgXpBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  AppLocalizations.of(context)!.rpgLevelN(level!),
+                  AppLocalizations.of(context)!.rpgLevelN(level),
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.white,

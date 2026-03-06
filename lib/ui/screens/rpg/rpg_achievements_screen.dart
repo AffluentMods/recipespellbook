@@ -19,7 +19,6 @@ class RpgAchievementsScreen extends ConsumerStatefulWidget {
 class _RpgAchievementsScreenState extends ConsumerState<RpgAchievementsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  AchievementCategory? _selectedCategory;
 
   @override
   void initState() {

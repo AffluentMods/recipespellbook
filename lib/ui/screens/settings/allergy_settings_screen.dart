@@ -640,10 +640,6 @@ class _DisabledRecipeTile extends ConsumerWidget {
         final recipe = snapshot.data;
         final recipeName = recipe?.title ?? recipeId;
 
-        // Allergen names list
-        final allergenNames = dismissedAllergens
-            .map((a) => a.getLocalizedName(l10n))
-            .toList();
 
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

@@ -580,7 +580,6 @@ class _MealsList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
     // Group by meal type
     final grouped = <String, List<MealPlanWithRecipe>>{};
     for (final plan in plans) {
@@ -980,7 +979,6 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
   }
 
   void _addRecipeToMealPlan(Recipe recipe) async {
-    final l10n = AppLocalizations.of(context)!;
     final mealPlanDao = ref.read(mealPlanDaoProvider);
     final id = 'meal_${DateTime.now().millisecondsSinceEpoch}';
 

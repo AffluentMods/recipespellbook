@@ -53,7 +53,10 @@ class SyncService {
   static final instance = SyncService._();
 
   final _auth = AuthService.instance;
-  static const _lastSyncKey = 'sync_last_sync_at';
+  static const _lastSyncKeyPrefix = 'sync_last_sync_at';
+
+  /// Legacy key (pre-per-account). Used for migration.
+  static const _legacyLastSyncKey = 'sync_last_sync_at';
 
   AppDatabase? _db;
   bool _isSyncing = false;
@@ -63,22 +66,48 @@ class SyncService {
 
   bool get isSyncing => _isSyncing;
 
-  // ── Last Sync Tracking ──
+  // ── Last Sync Tracking (per-account) ──
 
-  Future<DateTime?> getLastSyncAt() async {
+  /// Get the sync key for a specific user, or the current user.
+  String _syncKeyForUser([String? userId]) {
+    final uid = userId ?? _auth.currentUser?.id;
+    if (uid != null) return '${_lastSyncKeyPrefix}_$uid';
+    return _legacyLastSyncKey; // Fallback if no user (shouldn't happen)
+  }
+
+  Future<DateTime?> getLastSyncAt([String? userId]) async {
     final prefs = await SharedPreferences.getInstance();
-    final iso = prefs.getString(_lastSyncKey);
+
+    final key = _syncKeyForUser(userId);
+    var iso = prefs.getString(key);
+
+    // Migrate from legacy single-key if per-user key doesn't exist
+    if (iso == null && userId == null && _auth.currentUser != null) {
+      iso = prefs.getString(_legacyLastSyncKey);
+      if (iso != null) {
+        // Migrate: save under per-user key and remove legacy
+        await prefs.setString(key, iso);
+        await prefs.remove(_legacyLastSyncKey);
+      }
+    }
+
     return iso != null ? DateTime.tryParse(iso) : null;
   }
 
   Future<void> _saveLastSyncAt(DateTime dt) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_lastSyncKey, dt.toUtc().toIso8601String());
+    await prefs.setString(
+      _syncKeyForUser(),
+      dt.toUtc().toIso8601String(),
+    );
   }
 
+  /// Clear sync timestamp for the current user (used on account switch).
   Future<void> clearLastSyncAt() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_lastSyncKey);
+    await prefs.remove(_syncKeyForUser());
+    // Also clean up legacy key if it exists
+    await prefs.remove(_legacyLastSyncKey);
   }
 
   // ════════════════════════════════════════════

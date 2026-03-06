@@ -175,9 +175,10 @@ class SyncNotifier extends StateNotifier<SyncState> {
     }
   }
 
-  /// Clear sync state (e.g. on sign-out).
-  Future<void> reset() async {
-    await _service.clearLastSyncAt();
+  /// Reset sync UI state (e.g. on sign-out).
+  /// Does NOT clear per-account sync timestamps — those are preserved
+  /// so switching back to the same account can do incremental sync.
+  void reset() {
     state = const SyncState.initial();
   }
 }

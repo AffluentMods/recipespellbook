@@ -258,7 +258,6 @@ class _DeletedRecipeCard extends StatelessWidget {
                     ? Image.file(
                   File(recipe.imagePath!),
                   fit: BoxFit.cover,
-                  cacheWidth: 128,
                   cacheHeight: 128,
                   errorBuilder: (_, __, ___) => Icon(
                     Icons.restaurant,

@@ -398,10 +398,10 @@ class HelpSupportScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
-      builder: (ctx) => StatefulBuilder(
+      builder: (ctx) {
+        bool isSending = false;
+        return StatefulBuilder(
         builder: (ctx, setDialogState) {
-          bool isSending = false;
-
           return AlertDialog(
             icon: Icon(Icons.lightbulb, color: theme.colorScheme.primary, size: 32),
             title: Text(l10n.sendSuggestion),
@@ -478,7 +478,8 @@ class HelpSupportScreen extends StatelessWidget {
             ],
           );
         },
-      ),
+      );
+      },
     );
   }
 
@@ -492,10 +493,10 @@ class HelpSupportScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
-      builder: (ctx) => StatefulBuilder(
+      builder: (ctx) {
+        bool isSending = false;
+        return StatefulBuilder(
         builder: (ctx, setDialogState) {
-          bool isSending = false;
-
           return AlertDialog(
             icon: Icon(Icons.bug_report, color: theme.colorScheme.error, size: 32),
             title: Text(l10n.reportBug),
@@ -584,7 +585,8 @@ class HelpSupportScreen extends StatelessWidget {
             ],
           );
         },
-      ),
+      );
+      },
     );
   }
 }

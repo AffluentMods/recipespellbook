@@ -82,7 +82,6 @@ class RpgLeaderboardScreen extends ConsumerStatefulWidget {
 class _RpgLeaderboardScreenState extends ConsumerState<RpgLeaderboardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  LeaderboardCategory _selectedCategory = LeaderboardCategory.level;
 
   @override
   void initState() {

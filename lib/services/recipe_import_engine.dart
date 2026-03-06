@@ -1034,8 +1034,7 @@ class RecipeImportEngine {
   static ImportedRecipe? _tryPinterest(Document document) {
     // Pinterest sometimes includes recipe schema in their page
     // Also check for the "original source" link which points to the real recipe
-    final canonicalUrl = document.querySelector('link[rel="canonical"]')?.attributes['href'];
-    final ogUrl = _getMetaContent(document, 'og:url');
+    // (canonicalUrl and ogUrl checked by JSON-LD/microdata path)
 
     // If Pinterest has recipe schema, it's already handled by JSON-LD/microdata
     // This fallback extracts from pin description
@@ -2984,7 +2983,7 @@ class RecipeImportEngine {
 
 // ========== SUPPORTING TYPES ==========
 
-enum _Section { unknown, ingredients, instructions, notes, description }
+enum _Section { unknown, ingredients, instructions, notes }
 
 enum _Platform { instagram, tiktok, pinterest, youtube, squarespace, generic }
 

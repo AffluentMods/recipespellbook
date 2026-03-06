@@ -593,40 +593,6 @@ class _CookbookGrid extends ConsumerWidget {
     }
   }
 
-  void _showRenameDialog(BuildContext context, WidgetRef ref, Cookbook cookbook) {
-    final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController(text: cookbook.name);
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.renameCookbook),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(labelText: l10n.recipeFieldTitle),
-          textCapitalization: TextCapitalization.words,
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
-          FilledButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                // Use proper Drift companion for update
-                ref.read(cookbookDaoProvider).updateCookbookName(
-                  cookbook.id,
-                  controller.text.trim(),
-                );
-                Navigator.pop(ctx);
-              }
-            },
-            child: Text(l10n.actionSave),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showDeleteConfirmation(BuildContext context, WidgetRef ref, Cookbook cookbook) {
     final l10n = AppLocalizations.of(context)!;
 
@@ -687,7 +653,7 @@ class _CookbookCard extends StatelessWidget {
                   cookbook.imagePath!.isNotEmpty &&
                   FileExistsCache.exists(cookbook.imagePath!)
                   ? Image.file(File(cookbook.imagePath!), fit: BoxFit.cover,
-                      cacheWidth: 400, cacheHeight: 400)
+                      cacheHeight: 400)
                   : const CookbookPlaceholderImage(height: double.infinity),
             ),
             // Gradient overlay

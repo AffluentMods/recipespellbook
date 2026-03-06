@@ -25,7 +25,6 @@ class TagPicker extends ConsumerStatefulWidget {
 
 class _TagPickerState extends ConsumerState<TagPicker> {
   late Set<String> _selectedTagIds;
-  bool _initialized = false;
 
   @override
   void initState() {
@@ -38,7 +37,7 @@ class _TagPickerState extends ConsumerState<TagPicker> {
     final tagsDao = ref.read(tagsDaoProvider);
     await tagsDao.seedDefaultTags();
     if (mounted) {
-      setState(() => _initialized = true);
+      setState(() {});
     }
   }
 

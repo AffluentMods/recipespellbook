@@ -11,12 +11,9 @@ import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/onboarding_service.dart';
-import '../../../utils/default_recipe_images.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/new_recipe_dialog.dart';
-import '../../widgets/onboarding_dialog.dart';
 import '../onboarding/book_intro_screen.dart';
-import '../onboarding/spellbook_opening_screen.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
 import '../../../data/rpg/rpg_companion.dart';
@@ -314,7 +311,6 @@ class _QuickRecipesWidget extends ConsumerWidget {
     final recipeDao = ref.watch(recipeDaoProvider);
     final mealPlanDao = ref.watch(mealPlanDaoProvider);
     final settings = ref.watch(settingsProvider);
-    final rpg = RpgText.of(l10n, settings.nerdMode);
 
     return FutureBuilder<List<_QuickRecipeItem>>(
       future: _loadItems(recipeDao, mealPlanDao, settings),
@@ -736,7 +732,7 @@ class _CoursesSectionState extends ConsumerState<_CoursesSection> {
     for (final c in _customCourses) {
       final count = courseCounts[c.id] ?? 0;
       if (count > 0) {
-        chips.add(_ChipEntry(id: c.id, name: c.name, emoji: c.emoji ?? '📁', count: count));
+        chips.add(_ChipEntry(id: c.id, name: c.name, emoji: c.emoji, count: count));
       }
     }
     chips.sort((a, b) => b.count.compareTo(a.count));
@@ -853,7 +849,7 @@ class _CategoriesSectionState extends ConsumerState<_CategoriesSection> {
     for (final c in _customCategories) {
       final count = categoryCounts[c.id] ?? 0;
       if (count > 0) {
-        chips.add(_ChipEntry(id: c.id, name: c.name, emoji: c.emoji ?? '📁', count: count));
+        chips.add(_ChipEntry(id: c.id, name: c.name, emoji: c.emoji, count: count));
       }
     }
     chips.sort((a, b) => b.count.compareTo(a.count));
@@ -1201,7 +1197,6 @@ class _CookbookDropdown extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
     final cookbooksAsync = ref.watch(cookbooksProvider);
     final theme = Theme.of(context);
 
@@ -1300,7 +1295,7 @@ class _CookbookDropdown extends ConsumerWidget {
                             cookbook.imagePath!.isNotEmpty &&
                             FileExistsCache.exists(cookbook.imagePath!)
                         ? Image.file(File(cookbook.imagePath!), fit: BoxFit.cover,
-                            cacheWidth: 80, cacheHeight: 80,
+                            cacheHeight: 80,
                             errorBuilder: (_, __, ___) => const CookbookPlaceholderImage())
                         : const CookbookPlaceholderImage(),
                   ),

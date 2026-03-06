@@ -196,8 +196,6 @@ class RpgBossScreen extends ConsumerStatefulWidget {
 class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
     with SingleTickerProviderStateMixin {
   late Enemy _currentEnemy;
-  int? _lastDamage;
-  bool _lastWasCrit = false;
   String? _bossAttackName;
   int? _lastBossDamage;
   bool _isBlocking = false;
@@ -258,8 +256,6 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
           return;
         }
         setState(() {
-          _lastDamage = result.damage;
-          _lastWasCrit = result.isCrit;
           _isBlocking = false;
           _damageNumbers.add(_DamageNumber(
             damage: result.damage,
@@ -283,8 +279,6 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
         }
         setState(() {
           _isBlocking = true;
-          _lastDamage = null;
-          _lastWasCrit = false;
         });
         break;
 
@@ -298,8 +292,6 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
         final newHp = ref.read(rpgProvider).profile.hp;
         setState(() {
           _lastHealAmount = newHp - oldHp;
-          _lastDamage = null;
-          _lastWasCrit = false;
           _isBlocking = false;
         });
         break;
@@ -429,7 +421,6 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
               Navigator.pop(ctx);
               setState(() {
                 _currentEnemy = _currentEnemy.copyWith(currentHp: _currentEnemy.maxHp);
-                _lastDamage = null;
                 _damageNumbers.clear();
               });
             },
@@ -440,7 +431,6 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
               Navigator.pop(ctx);
               setState(() {
                 _currentEnemy = _currentEnemy.copyWith(currentHp: _currentEnemy.maxHp);
-                _lastDamage = null;
                 _damageNumbers.clear();
               });
             },
@@ -504,7 +494,6 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
               setState(() {
                 // Reset the enemy for a new attempt
                 _currentEnemy = _currentEnemy.copyWith(currentHp: _currentEnemy.maxHp);
-                _lastDamage = null;
                 _lastBossDamage = null;
                 _bossAttackName = null;
                 _damageNumbers.clear();
@@ -526,7 +515,6 @@ class _RpgBossScreenState extends ConsumerState<RpgBossScreen>
     if (ref.read(rpgProvider).profile.level >= enemy.minLevel) {
       setState(() {
         _currentEnemy = enemy;
-        _lastDamage = null;
         _damageNumbers.clear();
         _bossAttackName = null;
         _lastBossDamage = null;
