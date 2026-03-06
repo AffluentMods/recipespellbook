@@ -362,7 +362,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
     final scopeLabel = switch (scope) { _ResetScope.local => 'local data', _ResetScope.cloud => 'cloud data', _ResetScope.all => 'all data and settings' };
-    showDialog(context: context, builder: (context) => AlertDialog(
+    showDialog<void>(context: context, builder: (context) => AlertDialog(
       icon: Icon(Icons.delete_forever, size: 48, color: Theme.of(context).colorScheme.error),
       title: Text(l10n.finalConfirmation),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -377,7 +377,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           return FilledButton(style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error), onPressed: ok ? () => _performReset(context, ref, l10n, scope) : null, child: Text(l10n.actionDelete));
         }),
       ],
-    ));
+    )).then((_) => controller.dispose());
   }
 
   Future<void> _performReset(BuildContext context, WidgetRef ref, AppLocalizations l10n, _ResetScope scope) async {

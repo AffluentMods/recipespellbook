@@ -2,7 +2,7 @@ import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import '../utils/platform_utils.dart';
 import 'ocr_stub.dart' if (dart.library.io) 'ocr_native.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:pdfx/pdfx.dart';
+import 'pdfx_stub.dart' if (dart.library.io) 'pdfx_native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 

@@ -1,7 +1,2 @@
-import 'package:drift/drift.dart';
-import 'package:drift_flutter/drift_flutter.dart';
-
-/// Unified database connection that works on all platforms:
-/// - Native (Android/iOS/Windows/macOS/Linux): SQLite via FFI
-/// - Web: WASM-compiled sqlite3 with IndexedDB persistence
-QueryExecutor openConnection() => driftDatabase(name: 'recipespellbook');
+// Conditional import: web by default, native when dart:io is available.
+export 'connection_web.dart' if (dart.library.io) 'connection_native.dart';
