@@ -6786,6 +6786,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get importGuideCategoryOtherApps => '他のレシピアプリ';
 
   @override
+  String get importGuideCategoryAi => 'AI Import';
+
+  @override
+  String get importGuideTagNew => 'New';
+
+  @override
   String get importGuideScreenshotNeeded => 'スクリーンショットが必要';
 
   @override
@@ -7077,37 +7083,40 @@ class AppLocalizationsJa extends AppLocalizations {
   String get importGuideTextStep4Desc => '解析されたレシピを確認し、調整して保存します。';
 
   @override
-  String get importGuidePaprikaTitle => 'Paprika Recipe Manager';
+  String get importGuideAiTitle => 'AI (ChatGPT, Claude, etc.)';
 
   @override
-  String get importGuidePaprikaSubtitle => 'Paprikaライブラリ全体を一括インポート';
+  String get importGuideAiSubtitle => 'Generate recipes with AI and import them instantly';
 
   @override
-  String get importGuidePaprikaStep1Title => 'Paprikaからエクスポート';
+  String get importGuideAiStep1Title => 'Open AI Import';
 
   @override
-  String get importGuidePaprikaStep1Desc => 'Paprikaで設定（歯車アイコン） > エクスポートに移動。「すべてのレシピをエクスポート」を選び、.paprikarecipesファイルとして保存。';
+  String get importGuideAiStep1Desc => 'Go to Home, tap + to add a recipe, choose Import, then tap the AI button.';
 
   @override
-  String get importGuidePaprikaStep2Title => 'ファイルをデバイスに送信';
+  String get importGuideAiStep2Title => 'Copy the prompt';
 
   @override
-  String get importGuidePaprikaStep2Desc => 'ファイルを自分にメールするか、iCloud/Google Driveに保存するか、AirDropで転送します。';
+  String get importGuideAiStep2Desc => 'Tap the copy prompt button. Then open your favorite AI — ChatGPT, Claude, Gemini, or any other — and paste the prompt.';
 
   @override
-  String get importGuidePaprikaStep3Title => 'Recipe Spellbookでインポート';
+  String get importGuideAiStep3Title => 'Copy the AI\'s response';
 
   @override
-  String get importGuidePaprikaStep3Desc => 'Recipe Spellbookを開き、設定 > データ > インポートに移動して.paprikarecipesファイルを選択。';
+  String get importGuideAiStep3Desc => 'The AI will generate a recipe in JSON format. Copy the entire response.';
 
   @override
-  String get importGuidePaprikaStep4Title => 'インポートを待つ';
+  String get importGuideAiStep4Title => 'Paste into Recipe Spellbook';
 
   @override
-  String get importGuidePaprikaStep4Desc => 'すべてのPaprikaレシピが材料、手順、メモ、写真、カテゴリを保持してインポートされます。';
+  String get importGuideAiStep4Desc => 'Go back to Recipe Spellbook, tap the paste button, then tap Preview to see the parsed recipe.';
 
   @override
-  String get importGuidePaprikaStep4Tip => '大規模なライブラリ（100以上のレシピ）は1分ほどかかる場合があります。インポート中もアプリは操作可能です。';
+  String get importGuideAiStep5Title => 'Preview & import';
+
+  @override
+  String get importGuideAiStep5Desc => 'Check that everything looks correct, then tap Import to save the recipe to your cookbook.';
 
   @override
   String get importGuideOtherAppsTitle => '他のレシピアプリ';
@@ -7174,6 +7183,152 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get importGuideDeviceTransferStep4Tip => '有料アカウントをお持ちですか？新しいデバイスでサインインするだけで自動的に同期されます。';
+
+  @override
+  String get faqTitle => 'FAQs';
+
+  @override
+  String get faqHeroTitle => 'Frequently asked questions';
+
+  @override
+  String get faqHeroSubtitle => 'Find answers and step-by-step guides for common features.';
+
+  @override
+  String get faqHowToGuides => 'How-to Guides';
+
+  @override
+  String get faqCommonQuestions => 'Common Questions';
+
+  @override
+  String get faqSeeHowTo => 'See how-to guide';
+
+  @override
+  String faqStepsCount(int count) {
+    return '$count steps';
+  }
+
+  @override
+  String get faqAddHeadersTitle => 'How to add headers';
+
+  @override
+  String get faqAddHeadersSubtitle => 'Organize your recipe ingredients and steps into sections';
+
+  @override
+  String get faqAddHeadersStep1Title => 'Open the recipe editor';
+
+  @override
+  String get faqAddHeadersStep1Desc => 'Open a recipe and tap the edit icon.';
+
+  @override
+  String get faqAddHeadersStep2Title => 'Add a header';
+
+  @override
+  String get faqAddHeadersStep2Desc => 'Tap the \'Add Header\' button to insert a section header.';
+
+  @override
+  String get faqAddHeadersStep3Title => 'Open the header menu';
+
+  @override
+  String get faqAddHeadersStep3Desc => 'Tap the three dots (⋮) next to the header for more options.';
+
+  @override
+  String get faqAddHeadersStep4Title => 'Reorder your headers';
+
+  @override
+  String get faqAddHeadersStep4Desc => 'Tap Sort Order to rearrange. Drag the ≡ handle to move headers up or down.';
+
+  @override
+  String get faqAddHeadersStep4Tip => 'You can drag headers by holding the ≡ (two lines) handle on the left side.';
+
+  @override
+  String get faqAddHeadersStep5Title => 'Save your changes';
+
+  @override
+  String get faqAddHeadersStep5Desc => 'Tap the save button to keep your new headers.';
+
+  @override
+  String get faqAddHeadersStep6Title => 'Done!';
+
+  @override
+  String get faqAddHeadersStep6Desc => 'Your recipe now has organized sections with headers.';
+
+  @override
+  String get faqAddSublinkedTitle => 'How to add sublinked recipes';
+
+  @override
+  String get faqAddSublinkedSubtitle => 'Link related recipes together for quick access';
+
+  @override
+  String get faqAddSublinkedStep1Title => 'Open the recipe editor';
+
+  @override
+  String get faqAddSublinkedStep1Desc => 'Open a recipe and tap the edit icon.';
+
+  @override
+  String get faqAddSublinkedStep2Title => 'Open the menu';
+
+  @override
+  String get faqAddSublinkedStep2Desc => 'Tap the three dots (⋮) in the edit screen.';
+
+  @override
+  String get faqAddSublinkedStep3Title => 'Tap Link Recipe';
+
+  @override
+  String get faqAddSublinkedStep3Desc => 'Select \'Link Recipe\' from the menu.';
+
+  @override
+  String get faqAddSublinkedStep4Title => 'Choose a recipe to link';
+
+  @override
+  String get faqAddSublinkedStep4Desc => 'Tap the link icon next to the recipe you want to connect (e.g., Pizza Dough).';
+
+  @override
+  String get faqAddSublinkedStep5Title => 'Save your changes';
+
+  @override
+  String get faqAddSublinkedStep5Desc => 'Tap the save icon to keep the linked recipe.';
+
+  @override
+  String get faqAddSublinkedStep6Title => 'Done!';
+
+  @override
+  String get faqAddSublinkedStep6Desc => 'The linked recipe now appears in your recipe, ready to tap and view.';
+
+  @override
+  String get faqWhatAreHeadersTitle => 'What are headers?';
+
+  @override
+  String get faqWhatAreHeadersSubtitle => 'Organize recipes into sections';
+
+  @override
+  String get faqWhatAreHeadersAnswer => 'Headers let you divide your recipe ingredients and steps into sections. For example, you could have separate sections for \'Sauce\', \'Dough\', and \'Topping\' in a pizza recipe. They make long recipes much easier to follow.';
+
+  @override
+  String get faqWhatAreSublinkedTitle => 'What are sublinked recipes?';
+
+  @override
+  String get faqWhatAreSublinkedSubtitle => 'Connect related recipes together';
+
+  @override
+  String get faqWhatAreSublinkedAnswer => 'Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it — no searching needed.';
+
+  @override
+  String get faqImportFailedTitle => 'Why did my import fail?';
+
+  @override
+  String get faqImportFailedSubtitle => 'Common reasons and fixes';
+
+  @override
+  String get faqImportFailedAnswer => 'Imports can fail for a few reasons:\n\n• The website may block automated access — try copying the recipe text and using Text Import instead.\n• The link may have expired or be private — make sure it’s a public link.\n• Some sites use formats that are harder to parse — try the AI import as an alternative.\n• Check your internet connection and try again.';
+
+  @override
+  String get faqDeviceTransferTitle => 'Can I import from other devices?';
+
+  @override
+  String get faqDeviceTransferSubtitle => 'Transfer recipes between phones and tablets';
+
+  @override
+  String get faqDeviceTransferAnswer => 'Yes! Use the Device Transfer feature in Settings > Data > Device Transfer. Generate a code on your old device and enter it on your new one. All your recipes, cookbooks, and images will be transferred.';
 
   @override
   String get themeFrost => 'フロスト';

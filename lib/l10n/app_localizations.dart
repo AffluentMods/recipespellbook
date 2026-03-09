@@ -12481,6 +12481,18 @@ abstract class AppLocalizations {
   /// **'Other Recipe Apps'**
   String get importGuideCategoryOtherApps;
 
+  /// No description provided for @importGuideCategoryAi.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Import'**
+  String get importGuideCategoryAi;
+
+  /// No description provided for @importGuideTagNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get importGuideTagNew;
+
   /// No description provided for @importGuideScreenshotNeeded.
   ///
   /// In en, this message translates to:
@@ -12556,25 +12568,25 @@ abstract class AppLocalizations {
   /// No description provided for @importGuideInstagramStep4Title.
   ///
   /// In en, this message translates to:
-  /// **'Review the extracted recipe'**
+  /// **'Find Recipe Spellbook'**
   String get importGuideInstagramStep4Title;
 
   /// No description provided for @importGuideInstagramStep4Desc.
   ///
   /// In en, this message translates to:
-  /// **'Our AI reads the caption, hashtags, and any text in the image to build your recipe. Check ingredients and steps, then save.'**
+  /// **'Tap More to see all your apps, then find and tap Recipe Spellbook.'**
   String get importGuideInstagramStep4Desc;
 
   /// No description provided for @importGuideInstagramStep5Title.
   ///
   /// In en, this message translates to:
-  /// **'Pick a cookbook & save'**
+  /// **'Preview & import'**
   String get importGuideInstagramStep5Title;
 
   /// No description provided for @importGuideInstagramStep5Desc.
   ///
   /// In en, this message translates to:
-  /// **'Choose which cookbook to save to, add any tags, and tap Save. Done!'**
+  /// **'Review the recipe details and tap Import to save it to your cookbook.'**
   String get importGuideInstagramStep5Desc;
 
   /// No description provided for @importGuideTiktokTitle.
@@ -12634,25 +12646,25 @@ abstract class AppLocalizations {
   /// No description provided for @importGuideTiktokStep4Title.
   ///
   /// In en, this message translates to:
-  /// **'Paste the link in Recipe Spellbook'**
+  /// **'Find Recipe Spellbook'**
   String get importGuideTiktokStep4Title;
 
   /// No description provided for @importGuideTiktokStep4Desc.
   ///
   /// In en, this message translates to:
-  /// **'Open Recipe Spellbook, tap +, choose \"From Website/Link\", and paste the TikTok URL.'**
+  /// **'Tap More to see all your apps, then find and tap Recipe Spellbook.'**
   String get importGuideTiktokStep4Desc;
 
   /// No description provided for @importGuideTiktokStep5Title.
   ///
   /// In en, this message translates to:
-  /// **'Review & save'**
+  /// **'Preview & import'**
   String get importGuideTiktokStep5Title;
 
   /// No description provided for @importGuideTiktokStep5Desc.
   ///
   /// In en, this message translates to:
-  /// **'The AI extracts the recipe from the video description and comments. Review and save to your cookbook.'**
+  /// **'Review the recipe details and tap Import to save it to your cookbook.'**
   String get importGuideTiktokStep5Desc;
 
   /// No description provided for @importGuideYoutubeTitle.
@@ -12712,13 +12724,13 @@ abstract class AppLocalizations {
   /// No description provided for @importGuideYoutubeStep4Title.
   ///
   /// In en, this message translates to:
-  /// **'Paste & import'**
+  /// **'Preview & import'**
   String get importGuideYoutubeStep4Title;
 
   /// No description provided for @importGuideYoutubeStep4Desc.
   ///
   /// In en, this message translates to:
-  /// **'In Recipe Spellbook, tap + > \"From Website/Link\" and paste. The AI reads the video description for ingredients and steps.'**
+  /// **'Review the extracted recipe and tap Import to save it to your cookbook.'**
   String get importGuideYoutubeStep4Desc;
 
   /// No description provided for @importGuidePinterestTitle.
@@ -12766,25 +12778,25 @@ abstract class AppLocalizations {
   /// No description provided for @importGuidePinterestStep3Title.
   ///
   /// In en, this message translates to:
-  /// **'Copy the website URL'**
+  /// **'Share to Recipe Spellbook'**
   String get importGuidePinterestStep3Title;
 
   /// No description provided for @importGuidePinterestStep3Desc.
   ///
   /// In en, this message translates to:
-  /// **'Once the recipe website opens in your browser, copy the URL from the address bar.'**
+  /// **'Tap the share button and select Recipe Spellbook from the app list.'**
   String get importGuidePinterestStep3Desc;
 
   /// No description provided for @importGuidePinterestStep4Title.
   ///
   /// In en, this message translates to:
-  /// **'Import in Recipe Spellbook'**
+  /// **'Preview & import'**
   String get importGuidePinterestStep4Title;
 
   /// No description provided for @importGuidePinterestStep4Desc.
   ///
   /// In en, this message translates to:
-  /// **'Tap + > \"From Website/Link\", paste the URL, and the recipe is extracted automatically.'**
+  /// **'Review the recipe details and tap Import to save it to your cookbook.'**
   String get importGuidePinterestStep4Desc;
 
   /// No description provided for @importGuideWebsiteTitle.
@@ -12826,37 +12838,37 @@ abstract class AppLocalizations {
   /// No description provided for @importGuideWebsiteStep3Title.
   ///
   /// In en, this message translates to:
-  /// **'Tap + in Recipe Spellbook'**
+  /// **'Tap the Share button'**
   String get importGuideWebsiteStep3Title;
 
   /// No description provided for @importGuideWebsiteStep3Desc.
   ///
   /// In en, this message translates to:
-  /// **'Open the app and tap the + button to start adding a new recipe.'**
+  /// **'Tap the browser\'s share or More button to see sharing options.'**
   String get importGuideWebsiteStep3Desc;
 
   /// No description provided for @importGuideWebsiteStep4Title.
   ///
   /// In en, this message translates to:
-  /// **'Choose \"From Website/Link\"'**
+  /// **'Choose Recipe Spellbook'**
   String get importGuideWebsiteStep4Title;
 
   /// No description provided for @importGuideWebsiteStep4Desc.
   ///
   /// In en, this message translates to:
-  /// **'Select the website import option and paste your copied URL.'**
+  /// **'Find and tap Recipe Spellbook in the app list.'**
   String get importGuideWebsiteStep4Desc;
 
   /// No description provided for @importGuideWebsiteStep5Title.
   ///
   /// In en, this message translates to:
-  /// **'Review & save'**
+  /// **'Preview & import'**
   String get importGuideWebsiteStep5Title;
 
   /// No description provided for @importGuideWebsiteStep5Desc.
   ///
   /// In en, this message translates to:
-  /// **'The recipe is extracted instantly — title, ingredients, steps, cook times, and even the photo. Review and save.'**
+  /// **'Review the extracted recipe and tap Import to save it to your cookbook.'**
   String get importGuideWebsiteStep5Desc;
 
   /// No description provided for @importGuideWebsiteStep5Tip.
@@ -12910,13 +12922,13 @@ abstract class AppLocalizations {
   /// No description provided for @importGuidePhotoStep3Title.
   ///
   /// In en, this message translates to:
-  /// **'AI scans the text'**
+  /// **'Select your image'**
   String get importGuidePhotoStep3Title;
 
   /// No description provided for @importGuidePhotoStep3Desc.
   ///
   /// In en, this message translates to:
-  /// **'OCR technology reads the text in your photo and AI intelligently separates the title, ingredients, and instructions.'**
+  /// **'Pick the recipe image from your gallery.'**
   String get importGuidePhotoStep3Desc;
 
   /// No description provided for @importGuidePhotoStep4Title.
@@ -13063,71 +13075,77 @@ abstract class AppLocalizations {
   /// **'Check the parsed recipe, make any adjustments, and save.'**
   String get importGuideTextStep4Desc;
 
-  /// No description provided for @importGuidePaprikaTitle.
+  /// No description provided for @importGuideAiTitle.
   ///
   /// In en, this message translates to:
-  /// **'Paprika Recipe Manager'**
-  String get importGuidePaprikaTitle;
+  /// **'AI (ChatGPT, Claude, etc.)'**
+  String get importGuideAiTitle;
 
-  /// No description provided for @importGuidePaprikaSubtitle.
+  /// No description provided for @importGuideAiSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Bulk import your entire Paprika library'**
-  String get importGuidePaprikaSubtitle;
+  /// **'Generate recipes with AI and import them instantly'**
+  String get importGuideAiSubtitle;
 
-  /// No description provided for @importGuidePaprikaStep1Title.
+  /// No description provided for @importGuideAiStep1Title.
   ///
   /// In en, this message translates to:
-  /// **'Export from Paprika'**
-  String get importGuidePaprikaStep1Title;
+  /// **'Open AI Import'**
+  String get importGuideAiStep1Title;
 
-  /// No description provided for @importGuidePaprikaStep1Desc.
+  /// No description provided for @importGuideAiStep1Desc.
   ///
   /// In en, this message translates to:
-  /// **'In Paprika, go to Settings (gear icon) > Export. Choose \"Export All Recipes\" and save as a .paprikarecipes file.'**
-  String get importGuidePaprikaStep1Desc;
+  /// **'Go to Home, tap + to add a recipe, choose Import, then tap the AI button.'**
+  String get importGuideAiStep1Desc;
 
-  /// No description provided for @importGuidePaprikaStep2Title.
+  /// No description provided for @importGuideAiStep2Title.
   ///
   /// In en, this message translates to:
-  /// **'Send the file to your device'**
-  String get importGuidePaprikaStep2Title;
+  /// **'Copy the prompt'**
+  String get importGuideAiStep2Title;
 
-  /// No description provided for @importGuidePaprikaStep2Desc.
+  /// No description provided for @importGuideAiStep2Desc.
   ///
   /// In en, this message translates to:
-  /// **'Email the file to yourself, save to iCloud/Google Drive, or use AirDrop to transfer it.'**
-  String get importGuidePaprikaStep2Desc;
+  /// **'Tap the copy prompt button. Then open your favorite AI — ChatGPT, Claude, Gemini, or any other — and paste the prompt.'**
+  String get importGuideAiStep2Desc;
 
-  /// No description provided for @importGuidePaprikaStep3Title.
+  /// No description provided for @importGuideAiStep3Title.
   ///
   /// In en, this message translates to:
-  /// **'Import in Recipe Spellbook'**
-  String get importGuidePaprikaStep3Title;
+  /// **'Copy the AI\'s response'**
+  String get importGuideAiStep3Title;
 
-  /// No description provided for @importGuidePaprikaStep3Desc.
+  /// No description provided for @importGuideAiStep3Desc.
   ///
   /// In en, this message translates to:
-  /// **'Open Recipe Spellbook, go to Settings > Data > Import and select the .paprikarecipes file.'**
-  String get importGuidePaprikaStep3Desc;
+  /// **'The AI will generate a recipe in JSON format. Copy the entire response.'**
+  String get importGuideAiStep3Desc;
 
-  /// No description provided for @importGuidePaprikaStep4Title.
+  /// No description provided for @importGuideAiStep4Title.
   ///
   /// In en, this message translates to:
-  /// **'Wait for import'**
-  String get importGuidePaprikaStep4Title;
+  /// **'Paste into Recipe Spellbook'**
+  String get importGuideAiStep4Title;
 
-  /// No description provided for @importGuidePaprikaStep4Desc.
+  /// No description provided for @importGuideAiStep4Desc.
   ///
   /// In en, this message translates to:
-  /// **'All your Paprika recipes are imported with ingredients, steps, notes, photos, and categories preserved.'**
-  String get importGuidePaprikaStep4Desc;
+  /// **'Go back to Recipe Spellbook, tap the paste button, then tap Preview to see the parsed recipe.'**
+  String get importGuideAiStep4Desc;
 
-  /// No description provided for @importGuidePaprikaStep4Tip.
+  /// No description provided for @importGuideAiStep5Title.
   ///
   /// In en, this message translates to:
-  /// **'Large libraries (100+ recipes) may take a minute. The app stays responsive while importing.'**
-  String get importGuidePaprikaStep4Tip;
+  /// **'Preview & import'**
+  String get importGuideAiStep5Title;
+
+  /// No description provided for @importGuideAiStep5Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Check that everything looks correct, then tap Import to save the recipe to your cookbook.'**
+  String get importGuideAiStep5Desc;
 
   /// No description provided for @importGuideOtherAppsTitle.
   ///
@@ -13260,6 +13278,294 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Have a paid account? Just sign in on the new device and everything syncs automatically.'**
   String get importGuideDeviceTransferStep4Tip;
+
+  /// No description provided for @faqTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'FAQs'**
+  String get faqTitle;
+
+  /// No description provided for @faqHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequently asked questions'**
+  String get faqHeroTitle;
+
+  /// No description provided for @faqHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find answers and step-by-step guides for common features.'**
+  String get faqHeroSubtitle;
+
+  /// No description provided for @faqHowToGuides.
+  ///
+  /// In en, this message translates to:
+  /// **'How-to Guides'**
+  String get faqHowToGuides;
+
+  /// No description provided for @faqCommonQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Common Questions'**
+  String get faqCommonQuestions;
+
+  /// No description provided for @faqSeeHowTo.
+  ///
+  /// In en, this message translates to:
+  /// **'See how-to guide'**
+  String get faqSeeHowTo;
+
+  /// No description provided for @faqStepsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} steps'**
+  String faqStepsCount(int count);
+
+  /// No description provided for @faqAddHeadersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to add headers'**
+  String get faqAddHeadersTitle;
+
+  /// No description provided for @faqAddHeadersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize your recipe ingredients and steps into sections'**
+  String get faqAddHeadersSubtitle;
+
+  /// No description provided for @faqAddHeadersStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the recipe editor'**
+  String get faqAddHeadersStep1Title;
+
+  /// No description provided for @faqAddHeadersStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a recipe and tap the edit icon.'**
+  String get faqAddHeadersStep1Desc;
+
+  /// No description provided for @faqAddHeadersStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a header'**
+  String get faqAddHeadersStep2Title;
+
+  /// No description provided for @faqAddHeadersStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the \'Add Header\' button to insert a section header.'**
+  String get faqAddHeadersStep2Desc;
+
+  /// No description provided for @faqAddHeadersStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the header menu'**
+  String get faqAddHeadersStep3Title;
+
+  /// No description provided for @faqAddHeadersStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the three dots (⋮) next to the header for more options.'**
+  String get faqAddHeadersStep3Desc;
+
+  /// No description provided for @faqAddHeadersStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder your headers'**
+  String get faqAddHeadersStep4Title;
+
+  /// No description provided for @faqAddHeadersStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Sort Order to rearrange. Drag the ≡ handle to move headers up or down.'**
+  String get faqAddHeadersStep4Desc;
+
+  /// No description provided for @faqAddHeadersStep4Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'You can drag headers by holding the ≡ (two lines) handle on the left side.'**
+  String get faqAddHeadersStep4Tip;
+
+  /// No description provided for @faqAddHeadersStep5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your changes'**
+  String get faqAddHeadersStep5Title;
+
+  /// No description provided for @faqAddHeadersStep5Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the save button to keep your new headers.'**
+  String get faqAddHeadersStep5Desc;
+
+  /// No description provided for @faqAddHeadersStep6Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Done!'**
+  String get faqAddHeadersStep6Title;
+
+  /// No description provided for @faqAddHeadersStep6Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your recipe now has organized sections with headers.'**
+  String get faqAddHeadersStep6Desc;
+
+  /// No description provided for @faqAddSublinkedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to add sublinked recipes'**
+  String get faqAddSublinkedTitle;
+
+  /// No description provided for @faqAddSublinkedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Link related recipes together for quick access'**
+  String get faqAddSublinkedSubtitle;
+
+  /// No description provided for @faqAddSublinkedStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the recipe editor'**
+  String get faqAddSublinkedStep1Title;
+
+  /// No description provided for @faqAddSublinkedStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a recipe and tap the edit icon.'**
+  String get faqAddSublinkedStep1Desc;
+
+  /// No description provided for @faqAddSublinkedStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the menu'**
+  String get faqAddSublinkedStep2Title;
+
+  /// No description provided for @faqAddSublinkedStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the three dots (⋮) in the edit screen.'**
+  String get faqAddSublinkedStep2Desc;
+
+  /// No description provided for @faqAddSublinkedStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Link Recipe'**
+  String get faqAddSublinkedStep3Title;
+
+  /// No description provided for @faqAddSublinkedStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Select \'Link Recipe\' from the menu.'**
+  String get faqAddSublinkedStep3Desc;
+
+  /// No description provided for @faqAddSublinkedStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a recipe to link'**
+  String get faqAddSublinkedStep4Title;
+
+  /// No description provided for @faqAddSublinkedStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the link icon next to the recipe you want to connect (e.g., Pizza Dough).'**
+  String get faqAddSublinkedStep4Desc;
+
+  /// No description provided for @faqAddSublinkedStep5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your changes'**
+  String get faqAddSublinkedStep5Title;
+
+  /// No description provided for @faqAddSublinkedStep5Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the save icon to keep the linked recipe.'**
+  String get faqAddSublinkedStep5Desc;
+
+  /// No description provided for @faqAddSublinkedStep6Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Done!'**
+  String get faqAddSublinkedStep6Title;
+
+  /// No description provided for @faqAddSublinkedStep6Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'The linked recipe now appears in your recipe, ready to tap and view.'**
+  String get faqAddSublinkedStep6Desc;
+
+  /// No description provided for @faqWhatAreHeadersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What are headers?'**
+  String get faqWhatAreHeadersTitle;
+
+  /// No description provided for @faqWhatAreHeadersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize recipes into sections'**
+  String get faqWhatAreHeadersSubtitle;
+
+  /// No description provided for @faqWhatAreHeadersAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Headers let you divide your recipe ingredients and steps into sections. For example, you could have separate sections for \'Sauce\', \'Dough\', and \'Topping\' in a pizza recipe. They make long recipes much easier to follow.'**
+  String get faqWhatAreHeadersAnswer;
+
+  /// No description provided for @faqWhatAreSublinkedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What are sublinked recipes?'**
+  String get faqWhatAreSublinkedTitle;
+
+  /// No description provided for @faqWhatAreSublinkedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect related recipes together'**
+  String get faqWhatAreSublinkedSubtitle;
+
+  /// No description provided for @faqWhatAreSublinkedAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it — no searching needed.'**
+  String get faqWhatAreSublinkedAnswer;
+
+  /// No description provided for @faqImportFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why did my import fail?'**
+  String get faqImportFailedTitle;
+
+  /// No description provided for @faqImportFailedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Common reasons and fixes'**
+  String get faqImportFailedSubtitle;
+
+  /// No description provided for @faqImportFailedAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Imports can fail for a few reasons:\n\n• The website may block automated access — try copying the recipe text and using Text Import instead.\n• The link may have expired or be private — make sure it’s a public link.\n• Some sites use formats that are harder to parse — try the AI import as an alternative.\n• Check your internet connection and try again.'**
+  String get faqImportFailedAnswer;
+
+  /// No description provided for @faqDeviceTransferTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Can I import from other devices?'**
+  String get faqDeviceTransferTitle;
+
+  /// No description provided for @faqDeviceTransferSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer recipes between phones and tablets'**
+  String get faqDeviceTransferSubtitle;
+
+  /// No description provided for @faqDeviceTransferAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes! Use the Device Transfer feature in Settings > Data > Device Transfer. Generate a code on your old device and enter it on your new one. All your recipes, cookbooks, and images will be transferred.'**
+  String get faqDeviceTransferAnswer;
 
   /// No description provided for @themeFrost.
   ///

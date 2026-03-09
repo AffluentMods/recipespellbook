@@ -14,6 +14,7 @@ import '../../services/auth_service.dart';
 import '../../services/feedback_service.dart';
 import '../../services/revenuecat_service.dart';
 import '../../services/sync_service.dart';
+import '../../ui/screens/import/faq_screen.dart';
 import '../../ui/screens/import/import_guides_screen.dart';
 import 'app_snackbar.dart';
 
@@ -83,6 +84,17 @@ class AppMenuDrawer extends ConsumerWidget {
                       Navigator.pop(context);
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const ImportGuidesScreen()),
+                      );
+                    },
+                  ),
+                  _DrawerItem(
+                    icon: Icons.help_outline_rounded,
+                    iconColor: const Color(0xFF8B5CF6),
+                    label: l10n.faqTitle,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const FaqScreen()),
                       );
                     },
                   ),
@@ -350,6 +362,15 @@ class HelpSupportScreen extends StatelessWidget {
             subtitle: l10n.stepByStepGuides,
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ImportGuidesScreen()));
+            },
+          ),
+          const SizedBox(height: 10),
+          _SupportCard(
+            icon: Icons.help_outline_rounded, iconColor: const Color(0xFF8B5CF6),
+            title: l10n.faqTitle,
+            subtitle: l10n.faqHeroSubtitle,
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const FaqScreen()));
             },
           ),
           const SizedBox(height: 10),

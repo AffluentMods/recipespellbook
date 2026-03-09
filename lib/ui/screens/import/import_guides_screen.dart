@@ -61,6 +61,77 @@ class ImportGuidesScreen extends StatelessWidget {
 
   List<_GuideCategory> _buildCategories(AppLocalizations l10n) {
     return [
+      // ── AI IMPORT ──
+      _GuideCategory(
+        title: l10n.importGuideCategoryAi,
+        icon: Icons.auto_awesome,
+        guides: [
+          _ImportGuide(
+            id: 'ai',
+            icon: Icons.auto_awesome,
+            color: const Color(0xFF7C3AED),
+            title: l10n.importGuideAiTitle,
+            subtitle: l10n.importGuideAiSubtitle,
+            tag: l10n.importGuideTagNew,
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime1Min,
+            webSlug: 'ai',
+            steps: [
+              _GuideStep(
+                title: l10n.importGuideAiStep1Title,
+                description: l10n.importGuideAiStep1Desc,
+                icon: Icons.add_circle_outline,
+                asset: const _StepAsset(
+                  type: _AssetType.screenshot,
+                  description: 'Home > Add Recipe > Import > AI button highlighted',
+                  filename: 'ai_import.jpg',
+                ),
+              ),
+              _GuideStep(
+                title: l10n.importGuideAiStep2Title,
+                description: l10n.importGuideAiStep2Desc,
+                icon: Icons.content_copy,
+                asset: const _StepAsset(
+                  type: _AssetType.screenshot,
+                  description: 'Copy prompt button highlighted',
+                  filename: 'ai_copy_prompt.jpg',
+                ),
+              ),
+              _GuideStep(
+                title: l10n.importGuideAiStep3Title,
+                description: l10n.importGuideAiStep3Desc,
+                icon: Icons.smart_toy,
+                asset: const _StepAsset(
+                  type: _AssetType.screenshot,
+                  description: 'AI response with JSON recipe, copy button visible',
+                  filename: 'ai_copy_output.jpg',
+                ),
+              ),
+              _GuideStep(
+                title: l10n.importGuideAiStep4Title,
+                description: l10n.importGuideAiStep4Desc,
+                icon: Icons.paste,
+                asset: const _StepAsset(
+                  type: _AssetType.screenshot,
+                  description: 'Paste button and preview button in Recipe Spellbook',
+                  filename: 'ai_paste_output.jpg',
+                ),
+              ),
+              _GuideStep(
+                title: l10n.importGuideAiStep5Title,
+                description: l10n.importGuideAiStep5Desc,
+                icon: Icons.check_circle_outline,
+                asset: const _StepAsset(
+                  type: _AssetType.screenshot,
+                  description: 'Import preview showing parsed AI recipe ready to save',
+                  filename: 'ai_import_preview.jpg',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+
       // ── SOCIAL MEDIA ──
       _GuideCategory(
         title: l10n.importGuideCategorySocial,
@@ -83,8 +154,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.search,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Instagram Reel showing a recipe video with the share button visible',
-                  filename: 'ig_recipe_reel.png',
+                  description: 'Instagram Reel showing a recipe video',
+                  filename: 'ig_recipe_reel.jpg',
                 ),
               ),
               _GuideStep(
@@ -93,8 +164,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.send,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Instagram share button highlighted/circled on a recipe post',
-                  filename: 'ig_share_button.png',
+                  description: 'Instagram share button circled',
+                  filename: 'ig_share_buton.jpg', // actual filename has typo
                 ),
               ),
               _GuideStep(
@@ -103,29 +174,29 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.apps,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'iOS/Android share sheet with Recipe Spellbook icon visible in the app row',
-                  filename: 'ig_share_sheet.png',
+                  description: 'Share sheet with app options',
+                  filename: 'ig_share_sheet.jpg',
                 ),
                 tip: l10n.importGuideInstagramStep3Tip,
               ),
               _GuideStep(
                 title: l10n.importGuideInstagramStep4Title,
                 description: l10n.importGuideInstagramStep4Desc,
-                icon: Icons.auto_awesome,
+                icon: Icons.more_horiz,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Recipe Spellbook import preview screen showing an extracted recipe from Instagram with ingredients and steps populated',
-                  filename: 'ig_import_preview.png',
+                  description: 'Full app list with Recipe Spellbook circled',
+                  filename: 'final_share.jpg',
                 ),
               ),
               _GuideStep(
                 title: l10n.importGuideInstagramStep5Title,
                 description: l10n.importGuideInstagramStep5Desc,
-                icon: Icons.bookmark_add,
+                icon: Icons.check_circle_outline,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Save recipe dialog showing cookbook picker dropdown and save button',
-                  filename: 'ig_save_dialog.png',
+                  description: 'Import preview showing recipe ready to import',
+                  filename: 'import_preview.jpg',
                 ),
               ),
             ],
@@ -147,8 +218,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.search,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'TikTok video of someone cooking with the share arrow visible on the right side',
-                  filename: 'tt_recipe_video.png',
+                  description: 'TikTok recipe video with share arrow visible',
+                  filename: 'tt_recipe_video.jpg',
                 ),
               ),
               _GuideStep(
@@ -157,8 +228,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.arrow_forward,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'TikTok share arrow button highlighted on the right sidebar',
-                  filename: 'tt_share_arrow.png',
+                  description: 'TikTok share arrow highlighted',
+                  filename: 'tt_share_arrow.jpg',
                 ),
               ),
               _GuideStep(
@@ -167,19 +238,19 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.link,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'TikTok share menu showing Copy Link button and other share options',
-                  filename: 'tt_copy_link.png',
+                  description: 'TikTok share menu with Copy Link',
+                  filename: 'tt_copy_link.jpg',
                 ),
                 tip: l10n.importGuideTiktokStep3Tip,
               ),
               _GuideStep(
                 title: l10n.importGuideTiktokStep4Title,
                 description: l10n.importGuideTiktokStep4Desc,
-                icon: Icons.paste,
+                icon: Icons.more_horiz,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Recipe Spellbook URL input field with a TikTok link pasted',
-                  filename: 'tt_paste_url.png',
+                  description: 'Full app list with Recipe Spellbook circled',
+                  filename: 'final_share.jpg',
                 ),
               ),
               _GuideStep(
@@ -188,8 +259,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.check_circle_outline,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Import preview showing extracted TikTok recipe with title, ingredients, and steps',
-                  filename: 'tt_import_preview.png',
+                  description: 'Import preview showing recipe ready to import',
+                  filename: 'import_preview.jpg',
                 ),
               ),
             ],
@@ -210,8 +281,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.ondemand_video,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'YouTube video player showing a recipe/cooking video with the share button visible below',
-                  filename: 'yt_recipe_video.png',
+                  description: 'YouTube recipe video with share button visible',
+                  filename: 'yt_recipe_video.jpg',
                 ),
               ),
               _GuideStep(
@@ -220,8 +291,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.share,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'YouTube share button highlighted below the video, above comments',
-                  filename: 'yt_share_button.png',
+                  description: 'YouTube share button highlighted',
+                  filename: 'yt_share_button.jpg',
                 ),
               ),
               _GuideStep(
@@ -230,19 +301,19 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.content_copy,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'YouTube share options showing Copy Link and app sharing options',
-                  filename: 'yt_copy_link.png',
+                  description: 'YouTube share options with Copy Link',
+                  filename: 'yt_copy_link.jpg',
                 ),
                 tip: l10n.importGuideYoutubeStep3Tip,
               ),
               _GuideStep(
                 title: l10n.importGuideYoutubeStep4Title,
                 description: l10n.importGuideYoutubeStep4Desc,
-                icon: Icons.auto_awesome,
+                icon: Icons.check_circle_outline,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Recipe Spellbook import preview from a YouTube video with recipe extracted',
-                  filename: 'yt_import_preview.png',
+                  description: 'Import preview showing recipe ready to import',
+                  filename: 'import_preview.jpg',
                 ),
               ),
             ],
@@ -263,8 +334,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.open_in_new,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Pinterest pin showing a recipe with the visit/source button visible',
-                  filename: 'pin_recipe_pin.png',
+                  description: 'Pinterest pin showing a recipe',
+                  filename: 'pin_recipe_pin.jpg',
                 ),
               ),
               _GuideStep(
@@ -273,29 +344,29 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.link,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Pinterest pin detail showing the source URL/website link highlighted',
-                  filename: 'pin_source_link.png',
+                  description: 'Pinterest source link highlighted',
+                  filename: 'pin_source_link.jpg',
                 ),
                 tip: l10n.importGuidePinterestStep2Tip,
               ),
               _GuideStep(
                 title: l10n.importGuidePinterestStep3Title,
                 description: l10n.importGuidePinterestStep3Desc,
-                icon: Icons.content_copy,
+                icon: Icons.share,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Browser address bar showing a recipe website URL being copied',
-                  filename: 'pin_copy_url.png',
+                  description: 'Share via dialog with Recipe Spellbook option',
+                  filename: 'pin_share_via.jpg',
                 ),
               ),
               _GuideStep(
                 title: l10n.importGuidePinterestStep4Title,
                 description: l10n.importGuidePinterestStep4Desc,
-                icon: Icons.download_rounded,
+                icon: Icons.check_circle_outline,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Recipe Spellbook import preview from a Pinterest-sourced recipe',
-                  filename: 'pin_import_preview.png',
+                  description: 'Import preview showing recipe ready to import',
+                  filename: 'import_preview.jpg',
                 ),
               ),
             ],
@@ -325,8 +396,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.travel_explore,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'A recipe website (e.g. AllRecipes) showing a recipe page with the URL visible in the browser bar',
-                  filename: 'web_recipe_page.png',
+                  description: 'Recipe website page',
+                  filename: 'web_recipe_page.jpg',
                 ),
               ),
               _GuideStep(
@@ -335,28 +406,28 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.content_copy,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Browser address bar selected with the recipe URL highlighted and copy option showing',
-                  filename: 'web_copy_url.png',
+                  description: 'Copy URL from browser',
+                  filename: 'web_copy_url.jpg',
                 ),
               ),
               _GuideStep(
                 title: l10n.importGuideWebsiteStep3Title,
                 description: l10n.importGuideWebsiteStep3Desc,
-                icon: Icons.add_circle_outline,
+                icon: Icons.more_horiz,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Recipe Spellbook home screen with the + FAB button highlighted',
-                  filename: 'web_add_button.png',
+                  description: 'Browser More button to share',
+                  filename: 'web_more_button.jpg',
                 ),
               ),
               _GuideStep(
                 title: l10n.importGuideWebsiteStep4Title,
                 description: l10n.importGuideWebsiteStep4Desc,
-                icon: Icons.paste,
+                icon: Icons.apps,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Recipe Spellbook add recipe menu showing "From Website/Link" option and URL paste field',
-                  filename: 'web_paste_field.png',
+                  description: 'Full app list with Recipe Spellbook circled',
+                  filename: 'final_share.jpg',
                 ),
               ),
               _GuideStep(
@@ -365,8 +436,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.check_circle_outline,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Import preview showing a fully extracted recipe with image, ingredients list, steps, and prep/cook times',
-                  filename: 'web_import_preview.png',
+                  description: 'Import preview showing recipe ready to import',
+                  filename: 'import_preview.jpg',
                 ),
                 tip: l10n.importGuideWebsiteStep5Tip,
               ),
@@ -396,8 +467,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.camera_alt,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Camera viewfinder pointed at an open cookbook page showing a recipe, with good lighting and the text clearly visible',
-                  filename: 'photo_capture.png',
+                  description: 'Camera capturing a recipe from a cookbook',
+                  filename: 'photo_capture.jpg',
                 ),
                 tip: l10n.importGuidePhotoStep1Tip,
               ),
@@ -407,18 +478,18 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.add_photo_alternate,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Recipe Spellbook add menu showing "From Photo" option, then the photo picker/camera prompt',
-                  filename: 'photo_select.png',
+                  description: 'Photo picker showing gallery and camera options',
+                  filename: 'photo_select.jpg',
                 ),
               ),
               _GuideStep(
                 title: l10n.importGuidePhotoStep3Title,
                 description: l10n.importGuidePhotoStep3Desc,
-                icon: Icons.document_scanner,
+                icon: Icons.photo_library,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Loading/processing screen showing "Scanning recipe..." with a progress indicator',
-                  filename: 'photo_scanning.png',
+                  description: 'Selecting an image from gallery',
+                  filename: 'photo_select_image.jpg',
                 ),
               ),
               _GuideStep(
@@ -427,8 +498,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.edit_note,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Import preview from a photo scan with ingredients and steps, showing editable text fields',
-                  filename: 'photo_review.png',
+                  description: 'Import preview from photo scan',
+                  filename: 'photo_review.jpg',
                 ),
                 tip: l10n.importGuidePhotoStep4Tip,
               ),
@@ -448,41 +519,21 @@ class ImportGuidesScreen extends StatelessWidget {
                 title: l10n.importGuidePdfStep1Title,
                 description: l10n.importGuidePdfStep1Desc,
                 icon: Icons.description,
-                asset: const _StepAsset(
-                  type: _AssetType.screenshot,
-                  description: 'Files app or email showing a recipe PDF file ready to be selected',
-                  filename: 'pdf_file_ready.png',
-                ),
               ),
               _GuideStep(
                 title: l10n.importGuidePdfStep2Title,
                 description: l10n.importGuidePdfStep2Desc,
                 icon: Icons.file_open,
-                asset: const _StepAsset(
-                  type: _AssetType.screenshot,
-                  description: 'File picker showing PDF files with one selected',
-                  filename: 'pdf_file_picker.png',
-                ),
               ),
               _GuideStep(
                 title: l10n.importGuidePdfStep3Title,
                 description: l10n.importGuidePdfStep3Desc,
                 icon: Icons.checklist,
-                asset: const _StepAsset(
-                  type: _AssetType.screenshot,
-                  description: 'Page selector showing thumbnail previews of PDF pages with recipe pages highlighted',
-                  filename: 'pdf_page_select.png',
-                ),
               ),
               _GuideStep(
                 title: l10n.importGuidePdfStep4Title,
                 description: l10n.importGuidePdfStep4Desc,
                 icon: Icons.check_circle_outline,
-                asset: const _StepAsset(
-                  type: _AssetType.screenshot,
-                  description: 'Import preview showing recipe extracted from PDF with all fields populated',
-                  filename: 'pdf_import_preview.png',
-                ),
               ),
             ],
           ),
@@ -502,8 +553,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.content_copy,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Messages/email app with recipe text selected and "Copy" button visible',
-                  filename: 'text_copy_source.png',
+                  description: 'Copying recipe text from a message or email',
+                  filename: 'text_copy_source.jpg',
                 ),
               ),
               _GuideStep(
@@ -512,8 +563,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.add_circle_outline,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Add recipe menu with "From Text" option highlighted',
-                  filename: 'text_add_menu.png',
+                  description: 'Add recipe menu with From Text option',
+                  filename: 'text_add_menu.jpg',
                 ),
               ),
               _GuideStep(
@@ -522,8 +573,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.paste,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Text import screen with recipe text pasted in the input field and an "Import" button below',
-                  filename: 'text_paste_field.png',
+                  description: 'Text paste field with recipe text',
+                  filename: 'text_paste_field.jpg',
                 ),
                 tip: l10n.importGuideTextStep3Tip,
               ),
@@ -533,8 +584,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.check_circle_outline,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Import preview from pasted text showing properly parsed ingredients and steps',
-                  filename: 'text_import_preview.png',
+                  description: 'Import preview from pasted text',
+                  filename: 'text_import_preview.jpg',
                 ),
               ),
             ],
@@ -547,59 +598,6 @@ class ImportGuidesScreen extends StatelessWidget {
         title: l10n.importGuideCategoryOtherApps,
         icon: Icons.swap_horiz_rounded,
         guides: [
-          _ImportGuide(
-            id: 'paprika',
-            icon: Icons.swap_horiz_rounded,
-            color: const Color(0xFFFF9800),
-            title: l10n.importGuidePaprikaTitle,
-            subtitle: l10n.importGuidePaprikaSubtitle,
-            difficulty: l10n.importGuideDifficultyMedium,
-            timeEstimate: l10n.importGuideTime2To5Min,
-            webSlug: 'paprika',
-            steps: [
-              _GuideStep(
-                title: l10n.importGuidePaprikaStep1Title,
-                description: l10n.importGuidePaprikaStep1Desc,
-                icon: Icons.file_download,
-                asset: const _StepAsset(
-                  type: _AssetType.screenshot,
-                  description: 'Paprika app settings screen showing the Export option, then the export dialog',
-                  filename: 'paprika_export.png',
-                ),
-              ),
-              _GuideStep(
-                title: l10n.importGuidePaprikaStep2Title,
-                description: l10n.importGuidePaprikaStep2Desc,
-                icon: Icons.send,
-                asset: const _StepAsset(
-                  type: _AssetType.screenshot,
-                  description: 'Share/save dialog for the .paprikarecipes export file',
-                  filename: 'paprika_transfer.png',
-                ),
-              ),
-              _GuideStep(
-                title: l10n.importGuidePaprikaStep3Title,
-                description: l10n.importGuidePaprikaStep3Desc,
-                icon: Icons.file_open,
-                asset: const _StepAsset(
-                  type: _AssetType.screenshot,
-                  description: 'Recipe Spellbook Settings > Data > Import screen with file picker open showing the Paprika export file',
-                  filename: 'paprika_import.png',
-                ),
-              ),
-              _GuideStep(
-                title: l10n.importGuidePaprikaStep4Title,
-                description: l10n.importGuidePaprikaStep4Desc,
-                icon: Icons.hourglass_bottom,
-                asset: const _StepAsset(
-                  type: _AssetType.screenshot,
-                  description: 'Import progress indicator followed by success message showing "Imported 47 recipes"',
-                  filename: 'paprika_success.png',
-                ),
-                tip: l10n.importGuidePaprikaStep4Tip,
-              ),
-            ],
-          ),
           _ImportGuide(
             id: 'other-apps',
             icon: Icons.apps_rounded,
@@ -616,8 +614,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.file_download,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Generic settings/export screen from a recipe app (illustration style, not a specific app)',
-                  filename: 'other_export.png',
+                  description: 'Export screen from a recipe app',
+                  filename: 'other_export.jpg',
                 ),
                 tip: l10n.importGuideOtherAppsStep1Tip,
               ),
@@ -627,8 +625,8 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.cloud_download,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Files app showing a downloaded recipe export file (JSON or HTML)',
-                  filename: 'other_file_ready.png',
+                  description: 'Downloaded recipe export file',
+                  filename: 'other_file_ready.jpg',
                 ),
               ),
               _GuideStep(
@@ -637,18 +635,18 @@ class ImportGuidesScreen extends StatelessWidget {
                 icon: Icons.settings,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Recipe Spellbook Settings > Data > Import with file picker',
-                  filename: 'other_import.png',
+                  description: 'Recipe Spellbook import screen',
+                  filename: 'other_import.jpg',
                 ),
               ),
               _GuideStep(
                 title: l10n.importGuideOtherAppsStep4Title,
                 description: l10n.importGuideOtherAppsStep4Desc,
-                icon: Icons.library_books,
+                icon: Icons.check_circle_outline,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
-                  description: 'Cookbook view showing newly imported recipes from another app',
-                  filename: 'other_success.png',
+                  description: 'Import preview showing recipes from another app',
+                  filename: 'other_import_preview.jpg',
                 ),
               ),
             ],
@@ -667,41 +665,21 @@ class ImportGuidesScreen extends StatelessWidget {
                 title: l10n.importGuideDeviceTransferStep1Title,
                 description: l10n.importGuideDeviceTransferStep1Desc,
                 icon: Icons.phone_android,
-                asset: const _StepAsset(
-                  type: _AssetType.screenshot,
-                  description: 'Recipe Spellbook device transfer screen showing "Send" tab with a generated 6-character code',
-                  filename: 'transfer_send.png',
-                ),
               ),
               _GuideStep(
                 title: l10n.importGuideDeviceTransferStep2Title,
                 description: l10n.importGuideDeviceTransferStep2Desc,
                 icon: Icons.pin,
-                asset: const _StepAsset(
-                  type: _AssetType.screenshot,
-                  description: 'Transfer screen showing a large, clear 6-character code with a 15-minute countdown timer',
-                  filename: 'transfer_code.png',
-                ),
               ),
               _GuideStep(
                 title: l10n.importGuideDeviceTransferStep3Title,
                 description: l10n.importGuideDeviceTransferStep3Desc,
                 icon: Icons.input,
-                asset: const _StepAsset(
-                  type: _AssetType.screenshot,
-                  description: 'Transfer receive screen with code input field on the new device',
-                  filename: 'transfer_receive.png',
-                ),
               ),
               _GuideStep(
                 title: l10n.importGuideDeviceTransferStep4Title,
                 description: l10n.importGuideDeviceTransferStep4Desc,
                 icon: Icons.check_circle,
-                asset: const _StepAsset(
-                  type: _AssetType.screenshot,
-                  description: 'Success screen showing "Transfer complete — X recipes, X cookbooks imported"',
-                  filename: 'transfer_success.png',
-                ),
                 tip: l10n.importGuideDeviceTransferStep4Tip,
               ),
             ],
@@ -1273,7 +1251,7 @@ class _AssetPlaceholder extends StatelessWidget {
     final theme = Theme.of(context);
 
     // Try to load the real asset first
-    final assetPath = 'assets/guides/${asset.filename}';
+    final assetPath = 'assets/images/guides/${asset.filename}';
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
