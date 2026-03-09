@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../utils/responsive_utils.dart';
 
 // ═══════════════════════════════════════════════════════════════════
 // CONSTANTS
@@ -33,7 +34,7 @@ class ImportGuidesScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
+      body: Responsive.constrainWidth(context, child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
           // ── Hero ──
@@ -55,7 +56,7 @@ class ImportGuidesScreen extends StatelessWidget {
             const SizedBox(height: 16),
           ],
         ],
-      ),
+      )),
     );
   }
 
@@ -632,7 +633,7 @@ class ImportGuidesScreen extends StatelessWidget {
               _GuideStep(
                 title: l10n.importGuideOtherAppsStep3Title,
                 description: l10n.importGuideOtherAppsStep3Desc,
-                icon: Icons.settings,
+                icon: Icons.file_open,
                 asset: const _StepAsset(
                   type: _AssetType.screenshot,
                   description: 'Recipe Spellbook import screen',
@@ -1017,7 +1018,7 @@ class _GuideDetailScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
+      body: Responsive.constrainWidth(context, child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
         children: [
           // ── Hero header ──
@@ -1091,7 +1092,7 @@ class _GuideDetailScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }
@@ -1327,8 +1328,14 @@ class _AssetPlaceholder extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════════════
 
 Future<void> _launchUrl(String url) async {
-  final uri = Uri.parse(url);
-  if (await canLaunchUrl(uri)) {
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  try {
+    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  } catch (_) {
+    // Fallback: try in-app webview
+    try {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.inAppWebView);
+    } catch (_) {
+      debugPrint('[Guides] Could not launch $url');
+    }
   }
 }

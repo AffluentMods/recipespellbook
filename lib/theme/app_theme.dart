@@ -186,6 +186,7 @@ class AppTheme {
 
       // ── Bottom sheet — elevated surface ──
       bottomSheetTheme: BottomSheetThemeData(
+        constraints: const BoxConstraints(maxWidth: 640),
         backgroundColor: elevatedSurface,
         surfaceTintColor: Colors.transparent,
         shape: const RoundedRectangleBorder(

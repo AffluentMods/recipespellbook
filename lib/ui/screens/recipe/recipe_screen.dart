@@ -13,6 +13,7 @@ import '../../../data/ingredient_images.dart';
 import '../../../data/localized_units.dart';
 import '../../../data/nutrition_data.dart';
 import '../../../data/rpg/rpg_text.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
@@ -356,9 +357,9 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     }
 
     return Scaffold(
-      body: useTabbed
+      body: Responsive.constrainWidth(context, child: useTabbed
           ? _buildTabbedLayout(theme, l10n, isNerdMode, rpg)
-          : _buildStackedLayout(theme, l10n, isNerdMode, rpg),
+          : _buildStackedLayout(theme, l10n, isNerdMode, rpg)),
     );
   }
 
@@ -1352,7 +1353,8 @@ class _RecipeAppBar extends StatelessWidget {
                   tag: 'recipe_image_${recipe.id}',
                   child: isServer
                       ? _ServerImage(path: recipe.imagePath!)
-                      : buildFileImage(recipe.imagePath!, fit: BoxFit.cover, cacheHeight: 800),
+                      : buildFileImage(recipe.imagePath!, fit: BoxFit.cover,
+                          cacheHeight: (800 * MediaQuery.of(context).devicePixelRatio).toInt()),
                 ),
               )
             else if (defaultAsset != null)

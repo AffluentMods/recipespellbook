@@ -12,6 +12,7 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/imported_recipe.dart';
 import '../../../providers/database_provider.dart';
+import '../../../utils/ingredient_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/smart_import_button.dart';
 
@@ -172,14 +173,21 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
             lastViewedAt: drift.Value(DateTime.now()),
           ));
 
-          // Batch insert ingredients
+          // Batch insert ingredients (parse amount/unit from raw strings)
           await db.batch((batch) {
             for (var i = 0; i < recipe.ingredients.length; i++) {
+              final parsed = parseIngredient(recipe.ingredients[i]);
               batch.insert(db.ingredients, IngredientsCompanion.insert(
                 id: 'ing_${uuid.v4()}',
                 recipeId: recipeId,
                 sortOrder: i,
-                name: recipe.ingredients[i],
+                name: parsed.name,
+                amount: parsed.amount != null
+                    ? drift.Value(formatAmount(parsed.amount!))
+                    : const drift.Value.absent(),
+                unit: parsed.unit != null
+                    ? drift.Value(parsed.unit)
+                    : const drift.Value.absent(),
               ));
             }
           });

@@ -78,7 +78,7 @@ class HomeScreen extends ConsumerWidget {
         }
 
         return Scaffold(
-          body: CustomScrollView(
+          body: Responsive.constrainWidth(context, child: CustomScrollView(
             slivers: [
               // App bar
               SliverAppBar(
@@ -149,7 +149,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
             ],
-          ),
+          )),
           floatingActionButton: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,

@@ -8,6 +8,7 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../../services/shopping_list_generator.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/recipe_image.dart';
@@ -88,7 +89,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: Column(
+        child: Responsive.constrainWidth(context, child: Column(
           children: [
             // Header
             _PlannerHeader(
@@ -137,7 +138,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
               ),
             ),
           ],
-        ),
+        )),
       ),
       floatingActionButton: _ModernFAB(
         onPressed: () => _showAddMealSheet(context, selectedDate),

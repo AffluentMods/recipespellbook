@@ -7,6 +7,7 @@ import '../../../data/app_enums.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/companion_provider.dart';
+import '../../../utils/responsive_utils.dart';
 
 import '../../../providers/settings_provider.dart';
 import '../../../providers/subscription_provider.dart';
@@ -245,7 +246,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ].whereType<Widget>().toList();
 
     return Scaffold(
-      body: CustomScrollView(
+      body: Responsive.constrainWidth(context, child: CustomScrollView(
         slivers: [
           SliverAppBar(
             floating: true, snap: true,
@@ -284,7 +285,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
         ],
-      ),
+      )),
     );
   }
 
@@ -1197,7 +1198,6 @@ class _IntegrationsSection extends ConsumerStatefulWidget {
 }
 
 class _IntegrationsSectionState extends ConsumerState<_IntegrationsSection> {
-  bool _instacartConfigured = false;
   bool _krogerConfigured = false;
   bool _discordLinked = false;
   bool _loading = true;
@@ -1206,7 +1206,6 @@ class _IntegrationsSectionState extends ConsumerState<_IntegrationsSection> {
   void initState() { super.initState(); _checkStoreStatus(); }
 
   Future<void> _checkStoreStatus() async {
-    final ic = await GroceryService.isConfigured(GroceryProvider.instacart);
     final kr = await GroceryService.isConfigured(GroceryProvider.kroger);
     bool discord = false;
     try {
@@ -1215,7 +1214,7 @@ class _IntegrationsSectionState extends ConsumerState<_IntegrationsSection> {
         discord = status.linked;
       }
     } catch (_) {}
-    if (mounted) setState(() { _instacartConfigured = ic; _krogerConfigured = kr; _discordLinked = discord; _loading = false; });
+    if (mounted) setState(() { _krogerConfigured = kr; _discordLinked = discord; _loading = false; });
   }
 
   @override
@@ -1232,16 +1231,6 @@ class _IntegrationsSectionState extends ConsumerState<_IntegrationsSection> {
             style: TextStyle(fontSize: 13, color: _discordLinked ? const Color(0xFF43B02A) : theme.colorScheme.outline)),
         trailing: _discordLinked ? const Icon(Icons.check_circle, color: Color(0xFF43B02A), size: 20) : Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
         onTap: () => _showDiscordOptions(context),
-      ),
-      ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-        leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: const Color(0xFF43B02A).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-            child: const Center(child: Text('\u{1F955}', style: TextStyle(fontSize: 18)))),
-        title: Text(l10n.instacart, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-        subtitle: Text(_loading ? l10n.integrationsChecking : _instacartConfigured ? l10n.integrationsConnectedManage : l10n.integrationsNotConnected,
-            style: TextStyle(fontSize: 13, color: _instacartConfigured ? const Color(0xFF43B02A) : theme.colorScheme.outline)),
-        trailing: _instacartConfigured ? const Icon(Icons.check_circle, color: Color(0xFF43B02A), size: 20) : Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
-        onTap: () => _showInstacartOptions(context),
       ),
       ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
@@ -1288,22 +1277,6 @@ class _IntegrationsSectionState extends ConsumerState<_IntegrationsSection> {
     ])));
   }
 
-  void _showInstacartOptions(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    showModalBottomSheet(context: context, builder: (ctx) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-      Padding(padding: const EdgeInsets.all(16), child: Row(children: [
-        const Text('\u{1F955}', style: TextStyle(fontSize: 24)), const SizedBox(width: 12),
-        Text(l10n.instacart, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-        if (_instacartConfigured) ...[const SizedBox(width: 8), Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          decoration: BoxDecoration(color: const Color(0xFF43B02A).withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)),
-          child: Text(l10n.connected, style: const TextStyle(color: Color(0xFF43B02A), fontSize: 11, fontWeight: FontWeight.w600)),
-        )],
-      ])),
-      const SizedBox(height: 16),
-    ])));
-  }
 
   void _showKrogerOptions(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;

@@ -313,6 +313,16 @@ const _phraseKeywords = <String, List<String>>{
     'pasta sauce', 'spaghetti sauce', 'alfredo sauce',
     'mac and cheese', 'macaroni and cheese',
   ],
+  'spices': [
+    'onion powder', 'garlic powder', 'celery salt', 'celery seed',
+    'chili powder', 'mustard powder', 'dry mustard', 'lemon pepper',
+    'garlic salt', 'seasoned salt',
+  ],
+  'cookingAndBaking': [
+    'rice vinegar', 'rice flour', 'coconut oil', 'sesame oil',
+    'avocado oil', 'olive oil', 'vegetable oil', 'canola oil',
+    'peanut oil', 'corn oil',
+  ],
 };
 
 // Unit compatibility and combination functions
@@ -514,6 +524,7 @@ const shoppingCategoryKeywords = <String, List<String>>{
     'brown sugar', 'powdered sugar', 'confectioners sugar', 'coconut sugar',
     'baking powder', 'baking soda', 'baking chocolate', 'cocoa powder',
     'chocolate chips', 'vanilla extract', 'almond extract',
+    'cornstarch', 'corn starch', 'arrowroot', 'tapioca starch',
     'cream of tartar', 'active dry yeast', 'instant yeast',
     // Oils (prevent matching other categories)
     'olive oil', 'vegetable oil', 'canola oil', 'coconut oil',
@@ -563,6 +574,7 @@ const shoppingCategoryKeywords = <String, List<String>>{
     'cinnamon', 'nutmeg', 'clove', 'cloves', 'allspice', 'ground ginger',
     'turmeric', 'curry', 'curry powder', 'garam masala', 'cumin', 'coriander',
     'cardamom', 'saffron', 'star anise', 'fennel seed', 'anise',
+    'oregano', 'basil', 'thyme', 'rosemary', 'sage', 'marjoram', 'tarragon', 'dill',
     'dried oregano', 'dried basil', 'dried thyme', 'dried rosemary', 'dried sage',
     'dried marjoram', 'dried tarragon', 'dried dill', 'dried parsley',
     'bay leaf', 'bay leaves',

@@ -3569,8 +3569,8 @@
   "importGuideOtherAppsStep1Tip": "Common formats: JSON (best), HTML, PDF, or plain text. JSON preserves the most data.",
   "importGuideOtherAppsStep2Title": "Get the file on your device",
   "importGuideOtherAppsStep2Desc": "Save or transfer the exported file to your phone using email, cloud storage, or a file transfer method.",
-  "importGuideOtherAppsStep3Title": "Import via Settings",
-  "importGuideOtherAppsStep3Desc": "In Recipe Spellbook, go to Settings > Data > Import and select the exported file. The app handles JSON, HTML, and common recipe formats.",
+  "importGuideOtherAppsStep3Title": "Import the file",
+  "importGuideOtherAppsStep3Desc": "In Recipe Spellbook, open the main menu and tap Add Recipe → Import → File, then select the exported file. The app handles JSON, HTML, and common recipe formats.",
   "importGuideOtherAppsStep4Title": "Check your recipes",
   "importGuideOtherAppsStep4Desc": "Imported recipes appear in your default cookbook. You can reorganize them into different cookbooks afterward.",
 

@@ -13,6 +13,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../data/ingredient_images.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
@@ -104,7 +105,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: StreamBuilder<List<ShoppingListItem>>(
+        child: Responsive.constrainWidth(context, child: StreamBuilder<List<ShoppingListItem>>(
           stream: shoppingDao.watchItemsInList(_currentListId),
           builder: (context, snapshot) {
             final items = snapshot.data ?? [];
@@ -139,7 +140,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
               ],
             );
           },
-        ),
+        )),
       ),
       floatingActionButton: _ModernFAB(onTap: () => _showAddItemSheet(context)),
     );
@@ -966,8 +967,17 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 subtitle: Text(l10n.importFromTextShoppingSubtitle),
                 onTap: () {
                   Navigator.pop(ctx);
-                  _showAddItemSheet(context);
-                  // The Add Items screen has its own Import button
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      fullscreenDialog: true,
+                      builder: (_) => _AddItemFullScreen(
+                        listId: _currentListId,
+                        userMappings: _userMappings,
+                        onItemAdded: _loadUserMappings,
+                        autoOpenTextImport: true,
+                      ),
+                    ),
+                  );
                 },
               ),
               ListTile(
@@ -1851,11 +1861,13 @@ class _AddItemFullScreen extends ConsumerStatefulWidget {
   final String listId;
   final Map<String, String> userMappings;
   final VoidCallback onItemAdded;
+  final bool autoOpenTextImport;
 
   const _AddItemFullScreen({
     required this.listId,
     required this.userMappings,
     required this.onItemAdded,
+    this.autoOpenTextImport = false,
   });
 
   @override
@@ -1877,7 +1889,11 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     _controller.addListener(_onTextChanged);
     _initService();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
+      if (widget.autoOpenTextImport) {
+        _importFromText();
+      } else {
+        _focusNode.requestFocus();
+      }
     });
   }
 

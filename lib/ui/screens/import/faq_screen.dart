@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../utils/responsive_utils.dart';
 
 // ═══════════════════════════════════════════════════════════════════
 // FAQ SCREEN
@@ -18,7 +19,7 @@ class FaqScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.faqTitle)),
-      body: ListView(
+      body: Responsive.constrainWidth(context, child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
           // ── Hero ──
@@ -41,7 +42,7 @@ class FaqScreen extends StatelessWidget {
             _QuestionCard(question: q, allHowTos: howTos),
           ],
         ],
-      ),
+      )),
     );
   }
 
@@ -459,7 +460,7 @@ class _FaqDetailScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(howTo.title)),
-      body: ListView(
+      body: Responsive.constrainWidth(context, child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
         children: [
           // ── Hero header ──
@@ -522,7 +523,7 @@ class _FaqDetailScreen extends StatelessWidget {
           for (int i = 0; i < howTo.steps.length; i++)
             _StepCard(step: howTo.steps[i], color: howTo.color, isLast: i == howTo.steps.length - 1),
         ],
-      ),
+      )),
     );
   }
 }

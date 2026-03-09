@@ -18,6 +18,9 @@ class Responsive {
       width(context) >= 600 && width(context) < 900;
   static bool isExpanded(BuildContext context) => width(context) >= 900;
 
+  /// Whether to show NavigationRail instead of bottom nav bar
+  static bool useNavRail(BuildContext context) => width(context) >= 600;
+
   /// Cookbook grid: 2 on phone, 3 on medium tablet, 4 on large
   static int cookbookColumns(BuildContext context) {
     final w = width(context);
@@ -62,9 +65,8 @@ class Responsive {
 
   /// Max content width for very wide screens (optional centering)
   static double? maxContentWidth(BuildContext context) {
-    final w = width(context);
-    if (w >= 1400) return 1200;
-    return null; // no constraint
+    if (width(context) >= 600) return 1200;
+    return null; // no constraint on phones
   }
 
   /// Wraps child in a centered ConstrainedBox on very wide screens

@@ -13192,13 +13192,13 @@ abstract class AppLocalizations {
   /// No description provided for @importGuideOtherAppsStep3Title.
   ///
   /// In en, this message translates to:
-  /// **'Import via Settings'**
+  /// **'Import the file'**
   String get importGuideOtherAppsStep3Title;
 
   /// No description provided for @importGuideOtherAppsStep3Desc.
   ///
   /// In en, this message translates to:
-  /// **'In Recipe Spellbook, go to Settings > Data > Import and select the exported file. The app handles JSON, HTML, and common recipe formats.'**
+  /// **'In Recipe Spellbook, open the main menu and tap Add Recipe → Import → File, then select the exported file. The app handles JSON, HTML, and common recipe formats.'**
   String get importGuideOtherAppsStep3Desc;
 
   /// No description provided for @importGuideOtherAppsStep4Title.

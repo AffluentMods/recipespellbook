@@ -7192,10 +7192,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importGuideOtherAppsStep2Desc => 'Save or transfer the exported file to your phone using email, cloud storage, or a file transfer method.';
 
   @override
-  String get importGuideOtherAppsStep3Title => 'Import via Settings';
+  String get importGuideOtherAppsStep3Title => 'Import the file';
 
   @override
-  String get importGuideOtherAppsStep3Desc => 'In Recipe Spellbook, go to Settings > Data > Import and select the exported file. The app handles JSON, HTML, and common recipe formats.';
+  String get importGuideOtherAppsStep3Desc => 'In Recipe Spellbook, open the main menu and tap Add Recipe → Import → File, then select the exported file. The app handles JSON, HTML, and common recipe formats.';
 
   @override
   String get importGuideOtherAppsStep4Title => 'Check your recipes';

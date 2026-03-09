@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../router/router.dart';
+import '../../utils/responsive_utils.dart';
 import '../widgets/app_menu_drawer.dart';
 import '../widgets/app_snackbar.dart';
 import '../widgets/rpg/rpg_navigation_shell.dart';
@@ -90,7 +91,52 @@ class _AppShellState extends ConsumerState<AppShell> {
   Widget build(BuildContext context) {
     final currentIndex = ref.watch(currentNavIndexProvider);
     final shoppingCountAsync = ref.watch(shoppingBadgeCountProvider);
+    final shoppingBadge = shoppingCountAsync.when(
+      data: (count) => count > 0 ? count : null,
+      loading: () => null,
+      error: (_, __) => null,
+    );
 
+    // Tablet/desktop: NavigationRail on the left
+    if (Responsive.useNavRail(context)) {
+      return RpgNavigationShell(
+        child: Row(
+          children: [
+            _AppNavigationRail(
+              currentIndex: currentIndex,
+              shoppingBadge: shoppingBadge,
+              onDestinationSelected: (index) {
+                switch (index) {
+                  case 0: _navigateTo('/', 0);
+                  case 1: _navigateTo('/cookbooks', 1);
+                  case 2: _navigateTo('/planner', 2);
+                  case 3: _navigateTo('/shopping', 3);
+                }
+              },
+              onMenuTap: () {
+                if (shellNavigatorKey.currentState?.canPop() ?? false) {
+                  shellNavigatorKey.currentState!.popUntil((route) => route.isFirst);
+                }
+                if (rootNavigatorKey.currentState?.canPop() ?? false) {
+                  rootNavigatorKey.currentState!.popUntil((route) => route.isFirst);
+                }
+                _scaffoldKey.currentState?.openEndDrawer();
+              },
+            ),
+            const VerticalDivider(width: 1, thickness: 1),
+            Expanded(
+              child: Scaffold(
+                key: _scaffoldKey,
+                body: widget.child,
+                endDrawer: const AppMenuDrawer(),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Phone: existing bottom nav bar
     return RpgNavigationShell(
       child: Scaffold(
         key: _scaffoldKey,
@@ -98,11 +144,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         endDrawer: const AppMenuDrawer(),
         bottomNavigationBar: _NotchNavBar(
           currentIndex: currentIndex,
-          shoppingBadge: shoppingCountAsync.when(
-            data: (count) => count > 0 ? count : null,
-            loading: () => null,
-            error: (_, __) => null,
-          ),
+          shoppingBadge: shoppingBadge,
           onTap: (index) {
             switch (index) {
               case 0: _navigateTo('/', 0);
@@ -413,4 +455,95 @@ class _NavDef {
   final IconData selectedIcon;
   final String label;
   const _NavDef(this.icon, this.selectedIcon, this.label);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// NAVIGATION RAIL — tablet / desktop side navigation
+// ═══════════════════════════════════════════════════════════════════
+
+class _AppNavigationRail extends StatelessWidget {
+  final int currentIndex;
+  final int? shoppingBadge;
+  final ValueChanged<int> onDestinationSelected;
+  final VoidCallback onMenuTap;
+
+  const _AppNavigationRail({
+    required this.currentIndex,
+    this.shoppingBadge,
+    required this.onDestinationSelected,
+    required this.onMenuTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    return NavigationRail(
+      selectedIndex: currentIndex.clamp(0, 3),
+      onDestinationSelected: onDestinationSelected,
+      labelType: NavigationRailLabelType.all,
+      backgroundColor: theme.colorScheme.surface,
+      indicatorColor: theme.colorScheme.primaryContainer,
+      selectedIconTheme: IconThemeData(color: theme.colorScheme.primary),
+      selectedLabelTextStyle: TextStyle(
+        color: theme.colorScheme.primary,
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+      ),
+      unselectedLabelTextStyle: TextStyle(
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+        fontSize: 11,
+      ),
+      leading: Padding(
+        padding: const EdgeInsets.only(top: 8, bottom: 4),
+        child: Icon(Icons.auto_awesome, color: theme.colorScheme.primary, size: 28),
+      ),
+      trailing: Expanded(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.menu_rounded),
+              tooltip: l10n.navMenu,
+              onPressed: onMenuTap,
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+      destinations: [
+        NavigationRailDestination(
+          icon: const Icon(Icons.home_outlined),
+          selectedIcon: const Icon(Icons.home_rounded),
+          label: Text(l10n.navHome),
+        ),
+        NavigationRailDestination(
+          icon: const Icon(Icons.menu_book_outlined),
+          selectedIcon: const Icon(Icons.menu_book_rounded),
+          label: Text(l10n.navCookbooks),
+        ),
+        NavigationRailDestination(
+          icon: const Icon(Icons.calendar_today_outlined),
+          selectedIcon: const Icon(Icons.calendar_today_rounded),
+          label: Text(l10n.navPlanner),
+        ),
+        NavigationRailDestination(
+          icon: shoppingBadge != null && shoppingBadge! > 0
+              ? Badge(
+                  label: Text(shoppingBadge! > 99 ? '99+' : shoppingBadge.toString()),
+                  child: const Icon(Icons.shopping_cart_outlined),
+                )
+              : const Icon(Icons.shopping_cart_outlined),
+          selectedIcon: shoppingBadge != null && shoppingBadge! > 0
+              ? Badge(
+                  label: Text(shoppingBadge! > 99 ? '99+' : shoppingBadge.toString()),
+                  child: const Icon(Icons.shopping_cart_rounded),
+                )
+              : const Icon(Icons.shopping_cart_rounded),
+          label: Text(l10n.navShopping),
+        ),
+      ],
+    );
+  }
 }
