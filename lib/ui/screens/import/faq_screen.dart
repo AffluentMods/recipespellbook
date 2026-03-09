@@ -7,8 +7,41 @@ import '../../../utils/responsive_utils.dart';
 // FAQ SCREEN
 // ═══════════════════════════════════════════════════════════════════
 
-class FaqScreen extends StatelessWidget {
+class FaqScreen extends StatefulWidget {
   const FaqScreen({super.key});
+
+  @override
+  State<FaqScreen> createState() => _FaqScreenState();
+}
+
+class _FaqScreenState extends State<FaqScreen> {
+  bool _searching = false;
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  bool _howToMatchesQuery(_HowTo howTo, String q) {
+    if (howTo.title.toLowerCase().contains(q)) return true;
+    if (howTo.subtitle.toLowerCase().contains(q)) return true;
+    for (final step in howTo.steps) {
+      if (step.title.toLowerCase().contains(q)) return true;
+      if (step.description.toLowerCase().contains(q)) return true;
+      if (step.tip != null && step.tip!.toLowerCase().contains(q)) return true;
+    }
+    return false;
+  }
+
+  bool _questionMatchesQuery(_TextQuestion question, String q) {
+    if (question.question.toLowerCase().contains(q)) return true;
+    if (question.subtitle.toLowerCase().contains(q)) return true;
+    if (question.answer.toLowerCase().contains(q)) return true;
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,33 +49,111 @@ class FaqScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final howTos = _buildHowTos(l10n);
     final questions = _buildQuestions(l10n);
+    final q = _query.toLowerCase().trim();
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.faqTitle)),
-      body: Responsive.constrainWidth(context, child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-        children: [
-          // ── Hero ──
-          _HeroBanner(theme: theme),
-          const SizedBox(height: 24),
+      appBar: _searching
+          ? AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => setState(() {
+                  _searching = false;
+                  _searchController.clear();
+                  _query = '';
+                }),
+              ),
+              title: TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: '${l10n.faqTitle}...',
+                  border: InputBorder.none,
+                ),
+                onChanged: (v) => setState(() => _query = v),
+              ),
+              actions: [
+                if (_query.isNotEmpty)
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => setState(() {
+                      _searchController.clear();
+                      _query = '';
+                    }),
+                  ),
+              ],
+            )
+          : AppBar(
+              title: Text(l10n.faqTitle),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.search, size: 22),
+                  onPressed: () => setState(() => _searching = true),
+                ),
+              ],
+            ),
+      body: Responsive.constrainWidth(context, child: q.isEmpty
+          ? ListView(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+              children: [
+                // ── Hero ──
+                _HeroBanner(theme: theme),
+                const SizedBox(height: 24),
 
-          // ── How-to guides ──
-          _SectionHeader(title: l10n.faqHowToGuides, icon: Icons.menu_book_rounded),
-          const SizedBox(height: 8),
-          for (final howTo in howTos) ...[
-            _HowToCard(howTo: howTo, allHowTos: howTos),
-            const SizedBox(height: 8),
-          ],
-          const SizedBox(height: 16),
+                // ── How-to guides ──
+                _SectionHeader(title: l10n.faqHowToGuides, icon: Icons.menu_book_rounded),
+                const SizedBox(height: 8),
+                for (final howTo in howTos) ...[
+                  _HowToCard(howTo: howTo, allHowTos: howTos),
+                  const SizedBox(height: 8),
+                ],
+                const SizedBox(height: 16),
 
-          // ── Common questions ──
-          _SectionHeader(title: l10n.faqCommonQuestions, icon: Icons.help_outline_rounded),
-          const SizedBox(height: 8),
-          for (final q in questions) ...[
-            _QuestionCard(question: q, allHowTos: howTos),
-          ],
-        ],
-      )),
+                // ── Common questions ──
+                _SectionHeader(title: l10n.faqCommonQuestions, icon: Icons.help_outline_rounded),
+                const SizedBox(height: 8),
+                for (final faq in questions) ...[
+                  _QuestionCard(question: faq, allHowTos: howTos),
+                ],
+              ],
+            )
+          : Builder(builder: (context) {
+              final matchedHowTos = howTos.where((h) => _howToMatchesQuery(h, q)).toList();
+              final matchedQuestions = questions.where((faq) => _questionMatchesQuery(faq, q)).toList();
+              if (matchedHowTos.isEmpty && matchedQuestions.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.search_off, size: 48, color: theme.colorScheme.outline.withValues(alpha: 0.4)),
+                      const SizedBox(height: 12),
+                      Text(l10n.searchNoResults, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)),
+                    ],
+                  ),
+                );
+              }
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                children: [
+                  if (matchedHowTos.isNotEmpty) ...[
+                    _SectionHeader(title: l10n.faqHowToGuides, icon: Icons.menu_book_rounded),
+                    const SizedBox(height: 8),
+                    for (final howTo in matchedHowTos) ...[
+                      _HowToCard(howTo: howTo, allHowTos: howTos),
+                      const SizedBox(height: 8),
+                    ],
+                    const SizedBox(height: 16),
+                  ],
+                  if (matchedQuestions.isNotEmpty) ...[
+                    _SectionHeader(title: l10n.faqCommonQuestions, icon: Icons.help_outline_rounded),
+                    const SizedBox(height: 8),
+                    for (final faq in matchedQuestions) ...[
+                      _QuestionCard(question: faq, allHowTos: howTos),
+                    ],
+                  ],
+                ],
+              );
+            }),
+      ),
     );
   }
 

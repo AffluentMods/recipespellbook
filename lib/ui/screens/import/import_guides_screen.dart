@@ -14,49 +14,138 @@ const _kWebGuideBaseUrl = 'https://recipespellbook.app/guides';
 // IMPORT GUIDES LANDING PAGE
 // ═══════════════════════════════════════════════════════════════════
 
-class ImportGuidesScreen extends StatelessWidget {
+class ImportGuidesScreen extends StatefulWidget {
   const ImportGuidesScreen({super.key});
+
+  @override
+  State<ImportGuidesScreen> createState() => _ImportGuidesScreenState();
+}
+
+class _ImportGuidesScreenState extends State<ImportGuidesScreen> {
+  bool _searching = false;
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  bool _guideMatchesQuery(_ImportGuide guide, String q) {
+    if (guide.title.toLowerCase().contains(q)) return true;
+    if (guide.subtitle.toLowerCase().contains(q)) return true;
+    for (final step in guide.steps) {
+      if (step.title.toLowerCase().contains(q)) return true;
+      if (step.description.toLowerCase().contains(q)) return true;
+      if (step.tip != null && step.tip!.toLowerCase().contains(q)) return true;
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final categories = _buildCategories(l10n);
+    final q = _query.toLowerCase().trim();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.importGuidesTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.open_in_browser, size: 22),
-            tooltip: l10n.importGuidesOpenInBrowser,
-            onPressed: () => _launchUrl('$_kWebGuideBaseUrl'),
-          ),
-        ],
+      appBar: _searching
+          ? AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => setState(() {
+                  _searching = false;
+                  _searchController.clear();
+                  _query = '';
+                }),
+              ),
+              title: TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: '${l10n.importGuidesTitle}...',
+                  border: InputBorder.none,
+                ),
+                onChanged: (v) => setState(() => _query = v),
+              ),
+              actions: [
+                if (_query.isNotEmpty)
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => setState(() {
+                      _searchController.clear();
+                      _query = '';
+                    }),
+                  ),
+              ],
+            )
+          : AppBar(
+              title: Text(l10n.importGuidesTitle),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.search, size: 22),
+                  onPressed: () => setState(() => _searching = true),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.open_in_browser, size: 22),
+                  tooltip: l10n.importGuidesOpenInBrowser,
+                  onPressed: () => _launchUrl('$_kWebGuideBaseUrl'),
+                ),
+              ],
+            ),
+      body: Responsive.constrainWidth(context, child: q.isEmpty
+          ? ListView(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+              children: [
+                // ── Hero ──
+                _HeroBanner(theme: theme),
+                const SizedBox(height: 24),
+
+                // ── Quick tip ──
+                _QuickTipCard(theme: theme),
+                const SizedBox(height: 24),
+
+                // ── Guide categories ──
+                for (final cat in categories) ...[
+                  _CategoryHeader(title: cat.title, icon: cat.icon),
+                  const SizedBox(height: 8),
+                  for (final guide in cat.guides) ...[
+                    _GuideCard(guide: guide),
+                    const SizedBox(height: 10),
+                  ],
+                  const SizedBox(height: 16),
+                ],
+              ],
+            )
+          : Builder(builder: (context) {
+              final matches = <_ImportGuide>[];
+              for (final cat in categories) {
+                for (final guide in cat.guides) {
+                  if (_guideMatchesQuery(guide, q)) matches.add(guide);
+                }
+              }
+              if (matches.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.search_off, size: 48, color: theme.colorScheme.outline.withValues(alpha: 0.4)),
+                      const SizedBox(height: 12),
+                      Text(l10n.searchNoResults, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)),
+                    ],
+                  ),
+                );
+              }
+              return ListView.separated(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                itemCount: matches.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemBuilder: (_, i) => _GuideCard(guide: matches[i]),
+              );
+            }),
       ),
-      body: Responsive.constrainWidth(context, child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-        children: [
-          // ── Hero ──
-          _HeroBanner(theme: theme),
-          const SizedBox(height: 24),
-
-          // ── Quick tip ──
-          _QuickTipCard(theme: theme),
-          const SizedBox(height: 24),
-
-          // ── Guide categories ──
-          for (final cat in categories) ...[
-            _CategoryHeader(title: cat.title, icon: cat.icon),
-            const SizedBox(height: 8),
-            for (final guide in cat.guides) ...[
-              _GuideCard(guide: guide),
-              const SizedBox(height: 10),
-            ],
-            const SizedBox(height: 16),
-          ],
-        ],
-      )),
     );
   }
 

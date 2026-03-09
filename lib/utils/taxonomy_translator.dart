@@ -88,6 +88,8 @@ class TaxonomyTranslator {
     'pork': l10n.categoryPork,
     'rice': l10n.categoryRice,
     'sandwich': l10n.categorySandwich,
+    'salad': l10n.courseSalad,
+    'sauce': l10n.courseSauce,
     'seafood': l10n.categorySeafood,
     'soup': l10n.categorySoup,
     'vegetable': l10n.categoryVegetable,

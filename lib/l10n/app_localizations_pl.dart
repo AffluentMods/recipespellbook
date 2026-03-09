@@ -1880,7 +1880,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get categorySoup => 'Zupa';
 
   @override
-  String get categoryVegetable => 'Warzywo';
+  String get categoryVegetable => 'Warzywa';
 
   @override
   String get or => 'lub';
