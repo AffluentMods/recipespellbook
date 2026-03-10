@@ -27,6 +27,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   // Which subscription tier is selected: 0 = Cloud Sync, 1 = Cloud Sync Family
   int _subTierIndex = 0;
   bool _purchasing = false;
+  bool _trialEligible = true; // assume eligible until checked
 
   /// Set to true to show Cloud Sync Family in the subscription tab.
   /// Hidden for now until launch — all wiring is in place.
@@ -35,13 +36,25 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   @override
   void initState() {
     super.initState();
-    // If user already has premium, default to Cloud Sync tab
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // If user already has premium, default to Cloud Sync tab
       final sub = ref.read(subscriptionProvider);
       if (sub.tier == SubscriptionTier.premium) {
         setState(() => _tabIndex = 1);
       }
+      // Check free trial eligibility
+      _checkTrialEligibility();
     });
+  }
+
+  Future<void> _checkTrialEligibility() async {
+    final eligible = await RevenueCatService.instance.checkTrialEligibility([
+      RCConfig.cloudSyncMonthlyId,
+      RCConfig.cloudSyncYearlyId,
+    ]);
+    if (mounted) {
+      setState(() => _trialEligible = eligible);
+    }
   }
 
   bool get _hasPremium =>
@@ -266,7 +279,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             _Feature(icon: Icons.cloud_sync, text: l10n.featureCloudSyncPersonal),
             _Feature(icon: Icons.photo_library, text: l10n.featurePhotosOnSteps),
             _Feature(icon: Icons.cloud, text: l10n.featureCloudStorageLimited),
-            _Feature(icon: Icons.auto_awesome, text: l10n.featureExtraPolish),
+            _Feature(icon: Icons.auto_awesome, text: l10n.featureSmartImport),
           ],
         ),
       ],
@@ -333,7 +346,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         _PlanCard(
           title: l10n.cloudSyncFeature,
           price: _billingCycle == 0 ? '\$2.99/mo' : '\$29.99/yr',
-          subtitle: _billingCycle == 1 ? l10n.save16Yearly : l10n.billedMonthly,
+          subtitle: _trialEligible
+              ? '${l10n.cloudSyncFreeTrial} · ${_billingCycle == 1 ? l10n.save16Yearly : l10n.billedMonthly}'
+              : _billingCycle == 1 ? l10n.save16Yearly : l10n.billedMonthly,
           isSelected: _subTierIndex == 0,
           accentColor: Colors.blue,
           theme: theme,
@@ -499,9 +514,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     final buttonLabel = _isOnPremiumTab
         ? l10n.purchasePremiumCta
         : _subTierIndex == 0
-        ? (_billingCycle == 0
-        ? l10n.subscribeCloudSyncMonthlyCta
-        : l10n.subscribeCloudSyncYearlyCta)
+        ? (_trialEligible
+            ? (_billingCycle == 0
+                ? l10n.subscribeCloudSyncMonthlyTrialCta
+                : l10n.subscribeCloudSyncYearlyTrialCta)
+            : (_billingCycle == 0
+                ? l10n.subscribeCloudSyncMonthlyCta
+                : l10n.subscribeCloudSyncYearlyCta))
         : (_billingCycle == 0
         ? l10n.subscribeCloudSyncPlusMonthlyCta
         : l10n.subscribeCloudSyncPlusYearlyCta);
@@ -1183,6 +1202,8 @@ class _CompareTable extends StatelessWidget {
             [_x, _x, _check, if (showFamily) _check], cellStyle),
         _row(l10n.compareBackups,
             [_x, _x, _check, if (showFamily) _check], cellStyle),
+        _row(l10n.compareSmartImport,
+            [l10n.compareSmartImportNone, l10n.compareSmartImportPremium, l10n.compareSmartImportCloud, if (showFamily) l10n.compareSmartImportCloud], cellStyle),
       ],
     );
   }

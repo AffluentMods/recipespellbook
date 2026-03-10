@@ -19,6 +19,14 @@ class Purchases {
   static Future<Offerings> getOfferings() async => Offerings._();
   static Future<CustomerInfo> purchasePackage(Package package) async => CustomerInfo._();
   static Future<CustomerInfo> restorePurchases() async => CustomerInfo._();
+  static Future<Map<String, IntroEligibility>> checkTrialOrIntroDiscountEligibility(List<String> productIds) async => {};
+}
+
+enum IntroEligibilityStatus { eligible, ineligible, unknown }
+
+class IntroEligibility {
+  final IntroEligibilityStatus status;
+  IntroEligibility._(this.status);
 }
 
 enum LogLevel { debug, info, warn, error }

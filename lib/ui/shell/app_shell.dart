@@ -239,8 +239,6 @@ class _NotchNavBarState extends State<_NotchNavBar>
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final isDark = theme.brightness == Brightness.dark;
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
-
     final barBg = isDark
         ? Color.lerp(theme.colorScheme.surface, theme.colorScheme.primary, 0.06)!
         : Color.lerp(theme.colorScheme.surface, theme.colorScheme.primary, 0.03)!;
@@ -253,11 +251,10 @@ class _NotchNavBarState extends State<_NotchNavBar>
       _NavDef(Icons.menu_rounded, Icons.menu_rounded, l10n.navMenu),
     ];
 
-    // Total height = bar content + system nav bar padding
-    final totalHeight = _barHeight + bottomPadding;
-
+    // Scaffold's bottomNavigationBar already handles system bottom padding,
+    // so we only specify the bar content height.
     return SizedBox(
-      height: totalHeight,
+      height: _barHeight,
       child: AnimatedBuilder(
         animation: _animation,
         builder: (context, _) {

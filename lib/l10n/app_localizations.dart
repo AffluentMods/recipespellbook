@@ -7693,6 +7693,24 @@ abstract class AppLocalizations {
   /// **'Pay once, keep forever'**
   String get payOnceKeepForever;
 
+  /// No description provided for @cloudSyncFreeTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Try free for 1 week'**
+  String get cloudSyncFreeTrial;
+
+  /// No description provided for @subscribeCloudSyncMonthlyTrialCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Start free trial — then \$2.99/mo'**
+  String get subscribeCloudSyncMonthlyTrialCta;
+
+  /// No description provided for @subscribeCloudSyncYearlyTrialCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Start free trial — then \$29.99/yr'**
+  String get subscribeCloudSyncYearlyTrialCta;
+
   /// No description provided for @cloudSyncFeature.
   ///
   /// In en, this message translates to:
@@ -8347,11 +8365,11 @@ abstract class AppLocalizations {
   /// **'Cloud storage — Limited'**
   String get featureCloudStorageLimited;
 
-  /// No description provided for @featureExtraPolish.
+  /// No description provided for @featureSmartImport.
   ///
   /// In en, this message translates to:
-  /// **'Extra UI polish & QoL features'**
-  String get featureExtraPolish;
+  /// **'AI Smart Import'**
+  String get featureSmartImport;
 
   /// No description provided for @featureFamilySharing5.
   ///
@@ -8508,6 +8526,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Backups'**
   String get compareBackups;
+
+  /// No description provided for @compareSmartImport.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Smart Import'**
+  String get compareSmartImport;
+
+  /// No description provided for @compareSmartImportNone.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get compareSmartImportNone;
+
+  /// No description provided for @compareSmartImportPremium.
+  ///
+  /// In en, this message translates to:
+  /// **'2/mo'**
+  String get compareSmartImportPremium;
+
+  /// No description provided for @compareSmartImportCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'10/mo'**
+  String get compareSmartImportCloud;
 
   /// No description provided for @printOf.
   ///

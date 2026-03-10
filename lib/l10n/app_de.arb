@@ -1912,7 +1912,6 @@
   "featureCloudStorageLimited": "Cloud storage — Limited",
   "featureCloudStorage": "Cloud storage",
   "featureAutoBackups": "Automatic backups",
-  "featureExtraPolish": "Extra UI-Feinschliff & QoL-Funktionen",
   "featureFamilySharing5": "Familienfreigabe (5 Mitglieder)",
   "featureSharedLists": "Geteilte Einkaufslisten",
   "featureSharedCookbooks": "Geteilte Kochbücher",
@@ -2827,5 +2826,13 @@
   "kitchenBuddyIntroDescription": "This little chef will be your kitchen companion.\nCook recipes and earn coins to dress them up!",
   "kitchenBuddyNameLabel": "Buddy Name",
   "kitchenBuddyNameHint": "Enter a name...",
-  "kitchenBuddyCreate": "Create Buddy"
+  "kitchenBuddyCreate": "Create Buddy",
+  "featureSmartImport": "AI Smart Import",
+  "compareSmartImport": "AI Smart Import",
+  "compareSmartImportNone": "—",
+  "compareSmartImportPremium": "2/mo",
+  "compareSmartImportCloud": "10/mo",
+  "cloudSyncFreeTrial": "Try free for 1 week",
+  "subscribeCloudSyncMonthlyTrialCta": "Start free trial — then $2.99/mo",
+  "subscribeCloudSyncYearlyTrialCta": "Start free trial — then $29.99/yr"
 }

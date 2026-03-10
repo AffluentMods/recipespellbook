@@ -4136,6 +4136,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get payOnceKeepForever => '一次付费，永久使用';
 
   @override
+  String get cloudSyncFreeTrial => 'Try free for 1 week';
+
+  @override
+  String get subscribeCloudSyncMonthlyTrialCta => 'Start free trial — then \$2.99/mo';
+
+  @override
+  String get subscribeCloudSyncYearlyTrialCta => 'Start free trial — then \$29.99/yr';
+
+  @override
   String get cloudSyncFeature => '云端同步';
 
   @override
@@ -4503,7 +4512,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featureCloudStorageLimited => 'Cloud storage — Limited';
 
   @override
-  String get featureExtraPolish => 'UI和功能改进';
+  String get featureSmartImport => 'AI Smart Import';
 
   @override
   String get featureFamilySharing5 => '家庭共享（5人）';
@@ -4582,6 +4591,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get compareBackups => '备份';
+
+  @override
+  String get compareSmartImport => 'AI Smart Import';
+
+  @override
+  String get compareSmartImportNone => '—';
+
+  @override
+  String get compareSmartImportPremium => '2/mo';
+
+  @override
+  String get compareSmartImportCloud => '10/mo';
 
   @override
   String get printOf => '/';

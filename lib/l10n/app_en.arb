@@ -1215,7 +1215,9 @@
   "nutritionServings": "{count} servings",
   "@nutritionServings": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "nutritionIngredientBreakdown": "Ingredient Breakdown",
@@ -1223,14 +1225,20 @@
   "nutritionMatchedCount": "{matched} of {total} matched",
   "@nutritionMatchedCount": {
     "placeholders": {
-      "matched": {"type": "int"},
-      "total": {"type": "int"}
+      "matched": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "nutritionUncertainCount": "{count} need review",
   "@nutritionUncertainCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "nutritionUncertain": "verify match",
@@ -1283,7 +1291,9 @@
   "allergySelectedCount": "{count} allergens selected",
   "@allergySelectedCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "allergySelectAll": "Select All",
@@ -1302,7 +1312,6 @@
   "allergyDetailsTitle": "Allergen Details",
   "settingsAllergies": "Allergies",
   "settingsAllergiesSubtitle": "Set up allergen warnings",
-
   "allergenMilk": "Milk/Dairy",
   "allergenEggs": "Eggs",
   "allergenFish": "Fish",
@@ -1333,7 +1342,9 @@
   "tagsDeleteConfirm": "Are you sure you want to delete \"{name}\"?",
   "@tagsDeleteConfirm": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "tagsNameLabel": "Tag Name",
@@ -1341,7 +1352,6 @@
   "tagsColorLabel": "Color",
   "settingsKitchenBuddyEnabled": "Earn coins and dress up your buddy!",
   "settingsRecipeLayoutSubtitle": "Customize how recipes are displayed",
-
   "shareLink": "Link",
   "shareDocument": "PDF",
   "sharePrint": "Print",
@@ -1353,11 +1363,9 @@
   "editLayoutTabbed": "Tabbed",
   "editLayoutStackedDesc": "All sections in one scrollable view",
   "editLayoutTabbedDesc": "Separate tabs for details, ingredients, instructions",
-
   "tabDetails": "Details",
   "tabIngredients": "Ingredients",
   "tabInstructions": "Instructions",
-
   "stepImageAdd": "Add Image",
   "stepImageChange": "Change Image",
   "stepImageRemove": "Remove Image",
@@ -1442,8 +1450,12 @@
   "plannerMealAdded": "{recipe} added to {mealType}",
   "@plannerMealAdded": {
     "placeholders": {
-      "recipe": {"type": "String"},
-      "mealType": {"type": "String"}
+      "recipe": {
+        "type": "String"
+      },
+      "mealType": {
+        "type": "String"
+      }
     }
   },
   "plannerShareMealPlan": "Share meal plan",
@@ -1461,7 +1473,9 @@
   "shoppingItems": "{count} {count, plural, =1{item} other{items}}",
   "@shoppingItems": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shoppingBySection": "By Section",
@@ -1487,13 +1501,17 @@
   "importFromPlatform": "Import from {platform}",
   "@importFromPlatform": {
     "placeholders": {
-      "platform": {"type": "String"}
+      "platform": {
+        "type": "String"
+      }
     }
   },
   "importFromApp": "Import from {app}",
   "@importFromApp": {
     "placeholders": {
-      "app": {"type": "String"}
+      "app": {
+        "type": "String"
+      }
     }
   },
   "helpAddingRecipes": "Adding Recipes",
@@ -1529,7 +1547,9 @@
   "addToListCount": "Add {count} items",
   "@addToListCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "yes": "Yes",
@@ -1545,13 +1565,17 @@
   "deleteStepsConfirm": "Delete {count} steps?",
   "@deleteStepsConfirm": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "stepSelected": "{count} selected",
   "@stepSelected": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "selectAllSteps": "Select All",
@@ -1992,6 +2016,9 @@
   "oneTimeTab": "One-Time",
   "subscriptionTab": "Subscription",
   "payOnceKeepForever": "Pay once, keep forever",
+  "cloudSyncFreeTrial": "Try free for 1 week",
+  "subscribeCloudSyncMonthlyTrialCta": "Start free trial — then $2.99/mo",
+  "subscribeCloudSyncYearlyTrialCta": "Start free trial — then $29.99/yr",
   "cloudSyncFeature": "Cloud Sync",
   "cloudSyncFamilyFeature": "Cloud Sync Family",
   "unableToLoadProducts": "Unable to load products. Try again.",
@@ -2244,7 +2271,7 @@
   "featureCloudSyncPersonal": "Cloud sync (personal)",
   "featurePhotosOnSteps": "Photos on steps",
   "featureCloudStorageLimited": "Cloud storage — Limited",
-  "featureExtraPolish": "Extra UI polish & QoL features",
+  "featureSmartImport": "AI Smart Import",
   "featureFamilySharing5": "Family sharing (5 members)",
   "featureCloudStorage": "Cloud storage",
   "featureSharedLists": "Shared shopping lists",
@@ -2271,6 +2298,10 @@
   "compareSharedCookbooks": "Shared cookbooks",
   "compareSharedMealPlan": "Shared meal plan",
   "compareBackups": "Backups",
+  "compareSmartImport": "AI Smart Import",
+  "compareSmartImportNone": "—",
+  "compareSmartImportPremium": "2/mo",
+  "compareSmartImportCloud": "10/mo",
   "printOf": "of",
   "printRecipe": "Print",
   "stackedLayout": "Stacked Layout",
@@ -2290,15 +2321,36 @@
   "resetToDefault": "Reset to Default",
   "smartImportSuccess": "Recipe re-parsed by AI",
   "smartImportSuccessWithRemaining": "Recipe re-parsed by AI • {remaining} imports left this month",
-  "@smartImportSuccessWithRemaining": { "placeholders": { "remaining": { "type": "int" } } },
+  "@smartImportSuccessWithRemaining": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
   "smartImportLimitTitle": "Smart Import Limit Reached",
   "smartImportLimitMessage": "You''ve used all {limit} smart imports this month.",
-  "@smartImportLimitMessage": { "placeholders": { "limit": { "type": "int" } } },
+  "@smartImportLimitMessage": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
   "smartImportUpgradeHint": "Upgrade to Premium for 200 imports/month.",
   "smartImportParsing": "AI is parsing...",
   "smartImportFix": "Fix with Smart Import ✨",
   "smartImportRemaining": "{remaining} of {limit} smart imports remaining this month",
-  "@smartImportRemaining": { "placeholders": { "remaining": { "type": "int" }, "limit": { "type": "int" } } },
+  "@smartImportRemaining": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
   "smartImportHintTitle": "Import not looking right?",
   "smartImportHintSubtitle": "Subscribe for Smart Import — AI-powered recipe parsing",
   "learnMore": "Learn more",
@@ -2311,12 +2363,33 @@
   "qrScanningMobileOnly": "QR scanning is only available on mobile devices.",
   "communityComingSoon": "Community features coming in a future update!",
   "somethingWentWrong": "Something went wrong: {error}",
-  "@somethingWentWrong": {"placeholders": {"error": {"type": "String"}}},
+  "@somethingWentWrong": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "starterRecipesAdded": "Added {count} starter recipes! 🎉",
-  "@starterRecipesAdded": {"placeholders": {"count": {"type": "int"}}},
+  "@starterRecipesAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "enterAtLeastOneNutrient": "Enter at least calories or one macro nutrient",
   "addedToMealPlan": "Added to {mealType} on {date}",
-  "@addedToMealPlan": {"placeholders": {"mealType": {"type": "String"}, "date": {"type": "String"}}},
+  "@addedToMealPlan": {
+    "placeholders": {
+      "mealType": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "noItemsFoundInText": "No items found in text",
   "noTextFoundInImage": "No text found in image",
   "addDayToShoppingList": "Add day to shopping list",
@@ -2325,7 +2398,9 @@
   "removeMealConfirm": "Remove {recipeName} from this day?",
   "@removeMealConfirm": {
     "placeholders": {
-      "recipeName": { "type": "String" }
+      "recipeName": {
+        "type": "String"
+      }
     }
   },
   "actionRemove": "Remove",
@@ -2355,29 +2430,45 @@
   "shoppingAddedToList": "Added {count} {count, plural, =1{item} other{items}} to \"{listName}\"",
   "@shoppingAddedToList": {
     "placeholders": {
-      "count": { "type": "int" },
-      "listName": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
     }
   },
   "shoppingAddedAndCombined": "Added {added} {added, plural, =1{item} other{items}} to \"{listName}\", {combined} combined",
   "@shoppingAddedAndCombined": {
     "placeholders": {
-      "added": { "type": "int" },
-      "combined": { "type": "int" },
-      "listName": { "type": "String" }
+      "added": {
+        "type": "int"
+      },
+      "combined": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
     }
   },
   "shoppingItemsUpdated": "{count} {count, plural, =1{item} other{items}} updated on \"{listName}\"",
   "@shoppingItemsUpdated": {
     "placeholders": {
-      "count": { "type": "int" },
-      "listName": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "listName": {
+        "type": "String"
+      }
     }
   },
   "shoppingAddError": "Error: {message}",
   "@shoppingAddError": {
     "placeholders": {
-      "message": { "type": "String" }
+      "message": {
+        "type": "String"
+      }
     }
   },
   "editCookbook": "Edit Cookbook",
@@ -2390,20 +2481,28 @@
   "recipeCount": "{count} {count, plural, =1{recipe} other{recipes}}",
   "@recipeCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "cookbookDeleteWithRecipes": "This cookbook contains {count} {count, plural, =1{recipe} other{recipes}}. They will be moved to trash.\n\nAre you sure you want to delete \"{name}\"?",
   "@cookbookDeleteWithRecipes": {
     "placeholders": {
-      "count": { "type": "int" },
-      "name": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
     }
   },
   "cookbookDeleteConfirmNamed": "Are you sure you want to delete \"{name}\"?",
   "@cookbookDeleteConfirmNamed": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shareCookbook": "Share Cookbook",
@@ -2467,8 +2566,6 @@
   "exportTags": "Tags",
   "exportCategories": "Custom Categories",
   "exportCourses": "Custom Courses",
-
-
   "createRecipeManually": "Or create a recipe manually",
   "transferYourRecipes": "Transfer your recipes",
   "transferUpgradeBanner": "Want automatic sync? Upgrade to Premium for cloud sync across all your devices.",
@@ -2583,7 +2680,9 @@
   "kitchenBuddyStreakDays": "{count} day streak",
   "@kitchenBuddyStreakDays": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "kitchenBuddyClosetEmpty": "No items yet! Visit the Shop to get started.",
@@ -2592,27 +2691,35 @@
   "kitchenBuddyConfirmPurchase": "Buy {itemName}?",
   "@kitchenBuddyConfirmPurchase": {
     "placeholders": {
-      "itemName": { "type": "String" }
+      "itemName": {
+        "type": "String"
+      }
     }
   },
   "kitchenBuddyCostSummary": "This will cost 🪙 {price} Spice Coins.",
   "@kitchenBuddyCostSummary": {
     "placeholders": {
-      "price": { "type": "int" }
+      "price": {
+        "type": "int"
+      }
     }
   },
   "kitchenBuddyBuy": "Buy",
   "kitchenBuddyPurchaseSuccess": "Purchased {itemName}!",
   "@kitchenBuddyPurchaseSuccess": {
     "placeholders": {
-      "itemName": { "type": "String" }
+      "itemName": {
+        "type": "String"
+      }
     }
   },
   "kitchenBuddyNotEnoughCoins": "Not enough coins",
   "kitchenBuddyRequires": "Requires: {achievementName}",
   "@kitchenBuddyRequires": {
     "placeholders": {
-      "achievementName": { "type": "String" }
+      "achievementName": {
+        "type": "String"
+      }
     }
   },
   "kitchenBuddyNamingTitle": "Name Your Buddy",
@@ -2641,13 +2748,30 @@
   "settingsManage": "Manage",
   "manageTags": "Manage Tags",
   "tagsApplied": "{count} tags applied",
-  "@tagsApplied": { "placeholders": { "count": { "type": "int" } } },
+  "@tagsApplied": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "tagsEditTitle": "Edit \"{name}\"",
-  "@tagsEditTitle": { "placeholders": { "name": { "type": "String" } } },
+  "@tagsEditTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "tagsEditComingSoon": "Tag editing coming soon!",
   "tagsRecipeCount": "{count} recipes",
-  "@tagsRecipeCount": { "placeholders": { "count": { "type": "int" } } },
-
+  "@tagsRecipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "communityMyPublications": "My Publications",
   "communitySearchCookbooks": "Search cookbooks...",
   "communitySortRecent": "Recent",
@@ -2656,7 +2780,9 @@
   "communityNoResultsFor": "No results for \"{query}\"",
   "@communityNoResultsFor": {
     "placeholders": {
-      "query": { "type": "String" }
+      "query": {
+        "type": "String"
+      }
     }
   },
   "communityNoCookbooksYet": "No cookbooks yet",
@@ -2665,13 +2791,17 @@
   "communityByPublisher": "by {name}",
   "@communityByPublisher": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "communityRecipeCount": "{count} recipes",
   "@communityRecipeCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "communityPublishCookbook": "Publish Cookbook",
@@ -2684,28 +2814,38 @@
   "communityNeedMinRecipes": "Need at least 10 recipes to publish (has {count})",
   "@communityNeedMinRecipes": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "communityPublishConfirmTitle": "Publish to Community?",
   "communityPublishConfirmMessage": "This will share \"{name}\" ({count} recipes) publicly. Anyone can browse and download it.\n\nYou can unpublish it anytime.",
   "@communityPublishConfirmMessage": {
     "placeholders": {
-      "name": { "type": "String" },
-      "count": { "type": "int" }
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
     }
   },
   "communityPublishSuccess": "\"{name}\" published to the community!",
   "@communityPublishSuccess": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "communityPublishFailed": "Publish failed",
   "communityRecipeCountNeedMore": "{count} recipes (need 10+)",
   "@communityRecipeCountNeedMore": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "communityNoPublicationsYet": "No publications yet",
@@ -2715,13 +2855,17 @@
   "communityUnpublishConfirmMessage": "Remove \"{title}\" from the community? People who already downloaded it will keep their copy.",
   "@communityUnpublishConfirmMessage": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "communityUnpublishSuccess": "\"{title}\" unpublished",
   "@communityUnpublishSuccess": {
     "placeholders": {
-      "title": { "type": "String" }
+      "title": {
+        "type": "String"
+      }
     }
   },
   "communityUnpublishFailed": "Failed to unpublish",
@@ -2729,9 +2873,15 @@
   "communityPublicationStats": "{recipeCount} recipes · {downloadCount} downloads · {timeAgo}",
   "@communityPublicationStats": {
     "placeholders": {
-      "recipeCount": { "type": "int" },
-      "downloadCount": { "type": "int" },
-      "timeAgo": { "type": "String" }
+      "recipeCount": {
+        "type": "int"
+      },
+      "downloadCount": {
+        "type": "int"
+      },
+      "timeAgo": {
+        "type": "String"
+      }
     }
   },
   "communityPublicationNotFound": "Publication not found",
@@ -2747,20 +2897,28 @@
   "communityDownloadSuccess": "Downloaded \"{title}\" — {count} recipes added!",
   "@communityDownloadSuccess": {
     "placeholders": {
-      "title": { "type": "String" },
-      "count": { "type": "int" }
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
     }
   },
   "communityDownloadFailedError": "Download failed: {error}",
   "@communityDownloadFailedError": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "communityDownloadCount": "{count} downloads",
   "@communityDownloadCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "communityDownloading": "Downloading...",
@@ -2768,96 +2926,111 @@
   "communityPrepTime": "{minutes}m prep",
   "@communityPrepTime": {
     "placeholders": {
-      "minutes": { "type": "int" }
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "communityCookTime": "{minutes}m cook",
   "@communityCookTime": {
     "placeholders": {
-      "minutes": { "type": "int" }
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "communityServingsCount": "{count} servings",
   "@communityServingsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "communityIngredientCount": "{count} ingredients",
   "@communityIngredientCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "deleteRecipesTrashMessage": "Recipes will be moved to trash. You can restore them later.",
-
   "hintTitleExample": "e.g., Grandma's Apple Pie",
   "hintDescription": "A brief description of the recipe",
   "hintServingsExample": "e.g., 4",
   "prepMin": "Prep (min)",
   "cookMin": "Cook (min)",
   "hintNotes": "Tips, variations, storage instructions...",
-  "pinchToZoomCropped": "Pinch to zoom \u00b7 Cropped area will be saved",
-  "pinchToZoomOrUseAsIs": "Pinch to zoom and crop \u00b7 Or use as-is",
+  "pinchToZoomCropped": "Pinch to zoom · Cropped area will be saved",
+  "pinchToZoomOrUseAsIs": "Pinch to zoom and crop · Or use as-is",
   "savingLabel": "Saving...",
   "emptyHeader": "(empty header)",
   "emptyIngredient": "(empty ingredient)",
   "recipeUpdated": "Recipe updated!",
   "nutritionLessInfo": "Less info",
   "nutritionMoreInfo": "More info",
-
   "scaleOriginal": "Original: {servings}",
   "@scaleOriginal": {
     "placeholders": {
-      "servings": { "type": "String" }
+      "servings": {
+        "type": "String"
+      }
     }
   },
   "scaleAdjustQuantities": "Adjust ingredient quantities",
   "scaleOriginalLabel": "1x (Original)",
-
   "stepWillBeRemoved": "This step will be permanently removed.",
   "stepsWillBeRemoved": "These {count} steps will be permanently removed.",
   "@stepsWillBeRemoved": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "stepCount": "{count, plural, =1{1 step} other{{count} steps}}",
   "@stepCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "instructionsNoSteps": "No instructions yet",
   "instructionsAddStepsGuide": "Add steps to guide through the recipe",
-  "pinchToZoomPreview": "Pinch to zoom \u00b7 This is how your photo will look",
+  "pinchToZoomPreview": "Pinch to zoom · This is how your photo will look",
   "ingredientCount": "{count, plural, =1{1 ingredient} other{{count} ingredients}}",
   "@ingredientCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "ingredientPerLineHint": "Enter one ingredient per line:\n\n2 cups flour\n1 tsp salt\n3 eggs",
   "ingredientTip": "Tip: Enter one ingredient per line. Press Enter after each ingredient.",
-
   "cookbookEditSubtitle": "Rename, cover photo",
   "shareCookbookSubtitle": "Link, family, or community",
   "shareNamedCookbook": "Share \"{name}\"",
   "@shareNamedCookbook": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shareNamedList": "Share \"{name}\"",
   "@shareNamedList": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shareAsTextDescription": "Send list items as plain text",
   "oneTimeLink": "One-Time Link",
-  "oneTimeLinkDescription": "Free \u2022 24h expiry \u2022 Anyone can download",
+  "oneTimeLinkDescription": "Free • 24h expiry • Anyone can download",
   "familyShare": "Family Share",
   "familyShareDescription": "Real-time sync with family members",
   "postToCommunity": "Post to Community",
@@ -2871,7 +3044,9 @@
   "unlockFeature": "Unlock {feature}",
   "@unlockFeature": {
     "placeholders": {
-      "feature": { "type": "String" }
+      "feature": {
+        "type": "String"
+      }
     }
   },
   "notNow": "Not now",
@@ -2879,26 +3054,33 @@
   "publishMinRecipes": "Need at least 10 recipes to publish (has {count})",
   "@publishMinRecipes": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "publishConfirmTitle": "Post to Community?",
-  "publishConfirmMessage": "\"{name}\" ({count} recipes) will be publicly visible. Anyone can browse and download it.\n\nYou can remove it anytime from Community \u2192 My Publications.",
+  "publishConfirmMessage": "\"{name}\" ({count} recipes) will be publicly visible. Anyone can browse and download it.\n\nYou can remove it anytime from Community → My Publications.",
   "@publishConfirmMessage": {
     "placeholders": {
-      "name": { "type": "String" },
-      "count": { "type": "int" }
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
     }
   },
   "publishButton": "Publish",
-
   "selectCourse": "Select Course",
   "selectCategory": "Select Category",
   "taxonomyNone": "None",
   "createTaxonomy": "Create \"{name}\"",
   "@createTaxonomy": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "addAsNewCourse": "Add as new course",
@@ -2906,39 +3088,35 @@
   "doneWithCount": "Done ({count})",
   "@doneWithCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "quickAccessEmptyAll": "No quick access recipes yet",
   "quickAccessEmptyMealPlan": "No meals planned",
   "quickAccessEmptyPinned": "No pinned recipes",
   "quickAccessEmptyRecent": "No recent recipes",
-
-  "importingRecipe": "Importing recipe\u2026",
-  "failedToImport": "Failed to import: {error}",
-  "@failedToImport": {
-    "placeholders": {
-      "error": { "type": "String" }
-    }
-  },
+  "importingRecipe": "Importing recipe…",
   "errorWithMessage": "Error: {message}",
   "@errorWithMessage": {
     "placeholders": {
-      "message": { "type": "String" }
+      "message": {
+        "type": "String"
+      }
     }
   },
   "minutesPrepSuffix": "m prep",
   "minutesCookSuffix": "m cook",
-
   "couldNotOpenBrowser": "Could not open browser",
   "couldNotOpenUrl": "Could not open {url}",
   "@couldNotOpenUrl": {
     "placeholders": {
-      "url": { "type": "String" }
+      "url": {
+        "type": "String"
+      }
     }
   },
-
   "discord": "Discord",
   "discordLinkAccount": "Link Discord Account",
   "discordLinkSubtitle": "Connect your Discord for community features",
@@ -2947,7 +3125,6 @@
   "discordUnlinkFailed": "Failed to unlink Discord",
   "discordUnlinkSubtitle": "Remove your Discord connection",
   "discordUnlinked": "Discord unlinked",
-
   "familyCodeCopied": "Invite code copied!",
   "familyCopyLink": "Copy Link",
   "familyCreate": "Create Family",
@@ -2966,7 +3143,9 @@
   "familyJoined": "Joined {familyName}!",
   "@familyJoined": {
     "placeholders": {
-      "familyName": { "type": "String" }
+      "familyName": {
+        "type": "String"
+      }
     }
   },
   "familyLeave": "Leave Family",
@@ -2978,15 +3157,21 @@
   "familyMemberRemoved": "{displayName} removed",
   "@familyMemberRemoved": {
     "placeholders": {
-      "displayName": { "type": "String" }
+      "displayName": {
+        "type": "String"
+      }
     }
   },
   "familyMembers": "Members",
   "familyMembersCount": "{current} of {max} members",
   "@familyMembersCount": {
     "placeholders": {
-      "current": { "type": "int" },
-      "max": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
     }
   },
   "familyNameHint": "Family name",
@@ -2997,15 +3182,21 @@
   "familyRemoveMemberConfirm": "Remove {displayName} from the family?",
   "@familyRemoveMemberConfirm": {
     "placeholders": {
-      "displayName": { "type": "String" }
+      "displayName": {
+        "type": "String"
+      }
     }
   },
   "familyRename": "Rename Family",
   "familyShareMessage": "Join my family on Recipe Spellbook! Code: {inviteCode} or use this link: {shareLink}",
   "@familyShareMessage": {
     "placeholders": {
-      "inviteCode": { "type": "String" },
-      "shareLink": { "type": "String" }
+      "inviteCode": {
+        "type": "String"
+      },
+      "shareLink": {
+        "type": "String"
+      }
     }
   },
   "familyShareSubject": "Join my Recipe Spellbook family",
@@ -3013,22 +3204,24 @@
   "familySharing": "Family Sharing",
   "familySharingDescription": "Share cookbooks, shopping lists, and meal plans with your family.",
   "familySharingSubtitle": "Share cookbooks, lists & meal plans",
-
   "ingredientSubstitutesFor": "Substitutes for {ingredientName}",
   "@ingredientSubstitutesFor": {
     "placeholders": {
-      "ingredientName": { "type": "String" }
+      "ingredientName": {
+        "type": "String"
+      }
     }
   },
   "ingredientSubstitutionsNoResults": "No substitutions found",
   "ingredientSubstitutionsNotFound": "No substitutions found for {ingredientName}",
   "@ingredientSubstitutionsNotFound": {
     "placeholders": {
-      "ingredientName": { "type": "String" }
+      "ingredientName": {
+        "type": "String"
+      }
     }
   },
   "ingredientSubstitutionsTryDifferent": "Try a different ingredient",
-
   "integrationsChecking": "Checking...",
   "integrationsConnectedManage": "Connected - Tap to manage",
   "integrationsLinked": "Linked",
@@ -3036,7 +3229,6 @@
   "integrationsNotConnected": "Not connected",
   "integrationsTapToLink": "Tap to link",
   "integrationsTapToSignIn": "Tap to sign in",
-
   "nutritionCalculateFromEdit": "Calculate from the edit screen",
   "nutritionCaloriesAlwaysShow": "Always show calories",
   "nutritionChartStyle": "Chart Style",
@@ -3044,11 +3236,12 @@
   "nutritionSettingsLink": "Nutrition settings",
   "nutritionTapToCalculate": "Tap to calculate nutrition",
   "nutritionVisibleNutrients": "Visible Nutrients",
-
   "pantryAddedStaples": "Added {count} staples to pantry",
   "@pantryAddedStaples": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "pantryClearAll": "Clear All",
@@ -3060,19 +3253,26 @@
   "pantryItemCount": "{count} items",
   "@pantryItemCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "mealPlanAddTitle": "Add to Meal Plan",
   "mealPlanMealLabel": "Meal",
   "mealPlanAdding": "Adding...",
   "mealPlanDateFormat": "{weekday}, {month} {day}",
   "@mealPlanDateFormat": {
     "placeholders": {
-      "weekday": { "type": "String" },
-      "month": { "type": "String" },
-      "day": { "type": "int" }
+      "weekday": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      },
+      "day": {
+        "type": "int"
+      }
     }
   },
   "splashRecipe": "Recipe",
@@ -3093,97 +3293,124 @@
   "onboardingSummoning": "Summoning...",
   "onboardingBlankSpellbook": "Start with a blank spellbook",
   "onboardingSkip": "Skip",
-
   "settingsBrowseCommunity": "Browse Community",
   "settingsBrowseCommunitySubtitle": "Discover public cookbooks",
   "settingsCommunity": "Community",
   "settingsFamily": "Family",
   "settingsIntegrations": "Integrations",
-  "settingsManage": "Manage",
   "settingsMyPublications": "My Publications",
   "settingsMyPublicationsSubtitle": "Manage your published cookbooks",
   "settingsShoppingPlanning": "Shopping & Planning",
-
   "shoppingAddCountItems": "Add {count} items",
   "@shoppingAddCountItems": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shoppingAddIngredient": "Add Ingredient",
   "shoppingAddedItemName": "Added \"{name}\"",
   "@shoppingAddedItemName": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shoppingAddedNotFound": "{added} added, {failed} not found",
   "@shoppingAddedNotFound": {
     "placeholders": {
-      "added": { "type": "int" },
-      "failed": { "type": "int" }
+      "added": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
   },
-  "shoppingAddingTo": "Adding to {provider}\u2026",
+  "shoppingAddingTo": "Adding to {provider}…",
   "@shoppingAddingTo": {
     "placeholders": {
-      "provider": { "type": "String" }
+      "provider": {
+        "type": "String"
+      }
     }
   },
   "shoppingCamera": "camera",
   "shoppingCheckedItemsCount": "Checked items ({count})",
   "@shoppingCheckedItemsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shoppingCouldNotAccessSource": "Could not access {source}",
   "@shoppingCouldNotAccessSource": {
     "placeholders": {
-      "source": { "type": "String" }
+      "source": {
+        "type": "String"
+      }
     }
   },
   "shoppingCountAdded": "{count} added",
   "@shoppingCountAdded": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-  "shoppingCreatingListOn": "Creating list on {provider}\u2026",
+  "shoppingCreatingListOn": "Creating list on {provider}…",
   "@shoppingCreatingListOn": {
     "placeholders": {
-      "provider": { "type": "String" }
+      "provider": {
+        "type": "String"
+      }
     }
   },
   "shoppingCurrentOfTotal": "{current} of {total} items",
   "@shoppingCurrentOfTotal": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "shoppingDeleteListConfirm": "Are you sure you want to delete \"{name}\"?",
   "@shoppingDeleteListConfirm": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shoppingErrorReadingImage": "Error reading image: {error}",
   "@shoppingErrorReadingImage": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "shoppingExportFailed": "Export failed: {error}",
   "@shoppingExportFailed": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "shoppingExportTitle": "Export \"{name}\"",
   "@shoppingExportTitle": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shoppingFamilyShare": "Family Share",
@@ -3200,47 +3427,63 @@
   "shoppingIngredientsAvailable": "{count} ingredients available",
   "@shoppingIngredientsAvailable": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shoppingItemsAddedCount": "{count} items added",
   "@shoppingItemsAddedCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shoppingItemsAddedSuccess": "Items added!",
   "shoppingItemsCopiedToClipboard": "{count} items copied to clipboard",
   "@shoppingItemsCopiedToClipboard": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shoppingItemsInCart": "{count} items in your {provider} cart",
   "@shoppingItemsInCart": {
     "placeholders": {
-      "count": { "type": "int" },
-      "provider": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "provider": {
+        "type": "String"
+      }
     }
   },
   "shoppingItemsOnInstacartList": "{count} items on your Instacart list",
   "@shoppingItemsOnInstacartList": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shoppingJustAdded": "Just added",
   "shoppingListCopiedOpening": "List copied! Opening {name}...",
   "@shoppingListCopiedOpening": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "shoppingListReady": "Shopping list ready!",
   "shoppingNotFoundItems": "Not found: {items}",
   "@shoppingNotFoundItems": {
     "placeholders": {
-      "items": { "type": "String" }
+      "items": {
+        "type": "String"
+      }
     }
   },
   "shoppingOneItemPerLine": "One item per line",
@@ -3250,63 +3493,75 @@
   "shoppingStartTyping": "Start typing to see suggestions",
   "shoppingTapToAddToCart": "Tap to add items directly to your cart",
   "shoppingTapToCreateShoppableList": "Tap to create a shoppable list",
-
   "swipeToSwitch": "Swipe to switch sections",
   "syncFailed": "Sync failed",
   "syncSuccess": "Synced: {pushed} pushed, {pulled} pulled",
   "@syncSuccess": {
     "placeholders": {
-      "pushed": { "type": "int" },
-      "pulled": { "type": "int" }
+      "pushed": {
+        "type": "int"
+      },
+      "pulled": {
+        "type": "int"
+      }
     }
   },
   "textSizePreview": "Preview",
-
   "transferDeviceDesktop": "desktop",
   "transferDeviceMobileApp": "mobile app",
   "transferDeviceThisDevice": "this device",
   "transferExplanation": "Move all your recipes, cookbooks, and meal plans from {currentDevice} to your {targetDevice}. This is a one-time copy, not a sync.",
   "@transferExplanation": {
     "placeholders": {
-      "currentDevice": { "type": "String" },
-      "targetDevice": { "type": "String" }
+      "currentDevice": {
+        "type": "String"
+      },
+      "targetDevice": {
+        "type": "String"
+      }
     }
   },
   "transferImportedSuccess": "{count} items imported successfully.",
   "@transferImportedSuccess": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "transferOr": "OR",
   "transferReceiveOn": "Receive on {device}",
   "@transferReceiveOn": {
     "placeholders": {
-      "device": { "type": "String" }
+      "device": {
+        "type": "String"
+      }
     }
   },
   "transferSendFrom": "Send from {device}",
   "@transferSendFrom": {
     "placeholders": {
-      "device": { "type": "String" }
+      "device": {
+        "type": "String"
+      }
     }
   },
   "transferSendSubtitle": "Generate a code for your {device} to receive",
   "@transferSendSubtitle": {
     "placeholders": {
-      "device": { "type": "String" }
+      "device": {
+        "type": "String"
+      }
     }
   },
-
   "importGuidesTitle": "Import Guides",
   "importGuidesOpenInBrowser": "Open guides in browser",
   "importGuideHeroTitle": "Bring your recipes from anywhere",
   "importGuideHeroSubtitle": "Tap any guide below for step-by-step instructions with screenshots.",
   "importGuideQuickTipLabel": "Quick tip",
-  "importGuideQuickTipText": "The fastest way? Copy any recipe link and share it to Recipe Spellbook \u2014 works from almost any app.",
+  "importGuideQuickTipText": "The fastest way? Copy any recipe link and share it to Recipe Spellbook — works from almost any app.",
   "importGuideWebButton": "Web",
   "importGuideFollowInBrowser": "Follow along in browser",
-
   "importGuideTagPopular": "Popular",
   "importGuideTagEasiest": "Easiest",
   "importGuideDifficultyEasy": "Easy",
@@ -3314,26 +3569,24 @@
   "importGuideTime15Sec": "15 sec",
   "importGuideTime30Sec": "30 sec",
   "importGuideTime1Min": "1 min",
-  "importGuideTime2To5Min": "2\u20135 min",
-
+  "importGuideTime2To5Min": "2–5 min",
   "importGuideStepsCount": "{count} steps",
   "@importGuideStepsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "importGuideCategorySocial": "Social Media",
   "importGuideCategoryWebsites": "Websites",
   "importGuideCategoryPhotos": "Photos & Files",
   "importGuideCategoryOtherApps": "Other Recipe Apps",
   "importGuideCategoryAi": "AI Import",
   "importGuideTagNew": "New",
-
   "importGuideScreenshotNeeded": "Screenshot needed",
   "importGuideGifNeeded": "GIF needed",
   "importGuideVideoNeeded": "Video needed",
-
   "importGuideInstagramTitle": "Instagram",
   "importGuideInstagramSubtitle": "Import from Reels, posts, and stories",
   "importGuideInstagramStep1Title": "Find a recipe post or Reel",
@@ -3347,7 +3600,6 @@
   "importGuideInstagramStep4Desc": "Tap More to see all your apps, then find and tap Recipe Spellbook.",
   "importGuideInstagramStep5Title": "Preview & import",
   "importGuideInstagramStep5Desc": "Review the recipe details and tap Import to save it to your cookbook.",
-
   "importGuideTiktokTitle": "TikTok",
   "importGuideTiktokSubtitle": "Save recipes from cooking videos",
   "importGuideTiktokStep1Title": "Find a recipe TikTok",
@@ -3361,7 +3613,6 @@
   "importGuideTiktokStep4Desc": "Tap More to see all your apps, then find and tap Recipe Spellbook.",
   "importGuideTiktokStep5Title": "Preview & import",
   "importGuideTiktokStep5Desc": "Review the recipe details and tap Import to save it to your cookbook.",
-
   "importGuideYoutubeTitle": "YouTube",
   "importGuideYoutubeSubtitle": "Import from cooking channels & Shorts",
   "importGuideYoutubeStep1Title": "Find a recipe video",
@@ -3370,10 +3621,9 @@
   "importGuideYoutubeStep2Desc": "Tap the Share button below the video title.",
   "importGuideYoutubeStep3Title": "Copy link or share to app",
   "importGuideYoutubeStep3Desc": "Tap \"Copy link\" or find Recipe Spellbook in the share sheet.",
-  "importGuideYoutubeStep3Tip": "Many YouTube creators put the full recipe in the video description \u2014 this makes extraction more accurate.",
+  "importGuideYoutubeStep3Tip": "Many YouTube creators put the full recipe in the video description — this makes extraction more accurate.",
   "importGuideYoutubeStep4Title": "Preview & import",
   "importGuideYoutubeStep4Desc": "Review the extracted recipe and tap Import to save it to your cookbook.",
-
   "importGuidePinterestTitle": "Pinterest",
   "importGuidePinterestSubtitle": "Save pinned recipes to your cookbook",
   "importGuidePinterestStep1Title": "Open a recipe pin",
@@ -3385,7 +3635,6 @@
   "importGuidePinterestStep3Desc": "Tap the share button and select Recipe Spellbook from the app list.",
   "importGuidePinterestStep4Title": "Preview & import",
   "importGuidePinterestStep4Desc": "Review the recipe details and tap Import to save it to your cookbook.",
-
   "importGuideWebsiteTitle": "Any Recipe Website",
   "importGuideWebsiteSubtitle": "AllRecipes, Food Network, BBC, blogs & more",
   "importGuideWebsiteStep1Title": "Open the recipe page",
@@ -3399,7 +3648,6 @@
   "importGuideWebsiteStep5Title": "Preview & import",
   "importGuideWebsiteStep5Desc": "Review the extracted recipe and tap Import to save it to your cookbook.",
   "importGuideWebsiteStep5Tip": "Works with 10,000+ recipe sites. If extraction fails, try the \"From Text\" method.",
-
   "importGuidePhotoTitle": "Photo / Camera",
   "importGuidePhotoSubtitle": "Scan recipes from books, magazines, or handwritten cards",
   "importGuidePhotoStep1Title": "Photograph the recipe",
@@ -3410,9 +3658,8 @@
   "importGuidePhotoStep3Title": "Select your image",
   "importGuidePhotoStep3Desc": "Pick the recipe image from your gallery.",
   "importGuidePhotoStep4Title": "Review & fix any errors",
-  "importGuidePhotoStep4Desc": "Check the extracted recipe. OCR occasionally misreads characters \u2014 \"1/2\" might become \"1l2\". Fix any errors and save.",
+  "importGuidePhotoStep4Desc": "Check the extracted recipe. OCR occasionally misreads characters — \"1/2\" might become \"1l2\". Fix any errors and save.",
   "importGuidePhotoStep4Tip": "Handwritten recipes work too, but printed text gives the best results.",
-
   "importGuidePdfTitle": "PDF Document",
   "importGuidePdfSubtitle": "Import from PDF cookbooks or downloads",
   "importGuidePdfStep1Title": "Have a recipe PDF ready",
@@ -3423,7 +3670,6 @@
   "importGuidePdfStep3Desc": "If the PDF has multiple pages, choose which page contains the recipe you want to import.",
   "importGuidePdfStep4Title": "Review & save",
   "importGuidePdfStep4Desc": "The recipe is extracted from the PDF. Review the ingredients and steps, then save to your cookbook.",
-
   "importGuideTextTitle": "Text / Paste",
   "importGuideTextSubtitle": "Paste a recipe from messages, email, or notes",
   "importGuideTextStep1Title": "Copy recipe text",
@@ -3432,10 +3678,9 @@
   "importGuideTextStep2Desc": "Open Recipe Spellbook, tap +, and choose \"From Text\".",
   "importGuideTextStep3Title": "Paste your recipe",
   "importGuideTextStep3Desc": "Paste the copied text into the text field. The AI will automatically separate the title, ingredients, and steps.",
-  "importGuideTextStep3Tip": "This works even with unformatted text \u2014 the AI is smart about parsing ingredient amounts and step instructions.",
+  "importGuideTextStep3Tip": "This works even with unformatted text — the AI is smart about parsing ingredient amounts and step instructions.",
   "importGuideTextStep4Title": "Review & save",
   "importGuideTextStep4Desc": "Check the parsed recipe, make any adjustments, and save.",
-
   "importGuideAiTitle": "AI (ChatGPT, Claude, etc.)",
   "importGuideAiSubtitle": "Generate recipes with AI and import them instantly",
   "importGuideAiStep1Title": "Open AI Import",
@@ -3448,7 +3693,6 @@
   "importGuideAiStep4Desc": "Go back to Recipe Spellbook, tap the paste button, then tap Preview to see the parsed recipe.",
   "importGuideAiStep5Title": "Preview & import",
   "importGuideAiStep5Desc": "Check that everything looks correct, then tap Import to save the recipe to your cookbook.",
-
   "importGuideOtherAppsTitle": "Other Recipe Apps",
   "importGuideOtherAppsSubtitle": "Mealime, CopyMeThat, AnyList, Cookmate, etc.",
   "importGuideOtherAppsStep1Title": "Export from your current app",
@@ -3460,7 +3704,6 @@
   "importGuideOtherAppsStep3Desc": "In Recipe Spellbook, open the main menu and tap Add Recipe → Import → File, then select the exported file. The app handles JSON, HTML, and common recipe formats.",
   "importGuideOtherAppsStep4Title": "Check your recipes",
   "importGuideOtherAppsStep4Desc": "Imported recipes appear in your default cookbook. You can reorganize them into different cookbooks afterward.",
-
   "importGuideDeviceTransferTitle": "Device Transfer",
   "importGuideDeviceTransferSubtitle": "Move recipes between phones without an account",
   "importGuideDeviceTransferStep1Title": "Open Transfer on the OLD device",
@@ -3472,7 +3715,6 @@
   "importGuideDeviceTransferStep4Title": "Recipes transferred!",
   "importGuideDeviceTransferStep4Desc": "All your recipes, cookbooks, shopping lists, and meal plans are transferred to the new device.",
   "importGuideDeviceTransferStep4Tip": "Have a paid account? Just sign in on the new device and everything syncs automatically.",
-
   "faqTitle": "FAQs",
   "faqHeroTitle": "Frequently asked questions",
   "faqHeroSubtitle": "Find answers and step-by-step guides for common features.",
@@ -3480,7 +3722,13 @@
   "faqCommonQuestions": "Common Questions",
   "faqSeeHowTo": "See how-to guide",
   "faqStepsCount": "{count} steps",
-  "@faqStepsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@faqStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqAddHeadersTitle": "How to add headers",
   "faqAddHeadersSubtitle": "Organize your recipe ingredients and steps into sections",
   "faqAddHeadersStep1Title": "Open the recipe editor",
@@ -3488,10 +3736,10 @@
   "faqAddHeadersStep2Title": "Add a header",
   "faqAddHeadersStep2Desc": "Tap the 'Add Header' button to insert a section header.",
   "faqAddHeadersStep3Title": "Open the header menu",
-  "faqAddHeadersStep3Desc": "Tap the three dots (\u22ee) next to the header for more options.",
+  "faqAddHeadersStep3Desc": "Tap the three dots (⋮) next to the header for more options.",
   "faqAddHeadersStep4Title": "Reorder your headers",
-  "faqAddHeadersStep4Desc": "Tap Sort Order to rearrange. Drag the \u2261 handle to move headers up or down.",
-  "faqAddHeadersStep4Tip": "You can drag headers by holding the \u2261 (two lines) handle on the left side.",
+  "faqAddHeadersStep4Desc": "Tap Sort Order to rearrange. Drag the ≡ handle to move headers up or down.",
+  "faqAddHeadersStep4Tip": "You can drag headers by holding the ≡ (two lines) handle on the left side.",
   "faqAddHeadersStep5Title": "Save your changes",
   "faqAddHeadersStep5Desc": "Tap the save button to keep your new headers.",
   "faqAddHeadersStep6Title": "Done!",
@@ -3501,7 +3749,7 @@
   "faqAddSublinkedStep1Title": "Open the recipe editor",
   "faqAddSublinkedStep1Desc": "Open a recipe and tap the edit icon.",
   "faqAddSublinkedStep2Title": "Open the menu",
-  "faqAddSublinkedStep2Desc": "Tap the three dots (\u22ee) in the edit screen.",
+  "faqAddSublinkedStep2Desc": "Tap the three dots (⋮) in the edit screen.",
   "faqAddSublinkedStep3Title": "Tap Link Recipe",
   "faqAddSublinkedStep3Desc": "Select 'Link Recipe' from the menu.",
   "faqAddSublinkedStep4Title": "Choose a recipe to link",
@@ -3515,53 +3763,92 @@
   "faqWhatAreHeadersAnswer": "Headers let you divide your recipe ingredients and steps into sections. For example, you could have separate sections for 'Sauce', 'Dough', and 'Topping' in a pizza recipe. They make long recipes much easier to follow.",
   "faqWhatAreSublinkedTitle": "What are sublinked recipes?",
   "faqWhatAreSublinkedSubtitle": "Connect related recipes together",
-  "faqWhatAreSublinkedAnswer": "Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it \u2014 no searching needed.",
+  "faqWhatAreSublinkedAnswer": "Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it — no searching needed.",
   "faqImportFailedTitle": "Why did my import fail?",
   "faqImportFailedSubtitle": "Common reasons and fixes",
-  "faqImportFailedAnswer": "Imports can fail for a few reasons:\n\n\u2022 The website may block automated access \u2014 try copying the recipe text and using Text Import instead.\n\u2022 The link may have expired or be private \u2014 make sure it\u2019s a public link.\n\u2022 Some sites use formats that are harder to parse \u2014 try the AI import as an alternative.\n\u2022 Check your internet connection and try again.",
+  "faqImportFailedAnswer": "Imports can fail for a few reasons:\n\n• The website may block automated access — try copying the recipe text and using Text Import instead.\n• The link may have expired or be private — make sure it’s a public link.\n• Some sites use formats that are harder to parse — try the AI import as an alternative.\n• Check your internet connection and try again.",
   "faqDeviceTransferTitle": "Can I import from other devices?",
   "faqDeviceTransferSubtitle": "Transfer recipes between phones and tablets",
   "faqDeviceTransferAnswer": "Yes! Use the Device Transfer feature in Settings > Data > Device Transfer. Generate a code on your old device and enter it on your new one. All your recipes, cookbooks, and images will be transferred.",
-
   "themeFrost": "Frost",
   "themeEmber": "Ember",
   "themeSpring": "Spring",
   "themeAlchemist": "Alchemist",
-
-
   "communitySortTopRated": "Top Rated",
   "communityHasImages": "Has Images",
   "communityListView": "List view",
   "communityGridView": "Grid view",
-
   "communityDownloadOptions": "Download Options",
   "communityDownloadWithImages": "With images ({size})",
-  "@communityDownloadWithImages": { "placeholders": { "size": { "type": "String" } } },
+  "@communityDownloadWithImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "communityDownloadImagesIncluded": "{count} images included",
-  "@communityDownloadImagesIncluded": { "placeholders": { "count": { "type": "int" } } },
+  "@communityDownloadImagesIncluded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "communityDownloadTextOnly": "Text only",
   "communityDownloadTextOnlySubtitle": "Faster download, no images",
   "communityTapToPreview": "Tap a recipe to preview",
   "communityImageCountLabel": "{count} images",
-  "@communityImageCountLabel": { "placeholders": { "count": { "type": "int" } } },
+  "@communityImageCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "communityYourRating": "Your rating:",
   "communityRateThis": "Rate this cookbook:",
   "communityDownloadingImages": "Downloading images... {current}/{total}",
-  "@communityDownloadingImages": { "placeholders": { "current": { "type": "int" }, "total": { "type": "int" } } },
-
+  "@communityDownloadingImages": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "communityViewFullRecipe": "View Full Recipe",
   "communityMoreIngredients": "+ {count} more",
-  "@communityMoreIngredients": { "placeholders": { "count": { "type": "int" } } },
+  "@communityMoreIngredients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "communityStepCount": "{count} steps",
-  "@communityStepCount": { "placeholders": { "count": { "type": "int" } } },
+  "@communityStepCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "communityNotes": "Notes",
   "communityStatPrep": "Prep",
   "communityStatCook": "Cook",
   "communityStatTotal": "Total",
   "communityStatServings": "Servings",
   "communityStepDuration": "{minutes} min",
-  "@communityStepDuration": { "placeholders": { "minutes": { "type": "int" } } },
-
+  "@communityStepDuration": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "communityEditPublication": "Edit Publication",
   "communityEditDescription": "Description",
   "communityEditDescriptionHint": "Tell people about this cookbook...",
@@ -3573,18 +3860,37 @@
   "communityStatusUnderReview": "Under Review",
   "communityStatusRemoved": "Removed",
   "communityUnderReview": "This cookbook is under review by our moderation team.",
-
   "communityPublishPreparing": "Preparing cookbook...",
   "communityPublishUploading": "Uploading images ({current}/{total})",
-  "@communityPublishUploading": { "placeholders": { "current": { "type": "int" }, "total": { "type": "int" } } },
+  "@communityPublishUploading": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "communityPublishPublishing": "Publishing to community...",
   "communityPublishBackground": "You can leave this screen — publishing continues in the background.",
   "communityPublishDone": "Published!",
   "communityPublishImagesSkipped": "{count} images were skipped (rejected by moderation)",
-  "@communityPublishImagesSkipped": { "placeholders": { "count": { "type": "int" } } },
+  "@communityPublishImagesSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "communityPublishRejected": "{count} rejected by moderation",
-  "@communityPublishRejected": { "placeholders": { "count": { "type": "int" } } },
-
+  "@communityPublishRejected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "communityConfigurePublication": "Configure Publication",
   "communityPublishTitle": "Title",
   "communityPublishTitleHint": "Cookbook title",
@@ -3595,10 +3901,25 @@
   "communityPublishIncludeImagesSubtitle": "Upload recipe images with this cookbook. Images are scanned for safety.",
   "communityPublishSummary": "Summary",
   "communityPublishRecipesSummary": "{count} recipes",
-  "@communityPublishRecipesSummary": { "placeholders": { "count": { "type": "int" } } },
+  "@communityPublishRecipesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "communityPublishImagesWillUpload": "Images will be uploaded",
   "communityPublishTextOnlyNoImages": "Text only (no images)",
   "communityPublishTryAgain": "Try Again",
   "communityPublishUploadInProgress": "Publishing in progress... ({current}/{total} images)",
-  "@communityPublishUploadInProgress": { "placeholders": { "current": { "type": "int" }, "total": { "type": "int" } } }
+  "@communityPublishUploadInProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
 }

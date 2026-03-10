@@ -385,6 +385,23 @@ class RevenueCatService {
     }
   }
 
+  /// Check whether the user is eligible for a free trial / introductory offer.
+  /// Returns true if eligible for any of the given product IDs.
+  Future<bool> checkTrialEligibility(List<String> productIds) async {
+    if (!_initialized || !supportsRevenueCatSdk) return false;
+    try {
+      final result = await Purchases.checkTrialOrIntroDiscountEligibility(productIds);
+      return result.values.any(
+        (e) => e.status == IntroEligibilityStatus.eligible ||
+               e.status == IntroEligibilityStatus.unknown,
+      );
+    } catch (e) {
+      debugPrint('[RevenueCat] Trial eligibility check failed: $e');
+      // Assume eligible on error — better UX than hiding the trial text
+      return true;
+    }
+  }
+
   /// Restore previous purchases.
   Future<SubscriptionTier> restorePurchases() async {
     if (!supportsRevenueCatSdk) return _currentTier;

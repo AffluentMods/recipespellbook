@@ -4168,6 +4168,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get payOnceKeepForever => 'Einmal zahlen, für immer behalten';
 
   @override
+  String get cloudSyncFreeTrial => 'Try free for 1 week';
+
+  @override
+  String get subscribeCloudSyncMonthlyTrialCta => 'Start free trial — then \$2.99/mo';
+
+  @override
+  String get subscribeCloudSyncYearlyTrialCta => 'Start free trial — then \$29.99/yr';
+
+  @override
   String get cloudSyncFeature => 'Cloud-Sync';
 
   @override
@@ -4535,7 +4544,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get featureCloudStorageLimited => 'Cloud storage — Limited';
 
   @override
-  String get featureExtraPolish => 'Extra UI-Feinschliff & QoL-Funktionen';
+  String get featureSmartImport => 'AI Smart Import';
 
   @override
   String get featureFamilySharing5 => 'Familienfreigabe (5 Mitglieder)';
@@ -4614,6 +4623,18 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get compareBackups => 'Backups';
+
+  @override
+  String get compareSmartImport => 'AI Smart Import';
+
+  @override
+  String get compareSmartImportNone => '—';
+
+  @override
+  String get compareSmartImportPremium => '2/mo';
+
+  @override
+  String get compareSmartImportCloud => '10/mo';
 
   @override
   String get printOf => 'von';
