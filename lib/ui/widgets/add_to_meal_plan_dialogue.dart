@@ -6,7 +6,8 @@ import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
 import 'app_snackbar.dart';
-import 'rpg/rpg_navigation_shell.dart';
+// TODO: Kitchen Buddy hidden for now
+// import 'kitchen_buddy/kitchen_buddy_integration.dart';
 
 /// Shows a bottom sheet to add a recipe to meal plan
 /// Call this from recipe_screen.dart like:
@@ -256,8 +257,8 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
         recipeId: drift.Value(widget.recipeId),
       ));
 
-      // Award XP for planning a meal
-      RpgIntegration.onMealPlanned(widget.ref);
+      // TODO: Kitchen Buddy hidden for now
+      // KitchenBuddyIntegration.onMealPlanCompleted(widget.ref);
 
       if (mounted) {
         Navigator.of(context).pop();

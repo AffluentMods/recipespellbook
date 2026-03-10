@@ -265,8 +265,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           features: [
             _Feature(icon: Icons.cloud_sync, text: l10n.featureCloudSyncPersonal),
             _Feature(icon: Icons.photo_library, text: l10n.featurePhotosOnSteps),
-            _Feature(icon: Icons.cloud, text: 'Cloud Storage — 250 MB'),
-            _Feature(icon: Icons.verified, text: l10n.featureSupporterBadge),
+            _Feature(icon: Icons.cloud, text: l10n.featureCloudStorageLimited),
             _Feature(icon: Icons.auto_awesome, text: l10n.featureExtraPolish),
           ],
         ),
@@ -346,13 +345,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 icon: Icons.family_restroom,
                 text: l10n.featureFamilySharing5),
             _Feature(
-                icon: Icons.cloud, text: 'Cloud Storage — 1 GB'),
+                icon: Icons.cloud, text: l10n.featureCloudStorage),
             _Feature(icon: Icons.shopping_cart, text: l10n.featureSharedLists),
             _Feature(
                 icon: Icons.menu_book, text: l10n.featureSharedCookbooks),
             _Feature(
                 icon: Icons.calendar_month, text: l10n.featureSharedMealPlan),
-            _Feature(icon: Icons.backup, text: l10n.featureEncryptedBackups),
+            _Feature(icon: Icons.backup, text: l10n.featureAutoBackups),
           ],
         ),
         const SizedBox(height: 12),
@@ -376,7 +375,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   text: l10n.featureFamilySharing10),
               _Feature(
                   icon: Icons.cloud,
-                  text: 'Cloud Storage — 5 GB'),
+                  text: l10n.featureCloudStorage),
               _Feature(icon: Icons.speed, text: l10n.featurePrioritySync),
               _Feature(
                   icon: Icons.auto_awesome,
@@ -1184,10 +1183,6 @@ class _CompareTable extends StatelessWidget {
             [_x, _x, _check, if (showFamily) _check], cellStyle),
         _row(l10n.compareBackups,
             [_x, _x, _check, if (showFamily) _check], cellStyle),
-        // Version History removed — not planned for launch
-        // RPG Cosmetics removed — RPG system being redesigned
-        _row(l10n.compareSupporterBadge,
-            [_x, _check, _check, if (showFamily) _check], cellStyle),
       ],
     );
   }

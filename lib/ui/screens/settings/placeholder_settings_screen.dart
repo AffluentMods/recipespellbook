@@ -40,7 +40,7 @@ class PlaceholderSettingsScreen extends ConsumerWidget {
             isSelected: currentMode == PlaceholderImageMode.custom,
             onTap: () => ref.read(settingsProvider.notifier)
                 .setPlaceholderMode(PlaceholderImageMode.custom),
-            preview: _DefaultImagePreview(nerdMode: settings.nerdMode),
+            preview: const _DefaultImagePreview(),
             isDark: isDark,
             theme: theme,
           ),
@@ -162,15 +162,11 @@ class _PlaceholderOptionCard extends StatelessWidget {
 
 /// Preview: default app artwork
 class _DefaultImagePreview extends StatelessWidget {
-  final bool nerdMode;
-
-  const _DefaultImagePreview({required this.nerdMode});
+  const _DefaultImagePreview();
 
   @override
   Widget build(BuildContext context) {
-    final imagePath = nerdMode
-        ? 'assets/images/recipe_placeholder_rpg.png'
-        : 'assets/images/recipe_placeholder_normal.png';
+    const imagePath = 'assets/images/recipe_placeholder_normal.png';
 
     return Image.asset(
       imagePath,

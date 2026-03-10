@@ -23,7 +23,6 @@ class RecipePlaceholderImage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final mode = settings.recipePlaceholderMode;
-    final nerdMode = settings.nerdMode;
     final colorTheme = settings.appTheme;
 
     Widget placeholder;
@@ -31,7 +30,6 @@ class RecipePlaceholderImage extends ConsumerWidget {
     switch (mode) {
       case PlaceholderImageMode.custom:
         placeholder = _DefaultImagePlaceholder(
-          nerdMode: nerdMode,
           isRecipe: true,
           colorTheme: colorTheme,
         );
@@ -86,7 +84,6 @@ class CookbookPlaceholderImage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final mode = settings.cookbookPlaceholderMode;
-    final nerdMode = settings.nerdMode;
     final colorTheme = settings.appTheme;
 
     Widget placeholder;
@@ -94,7 +91,6 @@ class CookbookPlaceholderImage extends ConsumerWidget {
     switch (mode) {
       case PlaceholderImageMode.custom:
         placeholder = _DefaultImagePlaceholder(
-          nerdMode: nerdMode,
           isRecipe: false,
           colorTheme: colorTheme,
         );
@@ -194,12 +190,10 @@ class _GradientPlaceholder extends StatelessWidget {
 
 /// Default app artwork placeholder
 class _DefaultImagePlaceholder extends StatelessWidget {
-  final bool nerdMode;
   final bool isRecipe;
   final AppColorTheme colorTheme;
 
   const _DefaultImagePlaceholder({
-    required this.nerdMode,
     required this.isRecipe,
     required this.colorTheme,
   });
@@ -207,12 +201,8 @@ class _DefaultImagePlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imagePath = isRecipe
-        ? (nerdMode
-        ? 'assets/images/recipe_placeholder_rpg.png'
-        : 'assets/images/recipe_placeholder_normal.png')
-        : (nerdMode
-        ? 'assets/images/cookbook_placeholder_rpg.png'
-        : 'assets/images/cookbook_placeholder_normal.png');
+        ? 'assets/images/recipe_placeholder_normal.png'
+        : 'assets/images/cookbook_placeholder_normal.png';
 
     return Image.asset(
       imagePath,

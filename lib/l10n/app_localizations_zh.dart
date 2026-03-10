@@ -364,10 +364,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsMeasurementsMetric => '公制（毫升、克）';
 
   @override
-  String get settingsRPGMode => 'RPG模式';
+  String get settingsKitchenBuddy => 'RPG模式';
 
   @override
-  String get settingsRPGModeSubtitle => '启用奇幻风格文字和图像';
+  String get settingsKitchenBuddySubtitle => '启用奇幻风格文字和图像';
 
   @override
   String get settingsRecipes => '食谱';
@@ -2214,16 +2214,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get defaultImages => '默认图片';
 
   @override
-  String get defaultImagesDescription => '随RPG模式变化的插图';
+  String get defaultImagesDescription => 'Default app artwork for recipes and cookbooks';
 
   @override
   String get themeBased => '基于主题';
 
   @override
   String get themeBasedDescription => '带有主题logo的渐变色';
-
-  @override
-  String get placeholderRpgInfo => '默认图片在普通和RPG变体之间切换。';
 
   @override
   String get groupBySection => '按通道';
@@ -2405,7 +2402,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shoppingListEmptyHint => '添加商品或从食谱导入';
 
   @override
-  String get settingsRPGModeActive => '召唤魔法文字...';
+  String get settingsKitchenBuddyActive => '召唤魔法文字...';
 
   @override
   String get shoppingCheckAll => '全部勾选';
@@ -2841,64 +2838,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tagsColorLabel => '颜色';
 
   @override
-  String get settingsRpgAnimations => '稀有度动画';
-
-  @override
-  String get settingsRpgAnimationsSubtitle => '史诗和传奇食谱的光泽效果';
-
-  @override
-  String get settingsRpgSounds => '音效';
-
-  @override
-  String get settingsRpgSoundsSubtitle => '成就和升级音效';
-
-  @override
-  String get settingsRpgAchievements => '成就';
-
-  @override
-  String get settingsRpgAchievementsSubtitle => '查看已解锁成就';
-
-  @override
-  String get settingsRpgStats => '烹饪统计';
-
-  @override
-  String get settingsRpgStatsSubtitle => '查看烹饪统计';
-
-  @override
-  String get settingsRpgModeEnabled => 'Transform your cooking into an adventure!';
+  String get settingsKitchenBuddyEnabled => 'Earn coins and dress up your buddy!';
 
   @override
   String get settingsRecipeLayoutSubtitle => '自定义食谱显示';
-
-  @override
-  String get rarityCommon => '普通';
-
-  @override
-  String get rarityCommonDesc => '简单的日常食谱';
-
-  @override
-  String get rarityUncommon => '特别';
-
-  @override
-  String get rarityUncommonDesc => '有独特风味的美味食谱';
-
-  @override
-  String get rarityRare => '稀有';
-
-  @override
-  String get rarityRareDesc => '值得掌握的特别食谱';
-
-  @override
-  String get rarityEpic => '史诗';
-
-  @override
-  String get rarityEpicDesc => '具有强大力量的史诗食谱！';
-
-  @override
-  String get rarityLegendary => '传奇';
-
-  @override
-  String get rarityLegendaryDesc => '配得上神灵的传奇食谱！';
 
   @override
   String get shareLink => '链接';
@@ -3012,9 +2955,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get premiumSubtitle => '解锁同步、无限食谱等功能';
-
-  @override
-  String get rpgMode => 'RPG模式';
 
   @override
   String get leaderboards => '排行榜';
@@ -4379,7 +4319,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get menuImport => '导入';
 
   @override
-  String get menuRpgMode => 'RPG模式';
+  String get menuKitchenBuddyMode => 'RPG模式';
 
   @override
   String get menuSocial => '社交';
@@ -4560,13 +4500,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featurePhotosOnSteps => '步骤照片';
 
   @override
-  String get featurePhotoStorage250 => '照片存储250MB（约500张）';
-
-  @override
-  String get featureRpgCosmeticsStarter => 'RPG外观入门包';
-
-  @override
-  String get featureSupporterBadge => '高级支持者徽章';
+  String get featureCloudStorageLimited => 'Cloud storage — Limited';
 
   @override
   String get featureExtraPolish => 'UI和功能改进';
@@ -4575,7 +4509,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featureFamilySharing5 => '家庭共享（5人）';
 
   @override
-  String get featurePhotoStorage1gb => '照片存储1GB（约2,000张）';
+  String get featureCloudStorage => 'Cloud storage';
 
   @override
   String get featureSharedLists => '共享购物清单';
@@ -4587,16 +4521,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featureSharedMealPlan => '共享餐食计划';
 
   @override
-  String get featureEncryptedBackups => '加密备份+历史';
+  String get featureAutoBackups => 'Automatic backups';
 
   @override
   String get featureFamilySharing10 => '家庭共享（10人）';
-
-  @override
-  String get featurePhotoStorage5gb => '照片存储5GB（约10,000张）';
-
-  @override
-  String get featureExtendedVersionHistory => '扩展历史';
 
   @override
   String get featurePrioritySync => '优先同步';
@@ -4654,27 +4582,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get compareBackups => '备份';
-
-  @override
-  String get compareVersionHistory => '历史';
-
-  @override
-  String get light => '轻量';
-
-  @override
-  String get extended => '扩展';
-
-  @override
-  String get compareRpgCosmetics => 'RPG外观';
-
-  @override
-  String get basic => '基础';
-
-  @override
-  String get starterPack => '入门\n套餐';
-
-  @override
-  String get compareSupporterBadge => '支持者徽章';
 
   @override
   String get printOf => '/';
@@ -4788,9 +4695,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get qrScanningMobileOnly => '二维码扫描仅在移动端可用。';
 
   @override
-  String get notEnoughMana => '法力不足！通过食谱获得经验值来恢复。';
-
-  @override
   String get communityComingSoon => '社区功能即将推出！';
 
   @override
@@ -4886,10 +4790,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsNotifAchievementsSubtitle => '成就解锁和里程碑提醒';
 
   @override
-  String get settingsNotifQuests => '任务提醒';
+  String get settingsNotifBuddy => '任务提醒';
 
   @override
-  String get settingsNotifQuestsSubtitle => '每日任务重置和经验值提醒';
+  String get settingsNotifBuddySubtitle => '每日任务重置和经验值提醒';
 
   @override
   String get tuesday => '周二';
@@ -5396,7 +5300,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mealPlanThisWeekend => '本周末';
 
   @override
-  String get menuRpgProfile => 'RPG资料';
+  String get menuKitchenBuddy => 'RPG资料';
 
   @override
   String get menuTools => '工具';
@@ -5474,73 +5378,74 @@ class AppLocalizationsZh extends AppLocalizations {
   String get upgradeToProUnlock => '升级到Pro版解锁';
 
   @override
-  String get rpgFightAgain => '再战一次';
+  String get kitchenBuddyTitle => 'Kitchen Buddy';
 
   @override
-  String get rpgAwesome => '太棒了！';
+  String get kitchenBuddyCloset => 'Closet';
 
   @override
-  String get rpgPurchase => '购买';
+  String get kitchenBuddyShop => 'Shop';
 
   @override
-  String get rpgEquipped => '已装备';
+  String get kitchenBuddyAchievements => 'Achievements';
 
   @override
-  String get rpgClaim => '领取';
+  String kitchenBuddyStreakDays(int count) {
+    return '$count day streak';
+  }
 
   @override
-  String get rpgGuild => '公会';
+  String get kitchenBuddyClosetEmpty => 'No items yet! Visit the Shop to get started.';
 
   @override
-  String get rpgDmg => 'DMG';
+  String get kitchenBuddyShopOwnEverything => 'You own everything!';
 
   @override
-  String get rpgMana => '法力';
+  String get kitchenBuddyShopCheckBack => 'Check back when new items are added.';
 
   @override
-  String get rpgLevel => '等级';
+  String kitchenBuddyConfirmPurchase(String itemName) {
+    return 'Buy $itemName?';
+  }
 
   @override
-  String get rpgTotalXp => '总XP';
+  String kitchenBuddyCostSummary(int price) {
+    return 'This will cost 🪙 $price Spice Coins.';
+  }
 
   @override
-  String get rpgLoginStreak => '连续登录';
+  String get kitchenBuddyBuy => 'Buy';
 
   @override
-  String get rpgGoldEarned => '获得的金币';
+  String kitchenBuddyPurchaseSuccess(String itemName) {
+    return 'Purchased $itemName!';
+  }
 
   @override
-  String get rpgGemsEarned => '获得的宝石';
+  String get kitchenBuddyNotEnoughCoins => 'Not enough coins';
 
   @override
-  String get rpgNextLevel => '下一级';
+  String kitchenBuddyRequires(String achievementName) {
+    return 'Requires: $achievementName';
+  }
 
   @override
-  String get rpgNotifyMe => '通知我';
+  String get kitchenBuddyNamingTitle => 'Name Your Buddy';
 
   @override
-  String get rpgGold => '金币';
+  String get kitchenBuddyIntroTitle => 'Meet your Kitchen Buddy!';
 
   @override
-  String get rpgGems => '宝石';
+  String get kitchenBuddyIntroDescription => 'This little chef will be your kitchen companion.\nCook recipes and earn coins to dress them up!';
 
   @override
-  String get rpgLottery => '宝石抽奖';
+  String get kitchenBuddyNameLabel => 'Buddy Name';
 
   @override
-  String get rpgClasses => '职业';
+  String get kitchenBuddyNameHint => 'Enter a name...';
 
   @override
-  String get rpgDisplayName => '显示名称';
-
-  @override
-  String get rpgResetProgress => '重置进度';
-
-  @override
-  String get rpgResetProgressSubtitle => '从1级重新开始';
-
-  @override
-  String get rpgRecipeRarity => '食谱稀有度';
+  String get kitchenBuddyCreate => 'Create Buddy';
 
   @override
   String get settingsNoMatchingSettings => '没有匹配的设置';
@@ -6284,197 +6189,72 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get rpgAchievements => '成就';
+  String get mealPlanAddTitle => '添加到餐食计划';
 
   @override
-  String get rpgAttack => '攻击';
+  String get mealPlanMealLabel => '餐食';
 
   @override
-  String get rpgBattleArena => '⚔️ 战斗竞技场';
+  String get mealPlanAdding => '添加中...';
 
   @override
-  String get rpgBoss => 'BOSS';
-
-  @override
-  String get rpgBossDamage => 'Boss伤害';
-
-  @override
-  String get rpgBossDefeated => 'Boss已击败！';
-
-  @override
-  String get rpgBossFight => 'Boss战';
-
-  @override
-  String get rpgChooseYourClass => '选择你的职业';
-
-  @override
-  String get rpgClassBonusSubtitle => '每个职业都有独特的加成';
-
-  @override
-  String get rpgClassBonusesList => '职业加成';
-
-  @override
-  String get rpgClassBonusesTitle => '职业加成';
-
-  @override
-  String get rpgComingSoon => '即将推出！';
-
-  @override
-  String get rpgCommunity => '社区';
-
-  @override
-  String get rpgCommunityDescription => '与世界各地的厨师竞争！';
-
-  @override
-  String get rpgCommunityLeaderboard => '社区排行榜';
-
-  @override
-  String get rpgCooked => '已烹饪';
-
-  @override
-  String get rpgCosmetics => '装饰品';
-
-  @override
-  String get rpgCrit => '暴击！';
-
-  @override
-  String rpgDaysAgo(int count) {
-    return '$count天前';
+  String mealPlanDateFormat(String weekday, String month, int day) {
+    return '$month$day日 $weekday';
   }
 
   @override
-  String rpgDaysCount(int count) {
-    return '$count天';
-  }
+  String get splashRecipe => '食谱';
 
   @override
-  String get rpgGemLottery => '宝石抽奖';
+  String get splashSpellbook => '魔法书';
 
   @override
-  String rpgGemsAvailable(int count) {
-    return '$count颗宝石可用';
-  }
+  String get smartImportReparsed => '已由AI重新解析 — 请查看上方更新后的食谱';
 
   @override
-  String rpgHoursAgo(int count) {
-    return '$count小时前';
-  }
+  String get servingSizeHint => '例如：1杯、100克';
 
   @override
-  String get rpgHowYouCompare => '你的排名对比';
+  String get mainNutrients => '主要营养素';
 
   @override
-  String get rpgHp => 'HP';
+  String get additionalNutrients => '其他营养素';
 
   @override
-  String get rpgJustNow => '刚刚';
+  String get onboardingWelcomeTo => '欢迎使用';
 
   @override
-  String get rpgKeepEarningXp => '继续赚取XP来解锁此敌人！';
+  String get onboardingAppName => 'Recipe Spellbook!';
 
   @override
-  String rpgKillStreak(int count) {
-    return '连杀：$count 🔥';
-  }
+  String get onboardingDescription => '来自世界各地的10道精选食谱，助你轻松起步。';
 
   @override
-  String get rpgLeaderboard => '排行榜';
+  String get onboardingDeleteLater => '你可以随时删除它们。';
 
   @override
-  String rpgLevelN(int level) {
-    return '等级$level';
-  }
+  String get onboardingAdding => '添加中...';
 
   @override
-  String rpgLevelRequired(int level) {
-    return '需要等级$level';
-  }
+  String get onboardingAddStarter => '添加入门食谱';
 
   @override
-  String get rpgLotteryCost => '每次旋转花费1颗宝石';
+  String get onboardingBlankCookbook => '从空白食谱开始';
 
   @override
-  String rpgLotteryResultGems(int amount) {
-    return '你赢得了$amount颗宝石！';
-  }
+  String get onboardingSpellbookAwaits => '你的魔法书在等你';
 
   @override
-  String rpgLotteryResultGold(int amount) {
-    return '你赢得了$amount金币！';
-  }
+  String get onboardingYourSpellbookAwaits => '你的魔法书在等你...';
 
   @override
-  String get rpgLotteryResultNothing => '下次好运！';
+  String get onboardingSummoning => '召唤中...';
 
   @override
-  String get rpgLotteryResultRarePet => '你发现了一只稀有宠物！';
+  String get onboardingBlankSpellbook => '从空白魔法书开始';
 
   @override
-  String rpgLotteryResultXp(int amount) {
-    return '你获得了$amount XP！';
-  }
-
-  @override
-  String get rpgManaHint => '通过食谱赚取XP来恢复法力 · 升级可完全补充';
-
-  @override
-  String get rpgMilestones => '里程碑';
-
-  @override
-  String rpgMinutesAgo(int count) {
-    return '$count分钟前';
-  }
-
-  @override
-  String get rpgNoMana => '没有法力！';
-
-  @override
-  String get rpgProfileSettings => '资料设置';
-
-  @override
-  String get rpgQuickActions => '快速操作';
-
-  @override
-  String get rpgRecipes => '食谱';
-
-  @override
-  String get rpgReset => '重置';
-
-  @override
-  String get rpgResetProgressConfirmMessage => '这将重置你所有的RPG进度，包括等级、XP、金币和宝石。此操作无法撤销。';
-
-  @override
-  String get rpgResetProgressConfirmTitle => '重置进度？';
-
-  @override
-  String rpgResetsInHours(int count) {
-    return '$count小时后重置';
-  }
-
-  @override
-  String rpgResetsInMinutes(int count) {
-    return '$count分钟后重置';
-  }
-
-  @override
-  String get rpgSpin => '旋转！';
-
-  @override
-  String get rpgStreak => '连续';
-
-  @override
-  String get rpgVictory => '胜利！';
-
-  @override
-  String rpgYouDefeated(String name) {
-    return '你击败了$name！';
-  }
-
-  @override
-  String get rpgYourStatistics => '你的统计数据';
-
-  @override
-  String get rpgYourStats => '你的状态';
+  String get onboardingSkip => '跳过';
 
   @override
   String get settingsBrowseCommunity => '浏览社区';
@@ -7341,215 +7121,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get themeAlchemist => '炼金术士';
-
-  @override
-  String get rpgNoAchievementsInCategory => '此分类中没有成就';
-
-  @override
-  String rpgUnlocksItem(String item) {
-    return '解锁：$item';
-  }
-
-  @override
-  String get rpgCategory => '分类';
-
-  @override
-  String get rpgCompleted => '已完成';
-
-  @override
-  String get rpgProgress => '进度';
-
-  @override
-  String rpgDefeatedEnemy(String name) {
-    return '击败了$name！';
-  }
-
-  @override
-  String get rpgBlock => '格挡';
-
-  @override
-  String get rpgHeal => '治疗';
-
-  @override
-  String get rpgPlayerDefeated => '战败！';
-
-  @override
-  String rpgPlayerDefeatedDesc(String name) {
-    return '你被$name击败了！';
-  }
-
-  @override
-  String rpgGoldLost(int amount) {
-    return '失去了$amount金币';
-  }
-
-  @override
-  String get rpgRespawn => '复活';
-
-  @override
-  String get rpgYourHp => '你的HP';
-
-  @override
-  String rpgBossRetaliates(String name) {
-    return '$name反击！';
-  }
-
-  @override
-  String rpgBlockedDamage(int damage) {
-    return '格挡成功！仅受到$damage点伤害';
-  }
-
-  @override
-  String rpgHealedHp(int amount) {
-    return '恢复了${amount}HP！';
-  }
-
-  @override
-  String get rpgNotEnoughMana => '法力不足！';
-
-  @override
-  String get rpgAvatars => '头像';
-
-  @override
-  String get rpgFrames => '边框';
-
-  @override
-  String get rpgPets => '宠物';
-
-  @override
-  String get rpgTitles => '称号';
-
-  @override
-  String rpgPurchaseItem(String item) {
-    return '购买$item？';
-  }
-
-  @override
-  String get rpgUnlockedViaAchievement => '通过成就解锁';
-
-  @override
-  String get rpgPrice => '价格';
-
-  @override
-  String get rpgNotEnoughGold => '金币不足';
-
-  @override
-  String get rpgNotEnoughGems => '宝石不足';
-
-  @override
-  String rpgPurchased(String item) {
-    return '已购买$item！';
-  }
-
-  @override
-  String get rpgOwned => '已拥有';
-
-  @override
-  String get rpgDailyQuests => '每日任务';
-
-  @override
-  String rpgQuestsCompleted(int completed, int total) {
-    return '$completed/$total已完成';
-  }
-
-  @override
-  String get rpgWeeklyChallenge => '每周挑战';
-
-  @override
-  String get rpgQuestsSubtitle => '完成任务赚取XP和奖励';
-
-  @override
-  String get rpgRecentXp => '最近的XP';
-
-  @override
-  String get rpgNoAchievementsYet => '还没有成就';
-
-  @override
-  String rpgLv(int level) {
-    return 'Lv.$level';
-  }
-
-  @override
-  String rpgClassBonus(String className) {
-    return '$className加成';
-  }
-
-  @override
-  String get rpgLevelUp => '升级！';
-
-  @override
-  String get rpgUnlocked => '已解锁！';
-
-  @override
-  String get rpgAchievementUnlocked => '成就已解锁！';
-
-  @override
-  String get mealPlanAddTitle => '添加到餐食计划';
-
-  @override
-  String get mealPlanMealLabel => '餐食';
-
-  @override
-  String get mealPlanAdding => '添加中...';
-
-  @override
-  String mealPlanDateFormat(String weekday, String month, int day) {
-    return '$month$day日 $weekday';
-  }
-
-  @override
-  String get splashRecipe => '食谱';
-
-  @override
-  String get splashSpellbook => '魔法书';
-
-  @override
-  String get smartImportReparsed => '已由AI重新解析 — 请查看上方更新后的食谱';
-
-  @override
-  String get servingSizeHint => '例如：1杯、100克';
-
-  @override
-  String get mainNutrients => '主要营养素';
-
-  @override
-  String get additionalNutrients => '其他营养素';
-
-  @override
-  String get onboardingWelcomeTo => '欢迎使用';
-
-  @override
-  String get onboardingAppName => 'Recipe Spellbook!';
-
-  @override
-  String get onboardingDescription => '来自世界各地的10道精选食谱，助你轻松起步。';
-
-  @override
-  String get onboardingDeleteLater => '你可以随时删除它们。';
-
-  @override
-  String get onboardingAdding => '添加中...';
-
-  @override
-  String get onboardingAddStarter => '添加入门食谱';
-
-  @override
-  String get onboardingBlankCookbook => '从空白食谱开始';
-
-  @override
-  String get onboardingSpellbookAwaits => '你的魔法书在等你';
-
-  @override
-  String get onboardingYourSpellbookAwaits => '你的魔法书在等你...';
-
-  @override
-  String get onboardingSummoning => '召唤中...';
-
-  @override
-  String get onboardingBlankSpellbook => '从空白魔法书开始';
-
-  @override
-  String get onboardingSkip => '跳过';
 
   @override
   String get communitySortTopRated => '评分最高';

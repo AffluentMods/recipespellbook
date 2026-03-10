@@ -793,17 +793,17 @@ abstract class AppLocalizations {
   /// **'Metric (ml, g)'**
   String get settingsMeasurementsMetric;
 
-  /// No description provided for @settingsRPGMode.
+  /// No description provided for @settingsKitchenBuddy.
   ///
   /// In en, this message translates to:
-  /// **'RPG Mode'**
-  String get settingsRPGMode;
+  /// **'Kitchen Buddy'**
+  String get settingsKitchenBuddy;
 
-  /// No description provided for @settingsRPGModeSubtitle.
+  /// No description provided for @settingsKitchenBuddySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Enable fantasy-style text & images'**
-  String get settingsRPGModeSubtitle;
+  /// **'A cute chef companion you dress up with coins'**
+  String get settingsKitchenBuddySubtitle;
 
   /// No description provided for @settingsRecipes.
   ///
@@ -4108,7 +4108,7 @@ abstract class AppLocalizations {
   /// No description provided for @defaultImagesDescription.
   ///
   /// In en, this message translates to:
-  /// **'App artwork that changes with RPG mode'**
+  /// **'Default app artwork for recipes and cookbooks'**
   String get defaultImagesDescription;
 
   /// No description provided for @themeBased.
@@ -4122,12 +4122,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gradient with logo based on your color theme'**
   String get themeBasedDescription;
-
-  /// No description provided for @placeholderRpgInfo.
-  ///
-  /// In en, this message translates to:
-  /// **'Default images change between normal and RPG variants when RPG Mode is enabled.'**
-  String get placeholderRpgInfo;
 
   /// No description provided for @groupBySection.
   ///
@@ -4483,11 +4477,11 @@ abstract class AppLocalizations {
   /// **'Add items or import from recipes'**
   String get shoppingListEmptyHint;
 
-  /// No description provided for @settingsRPGModeActive.
+  /// No description provided for @settingsKitchenBuddyActive.
   ///
   /// In en, this message translates to:
-  /// **'Conjuring magical text...'**
-  String get settingsRPGModeActive;
+  /// **'Your Kitchen Buddy is ready to cook!'**
+  String get settingsKitchenBuddyActive;
 
   /// No description provided for @shoppingCheckAll.
   ///
@@ -5335,125 +5329,17 @@ abstract class AppLocalizations {
   /// **'Color'**
   String get tagsColorLabel;
 
-  /// No description provided for @settingsRpgAnimations.
+  /// No description provided for @settingsKitchenBuddyEnabled.
   ///
   /// In en, this message translates to:
-  /// **'Rarity Animations'**
-  String get settingsRpgAnimations;
-
-  /// No description provided for @settingsRpgAnimationsSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Glowing effects for epic and legendary recipes'**
-  String get settingsRpgAnimationsSubtitle;
-
-  /// No description provided for @settingsRpgSounds.
-  ///
-  /// In en, this message translates to:
-  /// **'Sound Effects'**
-  String get settingsRpgSounds;
-
-  /// No description provided for @settingsRpgSoundsSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Play sounds for achievements and level ups'**
-  String get settingsRpgSoundsSubtitle;
-
-  /// No description provided for @settingsRpgAchievements.
-  ///
-  /// In en, this message translates to:
-  /// **'Achievements'**
-  String get settingsRpgAchievements;
-
-  /// No description provided for @settingsRpgAchievementsSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'View your unlocked achievements'**
-  String get settingsRpgAchievementsSubtitle;
-
-  /// No description provided for @settingsRpgStats.
-  ///
-  /// In en, this message translates to:
-  /// **'Cooking Stats'**
-  String get settingsRpgStats;
-
-  /// No description provided for @settingsRpgStatsSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'View your cooking statistics'**
-  String get settingsRpgStatsSubtitle;
-
-  /// No description provided for @settingsRpgModeEnabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Transform your cooking into an adventure!'**
-  String get settingsRpgModeEnabled;
+  /// **'Earn coins and dress up your buddy!'**
+  String get settingsKitchenBuddyEnabled;
 
   /// No description provided for @settingsRecipeLayoutSubtitle.
   ///
   /// In en, this message translates to:
   /// **'Customize how recipes are displayed'**
   String get settingsRecipeLayoutSubtitle;
-
-  /// No description provided for @rarityCommon.
-  ///
-  /// In en, this message translates to:
-  /// **'Common'**
-  String get rarityCommon;
-
-  /// No description provided for @rarityCommonDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'A simple everyday recipe'**
-  String get rarityCommonDesc;
-
-  /// No description provided for @rarityUncommon.
-  ///
-  /// In en, this message translates to:
-  /// **'Uncommon'**
-  String get rarityUncommon;
-
-  /// No description provided for @rarityUncommonDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'A tasty recipe with a twist'**
-  String get rarityUncommonDesc;
-
-  /// No description provided for @rarityRare.
-  ///
-  /// In en, this message translates to:
-  /// **'Rare'**
-  String get rarityRare;
-
-  /// No description provided for @rarityRareDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'A special recipe worth mastering'**
-  String get rarityRareDesc;
-
-  /// No description provided for @rarityEpic.
-  ///
-  /// In en, this message translates to:
-  /// **'Epic'**
-  String get rarityEpic;
-
-  /// No description provided for @rarityEpicDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'An epic recipe of great power!'**
-  String get rarityEpicDesc;
-
-  /// No description provided for @rarityLegendary.
-  ///
-  /// In en, this message translates to:
-  /// **'Legendary'**
-  String get rarityLegendary;
-
-  /// No description provided for @rarityLegendaryDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'A legendary recipe worthy of the gods!'**
-  String get rarityLegendaryDesc;
 
   /// No description provided for @shareLink.
   ///
@@ -5676,12 +5562,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unlock sync, unlimited recipes & more'**
   String get premiumSubtitle;
-
-  /// No description provided for @rpgMode.
-  ///
-  /// In en, this message translates to:
-  /// **'RPG Mode'**
-  String get rpgMode;
 
   /// No description provided for @leaderboards.
   ///
@@ -8131,11 +8011,11 @@ abstract class AppLocalizations {
   /// **'IMPORT'**
   String get menuImport;
 
-  /// No description provided for @menuRpgMode.
+  /// No description provided for @menuKitchenBuddyMode.
   ///
   /// In en, this message translates to:
-  /// **'RPG MODE'**
-  String get menuRpgMode;
+  /// **'KITCHEN BUDDY'**
+  String get menuKitchenBuddyMode;
 
   /// No description provided for @menuSocial.
   ///
@@ -8461,23 +8341,11 @@ abstract class AppLocalizations {
   /// **'Photos on steps'**
   String get featurePhotosOnSteps;
 
-  /// No description provided for @featurePhotoStorage250.
+  /// No description provided for @featureCloudStorageLimited.
   ///
   /// In en, this message translates to:
-  /// **'250 MB photo storage (~500 photos)'**
-  String get featurePhotoStorage250;
-
-  /// No description provided for @featureRpgCosmeticsStarter.
-  ///
-  /// In en, this message translates to:
-  /// **'RPG cosmetics starter pack'**
-  String get featureRpgCosmeticsStarter;
-
-  /// No description provided for @featureSupporterBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Premium supporter badge'**
-  String get featureSupporterBadge;
+  /// **'Cloud storage — Limited'**
+  String get featureCloudStorageLimited;
 
   /// No description provided for @featureExtraPolish.
   ///
@@ -8491,11 +8359,11 @@ abstract class AppLocalizations {
   /// **'Family sharing (5 members)'**
   String get featureFamilySharing5;
 
-  /// No description provided for @featurePhotoStorage1gb.
+  /// No description provided for @featureCloudStorage.
   ///
   /// In en, this message translates to:
-  /// **'1 GB photo storage (~2,000 photos)'**
-  String get featurePhotoStorage1gb;
+  /// **'Cloud storage'**
+  String get featureCloudStorage;
 
   /// No description provided for @featureSharedLists.
   ///
@@ -8515,29 +8383,17 @@ abstract class AppLocalizations {
   /// **'Shared meal planning'**
   String get featureSharedMealPlan;
 
-  /// No description provided for @featureEncryptedBackups.
+  /// No description provided for @featureAutoBackups.
   ///
   /// In en, this message translates to:
-  /// **'Encrypted backups + version history'**
-  String get featureEncryptedBackups;
+  /// **'Automatic backups'**
+  String get featureAutoBackups;
 
   /// No description provided for @featureFamilySharing10.
   ///
   /// In en, this message translates to:
   /// **'Family sharing (10 members)'**
   String get featureFamilySharing10;
-
-  /// No description provided for @featurePhotoStorage5gb.
-  ///
-  /// In en, this message translates to:
-  /// **'5 GB photo storage (~10,000 photos)'**
-  String get featurePhotoStorage5gb;
-
-  /// No description provided for @featureExtendedVersionHistory.
-  ///
-  /// In en, this message translates to:
-  /// **'Extended version history'**
-  String get featureExtendedVersionHistory;
 
   /// No description provided for @featurePrioritySync.
   ///
@@ -8652,48 +8508,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Backups'**
   String get compareBackups;
-
-  /// No description provided for @compareVersionHistory.
-  ///
-  /// In en, this message translates to:
-  /// **'Version history'**
-  String get compareVersionHistory;
-
-  /// No description provided for @light.
-  ///
-  /// In en, this message translates to:
-  /// **'Light'**
-  String get light;
-
-  /// No description provided for @extended.
-  ///
-  /// In en, this message translates to:
-  /// **'Extended'**
-  String get extended;
-
-  /// No description provided for @compareRpgCosmetics.
-  ///
-  /// In en, this message translates to:
-  /// **'RPG cosmetics'**
-  String get compareRpgCosmetics;
-
-  /// No description provided for @basic.
-  ///
-  /// In en, this message translates to:
-  /// **'Basic'**
-  String get basic;
-
-  /// No description provided for @starterPack.
-  ///
-  /// In en, this message translates to:
-  /// **'Starter\npack'**
-  String get starterPack;
-
-  /// No description provided for @compareSupporterBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Supporter badge'**
-  String get compareSupporterBadge;
 
   /// No description provided for @printOf.
   ///
@@ -8905,12 +8719,6 @@ abstract class AppLocalizations {
   /// **'QR scanning is only available on mobile devices.'**
   String get qrScanningMobileOnly;
 
-  /// No description provided for @notEnoughMana.
-  ///
-  /// In en, this message translates to:
-  /// **'Not enough mana! Earn XP from recipes to regenerate.'**
-  String get notEnoughMana;
-
   /// No description provided for @communityComingSoon.
   ///
   /// In en, this message translates to:
@@ -9085,17 +8893,17 @@ abstract class AppLocalizations {
   /// **'Achievement unlocks and milestone alerts'**
   String get settingsNotifAchievementsSubtitle;
 
-  /// No description provided for @settingsNotifQuests.
+  /// No description provided for @settingsNotifBuddy.
   ///
   /// In en, this message translates to:
-  /// **'Quest Reminders'**
-  String get settingsNotifQuests;
+  /// **'Buddy Reminders'**
+  String get settingsNotifBuddy;
 
-  /// No description provided for @settingsNotifQuestsSubtitle.
+  /// No description provided for @settingsNotifBuddySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Daily quest resets and XP reminders'**
-  String get settingsNotifQuestsSubtitle;
+  /// **'Kitchen Buddy login streaks and coin bonuses'**
+  String get settingsNotifBuddySubtitle;
 
   /// No description provided for @tuesday.
   ///
@@ -10057,11 +9865,11 @@ abstract class AppLocalizations {
   /// **'This Weekend'**
   String get mealPlanThisWeekend;
 
-  /// No description provided for @menuRpgProfile.
+  /// No description provided for @menuKitchenBuddy.
   ///
   /// In en, this message translates to:
-  /// **'RPG Profile'**
-  String get menuRpgProfile;
+  /// **'Kitchen Buddy'**
+  String get menuKitchenBuddy;
 
   /// No description provided for @menuTools.
   ///
@@ -10213,143 +10021,125 @@ abstract class AppLocalizations {
   /// **'Upgrade to Pro to unlock'**
   String get upgradeToProUnlock;
 
-  /// No description provided for @rpgFightAgain.
+  /// No description provided for @kitchenBuddyTitle.
   ///
   /// In en, this message translates to:
-  /// **'Fight Again'**
-  String get rpgFightAgain;
+  /// **'Kitchen Buddy'**
+  String get kitchenBuddyTitle;
 
-  /// No description provided for @rpgAwesome.
+  /// No description provided for @kitchenBuddyCloset.
   ///
   /// In en, this message translates to:
-  /// **'Awesome!'**
-  String get rpgAwesome;
+  /// **'Closet'**
+  String get kitchenBuddyCloset;
 
-  /// No description provided for @rpgPurchase.
+  /// No description provided for @kitchenBuddyShop.
   ///
   /// In en, this message translates to:
-  /// **'Purchase'**
-  String get rpgPurchase;
+  /// **'Shop'**
+  String get kitchenBuddyShop;
 
-  /// No description provided for @rpgEquipped.
+  /// No description provided for @kitchenBuddyAchievements.
   ///
   /// In en, this message translates to:
-  /// **'Equipped'**
-  String get rpgEquipped;
+  /// **'Achievements'**
+  String get kitchenBuddyAchievements;
 
-  /// No description provided for @rpgClaim.
+  /// No description provided for @kitchenBuddyStreakDays.
   ///
   /// In en, this message translates to:
-  /// **'Claim'**
-  String get rpgClaim;
+  /// **'{count} day streak'**
+  String kitchenBuddyStreakDays(int count);
 
-  /// No description provided for @rpgGuild.
+  /// No description provided for @kitchenBuddyClosetEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Guild'**
-  String get rpgGuild;
+  /// **'No items yet! Visit the Shop to get started.'**
+  String get kitchenBuddyClosetEmpty;
 
-  /// No description provided for @rpgDmg.
+  /// No description provided for @kitchenBuddyShopOwnEverything.
   ///
   /// In en, this message translates to:
-  /// **'DMG'**
-  String get rpgDmg;
+  /// **'You own everything!'**
+  String get kitchenBuddyShopOwnEverything;
 
-  /// No description provided for @rpgMana.
+  /// No description provided for @kitchenBuddyShopCheckBack.
   ///
   /// In en, this message translates to:
-  /// **'Mana'**
-  String get rpgMana;
+  /// **'Check back when new items are added.'**
+  String get kitchenBuddyShopCheckBack;
 
-  /// No description provided for @rpgLevel.
+  /// No description provided for @kitchenBuddyConfirmPurchase.
   ///
   /// In en, this message translates to:
-  /// **'Level'**
-  String get rpgLevel;
+  /// **'Buy {itemName}?'**
+  String kitchenBuddyConfirmPurchase(String itemName);
 
-  /// No description provided for @rpgTotalXp.
+  /// No description provided for @kitchenBuddyCostSummary.
   ///
   /// In en, this message translates to:
-  /// **'Total XP'**
-  String get rpgTotalXp;
+  /// **'This will cost 🪙 {price} Spice Coins.'**
+  String kitchenBuddyCostSummary(int price);
 
-  /// No description provided for @rpgLoginStreak.
+  /// No description provided for @kitchenBuddyBuy.
   ///
   /// In en, this message translates to:
-  /// **'Login Streak'**
-  String get rpgLoginStreak;
+  /// **'Buy'**
+  String get kitchenBuddyBuy;
 
-  /// No description provided for @rpgGoldEarned.
+  /// No description provided for @kitchenBuddyPurchaseSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Gold Earned'**
-  String get rpgGoldEarned;
+  /// **'Purchased {itemName}!'**
+  String kitchenBuddyPurchaseSuccess(String itemName);
 
-  /// No description provided for @rpgGemsEarned.
+  /// No description provided for @kitchenBuddyNotEnoughCoins.
   ///
   /// In en, this message translates to:
-  /// **'Gems Earned'**
-  String get rpgGemsEarned;
+  /// **'Not enough coins'**
+  String get kitchenBuddyNotEnoughCoins;
 
-  /// No description provided for @rpgNextLevel.
+  /// No description provided for @kitchenBuddyRequires.
   ///
   /// In en, this message translates to:
-  /// **'Next Level'**
-  String get rpgNextLevel;
+  /// **'Requires: {achievementName}'**
+  String kitchenBuddyRequires(String achievementName);
 
-  /// No description provided for @rpgNotifyMe.
+  /// No description provided for @kitchenBuddyNamingTitle.
   ///
   /// In en, this message translates to:
-  /// **'Notify Me'**
-  String get rpgNotifyMe;
+  /// **'Name Your Buddy'**
+  String get kitchenBuddyNamingTitle;
 
-  /// No description provided for @rpgGold.
+  /// No description provided for @kitchenBuddyIntroTitle.
   ///
   /// In en, this message translates to:
-  /// **'Gold'**
-  String get rpgGold;
+  /// **'Meet your Kitchen Buddy!'**
+  String get kitchenBuddyIntroTitle;
 
-  /// No description provided for @rpgGems.
+  /// No description provided for @kitchenBuddyIntroDescription.
   ///
   /// In en, this message translates to:
-  /// **'Gems'**
-  String get rpgGems;
+  /// **'This little chef will be your kitchen companion.\nCook recipes and earn coins to dress them up!'**
+  String get kitchenBuddyIntroDescription;
 
-  /// No description provided for @rpgLottery.
+  /// No description provided for @kitchenBuddyNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'Gem Lottery'**
-  String get rpgLottery;
+  /// **'Buddy Name'**
+  String get kitchenBuddyNameLabel;
 
-  /// No description provided for @rpgClasses.
+  /// No description provided for @kitchenBuddyNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Classes'**
-  String get rpgClasses;
+  /// **'Enter a name...'**
+  String get kitchenBuddyNameHint;
 
-  /// No description provided for @rpgDisplayName.
+  /// No description provided for @kitchenBuddyCreate.
   ///
   /// In en, this message translates to:
-  /// **'Display Name'**
-  String get rpgDisplayName;
-
-  /// No description provided for @rpgResetProgress.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset Progress'**
-  String get rpgResetProgress;
-
-  /// No description provided for @rpgResetProgressSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Start over from level 1'**
-  String get rpgResetProgressSubtitle;
-
-  /// No description provided for @rpgRecipeRarity.
-  ///
-  /// In en, this message translates to:
-  /// **'Recipe Rarity'**
-  String get rpgRecipeRarity;
+  /// **'Create Buddy'**
+  String get kitchenBuddyCreate;
 
   /// No description provided for @settingsNoMatchingSettings.
   ///
@@ -11641,335 +11431,137 @@ abstract class AppLocalizations {
   /// **'{count} items'**
   String pantryItemCount(int count);
 
-  /// No description provided for @rpgAchievements.
+  /// No description provided for @mealPlanAddTitle.
   ///
   /// In en, this message translates to:
-  /// **'Achievements'**
-  String get rpgAchievements;
+  /// **'Add to Meal Plan'**
+  String get mealPlanAddTitle;
 
-  /// No description provided for @rpgAttack.
+  /// No description provided for @mealPlanMealLabel.
   ///
   /// In en, this message translates to:
-  /// **'Attack'**
-  String get rpgAttack;
+  /// **'Meal'**
+  String get mealPlanMealLabel;
 
-  /// No description provided for @rpgBattleArena.
+  /// No description provided for @mealPlanAdding.
   ///
   /// In en, this message translates to:
-  /// **'⚔️ Battle Arena'**
-  String get rpgBattleArena;
+  /// **'Adding...'**
+  String get mealPlanAdding;
 
-  /// No description provided for @rpgBoss.
+  /// No description provided for @mealPlanDateFormat.
   ///
   /// In en, this message translates to:
-  /// **'BOSS'**
-  String get rpgBoss;
+  /// **'{weekday}, {month} {day}'**
+  String mealPlanDateFormat(String weekday, String month, int day);
 
-  /// No description provided for @rpgBossDamage.
+  /// No description provided for @splashRecipe.
   ///
   /// In en, this message translates to:
-  /// **'Boss Damage'**
-  String get rpgBossDamage;
+  /// **'Recipe'**
+  String get splashRecipe;
 
-  /// No description provided for @rpgBossDefeated.
+  /// No description provided for @splashSpellbook.
   ///
   /// In en, this message translates to:
-  /// **'Boss Defeated!'**
-  String get rpgBossDefeated;
+  /// **'Spellbook'**
+  String get splashSpellbook;
 
-  /// No description provided for @rpgBossFight.
+  /// No description provided for @smartImportReparsed.
   ///
   /// In en, this message translates to:
-  /// **'Boss Fight'**
-  String get rpgBossFight;
+  /// **'Re-parsed by AI — review the updated recipe above'**
+  String get smartImportReparsed;
 
-  /// No description provided for @rpgChooseYourClass.
+  /// No description provided for @servingSizeHint.
   ///
   /// In en, this message translates to:
-  /// **'Choose Your Class'**
-  String get rpgChooseYourClass;
+  /// **'e.g., 1 cup, 100g'**
+  String get servingSizeHint;
 
-  /// No description provided for @rpgClassBonusSubtitle.
+  /// No description provided for @mainNutrients.
   ///
   /// In en, this message translates to:
-  /// **'Each class grants unique bonuses'**
-  String get rpgClassBonusSubtitle;
+  /// **'Main Nutrients'**
+  String get mainNutrients;
 
-  /// No description provided for @rpgClassBonusesList.
+  /// No description provided for @additionalNutrients.
   ///
   /// In en, this message translates to:
-  /// **'Class Bonuses'**
-  String get rpgClassBonusesList;
+  /// **'Additional Nutrients'**
+  String get additionalNutrients;
 
-  /// No description provided for @rpgClassBonusesTitle.
+  /// No description provided for @onboardingWelcomeTo.
   ///
   /// In en, this message translates to:
-  /// **'Class Bonuses'**
-  String get rpgClassBonusesTitle;
+  /// **'Welcome to'**
+  String get onboardingWelcomeTo;
 
-  /// No description provided for @rpgComingSoon.
+  /// No description provided for @onboardingAppName.
   ///
   /// In en, this message translates to:
-  /// **'Coming soon!'**
-  String get rpgComingSoon;
+  /// **'Recipe Spellbook!'**
+  String get onboardingAppName;
 
-  /// No description provided for @rpgCommunity.
+  /// No description provided for @onboardingDescription.
   ///
   /// In en, this message translates to:
-  /// **'Community'**
-  String get rpgCommunity;
+  /// **'10 handpicked recipes from around the world to get you started.'**
+  String get onboardingDescription;
 
-  /// No description provided for @rpgCommunityDescription.
+  /// No description provided for @onboardingDeleteLater.
   ///
   /// In en, this message translates to:
-  /// **'Compete with other cooks around the world!'**
-  String get rpgCommunityDescription;
+  /// **'You can always delete them later.'**
+  String get onboardingDeleteLater;
 
-  /// No description provided for @rpgCommunityLeaderboard.
+  /// No description provided for @onboardingAdding.
   ///
   /// In en, this message translates to:
-  /// **'Community Leaderboard'**
-  String get rpgCommunityLeaderboard;
+  /// **'Adding...'**
+  String get onboardingAdding;
 
-  /// No description provided for @rpgCooked.
+  /// No description provided for @onboardingAddStarter.
   ///
   /// In en, this message translates to:
-  /// **'Cooked'**
-  String get rpgCooked;
+  /// **'Add starter recipes'**
+  String get onboardingAddStarter;
 
-  /// No description provided for @rpgCosmetics.
+  /// No description provided for @onboardingBlankCookbook.
   ///
   /// In en, this message translates to:
-  /// **'Cosmetics'**
-  String get rpgCosmetics;
+  /// **'Start with a blank cookbook'**
+  String get onboardingBlankCookbook;
 
-  /// No description provided for @rpgCrit.
+  /// No description provided for @onboardingSpellbookAwaits.
   ///
   /// In en, this message translates to:
-  /// **'CRIT!'**
-  String get rpgCrit;
+  /// **'Your Spellbook Awaits'**
+  String get onboardingSpellbookAwaits;
 
-  /// No description provided for @rpgDaysAgo.
+  /// No description provided for @onboardingYourSpellbookAwaits.
   ///
   /// In en, this message translates to:
-  /// **'{count} days ago'**
-  String rpgDaysAgo(int count);
+  /// **'Your spellbook awaits...'**
+  String get onboardingYourSpellbookAwaits;
 
-  /// No description provided for @rpgDaysCount.
+  /// No description provided for @onboardingSummoning.
   ///
   /// In en, this message translates to:
-  /// **'{count} days'**
-  String rpgDaysCount(int count);
+  /// **'Summoning...'**
+  String get onboardingSummoning;
 
-  /// No description provided for @rpgGemLottery.
+  /// No description provided for @onboardingBlankSpellbook.
   ///
   /// In en, this message translates to:
-  /// **'Gem Lottery'**
-  String get rpgGemLottery;
+  /// **'Start with a blank spellbook'**
+  String get onboardingBlankSpellbook;
 
-  /// No description provided for @rpgGemsAvailable.
+  /// No description provided for @onboardingSkip.
   ///
   /// In en, this message translates to:
-  /// **'{count} gems available'**
-  String rpgGemsAvailable(int count);
-
-  /// No description provided for @rpgHoursAgo.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} hours ago'**
-  String rpgHoursAgo(int count);
-
-  /// No description provided for @rpgHowYouCompare.
-  ///
-  /// In en, this message translates to:
-  /// **'How You Compare'**
-  String get rpgHowYouCompare;
-
-  /// No description provided for @rpgHp.
-  ///
-  /// In en, this message translates to:
-  /// **'HP'**
-  String get rpgHp;
-
-  /// No description provided for @rpgJustNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Just now'**
-  String get rpgJustNow;
-
-  /// No description provided for @rpgKeepEarningXp.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep earning XP to unlock this enemy!'**
-  String get rpgKeepEarningXp;
-
-  /// No description provided for @rpgKillStreak.
-  ///
-  /// In en, this message translates to:
-  /// **'Kill streak: {count} 🔥'**
-  String rpgKillStreak(int count);
-
-  /// No description provided for @rpgLeaderboard.
-  ///
-  /// In en, this message translates to:
-  /// **'Leaderboard'**
-  String get rpgLeaderboard;
-
-  /// No description provided for @rpgLevelN.
-  ///
-  /// In en, this message translates to:
-  /// **'Level {level}'**
-  String rpgLevelN(int level);
-
-  /// No description provided for @rpgLevelRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Level {level} Required'**
-  String rpgLevelRequired(int level);
-
-  /// No description provided for @rpgLotteryCost.
-  ///
-  /// In en, this message translates to:
-  /// **'Costs 1 gem per spin'**
-  String get rpgLotteryCost;
-
-  /// No description provided for @rpgLotteryResultGems.
-  ///
-  /// In en, this message translates to:
-  /// **'You won {amount} gems!'**
-  String rpgLotteryResultGems(int amount);
-
-  /// No description provided for @rpgLotteryResultGold.
-  ///
-  /// In en, this message translates to:
-  /// **'You won {amount} gold!'**
-  String rpgLotteryResultGold(int amount);
-
-  /// No description provided for @rpgLotteryResultNothing.
-  ///
-  /// In en, this message translates to:
-  /// **'Better luck next time!'**
-  String get rpgLotteryResultNothing;
-
-  /// No description provided for @rpgLotteryResultRarePet.
-  ///
-  /// In en, this message translates to:
-  /// **'You found a rare pet!'**
-  String get rpgLotteryResultRarePet;
-
-  /// No description provided for @rpgLotteryResultXp.
-  ///
-  /// In en, this message translates to:
-  /// **'You earned {amount} XP!'**
-  String rpgLotteryResultXp(int amount);
-
-  /// No description provided for @rpgManaHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Earn XP from recipes to regenerate mana • Level up for full refill'**
-  String get rpgManaHint;
-
-  /// No description provided for @rpgMilestones.
-  ///
-  /// In en, this message translates to:
-  /// **'Milestones'**
-  String get rpgMilestones;
-
-  /// No description provided for @rpgMinutesAgo.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} minutes ago'**
-  String rpgMinutesAgo(int count);
-
-  /// No description provided for @rpgNoMana.
-  ///
-  /// In en, this message translates to:
-  /// **'No Mana!'**
-  String get rpgNoMana;
-
-  /// No description provided for @rpgProfileSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Profile Settings'**
-  String get rpgProfileSettings;
-
-  /// No description provided for @rpgQuickActions.
-  ///
-  /// In en, this message translates to:
-  /// **'Quick Actions'**
-  String get rpgQuickActions;
-
-  /// No description provided for @rpgRecipes.
-  ///
-  /// In en, this message translates to:
-  /// **'Recipes'**
-  String get rpgRecipes;
-
-  /// No description provided for @rpgReset.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset'**
-  String get rpgReset;
-
-  /// No description provided for @rpgResetProgressConfirmMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'This will reset all your RPG progress including level, XP, gold, and gems. This cannot be undone.'**
-  String get rpgResetProgressConfirmMessage;
-
-  /// No description provided for @rpgResetProgressConfirmTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset Progress?'**
-  String get rpgResetProgressConfirmTitle;
-
-  /// No description provided for @rpgResetsInHours.
-  ///
-  /// In en, this message translates to:
-  /// **'Resets in {count} hours'**
-  String rpgResetsInHours(int count);
-
-  /// No description provided for @rpgResetsInMinutes.
-  ///
-  /// In en, this message translates to:
-  /// **'Resets in {count} minutes'**
-  String rpgResetsInMinutes(int count);
-
-  /// No description provided for @rpgSpin.
-  ///
-  /// In en, this message translates to:
-  /// **'Spin!'**
-  String get rpgSpin;
-
-  /// No description provided for @rpgStreak.
-  ///
-  /// In en, this message translates to:
-  /// **'Streak'**
-  String get rpgStreak;
-
-  /// No description provided for @rpgVictory.
-  ///
-  /// In en, this message translates to:
-  /// **'Victory!'**
-  String get rpgVictory;
-
-  /// No description provided for @rpgYouDefeated.
-  ///
-  /// In en, this message translates to:
-  /// **'You defeated {name}!'**
-  String rpgYouDefeated(String name);
-
-  /// No description provided for @rpgYourStatistics.
-  ///
-  /// In en, this message translates to:
-  /// **'Your Statistics'**
-  String get rpgYourStatistics;
-
-  /// No description provided for @rpgYourStats.
-  ///
-  /// In en, this message translates to:
-  /// **'Your Stats'**
-  String get rpgYourStats;
+  /// **'Skip'**
+  String get onboardingSkip;
 
   /// No description provided for @settingsBrowseCommunity.
   ///
@@ -13590,372 +13182,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Alchemist'**
   String get themeAlchemist;
-
-  /// No description provided for @rpgNoAchievementsInCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'No achievements in this category'**
-  String get rpgNoAchievementsInCategory;
-
-  /// No description provided for @rpgUnlocksItem.
-  ///
-  /// In en, this message translates to:
-  /// **'Unlocks: {item}'**
-  String rpgUnlocksItem(String item);
-
-  /// No description provided for @rpgCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Category'**
-  String get rpgCategory;
-
-  /// No description provided for @rpgCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Completed'**
-  String get rpgCompleted;
-
-  /// No description provided for @rpgProgress.
-  ///
-  /// In en, this message translates to:
-  /// **'Progress'**
-  String get rpgProgress;
-
-  /// No description provided for @rpgDefeatedEnemy.
-  ///
-  /// In en, this message translates to:
-  /// **'Defeated {name}!'**
-  String rpgDefeatedEnemy(String name);
-
-  /// No description provided for @rpgBlock.
-  ///
-  /// In en, this message translates to:
-  /// **'Block'**
-  String get rpgBlock;
-
-  /// No description provided for @rpgHeal.
-  ///
-  /// In en, this message translates to:
-  /// **'Heal'**
-  String get rpgHeal;
-
-  /// No description provided for @rpgPlayerDefeated.
-  ///
-  /// In en, this message translates to:
-  /// **'Defeated!'**
-  String get rpgPlayerDefeated;
-
-  /// No description provided for @rpgPlayerDefeatedDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'You were defeated by {name}!'**
-  String rpgPlayerDefeatedDesc(String name);
-
-  /// No description provided for @rpgGoldLost.
-  ///
-  /// In en, this message translates to:
-  /// **'Lost {amount} gold'**
-  String rpgGoldLost(int amount);
-
-  /// No description provided for @rpgRespawn.
-  ///
-  /// In en, this message translates to:
-  /// **'Respawn'**
-  String get rpgRespawn;
-
-  /// No description provided for @rpgYourHp.
-  ///
-  /// In en, this message translates to:
-  /// **'Your HP'**
-  String get rpgYourHp;
-
-  /// No description provided for @rpgBossRetaliates.
-  ///
-  /// In en, this message translates to:
-  /// **'{name} retaliates!'**
-  String rpgBossRetaliates(String name);
-
-  /// No description provided for @rpgBlockedDamage.
-  ///
-  /// In en, this message translates to:
-  /// **'Blocked! Only {damage} damage taken'**
-  String rpgBlockedDamage(int damage);
-
-  /// No description provided for @rpgHealedHp.
-  ///
-  /// In en, this message translates to:
-  /// **'Healed {amount} HP!'**
-  String rpgHealedHp(int amount);
-
-  /// No description provided for @rpgNotEnoughMana.
-  ///
-  /// In en, this message translates to:
-  /// **'Not enough mana!'**
-  String get rpgNotEnoughMana;
-
-  /// No description provided for @rpgAvatars.
-  ///
-  /// In en, this message translates to:
-  /// **'Avatars'**
-  String get rpgAvatars;
-
-  /// No description provided for @rpgFrames.
-  ///
-  /// In en, this message translates to:
-  /// **'Frames'**
-  String get rpgFrames;
-
-  /// No description provided for @rpgPets.
-  ///
-  /// In en, this message translates to:
-  /// **'Pets'**
-  String get rpgPets;
-
-  /// No description provided for @rpgTitles.
-  ///
-  /// In en, this message translates to:
-  /// **'Titles'**
-  String get rpgTitles;
-
-  /// No description provided for @rpgPurchaseItem.
-  ///
-  /// In en, this message translates to:
-  /// **'Purchase {item}?'**
-  String rpgPurchaseItem(String item);
-
-  /// No description provided for @rpgUnlockedViaAchievement.
-  ///
-  /// In en, this message translates to:
-  /// **'Unlocked via achievement'**
-  String get rpgUnlockedViaAchievement;
-
-  /// No description provided for @rpgPrice.
-  ///
-  /// In en, this message translates to:
-  /// **'Price'**
-  String get rpgPrice;
-
-  /// No description provided for @rpgNotEnoughGold.
-  ///
-  /// In en, this message translates to:
-  /// **'Not enough gold'**
-  String get rpgNotEnoughGold;
-
-  /// No description provided for @rpgNotEnoughGems.
-  ///
-  /// In en, this message translates to:
-  /// **'Not enough gems'**
-  String get rpgNotEnoughGems;
-
-  /// No description provided for @rpgPurchased.
-  ///
-  /// In en, this message translates to:
-  /// **'Purchased {item}!'**
-  String rpgPurchased(String item);
-
-  /// No description provided for @rpgOwned.
-  ///
-  /// In en, this message translates to:
-  /// **'Owned'**
-  String get rpgOwned;
-
-  /// No description provided for @rpgDailyQuests.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily Quests'**
-  String get rpgDailyQuests;
-
-  /// No description provided for @rpgQuestsCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'{completed} of {total} completed'**
-  String rpgQuestsCompleted(int completed, int total);
-
-  /// No description provided for @rpgWeeklyChallenge.
-  ///
-  /// In en, this message translates to:
-  /// **'Weekly Challenge'**
-  String get rpgWeeklyChallenge;
-
-  /// No description provided for @rpgQuestsSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Complete quests to earn XP and rewards'**
-  String get rpgQuestsSubtitle;
-
-  /// No description provided for @rpgRecentXp.
-  ///
-  /// In en, this message translates to:
-  /// **'Recent XP'**
-  String get rpgRecentXp;
-
-  /// No description provided for @rpgNoAchievementsYet.
-  ///
-  /// In en, this message translates to:
-  /// **'No achievements yet'**
-  String get rpgNoAchievementsYet;
-
-  /// No description provided for @rpgLv.
-  ///
-  /// In en, this message translates to:
-  /// **'Lv.{level}'**
-  String rpgLv(int level);
-
-  /// No description provided for @rpgClassBonus.
-  ///
-  /// In en, this message translates to:
-  /// **'{className} Bonus'**
-  String rpgClassBonus(String className);
-
-  /// No description provided for @rpgLevelUp.
-  ///
-  /// In en, this message translates to:
-  /// **'Level Up!'**
-  String get rpgLevelUp;
-
-  /// No description provided for @rpgUnlocked.
-  ///
-  /// In en, this message translates to:
-  /// **'Unlocked!'**
-  String get rpgUnlocked;
-
-  /// No description provided for @rpgAchievementUnlocked.
-  ///
-  /// In en, this message translates to:
-  /// **'Achievement Unlocked!'**
-  String get rpgAchievementUnlocked;
-
-  /// No description provided for @mealPlanAddTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to Meal Plan'**
-  String get mealPlanAddTitle;
-
-  /// No description provided for @mealPlanMealLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Meal'**
-  String get mealPlanMealLabel;
-
-  /// No description provided for @mealPlanAdding.
-  ///
-  /// In en, this message translates to:
-  /// **'Adding...'**
-  String get mealPlanAdding;
-
-  /// No description provided for @mealPlanDateFormat.
-  ///
-  /// In en, this message translates to:
-  /// **'{weekday}, {month} {day}'**
-  String mealPlanDateFormat(String weekday, String month, int day);
-
-  /// No description provided for @splashRecipe.
-  ///
-  /// In en, this message translates to:
-  /// **'Recipe'**
-  String get splashRecipe;
-
-  /// No description provided for @splashSpellbook.
-  ///
-  /// In en, this message translates to:
-  /// **'Spellbook'**
-  String get splashSpellbook;
-
-  /// No description provided for @smartImportReparsed.
-  ///
-  /// In en, this message translates to:
-  /// **'Re-parsed by AI — review the updated recipe above'**
-  String get smartImportReparsed;
-
-  /// No description provided for @servingSizeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'e.g., 1 cup, 100g'**
-  String get servingSizeHint;
-
-  /// No description provided for @mainNutrients.
-  ///
-  /// In en, this message translates to:
-  /// **'Main Nutrients'**
-  String get mainNutrients;
-
-  /// No description provided for @additionalNutrients.
-  ///
-  /// In en, this message translates to:
-  /// **'Additional Nutrients'**
-  String get additionalNutrients;
-
-  /// No description provided for @onboardingWelcomeTo.
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome to'**
-  String get onboardingWelcomeTo;
-
-  /// No description provided for @onboardingAppName.
-  ///
-  /// In en, this message translates to:
-  /// **'Recipe Spellbook!'**
-  String get onboardingAppName;
-
-  /// No description provided for @onboardingDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'10 handpicked recipes from around the world to get you started.'**
-  String get onboardingDescription;
-
-  /// No description provided for @onboardingDeleteLater.
-  ///
-  /// In en, this message translates to:
-  /// **'You can always delete them later.'**
-  String get onboardingDeleteLater;
-
-  /// No description provided for @onboardingAdding.
-  ///
-  /// In en, this message translates to:
-  /// **'Adding...'**
-  String get onboardingAdding;
-
-  /// No description provided for @onboardingAddStarter.
-  ///
-  /// In en, this message translates to:
-  /// **'Add starter recipes'**
-  String get onboardingAddStarter;
-
-  /// No description provided for @onboardingBlankCookbook.
-  ///
-  /// In en, this message translates to:
-  /// **'Start with a blank cookbook'**
-  String get onboardingBlankCookbook;
-
-  /// No description provided for @onboardingSpellbookAwaits.
-  ///
-  /// In en, this message translates to:
-  /// **'Your Spellbook Awaits'**
-  String get onboardingSpellbookAwaits;
-
-  /// No description provided for @onboardingYourSpellbookAwaits.
-  ///
-  /// In en, this message translates to:
-  /// **'Your spellbook awaits...'**
-  String get onboardingYourSpellbookAwaits;
-
-  /// No description provided for @onboardingSummoning.
-  ///
-  /// In en, this message translates to:
-  /// **'Summoning...'**
-  String get onboardingSummoning;
-
-  /// No description provided for @onboardingBlankSpellbook.
-  ///
-  /// In en, this message translates to:
-  /// **'Start with a blank spellbook'**
-  String get onboardingBlankSpellbook;
-
-  /// No description provided for @onboardingSkip.
-  ///
-  /// In en, this message translates to:
-  /// **'Skip'**
-  String get onboardingSkip;
 
   /// No description provided for @communitySortTopRated.
   ///

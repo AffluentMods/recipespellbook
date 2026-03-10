@@ -28,7 +28,8 @@ import '../../../services/revenuecat_service.dart';
 import '../../../utils/ingredient_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/family_share_sheet.dart';
-import '../../widgets/rpg/rpg_navigation_shell.dart';
+// TODO: Kitchen Buddy hidden for now
+// import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
 
 /// Provider to track shopping list item count (for nav badge)
 final shoppingItemCountProvider = StreamProvider<int>((ref) {
@@ -706,7 +707,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   onTap: () {
                     Navigator.pop(ctx);
                     shoppingDao.deleteCheckedItems(_currentListId);
-                    RpgIntegration.onShoppingListCompleted(ref);
+                    // TODO: Kitchen Buddy hidden for now
+                    // KitchenBuddyIntegration.updateShoppingCompleteCount(ref, 1);
                   },
                 ),
                 const Divider(),
@@ -3583,7 +3585,8 @@ class _CheckedSection extends ConsumerWidget {
               TextButton(
                 onPressed: () {
                   shoppingDao.deleteCheckedItems(listId);
-                  RpgIntegration.onShoppingListCompleted(ref);
+                  // TODO: Kitchen Buddy hidden for now
+                  // KitchenBuddyIntegration.updateShoppingCompleteCount(ref, 1);
                 },
                 child: Text(l10n.shoppingClearAll),
               ),

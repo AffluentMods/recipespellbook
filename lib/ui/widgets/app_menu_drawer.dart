@@ -29,10 +29,11 @@ class AppMenuDrawer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final settings = ref.watch(settingsProvider);
     final subStatus = ref.watch(subscriptionProvider);
     final authState = ref.watch(authProvider);
-    final isRpgEnabled = settings.nerdMode;
+    // TODO: Kitchen Buddy hidden for now
+    // final settings = ref.watch(settingsProvider);
+    // final isKitchenBuddyEnabled = settings.kitchenBuddyEnabled;
     final isDark = theme.brightness == Brightness.dark;
 
     return Drawer(
@@ -49,7 +50,7 @@ class AppMenuDrawer extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(14, 16, 14, 8),
               children: [
-                // ── Group 1: Community & RPG ──
+                // ── Group 1: Community & Kitchen Buddy ──
                 _DrawerGroup(children: [
                   _DrawerItem(
                     icon: Icons.people_rounded,
@@ -60,16 +61,17 @@ class AppMenuDrawer extends ConsumerWidget {
                       context.push('/community');
                     },
                   ),
-                  if (isRpgEnabled)
-                    _DrawerItem(
-                      icon: Icons.sports_esports_rounded,
-                      iconColor: const Color(0xFF8B5CF6),
-                      label: l10n.menuRpgProfile,
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.push('/rpg/profile');
-                      },
-                    ),
+                  // TODO: Kitchen Buddy hidden for now — finish if app grows
+                  // if (isKitchenBuddyEnabled)
+                  //   _DrawerItem(
+                  //     icon: Icons.restaurant_rounded,
+                  //     iconColor: const Color(0xFF8B5CF6),
+                  //     label: l10n.menuKitchenBuddy,
+                  //     onTap: () {
+                  //       Navigator.pop(context);
+                  //       context.push('/kitchen-buddy');
+                  //     },
+                  //   ),
                 ]),
 
                 const SizedBox(height: 12),

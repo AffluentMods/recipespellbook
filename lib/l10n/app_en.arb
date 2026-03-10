@@ -135,8 +135,8 @@
   "settingsMeasurements": "Measurements",
   "settingsMeasurementsUS": "US (cups, oz)",
   "settingsMeasurementsMetric": "Metric (ml, g)",
-  "settingsRPGMode": "RPG Mode",
-  "settingsRPGModeSubtitle": "Enable fantasy-style text & images",
+  "settingsKitchenBuddy": "Kitchen Buddy",
+  "settingsKitchenBuddySubtitle": "A cute chef companion you dress up with coins",
   "settingsRecipes": "Recipes",
   "settingsManageCourses": "Manage Courses",
   "settingsManageCategories": "Manage Categories",
@@ -1101,10 +1101,9 @@
   "recipePlaceholders": "Recipe Placeholders",
   "cookbookPlaceholders": "Cookbook Placeholders",
   "defaultImages": "Default Images",
-  "defaultImagesDescription": "App artwork that changes with RPG mode",
+  "defaultImagesDescription": "Default app artwork for recipes and cookbooks",
   "themeBased": "Theme-based",
   "themeBasedDescription": "Gradient with logo based on your color theme",
-  "placeholderRpgInfo": "Default images change between normal and RPG variants when RPG Mode is enabled.",
   "groupBySection": "By Section",
   "groupByRecipe": "By Recipe",
   "groupByUngrouped": "Ungrouped",
@@ -1171,7 +1170,7 @@
   "unknownRecipe": "Unknown Recipe",
   "shoppingListEmpty": "Your shopping list is empty",
   "shoppingListEmptyHint": "Add items or import from recipes",
-  "settingsRPGModeActive": "Conjuring magical text...",
+  "settingsKitchenBuddyActive": "Your Kitchen Buddy is ready to cook!",
   "shoppingCheckAll": "Check All",
   "shoppingUncheckAll": "Uncheck All",
   "shoppingManageLists": "Manage Lists",
@@ -1340,27 +1339,8 @@
   "tagsNameLabel": "Tag Name",
   "tagsIconLabel": "Icon (emoji)",
   "tagsColorLabel": "Color",
-  "settingsRpgAnimations": "Rarity Animations",
-  "settingsRpgAnimationsSubtitle": "Glowing effects for epic and legendary recipes",
-  "settingsRpgSounds": "Sound Effects",
-  "settingsRpgSoundsSubtitle": "Play sounds for achievements and level ups",
-  "settingsRpgAchievements": "Achievements",
-  "settingsRpgAchievementsSubtitle": "View your unlocked achievements",
-  "settingsRpgStats": "Cooking Stats",
-  "settingsRpgStatsSubtitle": "View your cooking statistics",
-  "settingsRpgModeEnabled": "Transform your cooking into an adventure!",
+  "settingsKitchenBuddyEnabled": "Earn coins and dress up your buddy!",
   "settingsRecipeLayoutSubtitle": "Customize how recipes are displayed",
-
-  "rarityCommon": "Common",
-  "rarityCommonDesc": "A simple everyday recipe",
-  "rarityUncommon": "Uncommon",
-  "rarityUncommonDesc": "A tasty recipe with a twist",
-  "rarityRare": "Rare",
-  "rarityRareDesc": "A special recipe worth mastering",
-  "rarityEpic": "Epic",
-  "rarityEpicDesc": "An epic recipe of great power!",
-  "rarityLegendary": "Legendary",
-  "rarityLegendaryDesc": "A legendary recipe worthy of the gods!",
 
   "shareLink": "Link",
   "shareDocument": "PDF",
@@ -1408,7 +1388,6 @@
   "createAccount": "Create account",
   "upgradeToPremium": "Upgrade to Premium",
   "premiumSubtitle": "Unlock sync, unlimited recipes & more",
-  "rpgMode": "RPG Mode",
   "leaderboards": "Leaderboards",
   "achievements": "Achievements",
   "cookingStats": "Cooking Stats",
@@ -2153,7 +2132,7 @@
   },
   "menuNavigation": "NAVIGATION",
   "menuImport": "IMPORT",
-  "menuRpgMode": "RPG MODE",
+  "menuKitchenBuddyMode": "KITCHEN BUDDY",
   "menuSocial": "SOCIAL",
   "menuApp": "APP",
   "historyCount": "History Count",
@@ -2264,19 +2243,15 @@
   "comparePlans": "Compare Plans",
   "featureCloudSyncPersonal": "Cloud sync (personal)",
   "featurePhotosOnSteps": "Photos on steps",
-  "featurePhotoStorage250": "250 MB photo storage (~500 photos)",
-  "featureRpgCosmeticsStarter": "RPG cosmetics starter pack",
-  "featureSupporterBadge": "Premium supporter badge",
+  "featureCloudStorageLimited": "Cloud storage — Limited",
   "featureExtraPolish": "Extra UI polish & QoL features",
   "featureFamilySharing5": "Family sharing (5 members)",
-  "featurePhotoStorage1gb": "1 GB photo storage (~2,000 photos)",
+  "featureCloudStorage": "Cloud storage",
   "featureSharedLists": "Shared shopping lists",
   "featureSharedCookbooks": "Shared cookbooks",
   "featureSharedMealPlan": "Shared meal planning",
-  "featureEncryptedBackups": "Encrypted backups + version history",
+  "featureAutoBackups": "Automatic backups",
   "featureFamilySharing10": "Family sharing (10 members)",
-  "featurePhotoStorage5gb": "5 GB photo storage (~10,000 photos)",
-  "featureExtendedVersionHistory": "Extended version history",
   "featurePrioritySync": "Priority sync performance",
   "featureFutureAdvanced": "Future advanced features included",
   "tierCloudSync": "Cloud\nSync",
@@ -2296,13 +2271,6 @@
   "compareSharedCookbooks": "Shared cookbooks",
   "compareSharedMealPlan": "Shared meal plan",
   "compareBackups": "Backups",
-  "compareVersionHistory": "Version history",
-  "light": "Light",
-  "extended": "Extended",
-  "compareRpgCosmetics": "RPG cosmetics",
-  "basic": "Basic",
-  "starterPack": "Starter\npack",
-  "compareSupporterBadge": "Supporter badge",
   "printOf": "of",
   "printRecipe": "Print",
   "stackedLayout": "Stacked Layout",
@@ -2341,7 +2309,6 @@
   "noContentToSave": "No content to save",
   "recipeSaved": "Recipe saved!",
   "qrScanningMobileOnly": "QR scanning is only available on mobile devices.",
-  "notEnoughMana": "Not enough mana! Earn XP from recipes to regenerate.",
   "communityComingSoon": "Community features coming in a future update!",
   "somethingWentWrong": "Something went wrong: {error}",
   "@somethingWentWrong": {"placeholders": {"error": {"type": "String"}}},
@@ -2379,8 +2346,8 @@
   "settingsNotifCommunitySubtitle": "Downloads, ratings, and comments on your recipes",
   "settingsNotifAchievements": "Achievements",
   "settingsNotifAchievementsSubtitle": "Achievement unlocks and milestone alerts",
-  "settingsNotifQuests": "Quest Reminders",
-  "settingsNotifQuestsSubtitle": "Daily quest resets and XP reminders",
+  "settingsNotifBuddy": "Buddy Reminders",
+  "settingsNotifBuddySubtitle": "Kitchen Buddy login streaks and coin bonuses",
   "tuesday": "Tuesday",
   "wednesday": "Wednesday",
   "thursday": "Thursday",
@@ -2583,7 +2550,7 @@
   "importNoItemsDetected": "No items detected",
   "mealPlanDate": "Date",
   "mealPlanThisWeekend": "This Weekend",
-  "menuRpgProfile": "RPG Profile",
+  "menuKitchenBuddy": "Kitchen Buddy",
   "menuTools": "Tools",
   "menuSupport": "Support",
   "menuHowCanWeHelp": "How can we help?",
@@ -2609,29 +2576,51 @@
   "viewPlans": "View Plans",
   "renewsLabel": "Renews",
   "upgradeToProUnlock": "Upgrade to Pro to unlock",
-  "rpgFightAgain": "Fight Again",
-  "rpgAwesome": "Awesome!",
-  "rpgPurchase": "Purchase",
-  "rpgEquipped": "Equipped",
-  "rpgClaim": "Claim",
-  "rpgGuild": "Guild",
-  "rpgDmg": "DMG",
-  "rpgMana": "Mana",
-  "rpgLevel": "Level",
-  "rpgTotalXp": "Total XP",
-  "rpgLoginStreak": "Login Streak",
-  "rpgGoldEarned": "Gold Earned",
-  "rpgGemsEarned": "Gems Earned",
-  "rpgNextLevel": "Next Level",
-  "rpgNotifyMe": "Notify Me",
-  "rpgGold": "Gold",
-  "rpgGems": "Gems",
-  "rpgLottery": "Gem Lottery",
-  "rpgClasses": "Classes",
-  "rpgDisplayName": "Display Name",
-  "rpgResetProgress": "Reset Progress",
-  "rpgResetProgressSubtitle": "Start over from level 1",
-  "rpgRecipeRarity": "Recipe Rarity",
+  "kitchenBuddyTitle": "Kitchen Buddy",
+  "kitchenBuddyCloset": "Closet",
+  "kitchenBuddyShop": "Shop",
+  "kitchenBuddyAchievements": "Achievements",
+  "kitchenBuddyStreakDays": "{count} day streak",
+  "@kitchenBuddyStreakDays": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "kitchenBuddyClosetEmpty": "No items yet! Visit the Shop to get started.",
+  "kitchenBuddyShopOwnEverything": "You own everything!",
+  "kitchenBuddyShopCheckBack": "Check back when new items are added.",
+  "kitchenBuddyConfirmPurchase": "Buy {itemName}?",
+  "@kitchenBuddyConfirmPurchase": {
+    "placeholders": {
+      "itemName": { "type": "String" }
+    }
+  },
+  "kitchenBuddyCostSummary": "This will cost 🪙 {price} Spice Coins.",
+  "@kitchenBuddyCostSummary": {
+    "placeholders": {
+      "price": { "type": "int" }
+    }
+  },
+  "kitchenBuddyBuy": "Buy",
+  "kitchenBuddyPurchaseSuccess": "Purchased {itemName}!",
+  "@kitchenBuddyPurchaseSuccess": {
+    "placeholders": {
+      "itemName": { "type": "String" }
+    }
+  },
+  "kitchenBuddyNotEnoughCoins": "Not enough coins",
+  "kitchenBuddyRequires": "Requires: {achievementName}",
+  "@kitchenBuddyRequires": {
+    "placeholders": {
+      "achievementName": { "type": "String" }
+    }
+  },
+  "kitchenBuddyNamingTitle": "Name Your Buddy",
+  "kitchenBuddyIntroTitle": "Meet your Kitchen Buddy!",
+  "kitchenBuddyIntroDescription": "This little chef will be your kitchen companion.\nCook recipes and earn coins to dress them up!",
+  "kitchenBuddyNameLabel": "Buddy Name",
+  "kitchenBuddyNameHint": "Enter a name...",
+  "kitchenBuddyCreate": "Create Buddy",
   "settingsNoMatchingSettings": "No matching settings",
   "settingsSearchHint": "Search settings...",
   "textSizeSmall": "Small",
@@ -3075,137 +3064,35 @@
     }
   },
 
-  "rpgAchievements": "Achievements",
-  "rpgAttack": "Attack",
-  "rpgAwesome": "Awesome!",
-  "rpgBattleArena": "\u2694\uFE0F Battle Arena",
-  "rpgBoss": "BOSS",
-  "rpgBossDamage": "Boss Damage",
-  "rpgBossDefeated": "Boss Defeated!",
-  "rpgBossFight": "Boss Fight",
-  "rpgChooseYourClass": "Choose Your Class",
-  "rpgClassBonusSubtitle": "Each class grants unique bonuses",
-  "rpgClassBonusesList": "Class Bonuses",
-  "rpgClassBonusesTitle": "Class Bonuses",
-  "rpgComingSoon": "Coming soon!",
-  "rpgCommunity": "Community",
-  "rpgCommunityDescription": "Compete with other cooks around the world!",
-  "rpgCommunityLeaderboard": "Community Leaderboard",
-  "rpgCooked": "Cooked",
-  "rpgCosmetics": "Cosmetics",
-  "rpgCrit": "CRIT!",
-  "rpgDaysAgo": "{count} days ago",
-  "@rpgDaysAgo": {
+  "mealPlanAddTitle": "Add to Meal Plan",
+  "mealPlanMealLabel": "Meal",
+  "mealPlanAdding": "Adding...",
+  "mealPlanDateFormat": "{weekday}, {month} {day}",
+  "@mealPlanDateFormat": {
     "placeholders": {
-      "count": { "type": "int" }
+      "weekday": { "type": "String" },
+      "month": { "type": "String" },
+      "day": { "type": "int" }
     }
   },
-  "rpgDaysCount": "{count} days",
-  "@rpgDaysCount": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-  "rpgDmg": "DMG",
-  "rpgFightAgain": "Fight Again",
-  "rpgGemLottery": "Gem Lottery",
-  "rpgGemsAvailable": "{count} gems available",
-  "@rpgGemsAvailable": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-  "rpgGold": "Gold",
-  "rpgHoursAgo": "{count} hours ago",
-  "@rpgHoursAgo": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-  "rpgHowYouCompare": "How You Compare",
-  "rpgHp": "HP",
-  "rpgJustNow": "Just now",
-  "rpgKeepEarningXp": "Keep earning XP to unlock this enemy!",
-  "rpgKillStreak": "Kill streak: {count} \uD83D\uDD25",
-  "@rpgKillStreak": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-  "rpgLeaderboard": "Leaderboard",
-  "rpgLevel": "Level",
-  "rpgLevelN": "Level {level}",
-  "@rpgLevelN": {
-    "placeholders": {
-      "level": { "type": "int" }
-    }
-  },
-  "rpgLevelRequired": "Level {level} Required",
-  "@rpgLevelRequired": {
-    "placeholders": {
-      "level": { "type": "int" }
-    }
-  },
-  "rpgLotteryCost": "Costs 1 gem per spin",
-  "rpgLotteryResultGems": "You won {amount} gems!",
-  "@rpgLotteryResultGems": {
-    "placeholders": {
-      "amount": { "type": "int" }
-    }
-  },
-  "rpgLotteryResultGold": "You won {amount} gold!",
-  "@rpgLotteryResultGold": {
-    "placeholders": {
-      "amount": { "type": "int" }
-    }
-  },
-  "rpgLotteryResultNothing": "Better luck next time!",
-  "rpgLotteryResultRarePet": "You found a rare pet!",
-  "rpgLotteryResultXp": "You earned {amount} XP!",
-  "@rpgLotteryResultXp": {
-    "placeholders": {
-      "amount": { "type": "int" }
-    }
-  },
-  "rpgMana": "Mana",
-  "rpgManaHint": "Earn XP from recipes to regenerate mana \u2022 Level up for full refill",
-  "rpgMilestones": "Milestones",
-  "rpgMinutesAgo": "{count} minutes ago",
-  "@rpgMinutesAgo": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-  "rpgNoMana": "No Mana!",
-  "rpgProfileSettings": "Profile Settings",
-  "rpgQuickActions": "Quick Actions",
-  "rpgRecipes": "Recipes",
-  "rpgReset": "Reset",
-  "rpgResetProgressConfirmMessage": "This will reset all your RPG progress including level, XP, gold, and gems. This cannot be undone.",
-  "rpgResetProgressConfirmTitle": "Reset Progress?",
-  "rpgResetsInHours": "Resets in {count} hours",
-  "@rpgResetsInHours": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-  "rpgResetsInMinutes": "Resets in {count} minutes",
-  "@rpgResetsInMinutes": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-  "rpgSpin": "Spin!",
-  "rpgStreak": "Streak",
-  "rpgVictory": "Victory!",
-  "rpgYouDefeated": "You defeated {name}!",
-  "@rpgYouDefeated": {
-    "placeholders": {
-      "name": { "type": "String" }
-    }
-  },
-  "rpgYourStatistics": "Your Statistics",
-  "rpgYourStats": "Your Stats",
+  "splashRecipe": "Recipe",
+  "splashSpellbook": "Spellbook",
+  "smartImportReparsed": "Re-parsed by AI — review the updated recipe above",
+  "servingSizeHint": "e.g., 1 cup, 100g",
+  "mainNutrients": "Main Nutrients",
+  "additionalNutrients": "Additional Nutrients",
+  "onboardingWelcomeTo": "Welcome to",
+  "onboardingAppName": "Recipe Spellbook!",
+  "onboardingDescription": "10 handpicked recipes from around the world to get you started.",
+  "onboardingDeleteLater": "You can always delete them later.",
+  "onboardingAdding": "Adding...",
+  "onboardingAddStarter": "Add starter recipes",
+  "onboardingBlankCookbook": "Start with a blank cookbook",
+  "onboardingSpellbookAwaits": "Your Spellbook Awaits",
+  "onboardingYourSpellbookAwaits": "Your spellbook awaits...",
+  "onboardingSummoning": "Summoning...",
+  "onboardingBlankSpellbook": "Start with a blank spellbook",
+  "onboardingSkip": "Skip",
 
   "settingsBrowseCommunity": "Browse Community",
   "settingsBrowseCommunitySubtitle": "Discover public cookbooks",
@@ -3641,81 +3528,6 @@
   "themeSpring": "Spring",
   "themeAlchemist": "Alchemist",
 
-  "rpgNoAchievementsInCategory": "No achievements in this category",
-  "rpgUnlocksItem": "Unlocks: {item}",
-  "@rpgUnlocksItem": { "placeholders": { "item": { "type": "String" } } },
-  "rpgCategory": "Category",
-  "rpgCompleted": "Completed",
-  "rpgProgress": "Progress",
-  "rpgDefeatedEnemy": "Defeated {name}!",
-  "@rpgDefeatedEnemy": { "placeholders": { "name": { "type": "String" } } },
-  "rpgBlock": "Block",
-  "rpgHeal": "Heal",
-  "rpgPlayerDefeated": "Defeated!",
-  "rpgPlayerDefeatedDesc": "You were defeated by {name}!",
-  "@rpgPlayerDefeatedDesc": { "placeholders": { "name": { "type": "String" } } },
-  "rpgGoldLost": "Lost {amount} gold",
-  "@rpgGoldLost": { "placeholders": { "amount": { "type": "int" } } },
-  "rpgRespawn": "Respawn",
-  "rpgYourHp": "Your HP",
-  "rpgBossRetaliates": "{name} retaliates!",
-  "@rpgBossRetaliates": { "placeholders": { "name": { "type": "String" } } },
-  "rpgBlockedDamage": "Blocked! Only {damage} damage taken",
-  "@rpgBlockedDamage": { "placeholders": { "damage": { "type": "int" } } },
-  "rpgHealedHp": "Healed {amount} HP!",
-  "@rpgHealedHp": { "placeholders": { "amount": { "type": "int" } } },
-  "rpgNotEnoughMana": "Not enough mana!",
-  "rpgAvatars": "Avatars",
-  "rpgFrames": "Frames",
-  "rpgPets": "Pets",
-  "rpgTitles": "Titles",
-  "rpgPurchaseItem": "Purchase {item}?",
-  "@rpgPurchaseItem": { "placeholders": { "item": { "type": "String" } } },
-  "rpgUnlockedViaAchievement": "Unlocked via achievement",
-  "rpgPrice": "Price",
-  "rpgNotEnoughGold": "Not enough gold",
-  "rpgNotEnoughGems": "Not enough gems",
-  "rpgPurchased": "Purchased {item}!",
-  "@rpgPurchased": { "placeholders": { "item": { "type": "String" } } },
-  "rpgOwned": "Owned",
-  "rpgDailyQuests": "Daily Quests",
-  "rpgQuestsCompleted": "{completed} of {total} completed",
-  "@rpgQuestsCompleted": { "placeholders": { "completed": { "type": "int" }, "total": { "type": "int" } } },
-  "rpgWeeklyChallenge": "Weekly Challenge",
-  "rpgQuestsSubtitle": "Complete quests to earn XP and rewards",
-  "rpgRecentXp": "Recent XP",
-  "rpgNoAchievementsYet": "No achievements yet",
-  "rpgLv": "Lv.{level}",
-  "@rpgLv": { "placeholders": { "level": { "type": "int" } } },
-  "rpgClassBonus": "{className} Bonus",
-  "@rpgClassBonus": { "placeholders": { "className": { "type": "String" } } },
-  "rpgLevelUp": "Level Up!",
-  "rpgUnlocked": "Unlocked!",
-  "rpgAchievementUnlocked": "Achievement Unlocked!",
-  "settingsManage": "Manage",
-  "mealPlanAddTitle": "Add to Meal Plan",
-  "mealPlanMealLabel": "Meal",
-  "mealPlanAdding": "Adding...",
-  "mealPlanDateFormat": "{weekday}, {month} {day}",
-  "@mealPlanDateFormat": { "placeholders": { "weekday": { "type": "String" }, "month": { "type": "String" }, "day": { "type": "int" } } },
-  "splashRecipe": "Recipe",
-  "splashSpellbook": "Spellbook",
-  "smartImportReparsed": "Re-parsed by AI — review the updated recipe above",
-  "servingSizeHint": "e.g., 1 cup, 100g",
-  "mainNutrients": "Main Nutrients",
-  "additionalNutrients": "Additional Nutrients",
-  "onboardingWelcomeTo": "Welcome to",
-  "onboardingAppName": "Recipe Spellbook!",
-  "onboardingDescription": "10 handpicked recipes from around the world to get you started.",
-  "onboardingDeleteLater": "You can always delete them later.",
-  "onboardingAdding": "Adding...",
-  "onboardingAddStarter": "Add starter recipes",
-  "onboardingBlankCookbook": "Start with a blank cookbook",
-  "onboardingSpellbookAwaits": "Your Spellbook Awaits",
-  "onboardingYourSpellbookAwaits": "Your spellbook awaits...",
-  "onboardingSummoning": "Summoning...",
-  "onboardingBlankSpellbook": "Start with a blank spellbook",
-  "onboardingSkip": "Skip",
 
   "communitySortTopRated": "Top Rated",
   "communityHasImages": "Has Images",

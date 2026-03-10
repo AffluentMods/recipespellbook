@@ -6,7 +6,8 @@ import 'package:recipespellbook/ui/screens/settings/pantry_screen.dart';
 import '../../../data/app_enums.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
-import '../../../providers/companion_provider.dart';
+// TODO: Kitchen Buddy hidden for now
+// import '../../../providers/kitchen_buddy_provider.dart';
 import '../../../utils/responsive_utils.dart';
 
 import '../../../providers/settings_provider.dart';
@@ -135,10 +136,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           currentSystem: s.measurementSystem,
           onSystemSelected: (v) => ref.read(settingsProvider.notifier).setMeasurementSystem(v),
         ) : null,
-        _m(l10n.settingsAllergies, 'weaknesses allergy') ? _Tile(
-          icon: s.nerdMode ? Icons.flash_on : Icons.warning_amber,
-          title: s.nerdMode ? 'Weaknesses' : l10n.settingsAllergies,
-          subtitle: s.nerdMode ? 'Set your dietary vulnerabilities' : l10n.settingsAllergiesSubtitle,
+        _m(l10n.settingsAllergies, 'allergy') ? _Tile(
+          icon: Icons.warning_amber,
+          title: l10n.settingsAllergies,
+          subtitle: l10n.settingsAllergiesSubtitle,
           onTap: () => context.push('/settings/allergies'),
         ) : null,
       ]),
@@ -218,21 +219,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ) : null,
       ]),
 
-      // ─── RPG MODE ───
-      if (_query.isEmpty || _m('RPG Mode', 'nerd rpg companion'))
-        _Section(title: '\u2728 RPG Mode', icon: Icons.auto_awesome, children: [
-          _RpgModeTile(isEnabled: s.nerdMode, onChanged: (v) {
-            ref.read(settingsProvider.notifier).setNerdMode(v);
-            // When enabling RPG for the first time, navigate to companion naming
-            if (v && ref.read(companionDataProvider) == null) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (context.mounted) {
-                  context.push('/rpg/companion-naming');
-                }
-              });
-            }
-          }),
-        ]),
+      // TODO: Kitchen Buddy — hidden for now. Finish if app grows and community wants it.
+      // See lib/ui/screens/kitchen_buddy/, lib/ui/widgets/kitchen_buddy/
 
       // ─── ABOUT ───
       if (_query.isEmpty || _m(l10n.appTitle, 'version about'))
@@ -1076,113 +1064,6 @@ class _LanguageTile extends StatelessWidget {
           ])),
         ));
       },
-    );
-  }
-}
-
-// ════════════════════════════════════════════
-//  RPG MODE TILE WITH ANIMATION
-// ════════════════════════════════════════════
-
-class _RpgModeTile extends StatefulWidget {
-  final bool isEnabled;
-  final ValueChanged<bool> onChanged;
-  const _RpgModeTile({required this.isEnabled, required this.onChanged});
-  @override
-  State<_RpgModeTile> createState() => _RpgModeTileState();
-}
-
-class _RpgModeTileState extends State<_RpgModeTile> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _rotateAnimation;
-  late Animation<double> _glowAnimation;
-  bool _showMagicEffect = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(duration: const Duration(milliseconds: 800), vsync: this);
-    _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.15), weight: 30),
-      TweenSequenceItem(tween: Tween(begin: 1.15, end: 0.95), weight: 20),
-      TweenSequenceItem(tween: Tween(begin: 0.95, end: 1.05), weight: 25),
-      TweenSequenceItem(tween: Tween(begin: 1.05, end: 1.0), weight: 25),
-    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-    _rotateAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.05), weight: 25),
-      TweenSequenceItem(tween: Tween(begin: 0.05, end: -0.05), weight: 25),
-      TweenSequenceItem(tween: Tween(begin: -0.05, end: 0.03), weight: 25),
-      TweenSequenceItem(tween: Tween(begin: 0.03, end: 0.0), weight: 25),
-    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-    _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-  }
-
-  @override
-  void dispose() { _controller.dispose(); super.dispose(); }
-
-  void _handleToggle(bool value) {
-    if (value) {
-      setState(() => _showMagicEffect = true);
-      _controller.forward(from: 0.0).then((_) => setState(() => _showMagicEffect = false));
-    }
-    widget.onChanged(value);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) => Stack(clipBehavior: Clip.none, children: [
-        if (_showMagicEffect)
-          Positioned.fill(child: AnimatedOpacity(
-            opacity: _glowAnimation.value * 0.3, duration: const Duration(milliseconds: 100),
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), boxShadow: [
-                BoxShadow(color: Colors.purple.withOpacity(_glowAnimation.value * 0.5), blurRadius: 20 * _glowAnimation.value, spreadRadius: 5 * _glowAnimation.value),
-                BoxShadow(color: Colors.amber.withOpacity(_glowAnimation.value * 0.3), blurRadius: 30 * _glowAnimation.value, spreadRadius: 10 * _glowAnimation.value),
-              ]),
-            ),
-          )),
-        Transform.scale(scale: _scaleAnimation.value, child: Transform.rotate(angle: _rotateAnimation.value,
-          child: Container(
-            margin: _showMagicEffect ? const EdgeInsets.symmetric(horizontal: 8, vertical: 4) : EdgeInsets.zero,
-            decoration: _showMagicEffect ? BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.amber.withOpacity(_glowAnimation.value * 0.8), width: 2)) : null,
-            child: SwitchListTile(
-              secondary: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: widget.isEnabled ? Colors.purple.withValues(alpha: 0.2) : theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(8)),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: RotationTransition(turns: Tween(begin: 0.5, end: 1.0).animate(animation), child: child)),
-                  child: Icon(widget.isEnabled ? Icons.auto_awesome : Icons.auto_awesome_outlined, key: ValueKey(widget.isEnabled), color: widget.isEnabled ? Colors.amber : null),
-                ),
-              ),
-              title: Text(l10n.settingsRPGMode, style: TextStyle(fontWeight: widget.isEnabled ? FontWeight.bold : FontWeight.normal, color: widget.isEnabled ? Colors.amber.shade700 : null)),
-              subtitle: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: Text(widget.isEnabled ? l10n.settingsRPGModeActive : l10n.settingsRPGModeSubtitle, key: ValueKey(widget.isEnabled), style: TextStyle(color: widget.isEnabled ? Colors.purple : null, fontStyle: widget.isEnabled ? FontStyle.italic : FontStyle.normal)),
-              ),
-              value: widget.isEnabled,
-              onChanged: _handleToggle,
-            ),
-          ),
-        )),
-        if (_showMagicEffect)
-          ...List.generate(8, (i) {
-            final r = 40 + (i % 3) * 20.0;
-            return Positioned(
-              left: MediaQuery.of(context).size.width / 2 + r * _glowAnimation.value * (i.isEven ? 1 : -1) * (0.5 + 0.5 * (i % 3)) - 10,
-              top: 30 + r * _glowAnimation.value * (i < 4 ? -1 : 1) * 0.5,
-              child: AnimatedOpacity(opacity: (1 - _glowAnimation.value).clamp(0.0, 1.0), duration: const Duration(milliseconds: 100),
-                  child: Text(['\u2728', '\u2B50', '\u{1F4AB}', '\u{1F31F}'][i % 4], style: TextStyle(fontSize: 12 + (i % 3) * 4.0))),
-            );
-          }),
-      ]),
     );
   }
 }

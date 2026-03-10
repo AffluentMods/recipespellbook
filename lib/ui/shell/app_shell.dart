@@ -9,7 +9,8 @@ import '../../router/router.dart';
 import '../../utils/responsive_utils.dart';
 import '../widgets/app_menu_drawer.dart';
 import '../widgets/app_snackbar.dart';
-import '../widgets/rpg/rpg_navigation_shell.dart';
+// TODO: Kitchen Buddy hidden for now
+// import '../widgets/kitchen_buddy/coin_toast_overlay.dart';
 
 /// Provider to track current navigation index
 final currentNavIndexProvider = StateProvider<int>((ref) => 0);
@@ -99,8 +100,8 @@ class _AppShellState extends ConsumerState<AppShell> {
 
     // Tablet/desktop: NavigationRail on the left
     if (Responsive.useNavRail(context)) {
-      return RpgNavigationShell(
-        child: Row(
+      // TODO: CoinToastOverlay removed — Kitchen Buddy hidden for now
+      return Row(
           children: [
             _AppNavigationRail(
               currentIndex: currentIndex,
@@ -132,13 +133,12 @@ class _AppShellState extends ConsumerState<AppShell> {
               ),
             ),
           ],
-        ),
       );
     }
 
     // Phone: existing bottom nav bar
-    return RpgNavigationShell(
-      child: Scaffold(
+    // TODO: CoinToastOverlay removed — Kitchen Buddy hidden for now
+    return Scaffold(
         key: _scaffoldKey,
         body: widget.child,
         endDrawer: const AppMenuDrawer(),
@@ -162,7 +162,6 @@ class _AppShellState extends ConsumerState<AppShell> {
             }
           },
         ),
-      ),
     );
   }
 }

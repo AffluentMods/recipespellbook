@@ -281,7 +281,6 @@ class NutritionWidget extends StatefulWidget {
   final NutritionChartStyle chartStyle;
   final Set<String> enabledNutrients;
   final bool showSettingsLink;
-  final bool isNerdMode;
   final VoidCallback? onEmptyTap;
 
   const NutritionWidget({
@@ -292,7 +291,6 @@ class NutritionWidget extends StatefulWidget {
     required this.chartStyle,
     required this.enabledNutrients,
     this.showSettingsLink = true,
-    this.isNerdMode = false,
     this.onEmptyTap,
   });
 

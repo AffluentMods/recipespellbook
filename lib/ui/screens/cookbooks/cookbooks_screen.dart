@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
-import '../../../data/rpg/rpg_text.dart';
 import '../../../database/database.dart';
 import '../../../database/daos/tags_dao.dart';
 import '../../../providers/cookbook_provider.dart';
@@ -48,13 +47,11 @@ class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
     final l10n = AppLocalizations.of(context)!;
     final cookbooksAsync = ref.watch(cookbooksProvider);
     final selectedId = ref.watch(selectedCookbookIdProvider);
-    final nerdMode = ref.watch(settingsProvider).nerdMode;
-    final rpg = RpgText.of(l10n, nerdMode);
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(rpg.cookbooksTitle),
+        title: Text(l10n.cookbooksTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),

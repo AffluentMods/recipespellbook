@@ -14,7 +14,8 @@ class NotificationSettingsScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final prefs = ref.watch(notificationPrefsProvider);
     final notifier = ref.read(notificationPrefsProvider.notifier);
-    final isRpg = ref.watch(settingsProvider).nerdMode;
+    // TODO: Kitchen Buddy hidden for now
+    // final isKitchenBuddy = ref.watch(settingsProvider).kitchenBuddyEnabled;
 
     return Scaffold(
       appBar: AppBar(
@@ -73,25 +74,11 @@ class NotificationSettingsScreen extends ConsumerWidget {
           ],
           const Divider(),
 
-          // ── RPG Notifications (only if nerdMode on) ──
-          if (isRpg) ...[
-            _SectionHeader(title: 'RPG Notifications', icon: Icons.emoji_events_outlined),
-            SwitchListTile(
-              secondary: const Icon(Icons.emoji_events_outlined),
-              title: Text(l10n.settingsNotifAchievements),
-              subtitle: Text(l10n.settingsNotifAchievementsSubtitle),
-              value: prefs.achievementAlerts,
-              onChanged: (v) => notifier.setAchievementAlerts(v),
-            ),
-            SwitchListTile(
-              secondary: const Icon(Icons.assignment_outlined),
-              title: Text(l10n.settingsNotifQuests),
-              subtitle: Text(l10n.settingsNotifQuestsSubtitle),
-              value: prefs.questReminders,
-              onChanged: (v) => notifier.setQuestReminders(v),
-            ),
-            const Divider(),
-          ],
+          // TODO: Kitchen Buddy notifications hidden for now
+          // if (isKitchenBuddy) ...[
+          //   _SectionHeader(title: 'Kitchen Buddy Notifications', icon: Icons.emoji_events_outlined),
+          //   ...
+          // ],
 
           // ── Sync note ──
           if (AuthService.instance.isSignedIn)

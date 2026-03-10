@@ -1,20 +1,14 @@
 // lib/ui/widgets/hint_banner.dart
 // Contextual hint banner for feature discovery.
-// Shows tips when RPG is OFF, companion speech bubbles when RPG is ON.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/rpg/rpg_companion.dart';
-import '../../providers/companion_provider.dart';
 import '../../providers/hint_provider.dart';
-import '../../providers/rpg_provider.dart';
-
 // ============ HINT BANNER ============
 
 /// A dismissible banner that shows contextual hints on key screens.
 ///
-/// When RPG mode is OFF: a clean card with a lightbulb icon.
-/// When RPG mode is ON: styled as a companion speech bubble.
+/// Shows a clean card with a lightbulb icon containing a helpful tip.
 ///
 /// Usage: place at the top of a screen's content area:
 /// ```dart
@@ -37,16 +31,12 @@ class HintBanner extends ConsumerWidget {
     final hint = ref.read(hintProvider.notifier).getNextHint(screenName);
     if (hint == null) return const SizedBox.shrink();
 
-    final rpgEnabled = ref.watch(rpgEnabledProvider);
-    final companionData = rpgEnabled ? ref.watch(companionDataProvider) : null;
-    final message = hint.getMessage(rpgEnabled: rpgEnabled);
+    final message = hint.message;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       child: _HintCard(
         message: message,
-        rpgEnabled: rpgEnabled,
-        companionData: companionData,
         onDismiss: () {
           ref.read(hintProvider.notifier).markHintShown(hint.id);
         },
@@ -59,14 +49,10 @@ class HintBanner extends ConsumerWidget {
 
 class _HintCard extends StatefulWidget {
   final String message;
-  final bool rpgEnabled;
-  final CompanionData? companionData;
   final VoidCallback onDismiss;
 
   const _HintCard({
     required this.message,
-    required this.rpgEnabled,
-    required this.companionData,
     required this.onDismiss,
   });
 
@@ -120,14 +106,10 @@ class _HintCardState extends State<_HintCard> with SingleTickerProviderStateMixi
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(
-              color: widget.rpgEnabled
-                  ? Colors.amber.withValues(alpha: 0.3)
-                  : theme.colorScheme.primary.withValues(alpha: 0.2),
+              color: theme.colorScheme.primary.withValues(alpha: 0.2),
             ),
           ),
-          color: widget.rpgEnabled
-              ? Colors.amber.withValues(alpha: 0.06)
-              : theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(
@@ -136,12 +118,7 @@ class _HintCardState extends State<_HintCard> with SingleTickerProviderStateMixi
                 // Icon
                 Container(
                   margin: const EdgeInsets.only(top: 2),
-                  child: widget.rpgEnabled && widget.companionData != null
-                      ? Text(
-                          widget.companionData!.type.emoji,
-                          style: const TextStyle(fontSize: 20),
-                        )
-                      : Icon(
+                  child: Icon(
                           Icons.lightbulb_outline,
                           size: 20,
                           color: theme.colorScheme.primary,

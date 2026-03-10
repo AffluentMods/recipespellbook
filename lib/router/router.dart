@@ -17,13 +17,9 @@ import '../ui/screens/recipe/recipe_edit_screen.dart';
 import '../ui/screens/recipe/recipe_list_screen.dart';
 import '../ui/screens/recipe/recipe_screen.dart';
 import '../ui/screens/recipe/uncategorized_recipes_screen.dart';
-import '../ui/screens/rpg/rpg_achievements_screen.dart';
-import '../ui/screens/rpg/rpg_boss_screen.dart';
-import '../ui/screens/rpg/companion_naming_screen.dart';
-import '../ui/screens/rpg/rpg_cosmetics_screen.dart';
-import '../ui/screens/rpg/rpg_leaderboard_screen.dart';
-// RPG imports
-import '../ui/screens/rpg/rpg_profile_screen.dart';
+// TODO: Kitchen Buddy hidden for now
+// import '../ui/screens/kitchen_buddy/kitchen_buddy_screen.dart';
+// import '../ui/screens/kitchen_buddy/buddy_naming_screen.dart';
 import '../ui/screens/search/search_screen.dart';
 import '../ui/screens/settings/about_screen.dart';
 import '../ui/screens/settings/allergy_settings_screen.dart';
@@ -240,38 +236,17 @@ final router = GoRouter(
       builder: (context, state) => const FavoriteRecipesScreen(),
     ),
 
-    // ============ RPG ROUTES ============
-    GoRoute(
-      path: '/rpg/profile',
-      name: 'rpg-profile',
-      builder: (context, state) => const RpgProfileScreen(),
-    ),
-    GoRoute(
-      path: '/rpg/achievements',
-      name: 'rpg-achievements',
-      builder: (context, state) => const RpgAchievementsScreen(),
-    ),
-    GoRoute(
-      path: '/rpg/cosmetics',
-      name: 'rpg-cosmetics',
-      builder: (context, state) => const RpgCosmeticsScreen(),
-    ),
-    GoRoute(
-      path: '/rpg/leaderboard',
-      name: 'rpg-leaderboard',
-      builder: (context, state) => const RpgLeaderboardScreen(),
-    ),
-    GoRoute(
-      path: '/rpg/boss',
-      name: 'rpg-boss',
-      builder: (context, state) => const RpgBossScreen(),
-    ),
-    GoRoute(
-      path: '/rpg/companion-naming',
-      name: 'rpg-companion-naming',
-      builder: (context, state) => const CompanionNamingScreen(),
-    ),
-    // ============ END RPG ROUTES ============
+    // TODO: Kitchen Buddy routes hidden for now — finish if app grows
+    // GoRoute(
+    //   path: '/kitchen-buddy',
+    //   name: 'kitchen-buddy',
+    //   builder: (context, state) => const KitchenBuddyScreen(),
+    // ),
+    // GoRoute(
+    //   path: '/kitchen-buddy/naming',
+    //   name: 'kitchen-buddy-naming',
+    //   builder: (context, state) => const BuddyNamingScreen(),
+    // ),
 
     // Main shell with bottom navigation
     ShellRoute(

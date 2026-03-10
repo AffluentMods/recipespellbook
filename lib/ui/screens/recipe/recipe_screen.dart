@@ -12,7 +12,6 @@ import '../../../data/app_enums.dart';
 import '../../../data/ingredient_images.dart';
 import '../../../data/localized_units.dart';
 import '../../../data/nutrition_data.dart';
-import '../../../data/rpg/rpg_text.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
@@ -39,39 +38,6 @@ import '../settings/nutrition_settings_screen.dart';
 // ============ SESSION DISMISSED WARNINGS (temporary) ============
 
 final sessionDismissedWarningsProvider = StateProvider<Set<String>>((ref) => {});
-
-// ============ RPG RARITY COLORS ============
-
-class RarityColors {
-  static const Color common = Color(0xFF9E9E9E);
-  static const Color uncommon = Color(0xFF4CAF50);
-  static const Color rare = Color(0xFF2196F3);
-  static const Color epic = Color(0xFF9C27B0);
-  static const Color legendary = Color(0xFFFF9800);
-
-  static Color getColor(int rating) {
-    switch (rating) {
-      case 1: return common;
-      case 2: return uncommon;
-      case 3: return rare;
-      case 4: return epic;
-      case 5: return legendary;
-      default: return common;
-    }
-  }
-
-  static Color getTitleColor(int rating) {
-    // For title text - subtle gradient from white to golden
-    switch (rating) {
-      case 1: return Colors.white;
-      case 2: return const Color(0xFFE8F5E9); // Light green tint
-      case 3: return const Color(0xFFE3F2FD); // Light blue tint
-      case 4: return const Color(0xFFF3E5F5); // Light purple tint
-      case 5: return const Color(0xFFFFE0B2); // Golden/orange tint
-      default: return Colors.white;
-    }
-  }
-}
 
 // ============ UNIT CONVERSION ============
 
@@ -345,8 +311,6 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final settings = ref.watch(settingsProvider);
-    final isNerdMode = settings.nerdMode;
-    final rpg = RpgText.of(l10n, isNerdMode);
     final useTabbed = settings.recipeLayoutMode == RecipeLayoutMode.tabbed;
 
     if (_isLoading || _recipe == null) {
@@ -358,12 +322,12 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
 
     return Scaffold(
       body: Responsive.constrainWidth(context, child: useTabbed
-          ? _buildTabbedLayout(theme, l10n, isNerdMode, rpg)
-          : _buildStackedLayout(theme, l10n, isNerdMode, rpg)),
+          ? _buildTabbedLayout(theme, l10n)
+          : _buildStackedLayout(theme, l10n)),
     );
   }
 
-  Widget _buildStackedLayout(ThemeData theme, AppLocalizations l10n, bool isNerdMode, RpgText rpg) {
+  Widget _buildStackedLayout(ThemeData theme, AppLocalizations l10n) {
     return CustomScrollView(
       slivers: [
         _RecipeAppBar(
@@ -372,7 +336,6 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           onEdit: _navigateToEdit,
           onReload: _loadRecipe,
           onPrint: _printRecipe,
-          isNerdMode: isNerdMode,
           isTabbed: false,
           onToggleLayout: _toggleLayout,
         ),
@@ -384,7 +347,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Title with RPG rarity color
+                // Title
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -393,19 +356,16 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                         _recipe!.title,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: isNerdMode && _recipe!.rating != null && _recipe!.rating! > 0
-                              ? RarityColors.getColor(_recipe!.rating!)
-                              : null,
                         ),
                       ),
                     ),
                     _FavoriteButton(isFavorite: _recipe!.isFavorite, onToggle: _toggleFavorite),
                   ],
                 ),
-                // Rating/Rarity badge - only show in non-nerd mode (nerd mode uses title color)
-                if (_recipe!.rating != null && _recipe!.rating! > 0 && !isNerdMode) ...[
+                // Star rating
+                if (_recipe!.rating != null && _recipe!.rating! > 0) ...[
                   const SizedBox(height: 8),
-                  RecipeRating(rating: _recipe!.rating!, nerdMode: false),
+                  RecipeRating(rating: _recipe!.rating!),
                 ],
                 // Tags display
                 const SizedBox(height: 12),
@@ -423,21 +383,19 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   onAddToMealPlan: _showAddToMealPlanSheet,
                   onAddToShopping: _showAddToShoppingSheet,
                   onShare: _showShareSheet,
-                  nerdMode: isNerdMode,
                 ),
                 const SizedBox(height: 20),
 
                 // Recipe meta info (times, servings) — hidden if all empty
                 if (_hasMetaInfo(_recipe!))
-                  _RecipeMetaInfoCard(recipe: _recipe!, nerdMode: isNerdMode, scaleFactor: _scaleFactor),
+                  _RecipeMetaInfoCard(recipe: _recipe!, scaleFactor: _scaleFactor),
 
-                // NEW: Separate Scale & Convert buttons
+                // Separate Scale & Convert buttons
                 const SizedBox(height: 16),
                 _ModernScaleConvertButtons(
                   currentScale: _scaleFactor,
                   servings: _recipe!.servings,
                   onScaleChanged: (scale) => setState(() => _scaleFactor = scale),
-                  nerdMode: isNerdMode,
                   unitConversion: _unitConversion,
                   onConversionChanged: (mode) => setState(() => _unitConversion = mode),
                 ),
@@ -459,7 +417,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 _LargeAddToShoppingButton(onTap: _showAddToShoppingSheet),
 
                 const SizedBox(height: 32),
-                _SectionHeader(title: rpg.instructionsTitle),
+                _SectionHeader(title: l10n.instructionsTitle),
                 const SizedBox(height: 12),
                 ..._steps.asMap().entries.map((entry) => _InstructionStep(
                   stepNumber: entry.key + 1,
@@ -467,7 +425,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 )),
                 if (_recipe!.notes != null && _recipe!.notes!.isNotEmpty) ...[
                   const SizedBox(height: 32),
-                  _SectionHeader(title: rpg.recipeFieldNotes),
+                  _SectionHeader(title: l10n.recipeFieldNotes),
                   const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.all(16),
@@ -477,7 +435,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 ],
                 // Nutrition section
                 const SizedBox(height: 32),
-                _SectionHeader(title: rpg.nutritionTitle),
+                _SectionHeader(title: l10n.nutritionTitle),
                 const SizedBox(height: 12),
                 NutritionWidget(
                   nutrition: _nutrition,
@@ -485,7 +443,6 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   servings: _recipe!.servings,
                   chartStyle: ref.watch(settingsProvider).nutritionChartStyle,
                   enabledNutrients: ref.watch(settingsProvider).enabledNutrients,
-                  isNerdMode: isNerdMode,
                   onEmptyTap: _showNutritionCalculation,
                 ),
                 const SizedBox(height: 100),
@@ -497,7 +454,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     );
   }
 
-  Widget _buildTabbedLayout(ThemeData theme, AppLocalizations l10n, bool isNerdMode, RpgText rpg) {
+  Widget _buildTabbedLayout(ThemeData theme, AppLocalizations l10n) {
     return NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         _RecipeAppBar(
@@ -506,7 +463,6 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           onEdit: _navigateToEdit,
           onReload: _loadRecipe,
           onPrint: _printRecipe,
-          isNerdMode: isNerdMode,
           isTabbed: true,
           onToggleLayout: _toggleLayout,
         ),
@@ -524,18 +480,15 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                         _recipe!.title,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: isNerdMode && _recipe!.rating != null && _recipe!.rating! > 0
-                              ? RarityColors.getColor(_recipe!.rating!)
-                              : null,
                         ),
                       ),
                     ),
                     _FavoriteButton(isFavorite: _recipe!.isFavorite, onToggle: _toggleFavorite),
                   ],
                 ),
-                if (_recipe!.rating != null && _recipe!.rating! > 0 && !isNerdMode) ...[
+                if (_recipe!.rating != null && _recipe!.rating! > 0) ...[
                   const SizedBox(height: 8),
-                  RecipeRating(rating: _recipe!.rating!, nerdMode: false),
+                  RecipeRating(rating: _recipe!.rating!),
                 ],
                 const SizedBox(height: 12),
                 RecipeTagsDisplay(recipeId: widget.recipeId),
@@ -550,17 +503,15 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   onAddToMealPlan: _showAddToMealPlanSheet,
                   onAddToShopping: _showAddToShoppingSheet,
                   onShare: _showShareSheet,
-                  nerdMode: isNerdMode,
                 ),
                 const SizedBox(height: 20),
                 if (_hasMetaInfo(_recipe!))
-                  _RecipeMetaInfoCard(recipe: _recipe!, nerdMode: isNerdMode, scaleFactor: _scaleFactor),
+                  _RecipeMetaInfoCard(recipe: _recipe!, scaleFactor: _scaleFactor),
                 const SizedBox(height: 16),
                 _ModernScaleConvertButtons(
                   currentScale: _scaleFactor,
                   servings: _recipe!.servings,
                   onScaleChanged: (scale) => setState(() => _scaleFactor = scale),
-                  nerdMode: isNerdMode,
                   unitConversion: _unitConversion,
                   onConversionChanged: (mode) => setState(() => _unitConversion = mode),
                 ),
@@ -579,9 +530,9 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
             TabBar(
               controller: _tabController,
               tabs: [
-                Tab(text: rpg.nutritionTitle),
+                Tab(text: l10n.nutritionTitle),
                 Tab(text: l10n.ingredientsTitle),
-                Tab(text: rpg.instructionsTitle),
+                Tab(text: l10n.instructionsTitle),
               ],
             ),
             theme.colorScheme.surface,
@@ -600,14 +551,13 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
               servings: _recipe!.servings,
               chartStyle: ref.watch(settingsProvider).nutritionChartStyle,
               enabledNutrients: ref.watch(settingsProvider).enabledNutrients,
-              isNerdMode: isNerdMode,
               onEmptyTap: _showNutritionCalculation,
             ),
           ),
           // Ingredients tab (center — starts here)
           _IngredientsTab(ingredients: _sortedIngredients, scaleFactor: _scaleFactor, l10n: l10n, onAddToShopping: _showAddToShoppingSheet, unitConversion: _unitConversion, ingredientLinksMap: _ingredientLinksMap),
           // Instructions tab (swipe right from center)
-          _InstructionsTab(steps: _steps, notes: _recipe!.notes, l10n: l10n, nerdMode: isNerdMode),
+          _InstructionsTab(steps: _steps, notes: _recipe!.notes, l10n: l10n),
         ],
       ),
     );
@@ -620,26 +570,23 @@ class _ModernQuickActionsRow extends StatelessWidget {
   final VoidCallback onAddToMealPlan;
   final VoidCallback onAddToShopping;
   final VoidCallback onShare;
-  final bool nerdMode;
 
   const _ModernQuickActionsRow({
     required this.onAddToMealPlan,
     required this.onAddToShopping,
     required this.onShare,
-    this.nerdMode = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final rpg = RpgText.of(l10n, nerdMode);
 
     return Row(
       children: [
         Expanded(
           child: _ModernActionButton(
             icon: Icons.calendar_month_outlined,
-            label: rpg.mealPlanButton,
+            label: l10n.mealPlanButton,
             onTap: onAddToMealPlan,
           ),
         ),
@@ -647,7 +594,7 @@ class _ModernQuickActionsRow extends StatelessWidget {
         Expanded(
           child: _ModernActionButton(
             icon: Icons.add_shopping_cart_rounded,
-            label: rpg.groceriesButton,
+            label: l10n.groceriesButton,
             onTap: onAddToShopping,
           ),
         ),
@@ -713,10 +660,9 @@ class _ModernActionButton extends StatelessWidget {
 
 class _RecipeMetaInfoCard extends StatelessWidget {
   final Recipe recipe;
-  final bool nerdMode;
   final double scaleFactor;
 
-  const _RecipeMetaInfoCard({required this.recipe, this.nerdMode = false, this.scaleFactor = 1.0});
+  const _RecipeMetaInfoCard({required this.recipe, this.scaleFactor = 1.0});
 
   String _formatMinutes(int? minutes) {
     if (minutes == null || minutes <= 0) return '';
@@ -731,7 +677,6 @@ class _RecipeMetaInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final rpg = RpgText.of(l10n, nerdMode);
 
     final prepTimeStr = _formatMinutes(recipe.prepTimeMinutes);
     final cookTimeStr = _formatMinutes(recipe.cookTimeMinutes);
@@ -747,11 +692,11 @@ class _RecipeMetaInfoCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           if (prepTimeStr.isNotEmpty)
-            _MetaItem(icon: Icons.timer_outlined, label: rpg.recipeFieldPrepTime, value: prepTimeStr),
+            _MetaItem(icon: Icons.timer_outlined, label: l10n.recipeFieldPrepTime, value: prepTimeStr),
           if (cookTimeStr.isNotEmpty)
-            _MetaItem(icon: Icons.local_fire_department_outlined, label: rpg.recipeFieldCookTime, value: cookTimeStr),
+            _MetaItem(icon: Icons.local_fire_department_outlined, label: l10n.recipeFieldCookTime, value: cookTimeStr),
           if (recipe.servings != null && recipe.servings!.isNotEmpty)
-            _MetaItem(icon: Icons.people_outline, label: rpg.recipeFieldServings, value: _scaleServings(recipe.servings!, scaleFactor)),
+            _MetaItem(icon: Icons.people_outline, label: l10n.recipeFieldServings, value: _scaleServings(recipe.servings!, scaleFactor)),
         ],
       ),
     );
@@ -790,7 +735,6 @@ class _ModernScaleConvertButtons extends StatelessWidget {
   final double currentScale;
   final String? servings;
   final ValueChanged<double> onScaleChanged;
-  final bool nerdMode;
   final _UnitConversion unitConversion;
   final ValueChanged<_UnitConversion> onConversionChanged;
 
@@ -798,7 +742,6 @@ class _ModernScaleConvertButtons extends StatelessWidget {
     required this.currentScale,
     this.servings,
     required this.onScaleChanged,
-    this.nerdMode = false,
     this.unitConversion = _UnitConversion.none,
     required this.onConversionChanged,
   });
@@ -807,7 +750,6 @@ class _ModernScaleConvertButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final rpg = RpgText.of(l10n, nerdMode);
 
     return Row(
       children: [
@@ -815,7 +757,7 @@ class _ModernScaleConvertButtons extends StatelessWidget {
           child: OutlinedButton.icon(
             onPressed: () => _showScaleDialog(context),
             icon: const Icon(Icons.scale, size: 18),
-            label: Text(currentScale == 1.0 ? rpg.scaleRecipeButton : '${currentScale}x'),
+            label: Text(currentScale == 1.0 ? l10n.scaleRecipeButton : '${currentScale}x'),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -835,7 +777,7 @@ class _ModernScaleConvertButtons extends StatelessWidget {
           child: OutlinedButton.icon(
             onPressed: () => _showConvertDialog(context),
             icon: const Icon(Icons.swap_horiz, size: 18),
-            label: Text(rpg.convertUnitsButton),
+            label: Text(l10n.convertUnitsButton),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1271,18 +1213,16 @@ class _InstructionsTab extends StatelessWidget {
   final List<Step> steps;
   final String? notes;
   final AppLocalizations l10n;
-  final bool nerdMode;
-  const _InstructionsTab({required this.steps, this.notes, required this.l10n, this.nerdMode = false});
+  const _InstructionsTab({required this.steps, this.notes, required this.l10n});
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final rpg = RpgText.of(l10n, nerdMode);
     if (steps.isEmpty) return Center(child: Text(l10n.instructionsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)));
     return ListView(padding: const EdgeInsets.all(16), children: [
       ...steps.asMap().entries.map((entry) => _InstructionStep(stepNumber: entry.key + 1, step: entry.value)),
       if (notes != null && notes!.isNotEmpty) ...[
         const SizedBox(height: 24),
-        _SectionHeader(title: rpg.recipeFieldNotes),
+        _SectionHeader(title: l10n.recipeFieldNotes),
         const SizedBox(height: 12),
         Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)), child: Text(notes!, style: theme.textTheme.bodyMedium)),
       ],
@@ -1299,7 +1239,6 @@ class _RecipeAppBar extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onReload;
   final VoidCallback? onPrint;
-  final bool isNerdMode;
   final bool isTabbed;
   final VoidCallback? onToggleLayout;
 
@@ -1309,7 +1248,6 @@ class _RecipeAppBar extends StatelessWidget {
     required this.onEdit,
     required this.onReload,
     this.onPrint,
-    this.isNerdMode = false,
     this.isTabbed = false,
     this.onToggleLayout,
   });
@@ -1321,11 +1259,6 @@ class _RecipeAppBar extends StatelessWidget {
     final hasImage = recipe.imagePath != null &&
         (isServer || FileExistsCache.exists(recipe.imagePath!));
     final defaultAsset = defaultRecipeImageAsset(recipe.id);
-
-    // Get rarity color for border glow
-    final rarityColor = isNerdMode && recipe.rating != null && recipe.rating! > 0
-        ? RarityColors.getColor(recipe.rating!)
-        : null;
 
     return SliverAppBar(
       expandedHeight: 300,
@@ -1376,39 +1309,6 @@ class _RecipeAppBar extends StatelessWidget {
                 ),
               ),
             ),
-            // Rarity glow border effect (subtle inner glow)
-            if (rarityColor != null)
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: rarityColor.withValues(alpha: 0.6), width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: rarityColor.withValues(alpha: 0.3),
-                      blurRadius: 16,
-                      spreadRadius: -2,
-                    ),
-                  ],
-                ),
-              ),
-            // Rarity glow vignette at edges
-            if (rarityColor != null)
-              IgnorePointer(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        rarityColor.withValues(alpha: 0.15),
-                        Colors.transparent,
-                        Colors.transparent,
-                        rarityColor.withValues(alpha: 0.2),
-                      ],
-                      stops: const [0.0, 0.15, 0.85, 1.0],
-                    ),
-                  ),
-                ),
-              ),
           ],
         ),
       ),
@@ -1522,11 +1422,8 @@ class _FavoriteButton extends StatelessWidget {
 
 class RecipeRating extends StatelessWidget {
   final int rating;
-  final bool nerdMode;
-  const RecipeRating({super.key, required this.rating, this.nerdMode = false});
+  const RecipeRating({super.key, required this.rating});
   @override Widget build(BuildContext context) {
-    // In nerd mode, we use title color instead of badges
-    if (nerdMode) return const SizedBox.shrink();
     return Row(children: List.generate(5, (index) => Icon(index < rating ? Icons.star_rounded : Icons.star_outline_rounded, color: Colors.amber, size: 20)));
   }
 }

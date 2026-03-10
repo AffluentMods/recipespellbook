@@ -10,7 +10,8 @@ import 'package:recipespellbook/providers/database_provider.dart';
 
 import '../../../ui/widgets/nutrition_widgets.dart';
 import '../../ui/widgets/font_size_control.dart';
-import 'rpg/rpg_navigation_shell.dart';
+// TODO: Kitchen Buddy hidden for now
+// import 'kitchen_buddy/kitchen_buddy_integration.dart';
 
 /// Launches cooking mode for a recipe
 void launchCookingMode(BuildContext context, String recipeId) {
@@ -190,8 +191,8 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
   }
 
   void _finishCooking() {
-    // Award XP for completing cooking mode
-    RpgIntegration.onRecipeCooked(ref);
+    // TODO: Kitchen Buddy hidden for now
+    // KitchenBuddyIntegration.onRecipeCooked(ref);
     Navigator.pop(context);
   }
 

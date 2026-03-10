@@ -368,10 +368,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsMeasurementsMetric => 'Métrique (ml, g)';
 
   @override
-  String get settingsRPGMode => 'Mode RPG';
+  String get settingsKitchenBuddy => 'Mode RPG';
 
   @override
-  String get settingsRPGModeSubtitle => 'Activer le texte et images fantasy';
+  String get settingsKitchenBuddySubtitle => 'Activer le texte et images fantasy';
 
   @override
   String get settingsRecipes => 'Recettes';
@@ -2226,16 +2226,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get defaultImages => 'Images par défaut';
 
   @override
-  String get defaultImagesDescription => 'Illustrations qui changent avec le mode RPG';
+  String get defaultImagesDescription => 'Default app artwork for recipes and cookbooks';
 
   @override
   String get themeBased => 'Basé sur le thème';
 
   @override
   String get themeBasedDescription => 'Dégradé avec logo selon votre thème';
-
-  @override
-  String get placeholderRpgInfo => 'Les images par défaut changent entre les variantes normales et RPG.';
 
   @override
   String get groupBySection => 'Par section';
@@ -2417,7 +2414,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get shoppingListEmptyHint => 'Ajoutez des articles ou importez depuis des recettes';
 
   @override
-  String get settingsRPGModeActive => 'Invocation du texte magique...';
+  String get settingsKitchenBuddyActive => 'Invocation du texte magique...';
 
   @override
   String get shoppingCheckAll => 'Tout cocher';
@@ -2853,64 +2850,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tagsColorLabel => 'Couleur';
 
   @override
-  String get settingsRpgAnimations => 'Animations de rareté';
-
-  @override
-  String get settingsRpgAnimationsSubtitle => 'Effets lumineux pour les recettes épiques et légendaires';
-
-  @override
-  String get settingsRpgSounds => 'Effets sonores';
-
-  @override
-  String get settingsRpgSoundsSubtitle => 'Sons pour les succès et montées de niveau';
-
-  @override
-  String get settingsRpgAchievements => 'Succès';
-
-  @override
-  String get settingsRpgAchievementsSubtitle => 'Voir vos succès débloqués';
-
-  @override
-  String get settingsRpgStats => 'Statistiques de cuisine';
-
-  @override
-  String get settingsRpgStatsSubtitle => 'Voir vos statistiques de cuisine';
-
-  @override
-  String get settingsRpgModeEnabled => 'Transformez votre cuisine en aventure !';
+  String get settingsKitchenBuddyEnabled => 'Earn coins and dress up your buddy!';
 
   @override
   String get settingsRecipeLayoutSubtitle => 'Personnaliser l\'affichage des recettes';
-
-  @override
-  String get rarityCommon => 'Commun';
-
-  @override
-  String get rarityCommonDesc => 'Une recette simple du quotidien';
-
-  @override
-  String get rarityUncommon => 'Peu commun';
-
-  @override
-  String get rarityUncommonDesc => 'Une recette savoureuse avec une touche';
-
-  @override
-  String get rarityRare => 'Rare';
-
-  @override
-  String get rarityRareDesc => 'Une recette spéciale qui vaut la peine d\'être maîtrisée';
-
-  @override
-  String get rarityEpic => 'Épique';
-
-  @override
-  String get rarityEpicDesc => 'Une recette épique de grande puissance !';
-
-  @override
-  String get rarityLegendary => 'Légendaire';
-
-  @override
-  String get rarityLegendaryDesc => 'Une recette légendaire digne des dieux !';
 
   @override
   String get shareLink => 'Lien';
@@ -3024,9 +2967,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get premiumSubtitle => 'Débloquez la synchronisation, des recettes illimitées et plus';
-
-  @override
-  String get rpgMode => 'Mode RPG';
 
   @override
   String get leaderboards => 'Classements';
@@ -4399,7 +4339,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get menuImport => 'IMPORTER';
 
   @override
-  String get menuRpgMode => 'MODE RPG';
+  String get menuKitchenBuddyMode => 'MODE RPG';
 
   @override
   String get menuSocial => 'SOCIAL';
@@ -4580,13 +4520,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get featurePhotosOnSteps => 'Photo dans les instructions';
 
   @override
-  String get featurePhotoStorage250 => '250 Mo de stockage photo (~500 photos)';
-
-  @override
-  String get featureRpgCosmeticsStarter => 'Pack cosmétiques RPG de démarrage';
-
-  @override
-  String get featureSupporterBadge => 'Badge de soutien Premium';
+  String get featureCloudStorageLimited => 'Cloud storage — Limited';
 
   @override
   String get featureExtraPolish => 'Améliorations UI & fonctionnalités';
@@ -4595,7 +4529,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get featureFamilySharing5 => 'Partage familial (5 membres)';
 
   @override
-  String get featurePhotoStorage1gb => '1 Go de stockage photo (~2 000 photos)';
+  String get featureCloudStorage => 'Cloud storage';
 
   @override
   String get featureSharedLists => 'Listes de courses partagées';
@@ -4607,16 +4541,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get featureSharedMealPlan => 'Plan de repas partagé';
 
   @override
-  String get featureEncryptedBackups => 'Sauvegardes chiffrées + historique';
+  String get featureAutoBackups => 'Automatic backups';
 
   @override
   String get featureFamilySharing10 => 'Partage familial (10 membres)';
-
-  @override
-  String get featurePhotoStorage5gb => '5 Go de stockage photo (~10 000 photos)';
-
-  @override
-  String get featureExtendedVersionHistory => 'Historique étendu';
 
   @override
   String get featurePrioritySync => 'Synchronisation prioritaire';
@@ -4674,27 +4602,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get compareBackups => 'Sauvegardes';
-
-  @override
-  String get compareVersionHistory => 'Historique';
-
-  @override
-  String get light => 'Léger';
-
-  @override
-  String get extended => 'Étendu';
-
-  @override
-  String get compareRpgCosmetics => 'Cosmétiques RPG';
-
-  @override
-  String get basic => 'Basique';
-
-  @override
-  String get starterPack => 'Pack de\ndémarrage';
-
-  @override
-  String get compareSupporterBadge => 'Badge soutien';
 
   @override
   String get printOf => 'sur';
@@ -4808,9 +4715,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get qrScanningMobileOnly => 'Le scan QR n\'est disponible que sur mobile.';
 
   @override
-  String get notEnoughMana => 'Pas assez de mana ! Gagnez de l\'XP depuis les recettes pour en regénérer.';
-
-  @override
   String get communityComingSoon => 'Les fonctions communautaires arrivent bientôt !';
 
   @override
@@ -4906,10 +4810,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsNotifAchievementsSubtitle => 'Succes debloques et alertes de jalons';
 
   @override
-  String get settingsNotifQuests => 'Rappels de quetes';
+  String get settingsNotifBuddy => 'Rappels de quetes';
 
   @override
-  String get settingsNotifQuestsSubtitle => 'Reinitialisation des quetes quotidiennes et rappels d\'XP';
+  String get settingsNotifBuddySubtitle => 'Reinitialisation des quetes quotidiennes et rappels d\'XP';
 
   @override
   String get tuesday => 'Mardi';
@@ -5436,7 +5340,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mealPlanThisWeekend => 'Ce week-end';
 
   @override
-  String get menuRpgProfile => 'Profil RPG';
+  String get menuKitchenBuddy => 'Profil RPG';
 
   @override
   String get menuTools => 'Outils';
@@ -5514,73 +5418,74 @@ class AppLocalizationsFr extends AppLocalizations {
   String get upgradeToProUnlock => 'Passez à Pro pour débloquer';
 
   @override
-  String get rpgFightAgain => 'Combattre à nouveau';
+  String get kitchenBuddyTitle => 'Kitchen Buddy';
 
   @override
-  String get rpgAwesome => 'Génial !';
+  String get kitchenBuddyCloset => 'Closet';
 
   @override
-  String get rpgPurchase => 'Acheter';
+  String get kitchenBuddyShop => 'Shop';
 
   @override
-  String get rpgEquipped => 'Équipé';
+  String get kitchenBuddyAchievements => 'Achievements';
 
   @override
-  String get rpgClaim => 'Réclamer';
+  String kitchenBuddyStreakDays(int count) {
+    return '$count day streak';
+  }
 
   @override
-  String get rpgGuild => 'Guilde';
+  String get kitchenBuddyClosetEmpty => 'No items yet! Visit the Shop to get started.';
 
   @override
-  String get rpgDmg => 'DMG';
+  String get kitchenBuddyShopOwnEverything => 'You own everything!';
 
   @override
-  String get rpgMana => 'Mana';
+  String get kitchenBuddyShopCheckBack => 'Check back when new items are added.';
 
   @override
-  String get rpgLevel => 'Niveau';
+  String kitchenBuddyConfirmPurchase(String itemName) {
+    return 'Buy $itemName?';
+  }
 
   @override
-  String get rpgTotalXp => 'XP total';
+  String kitchenBuddyCostSummary(int price) {
+    return 'This will cost 🪙 $price Spice Coins.';
+  }
 
   @override
-  String get rpgLoginStreak => 'Série de connexions';
+  String get kitchenBuddyBuy => 'Buy';
 
   @override
-  String get rpgGoldEarned => 'Or gagné';
+  String kitchenBuddyPurchaseSuccess(String itemName) {
+    return 'Purchased $itemName!';
+  }
 
   @override
-  String get rpgGemsEarned => 'Gemmes gagnées';
+  String get kitchenBuddyNotEnoughCoins => 'Not enough coins';
 
   @override
-  String get rpgNextLevel => 'Niveau suivant';
+  String kitchenBuddyRequires(String achievementName) {
+    return 'Requires: $achievementName';
+  }
 
   @override
-  String get rpgNotifyMe => 'Me notifier';
+  String get kitchenBuddyNamingTitle => 'Name Your Buddy';
 
   @override
-  String get rpgGold => 'Or';
+  String get kitchenBuddyIntroTitle => 'Meet your Kitchen Buddy!';
 
   @override
-  String get rpgGems => 'Gemmes';
+  String get kitchenBuddyIntroDescription => 'This little chef will be your kitchen companion.\nCook recipes and earn coins to dress them up!';
 
   @override
-  String get rpgLottery => 'Loterie de gemmes';
+  String get kitchenBuddyNameLabel => 'Buddy Name';
 
   @override
-  String get rpgClasses => 'Classes';
+  String get kitchenBuddyNameHint => 'Enter a name...';
 
   @override
-  String get rpgDisplayName => 'Nom d\'affichage';
-
-  @override
-  String get rpgResetProgress => 'Réinitialiser la progression';
-
-  @override
-  String get rpgResetProgressSubtitle => 'Recommencer au niveau 1';
-
-  @override
-  String get rpgRecipeRarity => 'Rareté de la recette';
+  String get kitchenBuddyCreate => 'Create Buddy';
 
   @override
   String get settingsNoMatchingSettings => 'Aucun paramètre correspondant';
@@ -6324,197 +6229,72 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get rpgAchievements => 'Succès';
+  String get mealPlanAddTitle => 'Ajouter au plan de repas';
 
   @override
-  String get rpgAttack => 'Attaquer !';
+  String get mealPlanMealLabel => 'Repas';
 
   @override
-  String get rpgBattleArena => '⚔️ Arène de combat';
+  String get mealPlanAdding => 'Ajout en cours...';
 
   @override
-  String get rpgBoss => 'BOSS';
-
-  @override
-  String get rpgBossDamage => 'Dégâts du boss';
-
-  @override
-  String get rpgBossDefeated => 'Boss vaincu !';
-
-  @override
-  String get rpgBossFight => 'Combat de boss';
-
-  @override
-  String get rpgChooseYourClass => 'Choisissez votre classe';
-
-  @override
-  String get rpgClassBonusSubtitle => 'Chaque classe accorde des bonus uniques';
-
-  @override
-  String get rpgClassBonusesList => 'Bonus de classe';
-
-  @override
-  String get rpgClassBonusesTitle => 'Bonus de classe';
-
-  @override
-  String get rpgComingSoon => 'Bientôt disponible !';
-
-  @override
-  String get rpgCommunity => 'Communauté';
-
-  @override
-  String get rpgCommunityDescription => 'Affrontez d\'autres cuisiniers du monde entier !';
-
-  @override
-  String get rpgCommunityLeaderboard => 'Classement communautaire';
-
-  @override
-  String get rpgCooked => 'Cuisiné';
-
-  @override
-  String get rpgCosmetics => 'Cosmétiques';
-
-  @override
-  String get rpgCrit => 'CRIT !';
-
-  @override
-  String rpgDaysAgo(int count) {
-    return 'il y a $count jours';
+  String mealPlanDateFormat(String weekday, String month, int day) {
+    return '$weekday $day $month';
   }
 
   @override
-  String rpgDaysCount(int count) {
-    return '$count jours';
-  }
+  String get splashRecipe => 'Recette';
 
   @override
-  String get rpgGemLottery => 'Loterie de gemmes';
+  String get splashSpellbook => 'Grimoire';
 
   @override
-  String rpgGemsAvailable(int count) {
-    return '$count gemmes disponibles';
-  }
+  String get smartImportReparsed => 'Ré-analysé par l\'IA — vérifiez la recette mise à jour ci-dessus';
 
   @override
-  String rpgHoursAgo(int count) {
-    return 'il y a $count heures';
-  }
+  String get servingSizeHint => 'ex. 1 tasse, 100g';
 
   @override
-  String get rpgHowYouCompare => 'Comment vous vous comparez';
+  String get mainNutrients => 'Nutriments principaux';
 
   @override
-  String get rpgHp => 'HP';
+  String get additionalNutrients => 'Nutriments supplémentaires';
 
   @override
-  String get rpgJustNow => 'À l\'instant';
+  String get onboardingWelcomeTo => 'Bienvenue sur';
 
   @override
-  String get rpgKeepEarningXp => 'Continuez à gagner de l\'XP pour débloquer cet ennemi !';
+  String get onboardingAppName => 'Recipe Spellbook!';
 
   @override
-  String rpgKillStreak(int count) {
-    return 'Série de victoires : $count 🔥';
-  }
+  String get onboardingDescription => '10 recettes triées sur le volet du monde entier pour bien démarrer.';
 
   @override
-  String get rpgLeaderboard => 'Classement';
+  String get onboardingDeleteLater => 'Vous pourrez toujours les supprimer plus tard.';
 
   @override
-  String rpgLevelN(int level) {
-    return 'Niveau $level';
-  }
+  String get onboardingAdding => 'Ajout en cours...';
 
   @override
-  String rpgLevelRequired(int level) {
-    return 'Niveau $level requis';
-  }
+  String get onboardingAddStarter => 'Ajouter des recettes de démarrage';
 
   @override
-  String get rpgLotteryCost => 'Coûte 1 gemme par tour';
+  String get onboardingBlankCookbook => 'Commencer avec un livre vide';
 
   @override
-  String rpgLotteryResultGems(int amount) {
-    return 'Vous avez gagné $amount gemmes !';
-  }
+  String get onboardingSpellbookAwaits => 'Votre grimoire vous attend';
 
   @override
-  String rpgLotteryResultGold(int amount) {
-    return 'Vous avez gagné $amount or !';
-  }
+  String get onboardingYourSpellbookAwaits => 'Votre grimoire vous attend...';
 
   @override
-  String get rpgLotteryResultNothing => 'Plus de chance la prochaine fois !';
+  String get onboardingSummoning => 'Invocation...';
 
   @override
-  String get rpgLotteryResultRarePet => 'Vous avez trouvé un animal rare !';
+  String get onboardingBlankSpellbook => 'Commencer avec un grimoire vide';
 
   @override
-  String rpgLotteryResultXp(int amount) {
-    return 'Vous avez gagné $amount XP !';
-  }
-
-  @override
-  String get rpgManaHint => 'Gagnez de l\'XP avec les recettes pour régénérer le mana • Montez de niveau pour un rechargement complet';
-
-  @override
-  String get rpgMilestones => 'Jalons';
-
-  @override
-  String rpgMinutesAgo(int count) {
-    return 'il y a $count minutes';
-  }
-
-  @override
-  String get rpgNoMana => 'Plus de mana !';
-
-  @override
-  String get rpgProfileSettings => 'Paramètres du profil';
-
-  @override
-  String get rpgQuickActions => 'Actions rapides';
-
-  @override
-  String get rpgRecipes => 'Recettes';
-
-  @override
-  String get rpgReset => 'Réinitialiser';
-
-  @override
-  String get rpgResetProgressConfirmMessage => 'Cela réinitialisera toute votre progression RPG, y compris le niveau, l\'XP, l\'or et les gemmes. Cette action est irréversible.';
-
-  @override
-  String get rpgResetProgressConfirmTitle => 'Réinitialiser la progression ?';
-
-  @override
-  String rpgResetsInHours(int count) {
-    return 'Réinitialisation dans $count heures';
-  }
-
-  @override
-  String rpgResetsInMinutes(int count) {
-    return 'Réinitialisation dans $count minutes';
-  }
-
-  @override
-  String get rpgSpin => 'Tourner !';
-
-  @override
-  String get rpgStreak => 'Série';
-
-  @override
-  String get rpgVictory => 'Victoire !';
-
-  @override
-  String rpgYouDefeated(String name) {
-    return 'Vous avez vaincu $name !';
-  }
-
-  @override
-  String get rpgYourStatistics => 'Vos statistiques';
-
-  @override
-  String get rpgYourStats => 'Vos stats';
+  String get onboardingSkip => 'Passer';
 
   @override
   String get settingsBrowseCommunity => 'Parcourir la communauté';
@@ -7381,215 +7161,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get themeAlchemist => 'Alchimiste';
-
-  @override
-  String get rpgNoAchievementsInCategory => 'Aucun succès dans cette catégorie';
-
-  @override
-  String rpgUnlocksItem(String item) {
-    return 'Débloque : $item';
-  }
-
-  @override
-  String get rpgCategory => 'Catégorie';
-
-  @override
-  String get rpgCompleted => 'Terminé';
-
-  @override
-  String get rpgProgress => 'Progression';
-
-  @override
-  String rpgDefeatedEnemy(String name) {
-    return '$name vaincu !';
-  }
-
-  @override
-  String get rpgBlock => 'Bloquer';
-
-  @override
-  String get rpgHeal => 'Soigner';
-
-  @override
-  String get rpgPlayerDefeated => 'Vaincu !';
-
-  @override
-  String rpgPlayerDefeatedDesc(String name) {
-    return 'Vous avez été vaincu par $name !';
-  }
-
-  @override
-  String rpgGoldLost(int amount) {
-    return '$amount or perdu';
-  }
-
-  @override
-  String get rpgRespawn => 'Réapparaître';
-
-  @override
-  String get rpgYourHp => 'Vos PV';
-
-  @override
-  String rpgBossRetaliates(String name) {
-    return '$name riposte !';
-  }
-
-  @override
-  String rpgBlockedDamage(int damage) {
-    return 'Bloqué ! Seulement $damage dégâts subis';
-  }
-
-  @override
-  String rpgHealedHp(int amount) {
-    return '$amount PV restaurés !';
-  }
-
-  @override
-  String get rpgNotEnoughMana => 'Pas assez de mana !';
-
-  @override
-  String get rpgAvatars => 'Avatars';
-
-  @override
-  String get rpgFrames => 'Cadres';
-
-  @override
-  String get rpgPets => 'Animaux';
-
-  @override
-  String get rpgTitles => 'Titres';
-
-  @override
-  String rpgPurchaseItem(String item) {
-    return 'Acheter $item ?';
-  }
-
-  @override
-  String get rpgUnlockedViaAchievement => 'Débloqué via un succès';
-
-  @override
-  String get rpgPrice => 'Prix';
-
-  @override
-  String get rpgNotEnoughGold => 'Pas assez d\'or';
-
-  @override
-  String get rpgNotEnoughGems => 'Pas assez de gemmes';
-
-  @override
-  String rpgPurchased(String item) {
-    return '$item acheté !';
-  }
-
-  @override
-  String get rpgOwned => 'Possédé';
-
-  @override
-  String get rpgDailyQuests => 'Quêtes quotidiennes';
-
-  @override
-  String rpgQuestsCompleted(int completed, int total) {
-    return '$completed sur $total terminées';
-  }
-
-  @override
-  String get rpgWeeklyChallenge => 'Défi hebdomadaire';
-
-  @override
-  String get rpgQuestsSubtitle => 'Terminez des quêtes pour gagner de l\'XP et des récompenses';
-
-  @override
-  String get rpgRecentXp => 'XP récent';
-
-  @override
-  String get rpgNoAchievementsYet => 'Aucun succès pour l\'instant';
-
-  @override
-  String rpgLv(int level) {
-    return 'Nv.$level';
-  }
-
-  @override
-  String rpgClassBonus(String className) {
-    return 'Bonus $className';
-  }
-
-  @override
-  String get rpgLevelUp => 'Niveau supérieur !';
-
-  @override
-  String get rpgUnlocked => 'Débloqué !';
-
-  @override
-  String get rpgAchievementUnlocked => 'Succès débloqué !';
-
-  @override
-  String get mealPlanAddTitle => 'Ajouter au plan de repas';
-
-  @override
-  String get mealPlanMealLabel => 'Repas';
-
-  @override
-  String get mealPlanAdding => 'Ajout en cours...';
-
-  @override
-  String mealPlanDateFormat(String weekday, String month, int day) {
-    return '$weekday $day $month';
-  }
-
-  @override
-  String get splashRecipe => 'Recette';
-
-  @override
-  String get splashSpellbook => 'Grimoire';
-
-  @override
-  String get smartImportReparsed => 'Ré-analysé par l\'IA — vérifiez la recette mise à jour ci-dessus';
-
-  @override
-  String get servingSizeHint => 'ex. 1 tasse, 100g';
-
-  @override
-  String get mainNutrients => 'Nutriments principaux';
-
-  @override
-  String get additionalNutrients => 'Nutriments supplémentaires';
-
-  @override
-  String get onboardingWelcomeTo => 'Bienvenue sur';
-
-  @override
-  String get onboardingAppName => 'Recipe Spellbook!';
-
-  @override
-  String get onboardingDescription => '10 recettes triées sur le volet du monde entier pour bien démarrer.';
-
-  @override
-  String get onboardingDeleteLater => 'Vous pourrez toujours les supprimer plus tard.';
-
-  @override
-  String get onboardingAdding => 'Ajout en cours...';
-
-  @override
-  String get onboardingAddStarter => 'Ajouter des recettes de démarrage';
-
-  @override
-  String get onboardingBlankCookbook => 'Commencer avec un livre vide';
-
-  @override
-  String get onboardingSpellbookAwaits => 'Votre grimoire vous attend';
-
-  @override
-  String get onboardingYourSpellbookAwaits => 'Votre grimoire vous attend...';
-
-  @override
-  String get onboardingSummoning => 'Invocation...';
-
-  @override
-  String get onboardingBlankSpellbook => 'Commencer avec un grimoire vide';
-
-  @override
-  String get onboardingSkip => 'Passer';
 
   @override
   String get communitySortTopRated => 'Mieux notés';

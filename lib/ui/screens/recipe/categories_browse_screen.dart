@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../data/course_category_data.dart' as taxonomy;
-import '../../../data/rpg/rpg_text.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
@@ -60,13 +59,12 @@ class _CategoriesBrowseScreenState extends ConsumerState<CategoriesBrowseScreen>
     final l10n = AppLocalizations.of(context)!;
     final translator = TaxonomyTranslator.of(context);
     final settings = ref.watch(settingsProvider);
-    final rpg = RpgText.of(l10n, settings.nerdMode);
     final cookbookId = settings.currentCookbookId ?? 'starter';
     final recipeDao = ref.watch(recipeDaoProvider);
 
     final isCourses = widget.mode == BrowseMode.courses;
-    final primaryLabel = isCourses ? rpg.coursesTitle : rpg.categoriesTitle;
-    final secondaryLabel = isCourses ? rpg.categoriesTitle : rpg.coursesTitle;
+    final primaryLabel = isCourses ? l10n.coursesTitle : l10n.categoriesTitle;
+    final secondaryLabel = isCourses ? l10n.categoriesTitle : l10n.coursesTitle;
 
     return Scaffold(
       appBar: AppBar(

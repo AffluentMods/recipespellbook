@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../data/course_category_data.dart';
-import '../../../data/rpg/rpg_text.dart';
 import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
@@ -16,13 +15,10 @@ import '../../widgets/new_recipe_dialog.dart';
 import '../onboarding/book_intro_screen.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
-import '../../../data/rpg/rpg_companion.dart';
-import '../../../providers/companion_provider.dart';
-import '../../../providers/rpg_provider.dart';
 import '../../widgets/hint_banner.dart';
 import '../../../services/recipe_suggestion_service.dart';
-import '../../widgets/rpg/companion_widget.dart';
-import '../../widgets/rpg/rpg_navigation_shell.dart';
+// TODO: Kitchen Buddy hidden for now
+// import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
 import '../../../utils/responsive_utils.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -108,12 +104,12 @@ class HomeScreen extends ConsumerWidget {
                   builder: (context, snapshot) {
                     final recipes = snapshot.data ?? [];
 
-                    // Update RPG achievement progress for recipe count
-                    if (recipes.isNotEmpty) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        RpgIntegration.updateRecipeCount(ref, recipes.length);
-                      });
-                    }
+                    // TODO: Kitchen Buddy hidden for now
+                    // if (recipes.isNotEmpty) {
+                    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+                    //     KitchenBuddyIntegration.updateRecipeCount(ref, recipes.length);
+                    //   });
+                    // }
 
                     if (recipes.isEmpty) {
                       return _EmptyCookbookState(cookbookId: cookbookId);
@@ -150,18 +146,9 @@ class HomeScreen extends ConsumerWidget {
               ),
             ],
           )),
-          floatingActionButton: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              // Floating companion (RPG mode only)
-              const CompanionWidget(size: 64),
-              const SizedBox(height: 8),
-              _ModernFAB(
-                onPressed: () => showNewRecipeDialog(context, cookbookId),
-                label: l10n.recipeAdd,
-              ),
-            ],
+          floatingActionButton: _ModernFAB(
+            onPressed: () => showNewRecipeDialog(context, cookbookId),
+            label: l10n.recipeAdd,
           ),
         );
       },
@@ -189,14 +176,10 @@ class _SurpriseMeCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (recipes.length < 3) return const SizedBox.shrink(); // Need at least a few recipes
 
-    final rpgEnabled = ref.watch(rpgEnabledProvider);
     final showSurprise = ref.watch(settingsProvider.select((s) => s.showSurpriseMe));
-
-    // Only show if RPG is ON, or if the user has it enabled in settings
-    if (!rpgEnabled && !showSurprise) return const SizedBox.shrink();
+    if (!showSurprise) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
-    final companionData = rpgEnabled ? ref.watch(companionDataProvider) : null;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -205,14 +188,10 @@ class _SurpriseMeCard extends ConsumerWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: rpgEnabled
-                ? Colors.amber.withValues(alpha: 0.4)
-                : theme.colorScheme.outline.withValues(alpha: 0.2),
+            color: theme.colorScheme.outline.withValues(alpha: 0.2),
           ),
         ),
-        color: rpgEnabled
-            ? Colors.amber.withValues(alpha: 0.08)
-            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () => _onSurpriseMe(context, ref),
@@ -220,20 +199,16 @@ class _SurpriseMeCard extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
-                // Icon / companion emoji
+                // Icon
                 Container(
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: rpgEnabled
-                        ? Colors.amber.withValues(alpha: 0.2)
-                        : theme.colorScheme.primary.withValues(alpha: 0.1),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
-                    child: rpgEnabled && companionData != null
-                        ? Text(companionData.type.emoji, style: const TextStyle(fontSize: 24))
-                        : Icon(Icons.casino, color: theme.colorScheme.primary, size: 24),
+                    child: Icon(Icons.casino, color: theme.colorScheme.primary, size: 24),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -243,9 +218,7 @@ class _SurpriseMeCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        rpgEnabled && companionData != null
-                            ? 'Ask ${companionData.name}'
-                            : 'Surprise Me!',
+                        'Surprise Me!',
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -286,14 +259,6 @@ class _SurpriseMeCard extends ConsumerWidget {
     if (suggestion == null) return;
 
     final recipeId = suggestion['id'] as String;
-
-    // Show companion reaction in RPG mode
-    final rpgEnabled = ref.read(rpgEnabledProvider);
-    if (rpgEnabled) {
-      final title = suggestion['title'] as String;
-      final notifier = ref.read(companionProvider.notifier);
-      notifier.showMessage(notifier.generateCookingReaction(title));
-    }
 
     // Navigate to recipe
     context.push('/recipe/$recipeId');
@@ -365,7 +330,7 @@ class _QuickRecipesWidgetState extends ConsumerState<_QuickRecipesWidget> {
                   const SizedBox(width: 8),
                   // Help button
                   GestureDetector(
-                    onTap: () => _showHelpDialog(context, settings.nerdMode),
+                    onTap: () => _showHelpDialog(context),
                     child: Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
@@ -407,9 +372,8 @@ class _QuickRecipesWidgetState extends ConsumerState<_QuickRecipesWidget> {
     );
   }
 
-  void _showHelpDialog(BuildContext context, bool nerdMode) {
+  void _showHelpDialog(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final rpg = RpgText.of(l10n, nerdMode);
     final theme = Theme.of(context);
 
     showDialog(
@@ -437,14 +401,14 @@ class _QuickRecipesWidgetState extends ConsumerState<_QuickRecipesWidget> {
             _HelpBadgeRow(
               color: Colors.orange,
               icon: Icons.push_pin,
-              label: rpg.homePinnedRecipes,
+              label: l10n.homePinnedRecipes,
               description: l10n.quickAccessHelpPinned,
             ),
             const SizedBox(height: 12),
             _HelpBadgeRow(
               color: Colors.grey,
               icon: Icons.history,
-              label: rpg.homeRecentRecipes,
+              label: l10n.homeRecentRecipes,
               description: l10n.quickAccessHelpRecent,
             ),
           ],

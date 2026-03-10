@@ -372,10 +372,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsMeasurementsMetric => 'Метрические (мл, г)';
 
   @override
-  String get settingsRPGMode => 'Режим RPG';
+  String get settingsKitchenBuddy => 'Режим RPG';
 
   @override
-  String get settingsRPGModeSubtitle => 'Включить текст и изображения в стиле фэнтези';
+  String get settingsKitchenBuddySubtitle => 'Включить текст и изображения в стиле фэнтези';
 
   @override
   String get settingsRecipes => 'Рецепты';
@@ -2274,16 +2274,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get defaultImages => 'Изображения по умолчанию';
 
   @override
-  String get defaultImagesDescription => 'Иллюстрации, меняющиеся в режиме RPG';
+  String get defaultImagesDescription => 'Default app artwork for recipes and cookbooks';
 
   @override
   String get themeBased => 'На основе темы';
 
   @override
   String get themeBasedDescription => 'Градиент с логотипом согласно вашей теме';
-
-  @override
-  String get placeholderRpgInfo => 'Изображения по умолчанию переключаются между обычными и RPG вариантами.';
 
   @override
   String get groupBySection => 'По отделу';
@@ -2465,7 +2462,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get shoppingListEmptyHint => 'Добавьте товары или импортируйте из рецептов';
 
   @override
-  String get settingsRPGModeActive => 'Призываю магический текст...';
+  String get settingsKitchenBuddyActive => 'Призываю магический текст...';
 
   @override
   String get shoppingCheckAll => 'Отметить всё';
@@ -2901,64 +2898,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get tagsColorLabel => 'Цвет';
 
   @override
-  String get settingsRpgAnimations => 'Анимации редкости';
-
-  @override
-  String get settingsRpgAnimationsSubtitle => 'Световые эффекты для эпических и легендарных рецептов';
-
-  @override
-  String get settingsRpgSounds => 'Звуковые эффекты';
-
-  @override
-  String get settingsRpgSoundsSubtitle => 'Звуки для достижений и повышений уровня';
-
-  @override
-  String get settingsRpgAchievements => 'Достижения';
-
-  @override
-  String get settingsRpgAchievementsSubtitle => 'Просмотреть разблокированные достижения';
-
-  @override
-  String get settingsRpgStats => 'Статистика готовки';
-
-  @override
-  String get settingsRpgStatsSubtitle => 'Просмотреть статистику готовки';
-
-  @override
-  String get settingsRpgModeEnabled => 'Transform your cooking into an adventure!';
+  String get settingsKitchenBuddyEnabled => 'Earn coins and dress up your buddy!';
 
   @override
   String get settingsRecipeLayoutSubtitle => 'Настроить отображение рецептов';
-
-  @override
-  String get rarityCommon => 'Обычный';
-
-  @override
-  String get rarityCommonDesc => 'Простой повседневный рецепт';
-
-  @override
-  String get rarityUncommon => 'Необычный';
-
-  @override
-  String get rarityUncommonDesc => 'Вкусный рецепт с изюминкой';
-
-  @override
-  String get rarityRare => 'Редкий';
-
-  @override
-  String get rarityRareDesc => 'Особый рецепт, достойный освоения';
-
-  @override
-  String get rarityEpic => 'Эпический';
-
-  @override
-  String get rarityEpicDesc => 'Эпический рецепт великой силы!';
-
-  @override
-  String get rarityLegendary => 'Легендарный';
-
-  @override
-  String get rarityLegendaryDesc => 'Легендарный рецепт, достойный богов!';
 
   @override
   String get shareLink => 'Ссылка';
@@ -3072,9 +3015,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get premiumSubtitle => 'Откройте синхронизацию, неограниченные рецепты и многое другое';
-
-  @override
-  String get rpgMode => 'Режим RPG';
 
   @override
   String get leaderboards => 'Таблицы лидеров';
@@ -4463,7 +4403,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get menuImport => 'ИМПОРТ';
 
   @override
-  String get menuRpgMode => 'РЕЖИМ RPG';
+  String get menuKitchenBuddyMode => 'РЕЖИМ RPG';
 
   @override
   String get menuSocial => 'СООБЩЕСТВО';
@@ -4644,13 +4584,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get featurePhotosOnSteps => 'Фото к шагам';
 
   @override
-  String get featurePhotoStorage250 => '250 МБ хранилища фото (~500 фото)';
-
-  @override
-  String get featureRpgCosmeticsStarter => 'Стартовый набор косметики RPG';
-
-  @override
-  String get featureSupporterBadge => 'Значок поддержки Premium';
+  String get featureCloudStorageLimited => 'Cloud storage — Limited';
 
   @override
   String get featureExtraPolish => 'Улучшения UI и функций';
@@ -4659,7 +4593,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get featureFamilySharing5 => 'Семейный доступ (5 человек)';
 
   @override
-  String get featurePhotoStorage1gb => '1 ГБ хранилища фото (~2 000 фото)';
+  String get featureCloudStorage => 'Cloud storage';
 
   @override
   String get featureSharedLists => 'Общие списки покупок';
@@ -4671,16 +4605,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get featureSharedMealPlan => 'Общий план питания';
 
   @override
-  String get featureEncryptedBackups => 'Зашифрованные резервные копии + история';
+  String get featureAutoBackups => 'Automatic backups';
 
   @override
   String get featureFamilySharing10 => 'Семейный доступ (10 человек)';
-
-  @override
-  String get featurePhotoStorage5gb => '5 ГБ хранилища фото (~10 000 фото)';
-
-  @override
-  String get featureExtendedVersionHistory => 'Расширенная история';
 
   @override
   String get featurePrioritySync => 'Приоритетная синхронизация';
@@ -4738,27 +4666,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get compareBackups => 'Резервные копии';
-
-  @override
-  String get compareVersionHistory => 'История';
-
-  @override
-  String get light => 'Лёгкая';
-
-  @override
-  String get extended => 'Расширенная';
-
-  @override
-  String get compareRpgCosmetics => 'Косметика RPG';
-
-  @override
-  String get basic => 'Базовый';
-
-  @override
-  String get starterPack => 'Стартовый\nнабор';
-
-  @override
-  String get compareSupporterBadge => 'Значок поддержки';
 
   @override
   String get printOf => 'из';
@@ -4872,9 +4779,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get qrScanningMobileOnly => 'Сканирование QR доступно только на мобильном.';
 
   @override
-  String get notEnoughMana => 'Недостаточно маны! Получайте опыт из рецептов для восстановления.';
-
-  @override
   String get communityComingSoon => 'Функции сообщества скоро появятся!';
 
   @override
@@ -4970,10 +4874,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsNotifAchievementsSubtitle => 'Разблокированные достижения и оповещения о вехах';
 
   @override
-  String get settingsNotifQuests => 'Напоминания о заданиях';
+  String get settingsNotifBuddy => 'Напоминания о заданиях';
 
   @override
-  String get settingsNotifQuestsSubtitle => 'Сброс ежедневных заданий и напоминания об XP';
+  String get settingsNotifBuddySubtitle => 'Сброс ежедневных заданий и напоминания об XP';
 
   @override
   String get tuesday => 'Вторник';
@@ -5510,7 +5414,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mealPlanThisWeekend => 'В эти выходные';
 
   @override
-  String get menuRpgProfile => 'Профиль RPG';
+  String get menuKitchenBuddy => 'Профиль RPG';
 
   @override
   String get menuTools => 'Инструменты';
@@ -5588,73 +5492,74 @@ class AppLocalizationsRu extends AppLocalizations {
   String get upgradeToProUnlock => 'Перейдите на Pro для разблокировки';
 
   @override
-  String get rpgFightAgain => 'Сражаться снова';
+  String get kitchenBuddyTitle => 'Kitchen Buddy';
 
   @override
-  String get rpgAwesome => 'Отлично!';
+  String get kitchenBuddyCloset => 'Closet';
 
   @override
-  String get rpgPurchase => 'Купить';
+  String get kitchenBuddyShop => 'Shop';
 
   @override
-  String get rpgEquipped => 'Экипировано';
+  String get kitchenBuddyAchievements => 'Achievements';
 
   @override
-  String get rpgClaim => 'Забрать';
+  String kitchenBuddyStreakDays(int count) {
+    return '$count day streak';
+  }
 
   @override
-  String get rpgGuild => 'Гильдия';
+  String get kitchenBuddyClosetEmpty => 'No items yet! Visit the Shop to get started.';
 
   @override
-  String get rpgDmg => 'DMG';
+  String get kitchenBuddyShopOwnEverything => 'You own everything!';
 
   @override
-  String get rpgMana => 'Мана';
+  String get kitchenBuddyShopCheckBack => 'Check back when new items are added.';
 
   @override
-  String get rpgLevel => 'Уровень';
+  String kitchenBuddyConfirmPurchase(String itemName) {
+    return 'Buy $itemName?';
+  }
 
   @override
-  String get rpgTotalXp => 'Всего XP';
+  String kitchenBuddyCostSummary(int price) {
+    return 'This will cost 🪙 $price Spice Coins.';
+  }
 
   @override
-  String get rpgLoginStreak => 'Серия входов';
+  String get kitchenBuddyBuy => 'Buy';
 
   @override
-  String get rpgGoldEarned => 'Заработано золота';
+  String kitchenBuddyPurchaseSuccess(String itemName) {
+    return 'Purchased $itemName!';
+  }
 
   @override
-  String get rpgGemsEarned => 'Заработано самоцветов';
+  String get kitchenBuddyNotEnoughCoins => 'Not enough coins';
 
   @override
-  String get rpgNextLevel => 'Следующий уровень';
+  String kitchenBuddyRequires(String achievementName) {
+    return 'Requires: $achievementName';
+  }
 
   @override
-  String get rpgNotifyMe => 'Уведомить меня';
+  String get kitchenBuddyNamingTitle => 'Name Your Buddy';
 
   @override
-  String get rpgGold => 'Золото';
+  String get kitchenBuddyIntroTitle => 'Meet your Kitchen Buddy!';
 
   @override
-  String get rpgGems => 'Самоцветы';
+  String get kitchenBuddyIntroDescription => 'This little chef will be your kitchen companion.\nCook recipes and earn coins to dress them up!';
 
   @override
-  String get rpgLottery => 'Лотерея самоцветов';
+  String get kitchenBuddyNameLabel => 'Buddy Name';
 
   @override
-  String get rpgClasses => 'Классы';
+  String get kitchenBuddyNameHint => 'Enter a name...';
 
   @override
-  String get rpgDisplayName => 'Отображаемое имя';
-
-  @override
-  String get rpgResetProgress => 'Сбросить прогресс';
-
-  @override
-  String get rpgResetProgressSubtitle => 'Начать заново с 1 уровня';
-
-  @override
-  String get rpgRecipeRarity => 'Редкость рецепта';
+  String get kitchenBuddyCreate => 'Create Buddy';
 
   @override
   String get settingsNoMatchingSettings => 'Нет подходящих настроек';
@@ -6402,197 +6307,72 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get rpgAchievements => 'Достижения';
+  String get mealPlanAddTitle => 'Добавить в план питания';
 
   @override
-  String get rpgAttack => 'Атака';
+  String get mealPlanMealLabel => 'Приём пищи';
 
   @override
-  String get rpgBattleArena => '⚔️ Арена битв';
+  String get mealPlanAdding => 'Добавление...';
 
   @override
-  String get rpgBoss => 'БОСС';
-
-  @override
-  String get rpgBossDamage => 'Урон босса';
-
-  @override
-  String get rpgBossDefeated => 'Босс побеждён!';
-
-  @override
-  String get rpgBossFight => 'Битва с боссом';
-
-  @override
-  String get rpgChooseYourClass => 'Выберите свой класс';
-
-  @override
-  String get rpgClassBonusSubtitle => 'Каждый класс даёт уникальные бонусы';
-
-  @override
-  String get rpgClassBonusesList => 'Бонусы классов';
-
-  @override
-  String get rpgClassBonusesTitle => 'Бонусы классов';
-
-  @override
-  String get rpgComingSoon => 'Скоро!';
-
-  @override
-  String get rpgCommunity => 'Сообщество';
-
-  @override
-  String get rpgCommunityDescription => 'Соревнуйтесь с другими кулинарами по всему миру!';
-
-  @override
-  String get rpgCommunityLeaderboard => 'Таблица лидеров сообщества';
-
-  @override
-  String get rpgCooked => 'Приготовлено';
-
-  @override
-  String get rpgCosmetics => 'Косметика';
-
-  @override
-  String get rpgCrit => 'КРИТ!';
-
-  @override
-  String rpgDaysAgo(int count) {
-    return '$count дней назад';
+  String mealPlanDateFormat(String weekday, String month, int day) {
+    return '$weekday, $day $month';
   }
 
   @override
-  String rpgDaysCount(int count) {
-    return '$count дней';
-  }
+  String get splashRecipe => 'Рецепт';
 
   @override
-  String get rpgGemLottery => 'Лотерея самоцветов';
+  String get splashSpellbook => 'Книга заклинаний';
 
   @override
-  String rpgGemsAvailable(int count) {
-    return '$count самоцветов доступно';
-  }
+  String get smartImportReparsed => 'Повторно проанализировано ИИ — проверьте обновлённый рецепт выше';
 
   @override
-  String rpgHoursAgo(int count) {
-    return '$count часов назад';
-  }
+  String get servingSizeHint => 'напр., 1 стакан, 100г';
 
   @override
-  String get rpgHowYouCompare => 'Ваше сравнение';
+  String get mainNutrients => 'Основные нутриенты';
 
   @override
-  String get rpgHp => 'HP';
+  String get additionalNutrients => 'Дополнительные нутриенты';
 
   @override
-  String get rpgJustNow => 'Только что';
+  String get onboardingWelcomeTo => 'Добро пожаловать в';
 
   @override
-  String get rpgKeepEarningXp => 'Зарабатывайте XP, чтобы разблокировать этого врага!';
+  String get onboardingAppName => 'Recipe Spellbook!';
 
   @override
-  String rpgKillStreak(int count) {
-    return 'Серия побед: $count 🔥';
-  }
+  String get onboardingDescription => '10 отборных рецептов со всего мира для вашего старта.';
 
   @override
-  String get rpgLeaderboard => 'Таблица лидеров';
+  String get onboardingDeleteLater => 'Вы всегда сможете удалить их позже.';
 
   @override
-  String rpgLevelN(int level) {
-    return 'Уровень $level';
-  }
+  String get onboardingAdding => 'Добавление...';
 
   @override
-  String rpgLevelRequired(int level) {
-    return 'Требуется уровень $level';
-  }
+  String get onboardingAddStarter => 'Добавить стартовые рецепты';
 
   @override
-  String get rpgLotteryCost => 'Стоимость 1 самоцвет за вращение';
+  String get onboardingBlankCookbook => 'Начать с пустой книги рецептов';
 
   @override
-  String rpgLotteryResultGems(int amount) {
-    return 'Вы выиграли $amount самоцветов!';
-  }
+  String get onboardingSpellbookAwaits => 'Ваша книга заклинаний ждёт';
 
   @override
-  String rpgLotteryResultGold(int amount) {
-    return 'Вы выиграли $amount золота!';
-  }
+  String get onboardingYourSpellbookAwaits => 'Ваша книга заклинаний ждёт...';
 
   @override
-  String get rpgLotteryResultNothing => 'Повезёт в следующий раз!';
+  String get onboardingSummoning => 'Призываем...';
 
   @override
-  String get rpgLotteryResultRarePet => 'Вы нашли редкого питомца!';
+  String get onboardingBlankSpellbook => 'Начать с пустой книги заклинаний';
 
   @override
-  String rpgLotteryResultXp(int amount) {
-    return 'Вы заработали $amount XP!';
-  }
-
-  @override
-  String get rpgManaHint => 'Получайте XP из рецептов для восстановления маны • Повышайте уровень для полного восстановления';
-
-  @override
-  String get rpgMilestones => 'Вехи';
-
-  @override
-  String rpgMinutesAgo(int count) {
-    return '$count минут назад';
-  }
-
-  @override
-  String get rpgNoMana => 'Нет маны!';
-
-  @override
-  String get rpgProfileSettings => 'Настройки профиля';
-
-  @override
-  String get rpgQuickActions => 'Быстрые действия';
-
-  @override
-  String get rpgRecipes => 'Рецепты';
-
-  @override
-  String get rpgReset => 'Сбросить';
-
-  @override
-  String get rpgResetProgressConfirmMessage => 'Это сбросит весь ваш прогресс RPG, включая уровень, XP, золото и самоцветы. Это нельзя отменить.';
-
-  @override
-  String get rpgResetProgressConfirmTitle => 'Сбросить прогресс?';
-
-  @override
-  String rpgResetsInHours(int count) {
-    return 'Сброс через $count часов';
-  }
-
-  @override
-  String rpgResetsInMinutes(int count) {
-    return 'Сброс через $count минут';
-  }
-
-  @override
-  String get rpgSpin => 'Крутить!';
-
-  @override
-  String get rpgStreak => 'Серия';
-
-  @override
-  String get rpgVictory => 'Победа!';
-
-  @override
-  String rpgYouDefeated(String name) {
-    return 'Вы победили $name!';
-  }
-
-  @override
-  String get rpgYourStatistics => 'Ваша статистика';
-
-  @override
-  String get rpgYourStats => 'Ваши показатели';
+  String get onboardingSkip => 'Пропустить';
 
   @override
   String get settingsBrowseCommunity => 'Обзор сообщества';
@@ -7459,215 +7239,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get themeAlchemist => 'Алхимик';
-
-  @override
-  String get rpgNoAchievementsInCategory => 'Нет достижений в этой категории';
-
-  @override
-  String rpgUnlocksItem(String item) {
-    return 'Открывает: $item';
-  }
-
-  @override
-  String get rpgCategory => 'Категория';
-
-  @override
-  String get rpgCompleted => 'Завершено';
-
-  @override
-  String get rpgProgress => 'Прогресс';
-
-  @override
-  String rpgDefeatedEnemy(String name) {
-    return 'Побеждён $name!';
-  }
-
-  @override
-  String get rpgBlock => 'Блок';
-
-  @override
-  String get rpgHeal => 'Лечение';
-
-  @override
-  String get rpgPlayerDefeated => 'Поражение!';
-
-  @override
-  String rpgPlayerDefeatedDesc(String name) {
-    return 'Вас победил $name!';
-  }
-
-  @override
-  String rpgGoldLost(int amount) {
-    return 'Потеряно $amount золота';
-  }
-
-  @override
-  String get rpgRespawn => 'Возрождение';
-
-  @override
-  String get rpgYourHp => 'Ваше HP';
-
-  @override
-  String rpgBossRetaliates(String name) {
-    return '$name наносит ответный удар!';
-  }
-
-  @override
-  String rpgBlockedDamage(int damage) {
-    return 'Заблокировано! Получено только $damage урона';
-  }
-
-  @override
-  String rpgHealedHp(int amount) {
-    return 'Восстановлено $amount HP!';
-  }
-
-  @override
-  String get rpgNotEnoughMana => 'Недостаточно маны!';
-
-  @override
-  String get rpgAvatars => 'Аватары';
-
-  @override
-  String get rpgFrames => 'Рамки';
-
-  @override
-  String get rpgPets => 'Питомцы';
-
-  @override
-  String get rpgTitles => 'Титулы';
-
-  @override
-  String rpgPurchaseItem(String item) {
-    return 'Купить $item?';
-  }
-
-  @override
-  String get rpgUnlockedViaAchievement => 'Разблокировано через достижение';
-
-  @override
-  String get rpgPrice => 'Цена';
-
-  @override
-  String get rpgNotEnoughGold => 'Недостаточно золота';
-
-  @override
-  String get rpgNotEnoughGems => 'Недостаточно самоцветов';
-
-  @override
-  String rpgPurchased(String item) {
-    return 'Куплено $item!';
-  }
-
-  @override
-  String get rpgOwned => 'В наличии';
-
-  @override
-  String get rpgDailyQuests => 'Ежедневные задания';
-
-  @override
-  String rpgQuestsCompleted(int completed, int total) {
-    return '$completed из $total выполнено';
-  }
-
-  @override
-  String get rpgWeeklyChallenge => 'Еженедельное испытание';
-
-  @override
-  String get rpgQuestsSubtitle => 'Выполняйте задания, чтобы получать XP и награды';
-
-  @override
-  String get rpgRecentXp => 'Недавний XP';
-
-  @override
-  String get rpgNoAchievementsYet => 'Пока нет достижений';
-
-  @override
-  String rpgLv(int level) {
-    return 'Ур.$level';
-  }
-
-  @override
-  String rpgClassBonus(String className) {
-    return 'Бонус $className';
-  }
-
-  @override
-  String get rpgLevelUp => 'Новый уровень!';
-
-  @override
-  String get rpgUnlocked => 'Разблокировано!';
-
-  @override
-  String get rpgAchievementUnlocked => 'Достижение разблокировано!';
-
-  @override
-  String get mealPlanAddTitle => 'Добавить в план питания';
-
-  @override
-  String get mealPlanMealLabel => 'Приём пищи';
-
-  @override
-  String get mealPlanAdding => 'Добавление...';
-
-  @override
-  String mealPlanDateFormat(String weekday, String month, int day) {
-    return '$weekday, $day $month';
-  }
-
-  @override
-  String get splashRecipe => 'Рецепт';
-
-  @override
-  String get splashSpellbook => 'Книга заклинаний';
-
-  @override
-  String get smartImportReparsed => 'Повторно проанализировано ИИ — проверьте обновлённый рецепт выше';
-
-  @override
-  String get servingSizeHint => 'напр., 1 стакан, 100г';
-
-  @override
-  String get mainNutrients => 'Основные нутриенты';
-
-  @override
-  String get additionalNutrients => 'Дополнительные нутриенты';
-
-  @override
-  String get onboardingWelcomeTo => 'Добро пожаловать в';
-
-  @override
-  String get onboardingAppName => 'Recipe Spellbook!';
-
-  @override
-  String get onboardingDescription => '10 отборных рецептов со всего мира для вашего старта.';
-
-  @override
-  String get onboardingDeleteLater => 'Вы всегда сможете удалить их позже.';
-
-  @override
-  String get onboardingAdding => 'Добавление...';
-
-  @override
-  String get onboardingAddStarter => 'Добавить стартовые рецепты';
-
-  @override
-  String get onboardingBlankCookbook => 'Начать с пустой книги рецептов';
-
-  @override
-  String get onboardingSpellbookAwaits => 'Ваша книга заклинаний ждёт';
-
-  @override
-  String get onboardingYourSpellbookAwaits => 'Ваша книга заклинаний ждёт...';
-
-  @override
-  String get onboardingSummoning => 'Призываем...';
-
-  @override
-  String get onboardingBlankSpellbook => 'Начать с пустой книги заклинаний';
-
-  @override
-  String get onboardingSkip => 'Пропустить';
 
   @override
   String get communitySortTopRated => 'Лучшие по оценке';

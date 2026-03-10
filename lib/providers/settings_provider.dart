@@ -37,7 +37,7 @@ enum IngredientLayout {
 class AppSettings {
   final AppColorTheme appTheme;
   final ThemeMode themeMode;
-  final bool nerdMode; // Enables magical/RPG text
+  final bool kitchenBuddyEnabled; // Enables Kitchen Buddy companion mode
   final MeasurementSystem measurementSystem; // US or Metric
   final Color seedColor; // Derived from appTheme
   final String? currentCookbookId; // Currently selected cookbook
@@ -56,10 +56,6 @@ class AppSettings {
 
   // Recipe display settings
   final RecipeLayoutMode recipeLayoutMode;
-
-  // RPG Mode settings
-  final bool rpgAnimationsEnabled;
-  final bool rpgSoundsEnabled;
 
   final RecipeEditLayoutMode recipeEditLayoutMode;
 
@@ -89,7 +85,7 @@ class AppSettings {
   AppSettings({
     this.appTheme = AppColorTheme.spellbook,
     this.themeMode = ThemeMode.system,
-    this.nerdMode = false,
+    this.kitchenBuddyEnabled = false,
     this.measurementSystem = MeasurementSystem.us,
     this.currentCookbookId,
     this.languageCode = 'system',
@@ -101,8 +97,6 @@ class AppSettings {
     this.cookbookPlaceholderMode = PlaceholderImageMode.custom,
     this.recipeLayoutMode = RecipeLayoutMode.stacked,
     this.allergens = const [],
-    this.rpgAnimationsEnabled = true,
-    this.rpgSoundsEnabled = false,
     this.recipeEditLayoutMode = RecipeEditLayoutMode.stacked,
     this.defaultNutritionView = NutritionDisplayMode.perServing,
     this.nutritionChartStyle = NutritionChartStyle.donut,
@@ -118,7 +112,7 @@ class AppSettings {
   AppSettings copyWith({
     AppColorTheme? appTheme,
     ThemeMode? themeMode,
-    bool? nerdMode,
+    bool? kitchenBuddyEnabled,
     MeasurementSystem? measurementSystem,
     String? currentCookbookId,
     String? languageCode,
@@ -130,8 +124,6 @@ class AppSettings {
     PlaceholderImageMode? cookbookPlaceholderMode,
     RecipeLayoutMode? recipeLayoutMode,
     List<Allergen>? allergens,
-    bool? rpgAnimationsEnabled,
-    bool? rpgSoundsEnabled,
     RecipeEditLayoutMode? recipeEditLayoutMode,
     NutritionDisplayMode? defaultNutritionView,
     NutritionChartStyle? nutritionChartStyle,
@@ -145,7 +137,7 @@ class AppSettings {
     return AppSettings(
       appTheme: appTheme ?? this.appTheme,
       themeMode: themeMode ?? this.themeMode,
-      nerdMode: nerdMode ?? this.nerdMode,
+      kitchenBuddyEnabled: kitchenBuddyEnabled ?? this.kitchenBuddyEnabled,
       measurementSystem: measurementSystem ?? this.measurementSystem,
       currentCookbookId: currentCookbookId ?? this.currentCookbookId,
       languageCode: languageCode ?? this.languageCode,
@@ -157,8 +149,6 @@ class AppSettings {
       cookbookPlaceholderMode: cookbookPlaceholderMode ?? this.cookbookPlaceholderMode,
       recipeLayoutMode: recipeLayoutMode ?? this.recipeLayoutMode,
       allergens: allergens ?? this.allergens,
-      rpgAnimationsEnabled: rpgAnimationsEnabled ?? this.rpgAnimationsEnabled,
-      rpgSoundsEnabled: rpgSoundsEnabled ?? this.rpgSoundsEnabled,
       recipeEditLayoutMode: recipeEditLayoutMode ?? this.recipeEditLayoutMode,
       defaultNutritionView: defaultNutritionView ?? this.defaultNutritionView,
       nutritionChartStyle: nutritionChartStyle ?? this.nutritionChartStyle,
@@ -228,7 +218,8 @@ const supportedLocaleCodes = ['en', 'es', 'de', 'fr', 'it', 'pt', 'nl', 'pl', 'r
 class SettingsNotifier extends Notifier<AppSettings> {
   static const _themeKey = 'app_theme';
   static const _themeModeKey = 'theme_mode';
-  static const _nerdModeKey = 'nerd_mode';
+  static const _kitchenBuddyKey = 'kitchen_buddy_enabled';
+  static const _legacyNerdModeKey = 'nerd_mode'; // For migration
   static const _measurementKey = 'measurement_system';
   static const _cookbookKey = 'current_cookbook_id';
   static const _languageKey = 'language_code';
@@ -240,8 +231,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
   static const _cookbookPlaceholderKey = 'cookbook_placeholder_mode';
   static const _recipeLayoutKey = 'recipe_layout_mode';
   static const _allergensKey = 'allergens';
-  static const _rpgAnimationsKey = 'rpg_animations_enabled';
-  static const _rpgSoundsKey = 'rpg_sounds_enabled';
   static const _recipeEditLayoutKey = 'recipe_edit_layout';
   static const _textScaleKey = 'text_scale_factor';
   static const _weekStartDayKey = 'week_start_day';
@@ -285,8 +274,18 @@ class SettingsNotifier extends Notifier<AppSettings> {
       orElse: () => ThemeMode.system,
     );
 
-    // Load nerd mode
-    final nerdMode = prefs.getBool(_nerdModeKey) ?? false;
+    // Load Kitchen Buddy (with migration from old nerd_mode key)
+    var kitchenBuddyEnabled = prefs.getBool(_kitchenBuddyKey);
+    if (kitchenBuddyEnabled == null) {
+      // Migrate from old key
+      final legacyNerdMode = prefs.getBool(_legacyNerdModeKey);
+      if (legacyNerdMode != null) {
+        kitchenBuddyEnabled = legacyNerdMode;
+        await prefs.setBool(_kitchenBuddyKey, legacyNerdMode);
+      } else {
+        kitchenBuddyEnabled = false;
+      }
+    }
 
     // Load measurement system
     final measurementString = prefs.getString(_measurementKey);
@@ -333,10 +332,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
         .whereType<Allergen>()
         .toList();
 
-    // Load RPG mode settings
-    final rpgAnimationsEnabled = prefs.getBool(_rpgAnimationsKey) ?? true;
-    final rpgSoundsEnabled = prefs.getBool(_rpgSoundsKey) ?? false;
-
     final editLayoutIndex = prefs.getInt(_recipeEditLayoutKey) ?? 0;
 
     // Load enabled nutrients
@@ -371,7 +366,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
     state = AppSettings(
       appTheme: appTheme,
       themeMode: themeMode,
-      nerdMode: nerdMode,
+      kitchenBuddyEnabled: kitchenBuddyEnabled,
       measurementSystem: measurementSystem,
       currentCookbookId: currentCookbookId,
       languageCode: languageCode,
@@ -383,8 +378,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
       cookbookPlaceholderMode: cookbookPlaceholderMode,
       recipeLayoutMode: recipeLayoutMode,
       allergens: allergens,
-      rpgAnimationsEnabled: rpgAnimationsEnabled,
-      rpgSoundsEnabled: rpgSoundsEnabled,
       recipeEditLayoutMode: RecipeEditLayoutMode.values[editLayoutIndex],
       defaultNutritionView: nutritionView,
       nutritionChartStyle: chartStyle,
@@ -449,10 +442,10 @@ class SettingsNotifier extends Notifier<AppSettings> {
     state = state.copyWith(themeMode: mode);
   }
 
-  Future<void> setNerdMode(bool enabled) async {
+  Future<void> setKitchenBuddyEnabled(bool enabled) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_nerdModeKey, enabled);
-    state = state.copyWith(nerdMode: enabled);
+    await prefs.setBool(_kitchenBuddyKey, enabled);
+    state = state.copyWith(kitchenBuddyEnabled: enabled);
   }
 
   Future<void> setMeasurementSystem(MeasurementSystem system) async {
@@ -537,19 +530,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
     state = state.copyWith(ingredientLayout: layout);
   }
 
-  // RPG Mode settings
-  Future<void> setRpgAnimations(bool enabled) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_rpgAnimationsKey, enabled);
-    state = state.copyWith(rpgAnimationsEnabled: enabled);
-  }
-
-  Future<void> setRpgSounds(bool enabled) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_rpgSoundsKey, enabled);
-    state = state.copyWith(rpgSoundsEnabled: enabled);
-  }
-
   // Text scale — accessibility
   Future<void> setTextScaleFactor(double scale) async {
     final clamped = scale.clamp(0.8, 1.3);
@@ -608,8 +588,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
     await prefs.remove(_quickAccessPinnedKey);
     await prefs.remove(_recipeLayoutKey);
     await prefs.remove(_allergensKey);
-    await prefs.remove(_rpgAnimationsKey);
-    await prefs.remove(_rpgSoundsKey);
     await prefs.remove(_textScaleKey);
     await prefs.remove(_weekStartDayKey);
     await prefs.remove(_ingredientLayoutKey);

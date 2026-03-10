@@ -23,8 +23,8 @@ import '../../../data/nutrition_data.dart';
 import '../../widgets/taxonomy_picker.dart';
 import '../../widgets/tag_picker.dart';
 import '../../widgets/nutrition_calculation_sheet.dart';
-import '../../widgets/rpg/rpg_rarity_picker.dart';
-import '../../widgets/rpg/rpg_navigation_shell.dart';
+// TODO: Kitchen Buddy hidden for now
+// import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
 import '../../widgets/recipe_edit_instructions.dart';
 import '../../../services/image_service.dart';
 import '../../../services/auth_service.dart';
@@ -408,7 +408,6 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider);
-    final isRpgMode = settings.nerdMode;
     final useTabbed = settings.recipeEditLayoutMode == RecipeEditLayoutMode.tabbed;
 
     if (_isLoading) {
@@ -449,12 +448,12 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         ) : null,
       ),
       body: useTabbed
-          ? _buildTabbedLayout(theme, l10n, isRpgMode, settings)
-          : _buildStackedLayout(theme, l10n, isRpgMode, settings),
+          ? _buildTabbedLayout(theme, l10n, settings)
+          : _buildStackedLayout(theme, l10n, settings),
     );
   }
 
-  Widget _buildStackedLayout(ThemeData theme, AppLocalizations l10n, bool isRpgMode, AppSettings settings) {
+  Widget _buildStackedLayout(ThemeData theme, AppLocalizations l10n, AppSettings settings) {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
@@ -485,15 +484,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
             const SizedBox(height: 20),
             TagPicker(recipeId: widget.recipeId ?? '', initialTagIds: _selectedTagIds, onTagsChanged: (tagIds) => setState(() => _selectedTagIds = tagIds)),
             const SizedBox(height: 20),
-            // Show RPG rarity picker or standard star rating based on settings
-            if (isRpgMode)
-              RpgRarityPicker(
-                initialRating: _rating == 0 ? 1 : _rating,
-                onChanged: (r) => setState(() => _rating = r),
-                enableAnimations: settings.rpgAnimationsEnabled,
-              )
-            else
-              _RatingSelector(rating: _rating, onChanged: (r) => setState(() => _rating = r)),
+            _RatingSelector(rating: _rating, onChanged: (r) => setState(() => _rating = r)),
             const SizedBox(height: 20),
             Row(children: [
               Expanded(child: TextFormField(controller: _servingsController, decoration: InputDecoration(labelText: l10n.recipeFieldServings, hintText: l10n.hintServingsExample))),
@@ -556,7 +547,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     );
   }
 
-  Widget _buildTabbedLayout(ThemeData theme, AppLocalizations l10n, bool isRpgMode, AppSettings settings) {
+  Widget _buildTabbedLayout(ThemeData theme, AppLocalizations l10n, AppSettings settings) {
     return TabBarView(
       controller: _tabController,
       children: [
@@ -590,14 +581,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
                 const SizedBox(height: 20),
                 TagPicker(recipeId: widget.recipeId ?? '', initialTagIds: _selectedTagIds, onTagsChanged: (tagIds) => setState(() => _selectedTagIds = tagIds)),
                 const SizedBox(height: 20),
-                if (isRpgMode)
-                  RpgRarityPicker(
-                    initialRating: _rating == 0 ? 1 : _rating,
-                    onChanged: (r) => setState(() => _rating = r),
-                    enableAnimations: settings.rpgAnimationsEnabled,
-                  )
-                else
-                  _RatingSelector(rating: _rating, onChanged: (r) => setState(() => _rating = r)),
+                _RatingSelector(rating: _rating, onChanged: (r) => setState(() => _rating = r)),
                 const SizedBox(height: 20),
                 Row(children: [
                   Expanded(child: TextFormField(controller: _servingsController, decoration: InputDecoration(labelText: l10n.recipeFieldServings, hintText: l10n.hintServingsExample))),
@@ -1039,25 +1023,15 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
           onAction: () => router.push('/recipe/$recipeId'),
         );
 
-        // RPG XP - only for new recipes
-        if (!_isEditing) {
-          final isImported = widget.importedData != null;
-          if (isImported) {
-            RpgIntegration.onRecipeImported(ref);
-          } else {
-            RpgIntegration.onRecipeCreated(
-              ref,
-              stepCount: _steps.where((s) => s.instruction.trim().isNotEmpty).length,
-              ingredientCount: _ingredients.where((i) => i.text.trim().isNotEmpty).length,
-            );
-          }
-          if (finalImagePath != null) {
-            RpgIntegration.onPhotoAdded(ref);
-          }
-          if (_nutrition != null && !_nutrition!.isEmpty) {
-            RpgIntegration.onNutritionAdded(ref);
-          }
-        }
+        // TODO: Kitchen Buddy hidden for now
+        // if (!_isEditing) {
+        //   final isImported = widget.importedData != null;
+        //   if (isImported) {
+        //     KitchenBuddyIntegration.onRecipeImported(ref);
+        //   } else {
+        //     KitchenBuddyIntegration.onRecipeSaved(ref);
+        //   }
+        // }
 
         context.pop(true);
       }

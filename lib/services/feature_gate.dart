@@ -17,9 +17,6 @@ enum GatedFeature {
   /// Step-by-step photos on recipes
   stepPhotos(SubscriptionTier.premium, 'Step Photos', Icons.photo_library),
 
-  /// RPG cosmetics starter pack
-  premiumCosmetics(SubscriptionTier.premium, 'Premium Cosmetics', Icons.palette),
-
   /// Family sharing (shared cookbooks, lists, meal plans)
   familySharing(SubscriptionTier.cloudSync, 'Family Sharing', Icons.family_restroom),
 
@@ -32,14 +29,8 @@ enum GatedFeature {
   /// Shared meal planning
   sharedMealPlan(SubscriptionTier.cloudSync, 'Shared Meal Plan', Icons.calendar_month),
 
-  /// Automatic encrypted backups
+  /// Automatic backups
   backups(SubscriptionTier.cloudSync, 'Backups', Icons.backup),
-
-  /// Light version history
-  versionHistory(SubscriptionTier.cloudSync, 'Version History', Icons.history),
-
-  /// Extended version history
-  extendedVersionHistory(SubscriptionTier.cloudSyncFamily, 'Extended History', Icons.history_toggle_off),
 
   /// Community creator page
   creatorPage(SubscriptionTier.cloudSync, 'Creator Page', Icons.storefront),

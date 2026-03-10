@@ -28,7 +28,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
 
-  _ViewMode _viewMode = _ViewMode.grid;
+  _ViewMode _viewMode = _ViewMode.list;
   String _sort = 'recent';
   String _query = '';
   int _page = 1;
@@ -55,7 +55,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
   Future<void> _loadViewMode() async {
     final prefs = await SharedPreferences.getInstance();
-    final mode = prefs.getString('community_view_mode') ?? 'grid';
+    final mode = prefs.getString('community_view_mode') ?? 'list';
     if (mounted) setState(() => _viewMode = mode == 'list' ? _ViewMode.list : _ViewMode.grid);
   }
 

@@ -103,8 +103,6 @@ flutter:
     - assets/images/themes/
     - assets/images/guides/
     - assets/images/faqs/
-    - assets/rpg/avatars/
-    - assets/rpg/frames/
     - assets/rpg/pets/
     - assets/images/icon.png
     - assets/images/splash_logo.png

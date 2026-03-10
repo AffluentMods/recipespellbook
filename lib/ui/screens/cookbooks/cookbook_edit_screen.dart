@@ -13,7 +13,8 @@ import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../widgets/app_snackbar.dart';
-import '../../widgets/rpg/rpg_navigation_shell.dart';
+// TODO: Kitchen Buddy hidden for now
+// import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
 
 class CookbookEditScreen extends ConsumerStatefulWidget {
   final String? cookbookId; // null for new cookbook
@@ -137,8 +138,8 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
           description: drift.Value(_descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim()),
           imagePath: drift.Value(_imagePath),
         ));
-        // RPG XP for new cookbook
-        RpgIntegration.onCookbookCreated(ref);
+        // TODO: Kitchen Buddy hidden for now
+        // KitchenBuddyIntegration.onCookbookPublished(ref);
       }
 
       if (mounted) {
