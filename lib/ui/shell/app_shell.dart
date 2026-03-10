@@ -251,10 +251,13 @@ class _NotchNavBarState extends State<_NotchNavBar>
       _NavDef(Icons.menu_rounded, Icons.menu_rounded, l10n.navMenu),
     ];
 
-    // Scaffold's bottomNavigationBar already handles system bottom padding,
-    // so we only specify the bar content height.
+    // Include system bottom inset so the bar background extends behind
+    // the gesture nav area in portrait, but don't double-count in landscape
+    // where the system bar is on the side instead.
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
+
     return SizedBox(
-      height: _barHeight,
+      height: _barHeight + bottomPadding,
       child: AnimatedBuilder(
         animation: _animation,
         builder: (context, _) {
@@ -496,16 +499,16 @@ class _AppNavigationRail extends StatelessWidget {
         child: Icon(Icons.auto_awesome, color: theme.colorScheme.primary, size: 28),
       ),
       trailing: Expanded(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            IconButton(
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: IconButton(
               icon: const Icon(Icons.menu_rounded),
               tooltip: l10n.navMenu,
               onPressed: onMenuTap,
             ),
-            const SizedBox(height: 16),
-          ],
+          ),
         ),
       ),
       destinations: [

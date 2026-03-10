@@ -390,10 +390,10 @@ class RevenueCatService {
   Future<bool> checkTrialEligibility(List<String> productIds) async {
     if (!_initialized || !supportsRevenueCatSdk) return false;
     try {
-      final result = await Purchases.checkTrialOrIntroDiscountEligibility(productIds);
+      final result = await Purchases.checkTrialOrIntroductoryPriceEligibility(productIds);
       return result.values.any(
-        (e) => e.status == IntroEligibilityStatus.eligible ||
-               e.status == IntroEligibilityStatus.unknown,
+        (e) => e.status == IntroEligibilityStatus.introEligibilityStatusEligible ||
+               e.status == IntroEligibilityStatus.introEligibilityStatusUnknown,
       );
     } catch (e) {
       debugPrint('[RevenueCat] Trial eligibility check failed: $e');

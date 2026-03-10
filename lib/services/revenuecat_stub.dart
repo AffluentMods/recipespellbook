@@ -19,14 +19,20 @@ class Purchases {
   static Future<Offerings> getOfferings() async => Offerings._();
   static Future<CustomerInfo> purchasePackage(Package package) async => CustomerInfo._();
   static Future<CustomerInfo> restorePurchases() async => CustomerInfo._();
-  static Future<Map<String, IntroEligibility>> checkTrialOrIntroDiscountEligibility(List<String> productIds) async => {};
+  static Future<Map<String, IntroEligibility>> checkTrialOrIntroductoryPriceEligibility(List<String> productIds) async => {};
 }
 
-enum IntroEligibilityStatus { eligible, ineligible, unknown }
+enum IntroEligibilityStatus {
+  introEligibilityStatusUnknown,
+  introEligibilityStatusIneligible,
+  introEligibilityStatusEligible,
+  introEligibilityStatusNoIntroOfferExists,
+}
 
 class IntroEligibility {
-  final IntroEligibilityStatus status;
-  IntroEligibility._(this.status);
+  IntroEligibilityStatus status;
+  IntroEligibility.fromJson(Map<String, dynamic> map)
+      : status = IntroEligibilityStatus.values[map['status']];
 }
 
 enum LogLevel { debug, info, warn, error }
