@@ -107,16 +107,14 @@ flutter:
     - assets/images/icon.png
     - assets/images/splash_logo.png
     - assets/images/cookbook_placeholder_normal.png
-    - assets/images/cookbook_placeholder_rpg.png
     - assets/images/recipe_placeholder_normal.png
-    - assets/images/recipe_placeholder_rpg.png
     - assets/images/3rd-party/instacart_carrot.png
     - assets/images/3rd-party/instacart_carrot_white.png
     - assets/animations/
 
 msix_config:
   display_name: Recipe Spellbook
-  publisher_display_name: ANordlund
+  publisher_display_name: AffluentLabs
   identity_name: com.recipespellbook.app
   logo_path: assets/images/icon.png
   capabilities:
