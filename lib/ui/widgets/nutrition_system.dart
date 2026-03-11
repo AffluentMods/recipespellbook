@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../database/database.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Basic nutrition data for common ingredients (per 100g or per unit)
 /// In a real app, this would come from a nutrition API like USDA or Nutritionix
@@ -781,6 +782,7 @@ class NutritionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Card(
       child: Padding(
@@ -814,7 +816,7 @@ class NutritionCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Estimated values',
+              l10n.nutritionEstimated,
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
             ),
             const SizedBox(height: 16),
@@ -823,25 +825,25 @@ class NutritionCard extends StatelessWidget {
             Row(
               children: [
                 _MacroCircle(
-                  label: 'Calories',
+                  label: l10n.nutrientCalories,
                   value: '${nutrition.calories.round()}',
                   unit: 'kcal',
                   color: Colors.orange,
                 ),
                 _MacroCircle(
-                  label: 'Protein',
+                  label: l10n.nutrientProtein,
                   value: '${nutrition.protein.round()}',
                   unit: 'g',
                   color: Colors.red,
                 ),
                 _MacroCircle(
-                  label: 'Carbs',
+                  label: l10n.nutrientCarbs,
                   value: '${nutrition.carbs.round()}',
                   unit: 'g',
                   color: Colors.blue,
                 ),
                 _MacroCircle(
-                  label: 'Fat',
+                  label: l10n.nutrientFat,
                   value: '${nutrition.fat.round()}',
                   unit: 'g',
                   color: Colors.amber,
@@ -851,9 +853,9 @@ class NutritionCard extends StatelessWidget {
 
             if (expanded) ...[
               const Divider(height: 32),
-              _NutritionRow(label: 'Fiber', value: nutrition.fiber, unit: 'g'),
-              _NutritionRow(label: 'Sugar', value: nutrition.sugar, unit: 'g'),
-              _NutritionRow(label: 'Sodium', value: nutrition.sodium, unit: 'mg'),
+              _NutritionRow(label: l10n.nutrientFiber, value: nutrition.fiber, unit: 'g'),
+              _NutritionRow(label: l10n.nutrientSugar, value: nutrition.sugar, unit: 'g'),
+              _NutritionRow(label: l10n.nutrientSodium, value: nutrition.sodium, unit: 'mg'),
             ],
           ],
         ),

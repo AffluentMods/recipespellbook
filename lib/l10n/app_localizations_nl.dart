@@ -2393,6 +2393,15 @@ class AppLocalizationsNl extends AppLocalizations {
   String get typeDeleteHint => 'VERWIJDER';
 
   @override
+  String get resetScopeLocal => 'lokale gegevens';
+
+  @override
+  String get resetScopeCloud => 'cloudgegevens';
+
+  @override
+  String get resetScopeAll => 'alle gegevens en instellingen';
+
+  @override
   String get resetEverything => 'Alles resetten';
 
   @override
@@ -3823,6 +3832,57 @@ class AppLocalizationsNl extends AppLocalizations {
   String get accountTitle => 'Account';
 
   @override
+  String get accountSubscription => 'Abonnement';
+
+  @override
+  String get accountManageSubscription => 'Abonnement beheren';
+
+  @override
+  String get accountCloudSync => 'Cloudsynchronisatie';
+
+  @override
+  String get accountSyncNow => 'Nu synchroniseren';
+
+  @override
+  String get accountIntegrations => 'Integraties';
+
+  @override
+  String get accountDangerZone => 'Gevarenzone';
+
+  @override
+  String get purchasesRestored => 'Aankopen succesvol hersteld!';
+
+  @override
+  String get noPurchasesFound => 'Geen eerdere aankopen gevonden.';
+
+  @override
+  String get restoreFailed => 'Herstel mislukt. Probeer het opnieuw.';
+
+  @override
+  String get restorePurchasesLong => 'Aankopen herstellen';
+
+  @override
+  String get cancelled => 'Geannuleerd';
+
+  @override
+  String get accessUntil => 'toegang tot';
+
+  @override
+  String get renews => 'Verlenging';
+
+  @override
+  String get plan => 'Plan';
+
+  @override
+  String get upgradeDescription => 'Ontgrendel cloudsynchronisatie, slim importeren en meer.';
+
+  @override
+  String get syncDescription => 'Houd je recepten gesynchroniseerd tussen apparaten.';
+
+  @override
+  String get sync => 'Synchroniseren';
+
+  @override
   String get signInToSync => 'Inloggen om te synchroniseren';
 
   @override
@@ -4637,6 +4697,18 @@ class AppLocalizationsNl extends AppLocalizations {
   String get compareSmartImportCloud => '10/mo';
 
   @override
+  String get compareCloudStorage => 'Cloudopslag';
+
+  @override
+  String get compareCloudStorageBasic => 'Basis';
+
+  @override
+  String get compareCloudStorageStandard => 'Standaard';
+
+  @override
+  String get compareCloudStorageExtended => 'Uitgebreid';
+
+  @override
   String get printOf => 'van';
 
   @override
@@ -4847,6 +4919,30 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get settingsNotifBuddySubtitle => 'Dagelijkse quest-resets en XP-herinneringen';
+
+  @override
+  String get settingsNotifManagePreferences => 'Meldingsvoorkeuren beheren';
+
+  @override
+  String get settingsNotifNewDownloads => 'Nieuwe downloads';
+
+  @override
+  String get settingsNotifNewDownloadsSubtitle => 'Wanneer iemand je gepubliceerde recept downloadt';
+
+  @override
+  String get settingsNotifRatingUpdates => 'Beoordelingsupdates';
+
+  @override
+  String get settingsNotifRatingUpdatesSubtitle => 'Wanneer je gepubliceerde recept een nieuwe beoordeling krijgt';
+
+  @override
+  String get settingsNotifComments => 'Reacties';
+
+  @override
+  String get settingsNotifCommentsSubtitle => 'Wanneer iemand een reactie plaatst op je recept';
+
+  @override
+  String get settingsNotifSyncNote => 'Meldingsvoorkeuren worden gesynchroniseerd met je account.';
 
   @override
   String get tuesday => 'Dinsdag';
@@ -6657,10 +6753,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importGuideCategoryOtherApps => 'Andere recepten-apps';
 
   @override
-  String get importGuideCategoryAi => 'AI Import';
+  String get importGuideCategoryAi => 'AI-import';
 
   @override
-  String get importGuideTagNew => 'New';
+  String get importGuideTagNew => 'Nieuw';
 
   @override
   String get importGuideScreenshotNeeded => 'Schermafbeelding nodig';
@@ -6957,37 +7053,37 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importGuideAiTitle => 'AI (ChatGPT, Claude, etc.)';
 
   @override
-  String get importGuideAiSubtitle => 'Generate recipes with AI and import them instantly';
+  String get importGuideAiSubtitle => 'Genereer recepten met AI en importeer ze direct';
 
   @override
-  String get importGuideAiStep1Title => 'Open AI Import';
+  String get importGuideAiStep1Title => 'Open AI-import';
 
   @override
-  String get importGuideAiStep1Desc => 'Go to Home, tap + to add a recipe, choose Import, then tap the AI button.';
+  String get importGuideAiStep1Desc => 'Ga naar Home, tik op + om een recept toe te voegen, kies Importeren en tik vervolgens op de AI-knop.';
 
   @override
-  String get importGuideAiStep2Title => 'Copy the prompt';
+  String get importGuideAiStep2Title => 'Kopieer de prompt';
 
   @override
-  String get importGuideAiStep2Desc => 'Tap the copy prompt button. Then open your favorite AI — ChatGPT, Claude, Gemini, or any other — and paste the prompt.';
+  String get importGuideAiStep2Desc => 'Tik op de knop prompt kopiëren. Open vervolgens je favoriete AI — ChatGPT, Claude, Gemini of een andere — en plak de prompt.';
 
   @override
-  String get importGuideAiStep3Title => 'Copy the AI\'s response';
+  String get importGuideAiStep3Title => 'Kopieer het antwoord van de AI';
 
   @override
-  String get importGuideAiStep3Desc => 'The AI will generate a recipe in JSON format. Copy the entire response.';
+  String get importGuideAiStep3Desc => 'De AI genereert een recept in JSON-formaat. Kopieer het volledige antwoord.';
 
   @override
-  String get importGuideAiStep4Title => 'Paste into Recipe Spellbook';
+  String get importGuideAiStep4Title => 'Plak in Recipe Spellbook';
 
   @override
-  String get importGuideAiStep4Desc => 'Go back to Recipe Spellbook, tap the paste button, then tap Preview to see the parsed recipe.';
+  String get importGuideAiStep4Desc => 'Ga terug naar Recipe Spellbook, tik op de plakknop en tik vervolgens op Voorbeeld om het verwerkte recept te bekijken.';
 
   @override
-  String get importGuideAiStep5Title => 'Preview & import';
+  String get importGuideAiStep5Title => 'Voorbeeld bekijken & importeren';
 
   @override
-  String get importGuideAiStep5Desc => 'Check that everything looks correct, then tap Import to save the recipe to your cookbook.';
+  String get importGuideAiStep5Desc => 'Controleer of alles er goed uitziet en tik vervolgens op Importeren om het recept in je kookboek op te slaan.';
 
   @override
   String get importGuideOtherAppsTitle => 'Andere recepten-apps';
@@ -7056,150 +7152,222 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importGuideDeviceTransferStep4Tip => 'Een betaald account? Log gewoon in op het nieuwe apparaat en alles wordt automatisch gesynchroniseerd.';
 
   @override
-  String get faqTitle => 'FAQs';
+  String get faqTitle => 'FAQ\'s';
 
   @override
-  String get faqHeroTitle => 'Frequently asked questions';
+  String get faqHeroTitle => 'Veelgestelde vragen';
 
   @override
-  String get faqHeroSubtitle => 'Find answers and step-by-step guides for common features.';
+  String get faqHeroSubtitle => 'Vind antwoorden en stapsgewijze handleidingen voor veelgebruikte functies.';
 
   @override
-  String get faqHowToGuides => 'How-to Guides';
+  String get faqHowToGuides => 'Handleidingen';
 
   @override
-  String get faqCommonQuestions => 'Common Questions';
+  String get faqCommonQuestions => 'Veelgestelde vragen';
 
   @override
-  String get faqSeeHowTo => 'See how-to guide';
+  String get faqSeeHowTo => 'Bekijk de handleiding';
 
   @override
   String faqStepsCount(int count) {
-    return '$count steps';
+    return '$count stappen';
   }
 
   @override
-  String get faqAddHeadersTitle => 'How to add headers';
+  String get faqAddHeadersTitle => 'Hoe voeg je koppen toe';
 
   @override
-  String get faqAddHeadersSubtitle => 'Organize your recipe ingredients and steps into sections';
+  String get faqAddHeadersSubtitle => 'Organiseer je receptingrediënten en -stappen in secties';
 
   @override
-  String get faqAddHeadersStep1Title => 'Open the recipe editor';
+  String get faqAddHeadersStep1Title => 'Open de recepteditor';
 
   @override
-  String get faqAddHeadersStep1Desc => 'Open a recipe and tap the edit icon.';
+  String get faqAddHeadersStep1Desc => 'Open een recept en tik op het bewerkicoon.';
 
   @override
-  String get faqAddHeadersStep2Title => 'Add a header';
+  String get faqAddHeadersStep2Title => 'Voeg een kop toe';
 
   @override
-  String get faqAddHeadersStep2Desc => 'Tap the \'Add Header\' button to insert a section header.';
+  String get faqAddHeadersStep2Desc => 'Tik op de knop \'Kop toevoegen\' om een sectiekop in te voegen.';
 
   @override
-  String get faqAddHeadersStep3Title => 'Open the header menu';
+  String get faqAddHeadersStep3Title => 'Open het kopmenu';
 
   @override
-  String get faqAddHeadersStep3Desc => 'Tap the three dots (⋮) next to the header for more options.';
+  String get faqAddHeadersStep3Desc => 'Tik op de drie puntjes (⋮) naast de kop voor meer opties.';
 
   @override
-  String get faqAddHeadersStep4Title => 'Reorder your headers';
+  String get faqAddHeadersStep4Title => 'Herorden je koppen';
 
   @override
-  String get faqAddHeadersStep4Desc => 'Tap Sort Order to rearrange. Drag the ≡ handle to move headers up or down.';
+  String get faqAddHeadersStep4Desc => 'Tik op Sorteervolgorde om te herschikken. Sleep het ≡-handvat om koppen omhoog of omlaag te verplaatsen.';
 
   @override
-  String get faqAddHeadersStep4Tip => 'You can drag headers by holding the ≡ (two lines) handle on the left side.';
+  String get faqAddHeadersStep4Tip => 'Je kunt koppen slepen door het ≡ (twee lijnen) handvat aan de linkerkant ingedrukt te houden.';
 
   @override
-  String get faqAddHeadersStep5Title => 'Save your changes';
+  String get faqAddHeadersStep5Title => 'Sla je wijzigingen op';
 
   @override
-  String get faqAddHeadersStep5Desc => 'Tap the save button to keep your new headers.';
+  String get faqAddHeadersStep5Desc => 'Tik op de opslaanknop om je nieuwe koppen te bewaren.';
 
   @override
-  String get faqAddHeadersStep6Title => 'Done!';
+  String get faqAddHeadersStep6Title => 'Klaar!';
 
   @override
-  String get faqAddHeadersStep6Desc => 'Your recipe now has organized sections with headers.';
+  String get faqAddHeadersStep6Desc => 'Je recept heeft nu georganiseerde secties met koppen.';
 
   @override
-  String get faqAddSublinkedTitle => 'How to add sublinked recipes';
+  String get faqAddSublinkedTitle => 'Hoe voeg je gekoppelde recepten toe';
 
   @override
-  String get faqAddSublinkedSubtitle => 'Link related recipes together for quick access';
+  String get faqAddSublinkedSubtitle => 'Koppel gerelateerde recepten aan elkaar voor snelle toegang';
 
   @override
-  String get faqAddSublinkedStep1Title => 'Open the recipe editor';
+  String get faqAddSublinkedStep1Title => 'Open de recepteditor';
 
   @override
-  String get faqAddSublinkedStep1Desc => 'Open a recipe and tap the edit icon.';
+  String get faqAddSublinkedStep1Desc => 'Open een recept en tik op het bewerkicoon.';
 
   @override
-  String get faqAddSublinkedStep2Title => 'Open the menu';
+  String get faqAddSublinkedStep2Title => 'Open het menu';
 
   @override
-  String get faqAddSublinkedStep2Desc => 'Tap the three dots (⋮) in the edit screen.';
+  String get faqAddSublinkedStep2Desc => 'Tik op de drie puntjes (⋮) in het bewerkscherm.';
 
   @override
-  String get faqAddSublinkedStep3Title => 'Tap Link Recipe';
+  String get faqAddSublinkedStep3Title => 'Tik op Recept koppelen';
 
   @override
-  String get faqAddSublinkedStep3Desc => 'Select \'Link Recipe\' from the menu.';
+  String get faqAddSublinkedStep3Desc => 'Selecteer \'Recept koppelen\' in het menu.';
 
   @override
-  String get faqAddSublinkedStep4Title => 'Choose a recipe to link';
+  String get faqAddSublinkedStep4Title => 'Kies een recept om te koppelen';
 
   @override
-  String get faqAddSublinkedStep4Desc => 'Tap the link icon next to the recipe you want to connect (e.g., Pizza Dough).';
+  String get faqAddSublinkedStep4Desc => 'Tik op het koppelingspictogram naast het recept dat je wilt verbinden (bijv. Pizzadeeg).';
 
   @override
-  String get faqAddSublinkedStep5Title => 'Save your changes';
+  String get faqAddSublinkedStep5Title => 'Sla je wijzigingen op';
 
   @override
-  String get faqAddSublinkedStep5Desc => 'Tap the save icon to keep the linked recipe.';
+  String get faqAddSublinkedStep5Desc => 'Tik op het opslaanpictogram om het gekoppelde recept te bewaren.';
 
   @override
-  String get faqAddSublinkedStep6Title => 'Done!';
+  String get faqAddSublinkedStep6Title => 'Klaar!';
 
   @override
-  String get faqAddSublinkedStep6Desc => 'The linked recipe now appears in your recipe, ready to tap and view.';
+  String get faqAddSublinkedStep6Desc => 'Het gekoppelde recept verschijnt nu in je recept, klaar om op te tikken en te bekijken.';
 
   @override
-  String get faqWhatAreHeadersTitle => 'What are headers?';
+  String get faqWhatAreHeadersTitle => 'Wat zijn koppen?';
 
   @override
-  String get faqWhatAreHeadersSubtitle => 'Organize recipes into sections';
+  String get faqWhatAreHeadersSubtitle => 'Organiseer recepten in secties';
 
   @override
-  String get faqWhatAreHeadersAnswer => 'Headers let you divide your recipe ingredients and steps into sections. For example, you could have separate sections for \'Sauce\', \'Dough\', and \'Topping\' in a pizza recipe. They make long recipes much easier to follow.';
+  String get faqWhatAreHeadersAnswer => 'Met koppen kun je je receptingrediënten en -stappen in secties verdelen. Zo kun je bijvoorbeeld aparte secties hebben voor \'Saus\', \'Deeg\' en \'Beleg\' in een pizzarecept. Ze maken lange recepten veel gemakkelijker te volgen.';
 
   @override
-  String get faqWhatAreSublinkedTitle => 'What are sublinked recipes?';
+  String get faqWhatAreSublinkedTitle => 'Wat zijn gekoppelde recepten?';
 
   @override
-  String get faqWhatAreSublinkedSubtitle => 'Connect related recipes together';
+  String get faqWhatAreSublinkedSubtitle => 'Verbind gerelateerde recepten met elkaar';
 
   @override
-  String get faqWhatAreSublinkedAnswer => 'Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it — no searching needed.';
+  String get faqWhatAreSublinkedAnswer => 'Gekoppelde recepten laten je gerelateerde recepten aan elkaar verbinden. Zo kan een Margherita Pizza-recept bijvoorbeeld linken naar je Pizzadeeg-recept. Bij het bekijken van het hoofdrecept kun je op het gekoppelde recept tikken om er direct naartoe te gaan — geen zoeken nodig.';
 
   @override
-  String get faqImportFailedTitle => 'Why did my import fail?';
+  String get faqMacroCalcTitle => 'Hoe gebruik je de Macro Calculator';
 
   @override
-  String get faqImportFailedSubtitle => 'Common reasons and fixes';
+  String get faqMacroCalcSubtitle => 'Bereken automatisch calorieën en macro\'s voor elk recept';
 
   @override
-  String get faqImportFailedAnswer => 'Imports can fail for a few reasons:\n\n• The website may block automated access — try copying the recipe text and using Text Import instead.\n• The link may have expired or be private — make sure it’s a public link.\n• Some sites use formats that are harder to parse — try the AI import as an alternative.\n• Check your internet connection and try again.';
+  String get faqMacroCalcStep1Title => 'Open een recept';
 
   @override
-  String get faqDeviceTransferTitle => 'Can I import from other devices?';
+  String get faqMacroCalcStep1Desc => 'Open een recept en scroll naar het gedeelte Voedingswaarden.';
 
   @override
-  String get faqDeviceTransferSubtitle => 'Transfer recipes between phones and tablets';
+  String get faqMacroCalcStep2Title => 'Tik om te berekenen';
 
   @override
-  String get faqDeviceTransferAnswer => 'Yes! Use the Device Transfer feature in Settings > Data > Device Transfer. Generate a code on your old device and enter it on your new one. All your recipes, cookbooks, and images will be transferred.';
+  String get faqMacroCalcStep2Desc => 'Tik op het lege voedingswaardengedeelte om de calculator te openen. Er staat \'Tik om te berekenen\'.';
+
+  @override
+  String get faqMacroCalcStep3Title => 'Automatische analyse';
+
+  @override
+  String get faqMacroCalcStep3Desc => 'De calculator koppelt je ingrediënten automatisch aan de USDA-voedingsdatabase en berekent calorieën, eiwitten, koolhydraten, vetten en meer.';
+
+  @override
+  String get faqMacroCalcStep4Title => 'Handmatig invoeren';
+
+  @override
+  String get faqMacroCalcStep4Desc => 'Tik op \'Handmatig invoeren\' om de voedingswaarden zelf te bewerken.';
+
+  @override
+  String get faqMacroCalcStep5Title => 'Ingrediëntmatches bekijken';
+
+  @override
+  String get faqMacroCalcStep5Desc => 'Scroll naar beneden om te zien hoe elk ingrediënt is gekoppeld aan een USDA-voedingsmiddel. Gekoppelde recepten gebruiken hun eigen voedingsgegevens.';
+
+  @override
+  String get faqMacroCalcStep5Tip => 'Wat zijn gekoppelde recepten? Bekijk het onderdeel \'Wat zijn gekoppelde recepten?\' in de FAQ!';
+
+  @override
+  String get faqMacroCalcStep6Title => 'USDA-database doorzoeken';
+
+  @override
+  String get faqMacroCalcStep6Desc => 'Tik op een ingrediënt om in de USDA-database naar een betere match te zoeken.';
+
+  @override
+  String get faqMacroCalcStep7Title => 'Voeding gekoppelde recepten';
+
+  @override
+  String get faqMacroCalcStep7Desc => 'Ingrediënten die aan een ander recept zijn gekoppeld, tonen de voedingsgegevens van dat recept. Je kunt de schaal aanpassen.';
+
+  @override
+  String get faqMacroCalcStep8Title => 'Sla je resultaten op';
+
+  @override
+  String get faqMacroCalcStep8Desc => 'Tik op Opslaan om de voedingsgegevens op te slaan. De macro\'s verschijnen bij je recept met grafieken en details per portie.';
+
+  @override
+  String get faqMacroCalcStep9Title => 'Weergave aanpassen';
+
+  @override
+  String get faqMacroCalcStep9Desc => 'Via Instellingen > Voedingsweergave kun je kiezen welke voedingsstoffen je wilt tonen en hoe de grafieken eruitzien.';
+
+  @override
+  String get faqWhatIsMacroCalcTitle => 'Wat is de Macro Calculator?';
+
+  @override
+  String get faqWhatIsMacroCalcSubtitle => 'Automatische voedingsschatting voor recepten';
+
+  @override
+  String get faqWhatIsMacroCalcAnswer => 'De Macro Calculator schat automatisch de voedingswaarde van je recepten door elk ingrediënt te koppelen aan de USDA-voedingsdatabase. Het berekent calorieën, eiwitten, koolhydraten, vetten, vezels, suiker, natrium en meer — alles per portie. Je vindt het in het gedeelte Voedingswaarden van elk recept.';
+
+  @override
+  String get faqImportFailedTitle => 'Waarom is mijn import mislukt?';
+
+  @override
+  String get faqImportFailedSubtitle => 'Veelvoorkomende oorzaken en oplossingen';
+
+  @override
+  String get faqImportFailedAnswer => 'Imports kunnen om verschillende redenen mislukken:\n\n• De website blokkeert mogelijk geautomatiseerde toegang — probeer de recepttekst te kopiëren en gebruik in plaats daarvan Tekstimport.\n• De link is mogelijk verlopen of privé — zorg ervoor dat het een openbare link is.\n• Sommige sites gebruiken formaten die moeilijker te verwerken zijn — probeer de AI-import als alternatief.\n• Controleer je internetverbinding en probeer het opnieuw.';
+
+  @override
+  String get faqDeviceTransferTitle => 'Kan ik importeren vanaf andere apparaten?';
+
+  @override
+  String get faqDeviceTransferSubtitle => 'Draag recepten over tussen telefoons en tablets';
+
+  @override
+  String get faqDeviceTransferAnswer => 'Ja! Gebruik de functie Apparaatoverdracht in Instellingen > Gegevens > Apparaatoverdracht. Genereer een code op je oude apparaat en voer deze in op je nieuwe. Al je recepten, kookboeken en afbeeldingen worden overgedragen.';
 
   @override
   String get themeFrost => 'Vorst';
@@ -7212,6 +7380,12 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get themeAlchemist => 'Alchemist';
+
+  @override
+  String get themeMatcha => 'Matcha';
+
+  @override
+  String get themeCustom => 'Aangepast';
 
   @override
   String get communitySortTopRated => 'Best beoordeeld';
@@ -7401,4 +7575,513 @@ class AppLocalizationsNl extends AppLocalizations {
   String communityPublishUploadInProgress(int current, int total) {
     return 'Publicatie bezig... ($current/$total afbeeldingen)';
   }
+
+  @override
+  String get surpriseMeTitle => 'Verras me!';
+
+  @override
+  String get surpriseMeSubtitle => 'Wat zal ik koken?';
+
+  @override
+  String get hintNutritionCalculator => 'Wist je dat? Tik op het voedingsicoon om automatisch de voedingswaarden van elk recept te berekenen.';
+
+  @override
+  String get hintCookingScreen => 'Probeer de kookmodus! Tik op \'Koken\' bij een recept voor handsfree stap-voor-stap instructies.';
+
+  @override
+  String get hintIngredientHeaders => 'Tip: Typ een regel die eindigt met \':\' bij de ingrediënten om een sectiekop te maken.';
+
+  @override
+  String get hintImportMethods => 'Importeer recepten van URL\'s, foto\'s, PDF\'s of zelfs Instagram en TikTok!';
+
+  @override
+  String get hintMealPlanAutoFill => 'Sleep recepten naar je maaltijdplanner, of tik op een dag om uit je collectie te kiezen.';
+
+  @override
+  String get hintRecipeScaling => 'Tik op het aantal porties bij een recept om de ingrediënten aan te passen.';
+
+  @override
+  String get hintShoppingListGen => 'Voeg receptingrediënten met één tik toe aan je boodschappenlijst.';
+
+  @override
+  String get hintRecipeNotes => 'Voeg persoonlijke notities toe aan elk recept — tips, aanpassingen of herinneringen.';
+
+  @override
+  String get hintCookbookOrganization => 'Maak meerdere kookboeken om je recepten te ordenen op thema of gelegenheid.';
+
+  @override
+  String get hintTagSystem => 'Tag recepten voor eenvoudig filteren — maak aangepaste tags zoals \'Snel\', \'Favoriet\', enz.';
+
+  @override
+  String get allergyMyAllergies => 'Mijn Allergieën';
+
+  @override
+  String get allergyDisabledTab => 'Uitgeschakeld';
+
+  @override
+  String get allergyNoDisabledTitle => 'Geen uitgeschakelde waarschuwingen';
+
+  @override
+  String get allergyNoDisabledSubtitle => 'Wanneer je allergiewaarschuwingen bij recepten uitschakelt, verschijnen ze hier zodat je ze kunt herstellen.';
+
+  @override
+  String get allergyDisabledInfo => 'Deze recepten hebben allergiewaarschuwingen uitgeschakeld. Tik om te herstellen.';
+
+  @override
+  String trashRestoredMessage(String title) {
+    return '\"$title\" hersteld';
+  }
+
+  @override
+  String get nutrientCalories => 'Calorieën';
+
+  @override
+  String get nutrientTotalFat => 'Totaal vet';
+
+  @override
+  String get nutrientSaturatedFat => 'Verzadigd vet';
+
+  @override
+  String get nutrientTransFat => 'Transvet';
+
+  @override
+  String get nutrientMonounsaturatedFat => 'Enkelvoudig onverzadigd vet';
+
+  @override
+  String get nutrientPolyunsaturatedFat => 'Meervoudig onverzadigd vet';
+
+  @override
+  String get nutrientCarbohydrates => 'Koolhydraten';
+
+  @override
+  String get nutrientFiber => 'Voedingsvezel';
+
+  @override
+  String get nutrientSugars => 'Suikers';
+
+  @override
+  String get nutrientProtein => 'Eiwitten';
+
+  @override
+  String get nutrientCholesterol => 'Cholesterol';
+
+  @override
+  String get nutrientSodium => 'Natrium';
+
+  @override
+  String get nutrientPotassium => 'Kalium';
+
+  @override
+  String get nutrientCalcium => 'Calcium';
+
+  @override
+  String get nutrientIron => 'IJzer';
+
+  @override
+  String get nutrientMagnesium => 'Magnesium';
+
+  @override
+  String get nutrientPhosphorus => 'Fosfor';
+
+  @override
+  String get nutrientZinc => 'Zink';
+
+  @override
+  String get nutrientCopper => 'Koper';
+
+  @override
+  String get nutrientManganese => 'Mangaan';
+
+  @override
+  String get nutrientSelenium => 'Selenium';
+
+  @override
+  String get nutrientVitaminA => 'Vitamine A';
+
+  @override
+  String get nutrientVitaminC => 'Vitamine C';
+
+  @override
+  String get nutrientVitaminD => 'Vitamine D';
+
+  @override
+  String get nutrientVitaminE => 'Vitamine E';
+
+  @override
+  String get nutrientVitaminK => 'Vitamine K';
+
+  @override
+  String get nutrientThiaminB1 => 'Thiamine (B1)';
+
+  @override
+  String get nutrientRiboflavinB2 => 'Riboflavine (B2)';
+
+  @override
+  String get nutrientNiacinB3 => 'Niacine (B3)';
+
+  @override
+  String get nutrientPantothenicAcidB5 => 'Pantotheenzuur (B5)';
+
+  @override
+  String get nutrientVitaminB6 => 'Vitamine B6';
+
+  @override
+  String get nutrientVitaminB12 => 'Vitamine B12';
+
+  @override
+  String get nutrientFolate => 'Foliumzuur';
+
+  @override
+  String get nutrientCholine => 'Choline';
+
+  @override
+  String get nutrientCategoryMacronutrients => 'Macronutriënten';
+
+  @override
+  String get nutrientCategoryMinerals => 'Mineralen';
+
+  @override
+  String get nutrientCategoryVitamins => 'Vitaminen';
+
+  @override
+  String get nutrientCarbs => 'Koolhydraten';
+
+  @override
+  String get nutrientFat => 'Vet';
+
+  @override
+  String nutritionKcalPerServing(int count) {
+    return '$count kcal/portie';
+  }
+
+  @override
+  String nutritionKcalTotal(int count) {
+    return '$count kcal totaal';
+  }
+
+  @override
+  String get shareShoppingList => 'Boodschappenlijst delen';
+
+  @override
+  String get shareOneTimeLink => 'Eenmalige link';
+
+  @override
+  String get shareOneTimeLinkSubtitle => 'Gratis • 24 uur geldig • Alleen bekijken/downloaden';
+
+  @override
+  String get shareGenerateLink => 'Link genereren';
+
+  @override
+  String get shareFamilyShare => 'Gezinsdeling';
+
+  @override
+  String get shareFamilySyncSubtitle => 'Realtime synchronisatie · Rechten per lid';
+
+  @override
+  String get shareFamilyCreateJoin => 'Maak een gezin aan of sluit je aan om te delen';
+
+  @override
+  String get shareFamilyRequiresCloudSync => 'Vereist Cloud Sync-abonnement';
+
+  @override
+  String get shareFamilyUpgradeMessage => 'Upgrade naar Cloud Sync om kookboeken en lijsten in realtime met je gezin te delen.';
+
+  @override
+  String get shareFamilySignIn => 'Log in om gezinsdeling te gebruiken';
+
+  @override
+  String get shareFamilySetupInSettings => 'Maak een gezin aan of sluit je aan in Instellingen → Gezinsdeling';
+
+  @override
+  String get shareSharedWith => 'Gedeeld met';
+
+  @override
+  String get shareRevoked => 'Deling ingetrokken';
+
+  @override
+  String get shareSignInRequired => 'Log in om deellinks te maken';
+
+  @override
+  String get shareCreateFailed => 'Link aanmaken mislukt';
+
+  @override
+  String get shareNoFamilyMembers => 'Geen andere gezinsleden om mee te delen';
+
+  @override
+  String get shareAddFamilyMembers => 'Gezinsleden toevoegen';
+
+  @override
+  String get shareWith => 'Delen met';
+
+  @override
+  String shareSharedWithMember(String name) {
+    return 'Gedeeld met $name';
+  }
+
+  @override
+  String get shareShareFailed => 'Delen mislukt';
+
+  @override
+  String get shareLinkCopied => 'Link gekopieerd!';
+
+  @override
+  String shareLinkExpiresIn(int hours) {
+    return 'Verloopt over $hours uur';
+  }
+
+  @override
+  String get shareRevoke => 'Intrekken';
+
+  @override
+  String get shareUpgrade => 'Upgraden';
+
+  @override
+  String get sharePermReadOnly => 'Alleen lezen';
+
+  @override
+  String get sharePermAddOnly => 'Alleen toevoegen';
+
+  @override
+  String get sharePermFullEdit => 'Volledig bewerken';
+
+  @override
+  String get sharePermFullAccess => 'Volledige toegang';
+
+  @override
+  String get sharePermViewRecipes => 'Kan recepten bekijken';
+
+  @override
+  String get sharePermAddRecipes => 'Kan nieuwe recepten toevoegen';
+
+  @override
+  String get sharePermEditRecipes => 'Kan elk recept bewerken';
+
+  @override
+  String get sharePermViewItems => 'Kan items bekijken';
+
+  @override
+  String get sharePermAddItems => 'Kan items toevoegen, eigen items bewerken';
+
+  @override
+  String get sharePermEditItems => 'Kan items bewerken en verwijderen';
+
+  @override
+  String get shareUnknownMember => 'Onbekend';
+
+  @override
+  String get subscriptionTitle => 'Abonnement';
+
+  @override
+  String get subscriptionUpgradeToPro => 'Upgraden naar Pro';
+
+  @override
+  String get subscriptionUnlockFeatures => 'Ontgrendel cloudsynchronisatie, slim importeren en meer.';
+
+  @override
+  String get subscriptionViewPlans => 'Abonnementen bekijken';
+
+  @override
+  String get subscriptionRestored => 'Aankopen succesvol hersteld!';
+
+  @override
+  String get subscriptionNoPurchases => 'Geen eerdere aankopen gevonden.';
+
+  @override
+  String subscriptionRestoreFailed(String error) {
+    return 'Herstel mislukt: $error';
+  }
+
+  @override
+  String get subscriptionRestorePurchases => 'Aankopen herstellen';
+
+  @override
+  String subscriptionCancelledUntil(String date) {
+    return 'Geannuleerd — toegang tot $date';
+  }
+
+  @override
+  String get subscriptionRenews => 'Verlengt op';
+
+  @override
+  String get subscriptionPlan => 'Abonnement';
+
+  @override
+  String get subscriptionLifetime => 'Levenslang — verloopt nooit';
+
+  @override
+  String get subscriptionManage => 'Abonnement beheren';
+
+  @override
+  String get subscriptionUnknownDate => 'Onbekend';
+
+  @override
+  String get subscriptionUpgradeToUnlock => 'Upgrade naar Pro om te ontgrendelen';
+
+  @override
+  String get subscriptionProBadge => 'PRO';
+
+  @override
+  String get customThemeTitle => 'Aangepast thema';
+
+  @override
+  String get customThemeColors => 'Kleuren';
+
+  @override
+  String get customThemeBackground => 'Achtergrond';
+
+  @override
+  String get customThemeBackgroundDesc => 'App-achtergrond, scaffold';
+
+  @override
+  String get customThemePrimary => 'Primair';
+
+  @override
+  String get customThemePrimaryDesc => 'Knoppen, accenten, app-balk';
+
+  @override
+  String get customThemeAccent => 'Accent';
+
+  @override
+  String get customThemeAccentDesc => 'FAB, schakelaars, secundaire accenten';
+
+  @override
+  String get customThemeStartFromPreset => 'Begin vanuit een preset';
+
+  @override
+  String get settingsUserFallback => 'Gebruiker';
+
+  @override
+  String get settingsManageSection => 'Beheren';
+
+  @override
+  String get settingsExportNone => 'Niets geselecteerd';
+
+  @override
+  String get settingsExportPartial => 'Gedeeltelijke back-up';
+
+  @override
+  String get settingsSystemLanguage => 'Systeem';
+
+  @override
+  String get tierFamily => 'FAMILY';
+
+  @override
+  String get tierCreator => 'CREATOR';
+
+  @override
+  String get tierFreeName => 'Gratis';
+
+  @override
+  String get tierPremiumName => 'Premium';
+
+  @override
+  String get tierCloudSyncName => 'Cloud Sync';
+
+  @override
+  String get tierCloudSyncFamilyName => 'Cloud Sync Gezin';
+
+  @override
+  String get tierCreatorName => 'Creator';
+
+  @override
+  String get nutritionEstimated => 'Geschatte waarden';
+
+  @override
+  String get nutritionTipMatch => 'Tik op een ingrediënt om de USDA-match te wijzigen';
+
+  @override
+  String get nutritionTipManual => 'Voer exacte voedingswaarden in als je die kent';
+
+  @override
+  String get nutritionTipSpecific => 'Kies specifieke types (bijv. \"tarwebloem\" in plaats van alleen \"bloem\")';
+
+  @override
+  String get nutritionTipSaved => 'Je correcties worden opgeslagen voor toekomstige recepten';
+
+  @override
+  String get nutritionGotIt => 'Begrepen';
+
+  @override
+  String get nutritionScaleMultiplier => 'Schaalfactor';
+
+  @override
+  String get nutritionScaleHelper => '1,0 = volledig recept';
+
+  @override
+  String nutritionOpenRecipe(String title) {
+    return '$title openen';
+  }
+
+  @override
+  String get nutrientCal => 'Cal';
+
+  @override
+  String get nutrientSugar => 'Suiker';
+
+  @override
+  String get appearanceCustomThemeRequiresPremium => 'Aangepast thema vereist Premium';
+
+  @override
+  String get appearancePremiumBadge => 'Premium';
+
+  @override
+  String get substitutionsAll => 'Alle';
+
+  @override
+  String substitutionsCount(int count, String category) {
+    return '$count vervangers • $category';
+  }
+
+  @override
+  String get colorPickerTitle => 'Kies een kleur';
+
+  @override
+  String get colorPickerHex => 'Hex';
+
+  @override
+  String get colorPickerSelect => 'Selecteer';
+
+  @override
+  String get scanSelectPages => 'Meerdere pagina\'s selecteren';
+
+  @override
+  String get scanNoTextPdf => 'Geen tekst gevonden in PDF. Probeer een duidelijkere scan of de optie Tekst plakken.';
+
+  @override
+  String scanLittleTextPdf(int count) {
+    return 'Heel weinig tekst gedetecteerd in PDF ($count tekens). De scan is mogelijk te wazig. Probeer een PDF van betere kwaliteit of gebruik de optie Tekst plakken.';
+  }
+
+  @override
+  String get scanNoTextImage => 'Geen tekst gevonden in afbeelding. Probeer de foto bij betere verlichting te nemen of gebruik de optie Tekst plakken.';
+
+  @override
+  String scanLittleTextImage(int count) {
+    return 'Heel weinig tekst gedetecteerd ($count tekens). Probeer een duidelijkere foto met betere verlichting, of gebruik de optie Tekst plakken.';
+  }
+
+  @override
+  String scanProgress(int current, int total) {
+    return 'Pagina $current van $total scannen...';
+  }
+
+  @override
+  String get communityTagHint => 'Aangepaste tag toevoegen...';
+
+  @override
+  String get tagPickerOrganize => 'Tags helpen je om je recepten te organiseren';
+
+  @override
+  String get tagPickerLoadDefaults => 'Standaardtags laden';
+
+  @override
+  String get tagPickerExampleHint => 'bijv. Date Night';
+
+  @override
+  String drawerProTier(String tier) {
+    return 'Pro · $tier';
+  }
+
+  @override
+  String get accountStoreFallback => 'Winkel';
 }

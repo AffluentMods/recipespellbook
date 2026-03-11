@@ -218,13 +218,13 @@ class _SurpriseMeCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Surprise Me!',
+                        AppLocalizations.of(context)!.surpriseMeTitle,
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        'What should I cook?',
+                        AppLocalizations.of(context)!.surpriseMeSubtitle,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.outline,
                         ),

@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../data/app_enums.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../providers/subscription_provider.dart';
+import '../../../services/revenuecat_service.dart';
+import 'custom_theme_screen.dart';
 
 class AppearanceScreen extends ConsumerWidget {
   const AppearanceScreen({super.key});
@@ -175,7 +178,7 @@ class _ModeOption extends StatelessWidget {
 
 // ============ COLOR THEME GRID ============
 
-class _ColorThemeGrid extends StatelessWidget {
+class _ColorThemeGrid extends ConsumerWidget {
   final AppColorTheme currentTheme;
   final ValueChanged<AppColorTheme> onChanged;
 
@@ -185,7 +188,10 @@ class _ColorThemeGrid extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tier = ref.watch(subscriptionProvider).tier;
+    final isPremium = tier.index >= SubscriptionTier.premium.index;
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -201,7 +207,31 @@ class _ColorThemeGrid extends StatelessWidget {
         return _ColorThemeCard(
           colorTheme: colorTheme,
           isSelected: currentTheme == colorTheme,
-          onTap: () => onChanged(colorTheme),
+          isPremium: isPremium,
+          customColors: colorTheme.isCustom
+              ? (
+                  bg: ref.watch(settingsProvider).customBgColor,
+                  primary: ref.watch(settingsProvider).customPrimaryColor,
+                  accent: ref.watch(settingsProvider).customAccentColor,
+                )
+              : null,
+          onTap: () {
+            if (colorTheme.isCustom) {
+              if (isPremium) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CustomThemeScreen()),
+                );
+              } else {
+                // Show upgrade hint
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.appearanceCustomThemeRequiresPremium)),
+                );
+              }
+            } else {
+              onChanged(colorTheme);
+            }
+          },
         );
       },
     );
@@ -211,12 +241,16 @@ class _ColorThemeGrid extends StatelessWidget {
 class _ColorThemeCard extends StatelessWidget {
   final AppColorTheme colorTheme;
   final bool isSelected;
+  final bool isPremium;
+  final ({Color? bg, Color? primary, Color? accent})? customColors;
   final VoidCallback onTap;
 
   const _ColorThemeCard({
     required this.colorTheme,
     required this.isSelected,
     required this.onTap,
+    this.isPremium = true,
+    this.customColors,
   });
 
   @override
@@ -254,26 +288,77 @@ class _ColorThemeCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Banner image
-              Image.asset(
-                colorTheme.bannerAsset,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) {
-                  // Fallback to color gradient
-                  final palette = theme.brightness == Brightness.dark
-                      ? colorTheme.dark
-                      : colorTheme.light;
-                  return Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [palette.primary, palette.secondary],
-                      ),
+              // Banner image (or gradient for custom theme)
+              if (colorTheme.isCustom)
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        customColors?.primary ?? const Color(0xFF6750A4),
+                        customColors?.accent ?? const Color(0xFF7D5260),
+                        customColors?.bg ?? const Color(0xFFF5F5F5),
+                      ],
                     ),
-                  );
-                },
-              ),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.palette_rounded,
+                      size: 36,
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ),
+                  ),
+                )
+              else
+                Image.asset(
+                  colorTheme.bannerAsset,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) {
+                    // Fallback to color gradient
+                    final palette = theme.brightness == Brightness.dark
+                        ? colorTheme.dark
+                        : colorTheme.light;
+                    return Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [palette.primary, palette.secondary],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+
+              // Premium lock badge for custom theme (when not premium)
+              if (colorTheme.isCustom && !isPremium)
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.lock_rounded, color: Colors.amber, size: 12),
+                        const SizedBox(width: 2),
+                        Text(
+                          AppLocalizations.of(context)!.appearancePremiumBadge,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
 
               // Selected check
               if (isSelected)
@@ -343,6 +428,8 @@ class _ColorThemeCard extends StatelessWidget {
     switch (theme) {
       case AppColorTheme.spellbook:
         return l10n.themeSpellbook;
+      case AppColorTheme.custom:
+        return l10n.themeCustom;
       case AppColorTheme.forest:
         return l10n.themeForest;
       case AppColorTheme.ocean:
@@ -354,13 +441,15 @@ class _ColorThemeCard extends StatelessWidget {
       case AppColorTheme.rose:
         return l10n.themeRose;
       case AppColorTheme.frost:
-        return 'Frost';
+        return l10n.themeFrost;
       case AppColorTheme.ember:
-        return 'Ember';
+        return l10n.themeEmber;
       case AppColorTheme.spring:
-        return 'Spring';
+        return l10n.themeSpring;
       case AppColorTheme.alchemist:
-        return 'Alchemist';
+        return l10n.themeAlchemist;
+      case AppColorTheme.matcha:
+        return l10n.themeMatcha;
     }
   }
 }

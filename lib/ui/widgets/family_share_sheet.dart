@@ -8,22 +8,23 @@ import '../../providers/subscription_provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/family_service.dart';
 import '../../services/revenuecat_service.dart';
+import '../../l10n/app_localizations.dart';
 import 'app_snackbar.dart';
 
 // ════════════════════════════════════════════
 //  Permission labels
 // ════════════════════════════════════════════
 
-const _cookbookPerms = [
-  ('read', 'Read Only', 'Can view recipes'),
-  ('add', 'Add Only', 'Can add new recipes'),
-  ('edit', 'Full Edit', 'Can edit any recipe'),
+List<(String, String, String)> _cookbookPerms(AppLocalizations l10n) => [
+  ('read', l10n.sharePermReadOnly, l10n.sharePermViewRecipes),
+  ('add', l10n.sharePermAddOnly, l10n.sharePermAddRecipes),
+  ('edit', l10n.sharePermFullEdit, l10n.sharePermEditRecipes),
 ];
 
-const _listPerms = [
-  ('read', 'Read Only', 'Can view items'),
-  ('add', 'Add Only', 'Can add items, edit own'),
-  ('full', 'Full Access', 'Can edit & delete items'),
+List<(String, String, String)> _listPerms(AppLocalizations l10n) => [
+  ('read', l10n.sharePermReadOnly, l10n.sharePermViewItems),
+  ('add', l10n.sharePermAddOnly, l10n.sharePermAddItems),
+  ('full', l10n.sharePermFullAccess, l10n.sharePermEditItems),
 ];
 
 /// Shows a share bottom sheet for a cookbook or shopping list.
@@ -93,7 +94,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
     final tier = ref.read(subscriptionProvider).tier;
     return tier.index >= SubscriptionTier.cloudSync.index;
   }
-  List<(String, String, String)> get _permOptions => _isCookbook ? _cookbookPerms : _listPerms;
+  List<(String, String, String)> _permOptions(AppLocalizations l10n) => _isCookbook ? _cookbookPerms(l10n) : _listPerms(l10n);
 
   @override
   void initState() {
@@ -126,6 +127,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isFamilyAllowed = _familyInfo != null;
 
     return Column(
@@ -147,7 +149,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
             Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Share ${_isCookbook ? 'Cookbook' : 'Shopping List'}',
+                Text(_isCookbook ? l10n.shareCookbook : l10n.shareShoppingList,
                     style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                 Text(widget.resourceName,
                     style: TextStyle(color: theme.colorScheme.outline, fontSize: 13),
@@ -170,7 +172,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
             children: [
               // ━━━ ONE-TIME LINK ━━━
               if (!widget.familyOnly) ...[
-                _SectionHeader(icon: Icons.link, title: 'One-Time Link', subtitle: 'Free • 24h expiry • View/download only'),
+                _SectionHeader(icon: Icons.link, title: l10n.shareOneTimeLink, subtitle: l10n.shareOneTimeLinkSubtitle),
                 const SizedBox(height: 8),
                 if (_activeLink != null) ...[
                   _LinkCard(link: _activeLink!, onRevoke: () async {
@@ -183,7 +185,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
                     child: OutlinedButton.icon(
                       onPressed: _createOneTimeLink,
                       icon: const Icon(Icons.add_link, size: 18),
-                      label: const Text('Generate Link'),
+                      label: Text(l10n.shareGenerateLink),
                     ),
                   ),
                 ],
@@ -194,38 +196,38 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
               // ━━━ FAMILY SHARE ━━━
               _SectionHeader(
                 icon: Icons.family_restroom,
-                title: 'Family Share',
+                title: l10n.shareFamilyShare,
                 subtitle: _hasFamilyTier
                     ? (isFamilyAllowed
-                    ? 'Real-time sync • Per-member permissions'
-                    : 'Create or join a family to share')
-                    : 'Requires Cloud Sync subscription',
+                    ? l10n.shareFamilySyncSubtitle
+                    : l10n.shareFamilyCreateJoin)
+                    : l10n.shareFamilyRequiresCloudSync,
               ),
               const SizedBox(height: 8),
 
               if (!_hasFamilyTier) ...[
                 // ── Upgrade prompt ──
                 _UpgradeCard(
-                  message: 'Upgrade to Cloud Sync to share cookbooks and lists with your family in real-time.',
+                  message: l10n.shareFamilyUpgradeMessage,
                   onUpgrade: () {
                     Navigator.pop(context);
                     context.push('/upgrade');
                   },
                 ),
               ] else if (!_auth.isSignedIn) ...[
-                _InfoCard(message: 'Sign in to use family sharing', icon: Icons.login),
+                _InfoCard(message: l10n.shareFamilySignIn, icon: Icons.login),
               ] else if (!isFamilyAllowed) ...[
-                _InfoCard(message: 'Create or join a family in Settings → Family Sharing', icon: Icons.family_restroom),
+                _InfoCard(message: l10n.shareFamilySetupInSettings, icon: Icons.family_restroom),
               ] else ...[
                 // ── Existing shares ──
                 if (_existingShares.isNotEmpty) ...[
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
-                    child: Text('Shared with', style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
+                    child: Text(l10n.shareSharedWith, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
                   ),
                   ..._existingShares.map((share) => _ExistingShareTile(
                     share: share,
-                    permOptions: _permOptions,
+                    permOptions: _permOptions(l10n),
                     onPermissionChanged: (newPerm) async {
                       await _family.updateSharePermission(share.id, newPerm);
                       await _loadData();
@@ -233,7 +235,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
                     onRevoke: () async {
                       await _family.revokeShare(share.id);
                       await _loadData();
-                      if (mounted) AppSnackbar.success(context, 'Share revoked');
+                      if (mounted) AppSnackbar.success(context, l10n.shareRevoked);
                     },
                   )),
                   const SizedBox(height: 16),
@@ -254,8 +256,9 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
   // ────────────────────────────────────
 
   Future<void> _createOneTimeLink() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_auth.isSignedIn) {
-      AppSnackbar.error(context, 'Sign in to create share links');
+      AppSnackbar.error(context, l10n.shareSignInRequired);
       return;
     }
 
@@ -263,7 +266,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
     if (link != null) {
       setState(() => _activeLink = link);
     } else {
-      if (mounted) AppSnackbar.error(context, 'Failed to create link');
+      if (mounted) AppSnackbar.error(context, l10n.shareCreateFailed);
     }
   }
 
@@ -272,6 +275,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
   // ────────────────────────────────────
 
   List<Widget> _buildMemberPicker(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     final myId = _auth.currentUser?.id;
     final members = _familyInfo?.members.where((m) => m.userId != myId).toList() ?? [];
 
@@ -283,7 +287,21 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
     }).toList();
 
     if (unsharedMembers.isEmpty && _existingShares.isEmpty) {
-      return [_InfoCard(message: 'No other family members to share with', icon: Icons.group_off)];
+      return [
+        _InfoCard(message: l10n.shareNoFamilyMembers, icon: Icons.group_off),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () {
+              Navigator.pop(context);
+              context.push('/settings/family');
+            },
+            icon: const Icon(Icons.group_add, size: 18),
+            label: Text(l10n.shareAddFamilyMembers),
+          ),
+        ),
+      ];
     }
 
     if (unsharedMembers.isEmpty) return [];
@@ -291,11 +309,11 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
     return [
       Padding(
         padding: const EdgeInsets.only(bottom: 8),
-        child: Text('Share with', style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
+        child: Text(l10n.shareWith, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
       ),
       ...unsharedMembers.map((member) => _MemberShareTile(
         member: member,
-        permOptions: _permOptions,
+        permOptions: _permOptions(l10n),
         onShare: (permission) async {
           final result = await _family.shareResource(
             resourceType: widget.resourceType,
@@ -305,9 +323,9 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
           );
           if (result != null) {
             await _loadData();
-            if (mounted) AppSnackbar.success(context, 'Shared with ${member.displayName}');
+            if (mounted) AppSnackbar.success(context, l10n.shareSharedWithMember(member.displayName));
           } else {
-            if (mounted) AppSnackbar.error(context, 'Failed to share');
+            if (mounted) AppSnackbar.error(context, l10n.shareShareFailed);
           }
         },
       )),
@@ -379,6 +397,7 @@ class _UpgradeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -399,7 +418,7 @@ class _UpgradeCard extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: onUpgrade,
               icon: const Icon(Icons.star, size: 16),
-              label: const Text('Upgrade'),
+              label: Text(l10n.shareUpgrade),
             ),
           ),
         ],
@@ -417,6 +436,7 @@ class _LinkCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final remaining = link.expiresAt.difference(DateTime.now());
     final hoursLeft = remaining.inHours;
 
@@ -439,7 +459,7 @@ class _LinkCard extends StatelessWidget {
               icon: const Icon(Icons.copy, size: 18),
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: link.url));
-                AppSnackbar.success(context, 'Link copied!');
+                AppSnackbar.success(context, l10n.shareLinkCopied);
               },
               visualDensity: VisualDensity.compact,
             ),
@@ -448,14 +468,14 @@ class _LinkCard extends StatelessWidget {
           Row(children: [
             Icon(Icons.timer_outlined, size: 14, color: theme.colorScheme.outline),
             const SizedBox(width: 4),
-            Text('Expires in ${hoursLeft}h', style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
+            Text(l10n.shareLinkExpiresIn(hoursLeft), style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
             const Spacer(),
             TextButton.icon(
               onPressed: () {
-                Share.share('Check out "${link.url}"', subject: 'Shared from Recipe Spellbook');
+                Share.share('Check out "${link.url}"', subject: l10n.shareFromApp);
               },
               icon: const Icon(Icons.share, size: 14),
-              label: const Text('Share', style: TextStyle(fontSize: 12)),
+              label: Text(l10n.actionShare, style: const TextStyle(fontSize: 12)),
               style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
             ),
             TextButton(
@@ -464,7 +484,7 @@ class _LinkCard extends StatelessWidget {
                 foregroundColor: theme.colorScheme.error,
                 visualDensity: VisualDensity.compact,
               ),
-              child: const Text('Revoke', style: TextStyle(fontSize: 12)),
+              child: Text(l10n.shareRevoke, style: const TextStyle(fontSize: 12)),
             ),
           ]),
         ],
@@ -484,6 +504,7 @@ class _MemberShareTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: CircleAvatar(
@@ -495,7 +516,7 @@ class _MemberShareTile extends StatelessWidget {
       subtitle: Text(member.email ?? '', style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
       trailing: PopupMenuButton<String>(
         icon: Icon(Icons.add_circle_outline, color: theme.colorScheme.primary),
-        tooltip: 'Share',
+        tooltip: l10n.actionShare,
         onSelected: onShare,
         itemBuilder: (ctx) => permOptions.map((p) => PopupMenuItem(
           value: p.$1,
@@ -526,6 +547,7 @@ class _ExistingShareTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final currentPerm = permOptions.firstWhere((p) => p.$1 == share.permission, orElse: () => permOptions.first);
 
     return ListTile(
@@ -537,7 +559,7 @@ class _ExistingShareTile extends StatelessWidget {
             ? Text((share.sharedWithName ?? '?')[0].toUpperCase(), style: const TextStyle(fontSize: 14))
             : null,
       ),
-      title: Text(share.sharedWithName ?? share.sharedWithEmail ?? 'Unknown', style: const TextStyle(fontSize: 14)),
+      title: Text(share.sharedWithName ?? share.sharedWithEmail ?? l10n.shareUnknownMember, style: const TextStyle(fontSize: 14)),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -569,7 +591,7 @@ class _ExistingShareTile extends StatelessWidget {
             icon: Icon(Icons.remove_circle_outline, size: 18, color: theme.colorScheme.error),
             visualDensity: VisualDensity.compact,
             onPressed: onRevoke,
-            tooltip: 'Revoke',
+            tooltip: l10n.shareRevoke,
           ),
         ],
       ),

@@ -287,19 +287,18 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     _showLoading(l10n.readingImage);
     try {
       final result = await OcrService.instance.processPdf(path, onProgress: (current, total) {
-        if (mounted) _showLoading('Scanning page $current of $total...');
+        if (mounted) _showLoading(l10n.scanProgress(current, total));
       });
 
       if (result.isEmpty) {
         _hideLoading();
-        _showError('No text found in PDF. Try using a clearer scan or the Text paste option instead.');
+        _showError(l10n.scanNoTextPdf);
         return;
       }
 
       if (result.text.trim().length < 20) {
         _hideLoading();
-        _showError('Very little text detected in PDF (${result.text.trim().length} characters). '
-            'The scan may be too blurry. Try a higher quality PDF, or use the Text paste option instead.');
+        _showError(l10n.scanLittleTextPdf(result.text.trim().length));
         return;
       }
 
@@ -335,7 +334,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
           ListTile(
             leading: const Icon(Icons.photo_library),
             title: Text(l10n.photoChooseGallery),
-            subtitle: const Text('Select multiple pages'),
+            subtitle: Text(l10n.scanSelectPages),
             onTap: () => Navigator.pop(ctx, ImageSource.gallery),
           ),
         ]),
@@ -361,26 +360,25 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   Future<void> _processMultipleImages(List<String> imagePaths) async {
     final l10n = AppLocalizations.of(context)!;
     _showLoading(imagePaths.length > 1
-        ? 'Scanning page 1 of ${imagePaths.length}...'
+        ? l10n.scanProgress(1, imagePaths.length)
         : l10n.readingImage);
     try {
       final result = await OcrService.instance.processMultipleImages(
         imagePaths,
         onProgress: (current, total) {
-          if (mounted) _showLoading('Scanning page $current of $total...');
+          if (mounted) _showLoading(l10n.scanProgress(current, total));
         },
       );
 
       if (result.isEmpty) {
         _hideLoading();
-        _showError('No text found in image. Try taking the photo in better lighting, or use the Text paste option instead.');
+        _showError(l10n.scanNoTextImage);
         return;
       }
 
       if (result.text.trim().length < 20) {
         _hideLoading();
-        _showError('Very little text detected (${result.text.trim().length} characters). '
-            'Try a clearer photo with better lighting, or use the Text paste option instead.');
+        _showError(l10n.scanLittleTextImage(result.text.trim().length));
         return;
       }
 

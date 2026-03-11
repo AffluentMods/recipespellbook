@@ -2369,6 +2369,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get typeDeleteHint => '삭제';
 
   @override
+  String get resetScopeLocal => '로컬 데이터';
+
+  @override
+  String get resetScopeCloud => '클라우드 데이터';
+
+  @override
+  String get resetScopeAll => '모든 데이터 및 설정';
+
+  @override
   String get resetEverything => '모두 초기화';
 
   @override
@@ -3796,6 +3805,57 @@ class AppLocalizationsKo extends AppLocalizations {
   String get accountTitle => '계정';
 
   @override
+  String get accountSubscription => '구독';
+
+  @override
+  String get accountManageSubscription => '구독 관리';
+
+  @override
+  String get accountCloudSync => '클라우드 동기화';
+
+  @override
+  String get accountSyncNow => '지금 동기화';
+
+  @override
+  String get accountIntegrations => '연동';
+
+  @override
+  String get accountDangerZone => '위험 구역';
+
+  @override
+  String get purchasesRestored => '구매가 성공적으로 복원되었습니다!';
+
+  @override
+  String get noPurchasesFound => '이전 구매 내역을 찾을 수 없습니다.';
+
+  @override
+  String get restoreFailed => '복원에 실패했습니다. 다시 시도해 주세요.';
+
+  @override
+  String get restorePurchasesLong => '구매 복원';
+
+  @override
+  String get cancelled => '취소됨';
+
+  @override
+  String get accessUntil => '접근 가능 기한';
+
+  @override
+  String get renews => '갱신일';
+
+  @override
+  String get plan => '플랜';
+
+  @override
+  String get upgradeDescription => '클라우드 동기화, 스마트 가져오기 등을 잠금 해제하세요.';
+
+  @override
+  String get syncDescription => '기기 간에 레시피를 동기화합니다.';
+
+  @override
+  String get sync => '동기화';
+
+  @override
   String get signInToSync => '동기화하려면 로그인';
 
   @override
@@ -4605,6 +4665,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get compareSmartImportCloud => '10/mo';
 
   @override
+  String get compareCloudStorage => '클라우드 저장소';
+
+  @override
+  String get compareCloudStorageBasic => '기본';
+
+  @override
+  String get compareCloudStorageStandard => '표준';
+
+  @override
+  String get compareCloudStorageExtended => '확장';
+
+  @override
   String get printOf => '/';
 
   @override
@@ -4815,6 +4887,30 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settingsNotifBuddySubtitle => '일일 퀘스트 초기화 및 XP 리마인더';
+
+  @override
+  String get settingsNotifManagePreferences => '알림 환경설정 관리';
+
+  @override
+  String get settingsNotifNewDownloads => '새 다운로드';
+
+  @override
+  String get settingsNotifNewDownloadsSubtitle => '누군가 게시한 레시피를 다운로드할 때';
+
+  @override
+  String get settingsNotifRatingUpdates => '평점 업데이트';
+
+  @override
+  String get settingsNotifRatingUpdatesSubtitle => '게시한 레시피에 새 평점이 등록될 때';
+
+  @override
+  String get settingsNotifComments => '댓글';
+
+  @override
+  String get settingsNotifCommentsSubtitle => '누군가 레시피에 댓글을 달 때';
+
+  @override
+  String get settingsNotifSyncNote => '알림 환경설정은 계정과 동기화됩니다.';
 
   @override
   String get tuesday => '화요일';
@@ -6605,10 +6701,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get importGuideCategoryOtherApps => '다른 레시피 앱';
 
   @override
-  String get importGuideCategoryAi => 'AI Import';
+  String get importGuideCategoryAi => 'AI 가져오기';
 
   @override
-  String get importGuideTagNew => 'New';
+  String get importGuideTagNew => '신규';
 
   @override
   String get importGuideScreenshotNeeded => '스크린샷 필요';
@@ -6902,40 +6998,40 @@ class AppLocalizationsKo extends AppLocalizations {
   String get importGuideTextStep4Desc => '파싱된 레시피를 확인하고 조정한 후 저장하세요.';
 
   @override
-  String get importGuideAiTitle => 'AI (ChatGPT, Claude, etc.)';
+  String get importGuideAiTitle => 'AI (ChatGPT, Claude 등)';
 
   @override
-  String get importGuideAiSubtitle => 'Generate recipes with AI and import them instantly';
+  String get importGuideAiSubtitle => 'AI로 레시피를 생성하고 즉시 가져오기';
 
   @override
-  String get importGuideAiStep1Title => 'Open AI Import';
+  String get importGuideAiStep1Title => 'AI 가져오기 열기';
 
   @override
-  String get importGuideAiStep1Desc => 'Go to Home, tap + to add a recipe, choose Import, then tap the AI button.';
+  String get importGuideAiStep1Desc => '홈으로 이동하여 +를 탭해 레시피를 추가하고, 가져오기를 선택한 다음 AI 버튼을 탭합니다.';
 
   @override
-  String get importGuideAiStep2Title => 'Copy the prompt';
+  String get importGuideAiStep2Title => '프롬프트 복사하기';
 
   @override
-  String get importGuideAiStep2Desc => 'Tap the copy prompt button. Then open your favorite AI — ChatGPT, Claude, Gemini, or any other — and paste the prompt.';
+  String get importGuideAiStep2Desc => '프롬프트 복사 버튼을 탭합니다. 그런 다음 좋아하는 AI — ChatGPT, Claude, Gemini 등 — 를 열고 프롬프트를 붙여넣습니다.';
 
   @override
-  String get importGuideAiStep3Title => 'Copy the AI\'s response';
+  String get importGuideAiStep3Title => 'AI 응답 복사하기';
 
   @override
-  String get importGuideAiStep3Desc => 'The AI will generate a recipe in JSON format. Copy the entire response.';
+  String get importGuideAiStep3Desc => 'AI가 JSON 형식으로 레시피를 생성합니다. 전체 응답을 복사합니다.';
 
   @override
-  String get importGuideAiStep4Title => 'Paste into Recipe Spellbook';
+  String get importGuideAiStep4Title => 'Recipe Spellbook에 붙여넣기';
 
   @override
-  String get importGuideAiStep4Desc => 'Go back to Recipe Spellbook, tap the paste button, then tap Preview to see the parsed recipe.';
+  String get importGuideAiStep4Desc => 'Recipe Spellbook으로 돌아가서 붙여넣기 버튼을 탭한 다음, 미리보기를 탭하여 파싱된 레시피를 확인합니다.';
 
   @override
-  String get importGuideAiStep5Title => 'Preview & import';
+  String get importGuideAiStep5Title => '미리보기 및 가져오기';
 
   @override
-  String get importGuideAiStep5Desc => 'Check that everything looks correct, then tap Import to save the recipe to your cookbook.';
+  String get importGuideAiStep5Desc => '모든 내용이 올바른지 확인한 다음, 가져오기를 탭하여 레시피를 요리책에 저장합니다.';
 
   @override
   String get importGuideOtherAppsTitle => '다른 레시피 앱';
@@ -7004,150 +7100,222 @@ class AppLocalizationsKo extends AppLocalizations {
   String get importGuideDeviceTransferStep4Tip => '유료 계정이 있으신가요? 새 기기에서 로그인하면 모든 것이 자동으로 동기화됩니다.';
 
   @override
-  String get faqTitle => 'FAQs';
+  String get faqTitle => 'FAQ';
 
   @override
-  String get faqHeroTitle => 'Frequently asked questions';
+  String get faqHeroTitle => '자주 묻는 질문';
 
   @override
-  String get faqHeroSubtitle => 'Find answers and step-by-step guides for common features.';
+  String get faqHeroSubtitle => '주요 기능에 대한 답변과 단계별 가이드를 찾아보세요.';
 
   @override
-  String get faqHowToGuides => 'How-to Guides';
+  String get faqHowToGuides => '사용 가이드';
 
   @override
-  String get faqCommonQuestions => 'Common Questions';
+  String get faqCommonQuestions => '자주 묻는 질문';
 
   @override
-  String get faqSeeHowTo => 'See how-to guide';
+  String get faqSeeHowTo => '사용 가이드 보기';
 
   @override
   String faqStepsCount(int count) {
-    return '$count steps';
+    return '$count단계';
   }
 
   @override
-  String get faqAddHeadersTitle => 'How to add headers';
+  String get faqAddHeadersTitle => '헤더 추가 방법';
 
   @override
-  String get faqAddHeadersSubtitle => 'Organize your recipe ingredients and steps into sections';
+  String get faqAddHeadersSubtitle => '레시피 재료와 단계를 섹션으로 정리하세요';
 
   @override
-  String get faqAddHeadersStep1Title => 'Open the recipe editor';
+  String get faqAddHeadersStep1Title => '레시피 편집기 열기';
 
   @override
-  String get faqAddHeadersStep1Desc => 'Open a recipe and tap the edit icon.';
+  String get faqAddHeadersStep1Desc => '레시피를 열고 편집 아이콘을 탭합니다.';
 
   @override
-  String get faqAddHeadersStep2Title => 'Add a header';
+  String get faqAddHeadersStep2Title => '헤더 추가하기';
 
   @override
-  String get faqAddHeadersStep2Desc => 'Tap the \'Add Header\' button to insert a section header.';
+  String get faqAddHeadersStep2Desc => '\'헤더 추가\' 버튼을 탭하여 섹션 헤더를 삽입합니다.';
 
   @override
-  String get faqAddHeadersStep3Title => 'Open the header menu';
+  String get faqAddHeadersStep3Title => '헤더 메뉴 열기';
 
   @override
-  String get faqAddHeadersStep3Desc => 'Tap the three dots (⋮) next to the header for more options.';
+  String get faqAddHeadersStep3Desc => '헤더 옆의 세 점(⋮)을 탭하여 추가 옵션을 확인합니다.';
 
   @override
-  String get faqAddHeadersStep4Title => 'Reorder your headers';
+  String get faqAddHeadersStep4Title => '헤더 순서 변경하기';
 
   @override
-  String get faqAddHeadersStep4Desc => 'Tap Sort Order to rearrange. Drag the ≡ handle to move headers up or down.';
+  String get faqAddHeadersStep4Desc => '정렬 순서를 탭하여 재배열합니다. ≡ 핸들을 드래그하여 헤더를 위아래로 이동합니다.';
 
   @override
-  String get faqAddHeadersStep4Tip => 'You can drag headers by holding the ≡ (two lines) handle on the left side.';
+  String get faqAddHeadersStep4Tip => '왼쪽의 ≡(두 줄) 핸들을 길게 눌러 헤더를 드래그할 수 있습니다.';
 
   @override
-  String get faqAddHeadersStep5Title => 'Save your changes';
+  String get faqAddHeadersStep5Title => '변경사항 저장하기';
 
   @override
-  String get faqAddHeadersStep5Desc => 'Tap the save button to keep your new headers.';
+  String get faqAddHeadersStep5Desc => '저장 버튼을 탭하여 새 헤더를 유지합니다.';
 
   @override
-  String get faqAddHeadersStep6Title => 'Done!';
+  String get faqAddHeadersStep6Title => '완료!';
 
   @override
-  String get faqAddHeadersStep6Desc => 'Your recipe now has organized sections with headers.';
+  String get faqAddHeadersStep6Desc => '레시피에 헤더로 정리된 섹션이 추가되었습니다.';
 
   @override
-  String get faqAddSublinkedTitle => 'How to add sublinked recipes';
+  String get faqAddSublinkedTitle => '서브링크 레시피 추가 방법';
 
   @override
-  String get faqAddSublinkedSubtitle => 'Link related recipes together for quick access';
+  String get faqAddSublinkedSubtitle => '관련 레시피를 연결하여 빠르게 접근하세요';
 
   @override
-  String get faqAddSublinkedStep1Title => 'Open the recipe editor';
+  String get faqAddSublinkedStep1Title => '레시피 편집기 열기';
 
   @override
-  String get faqAddSublinkedStep1Desc => 'Open a recipe and tap the edit icon.';
+  String get faqAddSublinkedStep1Desc => '레시피를 열고 편집 아이콘을 탭합니다.';
 
   @override
-  String get faqAddSublinkedStep2Title => 'Open the menu';
+  String get faqAddSublinkedStep2Title => '메뉴 열기';
 
   @override
-  String get faqAddSublinkedStep2Desc => 'Tap the three dots (⋮) in the edit screen.';
+  String get faqAddSublinkedStep2Desc => '편집 화면에서 세 점(⋮)을 탭합니다.';
 
   @override
-  String get faqAddSublinkedStep3Title => 'Tap Link Recipe';
+  String get faqAddSublinkedStep3Title => '\'레시피 연결\' 탭하기';
 
   @override
-  String get faqAddSublinkedStep3Desc => 'Select \'Link Recipe\' from the menu.';
+  String get faqAddSublinkedStep3Desc => '메뉴에서 \'레시피 연결\'을 선택합니다.';
 
   @override
-  String get faqAddSublinkedStep4Title => 'Choose a recipe to link';
+  String get faqAddSublinkedStep4Title => '연결할 레시피 선택하기';
 
   @override
-  String get faqAddSublinkedStep4Desc => 'Tap the link icon next to the recipe you want to connect (e.g., Pizza Dough).';
+  String get faqAddSublinkedStep4Desc => '연결하려는 레시피(예: 피자 도우) 옆의 링크 아이콘을 탭합니다.';
 
   @override
-  String get faqAddSublinkedStep5Title => 'Save your changes';
+  String get faqAddSublinkedStep5Title => '변경사항 저장하기';
 
   @override
-  String get faqAddSublinkedStep5Desc => 'Tap the save icon to keep the linked recipe.';
+  String get faqAddSublinkedStep5Desc => '저장 아이콘을 탭하여 연결된 레시피를 유지합니다.';
 
   @override
-  String get faqAddSublinkedStep6Title => 'Done!';
+  String get faqAddSublinkedStep6Title => '완료!';
 
   @override
-  String get faqAddSublinkedStep6Desc => 'The linked recipe now appears in your recipe, ready to tap and view.';
+  String get faqAddSublinkedStep6Desc => '연결된 레시피가 레시피에 표시되며, 탭하여 바로 볼 수 있습니다.';
 
   @override
-  String get faqWhatAreHeadersTitle => 'What are headers?';
+  String get faqWhatAreHeadersTitle => '헤더란 무엇인가요?';
 
   @override
-  String get faqWhatAreHeadersSubtitle => 'Organize recipes into sections';
+  String get faqWhatAreHeadersSubtitle => '레시피를 섹션으로 정리';
 
   @override
-  String get faqWhatAreHeadersAnswer => 'Headers let you divide your recipe ingredients and steps into sections. For example, you could have separate sections for \'Sauce\', \'Dough\', and \'Topping\' in a pizza recipe. They make long recipes much easier to follow.';
+  String get faqWhatAreHeadersAnswer => '헤더를 사용하면 레시피의 재료와 단계를 섹션으로 나눌 수 있습니다. 예를 들어, 피자 레시피에서 \'소스\', \'도우\', \'토핑\'을 별도 섹션으로 만들 수 있습니다. 긴 레시피를 훨씬 쉽게 따라할 수 있게 해줍니다.';
 
   @override
-  String get faqWhatAreSublinkedTitle => 'What are sublinked recipes?';
+  String get faqWhatAreSublinkedTitle => '서브링크 레시피란 무엇인가요?';
 
   @override
-  String get faqWhatAreSublinkedSubtitle => 'Connect related recipes together';
+  String get faqWhatAreSublinkedSubtitle => '관련 레시피를 서로 연결';
 
   @override
-  String get faqWhatAreSublinkedAnswer => 'Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it — no searching needed.';
+  String get faqWhatAreSublinkedAnswer => '서브링크 레시피를 사용하면 관련 레시피를 서로 연결할 수 있습니다. 예를 들어, 마르게리타 피자 레시피에서 피자 도우 레시피로 연결할 수 있습니다. 메인 레시피를 볼 때 연결된 레시피를 탭하면 바로 이동할 수 있습니다 — 검색이 필요 없습니다.';
 
   @override
-  String get faqImportFailedTitle => 'Why did my import fail?';
+  String get faqMacroCalcTitle => '매크로 계산기 사용법';
 
   @override
-  String get faqImportFailedSubtitle => 'Common reasons and fixes';
+  String get faqMacroCalcSubtitle => '레시피의 칼로리와 매크로를 자동 계산';
 
   @override
-  String get faqImportFailedAnswer => 'Imports can fail for a few reasons:\n\n• The website may block automated access — try copying the recipe text and using Text Import instead.\n• The link may have expired or be private — make sure it’s a public link.\n• Some sites use formats that are harder to parse — try the AI import as an alternative.\n• Check your internet connection and try again.';
+  String get faqMacroCalcStep1Title => '레시피 열기';
 
   @override
-  String get faqDeviceTransferTitle => 'Can I import from other devices?';
+  String get faqMacroCalcStep1Desc => '아무 레시피나 열고 영양 섹션까지 스크롤하세요.';
 
   @override
-  String get faqDeviceTransferSubtitle => 'Transfer recipes between phones and tablets';
+  String get faqMacroCalcStep2Title => '탭하여 계산';
 
   @override
-  String get faqDeviceTransferAnswer => 'Yes! Use the Device Transfer feature in Settings > Data > Device Transfer. Generate a code on your old device and enter it on your new one. All your recipes, cookbooks, and images will be transferred.';
+  String get faqMacroCalcStep2Desc => '빈 영양 섹션을 탭하여 계산기를 엽니다. \'탭하여 계산\'이라고 표시됩니다.';
+
+  @override
+  String get faqMacroCalcStep3Title => '자동 분석';
+
+  @override
+  String get faqMacroCalcStep3Desc => '계산기가 재료를 USDA 식품 데이터베이스와 자동으로 매칭하여 칼로리, 단백질, 탄수화물, 지방 등을 계산합니다.';
+
+  @override
+  String get faqMacroCalcStep4Title => '수동 입력';
+
+  @override
+  String get faqMacroCalcStep4Desc => '직접 영양 값을 입력하려면 \'수동 입력\'을 탭하세요.';
+
+  @override
+  String get faqMacroCalcStep5Title => '재료 매칭 확인';
+
+  @override
+  String get faqMacroCalcStep5Desc => '아래로 스크롤하여 각 재료가 USDA 식품과 어떻게 매칭되었는지 확인합니다. 연결된 레시피는 자체 영양 데이터를 사용합니다.';
+
+  @override
+  String get faqMacroCalcStep5Tip => '연결 레시피가 뭔지 모르시나요? FAQ의 \'연결 레시피란?\' 섹션을 확인하세요!';
+
+  @override
+  String get faqMacroCalcStep6Title => 'USDA 데이터베이스 검색';
+
+  @override
+  String get faqMacroCalcStep6Desc => '재료를 탭하여 USDA 데이터베이스에서 더 나은 매칭을 검색할 수 있습니다.';
+
+  @override
+  String get faqMacroCalcStep7Title => '연결 레시피 영양';
+
+  @override
+  String get faqMacroCalcStep7Desc => '다른 레시피에 연결된 재료는 연결된 레시피의 영양 데이터를 표시합니다. 비율을 조정할 수 있습니다.';
+
+  @override
+  String get faqMacroCalcStep8Title => '결과 저장';
+
+  @override
+  String get faqMacroCalcStep8Desc => '저장을 탭하여 영양 데이터를 저장합니다.';
+
+  @override
+  String get faqMacroCalcStep9Title => '표시 사용자 지정';
+
+  @override
+  String get faqMacroCalcStep9Desc => '설정 > 영양 표시에서 표시할 영양소와 차트 스타일을 선택할 수 있습니다.';
+
+  @override
+  String get faqWhatIsMacroCalcTitle => '매크로 계산기란?';
+
+  @override
+  String get faqWhatIsMacroCalcSubtitle => '레시피 자동 영양 추정';
+
+  @override
+  String get faqWhatIsMacroCalcAnswer => '매크로 계산기는 각 재료를 USDA 식품 데이터베이스와 매칭하여 레시피의 영양 성분을 자동으로 추정합니다. 칼로리, 단백질, 탄수화물, 지방, 식이섬유, 당류, 나트륨 등을 1인분 기준으로 계산합니다. 모든 레시피의 영양 섹션에서 찾을 수 있습니다.';
+
+  @override
+  String get faqImportFailedTitle => '가져오기가 실패한 이유는?';
+
+  @override
+  String get faqImportFailedSubtitle => '일반적인 원인과 해결 방법';
+
+  @override
+  String get faqImportFailedAnswer => '가져오기가 실패하는 이유는 여러 가지입니다:\n\n• 웹사이트가 자동 접근을 차단할 수 있습니다 — 레시피 텍스트를 복사하여 텍스트 가져오기를 사용해 보세요.\n• 링크가 만료되었거나 비공개일 수 있습니다 — 공개 링크인지 확인하세요.\n• 일부 사이트는 파싱하기 어려운 형식을 사용합니다 — AI 가져오기를 대안으로 사용해 보세요.\n• 인터넷 연결을 확인하고 다시 시도하세요.';
+
+  @override
+  String get faqDeviceTransferTitle => '다른 기기에서 가져올 수 있나요?';
+
+  @override
+  String get faqDeviceTransferSubtitle => '휴대폰과 태블릿 간 레시피 전송';
+
+  @override
+  String get faqDeviceTransferAnswer => '네! 설정 > 데이터 > 기기 간 전송에서 기기 간 전송 기능을 사용하세요. 이전 기기에서 코드를 생성하고 새 기기에서 입력하세요. 모든 레시피, 요리책, 이미지가 전송됩니다.';
 
   @override
   String get themeFrost => '프로스트';
@@ -7160,6 +7328,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get themeAlchemist => '알케미스트';
+
+  @override
+  String get themeMatcha => '말차';
+
+  @override
+  String get themeCustom => '사용자 정의';
 
   @override
   String get communitySortTopRated => '평점 높은 순';
@@ -7349,4 +7523,513 @@ class AppLocalizationsKo extends AppLocalizations {
   String communityPublishUploadInProgress(int current, int total) {
     return '게시 진행 중... (이미지 $current/$total)';
   }
+
+  @override
+  String get surpriseMeTitle => '추천해줘!';
+
+  @override
+  String get surpriseMeSubtitle => '뭘 요리할까?';
+
+  @override
+  String get hintNutritionCalculator => '알고 계셨나요? 영양 아이콘을 탭하면 모든 레시피의 영양 정보를 자동 계산할 수 있습니다.';
+
+  @override
+  String get hintCookingScreen => '요리 모드를 사용해보세요! 레시피에서 \'요리\'를 탭하면 핸즈프리로 단계별 안내를 받을 수 있습니다.';
+
+  @override
+  String get hintIngredientHeaders => '팁: 재료에 \':\'로 끝나는 줄을 입력하면 섹션 제목을 만들 수 있습니다.';
+
+  @override
+  String get hintImportMethods => 'URL, 사진, PDF, 심지어 인스타그램과 틱톡에서도 레시피를 가져오세요!';
+
+  @override
+  String get hintMealPlanAutoFill => '레시피를 식단 계획에 드래그하거나, 날짜를 탭하여 컬렉션에서 선택하세요.';
+
+  @override
+  String get hintRecipeScaling => '레시피의 인분 수를 탭하여 재료를 늘리거나 줄이세요.';
+
+  @override
+  String get hintShoppingListGen => '한 번의 탭으로 레시피 재료를 장보기 목록에 추가하세요.';
+
+  @override
+  String get hintRecipeNotes => '모든 레시피에 개인 메모를 추가하세요 — 팁, 변형, 추억 등.';
+
+  @override
+  String get hintCookbookOrganization => '여러 요리책을 만들어 테마나 행사별로 레시피를 정리하세요.';
+
+  @override
+  String get hintTagSystem => '레시피에 태그를 붙여 쉽게 필터링하세요 — \'간편\', \'즐겨찾기\' 등 사용자 지정 태그를 만들어보세요.';
+
+  @override
+  String get allergyMyAllergies => '내 알레르기';
+
+  @override
+  String get allergyDisabledTab => '비활성화';
+
+  @override
+  String get allergyNoDisabledTitle => '비활성화된 경고 없음';
+
+  @override
+  String get allergyNoDisabledSubtitle => '레시피에서 알레르기 경고를 해제하면 여기에 표시되어 복원할 수 있습니다.';
+
+  @override
+  String get allergyDisabledInfo => '이 레시피들은 알레르기 경고가 비활성화되었습니다. 탭하여 복원하세요.';
+
+  @override
+  String trashRestoredMessage(String title) {
+    return '\"$title\" 복원됨';
+  }
+
+  @override
+  String get nutrientCalories => '칼로리';
+
+  @override
+  String get nutrientTotalFat => '총지방';
+
+  @override
+  String get nutrientSaturatedFat => '포화지방';
+
+  @override
+  String get nutrientTransFat => '트랜스지방';
+
+  @override
+  String get nutrientMonounsaturatedFat => '단일불포화지방';
+
+  @override
+  String get nutrientPolyunsaturatedFat => '다중불포화지방';
+
+  @override
+  String get nutrientCarbohydrates => '탄수화물';
+
+  @override
+  String get nutrientFiber => '식이섬유';
+
+  @override
+  String get nutrientSugars => '당류';
+
+  @override
+  String get nutrientProtein => '단백질';
+
+  @override
+  String get nutrientCholesterol => '콜레스테롤';
+
+  @override
+  String get nutrientSodium => '나트륨';
+
+  @override
+  String get nutrientPotassium => '칼륨';
+
+  @override
+  String get nutrientCalcium => '칼슘';
+
+  @override
+  String get nutrientIron => '철';
+
+  @override
+  String get nutrientMagnesium => '마그네슘';
+
+  @override
+  String get nutrientPhosphorus => '인';
+
+  @override
+  String get nutrientZinc => '아연';
+
+  @override
+  String get nutrientCopper => '구리';
+
+  @override
+  String get nutrientManganese => '망간';
+
+  @override
+  String get nutrientSelenium => '셀레늄';
+
+  @override
+  String get nutrientVitaminA => '비타민A';
+
+  @override
+  String get nutrientVitaminC => '비타민C';
+
+  @override
+  String get nutrientVitaminD => '비타민D';
+
+  @override
+  String get nutrientVitaminE => '비타민E';
+
+  @override
+  String get nutrientVitaminK => '비타민K';
+
+  @override
+  String get nutrientThiaminB1 => '티아민 (B1)';
+
+  @override
+  String get nutrientRiboflavinB2 => '리보플라빈 (B2)';
+
+  @override
+  String get nutrientNiacinB3 => '나이아신 (B3)';
+
+  @override
+  String get nutrientPantothenicAcidB5 => '판토텐산 (B5)';
+
+  @override
+  String get nutrientVitaminB6 => '비타민B6';
+
+  @override
+  String get nutrientVitaminB12 => '비타민B12';
+
+  @override
+  String get nutrientFolate => '엽산';
+
+  @override
+  String get nutrientCholine => '콜린';
+
+  @override
+  String get nutrientCategoryMacronutrients => '다량영양소';
+
+  @override
+  String get nutrientCategoryMinerals => '미네랄';
+
+  @override
+  String get nutrientCategoryVitamins => '비타민';
+
+  @override
+  String get nutrientCarbs => '탄수화물';
+
+  @override
+  String get nutrientFat => '지방';
+
+  @override
+  String nutritionKcalPerServing(int count) {
+    return '$count kcal/1인분';
+  }
+
+  @override
+  String nutritionKcalTotal(int count) {
+    return '$count kcal 합계';
+  }
+
+  @override
+  String get shareShoppingList => '장보기 목록 공유';
+
+  @override
+  String get shareOneTimeLink => '일회용 링크';
+
+  @override
+  String get shareOneTimeLinkSubtitle => '무료 • 24시간 만료 • 보기/다운로드만 가능';
+
+  @override
+  String get shareGenerateLink => '링크 생성';
+
+  @override
+  String get shareFamilyShare => '가족 공유';
+
+  @override
+  String get shareFamilySyncSubtitle => '실시간 동기화 · 구성원별 권한';
+
+  @override
+  String get shareFamilyCreateJoin => '공유하려면 가족을 만들거나 참여하세요';
+
+  @override
+  String get shareFamilyRequiresCloudSync => 'Cloud Sync 구독이 필요합니다';
+
+  @override
+  String get shareFamilyUpgradeMessage => 'Cloud Sync로 업그레이드하여 가족과 레시피북과 목록을 실시간으로 공유하세요.';
+
+  @override
+  String get shareFamilySignIn => '가족 공유를 사용하려면 로그인하세요';
+
+  @override
+  String get shareFamilySetupInSettings => '설정 → 가족 공유에서 가족을 만들거나 참여하세요';
+
+  @override
+  String get shareSharedWith => '공유 대상';
+
+  @override
+  String get shareRevoked => '공유가 취소되었습니다';
+
+  @override
+  String get shareSignInRequired => '공유 링크를 만들려면 로그인하세요';
+
+  @override
+  String get shareCreateFailed => '링크 생성 실패';
+
+  @override
+  String get shareNoFamilyMembers => '공유할 다른 가족 구성원이 없습니다';
+
+  @override
+  String get shareAddFamilyMembers => '가족 구성원 추가';
+
+  @override
+  String get shareWith => '공유 대상';
+
+  @override
+  String shareSharedWithMember(String name) {
+    return '$name과(와) 공유 중';
+  }
+
+  @override
+  String get shareShareFailed => '공유 실패';
+
+  @override
+  String get shareLinkCopied => '링크가 복사되었습니다!';
+
+  @override
+  String shareLinkExpiresIn(int hours) {
+    return '$hours시간 후 만료';
+  }
+
+  @override
+  String get shareRevoke => '취소';
+
+  @override
+  String get shareUpgrade => '업그레이드';
+
+  @override
+  String get sharePermReadOnly => '읽기 전용';
+
+  @override
+  String get sharePermAddOnly => '추가만';
+
+  @override
+  String get sharePermFullEdit => '전체 편집';
+
+  @override
+  String get sharePermFullAccess => '전체 액세스';
+
+  @override
+  String get sharePermViewRecipes => '레시피 보기 가능';
+
+  @override
+  String get sharePermAddRecipes => '새 레시피 추가 가능';
+
+  @override
+  String get sharePermEditRecipes => '모든 레시피 편집 가능';
+
+  @override
+  String get sharePermViewItems => '항목 보기 가능';
+
+  @override
+  String get sharePermAddItems => '항목 추가 및 자신의 항목 편집 가능';
+
+  @override
+  String get sharePermEditItems => '항목 편집 및 삭제 가능';
+
+  @override
+  String get shareUnknownMember => '알 수 없음';
+
+  @override
+  String get subscriptionTitle => '구독';
+
+  @override
+  String get subscriptionUpgradeToPro => 'Pro로 업그레이드';
+
+  @override
+  String get subscriptionUnlockFeatures => '클라우드 동기화, 스마트 가져오기 등을 잠금 해제하세요.';
+
+  @override
+  String get subscriptionViewPlans => '플랜 보기';
+
+  @override
+  String get subscriptionRestored => '구매가 성공적으로 복원되었습니다!';
+
+  @override
+  String get subscriptionNoPurchases => '이전 구매 내역이 없습니다.';
+
+  @override
+  String subscriptionRestoreFailed(String error) {
+    return '복원 실패: $error';
+  }
+
+  @override
+  String get subscriptionRestorePurchases => '구매 복원';
+
+  @override
+  String subscriptionCancelledUntil(String date) {
+    return '취소됨 — $date까지 이용 가능';
+  }
+
+  @override
+  String get subscriptionRenews => '갱신일';
+
+  @override
+  String get subscriptionPlan => '플랜';
+
+  @override
+  String get subscriptionLifetime => '평생 — 만료 없음';
+
+  @override
+  String get subscriptionManage => '구독 관리';
+
+  @override
+  String get subscriptionUnknownDate => '알 수 없음';
+
+  @override
+  String get subscriptionUpgradeToUnlock => '잠금 해제하려면 Pro로 업그레이드';
+
+  @override
+  String get subscriptionProBadge => 'PRO';
+
+  @override
+  String get customThemeTitle => '맞춤 테마';
+
+  @override
+  String get customThemeColors => '색상';
+
+  @override
+  String get customThemeBackground => '배경';
+
+  @override
+  String get customThemeBackgroundDesc => '앱 배경, 스캐폴드';
+
+  @override
+  String get customThemePrimary => '기본색';
+
+  @override
+  String get customThemePrimaryDesc => '버튼, 하이라이트, 앱 바';
+
+  @override
+  String get customThemeAccent => '강조';
+
+  @override
+  String get customThemeAccentDesc => 'FAB, 스위치, 보조 하이라이트';
+
+  @override
+  String get customThemeStartFromPreset => '프리셋에서 시작';
+
+  @override
+  String get settingsUserFallback => '사용자';
+
+  @override
+  String get settingsManageSection => '관리';
+
+  @override
+  String get settingsExportNone => '선택 안 됨';
+
+  @override
+  String get settingsExportPartial => '부분 백업';
+
+  @override
+  String get settingsSystemLanguage => '시스템';
+
+  @override
+  String get tierFamily => 'FAMILY';
+
+  @override
+  String get tierCreator => 'CREATOR';
+
+  @override
+  String get tierFreeName => '무료';
+
+  @override
+  String get tierPremiumName => '프리미엄';
+
+  @override
+  String get tierCloudSyncName => 'Cloud Sync';
+
+  @override
+  String get tierCloudSyncFamilyName => 'Cloud Sync 패밀리';
+
+  @override
+  String get tierCreatorName => '크리에이터';
+
+  @override
+  String get nutritionEstimated => '추정값';
+
+  @override
+  String get nutritionTipMatch => '재료를 탭하여 USDA 매칭을 변경하세요';
+
+  @override
+  String get nutritionTipManual => '정확한 영양 값을 알고 있다면 직접 입력하세요';
+
+  @override
+  String get nutritionTipSpecific => '구체적인 종류를 선택하세요 (예: \"밀가루\" 대신 \"중력분\")';
+
+  @override
+  String get nutritionTipSaved => '수정 사항은 향후 레시피에 저장됩니다';
+
+  @override
+  String get nutritionGotIt => '확인';
+
+  @override
+  String get nutritionScaleMultiplier => '배율';
+
+  @override
+  String get nutritionScaleHelper => '1.0 = 전체 레시피';
+
+  @override
+  String nutritionOpenRecipe(String title) {
+    return '$title 열기';
+  }
+
+  @override
+  String get nutrientCal => 'Cal';
+
+  @override
+  String get nutrientSugar => '당류';
+
+  @override
+  String get appearanceCustomThemeRequiresPremium => '맞춤 테마는 프리미엄이 필요합니다';
+
+  @override
+  String get appearancePremiumBadge => '프리미엄';
+
+  @override
+  String get substitutionsAll => '모두';
+
+  @override
+  String substitutionsCount(int count, String category) {
+    return '$count개 대체 재료 • $category';
+  }
+
+  @override
+  String get colorPickerTitle => '색상 선택';
+
+  @override
+  String get colorPickerHex => 'Hex';
+
+  @override
+  String get colorPickerSelect => '선택';
+
+  @override
+  String get scanSelectPages => '여러 페이지 선택';
+
+  @override
+  String get scanNoTextPdf => 'PDF에서 텍스트를 찾을 수 없습니다. 더 선명한 스캔이나 텍스트 붙여넣기 옵션을 사용하세요.';
+
+  @override
+  String scanLittleTextPdf(int count) {
+    return 'PDF에서 텍스트가 거의 감지되지 않았습니다 ($count자). 스캔이 흐릴 수 있습니다. 더 높은 품질의 PDF로 시도하거나 텍스트 붙여넣기 옵션을 사용하세요.';
+  }
+
+  @override
+  String get scanNoTextImage => '이미지에서 텍스트를 찾을 수 없습니다. 더 밝은 조명에서 사진을 찍거나 텍스트 붙여넣기 옵션을 사용하세요.';
+
+  @override
+  String scanLittleTextImage(int count) {
+    return '텍스트가 거의 감지되지 않았습니다 ($count자). 더 선명한 사진으로 다시 시도하거나 텍스트 붙여넣기 옵션을 사용하세요.';
+  }
+
+  @override
+  String scanProgress(int current, int total) {
+    return '페이지 $current/$total 스캔 중...';
+  }
+
+  @override
+  String get communityTagHint => '맞춤 태그 추가...';
+
+  @override
+  String get tagPickerOrganize => '태그로 레시피를 정리할 수 있습니다';
+
+  @override
+  String get tagPickerLoadDefaults => '기본 태그 불러오기';
+
+  @override
+  String get tagPickerExampleHint => '예: 데이트 나이트';
+
+  @override
+  String drawerProTier(String tier) {
+    return 'Pro · $tier';
+  }
+
+  @override
+  String get accountStoreFallback => '스토어';
 }

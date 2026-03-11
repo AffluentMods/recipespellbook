@@ -24,7 +24,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
       body: ListView(
         children: [
           // ── Cooking Reminders ──
-          _SectionHeader(title: 'Cooking Reminders', icon: Icons.schedule),
+          _SectionHeader(title: l10n.settingsNotifCooking, icon: Icons.schedule),
           SwitchListTile(
             secondary: const Icon(Icons.schedule),
             title: Text(l10n.settingsNotifCooking),
@@ -35,7 +35,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // ── Community Updates ──
-          _SectionHeader(title: 'Community Updates', icon: Icons.people_outline),
+          _SectionHeader(title: l10n.settingsNotifCommunity, icon: Icons.people_outline),
           SwitchListTile(
             secondary: const Icon(Icons.people_outline),
             title: Text(l10n.settingsNotifCommunity),
@@ -47,8 +47,8 @@ class NotificationSettingsScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(left: 24),
               child: SwitchListTile(
-                title: const Text('New downloads'),
-                subtitle: const Text('When someone downloads your published recipe'),
+                title: Text(l10n.settingsNotifNewDownloads),
+                subtitle: Text(l10n.settingsNotifNewDownloadsSubtitle),
                 value: prefs.communityDownloads,
                 onChanged: (v) => notifier.setCommunityDownloads(v),
               ),
@@ -56,8 +56,8 @@ class NotificationSettingsScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(left: 24),
               child: SwitchListTile(
-                title: const Text('Rating updates'),
-                subtitle: const Text('When your published recipe gets a new rating'),
+                title: Text(l10n.settingsNotifRatingUpdates),
+                subtitle: Text(l10n.settingsNotifRatingUpdatesSubtitle),
                 value: prefs.communityRatings,
                 onChanged: (v) => notifier.setCommunityRatings(v),
               ),
@@ -65,8 +65,8 @@ class NotificationSettingsScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(left: 24),
               child: SwitchListTile(
-                title: const Text('Comments'),
-                subtitle: const Text('When someone comments on your recipe'),
+                title: Text(l10n.settingsNotifComments),
+                subtitle: Text(l10n.settingsNotifCommentsSubtitle),
                 value: prefs.communityComments,
                 onChanged: (v) => notifier.setCommunityComments(v),
               ),
@@ -85,7 +85,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                'Notification preferences are synced with your account.',
+                l10n.settingsNotifSyncNote,
                 style: TextStyle(color: theme.colorScheme.outline, fontSize: 13),
               ),
             ),

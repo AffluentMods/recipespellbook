@@ -167,23 +167,35 @@ class FamilyService {
   }
 
   Future<({bool success, String? error, FamilyInfo? family})> createFamily(String name) async {
+    if (!_auth.isSignedIn) {
+      return (success: false, error: 'Sign in to create a family', family: null);
+    }
     try {
       final response = await _auth.post('/v1/family', {'name': name});
       if (response.statusCode == 201) {
         _cachedFamily = FamilyInfo.fromJson(jsonDecode(response.body)['family']);
         return (success: true, error: null, family: _cachedFamily);
       }
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        return (success: false, error: 'Cloud Sync subscription required to create a family', family: null);
+      }
       return (success: false, error: _parseError(response), family: null);
     } catch (e) { return (success: false, error: 'Connection error', family: null); }
   }
 
   Future<({bool success, String? error, String? familyName})> joinFamily(String inviteCode) async {
+    if (!_auth.isSignedIn) {
+      return (success: false, error: 'Sign in to join a family', familyName: null);
+    }
     try {
       final response = await _auth.post('/v1/family/join', {'inviteCode': inviteCode});
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         await getFamily();
         return (success: true, error: null, familyName: data['familyName'] as String?);
+      }
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        return (success: false, error: 'Cloud Sync subscription required to join a family', familyName: null);
       }
       return (success: false, error: _parseError(response), familyName: null);
     } catch (e) { return (success: false, error: 'Connection error', familyName: null); }

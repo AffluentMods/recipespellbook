@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/hint_provider.dart';
 // ============ HINT BANNER ============
 
@@ -31,7 +32,8 @@ class HintBanner extends ConsumerWidget {
     final hint = ref.read(hintProvider.notifier).getNextHint(screenName);
     if (hint == null) return const SizedBox.shrink();
 
-    final message = hint.message;
+    final l10n = AppLocalizations.of(context);
+    final message = l10n != null ? hint.getLocalizedMessage(l10n) : hint.message;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),

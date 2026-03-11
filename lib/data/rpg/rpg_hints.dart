@@ -1,6 +1,8 @@
 // lib/data/rpg/rpg_hints.dart
 // Tutorial hint definitions for contextual feature discovery
 
+import '../../l10n/app_localizations.dart';
+
 // ============ HINT IDS ============
 
 /// Hint IDs for tracking which hints have been shown
@@ -25,7 +27,7 @@ class HintDefinition {
   /// Unique identifier for this hint
   final HintId id;
 
-  /// Hint text shown to help users discover features
+  /// Fallback hint text (English) — used when l10n is unavailable
   final String message;
 
   /// Which screen triggers this hint: 'home', 'recipe', 'planner', 'shopping'
@@ -40,6 +42,22 @@ class HintDefinition {
     required this.triggerScreen,
     required this.minAppOpens,
   });
+
+  /// Returns the localized message for this hint.
+  String getLocalizedMessage(AppLocalizations l10n) {
+    return switch (id) {
+      HintId.nutritionCalculator => l10n.hintNutritionCalculator,
+      HintId.cookingScreen => l10n.hintCookingScreen,
+      HintId.ingredientHeaders => l10n.hintIngredientHeaders,
+      HintId.importMethods => l10n.hintImportMethods,
+      HintId.mealPlanAutoFill => l10n.hintMealPlanAutoFill,
+      HintId.recipeScaling => l10n.hintRecipeScaling,
+      HintId.shoppingListGen => l10n.hintShoppingListGen,
+      HintId.recipeNotes => l10n.hintRecipeNotes,
+      HintId.cookbookOrganization => l10n.hintCookbookOrganization,
+      HintId.tagSystem => l10n.hintTagSystem,
+    };
+  }
 
   // ============ ALL HINTS ============
 
@@ -125,3 +143,4 @@ class HintDefinition {
         .toList();
   }
 }
+

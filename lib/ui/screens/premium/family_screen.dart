@@ -53,7 +53,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
   Widget _buildNoFamily(ThemeData theme) {
     final l10n = AppLocalizations.of(context)!;
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,

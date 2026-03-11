@@ -35,6 +35,7 @@ import '../ui/screens/settings/quick_access_settings_screen.dart';
 import '../ui/screens/settings/recipe_layout_settings_screen.dart';
 import '../ui/screens/settings/ingredient_layout_settings_screen.dart';
 import '../ui/screens/settings/notification_settings_screen.dart';
+import '../ui/screens/settings/account_screen.dart';
 import '../ui/screens/settings/settings_screen.dart';
 import '../ui/screens/notifications/notifications_screen.dart';
 import '../ui/screens/community/community_screen.dart';
@@ -310,6 +311,12 @@ final router = GoRouter(
       name: 'settings',
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: '/settings/account',
+      name: 'account',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const AccountScreen(),
     ),
     GoRoute(
       path: '/about',

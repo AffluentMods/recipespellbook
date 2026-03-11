@@ -69,6 +69,7 @@ class RecipeSpellbookApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final settings = ref.watch(settingsProvider);
     final textScale = ref.watch(textScaleProvider);
+    final customPalettes = ref.watch(customThemePalettesProvider);
 
     final Locale? locale = settings.languageCode == 'system'
         ? null
@@ -97,8 +98,8 @@ class RecipeSpellbookApp extends ConsumerWidget {
           }
           return const Locale('en');
         },
-        theme: AppTheme.lightTheme(colorTheme),
-        darkTheme: AppTheme.darkTheme(colorTheme),
+        theme: AppTheme.lightTheme(colorTheme, customPalette: customPalettes?.light),
+        darkTheme: AppTheme.darkTheme(colorTheme, customPalette: customPalettes?.dark),
         themeMode: themeMode,
         routerConfig: router,
         // ── Text scale — applies user's accessibility preference globally ──

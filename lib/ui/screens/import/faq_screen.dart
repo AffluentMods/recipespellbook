@@ -250,6 +250,70 @@ class _FaqScreenState extends State<FaqScreen> {
           ),
         ],
       ),
+      _HowTo(
+        id: 'macro-calculator',
+        icon: Icons.local_fire_department_outlined,
+        color: const Color(0xFFFF5722),
+        title: l10n.faqMacroCalcTitle,
+        subtitle: l10n.faqMacroCalcSubtitle,
+        steps: [
+          _FaqStep(
+            title: l10n.faqMacroCalcStep1Title,
+            description: l10n.faqMacroCalcStep1Desc,
+            icon: Icons.restaurant_menu,
+            asset: const _FaqAsset(filename: 'macro_calc_1.jpg', description: 'Recipe view screen'),
+          ),
+          _FaqStep(
+            title: l10n.faqMacroCalcStep2Title,
+            description: l10n.faqMacroCalcStep2Desc,
+            icon: Icons.touch_app,
+            asset: const _FaqAsset(filename: 'macro_calc_2.jpg', description: 'Empty nutrition section at bottom of recipe'),
+          ),
+          _FaqStep(
+            title: l10n.faqMacroCalcStep3Title,
+            description: l10n.faqMacroCalcStep3Desc,
+            icon: Icons.calculate,
+            asset: const _FaqAsset(filename: 'macro_calc_3.jpg', description: 'Calculator showing match rate, calories, and macros'),
+          ),
+          _FaqStep(
+            title: l10n.faqMacroCalcStep4Title,
+            description: l10n.faqMacroCalcStep4Desc,
+            icon: Icons.edit_note,
+            asset: const _FaqAsset(filename: 'macro_calc_4.jpg', description: 'Enter Manually screen for editing values'),
+          ),
+          _FaqStep(
+            title: l10n.faqMacroCalcStep5Title,
+            description: l10n.faqMacroCalcStep5Desc,
+            icon: Icons.list_alt,
+            asset: const _FaqAsset(filename: 'macro_calc_5.jpg', description: 'Ingredient matches showing USDA foods and sublinked recipes'),
+            tip: l10n.faqMacroCalcStep5Tip,
+          ),
+          _FaqStep(
+            title: l10n.faqMacroCalcStep6Title,
+            description: l10n.faqMacroCalcStep6Desc,
+            icon: Icons.search,
+            asset: const _FaqAsset(filename: 'macro_calc_6.jpg', description: 'USDA food database search screen'),
+          ),
+          _FaqStep(
+            title: l10n.faqMacroCalcStep7Title,
+            description: l10n.faqMacroCalcStep7Desc,
+            icon: Icons.link,
+            asset: const _FaqAsset(filename: 'macro_calc_7.jpg', description: 'Linked recipe nutrition detail screen'),
+          ),
+          _FaqStep(
+            title: l10n.faqMacroCalcStep8Title,
+            description: l10n.faqMacroCalcStep8Desc,
+            icon: Icons.check_circle,
+            asset: const _FaqAsset(filename: 'macro_calc_8.jpg', description: 'Nutrition widget showing saved data on recipe'),
+          ),
+          _FaqStep(
+            title: l10n.faqMacroCalcStep9Title,
+            description: l10n.faqMacroCalcStep9Desc,
+            icon: Icons.settings,
+            asset: const _FaqAsset(filename: 'macro_calc_9.jpg', description: 'Nutrition display settings screen'),
+          ),
+        ],
+      ),
     ];
   }
 
@@ -270,6 +334,14 @@ class _FaqScreenState extends State<FaqScreen> {
         subtitle: l10n.faqWhatAreSublinkedSubtitle,
         answer: l10n.faqWhatAreSublinkedAnswer,
         linkedHowToId: 'add-sublinked-recipes',
+      ),
+      _TextQuestion(
+        icon: Icons.local_fire_department_outlined,
+        color: const Color(0xFFFF5722),
+        question: l10n.faqWhatIsMacroCalcTitle,
+        subtitle: l10n.faqWhatIsMacroCalcSubtitle,
+        answer: l10n.faqWhatIsMacroCalcAnswer,
+        linkedHowToId: 'macro-calculator',
       ),
       _TextQuestion(
         icon: Icons.error_outline,

@@ -739,57 +739,72 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Larger avatar
-            _UserAvatar(user: user, radius: 32),
-            const SizedBox(width: 14),
+            // Tappable profile area → opens account screen
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 4),
-                  Text(user.displayName,
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 17),
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 2),
-                  Text(user.email,
-                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, fontSize: 12),
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 6),
-                  // Subscription tier badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: subStatus.isPro
-                          ? Colors.amber.withValues(alpha: 0.2)
-                          : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: subStatus.isPro
-                            ? Colors.amber.withValues(alpha: 0.5)
-                            : theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
-                        width: 0.5,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                  context.push('/settings/account');
+                },
+                behavior: HitTestBehavior.opaque,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Larger avatar
+                    _UserAvatar(user: user, radius: 32),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          Text(user.displayName,
+                              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 17),
+                              maxLines: 1, overflow: TextOverflow.ellipsis),
+                          const SizedBox(height: 2),
+                          Text(user.email,
+                              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, fontSize: 12),
+                              maxLines: 1, overflow: TextOverflow.ellipsis),
+                          const SizedBox(height: 6),
+                          // Subscription tier badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: subStatus.isPro
+                                  ? Colors.amber.withValues(alpha: 0.2)
+                                  : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: subStatus.isPro
+                                    ? Colors.amber.withValues(alpha: 0.5)
+                                    : theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                                width: 0.5,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (subStatus.isPro)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 4),
+                                    child: Icon(Icons.star_rounded, size: 12, color: Colors.amber.shade700),
+                                  ),
+                                Text(
+                                  subStatus.isPro ? subStatus.tier.displayName : 'Free',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: subStatus.isPro ? Colors.amber.shade700 : theme.colorScheme.outline,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (subStatus.isPro)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 4),
-                            child: Icon(Icons.star_rounded, size: 12, color: Colors.amber.shade700),
-                          ),
-                        Text(
-                          subStatus.isPro ? subStatus.tier.displayName : 'Free',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: subStatus.isPro ? Colors.amber.shade700 : theme.colorScheme.outline,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             _NotificationBell(),
@@ -808,17 +823,30 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
       children: [
         Row(
           children: [
-            _buildAppIcon(theme, size: 52),
-            const SizedBox(width: 14),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Recipe Spellbook', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 2),
-                  Text(l10n.menuSignInSync,
-                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, fontSize: 12)),
-                ],
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                  context.push('/settings/account');
+                },
+                behavior: HitTestBehavior.opaque,
+                child: Row(
+                  children: [
+                    _buildAppIcon(theme, size: 52),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Recipe Spellbook', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 2),
+                          Text(l10n.menuSignInSync,
+                              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             _NotificationBell(),
@@ -930,6 +958,7 @@ class _BottomSection extends ConsumerWidget {
   }
 
   Widget _buildProBadge(BuildContext context, WidgetRef ref, ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton(
@@ -948,7 +977,7 @@ class _BottomSection extends ConsumerWidget {
           children: [
             const Icon(Icons.star_rounded, size: 18, color: Colors.amber),
             const SizedBox(width: 6),
-            Text('Pro · ${subStatus.tier.displayName}',
+            Text(l10n.drawerProTier(subStatus.tier.displayName),
                 style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.w500, fontSize: 13)),
           ],
         ),

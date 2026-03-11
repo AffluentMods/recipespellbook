@@ -79,6 +79,58 @@ NutrientInfo? getNutrientInfo(String key) {
 /// Get all nutrient infos
 List<NutrientInfo> get allNutrientInfos => _nutrientRegistry;
 
+/// Returns the localized label for a nutrient key.
+/// Falls back to the English label from the registry if no l10n match.
+String localizedNutrientLabel(String key, AppLocalizations l10n) {
+  return switch (key) {
+    'calories' => l10n.nutrientCalories,
+    'fat' => l10n.nutrientTotalFat,
+    'saturatedFat' => l10n.nutrientSaturatedFat,
+    'transFat' => l10n.nutrientTransFat,
+    'monounsaturatedFat' => l10n.nutrientMonounsaturatedFat,
+    'polyunsaturatedFat' => l10n.nutrientPolyunsaturatedFat,
+    'carbohydrates' => l10n.nutrientCarbohydrates,
+    'fiber' => l10n.nutrientFiber,
+    'sugar' => l10n.nutrientSugars,
+    'protein' => l10n.nutrientProtein,
+    'cholesterol' => l10n.nutrientCholesterol,
+    'sodium' => l10n.nutrientSodium,
+    'potassium' => l10n.nutrientPotassium,
+    'calcium' => l10n.nutrientCalcium,
+    'iron' => l10n.nutrientIron,
+    'magnesium' => l10n.nutrientMagnesium,
+    'phosphorus' => l10n.nutrientPhosphorus,
+    'zinc' => l10n.nutrientZinc,
+    'copper' => l10n.nutrientCopper,
+    'manganese' => l10n.nutrientManganese,
+    'selenium' => l10n.nutrientSelenium,
+    'vitaminA' => l10n.nutrientVitaminA,
+    'vitaminC' => l10n.nutrientVitaminC,
+    'vitaminD' => l10n.nutrientVitaminD,
+    'vitaminE' => l10n.nutrientVitaminE,
+    'vitaminK' => l10n.nutrientVitaminK,
+    'vitaminB1' => l10n.nutrientThiaminB1,
+    'vitaminB2' => l10n.nutrientRiboflavinB2,
+    'vitaminB3' => l10n.nutrientNiacinB3,
+    'vitaminB5' => l10n.nutrientPantothenicAcidB5,
+    'vitaminB6' => l10n.nutrientVitaminB6,
+    'vitaminB12' => l10n.nutrientVitaminB12,
+    'folate' => l10n.nutrientFolate,
+    'choline' => l10n.nutrientCholine,
+    _ => getNutrientInfo(key)?.label ?? key,
+  };
+}
+
+/// Returns the localized category name for the nutrient registry.
+String localizedNutrientCategory(String category, AppLocalizations l10n) {
+  return switch (category) {
+    'Macronutrients' => l10n.nutrientCategoryMacronutrients,
+    'Minerals' => l10n.nutrientCategoryMinerals,
+    'Vitamins' => l10n.nutrientCategoryVitamins,
+    _ => category,
+  };
+}
+
 // ============================================================
 // SAMPLE DATA for live preview
 // ============================================================
@@ -229,7 +281,7 @@ class NutritionSettingsScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
             child: Text(
-              info.category,
+              localizedNutrientCategory(info.category, l10n),
               style: theme.textTheme.labelLarge?.copyWith(
                 color: theme.colorScheme.outline,
                 fontWeight: FontWeight.w600,
@@ -254,7 +306,7 @@ class NutritionSettingsScreen extends ConsumerWidget {
               ? null // Calories can't be toggled off
               : (_) => ref.read(settingsProvider.notifier).toggleNutrient(info.key),
           title: Text(
-            info.label,
+            localizedNutrientLabel(info.key, l10n),
             style: theme.textTheme.bodyMedium?.copyWith(
               color: isCalories ? theme.colorScheme.outline : null,
             ),
@@ -536,6 +588,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
   // ─── NUMBERS VIEW ───
 
   Widget _buildNumbersView(ThemeData theme, NutritionData n) {
+    final l10n = AppLocalizations.of(context)!;
     final enabled = widget.enabledNutrients;
     final servings = _effectiveServings() ?? _parseServings();
 
@@ -547,7 +600,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text('Calories', style: theme.textTheme.bodyLarge),
+              Text(l10n.nutrientCalories, style: theme.textTheme.bodyLarge),
               const Spacer(),
               Text(
                 '${n.calories!.round()}',
@@ -566,7 +619,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                '${(n.calories! / servings).round()} kcal per serving',
+                l10n.nutritionKcalPerServing((n.calories! / servings).round()),
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
               ),
             ),
@@ -576,7 +629,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                '${(n.calories! * servings).round()} kcal total',
+                l10n.nutritionKcalTotal((n.calories! * servings).round()),
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
               ),
             ),
@@ -595,6 +648,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
   // ─── DONUT VIEW ───
 
   Widget _buildDonutView(ThemeData theme, NutritionData n) {
+    final l10n = AppLocalizations.of(context)!;
     final proteinG = n.protein ?? 0;
     final carbsG = n.carbohydrates ?? 0;
     final fatG = n.fat ?? 0;
@@ -661,11 +715,11 @@ class _NutritionWidgetState extends State<NutritionWidget> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _legendItem(theme, proteinColor, 'Protein', '${proteinG.round()}g', '${(proteinPct * 100).round()}%'),
+                    _legendItem(theme, proteinColor, l10n.nutrientProtein, '${proteinG.round()}g', '${(proteinPct * 100).round()}%'),
                     const SizedBox(height: 12),
-                    _legendItem(theme, carbsColor, 'Carbs', '${carbsG.round()}g', '${(carbsPct * 100).round()}%'),
+                    _legendItem(theme, carbsColor, l10n.nutrientCarbs, '${carbsG.round()}g', '${(carbsPct * 100).round()}%'),
                     const SizedBox(height: 12),
-                    _legendItem(theme, fatColor, 'Fat', '${fatG.round()}g', '${(fatPct * 100).round()}%'),
+                    _legendItem(theme, fatColor, l10n.nutrientFat, '${fatG.round()}g', '${(fatPct * 100).round()}%'),
                   ],
                 ),
               ),
@@ -678,8 +732,8 @@ class _NutritionWidgetState extends State<NutritionWidget> {
           const SizedBox(height: 4),
           Text(
             _showPerServing
-                ? '${(n.calories! * servings).round()} kcal total'
-                : '${(n.calories! / servings).round()} kcal per serving',
+                ? l10n.nutritionKcalTotal((n.calories! * servings).round())
+                : l10n.nutritionKcalPerServing((n.calories! / servings).round()),
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
           ),
         ],
@@ -729,6 +783,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
   // ─── BAR VIEW ───
 
   Widget _buildBarView(ThemeData theme, NutritionData n) {
+    final l10n = AppLocalizations.of(context)!;
     final enabled = widget.enabledNutrients;
     final servings = _parseServings();
 
@@ -740,7 +795,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text('Calories', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+              Text(l10n.nutrientCalories, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
               const Spacer(),
               Text(
                 '${n.calories!.round()}',
@@ -759,8 +814,8 @@ class _NutritionWidgetState extends State<NutritionWidget> {
               alignment: Alignment.centerRight,
               child: Text(
                 _showPerServing
-                    ? '${(n.calories! * servings).round()} kcal total'
-                    : '${(n.calories! / servings).round()} kcal per serving',
+                    ? l10n.nutritionKcalTotal((n.calories! * servings).round())
+                    : l10n.nutritionKcalPerServing((n.calories! / servings).round()),
                 style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
               ),
             ),
@@ -785,6 +840,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
   }
 
   Widget _buildBarItem(ThemeData theme, NutrientInfo info, double value) {
+    final l10n = AppLocalizations.of(context)!;
     final dvPct = info.dailyValue != null && info.dailyValue! > 0
         ? (value / info.dailyValue!) * 100
         : null;
@@ -815,7 +871,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
             children: [
               Expanded(
                 child: Text(
-                  info.label,
+                  localizedNutrientLabel(info.key, l10n),
                   style: info.isSubItem
                       ? theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)
                       : theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
@@ -860,6 +916,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
   // ─── SHARED: build nutrient rows for numbers & donut ───
 
   List<Widget> _buildNutrientRows(ThemeData theme, NutritionData n, Set<String> enabled, {bool skipMacros = false}) {
+    final l10n = AppLocalizations.of(context)!;
     const macroKeys = {'calories', 'fat', 'saturatedFat', 'transFat', 'monounsaturatedFat', 'polyunsaturatedFat', 'carbohydrates', 'fiber', 'sugar', 'protein'};
 
     final rows = <Widget>[];
@@ -899,7 +956,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
             children: [
               Expanded(
                 child: Text(
-                  info.label,
+                  localizedNutrientLabel(info.key, l10n),
                   style: info.isSubItem
                       ? theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)
                       : theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),

@@ -262,10 +262,15 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
       // Store DB default scale for dialog display
       _dbDefaultScales[ingredient.name] = selectedLinkInfo.scale;
 
+      // storedNutrition is the TOTAL recipe nutrition, but
+      // LinkedRecipeNutrition.perServingNutrition expects per-serving.
+      // Divide by the linked recipe's serving count to get per-serving.
+      final perServing = storedNutrition?.scaled(1.0 / linkedServings);
+
       linkedNutritionMap[ingredient.name] = LinkedRecipeNutrition(
         recipeId: linkedRecipe.id,
         recipeTitle: linkedRecipe.title,
-        perServingNutrition: storedNutrition,
+        perServingNutrition: perServing,
         servingCount: linkedServings,
         scale: scale,
       );
@@ -1220,19 +1225,19 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoRow(Icons.touch_app, 'Tap any ingredient to change its USDA food match'),
+            _buildInfoRow(Icons.touch_app, l10n.nutritionTipMatch),
             const SizedBox(height: 12),
-            _buildInfoRow(Icons.edit, 'Enter exact nutrition values if you know them'),
+            _buildInfoRow(Icons.edit, l10n.nutritionTipManual),
             const SizedBox(height: 12),
-            _buildInfoRow(Icons.restaurant, 'Choose specific types (e.g., "all-purpose flour" not just "flour")'),
+            _buildInfoRow(Icons.restaurant, l10n.nutritionTipSpecific),
             const SizedBox(height: 12),
-            _buildInfoRow(Icons.sync, 'Your corrections are saved for future recipes'),
+            _buildInfoRow(Icons.sync, l10n.nutritionTipSaved),
           ],
         ),
         actions: [
           FilledButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Got it'),
+            child: Text(l10n.nutritionGotIt),
           ),
         ],
       ),
@@ -1790,12 +1795,13 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
 
   void _showCustomScaleInput() {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     _customScaleController.text = _scale.toString();
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Custom Scale', style: theme.textTheme.titleMedium),
+        title: Text(l10n.nutritionCustomScale, style: theme.textTheme.titleMedium),
         content: TextField(
           controller: _customScaleController,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -1804,16 +1810,16 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
           ],
           autofocus: true,
           decoration: InputDecoration(
-            labelText: 'Scale multiplier',
-            hintText: 'e.g. 0.5, 1.5, 3.0',
+            labelText: l10n.nutritionScaleMultiplier,
+            hintText: l10n.nutritionScaleHint,
             suffixText: 'x',
-            helperText: '1.0 = full recipe',
+            helperText: l10n.nutritionScaleHelper,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.actionCancel),
           ),
           FilledButton(
             onPressed: () {
@@ -1826,7 +1832,7 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
                 Navigator.pop(ctx);
               }
             },
-            child: const Text('Set'),
+            child: Text(l10n.nutritionSet),
           ),
         ],
       ),
@@ -1836,6 +1842,7 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isDark = theme.brightness == Brightness.dark;
     final scaledNutrition = _scaledNutrition;
     final selectedRecipe = _selectedRecipe;
@@ -2153,7 +2160,7 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
                       child: OutlinedButton.icon(
                         onPressed: () => widget.onOpenRecipe(selectedRecipe.id),
                         icon: const Icon(Icons.open_in_new, size: 18),
-                        label: Text('Open ${selectedRecipe.title}'),
+                        label: Text(l10n.nutritionOpenRecipe(selectedRecipe.title)),
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 44),
                         ),
@@ -2181,7 +2188,7 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
+                      child: Text(l10n.actionCancel),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -2192,7 +2199,7 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
                         Navigator.pop(context);
                         widget.onApply(_selectedId, _scale);
                       },
-                      child: const Text('Apply & Recalculate'),
+                      child: Text(l10n.nutritionApplyRecalculate),
                     ),
                   ),
                 ],

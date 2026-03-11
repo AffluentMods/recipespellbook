@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// All 10 app color themes with detailed palette definitions
+/// All app color themes with detailed palette definitions
 enum AppColorTheme {
   // ── Original 6 ──
   spellbook(
@@ -34,31 +34,63 @@ enum AppColorTheme {
     ),
   ),
 
+  // ── Custom (premium-only, colors overridden at runtime) ──
+  custom(
+    label: 'Custom',
+    emoji: '🎨',
+    seedColor: Color(0xFF888888),
+    bannerAsset: 'assets/images/themes/theme_custom.png',
+    light: ThemePalette(
+      background: Color(0xFFF5F5F5),
+      surface: Color(0xFFFFFFFF),
+      primary: Color(0xFF6750A4),
+      primaryContainer: Color(0xFFE8DEF8),
+      secondary: Color(0xFF625B71),
+      secondaryContainer: Color(0xFFE8DEF8),
+      accent: Color(0xFF7D5260),
+      onBackground: Color(0xFF1C1B1F),
+      onSurface: Color(0xFF1C1B1F),
+      onPrimary: Color(0xFFFFFFFF),
+    ),
+    dark: ThemePalette(
+      background: Color(0xFF141414),
+      surface: Color(0xFF1E1E1E),
+      primary: Color(0xFFD0BCFF),
+      primaryContainer: Color(0xFF4F378B),
+      secondary: Color(0xFFCCC2DC),
+      secondaryContainer: Color(0xFF4A4458),
+      accent: Color(0xFFEFB8C8),
+      onBackground: Color(0xFFE6E1E5),
+      onSurface: Color(0xFFE6E1E5),
+      onPrimary: Color(0xFF381E72),
+    ),
+  ),
+
   forest(
     label: 'The Druid\'s Grove',
     emoji: '🌿',
-    seedColor: Color(0xFF4CAF50),
+    seedColor: Color(0xFF2E7D32),
     bannerAsset: 'assets/images/themes/theme_forest.png',
     light: ThemePalette(
-      background: Color(0xFFEFF8EC),       // Noticeably green-tinted
-      surface: Color(0xFFFAFDF8),           // Near-white with hint of green
-      primary: Color(0xFF4A8C4E),           // Softer sage green
-      primaryContainer: Color(0xFFC5DFC3),
-      secondary: Color(0xFF7AAE4C),         // Brighter leaf green
-      secondaryContainer: Color(0xFFD8F0D0),// Light mint
-      accent: Color(0xFF8BC34A),
-      onBackground: Color(0xFF1E3820),
-      onSurface: Color(0xFF2E4A2C),
+      background: Color(0xFFE8F5E9),       // Cool green tint
+      surface: Color(0xFFF1F8F2),           // Near-white with emerald hint
+      primary: Color(0xFF2E7D32),           // Deep emerald
+      primaryContainer: Color(0xFFA5D6A7),  // Rich green
+      secondary: Color(0xFF43A047),         // True green
+      secondaryContainer: Color(0xFFC8E6C9),// Soft mint
+      accent: Color(0xFF66BB6A),            // Emerald green
+      onBackground: Color(0xFF1B3A1E),
+      onSurface: Color(0xFF2E4A30),
       onPrimary: Color(0xFFFFFFFF),
     ),
     dark: ThemePalette(
       background: Color(0xFF0E1A0E),
       surface: Color(0xFF1A2E1A),
-      primary: Color(0xFF6B9E3C),
+      primary: Color(0xFF66BB6A),           // True green
       primaryContainer: Color(0xFF2E4A2C),
-      secondary: Color(0xFF8BC34A),
+      secondary: Color(0xFF81C784),         // Soft green
       secondaryContainer: Color(0xFF3A5A28),
-      accent: Color(0xFFA4D65E),
+      accent: Color(0xFFA5D6A7),            // Soft emerald
       onBackground: Color(0xFFD4E8CC),
       onSurface: Color(0xFFC5DFC3),
       onPrimary: Color(0xFF0E1A0E),
@@ -145,16 +177,16 @@ enum AppColorTheme {
       onPrimary: Color(0xFF1A1A2E),
     ),
     dark: ThemePalette(
-      background: Color(0xFF0D0D1A),
-      surface: Color(0xFF1A1A30),
+      background: Color(0xFF000000),        // Pure OLED black
+      surface: Color(0xFF0D0D18),           // Subtle deep purple on black
       primary: Color(0xFF7986CB),
-      primaryContainer: Color(0xFF283060),
+      primaryContainer: Color(0xFF1A1A40),  // Darker for OLED
       secondary: Color(0xFFB0BEC5),
-      secondaryContainer: Color(0xFF2A2A50),
+      secondaryContainer: Color(0xFF1A1A38),// Darker for OLED
       accent: Color(0xFFE0E0E0),
       onBackground: Color(0xFFD5D5E8),
       onSurface: Color(0xFFC5CAE9),
-      onPrimary: Color(0xFF0D0D1A),
+      onPrimary: Color(0xFF000000),
     ),
   ),
 
@@ -224,62 +256,62 @@ enum AppColorTheme {
   ember(
     label: 'Ember',
     emoji: '🔥',
-    seedColor: Color(0xFFD84315),
+    seedColor: Color(0xFFC62828),
     bannerAsset: 'assets/images/themes/theme_ember.png',
     light: ThemePalette(
-      background: Color(0xFFFFF0E8),       // Warm terracotta cream
-      surface: Color(0xFFFFF8F4),           // Soft warm white
-      primary: Color(0xFFA63A14),           // Richer ember (less dark)
-      primaryContainer: Color(0xFFFFD4C4),  // Peachy glow
-      secondary: Color(0xFFD84315),
-      secondaryContainer: Color(0xFFFFBCA0),// Warm apricot
-      accent: Color(0xFFFF9100),
-      onBackground: Color(0xFF3E1408),
-      onSurface: Color(0xFF4E2010),
+      background: Color(0xFFFFF0EA),       // Rose cream
+      surface: Color(0xFFFFF8F5),           // Soft rose-white
+      primary: Color(0xFFB71C1C),           // Deep crimson
+      primaryContainer: Color(0xFFFFCDD2),  // Light rose
+      secondary: Color(0xFFD32F2F),         // True red
+      secondaryContainer: Color(0xFFEF9A9A),// Soft rose
+      accent: Color(0xFFFF5722),            // Red-orange
+      onBackground: Color(0xFF3E1414),
+      onSurface: Color(0xFF4E1E1E),
       onPrimary: Color(0xFFFFFFFF),
     ),
     dark: ThemePalette(
-      background: Color(0xFF180C08),
-      surface: Color(0xFF2C1810),
-      primary: Color(0xFFD84315),
-      primaryContainer: Color(0xFF6E2008),
-      secondary: Color(0xFFFF6E40),
-      secondaryContainer: Color(0xFF802C10),
-      accent: Color(0xFFFFA726),
-      onBackground: Color(0xFFFFCCBC),
-      onSurface: Color(0xFFFFAB91),
-      onPrimary: Color(0xFF180C08),
+      background: Color(0xFF1A0C0C),       // Dark red-black
+      surface: Color(0xFF2C1616),
+      primary: Color(0xFFE53935),           // Bright red
+      primaryContainer: Color(0xFF6E1414),
+      secondary: Color(0xFFFF5252),         // Vivid red
+      secondaryContainer: Color(0xFF801A1A),
+      accent: Color(0xFFFF8A65),            // Warm coral
+      onBackground: Color(0xFFFFCDD2),      // Rose tint
+      onSurface: Color(0xFFEF9A9A),
+      onPrimary: Color(0xFF1A0C0C),
     ),
   ),
 
   spring(
     label: 'Spring',
     emoji: '🌸',
-    seedColor: Color(0xFF81C784),
+    seedColor: Color(0xFFE88EA0),
     bannerAsset: 'assets/images/themes/theme_spring.png',
     light: ThemePalette(
-      background: Color(0xFFF5FAF0),
-      surface: Color(0xFFEDF5E6),
-      primary: Color(0xFF5A8C5E),
-      primaryContainer: Color(0xFFC8E6CA),
-      secondary: Color(0xFFE8A0B8),
-      secondaryContainer: Color(0xFFF8D0DC),
-      accent: Color(0xFFC8A060),
-      onBackground: Color(0xFF2A402C),
-      onSurface: Color(0xFF3A503C),
+      background: Color(0xFFFFF5F6),       // Soft cherry blossom white
+      surface: Color(0xFFFFECEF),          // Pale pink blush
+      primary: Color(0xFFD4687A),          // Cherry blossom pink
+      primaryContainer: Color(0xFFF8D0D8), // Light petal pink
+      secondary: Color(0xFF7EB89C),        // Spring mint green
+      secondaryContainer: Color(0xFFD4EEE0),// Soft mint
+      accent: Color(0xFFF0B060),           // Honey gold
+      onBackground: Color(0xFF3A2028),     // Dark rose
+      onSurface: Color(0xFF4A2838),        // Warm dark pink
       onPrimary: Color(0xFFFFFFFF),
     ),
     dark: ThemePalette(
-      background: Color(0xFF0E160E),
-      surface: Color(0xFF1A281A),
-      primary: Color(0xFF81C784),
-      primaryContainer: Color(0xFF2E4A2E),
-      secondary: Color(0xFFF06292),
-      secondaryContainer: Color(0xFF4A2038),
-      accent: Color(0xFFE0C080),
-      onBackground: Color(0xFFC8E6CA),
-      onSurface: Color(0xFFB8D6BA),
-      onPrimary: Color(0xFF0E160E),
+      background: Color(0xFF160E10),       // Deep rose-black
+      surface: Color(0xFF281820),          // Dark blush
+      primary: Color(0xFFF06292),          // Bright pink
+      primaryContainer: Color(0xFF5A2038), // Deep rose
+      secondary: Color(0xFF81C784),        // Soft green
+      secondaryContainer: Color(0xFF264A30),// Dark mint
+      accent: Color(0xFFE8C080),           // Warm gold
+      onBackground: Color(0xFFF8D0DC),     // Pale pink text
+      onSurface: Color(0xFFEEC0CC),        // Soft rose text
+      onPrimary: Color(0xFF160E10),
     ),
   ),
 
@@ -312,6 +344,37 @@ enum AppColorTheme {
       onSurface: Color(0xFFC4B0D8),
       onPrimary: Color(0xFF100C18),
     ),
+  ),
+
+  matcha(
+    label: 'Matcha',
+    emoji: '🍵',
+    seedColor: Color(0xFF8B7355),
+    bannerAsset: 'assets/images/themes/theme_matcha.png',
+    light: ThemePalette(
+      background: Color(0xFFDAE8CE),       // Soft matcha green
+      surface: Color(0xFFC5D6B0),          // Muted sage card
+      primary: Color(0xFF8B7355),          // Warm brown/wood
+      primaryContainer: Color(0xFFD4C4A8), // Light warm stone
+      secondary: Color(0xFF5A7247),        // Deep matcha green
+      secondaryContainer: Color(0xFFB5CEAA),// Soft sage-green
+      accent: Color(0xFFA09070),           // Earthy brown
+      onBackground: Color(0xFF2A2E22),     // Dark olive text
+      onSurface: Color(0xFF2E3328),        // Warm dark green
+      onPrimary: Color(0xFFFFFFFF),
+    ),
+    dark: ThemePalette(
+      background: Color(0xFF111410),       // Deep green-black
+      surface: Color(0xFF1E2518),          // Dark matcha
+      primary: Color(0xFFBCA882),          // Warm light wood
+      primaryContainer: Color(0xFF4A3C28), // Deep brown
+      secondary: Color(0xFF8AAE72),        // Matcha green
+      secondaryContainer: Color(0xFF2C3A22),// Dark olive
+      accent: Color(0xFFCDB890),           // Warm gold-brown
+      onBackground: Color(0xFFDCE4D0),     // Pale sage text
+      onSurface: Color(0xFFCCD4C0),        // Light sage
+      onPrimary: Color(0xFF111410),
+    ),
   );
 
   const AppColorTheme({
@@ -332,6 +395,9 @@ enum AppColorTheme {
 
   /// Whether this theme is inherently "dark" even in light mode
   bool get isAlwaysDark => this == AppColorTheme.midnight;
+
+  /// Whether this is the user-customizable theme
+  bool get isCustom => this == AppColorTheme.custom;
 }
 
 /// Defines all the colors for a single light or dark palette
@@ -359,6 +425,41 @@ class ThemePalette {
     required this.onSurface,
     required this.onPrimary,
   });
+
+  /// Derive a full palette from 3 user-chosen colors (for Custom theme).
+  /// [bg] = background, [primary] = primary/buttons, [accent] = accent/FAB.
+  static ThemePalette deriveFrom({
+    required Color bg,
+    required Color primary,
+    required Color accent,
+    required bool isDark,
+  }) {
+    // Contrast text colors
+    final onBg = bg.computeLuminance() > 0.5
+        ? Color.lerp(Colors.black, bg, 0.15)!
+        : Color.lerp(Colors.white, bg, 0.15)!;
+    final onSurf = onBg;
+    final onPrim = primary.computeLuminance() > 0.5 ? Colors.black : Colors.white;
+
+    return ThemePalette(
+      background: bg,
+      surface: isDark
+          ? Color.lerp(bg, Colors.white, 0.04)!
+          : Color.lerp(bg, Colors.white, 0.5)!,
+      primary: primary,
+      primaryContainer: isDark
+          ? Color.lerp(primary, Colors.black, 0.6)!
+          : Color.lerp(primary, Colors.white, 0.7)!,
+      secondary: Color.lerp(primary, accent, 0.5)!,
+      secondaryContainer: isDark
+          ? Color.lerp(Color.lerp(primary, accent, 0.5)!, Colors.black, 0.6)!
+          : Color.lerp(Color.lerp(primary, accent, 0.5)!, Colors.white, 0.7)!,
+      accent: accent,
+      onBackground: onBg,
+      onSurface: onSurf,
+      onPrimary: onPrim,
+    );
+  }
 }
 
 /// Measurement system enum

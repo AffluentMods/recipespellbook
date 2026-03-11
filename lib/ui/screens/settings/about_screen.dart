@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../providers/settings_provider.dart';
 
-class AboutScreen extends StatelessWidget {
+class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
 
-  // Update these when releasing new versions
-  static const String appVersion = '1.0.0';
-  static const String buildLabel = 'Beta';
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    final appVersion = ref.watch(appVersionProvider).valueOrNull ?? '...';
 
     return Scaffold(
       appBar: AppBar(
@@ -72,7 +71,7 @@ class AboutScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                'v$appVersion · $buildLabel',
+                'v$appVersion',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.primary,
                   fontWeight: FontWeight.w600,
@@ -129,14 +128,14 @@ class AboutScreen extends StatelessWidget {
                   icon: Icons.discord,
                   title: l10n.aboutCommunity,
                   subtitle: l10n.aboutCommunitySub,
-                  onTap: () => _launchUrl('https://discord.gg/recipespellbook', context),
+                  onTap: () => _launchUrl('https://discord.gg/fqtrekcKFt', context),
                 ),
                 _divider(theme),
                 _AboutTile(
                   icon: Icons.bug_report_outlined,
                   title: l10n.aboutReportBug,
                   subtitle: l10n.aboutReportBugSub,
-                  onTap: () => _launchUrl('https://discord.gg/recipespellbook', context),
+                  onTap: () => _launchUrl('https://discord.gg/fqtrekcKFt', context),
                 ),
                 _divider(theme),
                 _AboutTile(
@@ -160,7 +159,7 @@ class AboutScreen extends StatelessWidget {
                   onTap: () => showLicensePage(
                     context: context,
                     applicationName: l10n.appTitle,
-                    applicationVersion: appVersion,
+                    applicationVersion: 'v$appVersion',
                     applicationIcon: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       child: ClipRRect(

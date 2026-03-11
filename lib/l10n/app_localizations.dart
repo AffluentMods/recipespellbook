@@ -3514,7 +3514,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareFromApp.
   ///
   /// In en, this message translates to:
-  /// **'Shared from Recipe Spellbook ✨'**
+  /// **'Shared from Recipe Spellbook'**
   String get shareFromApp;
 
   /// No description provided for @shareCreatingCard.
@@ -4410,6 +4410,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'DELETE'**
   String get typeDeleteHint;
+
+  /// No description provided for @resetScopeLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'local data'**
+  String get resetScopeLocal;
+
+  /// No description provided for @resetScopeCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'cloud data'**
+  String get resetScopeCloud;
+
+  /// No description provided for @resetScopeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'all data and settings'**
+  String get resetScopeAll;
 
   /// No description provided for @resetEverything.
   ///
@@ -7135,6 +7153,108 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get accountTitle;
 
+  /// No description provided for @accountSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get accountSubscription;
+
+  /// No description provided for @accountManageSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Subscription'**
+  String get accountManageSubscription;
+
+  /// No description provided for @accountCloudSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Sync'**
+  String get accountCloudSync;
+
+  /// No description provided for @accountSyncNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Now'**
+  String get accountSyncNow;
+
+  /// No description provided for @accountIntegrations.
+  ///
+  /// In en, this message translates to:
+  /// **'Integrations'**
+  String get accountIntegrations;
+
+  /// No description provided for @accountDangerZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger Zone'**
+  String get accountDangerZone;
+
+  /// No description provided for @purchasesRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases restored successfully!'**
+  String get purchasesRestored;
+
+  /// No description provided for @noPurchasesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No previous purchases found.'**
+  String get noPurchasesFound;
+
+  /// No description provided for @restoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed. Please try again.'**
+  String get restoreFailed;
+
+  /// No description provided for @restorePurchasesLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Purchases'**
+  String get restorePurchasesLong;
+
+  /// No description provided for @cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get cancelled;
+
+  /// No description provided for @accessUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'access until'**
+  String get accessUntil;
+
+  /// No description provided for @renews.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews'**
+  String get renews;
+
+  /// No description provided for @plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get plan;
+
+  /// No description provided for @upgradeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock cloud sync, smart import, and more.'**
+  String get upgradeDescription;
+
+  /// No description provided for @syncDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your recipes synced across devices.'**
+  String get syncDescription;
+
+  /// No description provided for @sync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get sync;
+
   /// No description provided for @signInToSync.
   ///
   /// In en, this message translates to:
@@ -7270,7 +7390,7 @@ abstract class AppLocalizations {
   /// No description provided for @tierPremium.
   ///
   /// In en, this message translates to:
-  /// **'Premium'**
+  /// **'PREMIUM'**
   String get tierPremium;
 
   /// No description provided for @tierStandard.
@@ -7288,7 +7408,7 @@ abstract class AppLocalizations {
   /// No description provided for @tierFree.
   ///
   /// In en, this message translates to:
-  /// **'Free'**
+  /// **'FREE'**
   String get tierFree;
 
   /// No description provided for @tierPlan.
@@ -8428,7 +8548,7 @@ abstract class AppLocalizations {
   /// No description provided for @tierCloudSync.
   ///
   /// In en, this message translates to:
-  /// **'Cloud\nSync'**
+  /// **'CLOUD SYNC'**
   String get tierCloudSync;
 
   /// No description provided for @tierCloudSyncPlus.
@@ -8542,14 +8662,38 @@ abstract class AppLocalizations {
   /// No description provided for @compareSmartImportPremium.
   ///
   /// In en, this message translates to:
-  /// **'2/mo'**
+  /// **'Trial'**
   String get compareSmartImportPremium;
 
   /// No description provided for @compareSmartImportCloud.
   ///
   /// In en, this message translates to:
-  /// **'10/mo'**
+  /// **'Standard'**
   String get compareSmartImportCloud;
+
+  /// No description provided for @compareCloudStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Storage'**
+  String get compareCloudStorage;
+
+  /// No description provided for @compareCloudStorageBasic.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic'**
+  String get compareCloudStorageBasic;
+
+  /// No description provided for @compareCloudStorageStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get compareCloudStorageStandard;
+
+  /// No description provided for @compareCloudStorageExtended.
+  ///
+  /// In en, this message translates to:
+  /// **'Extended'**
+  String get compareCloudStorageExtended;
 
   /// No description provided for @printOf.
   ///
@@ -8946,6 +9090,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Kitchen Buddy login streaks and coin bonuses'**
   String get settingsNotifBuddySubtitle;
+
+  /// No description provided for @settingsNotifManagePreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage notification preferences'**
+  String get settingsNotifManagePreferences;
+
+  /// No description provided for @settingsNotifNewDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'New downloads'**
+  String get settingsNotifNewDownloads;
+
+  /// No description provided for @settingsNotifNewDownloadsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When someone downloads your published recipe'**
+  String get settingsNotifNewDownloadsSubtitle;
+
+  /// No description provided for @settingsNotifRatingUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating updates'**
+  String get settingsNotifRatingUpdates;
+
+  /// No description provided for @settingsNotifRatingUpdatesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When your published recipe gets a new rating'**
+  String get settingsNotifRatingUpdatesSubtitle;
+
+  /// No description provided for @settingsNotifComments.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get settingsNotifComments;
+
+  /// No description provided for @settingsNotifCommentsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When someone comments on your recipe'**
+  String get settingsNotifCommentsSubtitle;
+
+  /// No description provided for @settingsNotifSyncNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification preferences are synced with your account.'**
+  String get settingsNotifSyncNote;
 
   /// No description provided for @tuesday.
   ///
@@ -13201,6 +13393,150 @@ abstract class AppLocalizations {
   /// **'Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it — no searching needed.'**
   String get faqWhatAreSublinkedAnswer;
 
+  /// No description provided for @faqMacroCalcTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to use the Macro Calculator'**
+  String get faqMacroCalcTitle;
+
+  /// No description provided for @faqMacroCalcSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-calculate calories and macros for any recipe'**
+  String get faqMacroCalcSubtitle;
+
+  /// No description provided for @faqMacroCalcStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a recipe'**
+  String get faqMacroCalcStep1Title;
+
+  /// No description provided for @faqMacroCalcStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Open any recipe to view its details.'**
+  String get faqMacroCalcStep1Desc;
+
+  /// No description provided for @faqMacroCalcStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Find the Nutrition section'**
+  String get faqMacroCalcStep2Title;
+
+  /// No description provided for @faqMacroCalcStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll to the bottom of the recipe. If no nutrition data exists yet, you\'ll see an empty state — tap it to start the calculator.'**
+  String get faqMacroCalcStep2Desc;
+
+  /// No description provided for @faqMacroCalcStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'View the calculator'**
+  String get faqMacroCalcStep3Title;
+
+  /// No description provided for @faqMacroCalcStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'The calculator automatically matches your ingredients to the USDA food database and shows the match rate, calories, and macro breakdown.'**
+  String get faqMacroCalcStep3Desc;
+
+  /// No description provided for @faqMacroCalcStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter manually'**
+  String get faqMacroCalcStep4Title;
+
+  /// No description provided for @faqMacroCalcStep4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap \'Enter Manually\' to edit nutrition values by hand if you prefer to input your own data instead of using the auto-calculated results.'**
+  String get faqMacroCalcStep4Desc;
+
+  /// No description provided for @faqMacroCalcStep5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Review ingredient matches'**
+  String get faqMacroCalcStep5Title;
+
+  /// No description provided for @faqMacroCalcStep5Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll down to see each ingredient matched to a USDA food item. Sublinked recipes (like Pizza Dough) use their own stored nutrition instead.'**
+  String get faqMacroCalcStep5Desc;
+
+  /// No description provided for @faqMacroCalcStep5Tip.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sure what a sublinked recipe is? Check out the \'What are sublinked recipes?\' section in the FAQ!'**
+  String get faqMacroCalcStep5Tip;
+
+  /// No description provided for @faqMacroCalcStep6Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse the USDA database'**
+  String get faqMacroCalcStep6Title;
+
+  /// No description provided for @faqMacroCalcStep6Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap any ingredient to search the USDA database for a better match. You can pick from thousands of verified food items.'**
+  String get faqMacroCalcStep6Desc;
+
+  /// No description provided for @faqMacroCalcStep7Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked recipe nutrition'**
+  String get faqMacroCalcStep7Title;
+
+  /// No description provided for @faqMacroCalcStep7Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients linked to other recipes show the linked recipe\'s nutrition data. You can adjust the scale to use a fraction of the linked recipe.'**
+  String get faqMacroCalcStep7Desc;
+
+  /// No description provided for @faqMacroCalcStep8Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your results'**
+  String get faqMacroCalcStep8Title;
+
+  /// No description provided for @faqMacroCalcStep8Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Save to store the nutrition data. The macros will now appear on your recipe with charts and detailed breakdowns per serving.'**
+  String get faqMacroCalcStep8Desc;
+
+  /// No description provided for @faqMacroCalcStep9Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize the display'**
+  String get faqMacroCalcStep9Title;
+
+  /// No description provided for @faqMacroCalcStep9Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Settings > Nutrition Display to choose which nutrients to show and how the charts are displayed.'**
+  String get faqMacroCalcStep9Desc;
+
+  /// No description provided for @faqWhatIsMacroCalcTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What is the Macro Calculator?'**
+  String get faqWhatIsMacroCalcTitle;
+
+  /// No description provided for @faqWhatIsMacroCalcSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic nutrition estimation for recipes'**
+  String get faqWhatIsMacroCalcSubtitle;
+
+  /// No description provided for @faqWhatIsMacroCalcAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'The Macro Calculator automatically estimates the nutritional content of your recipes by matching each ingredient to the USDA food database. It calculates calories, protein, carbs, fat, fiber, sugar, sodium, and more — all per serving. You can find it in the Nutrition section of any recipe.'**
+  String get faqWhatIsMacroCalcAnswer;
+
   /// No description provided for @faqImportFailedTitle.
   ///
   /// In en, this message translates to:
@@ -13260,6 +13596,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Alchemist'**
   String get themeAlchemist;
+
+  /// No description provided for @themeMatcha.
+  ///
+  /// In en, this message translates to:
+  /// **'Matcha'**
+  String get themeMatcha;
+
+  /// No description provided for @themeCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get themeCustom;
 
   /// No description provided for @communitySortTopRated.
   ///
@@ -13590,6 +13938,972 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Publishing in progress... ({current}/{total} images)'**
   String communityPublishUploadInProgress(int current, int total);
+
+  /// No description provided for @surpriseMeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Surprise Me!'**
+  String get surpriseMeTitle;
+
+  /// No description provided for @surpriseMeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What should I cook?'**
+  String get surpriseMeSubtitle;
+
+  /// No description provided for @hintNutritionCalculator.
+  ///
+  /// In en, this message translates to:
+  /// **'Did you know? Tap the nutrition icon to auto-calculate nutrition for any recipe.'**
+  String get hintNutritionCalculator;
+
+  /// No description provided for @hintCookingScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Try cooking mode! Tap \'Cook\' on any recipe for hands-free step-by-step instructions.'**
+  String get hintCookingScreen;
+
+  /// No description provided for @hintIngredientHeaders.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Type a line ending with \':\' in ingredients to create a section header.'**
+  String get hintIngredientHeaders;
+
+  /// No description provided for @hintImportMethods.
+  ///
+  /// In en, this message translates to:
+  /// **'Import recipes from URLs, photos, PDFs, or even Instagram and TikTok!'**
+  String get hintImportMethods;
+
+  /// No description provided for @hintMealPlanAutoFill.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag recipes into your meal plan, or tap a day to pick from your collection.'**
+  String get hintMealPlanAutoFill;
+
+  /// No description provided for @hintRecipeScaling.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the servings number on any recipe to scale ingredients up or down.'**
+  String get hintRecipeScaling;
+
+  /// No description provided for @hintShoppingListGen.
+  ///
+  /// In en, this message translates to:
+  /// **'Add recipe ingredients to your shopping list with one tap.'**
+  String get hintShoppingListGen;
+
+  /// No description provided for @hintRecipeNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Add personal notes to any recipe - tips, modifications, or memories.'**
+  String get hintRecipeNotes;
+
+  /// No description provided for @hintCookbookOrganization.
+  ///
+  /// In en, this message translates to:
+  /// **'Create multiple cookbooks to organize your recipes by theme or occasion.'**
+  String get hintCookbookOrganization;
+
+  /// No description provided for @hintTagSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag recipes for easy filtering - create custom tags like \'Quick\', \'Favorite\', etc.'**
+  String get hintTagSystem;
+
+  /// No description provided for @allergyMyAllergies.
+  ///
+  /// In en, this message translates to:
+  /// **'My Allergies'**
+  String get allergyMyAllergies;
+
+  /// No description provided for @allergyDisabledTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get allergyDisabledTab;
+
+  /// No description provided for @allergyNoDisabledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Disabled Warnings'**
+  String get allergyNoDisabledTitle;
+
+  /// No description provided for @allergyNoDisabledSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When you dismiss allergy warnings on recipes, they will appear here so you can restore them later.'**
+  String get allergyNoDisabledSubtitle;
+
+  /// No description provided for @allergyDisabledInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'These recipes have had their allergy warnings disabled. Tap to restore warnings.'**
+  String get allergyDisabledInfo;
+
+  /// No description provided for @trashRestoredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{title}\" restored'**
+  String trashRestoredMessage(String title);
+
+  /// No description provided for @nutrientCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories'**
+  String get nutrientCalories;
+
+  /// No description provided for @nutrientTotalFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Fat'**
+  String get nutrientTotalFat;
+
+  /// No description provided for @nutrientSaturatedFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturated Fat'**
+  String get nutrientSaturatedFat;
+
+  /// No description provided for @nutrientTransFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Trans Fat'**
+  String get nutrientTransFat;
+
+  /// No description provided for @nutrientMonounsaturatedFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Monounsaturated Fat'**
+  String get nutrientMonounsaturatedFat;
+
+  /// No description provided for @nutrientPolyunsaturatedFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Polyunsaturated Fat'**
+  String get nutrientPolyunsaturatedFat;
+
+  /// No description provided for @nutrientCarbohydrates.
+  ///
+  /// In en, this message translates to:
+  /// **'Carbohydrates'**
+  String get nutrientCarbohydrates;
+
+  /// No description provided for @nutrientFiber.
+  ///
+  /// In en, this message translates to:
+  /// **'Fiber'**
+  String get nutrientFiber;
+
+  /// No description provided for @nutrientSugars.
+  ///
+  /// In en, this message translates to:
+  /// **'Sugars'**
+  String get nutrientSugars;
+
+  /// No description provided for @nutrientProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Protein'**
+  String get nutrientProtein;
+
+  /// No description provided for @nutrientCholesterol.
+  ///
+  /// In en, this message translates to:
+  /// **'Cholesterol'**
+  String get nutrientCholesterol;
+
+  /// No description provided for @nutrientSodium.
+  ///
+  /// In en, this message translates to:
+  /// **'Sodium'**
+  String get nutrientSodium;
+
+  /// No description provided for @nutrientPotassium.
+  ///
+  /// In en, this message translates to:
+  /// **'Potassium'**
+  String get nutrientPotassium;
+
+  /// No description provided for @nutrientCalcium.
+  ///
+  /// In en, this message translates to:
+  /// **'Calcium'**
+  String get nutrientCalcium;
+
+  /// No description provided for @nutrientIron.
+  ///
+  /// In en, this message translates to:
+  /// **'Iron'**
+  String get nutrientIron;
+
+  /// No description provided for @nutrientMagnesium.
+  ///
+  /// In en, this message translates to:
+  /// **'Magnesium'**
+  String get nutrientMagnesium;
+
+  /// No description provided for @nutrientPhosphorus.
+  ///
+  /// In en, this message translates to:
+  /// **'Phosphorus'**
+  String get nutrientPhosphorus;
+
+  /// No description provided for @nutrientZinc.
+  ///
+  /// In en, this message translates to:
+  /// **'Zinc'**
+  String get nutrientZinc;
+
+  /// No description provided for @nutrientCopper.
+  ///
+  /// In en, this message translates to:
+  /// **'Copper'**
+  String get nutrientCopper;
+
+  /// No description provided for @nutrientManganese.
+  ///
+  /// In en, this message translates to:
+  /// **'Manganese'**
+  String get nutrientManganese;
+
+  /// No description provided for @nutrientSelenium.
+  ///
+  /// In en, this message translates to:
+  /// **'Selenium'**
+  String get nutrientSelenium;
+
+  /// No description provided for @nutrientVitaminA.
+  ///
+  /// In en, this message translates to:
+  /// **'Vitamin A'**
+  String get nutrientVitaminA;
+
+  /// No description provided for @nutrientVitaminC.
+  ///
+  /// In en, this message translates to:
+  /// **'Vitamin C'**
+  String get nutrientVitaminC;
+
+  /// No description provided for @nutrientVitaminD.
+  ///
+  /// In en, this message translates to:
+  /// **'Vitamin D'**
+  String get nutrientVitaminD;
+
+  /// No description provided for @nutrientVitaminE.
+  ///
+  /// In en, this message translates to:
+  /// **'Vitamin E'**
+  String get nutrientVitaminE;
+
+  /// No description provided for @nutrientVitaminK.
+  ///
+  /// In en, this message translates to:
+  /// **'Vitamin K'**
+  String get nutrientVitaminK;
+
+  /// No description provided for @nutrientThiaminB1.
+  ///
+  /// In en, this message translates to:
+  /// **'Thiamin (B1)'**
+  String get nutrientThiaminB1;
+
+  /// No description provided for @nutrientRiboflavinB2.
+  ///
+  /// In en, this message translates to:
+  /// **'Riboflavin (B2)'**
+  String get nutrientRiboflavinB2;
+
+  /// No description provided for @nutrientNiacinB3.
+  ///
+  /// In en, this message translates to:
+  /// **'Niacin (B3)'**
+  String get nutrientNiacinB3;
+
+  /// No description provided for @nutrientPantothenicAcidB5.
+  ///
+  /// In en, this message translates to:
+  /// **'Pantothenic Acid (B5)'**
+  String get nutrientPantothenicAcidB5;
+
+  /// No description provided for @nutrientVitaminB6.
+  ///
+  /// In en, this message translates to:
+  /// **'Vitamin B6'**
+  String get nutrientVitaminB6;
+
+  /// No description provided for @nutrientVitaminB12.
+  ///
+  /// In en, this message translates to:
+  /// **'Vitamin B12'**
+  String get nutrientVitaminB12;
+
+  /// No description provided for @nutrientFolate.
+  ///
+  /// In en, this message translates to:
+  /// **'Folate'**
+  String get nutrientFolate;
+
+  /// No description provided for @nutrientCholine.
+  ///
+  /// In en, this message translates to:
+  /// **'Choline'**
+  String get nutrientCholine;
+
+  /// No description provided for @nutrientCategoryMacronutrients.
+  ///
+  /// In en, this message translates to:
+  /// **'Macronutrients'**
+  String get nutrientCategoryMacronutrients;
+
+  /// No description provided for @nutrientCategoryMinerals.
+  ///
+  /// In en, this message translates to:
+  /// **'Minerals'**
+  String get nutrientCategoryMinerals;
+
+  /// No description provided for @nutrientCategoryVitamins.
+  ///
+  /// In en, this message translates to:
+  /// **'Vitamins'**
+  String get nutrientCategoryVitamins;
+
+  /// No description provided for @nutrientCarbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Carbs'**
+  String get nutrientCarbs;
+
+  /// No description provided for @nutrientFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Fat'**
+  String get nutrientFat;
+
+  /// No description provided for @nutritionKcalPerServing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} kcal per serving'**
+  String nutritionKcalPerServing(int count);
+
+  /// No description provided for @nutritionKcalTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} kcal total'**
+  String nutritionKcalTotal(int count);
+
+  /// No description provided for @shareShoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Shopping List'**
+  String get shareShoppingList;
+
+  /// No description provided for @shareOneTimeLink.
+  ///
+  /// In en, this message translates to:
+  /// **'One-Time Link'**
+  String get shareOneTimeLink;
+
+  /// No description provided for @shareOneTimeLinkSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Free • 24h expiry • View/download only'**
+  String get shareOneTimeLinkSubtitle;
+
+  /// No description provided for @shareGenerateLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate Link'**
+  String get shareGenerateLink;
+
+  /// No description provided for @shareFamilyShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Share'**
+  String get shareFamilyShare;
+
+  /// No description provided for @shareFamilySyncSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Real-time sync • Per-member permissions'**
+  String get shareFamilySyncSubtitle;
+
+  /// No description provided for @shareFamilyCreateJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Create or join a family to share'**
+  String get shareFamilyCreateJoin;
+
+  /// No description provided for @shareFamilyRequiresCloudSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires Cloud Sync subscription'**
+  String get shareFamilyRequiresCloudSync;
+
+  /// No description provided for @shareFamilyUpgradeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Cloud Sync to share cookbooks and lists with your family in real-time.'**
+  String get shareFamilyUpgradeMessage;
+
+  /// No description provided for @shareFamilySignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to use family sharing'**
+  String get shareFamilySignIn;
+
+  /// No description provided for @shareFamilySetupInSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Create or join a family in Settings → Family Sharing'**
+  String get shareFamilySetupInSettings;
+
+  /// No description provided for @shareSharedWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared with'**
+  String get shareSharedWith;
+
+  /// No description provided for @shareRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Share revoked'**
+  String get shareRevoked;
+
+  /// No description provided for @shareSignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to create share links'**
+  String get shareSignInRequired;
+
+  /// No description provided for @shareCreateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create link'**
+  String get shareCreateFailed;
+
+  /// No description provided for @shareNoFamilyMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'No other family members to share with'**
+  String get shareNoFamilyMembers;
+
+  /// No description provided for @shareAddFamilyMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Add family members'**
+  String get shareAddFamilyMembers;
+
+  /// No description provided for @shareWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Share with'**
+  String get shareWith;
+
+  /// No description provided for @shareSharedWithMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared with {name}'**
+  String shareSharedWithMember(String name);
+
+  /// No description provided for @shareShareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to share'**
+  String get shareShareFailed;
+
+  /// No description provided for @shareLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied!'**
+  String get shareLinkCopied;
+
+  /// No description provided for @shareLinkExpiresIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in {hours}h'**
+  String shareLinkExpiresIn(int hours);
+
+  /// No description provided for @shareRevoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get shareRevoke;
+
+  /// No description provided for @shareUpgrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade'**
+  String get shareUpgrade;
+
+  /// No description provided for @sharePermReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Read Only'**
+  String get sharePermReadOnly;
+
+  /// No description provided for @sharePermAddOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Only'**
+  String get sharePermAddOnly;
+
+  /// No description provided for @sharePermFullEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Edit'**
+  String get sharePermFullEdit;
+
+  /// No description provided for @sharePermFullAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Access'**
+  String get sharePermFullAccess;
+
+  /// No description provided for @sharePermViewRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Can view recipes'**
+  String get sharePermViewRecipes;
+
+  /// No description provided for @sharePermAddRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Can add new recipes'**
+  String get sharePermAddRecipes;
+
+  /// No description provided for @sharePermEditRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Can edit any recipe'**
+  String get sharePermEditRecipes;
+
+  /// No description provided for @sharePermViewItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Can view items'**
+  String get sharePermViewItems;
+
+  /// No description provided for @sharePermAddItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Can add items, edit own'**
+  String get sharePermAddItems;
+
+  /// No description provided for @sharePermEditItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Can edit & delete items'**
+  String get sharePermEditItems;
+
+  /// No description provided for @shareUnknownMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get shareUnknownMember;
+
+  /// No description provided for @subscriptionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get subscriptionTitle;
+
+  /// No description provided for @subscriptionUpgradeToPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Pro'**
+  String get subscriptionUpgradeToPro;
+
+  /// No description provided for @subscriptionUnlockFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock cloud sync, smart import, and more.'**
+  String get subscriptionUnlockFeatures;
+
+  /// No description provided for @subscriptionViewPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'View Plans'**
+  String get subscriptionViewPlans;
+
+  /// No description provided for @subscriptionRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases restored successfully!'**
+  String get subscriptionRestored;
+
+  /// No description provided for @subscriptionNoPurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'No previous purchases found.'**
+  String get subscriptionNoPurchases;
+
+  /// No description provided for @subscriptionRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed: {error}'**
+  String subscriptionRestoreFailed(String error);
+
+  /// No description provided for @subscriptionRestorePurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get subscriptionRestorePurchases;
+
+  /// No description provided for @subscriptionCancelledUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled — access until {date}'**
+  String subscriptionCancelledUntil(String date);
+
+  /// No description provided for @subscriptionRenews.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews'**
+  String get subscriptionRenews;
+
+  /// No description provided for @subscriptionPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get subscriptionPlan;
+
+  /// No description provided for @subscriptionLifetime.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifetime — never expires'**
+  String get subscriptionLifetime;
+
+  /// No description provided for @subscriptionManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage subscription'**
+  String get subscriptionManage;
+
+  /// No description provided for @subscriptionUnknownDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get subscriptionUnknownDate;
+
+  /// No description provided for @subscriptionUpgradeToUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Pro to unlock'**
+  String get subscriptionUpgradeToUnlock;
+
+  /// No description provided for @subscriptionProBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'PRO'**
+  String get subscriptionProBadge;
+
+  /// No description provided for @customThemeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Theme'**
+  String get customThemeTitle;
+
+  /// No description provided for @customThemeColors.
+  ///
+  /// In en, this message translates to:
+  /// **'Colors'**
+  String get customThemeColors;
+
+  /// No description provided for @customThemeBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Background'**
+  String get customThemeBackground;
+
+  /// No description provided for @customThemeBackgroundDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'App background, scaffold'**
+  String get customThemeBackgroundDesc;
+
+  /// No description provided for @customThemePrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary'**
+  String get customThemePrimary;
+
+  /// No description provided for @customThemePrimaryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Buttons, highlights, app bar'**
+  String get customThemePrimaryDesc;
+
+  /// No description provided for @customThemeAccent.
+  ///
+  /// In en, this message translates to:
+  /// **'Accent'**
+  String get customThemeAccent;
+
+  /// No description provided for @customThemeAccentDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'FAB, switches, secondary highlights'**
+  String get customThemeAccentDesc;
+
+  /// No description provided for @customThemeStartFromPreset.
+  ///
+  /// In en, this message translates to:
+  /// **'Start from a preset'**
+  String get customThemeStartFromPreset;
+
+  /// No description provided for @settingsUserFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get settingsUserFallback;
+
+  /// No description provided for @settingsManageSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get settingsManageSection;
+
+  /// No description provided for @settingsExportNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None Selected'**
+  String get settingsExportNone;
+
+  /// No description provided for @settingsExportPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial Backup'**
+  String get settingsExportPartial;
+
+  /// No description provided for @settingsSystemLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get settingsSystemLanguage;
+
+  /// No description provided for @tierFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'FAMILY'**
+  String get tierFamily;
+
+  /// No description provided for @tierCreator.
+  ///
+  /// In en, this message translates to:
+  /// **'CREATOR'**
+  String get tierCreator;
+
+  /// No description provided for @tierFreeName.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get tierFreeName;
+
+  /// No description provided for @tierPremiumName.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get tierPremiumName;
+
+  /// No description provided for @tierCloudSyncName.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Sync'**
+  String get tierCloudSyncName;
+
+  /// No description provided for @tierCloudSyncFamilyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Sync Family'**
+  String get tierCloudSyncFamilyName;
+
+  /// No description provided for @tierCreatorName.
+  ///
+  /// In en, this message translates to:
+  /// **'Creator'**
+  String get tierCreatorName;
+
+  /// No description provided for @nutritionEstimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated values'**
+  String get nutritionEstimated;
+
+  /// No description provided for @nutritionTipMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap any ingredient to change its USDA food match'**
+  String get nutritionTipMatch;
+
+  /// No description provided for @nutritionTipManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter exact nutrition values if you know them'**
+  String get nutritionTipManual;
+
+  /// No description provided for @nutritionTipSpecific.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose specific types (e.g., \"all-purpose flour\" not just \"flour\")'**
+  String get nutritionTipSpecific;
+
+  /// No description provided for @nutritionTipSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Your corrections are saved for future recipes'**
+  String get nutritionTipSaved;
+
+  /// No description provided for @nutritionGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get nutritionGotIt;
+
+  /// No description provided for @nutritionScaleMultiplier.
+  ///
+  /// In en, this message translates to:
+  /// **'Scale multiplier'**
+  String get nutritionScaleMultiplier;
+
+  /// No description provided for @nutritionScaleHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'1.0 = full recipe'**
+  String get nutritionScaleHelper;
+
+  /// No description provided for @nutritionOpenRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {title}'**
+  String nutritionOpenRecipe(String title);
+
+  /// No description provided for @nutrientCal.
+  ///
+  /// In en, this message translates to:
+  /// **'Cal'**
+  String get nutrientCal;
+
+  /// No description provided for @nutrientSugar.
+  ///
+  /// In en, this message translates to:
+  /// **'Sugar'**
+  String get nutrientSugar;
+
+  /// No description provided for @appearanceCustomThemeRequiresPremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom theme requires Premium'**
+  String get appearanceCustomThemeRequiresPremium;
+
+  /// No description provided for @appearancePremiumBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get appearancePremiumBadge;
+
+  /// No description provided for @substitutionsAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get substitutionsAll;
+
+  /// No description provided for @substitutionsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} substitutes • {category}'**
+  String substitutionsCount(int count, String category);
+
+  /// No description provided for @colorPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a color'**
+  String get colorPickerTitle;
+
+  /// No description provided for @colorPickerHex.
+  ///
+  /// In en, this message translates to:
+  /// **'Hex'**
+  String get colorPickerHex;
+
+  /// No description provided for @colorPickerSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get colorPickerSelect;
+
+  /// No description provided for @scanSelectPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Select multiple pages'**
+  String get scanSelectPages;
+
+  /// No description provided for @scanNoTextPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'No text found in PDF. Try using a clearer scan or the Text paste option instead.'**
+  String get scanNoTextPdf;
+
+  /// No description provided for @scanLittleTextPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Very little text detected in PDF ({count} characters). The scan may be too blurry. Try a higher quality PDF, or use the Text paste option instead.'**
+  String scanLittleTextPdf(int count);
+
+  /// No description provided for @scanNoTextImage.
+  ///
+  /// In en, this message translates to:
+  /// **'No text found in image. Try taking the photo in better lighting, or use the Text paste option instead.'**
+  String get scanNoTextImage;
+
+  /// No description provided for @scanLittleTextImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Very little text detected ({count} characters). Try a clearer photo with better lighting, or use the Text paste option instead.'**
+  String scanLittleTextImage(int count);
+
+  /// No description provided for @scanProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning page {current} of {total}...'**
+  String scanProgress(int current, int total);
+
+  /// No description provided for @communityTagHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add custom tag...'**
+  String get communityTagHint;
+
+  /// No description provided for @tagPickerOrganize.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags help you organize your recipes'**
+  String get tagPickerOrganize;
+
+  /// No description provided for @tagPickerLoadDefaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Load Default Tags'**
+  String get tagPickerLoadDefaults;
+
+  /// No description provided for @tagPickerExampleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Date Night'**
+  String get tagPickerExampleHint;
+
+  /// No description provided for @drawerProTier.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro · {tier}'**
+  String drawerProTier(String tier);
+
+  /// No description provided for @accountStoreFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Store'**
+  String get accountStoreFallback;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

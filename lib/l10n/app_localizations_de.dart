@@ -2393,6 +2393,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get typeDeleteHint => 'LÖSCHEN';
 
   @override
+  String get resetScopeLocal => 'lokale Daten';
+
+  @override
+  String get resetScopeCloud => 'Cloud-Daten';
+
+  @override
+  String get resetScopeAll => 'alle Daten und Einstellungen';
+
+  @override
   String get resetEverything => 'Alles zurücksetzen';
 
   @override
@@ -3823,6 +3832,57 @@ class AppLocalizationsDe extends AppLocalizations {
   String get accountTitle => 'Konto';
 
   @override
+  String get accountSubscription => 'Abonnement';
+
+  @override
+  String get accountManageSubscription => 'Abonnement verwalten';
+
+  @override
+  String get accountCloudSync => 'Cloud-Synchronisierung';
+
+  @override
+  String get accountSyncNow => 'Jetzt synchronisieren';
+
+  @override
+  String get accountIntegrations => 'Integrationen';
+
+  @override
+  String get accountDangerZone => 'Gefahrenzone';
+
+  @override
+  String get purchasesRestored => 'Käufe erfolgreich wiederhergestellt!';
+
+  @override
+  String get noPurchasesFound => 'Keine früheren Käufe gefunden.';
+
+  @override
+  String get restoreFailed => 'Wiederherstellung fehlgeschlagen. Bitte erneut versuchen.';
+
+  @override
+  String get restorePurchasesLong => 'Käufe wiederherstellen';
+
+  @override
+  String get cancelled => 'Gekündigt';
+
+  @override
+  String get accessUntil => 'Zugang bis';
+
+  @override
+  String get renews => 'Verlängerung';
+
+  @override
+  String get plan => 'Plan';
+
+  @override
+  String get upgradeDescription => 'Schalte Cloud-Sync, Smart-Import und mehr frei.';
+
+  @override
+  String get syncDescription => 'Halte deine Rezepte geräteübergreifend synchron.';
+
+  @override
+  String get sync => 'Synchronisieren';
+
+  @override
   String get signInToSync => 'Anmelden zum Synchronisieren';
 
   @override
@@ -4637,6 +4697,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get compareSmartImportCloud => '10/mo';
 
   @override
+  String get compareCloudStorage => 'Cloud-Speicher';
+
+  @override
+  String get compareCloudStorageBasic => 'Basis';
+
+  @override
+  String get compareCloudStorageStandard => 'Standard';
+
+  @override
+  String get compareCloudStorageExtended => 'Erweitert';
+
+  @override
   String get printOf => 'von';
 
   @override
@@ -4847,6 +4919,30 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsNotifBuddySubtitle => 'Taegliche Quest-Resets und XP-Erinnerungen';
+
+  @override
+  String get settingsNotifManagePreferences => 'Benachrichtigungseinstellungen verwalten';
+
+  @override
+  String get settingsNotifNewDownloads => 'Neue Downloads';
+
+  @override
+  String get settingsNotifNewDownloadsSubtitle => 'Wenn jemand dein veröffentlichtes Rezept herunterlädt';
+
+  @override
+  String get settingsNotifRatingUpdates => 'Bewertungsaktualisierungen';
+
+  @override
+  String get settingsNotifRatingUpdatesSubtitle => 'Wenn dein veröffentlichtes Rezept eine neue Bewertung erhält';
+
+  @override
+  String get settingsNotifComments => 'Kommentare';
+
+  @override
+  String get settingsNotifCommentsSubtitle => 'Wenn jemand dein Rezept kommentiert';
+
+  @override
+  String get settingsNotifSyncNote => 'Benachrichtigungseinstellungen werden mit deinem Konto synchronisiert.';
 
   @override
   String get tuesday => 'Dienstag';
@@ -6657,10 +6753,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get importGuideCategoryOtherApps => 'Andere Rezepte-Apps';
 
   @override
-  String get importGuideCategoryAi => 'AI Import';
+  String get importGuideCategoryAi => 'AI-Import';
 
   @override
-  String get importGuideTagNew => 'New';
+  String get importGuideTagNew => 'Neu';
 
   @override
   String get importGuideScreenshotNeeded => 'Screenshot benötigt';
@@ -6954,40 +7050,40 @@ class AppLocalizationsDe extends AppLocalizations {
   String get importGuideTextStep4Desc => 'Prüfe das analysierte Rezept, nimm Anpassungen vor und speichere.';
 
   @override
-  String get importGuideAiTitle => 'AI (ChatGPT, Claude, etc.)';
+  String get importGuideAiTitle => 'AI (ChatGPT, Claude usw.)';
 
   @override
-  String get importGuideAiSubtitle => 'Generate recipes with AI and import them instantly';
+  String get importGuideAiSubtitle => 'Erstelle Rezepte mit AI und importiere sie sofort';
 
   @override
-  String get importGuideAiStep1Title => 'Open AI Import';
+  String get importGuideAiStep1Title => 'AI-Import öffnen';
 
   @override
-  String get importGuideAiStep1Desc => 'Go to Home, tap + to add a recipe, choose Import, then tap the AI button.';
+  String get importGuideAiStep1Desc => 'Gehe zur Startseite, tippe auf +, um ein Rezept hinzuzufügen, wähle Import und tippe dann auf die AI-Taste.';
 
   @override
-  String get importGuideAiStep2Title => 'Copy the prompt';
+  String get importGuideAiStep2Title => 'Prompt kopieren';
 
   @override
-  String get importGuideAiStep2Desc => 'Tap the copy prompt button. Then open your favorite AI — ChatGPT, Claude, Gemini, or any other — and paste the prompt.';
+  String get importGuideAiStep2Desc => 'Tippe auf den Prompt-Kopieren-Button. Öffne dann deine bevorzugte AI — ChatGPT, Claude, Gemini oder andere — und füge den Prompt ein.';
 
   @override
-  String get importGuideAiStep3Title => 'Copy the AI\'s response';
+  String get importGuideAiStep3Title => 'AI-Antwort kopieren';
 
   @override
-  String get importGuideAiStep3Desc => 'The AI will generate a recipe in JSON format. Copy the entire response.';
+  String get importGuideAiStep3Desc => 'Die AI generiert ein Rezept im JSON-Format. Kopiere die gesamte Antwort.';
 
   @override
-  String get importGuideAiStep4Title => 'Paste into Recipe Spellbook';
+  String get importGuideAiStep4Title => 'In Recipe Spellbook einfügen';
 
   @override
-  String get importGuideAiStep4Desc => 'Go back to Recipe Spellbook, tap the paste button, then tap Preview to see the parsed recipe.';
+  String get importGuideAiStep4Desc => 'Gehe zurück zu Recipe Spellbook, tippe auf Einfügen, dann auf Vorschau, um das verarbeitete Rezept zu sehen.';
 
   @override
-  String get importGuideAiStep5Title => 'Preview & import';
+  String get importGuideAiStep5Title => 'Vorschau & Import';
 
   @override
-  String get importGuideAiStep5Desc => 'Check that everything looks correct, then tap Import to save the recipe to your cookbook.';
+  String get importGuideAiStep5Desc => 'Prüfe, ob alles korrekt aussieht, und tippe dann auf Importieren, um das Rezept zu speichern.';
 
   @override
   String get importGuideOtherAppsTitle => 'Andere Rezepte-Apps';
@@ -7056,150 +7152,222 @@ class AppLocalizationsDe extends AppLocalizations {
   String get importGuideDeviceTransferStep4Tip => 'Ein kostenpflichtiges Konto? Melde dich einfach auf dem neuen Gerät an und alles wird automatisch synchronisiert.';
 
   @override
-  String get faqTitle => 'FAQs';
+  String get faqTitle => 'FAQ';
 
   @override
-  String get faqHeroTitle => 'Frequently asked questions';
+  String get faqHeroTitle => 'Häufig gestellte Fragen';
 
   @override
-  String get faqHeroSubtitle => 'Find answers and step-by-step guides for common features.';
+  String get faqHeroSubtitle => 'Finde Antworten und Schritt-für-Schritt-Anleitungen für häufige Funktionen.';
 
   @override
-  String get faqHowToGuides => 'How-to Guides';
+  String get faqHowToGuides => 'Anleitungen';
 
   @override
-  String get faqCommonQuestions => 'Common Questions';
+  String get faqCommonQuestions => 'Häufige Fragen';
 
   @override
-  String get faqSeeHowTo => 'See how-to guide';
+  String get faqSeeHowTo => 'Anleitung ansehen';
 
   @override
   String faqStepsCount(int count) {
-    return '$count steps';
+    return '$count Schritte';
   }
 
   @override
-  String get faqAddHeadersTitle => 'How to add headers';
+  String get faqAddHeadersTitle => 'Überschriften hinzufügen';
 
   @override
-  String get faqAddHeadersSubtitle => 'Organize your recipe ingredients and steps into sections';
+  String get faqAddHeadersSubtitle => 'Organisiere Zutaten und Schritte in Abschnitte';
 
   @override
-  String get faqAddHeadersStep1Title => 'Open the recipe editor';
+  String get faqAddHeadersStep1Title => 'Rezepteditor öffnen';
 
   @override
-  String get faqAddHeadersStep1Desc => 'Open a recipe and tap the edit icon.';
+  String get faqAddHeadersStep1Desc => 'Öffne ein Rezept und tippe auf das Bearbeiten-Symbol.';
 
   @override
-  String get faqAddHeadersStep2Title => 'Add a header';
+  String get faqAddHeadersStep2Title => 'Überschrift hinzufügen';
 
   @override
-  String get faqAddHeadersStep2Desc => 'Tap the \'Add Header\' button to insert a section header.';
+  String get faqAddHeadersStep2Desc => 'Tippe auf „Überschrift hinzufügen“, um eine Abschnittsüberschrift einzufügen.';
 
   @override
-  String get faqAddHeadersStep3Title => 'Open the header menu';
+  String get faqAddHeadersStep3Title => 'Überschrift-Menü öffnen';
 
   @override
-  String get faqAddHeadersStep3Desc => 'Tap the three dots (⋮) next to the header for more options.';
+  String get faqAddHeadersStep3Desc => 'Tippe auf die drei Punkte (⋮) neben der Überschrift für weitere Optionen.';
 
   @override
-  String get faqAddHeadersStep4Title => 'Reorder your headers';
+  String get faqAddHeadersStep4Title => 'Überschriften neu anordnen';
 
   @override
-  String get faqAddHeadersStep4Desc => 'Tap Sort Order to rearrange. Drag the ≡ handle to move headers up or down.';
+  String get faqAddHeadersStep4Desc => 'Tippe auf Sortierreihenfolge, um die Anordnung zu ändern. Ziehe den ≡-Griff, um Überschriften zu verschieben.';
 
   @override
-  String get faqAddHeadersStep4Tip => 'You can drag headers by holding the ≡ (two lines) handle on the left side.';
+  String get faqAddHeadersStep4Tip => 'Du kannst Überschriften ziehen, indem du den ≡-Griff (zwei Linien) auf der linken Seite gedrückt hältst.';
 
   @override
-  String get faqAddHeadersStep5Title => 'Save your changes';
+  String get faqAddHeadersStep5Title => 'Änderungen speichern';
 
   @override
-  String get faqAddHeadersStep5Desc => 'Tap the save button to keep your new headers.';
+  String get faqAddHeadersStep5Desc => 'Tippe auf Speichern, um die neuen Überschriften zu behalten.';
 
   @override
-  String get faqAddHeadersStep6Title => 'Done!';
+  String get faqAddHeadersStep6Title => 'Fertig!';
 
   @override
-  String get faqAddHeadersStep6Desc => 'Your recipe now has organized sections with headers.';
+  String get faqAddHeadersStep6Desc => 'Dein Rezept hat jetzt übersichtliche Abschnitte mit Überschriften.';
 
   @override
-  String get faqAddSublinkedTitle => 'How to add sublinked recipes';
+  String get faqAddSublinkedTitle => 'Verknüpfte Rezepte hinzufügen';
 
   @override
-  String get faqAddSublinkedSubtitle => 'Link related recipes together for quick access';
+  String get faqAddSublinkedSubtitle => 'Verknüpfe verwandte Rezepte für schnellen Zugriff';
 
   @override
-  String get faqAddSublinkedStep1Title => 'Open the recipe editor';
+  String get faqAddSublinkedStep1Title => 'Rezepteditor öffnen';
 
   @override
-  String get faqAddSublinkedStep1Desc => 'Open a recipe and tap the edit icon.';
+  String get faqAddSublinkedStep1Desc => 'Öffne ein Rezept und tippe auf das Bearbeiten-Symbol.';
 
   @override
-  String get faqAddSublinkedStep2Title => 'Open the menu';
+  String get faqAddSublinkedStep2Title => 'Menü öffnen';
 
   @override
-  String get faqAddSublinkedStep2Desc => 'Tap the three dots (⋮) in the edit screen.';
+  String get faqAddSublinkedStep2Desc => 'Tippe auf die drei Punkte (⋮) im Bearbeitungsbildschirm.';
 
   @override
-  String get faqAddSublinkedStep3Title => 'Tap Link Recipe';
+  String get faqAddSublinkedStep3Title => 'Rezept verknüpfen antippen';
 
   @override
-  String get faqAddSublinkedStep3Desc => 'Select \'Link Recipe\' from the menu.';
+  String get faqAddSublinkedStep3Desc => 'Wähle „Rezept verknüpfen“ aus dem Menü.';
 
   @override
-  String get faqAddSublinkedStep4Title => 'Choose a recipe to link';
+  String get faqAddSublinkedStep4Title => 'Rezept zum Verknüpfen wählen';
 
   @override
-  String get faqAddSublinkedStep4Desc => 'Tap the link icon next to the recipe you want to connect (e.g., Pizza Dough).';
+  String get faqAddSublinkedStep4Desc => 'Tippe auf das Verknüpfungssymbol neben dem Rezept, das du verbinden möchtest (z.B. Pizzateig).';
 
   @override
-  String get faqAddSublinkedStep5Title => 'Save your changes';
+  String get faqAddSublinkedStep5Title => 'Änderungen speichern';
 
   @override
-  String get faqAddSublinkedStep5Desc => 'Tap the save icon to keep the linked recipe.';
+  String get faqAddSublinkedStep5Desc => 'Tippe auf Speichern, um das verknüpfte Rezept zu behalten.';
 
   @override
-  String get faqAddSublinkedStep6Title => 'Done!';
+  String get faqAddSublinkedStep6Title => 'Fertig!';
 
   @override
-  String get faqAddSublinkedStep6Desc => 'The linked recipe now appears in your recipe, ready to tap and view.';
+  String get faqAddSublinkedStep6Desc => 'Das verknüpfte Rezept erscheint jetzt in deinem Rezept und kann angetippt werden.';
 
   @override
-  String get faqWhatAreHeadersTitle => 'What are headers?';
+  String get faqWhatAreHeadersTitle => 'Was sind Überschriften?';
 
   @override
-  String get faqWhatAreHeadersSubtitle => 'Organize recipes into sections';
+  String get faqWhatAreHeadersSubtitle => 'Rezepte in Abschnitte organisieren';
 
   @override
-  String get faqWhatAreHeadersAnswer => 'Headers let you divide your recipe ingredients and steps into sections. For example, you could have separate sections for \'Sauce\', \'Dough\', and \'Topping\' in a pizza recipe. They make long recipes much easier to follow.';
+  String get faqWhatAreHeadersAnswer => 'Mit Überschriften kannst du Zutaten und Schritte in Abschnitte unterteilen. Du könntest z.B. separate Abschnitte für „Soße“, „Teig“ und „Belag“ in einem Pizzarezept haben. Sie machen lange Rezepte viel übersichtlicher.';
 
   @override
-  String get faqWhatAreSublinkedTitle => 'What are sublinked recipes?';
+  String get faqWhatAreSublinkedTitle => 'Was sind verknüpfte Rezepte?';
 
   @override
-  String get faqWhatAreSublinkedSubtitle => 'Connect related recipes together';
+  String get faqWhatAreSublinkedSubtitle => 'Verwandte Rezepte verbinden';
 
   @override
-  String get faqWhatAreSublinkedAnswer => 'Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it — no searching needed.';
+  String get faqWhatAreSublinkedAnswer => 'Verknüpfte Rezepte verbinden verwandte Rezepte miteinander. Zum Beispiel kann ein Margherita-Pizza-Rezept mit deinem Pizzateig-Rezept verknüpft werden. Beim Ansehen des Hauptrezepts kannst du auf das verknüpfte Rezept tippen, um direkt dorthin zu springen.';
 
   @override
-  String get faqImportFailedTitle => 'Why did my import fail?';
+  String get faqMacroCalcTitle => 'So nutzt du den Makro-Rechner';
 
   @override
-  String get faqImportFailedSubtitle => 'Common reasons and fixes';
+  String get faqMacroCalcSubtitle => 'Kalorien und Makros für jedes Rezept automatisch berechnen';
 
   @override
-  String get faqImportFailedAnswer => 'Imports can fail for a few reasons:\n\n• The website may block automated access — try copying the recipe text and using Text Import instead.\n• The link may have expired or be private — make sure it’s a public link.\n• Some sites use formats that are harder to parse — try the AI import as an alternative.\n• Check your internet connection and try again.';
+  String get faqMacroCalcStep1Title => 'Öffne ein Rezept';
 
   @override
-  String get faqDeviceTransferTitle => 'Can I import from other devices?';
+  String get faqMacroCalcStep1Desc => 'Öffne ein beliebiges Rezept und scrolle zum Abschnitt Nährwerte.';
 
   @override
-  String get faqDeviceTransferSubtitle => 'Transfer recipes between phones and tablets';
+  String get faqMacroCalcStep2Title => 'Tippe zum Berechnen';
 
   @override
-  String get faqDeviceTransferAnswer => 'Yes! Use the Device Transfer feature in Settings > Data > Device Transfer. Generate a code on your old device and enter it on your new one. All your recipes, cookbooks, and images will be transferred.';
+  String get faqMacroCalcStep2Desc => 'Tippe auf den leeren Nährwertbereich, um den Rechner zu öffnen. Dort steht „Zum Berechnen tippen“.';
+
+  @override
+  String get faqMacroCalcStep3Title => 'Automatische Analyse';
+
+  @override
+  String get faqMacroCalcStep3Desc => 'Der Rechner gleicht deine Zutaten automatisch mit der USDA-Lebensmitteldatenbank ab und berechnet Kalorien, Protein, Kohlenhydrate, Fett und mehr.';
+
+  @override
+  String get faqMacroCalcStep4Title => 'Manuell eingeben';
+
+  @override
+  String get faqMacroCalcStep4Desc => 'Tippe auf „Manuell eingeben“, um Nährwerte von Hand zu bearbeiten, wenn du eigene Daten eingeben möchtest.';
+
+  @override
+  String get faqMacroCalcStep5Title => 'Zutatenzuordnungen prüfen';
+
+  @override
+  String get faqMacroCalcStep5Desc => 'Scrolle nach unten, um jede Zutat zu sehen, die einem USDA-Lebensmittel zugeordnet wurde. Verlinkte Rezepte (wie Pizzateig) verwenden ihre eigenen gespeicherten Nährwerte.';
+
+  @override
+  String get faqMacroCalcStep5Tip => 'Nicht sicher, was ein verlinktes Rezept ist? Schau in den FAQ-Bereich „Was sind verlinkte Rezepte?“!';
+
+  @override
+  String get faqMacroCalcStep6Title => 'USDA-Datenbank durchsuchen';
+
+  @override
+  String get faqMacroCalcStep6Desc => 'Tippe auf eine Zutat, um die USDA-Datenbank nach einer besseren Zuordnung zu durchsuchen.';
+
+  @override
+  String get faqMacroCalcStep7Title => 'Nährwerte verlinkter Rezepte';
+
+  @override
+  String get faqMacroCalcStep7Desc => 'Zutaten, die mit anderen Rezepten verlinkt sind, zeigen die Nährwerte des verlinkten Rezepts. Du kannst den Faktor anpassen.';
+
+  @override
+  String get faqMacroCalcStep8Title => 'Ergebnisse speichern';
+
+  @override
+  String get faqMacroCalcStep8Desc => 'Tippe auf Speichern, um die Nährwertdaten zu sichern. Die Makros erscheinen nun auf deinem Rezept mit Diagrammen und detaillierten Aufschlüsselungen pro Portion.';
+
+  @override
+  String get faqMacroCalcStep9Title => 'Anzeige anpassen';
+
+  @override
+  String get faqMacroCalcStep9Desc => 'Gehe zu Einstellungen > Nährwertanzeige, um auszuwählen, welche Nährstoffe angezeigt werden und wie die Diagramme dargestellt werden.';
+
+  @override
+  String get faqWhatIsMacroCalcTitle => 'Was ist der Makro-Rechner?';
+
+  @override
+  String get faqWhatIsMacroCalcSubtitle => 'Automatische Nährwertschätzung für Rezepte';
+
+  @override
+  String get faqWhatIsMacroCalcAnswer => 'Der Makro-Rechner schätzt automatisch den Nährstoffgehalt deiner Rezepte, indem jede Zutat mit der USDA-Lebensmitteldatenbank abgeglichen wird. Er berechnet Kalorien, Protein, Kohlenhydrate, Fett, Ballaststoffe, Zucker, Natrium und mehr – alles pro Portion. Du findest ihn im Abschnitt Nährwerte bei jedem Rezept.';
+
+  @override
+  String get faqImportFailedTitle => 'Warum ist mein Import fehlgeschlagen?';
+
+  @override
+  String get faqImportFailedSubtitle => 'Häufige Ursachen und Lösungen';
+
+  @override
+  String get faqImportFailedAnswer => 'Importe können aus mehreren Gründen fehlschlagen:\n\n• Die Website blockiert möglicherweise den automatischen Zugriff — versuche, den Rezepttext zu kopieren und den Textimport zu verwenden.\n• Der Link ist möglicherweise abgelaufen oder privat — stelle sicher, dass er öffentlich ist.\n• Manche Seiten verwenden schwer zu lesende Formate — versuche den AI-Import.\n• Prüfe deine Internetverbindung und versuche es erneut.';
+
+  @override
+  String get faqDeviceTransferTitle => 'Kann ich von anderen Geräten importieren?';
+
+  @override
+  String get faqDeviceTransferSubtitle => 'Rezepte zwischen Geräten übertragen';
+
+  @override
+  String get faqDeviceTransferAnswer => 'Ja! Nutze die Gerätetransfer-Funktion unter Einstellungen > Daten > Gerätetransfer. Generiere einen Code auf deinem alten Gerät und gib ihn auf dem neuen ein. Alle Rezepte, Kochbücher und Bilder werden übertragen.';
 
   @override
   String get themeFrost => 'Frost';
@@ -7212,6 +7380,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get themeAlchemist => 'Alchemist';
+
+  @override
+  String get themeMatcha => 'Matcha';
+
+  @override
+  String get themeCustom => 'Benutzerdefiniert';
 
   @override
   String get communitySortTopRated => 'Bestbewertet';
@@ -7401,4 +7575,513 @@ class AppLocalizationsDe extends AppLocalizations {
   String communityPublishUploadInProgress(int current, int total) {
     return 'Veröffentlichung läuft... ($current/$total Bilder)';
   }
+
+  @override
+  String get surpriseMeTitle => 'Überrasch mich!';
+
+  @override
+  String get surpriseMeSubtitle => 'Was soll ich kochen?';
+
+  @override
+  String get hintNutritionCalculator => 'Wusstest du? Tippe auf das Nährwert-Symbol, um die Nährwerte für jedes Rezept automatisch zu berechnen.';
+
+  @override
+  String get hintCookingScreen => 'Probiere den Kochmodus! Tippe bei einem Rezept auf \'Kochen\' für eine freihändige Schritt-für-Schritt-Anleitung.';
+
+  @override
+  String get hintIngredientHeaders => 'Tipp: Tippe eine Zeile mit \':\' am Ende bei den Zutaten ein, um eine Abschnittsüberschrift zu erstellen.';
+
+  @override
+  String get hintImportMethods => 'Importiere Rezepte von URLs, Fotos, PDFs oder sogar Instagram und TikTok!';
+
+  @override
+  String get hintMealPlanAutoFill => 'Ziehe Rezepte in deinen Essensplan oder tippe auf einen Tag, um aus deiner Sammlung auszuwählen.';
+
+  @override
+  String get hintRecipeScaling => 'Tippe auf die Portionszahl bei einem Rezept, um die Zutaten hoch- oder runterzurechnen.';
+
+  @override
+  String get hintShoppingListGen => 'Füge Rezeptzutaten mit einem Tipp zu deiner Einkaufsliste hinzu.';
+
+  @override
+  String get hintRecipeNotes => 'Füge persönliche Notizen zu jedem Rezept hinzu – Tipps, Änderungen oder Erinnerungen.';
+
+  @override
+  String get hintCookbookOrganization => 'Erstelle mehrere Kochbücher, um deine Rezepte nach Thema oder Anlass zu ordnen.';
+
+  @override
+  String get hintTagSystem => 'Tagge Rezepte für einfaches Filtern – erstelle eigene Tags wie \'Schnell\', \'Favorit\' usw.';
+
+  @override
+  String get allergyMyAllergies => 'Meine Allergien';
+
+  @override
+  String get allergyDisabledTab => 'Deaktiviert';
+
+  @override
+  String get allergyNoDisabledTitle => 'Keine deaktivierten Warnungen';
+
+  @override
+  String get allergyNoDisabledSubtitle => 'Wenn du Allergiewarnungen bei Rezepten ausblendet, erscheinen sie hier, damit du sie wiederherstellen kannst.';
+
+  @override
+  String get allergyDisabledInfo => 'Bei diesen Rezepten wurden die Allergiewarnungen deaktiviert. Tippe zum Wiederherstellen.';
+
+  @override
+  String trashRestoredMessage(String title) {
+    return '\"$title\" wiederhergestellt';
+  }
+
+  @override
+  String get nutrientCalories => 'Kalorien';
+
+  @override
+  String get nutrientTotalFat => 'Gesamtfett';
+
+  @override
+  String get nutrientSaturatedFat => 'Gesättigtes Fett';
+
+  @override
+  String get nutrientTransFat => 'Transfett';
+
+  @override
+  String get nutrientMonounsaturatedFat => 'Einfach ungesättigtes Fett';
+
+  @override
+  String get nutrientPolyunsaturatedFat => 'Mehrfach ungesättigtes Fett';
+
+  @override
+  String get nutrientCarbohydrates => 'Kohlenhydrate';
+
+  @override
+  String get nutrientFiber => 'Ballaststoffe';
+
+  @override
+  String get nutrientSugars => 'Zucker';
+
+  @override
+  String get nutrientProtein => 'Protein';
+
+  @override
+  String get nutrientCholesterol => 'Cholesterin';
+
+  @override
+  String get nutrientSodium => 'Natrium';
+
+  @override
+  String get nutrientPotassium => 'Kalium';
+
+  @override
+  String get nutrientCalcium => 'Kalzium';
+
+  @override
+  String get nutrientIron => 'Eisen';
+
+  @override
+  String get nutrientMagnesium => 'Magnesium';
+
+  @override
+  String get nutrientPhosphorus => 'Phosphor';
+
+  @override
+  String get nutrientZinc => 'Zink';
+
+  @override
+  String get nutrientCopper => 'Kupfer';
+
+  @override
+  String get nutrientManganese => 'Mangan';
+
+  @override
+  String get nutrientSelenium => 'Selen';
+
+  @override
+  String get nutrientVitaminA => 'Vitamin A';
+
+  @override
+  String get nutrientVitaminC => 'Vitamin C';
+
+  @override
+  String get nutrientVitaminD => 'Vitamin D';
+
+  @override
+  String get nutrientVitaminE => 'Vitamin E';
+
+  @override
+  String get nutrientVitaminK => 'Vitamin K';
+
+  @override
+  String get nutrientThiaminB1 => 'Thiamin (B1)';
+
+  @override
+  String get nutrientRiboflavinB2 => 'Riboflavin (B2)';
+
+  @override
+  String get nutrientNiacinB3 => 'Niacin (B3)';
+
+  @override
+  String get nutrientPantothenicAcidB5 => 'Pantothensäure (B5)';
+
+  @override
+  String get nutrientVitaminB6 => 'Vitamin B6';
+
+  @override
+  String get nutrientVitaminB12 => 'Vitamin B12';
+
+  @override
+  String get nutrientFolate => 'Folat';
+
+  @override
+  String get nutrientCholine => 'Cholin';
+
+  @override
+  String get nutrientCategoryMacronutrients => 'Makronährstoffe';
+
+  @override
+  String get nutrientCategoryMinerals => 'Mineralstoffe';
+
+  @override
+  String get nutrientCategoryVitamins => 'Vitamine';
+
+  @override
+  String get nutrientCarbs => 'Kohlenhydrate';
+
+  @override
+  String get nutrientFat => 'Fett';
+
+  @override
+  String nutritionKcalPerServing(int count) {
+    return '$count kcal pro Portion';
+  }
+
+  @override
+  String nutritionKcalTotal(int count) {
+    return '$count kcal gesamt';
+  }
+
+  @override
+  String get shareShoppingList => 'Einkaufsliste teilen';
+
+  @override
+  String get shareOneTimeLink => 'Einmaliger Link';
+
+  @override
+  String get shareOneTimeLinkSubtitle => 'Kostenlos • 24 Std. gültig • Nur ansehen/herunterladen';
+
+  @override
+  String get shareGenerateLink => 'Link erstellen';
+
+  @override
+  String get shareFamilyShare => 'Familienfreigabe';
+
+  @override
+  String get shareFamilySyncSubtitle => 'Echtzeit-Sync · Berechtigungen pro Mitglied';
+
+  @override
+  String get shareFamilyCreateJoin => 'Erstelle oder trete einer Familie bei, um zu teilen';
+
+  @override
+  String get shareFamilyRequiresCloudSync => 'Erfordert Cloud-Sync-Abonnement';
+
+  @override
+  String get shareFamilyUpgradeMessage => 'Upgrade auf Cloud Sync, um Kochbücher und Listen in Echtzeit mit deiner Familie zu teilen.';
+
+  @override
+  String get shareFamilySignIn => 'Anmelden, um Familienfreigabe zu nutzen';
+
+  @override
+  String get shareFamilySetupInSettings => 'Erstelle oder trete einer Familie bei unter Einstellungen → Familienfreigabe';
+
+  @override
+  String get shareSharedWith => 'Geteilt mit';
+
+  @override
+  String get shareRevoked => 'Freigabe widerrufen';
+
+  @override
+  String get shareSignInRequired => 'Anmelden, um Teilen-Links zu erstellen';
+
+  @override
+  String get shareCreateFailed => 'Link konnte nicht erstellt werden';
+
+  @override
+  String get shareNoFamilyMembers => 'Keine anderen Familienmitglieder zum Teilen';
+
+  @override
+  String get shareAddFamilyMembers => 'Familienmitglieder hinzufügen';
+
+  @override
+  String get shareWith => 'Teilen mit';
+
+  @override
+  String shareSharedWithMember(String name) {
+    return 'Geteilt mit $name';
+  }
+
+  @override
+  String get shareShareFailed => 'Teilen fehlgeschlagen';
+
+  @override
+  String get shareLinkCopied => 'Link kopiert!';
+
+  @override
+  String shareLinkExpiresIn(int hours) {
+    return 'Läuft ab in $hours Std.';
+  }
+
+  @override
+  String get shareRevoke => 'Widerrufen';
+
+  @override
+  String get shareUpgrade => 'Upgrade';
+
+  @override
+  String get sharePermReadOnly => 'Nur lesen';
+
+  @override
+  String get sharePermAddOnly => 'Nur hinzufügen';
+
+  @override
+  String get sharePermFullEdit => 'Vollständig bearbeiten';
+
+  @override
+  String get sharePermFullAccess => 'Vollzugriff';
+
+  @override
+  String get sharePermViewRecipes => 'Kann Rezepte ansehen';
+
+  @override
+  String get sharePermAddRecipes => 'Kann neue Rezepte hinzufügen';
+
+  @override
+  String get sharePermEditRecipes => 'Kann jedes Rezept bearbeiten';
+
+  @override
+  String get sharePermViewItems => 'Kann Einträge ansehen';
+
+  @override
+  String get sharePermAddItems => 'Kann Einträge hinzufügen, eigene bearbeiten';
+
+  @override
+  String get sharePermEditItems => 'Kann Einträge bearbeiten und löschen';
+
+  @override
+  String get shareUnknownMember => 'Unbekannt';
+
+  @override
+  String get subscriptionTitle => 'Abonnement';
+
+  @override
+  String get subscriptionUpgradeToPro => 'Auf Pro upgraden';
+
+  @override
+  String get subscriptionUnlockFeatures => 'Cloud-Sync, smarten Import und mehr freischalten.';
+
+  @override
+  String get subscriptionViewPlans => 'Pläne ansehen';
+
+  @override
+  String get subscriptionRestored => 'Käufe erfolgreich wiederhergestellt!';
+
+  @override
+  String get subscriptionNoPurchases => 'Keine früheren Käufe gefunden.';
+
+  @override
+  String subscriptionRestoreFailed(String error) {
+    return 'Wiederherstellung fehlgeschlagen: $error';
+  }
+
+  @override
+  String get subscriptionRestorePurchases => 'Käufe wiederherstellen';
+
+  @override
+  String subscriptionCancelledUntil(String date) {
+    return 'Gekündigt — Zugriff bis $date';
+  }
+
+  @override
+  String get subscriptionRenews => 'Verlängert sich';
+
+  @override
+  String get subscriptionPlan => 'Abo';
+
+  @override
+  String get subscriptionLifetime => 'Lebenslang — läuft nie ab';
+
+  @override
+  String get subscriptionManage => 'Abonnement verwalten';
+
+  @override
+  String get subscriptionUnknownDate => 'Unbekannt';
+
+  @override
+  String get subscriptionUpgradeToUnlock => 'Auf Pro upgraden zum Freischalten';
+
+  @override
+  String get subscriptionProBadge => 'PRO';
+
+  @override
+  String get customThemeTitle => 'Benutzerdefiniertes Theme';
+
+  @override
+  String get customThemeColors => 'Farben';
+
+  @override
+  String get customThemeBackground => 'Hintergrund';
+
+  @override
+  String get customThemeBackgroundDesc => 'App-Hintergrund, Gerüst';
+
+  @override
+  String get customThemePrimary => 'Primär';
+
+  @override
+  String get customThemePrimaryDesc => 'Schaltflächen, Hervorhebungen, App-Leiste';
+
+  @override
+  String get customThemeAccent => 'Akzent';
+
+  @override
+  String get customThemeAccentDesc => 'FAB, Schalter, sekundäre Hervorhebungen';
+
+  @override
+  String get customThemeStartFromPreset => 'Von einer Vorlage starten';
+
+  @override
+  String get settingsUserFallback => 'Benutzer';
+
+  @override
+  String get settingsManageSection => 'Verwalten';
+
+  @override
+  String get settingsExportNone => 'Keine ausgewählt';
+
+  @override
+  String get settingsExportPartial => 'Teilweise Sicherung';
+
+  @override
+  String get settingsSystemLanguage => 'System';
+
+  @override
+  String get tierFamily => 'FAMILY';
+
+  @override
+  String get tierCreator => 'CREATOR';
+
+  @override
+  String get tierFreeName => 'Kostenlos';
+
+  @override
+  String get tierPremiumName => 'Premium';
+
+  @override
+  String get tierCloudSyncName => 'Cloud Sync';
+
+  @override
+  String get tierCloudSyncFamilyName => 'Cloud Sync Familie';
+
+  @override
+  String get tierCreatorName => 'Creator';
+
+  @override
+  String get nutritionEstimated => 'Geschätzte Werte';
+
+  @override
+  String get nutritionTipMatch => 'Tippe auf eine Zutat, um die USDA-Zuordnung zu ändern';
+
+  @override
+  String get nutritionTipManual => 'Genaue Nährwerte eingeben, wenn du sie kennst';
+
+  @override
+  String get nutritionTipSpecific => 'Wähle spezifische Sorten (z. B. „Weizenmehl Typ 405“ statt nur „Mehl“)';
+
+  @override
+  String get nutritionTipSaved => 'Deine Korrekturen werden für zukünftige Rezepte gespeichert';
+
+  @override
+  String get nutritionGotIt => 'Verstanden';
+
+  @override
+  String get nutritionScaleMultiplier => 'Skalierungsfaktor';
+
+  @override
+  String get nutritionScaleHelper => '1,0 = ganzes Rezept';
+
+  @override
+  String nutritionOpenRecipe(String title) {
+    return '$title öffnen';
+  }
+
+  @override
+  String get nutrientCal => 'kcal';
+
+  @override
+  String get nutrientSugar => 'Zucker';
+
+  @override
+  String get appearanceCustomThemeRequiresPremium => 'Benutzerdefiniertes Theme erfordert Premium';
+
+  @override
+  String get appearancePremiumBadge => 'Premium';
+
+  @override
+  String get substitutionsAll => 'Alle';
+
+  @override
+  String substitutionsCount(int count, String category) {
+    return '$count Alternativen • $category';
+  }
+
+  @override
+  String get colorPickerTitle => 'Farbe auswählen';
+
+  @override
+  String get colorPickerHex => 'Hex';
+
+  @override
+  String get colorPickerSelect => 'Auswählen';
+
+  @override
+  String get scanSelectPages => 'Mehrere Seiten auswählen';
+
+  @override
+  String get scanNoTextPdf => 'Kein Text im PDF gefunden. Versuche einen klareren Scan oder die Text-Einfügen-Option.';
+
+  @override
+  String scanLittleTextPdf(int count) {
+    return 'Sehr wenig Text im PDF erkannt ($count Zeichen). Der Scan ist möglicherweise zu unscharf. Versuche ein besseres PDF oder nutze stattdessen die Text-Einfügen-Option.';
+  }
+
+  @override
+  String get scanNoTextImage => 'Kein Text im Bild gefunden. Versuche das Foto bei besserer Beleuchtung aufzunehmen oder nutze stattdessen die Text-Einfügen-Option.';
+
+  @override
+  String scanLittleTextImage(int count) {
+    return 'Sehr wenig Text erkannt ($count Zeichen). Versuche ein klareres Foto mit besserer Beleuchtung oder nutze stattdessen die Text-Einfügen-Option.';
+  }
+
+  @override
+  String scanProgress(int current, int total) {
+    return 'Scanne Seite $current von $total...';
+  }
+
+  @override
+  String get communityTagHint => 'Eigenen Tag hinzufügen...';
+
+  @override
+  String get tagPickerOrganize => 'Tags helfen dir, deine Rezepte zu organisieren';
+
+  @override
+  String get tagPickerLoadDefaults => 'Standard-Tags laden';
+
+  @override
+  String get tagPickerExampleHint => 'z. B. Date Night';
+
+  @override
+  String drawerProTier(String tier) {
+    return 'Pro · $tier';
+  }
+
+  @override
+  String get accountStoreFallback => 'Store';
 }

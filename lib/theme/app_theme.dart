@@ -3,25 +3,30 @@ import '../data/app_enums.dart';
 
 /// Builds ThemeData for any AppColorTheme in light or dark mode
 class AppTheme {
-  /// Build a light ThemeData for the given app theme
-  /// Note: Midnight theme is always dark, even in "light" mode
-  static ThemeData lightTheme(AppColorTheme appTheme) {
-    return _build(appTheme, Brightness.light);
+  /// Build a light ThemeData for the given app theme.
+  /// Pass [customPalette] to override the default palette (for custom theme).
+  static ThemeData lightTheme(AppColorTheme appTheme, {ThemePalette? customPalette}) {
+    return _build(appTheme, Brightness.light, customPalette: customPalette);
   }
 
-  /// Build a dark ThemeData for the given app theme
-  static ThemeData darkTheme(AppColorTheme appTheme) {
-    return _build(appTheme, Brightness.dark);
+  /// Build a dark ThemeData for the given app theme.
+  /// Pass [customPalette] to override the default palette (for custom theme).
+  static ThemeData darkTheme(AppColorTheme appTheme, {ThemePalette? customPalette}) {
+    return _build(appTheme, Brightness.dark, customPalette: customPalette);
   }
 
-  static ThemeData _build(AppColorTheme appTheme, Brightness brightness) {
+  static ThemeData _build(AppColorTheme appTheme, Brightness brightness, {ThemePalette? customPalette}) {
     // Midnight is always dark-themed
     final effectiveBrightness =
     appTheme.isAlwaysDark ? Brightness.dark : brightness;
 
-    final palette = effectiveBrightness == Brightness.dark
-        ? appTheme.dark
-        : appTheme.light;
+    // Use original brightness (not effectiveBrightness) for palette selection.
+    // This lets always-dark themes (Midnight) have distinct light/dark palettes
+    // while still forcing Brightness.dark for the ColorScheme.
+    final palette = customPalette ??
+        (brightness == Brightness.dark
+            ? appTheme.dark
+            : appTheme.light);
 
     final isDark = effectiveBrightness == Brightness.dark;
 

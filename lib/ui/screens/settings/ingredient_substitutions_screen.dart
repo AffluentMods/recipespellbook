@@ -105,7 +105,7 @@ class _IngredientSubstitutionsScreenState extends State<IngredientSubstitutionsS
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 children: [
                   _CategoryChip(
-                    label: 'All',
+                    label: l10n.substitutionsAll,
                     selected: _selectedCategory == null,
                     onTap: () => _onCategoryTap(null),
                   ),
@@ -202,6 +202,7 @@ class _SubstitutionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -228,7 +229,7 @@ class _SubstitutionCard extends StatelessWidget {
             style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           subtitle: Text(
-            '${entry.substitutes.length} substitutes • ${entry.category}',
+            l10n.substitutionsCount(entry.substitutes.length, entry.category),
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
           ),
           children: entry.substitutes.map((sub) => _SubstituteRow(sub: sub)).toList(),

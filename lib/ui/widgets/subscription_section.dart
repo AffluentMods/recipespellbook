@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/subscription_provider.dart';
 import '../../services/revenuecat_service.dart';
 import 'app_snackbar.dart';
@@ -22,6 +23,7 @@ class SubscriptionSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final status = ref.watch(subscriptionProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,7 +31,7 @@ class SubscriptionSection extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Text(
-            'Subscription',
+            l10n.subscriptionTitle,
             style: theme.textTheme.titleSmall?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.w600,
@@ -57,6 +59,7 @@ class _FreeContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.all(20),
@@ -72,12 +75,12 @@ class _FreeContent extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Upgrade to Pro',
+            l10n.subscriptionUpgradeToPro,
             style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
           Text(
-            'Unlock cloud sync, smart import, and more.',
+            l10n.subscriptionUnlockFeatures,
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
             textAlign: TextAlign.center,
           ),
@@ -87,7 +90,7 @@ class _FreeContent extends ConsumerWidget {
             child: FilledButton.icon(
               onPressed: () => ref.read(subscriptionProvider.notifier).presentPaywall(),
               icon: const Icon(Icons.star, size: 18),
-              label: const Text('View Plans'),
+              label: Text(l10n.subscriptionViewPlans),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -102,18 +105,18 @@ class _FreeContent extends ConsumerWidget {
                 if (context.mounted) {
                   final isPro = ref.read(subscriptionProvider).isPro;
                   if (isPro) {
-                    AppSnackbar.success(context, 'Purchases restored successfully!');
+                    AppSnackbar.success(context, l10n.subscriptionRestored);
                   } else {
-                    AppSnackbar.info(context, 'No previous purchases found.');
+                    AppSnackbar.info(context, l10n.subscriptionNoPurchases);
                   }
                 }
               } catch (e) {
                 if (context.mounted) {
-                  AppSnackbar.error(context, 'Restore failed: $e');
+                  AppSnackbar.error(context, l10n.subscriptionRestoreFailed(e.toString()));
                 }
               }
             },
-            child: const Text('Restore purchases'),
+            child: Text(l10n.subscriptionRestorePurchases),
           ),
         ],
       ),
@@ -132,6 +135,7 @@ class _ProContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       children: [
@@ -194,7 +198,7 @@ class _ProContent extends ConsumerWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Cancelled — access until ${_formatDate(status.expirationDate)}',
+                          l10n.subscriptionCancelledUntil(_formatDate(status.expirationDate, l10n)),
                           style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
                         ),
                       ),
@@ -208,14 +212,14 @@ class _ProContent extends ConsumerWidget {
                   status.expirationDate != null &&
                   !status.isCancelled) ...[
                 _DetailRow(
-                  label: 'Renews',
-                  value: _formatDate(status.expirationDate),
+                  label: l10n.subscriptionRenews,
+                  value: _formatDate(status.expirationDate, l10n),
                 ),
                 const SizedBox(height: 4),
               ],
 
               if (status.tier == SubscriptionTier.premium)
-                _DetailRow(label: 'Plan', value: 'Lifetime — never expires'),
+                _DetailRow(label: l10n.subscriptionPlan, value: l10n.subscriptionLifetime),
             ],
           ),
         ),
@@ -225,7 +229,7 @@ class _ProContent extends ConsumerWidget {
         // Manage subscription
         ListTile(
           leading: Icon(Icons.credit_card, color: theme.colorScheme.outline),
-          title: const Text('Manage subscription'),
+          title: Text(l10n.subscriptionManage),
           trailing: const Icon(Icons.chevron_right, size: 18),
           onTap: () => ref.read(subscriptionProvider.notifier).presentCustomerCenter(),
         ),
@@ -233,8 +237,8 @@ class _ProContent extends ConsumerWidget {
     );
   }
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return 'Unknown';
+  String _formatDate(DateTime? date, AppLocalizations l10n) {
+    if (date == null) return l10n.subscriptionUnknownDate;
     return '${date.month}/${date.day}/${date.year}';
   }
 }
@@ -327,6 +331,7 @@ class _InlineUpgradePrompt extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
@@ -344,13 +349,13 @@ class _InlineUpgradePrompt extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(feature, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-                Text('Upgrade to Pro to unlock', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+                Text(l10n.subscriptionUpgradeToUnlock, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
               ],
             ),
           ),
           TextButton(
             onPressed: () => ref.read(subscriptionProvider.notifier).presentPaywall(),
-            child: const Text('Upgrade'),
+            child: Text(l10n.shareUpgrade),
           ),
         ],
       ),

@@ -252,6 +252,7 @@ class NutritionBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!nutrition.hasAnyData) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -260,13 +261,13 @@ class NutritionBanner extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           if (nutrition.calories != null)
-            _NutrientPill(label: 'Cal', value: '${nutrition.calories!.round()}'),
+            _NutrientPill(label: l10n.nutrientCal, value: '${nutrition.calories!.round()}'),
           if (nutrition.protein != null)
-            _NutrientPill(label: 'Protein', value: '${nutrition.protein!.round()}g'),
+            _NutrientPill(label: l10n.nutrientProtein, value: '${nutrition.protein!.round()}g'),
           if (nutrition.carbohydrates != null)
-            _NutrientPill(label: 'Carbs', value: '${nutrition.carbohydrates!.round()}g'),
+            _NutrientPill(label: l10n.nutrientCarbs, value: '${nutrition.carbohydrates!.round()}g'),
           if (nutrition.fat != null)
-            _NutrientPill(label: 'Fat', value: '${nutrition.fat!.round()}g'),
+            _NutrientPill(label: l10n.nutrientFat, value: '${nutrition.fat!.round()}g'),
         ],
       ),
     );

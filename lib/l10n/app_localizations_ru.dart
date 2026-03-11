@@ -2429,6 +2429,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get typeDeleteHint => 'УДАЛИТЬ';
 
   @override
+  String get resetScopeLocal => 'локальные данные';
+
+  @override
+  String get resetScopeCloud => 'облачные данные';
+
+  @override
+  String get resetScopeAll => 'все данные и настройки';
+
+  @override
   String get resetEverything => 'Сбросить всё';
 
   @override
@@ -3865,6 +3874,57 @@ class AppLocalizationsRu extends AppLocalizations {
   String get accountTitle => 'Аккаунт';
 
   @override
+  String get accountSubscription => 'Подписка';
+
+  @override
+  String get accountManageSubscription => 'Управление подпиской';
+
+  @override
+  String get accountCloudSync => 'Облачная синхронизация';
+
+  @override
+  String get accountSyncNow => 'Синхронизировать сейчас';
+
+  @override
+  String get accountIntegrations => 'Интеграции';
+
+  @override
+  String get accountDangerZone => 'Опасная зона';
+
+  @override
+  String get purchasesRestored => 'Покупки успешно восстановлены!';
+
+  @override
+  String get noPurchasesFound => 'Предыдущие покупки не найдены.';
+
+  @override
+  String get restoreFailed => 'Ошибка восстановления. Попробуйте снова.';
+
+  @override
+  String get restorePurchasesLong => 'Восстановить покупки';
+
+  @override
+  String get cancelled => 'Отменена';
+
+  @override
+  String get accessUntil => 'доступ до';
+
+  @override
+  String get renews => 'Продление';
+
+  @override
+  String get plan => 'План';
+
+  @override
+  String get upgradeDescription => 'Разблокируйте облачную синхронизацию, умный импорт и многое другое.';
+
+  @override
+  String get syncDescription => 'Синхронизируйте рецепты между устройствами.';
+
+  @override
+  String get sync => 'Синхронизация';
+
+  @override
   String get signInToSync => 'Войдите для синхронизации';
 
   @override
@@ -4689,6 +4749,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get compareSmartImportCloud => '10/mo';
 
   @override
+  String get compareCloudStorage => 'Облачное хранилище';
+
+  @override
+  String get compareCloudStorageBasic => 'Базовое';
+
+  @override
+  String get compareCloudStorageStandard => 'Стандартное';
+
+  @override
+  String get compareCloudStorageExtended => 'Расширенное';
+
+  @override
   String get printOf => 'из';
 
   @override
@@ -4899,6 +4971,30 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsNotifBuddySubtitle => 'Сброс ежедневных заданий и напоминания об XP';
+
+  @override
+  String get settingsNotifManagePreferences => 'Управление настройками уведомлений';
+
+  @override
+  String get settingsNotifNewDownloads => 'Новые загрузки';
+
+  @override
+  String get settingsNotifNewDownloadsSubtitle => 'Когда кто-то скачивает ваш опубликованный рецепт';
+
+  @override
+  String get settingsNotifRatingUpdates => 'Обновления рейтинга';
+
+  @override
+  String get settingsNotifRatingUpdatesSubtitle => 'Когда ваш опубликованный рецепт получает новую оценку';
+
+  @override
+  String get settingsNotifComments => 'Комментарии';
+
+  @override
+  String get settingsNotifCommentsSubtitle => 'Когда кто-то комментирует ваш рецепт';
+
+  @override
+  String get settingsNotifSyncNote => 'Настройки уведомлений синхронизируются с вашей учётной записью.';
 
   @override
   String get tuesday => 'Вторник';
@@ -6723,10 +6819,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get importGuideCategoryOtherApps => 'Другие приложения для рецептов';
 
   @override
-  String get importGuideCategoryAi => 'AI Import';
+  String get importGuideCategoryAi => 'Импорт через ИИ';
 
   @override
-  String get importGuideTagNew => 'New';
+  String get importGuideTagNew => 'Новое';
 
   @override
   String get importGuideScreenshotNeeded => 'Нужен скриншот';
@@ -7020,40 +7116,40 @@ class AppLocalizationsRu extends AppLocalizations {
   String get importGuideTextStep4Desc => 'Проверьте обработанный рецепт, внесите правки и сохраните.';
 
   @override
-  String get importGuideAiTitle => 'AI (ChatGPT, Claude, etc.)';
+  String get importGuideAiTitle => 'ИИ (ChatGPT, Claude и др.)';
 
   @override
-  String get importGuideAiSubtitle => 'Generate recipes with AI and import them instantly';
+  String get importGuideAiSubtitle => 'Генерируйте рецепты с помощью ИИ и импортируйте их мгновенно';
 
   @override
-  String get importGuideAiStep1Title => 'Open AI Import';
+  String get importGuideAiStep1Title => 'Откройте импорт через ИИ';
 
   @override
-  String get importGuideAiStep1Desc => 'Go to Home, tap + to add a recipe, choose Import, then tap the AI button.';
+  String get importGuideAiStep1Desc => 'Перейдите на Главную, нажмите + чтобы добавить рецепт, выберите Импорт, затем нажмите кнопку ИИ.';
 
   @override
-  String get importGuideAiStep2Title => 'Copy the prompt';
+  String get importGuideAiStep2Title => 'Скопируйте промпт';
 
   @override
-  String get importGuideAiStep2Desc => 'Tap the copy prompt button. Then open your favorite AI — ChatGPT, Claude, Gemini, or any other — and paste the prompt.';
+  String get importGuideAiStep2Desc => 'Нажмите кнопку копирования промпта. Затем откройте ваш любимый ИИ — ChatGPT, Claude, Gemini или любой другой — и вставьте промпт.';
 
   @override
-  String get importGuideAiStep3Title => 'Copy the AI\'s response';
+  String get importGuideAiStep3Title => 'Скопируйте ответ ИИ';
 
   @override
-  String get importGuideAiStep3Desc => 'The AI will generate a recipe in JSON format. Copy the entire response.';
+  String get importGuideAiStep3Desc => 'ИИ сгенерирует рецепт в формате JSON. Скопируйте весь ответ.';
 
   @override
-  String get importGuideAiStep4Title => 'Paste into Recipe Spellbook';
+  String get importGuideAiStep4Title => 'Вставьте в Recipe Spellbook';
 
   @override
-  String get importGuideAiStep4Desc => 'Go back to Recipe Spellbook, tap the paste button, then tap Preview to see the parsed recipe.';
+  String get importGuideAiStep4Desc => 'Вернитесь в Recipe Spellbook, нажмите кнопку вставки, затем нажмите «Предпросмотр», чтобы увидеть обработанный рецепт.';
 
   @override
-  String get importGuideAiStep5Title => 'Preview & import';
+  String get importGuideAiStep5Title => 'Предпросмотр и импорт';
 
   @override
-  String get importGuideAiStep5Desc => 'Check that everything looks correct, then tap Import to save the recipe to your cookbook.';
+  String get importGuideAiStep5Desc => 'Проверьте, что всё выглядит правильно, затем нажмите «Импортировать», чтобы сохранить рецепт в вашу кулинарную книгу.';
 
   @override
   String get importGuideOtherAppsTitle => 'Другие приложения для рецептов';
@@ -7122,150 +7218,222 @@ class AppLocalizationsRu extends AppLocalizations {
   String get importGuideDeviceTransferStep4Tip => 'Есть платный аккаунт? Просто войдите на новом устройстве и всё синхронизируется автоматически.';
 
   @override
-  String get faqTitle => 'FAQs';
+  String get faqTitle => 'ЧаВо';
 
   @override
-  String get faqHeroTitle => 'Frequently asked questions';
+  String get faqHeroTitle => 'Часто задаваемые вопросы';
 
   @override
-  String get faqHeroSubtitle => 'Find answers and step-by-step guides for common features.';
+  String get faqHeroSubtitle => 'Найдите ответы и пошаговые руководства по основным функциям.';
 
   @override
-  String get faqHowToGuides => 'How-to Guides';
+  String get faqHowToGuides => 'Пошаговые руководства';
 
   @override
-  String get faqCommonQuestions => 'Common Questions';
+  String get faqCommonQuestions => 'Часто задаваемые вопросы';
 
   @override
-  String get faqSeeHowTo => 'See how-to guide';
+  String get faqSeeHowTo => 'Смотреть руководство';
 
   @override
   String faqStepsCount(int count) {
-    return '$count steps';
+    return '$count шагов';
   }
 
   @override
-  String get faqAddHeadersTitle => 'How to add headers';
+  String get faqAddHeadersTitle => 'Как добавить заголовки';
 
   @override
-  String get faqAddHeadersSubtitle => 'Organize your recipe ingredients and steps into sections';
+  String get faqAddHeadersSubtitle => 'Организуйте ингредиенты и шаги рецепта по разделам';
 
   @override
-  String get faqAddHeadersStep1Title => 'Open the recipe editor';
+  String get faqAddHeadersStep1Title => 'Откройте редактор рецептов';
 
   @override
-  String get faqAddHeadersStep1Desc => 'Open a recipe and tap the edit icon.';
+  String get faqAddHeadersStep1Desc => 'Откройте рецепт и нажмите на значок редактирования.';
 
   @override
-  String get faqAddHeadersStep2Title => 'Add a header';
+  String get faqAddHeadersStep2Title => 'Добавьте заголовок';
 
   @override
-  String get faqAddHeadersStep2Desc => 'Tap the \'Add Header\' button to insert a section header.';
+  String get faqAddHeadersStep2Desc => 'Нажмите кнопку «Добавить заголовок», чтобы вставить заголовок раздела.';
 
   @override
-  String get faqAddHeadersStep3Title => 'Open the header menu';
+  String get faqAddHeadersStep3Title => 'Откройте меню заголовка';
 
   @override
-  String get faqAddHeadersStep3Desc => 'Tap the three dots (⋮) next to the header for more options.';
+  String get faqAddHeadersStep3Desc => 'Нажмите на три точки (⋮) рядом с заголовком для дополнительных параметров.';
 
   @override
-  String get faqAddHeadersStep4Title => 'Reorder your headers';
+  String get faqAddHeadersStep4Title => 'Измените порядок заголовков';
 
   @override
-  String get faqAddHeadersStep4Desc => 'Tap Sort Order to rearrange. Drag the ≡ handle to move headers up or down.';
+  String get faqAddHeadersStep4Desc => 'Нажмите «Порядок сортировки» для изменения расположения. Перетащите значок ≡, чтобы переместить заголовки вверх или вниз.';
 
   @override
-  String get faqAddHeadersStep4Tip => 'You can drag headers by holding the ≡ (two lines) handle on the left side.';
+  String get faqAddHeadersStep4Tip => 'Вы можете перетаскивать заголовки, удерживая значок ≡ (две линии) на левой стороне.';
 
   @override
-  String get faqAddHeadersStep5Title => 'Save your changes';
+  String get faqAddHeadersStep5Title => 'Сохраните изменения';
 
   @override
-  String get faqAddHeadersStep5Desc => 'Tap the save button to keep your new headers.';
+  String get faqAddHeadersStep5Desc => 'Нажмите кнопку сохранения, чтобы сохранить новые заголовки.';
 
   @override
-  String get faqAddHeadersStep6Title => 'Done!';
+  String get faqAddHeadersStep6Title => 'Готово!';
 
   @override
-  String get faqAddHeadersStep6Desc => 'Your recipe now has organized sections with headers.';
+  String get faqAddHeadersStep6Desc => 'Ваш рецепт теперь имеет организованные разделы с заголовками.';
 
   @override
-  String get faqAddSublinkedTitle => 'How to add sublinked recipes';
+  String get faqAddSublinkedTitle => 'Как добавить связанные рецепты';
 
   @override
-  String get faqAddSublinkedSubtitle => 'Link related recipes together for quick access';
+  String get faqAddSublinkedSubtitle => 'Свяжите связанные рецепты для быстрого доступа';
 
   @override
-  String get faqAddSublinkedStep1Title => 'Open the recipe editor';
+  String get faqAddSublinkedStep1Title => 'Откройте редактор рецептов';
 
   @override
-  String get faqAddSublinkedStep1Desc => 'Open a recipe and tap the edit icon.';
+  String get faqAddSublinkedStep1Desc => 'Откройте рецепт и нажмите на значок редактирования.';
 
   @override
-  String get faqAddSublinkedStep2Title => 'Open the menu';
+  String get faqAddSublinkedStep2Title => 'Откройте меню';
 
   @override
-  String get faqAddSublinkedStep2Desc => 'Tap the three dots (⋮) in the edit screen.';
+  String get faqAddSublinkedStep2Desc => 'Нажмите на три точки (⋮) на экране редактирования.';
 
   @override
-  String get faqAddSublinkedStep3Title => 'Tap Link Recipe';
+  String get faqAddSublinkedStep3Title => 'Нажмите «Связать рецепт»';
 
   @override
-  String get faqAddSublinkedStep3Desc => 'Select \'Link Recipe\' from the menu.';
+  String get faqAddSublinkedStep3Desc => 'Выберите «Связать рецепт» в меню.';
 
   @override
-  String get faqAddSublinkedStep4Title => 'Choose a recipe to link';
+  String get faqAddSublinkedStep4Title => 'Выберите рецепт для связывания';
 
   @override
-  String get faqAddSublinkedStep4Desc => 'Tap the link icon next to the recipe you want to connect (e.g., Pizza Dough).';
+  String get faqAddSublinkedStep4Desc => 'Нажмите на значок ссылки рядом с рецептом, который хотите связать (например, Тесто для пиццы).';
 
   @override
-  String get faqAddSublinkedStep5Title => 'Save your changes';
+  String get faqAddSublinkedStep5Title => 'Сохраните изменения';
 
   @override
-  String get faqAddSublinkedStep5Desc => 'Tap the save icon to keep the linked recipe.';
+  String get faqAddSublinkedStep5Desc => 'Нажмите на значок сохранения, чтобы сохранить связанный рецепт.';
 
   @override
-  String get faqAddSublinkedStep6Title => 'Done!';
+  String get faqAddSublinkedStep6Title => 'Готово!';
 
   @override
-  String get faqAddSublinkedStep6Desc => 'The linked recipe now appears in your recipe, ready to tap and view.';
+  String get faqAddSublinkedStep6Desc => 'Связанный рецепт теперь отображается в вашем рецепте, готовый к просмотру по нажатию.';
 
   @override
-  String get faqWhatAreHeadersTitle => 'What are headers?';
+  String get faqWhatAreHeadersTitle => 'Что такое заголовки?';
 
   @override
-  String get faqWhatAreHeadersSubtitle => 'Organize recipes into sections';
+  String get faqWhatAreHeadersSubtitle => 'Организуйте рецепты по разделам';
 
   @override
-  String get faqWhatAreHeadersAnswer => 'Headers let you divide your recipe ingredients and steps into sections. For example, you could have separate sections for \'Sauce\', \'Dough\', and \'Topping\' in a pizza recipe. They make long recipes much easier to follow.';
+  String get faqWhatAreHeadersAnswer => 'Заголовки позволяют разделить ингредиенты и шаги рецепта на разделы. Например, в рецепте пиццы можно создать отдельные разделы для «Соуса», «Теста» и «Начинки». Они значительно упрощают следование длинным рецептам.';
 
   @override
-  String get faqWhatAreSublinkedTitle => 'What are sublinked recipes?';
+  String get faqWhatAreSublinkedTitle => 'Что такое связанные рецепты?';
 
   @override
-  String get faqWhatAreSublinkedSubtitle => 'Connect related recipes together';
+  String get faqWhatAreSublinkedSubtitle => 'Соедините связанные рецепты вместе';
 
   @override
-  String get faqWhatAreSublinkedAnswer => 'Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it — no searching needed.';
+  String get faqWhatAreSublinkedAnswer => 'Связанные рецепты позволяют соединять связанные рецепты вместе. Например, рецепт пиццы «Маргарита» может ссылаться на ваш рецепт теста для пиццы. При просмотре основного рецепта вы можете нажать на связанный рецепт, чтобы сразу перейти к нему — без поиска.';
 
   @override
-  String get faqImportFailedTitle => 'Why did my import fail?';
+  String get faqMacroCalcTitle => 'Как использовать Калькулятор макросов';
 
   @override
-  String get faqImportFailedSubtitle => 'Common reasons and fixes';
+  String get faqMacroCalcSubtitle => 'Автоматический расчёт калорий и макросов для любого рецепта';
 
   @override
-  String get faqImportFailedAnswer => 'Imports can fail for a few reasons:\n\n• The website may block automated access — try copying the recipe text and using Text Import instead.\n• The link may have expired or be private — make sure it’s a public link.\n• Some sites use formats that are harder to parse — try the AI import as an alternative.\n• Check your internet connection and try again.';
+  String get faqMacroCalcStep1Title => 'Откройте рецепт';
 
   @override
-  String get faqDeviceTransferTitle => 'Can I import from other devices?';
+  String get faqMacroCalcStep1Desc => 'Откройте любой рецепт и прокрутите до раздела Питание.';
 
   @override
-  String get faqDeviceTransferSubtitle => 'Transfer recipes between phones and tablets';
+  String get faqMacroCalcStep2Title => 'Нажмите для расчёта';
 
   @override
-  String get faqDeviceTransferAnswer => 'Yes! Use the Device Transfer feature in Settings > Data > Device Transfer. Generate a code on your old device and enter it on your new one. All your recipes, cookbooks, and images will be transferred.';
+  String get faqMacroCalcStep2Desc => 'Нажмите на пустой раздел питания, чтобы открыть калькулятор. Там написано «Нажмите для расчёта».';
+
+  @override
+  String get faqMacroCalcStep3Title => 'Автоматический анализ';
+
+  @override
+  String get faqMacroCalcStep3Desc => 'Калькулятор автоматически сопоставляет ваши ингредиенты с базой данных продуктов USDA и рассчитывает калории, белки, углеводы, жиры и другое.';
+
+  @override
+  String get faqMacroCalcStep4Title => 'Ввести вручную';
+
+  @override
+  String get faqMacroCalcStep4Desc => 'Нажмите «Ввести вручную», чтобы редактировать пищевую ценность вручную.';
+
+  @override
+  String get faqMacroCalcStep5Title => 'Проверьте соответствия';
+
+  @override
+  String get faqMacroCalcStep5Desc => 'Прокрутите вниз, чтобы увидеть каждый ингредиент, сопоставленный с продуктом USDA. Связанные рецепты используют собственные данные о питании.';
+
+  @override
+  String get faqMacroCalcStep5Tip => 'Не знаете, что такое связанный рецепт? Посмотрите раздел FAQ!';
+
+  @override
+  String get faqMacroCalcStep6Title => 'Поиск в базе USDA';
+
+  @override
+  String get faqMacroCalcStep6Desc => 'Нажмите на ингредиент, чтобы найти лучшее соответствие в базе USDA.';
+
+  @override
+  String get faqMacroCalcStep7Title => 'Питание связанных рецептов';
+
+  @override
+  String get faqMacroCalcStep7Desc => 'Ингредиенты, связанные с другими рецептами, показывают данные о питании связанного рецепта. Можно настроить масштаб.';
+
+  @override
+  String get faqMacroCalcStep8Title => 'Сохраните результаты';
+
+  @override
+  String get faqMacroCalcStep8Desc => 'Нажмите Сохранить. Макросы появятся в рецепте с графиками и подробной разбивкой на порцию.';
+
+  @override
+  String get faqMacroCalcStep9Title => 'Настройте отображение';
+
+  @override
+  String get faqMacroCalcStep9Desc => 'Перейдите в Настройки > Отображение питания, чтобы выбрать нутриенты и стиль графиков.';
+
+  @override
+  String get faqWhatIsMacroCalcTitle => 'Что такое Калькулятор макросов?';
+
+  @override
+  String get faqWhatIsMacroCalcSubtitle => 'Автоматическая оценка пищевой ценности рецептов';
+
+  @override
+  String get faqWhatIsMacroCalcAnswer => 'Калькулятор макросов автоматически оценивает пищевую ценность ваших рецептов, сопоставляя каждый ингредиент с базой данных продуктов USDA. Он рассчитывает калории, белки, углеводы, жиры, клетчатку, сахар, натрий и другое — всё на порцию. Найти его можно в разделе Питание любого рецепта.';
+
+  @override
+  String get faqImportFailedTitle => 'Почему мой импорт не удался?';
+
+  @override
+  String get faqImportFailedSubtitle => 'Распространённые причины и решения';
+
+  @override
+  String get faqImportFailedAnswer => 'Импорт может не удаться по нескольким причинам:\n\n• Сайт может блокировать автоматический доступ — попробуйте скопировать текст рецепта и использовать текстовый импорт.\n• Ссылка могла устареть или быть приватной — убедитесь, что это публичная ссылка.\n• Некоторые сайты используют форматы, которые сложнее обработать — попробуйте импорт через ИИ как альтернативу.\n• Проверьте подключение к интернету и попробуйте снова.';
+
+  @override
+  String get faqDeviceTransferTitle => 'Можно ли импортировать с других устройств?';
+
+  @override
+  String get faqDeviceTransferSubtitle => 'Перенос рецептов между телефонами и планшетами';
+
+  @override
+  String get faqDeviceTransferAnswer => 'Да! Используйте функцию «Перенос между устройствами» в Настройки > Данные > Перенос между устройствами. Сгенерируйте код на старом устройстве и введите его на новом. Все ваши рецепты, кулинарные книги и изображения будут перенесены.';
 
   @override
   String get themeFrost => 'Мороз';
@@ -7278,6 +7446,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get themeAlchemist => 'Алхимик';
+
+  @override
+  String get themeMatcha => 'Матча';
+
+  @override
+  String get themeCustom => 'Свой';
 
   @override
   String get communitySortTopRated => 'Лучшие по оценке';
@@ -7467,4 +7641,513 @@ class AppLocalizationsRu extends AppLocalizations {
   String communityPublishUploadInProgress(int current, int total) {
     return 'Публикация... ($current/$total изображений)';
   }
+
+  @override
+  String get surpriseMeTitle => 'Удиви меня!';
+
+  @override
+  String get surpriseMeSubtitle => 'Что приготовить?';
+
+  @override
+  String get hintNutritionCalculator => 'Знаете ли вы? Нажмите на значок питания, чтобы автоматически рассчитать пищевую ценность любого рецепта.';
+
+  @override
+  String get hintCookingScreen => 'Попробуйте режим готовки! Нажмите «Готовить» на любом рецепте для пошаговых инструкций без рук.';
+
+  @override
+  String get hintIngredientHeaders => 'Совет: Введите строку, заканчивающуюся на \':\', в ингредиентах, чтобы создать заголовок раздела.';
+
+  @override
+  String get hintImportMethods => 'Импортируйте рецепты из URL, фото, PDF или даже Instagram и TikTok!';
+
+  @override
+  String get hintMealPlanAutoFill => 'Перетащите рецепты в план питания или коснитесь дня, чтобы выбрать из коллекции.';
+
+  @override
+  String get hintRecipeScaling => 'Нажмите на количество порций в рецепте, чтобы пересчитать ингредиенты.';
+
+  @override
+  String get hintShoppingListGen => 'Добавьте ингредиенты рецепта в список покупок одним нажатием.';
+
+  @override
+  String get hintRecipeNotes => 'Добавляйте личные заметки к рецептам — советы, изменения или воспоминания.';
+
+  @override
+  String get hintCookbookOrganization => 'Создавайте несколько кулинарных книг для организации рецептов по теме или случаю.';
+
+  @override
+  String get hintTagSystem => 'Помечайте рецепты тегами для простой фильтрации — создавайте свои теги: «Быстрый», «Любимый» и др.';
+
+  @override
+  String get allergyMyAllergies => 'Мои аллергии';
+
+  @override
+  String get allergyDisabledTab => 'Отключенные';
+
+  @override
+  String get allergyNoDisabledTitle => 'Нет отключённых предупреждений';
+
+  @override
+  String get allergyNoDisabledSubtitle => 'Когда вы отключаете предупреждения об аллергии, они появятся здесь для восстановления.';
+
+  @override
+  String get allergyDisabledInfo => 'У этих рецептов отключены предупреждения об аллергии. Нажмите для восстановления.';
+
+  @override
+  String trashRestoredMessage(String title) {
+    return '«$title» восстановлено';
+  }
+
+  @override
+  String get nutrientCalories => 'Калории';
+
+  @override
+  String get nutrientTotalFat => 'Жиры';
+
+  @override
+  String get nutrientSaturatedFat => 'Насыщенные жиры';
+
+  @override
+  String get nutrientTransFat => 'Транс-жиры';
+
+  @override
+  String get nutrientMonounsaturatedFat => 'Мононенасыщенные жиры';
+
+  @override
+  String get nutrientPolyunsaturatedFat => 'Полиненасыщенные жиры';
+
+  @override
+  String get nutrientCarbohydrates => 'Углеводы';
+
+  @override
+  String get nutrientFiber => 'Клетчатка';
+
+  @override
+  String get nutrientSugars => 'Сахар';
+
+  @override
+  String get nutrientProtein => 'Белок';
+
+  @override
+  String get nutrientCholesterol => 'Холестерин';
+
+  @override
+  String get nutrientSodium => 'Натрий';
+
+  @override
+  String get nutrientPotassium => 'Калий';
+
+  @override
+  String get nutrientCalcium => 'Кальций';
+
+  @override
+  String get nutrientIron => 'Железо';
+
+  @override
+  String get nutrientMagnesium => 'Магний';
+
+  @override
+  String get nutrientPhosphorus => 'Фосфор';
+
+  @override
+  String get nutrientZinc => 'Цинк';
+
+  @override
+  String get nutrientCopper => 'Медь';
+
+  @override
+  String get nutrientManganese => 'Марганец';
+
+  @override
+  String get nutrientSelenium => 'Селен';
+
+  @override
+  String get nutrientVitaminA => 'Витамин A';
+
+  @override
+  String get nutrientVitaminC => 'Витамин C';
+
+  @override
+  String get nutrientVitaminD => 'Витамин D';
+
+  @override
+  String get nutrientVitaminE => 'Витамин E';
+
+  @override
+  String get nutrientVitaminK => 'Витамин K';
+
+  @override
+  String get nutrientThiaminB1 => 'Тиамин (B1)';
+
+  @override
+  String get nutrientRiboflavinB2 => 'Рибофлавин (B2)';
+
+  @override
+  String get nutrientNiacinB3 => 'Ниацин (B3)';
+
+  @override
+  String get nutrientPantothenicAcidB5 => 'Пантотеновая кислота (B5)';
+
+  @override
+  String get nutrientVitaminB6 => 'Витамин B6';
+
+  @override
+  String get nutrientVitaminB12 => 'Витамин B12';
+
+  @override
+  String get nutrientFolate => 'Фолат';
+
+  @override
+  String get nutrientCholine => 'Холин';
+
+  @override
+  String get nutrientCategoryMacronutrients => 'Макронутриенты';
+
+  @override
+  String get nutrientCategoryMinerals => 'Минералы';
+
+  @override
+  String get nutrientCategoryVitamins => 'Витамины';
+
+  @override
+  String get nutrientCarbs => 'Углеводы';
+
+  @override
+  String get nutrientFat => 'Жиры';
+
+  @override
+  String nutritionKcalPerServing(int count) {
+    return '$count ккал на порцию';
+  }
+
+  @override
+  String nutritionKcalTotal(int count) {
+    return '$count ккал всего';
+  }
+
+  @override
+  String get shareShoppingList => 'Поделиться списком покупок';
+
+  @override
+  String get shareOneTimeLink => 'Одноразовая ссылка';
+
+  @override
+  String get shareOneTimeLinkSubtitle => 'Бесплатно • Действует 24 ч • Только просмотр/скачивание';
+
+  @override
+  String get shareGenerateLink => 'Создать ссылку';
+
+  @override
+  String get shareFamilyShare => 'Семейный доступ';
+
+  @override
+  String get shareFamilySyncSubtitle => 'Синхронизация в реальном времени · Права для каждого участника';
+
+  @override
+  String get shareFamilyCreateJoin => 'Создайте семью или присоединитесь к ней для совместного доступа';
+
+  @override
+  String get shareFamilyRequiresCloudSync => 'Требуется подписка Cloud Sync';
+
+  @override
+  String get shareFamilyUpgradeMessage => 'Перейдите на Cloud Sync, чтобы делиться книгами рецептов и списками с семьёй в реальном времени.';
+
+  @override
+  String get shareFamilySignIn => 'Войдите для использования семейного доступа';
+
+  @override
+  String get shareFamilySetupInSettings => 'Создайте семью или присоединитесь в Настройки → Семейный доступ';
+
+  @override
+  String get shareSharedWith => 'Доступ открыт для';
+
+  @override
+  String get shareRevoked => 'Совместный доступ отозван';
+
+  @override
+  String get shareSignInRequired => 'Войдите для создания ссылок общего доступа';
+
+  @override
+  String get shareCreateFailed => 'Не удалось создать ссылку';
+
+  @override
+  String get shareNoFamilyMembers => 'Нет других членов семьи для совместного доступа';
+
+  @override
+  String get shareAddFamilyMembers => 'Добавить членов семьи';
+
+  @override
+  String get shareWith => 'Поделиться с';
+
+  @override
+  String shareSharedWithMember(String name) {
+    return 'Доступ открыт для $name';
+  }
+
+  @override
+  String get shareShareFailed => 'Не удалось поделиться';
+
+  @override
+  String get shareLinkCopied => 'Ссылка скопирована!';
+
+  @override
+  String shareLinkExpiresIn(int hours) {
+    return 'Истекает через $hours ч';
+  }
+
+  @override
+  String get shareRevoke => 'Отозвать';
+
+  @override
+  String get shareUpgrade => 'Обновить';
+
+  @override
+  String get sharePermReadOnly => 'Только чтение';
+
+  @override
+  String get sharePermAddOnly => 'Только добавление';
+
+  @override
+  String get sharePermFullEdit => 'Полное редактирование';
+
+  @override
+  String get sharePermFullAccess => 'Полный доступ';
+
+  @override
+  String get sharePermViewRecipes => 'Может просматривать рецепты';
+
+  @override
+  String get sharePermAddRecipes => 'Может добавлять новые рецепты';
+
+  @override
+  String get sharePermEditRecipes => 'Может редактировать любой рецепт';
+
+  @override
+  String get sharePermViewItems => 'Может просматривать элементы';
+
+  @override
+  String get sharePermAddItems => 'Может добавлять элементы, редактировать свои';
+
+  @override
+  String get sharePermEditItems => 'Может редактировать и удалять элементы';
+
+  @override
+  String get shareUnknownMember => 'Неизвестный';
+
+  @override
+  String get subscriptionTitle => 'Подписка';
+
+  @override
+  String get subscriptionUpgradeToPro => 'Перейти на Pro';
+
+  @override
+  String get subscriptionUnlockFeatures => 'Откройте облачную синхронизацию, умный импорт и многое другое.';
+
+  @override
+  String get subscriptionViewPlans => 'Посмотреть тарифы';
+
+  @override
+  String get subscriptionRestored => 'Покупки успешно восстановлены!';
+
+  @override
+  String get subscriptionNoPurchases => 'Предыдущие покупки не найдены.';
+
+  @override
+  String subscriptionRestoreFailed(String error) {
+    return 'Ошибка восстановления: $error';
+  }
+
+  @override
+  String get subscriptionRestorePurchases => 'Восстановить покупки';
+
+  @override
+  String subscriptionCancelledUntil(String date) {
+    return 'Отменена — доступ до $date';
+  }
+
+  @override
+  String get subscriptionRenews => 'Продление';
+
+  @override
+  String get subscriptionPlan => 'Тариф';
+
+  @override
+  String get subscriptionLifetime => 'Пожизненная — без срока действия';
+
+  @override
+  String get subscriptionManage => 'Управление подпиской';
+
+  @override
+  String get subscriptionUnknownDate => 'Неизвестно';
+
+  @override
+  String get subscriptionUpgradeToUnlock => 'Перейдите на Pro для разблокировки';
+
+  @override
+  String get subscriptionProBadge => 'PRO';
+
+  @override
+  String get customThemeTitle => 'Пользовательская тема';
+
+  @override
+  String get customThemeColors => 'Цвета';
+
+  @override
+  String get customThemeBackground => 'Фон';
+
+  @override
+  String get customThemeBackgroundDesc => 'Фон приложения, scaffold';
+
+  @override
+  String get customThemePrimary => 'Основной';
+
+  @override
+  String get customThemePrimaryDesc => 'Кнопки, акценты, панель приложения';
+
+  @override
+  String get customThemeAccent => 'Акцент';
+
+  @override
+  String get customThemeAccentDesc => 'FAB, переключатели, вторичные акценты';
+
+  @override
+  String get customThemeStartFromPreset => 'Начать с пресета';
+
+  @override
+  String get settingsUserFallback => 'Пользователь';
+
+  @override
+  String get settingsManageSection => 'Управление';
+
+  @override
+  String get settingsExportNone => 'Ничего не выбрано';
+
+  @override
+  String get settingsExportPartial => 'Частичная резервная копия';
+
+  @override
+  String get settingsSystemLanguage => 'Системный';
+
+  @override
+  String get tierFamily => 'FAMILY';
+
+  @override
+  String get tierCreator => 'CREATOR';
+
+  @override
+  String get tierFreeName => 'Бесплатный';
+
+  @override
+  String get tierPremiumName => 'Премиум';
+
+  @override
+  String get tierCloudSyncName => 'Cloud Sync';
+
+  @override
+  String get tierCloudSyncFamilyName => 'Cloud Sync Семья';
+
+  @override
+  String get tierCreatorName => 'Создатель';
+
+  @override
+  String get nutritionEstimated => 'Ориентировочные значения';
+
+  @override
+  String get nutritionTipMatch => 'Нажмите на ингредиент, чтобы изменить соответствие USDA';
+
+  @override
+  String get nutritionTipManual => 'Введите точные значения пищевой ценности, если они вам известны';
+
+  @override
+  String get nutritionTipSpecific => 'Выбирайте конкретные виды (напр., «мука пшеничная» вместо просто «мука»)';
+
+  @override
+  String get nutritionTipSaved => 'Ваши исправления сохраняются для будущих рецептов';
+
+  @override
+  String get nutritionGotIt => 'Понятно';
+
+  @override
+  String get nutritionScaleMultiplier => 'Множитель масштаба';
+
+  @override
+  String get nutritionScaleHelper => '1,0 = весь рецепт';
+
+  @override
+  String nutritionOpenRecipe(String title) {
+    return 'Открыть $title';
+  }
+
+  @override
+  String get nutrientCal => 'Кал';
+
+  @override
+  String get nutrientSugar => 'Сахар';
+
+  @override
+  String get appearanceCustomThemeRequiresPremium => 'Пользовательская тема требует Premium';
+
+  @override
+  String get appearancePremiumBadge => 'Premium';
+
+  @override
+  String get substitutionsAll => 'Все';
+
+  @override
+  String substitutionsCount(int count, String category) {
+    return '$count заменителей • $category';
+  }
+
+  @override
+  String get colorPickerTitle => 'Выберите цвет';
+
+  @override
+  String get colorPickerHex => 'Hex';
+
+  @override
+  String get colorPickerSelect => 'Выбрать';
+
+  @override
+  String get scanSelectPages => 'Выбрать несколько страниц';
+
+  @override
+  String get scanNoTextPdf => 'Текст в PDF не найден. Попробуйте более чёткий скан или вставку текста.';
+
+  @override
+  String scanLittleTextPdf(int count) {
+    return 'В PDF обнаружено очень мало текста ($count символов). Скан может быть слишком размытым. Попробуйте PDF лучшего качества или вставку текста.';
+  }
+
+  @override
+  String get scanNoTextImage => 'Текст на изображении не найден. Попробуйте сфотографировать при лучшем освещении или воспользуйтесь вставкой текста.';
+
+  @override
+  String scanLittleTextImage(int count) {
+    return 'Обнаружено очень мало текста ($count символов). Попробуйте сделать более чёткое фото при лучшем освещении или воспользуйтесь вставкой текста.';
+  }
+
+  @override
+  String scanProgress(int current, int total) {
+    return 'Сканирование страницы $current из $total...';
+  }
+
+  @override
+  String get communityTagHint => 'Добавить свой тег...';
+
+  @override
+  String get tagPickerOrganize => 'Теги помогают организовать ваши рецепты';
+
+  @override
+  String get tagPickerLoadDefaults => 'Загрузить стандартные теги';
+
+  @override
+  String get tagPickerExampleHint => 'напр., Романтический ужин';
+
+  @override
+  String drawerProTier(String tier) {
+    return 'Pro · $tier';
+  }
+
+  @override
+  String get accountStoreFallback => 'Магазин';
 }

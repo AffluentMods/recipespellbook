@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../data/community_tags_data.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Tag picker widget for community publish/edit screens.
 ///
@@ -66,6 +67,7 @@ class _CommunityTagPickerState extends State<CommunityTagPicker> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     // Separate predefined from custom
     final predefinedIds = communityTags.map((t) => t.id).toSet();
@@ -135,7 +137,7 @@ class _CommunityTagPickerState extends State<CommunityTagPicker> {
               child: TextField(
                 controller: _customController,
                 decoration: InputDecoration(
-                  hintText: 'Add custom tag...',
+                  hintText: l10n.communityTagHint,
                   hintStyle: TextStyle(fontSize: 13, color: theme.colorScheme.outline),
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

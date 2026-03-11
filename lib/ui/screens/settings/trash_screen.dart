@@ -112,7 +112,7 @@ class TrashScreen extends ConsumerWidget {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('"${recipe.title}" ${l10n.trashRestored}'),
+          content: Text(l10n.trashRestoredMessage(recipe.title)),
           action: SnackBarAction(
             label: l10n.actionView,
             onPressed: () {

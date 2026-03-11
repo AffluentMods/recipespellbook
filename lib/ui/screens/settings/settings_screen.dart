@@ -13,16 +13,12 @@ import '../../../utils/responsive_utils.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../providers/auth_provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../services/auth_service.dart';
-import '../../../utils/platform_utils.dart';
 import '../../../services/export_import_service.dart';
 import '../../../services/family_service.dart';
-import '../../../services/grocery_service.dart';
 import '../../../services/onboarding_service.dart';
 import '../home/home_screen.dart';
 import '../../../services/revenuecat_service.dart';
-import '../../../services/sync_service.dart';
 import '../../widgets/app_snackbar.dart';
 import 'nutrition_settings_screen.dart';
 
@@ -165,7 +161,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _Tile(
           icon: Icons.notifications_outlined,
           title: l10n.settingsNotifications,
-          subtitle: 'Manage notification preferences',
+          subtitle: l10n.settingsNotifManagePreferences,
           onTap: () => context.push('/settings/notifications'),
         ),
       ]),
@@ -185,10 +181,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           onTap: () => context.push('/settings/categories'),
         ) : null,
       ]),
-
-      // ─── INTEGRATIONS ───
-      if (_query.isEmpty || _m('Integrations', 'google apple discord instacart kroger sign in'))
-        const _IntegrationsSection(),
 
       // ─── FAMILY ───
       if (_query.isEmpty || _m(l10n.settingsFamily, 'sharing invite members household'))
@@ -231,7 +223,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _Section(title: l10n.settingsAbout, icon: Icons.info_outline, children: [
           _Tile(
             icon: Icons.info_outline, title: l10n.appTitle,
-            subtitle: 'Version ${ref.watch(appVersionProvider).valueOrNull ?? '...'} \u00B7 Beta',
+            subtitle: l10n.settingsVersion(ref.watch(appVersionProvider).valueOrNull ?? '...'),
             onTap: () => context.push('/about'),
           ),
         ]),
@@ -387,7 +379,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _showFinalResetConfirmation(BuildContext context, WidgetRef ref, _ResetScope scope) {
     final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
-    final scopeLabel = switch (scope) { _ResetScope.local => 'local data', _ResetScope.cloud => 'cloud data', _ResetScope.all => 'all data and settings' };
+    final scopeLabel = switch (scope) { _ResetScope.local => l10n.resetScopeLocal, _ResetScope.cloud => l10n.resetScopeCloud, _ResetScope.all => l10n.resetScopeAll };
     showDialog<void>(context: context, builder: (context) => AlertDialog(
       icon: Icon(Icons.delete_forever, size: 48, color: Theme.of(context).colorScheme.error),
       title: Text(l10n.finalConfirmation),
@@ -399,7 +391,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       actions: [
         TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
         ListenableBuilder(listenable: controller, builder: (context, _) {
-          final ok = controller.text.toUpperCase() == 'DELETE';
+          final ok = controller.text.toUpperCase() == l10n.typeDeleteHint.toUpperCase();
           return FilledButton(style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error), onPressed: ok ? () => _performReset(context, ref, l10n, scope) : null, child: Text(l10n.actionDelete));
         }),
       ],
@@ -531,60 +523,33 @@ class _AccountCard extends ConsumerWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
         ),
-        child: Column(children: [
-          InkWell(
-            onTap: isIn ? null : () => _showSignInSheet(context, ref),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-              child: Row(children: [
-                Container(
-                  width: 48, height: 48,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: theme.colorScheme.primary.withValues(alpha: 0.15)),
-                  child: isIn && user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty
-                      ? ClipOval(child: Image.network(user.avatarUrl!, width: 48, height: 48, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _avatar(theme, user.displayName)))
-                      : _avatar(theme, user?.displayName),
-                ),
-                const SizedBox(width: 14),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Row(children: [
-                    Flexible(child: Text(isIn ? (user?.displayName ?? 'User') : l10n.signIn, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                    const SizedBox(width: 8),
-                    const _TierBadge(),
-                  ]),
-                  const SizedBox(height: 2),
-                  Text(isIn ? (user?.email ?? '') : l10n.signInDescription, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline), maxLines: 1, overflow: TextOverflow.ellipsis),
-                ])),
-                if (isIn)
-                  IconButton(icon: Icon(Icons.logout, size: 20, color: theme.colorScheme.error), tooltip: l10n.signOut, onPressed: () => ref.read(authProvider.notifier).signOut())
-                else
-                  Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline),
-              ]),
-            ),
-          ),
-          if (isIn && !isFree) ...[
-            Divider(height: 0.5, indent: 16, endIndent: 16, color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
-            _SyncRow(theme: theme),
-          ],
-          if (isFree) ...[
-            Divider(height: 0.5, indent: 16, endIndent: 16, color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
-            InkWell(
-              onTap: () => context.push('/upgrade'),
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(children: [
-                  Icon(Icons.star_rounded, size: 18, color: Colors.amber.shade700),
-                  const SizedBox(width: 10),
-                  Expanded(child: Text(l10n.upgradeToPro, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.amber.shade700))),
-                  Text(l10n.settingsUpgradeSubtitle, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
-                  const SizedBox(width: 4),
-                  Icon(Icons.chevron_right, size: 18, color: theme.colorScheme.outline),
-                ]),
+        child: InkWell(
+          onTap: () => context.push('/settings/account'),
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            child: Row(children: [
+              Container(
+                width: 48, height: 48,
+                decoration: BoxDecoration(shape: BoxShape.circle, color: theme.colorScheme.primary.withValues(alpha: 0.15)),
+                child: isIn && user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty
+                    ? ClipOval(child: Image.network(user.avatarUrl!, width: 48, height: 48, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _avatar(theme, user.displayName)))
+                    : _avatar(theme, user?.displayName),
               ),
-            ),
-          ],
-        ]),
+              const SizedBox(width: 14),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  Flexible(child: Text(isIn ? (user?.displayName ?? l10n.settingsUserFallback) : l10n.signIn, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                  const SizedBox(width: 8),
+                  const _TierBadge(),
+                ]),
+                const SizedBox(height: 2),
+                Text(isIn ? (user?.email ?? '') : l10n.signInDescription, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline), maxLines: 1, overflow: TextOverflow.ellipsis),
+              ])),
+              Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline),
+            ]),
+          ),
+        ),
       ),
     );
   }
@@ -593,101 +558,20 @@ class _AccountCard extends ConsumerWidget {
     return Center(child: Text((name != null && name.isNotEmpty) ? name[0].toUpperCase() : '?',
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.colorScheme.primary)));
   }
-
-  static void _showSignInSheet(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final auth = ref.read(authProvider.notifier);
-    showModalBottomSheet(context: context, builder: (ctx) => SafeArea(child: Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
-        const SizedBox(height: 20),
-        Icon(Icons.account_circle_outlined, size: 48, color: theme.colorScheme.primary),
-        const SizedBox(height: 12),
-        Text(l10n.signIn, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 4),
-        Text(l10n.signInDescription, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-        const SizedBox(height: 24),
-        SizedBox(width: double.infinity, child: OutlinedButton(
-          onPressed: () { Navigator.pop(ctx); auth.signInWithGoogle(); },
-          style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12), side: BorderSide(color: theme.colorScheme.outlineVariant), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text('G', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
-            const SizedBox(width: 10),
-            Text(l10n.continueWithGoogle, style: TextStyle(fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface)),
-          ]),
-        )),
-        if (supportsAppleSignIn) ...[
-          const SizedBox(height: 10),
-          SizedBox(width: double.infinity, child: FilledButton(
-            onPressed: () { Navigator.pop(ctx); auth.signInWithApple(); },
-            style: FilledButton.styleFrom(backgroundColor: theme.brightness == Brightness.dark ? Colors.white : Colors.black, foregroundColor: theme.brightness == Brightness.dark ? Colors.black : Colors.white, padding: const EdgeInsets.symmetric(vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.apple, size: 20), const SizedBox(width: 10), Text(l10n.continueWithApple, style: const TextStyle(fontWeight: FontWeight.w500))]),
-          )),
-        ],
-        const SizedBox(height: 16),
-      ]),
-    )));
-  }
-}
-
-class _SyncRow extends StatefulWidget {
-  final ThemeData theme;
-  const _SyncRow({required this.theme});
-  @override
-  State<_SyncRow> createState() => _SyncRowState();
-}
-
-class _SyncRowState extends State<_SyncRow> {
-  bool _syncing = false;
-
-  Future<void> _doSync() async {
-    if (_syncing) return;
-    setState(() => _syncing = true);
-    final result = await SyncService.instance.sync();
-    if (!mounted) return;
-    setState(() => _syncing = false);
-    final l10n = AppLocalizations.of(context)!;
-    if (result.success) {
-      AppSnackbar.success(context, l10n.syncSuccess(result.pushedCount, result.pulledCount));
-    } else {
-      AppSnackbar.error(context, result.error ?? l10n.syncFailed);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = widget.theme;
-    return InkWell(
-      onTap: _syncing ? null : _doSync,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Row(children: [
-          Icon(Icons.cloud_sync_rounded, size: 18, color: theme.colorScheme.primary),
-          const SizedBox(width: 10),
-          Expanded(child: Text(AppLocalizations.of(context)!.cloudSync, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500))),
-          if (_syncing)
-            SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.primary))
-          else
-            Icon(Icons.sync, size: 18, color: theme.colorScheme.outline),
-        ]),
-      ),
-    );
-  }
 }
 
 class _TierBadge extends ConsumerWidget {
   const _TierBadge();
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final tier = ref.watch(subscriptionProvider).tier;
     final (label, color) = switch (tier) {
-      SubscriptionTier.free => ('FREE', Theme.of(context).colorScheme.outline),
-      SubscriptionTier.premium => ('PREMIUM', Colors.amber.shade700),
-      SubscriptionTier.cloudSync => ('CLOUD SYNC', Colors.blue),
-      SubscriptionTier.cloudSyncFamily => ('FAMILY', Colors.deepPurple),
-      SubscriptionTier.creator => ('CREATOR', Colors.deepPurple),
+      SubscriptionTier.free => (l10n.tierFree, Theme.of(context).colorScheme.outline),
+      SubscriptionTier.premium => (l10n.tierPremium, Colors.amber.shade700),
+      SubscriptionTier.cloudSync => (l10n.tierCloudSync, Colors.blue),
+      SubscriptionTier.cloudSyncFamily => (l10n.tierFamily, Colors.deepPurple),
+      SubscriptionTier.creator => (l10n.tierCreator, Colors.deepPurple),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -869,6 +753,7 @@ class _ThemeSelectionTile extends StatelessWidget {
     final l = AppLocalizations.of(context)!;
     return switch (t) {
       AppColorTheme.spellbook => l.themeSpellbook,
+      AppColorTheme.custom => l.themeCustom,
       AppColorTheme.forest => l.themeForest,
       AppColorTheme.ocean => l.themeOcean,
       AppColorTheme.sunset => l.themeSunset,
@@ -878,6 +763,7 @@ class _ThemeSelectionTile extends StatelessWidget {
       AppColorTheme.ember => l.themeEmber,
       AppColorTheme.spring => l.themeSpring,
       AppColorTheme.alchemist => l.themeAlchemist,
+      AppColorTheme.matcha => l.themeMatcha,
     };
   }
 
@@ -906,9 +792,9 @@ class _ThemeSelectionTile extends StatelessWidget {
         Expanded(child: GridView.builder(
           controller: sc, padding: const EdgeInsets.symmetric(horizontal: 16),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 1.5, crossAxisSpacing: 12, mainAxisSpacing: 12),
-          itemCount: AppColorTheme.values.length,
+          itemCount: AppColorTheme.values.where((t) => !t.isCustom).length,
           itemBuilder: (context, i) {
-            final t = AppColorTheme.values[i];
+            final t = AppColorTheme.values.where((t) => !t.isCustom).elementAt(i);
             return _ThemeCard(theme: t, label: _name(context, t), isSelected: currentTheme == t, onTap: () { onThemeSelected(t); Navigator.pop(context); });
           },
         )),
@@ -1065,11 +951,11 @@ class _LanguageTile extends StatelessWidget {
   final ValueChanged<String> onLanguageSelected;
   const _LanguageTile({required this.currentLanguage, required this.onLanguageSelected});
 
-  String get _currentName {
+  String? get _currentName {
     for (final lang in supportedLanguages) {
       if (lang.code == currentLanguage) return '${lang.flag} ${lang.nativeName}';
     }
-    return '\u{1F310} System';
+    return null;
   }
 
   @override
@@ -1080,7 +966,7 @@ class _LanguageTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
       leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: theme.colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(Icons.language, size: 20, color: theme.colorScheme.primary)),
       title: Text(l10n.settingsLanguage, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-      subtitle: Text(_currentName, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
+      subtitle: Text(_currentName ?? '\u{1F310} ${l10n.settingsSystemLanguage}', style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
       onTap: () {
         showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) => DraggableScrollableSheet(
@@ -1105,165 +991,6 @@ class _LanguageTile extends StatelessWidget {
   }
 }
 
-// ════════════════════════════════════════════
-//  INTEGRATIONS SECTION
-// ════════════════════════════════════════════
-
-class _IntegrationsSection extends ConsumerStatefulWidget {
-  const _IntegrationsSection();
-  @override
-  ConsumerState<_IntegrationsSection> createState() => _IntegrationsSectionState();
-}
-
-class _IntegrationsSectionState extends ConsumerState<_IntegrationsSection> {
-  bool _krogerConfigured = false;
-  bool _discordLinked = false;
-  bool _loading = true;
-
-  @override
-  void initState() { super.initState(); _checkStoreStatus(); }
-
-  Future<void> _checkStoreStatus() async {
-    final kr = await GroceryService.isConfigured(GroceryProvider.kroger);
-    bool discord = false;
-    try {
-      if (AuthService.instance.isSignedIn) {
-        final status = await AuthService.instance.getDiscordStatus();
-        discord = status.linked;
-      }
-    } catch (_) {}
-    if (mounted) setState(() { _krogerConfigured = kr; _discordLinked = discord; _loading = false; });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    return _Section(title: l10n.settingsIntegrations, icon: Icons.extension_outlined, children: [
-      ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-        leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: const Color(0xFF5865F2).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-            child: const Center(child: Icon(Icons.forum_outlined, size: 20, color: Color(0xFF5865F2)))),
-        title: Text(l10n.discord, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-        subtitle: Text(_loading ? l10n.integrationsChecking : _discordLinked ? l10n.integrationsLinkedManage : l10n.integrationsTapToLink,
-            style: TextStyle(fontSize: 13, color: _discordLinked ? const Color(0xFF43B02A) : theme.colorScheme.outline)),
-        trailing: _discordLinked ? const Icon(Icons.check_circle, color: Color(0xFF43B02A), size: 20) : Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
-        onTap: () => _showDiscordOptions(context),
-      ),
-      ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-        leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: const Color(0xFF0068B5).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-            child: const Center(child: Text('\u{1F3EA}', style: TextStyle(fontSize: 18)))),
-        title: Text(l10n.kroger, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-        subtitle: Text(_loading ? l10n.integrationsChecking : _krogerConfigured ? l10n.integrationsConnectedManage : l10n.integrationsTapToSignIn,
-            style: TextStyle(fontSize: 13, color: _krogerConfigured ? const Color(0xFF43B02A) : theme.colorScheme.outline)),
-        trailing: _krogerConfigured ? const Icon(Icons.check_circle, color: Color(0xFF43B02A), size: 20) : Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
-        onTap: () => _showKrogerOptions(context),
-      ),
-    ]);
-  }
-
-  void _showDiscordOptions(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final auth = AuthService.instance;
-    showModalBottomSheet(context: context, builder: (ctx) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-      Padding(padding: const EdgeInsets.all(16), child: Row(children: [
-        const Icon(Icons.forum, size: 24, color: Color(0xFF5865F2)), const SizedBox(width: 12),
-        Text(l10n.discord, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-        if (_discordLinked) ...[const SizedBox(width: 8), Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          decoration: BoxDecoration(color: const Color(0xFF43B02A).withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)),
-          child: Text(l10n.integrationsLinked, style: const TextStyle(color: Color(0xFF43B02A), fontSize: 11, fontWeight: FontWeight.w600)),
-        )],
-      ])),
-      if (!_discordLinked)
-        ListTile(leading: const Icon(Icons.link), title: Text(l10n.discordLinkAccount), subtitle: Text(l10n.discordLinkSubtitle), onTap: () async {
-          Navigator.pop(ctx);
-          if (!auth.isSignedIn) { if (context.mounted) AppSnackbar.error(context, l10n.discordSignInFirst); return; }
-          final url = Uri.parse(auth.discordLinkUrl);
-          try { await launchUrl(url, mode: LaunchMode.externalApplication); } catch (e) { if (context.mounted) AppSnackbar.error(context, l10n.couldNotOpenBrowser); }
-        }),
-      if (_discordLinked)
-        ListTile(leading: Icon(Icons.link_off, color: theme.colorScheme.error), title: Text(l10n.discordUnlink, style: TextStyle(color: theme.colorScheme.error)), subtitle: Text(l10n.discordUnlinkSubtitle), onTap: () async {
-          Navigator.pop(ctx);
-          final success = await auth.unlinkDiscord();
-          if (success) { _checkStoreStatus(); if (context.mounted) AppSnackbar.success(context, l10n.discordUnlinked); }
-          else { if (context.mounted) AppSnackbar.error(context, l10n.discordUnlinkFailed); }
-        }),
-      const SizedBox(height: 16),
-    ])));
-  }
-
-
-  void _showKrogerOptions(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    showModalBottomSheet(context: context, builder: (ctx) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-      Padding(padding: const EdgeInsets.all(16), child: Row(children: [
-        const Text('\u{1F3EA}', style: TextStyle(fontSize: 24)), const SizedBox(width: 12),
-        Text(l10n.kroger, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-        if (_krogerConfigured) ...[const SizedBox(width: 8), Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          decoration: BoxDecoration(color: const Color(0xFF43B02A).withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)),
-          child: Text(l10n.connected, style: const TextStyle(color: Color(0xFF43B02A), fontSize: 11, fontWeight: FontWeight.w600)),
-        )],
-      ])),
-      if (!_krogerConfigured)
-        ListTile(leading: const Icon(Icons.login), title: Text(l10n.signInToKroger), subtitle: Text(l10n.connectToAddItems), onTap: () async { Navigator.pop(ctx); await GroceryService.krogerStartOAuthLogin(); }),
-      ListTile(leading: const Icon(Icons.location_on_outlined), title: Text(l10n.setPreferredStore), subtitle: Text(l10n.searchByZipCode), onTap: () { Navigator.pop(ctx); _showKrogerLocationDialog(context); }),
-      if (_krogerConfigured)
-        ListTile(leading: Icon(Icons.link_off, color: theme.colorScheme.error), title: Text(l10n.disconnect, style: TextStyle(color: theme.colorScheme.error)), onTap: () async { Navigator.pop(ctx); await GroceryService.disconnect(GroceryProvider.kroger); _checkStoreStatus(); }),
-      const SizedBox(height: 16),
-    ])));
-  }
-
-  void _showKrogerLocationDialog(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController();
-    final theme = Theme.of(context);
-    showDialog(context: context, builder: (ctx) {
-      List<Map<String, dynamic>> results = [];
-      bool searching = false;
-      return StatefulBuilder(builder: (ctx, ss) => AlertDialog(
-        title: Text(l10n.findYourKrogerStore),
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextField(controller: controller, decoration: InputDecoration(
-            hintText: l10n.enterZipCode, border: const OutlineInputBorder(),
-            suffixIcon: IconButton(
-              icon: searching ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.search),
-              onPressed: () async {
-                final zip = controller.text.trim(); if (zip.isEmpty) return;
-                ss(() => searching = true);
-                final locs = await GroceryService.krogerSearchLocations(zip);
-                ss(() { results = locs; searching = false; });
-              },
-            ),
-          ), keyboardType: TextInputType.number),
-          if (results.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            ConstrainedBox(constraints: const BoxConstraints(maxHeight: 200), child: ListView.builder(
-              shrinkWrap: true, itemCount: results.length,
-              itemBuilder: (_, i) {
-                final loc = results[i];
-                return ListTile(dense: true, title: Text(loc['name'] ?? 'Store'),
-                  subtitle: Text('${loc['address'] ?? ''}, ${loc['city'] ?? ''} ${loc['state'] ?? ''}', style: theme.textTheme.bodySmall),
-                  onTap: () async {
-                    final id = loc['id']?.toString();
-                    if (id != null) await GroceryService.setKrogerLocation(id);
-                    if (ctx.mounted) Navigator.pop(ctx);
-                    if (mounted) AppSnackbar.success(context, l10n.storeSet(loc['name'] ?? 'Kroger'));
-                  },
-                );
-              },
-            )),
-          ],
-        ]),
-        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionClose))],
-      ));
-    });
-  }
-}
 
 // ════════════════════════════════════════════
 //  ADVANCED SETTINGS SCREEN (route target)
@@ -1275,9 +1002,9 @@ class AdvancedSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Advanced Settings')),
+      appBar: AppBar(title: Text(l10n.settingsAdvanced)),
       body: ListView(children: [
-        _Section(title: 'Manage', icon: Icons.tune, children: [
+        _Section(title: l10n.settingsManageSection, icon: Icons.tune, children: [
           _Tile(icon: Icons.local_offer_outlined, title: l10n.settingsManageTags, subtitle: l10n.settingsManageTagsSubtitle, onTap: () => context.push('/settings/tags')),
           _Tile(icon: Icons.restaurant_menu, title: l10n.settingsManageCourses, subtitle: l10n.settingsManageCoursesSubtitle, onTap: () => context.push('/settings/courses')),
           _Tile(icon: Icons.category_outlined, title: l10n.settingsManageCategories, subtitle: l10n.settingsManageCategoriesSubtitle, onTap: () => context.push('/settings/categories')),
@@ -1314,7 +1041,8 @@ class _ExportOptionsSheetState extends State<_ExportOptionsSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l = widget.l10n;
-    final buttonLabel = _allChecked ? l.exportFullBackup : _noneChecked ? 'None Selected' : 'Partial Backup';
+    final l10n = AppLocalizations.of(context)!;
+    final buttonLabel = _allChecked ? l.exportFullBackup : _noneChecked ? l10n.settingsExportNone : l10n.settingsExportPartial;
     return SafeArea(child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(mainAxisSize: MainAxisSize.min, children: [

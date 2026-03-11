@@ -1919,7 +1919,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get shareFromApp => 'Shared from Recipe Spellbook ✨';
+  String get shareFromApp => 'Shared from Recipe Spellbook';
 
   @override
   String get shareCreatingCard => 'Creating recipe card...';
@@ -2391,6 +2391,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get typeDeleteHint => 'DELETE';
+
+  @override
+  String get resetScopeLocal => 'local data';
+
+  @override
+  String get resetScopeCloud => 'cloud data';
+
+  @override
+  String get resetScopeAll => 'all data and settings';
 
   @override
   String get resetEverything => 'Reset Everything';
@@ -3823,6 +3832,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountTitle => 'Account';
 
   @override
+  String get accountSubscription => 'Subscription';
+
+  @override
+  String get accountManageSubscription => 'Manage Subscription';
+
+  @override
+  String get accountCloudSync => 'Cloud Sync';
+
+  @override
+  String get accountSyncNow => 'Sync Now';
+
+  @override
+  String get accountIntegrations => 'Integrations';
+
+  @override
+  String get accountDangerZone => 'Danger Zone';
+
+  @override
+  String get purchasesRestored => 'Purchases restored successfully!';
+
+  @override
+  String get noPurchasesFound => 'No previous purchases found.';
+
+  @override
+  String get restoreFailed => 'Restore failed. Please try again.';
+
+  @override
+  String get restorePurchasesLong => 'Restore Purchases';
+
+  @override
+  String get cancelled => 'Cancelled';
+
+  @override
+  String get accessUntil => 'access until';
+
+  @override
+  String get renews => 'Renews';
+
+  @override
+  String get plan => 'Plan';
+
+  @override
+  String get upgradeDescription => 'Unlock cloud sync, smart import, and more.';
+
+  @override
+  String get syncDescription => 'Keep your recipes synced across devices.';
+
+  @override
+  String get sync => 'Sync';
+
+  @override
   String get signInToSync => 'Sign in to sync recipes';
 
   @override
@@ -3895,7 +3955,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manageSubscription => 'Manage Subscription';
 
   @override
-  String get tierPremium => 'Premium';
+  String get tierPremium => 'PREMIUM';
 
   @override
   String get tierStandard => 'Standard';
@@ -3904,7 +3964,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tierBasic => 'Basic';
 
   @override
-  String get tierFree => 'Free';
+  String get tierFree => 'FREE';
 
   @override
   String tierPlan(String tier) {
@@ -4574,7 +4634,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get featureFutureAdvanced => 'Future advanced features included';
 
   @override
-  String get tierCloudSync => 'Cloud\nSync';
+  String get tierCloudSync => 'CLOUD SYNC';
 
   @override
   String get tierCloudSyncPlus => 'Cloud\nSync+';
@@ -4631,10 +4691,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get compareSmartImportNone => '—';
 
   @override
-  String get compareSmartImportPremium => '2/mo';
+  String get compareSmartImportPremium => 'Trial';
 
   @override
-  String get compareSmartImportCloud => '10/mo';
+  String get compareSmartImportCloud => 'Standard';
+
+  @override
+  String get compareCloudStorage => 'Cloud Storage';
+
+  @override
+  String get compareCloudStorageBasic => 'Basic';
+
+  @override
+  String get compareCloudStorageStandard => 'Standard';
+
+  @override
+  String get compareCloudStorageExtended => 'Extended';
 
   @override
   String get printOf => 'of';
@@ -4847,6 +4919,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsNotifBuddySubtitle => 'Kitchen Buddy login streaks and coin bonuses';
+
+  @override
+  String get settingsNotifManagePreferences => 'Manage notification preferences';
+
+  @override
+  String get settingsNotifNewDownloads => 'New downloads';
+
+  @override
+  String get settingsNotifNewDownloadsSubtitle => 'When someone downloads your published recipe';
+
+  @override
+  String get settingsNotifRatingUpdates => 'Rating updates';
+
+  @override
+  String get settingsNotifRatingUpdatesSubtitle => 'When your published recipe gets a new rating';
+
+  @override
+  String get settingsNotifComments => 'Comments';
+
+  @override
+  String get settingsNotifCommentsSubtitle => 'When someone comments on your recipe';
+
+  @override
+  String get settingsNotifSyncNote => 'Notification preferences are synced with your account.';
 
   @override
   String get tuesday => 'Tuesday';
@@ -7184,6 +7280,78 @@ class AppLocalizationsEn extends AppLocalizations {
   String get faqWhatAreSublinkedAnswer => 'Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it — no searching needed.';
 
   @override
+  String get faqMacroCalcTitle => 'How to use the Macro Calculator';
+
+  @override
+  String get faqMacroCalcSubtitle => 'Auto-calculate calories and macros for any recipe';
+
+  @override
+  String get faqMacroCalcStep1Title => 'Open a recipe';
+
+  @override
+  String get faqMacroCalcStep1Desc => 'Open any recipe to view its details.';
+
+  @override
+  String get faqMacroCalcStep2Title => 'Find the Nutrition section';
+
+  @override
+  String get faqMacroCalcStep2Desc => 'Scroll to the bottom of the recipe. If no nutrition data exists yet, you\'ll see an empty state — tap it to start the calculator.';
+
+  @override
+  String get faqMacroCalcStep3Title => 'View the calculator';
+
+  @override
+  String get faqMacroCalcStep3Desc => 'The calculator automatically matches your ingredients to the USDA food database and shows the match rate, calories, and macro breakdown.';
+
+  @override
+  String get faqMacroCalcStep4Title => 'Enter manually';
+
+  @override
+  String get faqMacroCalcStep4Desc => 'Tap \'Enter Manually\' to edit nutrition values by hand if you prefer to input your own data instead of using the auto-calculated results.';
+
+  @override
+  String get faqMacroCalcStep5Title => 'Review ingredient matches';
+
+  @override
+  String get faqMacroCalcStep5Desc => 'Scroll down to see each ingredient matched to a USDA food item. Sublinked recipes (like Pizza Dough) use their own stored nutrition instead.';
+
+  @override
+  String get faqMacroCalcStep5Tip => 'Not sure what a sublinked recipe is? Check out the \'What are sublinked recipes?\' section in the FAQ!';
+
+  @override
+  String get faqMacroCalcStep6Title => 'Browse the USDA database';
+
+  @override
+  String get faqMacroCalcStep6Desc => 'Tap any ingredient to search the USDA database for a better match. You can pick from thousands of verified food items.';
+
+  @override
+  String get faqMacroCalcStep7Title => 'Linked recipe nutrition';
+
+  @override
+  String get faqMacroCalcStep7Desc => 'Ingredients linked to other recipes show the linked recipe\'s nutrition data. You can adjust the scale to use a fraction of the linked recipe.';
+
+  @override
+  String get faqMacroCalcStep8Title => 'Save your results';
+
+  @override
+  String get faqMacroCalcStep8Desc => 'Tap Save to store the nutrition data. The macros will now appear on your recipe with charts and detailed breakdowns per serving.';
+
+  @override
+  String get faqMacroCalcStep9Title => 'Customize the display';
+
+  @override
+  String get faqMacroCalcStep9Desc => 'Go to Settings > Nutrition Display to choose which nutrients to show and how the charts are displayed.';
+
+  @override
+  String get faqWhatIsMacroCalcTitle => 'What is the Macro Calculator?';
+
+  @override
+  String get faqWhatIsMacroCalcSubtitle => 'Automatic nutrition estimation for recipes';
+
+  @override
+  String get faqWhatIsMacroCalcAnswer => 'The Macro Calculator automatically estimates the nutritional content of your recipes by matching each ingredient to the USDA food database. It calculates calories, protein, carbs, fat, fiber, sugar, sodium, and more — all per serving. You can find it in the Nutrition section of any recipe.';
+
+  @override
   String get faqImportFailedTitle => 'Why did my import fail?';
 
   @override
@@ -7212,6 +7380,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeAlchemist => 'Alchemist';
+
+  @override
+  String get themeMatcha => 'Matcha';
+
+  @override
+  String get themeCustom => 'Custom';
 
   @override
   String get communitySortTopRated => 'Top Rated';
@@ -7401,4 +7575,513 @@ class AppLocalizationsEn extends AppLocalizations {
   String communityPublishUploadInProgress(int current, int total) {
     return 'Publishing in progress... ($current/$total images)';
   }
+
+  @override
+  String get surpriseMeTitle => 'Surprise Me!';
+
+  @override
+  String get surpriseMeSubtitle => 'What should I cook?';
+
+  @override
+  String get hintNutritionCalculator => 'Did you know? Tap the nutrition icon to auto-calculate nutrition for any recipe.';
+
+  @override
+  String get hintCookingScreen => 'Try cooking mode! Tap \'Cook\' on any recipe for hands-free step-by-step instructions.';
+
+  @override
+  String get hintIngredientHeaders => 'Tip: Type a line ending with \':\' in ingredients to create a section header.';
+
+  @override
+  String get hintImportMethods => 'Import recipes from URLs, photos, PDFs, or even Instagram and TikTok!';
+
+  @override
+  String get hintMealPlanAutoFill => 'Drag recipes into your meal plan, or tap a day to pick from your collection.';
+
+  @override
+  String get hintRecipeScaling => 'Tap the servings number on any recipe to scale ingredients up or down.';
+
+  @override
+  String get hintShoppingListGen => 'Add recipe ingredients to your shopping list with one tap.';
+
+  @override
+  String get hintRecipeNotes => 'Add personal notes to any recipe - tips, modifications, or memories.';
+
+  @override
+  String get hintCookbookOrganization => 'Create multiple cookbooks to organize your recipes by theme or occasion.';
+
+  @override
+  String get hintTagSystem => 'Tag recipes for easy filtering - create custom tags like \'Quick\', \'Favorite\', etc.';
+
+  @override
+  String get allergyMyAllergies => 'My Allergies';
+
+  @override
+  String get allergyDisabledTab => 'Disabled';
+
+  @override
+  String get allergyNoDisabledTitle => 'No Disabled Warnings';
+
+  @override
+  String get allergyNoDisabledSubtitle => 'When you dismiss allergy warnings on recipes, they will appear here so you can restore them later.';
+
+  @override
+  String get allergyDisabledInfo => 'These recipes have had their allergy warnings disabled. Tap to restore warnings.';
+
+  @override
+  String trashRestoredMessage(String title) {
+    return '\"$title\" restored';
+  }
+
+  @override
+  String get nutrientCalories => 'Calories';
+
+  @override
+  String get nutrientTotalFat => 'Total Fat';
+
+  @override
+  String get nutrientSaturatedFat => 'Saturated Fat';
+
+  @override
+  String get nutrientTransFat => 'Trans Fat';
+
+  @override
+  String get nutrientMonounsaturatedFat => 'Monounsaturated Fat';
+
+  @override
+  String get nutrientPolyunsaturatedFat => 'Polyunsaturated Fat';
+
+  @override
+  String get nutrientCarbohydrates => 'Carbohydrates';
+
+  @override
+  String get nutrientFiber => 'Fiber';
+
+  @override
+  String get nutrientSugars => 'Sugars';
+
+  @override
+  String get nutrientProtein => 'Protein';
+
+  @override
+  String get nutrientCholesterol => 'Cholesterol';
+
+  @override
+  String get nutrientSodium => 'Sodium';
+
+  @override
+  String get nutrientPotassium => 'Potassium';
+
+  @override
+  String get nutrientCalcium => 'Calcium';
+
+  @override
+  String get nutrientIron => 'Iron';
+
+  @override
+  String get nutrientMagnesium => 'Magnesium';
+
+  @override
+  String get nutrientPhosphorus => 'Phosphorus';
+
+  @override
+  String get nutrientZinc => 'Zinc';
+
+  @override
+  String get nutrientCopper => 'Copper';
+
+  @override
+  String get nutrientManganese => 'Manganese';
+
+  @override
+  String get nutrientSelenium => 'Selenium';
+
+  @override
+  String get nutrientVitaminA => 'Vitamin A';
+
+  @override
+  String get nutrientVitaminC => 'Vitamin C';
+
+  @override
+  String get nutrientVitaminD => 'Vitamin D';
+
+  @override
+  String get nutrientVitaminE => 'Vitamin E';
+
+  @override
+  String get nutrientVitaminK => 'Vitamin K';
+
+  @override
+  String get nutrientThiaminB1 => 'Thiamin (B1)';
+
+  @override
+  String get nutrientRiboflavinB2 => 'Riboflavin (B2)';
+
+  @override
+  String get nutrientNiacinB3 => 'Niacin (B3)';
+
+  @override
+  String get nutrientPantothenicAcidB5 => 'Pantothenic Acid (B5)';
+
+  @override
+  String get nutrientVitaminB6 => 'Vitamin B6';
+
+  @override
+  String get nutrientVitaminB12 => 'Vitamin B12';
+
+  @override
+  String get nutrientFolate => 'Folate';
+
+  @override
+  String get nutrientCholine => 'Choline';
+
+  @override
+  String get nutrientCategoryMacronutrients => 'Macronutrients';
+
+  @override
+  String get nutrientCategoryMinerals => 'Minerals';
+
+  @override
+  String get nutrientCategoryVitamins => 'Vitamins';
+
+  @override
+  String get nutrientCarbs => 'Carbs';
+
+  @override
+  String get nutrientFat => 'Fat';
+
+  @override
+  String nutritionKcalPerServing(int count) {
+    return '$count kcal per serving';
+  }
+
+  @override
+  String nutritionKcalTotal(int count) {
+    return '$count kcal total';
+  }
+
+  @override
+  String get shareShoppingList => 'Share Shopping List';
+
+  @override
+  String get shareOneTimeLink => 'One-Time Link';
+
+  @override
+  String get shareOneTimeLinkSubtitle => 'Free • 24h expiry • View/download only';
+
+  @override
+  String get shareGenerateLink => 'Generate Link';
+
+  @override
+  String get shareFamilyShare => 'Family Share';
+
+  @override
+  String get shareFamilySyncSubtitle => 'Real-time sync • Per-member permissions';
+
+  @override
+  String get shareFamilyCreateJoin => 'Create or join a family to share';
+
+  @override
+  String get shareFamilyRequiresCloudSync => 'Requires Cloud Sync subscription';
+
+  @override
+  String get shareFamilyUpgradeMessage => 'Upgrade to Cloud Sync to share cookbooks and lists with your family in real-time.';
+
+  @override
+  String get shareFamilySignIn => 'Sign in to use family sharing';
+
+  @override
+  String get shareFamilySetupInSettings => 'Create or join a family in Settings → Family Sharing';
+
+  @override
+  String get shareSharedWith => 'Shared with';
+
+  @override
+  String get shareRevoked => 'Share revoked';
+
+  @override
+  String get shareSignInRequired => 'Sign in to create share links';
+
+  @override
+  String get shareCreateFailed => 'Failed to create link';
+
+  @override
+  String get shareNoFamilyMembers => 'No other family members to share with';
+
+  @override
+  String get shareAddFamilyMembers => 'Add family members';
+
+  @override
+  String get shareWith => 'Share with';
+
+  @override
+  String shareSharedWithMember(String name) {
+    return 'Shared with $name';
+  }
+
+  @override
+  String get shareShareFailed => 'Failed to share';
+
+  @override
+  String get shareLinkCopied => 'Link copied!';
+
+  @override
+  String shareLinkExpiresIn(int hours) {
+    return 'Expires in ${hours}h';
+  }
+
+  @override
+  String get shareRevoke => 'Revoke';
+
+  @override
+  String get shareUpgrade => 'Upgrade';
+
+  @override
+  String get sharePermReadOnly => 'Read Only';
+
+  @override
+  String get sharePermAddOnly => 'Add Only';
+
+  @override
+  String get sharePermFullEdit => 'Full Edit';
+
+  @override
+  String get sharePermFullAccess => 'Full Access';
+
+  @override
+  String get sharePermViewRecipes => 'Can view recipes';
+
+  @override
+  String get sharePermAddRecipes => 'Can add new recipes';
+
+  @override
+  String get sharePermEditRecipes => 'Can edit any recipe';
+
+  @override
+  String get sharePermViewItems => 'Can view items';
+
+  @override
+  String get sharePermAddItems => 'Can add items, edit own';
+
+  @override
+  String get sharePermEditItems => 'Can edit & delete items';
+
+  @override
+  String get shareUnknownMember => 'Unknown';
+
+  @override
+  String get subscriptionTitle => 'Subscription';
+
+  @override
+  String get subscriptionUpgradeToPro => 'Upgrade to Pro';
+
+  @override
+  String get subscriptionUnlockFeatures => 'Unlock cloud sync, smart import, and more.';
+
+  @override
+  String get subscriptionViewPlans => 'View Plans';
+
+  @override
+  String get subscriptionRestored => 'Purchases restored successfully!';
+
+  @override
+  String get subscriptionNoPurchases => 'No previous purchases found.';
+
+  @override
+  String subscriptionRestoreFailed(String error) {
+    return 'Restore failed: $error';
+  }
+
+  @override
+  String get subscriptionRestorePurchases => 'Restore purchases';
+
+  @override
+  String subscriptionCancelledUntil(String date) {
+    return 'Cancelled — access until $date';
+  }
+
+  @override
+  String get subscriptionRenews => 'Renews';
+
+  @override
+  String get subscriptionPlan => 'Plan';
+
+  @override
+  String get subscriptionLifetime => 'Lifetime — never expires';
+
+  @override
+  String get subscriptionManage => 'Manage subscription';
+
+  @override
+  String get subscriptionUnknownDate => 'Unknown';
+
+  @override
+  String get subscriptionUpgradeToUnlock => 'Upgrade to Pro to unlock';
+
+  @override
+  String get subscriptionProBadge => 'PRO';
+
+  @override
+  String get customThemeTitle => 'Custom Theme';
+
+  @override
+  String get customThemeColors => 'Colors';
+
+  @override
+  String get customThemeBackground => 'Background';
+
+  @override
+  String get customThemeBackgroundDesc => 'App background, scaffold';
+
+  @override
+  String get customThemePrimary => 'Primary';
+
+  @override
+  String get customThemePrimaryDesc => 'Buttons, highlights, app bar';
+
+  @override
+  String get customThemeAccent => 'Accent';
+
+  @override
+  String get customThemeAccentDesc => 'FAB, switches, secondary highlights';
+
+  @override
+  String get customThemeStartFromPreset => 'Start from a preset';
+
+  @override
+  String get settingsUserFallback => 'User';
+
+  @override
+  String get settingsManageSection => 'Manage';
+
+  @override
+  String get settingsExportNone => 'None Selected';
+
+  @override
+  String get settingsExportPartial => 'Partial Backup';
+
+  @override
+  String get settingsSystemLanguage => 'System';
+
+  @override
+  String get tierFamily => 'FAMILY';
+
+  @override
+  String get tierCreator => 'CREATOR';
+
+  @override
+  String get tierFreeName => 'Free';
+
+  @override
+  String get tierPremiumName => 'Premium';
+
+  @override
+  String get tierCloudSyncName => 'Cloud Sync';
+
+  @override
+  String get tierCloudSyncFamilyName => 'Cloud Sync Family';
+
+  @override
+  String get tierCreatorName => 'Creator';
+
+  @override
+  String get nutritionEstimated => 'Estimated values';
+
+  @override
+  String get nutritionTipMatch => 'Tap any ingredient to change its USDA food match';
+
+  @override
+  String get nutritionTipManual => 'Enter exact nutrition values if you know them';
+
+  @override
+  String get nutritionTipSpecific => 'Choose specific types (e.g., \"all-purpose flour\" not just \"flour\")';
+
+  @override
+  String get nutritionTipSaved => 'Your corrections are saved for future recipes';
+
+  @override
+  String get nutritionGotIt => 'Got it';
+
+  @override
+  String get nutritionScaleMultiplier => 'Scale multiplier';
+
+  @override
+  String get nutritionScaleHelper => '1.0 = full recipe';
+
+  @override
+  String nutritionOpenRecipe(String title) {
+    return 'Open $title';
+  }
+
+  @override
+  String get nutrientCal => 'Cal';
+
+  @override
+  String get nutrientSugar => 'Sugar';
+
+  @override
+  String get appearanceCustomThemeRequiresPremium => 'Custom theme requires Premium';
+
+  @override
+  String get appearancePremiumBadge => 'Premium';
+
+  @override
+  String get substitutionsAll => 'All';
+
+  @override
+  String substitutionsCount(int count, String category) {
+    return '$count substitutes • $category';
+  }
+
+  @override
+  String get colorPickerTitle => 'Pick a color';
+
+  @override
+  String get colorPickerHex => 'Hex';
+
+  @override
+  String get colorPickerSelect => 'Select';
+
+  @override
+  String get scanSelectPages => 'Select multiple pages';
+
+  @override
+  String get scanNoTextPdf => 'No text found in PDF. Try using a clearer scan or the Text paste option instead.';
+
+  @override
+  String scanLittleTextPdf(int count) {
+    return 'Very little text detected in PDF ($count characters). The scan may be too blurry. Try a higher quality PDF, or use the Text paste option instead.';
+  }
+
+  @override
+  String get scanNoTextImage => 'No text found in image. Try taking the photo in better lighting, or use the Text paste option instead.';
+
+  @override
+  String scanLittleTextImage(int count) {
+    return 'Very little text detected ($count characters). Try a clearer photo with better lighting, or use the Text paste option instead.';
+  }
+
+  @override
+  String scanProgress(int current, int total) {
+    return 'Scanning page $current of $total...';
+  }
+
+  @override
+  String get communityTagHint => 'Add custom tag...';
+
+  @override
+  String get tagPickerOrganize => 'Tags help you organize your recipes';
+
+  @override
+  String get tagPickerLoadDefaults => 'Load Default Tags';
+
+  @override
+  String get tagPickerExampleHint => 'e.g., Date Night';
+
+  @override
+  String drawerProTier(String tier) {
+    return 'Pro · $tier';
+  }
+
+  @override
+  String get accountStoreFallback => 'Store';
 }

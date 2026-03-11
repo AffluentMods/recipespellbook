@@ -2369,6 +2369,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get typeDeleteHint => '删除';
 
   @override
+  String get resetScopeLocal => '本地数据';
+
+  @override
+  String get resetScopeCloud => '云端数据';
+
+  @override
+  String get resetScopeAll => '所有数据和设置';
+
+  @override
   String get resetEverything => '重置所有';
 
   @override
@@ -3796,6 +3805,57 @@ class AppLocalizationsZh extends AppLocalizations {
   String get accountTitle => '账户';
 
   @override
+  String get accountSubscription => '订阅';
+
+  @override
+  String get accountManageSubscription => '管理订阅';
+
+  @override
+  String get accountCloudSync => '云同步';
+
+  @override
+  String get accountSyncNow => '立即同步';
+
+  @override
+  String get accountIntegrations => '集成';
+
+  @override
+  String get accountDangerZone => '危险区域';
+
+  @override
+  String get purchasesRestored => '购买已成功恢复！';
+
+  @override
+  String get noPurchasesFound => '未找到以前的购买记录。';
+
+  @override
+  String get restoreFailed => '恢复失败，请重试。';
+
+  @override
+  String get restorePurchasesLong => '恢复购买';
+
+  @override
+  String get cancelled => '已取消';
+
+  @override
+  String get accessUntil => '访问截止';
+
+  @override
+  String get renews => '续期';
+
+  @override
+  String get plan => '套餐';
+
+  @override
+  String get upgradeDescription => '解锁云同步、智能导入等更多功能。';
+
+  @override
+  String get syncDescription => '在设备之间同步您的食谱。';
+
+  @override
+  String get sync => '同步';
+
+  @override
   String get signInToSync => '登录以同步';
 
   @override
@@ -4605,6 +4665,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get compareSmartImportCloud => '10/mo';
 
   @override
+  String get compareCloudStorage => '云存储';
+
+  @override
+  String get compareCloudStorageBasic => '基础';
+
+  @override
+  String get compareCloudStorageStandard => '标准';
+
+  @override
+  String get compareCloudStorageExtended => '扩展';
+
+  @override
   String get printOf => '/';
 
   @override
@@ -4815,6 +4887,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsNotifBuddySubtitle => '每日任务重置和经验值提醒';
+
+  @override
+  String get settingsNotifManagePreferences => '管理通知偏好设置';
+
+  @override
+  String get settingsNotifNewDownloads => '新下载';
+
+  @override
+  String get settingsNotifNewDownloadsSubtitle => '当有人下载您发布的食谱时';
+
+  @override
+  String get settingsNotifRatingUpdates => '评分更新';
+
+  @override
+  String get settingsNotifRatingUpdatesSubtitle => '当您发布的食谱获得新评分时';
+
+  @override
+  String get settingsNotifComments => '评论';
+
+  @override
+  String get settingsNotifCommentsSubtitle => '当有人评论您的食谱时';
+
+  @override
+  String get settingsNotifSyncNote => '通知偏好设置与您的账户同步。';
 
   @override
   String get tuesday => '周二';
@@ -6605,10 +6701,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importGuideCategoryOtherApps => '其他食谱应用';
 
   @override
-  String get importGuideCategoryAi => 'AI Import';
+  String get importGuideCategoryAi => 'AI导入';
 
   @override
-  String get importGuideTagNew => 'New';
+  String get importGuideTagNew => '新功能';
 
   @override
   String get importGuideScreenshotNeeded => '需要截图';
@@ -6902,40 +6998,40 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importGuideTextStep4Desc => '检查解析的食谱，进行调整，然后保存。';
 
   @override
-  String get importGuideAiTitle => 'AI (ChatGPT, Claude, etc.)';
+  String get importGuideAiTitle => 'AI（ChatGPT、Claude等）';
 
   @override
-  String get importGuideAiSubtitle => 'Generate recipes with AI and import them instantly';
+  String get importGuideAiSubtitle => '使用AI生成食谱并即时导入';
 
   @override
-  String get importGuideAiStep1Title => 'Open AI Import';
+  String get importGuideAiStep1Title => '打开AI导入';
 
   @override
-  String get importGuideAiStep1Desc => 'Go to Home, tap + to add a recipe, choose Import, then tap the AI button.';
+  String get importGuideAiStep1Desc => '前往首页，点击+添加食谱，选择导入，然后点击AI按钮。';
 
   @override
-  String get importGuideAiStep2Title => 'Copy the prompt';
+  String get importGuideAiStep2Title => '复制提示词';
 
   @override
-  String get importGuideAiStep2Desc => 'Tap the copy prompt button. Then open your favorite AI — ChatGPT, Claude, Gemini, or any other — and paste the prompt.';
+  String get importGuideAiStep2Desc => '点击复制提示词按钮。然后打开您喜欢的AI — ChatGPT、Claude、Gemini或其他 — 粘贴提示词。';
 
   @override
-  String get importGuideAiStep3Title => 'Copy the AI\'s response';
+  String get importGuideAiStep3Title => '复制AI的回复';
 
   @override
-  String get importGuideAiStep3Desc => 'The AI will generate a recipe in JSON format. Copy the entire response.';
+  String get importGuideAiStep3Desc => 'AI将以JSON格式生成食谱。复制完整的回复。';
 
   @override
-  String get importGuideAiStep4Title => 'Paste into Recipe Spellbook';
+  String get importGuideAiStep4Title => '粘贴到Recipe Spellbook';
 
   @override
-  String get importGuideAiStep4Desc => 'Go back to Recipe Spellbook, tap the paste button, then tap Preview to see the parsed recipe.';
+  String get importGuideAiStep4Desc => '返回Recipe Spellbook，点击粘贴按钮，然后点击预览查看解析后的食谱。';
 
   @override
-  String get importGuideAiStep5Title => 'Preview & import';
+  String get importGuideAiStep5Title => '预览并导入';
 
   @override
-  String get importGuideAiStep5Desc => 'Check that everything looks correct, then tap Import to save the recipe to your cookbook.';
+  String get importGuideAiStep5Desc => '确认一切正确后，点击导入将食谱保存到您的食谱簿。';
 
   @override
   String get importGuideOtherAppsTitle => '其他食谱应用';
@@ -7004,150 +7100,222 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importGuideDeviceTransferStep4Tip => '有付费账户？只需在新设备上登录，一切会自动同步。';
 
   @override
-  String get faqTitle => 'FAQs';
+  String get faqTitle => '常见问题';
 
   @override
-  String get faqHeroTitle => 'Frequently asked questions';
+  String get faqHeroTitle => '常见问题';
 
   @override
-  String get faqHeroSubtitle => 'Find answers and step-by-step guides for common features.';
+  String get faqHeroSubtitle => '查找常见功能的答案和分步指南。';
 
   @override
-  String get faqHowToGuides => 'How-to Guides';
+  String get faqHowToGuides => '操作指南';
 
   @override
-  String get faqCommonQuestions => 'Common Questions';
+  String get faqCommonQuestions => '常见问题';
 
   @override
-  String get faqSeeHowTo => 'See how-to guide';
+  String get faqSeeHowTo => '查看操作指南';
 
   @override
   String faqStepsCount(int count) {
-    return '$count steps';
+    return '$count个步骤';
   }
 
   @override
-  String get faqAddHeadersTitle => 'How to add headers';
+  String get faqAddHeadersTitle => '如何添加标题';
 
   @override
-  String get faqAddHeadersSubtitle => 'Organize your recipe ingredients and steps into sections';
+  String get faqAddHeadersSubtitle => '将食谱的食材和步骤整理成分区';
 
   @override
-  String get faqAddHeadersStep1Title => 'Open the recipe editor';
+  String get faqAddHeadersStep1Title => '打开食谱编辑器';
 
   @override
-  String get faqAddHeadersStep1Desc => 'Open a recipe and tap the edit icon.';
+  String get faqAddHeadersStep1Desc => '打开一个食谱，点击编辑图标。';
 
   @override
-  String get faqAddHeadersStep2Title => 'Add a header';
+  String get faqAddHeadersStep2Title => '添加标题';
 
   @override
-  String get faqAddHeadersStep2Desc => 'Tap the \'Add Header\' button to insert a section header.';
+  String get faqAddHeadersStep2Desc => '点击「添加标题」按钮来插入一个分区标题。';
 
   @override
-  String get faqAddHeadersStep3Title => 'Open the header menu';
+  String get faqAddHeadersStep3Title => '打开标题菜单';
 
   @override
-  String get faqAddHeadersStep3Desc => 'Tap the three dots (⋮) next to the header for more options.';
+  String get faqAddHeadersStep3Desc => '点击标题旁边的三个点（⋮）查看更多选项。';
 
   @override
-  String get faqAddHeadersStep4Title => 'Reorder your headers';
+  String get faqAddHeadersStep4Title => '重新排列标题';
 
   @override
-  String get faqAddHeadersStep4Desc => 'Tap Sort Order to rearrange. Drag the ≡ handle to move headers up or down.';
+  String get faqAddHeadersStep4Desc => '点击排序顺序来重新排列。拖动≡图标来上下移动标题。';
 
   @override
-  String get faqAddHeadersStep4Tip => 'You can drag headers by holding the ≡ (two lines) handle on the left side.';
+  String get faqAddHeadersStep4Tip => '您可以通过长按左侧的≡（两条线）图标来拖动标题。';
 
   @override
-  String get faqAddHeadersStep5Title => 'Save your changes';
+  String get faqAddHeadersStep5Title => '保存更改';
 
   @override
-  String get faqAddHeadersStep5Desc => 'Tap the save button to keep your new headers.';
+  String get faqAddHeadersStep5Desc => '点击保存按钮以保留您的新标题。';
 
   @override
-  String get faqAddHeadersStep6Title => 'Done!';
+  String get faqAddHeadersStep6Title => '完成！';
 
   @override
-  String get faqAddHeadersStep6Desc => 'Your recipe now has organized sections with headers.';
+  String get faqAddHeadersStep6Desc => '您的食谱现在有了带标题的分区。';
 
   @override
-  String get faqAddSublinkedTitle => 'How to add sublinked recipes';
+  String get faqAddSublinkedTitle => '如何添加子链接食谱';
 
   @override
-  String get faqAddSublinkedSubtitle => 'Link related recipes together for quick access';
+  String get faqAddSublinkedSubtitle => '将相关食谱链接在一起，快速访问';
 
   @override
-  String get faqAddSublinkedStep1Title => 'Open the recipe editor';
+  String get faqAddSublinkedStep1Title => '打开食谱编辑器';
 
   @override
-  String get faqAddSublinkedStep1Desc => 'Open a recipe and tap the edit icon.';
+  String get faqAddSublinkedStep1Desc => '打开一个食谱，点击编辑图标。';
 
   @override
-  String get faqAddSublinkedStep2Title => 'Open the menu';
+  String get faqAddSublinkedStep2Title => '打开菜单';
 
   @override
-  String get faqAddSublinkedStep2Desc => 'Tap the three dots (⋮) in the edit screen.';
+  String get faqAddSublinkedStep2Desc => '在编辑界面点击三个点（⋮）。';
 
   @override
-  String get faqAddSublinkedStep3Title => 'Tap Link Recipe';
+  String get faqAddSublinkedStep3Title => '点击「链接食谱」';
 
   @override
-  String get faqAddSublinkedStep3Desc => 'Select \'Link Recipe\' from the menu.';
+  String get faqAddSublinkedStep3Desc => '从菜单中选择「链接食谱」。';
 
   @override
-  String get faqAddSublinkedStep4Title => 'Choose a recipe to link';
+  String get faqAddSublinkedStep4Title => '选择要链接的食谱';
 
   @override
-  String get faqAddSublinkedStep4Desc => 'Tap the link icon next to the recipe you want to connect (e.g., Pizza Dough).';
+  String get faqAddSublinkedStep4Desc => '点击要关联的食谱（如披萨面团）旁边的链接图标。';
 
   @override
-  String get faqAddSublinkedStep5Title => 'Save your changes';
+  String get faqAddSublinkedStep5Title => '保存更改';
 
   @override
-  String get faqAddSublinkedStep5Desc => 'Tap the save icon to keep the linked recipe.';
+  String get faqAddSublinkedStep5Desc => '点击保存图标以保留链接的食谱。';
 
   @override
-  String get faqAddSublinkedStep6Title => 'Done!';
+  String get faqAddSublinkedStep6Title => '完成！';
 
   @override
-  String get faqAddSublinkedStep6Desc => 'The linked recipe now appears in your recipe, ready to tap and view.';
+  String get faqAddSublinkedStep6Desc => '链接的食谱现在显示在您的食谱中，点击即可查看。';
 
   @override
-  String get faqWhatAreHeadersTitle => 'What are headers?';
+  String get faqWhatAreHeadersTitle => '什么是标题？';
 
   @override
-  String get faqWhatAreHeadersSubtitle => 'Organize recipes into sections';
+  String get faqWhatAreHeadersSubtitle => '将食谱整理成分区';
 
   @override
-  String get faqWhatAreHeadersAnswer => 'Headers let you divide your recipe ingredients and steps into sections. For example, you could have separate sections for \'Sauce\', \'Dough\', and \'Topping\' in a pizza recipe. They make long recipes much easier to follow.';
+  String get faqWhatAreHeadersAnswer => '标题可以将食谱的食材和步骤分成不同区域。例如，在披萨食谱中，您可以为「酱料」、「面团」和「配料」创建单独的区域。它们让较长的食谱更容易跟随。';
 
   @override
-  String get faqWhatAreSublinkedTitle => 'What are sublinked recipes?';
+  String get faqWhatAreSublinkedTitle => '什么是子链接食谱？';
 
   @override
-  String get faqWhatAreSublinkedSubtitle => 'Connect related recipes together';
+  String get faqWhatAreSublinkedSubtitle => '将相关食谱连接在一起';
 
   @override
-  String get faqWhatAreSublinkedAnswer => 'Sublinked recipes let you connect related recipes together. For example, a Margherita Pizza recipe can link to your Pizza Dough recipe. When viewing the main recipe, you can tap the linked recipe to jump straight to it — no searching needed.';
+  String get faqWhatAreSublinkedAnswer => '子链接食谱可以将相关食谱连接在一起。例如，玛格丽特披萨食谱可以链接到您的披萨面团食谱。查看主食谱时，您可以点击链接的食谱直接跳转 — 无需搜索。';
 
   @override
-  String get faqImportFailedTitle => 'Why did my import fail?';
+  String get faqMacroCalcTitle => '如何使用宏量营养素计算器';
 
   @override
-  String get faqImportFailedSubtitle => 'Common reasons and fixes';
+  String get faqMacroCalcSubtitle => '自动计算任何食谱的卡路里和宏量营养素';
 
   @override
-  String get faqImportFailedAnswer => 'Imports can fail for a few reasons:\n\n• The website may block automated access — try copying the recipe text and using Text Import instead.\n• The link may have expired or be private — make sure it’s a public link.\n• Some sites use formats that are harder to parse — try the AI import as an alternative.\n• Check your internet connection and try again.';
+  String get faqMacroCalcStep1Title => '打开食谱';
 
   @override
-  String get faqDeviceTransferTitle => 'Can I import from other devices?';
+  String get faqMacroCalcStep1Desc => '打开任意食谱并滚动到营养部分。';
 
   @override
-  String get faqDeviceTransferSubtitle => 'Transfer recipes between phones and tablets';
+  String get faqMacroCalcStep2Title => '点击计算';
 
   @override
-  String get faqDeviceTransferAnswer => 'Yes! Use the Device Transfer feature in Settings > Data > Device Transfer. Generate a code on your old device and enter it on your new one. All your recipes, cookbooks, and images will be transferred.';
+  String get faqMacroCalcStep2Desc => '点击空的营养部分打开计算器。显示“点击计算”。';
+
+  @override
+  String get faqMacroCalcStep3Title => '自动分析';
+
+  @override
+  String get faqMacroCalcStep3Desc => '计算器自动将您的食材与USDA食品数据库进行匹配，计算卡路里、蛋白质、碳水化合物、脂肪等。';
+
+  @override
+  String get faqMacroCalcStep4Title => '手动输入';
+
+  @override
+  String get faqMacroCalcStep4Desc => '点击“手动输入”可以手动编辑营养值。';
+
+  @override
+  String get faqMacroCalcStep5Title => '查看食材匹配';
+
+  @override
+  String get faqMacroCalcStep5Desc => '向下滚动查看每种食材与USDA食品的匹配情况。关联食谱会使用其自身的营养数据。';
+
+  @override
+  String get faqMacroCalcStep5Tip => '不确定什么是关联食谱？请查看FAQ中的“什么是关联食谱？”部分！';
+
+  @override
+  String get faqMacroCalcStep6Title => '浏览USDA数据库';
+
+  @override
+  String get faqMacroCalcStep6Desc => '点击任何食材可以在USDA数据库中搜索更好的匹配。';
+
+  @override
+  String get faqMacroCalcStep7Title => '关联食谱营养';
+
+  @override
+  String get faqMacroCalcStep7Desc => '与其他食谱关联的食材会显示关联食谱的营养数据。您可以调整比例。';
+
+  @override
+  String get faqMacroCalcStep8Title => '保存结果';
+
+  @override
+  String get faqMacroCalcStep8Desc => '点击保存以存储营养数据。宏量营养素将以图表和每份详细分解的形式显示在食谱上。';
+
+  @override
+  String get faqMacroCalcStep9Title => '自定义显示';
+
+  @override
+  String get faqMacroCalcStep9Desc => '进入设置 > 营养显示，选择要显示的营养素和图表样式。';
+
+  @override
+  String get faqWhatIsMacroCalcTitle => '什么是宏量营养素计算器？';
+
+  @override
+  String get faqWhatIsMacroCalcSubtitle => '食谱自动营养估算';
+
+  @override
+  String get faqWhatIsMacroCalcAnswer => '宏量营养素计算器通过将每种食材与USDA食品数据库进行匹配，自动估算食谱的营养成分。它计算卡路里、蛋白质、碳水化合物、脂肪、膳食纤维、糖、钠等——全部按每份计算。您可以在任何食谱的营养部分找到它。';
+
+  @override
+  String get faqImportFailedTitle => '为什么导入失败了？';
+
+  @override
+  String get faqImportFailedSubtitle => '常见原因和解决方法';
+
+  @override
+  String get faqImportFailedAnswer => '导入失败可能有以下原因：\n\n• 网站可能阻止了自动访问 — 尝试复制食谱文本并使用文本导入。\n• 链接可能已过期或为私密链接 — 请确保是公开链接。\n• 某些网站使用难以解析的格式 — 尝试使用AI导入作为替代方案。\n• 检查您的网络连接并重试。';
+
+  @override
+  String get faqDeviceTransferTitle => '可以从其他设备导入吗？';
+
+  @override
+  String get faqDeviceTransferSubtitle => '在手机和平板之间传输食谱';
+
+  @override
+  String get faqDeviceTransferAnswer => '可以！使用设置 > 数据 > 设备间传输中的设备间传输功能。在旧设备上生成代码，在新设备上输入。所有食谱、食谱簿和图片都会被传输。';
 
   @override
   String get themeFrost => '冰霜';
@@ -7160,6 +7328,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get themeAlchemist => '炼金术士';
+
+  @override
+  String get themeMatcha => '抹茶';
+
+  @override
+  String get themeCustom => '自定义';
 
   @override
   String get communitySortTopRated => '评分最高';
@@ -7349,4 +7523,513 @@ class AppLocalizationsZh extends AppLocalizations {
   String communityPublishUploadInProgress(int current, int total) {
     return '发布中... ($current/$total 张图片)';
   }
+
+  @override
+  String get surpriseMeTitle => '给我惊喜！';
+
+  @override
+  String get surpriseMeSubtitle => '今天做什么菜？';
+
+  @override
+  String get hintNutritionCalculator => '你知道吗？点击营养图标即可自动计算任何食谱的营养价值。';
+
+  @override
+  String get hintCookingScreen => '试试烹饪模式！在任何食谱上点击“烹饪”，即可获得免提逐步指导。';
+
+  @override
+  String get hintIngredientHeaders => '提示：在配料中输入以“:”结尾的行来创建分节标题。';
+
+  @override
+  String get hintImportMethods => '从网址、照片、PDF甚至Instagram和TikTok导入食谱！';
+
+  @override
+  String get hintMealPlanAutoFill => '将食谱拖入你的餐食计划，或点击某天从你的收藏中选择。';
+
+  @override
+  String get hintRecipeScaling => '点击任何食谱的份量数来增减配料用量。';
+
+  @override
+  String get hintShoppingListGen => '一键将食谱配料添加到购物清单。';
+
+  @override
+  String get hintRecipeNotes => '给任何食谱添加个人笔记——技巧、修改或回忆。';
+
+  @override
+  String get hintCookbookOrganization => '创建多个食谱本，按主题或场合整理你的食谱。';
+
+  @override
+  String get hintTagSystem => '为食谱添加标签以便筛选——创建自定义标签如“快手”、“收藏”等。';
+
+  @override
+  String get allergyMyAllergies => '我的过敏';
+
+  @override
+  String get allergyDisabledTab => '已禁用';
+
+  @override
+  String get allergyNoDisabledTitle => '没有禁用的警告';
+
+  @override
+  String get allergyNoDisabledSubtitle => '当您禁用食谱的过敏警告时，它们会显示在这里，以便您可以恢复。';
+
+  @override
+  String get allergyDisabledInfo => '这些食谱已禁用过敏警告。点击恢复。';
+
+  @override
+  String trashRestoredMessage(String title) {
+    return '已恢复“$title”';
+  }
+
+  @override
+  String get nutrientCalories => '卡路里';
+
+  @override
+  String get nutrientTotalFat => '总脂肪';
+
+  @override
+  String get nutrientSaturatedFat => '饮和脂肪';
+
+  @override
+  String get nutrientTransFat => '反式脂肪';
+
+  @override
+  String get nutrientMonounsaturatedFat => '单不饮和脂肪';
+
+  @override
+  String get nutrientPolyunsaturatedFat => '多不饮和脂肪';
+
+  @override
+  String get nutrientCarbohydrates => '碳水化合物';
+
+  @override
+  String get nutrientFiber => '膳食纤维';
+
+  @override
+  String get nutrientSugars => '糖';
+
+  @override
+  String get nutrientProtein => '蛋白质';
+
+  @override
+  String get nutrientCholesterol => '胆固醇';
+
+  @override
+  String get nutrientSodium => '钠';
+
+  @override
+  String get nutrientPotassium => '钾';
+
+  @override
+  String get nutrientCalcium => '钙';
+
+  @override
+  String get nutrientIron => '铁';
+
+  @override
+  String get nutrientMagnesium => '镁';
+
+  @override
+  String get nutrientPhosphorus => '磷';
+
+  @override
+  String get nutrientZinc => '锌';
+
+  @override
+  String get nutrientCopper => '铜';
+
+  @override
+  String get nutrientManganese => '锰';
+
+  @override
+  String get nutrientSelenium => '硒';
+
+  @override
+  String get nutrientVitaminA => '维生素A';
+
+  @override
+  String get nutrientVitaminC => '维生素C';
+
+  @override
+  String get nutrientVitaminD => '维生素D';
+
+  @override
+  String get nutrientVitaminE => '维生素E';
+
+  @override
+  String get nutrientVitaminK => '维生素K';
+
+  @override
+  String get nutrientThiaminB1 => '硫胺 (B1)';
+
+  @override
+  String get nutrientRiboflavinB2 => '核黄素 (B2)';
+
+  @override
+  String get nutrientNiacinB3 => '烟酸 (B3)';
+
+  @override
+  String get nutrientPantothenicAcidB5 => '泛酸 (B5)';
+
+  @override
+  String get nutrientVitaminB6 => '维生素B6';
+
+  @override
+  String get nutrientVitaminB12 => '维生素B12';
+
+  @override
+  String get nutrientFolate => '叶酸';
+
+  @override
+  String get nutrientCholine => '胆碱';
+
+  @override
+  String get nutrientCategoryMacronutrients => '宏量营养素';
+
+  @override
+  String get nutrientCategoryMinerals => '矿物质';
+
+  @override
+  String get nutrientCategoryVitamins => '维生素';
+
+  @override
+  String get nutrientCarbs => '碳水化合物';
+
+  @override
+  String get nutrientFat => '脂肪';
+
+  @override
+  String nutritionKcalPerServing(int count) {
+    return '$count 千卡/每份';
+  }
+
+  @override
+  String nutritionKcalTotal(int count) {
+    return '$count 千卡 合计';
+  }
+
+  @override
+  String get shareShoppingList => '共享购物清单';
+
+  @override
+  String get shareOneTimeLink => '一次性链接';
+
+  @override
+  String get shareOneTimeLinkSubtitle => '免费 • 24小时有效 • 仅查看/下载';
+
+  @override
+  String get shareGenerateLink => '生成链接';
+
+  @override
+  String get shareFamilyShare => '家庭共享';
+
+  @override
+  String get shareFamilySyncSubtitle => '实时同步 · 按成员设置权限';
+
+  @override
+  String get shareFamilyCreateJoin => '创建或加入家庭以共享';
+
+  @override
+  String get shareFamilyRequiresCloudSync => '需要Cloud Sync订阅';
+
+  @override
+  String get shareFamilyUpgradeMessage => '升级到Cloud Sync，与家人实时共享食谱本和清单。';
+
+  @override
+  String get shareFamilySignIn => '登录以使用家庭共享';
+
+  @override
+  String get shareFamilySetupInSettings => '在设置 → 家庭共享中创建或加入家庭';
+
+  @override
+  String get shareSharedWith => '已共享给';
+
+  @override
+  String get shareRevoked => '共享已撤销';
+
+  @override
+  String get shareSignInRequired => '登录以创建共享链接';
+
+  @override
+  String get shareCreateFailed => '创建链接失败';
+
+  @override
+  String get shareNoFamilyMembers => '没有其他家庭成员可共享';
+
+  @override
+  String get shareAddFamilyMembers => '添加家庭成员';
+
+  @override
+  String get shareWith => '共享给';
+
+  @override
+  String shareSharedWithMember(String name) {
+    return '已与$name共享';
+  }
+
+  @override
+  String get shareShareFailed => '共享失败';
+
+  @override
+  String get shareLinkCopied => '链接已复制！';
+
+  @override
+  String shareLinkExpiresIn(int hours) {
+    return '$hours小时后过期';
+  }
+
+  @override
+  String get shareRevoke => '撤销';
+
+  @override
+  String get shareUpgrade => '升级';
+
+  @override
+  String get sharePermReadOnly => '只读';
+
+  @override
+  String get sharePermAddOnly => '仅添加';
+
+  @override
+  String get sharePermFullEdit => '完全编辑';
+
+  @override
+  String get sharePermFullAccess => '完全访问';
+
+  @override
+  String get sharePermViewRecipes => '可查看食谱';
+
+  @override
+  String get sharePermAddRecipes => '可添加新食谱';
+
+  @override
+  String get sharePermEditRecipes => '可编辑任何食谱';
+
+  @override
+  String get sharePermViewItems => '可查看项目';
+
+  @override
+  String get sharePermAddItems => '可添加项目，编辑自己的';
+
+  @override
+  String get sharePermEditItems => '可编辑和删除项目';
+
+  @override
+  String get shareUnknownMember => '未知';
+
+  @override
+  String get subscriptionTitle => '订阅';
+
+  @override
+  String get subscriptionUpgradeToPro => '升级到Pro';
+
+  @override
+  String get subscriptionUnlockFeatures => '解锁云同步、智能导入等功能。';
+
+  @override
+  String get subscriptionViewPlans => '查看方案';
+
+  @override
+  String get subscriptionRestored => '购买已成功恢复！';
+
+  @override
+  String get subscriptionNoPurchases => '未找到以前的购买记录。';
+
+  @override
+  String subscriptionRestoreFailed(String error) {
+    return '恢复失败：$error';
+  }
+
+  @override
+  String get subscriptionRestorePurchases => '恢复购买';
+
+  @override
+  String subscriptionCancelledUntil(String date) {
+    return '已取消 — 可使用至$date';
+  }
+
+  @override
+  String get subscriptionRenews => '续订日期';
+
+  @override
+  String get subscriptionPlan => '方案';
+
+  @override
+  String get subscriptionLifetime => '终身 — 永不过期';
+
+  @override
+  String get subscriptionManage => '管理订阅';
+
+  @override
+  String get subscriptionUnknownDate => '未知';
+
+  @override
+  String get subscriptionUpgradeToUnlock => '升级到Pro以解锁';
+
+  @override
+  String get subscriptionProBadge => 'PRO';
+
+  @override
+  String get customThemeTitle => '自定义主题';
+
+  @override
+  String get customThemeColors => '颜色';
+
+  @override
+  String get customThemeBackground => '背景';
+
+  @override
+  String get customThemeBackgroundDesc => '应用背景、脚手架';
+
+  @override
+  String get customThemePrimary => '主色';
+
+  @override
+  String get customThemePrimaryDesc => '按钮、高亮、应用栏';
+
+  @override
+  String get customThemeAccent => '强调色';
+
+  @override
+  String get customThemeAccentDesc => 'FAB、开关、次要高亮';
+
+  @override
+  String get customThemeStartFromPreset => '从预设开始';
+
+  @override
+  String get settingsUserFallback => '用户';
+
+  @override
+  String get settingsManageSection => '管理';
+
+  @override
+  String get settingsExportNone => '未选择';
+
+  @override
+  String get settingsExportPartial => '部分备份';
+
+  @override
+  String get settingsSystemLanguage => '系统';
+
+  @override
+  String get tierFamily => 'FAMILY';
+
+  @override
+  String get tierCreator => 'CREATOR';
+
+  @override
+  String get tierFreeName => '免费';
+
+  @override
+  String get tierPremiumName => '高级版';
+
+  @override
+  String get tierCloudSyncName => 'Cloud Sync';
+
+  @override
+  String get tierCloudSyncFamilyName => 'Cloud Sync 家庭版';
+
+  @override
+  String get tierCreatorName => '创作者';
+
+  @override
+  String get nutritionEstimated => '估算值';
+
+  @override
+  String get nutritionTipMatch => '点击任何食材以更改其USDA匹配';
+
+  @override
+  String get nutritionTipManual => '如果您知道确切的营养值，请直接输入';
+
+  @override
+  String get nutritionTipSpecific => '选择具体种类（例如「中筋面粉」而非「面粉」）';
+
+  @override
+  String get nutritionTipSaved => '您的修正会保存以用于未来的食谱';
+
+  @override
+  String get nutritionGotIt => '知道了';
+
+  @override
+  String get nutritionScaleMultiplier => '缩放倍数';
+
+  @override
+  String get nutritionScaleHelper => '1.0 = 整个食谱';
+
+  @override
+  String nutritionOpenRecipe(String title) {
+    return '打开$title';
+  }
+
+  @override
+  String get nutrientCal => '千卡';
+
+  @override
+  String get nutrientSugar => '糖';
+
+  @override
+  String get appearanceCustomThemeRequiresPremium => '自定义主题需要高级版';
+
+  @override
+  String get appearancePremiumBadge => '高级版';
+
+  @override
+  String get substitutionsAll => '全部';
+
+  @override
+  String substitutionsCount(int count, String category) {
+    return '$count种替代品 • $category';
+  }
+
+  @override
+  String get colorPickerTitle => '选择颜色';
+
+  @override
+  String get colorPickerHex => 'Hex';
+
+  @override
+  String get colorPickerSelect => '选择';
+
+  @override
+  String get scanSelectPages => '选择多个页面';
+
+  @override
+  String get scanNoTextPdf => '在PDF中未找到文字。请尝试更清晰的扫描或文本粘贴选项。';
+
+  @override
+  String scanLittleTextPdf(int count) {
+    return 'PDF中检测到的文字很少（$count个字符）。扫描可能太模糊。请尝试更高质量的PDF，或使用文本粘贴选项。';
+  }
+
+  @override
+  String get scanNoTextImage => '在图片中未找到文字。请尝试在更好的光线下拍照，或使用文本粘贴选项。';
+
+  @override
+  String scanLittleTextImage(int count) {
+    return '检测到的文字很少（$count个字符）。请尝试在更好的光线下拍摄更清晰的照片，或使用文本粘贴选项。';
+  }
+
+  @override
+  String scanProgress(int current, int total) {
+    return '正在扫描第$current页，共$total页...';
+  }
+
+  @override
+  String get communityTagHint => '添加自定义标签...';
+
+  @override
+  String get tagPickerOrganize => '标签帮助您整理食谱';
+
+  @override
+  String get tagPickerLoadDefaults => '加载默认标签';
+
+  @override
+  String get tagPickerExampleHint => '例如：约会之夜';
+
+  @override
+  String drawerProTier(String tier) {
+    return 'Pro · $tier';
+  }
+
+  @override
+  String get accountStoreFallback => '商店';
 }

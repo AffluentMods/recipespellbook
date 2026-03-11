@@ -239,9 +239,15 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   Future<void> _showNutritionCalculation() async {
     if (_recipe == null || _ingredients.isEmpty) return;
 
+    // Filter out header rows — they are display-only dividers, not real ingredients
+    final realIngredients = _ingredients
+        .where((i) => i.notes != '__header__')
+        .toList();
+    if (realIngredients.isEmpty) return;
+
     final result = await NutritionCalculationSheet.show(
       context: context,
-      ingredients: _ingredients,
+      ingredients: realIngredients,
       servings: _recipe!.servings ?? '1',
       existingNutrition: _nutrition,
       recipeId: widget.recipeId,

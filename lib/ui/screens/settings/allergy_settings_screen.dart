@@ -192,7 +192,7 @@ class _AllergySettingsScreenState extends ConsumerState<AllergySettingsScreen>
             tabs: [
               Tab(
                 icon: const Icon(Icons.warning_amber),
-                text: 'My Allergies',
+                text: l10n.allergyMyAllergies,
               ),
               Tab(
                 icon: Badge(
@@ -200,7 +200,7 @@ class _AllergySettingsScreenState extends ConsumerState<AllergySettingsScreen>
                   label: Text('$dismissedCount'),
                   child: const Icon(Icons.visibility_off),
                 ),
-                text: 'Disabled',
+                text: l10n.allergyDisabledTab,
               ),
             ],
           ),
@@ -510,14 +510,14 @@ class _DisabledWarningsTab extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'No Disabled Warnings',
+                l10n.allergyNoDisabledTitle,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'When you dismiss allergy warnings on recipes, they will appear here so you can restore them later.',
+                l10n.allergyNoDisabledSubtitle,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.outline,
@@ -548,7 +548,7 @@ class _DisabledWarningsTab extends ConsumerWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
-                  'These recipes have had their allergy warnings disabled. Tap to restore warnings.',
+                  l10n.allergyDisabledInfo,
                   style: theme.textTheme.bodyMedium,
                 ),
               ),

@@ -425,7 +425,7 @@ class _TagSelectorSheetState extends ConsumerState<_TagSelectorSheet> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Tags help you organize your recipes',
+              l10n.tagPickerOrganize,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.outline,
               ),
@@ -440,7 +440,7 @@ class _TagSelectorSheetState extends ConsumerState<_TagSelectorSheet> {
                 setState(() {});
               },
               icon: const Icon(Icons.refresh),
-              label: const Text('Load Default Tags'),
+              label: Text(l10n.tagPickerLoadDefaults),
             ),
           ],
         ),
@@ -499,7 +499,7 @@ class _TagSelectorSheetState extends ConsumerState<_TagSelectorSheet> {
                   autofocus: initialName == null || initialName.isEmpty,
                   decoration: InputDecoration(
                     labelText: l10n.tagsEnterName,
-                    hintText: 'e.g., Date Night',
+                    hintText: l10n.tagPickerExampleHint,
                   ),
                   textCapitalization: TextCapitalization.words,
                 ),

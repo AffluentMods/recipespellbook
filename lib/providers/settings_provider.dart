@@ -77,6 +77,11 @@ class AppSettings {
   // Surprise Me card visibility (home screen)
   final bool showSurpriseMe;
 
+  // Custom theme colors (for AppColorTheme.custom, premium-only)
+  final Color? customBgColor;
+  final Color? customPrimaryColor;
+  final Color? customAccentColor;
+
   /// Default nutrients shown in the nutrition widget
   static const Set<String> defaultEnabledNutrients = {
     'calories', 'protein', 'carbohydrates', 'fat', 'fiber', 'sugar', 'sodium',
@@ -105,6 +110,9 @@ class AppSettings {
     this.weekStartDay = 1,
     this.ingredientLayout = IngredientLayout.inline,
     this.showSurpriseMe = true,
+    this.customBgColor,
+    this.customPrimaryColor,
+    this.customAccentColor,
     Set<String>? enabledNutrients,
   }) : seedColor = appTheme.seedColor,
         enabledNutrients = enabledNutrients ?? defaultEnabledNutrients;
@@ -133,6 +141,9 @@ class AppSettings {
     int? weekStartDay,
     IngredientLayout? ingredientLayout,
     bool? showSurpriseMe,
+    Color? customBgColor,
+    Color? customPrimaryColor,
+    Color? customAccentColor,
   }) {
     return AppSettings(
       appTheme: appTheme ?? this.appTheme,
@@ -158,6 +169,9 @@ class AppSettings {
       weekStartDay: weekStartDay ?? this.weekStartDay,
       ingredientLayout: ingredientLayout ?? this.ingredientLayout,
       showSurpriseMe: showSurpriseMe ?? this.showSurpriseMe,
+      customBgColor: customBgColor ?? this.customBgColor,
+      customPrimaryColor: customPrimaryColor ?? this.customPrimaryColor,
+      customAccentColor: customAccentColor ?? this.customAccentColor,
     );
   }
 }
@@ -236,6 +250,9 @@ class SettingsNotifier extends Notifier<AppSettings> {
   static const _weekStartDayKey = 'week_start_day';
   static const _ingredientLayoutKey = 'ingredient_layout';
   static const _showSurpriseMeKey = 'show_surprise_me';
+  static const _customBgKey = 'custom_theme_bg';
+  static const _customPrimaryKey = 'custom_theme_primary';
+  static const _customAccentKey = 'custom_theme_accent';
 
   @override
   AppSettings build() {
@@ -363,6 +380,14 @@ class SettingsNotifier extends Notifier<AppSettings> {
     // Load Surprise Me visibility
     final showSurpriseMe = prefs.getBool(_showSurpriseMeKey) ?? true;
 
+    // Load custom theme colors
+    final customBgInt = prefs.getInt(_customBgKey);
+    final customPrimaryInt = prefs.getInt(_customPrimaryKey);
+    final customAccentInt = prefs.getInt(_customAccentKey);
+    final customBgColor = customBgInt != null ? Color(customBgInt) : null;
+    final customPrimaryColor = customPrimaryInt != null ? Color(customPrimaryInt) : null;
+    final customAccentColor = customAccentInt != null ? Color(customAccentInt) : null;
+
     state = AppSettings(
       appTheme: appTheme,
       themeMode: themeMode,
@@ -387,6 +412,9 @@ class SettingsNotifier extends Notifier<AppSettings> {
       weekStartDay: weekStartDay,
       ingredientLayout: ingredientLayout,
       showSurpriseMe: showSurpriseMe,
+      customBgColor: customBgColor,
+      customPrimaryColor: customPrimaryColor,
+      customAccentColor: customAccentColor,
     );
   }
 
@@ -434,6 +462,21 @@ class SettingsNotifier extends Notifier<AppSettings> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_themeKey, theme.name);
     state = state.copyWith(appTheme: theme);
+  }
+
+  /// Save custom theme colors and activate the custom theme.
+  Future<void> setCustomColors(Color bg, Color primary, Color accent) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_customBgKey, bg.toARGB32());
+    await prefs.setInt(_customPrimaryKey, primary.toARGB32());
+    await prefs.setInt(_customAccentKey, accent.toARGB32());
+    await prefs.setString(_themeKey, AppColorTheme.custom.name);
+    state = state.copyWith(
+      appTheme: AppColorTheme.custom,
+      customBgColor: bg,
+      customPrimaryColor: primary,
+      customAccentColor: accent,
+    );
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
@@ -637,6 +680,41 @@ final settingsProvider = NotifierProvider<SettingsNotifier, AppSettings>(() {
 final appColorThemeProvider = Provider<AppColorTheme>((ref) {
   return ref.watch(settingsProvider.select((s) => s.appTheme));
 });
+
+/// Provides custom theme palettes when the custom theme is active.
+/// Returns null for non-custom themes.
+final customThemePalettesProvider = Provider<({ThemePalette light, ThemePalette dark})?>(
+  (ref) {
+    final settings = ref.watch(settingsProvider);
+    if (!settings.appTheme.isCustom) return null;
+
+    final bg = settings.customBgColor ?? const Color(0xFFF5F5F5);
+    final primary = settings.customPrimaryColor ?? const Color(0xFF6750A4);
+    final accent = settings.customAccentColor ?? const Color(0xFF7D5260);
+
+    return (
+      light: ThemePalette.deriveFrom(bg: bg, primary: primary, accent: accent, isDark: false),
+      dark: ThemePalette.deriveFrom(
+        bg: _darkenForDark(bg),
+        primary: _lightenForDark(primary),
+        accent: _lightenForDark(accent),
+        isDark: true,
+      ),
+    );
+  },
+);
+
+/// Convert a user's light bg color to a dark equivalent
+Color _darkenForDark(Color c) {
+  final hsl = HSLColor.fromColor(c);
+  return hsl.withLightness((hsl.lightness * 0.15).clamp(0.05, 0.12)).toColor();
+}
+
+/// Brighten a user's primary/accent for dark mode readability
+Color _lightenForDark(Color c) {
+  final hsl = HSLColor.fromColor(c);
+  return hsl.withLightness((hsl.lightness * 0.6 + 0.4).clamp(0.55, 0.8)).toColor();
+}
 
 /// Provides just the ThemeMode for MaterialApp
 final themeModeProvider = Provider<ThemeMode>((ref) {
