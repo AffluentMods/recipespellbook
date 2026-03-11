@@ -107,9 +107,7 @@ flutter:
     - assets/images/icon.png
     - assets/images/splash_logo.png
     - assets/images/cookbook_placeholder_normal.png
-    - assets/images/cookbook_placeholder_rpg.png
     - assets/images/recipe_placeholder_normal.png
-    - assets/images/recipe_placeholder_rpg.png
     - assets/images/3rd-party/instacart_carrot.png
     - assets/images/3rd-party/instacart_carrot_white.png
     - assets/animations/
