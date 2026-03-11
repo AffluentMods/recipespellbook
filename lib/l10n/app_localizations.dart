@@ -9649,6 +9649,24 @@ abstract class AppLocalizations {
   /// **'Tags, courses, categories & more'**
   String get settingsAdvancedSubtitle;
 
+  /// No description provided for @settingsRestoreDefaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Default Recipes'**
+  String get settingsRestoreDefaults;
+
+  /// No description provided for @settingsRestoreDefaultsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-add the 10 starter recipes'**
+  String get settingsRestoreDefaultsSubtitle;
+
+  /// No description provided for @settingsRestoreDefaultsConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Add 10 starter recipes to your cookbook? Existing recipes won\'t be affected.'**
+  String get settingsRestoreDefaultsConfirm;
+
   /// No description provided for @settingsDeleteData.
   ///
   /// In en, this message translates to:
@@ -11574,6 +11592,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start with a blank cookbook'**
   String get onboardingBlankCookbook;
+
+  /// No description provided for @onboardingBlankConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with nothing?'**
+  String get onboardingBlankConfirmTitle;
+
+  /// No description provided for @onboardingBlankConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can always add the starter recipes later from Settings.'**
+  String get onboardingBlankConfirmBody;
+
+  /// No description provided for @onboardingBlankConfirmYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, start empty'**
+  String get onboardingBlankConfirmYes;
 
   /// No description provided for @onboardingSpellbookAwaits.
   ///

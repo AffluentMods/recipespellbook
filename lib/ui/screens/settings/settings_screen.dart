@@ -212,6 +212,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           icon: Icons.file_download_outlined, title: l10n.settingsImport, subtitle: l10n.settingsImportSubtitle,
           onTap: () => _showImportOptions(context, ref),
         ) : null,
+        _m(l10n.settingsRestoreDefaults, 'starter recipes default') ? _Tile(
+          icon: Icons.auto_fix_high_rounded, title: l10n.settingsRestoreDefaults, subtitle: l10n.settingsRestoreDefaultsSubtitle,
+          onTap: () => _restoreDefaultRecipes(context, ref),
+        ) : null,
         _m(l10n.settingsDeleteData, 'erase reset') ? _Tile(
           icon: Icons.delete_forever_outlined, title: l10n.settingsDeleteData, subtitle: l10n.settingsDeleteDataSubtitle,
           titleColor: theme.colorScheme.error,
@@ -325,6 +329,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SizedBox(height: 16),
       ]),
     ));
+  }
+
+  Future<void> _restoreDefaultRecipes(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.settingsRestoreDefaults),
+        content: Text(l10n.settingsRestoreDefaultsConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.actionAdd),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    try {
+      final db = ref.read(databaseProvider);
+      final count = await OnboardingService.seedDefaultRecipes(db);
+      if (context.mounted) {
+        AppSnackbar.success(context, l10n.starterRecipesAdded(count));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
+      }
+    }
   }
 
   void _showResetConfirmation(BuildContext context, WidgetRef ref) {

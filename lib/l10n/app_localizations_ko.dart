@@ -5192,6 +5192,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsAdvancedSubtitle => '태그, 코스, 카테고리 등';
 
   @override
+  String get settingsRestoreDefaults => 'Restore Default Recipes';
+
+  @override
+  String get settingsRestoreDefaultsSubtitle => 'Re-add the 10 starter recipes';
+
+  @override
+  String get settingsRestoreDefaultsConfirm => 'Add 10 starter recipes to your cookbook? Existing recipes won\'t be affected.';
+
+  @override
   String get settingsDeleteData => '데이터 삭제';
 
   @override
@@ -6261,6 +6270,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get onboardingBlankCookbook => '빈 요리책으로 시작';
+
+  @override
+  String get onboardingBlankConfirmTitle => 'Start with nothing?';
+
+  @override
+  String get onboardingBlankConfirmBody => 'You can always add the starter recipes later from Settings.';
+
+  @override
+  String get onboardingBlankConfirmYes => 'Yes, start empty';
 
   @override
   String get onboardingSpellbookAwaits => '당신의 마법서가 기다리고 있어요';

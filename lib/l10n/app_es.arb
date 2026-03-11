@@ -2799,5 +2799,11 @@
   "compareSmartImportCloud": "10/mo",
   "cloudSyncFreeTrial": "Try free for 1 week",
   "subscribeCloudSyncMonthlyTrialCta": "Start free trial — then $2.99/mo",
-  "subscribeCloudSyncYearlyTrialCta": "Start free trial — then $29.99/yr"
+  "subscribeCloudSyncYearlyTrialCta": "Start free trial — then $29.99/yr",
+  "settingsRestoreDefaults": "Restore Default Recipes",
+  "settingsRestoreDefaultsSubtitle": "Re-add the 10 starter recipes",
+  "settingsRestoreDefaultsConfirm": "Add 10 starter recipes to your cookbook? Existing recipes won't be affected.",
+  "onboardingBlankConfirmTitle": "Start with nothing?",
+  "onboardingBlankConfirmBody": "You can always add the starter recipes later from Settings.",
+  "onboardingBlankConfirmYes": "Yes, start empty"
 }

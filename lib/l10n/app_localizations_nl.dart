@@ -5244,6 +5244,15 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settingsAdvancedSubtitle => 'Labels, gangen, categorieën & meer';
 
   @override
+  String get settingsRestoreDefaults => 'Restore Default Recipes';
+
+  @override
+  String get settingsRestoreDefaultsSubtitle => 'Re-add the 10 starter recipes';
+
+  @override
+  String get settingsRestoreDefaultsConfirm => 'Add 10 starter recipes to your cookbook? Existing recipes won\'t be affected.';
+
+  @override
   String get settingsDeleteData => 'Gegevens verwijderen';
 
   @override
@@ -6313,6 +6322,15 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get onboardingBlankCookbook => 'Begin met een leeg kookboek';
+
+  @override
+  String get onboardingBlankConfirmTitle => 'Start with nothing?';
+
+  @override
+  String get onboardingBlankConfirmBody => 'You can always add the starter recipes later from Settings.';
+
+  @override
+  String get onboardingBlankConfirmYes => 'Yes, start empty';
 
   @override
   String get onboardingSpellbookAwaits => 'Je spreukenboek wacht';

@@ -5244,6 +5244,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsAdvancedSubtitle => 'Tags, tipos de prato, categorias e mais';
 
   @override
+  String get settingsRestoreDefaults => 'Restore Default Recipes';
+
+  @override
+  String get settingsRestoreDefaultsSubtitle => 'Re-add the 10 starter recipes';
+
+  @override
+  String get settingsRestoreDefaultsConfirm => 'Add 10 starter recipes to your cookbook? Existing recipes won\'t be affected.';
+
+  @override
   String get settingsDeleteData => 'Excluir Dados';
 
   @override
@@ -6313,6 +6322,15 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get onboardingBlankCookbook => 'Começar com um livro vazio';
+
+  @override
+  String get onboardingBlankConfirmTitle => 'Start with nothing?';
+
+  @override
+  String get onboardingBlankConfirmBody => 'You can always add the starter recipes later from Settings.';
+
+  @override
+  String get onboardingBlankConfirmYes => 'Yes, start empty';
 
   @override
   String get onboardingSpellbookAwaits => 'Seu livro de feitiços te espera';

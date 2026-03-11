@@ -5192,6 +5192,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAdvancedSubtitle => '标签、课程、分类等';
 
   @override
+  String get settingsRestoreDefaults => 'Restore Default Recipes';
+
+  @override
+  String get settingsRestoreDefaultsSubtitle => 'Re-add the 10 starter recipes';
+
+  @override
+  String get settingsRestoreDefaultsConfirm => 'Add 10 starter recipes to your cookbook? Existing recipes won\'t be affected.';
+
+  @override
   String get settingsDeleteData => '删除数据';
 
   @override
@@ -6261,6 +6270,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboardingBlankCookbook => '从空白食谱开始';
+
+  @override
+  String get onboardingBlankConfirmTitle => 'Start with nothing?';
+
+  @override
+  String get onboardingBlankConfirmBody => 'You can always add the starter recipes later from Settings.';
+
+  @override
+  String get onboardingBlankConfirmYes => 'Yes, start empty';
 
   @override
   String get onboardingSpellbookAwaits => '你的魔法书在等你';

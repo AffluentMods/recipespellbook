@@ -120,6 +120,10 @@ class AppMenuDrawer extends ConsumerWidget {
                         Navigator.pop(context);
                         _triggerSync(context);
                       },
+                      onLongPress: () {
+                        Navigator.pop(context);
+                        _triggerSync(context, fullSync: true);
+                      },
                     ),
                   _DrawerItem(
                     icon: Icons.person_add_rounded,
@@ -238,15 +242,15 @@ class AppMenuDrawer extends ConsumerWidget {
     decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2)),
   );
 
-  static Future<void> _triggerSync(BuildContext context) async {
-    AppSnackbar.loading(context, 'Syncing…');
-    final result = await SyncService.instance.sync();
+  static Future<void> _triggerSync(BuildContext context, {bool fullSync = false}) async {
+    AppSnackbar.loading(context, fullSync ? 'Full sync…' : 'Syncing…');
+    final result = await SyncService.instance.sync(fullSync: fullSync);
     if (!context.mounted) return;
     AppSnackbar.dismiss(context);
     if (result.success) {
       final pushed = result.pushedCount;
       final pulled = result.pulledCount;
-      AppSnackbar.success(context, 'Synced! ↑$pushed ↓$pulled');
+      AppSnackbar.success(context, '${fullSync ? 'Full sync' : 'Synced'}! ↑$pushed ↓$pulled');
     } else {
       AppSnackbar.error(context, result.error ?? 'Sync failed');
     }
@@ -1135,7 +1139,8 @@ class _DrawerItem extends StatelessWidget {
   final String label;
   final Color? textColor;
   final VoidCallback onTap;
-  const _DrawerItem({required this.icon, required this.iconColor, required this.label, this.textColor, required this.onTap});
+  final VoidCallback? onLongPress;
+  const _DrawerItem({required this.icon, required this.iconColor, required this.label, this.textColor, required this.onTap, this.onLongPress});
 
   @override
   Widget build(BuildContext context) {
@@ -1145,6 +1150,7 @@ class _DrawerItem extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(

@@ -218,8 +218,28 @@ class _OnboardingScreenState extends State<_OnboardingScreen> {
   }
 
   Future<void> _startEmpty() async {
-    await OnboardingService.declineDefaultRecipes();
-    if (mounted) Navigator.of(context).pop();
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.onboardingBlankConfirmTitle),
+        content: Text(l10n.onboardingBlankConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.onboardingBlankConfirmYes),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await OnboardingService.declineDefaultRecipes();
+      if (mounted) Navigator.of(context).pop();
+    }
   }
 }
 
