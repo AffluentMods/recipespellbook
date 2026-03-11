@@ -20,6 +20,7 @@ import '../../../services/onboarding_service.dart';
 import '../home/home_screen.dart';
 import '../../../services/revenuecat_service.dart';
 import '../../widgets/app_snackbar.dart';
+import 'custom_theme_screen.dart';
 import 'nutrition_settings_screen.dart';
 
 // ════════════════════════════════════════════════════════════
@@ -744,7 +745,7 @@ class _TextScaleTile extends StatelessWidget {
 //  THEME SELECTION TILE + CARD
 // ════════════════════════════════════════════
 
-class _ThemeSelectionTile extends StatelessWidget {
+class _ThemeSelectionTile extends ConsumerWidget {
   final AppColorTheme currentTheme;
   final ValueChanged<AppColorTheme> onThemeSelected;
   const _ThemeSelectionTile({required this.currentTheme, required this.onThemeSelected});
@@ -768,7 +769,7 @@ class _ThemeSelectionTile extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return ListTile(
@@ -777,12 +778,14 @@ class _ThemeSelectionTile extends StatelessWidget {
       title: Text(l10n.settingsTheme, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
       subtitle: Text('${currentTheme.emoji} ${_name(context, currentTheme)}', style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
-      onTap: () => _showPicker(context),
+      onTap: () => _showPicker(context, ref),
     );
   }
 
-  void _showPicker(BuildContext context) {
+  void _showPicker(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final tier = ref.read(subscriptionProvider).tier;
+    final isPremium = tier.index >= SubscriptionTier.premium.index;
     showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) => DraggableScrollableSheet(
       expand: false, initialChildSize: 0.7, maxChildSize: 0.9, minChildSize: 0.4,
       builder: (context, sc) => SafeArea(child: Column(children: [
@@ -792,10 +795,28 @@ class _ThemeSelectionTile extends StatelessWidget {
         Expanded(child: GridView.builder(
           controller: sc, padding: const EdgeInsets.symmetric(horizontal: 16),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 1.5, crossAxisSpacing: 12, mainAxisSpacing: 12),
-          itemCount: AppColorTheme.values.where((t) => !t.isCustom).length,
+          itemCount: AppColorTheme.values.length,
           itemBuilder: (context, i) {
-            final t = AppColorTheme.values.where((t) => !t.isCustom).elementAt(i);
-            return _ThemeCard(theme: t, label: _name(context, t), isSelected: currentTheme == t, onTap: () { onThemeSelected(t); Navigator.pop(context); });
+            final t = AppColorTheme.values[i];
+            return _ThemeCard(
+              theme: t,
+              label: _name(context, t),
+              isSelected: currentTheme == t,
+              isPremiumLocked: t.isCustom && !isPremium,
+              onTap: () {
+                if (t.isCustom && !isPremium) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(AppLocalizations.of(context)!.appearanceCustomThemeRequiresPremium)),
+                  );
+                } else if (t.isCustom) {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const CustomThemeScreen()));
+                } else {
+                  onThemeSelected(t);
+                  Navigator.pop(context);
+                }
+              },
+            );
           },
         )),
         const SizedBox(height: 16),
@@ -804,9 +825,10 @@ class _ThemeSelectionTile extends StatelessWidget {
   }
 }
 
+
 class _ThemeCard extends StatelessWidget {
-  final AppColorTheme theme; final String label; final bool isSelected; final VoidCallback onTap;
-  const _ThemeCard({required this.theme, required this.label, required this.isSelected, required this.onTap});
+  final AppColorTheme theme; final String label; final bool isSelected; final bool isPremiumLocked; final VoidCallback onTap;
+  const _ThemeCard({required this.theme, required this.label, required this.isSelected, required this.onTap, this.isPremiumLocked = false});
 
   @override
   Widget build(BuildContext context) {
@@ -820,6 +842,17 @@ class _ThemeCard extends StatelessWidget {
       ),
       child: ClipRRect(borderRadius: BorderRadius.circular(isSelected ? 11 : 14), child: Stack(fit: StackFit.expand, children: [
         Image.asset(theme.bannerAsset, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Container(color: theme.seedColor.withValues(alpha: 0.3))),
+        // Premium lock badge
+        if (isPremiumLocked)
+          Positioned(top: 8, left: 8, child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(8)),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              const Icon(Icons.lock_rounded, color: Colors.amber, size: 12),
+              const SizedBox(width: 2),
+              Text(AppLocalizations.of(context)!.appearancePremiumBadge, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600)),
+            ]),
+          )),
         Positioned(left: 0, right: 0, bottom: 0, child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.black.withValues(alpha: 0.0), Colors.black.withValues(alpha: 0.65)])),

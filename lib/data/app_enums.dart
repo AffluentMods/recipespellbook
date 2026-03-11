@@ -349,31 +349,31 @@ enum AppColorTheme {
   matcha(
     label: 'Matcha',
     emoji: '🍵',
-    seedColor: Color(0xFF8B7355),
+    seedColor: Color(0xFF3B5323),
     bannerAsset: 'assets/images/themes/theme_matcha.png',
     light: ThemePalette(
-      background: Color(0xFFDAE8CE),       // Soft matcha green
-      surface: Color(0xFFC5D6B0),          // Muted sage card
-      primary: Color(0xFF8B7355),          // Warm brown/wood
-      primaryContainer: Color(0xFFD4C4A8), // Light warm stone
-      secondary: Color(0xFF5A7247),        // Deep matcha green
-      secondaryContainer: Color(0xFFB5CEAA),// Soft sage-green
-      accent: Color(0xFFA09070),           // Earthy brown
-      onBackground: Color(0xFF2A2E22),     // Dark olive text
-      onSurface: Color(0xFF2E3328),        // Warm dark green
+      background: Color(0xFFF5ECD7),       // Warm cream / bamboo
+      surface: Color(0xFFEDE4CC),          // Light parchment / wood
+      primary: Color(0xFF3B5323),          // Dark forest green
+      primaryContainer: Color(0xFFCBD8B0), // Soft sage green
+      secondary: Color(0xFF6B4226),        // Warm wood brown
+      secondaryContainer: Color(0xFFE0D2B4),// Light tan / bamboo
+      accent: Color(0xFF7A9A50),           // Matcha green accent
+      onBackground: Color(0xFF2C3320),     // Dark olive text
+      onSurface: Color(0xFF33391E),        // Deep green-brown
       onPrimary: Color(0xFFFFFFFF),
     ),
     dark: ThemePalette(
-      background: Color(0xFF111410),       // Deep green-black
-      surface: Color(0xFF1E2518),          // Dark matcha
-      primary: Color(0xFFBCA882),          // Warm light wood
-      primaryContainer: Color(0xFF4A3C28), // Deep brown
-      secondary: Color(0xFF8AAE72),        // Matcha green
-      secondaryContainer: Color(0xFF2C3A22),// Dark olive
-      accent: Color(0xFFCDB890),           // Warm gold-brown
-      onBackground: Color(0xFFDCE4D0),     // Pale sage text
-      onSurface: Color(0xFFCCD4C0),        // Light sage
-      onPrimary: Color(0xFF111410),
+      background: Color(0xFF0E1208),       // Deep forest black
+      surface: Color(0xFF1A2010),          // Dark olive
+      primary: Color(0xFF9AB87A),          // Soft matcha green
+      primaryContainer: Color(0xFF2E3E1C), // Deep forest
+      secondary: Color(0xFFD4B896),        // Warm wood / tan
+      secondaryContainer: Color(0xFF3A2A18),// Dark wood brown
+      accent: Color(0xFFB8CE8E),           // Light matcha
+      onBackground: Color(0xFFE4DCC8),     // Warm cream text
+      onSurface: Color(0xFFD8D0BC),        // Light parchment
+      onPrimary: Color(0xFF0E1208),
     ),
   );
 
