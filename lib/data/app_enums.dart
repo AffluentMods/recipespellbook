@@ -9,15 +9,15 @@ enum AppColorTheme {
     seedColor: Color(0xFFE8882A),
     bannerAsset: 'assets/images/themes/theme_spellbook.png',
     light: ThemePalette(
-      background: Color(0xFFFAF9F7),       // Clean warm white
-      surface: Color(0xFFFFFFFF),           // Pure white cards
-      primary: Color(0xFFE8882A),           // Warm orange (buttons, accents)
+      background: Color(0xFFFFF6EE),       // Warm peach cream
+      surface: Color(0xFFFFFFFF),           // White cards for contrast
+      primary: Color(0xFFD4782A),           // Warm amber-orange
       primaryContainer: Color(0xFFFDE8D0),  // Light peach/orange tint
-      secondary: Color(0xFF8A7E72),         // Warm grey-brown (secondary text)
-      secondaryContainer: Color(0xFFF2E8DC),// Beige (subtle containers)
-      accent: Color(0xFFE8882A),            // Same orange for consistency
-      onBackground: Color(0xFF1A1A1A),      // Near-black text
-      onSurface: Color(0xFF2C2520),         // Dark warm brown text
+      secondary: Color(0xFFA08E7E),         // Warm taupe
+      secondaryContainer: Color(0xFFF5E6D6),// Soft beige
+      accent: Color(0xFFE8882A),            // Warm orange pop
+      onBackground: Color(0xFF2C2018),      // Warm dark brown
+      onSurface: Color(0xFF3A2E24),         // Rich brown text
       onPrimary: Color(0xFFFFFFFF),
     ),
     dark: ThemePalette(
@@ -40,14 +40,14 @@ enum AppColorTheme {
     seedColor: Color(0xFF4CAF50),
     bannerAsset: 'assets/images/themes/theme_forest.png',
     light: ThemePalette(
-      background: Color(0xFFF0F4EE),
-      surface: Color(0xFFE8EDE6),
-      primary: Color(0xFF2E5E2C),
+      background: Color(0xFFEFF8EC),       // Noticeably green-tinted
+      surface: Color(0xFFFAFDF8),           // Near-white with hint of green
+      primary: Color(0xFF4A8C4E),           // Softer sage green
       primaryContainer: Color(0xFFC5DFC3),
-      secondary: Color(0xFF6B9E3C),
-      secondaryContainer: Color(0xFFD4EDCC),
+      secondary: Color(0xFF7AAE4C),         // Brighter leaf green
+      secondaryContainer: Color(0xFFD8F0D0),// Light mint
       accent: Color(0xFF8BC34A),
-      onBackground: Color(0xFF1B3518),
+      onBackground: Color(0xFF1E3820),
       onSurface: Color(0xFF2E4A2C),
       onPrimary: Color(0xFFFFFFFF),
     ),
@@ -71,12 +71,12 @@ enum AppColorTheme {
     seedColor: Color(0xFF0288D1),
     bannerAsset: 'assets/images/themes/theme_ocean.png',
     light: ThemePalette(
-      background: Color(0xFFECF7FA),
-      surface: Color(0xFFE0F2F7),
-      primary: Color(0xFF00695C),
+      background: Color(0xFFE8F6F8),       // Richer aqua tint
+      surface: Color(0xFFF6FCFD),           // Crisp near-white with blue
+      primary: Color(0xFF1A8A7C),           // Friendlier teal
       primaryContainer: Color(0xFFB2DFDB),
-      secondary: Color(0xFF0097A7),
-      secondaryContainer: Color(0xFFB2EBF2),
+      secondary: Color(0xFF00A5B8),         // Brighter cyan
+      secondaryContainer: Color(0xFFC0F0F5),// Soft sky blue
       accent: Color(0xFF00BCD4),
       onBackground: Color(0xFF0D2B3E),
       onSurface: Color(0xFF1A3C50),
@@ -102,14 +102,14 @@ enum AppColorTheme {
     seedColor: Color(0xFFE64A19),
     bannerAsset: 'assets/images/themes/theme_sunset.png',
     light: ThemePalette(
-      background: Color(0xFFFFF3EC),
-      surface: Color(0xFFFEECE2),
-      primary: Color(0xFFC65100),
-      primaryContainer: Color(0xFFFFCCBC),
+      background: Color(0xFFFFF0E6),       // Warm golden peach
+      surface: Color(0xFFFFFAF5),           // Creamy white
+      primary: Color(0xFFBF5A10),           // Rich burnt orange
+      primaryContainer: Color(0xFFFFD4BC),  // Soft peach
       secondary: Color(0xFFE8871E),
-      secondaryContainer: Color(0xFFFFE0B2),
+      secondaryContainer: Color(0xFFFFE4C0),// Golden cream
       accent: Color(0xFFF9A825),
-      onBackground: Color(0xFF3E1A47),
+      onBackground: Color(0xFF3A1E10),
       onSurface: Color(0xFF4E2A20),
       onPrimary: Color(0xFFFFFFFF),
     ),
@@ -196,12 +196,12 @@ enum AppColorTheme {
     seedColor: Color(0xFF90CAF9),
     bannerAsset: 'assets/images/themes/theme_frost.png',
     light: ThemePalette(
-      background: Color(0xFFF0F6FA),
-      surface: Color(0xFFE6EFF5),
-      primary: Color(0xFF546E8A),
-      primaryContainer: Color(0xFFC8DCE8),
-      secondary: Color(0xFF78A8CC),
-      secondaryContainer: Color(0xFFD6E8F4),
+      background: Color(0xFFEAF2F8),       // Noticeably icy blue
+      surface: Color(0xFFF6FAFC),           // Frosty white
+      primary: Color(0xFF5A82A6),           // Softer steel-blue
+      primaryContainer: Color(0xFFD0E4F0),  // Light powder blue
+      secondary: Color(0xFF7EB4D8),         // Brighter sky
+      secondaryContainer: Color(0xFFDCEEF8),// Pale frost
       accent: Color(0xFF90CAF9),
       onBackground: Color(0xFF1C2E3E),
       onSurface: Color(0xFF2A3E50),
@@ -227,12 +227,12 @@ enum AppColorTheme {
     seedColor: Color(0xFFD84315),
     bannerAsset: 'assets/images/themes/theme_ember.png',
     light: ThemePalette(
-      background: Color(0xFFFBF0EB),
-      surface: Color(0xFFF5E6DE),
-      primary: Color(0xFF8E2C0C),
-      primaryContainer: Color(0xFFFFCCBC),
+      background: Color(0xFFFFF0E8),       // Warm terracotta cream
+      surface: Color(0xFFFFF8F4),           // Soft warm white
+      primary: Color(0xFFA63A14),           // Richer ember (less dark)
+      primaryContainer: Color(0xFFFFD4C4),  // Peachy glow
       secondary: Color(0xFFD84315),
-      secondaryContainer: Color(0xFFFFAB91),
+      secondaryContainer: Color(0xFFFFBCA0),// Warm apricot
       accent: Color(0xFFFF9100),
       onBackground: Color(0xFF3E1408),
       onSurface: Color(0xFF4E2010),
@@ -289,12 +289,12 @@ enum AppColorTheme {
     seedColor: Color(0xFF66BB6A),
     bannerAsset: 'assets/images/themes/theme_alchemist.png',
     light: ThemePalette(
-      background: Color(0xFFF0EDF5),
-      surface: Color(0xFFE8E4F0),
-      primary: Color(0xFF5E4080),
-      primaryContainer: Color(0xFFD4C0E8),
-      secondary: Color(0xFF2E8B57),
-      secondaryContainer: Color(0xFFB8E0CC),
+      background: Color(0xFFF0ECF6),       // Lavender-tinted
+      surface: Color(0xFFF9F7FC),           // Soft lilac white
+      primary: Color(0xFF7B52A0),           // Friendlier purple
+      primaryContainer: Color(0xFFDCC8F0),  // Light wisteria
+      secondary: Color(0xFF3EA06A),         // Brighter emerald
+      secondaryContainer: Color(0xFFC0E8D4),// Soft mint
       accent: Color(0xFFCD8032),
       onBackground: Color(0xFF2A1840),
       onSurface: Color(0xFF3A2850),

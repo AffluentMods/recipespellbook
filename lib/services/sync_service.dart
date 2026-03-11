@@ -312,6 +312,10 @@ class SyncService {
       });
     }
 
+    // ── Sort recipes so linked-to recipes come before recipes that link to them ──
+    // This prevents foreign key violations when the backend inserts links sequentially.
+    _topologicalSortRecipes(recipeMaps);
+
     // ── Small tables: no updatedAt, always push all ──
     final categories = await db.select(db.categories).get();
     final customCategories = await db.select(db.customCategories).get();
@@ -449,6 +453,61 @@ class SyncService {
     'sortOrder': rl.sortOrder,
     'createdAt': _iso(rl.createdAt),
   };
+
+  /// Sort recipes so that linked-to (dependency) recipes appear before
+  /// recipes that reference them via recipeLinks. This prevents FK violations
+  /// when the backend inserts recipe links sequentially within a transaction.
+  void _topologicalSortRecipes(List<Map<String, dynamic>> recipes) {
+    // Build a set of recipe IDs in this batch
+    final batchIds = <String>{for (final r in recipes) r['id'] as String};
+
+    // Build adjacency: source → {linked targets that are also in this batch}
+    final deps = <String, Set<String>>{};
+    for (final r in recipes) {
+      final id = r['id'] as String;
+      final links = r['recipeLinks'] as List<dynamic>? ?? [];
+      final targets = <String>{};
+      for (final link in links) {
+        final linkedId = (link as Map<String, dynamic>)['linkedRecipeId'] as String;
+        if (batchIds.contains(linkedId)) targets.add(linkedId);
+      }
+      if (targets.isNotEmpty) deps[id] = targets;
+    }
+
+    // No links in this batch — nothing to sort
+    if (deps.isEmpty) return;
+
+    // Simple stable topological sort: recipes with no dependencies first
+    final sorted = <Map<String, dynamic>>[];
+    final placed = <String>{};
+    final remaining = List<Map<String, dynamic>>.from(recipes);
+
+    // Keep pulling out recipes whose dependencies are all placed
+    while (remaining.isNotEmpty) {
+      final before = remaining.length;
+      remaining.removeWhere((r) {
+        final id = r['id'] as String;
+        final needs = deps[id] ?? {};
+        if (needs.every(placed.contains)) {
+          sorted.add(r);
+          placed.add(id);
+          return true;
+        }
+        return false;
+      });
+      // Safety: if nothing was placed this round, break to avoid infinite loop
+      // (circular links — just append the rest)
+      if (remaining.length == before) {
+        sorted.addAll(remaining);
+        break;
+      }
+    }
+
+    // Replace in-place
+    recipes
+      ..clear()
+      ..addAll(sorted);
+  }
 
   Map<String, dynamic> _serializeCategory(Category c) => {
     'id': c.id,

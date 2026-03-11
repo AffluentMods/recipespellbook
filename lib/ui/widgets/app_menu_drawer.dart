@@ -243,16 +243,21 @@ class AppMenuDrawer extends ConsumerWidget {
   );
 
   static Future<void> _triggerSync(BuildContext context, {bool fullSync = false}) async {
+    // Capture messenger before drawer closes (context may become unmounted)
+    final messenger = ScaffoldMessenger.of(context);
     AppSnackbar.loading(context, fullSync ? 'Full sync…' : 'Syncing…');
     final result = await SyncService.instance.sync(fullSync: fullSync);
-    if (!context.mounted) return;
-    AppSnackbar.dismiss(context);
+    messenger.hideCurrentSnackBar();
     if (result.success) {
       final pushed = result.pushedCount;
       final pulled = result.pulledCount;
-      AppSnackbar.success(context, '${fullSync ? 'Full sync' : 'Synced'}! ↑$pushed ↓$pulled');
+      if (context.mounted) {
+        AppSnackbar.success(context, '${fullSync ? 'Full sync' : 'Synced'}! ↑$pushed ↓$pulled');
+      }
     } else {
-      AppSnackbar.error(context, result.error ?? 'Sync failed');
+      if (context.mounted) {
+        AppSnackbar.error(context, result.error ?? 'Sync failed');
+      }
     }
   }
 }
