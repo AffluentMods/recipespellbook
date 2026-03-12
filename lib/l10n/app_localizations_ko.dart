@@ -3599,16 +3599,31 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localDataDesc => '이 기기의 레시피, 요리책, 식사 계획, 쇼핑 목록';
 
   @override
-  String get cloudData => '클라우드 데이터';
-
-  @override
-  String get cloudDataDesc => '곧 출시 — 클라우드 동기화는 아직 사용 불가';
-
-  @override
   String get allData => '모든 데이터';
 
   @override
   String get allDataDesc => '로컬 데이터 및 설정 — 전체 초기화';
+
+  @override
+  String get allDataWarningTitle => 'This will delete everything';
+
+  @override
+  String get allDataWarningCloudData => 'All recipes, cookbooks, and meal plans synced to the cloud';
+
+  @override
+  String get allDataWarningLocalData => 'All local data on this device';
+
+  @override
+  String get allDataWarningAccount => 'Your account (subscription restores automatically on sign-in)';
+
+  @override
+  String get allDataWarningSettings => 'All app settings and preferences';
+
+  @override
+  String get allDataIUnderstand => 'I understand this will permanently delete all my data';
+
+  @override
+  String get allDataNoUndo => 'I understand this action cannot be undone';
 
   @override
   String permanentDeleteWarning(String scope) {

@@ -21,6 +21,12 @@ class Responsive {
   /// Whether to show NavigationRail instead of bottom nav bar
   static bool useNavRail(BuildContext context) => width(context) >= 600;
 
+  /// Whether to show full expanded sidebar (labels + section headers + account)
+  static bool useExpandedSidebar(BuildContext context) => width(context) >= 900;
+
+  /// Whether this is a desktop-class layout (for density, hover, context menus, etc.)
+  static bool isDesktopLayout(BuildContext context) => width(context) >= 900;
+
   /// Cookbook grid: 2 on phone, 3 on medium tablet, 4 on large
   static int cookbookColumns(BuildContext context) {
     final w = width(context);

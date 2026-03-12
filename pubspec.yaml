@@ -65,6 +65,7 @@ dependencies:
   cached_network_image: ^3.4.1
   device_info_plus: ^9.1.2
   video_player: ^2.9.2
+  window_manager: ^0.4.3
 
 dev_dependencies:
   flutter_test:

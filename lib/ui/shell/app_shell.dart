@@ -6,6 +6,7 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/subscription_provider.dart';
+import '../../services/auth_service.dart';
 import '../../router/router.dart';
 import '../../utils/responsive_utils.dart';
 import '../screens/import/import_guides_screen.dart';

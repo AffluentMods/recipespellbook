@@ -3626,16 +3626,31 @@ class AppLocalizationsPt extends AppLocalizations {
   String get localDataDesc => 'Receitas, livros, planos de refeições, listas de compras neste dispositivo';
 
   @override
-  String get cloudData => 'Dados na nuvem';
-
-  @override
-  String get cloudDataDesc => 'Em breve — Sync na nuvem ainda não disponível';
-
-  @override
   String get allData => 'Todos os dados';
 
   @override
   String get allDataDesc => 'Dados locais e configurações — redefinição completa';
+
+  @override
+  String get allDataWarningTitle => 'This will delete everything';
+
+  @override
+  String get allDataWarningCloudData => 'All recipes, cookbooks, and meal plans synced to the cloud';
+
+  @override
+  String get allDataWarningLocalData => 'All local data on this device';
+
+  @override
+  String get allDataWarningAccount => 'Your account (subscription restores automatically on sign-in)';
+
+  @override
+  String get allDataWarningSettings => 'All app settings and preferences';
+
+  @override
+  String get allDataIUnderstand => 'I understand this will permanently delete all my data';
+
+  @override
+  String get allDataNoUndo => 'I understand this action cannot be undone';
 
   @override
   String permanentDeleteWarning(String scope) {

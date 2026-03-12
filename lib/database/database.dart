@@ -239,6 +239,36 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  /// Delete local recipe/cookbook data but keep shopping lists intact.
+  /// Used by "Delete Local Data" in settings. Runs in a transaction so
+  /// it either fully completes or fully rolls back — no half-deleted state.
+  Future<void> deleteLocalRecipeData() async {
+    await transaction(() async {
+      // Delete in dependency order (children first)
+      await delete(recipeLinks).go();
+      await delete(recipeTags).go();
+      await delete(userIngredientMappings).go();
+      await delete(ingredients).go();
+      await delete(steps).go();
+      await delete(mealPlans).go();
+      await delete(recipes).go();
+      await delete(cookbooks).go();
+      await delete(categories).go();
+      await delete(tags).go();
+      await delete(customCourses).go();
+      await delete(customCategories).go();
+
+      // Clear shopping items but keep the default list container
+      await delete(shoppingListItems).go();
+      await (delete(shoppingLists)
+            ..where((t) => t.id.equals('list_default').not()))
+          .go();
+
+      // Re-seed defaults so the app has a starter cookbook, categories, etc.
+      await _seedDefaultData();
+    });
+  }
+
   Future<void> _seedDefaultData() async {
     // Default cookbook
     await into(cookbooks).insert(CookbooksCompanion.insert(

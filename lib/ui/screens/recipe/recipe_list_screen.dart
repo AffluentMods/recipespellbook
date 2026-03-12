@@ -4,15 +4,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 
+import 'recipe_screen.dart';
 import '../../../data/course_category_data.dart' as taxonomy;
 import '../../../database/daos/tags_dao.dart';
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../utils/taxonomy_translator.dart';
+import '../../widgets/app_context_menu.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/new_recipe_dialog.dart';
 import '../../widgets/recipe_image.dart';
+import '../../layouts/master_detail_layout.dart';
 import '../../../utils/responsive_utils.dart';
 
 /// Generic recipe list screen with filtering by course/category/tags
@@ -44,6 +47,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
   bool _isSearching = false;
   Set<String> _selectedTagIds = {};
   bool _showTagFilter = false;
+  String? _selectedRecipeId; // Desktop master-detail
 
   final TextEditingController _searchController = TextEditingController();
 
@@ -117,7 +121,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       recipeStream = recipeDao.watchRecipesForCookbook(effectiveCookbookId);
     }
 
-    return Scaffold(
+    final masterScaffold = Scaffold(
       appBar: _isSelecting
           ? AppBar(
         leading: IconButton(
@@ -141,6 +145,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         actions: [
           IconButton(
             icon: Icon(_isSearching ? Icons.close : Icons.search),
+            tooltip: AppLocalizations.of(context)!.searchRecipes,
             onPressed: () {
               setState(() {
                 _isSearching = !_isSearching;
@@ -276,6 +281,22 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         label: Text(AppLocalizations.of(context)!.recipeAdd),
       ),
     );
+
+    // Desktop master-detail layout
+    if (Responsive.isDesktopLayout(context)) {
+      return MasterDetailLayout(
+        masterWidth: 420,
+        master: masterScaffold,
+        detail: _selectedRecipeId != null
+            ? RecipeScreen(
+                key: ValueKey(_selectedRecipeId),
+                recipeId: _selectedRecipeId!,
+              )
+            : null,
+      );
+    }
+
+    return masterScaffold;
   }
 
   Widget _buildRecipeList(List<Recipe> recipes, String cookbookId, TagsDao tagsDao) {
@@ -304,6 +325,15 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       }
     }
     return filteredRecipes;
+  }
+
+  /// Navigate to recipe — either inline (desktop) or full-screen (mobile)
+  void _openRecipe(BuildContext context, String id) {
+    if (Responsive.isDesktopLayout(context)) {
+      setState(() => _selectedRecipeId = id);
+    } else {
+      context.push('/recipe/$id');
+    }
   }
 
   void _showAddRecipeDialog(BuildContext context) {
@@ -457,21 +487,21 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         return _SmallListView(
           recipes: recipes, tagsDao: tagsDao,
           isSelecting: _isSelecting, selectedIds: _selectedIds,
-          onTap: (id) { if (_isSelecting) { _toggleSelection(id); } else { context.push('/recipe/$id'); } },
+          onTap: (id) { if (_isSelecting) { _toggleSelection(id); } else { _openRecipe(context, id); } },
           onLongPress: (id) { if (!_isSelecting) _enterSelection(id); },
         );
       case _ViewSize.medium:
         return _MediumGridView(
           recipes: recipes, tagsDao: tagsDao,
           isSelecting: _isSelecting, selectedIds: _selectedIds,
-          onTap: (id) { if (_isSelecting) { _toggleSelection(id); } else { context.push('/recipe/$id'); } },
+          onTap: (id) { if (_isSelecting) { _toggleSelection(id); } else { _openRecipe(context, id); } },
           onLongPress: (id) { if (!_isSelecting) _enterSelection(id); },
         );
       case _ViewSize.large:
         return _LargeCardView(
           recipes: recipes, tagsDao: tagsDao,
           isSelecting: _isSelecting, selectedIds: _selectedIds,
-          onTap: (id) { if (_isSelecting) { _toggleSelection(id); } else { context.push('/recipe/$id'); } },
+          onTap: (id) { if (_isSelecting) { _toggleSelection(id); } else { _openRecipe(context, id); } },
           onLongPress: (id) { if (!_isSelecting) _enterSelection(id); },
         );
     }
@@ -740,14 +770,37 @@ class _MediumGridView extends StatelessWidget {
         mainAxisSpacing: 12,
       ),
       itemCount: recipes.length,
-      itemBuilder: (context, index) => _MediumCard(
-        key: ValueKey(recipes[index].id),
-        recipe: recipes[index], tagsDao: tagsDao,
-        isSelecting: isSelecting,
-        isSelected: selectedIds.contains(recipes[index].id),
-        onTap: () => onTap(recipes[index].id),
-        onLongPress: () => onLongPress(recipes[index].id),
-      ),
+      itemBuilder: (context, index) {
+        final recipe = recipes[index];
+        final l10n = AppLocalizations.of(context)!;
+        return ContextMenuRegion(
+          items: [
+            ContextMenuItem(
+              icon: Icons.open_in_new_rounded,
+              label: l10n.actionView,
+              onTap: () => onTap(recipe.id),
+            ),
+            ContextMenuItem(
+              icon: Icons.edit_rounded,
+              label: l10n.actionEdit,
+              onTap: () => context.push('/recipe/${recipe.id}/edit'),
+            ),
+            ContextMenuItem(
+              icon: Icons.favorite_rounded,
+              label: l10n.bulkFavorite,
+              onTap: () {},
+            ),
+          ],
+          child: _MediumCard(
+            key: ValueKey(recipe.id),
+            recipe: recipe, tagsDao: tagsDao,
+            isSelecting: isSelecting,
+            isSelected: selectedIds.contains(recipe.id),
+            onTap: () => onTap(recipe.id),
+            onLongPress: () => onLongPress(recipe.id),
+          ),
+        );
+      },
     );
   }
 }

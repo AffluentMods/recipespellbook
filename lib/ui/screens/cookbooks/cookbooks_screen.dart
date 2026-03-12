@@ -92,6 +92,7 @@ class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
                       suffixIcon: _query.isNotEmpty
                           ? IconButton(
                         icon: const Icon(Icons.clear, size: 18),
+                        tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
                         onPressed: () => setState(() {
                           _searchController.clear();
                           _query = '';
@@ -453,6 +454,7 @@ class _CookbookGrid extends ConsumerWidget {
                       maxLines: 2, overflow: TextOverflow.ellipsis)),
                   IconButton(
                     icon: const Icon(Icons.copy, size: 20),
+                    tooltip: l10n.actionCopy,
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: link.url));
                       AppSnackbar.success(context, l10n.linkCopied);

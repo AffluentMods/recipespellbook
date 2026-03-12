@@ -13,14 +13,38 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
 import 'app_snackbar.dart';
 
-/// Strip emoji characters that PDF fonts can't render
-String _stripEmoji(String text) {
+/// Strip emoji characters that even Unicode fonts struggle with in PDFs.
+String _stripEmojiForPdf(String text) {
   return text.replaceAll(RegExp(
-    r'[\u{1F000}-\u{1FFFF}]|[\u{2600}-\u{27BF}]|[\u{FE00}-\u{FE0F}]|'
-    r'[\u{200D}]|[\u{20E3}]|[\u{E0020}-\u{E007F}]|[\u{2300}-\u{23FF}]|'
-    r'[\u{2B05}-\u{2B55}]|[\u{3030}]|[\u{303D}]|[\u{3297}]|[\u{3299}]',
+    r'[\u{1F000}-\u{1FFFF}]|[\u{FE00}-\u{FE0F}]|'
+    r'[\u{200D}]|[\u{20E3}]|[\u{E0020}-\u{E007F}]',
     unicode: true,
   ), '').replaceAll(RegExp(r'\s{2,}'), ' ').trim();
+}
+
+/// Cached Unicode fonts for PDF rendering.
+pw.Font? _pdfRegular;
+pw.Font? _pdfBold;
+pw.Font? _pdfItalic;
+pw.Font? _pdfBoldItalic;
+
+/// Load Noto Sans fonts for full Unicode support in PDFs.
+Future<pw.ThemeData> _loadPdfTheme() async {
+  try {
+    _pdfRegular ??= await PdfGoogleFonts.notoSansRegular();
+    _pdfBold ??= await PdfGoogleFonts.notoSansBold();
+    _pdfItalic ??= await PdfGoogleFonts.notoSansItalic();
+    _pdfBoldItalic ??= await PdfGoogleFonts.notoSansBoldItalic();
+
+    return pw.ThemeData.withFont(
+      base: _pdfRegular!,
+      bold: _pdfBold!,
+      italic: _pdfItalic!,
+      boldItalic: _pdfBoldItalic!,
+    );
+  } catch (_) {
+    return pw.ThemeData.base();
+  }
 }
 
 /// Shows a share sheet for a recipe with multiple options
@@ -456,7 +480,8 @@ class _RecipeShareSheet extends StatelessWidget {
       AppLocalizations l10n, {
         List<_LinkedRecipeData> linkedRecipes = const [],
       }) async {
-    final pdf = pw.Document();
+    final theme = await _loadPdfTheme();
+    final pdf = pw.Document(theme: theme);
 
     pdf.addPage(
       pw.MultiPage(
@@ -467,13 +492,13 @@ class _RecipeShareSheet extends StatelessWidget {
             pw.Header(
               level: 0,
               child: pw.Text(
-                _stripEmoji(recipe.title),
+                _stripEmojiForPdf(recipe.title),
                 style: pw.TextStyle(fontSize: 28, fontWeight: pw.FontWeight.bold),
               ),
             ),
             if (recipe.description != null && recipe.description!.isNotEmpty)
               pw.Paragraph(
-                text: _stripEmoji(recipe.description!),
+                text: _stripEmojiForPdf(recipe.description!),
                 style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
               ),
             pw.SizedBox(height: 16),
@@ -501,7 +526,7 @@ class _RecipeShareSheet extends StatelessWidget {
                   final parts = <String>[];
                   if (ing.amount != null) parts.add(ing.amount!);
                   if (ing.unit != null) parts.add(ing.unit!);
-                  parts.add(_stripEmoji(ing.name));
+                  parts.add(_stripEmojiForPdf(ing.name));
                   return pw.Padding(
                     padding: const pw.EdgeInsets.symmetric(vertical: 2),
                     child: pw.Row(
@@ -545,7 +570,7 @@ class _RecipeShareSheet extends StatelessWidget {
                         ),
                         pw.SizedBox(width: 12),
                         pw.Expanded(
-                          child: pw.Text(_stripEmoji(entry.value.instruction),
+                          child: pw.Text(_stripEmojiForPdf(entry.value.instruction),
                               style: const pw.TextStyle(fontSize: 12)),
                         ),
                       ],
@@ -567,7 +592,7 @@ class _RecipeShareSheet extends StatelessWidget {
                   color: PdfColors.grey100,
                   borderRadius: pw.BorderRadius.circular(8),
                 ),
-                child: pw.Text(_stripEmoji(recipe.notes!), style: const pw.TextStyle(fontSize: 11)),
+                child: pw.Text(_stripEmojiForPdf(recipe.notes!), style: const pw.TextStyle(fontSize: 11)),
               ),
             ],
 
@@ -611,13 +636,13 @@ class _RecipeShareSheet extends StatelessWidget {
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             pw.Text(
-              _stripEmoji(data.recipe.title),
+              _stripEmojiForPdf(data.recipe.title),
               style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
             ),
             if (data.recipe.description != null && data.recipe.description!.isNotEmpty) ...[
               pw.SizedBox(height: 4),
               pw.Text(
-                _stripEmoji(data.recipe.description!),
+                _stripEmojiForPdf(data.recipe.description!),
                 style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
               ),
             ],
@@ -630,7 +655,7 @@ class _RecipeShareSheet extends StatelessWidget {
                 final parts = <String>[];
                 if (ing.amount != null) parts.add(ing.amount!);
                 if (ing.unit != null) parts.add(ing.unit!);
-                parts.add(_stripEmoji(ing.name));
+                parts.add(_stripEmojiForPdf(ing.name));
                 return pw.Padding(
                   padding: const pw.EdgeInsets.symmetric(vertical: 1),
                   child: pw.Text('\u2022 ${parts.join(' ')}',
@@ -646,7 +671,7 @@ class _RecipeShareSheet extends StatelessWidget {
               ...data.steps.asMap().entries.map((entry) => pw.Padding(
                 padding: const pw.EdgeInsets.symmetric(vertical: 2),
                 child: pw.Text(
-                  '${entry.key + 1}. ${_stripEmoji(entry.value.instruction)}',
+                  '${entry.key + 1}. ${_stripEmojiForPdf(entry.value.instruction)}',
                   style: const pw.TextStyle(fontSize: 10),
                 ),
               )),

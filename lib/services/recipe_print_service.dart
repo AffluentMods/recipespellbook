@@ -5,14 +5,43 @@ import 'package:printing/printing.dart';
 import '../../data/course_category_data.dart';
 import '../../database/database.dart'; // Keep Step from here
 
-/// Strip emoji characters that PDF fonts can't render
+/// Strip emoji characters that even Unicode fonts struggle with in PDFs.
+/// With Noto Sans embedded, most special characters (accents, CJK, Cyrillic)
+/// now render correctly — only emoji are stripped.
 String _stripEmoji(String text) {
   return text.replaceAll(RegExp(
-    r'[\u{1F000}-\u{1FFFF}]|[\u{2600}-\u{27BF}]|[\u{FE00}-\u{FE0F}]|'
-    r'[\u{200D}]|[\u{20E3}]|[\u{E0020}-\u{E007F}]|[\u{2300}-\u{23FF}]|'
-    r'[\u{2B05}-\u{2B55}]|[\u{3030}]|[\u{303D}]|[\u{3297}]|[\u{3299}]',
+    r'[\u{1F000}-\u{1FFFF}]|[\u{FE00}-\u{FE0F}]|'
+    r'[\u{200D}]|[\u{20E3}]|[\u{E0020}-\u{E007F}]',
     unicode: true,
   ), '').replaceAll(RegExp(r'\s{2,}'), ' ').trim();
+}
+
+/// Cached Unicode fonts for PDF rendering.
+/// Loaded once from Google Fonts CDN, then cached on disk.
+pw.Font? _cachedRegular;
+pw.Font? _cachedBold;
+pw.Font? _cachedItalic;
+pw.Font? _cachedBoldItalic;
+
+/// Load Noto Sans fonts for full Unicode support in PDFs.
+/// Falls back to default PDF fonts if loading fails (e.g. offline).
+Future<pw.ThemeData> _loadPdfTheme() async {
+  try {
+    _cachedRegular ??= await PdfGoogleFonts.notoSansRegular();
+    _cachedBold ??= await PdfGoogleFonts.notoSansBold();
+    _cachedItalic ??= await PdfGoogleFonts.notoSansItalic();
+    _cachedBoldItalic ??= await PdfGoogleFonts.notoSansBoldItalic();
+
+    return pw.ThemeData.withFont(
+      base: _cachedRegular!,
+      bold: _cachedBold!,
+      italic: _cachedItalic!,
+      boldItalic: _cachedBoldItalic!,
+    );
+  } catch (_) {
+    // Offline or CDN error — fall back to default fonts
+    return pw.ThemeData.base();
+  }
 }
 
 /// Service for printing recipes
@@ -27,7 +56,9 @@ class RecipePrintService {
     bool columnarLayout = false,
     required Map<String, String> labels,
   }) async {
-    final pdf = pw.Document();
+    // Load Unicode fonts for full character support
+    final theme = await _loadPdfTheme();
+    final pdf = pw.Document(theme: theme);
 
     // Load image if available
     pw.MemoryImage? recipeImage;

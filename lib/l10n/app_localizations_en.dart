@@ -2399,7 +2399,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetScopeCloud => 'cloud data';
 
   @override
-  String get resetScopeAll => 'all data and settings';
+  String get resetScopeAll => 'all data, cloud sync, and your account';
 
   @override
   String get resetEverything => 'Reset Everything';
@@ -3623,19 +3623,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localData => 'Local Data';
 
   @override
-  String get localDataDesc => 'Recipes, cookbooks, meal plans, shopping lists on this device';
-
-  @override
-  String get cloudData => 'Cloud Data';
-
-  @override
-  String get cloudDataDesc => 'Coming soon — Cloud Sync not yet available';
+  String get localDataDesc => 'Deletes recipes, cookbooks, meal plans, and shopping lists on this device only. Cloud data stays intact and will sync back.';
 
   @override
   String get allData => 'All Data';
 
   @override
-  String get allDataDesc => 'Local data and settings — complete fresh start';
+  String get allDataDesc => 'Permanently deletes EVERYTHING — local data, cloud data, and your account. Complete fresh start.';
+
+  @override
+  String get allDataWarningTitle => 'This will delete everything';
+
+  @override
+  String get allDataWarningCloudData => 'All recipes, cookbooks, and meal plans synced to the cloud';
+
+  @override
+  String get allDataWarningLocalData => 'All local data on this device';
+
+  @override
+  String get allDataWarningAccount => 'Your account (subscription restores automatically on sign-in)';
+
+  @override
+  String get allDataWarningSettings => 'All app settings and preferences';
+
+  @override
+  String get allDataIUnderstand => 'I understand this will permanently delete all my data';
+
+  @override
+  String get allDataNoUndo => 'I understand this action cannot be undone';
 
   @override
   String permanentDeleteWarning(String scope) {

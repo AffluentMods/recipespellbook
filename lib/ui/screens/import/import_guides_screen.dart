@@ -741,6 +741,470 @@ class _ImportGuidesScreenState extends State<ImportGuidesScreen> {
               ),
             ],
           ),
+
+          // ── App-Specific Guides ──
+
+          _ImportGuide(
+            id: 'paprika',
+            icon: Icons.local_fire_department,
+            color: const Color(0xFFE64A19),
+            title: 'Paprika 3',
+            subtitle: 'Import all recipes from Paprika 3 with photos',
+            tag: 'POPULAR',
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime1Min,
+            webSlug: 'paprika',
+            steps: [
+              _GuideStep(
+                title: 'Open Paprika',
+                description: 'Open Paprika 3 on your device. Go to Settings or the File menu.',
+                icon: Icons.settings,
+              ),
+              _GuideStep(
+                title: 'Export All Recipes',
+                description: 'Tap "Export" and choose "Paprika Export Format" (.paprikarecipes). This creates a file with all your recipes and photos.',
+                icon: Icons.file_download,
+                tip: 'On iOS/Android: Settings > Export. On Desktop: File > Export.',
+              ),
+              _GuideStep(
+                title: 'Open in Recipe Spellbook',
+                description: 'Open Recipe Spellbook, tap the + button, choose "File", and select the exported .paprikarecipes file.',
+                icon: Icons.file_open,
+              ),
+              _GuideStep(
+                title: 'Review & Import',
+                description: 'Preview your recipes, deselect any you don\'t want, then tap Import. Photos will be included automatically.',
+                icon: Icons.check_circle_outline,
+              ),
+            ],
+          ),
+
+          _ImportGuide(
+            id: 'mela',
+            icon: Icons.restaurant_menu,
+            color: const Color(0xFFFF6F00),
+            title: 'Mela',
+            subtitle: 'Import recipes from Mela recipe manager',
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime1Min,
+            webSlug: 'mela',
+            steps: [
+              _GuideStep(
+                title: 'Open Mela',
+                description: 'Open Mela and go to Settings.',
+                icon: Icons.settings,
+              ),
+              _GuideStep(
+                title: 'Export Recipes',
+                description: 'Tap "Export" and choose to export all recipes. This creates a .melarecipes file.',
+                icon: Icons.file_download,
+                tip: 'You can also share individual recipes as .melarecipe files.',
+              ),
+              _GuideStep(
+                title: 'Open in Recipe Spellbook',
+                description: 'Open Recipe Spellbook, tap +, choose "File", and select the .melarecipes file.',
+                icon: Icons.file_open,
+              ),
+              _GuideStep(
+                title: 'Review & Import',
+                description: 'Preview and import your recipes. Categories will be converted to tags.',
+                icon: Icons.check_circle_outline,
+              ),
+            ],
+          ),
+
+          _ImportGuide(
+            id: 'crouton',
+            icon: Icons.bakery_dining,
+            color: const Color(0xFF8D6E63),
+            title: 'Crouton',
+            subtitle: 'Import recipes from Crouton app',
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime1Min,
+            webSlug: 'crouton',
+            steps: [
+              _GuideStep(
+                title: 'Open Crouton',
+                description: 'Open Crouton and go to Settings.',
+                icon: Icons.settings,
+              ),
+              _GuideStep(
+                title: 'Export Data',
+                description: 'Tap "Export" to create a .crumb file with all your recipes.',
+                icon: Icons.file_download,
+              ),
+              _GuideStep(
+                title: 'Open in Recipe Spellbook',
+                description: 'Open Recipe Spellbook, tap +, choose "File", and select the .crumb file.',
+                icon: Icons.file_open,
+              ),
+              _GuideStep(
+                title: 'Review & Import',
+                description: 'Preview your recipes and import them. Ingredient sections are preserved.',
+                icon: Icons.check_circle_outline,
+              ),
+            ],
+          ),
+
+          _ImportGuide(
+            id: 'recipe-keeper',
+            icon: Icons.menu_book,
+            color: const Color(0xFF43A047),
+            title: 'Recipe Keeper',
+            subtitle: 'Import from Recipe Keeper (ZIP or HTML)',
+            tag: 'POPULAR',
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime2To5Min,
+            webSlug: 'recipe-keeper',
+            steps: [
+              _GuideStep(
+                title: 'Open Recipe Keeper',
+                description: 'Open Recipe Keeper and go to Settings > Export.',
+                icon: Icons.settings,
+              ),
+              _GuideStep(
+                title: 'Export as ZIP',
+                description: 'Choose "Export as ZIP" or "Export as HTML". The ZIP format includes photos.',
+                icon: Icons.file_download,
+                tip: 'ZIP export is recommended — it includes all your recipe photos.',
+              ),
+              _GuideStep(
+                title: 'Open in Recipe Spellbook',
+                description: 'Open Recipe Spellbook, tap +, choose "File", and select the exported ZIP or HTML file.',
+                icon: Icons.file_open,
+              ),
+              _GuideStep(
+                title: 'Review & Import',
+                description: 'All recipes will be detected automatically. Review and import with photos.',
+                icon: Icons.check_circle_outline,
+              ),
+            ],
+          ),
+
+          _ImportGuide(
+            id: 'copy-me-that',
+            icon: Icons.content_copy,
+            color: const Color(0xFF1976D2),
+            title: 'CopyMeThat',
+            subtitle: 'Import from CopyMeThat HTML export',
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime2To5Min,
+            webSlug: 'copy-me-that',
+            steps: [
+              _GuideStep(
+                title: 'Go to CopyMeThat.com',
+                description: 'Log in to CopyMeThat.com on your computer.',
+                icon: Icons.language,
+              ),
+              _GuideStep(
+                title: 'Export Recipes',
+                description: 'Go to Settings > Export and download the HTML file with all your recipes.',
+                icon: Icons.file_download,
+              ),
+              _GuideStep(
+                title: 'Open in Recipe Spellbook',
+                description: 'Open Recipe Spellbook, tap +, choose "File", and select the .html file.',
+                icon: Icons.file_open,
+              ),
+              _GuideStep(
+                title: 'Review & Import',
+                description: 'All recipes from the HTML file will be parsed and ready to import.',
+                icon: Icons.check_circle_outline,
+              ),
+            ],
+          ),
+
+          _ImportGuide(
+            id: 'mealie',
+            icon: Icons.dinner_dining,
+            color: const Color(0xFF00897B),
+            title: 'Mealie',
+            subtitle: 'Import from Mealie self-hosted recipe manager',
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime2To5Min,
+            webSlug: 'mealie',
+            steps: [
+              _GuideStep(
+                title: 'Open Mealie',
+                description: 'Log in to your Mealie instance on a computer.',
+                icon: Icons.language,
+              ),
+              _GuideStep(
+                title: 'Export Recipes',
+                description: 'Go to Admin > Backups and create a new backup. Download the JSON export.',
+                icon: Icons.file_download,
+                tip: 'You can also export individual recipes as JSON from the recipe page.',
+              ),
+              _GuideStep(
+                title: 'Open in Recipe Spellbook',
+                description: 'Open Recipe Spellbook, tap +, choose "File", and select the JSON file.',
+                icon: Icons.file_open,
+              ),
+              _GuideStep(
+                title: 'Review & Import',
+                description: 'Mealie recipe data is well-structured. All fields will be imported accurately.',
+                icon: Icons.check_circle_outline,
+              ),
+            ],
+          ),
+
+          _ImportGuide(
+            id: 'tandoor',
+            icon: Icons.outdoor_grill,
+            color: const Color(0xFFD84315),
+            title: 'Tandoor',
+            subtitle: 'Import from Tandoor Recipes',
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime2To5Min,
+            webSlug: 'tandoor',
+            steps: [
+              _GuideStep(
+                title: 'Open Tandoor',
+                description: 'Log in to your Tandoor instance.',
+                icon: Icons.language,
+              ),
+              _GuideStep(
+                title: 'Export Recipes',
+                description: 'Go to Admin > Export. Select your recipes and download as JSON.',
+                icon: Icons.file_download,
+              ),
+              _GuideStep(
+                title: 'Open in Recipe Spellbook',
+                description: 'Open Recipe Spellbook, tap +, choose "File", and select the JSON file.',
+                icon: Icons.file_open,
+              ),
+              _GuideStep(
+                title: 'Review & Import',
+                description: 'Keywords and ingredient details are preserved. Review and import.',
+                icon: Icons.check_circle_outline,
+              ),
+            ],
+          ),
+
+          _ImportGuide(
+            id: 'cookmate',
+            icon: Icons.menu_book_rounded,
+            color: const Color(0xFF5C6BC0),
+            title: 'Cookmate (My CookBook)',
+            subtitle: 'Import from Cookmate .mcb export',
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime1Min,
+            webSlug: 'cookmate',
+            steps: [
+              _GuideStep(
+                title: 'Open Cookmate',
+                description: 'Open Cookmate (previously "My CookBook") and go to Settings.',
+                icon: Icons.settings,
+              ),
+              _GuideStep(
+                title: 'Export as MCB',
+                description: 'Tap Export and choose the .mcb format. This includes recipes and photos.',
+                icon: Icons.file_download,
+              ),
+              _GuideStep(
+                title: 'Open in Recipe Spellbook',
+                description: 'Open Recipe Spellbook, tap +, choose "File", and select the .mcb file.',
+                icon: Icons.file_open,
+              ),
+              _GuideStep(
+                title: 'Review & Import',
+                description: 'All recipes with categories and photos will be imported.',
+                icon: Icons.check_circle_outline,
+              ),
+            ],
+          ),
+
+          _ImportGuide(
+            id: 'plan-to-eat',
+            icon: Icons.calendar_today,
+            color: const Color(0xFF7CB342),
+            title: 'Plan to Eat',
+            subtitle: 'Import from Plan to Eat CSV export',
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime2To5Min,
+            webSlug: 'plan-to-eat',
+            steps: [
+              _GuideStep(
+                title: 'Go to plantoeat.com',
+                description: 'Log in to your Plan to Eat account on a computer.',
+                icon: Icons.language,
+              ),
+              _GuideStep(
+                title: 'Export as CSV',
+                description: 'Go to Settings > Export Data and download your recipes as a CSV file.',
+                icon: Icons.file_download,
+              ),
+              _GuideStep(
+                title: 'Open in Recipe Spellbook',
+                description: 'Open Recipe Spellbook, tap +, choose "File", and select the .csv file.',
+                icon: Icons.file_open,
+              ),
+              _GuideStep(
+                title: 'Review & Import',
+                description: 'All columns are parsed: title, ingredients, directions, tags, times, and more.',
+                icon: Icons.check_circle_outline,
+              ),
+            ],
+          ),
+
+          _ImportGuide(
+            id: 'mastercook',
+            icon: Icons.restaurant,
+            color: const Color(0xFF6D4C41),
+            title: 'MasterCook',
+            subtitle: 'Import MasterCook .mxp files',
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime1Min,
+            webSlug: 'mastercook',
+            steps: [
+              _GuideStep(
+                title: 'Open MasterCook',
+                description: 'Open MasterCook and select the recipes you want to export.',
+                icon: Icons.checklist,
+              ),
+              _GuideStep(
+                title: 'Export as MXP',
+                description: 'Go to File > Export and choose the .mxp format.',
+                icon: Icons.file_download,
+              ),
+              _GuideStep(
+                title: 'Open in Recipe Spellbook',
+                description: 'Open Recipe Spellbook, tap +, choose "File", and select the .mxp file.',
+                icon: Icons.file_open,
+              ),
+              _GuideStep(
+                title: 'Review & Import',
+                description: 'Fixed-width formatting is parsed automatically. Review and import your recipes.',
+                icon: Icons.check_circle_outline,
+              ),
+            ],
+          ),
+
+          _ImportGuide(
+            id: 'meal-master',
+            icon: Icons.food_bank,
+            color: const Color(0xFF455A64),
+            title: 'Meal-Master',
+            subtitle: 'Import Meal-Master .mmf files',
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime1Min,
+            webSlug: 'meal-master',
+            steps: [
+              _GuideStep(
+                title: 'Locate your files',
+                description: 'Find your Meal-Master .mmf or .mk files on your computer.',
+                icon: Icons.folder_open,
+              ),
+              _GuideStep(
+                title: 'Open in Recipe Spellbook',
+                description: 'Open Recipe Spellbook, tap +, choose "File", and select the .mmf file.',
+                icon: Icons.file_open,
+                tip: 'Meal-Master files can contain hundreds of recipes in a single file.',
+              ),
+              _GuideStep(
+                title: 'Review & Import',
+                description: 'All recipes are parsed from the file. Two-column ingredient layouts are supported.',
+                icon: Icons.check_circle_outline,
+              ),
+            ],
+          ),
+
+          _ImportGuide(
+            id: 'cooklang',
+            icon: Icons.code,
+            color: const Color(0xFF78909C),
+            title: 'Cooklang',
+            subtitle: 'Import Cooklang .cook recipe files',
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime1Min,
+            webSlug: 'cooklang',
+            steps: [
+              _GuideStep(
+                title: 'Find your .cook files',
+                description: 'Locate your Cooklang recipe files. They\'re plain text files with .cook extension.',
+                icon: Icons.folder_open,
+              ),
+              _GuideStep(
+                title: 'Open in Recipe Spellbook',
+                description: 'Open Recipe Spellbook, tap +, choose "File", and select the .cook file.',
+                icon: Icons.file_open,
+                tip: 'Cooklang markup (@ingredients, #cookware, ~timers) is automatically parsed.',
+              ),
+              _GuideStep(
+                title: 'Review & Import',
+                description: 'Ingredients are extracted from the markup and steps are formatted as readable text.',
+                icon: Icons.check_circle_outline,
+              ),
+            ],
+          ),
+
+          _ImportGuide(
+            id: 'living-cookbook',
+            icon: Icons.book,
+            color: const Color(0xFF8E24AA),
+            title: 'Living Cookbook',
+            subtitle: 'Import Living Cookbook .fdx files',
+            difficulty: l10n.importGuideDifficultyEasy,
+            timeEstimate: l10n.importGuideTime1Min,
+            webSlug: 'living-cookbook',
+            steps: [
+              _GuideStep(
+                title: 'Open Living Cookbook',
+                description: 'Open Living Cookbook and go to File > Export.',
+                icon: Icons.settings,
+              ),
+              _GuideStep(
+                title: 'Export as FDX',
+                description: 'Choose the FDX (Food Data Exchange) format and export your recipes.',
+                icon: Icons.file_download,
+              ),
+              _GuideStep(
+                title: 'Open in Recipe Spellbook',
+                description: 'Open Recipe Spellbook, tap +, choose "File", and select the .fdx file.',
+                icon: Icons.file_open,
+              ),
+              _GuideStep(
+                title: 'Review & Import',
+                description: 'XML data is parsed into structured recipes with ingredients and procedures.',
+                icon: Icons.check_circle_outline,
+              ),
+            ],
+          ),
+
+          _ImportGuide(
+            id: 'samsung-food',
+            icon: Icons.phone_android_rounded,
+            color: const Color(0xFF1565C0),
+            title: 'Samsung Food / Whisk',
+            subtitle: 'Import from Samsung Food JSON export',
+            difficulty: l10n.importGuideDifficultyMedium,
+            timeEstimate: l10n.importGuideTime2To5Min,
+            webSlug: 'samsung-food',
+            steps: [
+              _GuideStep(
+                title: 'Request your data',
+                description: 'Open Samsung Food app or website and go to Settings > Privacy > Download My Data.',
+                icon: Icons.settings,
+              ),
+              _GuideStep(
+                title: 'Download the export',
+                description: 'You\'ll receive a download link (may take some time). Download the JSON file.',
+                icon: Icons.file_download,
+                tip: 'If you previously used Whisk, the format is the same.',
+              ),
+              _GuideStep(
+                title: 'Open in Recipe Spellbook',
+                description: 'Open Recipe Spellbook, tap +, choose "File", and select the JSON file.',
+                icon: Icons.file_open,
+              ),
+              _GuideStep(
+                title: 'Review & Import',
+                description: 'Samsung Food recipe data will be parsed and ready to import.',
+                icon: Icons.check_circle_outline,
+              ),
+            ],
+          ),
+
           _ImportGuide(
             id: 'device-transfer',
             icon: Icons.phone_android,

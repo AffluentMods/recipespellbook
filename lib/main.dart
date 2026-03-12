@@ -19,10 +19,12 @@ import 'services/ingredient_suggestion_service.dart';
 import 'services/notification_service.dart';
 import 'services/ocr_service.dart';
 import 'services/recipe_import_engine.dart';
+import 'services/desktop_window_service.dart';
 import 'services/sync_service.dart';
 import 'services/transfer_service.dart';
 import 'theme/app_theme.dart';
 import 'ui/screens/import/import_preview_screen.dart';
+import 'ui/widgets/app_shortcuts.dart';
 
 Future<void> main() async {
   // Global error boundary — catch uncaught async errors
@@ -46,6 +48,9 @@ Future<void> main() async {
     if (supportsNativeSplash) {
       FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
     }
+
+    // Desktop window management (min size, title, restore position)
+    await DesktopWindowService.initialize();
 
     // Preload ingredient suggestions (fire-and-forget with error handling)
     try {
@@ -102,13 +107,13 @@ class RecipeSpellbookApp extends ConsumerWidget {
         darkTheme: AppTheme.darkTheme(colorTheme, customPalette: customPalettes?.dark),
         themeMode: themeMode,
         routerConfig: router,
-        // ── Text scale — applies user's accessibility preference globally ──
+        // ── Text scale + keyboard shortcuts ──
         builder: (context, child) {
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(
               textScaler: TextScaler.linear(textScale),
             ),
-            child: child!,
+            child: AppShortcuts(child: child!),
           );
         },
       ),

@@ -1276,7 +1276,7 @@ class _RecipeAppBar extends StatelessWidget {
       leading: Container(
         margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
-        child: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.of(context).pop()),
+        child: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), tooltip: 'Back', onPressed: () => Navigator.of(context).pop()),
       ),
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
@@ -1427,7 +1427,7 @@ class _FavoriteButton extends StatelessWidget {
   final bool isFavorite;
   final VoidCallback onToggle;
   const _FavoriteButton({required this.isFavorite, required this.onToggle});
-  @override Widget build(BuildContext context) => IconButton(icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border, color: isFavorite ? Colors.red : null), onPressed: onToggle);
+  @override Widget build(BuildContext context) => IconButton(icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border, color: isFavorite ? Colors.red : null), tooltip: AppLocalizations.of(context)!.bulkFavorite, onPressed: onToggle);
 }
 
 class RecipeRating extends StatelessWidget {
@@ -1748,6 +1748,7 @@ class _FullScreenImageViewer extends StatelessWidget {
                 ),
                 child: IconButton(
                   icon: const Icon(Icons.close, color: Colors.white),
+                  tooltip: AppLocalizations.of(context)!.actionClose,
                   onPressed: () => Navigator.pop(context),
                 ),
               ),

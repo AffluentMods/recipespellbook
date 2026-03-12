@@ -3599,16 +3599,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localDataDesc => '此设备上的食谱、食谱书、餐食计划、购物清单';
 
   @override
-  String get cloudData => '云端数据';
-
-  @override
-  String get cloudDataDesc => '即将推出 — 云端同步尚不可用';
-
-  @override
   String get allData => '所有数据';
 
   @override
   String get allDataDesc => '本地数据和设置 — 完全重置';
+
+  @override
+  String get allDataWarningTitle => 'This will delete everything';
+
+  @override
+  String get allDataWarningCloudData => 'All recipes, cookbooks, and meal plans synced to the cloud';
+
+  @override
+  String get allDataWarningLocalData => 'All local data on this device';
+
+  @override
+  String get allDataWarningAccount => 'Your account (subscription restores automatically on sign-in)';
+
+  @override
+  String get allDataWarningSettings => 'All app settings and preferences';
+
+  @override
+  String get allDataIUnderstand => 'I understand this will permanently delete all my data';
+
+  @override
+  String get allDataNoUndo => 'I understand this action cannot be undone';
 
   @override
   String permanentDeleteWarning(String scope) {

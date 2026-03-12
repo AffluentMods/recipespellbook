@@ -347,6 +347,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                       maxLines: 2, overflow: TextOverflow.ellipsis)),
                   IconButton(
                     icon: const Icon(Icons.copy, size: 20),
+                    tooltip: l10n.familyCopyLink,
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: link.url));
                       AppSnackbar.success(context, l10n.linkCopied);
@@ -512,11 +513,13 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                           ),
                           IconButton(
                             icon: const Icon(Icons.edit, size: 20),
+                            tooltip: l10n.rename,
                             onPressed: () => _renameList(context, list),
                           ),
                           if (!list.isDefault)
                             IconButton(
                               icon: const Icon(Icons.delete, size: 20),
+                              tooltip: l10n.actionDelete,
                               onPressed: () => _deleteList(context, list),
                             ),
                         ],
@@ -1125,8 +1128,8 @@ class _ModernHeader extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              IconButton(icon: const Icon(Icons.share_outlined), onPressed: onShare),
-              IconButton(icon: const Icon(Icons.more_vert), onPressed: onMoreOptions),
+              IconButton(icon: const Icon(Icons.share_outlined), tooltip: l10n.actionShare, onPressed: onShare),
+              IconButton(icon: const Icon(Icons.more_vert), tooltip: 'More options', onPressed: onMoreOptions),
             ],
           ),
           const SizedBox(height: 12),
@@ -2005,6 +2008,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close),
+          tooltip: l10n.actionClose,
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -2092,6 +2096,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                           IconButton(
                             icon: Icon(Icons.clear,
                                 size: 20, color: theme.colorScheme.outline),
+                            tooltip: l10n.actionClear,
                             onPressed: () {
                               _controller.clear();
                               _ensureKeyboardVisible();
@@ -2106,6 +2111,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                           child: IconButton(
                             icon: Icon(Icons.arrow_upward,
                                 color: theme.colorScheme.onPrimary, size: 20),
+                            tooltip: l10n.shoppingAddItem,
                             constraints: const BoxConstraints(
                               minWidth: 36,
                               minHeight: 36,

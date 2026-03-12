@@ -537,6 +537,7 @@ class RecipeImportEngine {
 
     switch (ext) {
       case 'json':
+      case 'crumb': // Crouton
       // Try app-specific JSON formats first, then generic
         return _tryAppJson(content)
             ?? _tryParseJson(content)
@@ -551,11 +552,22 @@ class RecipeImportEngine {
         return recipes.isNotEmpty
             ? recipes.first
             : ImportedRecipe(title: 'Imported Recipe', ingredients: [], instructions: []);
+      case 'mxp':
+      // MasterCook — delegate to file importers
+        final mxpRecipes = _parseMasterCookMxp(content);
+        return mxpRecipes.isNotEmpty
+            ? mxpRecipes.first
+            : ImportedRecipe(title: 'Imported Recipe', ingredients: [], instructions: []);
       case 'txt':
       default:
       // Try MealMaster detection on .txt files too
         if (_looksLikeMealMaster(content)) {
           final recipes = _parseMealMaster(content);
+          if (recipes.isNotEmpty) return recipes.first;
+        }
+        // Try MasterCook detection
+        if (_looksLikeMasterCook(content)) {
+          final recipes = _parseMasterCookMxp(content);
           if (recipes.isNotEmpty) return recipes.first;
         }
         return parseFromText(content);
@@ -569,6 +581,7 @@ class RecipeImportEngine {
 
     switch (ext) {
       case 'json':
+      case 'crumb': // Crouton
       // JSON arrays can contain multiple recipes
         final appRecipes = _tryAppJsonBulk(content);
         if (appRecipes.isNotEmpty) return appRecipes;
@@ -580,14 +593,112 @@ class RecipeImportEngine {
       case 'mmf':
       case 'mk':
         return _parseMealMaster(content);
+      case 'mxp':
+        return _parseMasterCookMxp(content);
       case 'txt':
         if (_looksLikeMealMaster(content)) return _parseMealMaster(content);
+        if (_looksLikeMasterCook(content)) return _parseMasterCookMxp(content);
         final recipe = parseFromText(content);
         return (recipe.ingredients.isNotEmpty || recipe.instructions.isNotEmpty) ? [recipe] : [];
       default:
         final recipe = parseFromFile(content, filename);
         return (recipe.ingredients.isNotEmpty || recipe.instructions.isNotEmpty) ? [recipe] : [];
     }
+  }
+
+  /// Check if text looks like MasterCook format.
+  static bool _looksLikeMasterCook(String content) {
+    return content.contains('EXPORTED FROM  MASTERCOOK') ||
+        content.contains('EXPORTED FROM MASTERCOOK') ||
+        RegExp(r'Serving Size\s*:\s*\d', caseSensitive: false).hasMatch(content);
+  }
+
+  /// Parse MasterCook .mxp format text.
+  /// Delegates to the MasterCook importer for the actual parsing logic.
+  static List<ImportedRecipe> _parseMasterCookMxp(String content) {
+    // Inline MasterCook parsing (same logic as MasterCookImporter)
+    // to avoid circular dependency with file_importers package.
+    final recipes = <ImportedRecipe>[];
+
+    final blocks = content.split(RegExp(
+      r'(?:^\s*\*\s*EXPORTED\s+FROM\s+MASTERCOOK\s*\*\s*$|'
+      r'^-\s*-\s*-\s*-\s*-\s*-\s*-\s*-\s*-.*$)',
+      multiLine: true,
+      caseSensitive: false,
+    ));
+
+    for (final block in blocks) {
+      final trimmed = block.trim();
+      if (trimmed.isEmpty || trimmed.length < 20) continue;
+
+      String? title;
+      String? servings;
+      List<String>? tags;
+      final ingredients = <String>[];
+      final instructions = <String>[];
+
+      final lines = trimmed.split('\n');
+      var inInstructions = false;
+
+      for (final rawLine in lines) {
+        final line = rawLine.trim();
+        if (line.isEmpty) {
+          if (ingredients.isNotEmpty && !inInstructions) inInstructions = true;
+          continue;
+        }
+
+        // Header fields
+        if (line.toLowerCase().startsWith('recipe by')) continue;
+        if (line.toLowerCase().startsWith('serving size') && line.contains(':')) {
+          servings = RegExp(r':\s*(\d+)').firstMatch(line)?.group(1);
+          continue;
+        }
+        if (line.toLowerCase().startsWith('categories') && line.contains(':')) {
+          tags = line.substring(line.indexOf(':') + 1).trim()
+              .split(RegExp(r'\s{2,}'))
+              .map((c) => c.trim())
+              .where((c) => c.isNotEmpty)
+              .toList();
+          continue;
+        }
+        if (line.toLowerCase().contains('amount') &&
+            line.toLowerCase().contains('measure')) continue;
+        if (RegExp(r'^[-\s]+$').hasMatch(line) && line.contains('---')) continue;
+        if (line.startsWith('*')) continue;
+
+        // Title
+        if (title == null && !inInstructions && ingredients.isEmpty) {
+          title = line;
+          continue;
+        }
+
+        // Ingredients vs instructions
+        if (!inInstructions) {
+          if (RegExp(r'^\s*[\d½¼¾⅓⅔⅛]').hasMatch(rawLine) ||
+              rawLine.startsWith('     ')) {
+            ingredients.add(line);
+          } else {
+            inInstructions = true;
+            instructions.add(line);
+          }
+        } else {
+          instructions.add(line);
+        }
+      }
+
+      if (title != null && (ingredients.isNotEmpty || instructions.isNotEmpty)) {
+        recipes.add(ImportedRecipe(
+          title: title,
+          ingredients: ingredients,
+          instructions: instructions,
+          servings: servings,
+          tags: tags,
+          sourceApp: 'mastercook',
+        ));
+      }
+    }
+
+    return recipes;
   }
 
   /// Parse OCR text with extra cleanup for camera/scan artifacts.

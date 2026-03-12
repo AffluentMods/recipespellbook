@@ -109,6 +109,30 @@ class SyncService {
     await prefs.remove(_legacyLastSyncKey);
   }
 
+  /// Purge ALL synced data from the server for the current user.
+  ///
+  /// Called when user chooses "Delete All Data" in settings.
+  /// Deletes server-side recipes, cookbooks, planner, shopping, etc.
+  /// without deleting the user's account.
+  ///
+  /// Also clears the local sync timestamp so a future sync
+  /// doesn't re-pull the (now deleted) server data.
+  Future<bool> purgeCloudData() async {
+    if (!_auth.isSignedIn) return false;
+    try {
+      final response = await _auth.delete('/v1/sync/data');
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        await clearLastSyncAt();
+        return true;
+      }
+      debugPrint('[Sync] Purge cloud data failed: ${response.statusCode}');
+      return false;
+    } catch (e) {
+      debugPrint('[Sync] Purge cloud data error: $e');
+      return false;
+    }
+  }
+
   // ════════════════════════════════════════════
   //  CORE SYNC
   // ════════════════════════════════════════════

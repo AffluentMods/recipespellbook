@@ -4426,7 +4426,7 @@ abstract class AppLocalizations {
   /// No description provided for @resetScopeAll.
   ///
   /// In en, this message translates to:
-  /// **'all data and settings'**
+  /// **'all data, cloud sync, and your account'**
   String get resetScopeAll;
 
   /// No description provided for @resetEverything.
@@ -6754,20 +6754,8 @@ abstract class AppLocalizations {
   /// No description provided for @localDataDesc.
   ///
   /// In en, this message translates to:
-  /// **'Recipes, cookbooks, meal plans, shopping lists on this device'**
+  /// **'Deletes recipes, cookbooks, meal plans, and shopping lists on this device only. Cloud data stays intact and will sync back.'**
   String get localDataDesc;
-
-  /// No description provided for @cloudData.
-  ///
-  /// In en, this message translates to:
-  /// **'Cloud Data'**
-  String get cloudData;
-
-  /// No description provided for @cloudDataDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Coming soon — Cloud Sync not yet available'**
-  String get cloudDataDesc;
 
   /// No description provided for @allData.
   ///
@@ -6778,8 +6766,50 @@ abstract class AppLocalizations {
   /// No description provided for @allDataDesc.
   ///
   /// In en, this message translates to:
-  /// **'Local data and settings — complete fresh start'**
+  /// **'Permanently deletes EVERYTHING — local data, cloud data, and your account. Complete fresh start.'**
   String get allDataDesc;
+
+  /// No description provided for @allDataWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This will delete everything'**
+  String get allDataWarningTitle;
+
+  /// No description provided for @allDataWarningCloudData.
+  ///
+  /// In en, this message translates to:
+  /// **'All recipes, cookbooks, and meal plans synced to the cloud'**
+  String get allDataWarningCloudData;
+
+  /// No description provided for @allDataWarningLocalData.
+  ///
+  /// In en, this message translates to:
+  /// **'All local data on this device'**
+  String get allDataWarningLocalData;
+
+  /// No description provided for @allDataWarningAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account (subscription restores automatically on sign-in)'**
+  String get allDataWarningAccount;
+
+  /// No description provided for @allDataWarningSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'All app settings and preferences'**
+  String get allDataWarningSettings;
+
+  /// No description provided for @allDataIUnderstand.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand this will permanently delete all my data'**
+  String get allDataIUnderstand;
+
+  /// No description provided for @allDataNoUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand this action cannot be undone'**
+  String get allDataNoUndo;
 
   /// No description provided for @permanentDeleteWarning.
   ///

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import '../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
-import 'package:archive/archive.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +12,7 @@ import 'package:path/path.dart' as p;
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/imported_recipe.dart';
+import '../../services/recipe_file_importers/file_import_dispatcher.dart';
 import '../../providers/database_provider.dart';
 import '../../services/ocr_service.dart';
 import '../../services/recipe_import_engine.dart';
@@ -416,19 +416,8 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   }
 
   // ========== FILE IMPORT ==========
-  // Supported extensions for recipe import
-  static const _supportedExtensions = {
-    'pdf', 'txt', 'md', 'json', 'zip', 'html', 'htm',
-    'mela', 'melarecipes', 'melarecipe',
-    'paprikarecipes', 'paprikarecipe',
-    'crumb', 'fdx', 'mmf', 'mk', 'rcb', 'mx2', 'mcx',
-  };
-
-  // Extensions that need user action before importing
-  static const _redirectExtensions = <String, String>{};
 
   Future<void> _importFromFile() async {
-    final l10n = AppLocalizations.of(context)!;
     // Use FileType.any because Android doesn't recognize custom extensions
     final result = await FilePicker.platform.pickFiles(type: FileType.any);
     if (result == null || result.files.isEmpty) return;
@@ -437,61 +426,20 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     if (path == null) return;
     final ext = file.extension?.toLowerCase() ?? '';
 
-    // Check for redirect extensions (e.g. Paprika)
-    if (_redirectExtensions.containsKey(ext)) {
-      _showInfoDialog(_redirectExtensions[ext]!);
+    // PDF is handled separately (OCR flow)
+    if (ext == 'pdf') {
+      _processPdfFile(path);
       return;
     }
 
-    // Validate extension
-    if (ext.isNotEmpty && !_supportedExtensions.contains(ext)) {
-      _showError(l10n.failedToImport('Unsupported file type: .$ext'));
+    // JSON might be our own export format — check first
+    if (ext == 'json') {
+      _processJsonFile(path);
       return;
     }
 
-    switch (ext) {
-      case 'pdf':
-        _processPdfFile(path);
-        break;
-      case 'zip': case 'mela': case 'melarecipes':
-      case 'melarecipe': case 'crumb': case 'fdx': case 'rcb':
-      case 'mx2': case 'mcx': case 'paprikarecipes': case 'paprikarecipe':
-      _processZipFile(path);
-      break;
-      case 'html': case 'htm':
-      _processHtmlFile(path);
-      break;
-      case 'json':
-      // JSON might contain single or multiple recipes (Tandoor, Mealie, Crouton, etc.)
-        _processJsonFile(path);
-        break;
-      case 'mmf': case 'mk':
-    // MealMaster format — can contain multiple recipes
-      _processMealMasterFile(path);
-      break;
-      default:
-      // For unknown extensions, try to detect format from content
-        _processTextFile(path, file.name);
-        break;
-    }
-  }
-
-  void _showInfoDialog(String message) {
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        icon: const Icon(Icons.info_outline, size: 32),
-        title: Text(l10n.exportFormat),
-        content: Text(message),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.gotIt),
-          ),
-        ],
-      ),
-    );
+    // All other formats → unified FileImportDispatcher
+    _processFileWithDispatcher(path, file.name);
   }
 
   void _createManually() {
@@ -499,30 +447,22 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     context.push('/cookbook/${widget.cookbookId}/new-recipe');
   }
 
-  Future<void> _processTextFile(String path, String filename) async {
-    final l10n = AppLocalizations.of(context)!;
-    _showLoading(l10n.readingImage);
-    try {
-      final content = await File(path).readAsString();
-      final recipe = RecipeImportEngine.parseFromFile(content, filename);
-      _hideLoading();
-      _showImportPreview([recipe], sourceText: content);
-    } catch (e) {
-      _hideLoading();
-      _showError(l10n.failedToImport(e.toString()));
-    }
-  }
-
-  Future<void> _processHtmlFile(String path) async {
+  /// Unified file import using FileImportDispatcher.
+  /// Handles all formats: ZIP-based (Paprika, Mela, Recipe Keeper, Cookmate),
+  /// text-based (MasterCook, Plan to Eat CSV, Cooklang, Living Cookbook),
+  /// and legacy formats (MealMaster, HTML, Markdown, etc.)
+  Future<void> _processFileWithDispatcher(String path, String filename) async {
     final l10n = AppLocalizations.of(context)!;
     _showLoading(l10n.importProcessing);
     try {
-      final content = await File(path).readAsString();
-      final recipes = RecipeImportEngine.parseFromHtml(content);
+      final bytes = Uint8List.fromList(await File(path).readAsBytes());
+      final recipes = await FileImportDispatcher.importFromBytes(bytes, filename);
 
       _hideLoading();
-      if (recipes.isEmpty) { _showError(l10n.errorNoRecipeFound); return; }
-      // All imports route through preview for Smart Import fallback
+      if (recipes.isEmpty) {
+        _showError(l10n.errorNoRecipeFound);
+        return;
+      }
       _showImportPreview(recipes);
     } catch (e) {
       _hideLoading();
@@ -626,23 +566,6 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     _showImportPreview(recipes, sourceText: 'Recipe Spellbook export (${recipes.length} recipes)');
   }
 
-  Future<void> _processMealMasterFile(String path) async {
-    final l10n = AppLocalizations.of(context)!;
-    _showLoading(l10n.importProcessing);
-    try {
-      final content = await File(path).readAsString();
-      final recipes = RecipeImportEngine.parseFromFileBulk(content, path.split('/').last);
-
-      _hideLoading();
-      if (recipes.isEmpty) { _showError(l10n.errorNoRecipeFound); return; }
-      // All imports route through preview for Smart Import fallback
-      _showImportPreview(recipes);
-    } catch (e) {
-      _hideLoading();
-      _showError(l10n.failedToImport(e.toString()));
-    }
-  }
-
   void _showImportPreview(List<ImportedRecipe> recipes, {String? sourceUrl, String? sourceText}) {
     // Navigate to the full import preview screen
     Navigator.of(context).pop(); // Close the new recipe dialog first
@@ -657,122 +580,6 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
         ),
       ),
     );
-  }
-
-  Future<void> _processZipFile(String path) async {
-    final l10n = AppLocalizations.of(context)!;
-    _showLoading(l10n.extractingArchive);
-    final errors = <String>[];
-    try {
-      final bytes = await File(path).readAsBytes();
-      final ext = path.toLowerCase().split('.').last;
-
-      // Paprika format: gzip-compressed archive of individual gzip-compressed JSON files
-      if (ext == 'paprikarecipes' || ext == 'paprikarecipe') {
-        final recipes = await _processPaprikaBytes(bytes, errors);
-        _hideLoading();
-        if (recipes.isEmpty) {
-          _showError(errors.isNotEmpty ? errors.join('\n') : l10n.errorNoRecipeFound);
-          return;
-        }
-        _showImportPreview(recipes);
-        return;
-      }
-
-      final archive = ZipDecoder().decodeBytes(bytes);
-      final recipes = <ImportedRecipe>[];
-
-      for (final file in archive) {
-        if (!file.isFile) continue;
-        final name = file.name.toLowerCase();
-
-        try {
-          final content = utf8.decode(file.content as List<int>, allowMalformed: true);
-
-          if (name.endsWith('.json')) {
-            final bulkRecipes = RecipeImportEngine.parseFromFileBulk(content, file.name);
-            recipes.addAll(bulkRecipes);
-          } else if (name.endsWith('.html') || name.endsWith('.htm')) {
-            recipes.addAll(RecipeImportEngine.parseFromHtml(content));
-          } else if (name.endsWith('.md') || name.endsWith('.txt') || name.endsWith('.mmf') || name.endsWith('.mk')) {
-            final bulkText = RecipeImportEngine.parseFromFileBulk(content, file.name);
-            recipes.addAll(bulkText);
-          }
-        } catch (e) {
-          errors.add('${file.name}: $e');
-        }
-      }
-
-      _hideLoading();
-      if (recipes.isEmpty) {
-        _showError(errors.isNotEmpty
-            ? '${l10n.errorNoRecipeFound}\n${errors.length} files had errors.'
-            : l10n.errorNoRecipeFound);
-        return;
-      }
-      if (errors.isNotEmpty) {
-        debugPrint('[Import] ZIP: ${recipes.length} recipes found, ${errors.length} errors: $errors');
-      }
-      _showImportPreview(recipes);
-    } catch (e) {
-      _hideLoading();
-      _showError(l10n.failedToImport(e.toString()));
-    }
-  }
-
-  /// Process Paprika format: gzip-compressed archive containing
-  /// individual gzip-compressed JSON recipe files.
-  Future<List<ImportedRecipe>> _processPaprikaBytes(List<int> bytes, List<String> errors) async {
-    final recipes = <ImportedRecipe>[];
-    try {
-      // First decompress the outer gzip to get the inner archive
-      final decompressed = GZipDecoder().decodeBytes(bytes);
-      final archive = ZipDecoder().decodeBytes(decompressed);
-
-      for (final file in archive) {
-        if (!file.isFile) continue;
-        try {
-          // Each file inside is also gzip-compressed JSON
-          List<int> recipeBytes;
-          try {
-            recipeBytes = GZipDecoder().decodeBytes(file.content as List<int>);
-          } catch (_) {
-            // Some Paprika exports don't double-compress
-            recipeBytes = file.content as List<int>;
-          }
-
-          final jsonStr = utf8.decode(recipeBytes, allowMalformed: true);
-          final json = jsonDecode(jsonStr) as Map<String, dynamic>;
-          recipes.add(RecipeImportEngine.parsePaprikaRecipe(json));
-        } catch (e) {
-          errors.add('${file.name}: $e');
-        }
-      }
-    } catch (_) {
-      // The outer format might be a plain zip (not gzip-wrapped)
-      try {
-        final archive = ZipDecoder().decodeBytes(bytes);
-        for (final file in archive) {
-          if (!file.isFile) continue;
-          try {
-            List<int> recipeBytes;
-            try {
-              recipeBytes = GZipDecoder().decodeBytes(file.content as List<int>);
-            } catch (_) {
-              recipeBytes = file.content as List<int>;
-            }
-            final jsonStr = utf8.decode(recipeBytes, allowMalformed: true);
-            final json = jsonDecode(jsonStr) as Map<String, dynamic>;
-            recipes.add(RecipeImportEngine.parsePaprikaRecipe(json));
-          } catch (e) {
-            errors.add('${file.name}: $e');
-          }
-        }
-      } catch (e) {
-        errors.add('Failed to read Paprika archive: $e');
-      }
-    }
-    return recipes;
   }
 
   @override

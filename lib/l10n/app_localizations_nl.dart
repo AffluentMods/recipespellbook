@@ -3626,16 +3626,31 @@ class AppLocalizationsNl extends AppLocalizations {
   String get localDataDesc => 'Recepten, kookboeken, maaltijdplannen, boodschappenlijsten op dit apparaat';
 
   @override
-  String get cloudData => 'Cloudgegevens';
-
-  @override
-  String get cloudDataDesc => 'Binnenkort — Cloud sync nog niet beschikbaar';
-
-  @override
   String get allData => 'Alle gegevens';
 
   @override
   String get allDataDesc => 'Lokale gegevens en instellingen — volledige reset';
+
+  @override
+  String get allDataWarningTitle => 'This will delete everything';
+
+  @override
+  String get allDataWarningCloudData => 'All recipes, cookbooks, and meal plans synced to the cloud';
+
+  @override
+  String get allDataWarningLocalData => 'All local data on this device';
+
+  @override
+  String get allDataWarningAccount => 'Your account (subscription restores automatically on sign-in)';
+
+  @override
+  String get allDataWarningSettings => 'All app settings and preferences';
+
+  @override
+  String get allDataIUnderstand => 'I understand this will permanently delete all my data';
+
+  @override
+  String get allDataNoUndo => 'I understand this action cannot be undone';
 
   @override
   String permanentDeleteWarning(String scope) {

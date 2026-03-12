@@ -17,6 +17,7 @@ import '../../../services/auth_service.dart';
 import '../../../services/export_import_service.dart';
 import '../../../services/family_service.dart';
 import '../../../services/onboarding_service.dart';
+import '../../../services/sync_service.dart';
 import '../home/home_screen.dart';
 import '../../../services/revenuecat_service.dart';
 import '../../widgets/app_snackbar.dart';
@@ -367,25 +368,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         Text(l10n.resetAppWarning), const SizedBox(height: 20),
         Text(l10n.whatToDelete, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
-        _ResetOptionTile(icon: Icons.phone_android, title: l10n.localData, subtitle: l10n.localDataDesc, color: theme.colorScheme.error, onTap: () { Navigator.pop(context); _showFinalResetConfirmation(context, ref, _ResetScope.local); }),
+        _ResetOptionTile(icon: Icons.phone_android, title: l10n.localData, subtitle: l10n.localDataDesc, color: theme.colorScheme.error, onTap: () { Navigator.pop(context); _showLocalResetConfirmation(context, ref); }),
         const SizedBox(height: 8),
-        _ResetOptionTile(icon: Icons.cloud_outlined, title: l10n.cloudData, subtitle: l10n.cloudDataDesc, color: theme.colorScheme.outline, enabled: false, onTap: () {}),
-        const SizedBox(height: 8),
-        _ResetOptionTile(icon: Icons.delete_forever, title: l10n.allData, subtitle: l10n.allDataDesc, color: theme.colorScheme.error, onTap: () { Navigator.pop(context); _showFinalResetConfirmation(context, ref, _ResetScope.all); }),
+        _ResetOptionTile(icon: Icons.delete_forever, title: l10n.allData, subtitle: l10n.allDataDesc, color: theme.colorScheme.error, onTap: () { Navigator.pop(context); _showAllDataWarning(context, ref); }),
       ]),
       actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel))],
     ));
   }
 
-  void _showFinalResetConfirmation(BuildContext context, WidgetRef ref, _ResetScope scope) {
+  /// Local data: single confirmation with type-DELETE (recoverable via cloud sync).
+  void _showLocalResetConfirmation(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
-    final scopeLabel = switch (scope) { _ResetScope.local => l10n.resetScopeLocal, _ResetScope.cloud => l10n.resetScopeCloud, _ResetScope.all => l10n.resetScopeAll };
     showDialog<void>(context: context, builder: (context) => AlertDialog(
-      icon: Icon(Icons.delete_forever, size: 48, color: Theme.of(context).colorScheme.error),
+      icon: Icon(Icons.phone_android, size: 48, color: Theme.of(context).colorScheme.error),
       title: Text(l10n.finalConfirmation),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        Text(l10n.permanentlyDeleteWarning(scopeLabel)), const SizedBox(height: 16),
+        Text(l10n.permanentlyDeleteWarning(l10n.resetScopeLocal)), const SizedBox(height: 16),
         Text(l10n.typeDeleteToConfirm, style: const TextStyle(fontWeight: FontWeight.bold)), const SizedBox(height: 16),
         TextField(controller: controller, decoration: InputDecoration(hintText: l10n.typeDeleteHint, border: const OutlineInputBorder()), textCapitalization: TextCapitalization.characters, autofocus: true),
       ]),
@@ -393,7 +392,85 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
         ListenableBuilder(listenable: controller, builder: (context, _) {
           final ok = controller.text.toUpperCase() == l10n.typeDeleteHint.toUpperCase();
-          return FilledButton(style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error), onPressed: ok ? () => _performReset(context, ref, l10n, scope) : null, child: Text(l10n.actionDelete));
+          return FilledButton(style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error), onPressed: ok ? () => _performReset(context, ref, l10n, _ResetScope.local) : null, child: Text(l10n.actionDelete));
+        }),
+      ],
+    )).then((_) => controller.dispose());
+  }
+
+  /// All data — SCREEN 1: Checkbox acknowledgments showing exactly what will be deleted.
+  void _showAllDataWarning(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final check1 = ValueNotifier(false);
+    final check2 = ValueNotifier(false);
+    showDialog<void>(context: context, builder: (context) {
+      final theme = Theme.of(context);
+      final errorColor = theme.colorScheme.error;
+      return AlertDialog(
+        icon: Icon(Icons.warning_amber_rounded, size: 48, color: errorColor),
+        title: Text(l10n.allDataWarningTitle),
+        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          // What will be deleted
+          _DeleteBullet(icon: Icons.cloud_off, text: l10n.allDataWarningCloudData),
+          const SizedBox(height: 6),
+          _DeleteBullet(icon: Icons.phone_android, text: l10n.allDataWarningLocalData),
+          const SizedBox(height: 6),
+          _DeleteBullet(icon: Icons.person_off, text: l10n.allDataWarningAccount),
+          const SizedBox(height: 6),
+          _DeleteBullet(icon: Icons.settings, text: l10n.allDataWarningSettings),
+          const SizedBox(height: 20),
+          // Checkbox acknowledgments
+          ValueListenableBuilder<bool>(valueListenable: check1, builder: (_, v, __) =>
+            CheckboxListTile(
+              value: v, onChanged: (val) => check1.value = val ?? false,
+              title: Text(l10n.allDataIUnderstand, style: theme.textTheme.bodySmall),
+              controlAffinity: ListTileControlAffinity.leading,
+              dense: true, contentPadding: EdgeInsets.zero,
+              activeColor: errorColor,
+            ),
+          ),
+          ValueListenableBuilder<bool>(valueListenable: check2, builder: (_, v, __) =>
+            CheckboxListTile(
+              value: v, onChanged: (val) => check2.value = val ?? false,
+              title: Text(l10n.allDataNoUndo, style: theme.textTheme.bodySmall),
+              controlAffinity: ListTileControlAffinity.leading,
+              dense: true, contentPadding: EdgeInsets.zero,
+              activeColor: errorColor,
+            ),
+          ),
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
+          ListenableBuilder(listenable: Listenable.merge([check1, check2]), builder: (context, _) {
+            final ok = check1.value && check2.value;
+            return FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: errorColor),
+              onPressed: ok ? () { Navigator.pop(context); _showAllDataFinalConfirmation(context, ref); } : null,
+              child: Text(l10n.actionContinue),
+            );
+          }),
+        ],
+      );
+    }).then((_) { check1.dispose(); check2.dispose(); });
+  }
+
+  /// All data — SCREEN 2: Type DELETE to confirm.
+  void _showAllDataFinalConfirmation(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController();
+    showDialog<void>(context: context, builder: (context) => AlertDialog(
+      icon: Icon(Icons.delete_forever, size: 48, color: Theme.of(context).colorScheme.error),
+      title: Text(l10n.finalConfirmation),
+      content: Column(mainAxisSize: MainAxisSize.min, children: [
+        Text(l10n.permanentlyDeleteWarning(l10n.resetScopeAll)), const SizedBox(height: 16),
+        Text(l10n.typeDeleteToConfirm, style: const TextStyle(fontWeight: FontWeight.bold)), const SizedBox(height: 16),
+        TextField(controller: controller, decoration: InputDecoration(hintText: l10n.typeDeleteHint, border: const OutlineInputBorder()), textCapitalization: TextCapitalization.characters, autofocus: true),
+      ]),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
+        ListenableBuilder(listenable: controller, builder: (context, _) {
+          final ok = controller.text.toUpperCase() == l10n.typeDeleteHint.toUpperCase();
+          return FilledButton(style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error), onPressed: ok ? () => _performReset(context, ref, l10n, _ResetScope.all) : null, child: Text(l10n.actionDelete));
         }),
       ],
     )).then((_) => controller.dispose());
@@ -415,19 +492,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (context.mounted) context.go('/splash');
 
     // Wait for navigation and widget tree teardown to complete
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future.delayed(const Duration(milliseconds: 300));
 
     try {
-      for (final t in ['recipe_links', 'recipe_tags', 'ingredient_usda_mappings', 'user_ingredient_mappings', 'ingredients', 'steps', 'recipes']) {
-        await db.customStatement('DELETE FROM $t');
+      // Use proper Drift transaction methods — atomic, triggers stream
+      // notifications so providers update correctly, and re-seeds defaults.
+      if (scope == _ResetScope.all) {
+        // Delete account from server (cascades to all synced data).
+        // Subscription is tied to Apple/Google via RevenueCat, not our
+        // user row — it auto-restores on next sign-in.
+        await AuthService.instance.deleteAccount();
+        // Wipe local data
+        await db.deleteAllUserData();
+        settingsNotifier?.resetToDefaults();
+      } else {
+        // Local only: delete recipes/cookbooks/planner, keep shopping list
+        await db.deleteLocalRecipeData();
+        // Clear sync timestamp so next sync re-pulls from cloud
+        await SyncService.instance.clearLastSyncAt();
       }
-      await db.customStatement("DELETE FROM cookbooks WHERE id != 'starter'");
-      await db.customStatement('DELETE FROM shopping_list_items');
-      await db.customStatement("DELETE FROM shopping_lists WHERE id != 'list_default'");
-      await db.customStatement('DELETE FROM meal_plans');
-      await db.customStatement('DELETE FROM custom_courses');
-      await db.customStatement('DELETE FROM custom_categories');
-      settingsNotifier?.resetToDefaults();
 
       // Reset onboarding so the intro flow triggers again —
       // the onboarding will offer to import default recipes automatically.
@@ -560,7 +643,7 @@ class _TierBadge extends ConsumerWidget {
 //  CORE WIDGETS
 // ════════════════════════════════════════════
 
-enum _ResetScope { local, cloud, all }
+enum _ResetScope { local, all }
 
 class _Section extends StatelessWidget {
   final String title;
@@ -641,6 +724,21 @@ class _ResetOptionTile extends StatelessWidget {
         ]),
       )),
     ));
+  }
+}
+
+class _DeleteBullet extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  const _DeleteBullet({required this.icon, required this.text});
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(children: [
+      Icon(icon, size: 18, color: theme.colorScheme.error),
+      const SizedBox(width: 10),
+      Expanded(child: Text(text, style: theme.textTheme.bodySmall)),
+    ]);
   }
 }
 

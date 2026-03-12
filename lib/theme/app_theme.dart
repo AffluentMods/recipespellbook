@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/app_enums.dart';
+import '../utils/platform_utils.dart';
 
 /// Builds ThemeData for any AppColorTheme in light or dark mode
 class AppTheme {
@@ -116,10 +117,16 @@ class AppTheme {
       scrim: Colors.black,
     );
 
+    // Desktop/web uses compact density for tighter spacing
+    final density = (isDesktop || isWeb)
+        ? VisualDensity.compact
+        : VisualDensity.adaptivePlatformDensity;
+
     return ThemeData(
       useMaterial3: true,
       brightness: effectiveBrightness,
       colorScheme: colorScheme,
+      visualDensity: density,
       scaffoldBackgroundColor: palette.background,
 
       // ── Global circular back button — applies to ALL screens ──
