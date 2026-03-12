@@ -3157,6 +3157,7 @@
   "mealPlanDateFormat": "{weekday} {day} {month}",
   "splashRecipe": "Recept",
   "splashSpellbook": "Spreukenboek",
+  "splashTagline": "Je culinaire avontuur wacht",
   "smartImportReparsed": "Opnieuw geanalyseerd door AI — controleer het bijgewerkte recept hierboven",
   "servingSizeHint": "bijv. 1 kopje, 100g",
   "mainNutrients": "Hoofdvoedingsstoffen",
@@ -3374,7 +3375,13 @@
   "allergyNoDisabledSubtitle": "Wanneer je allergiewaarschuwingen bij recepten uitschakelt, verschijnen ze hier zodat je ze kunt herstellen.",
   "allergyDisabledInfo": "Deze recepten hebben allergiewaarschuwingen uitgeschakeld. Tik om te herstellen.",
   "trashRestoredMessage": "\"{title}\" hersteld",
-  "@trashRestoredMessage": {"placeholders": {"title": {"type": "String"}}},
+  "@trashRestoredMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "nutrientCalories": "Calorieën",
   "nutrientTotalFat": "Totaal vet",
   "nutrientSaturatedFat": "Verzadigd vet",
@@ -3415,10 +3422,21 @@
   "nutrientCarbs": "Koolhydraten",
   "nutrientFat": "Vet",
   "nutritionKcalPerServing": "{count} kcal/portie",
-  "@nutritionKcalPerServing": {"placeholders": {"count": {"type": "int"}}},
+  "@nutritionKcalPerServing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "nutritionKcalTotal": "{count} kcal totaal",
-  "@nutritionKcalTotal": {"placeholders": {"count": {"type": "int"}}},
-
+  "@nutritionKcalTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqAddHeadersStep1Desc": "Open een recept en tik op het bewerkicoon.",
   "faqAddHeadersStep1Title": "Open de recepteditor",
   "faqAddHeadersStep2Desc": "Tik op de knop 'Kop toevoegen' om een sectiekop in te voegen.",
@@ -3434,7 +3452,6 @@
   "faqAddHeadersStep6Title": "Klaar!",
   "faqAddHeadersSubtitle": "Organiseer je receptingrediënten en -stappen in secties",
   "faqAddHeadersTitle": "Hoe voeg je koppen toe",
-
   "faqAddSublinkedStep1Desc": "Open een recept en tik op het bewerkicoon.",
   "faqAddSublinkedStep1Title": "Open de recepteditor",
   "faqAddSublinkedStep2Desc": "Tik op de drie puntjes (⋮) in het bewerkscherm.",
@@ -3449,7 +3466,6 @@
   "faqAddSublinkedStep6Title": "Klaar!",
   "faqAddSublinkedSubtitle": "Koppel gerelateerde recepten aan elkaar voor snelle toegang",
   "faqAddSublinkedTitle": "Hoe voeg je gekoppelde recepten toe",
-
   "faqCommonQuestions": "Veelgestelde vragen",
   "faqDeviceTransferAnswer": "Ja! Gebruik de functie Apparaatoverdracht in Instellingen > Gegevens > Apparaatoverdracht. Genereer een code op je oude apparaat en voer deze in op je nieuwe. Al je recepten, kookboeken en afbeeldingen worden overgedragen.",
   "faqDeviceTransferSubtitle": "Draag recepten over tussen telefoons en tablets",
@@ -3462,7 +3478,13 @@
   "faqImportFailedTitle": "Waarom is mijn import mislukt?",
   "faqSeeHowTo": "Bekijk de handleiding",
   "faqStepsCount": "{count} stappen",
-  "@faqStepsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@faqStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqTitle": "FAQ's",
   "faqWhatAreHeadersAnswer": "Met koppen kun je je receptingrediënten en -stappen in secties verdelen. Zo kun je bijvoorbeeld aparte secties hebben voor 'Saus', 'Deeg' en 'Beleg' in een pizzarecept. Ze maken lange recepten veel gemakkelijker te volgen.",
   "faqWhatAreHeadersSubtitle": "Organiseer recepten in secties",
@@ -3470,7 +3492,6 @@
   "faqWhatAreSublinkedAnswer": "Gekoppelde recepten laten je gerelateerde recepten aan elkaar verbinden. Zo kan een Margherita Pizza-recept bijvoorbeeld linken naar je Pizzadeeg-recept. Bij het bekijken van het hoofdrecept kun je op het gekoppelde recept tikken om er direct naartoe te gaan — geen zoeken nodig.",
   "faqWhatAreSublinkedSubtitle": "Verbind gerelateerde recepten met elkaar",
   "faqWhatAreSublinkedTitle": "Wat zijn gekoppelde recepten?",
-
   "importGuideAiStep1Desc": "Ga naar Home, tik op + om een recept toe te voegen, kies Importeren en tik vervolgens op de AI-knop.",
   "importGuideAiStep1Title": "Open AI-import",
   "importGuideAiStep2Desc": "Tik op de knop prompt kopiëren. Open vervolgens je favoriete AI — ChatGPT, Claude, Gemini of een andere — en plak de prompt.",
@@ -3485,7 +3506,6 @@
   "importGuideAiTitle": "AI (ChatGPT, Claude, etc.)",
   "importGuideCategoryAi": "AI-import",
   "importGuideTagNew": "Nieuw",
-
   "settingsNotifManagePreferences": "Meldingsvoorkeuren beheren",
   "settingsNotifNewDownloads": "Nieuwe downloads",
   "settingsNotifNewDownloadsSubtitle": "Wanneer iemand je gepubliceerde recept downloadt",
@@ -3494,7 +3514,6 @@
   "settingsNotifComments": "Reacties",
   "settingsNotifCommentsSubtitle": "Wanneer iemand een reactie plaatst op je recept",
   "settingsNotifSyncNote": "Meldingsvoorkeuren worden gesynchroniseerd met je account.",
-
   "accountStoreFallback": "Winkel",
   "appearanceCustomThemeRequiresPremium": "Aangepast thema vereist Premium",
   "appearancePremiumBadge": "Premium",
@@ -3515,7 +3534,7 @@
   "customThemePrimaryDesc": "Knoppen, accenten, app-balk",
   "customThemeStartFromPreset": "Begin vanuit een preset",
   "customThemeTitle": "Aangepast thema",
-  "drawerProTier": "Pro \u00b7 {tier}",
+  "drawerProTier": "Pro · {tier}",
   "@drawerProTier": {
     "placeholders": {
       "tier": {
@@ -3538,7 +3557,7 @@
   "nutritionScaleHelper": "1,0 = volledig recept",
   "nutritionScaleMultiplier": "Schaalfactor",
   "nutritionTipManual": "Voer exacte voedingswaarden in als je die kent",
-  "nutritionTipMatch": "Tik op een ingredi\u00ebnt om de USDA-match te wijzigen",
+  "nutritionTipMatch": "Tik op een ingrediënt om de USDA-match te wijzigen",
   "nutritionTipSaved": "Je correcties worden opgeslagen voor toekomstige recepten",
   "nutritionTipSpecific": "Kies specifieke types (bijv. \"tarwebloem\" in plaats van alleen \"bloem\")",
   "scanLittleTextImage": "Heel weinig tekst gedetecteerd ({count} tekens). Probeer een duidelijkere foto met betere verlichting, of gebruik de optie Tekst plakken.",
@@ -3580,10 +3599,10 @@
   "shareCreateFailed": "Link aanmaken mislukt",
   "shareFamilyCreateJoin": "Maak een gezin aan of sluit je aan om te delen",
   "shareFamilyRequiresCloudSync": "Vereist Cloud Sync-abonnement",
-  "shareFamilySetupInSettings": "Maak een gezin aan of sluit je aan in Instellingen \u2192 Gezinsdeling",
+  "shareFamilySetupInSettings": "Maak een gezin aan of sluit je aan in Instellingen → Gezinsdeling",
   "shareFamilyShare": "Gezinsdeling",
   "shareFamilySignIn": "Log in om gezinsdeling te gebruiken",
-  "shareFamilySyncSubtitle": "Realtime synchronisatie \u00b7 Rechten per lid",
+  "shareFamilySyncSubtitle": "Realtime synchronisatie · Rechten per lid",
   "shareFamilyUpgradeMessage": "Upgrade naar Cloud Sync om kookboeken en lijsten in realtime met je gezin te delen.",
   "shareGenerateLink": "Link genereren",
   "shareLinkCopied": "Link gekopieerd!",
@@ -3597,7 +3616,7 @@
   },
   "shareNoFamilyMembers": "Geen andere gezinsleden om mee te delen",
   "shareOneTimeLink": "Eenmalige link",
-  "shareOneTimeLinkSubtitle": "Gratis \u2022 24 uur geldig \u2022 Alleen bekijken/downloaden",
+  "shareOneTimeLinkSubtitle": "Gratis • 24 uur geldig • Alleen bekijken/downloaden",
   "sharePermAddItems": "Kan items toevoegen, eigen items bewerken",
   "sharePermAddOnly": "Alleen toevoegen",
   "sharePermAddRecipes": "Kan nieuwe recepten toevoegen",
@@ -3625,7 +3644,7 @@
   "shareUnknownMember": "Onbekend",
   "shareUpgrade": "Upgraden",
   "shareWith": "Delen met",
-  "subscriptionCancelledUntil": "Geannuleerd \u2014 toegang tot {date}",
+  "subscriptionCancelledUntil": "Geannuleerd — toegang tot {date}",
   "@subscriptionCancelledUntil": {
     "placeholders": {
       "date": {
@@ -3633,7 +3652,7 @@
       }
     }
   },
-  "subscriptionLifetime": "Levenslang \u2014 verloopt nooit",
+  "subscriptionLifetime": "Levenslang — verloopt nooit",
   "subscriptionManage": "Abonnement beheren",
   "subscriptionNoPurchases": "Geen eerdere aankopen gevonden.",
   "subscriptionPlan": "Abonnement",
@@ -3656,7 +3675,7 @@
   "subscriptionUpgradeToUnlock": "Upgrade naar Pro om te ontgrendelen",
   "subscriptionViewPlans": "Abonnementen bekijken",
   "substitutionsAll": "Alle",
-  "substitutionsCount": "{count} vervangers \u2022 {category}",
+  "substitutionsCount": "{count} vervangers • {category}",
   "@substitutionsCount": {
     "placeholders": {
       "count": {
@@ -3676,5 +3695,25 @@
   "tierCreatorName": "Creator",
   "tierFamily": "FAMILY",
   "tierFreeName": "Gratis",
-  "tierPremiumName": "Premium"
+  "tierPremiumName": "Premium",
+  "customThemeLightMode": "Licht",
+  "customThemeDarkMode": "Donker",
+  "customThemeLivePreview": "Live voorbeeld",
+  "customThemeLinkedOverlay": "Kleuren worden automatisch gegenereerd op basis van je {mode} thema",
+  "customThemeUnlockButton": "Kleuren aanpassen",
+  "customThemeLinkButton": "Koppelen aan {mode}",
+  "@customThemeLinkedOverlay": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@customThemeLinkButton": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  }
 }

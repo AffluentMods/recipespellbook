@@ -297,7 +297,7 @@ class _ManageTagsSheetState extends ConsumerState<_ManageTagsSheet> {
                     ref.read(tagsDaoProvider).insertTag(TagsCompanion.insert(
                       id: tagId,
                       name: name,
-                      color: Value('#${selectedColor.value.toRadixString(16).substring(2).toUpperCase()}'),
+                      color: Value('#${selectedColor.toARGB32().toRadixString(16).substring(2).toUpperCase()}'),
                       icon: Value(selectedIcon.codePoint.toString()),
                     ));
                     setState(() {

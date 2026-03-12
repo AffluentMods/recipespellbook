@@ -276,7 +276,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   final check = item.isChecked ? '☑' : '☐';
                   buffer.writeln('$check ${item.name}');
                 }
-                await Share.share(buffer.toString(), subject: name);
+                await SharePlus.instance.share(ShareParams(text: buffer.toString(), subject: name));
               },
             ),
 
@@ -363,7 +363,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 const SizedBox(width: 12),
                 Expanded(child: FilledButton.icon(
                   onPressed: () {
-                    Share.share(link.url, subject: 'Shared from Recipe Spellbook');
+                    SharePlus.instance.share(ShareParams(text: link.url, subject: 'Shared from Recipe Spellbook'));
                   },
                   icon: const Icon(Icons.share, size: 18),
                   label: Text(l10n.actionShare),

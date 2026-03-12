@@ -6387,6 +6387,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get splashSpellbook => 'Spreukenboek';
 
   @override
+  String get splashTagline => 'Je culinaire avontuur wacht';
+
+  @override
   String get smartImportReparsed => 'Opnieuw geanalyseerd door AI — controleer het bijgewerkte recept hierboven';
 
   @override
@@ -7946,6 +7949,28 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get customThemeStartFromPreset => 'Begin vanuit een preset';
+
+  @override
+  String get customThemeLightMode => 'Licht';
+
+  @override
+  String get customThemeDarkMode => 'Donker';
+
+  @override
+  String customThemeLinkedOverlay(String mode) {
+    return 'Kleuren worden automatisch gegenereerd op basis van je $mode thema';
+  }
+
+  @override
+  String get customThemeUnlockButton => 'Kleuren aanpassen';
+
+  @override
+  String customThemeLinkButton(String mode) {
+    return 'Koppelen aan $mode';
+  }
+
+  @override
+  String get customThemeLivePreview => 'Live voorbeeld';
 
   @override
   String get settingsUserFallback => 'Gebruiker';

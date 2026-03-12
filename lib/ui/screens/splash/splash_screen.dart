@@ -352,10 +352,11 @@ class _SplashScreenState extends State<SplashScreen>
   // ─── Tagline ───
 
   Widget _buildTagline() {
+    final l10n = AppLocalizations.of(context)!;
     return Opacity(
       opacity: _subtitleFade.value,
       child: Text(
-        'Your culinary adventure awaits',
+        l10n.splashTagline,
         style: GoogleFonts.cormorantGaramond(
           fontSize: 17,
           fontStyle: FontStyle.italic,

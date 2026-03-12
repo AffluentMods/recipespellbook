@@ -400,8 +400,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _performReset(BuildContext context, WidgetRef ref, AppLocalizations l10n, _ResetScope scope) async {
+    // Capture references before navigating away (widget will unmount)
+    final db = ref.read(databaseProvider);
+    final settingsNotifier = scope == _ResetScope.all
+        ? ref.read(settingsProvider.notifier)
+        : null;
+
+    // Pop the confirmation dialog
+    if (context.mounted) Navigator.pop(context);
+
+    // Navigate to splash FIRST — this tears down all data-watching widgets
+    // and prevents framework assertion errors from provider-driven rebuilds
+    // against empty data.
+    if (context.mounted) context.go('/splash');
+
+    // Wait for navigation and widget tree teardown to complete
+    await Future.delayed(const Duration(milliseconds: 200));
+
     try {
-      final db = ref.read(databaseProvider);
       for (final t in ['recipe_links', 'recipe_tags', 'ingredient_usda_mappings', 'user_ingredient_mappings', 'ingredients', 'steps', 'recipes']) {
         await db.customStatement('DELETE FROM $t');
       }
@@ -411,57 +427,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       await db.customStatement('DELETE FROM meal_plans');
       await db.customStatement('DELETE FROM custom_courses');
       await db.customStatement('DELETE FROM custom_categories');
-      if (scope == _ResetScope.all) ref.read(settingsProvider.notifier).resetToDefaults();
+      settingsNotifier?.resetToDefaults();
 
-      // Reset onboarding so the intro flow triggers again
+      // Reset onboarding so the intro flow triggers again —
+      // the onboarding will offer to import default recipes automatically.
       await OnboardingService.resetOnboarding();
       HomeScreen.resetOnboardingCheck();
-
-      if (context.mounted) {
-        Navigator.pop(context);
-        _showRestartDialog(context);
-      }
     } catch (e) {
-      if (context.mounted) { Navigator.pop(context); AppSnackbar.error(context, '${l10n.resetFailed}: $e'); }
+      debugPrint('Reset error: $e');
     }
-  }
-
-  void _showRestartDialog(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(context: context, barrierDismissible: false, builder: (ctx) => AlertDialog(
-      icon: const Icon(Icons.check_circle_outline, size: 48, color: Colors.green),
-      title: Text(l10n.dataResetComplete),
-      content: Text(l10n.resetDataClearedDesc),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(ctx);
-            context.go('/splash');
-          },
-          child: Text(l10n.noThanks),
-        ),
-        FilledButton(
-          onPressed: () async {
-            Navigator.pop(ctx);
-            // Show importing indicator
-            if (context.mounted) {
-              AppSnackbar.info(context, l10n.importingDefaultRecipes);
-            }
-            try {
-              final db = ref.read(databaseProvider);
-              final count = await OnboardingService.seedDefaultRecipes(db);
-              if (context.mounted) {
-                AppSnackbar.success(context, l10n.starterRecipesAdded(count));
-              }
-            } catch (_) {}
-            if (context.mounted) {
-              context.go('/splash');
-            }
-          },
-          child: Text(l10n.yesImport),
-        ),
-      ],
-    ));
   }
 
 }

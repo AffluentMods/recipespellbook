@@ -6335,6 +6335,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get splashSpellbook => '魔法书';
 
   @override
+  String get splashTagline => '你的烹饪冒险即将开始';
+
+  @override
   String get smartImportReparsed => '已由AI重新解析 — 请查看上方更新后的食谱';
 
   @override
@@ -7894,6 +7897,28 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get customThemeStartFromPreset => '从预设开始';
+
+  @override
+  String get customThemeLightMode => '浅色';
+
+  @override
+  String get customThemeDarkMode => '深色';
+
+  @override
+  String customThemeLinkedOverlay(String mode) {
+    return '颜色会根据您的$mode主题自动生成';
+  }
+
+  @override
+  String get customThemeUnlockButton => '自定义颜色';
+
+  @override
+  String customThemeLinkButton(String mode) {
+    return '链接到$mode';
+  }
+
+  @override
+  String get customThemeLivePreview => '实时预览';
 
   @override
   String get settingsUserFallback => '用户';

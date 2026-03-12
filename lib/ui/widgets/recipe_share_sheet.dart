@@ -200,7 +200,7 @@ class _RecipeShareSheet extends StatelessWidget {
             FilledButton.icon(
               onPressed: () {
                 Navigator.pop(ctx);
-                Share.share(shareText, subject: recipe.title);
+                SharePlus.instance.share(ShareParams(text: shareText, subject: recipe.title));
               },
               icon: const Icon(Icons.share),
               label: Text(l10n.actionShare),
@@ -295,7 +295,7 @@ class _RecipeShareSheet extends StatelessWidget {
 
     buffer.writeln(l10n.shareFromApp);
 
-    await Share.share(buffer.toString(), subject: recipe.title);
+    await SharePlus.instance.share(ShareParams(text: buffer.toString(), subject: recipe.title));
   }
 
   Future<void> _shareAsDocument(BuildContext context) async {
@@ -325,10 +325,10 @@ class _RecipeShareSheet extends StatelessWidget {
       final file = File('${dir.path}/$filename.pdf');
       await file.writeAsBytes(await pdf.save());
 
-      await Share.shareXFiles(
-        [XFile(file.path)],
+      await SharePlus.instance.share(ShareParams(
+        files: [XFile(file.path)],
         subject: '${recipe.title} - Recipe',
-      );
+      ));
     } catch (e) {
       if (context.mounted) {
         AppSnackbar.info(context, '${l10n.errorGeneric}: $e');
@@ -443,10 +443,10 @@ class _RecipeShareSheet extends StatelessWidget {
     final file = File('${dir.path}/$filename.json');
     await file.writeAsString(json);
 
-    await Share.shareXFiles(
-      [XFile(file.path)],
+    await SharePlus.instance.share(ShareParams(
+      files: [XFile(file.path)],
       subject: '${recipe.title} - Recipe Export',
-    );
+    ));
   }
 
   Future<pw.Document> _createRecipePdf(

@@ -570,7 +570,7 @@ class _TagSelectorSheetState extends ConsumerState<_TagSelectorSheet> {
             FilledButton(
               onPressed: () {
                 if (nameController.text.trim().isNotEmpty) {
-                  final colorHex = '#${selectedColor.value.toRadixString(16).substring(2).toUpperCase()}';
+                  final colorHex = '#${selectedColor.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
                   widget.onCreateTag(
                     nameController.text.trim(),
                     color: colorHex,

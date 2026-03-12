@@ -472,7 +472,7 @@ class _LinkCard extends StatelessWidget {
             const Spacer(),
             TextButton.icon(
               onPressed: () {
-                Share.share('Check out "${link.url}"', subject: l10n.shareFromApp);
+                SharePlus.instance.share(ShareParams(text: 'Check out "${link.url}"', subject: l10n.shareFromApp));
               },
               icon: const Icon(Icons.share, size: 14),
               label: Text(l10n.actionShare, style: const TextStyle(fontSize: 12)),

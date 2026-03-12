@@ -9,8 +9,8 @@ enum AppColorTheme {
     seedColor: Color(0xFFE8882A),
     bannerAsset: 'assets/images/themes/theme_spellbook.png',
     light: ThemePalette(
-      background: Color(0xFFFFF6EE),       // Warm peach cream
-      surface: Color(0xFFFFFFFF),           // White cards for contrast
+      background: Color(0xFFFCEEDE),       // Warm peach cream — more tinted
+      surface: Color(0xFFFFF6EE),           // Warm off-white cards
       primary: Color(0xFFD4782A),           // Warm amber-orange
       primaryContainer: Color(0xFFFDE8D0),  // Light peach/orange tint
       secondary: Color(0xFFA08E7E),         // Warm taupe
@@ -69,62 +69,62 @@ enum AppColorTheme {
   forest(
     label: 'The Druid\'s Grove',
     emoji: '🌿',
-    seedColor: Color(0xFF2E7D32),
+    seedColor: Color(0xFF2E6B38),
     bannerAsset: 'assets/images/themes/theme_forest.png',
     light: ThemePalette(
-      background: Color(0xFFE8F5E9),       // Cool green tint
-      surface: Color(0xFFF1F8F2),           // Near-white with emerald hint
-      primary: Color(0xFF2E7D32),           // Deep emerald
-      primaryContainer: Color(0xFFA5D6A7),  // Rich green
-      secondary: Color(0xFF43A047),         // True green
-      secondaryContainer: Color(0xFFC8E6C9),// Soft mint
-      accent: Color(0xFF66BB6A),            // Emerald green
-      onBackground: Color(0xFF1B3A1E),
-      onSurface: Color(0xFF2E4A30),
+      background: Color(0xFFF0EBDF),       // Warm ivory / woodland parchment
+      surface: Color(0xFFF8F4EA),           // Cream card
+      primary: Color(0xFF2E6B38),           // Deep woodland green
+      primaryContainer: Color(0xFFC4DDB0), // Soft sage
+      secondary: Color(0xFF8A6E42),        // Warm bark brown / gold
+      secondaryContainer: Color(0xFFE4D8C0),// Light wood
+      accent: Color(0xFFCDA040),            // Dappled sunlight gold
+      onBackground: Color(0xFF1E2E18),
+      onSurface: Color(0xFF2A3820),
       onPrimary: Color(0xFFFFFFFF),
     ),
     dark: ThemePalette(
-      background: Color(0xFF0E1A0E),
-      surface: Color(0xFF1A2E1A),
-      primary: Color(0xFF66BB6A),           // True green
-      primaryContainer: Color(0xFF2E4A2C),
-      secondary: Color(0xFF81C784),         // Soft green
-      secondaryContainer: Color(0xFF3A5A28),
-      accent: Color(0xFFA5D6A7),            // Soft emerald
-      onBackground: Color(0xFFD4E8CC),
-      onSurface: Color(0xFFC5DFC3),
-      onPrimary: Color(0xFF0E1A0E),
+      background: Color(0xFF0C1408),       // Deep woodland black
+      surface: Color(0xFF182410),           // Dark moss
+      primary: Color(0xFF72B07A),           // Soft emerald
+      primaryContainer: Color(0xFF2A4420),
+      secondary: Color(0xFFD4B880),        // Warm gold bark
+      secondaryContainer: Color(0xFF3A3018),
+      accent: Color(0xFFE2C468),            // Brighter gold
+      onBackground: Color(0xFFDEE4CC),
+      onSurface: Color(0xFFD0D8C0),
+      onPrimary: Color(0xFF0C1408),
     ),
   ),
 
   ocean(
     label: 'The Siren\'s Call',
     emoji: '🌊',
-    seedColor: Color(0xFF0288D1),
+    seedColor: Color(0xFF1A7A8A),
     bannerAsset: 'assets/images/themes/theme_ocean.png',
     light: ThemePalette(
-      background: Color(0xFFE8F6F8),       // Richer aqua tint
-      surface: Color(0xFFF6FCFD),           // Crisp near-white with blue
-      primary: Color(0xFF1A8A7C),           // Friendlier teal
-      primaryContainer: Color(0xFFB2DFDB),
-      secondary: Color(0xFF00A5B8),         // Brighter cyan
-      secondaryContainer: Color(0xFFC0F0F5),// Soft sky blue
-      accent: Color(0xFF00BCD4),
-      onBackground: Color(0xFF0D2B3E),
-      onSurface: Color(0xFF1A3C50),
+      background: Color(0xFFDCEEF2),       // Noticeably oceanic blue
+      surface: Color(0xFFEBF5F8),           // Soft wave foam
+      primary: Color(0xFF1A6E7A),           // Rich warm teal
+      primaryContainer: Color(0xFFB0D8DE),  // Sea glass
+      secondary: Color(0xFF2E8E9E),         // Deeper teal
+      secondaryContainer: Color(0xFFC4E4EC),// Soft tide
+      accent: Color(0xFFD4A050),            // Sandy gold accent
+      onBackground: Color(0xFF102830),
+      onSurface: Color(0xFF1A3840),
       onPrimary: Color(0xFFFFFFFF),
     ),
     dark: ThemePalette(
-      background: Color(0xFF0A1620),
-      surface: Color(0xFF102030),
-      primary: Color(0xFF00BCD4),
-      primaryContainer: Color(0xFF00505C),
-      secondary: Color(0xFF26C6DA),
-      secondaryContainer: Color(0xFF00606C),
-      accent: Color(0xFF4DD0E1),
-      onBackground: Color(0xFFB2EBF2),
-      onSurface: Color(0xFFA0D8E0),
-      onPrimary: Color(0xFF0A1620),
+      background: Color(0xFF081418),        // Deep ocean
+      surface: Color(0xFF102028),           // Dark teal surface
+      primary: Color(0xFF4ABCC8),           // Warm bright teal
+      primaryContainer: Color(0xFF1A4850),
+      secondary: Color(0xFF68D0DA),         // Light teal
+      secondaryContainer: Color(0xFF1A505A),
+      accent: Color(0xFFE8C070),            // Warm sand gold
+      onBackground: Color(0xFFC0E4E8),
+      onSurface: Color(0xFFB0D4DC),
+      onPrimary: Color(0xFF081418),
     ),
   ),
 
@@ -134,8 +134,8 @@ enum AppColorTheme {
     seedColor: Color(0xFFE64A19),
     bannerAsset: 'assets/images/themes/theme_sunset.png',
     light: ThemePalette(
-      background: Color(0xFFFFF0E6),       // Warm golden peach
-      surface: Color(0xFFFFFAF5),           // Creamy white
+      background: Color(0xFFFCE6D0),       // Warm golden peach — richer tint
+      surface: Color(0xFFFFF0E2),           // Creamy peach card
       primary: Color(0xFFBF5A10),           // Rich burnt orange
       primaryContainer: Color(0xFFFFD4BC),  // Soft peach
       secondary: Color(0xFFE8871E),
@@ -196,8 +196,8 @@ enum AppColorTheme {
     seedColor: Color(0xFFE91E63),
     bannerAsset: 'assets/images/themes/theme_rose.png',
     light: ThemePalette(
-      background: Color(0xFFFFF0F3),
-      surface: Color(0xFFFFE8ED),
+      background: Color(0xFFF8E0E6),       // Deeper rose blush
+      surface: Color(0xFFFFF0F3),           // Soft pink card
       primary: Color(0xFFAD5068),
       primaryContainer: Color(0xFFF8C8D4),
       secondary: Color(0xFFD4618C),
@@ -225,31 +225,31 @@ enum AppColorTheme {
   frost(
     label: 'Frost',
     emoji: '❄️',
-    seedColor: Color(0xFF90CAF9),
+    seedColor: Color(0xFF4A7EA8),
     bannerAsset: 'assets/images/themes/theme_frost.png',
     light: ThemePalette(
-      background: Color(0xFFEAF2F8),       // Noticeably icy blue
-      surface: Color(0xFFF6FAFC),           // Frosty white
-      primary: Color(0xFF5A82A6),           // Softer steel-blue
-      primaryContainer: Color(0xFFD0E4F0),  // Light powder blue
-      secondary: Color(0xFF7EB4D8),         // Brighter sky
-      secondaryContainer: Color(0xFFDCEEF8),// Pale frost
-      accent: Color(0xFF90CAF9),
-      onBackground: Color(0xFF1C2E3E),
-      onSurface: Color(0xFF2A3E50),
+      background: Color(0xFFDAE8F2),       // Crisp winter sky blue
+      surface: Color(0xFFE8F0F6),           // Frosted glass
+      primary: Color(0xFF3A6A90),           // Deep winter blue
+      primaryContainer: Color(0xFFB8D4E6),  // Powder blue
+      secondary: Color(0xFF5A92B8),         // Steel blue
+      secondaryContainer: Color(0xFFCCE0EE),// Pale ice
+      accent: Color(0xFFC47A50),            // Warm copper accent (contrast)
+      onBackground: Color(0xFF162838),
+      onSurface: Color(0xFF1E3448),
       onPrimary: Color(0xFFFFFFFF),
     ),
     dark: ThemePalette(
-      background: Color(0xFF0C1418),
-      surface: Color(0xFF162028),
-      primary: Color(0xFF78A8CC),
-      primaryContainer: Color(0xFF2A4050),
-      secondary: Color(0xFF90CAF9),
-      secondaryContainer: Color(0xFF304860),
-      accent: Color(0xFFBBDEFB),
-      onBackground: Color(0xFFD6E8F4),
-      onSurface: Color(0xFFC8DCE8),
-      onPrimary: Color(0xFF0C1418),
+      background: Color(0xFF0A1018),        // Deep arctic night
+      surface: Color(0xFF141E2A),           // Dark blue-grey
+      primary: Color(0xFF6AA8D0),           // Bright winter blue
+      primaryContainer: Color(0xFF243848),
+      secondary: Color(0xFF88C4E4),         // Light frost blue
+      secondaryContainer: Color(0xFF2A4458),
+      accent: Color(0xFFD8A070),            // Warm amber glow
+      onBackground: Color(0xFFD0E0EC),
+      onSurface: Color(0xFFC0D4E0),
+      onPrimary: Color(0xFF0A1018),
     ),
   ),
 
@@ -259,8 +259,8 @@ enum AppColorTheme {
     seedColor: Color(0xFFC62828),
     bannerAsset: 'assets/images/themes/theme_ember.png',
     light: ThemePalette(
-      background: Color(0xFFFFF0EA),       // Rose cream
-      surface: Color(0xFFFFF8F5),           // Soft rose-white
+      background: Color(0xFFF6DDD4),       // Warm terracotta tint
+      surface: Color(0xFFFCEDE6),           // Soft ember glow
       primary: Color(0xFFB71C1C),           // Deep crimson
       primaryContainer: Color(0xFFFFCDD2),  // Light rose
       secondary: Color(0xFFD32F2F),         // True red
@@ -287,62 +287,62 @@ enum AppColorTheme {
   spring(
     label: 'Spring',
     emoji: '🌸',
-    seedColor: Color(0xFFE88EA0),
+    seedColor: Color(0xFFE08060),
     bannerAsset: 'assets/images/themes/theme_spring.png',
     light: ThemePalette(
-      background: Color(0xFFFFF5F6),       // Soft cherry blossom white
-      surface: Color(0xFFFFECEF),          // Pale pink blush
-      primary: Color(0xFFD4687A),          // Cherry blossom pink
-      primaryContainer: Color(0xFFF8D0D8), // Light petal pink
-      secondary: Color(0xFF7EB89C),        // Spring mint green
-      secondaryContainer: Color(0xFFD4EEE0),// Soft mint
-      accent: Color(0xFFF0B060),           // Honey gold
-      onBackground: Color(0xFF3A2028),     // Dark rose
-      onSurface: Color(0xFF4A2838),        // Warm dark pink
+      background: Color(0xFFF8E8DA),       // Warm peach / morning garden
+      surface: Color(0xFFFFF2E8),           // Soft peach cream card
+      primary: Color(0xFFCC6848),           // Warm coral / terracotta
+      primaryContainer: Color(0xFFF4D4C0), // Light coral tint
+      secondary: Color(0xFF5E9E78),        // Fresh garden green
+      secondaryContainer: Color(0xFFCCE4D4),// Soft spring green
+      accent: Color(0xFFE8B84C),            // Warm golden sun
+      onBackground: Color(0xFF382418),
+      onSurface: Color(0xFF443020),
       onPrimary: Color(0xFFFFFFFF),
     ),
     dark: ThemePalette(
-      background: Color(0xFF160E10),       // Deep rose-black
-      surface: Color(0xFF281820),          // Dark blush
-      primary: Color(0xFFF06292),          // Bright pink
-      primaryContainer: Color(0xFF5A2038), // Deep rose
-      secondary: Color(0xFF81C784),        // Soft green
-      secondaryContainer: Color(0xFF264A30),// Dark mint
-      accent: Color(0xFFE8C080),           // Warm gold
-      onBackground: Color(0xFFF8D0DC),     // Pale pink text
-      onSurface: Color(0xFFEEC0CC),        // Soft rose text
-      onPrimary: Color(0xFF160E10),
+      background: Color(0xFF141008),       // Warm dark earth
+      surface: Color(0xFF241C14),          // Dark terracotta
+      primary: Color(0xFFE8986C),          // Soft warm coral
+      primaryContainer: Color(0xFF4A2C1C), // Deep terracotta
+      secondary: Color(0xFF7EC89A),        // Bright spring green
+      secondaryContainer: Color(0xFF204030),// Dark green
+      accent: Color(0xFFE8CC70),           // Warm gold
+      onBackground: Color(0xFFF0DCC8),     // Cream text
+      onSurface: Color(0xFFE4D0BC),        // Warm parchment
+      onPrimary: Color(0xFF141008),
     ),
   ),
 
   alchemist(
     label: 'Alchemist',
     emoji: '⚗️',
-    seedColor: Color(0xFF66BB6A),
+    seedColor: Color(0xFF5E3A8A),
     bannerAsset: 'assets/images/themes/theme_alchemist.png',
     light: ThemePalette(
-      background: Color(0xFFF0ECF6),       // Lavender-tinted
-      surface: Color(0xFFF9F7FC),           // Soft lilac white
-      primary: Color(0xFF7B52A0),           // Friendlier purple
-      primaryContainer: Color(0xFFDCC8F0),  // Light wisteria
-      secondary: Color(0xFF3EA06A),         // Brighter emerald
-      secondaryContainer: Color(0xFFC0E8D4),// Soft mint
-      accent: Color(0xFFCD8032),
-      onBackground: Color(0xFF2A1840),
-      onSurface: Color(0xFF3A2850),
+      background: Color(0xFFE6DEF0),       // Rich lavender — truly tinted
+      surface: Color(0xFFF0EBF6),           // Soft wisteria card
+      primary: Color(0xFF5E3A8A),           // Deep mystical purple
+      primaryContainer: Color(0xFFD0BEE4),  // Light amethyst
+      secondary: Color(0xFF8A6EB0),         // Muted violet
+      secondaryContainer: Color(0xFFDCD0EC),// Pale lilac
+      accent: Color(0xFF48A868),            // Potion green (glow)
+      onBackground: Color(0xFF201430),
+      onSurface: Color(0xFF2E1E40),
       onPrimary: Color(0xFFFFFFFF),
     ),
     dark: ThemePalette(
-      background: Color(0xFF100C18),
-      surface: Color(0xFF1C1828),
-      primary: Color(0xFF9C6CC0),
-      primaryContainer: Color(0xFF3A2858),
-      secondary: Color(0xFF66BB6A),
-      secondaryContainer: Color(0xFF1E5030),
-      accent: Color(0xFFE0A050),
-      onBackground: Color(0xFFD4C0E8),
-      onSurface: Color(0xFFC4B0D8),
-      onPrimary: Color(0xFF100C18),
+      background: Color(0xFF0E0A14),       // Deep potion black
+      surface: Color(0xFF1A1424),           // Dark amethyst
+      primary: Color(0xFFA880CC),           // Bright amethyst
+      primaryContainer: Color(0xFF362650),
+      secondary: Color(0xFFC0A0DC),         // Light violet
+      secondaryContainer: Color(0xFF2A2040),
+      accent: Color(0xFF60D080),            // Glowing potion green
+      onBackground: Color(0xFFD4C4E8),
+      onSurface: Color(0xFFC4B4D8),
+      onPrimary: Color(0xFF0E0A14),
     ),
   ),
 

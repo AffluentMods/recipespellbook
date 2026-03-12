@@ -253,15 +253,15 @@ class ExportImportService {
     if (isWeb) {
       // On web, share as XFile from bytes (no local filesystem)
       final bytes = utf8.encode(jsonStr);
-      await Share.shareXFiles(
-        [XFile.fromData(Uint8List.fromList(bytes), name: filename, mimeType: 'application/json')],
+      await SharePlus.instance.share(ShareParams(
+        files: [XFile.fromData(Uint8List.fromList(bytes), name: filename, mimeType: 'application/json')],
         subject: 'Recipe Spellbook Export',
-      );
+      ));
     } else {
       final dir = await getTemporaryDirectory();
       final file = File(p.join(dir.path, filename));
       await file.writeAsString(jsonStr);
-      await Share.shareXFiles([XFile(file.path)], subject: 'Recipe Spellbook Export');
+      await SharePlus.instance.share(ShareParams(files: [XFile(file.path)], subject: 'Recipe Spellbook Export'));
     }
   }
 

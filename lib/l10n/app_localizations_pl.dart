@@ -6453,6 +6453,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get splashSpellbook => 'Księga Zaklęć';
 
   @override
+  String get splashTagline => 'Twoja kulinarna przygoda czeka';
+
+  @override
   String get smartImportReparsed => 'Ponownie przeanalizowane przez AI — sprawdź zaktualizowany przepis powyżej';
 
   @override
@@ -8012,6 +8015,28 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get customThemeStartFromPreset => 'Zacznij od presetu';
+
+  @override
+  String get customThemeLightMode => 'Jasny';
+
+  @override
+  String get customThemeDarkMode => 'Ciemny';
+
+  @override
+  String customThemeLinkedOverlay(String mode) {
+    return 'Kolory są automatycznie generowane z motywu $mode';
+  }
+
+  @override
+  String get customThemeUnlockButton => 'Dostosuj kolory';
+
+  @override
+  String customThemeLinkButton(String mode) {
+    return 'Połącz z $mode';
+  }
+
+  @override
+  String get customThemeLivePreview => 'Podgląd na żywo';
 
   @override
   String get settingsUserFallback => 'Użytkownik';

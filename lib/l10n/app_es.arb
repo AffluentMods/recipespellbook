@@ -2629,6 +2629,7 @@
   "mealPlanDateFormat": "{weekday}, {day} de {month}",
   "splashRecipe": "Receta",
   "splashSpellbook": "Grimorio",
+  "splashTagline": "Tu aventura culinaria te espera",
   "smartImportReparsed": "Re-analizado por IA — revisa la receta actualizada arriba",
   "servingSizeHint": "ej., 1 taza, 100g",
   "mainNutrients": "Nutrientes principales",
@@ -2870,7 +2871,13 @@
   "allergyNoDisabledSubtitle": "Cuando desactives las advertencias de alergia en las recetas, aparecerán aquí para que puedas restaurarlas.",
   "allergyDisabledInfo": "Estas recetas tienen las advertencias de alergia desactivadas. Toca para restaurar.",
   "trashRestoredMessage": "\"{title}\" restaurada",
-  "@trashRestoredMessage": {"placeholders": {"title": {"type": "String"}}},
+  "@trashRestoredMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "nutrientCalories": "Calorías",
   "nutrientTotalFat": "Grasa Total",
   "nutrientSaturatedFat": "Grasa Saturada",
@@ -2911,9 +2918,21 @@
   "nutrientCarbs": "Carbos",
   "nutrientFat": "Grasa",
   "nutritionKcalPerServing": "{count} kcal por porción",
-  "@nutritionKcalPerServing": {"placeholders": {"count": {"type": "int"}}},
+  "@nutritionKcalPerServing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "nutritionKcalTotal": "{count} kcal total",
-  "@nutritionKcalTotal": {"placeholders": {"count": {"type": "int"}}},
+  "@nutritionKcalTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqAddHeadersStep1Desc": "Abre una receta y toca el icono de edición.",
   "faqAddHeadersStep1Title": "Abrir el editor de recetas",
   "faqAddHeadersStep2Desc": "Toca el botón 'Agregar encabezado' para insertar un encabezado de sección.",
@@ -2955,7 +2974,13 @@
   "faqImportFailedTitle": "¿Por qué falló mi importación?",
   "faqSeeHowTo": "Ver guía",
   "faqStepsCount": "{count} pasos",
-  "@faqStepsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@faqStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqTitle": "Preguntas frecuentes",
   "faqWhatAreHeadersAnswer": "Los encabezados te permiten dividir los ingredientes y pasos de tu receta en secciones. Por ejemplo, puedes tener secciones separadas para 'Salsa', 'Masa' y 'Cobertura' en una receta de pizza. Hacen que las recetas largas sean mucho más fáciles de seguir.",
   "faqWhatAreHeadersSubtitle": "Organiza las recetas en secciones",
@@ -2985,7 +3010,6 @@
   "settingsNotifComments": "Comentarios",
   "settingsNotifCommentsSubtitle": "Cuando alguien comenta en tu receta",
   "settingsNotifSyncNote": "Las preferencias de notificaciones se sincronizan con tu cuenta.",
-
   "accountStoreFallback": "Tienda",
   "appearanceCustomThemeRequiresPremium": "El tema personalizado requiere Premium",
   "appearancePremiumBadge": "Premium",
@@ -3006,7 +3030,7 @@
   "customThemePrimaryDesc": "Botones, resaltados, barra de app",
   "customThemeStartFromPreset": "Empezar desde un preset",
   "customThemeTitle": "Tema personalizado",
-  "drawerProTier": "Pro \u00b7 {tier}",
+  "drawerProTier": "Pro · {tier}",
   "@drawerProTier": {
     "placeholders": {
       "tier": {
@@ -3071,10 +3095,10 @@
   "shareCreateFailed": "Error al crear el enlace",
   "shareFamilyCreateJoin": "Crea o únete a una familia para compartir",
   "shareFamilyRequiresCloudSync": "Requiere suscripción a Cloud Sync",
-  "shareFamilySetupInSettings": "Crea o únete a una familia en Ajustes \u2192 Compartir en familia",
+  "shareFamilySetupInSettings": "Crea o únete a una familia en Ajustes → Compartir en familia",
   "shareFamilyShare": "Compartir en familia",
   "shareFamilySignIn": "Inicia sesión para usar el compartir en familia",
-  "shareFamilySyncSubtitle": "Sincronización en tiempo real \u00b7 Permisos por miembro",
+  "shareFamilySyncSubtitle": "Sincronización en tiempo real · Permisos por miembro",
   "shareFamilyUpgradeMessage": "Actualiza a Cloud Sync para compartir recetarios y listas con tu familia en tiempo real.",
   "shareGenerateLink": "Generar enlace",
   "shareLinkCopied": "¡Enlace copiado!",
@@ -3088,7 +3112,7 @@
   },
   "shareNoFamilyMembers": "No hay otros miembros de la familia para compartir",
   "shareOneTimeLink": "Enlace de un solo uso",
-  "shareOneTimeLinkSubtitle": "Gratis \u2022 Expira en 24 h \u2022 Solo ver/descargar",
+  "shareOneTimeLinkSubtitle": "Gratis • Expira en 24 h • Solo ver/descargar",
   "sharePermAddItems": "Puede agregar elementos, editar propios",
   "sharePermAddOnly": "Solo agregar",
   "sharePermAddRecipes": "Puede agregar nuevas recetas",
@@ -3116,7 +3140,7 @@
   "shareUnknownMember": "Desconocido",
   "shareUpgrade": "Actualizar",
   "shareWith": "Compartir con",
-  "subscriptionCancelledUntil": "Cancelada \u2014 acceso hasta {date}",
+  "subscriptionCancelledUntil": "Cancelada — acceso hasta {date}",
   "@subscriptionCancelledUntil": {
     "placeholders": {
       "date": {
@@ -3124,7 +3148,7 @@
       }
     }
   },
-  "subscriptionLifetime": "De por vida \u2014 nunca expira",
+  "subscriptionLifetime": "De por vida — nunca expira",
   "subscriptionManage": "Gestionar suscripción",
   "subscriptionNoPurchases": "No se encontraron compras anteriores.",
   "subscriptionPlan": "Plan",
@@ -3147,7 +3171,7 @@
   "subscriptionUpgradeToUnlock": "Actualiza a Pro para desbloquear",
   "subscriptionViewPlans": "Ver planes",
   "substitutionsAll": "Todos",
-  "substitutionsCount": "{count} sustitutos \u2022 {category}",
+  "substitutionsCount": "{count} sustitutos • {category}",
   "@substitutionsCount": {
     "placeholders": {
       "count": {
@@ -3167,5 +3191,25 @@
   "tierCreatorName": "Creator",
   "tierFamily": "FAMILY",
   "tierFreeName": "Gratis",
-  "tierPremiumName": "Premium"
+  "tierPremiumName": "Premium",
+  "customThemeLightMode": "Claro",
+  "customThemeDarkMode": "Oscuro",
+  "customThemeLivePreview": "Vista previa en vivo",
+  "customThemeLinkedOverlay": "Los colores se generan automáticamente a partir de tu tema {mode}",
+  "customThemeUnlockButton": "Personalizar colores",
+  "customThemeLinkButton": "Vincular a {mode}",
+  "@customThemeLinkedOverlay": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@customThemeLinkButton": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  }
 }

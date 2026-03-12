@@ -2126,6 +2126,7 @@
   "mealPlanDateFormat": "{weekday}, {day} {month}",
   "splashRecipe": "Ricetta",
   "splashSpellbook": "Grimorio",
+  "splashTagline": "La tua avventura culinaria ti aspetta",
   "smartImportReparsed": "Ri-analizzato dall'IA — controlla la ricetta aggiornata sopra",
   "servingSizeHint": "es. 1 tazza, 100g",
   "mainNutrients": "Nutrienti principali",
@@ -2349,7 +2350,7 @@
   "faqMacroCalcStep4Desc": "Tocca 'Inserisci manualmente' per modificare i valori nutrizionali a mano.",
   "faqMacroCalcStep5Title": "Verifica le corrispondenze",
   "faqMacroCalcStep5Desc": "Scorri verso il basso per vedere ogni ingrediente associato a un alimento USDA. Le ricette collegate (come Impasto per pizza) usano i propri dati nutrizionali.",
-  "faqMacroCalcStep5Tip": "Non sai cos'\u00e8 una ricetta collegata? Consulta la sezione 'Cosa sono le ricette collegate?' nelle FAQ!",
+  "faqMacroCalcStep5Tip": "Non sai cos'è una ricetta collegata? Consulta la sezione 'Cosa sono le ricette collegate?' nelle FAQ!",
   "faqMacroCalcStep6Title": "Cerca nel database USDA",
   "faqMacroCalcStep6Desc": "Tocca un ingrediente per cercare una corrispondenza migliore nel database USDA.",
   "faqMacroCalcStep7Title": "Nutrizione ricette collegate",
@@ -2367,7 +2368,13 @@
   "allergyNoDisabledSubtitle": "Quando disattivi gli avvisi di allergia sulle ricette, appariranno qui per poterli ripristinare.",
   "allergyDisabledInfo": "Queste ricette hanno gli avvisi di allergia disattivati. Tocca per ripristinare.",
   "trashRestoredMessage": "\"{title}\" ripristinata",
-  "@trashRestoredMessage": {"placeholders": {"title": {"type": "String"}}},
+  "@trashRestoredMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "nutrientCalories": "Calorie",
   "nutrientTotalFat": "Grassi Totali",
   "nutrientSaturatedFat": "Grassi Saturi",
@@ -2408,9 +2415,21 @@
   "nutrientCarbs": "Carboidrati",
   "nutrientFat": "Grassi",
   "nutritionKcalPerServing": "{count} kcal per porzione",
-  "@nutritionKcalPerServing": {"placeholders": {"count": {"type": "int"}}},
+  "@nutritionKcalPerServing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "nutritionKcalTotal": "{count} kcal totali",
-  "@nutritionKcalTotal": {"placeholders": {"count": {"type": "int"}}},
+  "@nutritionKcalTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqAddHeadersStep1Desc": "Apri una ricetta e tocca l'icona di modifica.",
   "faqAddHeadersStep1Title": "Apri l'editor della ricetta",
   "faqAddHeadersStep2Desc": "Tocca il pulsante 'Aggiungi intestazione' per inserire un'intestazione di sezione.",
@@ -2452,7 +2471,13 @@
   "faqImportFailedTitle": "Perché la mia importazione è fallita?",
   "faqSeeHowTo": "Vedi la guida",
   "faqStepsCount": "{count} passaggi",
-  "@faqStepsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@faqStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqTitle": "FAQ",
   "faqWhatAreHeadersAnswer": "Le intestazioni ti permettono di dividere gli ingredienti e i passaggi della ricetta in sezioni. Ad esempio, puoi avere sezioni separate per 'Salsa', 'Impasto' e 'Condimento' in una ricetta per la pizza. Rendono le ricette lunghe molto più facili da seguire.",
   "faqWhatAreHeadersSubtitle": "Organizza le ricette in sezioni",
@@ -2482,7 +2507,6 @@
   "settingsNotifComments": "Commenti",
   "settingsNotifCommentsSubtitle": "Quando qualcuno commenta la tua ricetta",
   "settingsNotifSyncNote": "Le preferenze di notifica vengono sincronizzate con il tuo account.",
-
   "accountStoreFallback": "Store",
   "appearanceCustomThemeRequiresPremium": "Il tema personalizzato richiede Premium",
   "appearancePremiumBadge": "Premium",
@@ -2503,7 +2527,7 @@
   "customThemePrimaryDesc": "Pulsanti, evidenziazioni, barra dell'app",
   "customThemeStartFromPreset": "Parti da un preset",
   "customThemeTitle": "Tema personalizzato",
-  "drawerProTier": "Pro \u00b7 {tier}",
+  "drawerProTier": "Pro · {tier}",
   "@drawerProTier": {
     "placeholders": {
       "tier": {
@@ -2568,10 +2592,10 @@
   "shareCreateFailed": "Impossibile creare il link",
   "shareFamilyCreateJoin": "Crea o unisciti a una famiglia per condividere",
   "shareFamilyRequiresCloudSync": "Richiede abbonamento Cloud Sync",
-  "shareFamilySetupInSettings": "Crea o unisciti a una famiglia in Impostazioni \u2192 Condivisione familiare",
+  "shareFamilySetupInSettings": "Crea o unisciti a una famiglia in Impostazioni → Condivisione familiare",
   "shareFamilyShare": "Condivisione familiare",
   "shareFamilySignIn": "Accedi per usare la condivisione familiare",
-  "shareFamilySyncSubtitle": "Sincronizzazione in tempo reale \u00b7 Permessi per membro",
+  "shareFamilySyncSubtitle": "Sincronizzazione in tempo reale · Permessi per membro",
   "shareFamilyUpgradeMessage": "Passa a Cloud Sync per condividere ricettari e liste con la tua famiglia in tempo reale.",
   "shareGenerateLink": "Genera link",
   "shareLinkCopied": "Link copiato!",
@@ -2585,7 +2609,7 @@
   },
   "shareNoFamilyMembers": "Nessun altro membro della famiglia con cui condividere",
   "shareOneTimeLink": "Link monouso",
-  "shareOneTimeLinkSubtitle": "Gratuito \u2022 Scadenza 24 ore \u2022 Solo visualizzazione/download",
+  "shareOneTimeLinkSubtitle": "Gratuito • Scadenza 24 ore • Solo visualizzazione/download",
   "sharePermAddItems": "Può aggiungere elementi, modificare i propri",
   "sharePermAddOnly": "Solo aggiunta",
   "sharePermAddRecipes": "Può aggiungere nuove ricette",
@@ -2613,7 +2637,7 @@
   "shareUnknownMember": "Sconosciuto",
   "shareUpgrade": "Aggiorna",
   "shareWith": "Condividi con",
-  "subscriptionCancelledUntil": "Annullato \u2014 accesso fino al {date}",
+  "subscriptionCancelledUntil": "Annullato — accesso fino al {date}",
   "@subscriptionCancelledUntil": {
     "placeholders": {
       "date": {
@@ -2621,7 +2645,7 @@
       }
     }
   },
-  "subscriptionLifetime": "A vita \u2014 non scade mai",
+  "subscriptionLifetime": "A vita — non scade mai",
   "subscriptionManage": "Gestisci abbonamento",
   "subscriptionNoPurchases": "Nessun acquisto precedente trovato.",
   "subscriptionPlan": "Piano",
@@ -2644,7 +2668,7 @@
   "subscriptionUpgradeToUnlock": "Passa a Pro per sbloccare",
   "subscriptionViewPlans": "Vedi piani",
   "substitutionsAll": "Tutti",
-  "substitutionsCount": "{count} sostituti \u2022 {category}",
+  "substitutionsCount": "{count} sostituti • {category}",
   "@substitutionsCount": {
     "placeholders": {
       "count": {
@@ -2664,5 +2688,25 @@
   "tierCreatorName": "Creator",
   "tierFamily": "FAMILY",
   "tierFreeName": "Gratuito",
-  "tierPremiumName": "Premium"
+  "tierPremiumName": "Premium",
+  "customThemeLightMode": "Chiaro",
+  "customThemeDarkMode": "Scuro",
+  "customThemeLivePreview": "Anteprima dal vivo",
+  "customThemeLinkedOverlay": "I colori vengono generati automaticamente dal tema {mode}",
+  "customThemeUnlockButton": "Personalizza colori",
+  "customThemeLinkButton": "Collega a {mode}",
+  "@customThemeLinkedOverlay": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@customThemeLinkButton": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  }
 }

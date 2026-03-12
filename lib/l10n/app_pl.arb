@@ -3126,7 +3126,7 @@
   "faqMacroCalcStep1Title": "Otwórz przepis",
   "faqMacroCalcStep1Desc": "Otwórz dowolny przepis i przewiń do sekcji Wartości odżywcze.",
   "faqMacroCalcStep2Title": "Dotknij, aby obliczyć",
-  "faqMacroCalcStep2Desc": "Dotknij pustej sekcji wartości odżywczych, aby otworzyć kalkulator. Wyświetla się \u201eDotknij, aby obliczyć\u201d.",
+  "faqMacroCalcStep2Desc": "Dotknij pustej sekcji wartości odżywczych, aby otworzyć kalkulator. Wyświetla się „Dotknij, aby obliczyć”.",
   "faqMacroCalcStep3Title": "Automatyczna analiza",
   "faqMacroCalcStep3Desc": "Kalkulator automatycznie dopasowuje składniki do bazy danych żywności USDA i oblicza kalorie, białko, węglowodany, tłuszcz i więcej.",
   "faqMacroCalcStep4Title": "Wprowadź ręcznie",
@@ -3157,6 +3157,7 @@
   "mealPlanDateFormat": "{weekday}, {day} {month}",
   "splashRecipe": "Przepis",
   "splashSpellbook": "Księga Zaklęć",
+  "splashTagline": "Twoja kulinarna przygoda czeka",
   "smartImportReparsed": "Ponownie przeanalizowane przez AI — sprawdź zaktualizowany przepis powyżej",
   "servingSizeHint": "np. 1 szklanka, 100g",
   "mainNutrients": "Główne składniki odżywcze",
@@ -3374,7 +3375,13 @@
   "allergyNoDisabledSubtitle": "Gdy wyłączysz ostrzeżenia o alergiach w przepisach, pojawią się tutaj, abyś mógł je przywrócić.",
   "allergyDisabledInfo": "Te przepisy mają wyłączone ostrzeżenia o alergiach. Dotknij, aby przywrócić.",
   "trashRestoredMessage": "Przywrócono \"{title}\"",
-  "@trashRestoredMessage": {"placeholders": {"title": {"type": "String"}}},
+  "@trashRestoredMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "nutrientCalories": "Kalorie",
   "nutrientTotalFat": "Tłuszcz całkowity",
   "nutrientSaturatedFat": "Tłuszcz nasycony",
@@ -3415,12 +3422,24 @@
   "nutrientCarbs": "Węglowodany",
   "nutrientFat": "Tłuszcz",
   "nutritionKcalPerServing": "{count} kcal/porcję",
-  "@nutritionKcalPerServing": {"placeholders": {"count": {"type": "int"}}},
+  "@nutritionKcalPerServing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "nutritionKcalTotal": "{count} kcal łącznie",
-  "@nutritionKcalTotal": {"placeholders": {"count": {"type": "int"}}},
+  "@nutritionKcalTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqAddHeadersStep1Desc": "Otwórz przepis i naciśnij ikonę edycji.",
   "faqAddHeadersStep1Title": "Otwórz edytor przepisu",
-  "faqAddHeadersStep2Desc": "Naciśnij przycisk \u201eDodaj nagłówek\u201d, aby wstawić nagłówek sekcji.",
+  "faqAddHeadersStep2Desc": "Naciśnij przycisk „Dodaj nagłówek”, aby wstawić nagłówek sekcji.",
   "faqAddHeadersStep2Title": "Dodaj nagłówek",
   "faqAddHeadersStep3Desc": "Naciśnij trzy kropki (⋮) obok nagłówka, aby zobaczyć więcej opcji.",
   "faqAddHeadersStep3Title": "Otwórz menu nagłówka",
@@ -3437,7 +3456,7 @@
   "faqAddSublinkedStep1Title": "Otwórz edytor przepisu",
   "faqAddSublinkedStep2Desc": "Naciśnij trzy kropki (⋮) na ekranie edycji.",
   "faqAddSublinkedStep2Title": "Otwórz menu",
-  "faqAddSublinkedStep3Desc": "Wybierz \u201ePołącz przepis\u201d z menu.",
+  "faqAddSublinkedStep3Desc": "Wybierz „Połącz przepis” z menu.",
   "faqAddSublinkedStep3Title": "Naciśnij Połącz przepis",
   "faqAddSublinkedStep4Desc": "Naciśnij ikonę łącza obok przepisu, który chcesz połączyć (np. Ciasto na pizzę).",
   "faqAddSublinkedStep4Title": "Wybierz przepis do połączenia",
@@ -3459,9 +3478,15 @@
   "faqImportFailedTitle": "Dlaczego import się nie powiódł?",
   "faqSeeHowTo": "Zobacz przewodnik",
   "faqStepsCount": "{count} kroków",
-  "@faqStepsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@faqStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqTitle": "FAQ",
-  "faqWhatAreHeadersAnswer": "Nagłówki pozwalają podzielić składniki i kroki przepisu na sekcje. Na przykład możesz mieć osobne sekcje \u201eSos\u201d, \u201eCiasto\u201d i \u201eDodatki\u201d w przepisie na pizzę. Ułatwiają korzystanie z długich przepisów.",
+  "faqWhatAreHeadersAnswer": "Nagłówki pozwalają podzielić składniki i kroki przepisu na sekcje. Na przykład możesz mieć osobne sekcje „Sos”, „Ciasto” i „Dodatki” w przepisie na pizzę. Ułatwiają korzystanie z długich przepisów.",
   "faqWhatAreHeadersSubtitle": "Uporządkuj przepisy w sekcje",
   "faqWhatAreHeadersTitle": "Czym są nagłówki?",
   "faqWhatAreSublinkedAnswer": "Połączone przepisy pozwalają łączyć powiązane przepisy razem. Na przykład przepis na Margheritę może linkować do przepisu na Ciasto na pizzę. Podczas przeglądania głównego przepisu możesz nacisnąć połączony przepis, aby od razu do niego przejść.",
@@ -3489,7 +3514,6 @@
   "settingsNotifComments": "Komentarze",
   "settingsNotifCommentsSubtitle": "Gdy ktoś skomentuje twój przepis",
   "settingsNotifSyncNote": "Ustawienia powiadomień są synchronizowane z twoim kontem.",
-
   "accountStoreFallback": "Sklep",
   "appearanceCustomThemeRequiresPremium": "Niestandardowy motyw wymaga Premium",
   "appearancePremiumBadge": "Premium",
@@ -3510,7 +3534,7 @@
   "customThemePrimaryDesc": "Przyciski, wyróżnienia, pasek aplikacji",
   "customThemeStartFromPreset": "Zacznij od presetu",
   "customThemeTitle": "Niestandardowy motyw",
-  "drawerProTier": "Pro \u00b7 {tier}",
+  "drawerProTier": "Pro · {tier}",
   "@drawerProTier": {
     "placeholders": {
       "tier": {
@@ -3535,7 +3559,7 @@
   "nutritionTipManual": "Wprowadź dokładne wartości odżywcze, jeśli je znasz",
   "nutritionTipMatch": "Dotknij składnika, aby zmienić dopasowanie USDA",
   "nutritionTipSaved": "Twoje poprawki są zapisywane dla przyszłych przepisów",
-  "nutritionTipSpecific": "Wybierz konkretne rodzaje (np. \u201Emąka pszenna\u201D zamiast samego \u201Emąka\u201D)",
+  "nutritionTipSpecific": "Wybierz konkretne rodzaje (np. „mąka pszenna” zamiast samego „mąka”)",
   "scanLittleTextImage": "Wykryto bardzo mało tekstu ({count} znaków). Spróbuj wyraźniejszego zdjęcia z lepszym oświetleniem lub użyj opcji wklejania tekstu.",
   "@scanLittleTextImage": {
     "placeholders": {
@@ -3575,10 +3599,10 @@
   "shareCreateFailed": "Nie udało się utworzyć linku",
   "shareFamilyCreateJoin": "Utwórz lub dołącz do rodziny, aby udostępniać",
   "shareFamilyRequiresCloudSync": "Wymaga subskrypcji Cloud Sync",
-  "shareFamilySetupInSettings": "Utwórz lub dołącz do rodziny w Ustawienia \u2192 Udostępnianie rodzinne",
+  "shareFamilySetupInSettings": "Utwórz lub dołącz do rodziny w Ustawienia → Udostępnianie rodzinne",
   "shareFamilyShare": "Udostępnianie rodzinne",
   "shareFamilySignIn": "Zaloguj się, aby korzystać z udostępniania rodzinnego",
-  "shareFamilySyncSubtitle": "Synchronizacja w czasie rzeczywistym \u00b7 Uprawnienia na członka",
+  "shareFamilySyncSubtitle": "Synchronizacja w czasie rzeczywistym · Uprawnienia na członka",
   "shareFamilyUpgradeMessage": "Przejdź na Cloud Sync, aby udostępniać książki kucharskie i listy rodzinie w czasie rzeczywistym.",
   "shareGenerateLink": "Wygeneruj link",
   "shareLinkCopied": "Link skopiowany!",
@@ -3592,7 +3616,7 @@
   },
   "shareNoFamilyMembers": "Brak innych członków rodziny do udostępniania",
   "shareOneTimeLink": "Jednorazowy link",
-  "shareOneTimeLinkSubtitle": "Bezpłatnie \u2022 Ważny 24 godz. \u2022 Tylko podgląd/pobieranie",
+  "shareOneTimeLinkSubtitle": "Bezpłatnie • Ważny 24 godz. • Tylko podgląd/pobieranie",
   "sharePermAddItems": "Może dodawać elementy, edytować własne",
   "sharePermAddOnly": "Tylko dodawanie",
   "sharePermAddRecipes": "Może dodawać nowe przepisy",
@@ -3620,7 +3644,7 @@
   "shareUnknownMember": "Nieznany",
   "shareUpgrade": "Uaktualnij",
   "shareWith": "Udostępnij",
-  "subscriptionCancelledUntil": "Anulowano \u2014 dostęp do {date}",
+  "subscriptionCancelledUntil": "Anulowano — dostęp do {date}",
   "@subscriptionCancelledUntil": {
     "placeholders": {
       "date": {
@@ -3628,7 +3652,7 @@
       }
     }
   },
-  "subscriptionLifetime": "Dożywotnio \u2014 nigdy nie wygasa",
+  "subscriptionLifetime": "Dożywotnio — nigdy nie wygasa",
   "subscriptionManage": "Zarządzaj subskrypcją",
   "subscriptionNoPurchases": "Nie znaleziono wcześniejszych zakupów.",
   "subscriptionPlan": "Plan",
@@ -3651,7 +3675,7 @@
   "subscriptionUpgradeToUnlock": "Przejdź na Pro, aby odblokować",
   "subscriptionViewPlans": "Zobacz plany",
   "substitutionsAll": "Wszystkie",
-  "substitutionsCount": "{count} zamienników \u2022 {category}",
+  "substitutionsCount": "{count} zamienników • {category}",
   "@substitutionsCount": {
     "placeholders": {
       "count": {
@@ -3671,5 +3695,25 @@
   "tierCreatorName": "Creator",
   "tierFamily": "FAMILY",
   "tierFreeName": "Bezpłatny",
-  "tierPremiumName": "Premium"
+  "tierPremiumName": "Premium",
+  "customThemeLightMode": "Jasny",
+  "customThemeDarkMode": "Ciemny",
+  "customThemeLivePreview": "Podgląd na żywo",
+  "customThemeLinkedOverlay": "Kolory są automatycznie generowane z motywu {mode}",
+  "customThemeUnlockButton": "Dostosuj kolory",
+  "customThemeLinkButton": "Połącz z {mode}",
+  "@customThemeLinkedOverlay": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@customThemeLinkButton": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  }
 }

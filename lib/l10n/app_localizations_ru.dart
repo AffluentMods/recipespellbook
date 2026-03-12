@@ -6453,6 +6453,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get splashSpellbook => 'Книга заклинаний';
 
   @override
+  String get splashTagline => 'Ваше кулинарное приключение ждёт';
+
+  @override
   String get smartImportReparsed => 'Повторно проанализировано ИИ — проверьте обновлённый рецепт выше';
 
   @override
@@ -8012,6 +8015,28 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get customThemeStartFromPreset => 'Начать с пресета';
+
+  @override
+  String get customThemeLightMode => 'Светлый';
+
+  @override
+  String get customThemeDarkMode => 'Тёмный';
+
+  @override
+  String customThemeLinkedOverlay(String mode) {
+    return 'Цвета автоматически генерируются из темы $mode';
+  }
+
+  @override
+  String get customThemeUnlockButton => 'Настроить цвета';
+
+  @override
+  String customThemeLinkButton(String mode) {
+    return 'Связать с $mode';
+  }
+
+  @override
+  String get customThemeLivePreview => 'Предпросмотр';
 
   @override
   String get settingsUserFallback => 'Пользователь';

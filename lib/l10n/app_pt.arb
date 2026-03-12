@@ -3157,6 +3157,7 @@
   "mealPlanDateFormat": "{weekday}, {day} de {month}",
   "splashRecipe": "Receita",
   "splashSpellbook": "Grimório",
+  "splashTagline": "Sua aventura culinária espera por você",
   "smartImportReparsed": "Reanalisado pela IA — confira a receita atualizada acima",
   "servingSizeHint": "ex.: 1 xícara, 100g",
   "mainNutrients": "Nutrientes principais",
@@ -3374,7 +3375,13 @@
   "allergyNoDisabledSubtitle": "Quando você desativar os avisos de alergia em receitas, eles aparecerão aqui para que você possa restaurá-los.",
   "allergyDisabledInfo": "Estas receitas tiveram os avisos de alergia desativados. Toque para restaurar.",
   "trashRestoredMessage": "\"{title}\" restaurada",
-  "@trashRestoredMessage": {"placeholders": {"title": {"type": "String"}}},
+  "@trashRestoredMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "nutrientCalories": "Calorias",
   "nutrientTotalFat": "Gordura Total",
   "nutrientSaturatedFat": "Gordura Saturada",
@@ -3415,10 +3422,21 @@
   "nutrientCarbs": "Carbos",
   "nutrientFat": "Gordura",
   "nutritionKcalPerServing": "{count} kcal por porção",
-  "@nutritionKcalPerServing": {"placeholders": {"count": {"type": "int"}}},
+  "@nutritionKcalPerServing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "nutritionKcalTotal": "{count} kcal total",
-  "@nutritionKcalTotal": {"placeholders": {"count": {"type": "int"}}},
-
+  "@nutritionKcalTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqAddHeadersStep1Desc": "Abra uma receita e toque no ícone de edição.",
   "faqAddHeadersStep1Title": "Abra o editor de receitas",
   "faqAddHeadersStep2Desc": "Toque no botão 'Adicionar Cabeçalho' para inserir um cabeçalho de seção.",
@@ -3434,7 +3452,6 @@
   "faqAddHeadersStep6Title": "Pronto!",
   "faqAddHeadersSubtitle": "Organize os ingredientes e passos da sua receita em seções",
   "faqAddHeadersTitle": "Como adicionar cabeçalhos",
-
   "faqAddSublinkedStep1Desc": "Abra uma receita e toque no ícone de edição.",
   "faqAddSublinkedStep1Title": "Abra o editor de receitas",
   "faqAddSublinkedStep2Desc": "Toque nos três pontos (⋮) na tela de edição.",
@@ -3449,7 +3466,6 @@
   "faqAddSublinkedStep6Title": "Pronto!",
   "faqAddSublinkedSubtitle": "Vincule receitas relacionadas para acesso rápido",
   "faqAddSublinkedTitle": "Como adicionar receitas vinculadas",
-
   "faqCommonQuestions": "Perguntas Frequentes",
   "faqDeviceTransferAnswer": "Sim! Use a função Transferência de Dispositivo em Configurações > Dados > Transferência de Dispositivo. Gere um código no seu dispositivo antigo e insira-o no novo. Todas as suas receitas, livros de receitas e imagens serão transferidos.",
   "faqDeviceTransferSubtitle": "Transfira receitas entre telefones e tablets",
@@ -3462,7 +3478,13 @@
   "faqImportFailedTitle": "Por que minha importação falhou?",
   "faqSeeHowTo": "Ver guia prático",
   "faqStepsCount": "{count} passos",
-  "@faqStepsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@faqStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqTitle": "FAQ",
   "faqWhatAreHeadersAnswer": "Cabeçalhos permitem dividir os ingredientes e passos da sua receita em seções. Por exemplo, você pode ter seções separadas para 'Molho', 'Massa' e 'Cobertura' em uma receita de pizza. Eles tornam receitas longas muito mais fáceis de seguir.",
   "faqWhatAreHeadersSubtitle": "Organize receitas em seções",
@@ -3470,7 +3492,6 @@
   "faqWhatAreSublinkedAnswer": "Receitas vinculadas permitem conectar receitas relacionadas. Por exemplo, uma receita de Pizza Margherita pode vincular à sua receita de Massa de Pizza. Ao visualizar a receita principal, você pode tocar na receita vinculada para ir direto a ela — sem precisar buscar.",
   "faqWhatAreSublinkedSubtitle": "Conecte receitas relacionadas",
   "faqWhatAreSublinkedTitle": "O que são receitas vinculadas?",
-
   "importGuideAiStep1Desc": "Vá para Início, toque em + para adicionar uma receita, escolha Importar e depois toque no botão IA.",
   "importGuideAiStep1Title": "Abra a Importação por IA",
   "importGuideAiStep2Desc": "Toque no botão copiar prompt. Depois abra sua IA favorita — ChatGPT, Claude, Gemini ou qualquer outra — e cole o prompt.",
@@ -3485,7 +3506,6 @@
   "importGuideAiTitle": "IA (ChatGPT, Claude, etc.)",
   "importGuideCategoryAi": "Importação por IA",
   "importGuideTagNew": "Novo",
-
   "settingsNotifManagePreferences": "Gerenciar preferências de notificação",
   "settingsNotifNewDownloads": "Novos downloads",
   "settingsNotifNewDownloadsSubtitle": "Quando alguém baixa sua receita publicada",
@@ -3494,7 +3514,6 @@
   "settingsNotifComments": "Comentários",
   "settingsNotifCommentsSubtitle": "Quando alguém comenta na sua receita",
   "settingsNotifSyncNote": "As preferências de notificação são sincronizadas com sua conta.",
-
   "accountStoreFallback": "Loja",
   "appearanceCustomThemeRequiresPremium": "Tema personalizado requer Premium",
   "appearancePremiumBadge": "Premium",
@@ -3515,7 +3534,7 @@
   "customThemePrimaryDesc": "Botões, destaques, barra do app",
   "customThemeStartFromPreset": "Começar de um preset",
   "customThemeTitle": "Tema personalizado",
-  "drawerProTier": "Pro \u00b7 {tier}",
+  "drawerProTier": "Pro · {tier}",
   "@drawerProTier": {
     "placeholders": {
       "tier": {
@@ -3580,10 +3599,10 @@
   "shareCreateFailed": "Falha ao criar o link",
   "shareFamilyCreateJoin": "Crie ou entre em uma família para compartilhar",
   "shareFamilyRequiresCloudSync": "Requer assinatura Cloud Sync",
-  "shareFamilySetupInSettings": "Crie ou entre em uma família em Configurações \u2192 Compartilhamento familiar",
+  "shareFamilySetupInSettings": "Crie ou entre em uma família em Configurações → Compartilhamento familiar",
   "shareFamilyShare": "Compartilhamento familiar",
   "shareFamilySignIn": "Faça login para usar o compartilhamento familiar",
-  "shareFamilySyncSubtitle": "Sincronização em tempo real \u00b7 Permissões por membro",
+  "shareFamilySyncSubtitle": "Sincronização em tempo real · Permissões por membro",
   "shareFamilyUpgradeMessage": "Atualize para Cloud Sync para compartilhar livros de receitas e listas com sua família em tempo real.",
   "shareGenerateLink": "Gerar link",
   "shareLinkCopied": "Link copiado!",
@@ -3597,7 +3616,7 @@
   },
   "shareNoFamilyMembers": "Nenhum outro membro da família para compartilhar",
   "shareOneTimeLink": "Link único",
-  "shareOneTimeLinkSubtitle": "Grátis \u2022 Expira em 24h \u2022 Apenas visualizar/baixar",
+  "shareOneTimeLinkSubtitle": "Grátis • Expira em 24h • Apenas visualizar/baixar",
   "sharePermAddItems": "Pode adicionar itens, editar os próprios",
   "sharePermAddOnly": "Apenas adicionar",
   "sharePermAddRecipes": "Pode adicionar novas receitas",
@@ -3625,7 +3644,7 @@
   "shareUnknownMember": "Desconhecido",
   "shareUpgrade": "Atualizar",
   "shareWith": "Compartilhar com",
-  "subscriptionCancelledUntil": "Cancelada \u2014 acesso até {date}",
+  "subscriptionCancelledUntil": "Cancelada — acesso até {date}",
   "@subscriptionCancelledUntil": {
     "placeholders": {
       "date": {
@@ -3633,7 +3652,7 @@
       }
     }
   },
-  "subscriptionLifetime": "Vitalícia \u2014 nunca expira",
+  "subscriptionLifetime": "Vitalícia — nunca expira",
   "subscriptionManage": "Gerenciar assinatura",
   "subscriptionNoPurchases": "Nenhuma compra anterior encontrada.",
   "subscriptionPlan": "Plano",
@@ -3656,7 +3675,7 @@
   "subscriptionUpgradeToUnlock": "Atualize para Pro para desbloquear",
   "subscriptionViewPlans": "Ver planos",
   "substitutionsAll": "Todos",
-  "substitutionsCount": "{count} substitutos \u2022 {category}",
+  "substitutionsCount": "{count} substitutos • {category}",
   "@substitutionsCount": {
     "placeholders": {
       "count": {
@@ -3676,5 +3695,25 @@
   "tierCreatorName": "Creator",
   "tierFamily": "FAMILY",
   "tierFreeName": "Grátis",
-  "tierPremiumName": "Premium"
+  "tierPremiumName": "Premium",
+  "customThemeLightMode": "Claro",
+  "customThemeDarkMode": "Escuro",
+  "customThemeLivePreview": "Pré-visualização ao vivo",
+  "customThemeLinkedOverlay": "As cores são geradas automaticamente a partir do seu tema {mode}",
+  "customThemeUnlockButton": "Personalizar cores",
+  "customThemeLinkButton": "Vincular a {mode}",
+  "@customThemeLinkedOverlay": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@customThemeLinkButton": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  }
 }

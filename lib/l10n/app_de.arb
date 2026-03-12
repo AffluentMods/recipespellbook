@@ -2664,6 +2664,7 @@
   "mealPlanDateFormat": "{weekday}, {day}. {month}",
   "splashRecipe": "Rezept",
   "splashSpellbook": "Zauberbuch",
+  "splashTagline": "Dein kulinarisches Abenteuer wartet",
   "smartImportReparsed": "Von KI neu analysiert — überprüfe das aktualisierte Rezept oben",
   "servingSizeHint": "z.B. 1 Tasse, 100g",
   "mainNutrients": "Hauptnährstoffe",
@@ -2880,14 +2881,14 @@
   "faqMacroCalcStep1Title": "Öffne ein Rezept",
   "faqMacroCalcStep1Desc": "Öffne ein beliebiges Rezept und scrolle zum Abschnitt Nährwerte.",
   "faqMacroCalcStep2Title": "Tippe zum Berechnen",
-  "faqMacroCalcStep2Desc": "Tippe auf den leeren Nährwertbereich, um den Rechner zu öffnen. Dort steht \u201eZum Berechnen tippen\u201c.",
+  "faqMacroCalcStep2Desc": "Tippe auf den leeren Nährwertbereich, um den Rechner zu öffnen. Dort steht „Zum Berechnen tippen“.",
   "faqMacroCalcStep3Title": "Automatische Analyse",
   "faqMacroCalcStep3Desc": "Der Rechner gleicht deine Zutaten automatisch mit der USDA-Lebensmitteldatenbank ab und berechnet Kalorien, Protein, Kohlenhydrate, Fett und mehr.",
   "faqMacroCalcStep4Title": "Manuell eingeben",
-  "faqMacroCalcStep4Desc": "Tippe auf \u201eManuell eingeben\u201c, um Nährwerte von Hand zu bearbeiten, wenn du eigene Daten eingeben möchtest.",
+  "faqMacroCalcStep4Desc": "Tippe auf „Manuell eingeben“, um Nährwerte von Hand zu bearbeiten, wenn du eigene Daten eingeben möchtest.",
   "faqMacroCalcStep5Title": "Zutatenzuordnungen prüfen",
   "faqMacroCalcStep5Desc": "Scrolle nach unten, um jede Zutat zu sehen, die einem USDA-Lebensmittel zugeordnet wurde. Verlinkte Rezepte (wie Pizzateig) verwenden ihre eigenen gespeicherten Nährwerte.",
-  "faqMacroCalcStep5Tip": "Nicht sicher, was ein verlinktes Rezept ist? Schau in den FAQ-Bereich \u201eWas sind verlinkte Rezepte?\u201c!",
+  "faqMacroCalcStep5Tip": "Nicht sicher, was ein verlinktes Rezept ist? Schau in den FAQ-Bereich „Was sind verlinkte Rezepte?“!",
   "faqMacroCalcStep6Title": "USDA-Datenbank durchsuchen",
   "faqMacroCalcStep6Desc": "Tippe auf eine Zutat, um die USDA-Datenbank nach einer besseren Zuordnung zu durchsuchen.",
   "faqMacroCalcStep7Title": "Nährwerte verlinkter Rezepte",
@@ -2905,7 +2906,13 @@
   "allergyNoDisabledSubtitle": "Wenn du Allergiewarnungen bei Rezepten ausblendet, erscheinen sie hier, damit du sie wiederherstellen kannst.",
   "allergyDisabledInfo": "Bei diesen Rezepten wurden die Allergiewarnungen deaktiviert. Tippe zum Wiederherstellen.",
   "trashRestoredMessage": "\"{title}\" wiederhergestellt",
-  "@trashRestoredMessage": {"placeholders": {"title": {"type": "String"}}},
+  "@trashRestoredMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "nutrientCalories": "Kalorien",
   "nutrientTotalFat": "Gesamtfett",
   "nutrientSaturatedFat": "Gesättigtes Fett",
@@ -2946,12 +2953,24 @@
   "nutrientCarbs": "Kohlenhydrate",
   "nutrientFat": "Fett",
   "nutritionKcalPerServing": "{count} kcal pro Portion",
-  "@nutritionKcalPerServing": {"placeholders": {"count": {"type": "int"}}},
+  "@nutritionKcalPerServing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "nutritionKcalTotal": "{count} kcal gesamt",
-  "@nutritionKcalTotal": {"placeholders": {"count": {"type": "int"}}},
+  "@nutritionKcalTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqAddHeadersStep1Desc": "Öffne ein Rezept und tippe auf das Bearbeiten-Symbol.",
   "faqAddHeadersStep1Title": "Rezepteditor öffnen",
-  "faqAddHeadersStep2Desc": "Tippe auf \u201eÜberschrift hinzufügen\u201c, um eine Abschnittsüberschrift einzufügen.",
+  "faqAddHeadersStep2Desc": "Tippe auf „Überschrift hinzufügen“, um eine Abschnittsüberschrift einzufügen.",
   "faqAddHeadersStep2Title": "Überschrift hinzufügen",
   "faqAddHeadersStep3Desc": "Tippe auf die drei Punkte (⋮) neben der Überschrift für weitere Optionen.",
   "faqAddHeadersStep3Title": "Überschrift-Menü öffnen",
@@ -2968,7 +2987,7 @@
   "faqAddSublinkedStep1Title": "Rezepteditor öffnen",
   "faqAddSublinkedStep2Desc": "Tippe auf die drei Punkte (⋮) im Bearbeitungsbildschirm.",
   "faqAddSublinkedStep2Title": "Menü öffnen",
-  "faqAddSublinkedStep3Desc": "Wähle \u201eRezept verknüpfen\u201c aus dem Menü.",
+  "faqAddSublinkedStep3Desc": "Wähle „Rezept verknüpfen“ aus dem Menü.",
   "faqAddSublinkedStep3Title": "Rezept verknüpfen antippen",
   "faqAddSublinkedStep4Desc": "Tippe auf das Verknüpfungssymbol neben dem Rezept, das du verbinden möchtest (z.B. Pizzateig).",
   "faqAddSublinkedStep4Title": "Rezept zum Verknüpfen wählen",
@@ -2990,9 +3009,15 @@
   "faqImportFailedTitle": "Warum ist mein Import fehlgeschlagen?",
   "faqSeeHowTo": "Anleitung ansehen",
   "faqStepsCount": "{count} Schritte",
-  "@faqStepsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@faqStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqTitle": "FAQ",
-  "faqWhatAreHeadersAnswer": "Mit Überschriften kannst du Zutaten und Schritte in Abschnitte unterteilen. Du könntest z.B. separate Abschnitte für \u201eSoße\u201c, \u201eTeig\u201c und \u201eBelag\u201c in einem Pizzarezept haben. Sie machen lange Rezepte viel übersichtlicher.",
+  "faqWhatAreHeadersAnswer": "Mit Überschriften kannst du Zutaten und Schritte in Abschnitte unterteilen. Du könntest z.B. separate Abschnitte für „Soße“, „Teig“ und „Belag“ in einem Pizzarezept haben. Sie machen lange Rezepte viel übersichtlicher.",
   "faqWhatAreHeadersSubtitle": "Rezepte in Abschnitte organisieren",
   "faqWhatAreHeadersTitle": "Was sind Überschriften?",
   "faqWhatAreSublinkedAnswer": "Verknüpfte Rezepte verbinden verwandte Rezepte miteinander. Zum Beispiel kann ein Margherita-Pizza-Rezept mit deinem Pizzateig-Rezept verknüpft werden. Beim Ansehen des Hauptrezepts kannst du auf das verknüpfte Rezept tippen, um direkt dorthin zu springen.",
@@ -3020,7 +3045,6 @@
   "settingsNotifComments": "Kommentare",
   "settingsNotifCommentsSubtitle": "Wenn jemand dein Rezept kommentiert",
   "settingsNotifSyncNote": "Benachrichtigungseinstellungen werden mit deinem Konto synchronisiert.",
-
   "accountStoreFallback": "Store",
   "appearanceCustomThemeRequiresPremium": "Benutzerdefiniertes Theme erfordert Premium",
   "appearancePremiumBadge": "Premium",
@@ -3066,7 +3090,7 @@
   "nutritionTipManual": "Genaue Nährwerte eingeben, wenn du sie kennst",
   "nutritionTipMatch": "Tippe auf eine Zutat, um die USDA-Zuordnung zu ändern",
   "nutritionTipSaved": "Deine Korrekturen werden für zukünftige Rezepte gespeichert",
-  "nutritionTipSpecific": "Wähle spezifische Sorten (z. B. \u201EWeizenmehl Typ 405\u201C statt nur \u201EMehl\u201C)",
+  "nutritionTipSpecific": "Wähle spezifische Sorten (z. B. „Weizenmehl Typ 405“ statt nur „Mehl“)",
   "scanLittleTextImage": "Sehr wenig Text erkannt ({count} Zeichen). Versuche ein klareres Foto mit besserer Beleuchtung oder nutze stattdessen die Text-Einfügen-Option.",
   "@scanLittleTextImage": {
     "placeholders": {
@@ -3106,7 +3130,7 @@
   "shareCreateFailed": "Link konnte nicht erstellt werden",
   "shareFamilyCreateJoin": "Erstelle oder trete einer Familie bei, um zu teilen",
   "shareFamilyRequiresCloudSync": "Erfordert Cloud-Sync-Abonnement",
-  "shareFamilySetupInSettings": "Erstelle oder trete einer Familie bei unter Einstellungen \u2192 Familienfreigabe",
+  "shareFamilySetupInSettings": "Erstelle oder trete einer Familie bei unter Einstellungen → Familienfreigabe",
   "shareFamilyShare": "Familienfreigabe",
   "shareFamilySignIn": "Anmelden, um Familienfreigabe zu nutzen",
   "shareFamilySyncSubtitle": "Echtzeit-Sync · Berechtigungen pro Mitglied",
@@ -3123,7 +3147,7 @@
   },
   "shareNoFamilyMembers": "Keine anderen Familienmitglieder zum Teilen",
   "shareOneTimeLink": "Einmaliger Link",
-  "shareOneTimeLinkSubtitle": "Kostenlos \u2022 24 Std. gültig \u2022 Nur ansehen/herunterladen",
+  "shareOneTimeLinkSubtitle": "Kostenlos • 24 Std. gültig • Nur ansehen/herunterladen",
   "sharePermAddItems": "Kann Einträge hinzufügen, eigene bearbeiten",
   "sharePermAddOnly": "Nur hinzufügen",
   "sharePermAddRecipes": "Kann neue Rezepte hinzufügen",
@@ -3151,7 +3175,7 @@
   "shareUnknownMember": "Unbekannt",
   "shareUpgrade": "Upgrade",
   "shareWith": "Teilen mit",
-  "subscriptionCancelledUntil": "Gekündigt \u2014 Zugriff bis {date}",
+  "subscriptionCancelledUntil": "Gekündigt — Zugriff bis {date}",
   "@subscriptionCancelledUntil": {
     "placeholders": {
       "date": {
@@ -3159,7 +3183,7 @@
       }
     }
   },
-  "subscriptionLifetime": "Lebenslang \u2014 läuft nie ab",
+  "subscriptionLifetime": "Lebenslang — läuft nie ab",
   "subscriptionManage": "Abonnement verwalten",
   "subscriptionNoPurchases": "Keine früheren Käufe gefunden.",
   "subscriptionPlan": "Abo",
@@ -3182,7 +3206,7 @@
   "subscriptionUpgradeToUnlock": "Auf Pro upgraden zum Freischalten",
   "subscriptionViewPlans": "Pläne ansehen",
   "substitutionsAll": "Alle",
-  "substitutionsCount": "{count} Alternativen \u2022 {category}",
+  "substitutionsCount": "{count} Alternativen • {category}",
   "@substitutionsCount": {
     "placeholders": {
       "count": {
@@ -3202,5 +3226,25 @@
   "tierCreatorName": "Creator",
   "tierFamily": "FAMILY",
   "tierFreeName": "Kostenlos",
-  "tierPremiumName": "Premium"
+  "tierPremiumName": "Premium",
+  "customThemeLightMode": "Hell",
+  "customThemeDarkMode": "Dunkel",
+  "customThemeLivePreview": "Live-Vorschau",
+  "customThemeLinkedOverlay": "Farben werden automatisch aus Ihrem {mode}-Design generiert",
+  "customThemeUnlockButton": "Farben anpassen",
+  "customThemeLinkButton": "Mit {mode} verknüpfen",
+  "@customThemeLinkedOverlay": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@customThemeLinkButton": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  }
 }

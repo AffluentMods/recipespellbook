@@ -6387,6 +6387,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get splashSpellbook => 'Spellbook';
 
   @override
+  String get splashTagline => 'Your culinary adventure awaits';
+
+  @override
   String get smartImportReparsed => 'Re-parsed by AI — review the updated recipe above';
 
   @override
@@ -7946,6 +7949,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customThemeStartFromPreset => 'Start from a preset';
+
+  @override
+  String get customThemeLightMode => 'Light';
+
+  @override
+  String get customThemeDarkMode => 'Dark';
+
+  @override
+  String customThemeLinkedOverlay(String mode) {
+    return 'Colors are auto-generated from your $mode theme';
+  }
+
+  @override
+  String get customThemeUnlockButton => 'Customize colors';
+
+  @override
+  String customThemeLinkButton(String mode) {
+    return 'Link to $mode';
+  }
+
+  @override
+  String get customThemeLivePreview => 'Live Preview';
 
   @override
   String get settingsUserFallback => 'User';

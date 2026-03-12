@@ -359,7 +359,7 @@ class _QuickRecipesWidgetState extends ConsumerState<_QuickRecipesWidget> {
               height: Responsive.quickAccessHeight(context),
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
                 itemCount: displayItems.length,
                 itemBuilder: (context, index) {
                   return _QuickRecipeCard(item: displayItems[index]);
@@ -748,7 +748,7 @@ class _CoursesSectionState extends ConsumerState<_CoursesSection> {
           height: Responsive.chipRowHeight(context),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
             itemCount: chips.length,
             itemBuilder: (context, index) {
               final chip = chips[index];
@@ -865,7 +865,7 @@ class _CategoriesSectionState extends ConsumerState<_CategoriesSection> {
           height: Responsive.chipRowHeight(context),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
             itemCount: chips.length,
             itemBuilder: (context, index) {
               final chip = chips[index];
@@ -983,7 +983,7 @@ class _UncategorizedSectionState extends ConsumerState<_UncategorizedSection> {
           height: Responsive.chipRowHeight(context),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
             itemCount: uncategorized.length.clamp(0, 10), // Show max 10
             itemBuilder: (context, index) {
               final recipe = uncategorized[index];

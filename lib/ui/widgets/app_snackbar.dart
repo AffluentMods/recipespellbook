@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 /// Modern snackbar helper — shows at the TOP of the screen.
 ///
+/// Theme-aware: blends semantic colors with the active theme's surface
+/// so it feels native regardless of which of the 12+ themes is active.
+///
 /// Usage:
 ///   AppSnackbar.success(context, 'Recipe saved!');
 ///   AppSnackbar.error(context, 'Something went wrong');
@@ -15,32 +18,42 @@ class AppSnackbar {
   static OverlayEntry? _currentEntry;
   static AnimationController? _currentController;
 
+  // ─── Semantic colours (icon accent) ───
+
+  static const _successAccent = Color(0xFF2E7D32);
+  static const _errorAccent = Color(0xFFC62828);
+  static const _infoAccent = Color(0xFF1565C0);
+  static const _warningAccent = Color(0xFFE65100);
+
+  // ─── Public API ───
+
   static void success(BuildContext context, String message) =>
-      _show(context, message, Icons.check_circle_rounded, const Color(0xFF2E7D32), const Color(0xFFE8F5E9));
+      _show(context, message, Icons.check_circle_rounded, _successAccent);
 
   static void error(BuildContext context, String message) =>
-      _show(context, message, Icons.error_rounded, const Color(0xFFC62828), const Color(0xFFFFEBEE));
+      _show(context, message, Icons.error_rounded, _errorAccent);
 
   static void info(BuildContext context, String message) =>
-      _show(context, message, Icons.info_rounded, const Color(0xFF1565C0), const Color(0xFFE3F2FD));
+      _show(context, message, Icons.info_rounded, _infoAccent);
 
   static void warning(BuildContext context, String message) =>
-      _show(context, message, Icons.warning_rounded, const Color(0xFFE65100), const Color(0xFFFFF3E0));
+      _show(context, message, Icons.warning_rounded, _warningAccent);
 
-  static void custom(BuildContext context, String message, {required IconData icon, required Color color}) =>
-      _show(context, message, icon, color, color.withValues(alpha: 0.08));
+  static void custom(BuildContext context, String message,
+          {required IconData icon, required Color color}) =>
+      _show(context, message, icon, color);
 
   /// Success snackbar with an action button
   static void successWithAction(
-      BuildContext context,
-      String message, {
-        required String actionLabel,
-        required VoidCallback onAction,
-        Duration duration = const Duration(seconds: 4),
-      }) {
+    BuildContext context,
+    String message, {
+    required String actionLabel,
+    required VoidCallback onAction,
+    Duration duration = const Duration(seconds: 4),
+  }) {
     _show(
       context, message,
-      Icons.check_circle_rounded, const Color(0xFF2E7D32), const Color(0xFFE8F5E9),
+      Icons.check_circle_rounded, _successAccent,
       duration: duration,
       actionLabel: actionLabel,
       onAction: onAction,
@@ -49,15 +62,15 @@ class AppSnackbar {
 
   /// Error snackbar with an action button
   static void errorWithAction(
-      BuildContext context,
-      String message, {
-        required String actionLabel,
-        required VoidCallback onAction,
-        Duration duration = const Duration(seconds: 5),
-      }) {
+    BuildContext context,
+    String message, {
+    required String actionLabel,
+    required VoidCallback onAction,
+    Duration duration = const Duration(seconds: 5),
+  }) {
     _show(
       context, message,
-      Icons.error_rounded, const Color(0xFFC62828), const Color(0xFFFFEBEE),
+      Icons.error_rounded, _errorAccent,
       duration: duration,
       actionLabel: actionLabel,
       onAction: onAction,
@@ -68,7 +81,7 @@ class AppSnackbar {
   static void loading(BuildContext context, String message) {
     _show(
       context, message,
-      null, null, null,
+      null, null,
       isLoading: true,
       duration: const Duration(seconds: 30),
     );
@@ -79,41 +92,42 @@ class AppSnackbar {
     _dismissCurrent();
   }
 
+  // ─── Internal ───
+
   static void _dismissCurrent() {
-    if (_currentController != null && _currentController!.isAnimating == false && _currentController!.value == 1.0) {
-      _currentController?.reverse().then((_) {
-        _currentEntry?.remove();
-        _currentEntry = null;
-        _currentController?.dispose();
-        _currentController = null;
-      });
-    } else if (_currentEntry != null) {
-      _currentEntry?.remove();
-      _currentEntry = null;
-      _currentController?.dispose();
+    final ctrl = _currentController;
+    final entry = _currentEntry;
+    if (ctrl != null && !ctrl.isAnimating && ctrl.value == 1.0) {
       _currentController = null;
+      _currentEntry = null;
+      ctrl.reverse().then((_) {
+        entry?.remove();
+        ctrl.dispose();
+      });
+    } else if (entry != null) {
+      _currentEntry = null;
+      _currentController = null;
+      entry.remove();
+      ctrl?.dispose();
     }
   }
 
   static void _show(
-      BuildContext context,
-      String message,
-      IconData? icon,
-      Color? accent,
-      Color? bgLight, {
-        Duration duration = const Duration(seconds: 3),
-        String? actionLabel,
-        VoidCallback? onAction,
-        bool isLoading = false,
-      }) {
-    // Dismiss any existing snackbar
+    BuildContext context,
+    String message,
+    IconData? icon,
+    Color? accent, {
+    Duration duration = const Duration(seconds: 3),
+    String? actionLabel,
+    VoidCallback? onAction,
+    bool isLoading = false,
+  }) {
     _dismissCurrent();
-    // Also hide any legacy SnackBars
     ScaffoldMessenger.maybeOf(context)?.hideCurrentSnackBar();
 
     final overlay = Overlay.of(context, rootOverlay: true);
-
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final topPadding = MediaQuery.of(context).padding.top;
 
     final controller = AnimationController(
@@ -126,28 +140,34 @@ class AppSnackbar {
     final slideAnimation = Tween<Offset>(
       begin: const Offset(0, -1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOutCubic, reverseCurve: Curves.easeIn));
+    ).animate(CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeIn,
+    ));
 
     late OverlayEntry entry;
     entry = OverlayEntry(
-      builder: (context) => _TopSnackbarWidget(
+      builder: (_) => _TopSnackbarWidget(
         message: message,
         icon: icon,
         accent: accent,
-        bgLight: bgLight,
-        isDark: isDark,
+        surface: cs.surface,
+        onSurface: cs.onSurface,
+        outline: cs.outline,
+        isDark: theme.brightness == Brightness.dark,
         topPadding: topPadding,
         slideAnimation: slideAnimation,
         controller: controller,
         actionLabel: actionLabel,
-        onAction: onAction != null ? () {
-          _dismissCurrent();
-          onAction();
-        } : null,
+        onAction: onAction != null
+            ? () {
+                _dismissCurrent();
+                onAction();
+              }
+            : null,
         isLoading: isLoading,
-        onDismiss: () {
-          _dismissCurrent();
-        },
+        onDismiss: _dismissCurrent,
       ),
     );
 
@@ -166,11 +186,15 @@ class AppSnackbar {
   }
 }
 
+// ─── Widget ──────────────────────────────────────────────────────────────────
+
 class _TopSnackbarWidget extends StatelessWidget {
   final String message;
   final IconData? icon;
   final Color? accent;
-  final Color? bgLight;
+  final Color surface;
+  final Color onSurface;
+  final Color outline;
   final bool isDark;
   final double topPadding;
   final Animation<Offset> slideAnimation;
@@ -184,7 +208,9 @@ class _TopSnackbarWidget extends StatelessWidget {
     required this.message,
     this.icon,
     this.accent,
-    this.bgLight,
+    required this.surface,
+    required this.onSurface,
+    required this.outline,
     required this.isDark,
     required this.topPadding,
     required this.slideAnimation,
@@ -195,12 +221,21 @@ class _TopSnackbarWidget extends StatelessWidget {
     required this.onDismiss,
   });
 
+  static const _maxWidth = 480.0;
+
   @override
   Widget build(BuildContext context) {
-    final effectiveAccent = accent ?? (isDark ? Colors.white70 : Colors.grey.shade700);
-    final effectiveBg = isDark
-        ? Color.lerp(Colors.grey.shade900, effectiveAccent, 0.08)!
-        : bgLight ?? Colors.grey.shade100;
+    final effectiveAccent = accent ?? onSurface.withValues(alpha: 0.7);
+
+    // Blend semantic accent with theme surface — feels native to any theme
+    final bg = isDark
+        ? Color.lerp(surface, effectiveAccent, 0.10)!
+        : Color.lerp(surface, effectiveAccent, 0.07)!;
+
+    // Subtle border so the snackbar never melts into the background
+    final borderColor = isDark
+        ? effectiveAccent.withValues(alpha: 0.20)
+        : effectiveAccent.withValues(alpha: 0.15);
 
     return Positioned(
       top: 0,
@@ -212,87 +247,128 @@ class _TopSnackbarWidget extends StatelessWidget {
           opacity: controller,
           child: GestureDetector(
             onVerticalDragEnd: (details) {
-              // Swipe up to dismiss
-              if (details.velocity.pixelsPerSecond.dy < -100) {
-                onDismiss();
-              }
+              if (details.velocity.pixelsPerSecond.dy < -100) onDismiss();
             },
             onTap: onDismiss,
             child: Material(
               color: Colors.transparent,
               child: Container(
                 padding: EdgeInsets.only(top: topPadding),
+                alignment: Alignment.topCenter,
                 child: Container(
-                  margin: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  constraints: const BoxConstraints(maxWidth: _maxWidth),
+                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
-                    color: effectiveBg,
-                    borderRadius: BorderRadius.circular(12),
+                    color: bg,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: borderColor, width: 1),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withValues(
+                            alpha: isDark ? 0.35 : 0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                            alpha: isDark ? 0.15 : 0.04),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Icon or spinner
-                      if (isLoading)
-                        SizedBox(
-                          width: 20, height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: isDark ? Colors.white70 : Colors.grey.shade700,
-                          ),
-                        )
-                      else
-                        Container(
-                          width: 32, height: 32,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? effectiveAccent.withValues(alpha: 0.25)
-                                : effectiveAccent.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(icon, size: 18, color: isDark
-                              ? effectiveAccent.withValues(alpha: 0.9)
-                              : effectiveAccent),
-                        ),
+                      _buildLeading(effectiveAccent),
                       const SizedBox(width: 12),
-                      // Message
-                      Expanded(
-                        child: Text(
-                          message,
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.grey.shade900,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      // Action button
+                      Flexible(child: _buildMessage()),
                       if (actionLabel != null && onAction != null) ...[
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTap: onAction,
-                          child: Text(
-                            actionLabel!,
-                            style: TextStyle(
-                              color: isDark
-                                  ? const Color(0xFF81C784)
-                                  : effectiveAccent,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
+                        const SizedBox(width: 10),
+                        _buildAction(effectiveAccent),
                       ],
                     ],
                   ),
                 ),
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─── Icon or spinner ───
+
+  Widget _buildLeading(Color effectiveAccent) {
+    if (isLoading) {
+      return SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: onSurface.withValues(alpha: 0.6),
+        ),
+      );
+    }
+
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: effectiveAccent.withValues(alpha: isDark ? 0.22 : 0.12),
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: Icon(
+        icon,
+        size: 18,
+        color: isDark
+            ? effectiveAccent.withValues(alpha: 0.9)
+            : effectiveAccent,
+      ),
+    );
+  }
+
+  // ─── Message text ───
+
+  Widget _buildMessage() {
+    return Text(
+      message,
+      style: TextStyle(
+        color: onSurface.withValues(alpha: 0.9),
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        height: 1.3,
+      ),
+    );
+  }
+
+  // ─── Action button with ripple ───
+
+  Widget _buildAction(Color effectiveAccent) {
+    final actionColor = isDark
+        ? Color.lerp(effectiveAccent, Colors.white, 0.35)!
+        : effectiveAccent;
+
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onAction,
+        borderRadius: BorderRadius.circular(8),
+        splashColor: actionColor.withValues(alpha: 0.12),
+        highlightColor: actionColor.withValues(alpha: 0.06),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          child: Text(
+            actionLabel!,
+            style: TextStyle(
+              color: actionColor,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
             ),
           ),
         ),

@@ -1,4 +1,3 @@
-import '../../utils/platform_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -50,7 +49,7 @@ class AppMenuDrawer extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(14, 16, 14, 8),
               children: [
-                // ── Group 1: Community & Kitchen Buddy ──
+                // ── Main ──
                 _DrawerGroup(children: [
                   _DrawerItem(
                     icon: Icons.people_rounded,
@@ -61,23 +60,6 @@ class AppMenuDrawer extends ConsumerWidget {
                       context.push('/community');
                     },
                   ),
-                  // TODO: Kitchen Buddy hidden for now — finish if app grows
-                  // if (isKitchenBuddyEnabled)
-                  //   _DrawerItem(
-                  //     icon: Icons.restaurant_rounded,
-                  //     iconColor: const Color(0xFF8B5CF6),
-                  //     label: l10n.menuKitchenBuddy,
-                  //     onTap: () {
-                  //       Navigator.pop(context);
-                  //       context.push('/kitchen-buddy');
-                  //     },
-                  //   ),
-                ]),
-
-                const SizedBox(height: 12),
-
-                // ── Group 2: Tools ──
-                _DrawerGroup(children: [
                   _DrawerItem(
                     icon: Icons.download_rounded,
                     iconColor: Colors.teal,
@@ -90,20 +72,9 @@ class AppMenuDrawer extends ConsumerWidget {
                     },
                   ),
                   _DrawerItem(
-                    icon: Icons.help_outline_rounded,
-                    iconColor: const Color(0xFF8B5CF6),
-                    label: l10n.faqTitle,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const FaqScreen()),
-                      );
-                    },
-                  ),
-                  _DrawerItem(
                     icon: Icons.swap_horiz_rounded,
                     iconColor: const Color(0xFF0EA5E9),
-                    label: _isDesktopPlatform ? l10n.menuSyncToMobile : l10n.transferTitle,
+                    label: l10n.transferTitle,
                     onTap: () {
                       Navigator.pop(context);
                       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -111,34 +82,11 @@ class AppMenuDrawer extends ConsumerWidget {
                       });
                     },
                   ),
-                  if (authState.isSignedIn && subStatus.tier.hasCloudSync)
-                    _DrawerItem(
-                      icon: Icons.cloud_sync_rounded,
-                      iconColor: const Color(0xFF10B981),
-                      label: l10n.syncNow,
-                      onTap: () {
-                        Navigator.pop(context);
-                        _triggerSync(context);
-                      },
-                      onLongPress: () {
-                        Navigator.pop(context);
-                        _triggerSync(context, fullSync: true);
-                      },
-                    ),
-                  _DrawerItem(
-                    icon: Icons.person_add_rounded,
-                    iconColor: const Color(0xFFF59E0B),
-                    label: l10n.inviteFriends,
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showInviteSheet(context);
-                    },
-                  ),
                 ]),
 
                 const SizedBox(height: 12),
 
-                // ── Group 3: Help & Settings ──
+                // ── Help & Settings ──
                 _DrawerGroup(children: [
                   _DrawerItem(
                     icon: Icons.headset_mic_rounded,
@@ -162,23 +110,6 @@ class AppMenuDrawer extends ConsumerWidget {
                   ),
                 ]),
 
-                if (authState.isSignedIn) ...[
-                  const SizedBox(height: 12),
-                  _DrawerGroup(children: [
-                    _DrawerItem(
-                      icon: Icons.logout_rounded,
-                      iconColor: const Color(0xFFEF4444),
-                      label: l10n.signOut,
-                      textColor: const Color(0xFFEF4444),
-                      onTap: () {
-                        final authNotifier = ref.read(authProvider.notifier);
-                        Navigator.pop(context);
-                        authNotifier.signOut();
-                      },
-                    ),
-                  ]),
-                ],
-
                 const SizedBox(height: 8),
               ],
             ),
@@ -191,75 +122,6 @@ class AppMenuDrawer extends ConsumerWidget {
     );
   }
 
-  static bool get _isDesktopPlatform => isDesktop;
-
-  void _showInviteSheet(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _sheetHandle(theme),
-            const SizedBox(height: 24),
-            const Icon(Icons.favorite, size: 48, color: Colors.pink),
-            const SizedBox(height: 16),
-            Text(l10n.menuShareApp,
-                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text(l10n.menuShareSubtitle,
-                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                textAlign: TextAlign.center),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.maybeLater))),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      Share.share(l10n.menuShareMessage, subject: 'Recipe Spellbook');
-                    },
-                    icon: const Icon(Icons.share),
-                    label: Text(l10n.actionShare),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  static Widget _sheetHandle(ThemeData theme) => Container(
-    width: 40, height: 4,
-    decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2)),
-  );
-
-  static Future<void> _triggerSync(BuildContext context, {bool fullSync = false}) async {
-    // Capture messenger before drawer closes (context may become unmounted)
-    final messenger = ScaffoldMessenger.of(context);
-    AppSnackbar.loading(context, fullSync ? 'Full sync…' : 'Syncing…');
-    final result = await SyncService.instance.sync(fullSync: fullSync);
-    messenger.hideCurrentSnackBar();
-    if (result.success) {
-      final pushed = result.pushedCount;
-      final pulled = result.pulledCount;
-      if (context.mounted) {
-        AppSnackbar.success(context, '${fullSync ? 'Full sync' : 'Synced'}! ↑$pushed ↓$pulled');
-      }
-    } else {
-      if (context.mounted) {
-        AppSnackbar.error(context, result.error ?? 'Sync failed');
-      }
-    }
-  }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -807,7 +669,13 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
                 ),
               ),
             ),
-            _NotificationBell(),
+            Column(
+              children: [
+                _NotificationBell(),
+                if (subStatus.tier.hasCloudSync)
+                  _SyncButton(),
+              ],
+            ),
           ],
         ),
       ],
@@ -943,6 +811,24 @@ class _BottomSection extends ConsumerWidget {
 
     return Column(
       children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+              SharePlus.instance.share(ShareParams(text: l10n.menuShareMessage, subject: 'Recipe Spellbook'));
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.favorite_rounded, size: 15, color: Color(0xFFE53935)),
+                const SizedBox(width: 6),
+                Text(l10n.inviteFriends,
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline.withValues(alpha: 0.7), fontSize: 13)),
+              ],
+            ),
+          ),
+        ),
         Divider(height: 1, color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4), indent: 20, endIndent: 20),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
@@ -950,7 +836,7 @@ class _BottomSection extends ConsumerWidget {
         ),
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
-          child: Text('${l10n.menuAppVersion(version)} · Beta',
+          child: Text(l10n.menuAppVersion(version),
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline.withValues(alpha: 0.45), fontSize: 11)),
         ),
       ],
@@ -1030,7 +916,7 @@ class _BottomSection extends ConsumerWidget {
     final sub = ref.read(subscriptionProvider.notifier);
     showModalBottomSheet(
       context: ctx,
-      builder: (bCtx) => Padding(
+      builder: (bCtx) => SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1125,6 +1011,52 @@ class _NotificationBell extends ConsumerWidget {
   }
 }
 
+class _SyncButton extends StatefulWidget {
+  @override
+  State<_SyncButton> createState() => _SyncButtonState();
+}
+
+class _SyncButtonState extends State<_SyncButton> {
+  bool _syncing = false;
+
+  Future<void> _sync() async {
+    if (_syncing) return;
+    setState(() => _syncing = true);
+    try {
+      final result = await SyncService.instance.sync();
+      if (mounted) {
+        final pushed = result.pushedCount;
+        final pulled = result.pulledCount;
+        if (result.success) {
+          AppSnackbar.success(context, 'Synced! ↑$pushed ↓$pulled');
+        } else {
+          AppSnackbar.error(context, result.error ?? 'Sync failed');
+        }
+      }
+    } catch (e) {
+      if (mounted) AppSnackbar.error(context, 'Sync failed');
+    } finally {
+      if (mounted) setState(() => _syncing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return IconButton(
+      onPressed: _syncing ? null : _sync,
+      icon: _syncing
+          ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.primary))
+          : Icon(Icons.sync_rounded, size: 22, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+      style: IconButton.styleFrom(
+        backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.5),
+        padding: const EdgeInsets.all(8),
+        minimumSize: const Size(36, 36),
+      ),
+    );
+  }
+}
+
 
 class _DrawerGroup extends StatelessWidget {
   final List<Widget> children;
@@ -1171,20 +1103,17 @@ class _DrawerItem extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final String label;
-  final Color? textColor;
   final VoidCallback onTap;
-  final VoidCallback? onLongPress;
-  const _DrawerItem({required this.icon, required this.iconColor, required this.label, this.textColor, required this.onTap, this.onLongPress});
+  const _DrawerItem({required this.icon, required this.iconColor, required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final c = textColor ?? theme.colorScheme.onSurface;
+    final c = theme.colorScheme.onSurface;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        onLongPress: onLongPress,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(

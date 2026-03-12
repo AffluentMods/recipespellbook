@@ -3157,6 +3157,7 @@
   "mealPlanDateFormat": "{month}{day}日（{weekday}）",
   "splashRecipe": "レシピ",
   "splashSpellbook": "魔法書",
+  "splashTagline": "あなたの料理の冒険が待っています",
   "smartImportReparsed": "AIが再解析しました — 上の更新されたレシピを確認してください",
   "servingSizeHint": "例: 1カップ、100g",
   "mainNutrients": "主要栄養素",
@@ -3374,7 +3375,13 @@
   "allergyNoDisabledSubtitle": "レシピのアレルギー警告を無効にすると、復元できるようにここに表示されます。",
   "allergyDisabledInfo": "これらのレシピはアレルギー警告が無効になっています。タップして復元します。",
   "trashRestoredMessage": "「{title}」を復元しました",
-  "@trashRestoredMessage": {"placeholders": {"title": {"type": "String"}}},
+  "@trashRestoredMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "nutrientCalories": "カロリー",
   "nutrientTotalFat": "総脂質",
   "nutrientSaturatedFat": "飽和脂肪酸",
@@ -3415,10 +3422,21 @@
   "nutrientCarbs": "炭水化物",
   "nutrientFat": "脂質",
   "nutritionKcalPerServing": "{count} kcal/1食",
-  "@nutritionKcalPerServing": {"placeholders": {"count": {"type": "int"}}},
+  "@nutritionKcalPerServing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "nutritionKcalTotal": "{count} kcal 合計",
-  "@nutritionKcalTotal": {"placeholders": {"count": {"type": "int"}}},
-
+  "@nutritionKcalTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqAddHeadersStep1Desc": "レシピを開き、編集アイコンをタップします。",
   "faqAddHeadersStep1Title": "レシピエディターを開く",
   "faqAddHeadersStep2Desc": "「ヘッダーを追加」ボタンをタップして、セクションヘッダーを挿入します。",
@@ -3434,7 +3452,6 @@
   "faqAddHeadersStep6Title": "完了！",
   "faqAddHeadersSubtitle": "レシピの材料と手順をセクションに整理する",
   "faqAddHeadersTitle": "ヘッダーの追加方法",
-
   "faqAddSublinkedStep1Desc": "レシピを開き、編集アイコンをタップします。",
   "faqAddSublinkedStep1Title": "レシピエディターを開く",
   "faqAddSublinkedStep2Desc": "編集画面で三点メニュー（⋮）をタップします。",
@@ -3449,7 +3466,6 @@
   "faqAddSublinkedStep6Title": "完了！",
   "faqAddSublinkedSubtitle": "関連レシピをリンクしてすぐにアクセス",
   "faqAddSublinkedTitle": "サブリンクレシピの追加方法",
-
   "faqCommonQuestions": "よくある質問",
   "faqDeviceTransferAnswer": "はい！設定 > データ > デバイス間転送の「デバイス間転送」機能を使用してください。古いデバイスでコードを生成し、新しいデバイスで入力します。すべてのレシピ、クックブック、画像が転送されます。",
   "faqDeviceTransferSubtitle": "スマートフォンやタブレット間でレシピを転送",
@@ -3462,7 +3478,13 @@
   "faqImportFailedTitle": "インポートが失敗したのはなぜ？",
   "faqSeeHowTo": "ハウツーガイドを見る",
   "faqStepsCount": "{count}ステップ",
-  "@faqStepsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@faqStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqTitle": "FAQ",
   "faqWhatAreHeadersAnswer": "ヘッダーを使うと、レシピの材料や手順をセクションに分けることができます。例えば、ピザのレシピで「ソース」「生地」「トッピング」のように別々のセクションを作れます。長いレシピがとても見やすくなります。",
   "faqWhatAreHeadersSubtitle": "レシピをセクションに整理",
@@ -3470,7 +3492,6 @@
   "faqWhatAreSublinkedAnswer": "サブリンクレシピを使うと、関連するレシピ同士をリンクできます。例えば、マルゲリータピザのレシピからピザ生地のレシピにリンクできます。メインレシピを表示中にリンクされたレシピをタップすると、すぐに移動できます — 検索不要です。",
   "faqWhatAreSublinkedSubtitle": "関連レシピを繋げる",
   "faqWhatAreSublinkedTitle": "サブリンクレシピとは？",
-
   "importGuideAiStep1Desc": "ホームに移動し、+をタップしてレシピを追加、インポートを選択してからAIボタンをタップします。",
   "importGuideAiStep1Title": "AIインポートを開く",
   "importGuideAiStep2Desc": "プロンプトコピーボタンをタップします。次にお好みのAI — ChatGPT、Claude、Geminiなど — を開いてプロンプトを貼り付けます。",
@@ -3485,7 +3506,6 @@
   "importGuideAiTitle": "AI（ChatGPT、Claudeなど）",
   "importGuideCategoryAi": "AIインポート",
   "importGuideTagNew": "新機能",
-
   "settingsNotifManagePreferences": "通知設定を管理",
   "settingsNotifNewDownloads": "新しいダウンロード",
   "settingsNotifNewDownloadsSubtitle": "公開したレシピを誰かがダウンロードした時",
@@ -3494,7 +3514,6 @@
   "settingsNotifComments": "コメント",
   "settingsNotifCommentsSubtitle": "レシピに誰かがコメントした時",
   "settingsNotifSyncNote": "通知設定はアカウントと同期されます。",
-
   "accountStoreFallback": "ストア",
   "appearanceCustomThemeRequiresPremium": "カスタムテーマにはプレミアムが必要です",
   "appearancePremiumBadge": "プレミアム",
@@ -3515,7 +3534,7 @@
   "customThemePrimaryDesc": "ボタン、ハイライト、アプリバー",
   "customThemeStartFromPreset": "プリセットから開始",
   "customThemeTitle": "カスタムテーマ",
-  "drawerProTier": "Pro \u00b7 {tier}",
+  "drawerProTier": "Pro · {tier}",
   "@drawerProTier": {
     "placeholders": {
       "tier": {
@@ -3580,10 +3599,10 @@
   "shareCreateFailed": "リンクの作成に失敗しました",
   "shareFamilyCreateJoin": "共有するには家族を作成または参加してください",
   "shareFamilyRequiresCloudSync": "Cloud Syncサブスクリプションが必要です",
-  "shareFamilySetupInSettings": "設定 \u2192 ファミリー共有で家族を作成または参加",
+  "shareFamilySetupInSettings": "設定 → ファミリー共有で家族を作成または参加",
   "shareFamilyShare": "ファミリー共有",
   "shareFamilySignIn": "ファミリー共有を利用するにはサインインしてください",
-  "shareFamilySyncSubtitle": "リアルタイム同期 \u00b7 メンバーごとの権限",
+  "shareFamilySyncSubtitle": "リアルタイム同期 · メンバーごとの権限",
   "shareFamilyUpgradeMessage": "Cloud Syncにアップグレードして、レシピブックやリストを家族とリアルタイムで共有しましょう。",
   "shareGenerateLink": "リンクを生成",
   "shareLinkCopied": "リンクをコピーしました！",
@@ -3597,7 +3616,7 @@
   },
   "shareNoFamilyMembers": "共有できる家族メンバーがいません",
   "shareOneTimeLink": "ワンタイムリンク",
-  "shareOneTimeLinkSubtitle": "無料 \u2022 24時間有効 \u2022 閲覧/ダウンロードのみ",
+  "shareOneTimeLinkSubtitle": "無料 • 24時間有効 • 閲覧/ダウンロードのみ",
   "sharePermAddItems": "アイテムの追加、自分のものの編集が可能",
   "sharePermAddOnly": "追加のみ",
   "sharePermAddRecipes": "新しいレシピの追加が可能",
@@ -3625,7 +3644,7 @@
   "shareUnknownMember": "不明",
   "shareUpgrade": "アップグレード",
   "shareWith": "共有先",
-  "subscriptionCancelledUntil": "キャンセル済み \u2014 {date}までアクセス可能",
+  "subscriptionCancelledUntil": "キャンセル済み — {date}までアクセス可能",
   "@subscriptionCancelledUntil": {
     "placeholders": {
       "date": {
@@ -3633,7 +3652,7 @@
       }
     }
   },
-  "subscriptionLifetime": "永久 \u2014 期限なし",
+  "subscriptionLifetime": "永久 — 期限なし",
   "subscriptionManage": "サブスクリプション管理",
   "subscriptionNoPurchases": "過去の購入が見つかりませんでした。",
   "subscriptionPlan": "プラン",
@@ -3656,7 +3675,7 @@
   "subscriptionUpgradeToUnlock": "Proにアップグレードして解除",
   "subscriptionViewPlans": "プランを見る",
   "substitutionsAll": "すべて",
-  "substitutionsCount": "{count}件の代用品 \u2022 {category}",
+  "substitutionsCount": "{count}件の代用品 • {category}",
   "@substitutionsCount": {
     "placeholders": {
       "count": {
@@ -3676,5 +3695,25 @@
   "tierCreatorName": "クリエイター",
   "tierFamily": "FAMILY",
   "tierFreeName": "無料",
-  "tierPremiumName": "プレミアム"
+  "tierPremiumName": "プレミアム",
+  "customThemeLightMode": "ライト",
+  "customThemeDarkMode": "ダーク",
+  "customThemeLivePreview": "ライブプレビュー",
+  "customThemeLinkedOverlay": "{mode}テーマから自動生成されます",
+  "customThemeUnlockButton": "色をカスタマイズ",
+  "customThemeLinkButton": "{mode}にリンク",
+  "@customThemeLinkedOverlay": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@customThemeLinkButton": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  }
 }

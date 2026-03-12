@@ -191,10 +191,10 @@ class _FamilyScreenState extends State<FamilyScreen> {
                     Expanded(
                       child: FilledButton.icon(
                         onPressed: () {
-                          Share.share(
-                            l10n.familyShareMessage(info.inviteCode, info.shareLink),
+                          SharePlus.instance.share(ShareParams(
+                            text: l10n.familyShareMessage(info.inviteCode, info.shareLink),
                             subject: l10n.familyShareSubject,
-                          );
+                          ));
                         },
                         icon: const Icon(Icons.share, size: 18),
                         label: Text(l10n.actionShare),

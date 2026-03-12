@@ -11719,6 +11719,12 @@ abstract class AppLocalizations {
   /// **'Spellbook'**
   String get splashSpellbook;
 
+  /// No description provided for @splashTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Your culinary adventure awaits'**
+  String get splashTagline;
+
   /// No description provided for @smartImportReparsed.
   ///
   /// In en, this message translates to:
@@ -14652,6 +14658,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start from a preset'**
   String get customThemeStartFromPreset;
+
+  /// No description provided for @customThemeLightMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get customThemeLightMode;
+
+  /// No description provided for @customThemeDarkMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get customThemeDarkMode;
+
+  /// No description provided for @customThemeLinkedOverlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Colors are auto-generated from your {mode} theme'**
+  String customThemeLinkedOverlay(String mode);
+
+  /// No description provided for @customThemeUnlockButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize colors'**
+  String get customThemeUnlockButton;
+
+  /// No description provided for @customThemeLinkButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Link to {mode}'**
+  String customThemeLinkButton(String mode);
+
+  /// No description provided for @customThemeLivePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Live Preview'**
+  String get customThemeLivePreview;
 
   /// No description provided for @settingsUserFallback.
   ///

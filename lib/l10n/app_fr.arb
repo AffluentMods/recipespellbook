@@ -2127,6 +2127,7 @@
   "mealPlanDateFormat": "{weekday} {day} {month}",
   "splashRecipe": "Recette",
   "splashSpellbook": "Grimoire",
+  "splashTagline": "Votre aventure culinaire vous attend",
   "smartImportReparsed": "Ré-analysé par l'IA — vérifiez la recette mise à jour ci-dessus",
   "servingSizeHint": "ex. 1 tasse, 100g",
   "mainNutrients": "Nutriments principaux",
@@ -2368,7 +2369,13 @@
   "allergyNoDisabledSubtitle": "Lorsque vous désactivez les avertissements d'allergie sur les recettes, ils apparaîtront ici pour que vous puissiez les restaurer.",
   "allergyDisabledInfo": "Ces recettes ont leurs avertissements d'allergie désactivés. Appuyez pour restaurer.",
   "trashRestoredMessage": "\"{title}\" restauré(e)",
-  "@trashRestoredMessage": {"placeholders": {"title": {"type": "String"}}},
+  "@trashRestoredMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "nutrientCalories": "Calories",
   "nutrientTotalFat": "Lipides totaux",
   "nutrientSaturatedFat": "Graisses saturées",
@@ -2409,9 +2416,21 @@
   "nutrientCarbs": "Glucides",
   "nutrientFat": "Lipides",
   "nutritionKcalPerServing": "{count} kcal par portion",
-  "@nutritionKcalPerServing": {"placeholders": {"count": {"type": "int"}}},
+  "@nutritionKcalPerServing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "nutritionKcalTotal": "{count} kcal au total",
-  "@nutritionKcalTotal": {"placeholders": {"count": {"type": "int"}}},
+  "@nutritionKcalTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqAddHeadersStep1Desc": "Ouvrez une recette et appuyez sur l'icône de modification.",
   "faqAddHeadersStep1Title": "Ouvrir l'éditeur de recette",
   "faqAddHeadersStep2Desc": "Appuyez sur « Ajouter un en-tête » pour insérer un en-tête de section.",
@@ -2453,7 +2472,13 @@
   "faqImportFailedTitle": "Pourquoi mon importation a-t-elle échoué ?",
   "faqSeeHowTo": "Voir le guide",
   "faqStepsCount": "{count} étapes",
-  "@faqStepsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@faqStepsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "faqTitle": "FAQ",
   "faqWhatAreHeadersAnswer": "Les en-têtes vous permettent de diviser les ingrédients et les étapes de votre recette en sections. Par exemple, vous pouvez avoir des sections séparées pour « Sauce », « Pâte » et « Garniture » dans une recette de pizza. Ils rendent les longues recettes beaucoup plus faciles à suivre.",
   "faqWhatAreHeadersSubtitle": "Organisez les recettes en sections",
@@ -2483,7 +2508,6 @@
   "settingsNotifComments": "Commentaires",
   "settingsNotifCommentsSubtitle": "Quand quelqu'un commente votre recette",
   "settingsNotifSyncNote": "Les préférences de notifications sont synchronisées avec votre compte.",
-
   "accountStoreFallback": "Boutique",
   "appearanceCustomThemeRequiresPremium": "Le thème personnalisé nécessite Premium",
   "appearancePremiumBadge": "Premium",
@@ -2504,7 +2528,7 @@
   "customThemePrimaryDesc": "Boutons, mises en avant, barre d'app",
   "customThemeStartFromPreset": "Partir d'un preset",
   "customThemeTitle": "Thème personnalisé",
-  "drawerProTier": "Pro \u00b7 {tier}",
+  "drawerProTier": "Pro · {tier}",
   "@drawerProTier": {
     "placeholders": {
       "tier": {
@@ -2569,10 +2593,10 @@
   "shareCreateFailed": "Échec de la création du lien",
   "shareFamilyCreateJoin": "Créez ou rejoignez une famille pour partager",
   "shareFamilyRequiresCloudSync": "Nécessite un abonnement Cloud Sync",
-  "shareFamilySetupInSettings": "Créez ou rejoignez une famille dans Réglages \u2192 Partage familial",
+  "shareFamilySetupInSettings": "Créez ou rejoignez une famille dans Réglages → Partage familial",
   "shareFamilyShare": "Partage familial",
   "shareFamilySignIn": "Connectez-vous pour utiliser le partage familial",
-  "shareFamilySyncSubtitle": "Synchronisation en temps réel \u00b7 Permissions par membre",
+  "shareFamilySyncSubtitle": "Synchronisation en temps réel · Permissions par membre",
   "shareFamilyUpgradeMessage": "Passez à Cloud Sync pour partager vos livres de recettes et listes avec votre famille en temps réel.",
   "shareGenerateLink": "Générer un lien",
   "shareLinkCopied": "Lien copié !",
@@ -2586,7 +2610,7 @@
   },
   "shareNoFamilyMembers": "Aucun autre membre de la famille à partager",
   "shareOneTimeLink": "Lien à usage unique",
-  "shareOneTimeLinkSubtitle": "Gratuit \u2022 Expire en 24 h \u2022 Consultation/téléchargement uniquement",
+  "shareOneTimeLinkSubtitle": "Gratuit • Expire en 24 h • Consultation/téléchargement uniquement",
   "sharePermAddItems": "Peut ajouter des éléments, modifier les siens",
   "sharePermAddOnly": "Ajout uniquement",
   "sharePermAddRecipes": "Peut ajouter de nouvelles recettes",
@@ -2614,7 +2638,7 @@
   "shareUnknownMember": "Inconnu",
   "shareUpgrade": "Mettre à niveau",
   "shareWith": "Partager avec",
-  "subscriptionCancelledUntil": "Annulé \u2014 accès jusqu'au {date}",
+  "subscriptionCancelledUntil": "Annulé — accès jusqu'au {date}",
   "@subscriptionCancelledUntil": {
     "placeholders": {
       "date": {
@@ -2622,7 +2646,7 @@
       }
     }
   },
-  "subscriptionLifetime": "À vie \u2014 n'expire jamais",
+  "subscriptionLifetime": "À vie — n'expire jamais",
   "subscriptionManage": "Gérer l'abonnement",
   "subscriptionNoPurchases": "Aucun achat précédent trouvé.",
   "subscriptionPlan": "Forfait",
@@ -2645,7 +2669,7 @@
   "subscriptionUpgradeToUnlock": "Passez à Pro pour débloquer",
   "subscriptionViewPlans": "Voir les forfaits",
   "substitutionsAll": "Tous",
-  "substitutionsCount": "{count} substituts \u2022 {category}",
+  "substitutionsCount": "{count} substituts • {category}",
   "@substitutionsCount": {
     "placeholders": {
       "count": {
@@ -2665,5 +2689,25 @@
   "tierCreatorName": "Creator",
   "tierFamily": "FAMILY",
   "tierFreeName": "Gratuit",
-  "tierPremiumName": "Premium"
+  "tierPremiumName": "Premium",
+  "customThemeLightMode": "Clair",
+  "customThemeDarkMode": "Sombre",
+  "customThemeLivePreview": "Aperçu en direct",
+  "customThemeLinkedOverlay": "Les couleurs sont générées automatiquement à partir de votre thème {mode}",
+  "customThemeUnlockButton": "Personnaliser les couleurs",
+  "customThemeLinkButton": "Lier à {mode}",
+  "@customThemeLinkedOverlay": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@customThemeLinkButton": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  }
 }

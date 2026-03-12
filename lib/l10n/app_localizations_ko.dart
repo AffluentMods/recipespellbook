@@ -6335,6 +6335,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get splashSpellbook => '마법서';
 
   @override
+  String get splashTagline => '당신의 요리 모험이 기다립니다';
+
+  @override
   String get smartImportReparsed => 'AI가 다시 분석했습니다 — 위의 업데이트된 레시피를 확인하세요';
 
   @override
@@ -7894,6 +7897,28 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get customThemeStartFromPreset => '프리셋에서 시작';
+
+  @override
+  String get customThemeLightMode => '라이트';
+
+  @override
+  String get customThemeDarkMode => '다크';
+
+  @override
+  String customThemeLinkedOverlay(String mode) {
+    return '$mode 테마에서 자동 생성됩니다';
+  }
+
+  @override
+  String get customThemeUnlockButton => '색상 사용자 지정';
+
+  @override
+  String customThemeLinkButton(String mode) {
+    return '$mode에 연결';
+  }
+
+  @override
+  String get customThemeLivePreview => '실시간 미리보기';
 
   @override
   String get settingsUserFallback => '사용자';

@@ -6375,6 +6375,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get splashSpellbook => 'Grimoire';
 
   @override
+  String get splashTagline => 'Votre aventure culinaire vous attend';
+
+  @override
   String get smartImportReparsed => 'Ré-analysé par l\'IA — vérifiez la recette mise à jour ci-dessus';
 
   @override
@@ -7934,6 +7937,28 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get customThemeStartFromPreset => 'Partir d\'un preset';
+
+  @override
+  String get customThemeLightMode => 'Clair';
+
+  @override
+  String get customThemeDarkMode => 'Sombre';
+
+  @override
+  String customThemeLinkedOverlay(String mode) {
+    return 'Les couleurs sont générées automatiquement à partir de votre thème $mode';
+  }
+
+  @override
+  String get customThemeUnlockButton => 'Personnaliser les couleurs';
+
+  @override
+  String customThemeLinkButton(String mode) {
+    return 'Lier à $mode';
+  }
+
+  @override
+  String get customThemeLivePreview => 'Aperçu en direct';
 
   @override
   String get settingsUserFallback => 'Utilisateur';

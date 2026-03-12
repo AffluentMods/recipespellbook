@@ -92,11 +92,15 @@ class _TagChip extends StatelessWidget {
               Icon(_parseIcon(tag.icon!), size: 12, color: tagColor),
               const SizedBox(width: 4),
             ],
-            Text(
-              tag.name,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: tagColor,
-                fontWeight: FontWeight.w500,
+            Flexible(
+              child: Text(
+                tag.name,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: tagColor,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -118,11 +122,15 @@ class _TagChip extends StatelessWidget {
             Icon(_parseIcon(tag.icon!), size: 14, color: tagColor),
             const SizedBox(width: 6),
           ],
-          Text(
-            tag.name,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: tagColor,
-              fontWeight: FontWeight.w500,
+          Flexible(
+            child: Text(
+              tag.name,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: tagColor,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

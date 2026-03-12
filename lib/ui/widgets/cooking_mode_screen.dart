@@ -692,7 +692,7 @@ class _IngredientsView extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             margin: const EdgeInsets.only(bottom: 8),
-            decoration: BoxDecoration(color: Colors.white.withOpacity(isChecked ? 0.05 : 0.1), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(color: Colors.white.withValues(alpha: isChecked ? 0.05 : 0.1), borderRadius: BorderRadius.circular(8)),
             child: Row(
               children: [
                 Icon(isChecked ? Icons.check_circle : Icons.circle_outlined, color: isChecked ? Colors.green : Colors.white.withValues(alpha: 0.5)),

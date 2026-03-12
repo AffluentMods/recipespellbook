@@ -313,7 +313,16 @@ class NutritionCalculator {
       'cracked pepper', 'peppercorn', 'peppercorns',
     };
 
-    if (!negligibleSeasonings.contains(lower)) return false;
+    // Strip descriptive suffixes: "salt, for pasta water" → "salt"
+    // Also handles "salt (for pasta water)", "salt - to finish"
+    final stripped = lower
+        .replaceAll(RegExp(r',?\s+for\s+.+$'), '')
+        .replaceAll(RegExp(r'\s*\(.*\)'), '')
+        .replaceAll(RegExp(r',?\s+-\s+.+$'), '')
+        .trim();
+
+    if (!negligibleSeasonings.contains(lower) &&
+        !negligibleSeasonings.contains(stripped)) return false;
 
     // If no amount or small amounts (pinch, tsp, tbsp, dash) → negligible
     if (amount == null || amount.isEmpty) return true;

@@ -6375,6 +6375,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get splashSpellbook => 'Grimorio';
 
   @override
+  String get splashTagline => 'La tua avventura culinaria ti aspetta';
+
+  @override
   String get smartImportReparsed => 'Ri-analizzato dall\'IA — controlla la ricetta aggiornata sopra';
 
   @override
@@ -7934,6 +7937,28 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get customThemeStartFromPreset => 'Parti da un preset';
+
+  @override
+  String get customThemeLightMode => 'Chiaro';
+
+  @override
+  String get customThemeDarkMode => 'Scuro';
+
+  @override
+  String customThemeLinkedOverlay(String mode) {
+    return 'I colori vengono generati automaticamente dal tema $mode';
+  }
+
+  @override
+  String get customThemeUnlockButton => 'Personalizza colori';
+
+  @override
+  String customThemeLinkButton(String mode) {
+    return 'Collega a $mode';
+  }
+
+  @override
+  String get customThemeLivePreview => 'Anteprima dal vivo';
 
   @override
   String get settingsUserFallback => 'Utente';

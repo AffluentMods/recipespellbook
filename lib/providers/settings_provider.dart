@@ -82,6 +82,12 @@ class AppSettings {
   final Color? customPrimaryColor;
   final Color? customAccentColor;
 
+  // Custom dark theme (separate from light when unlinked)
+  final bool customDarkLinked;          // true = auto-derive dark from light
+  final Color? customDarkBgColor;
+  final Color? customDarkPrimaryColor;
+  final Color? customDarkAccentColor;
+
   /// Default nutrients shown in the nutrition widget
   static const Set<String> defaultEnabledNutrients = {
     'calories', 'protein', 'carbohydrates', 'fat', 'fiber', 'sugar', 'sodium',
@@ -113,6 +119,10 @@ class AppSettings {
     this.customBgColor,
     this.customPrimaryColor,
     this.customAccentColor,
+    this.customDarkLinked = true,
+    this.customDarkBgColor,
+    this.customDarkPrimaryColor,
+    this.customDarkAccentColor,
     Set<String>? enabledNutrients,
   }) : seedColor = appTheme.seedColor,
         enabledNutrients = enabledNutrients ?? defaultEnabledNutrients;
@@ -144,6 +154,10 @@ class AppSettings {
     Color? customBgColor,
     Color? customPrimaryColor,
     Color? customAccentColor,
+    bool? customDarkLinked,
+    Color? customDarkBgColor,
+    Color? customDarkPrimaryColor,
+    Color? customDarkAccentColor,
   }) {
     return AppSettings(
       appTheme: appTheme ?? this.appTheme,
@@ -172,6 +186,10 @@ class AppSettings {
       customBgColor: customBgColor ?? this.customBgColor,
       customPrimaryColor: customPrimaryColor ?? this.customPrimaryColor,
       customAccentColor: customAccentColor ?? this.customAccentColor,
+      customDarkLinked: customDarkLinked ?? this.customDarkLinked,
+      customDarkBgColor: customDarkBgColor ?? this.customDarkBgColor,
+      customDarkPrimaryColor: customDarkPrimaryColor ?? this.customDarkPrimaryColor,
+      customDarkAccentColor: customDarkAccentColor ?? this.customDarkAccentColor,
     );
   }
 }
@@ -253,6 +271,10 @@ class SettingsNotifier extends Notifier<AppSettings> {
   static const _customBgKey = 'custom_theme_bg';
   static const _customPrimaryKey = 'custom_theme_primary';
   static const _customAccentKey = 'custom_theme_accent';
+  static const _customDarkLinkedKey = 'custom_theme_dark_linked';
+  static const _customDarkBgKey = 'custom_theme_dark_bg';
+  static const _customDarkPrimaryKey = 'custom_theme_dark_primary';
+  static const _customDarkAccentKey = 'custom_theme_dark_accent';
 
   @override
   AppSettings build() {
@@ -387,6 +409,13 @@ class SettingsNotifier extends Notifier<AppSettings> {
     final customBgColor = customBgInt != null ? Color(customBgInt) : null;
     final customPrimaryColor = customPrimaryInt != null ? Color(customPrimaryInt) : null;
     final customAccentColor = customAccentInt != null ? Color(customAccentInt) : null;
+    final customDarkLinked = prefs.getBool(_customDarkLinkedKey) ?? true;
+    final customDarkBgInt = prefs.getInt(_customDarkBgKey);
+    final customDarkPrimaryInt = prefs.getInt(_customDarkPrimaryKey);
+    final customDarkAccentInt = prefs.getInt(_customDarkAccentKey);
+    final customDarkBgColor = customDarkBgInt != null ? Color(customDarkBgInt) : null;
+    final customDarkPrimaryColor = customDarkPrimaryInt != null ? Color(customDarkPrimaryInt) : null;
+    final customDarkAccentColor = customDarkAccentInt != null ? Color(customDarkAccentInt) : null;
 
     state = AppSettings(
       appTheme: appTheme,
@@ -415,6 +444,10 @@ class SettingsNotifier extends Notifier<AppSettings> {
       customBgColor: customBgColor,
       customPrimaryColor: customPrimaryColor,
       customAccentColor: customAccentColor,
+      customDarkLinked: customDarkLinked,
+      customDarkBgColor: customDarkBgColor,
+      customDarkPrimaryColor: customDarkPrimaryColor,
+      customDarkAccentColor: customDarkAccentColor,
     );
   }
 
@@ -464,7 +497,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
     state = state.copyWith(appTheme: theme);
   }
 
-  /// Save custom theme colors and activate the custom theme.
+  /// Save custom light theme colors and activate the custom theme.
   Future<void> setCustomColors(Color bg, Color primary, Color accent) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_customBgKey, bg.toARGB32());
@@ -477,6 +510,26 @@ class SettingsNotifier extends Notifier<AppSettings> {
       customPrimaryColor: primary,
       customAccentColor: accent,
     );
+  }
+
+  /// Save custom dark theme colors (only used when dark is unlinked).
+  Future<void> setCustomDarkColors(Color bg, Color primary, Color accent) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_customDarkBgKey, bg.toARGB32());
+    await prefs.setInt(_customDarkPrimaryKey, primary.toARGB32());
+    await prefs.setInt(_customDarkAccentKey, accent.toARGB32());
+    state = state.copyWith(
+      customDarkBgColor: bg,
+      customDarkPrimaryColor: primary,
+      customDarkAccentColor: accent,
+    );
+  }
+
+  /// Toggle whether dark mode is linked (auto-derived) or independent.
+  Future<void> setCustomDarkLinked(bool linked) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_customDarkLinkedKey, linked);
+    state = state.copyWith(customDarkLinked: linked);
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
@@ -692,14 +745,31 @@ final customThemePalettesProvider = Provider<({ThemePalette light, ThemePalette 
     final primary = settings.customPrimaryColor ?? const Color(0xFF6750A4);
     final accent = settings.customAccentColor ?? const Color(0xFF7D5260);
 
-    return (
-      light: ThemePalette.deriveFrom(bg: bg, primary: primary, accent: accent, isDark: false),
-      dark: ThemePalette.deriveFrom(
+    final ThemePalette darkPalette;
+    if (!settings.customDarkLinked &&
+        settings.customDarkBgColor != null &&
+        settings.customDarkPrimaryColor != null &&
+        settings.customDarkAccentColor != null) {
+      // Independent dark colors
+      darkPalette = ThemePalette.deriveFrom(
+        bg: settings.customDarkBgColor!,
+        primary: settings.customDarkPrimaryColor!,
+        accent: settings.customDarkAccentColor!,
+        isDark: true,
+      );
+    } else {
+      // Auto-derive dark from light
+      darkPalette = ThemePalette.deriveFrom(
         bg: _darkenForDark(bg),
         primary: _lightenForDark(primary),
         accent: _lightenForDark(accent),
         isDark: true,
-      ),
+      );
+    }
+
+    return (
+      light: ThemePalette.deriveFrom(bg: bg, primary: primary, accent: accent, isDark: false),
+      dark: darkPalette,
     );
   },
 );

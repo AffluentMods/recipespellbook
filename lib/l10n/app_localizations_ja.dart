@@ -6335,6 +6335,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get splashSpellbook => '魔法書';
 
   @override
+  String get splashTagline => 'あなたの料理の冒険が待っています';
+
+  @override
   String get smartImportReparsed => 'AIが再解析しました — 上の更新されたレシピを確認してください';
 
   @override
@@ -7894,6 +7897,28 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get customThemeStartFromPreset => 'プリセットから開始';
+
+  @override
+  String get customThemeLightMode => 'ライト';
+
+  @override
+  String get customThemeDarkMode => 'ダーク';
+
+  @override
+  String customThemeLinkedOverlay(String mode) {
+    return '$modeテーマから自動生成されます';
+  }
+
+  @override
+  String get customThemeUnlockButton => '色をカスタマイズ';
+
+  @override
+  String customThemeLinkButton(String mode) {
+    return '$modeにリンク';
+  }
+
+  @override
+  String get customThemeLivePreview => 'ライブプレビュー';
 
   @override
   String get settingsUserFallback => 'ユーザー';

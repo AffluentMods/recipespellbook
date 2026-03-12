@@ -186,9 +186,35 @@ class _CookbookGrid extends ConsumerWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
+    if (cookbooks.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.menu_book_rounded, size: 64, color: theme.colorScheme.outline.withValues(alpha: 0.4)),
+              const SizedBox(height: 16),
+              Text(
+                l10n.cookbooksEmpty,
+                style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.cookbookHint,
+                style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Column(
       children: [
-        // Hint text at top - FIXED: Using Expanded + overflow handling
+        // Hint text at top
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -443,7 +469,7 @@ class _CookbookGrid extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(child: FilledButton.icon(
                   onPressed: () {
-                    Share.share(link.url, subject: 'Shared from Recipe Spellbook');
+                    SharePlus.instance.share(ShareParams(text: link.url, subject: 'Shared from Recipe Spellbook'));
                   },
                   icon: const Icon(Icons.share, size: 18),
                   label: Text(l10n.actionShare),

@@ -363,6 +363,8 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     _FavoriteButton(isFavorite: _recipe!.isFavorite, onToggle: _toggleFavorite),
@@ -487,6 +489,8 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     _FavoriteButton(isFavorite: _recipe!.isFavorite, onToggle: _toggleFavorite),

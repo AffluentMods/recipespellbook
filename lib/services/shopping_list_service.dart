@@ -160,16 +160,16 @@ class ShoppingListService {
     final file = File(p.join(dir.path, filename));
     await file.writeAsString(content);
 
-    await Share.shareXFiles(
-      [XFile(file.path)],
+    await SharePlus.instance.share(ShareParams(
+      files: [XFile(file.path)],
       subject: 'Shopping List',
-    );
+    ));
   }
 
   /// Share list as plain text via OS share sheet
   Future<void> shareAsText(String listId) async {
     final text = await exportAsText(listId);
-    await Share.share(text, subject: 'Shopping List');
+    await SharePlus.instance.share(ShareParams(text: text, subject: 'Shopping List'));
   }
 
   /// Import list from JSON (exported by another Recipe Spellbook user)
