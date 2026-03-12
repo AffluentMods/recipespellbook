@@ -376,15 +376,82 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ));
   }
 
-  /// Local data: single confirmation with type-DELETE (recoverable via cloud sync).
+  /// Local data deletion.
+  /// - With cloud sync: simple type-DELETE (data recoverable from cloud).
+  /// - Without cloud sync (free tier): double-checkbox warning first,
+  ///   because this is ALL their data with no way to get it back.
   void _showLocalResetConfirmation(BuildContext context, WidgetRef ref) {
+    final hasCloud = ref.read(subscriptionProvider).hasCloudSync;
+    if (hasCloud) {
+      _showTypeDeleteConfirmation(context, ref, _ResetScope.local);
+    } else {
+      _showLocalNoCloudWarning(context, ref);
+    }
+  }
+
+  /// Free-tier local delete — SCREEN 1: Checkbox acknowledgments.
+  /// Without cloud sync this deletes everything with no recovery.
+  void _showLocalNoCloudWarning(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final check1 = ValueNotifier(false);
+    final check2 = ValueNotifier(false);
+    showDialog<void>(context: context, builder: (context) {
+      final theme = Theme.of(context);
+      final errorColor = theme.colorScheme.error;
+      return AlertDialog(
+        icon: Icon(Icons.warning_amber_rounded, size: 48, color: errorColor),
+        title: Text(l10n.allDataWarningTitle),
+        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          _DeleteBullet(icon: Icons.phone_android, text: l10n.allDataWarningLocalData),
+          const SizedBox(height: 6),
+          _DeleteBullet(icon: Icons.settings, text: l10n.allDataWarningSettings),
+          const SizedBox(height: 6),
+          _DeleteBullet(icon: Icons.cloud_off, text: l10n.localNoCloudWarning),
+          const SizedBox(height: 20),
+          ValueListenableBuilder<bool>(valueListenable: check1, builder: (_, v, __) =>
+            CheckboxListTile(
+              value: v, onChanged: (val) => check1.value = val ?? false,
+              title: Text(l10n.allDataIUnderstand, style: theme.textTheme.bodySmall),
+              controlAffinity: ListTileControlAffinity.leading,
+              dense: true, contentPadding: EdgeInsets.zero,
+              activeColor: errorColor,
+            ),
+          ),
+          ValueListenableBuilder<bool>(valueListenable: check2, builder: (_, v, __) =>
+            CheckboxListTile(
+              value: v, onChanged: (val) => check2.value = val ?? false,
+              title: Text(l10n.allDataNoUndo, style: theme.textTheme.bodySmall),
+              controlAffinity: ListTileControlAffinity.leading,
+              dense: true, contentPadding: EdgeInsets.zero,
+              activeColor: errorColor,
+            ),
+          ),
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
+          ListenableBuilder(listenable: Listenable.merge([check1, check2]), builder: (context, _) {
+            final ok = check1.value && check2.value;
+            return FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: errorColor),
+              onPressed: ok ? () { Navigator.pop(context); _showTypeDeleteConfirmation(context, ref, _ResetScope.local); } : null,
+              child: Text(l10n.actionContinue),
+            );
+          }),
+        ],
+      );
+    }).then((_) { check1.dispose(); check2.dispose(); });
+  }
+
+  /// Simple type-DELETE confirmation screen (used by both local+cloud and all-data flows).
+  void _showTypeDeleteConfirmation(BuildContext context, WidgetRef ref, _ResetScope scope) {
     final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
+    final scopeLabel = switch (scope) { _ResetScope.local => l10n.resetScopeLocal, _ResetScope.all => l10n.resetScopeAll };
     showDialog<void>(context: context, builder: (context) => AlertDialog(
-      icon: Icon(Icons.phone_android, size: 48, color: Theme.of(context).colorScheme.error),
+      icon: Icon(Icons.delete_forever, size: 48, color: Theme.of(context).colorScheme.error),
       title: Text(l10n.finalConfirmation),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        Text(l10n.permanentlyDeleteWarning(l10n.resetScopeLocal)), const SizedBox(height: 16),
+        Text(l10n.permanentlyDeleteWarning(scopeLabel)), const SizedBox(height: 16),
         Text(l10n.typeDeleteToConfirm, style: const TextStyle(fontWeight: FontWeight.bold)), const SizedBox(height: 16),
         TextField(controller: controller, decoration: InputDecoration(hintText: l10n.typeDeleteHint, border: const OutlineInputBorder()), textCapitalization: TextCapitalization.characters, autofocus: true),
       ]),
@@ -392,7 +459,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
         ListenableBuilder(listenable: controller, builder: (context, _) {
           final ok = controller.text.toUpperCase() == l10n.typeDeleteHint.toUpperCase();
-          return FilledButton(style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error), onPressed: ok ? () => _performReset(context, ref, l10n, _ResetScope.local) : null, child: Text(l10n.actionDelete));
+          return FilledButton(style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error), onPressed: ok ? () => _performReset(context, ref, l10n, scope) : null, child: Text(l10n.actionDelete));
         }),
       ],
     )).then((_) => controller.dispose());
@@ -445,35 +512,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             final ok = check1.value && check2.value;
             return FilledButton(
               style: FilledButton.styleFrom(backgroundColor: errorColor),
-              onPressed: ok ? () { Navigator.pop(context); _showAllDataFinalConfirmation(context, ref); } : null,
+              onPressed: ok ? () { Navigator.pop(context); _showTypeDeleteConfirmation(context, ref, _ResetScope.all); } : null,
               child: Text(l10n.actionContinue),
             );
           }),
         ],
       );
     }).then((_) { check1.dispose(); check2.dispose(); });
-  }
-
-  /// All data — SCREEN 2: Type DELETE to confirm.
-  void _showAllDataFinalConfirmation(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController();
-    showDialog<void>(context: context, builder: (context) => AlertDialog(
-      icon: Icon(Icons.delete_forever, size: 48, color: Theme.of(context).colorScheme.error),
-      title: Text(l10n.finalConfirmation),
-      content: Column(mainAxisSize: MainAxisSize.min, children: [
-        Text(l10n.permanentlyDeleteWarning(l10n.resetScopeAll)), const SizedBox(height: 16),
-        Text(l10n.typeDeleteToConfirm, style: const TextStyle(fontWeight: FontWeight.bold)), const SizedBox(height: 16),
-        TextField(controller: controller, decoration: InputDecoration(hintText: l10n.typeDeleteHint, border: const OutlineInputBorder()), textCapitalization: TextCapitalization.characters, autofocus: true),
-      ]),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
-        ListenableBuilder(listenable: controller, builder: (context, _) {
-          final ok = controller.text.toUpperCase() == l10n.typeDeleteHint.toUpperCase();
-          return FilledButton(style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error), onPressed: ok ? () => _performReset(context, ref, l10n, _ResetScope.all) : null, child: Text(l10n.actionDelete));
-        }),
-      ],
-    )).then((_) => controller.dispose());
   }
 
   Future<void> _performReset(BuildContext context, WidgetRef ref, AppLocalizations l10n, _ResetScope scope) async {

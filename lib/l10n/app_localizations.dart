@@ -6811,6 +6811,12 @@ abstract class AppLocalizations {
   /// **'I understand this action cannot be undone'**
   String get allDataNoUndo;
 
+  /// No description provided for @localNoCloudWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have Cloud Sync — there is no backup to recover from'**
+  String get localNoCloudWarning;
+
   /// No description provided for @permanentDeleteWarning.
   ///
   /// In en, this message translates to:

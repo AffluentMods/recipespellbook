@@ -3641,6 +3641,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get allDataNoUndo => 'I understand this action cannot be undone';
 
   @override
+  String get localNoCloudWarning => 'You don\'t have Cloud Sync — there is no backup to recover from';
+
+  @override
   String permanentDeleteWarning(String scope) {
     return 'Cela supprimera définitivement $scope. Cette action est irréversible.';
   }

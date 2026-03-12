@@ -1712,6 +1712,7 @@
   "allDataWarningSettings": "All app settings and preferences",
   "allDataIUnderstand": "I understand this will permanently delete all my data",
   "allDataNoUndo": "I understand this action cannot be undone",
+  "localNoCloudWarning": "You don't have Cloud Sync — there is no backup to recover from",
   "permanentDeleteWarning": "This will permanently delete {scope}. This cannot be undone.",
   "@permanentDeleteWarning": {
     "placeholders": {
