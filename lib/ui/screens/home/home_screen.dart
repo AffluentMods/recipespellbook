@@ -1156,14 +1156,8 @@ class _EmptyCookbookState extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             FilledButton.icon(
-              onPressed: () => context.push('/import/url'),
-              icon: const Icon(Icons.link),
-              label: Text(l10n.importFromURL),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
               onPressed: () => showNewRecipeDialog(context, cookbookId),
-              icon: const Icon(Icons.edit),
+              icon: const Icon(Icons.add),
               label: Text(l10n.recipeAdd),
             ),
           ],
