@@ -5,6 +5,7 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../widgets/recipe_image.dart';
 
 /// Screen showing all quick access recipes (meal plan + pinned + recent)
@@ -334,17 +335,33 @@ class _MediumGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(12),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.85,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-      ),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        return _MediumCard(item: items[index]);
+    final isDesktop = Responsive.isDesktopLayout(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth;
+        int columns;
+        if (availableWidth >= 1200) {
+          columns = 5;
+        } else if (availableWidth >= 900) {
+          columns = 4;
+        } else if (availableWidth >= 600) {
+          columns = 3;
+        } else {
+          columns = 2;
+        }
+        return GridView.builder(
+          padding: const EdgeInsets.all(12),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columns,
+            childAspectRatio: isDesktop ? 0.75 : 0.85,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+          ),
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            return _MediumCard(item: items[index]);
+          },
+        );
       },
     );
   }

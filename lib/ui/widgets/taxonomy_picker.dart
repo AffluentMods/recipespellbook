@@ -6,6 +6,7 @@ import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/cookbook_provider.dart';
 import '../../providers/database_provider.dart';
+import '../../utils/responsive_utils.dart';
 import 'app_snackbar.dart';
 
 /// A unified item that can be either a built-in or custom course/category
@@ -260,24 +261,24 @@ class _CategoryPickerState extends ConsumerState<CategoryPicker> {
 
 Future<String?> showCoursePickerDialog(BuildContext context, WidgetRef ref, String? currentSelection) {
   final l10n = AppLocalizations.of(context)!;
-  return showModalBottomSheet<String>(
-    context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+  return Responsive.showAdaptiveSheet<String>(
+    context,
     builder: (context) => _TaxonomyPickerSheet(title: l10n.selectCourse, type: _TaxonomyType.course, currentSelection: currentSelection),
   );
 }
 
 Future<String?> showCategoryPickerDialog(BuildContext context, WidgetRef ref, String? currentSelection) {
   final l10n = AppLocalizations.of(context)!;
-  return showModalBottomSheet<String>(
-    context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+  return Responsive.showAdaptiveSheet<String>(
+    context,
     builder: (context) => _TaxonomyPickerSheet(title: l10n.selectCategory, type: _TaxonomyType.category, currentSelection: currentSelection),
   );
 }
 
 /// Multi-select category picker — returns list of selected IDs
 Future<List<String>?> showMultiCategoryPickerDialog(BuildContext context, WidgetRef ref, List<String> currentSelection) {
-  return showModalBottomSheet<List<String>>(
-    context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+  return Responsive.showAdaptiveSheet<List<String>>(
+    context,
     builder: (context) => _MultiCategoryPickerSheet(currentSelection: currentSelection),
   );
 }

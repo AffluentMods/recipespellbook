@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../services/revenuecat_stub.dart' if (dart.library.io) '../../../services/revenuecat_native.dart';
+import '../../../utils/responsive_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/auth_provider.dart';
@@ -754,8 +755,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -847,9 +848,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   void _showCompareSheet(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => DraggableScrollableSheet(
         initialChildSize: 0.85,
         minChildSize: 0.5,

@@ -5,6 +5,7 @@ import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
 import 'app_snackbar.dart';
+import '../../utils/responsive_utils.dart';
 
 /// Model for recipe tags/collections
 class RecipeTag {
@@ -67,12 +68,8 @@ void showManageTagsSheet(
     WidgetRef ref,
     String recipeId,
     ) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
+  Responsive.showAdaptiveSheet(
+    context,
     builder: (ctx) => DraggableScrollableSheet(
       initialChildSize: 0.6,
       minChildSize: 0.4,

@@ -74,7 +74,7 @@ class HomeScreen extends ConsumerWidget {
         }
 
         return Scaffold(
-          body: Responsive.constrainWidth(context, child: CustomScrollView(
+          body: CustomScrollView(
             slivers: [
               // App bar
               SliverAppBar(
@@ -99,7 +99,7 @@ class HomeScreen extends ConsumerWidget {
 
               // Content
               SliverToBoxAdapter(
-                child: StreamBuilder<List<Recipe>>(
+                child: Responsive.constrainWidth(context, child: StreamBuilder<List<Recipe>>(
                   stream: recipeDao.watchAllRecipes(cookbookId),
                   builder: (context, snapshot) {
                     final recipes = snapshot.data ?? [];
@@ -142,10 +142,10 @@ class HomeScreen extends ConsumerWidget {
                       ],
                     );
                   },
-                ),
+                )),
               ),
             ],
-          )),
+          ),
           floatingActionButton: _ModernFAB(
             onPressed: () => showNewRecipeDialog(context, cookbookId),
             label: l10n.recipeAdd,
@@ -1218,9 +1218,8 @@ class _CookbookDropdown extends ConsumerWidget {
     final theme = Theme.of(context);
     final selectedId = ref.read(selectedCookbookIdProvider);
 
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,

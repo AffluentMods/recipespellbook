@@ -7,6 +7,7 @@ import '../../utils/platform_utils.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../services/feature_gate.dart';
+import '../../../utils/responsive_utils.dart';
 import 'recipe_image.dart';
 
 /// Step data model for editing
@@ -598,8 +599,8 @@ class _StepCardState extends State<_StepCard> {
 
     final picker = ImagePicker();
 
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => SafeArea(
         child: Wrap(
           children: [

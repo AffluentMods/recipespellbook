@@ -75,7 +75,9 @@ class Responsive {
     return null; // no constraint on phones
   }
 
-  /// Wraps child in a centered ConstrainedBox on very wide screens
+  /// Wraps child in a centered ConstrainedBox on very wide screens.
+  /// For scrollable content, use [constrainScrollable] instead to ensure
+  /// scroll input works across the full window width (not just the center).
   static Widget constrainWidth(BuildContext context, {required Widget child}) {
     final max = maxContentWidth(context);
     if (max == null) return child;
@@ -84,6 +86,19 @@ class Responsive {
         constraints: BoxConstraints(maxWidth: max),
         child: child,
       ),
+    );
+  }
+
+  /// Constrain button widths on desktop. Buttons should not stretch full-width
+  /// on a 1920px window.
+  static Widget constrainButton(BuildContext context, {
+    required Widget child,
+    double maxWidth = 400,
+  }) {
+    if (isCompact(context)) return child;
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      child: child,
     );
   }
 
@@ -99,6 +114,40 @@ class Responsive {
       childAspectRatio: childAspectRatio,
       crossAxisSpacing: crossAxisSpacing,
       mainAxisSpacing: mainAxisSpacing,
+    );
+  }
+
+  /// Shows a bottom sheet on mobile or a centered dialog on desktop.
+  /// Use this instead of raw `showModalBottomSheet` for adaptive UX.
+  static Future<T?> showAdaptiveSheet<T>(
+    BuildContext context, {
+    required Widget Function(BuildContext) builder,
+    bool isScrollControlled = true,
+    double desktopMaxWidth = 480,
+    double desktopMaxHeight = 600,
+  }) {
+    if (isDesktopLayout(context)) {
+      return showDialog<T>(
+        context: context,
+        builder: (ctx) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          clipBehavior: Clip.antiAlias,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: desktopMaxWidth,
+              maxHeight: desktopMaxHeight,
+            ),
+            child: builder(ctx),
+          ),
+        ),
+      );
+    }
+
+    return showModalBottomSheet<T>(
+      context: context,
+      isScrollControlled: isScrollControlled,
+      backgroundColor: Colors.transparent,
+      builder: builder,
     );
   }
 }

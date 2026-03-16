@@ -21,8 +21,19 @@ import '../../../services/sync_service.dart';
 import '../home/home_screen.dart';
 import '../../../services/revenuecat_service.dart';
 import '../../widgets/app_snackbar.dart';
+import 'allergy_settings_screen.dart';
 import 'custom_theme_screen.dart';
+import 'ingredient_layout_settings_screen.dart';
+import 'manage_categories_screen.dart';
+import 'manage_courses_screen.dart';
+import 'manage_shopping_categories_screen.dart';
+import 'manage_tags_screen.dart';
+import 'notification_settings_screen.dart';
 import 'nutrition_settings_screen.dart';
+import 'quick_access_settings_screen.dart';
+import 'recipe_layout_settings_screen.dart';
+import 'trash_screen.dart';
+import '../premium/family_screen.dart';
 
 // ════════════════════════════════════════════════════════════
 //  SETTINGS SCREEN
@@ -49,6 +60,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (_query.isEmpty) return true;
     final q = _query.toLowerCase();
     return title.toLowerCase().contains(q) || extra.toLowerCase().contains(q);
+  }
+
+  void _openSettingsPanel(Widget screen, {double maxWidth = 800, double maxHeight = 600}) {
+    if (Responsive.isDesktopLayout(context)) {
+      showDialog(
+        context: context,
+        barrierColor: Colors.black54,
+        builder: (_) => Center(
+          child: Material(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            clipBehavior: Clip.antiAlias,
+            elevation: 8,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
+              child: screen,
+            ),
+          ),
+        ),
+      );
+    } else {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+    }
   }
 
   Widget? _section({required String title, required IconData icon, required List<Widget?> children}) {
@@ -91,7 +125,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ) : null,
         _m(l10n.nutritionDisplay) ? _Tile(
           icon: Icons.tune, title: l10n.nutritionDisplay, subtitle: l10n.nutritionDisplaySubtitle,
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NutritionSettingsScreen())),
+          onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _openSettingsPanel(const NutritionSettingsScreen(), maxWidth: 600, maxHeight: 500);
+            } else {
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NutritionSettingsScreen()));
+            }
+          },
         ) : null,
         _m(l10n.settingsWeekStartDay) ? _WeekStartDayTile(
           currentDay: s.weekStartDay,
@@ -118,17 +158,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _section(title: l10n.settingsRecipes, icon: Icons.menu_book_outlined, children: [
         _m(l10n.settingsQuickAccess) ? _Tile(
           icon: Icons.bolt, title: l10n.settingsQuickAccess, subtitle: l10n.settingsQuickAccessSubtitle,
-          onTap: () => context.push('/settings/quick-access'),
+          onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _openSettingsPanel(const QuickAccessSettingsScreen(), maxWidth: 700, maxHeight: 500);
+            } else {
+              context.push('/settings/quick-access');
+            }
+          },
         ) : null,
         _m(l10n.settingsRecipeLayout) ? _Tile(
           icon: Icons.view_agenda, title: l10n.settingsRecipeLayout,
           subtitle: s.recipeLayoutMode == RecipeLayoutMode.tabbed ? l10n.layoutTabbed : l10n.layoutStacked,
-          onTap: () => context.push('/settings/recipe-layout'),
+          onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _openSettingsPanel(const RecipeLayoutSettingsScreen(), maxWidth: 700, maxHeight: 500);
+            } else {
+              context.push('/settings/recipe-layout');
+            }
+          },
         ) : null,
         _m(l10n.settingsIngredientLayout) ? _Tile(
           icon: Icons.format_align_left, title: l10n.settingsIngredientLayout,
           subtitle: s.ingredientLayout == IngredientLayout.columnar ? l10n.ingredientLayoutColumnar : l10n.ingredientLayoutInline,
-          onTap: () => context.push('/settings/ingredient-layout'),
+          onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _openSettingsPanel(const IngredientLayoutSettingsScreen(), maxWidth: 700, maxHeight: 500);
+            } else {
+              context.push('/settings/ingredient-layout');
+            }
+          },
         ) : null,
         _m(l10n.settingsMeasurements, 'metric imperial') ? _MeasurementSystemTile(
           currentSystem: s.measurementSystem,
@@ -138,7 +196,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           icon: Icons.warning_amber,
           title: l10n.settingsAllergies,
           subtitle: l10n.settingsAllergiesSubtitle,
-          onTap: () => context.push('/settings/allergies'),
+          onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _openSettingsPanel(const AllergySettingsScreen(), maxWidth: 800, maxHeight: 600);
+            } else {
+              context.push('/settings/allergies');
+            }
+          },
         ) : null,
       ]),
 
@@ -146,15 +210,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _section(title: l10n.settingsShoppingPlanning, icon: Icons.shopping_cart_outlined, children: [
         _m(l10n.myPantry, 'always on hand') ? _Tile(
           icon: Icons.kitchen, title: l10n.myPantry, subtitle: l10n.itemsAlwaysOnHand,
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PantryScreen())),
+          onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _openSettingsPanel(const PantryScreen(), maxWidth: 800, maxHeight: 600);
+            } else {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const PantryScreen()));
+            }
+          },
         ) : null,
         _m(l10n.settingsShoppingCategories) ? _Tile(
           icon: Icons.view_list, title: l10n.settingsShoppingCategories, subtitle: l10n.settingsShoppingCategoriesSubtitle,
-          onTap: () => context.push('/settings/shopping-categories'),
+          onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _openSettingsPanel(const ManageShoppingCategoriesScreen(), maxWidth: 700, maxHeight: 550);
+            } else {
+              context.push('/settings/shopping-categories');
+            }
+          },
         ) : null,
         _m(l10n.trashTitle, 'deleted') ? _Tile(
           icon: Icons.delete_outline, title: l10n.trashTitle, subtitle: l10n.trashSubtitle,
-          onTap: () => context.push('/settings/trash'),
+          onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _openSettingsPanel(const TrashScreen(), maxWidth: 800, maxHeight: 600);
+            } else {
+              context.push('/settings/trash');
+            }
+          },
         ) : null,
       ]),
 
@@ -164,7 +246,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           icon: Icons.notifications_outlined,
           title: l10n.settingsNotifications,
           subtitle: l10n.settingsNotifManagePreferences,
-          onTap: () => context.push('/settings/notifications'),
+          onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _openSettingsPanel(const NotificationSettingsScreen(), maxWidth: 600, maxHeight: 500);
+            } else {
+              context.push('/settings/notifications');
+            }
+          },
         ),
       ]),
 
@@ -172,15 +260,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _section(title: l10n.settingsManage, icon: Icons.tune, children: [
         _m(l10n.settingsManageTags, 'tag label') ? _Tile(
           icon: Icons.local_offer_outlined, title: l10n.settingsManageTags, subtitle: l10n.settingsManageTagsSubtitle,
-          onTap: () => context.push('/settings/tags'),
+          onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _openSettingsPanel(const ManageTagsScreen(), maxWidth: 800, maxHeight: 600);
+            } else {
+              context.push('/settings/tags');
+            }
+          },
         ) : null,
         _m(l10n.settingsManageCourses, 'course meal') ? _Tile(
           icon: Icons.restaurant_menu, title: l10n.settingsManageCourses, subtitle: l10n.settingsManageCoursesSubtitle,
-          onTap: () => context.push('/settings/courses'),
+          onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _openSettingsPanel(const ManageCoursesScreen(), maxWidth: 700, maxHeight: 550);
+            } else {
+              context.push('/settings/courses');
+            }
+          },
         ) : null,
         _m(l10n.settingsManageCategories, 'category') ? _Tile(
           icon: Icons.category_outlined, title: l10n.settingsManageCategories, subtitle: l10n.settingsManageCategoriesSubtitle,
-          onTap: () => context.push('/settings/categories'),
+          onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _openSettingsPanel(const ManageCategoriesScreen(), maxWidth: 700, maxHeight: 550);
+            } else {
+              context.push('/settings/categories');
+            }
+          },
         ) : null,
       ]),
 
@@ -192,7 +298,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             subtitle: FamilyService.instance.isInFamily
                 ? l10n.familyManage
                 : l10n.familySharingSubtitle,
-            onTap: () => context.push('/settings/family'),
+            onTap: () {
+              if (Responsive.isDesktopLayout(context)) {
+                _openSettingsPanel(const FamilyScreen(), maxWidth: 700, maxHeight: 550);
+              } else {
+                context.push('/settings/family');
+              }
+            },
           ) : null,
         ]),
 
@@ -232,21 +344,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ].whereType<Widget>().toList();
 
     return Scaffold(
-      body: Responsive.constrainWidth(context, child: CustomScrollView(
+      body: CustomScrollView(
         slivers: [
           SliverAppBar(
             floating: true, snap: true,
             title: Text(l10n.settingsTitle),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(56),
-              child: Padding(
+              child: Responsive.constrainWidth(context, child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
                 child: _SearchField(
                   controller: _searchController,
                   focusNode: _searchFocusNode,
                   onChanged: (q) => setState(() => _query = q.trim()),
                 ),
-              ),
+              )),
             ),
           ),
           if (sections.isEmpty)
@@ -264,14 +376,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             )
           else
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                    (context, i) => i == sections.length ? const SizedBox(height: 40) : sections[i],
-                childCount: sections.length + 1,
-              ),
+            SliverToBoxAdapter(
+              child: Responsive.constrainWidth(context, child: Padding(
+                padding: const EdgeInsets.only(bottom: 40),
+                child: Column(children: sections),
+              )),
             ),
         ],
-      )),
+      ),
     );
   }
 
@@ -281,7 +393,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final db = ref.read(databaseProvider);
     final service = ExportImportService(db);
-    showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) => _ExportOptionsSheet(
+    Responsive.showAdaptiveSheet(context, builder: (context) => _ExportOptionsSheet(
       l10n: l10n,
       onExportCookbook: () async {
         Navigator.pop(context);
@@ -305,7 +417,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final db = ref.read(databaseProvider);
     final service = ExportImportService(db);
-    showModalBottomSheet(context: context, builder: (context) => SafeArea(
+    Responsive.showAdaptiveSheet(context, builder: (context) => SafeArea(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         Padding(padding: const EdgeInsets.all(16), child: Text(l10n.settingsImport, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
         ListTile(
@@ -822,7 +934,7 @@ class _TextScaleTile extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     double temp = currentScale;
-    showModalBottomSheet(context: context, isScrollControlled: true, builder: (ctx) => StatefulBuilder(
+    Responsive.showAdaptiveSheet(context, builder: (ctx) => StatefulBuilder(
       builder: (ctx, ss) => SafeArea(child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -903,7 +1015,7 @@ class _ThemeSelectionTile extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final tier = ref.read(subscriptionProvider).tier;
     final isPremium = tier.index >= SubscriptionTier.premium.index;
-    showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) => DraggableScrollableSheet(
+    Responsive.showAdaptiveSheet(context, builder: (context) => DraggableScrollableSheet(
       expand: false, initialChildSize: 0.7, maxChildSize: 0.9, minChildSize: 0.4,
       builder: (context, sc) => SafeArea(child: Column(children: [
         const SizedBox(height: 8),
@@ -1009,7 +1121,7 @@ class _ThemeModeTile extends StatelessWidget {
       subtitle: Text(subtitle, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
       onTap: () {
-        showModalBottomSheet(context: context, builder: (context) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Responsive.showAdaptiveSheet(context, builder: (context) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16), child: Text(l10n.settingsThemeMode, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
           for (final m in ThemeMode.values)
             ListTile(
@@ -1045,7 +1157,7 @@ class _MeasurementSystemTile extends StatelessWidget {
       subtitle: Text(currentSystem.displayName, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
       onTap: () {
-        showModalBottomSheet(context: context, builder: (context) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Responsive.showAdaptiveSheet(context, builder: (context) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16), child: Text(l10n.settingsMeasurements, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
           ListTile(leading: const Text('\u{1F1FA}\u{1F1F8}', style: TextStyle(fontSize: 24)), title: Text(l10n.settingsMeasurementsUS), subtitle: Text(l10n.usUnits), trailing: currentSystem == MeasurementSystem.us ? Icon(Icons.check, color: theme.colorScheme.primary) : null, onTap: () { onSystemSelected(MeasurementSystem.us); Navigator.pop(context); }),
           ListTile(leading: const Text('\u{1F30D}', style: TextStyle(fontSize: 24)), title: Text(l10n.settingsMeasurementsMetric), subtitle: Text(l10n.metricUnits), trailing: currentSystem == MeasurementSystem.metric ? Icon(Icons.check, color: theme.colorScheme.primary) : null, onTap: () { onSystemSelected(MeasurementSystem.metric); Navigator.pop(context); }),
@@ -1081,7 +1193,7 @@ class _WeekStartDayTile extends StatelessWidget {
       subtitle: Text(_name(context, currentDay), style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
       onTap: () {
-        showModalBottomSheet(context: context, builder: (context) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Responsive.showAdaptiveSheet(context, builder: (context) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16), child: Text(l10n.settingsWeekStartDay, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
           for (final d in [1,2,3,4,5,6,7])
             ListTile(title: Text(_name(context, d)), trailing: currentDay == d ? Icon(Icons.check, color: theme.colorScheme.primary) : null, onTap: () { onDaySelected(d); Navigator.pop(context); }),
@@ -1119,7 +1231,7 @@ class _LanguageTile extends StatelessWidget {
       subtitle: Text(_currentName ?? '\u{1F310} ${l10n.settingsSystemLanguage}', style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
       trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
       onTap: () {
-        showModalBottomSheet(context: context, isScrollControlled: true, builder: (context) => DraggableScrollableSheet(
+        Responsive.showAdaptiveSheet(context, builder: (context) => DraggableScrollableSheet(
           expand: false, initialChildSize: 0.6, maxChildSize: 0.85, minChildSize: 0.3,
           builder: (context, sc) => SafeArea(child: Column(children: [
             const SizedBox(height: 8),
@@ -1146,6 +1258,25 @@ class _LanguageTile extends StatelessWidget {
 //  ADVANCED SETTINGS SCREEN (route target)
 // ════════════════════════════════════════════
 
+void _showSettingsPanel(BuildContext context, Widget screen, {double maxWidth = 800, double maxHeight = 600}) {
+  showDialog(
+    context: context,
+    barrierColor: Colors.black54,
+    builder: (_) => Center(
+      child: Material(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        elevation: 8,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
+          child: screen,
+        ),
+      ),
+    ),
+  );
+}
+
 class AdvancedSettingsScreen extends StatelessWidget {
   const AdvancedSettingsScreen({super.key});
   @override
@@ -1155,10 +1286,34 @@ class AdvancedSettingsScreen extends StatelessWidget {
       appBar: AppBar(title: Text(l10n.settingsAdvanced)),
       body: ListView(children: [
         _Section(title: l10n.settingsManageSection, icon: Icons.tune, children: [
-          _Tile(icon: Icons.local_offer_outlined, title: l10n.settingsManageTags, subtitle: l10n.settingsManageTagsSubtitle, onTap: () => context.push('/settings/tags')),
-          _Tile(icon: Icons.restaurant_menu, title: l10n.settingsManageCourses, subtitle: l10n.settingsManageCoursesSubtitle, onTap: () => context.push('/settings/courses')),
-          _Tile(icon: Icons.category_outlined, title: l10n.settingsManageCategories, subtitle: l10n.settingsManageCategoriesSubtitle, onTap: () => context.push('/settings/categories')),
-          _Tile(icon: Icons.view_list, title: l10n.settingsShoppingCategories, subtitle: l10n.settingsShoppingCategoriesSubtitle, onTap: () => context.push('/settings/shopping-categories')),
+          _Tile(icon: Icons.local_offer_outlined, title: l10n.settingsManageTags, subtitle: l10n.settingsManageTagsSubtitle, onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _showSettingsPanel(context, const ManageTagsScreen(), maxWidth: 800, maxHeight: 600);
+            } else {
+              context.push('/settings/tags');
+            }
+          }),
+          _Tile(icon: Icons.restaurant_menu, title: l10n.settingsManageCourses, subtitle: l10n.settingsManageCoursesSubtitle, onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _showSettingsPanel(context, const ManageCoursesScreen(), maxWidth: 700, maxHeight: 550);
+            } else {
+              context.push('/settings/courses');
+            }
+          }),
+          _Tile(icon: Icons.category_outlined, title: l10n.settingsManageCategories, subtitle: l10n.settingsManageCategoriesSubtitle, onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _showSettingsPanel(context, const ManageCategoriesScreen(), maxWidth: 700, maxHeight: 550);
+            } else {
+              context.push('/settings/categories');
+            }
+          }),
+          _Tile(icon: Icons.view_list, title: l10n.settingsShoppingCategories, subtitle: l10n.settingsShoppingCategoriesSubtitle, onTap: () {
+            if (Responsive.isDesktopLayout(context)) {
+              _showSettingsPanel(context, const ManageShoppingCategoriesScreen(), maxWidth: 700, maxHeight: 550);
+            } else {
+              context.push('/settings/shopping-categories');
+            }
+          }),
         ]),
         const SizedBox(height: 32),
       ]),

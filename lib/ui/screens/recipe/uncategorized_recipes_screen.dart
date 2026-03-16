@@ -10,6 +10,7 @@ import '../../../providers/database_provider.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/recipe_image.dart';
+import '../../../utils/responsive_utils.dart';
 
 class UncategorizedRecipesScreen extends ConsumerStatefulWidget {
   const UncategorizedRecipesScreen({super.key});
@@ -302,8 +303,8 @@ class _UncategorizedRecipesScreenState
     final translator = TaxonomyTranslator.of(context);
     final courses = taxonomy.CourseData.courses;
 
-    final selected = await showModalBottomSheet<String>(
-      context: context,
+    final selected = await Responsive.showAdaptiveSheet<String>(
+      context,
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -352,8 +353,8 @@ class _UncategorizedRecipesScreenState
     final translator = TaxonomyTranslator.of(context);
     final categories = taxonomy.CategoryData.categories;
 
-    final selected = await showModalBottomSheet<String>(
-      context: context,
+    final selected = await Responsive.showAdaptiveSheet<String>(
+      context,
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/ingredient_substitutions.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../utils/responsive_utils.dart';
 
 /// Standalone ingredient substitutions screen
 /// Accessible from drawer menu and from long-pressing ingredients in recipes
@@ -340,10 +341,8 @@ void showIngredientSubsSheet(BuildContext context, String ingredientName) {
   final theme = Theme.of(context);
   final l10n = AppLocalizations.of(context)!;
 
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
+  Responsive.showAdaptiveSheet(
+    context,
     builder: (ctx) => DraggableScrollableSheet(
       initialChildSize: entry != null ? 0.5 : 0.3,
       maxChildSize: 0.85,

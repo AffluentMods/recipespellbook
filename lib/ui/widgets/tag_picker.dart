@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
+import '../../utils/responsive_utils.dart';
 
 /// A widget that displays selected tags and allows adding/removing tags
 class TagPicker extends ConsumerStatefulWidget {
@@ -151,12 +152,8 @@ class _TagPickerState extends ConsumerState<TagPicker> {
   }
 
   void _showTagSelector(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => _TagSelectorSheet(
         selectedTagIds: _selectedTagIds,
         onTagToggled: (tagId, selected) {

@@ -12,6 +12,7 @@ import 'package:recipespellbook/l10n/app_localizations.dart';
 
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
@@ -67,8 +68,8 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
 
   Future<void> _pickImage() async {
     final l10n = AppLocalizations.of(context)!;
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
+    final source = await Responsive.showAdaptiveSheet<ImageSource>(
+      context,
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,

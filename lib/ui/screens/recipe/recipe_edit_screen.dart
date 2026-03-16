@@ -28,6 +28,7 @@ import '../../widgets/nutrition_calculation_sheet.dart';
 import '../../widgets/recipe_edit_instructions.dart';
 import '../../../services/image_service.dart';
 import '../../../services/auth_service.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/recipe_image.dart';
@@ -1966,7 +1967,7 @@ class _PhotoPicker extends StatelessWidget {
   }
   void _showImageOptions(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet(context: context, builder: (ctx) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+    Responsive.showAdaptiveSheet(context, builder: (ctx) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
       ListTile(leading: const Icon(Icons.photo_library), title: Text(l10n.chooseFromGallery), onTap: () { Navigator.pop(ctx); _pickImageWithPreview(context, ImageSource.gallery); }),
       if (supportsCamera) ListTile(leading: const Icon(Icons.camera_alt), title: Text(l10n.takePhoto), onTap: () { Navigator.pop(ctx); _pickImageWithPreview(context, ImageSource.camera); }),
     ])));

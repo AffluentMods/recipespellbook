@@ -106,7 +106,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: Responsive.constrainWidth(context, child: StreamBuilder<List<ShoppingListItem>>(
+        child: StreamBuilder<List<ShoppingListItem>>(
           stream: shoppingDao.watchItemsInList(_currentListId),
           builder: (context, snapshot) {
             final items = snapshot.data ?? [];
@@ -118,7 +118,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
             return Column(
               children: [
                 // Header with list switcher
-                _ModernHeader(
+                Responsive.constrainWidth(context, child: _ModernHeader(
                   listName: _currentListName,
                   itemCount: uncheckedItems.length,
                   groupMode: _groupMode,
@@ -126,22 +126,22 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   onShare: () => _showShareSheet(context),
                   onMoreOptions: () => _showMoreOptions(context),
                   onListTap: () => _showListSwitcher(context),
-                ),
+                )),
 
                 // Order Online Button
                 if (uncheckedItems.isNotEmpty)
-                  _OrderOnlineButton(items: uncheckedItems),
+                  Responsive.constrainWidth(context, child: _OrderOnlineButton(items: uncheckedItems)),
 
                 // Items List
                 Expanded(
-                  child: items.isEmpty
+                  child: Responsive.constrainWidth(context, child: items.isEmpty
                       ? _EmptyState()
-                      : _buildGroupedList(uncheckedItems, checkedItems),
+                      : _buildGroupedList(uncheckedItems, checkedItems)),
                 ),
               ],
             );
           },
-        )),
+        ),
       ),
       floatingActionButton: _ModernFAB(onTap: () => _showAddItemSheet(context)),
     );
@@ -209,8 +209,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     final id = listId ?? _currentListId;
     final name = listName ?? _currentListName;
 
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -317,8 +317,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   void _showLinkResult(BuildContext context, ShareLinkInfo link) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -386,8 +386,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   void _showUpgradePrompt(BuildContext context, String featureName, String message) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -433,9 +433,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.read(shoppingDaoProvider);
 
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
@@ -678,9 +677,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.read(shoppingDaoProvider);
 
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
@@ -745,15 +743,16 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                     _showImportSheet(context);
                   },
                 ),
-                ListTile(
-                  leading: const Icon(Icons.qr_code_scanner),
-                  title: Text(l10n.scanBarcode),
-                  subtitle: Text(l10n.shoppingScanBarcodeSubtitle),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _openBarcodeScanner();
-                  },
-                ),
+                if (supportsBarcodeScanner)
+                  ListTile(
+                    leading: const Icon(Icons.qr_code_scanner),
+                    title: Text(l10n.scanBarcode),
+                    subtitle: Text(l10n.shoppingScanBarcodeSubtitle),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _openBarcodeScanner();
+                    },
+                  ),
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.category),
@@ -822,9 +821,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
@@ -920,9 +918,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
@@ -1239,10 +1236,8 @@ class _OrderOnlineButton extends StatelessWidget {
       return parsed.name;
     }).toList();
 
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => _OrderOnlineSheet(
         itemNames: itemNames,
         itemCount: items.length,
@@ -2342,9 +2337,8 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
@@ -2476,9 +2470,8 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
@@ -3059,33 +3052,86 @@ class _SectionGroupedList extends ConsumerWidget {
           return (aIdx == -1 ? 999 : aIdx).compareTo(bIdx == -1 ? 999 : bIdx);
         });
 
+        // Build section widgets for each category
+        final sectionWidgets = <Widget>[
+          for (final category in sortedKeys)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 16, 4),
+                  child: Text(
+                    resolveCategoryName(category).toUpperCase(),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                for (final item in grouped[category]!)
+                  _ShoppingItemTile(
+                    item: item,
+                    listId: listId,
+                    userMappings: userMappings,
+                    onCategoryChanged: onCategoryChanged,
+                    onItemChecked: onItemChecked,
+                    onItemUnchecked: onItemUnchecked,
+                  ),
+              ],
+            ),
+        ];
+
+        final checkedSection = checkedItems.isNotEmpty
+            ? _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemUnchecked: onItemUnchecked)
+            : null;
+
+        // Desktop: multi-column masonry-style layout
+        if (Responsive.isDesktopLayout(context)) {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final columnCount = constraints.maxWidth >= 1200 ? 3 : 2;
+              final columns = List.generate(columnCount, (_) => <Widget>[]);
+              for (int i = 0; i < sectionWidgets.length; i++) {
+                columns[i % columnCount].add(
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 500),
+                    child: sectionWidgets[i],
+                  ),
+                );
+              }
+              // Add checked section to the first column
+              if (checkedSection != null) {
+                columns[0].add(
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 500),
+                    child: checkedSection,
+                  ),
+                );
+              }
+              return SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 100),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: columns.map((col) => Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: col,
+                    ),
+                  )).toList(),
+                ),
+              );
+            },
+          );
+        }
+
+        // Mobile: single-column list
         return ListView(
           padding: const EdgeInsets.only(bottom: 100),
           children: [
-            for (final category in sortedKeys) ...[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 16, 4),
-                child: Text(
-                  resolveCategoryName(category).toUpperCase(),
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-              for (final item in grouped[category]!)
-                _ShoppingItemTile(
-                  item: item,
-                  listId: listId,
-                  userMappings: userMappings,
-                  onCategoryChanged: onCategoryChanged,
-                  onItemChecked: onItemChecked,
-                  onItemUnchecked: onItemUnchecked,
-                ),
-            ],
-            if (checkedItems.isNotEmpty)
-              _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemUnchecked: onItemUnchecked),
+            ...sectionWidgets,
+            if (checkedSection != null) checkedSection,
           ],
         );
       },
@@ -3442,10 +3488,8 @@ class _ShoppingItemTile extends ConsumerWidget {
     final shoppingDao = ref.read(shoppingDaoProvider);
     final controller = TextEditingController(text: item.name);
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
         child: Container(

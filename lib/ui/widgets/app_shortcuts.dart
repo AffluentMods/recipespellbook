@@ -15,7 +15,7 @@ import 'new_recipe_dialog.dart';
 ///   Ctrl/Cmd + N — New recipe
 ///   Ctrl/Cmd + F — Search
 ///   Ctrl/Cmd + , — Settings
-///   Ctrl/Cmd + 1–4 — Switch tabs
+///   Ctrl/Cmd + 1–5 — Switch tabs (1=Home, 2=Cookbooks, 3=Planner, 4=Shopping, 5=Community)
 class AppShortcuts extends ConsumerWidget {
   final Widget child;
   const AppShortcuts({super.key, required this.child});
@@ -89,6 +89,12 @@ class AppShortcuts extends ConsumerWidget {
         ref.read(currentNavIndexProvider.notifier).state = 3;
         final ctx = rootNavigatorKey.currentContext ?? context;
         ctx.go('/shopping');
+      },
+
+      // Ctrl/Cmd + 5 — Community
+      shortcut(LogicalKeyboardKey.digit5): () {
+        final ctx = rootNavigatorKey.currentContext ?? context;
+        ctx.go('/community');
       },
     };
   }

@@ -1571,9 +1571,11 @@ class _GuideDetailScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Responsive.constrainWidth(context, child: ListView(
+      body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
         children: [
+          Responsive.constrainWidth(context, child: Column(
+            children: [
           // ── Hero header ──
           Container(
             padding: const EdgeInsets.all(24),
@@ -1644,8 +1646,10 @@ class _GuideDetailScreen extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           ),
+            ],
+          )),
         ],
-      )),
+      ),
     );
   }
 }

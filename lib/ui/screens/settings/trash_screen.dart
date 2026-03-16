@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../utils/native_file_image.dart';
+import '../../../utils/responsive_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
@@ -215,8 +216,9 @@ class _DeletedRecipeCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          showModalBottomSheet(
-            context: context,
+          Responsive.showAdaptiveSheet(
+            context,
+            isScrollControlled: false,
             builder: (ctx) => SafeArea(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

@@ -6,6 +6,7 @@ import '../../../data/community_tags_data.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/community_service.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/community_image.dart';
 import '../../widgets/community_tag_picker.dart';
@@ -99,13 +100,8 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
     final currentTags = pub.tags?.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList() ?? <String>[];
     List<String> selectedTags = List.from(currentTags);
 
-    final result = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
+    final result = await Responsive.showAdaptiveSheet<bool>(
+      context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setSheetState) {
           final theme = Theme.of(ctx);

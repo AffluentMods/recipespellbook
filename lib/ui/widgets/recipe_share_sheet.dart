@@ -12,6 +12,7 @@ import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
 import 'app_snackbar.dart';
+import '../../utils/responsive_utils.dart';
 
 /// Strip emoji characters that even Unicode fonts struggle with in PDFs.
 String _stripEmojiForPdf(String text) {
@@ -53,11 +54,8 @@ void showRecipeShareSheet(
     WidgetRef ref,
     Recipe recipe,
     ) {
-  showModalBottomSheet(
-    context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
+  Responsive.showAdaptiveSheet(
+    context,
     builder: (ctx) => _RecipeShareSheet(recipe: recipe, ref: ref),
   );
 }

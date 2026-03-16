@@ -128,8 +128,12 @@ class _ConversionRule {
 
 class RecipeScreen extends ConsumerStatefulWidget {
   final String recipeId;
+  /// When true, the back button is hidden (used inside MasterDetailLayout).
+  final bool isDetailPane;
+  /// Called when the user closes the detail pane (X button in master-detail mode).
+  final VoidCallback? onClose;
 
-  const RecipeScreen({super.key, required this.recipeId});
+  const RecipeScreen({super.key, required this.recipeId, this.isDetailPane = false, this.onClose});
 
   @override
   ConsumerState<RecipeScreen> createState() => _RecipeScreenState();
@@ -327,13 +331,84 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     }
 
     return Scaffold(
-      body: Responsive.constrainWidth(context, child: useTabbed
+      body: useTabbed
           ? _buildTabbedLayout(theme, l10n)
-          : _buildStackedLayout(theme, l10n)),
+          : _buildStackedLayout(theme, l10n),
     );
   }
 
+  /// Header content shared by both mobile and desktop stacked layouts.
+  List<Widget> _buildRecipeHeader(ThemeData theme, AppLocalizations l10n) {
+    return [
+      // Title
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              _recipe!.title,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          _FavoriteButton(isFavorite: _recipe!.isFavorite, onToggle: _toggleFavorite),
+        ],
+      ),
+      // Star rating
+      if (_recipe!.rating != null && _recipe!.rating! > 0) ...[
+        const SizedBox(height: 8),
+        RecipeRating(rating: _recipe!.rating!),
+      ],
+      // Tags display
+      const SizedBox(height: 12),
+      RecipeTagsDisplay(recipeId: widget.recipeId),
+
+      if (_recipe!.description != null && _recipe!.description!.isNotEmpty) ...[
+        const SizedBox(height: 12),
+        Text(_recipe!.description!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+      ],
+
+      const SizedBox(height: 16),
+
+      // 3 Simple Action Buttons (Meal Plan, Groceries, Share)
+      _ModernQuickActionsRow(
+        onAddToMealPlan: _showAddToMealPlanSheet,
+        onAddToShopping: _showAddToShoppingSheet,
+        onShare: _showShareSheet,
+      ),
+      const SizedBox(height: 20),
+
+      // Recipe meta info (times, servings) — hidden if all empty
+      if (_hasMetaInfo(_recipe!))
+        _RecipeMetaInfoCard(recipe: _recipe!, scaleFactor: _scaleFactor),
+
+      // Separate Scale & Convert buttons
+      const SizedBox(height: 16),
+      _ModernScaleConvertButtons(
+        currentScale: _scaleFactor,
+        servings: _recipe!.servings,
+        onScaleChanged: (scale) => setState(() => _scaleFactor = scale),
+        unitConversion: _unitConversion,
+        onConversionChanged: (mode) => setState(() => _unitConversion = mode),
+      ),
+
+      // Dismissible Allergy warning banner with improved UX
+      const SizedBox(height: 16),
+      _ImprovedAllergyWarning(
+        recipeId: widget.recipeId,
+        ingredientTexts: _ingredients.map((i) => i.name).toList(),
+      ),
+    ];
+  }
+
   Widget _buildStackedLayout(ThemeData theme, AppLocalizations l10n) {
+    // On wide desktop (full-screen, not detail pane), show ingredients
+    // and instructions side-by-side for a proper desktop recipe experience.
+    final isWideDesktop = Responsive.isDesktopLayout(context) && !widget.isDetailPane;
+
     return CustomScrollView(
       slivers: [
         _RecipeAppBar(
@@ -343,105 +418,102 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           onReload: _loadRecipe,
           onPrint: _printRecipe,
           isTabbed: false,
+          isDetailPane: widget.isDetailPane,
+          onClose: widget.onClose,
           onToggleLayout: _toggleLayout,
         ),
         // Contextual hint banner for recipe screen
         const SliverToBoxAdapter(child: HintBanner(screenName: 'recipe')),
         SliverToBoxAdapter(
-          child: Padding(
+          child: Center(child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: isWideDesktop ? 1100 : 800),
+            child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Title
-                Row(
+                ..._buildRecipeHeader(theme, l10n),
+                const SizedBox(height: 24),
+
+                // Wrap recipe content in SelectionArea for desktop text selection
+                SelectionArea(child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        _recipe!.title,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+                // Desktop: side-by-side layout for ingredients + instructions
+                if (isWideDesktop) ...[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Left column — Ingredients
+                      Expanded(
+                        flex: 2,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _SectionHeader(title: l10n.ingredientsTitle, trailing: _scaleFactor != 1.0 ? Text('${_scaleFactor}x', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary)) : null),
+                            const SizedBox(height: 12),
+                            ..._sortedIngredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: _scaleFactor, unitConversion: _unitConversion, linkedRecipes: (_ingredientLinksMap[ing.id] ?? []).map((info) => info.recipe).toList())),
+                            const SizedBox(height: 16),
+                            _LargeAddToShoppingButton(onTap: _showAddToShoppingSheet),
+                          ],
                         ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    _FavoriteButton(isFavorite: _recipe!.isFavorite, onToggle: _toggleFavorite),
-                  ],
-                ),
-                // Star rating
-                if (_recipe!.rating != null && _recipe!.rating! > 0) ...[
-                  const SizedBox(height: 8),
-                  RecipeRating(rating: _recipe!.rating!),
-                ],
-                // Tags display
-                const SizedBox(height: 12),
-                RecipeTagsDisplay(recipeId: widget.recipeId),
-
-                if (_recipe!.description != null && _recipe!.description!.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  Text(_recipe!.description!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                ],
-
-                const SizedBox(height: 16),
-
-                // NEW: 3 Simple Action Buttons (Meal Plan, Groceries, Share)
-                _ModernQuickActionsRow(
-                  onAddToMealPlan: _showAddToMealPlanSheet,
-                  onAddToShopping: _showAddToShoppingSheet,
-                  onShare: _showShareSheet,
-                ),
-                const SizedBox(height: 20),
-
-                // Recipe meta info (times, servings) — hidden if all empty
-                if (_hasMetaInfo(_recipe!))
-                  _RecipeMetaInfoCard(recipe: _recipe!, scaleFactor: _scaleFactor),
-
-                // Separate Scale & Convert buttons
-                const SizedBox(height: 16),
-                _ModernScaleConvertButtons(
-                  currentScale: _scaleFactor,
-                  servings: _recipe!.servings,
-                  onScaleChanged: (scale) => setState(() => _scaleFactor = scale),
-                  unitConversion: _unitConversion,
-                  onConversionChanged: (mode) => setState(() => _unitConversion = mode),
-                ),
-
-                // Dismissible Allergy warning banner with improved UX
-                const SizedBox(height: 16),
-                _ImprovedAllergyWarning(
-                  recipeId: widget.recipeId,
-                  ingredientTexts: _ingredients.map((i) => i.name).toList(),
-                ),
-
-                const SizedBox(height: 24),
-                _SectionHeader(title: l10n.ingredientsTitle, trailing: _scaleFactor != 1.0 ? Text('${_scaleFactor}x', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary)) : null),
-                const SizedBox(height: 12),
-                ..._sortedIngredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: _scaleFactor, unitConversion: _unitConversion, linkedRecipes: (_ingredientLinksMap[ing.id] ?? []).map((info) => info.recipe).toList())),
-
-                // NEW: Large "Add to Shopping List" button at bottom of ingredients
-                const SizedBox(height: 16),
-                _LargeAddToShoppingButton(onTap: _showAddToShoppingSheet),
-
-                const SizedBox(height: 32),
-                _SectionHeader(title: l10n.instructionsTitle),
-                const SizedBox(height: 12),
-                ..._steps.asMap().entries.map((entry) => _InstructionStep(
-                  stepNumber: entry.key + 1,
-                  step: entry.value,
-                )),
-                if (_recipe!.notes != null && _recipe!.notes!.isNotEmpty) ...[
-                  const SizedBox(height: 32),
-                  _SectionHeader(title: l10n.recipeFieldNotes),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)),
-                    child: Text(_recipe!.notes!, style: theme.textTheme.bodyMedium),
+                      const SizedBox(width: 32),
+                      // Right column — Instructions
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _SectionHeader(title: l10n.instructionsTitle),
+                            const SizedBox(height: 12),
+                            ..._steps.asMap().entries.map((entry) => _InstructionStep(
+                              stepNumber: entry.key + 1,
+                              step: entry.value,
+                            )),
+                            if (_recipe!.notes != null && _recipe!.notes!.isNotEmpty) ...[
+                              const SizedBox(height: 32),
+                              _SectionHeader(title: l10n.recipeFieldNotes),
+                              const SizedBox(height: 12),
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)),
+                                child: Text(_recipe!.notes!, style: theme.textTheme.bodyMedium),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
+                ] else ...[
+                  // Mobile/tablet: original vertical layout
+                  _SectionHeader(title: l10n.ingredientsTitle, trailing: _scaleFactor != 1.0 ? Text('${_scaleFactor}x', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary)) : null),
+                  const SizedBox(height: 12),
+                  ..._sortedIngredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: _scaleFactor, unitConversion: _unitConversion, linkedRecipes: (_ingredientLinksMap[ing.id] ?? []).map((info) => info.recipe).toList())),
+
+                  const SizedBox(height: 16),
+                  _LargeAddToShoppingButton(onTap: _showAddToShoppingSheet),
+
+                  const SizedBox(height: 32),
+                  _SectionHeader(title: l10n.instructionsTitle),
+                  const SizedBox(height: 12),
+                  ..._steps.asMap().entries.map((entry) => _InstructionStep(
+                    stepNumber: entry.key + 1,
+                    step: entry.value,
+                  )),
+                  if (_recipe!.notes != null && _recipe!.notes!.isNotEmpty) ...[
+                    const SizedBox(height: 32),
+                    _SectionHeader(title: l10n.recipeFieldNotes),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)),
+                      child: Text(_recipe!.notes!, style: theme.textTheme.bodyMedium),
+                    ),
+                  ],
                 ],
-                // Nutrition section
+                // Nutrition section — always full width below
                 const SizedBox(height: 32),
                 _SectionHeader(title: l10n.nutritionTitle),
                 const SizedBox(height: 12),
@@ -453,10 +525,12 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   enabledNutrients: ref.watch(settingsProvider).enabledNutrients,
                   onEmptyTap: _showNutritionCalculation,
                 ),
+                  ],
+                )),
                 const SizedBox(height: 100),
               ],
             ),
-          ),
+          ))),
         ),
       ],
     );
@@ -472,10 +546,12 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           onReload: _loadRecipe,
           onPrint: _printRecipe,
           isTabbed: true,
+          isDetailPane: widget.isDetailPane,
+          onClose: widget.onClose,
           onToggleLayout: _toggleLayout,
         ),
         SliverToBoxAdapter(
-          child: Padding(
+          child: Responsive.constrainWidth(context, child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -532,7 +608,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 ),
               ],
             ),
-          ),
+          )),
         ),
         SliverPersistentHeader(
           pinned: true,
@@ -872,9 +948,8 @@ class _ModernScaleConvertButtons extends StatelessWidget {
   void _showConvertDialog(BuildContext context) {
     final theme = Theme.of(context);
     final units = LocalizedUnits.of(context);
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
@@ -1207,7 +1282,7 @@ class _IngredientsTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     if (ingredients.isEmpty) return Center(child: Text(l10n.ingredientsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)));
-    return ListView(
+    return SelectionArea(child: ListView(
       padding: const EdgeInsets.all(16),
       children: [
         ...ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: scaleFactor, unitConversion: unitConversion, linkedRecipes: (ingredientLinksMap[ing.id] ?? []).map((info) => info.recipe).toList())),
@@ -1215,7 +1290,7 @@ class _IngredientsTab extends ConsumerWidget {
         _LargeAddToShoppingButton(onTap: onAddToShopping),
         const SizedBox(height: 32),
       ],
-    );
+    ));
   }
 }
 
@@ -1228,7 +1303,7 @@ class _InstructionsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     if (steps.isEmpty) return Center(child: Text(l10n.instructionsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)));
-    return ListView(padding: const EdgeInsets.all(16), children: [
+    return SelectionArea(child: ListView(padding: const EdgeInsets.all(16), children: [
       ...steps.asMap().entries.map((entry) => _InstructionStep(stepNumber: entry.key + 1, step: entry.value)),
       if (notes != null && notes!.isNotEmpty) ...[
         const SizedBox(height: 24),
@@ -1237,7 +1312,7 @@ class _InstructionsTab extends StatelessWidget {
         Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)), child: Text(notes!, style: theme.textTheme.bodyMedium)),
       ],
       const SizedBox(height: 32),
-    ]);
+    ]));
   }
 }
 
@@ -1250,6 +1325,8 @@ class _RecipeAppBar extends StatelessWidget {
   final VoidCallback onReload;
   final VoidCallback? onPrint;
   final bool isTabbed;
+  final bool isDetailPane;
+  final VoidCallback? onClose;
   final VoidCallback? onToggleLayout;
 
   const _RecipeAppBar({
@@ -1259,6 +1336,8 @@ class _RecipeAppBar extends StatelessWidget {
     required this.onReload,
     this.onPrint,
     this.isTabbed = false,
+    this.isDetailPane = false,
+    this.onClose,
     this.onToggleLayout,
   });
 
@@ -1270,14 +1349,29 @@ class _RecipeAppBar extends StatelessWidget {
         (isServer || FileExistsCache.exists(recipe.imagePath!));
     final defaultAsset = defaultRecipeImageAsset(recipe.id);
 
+    // Smaller hero image on desktop to avoid taking up half the screen
+    final expandedHeight = Responsive.isDesktopLayout(context) ? 220.0 : 300.0;
+
     return SliverAppBar(
-      expandedHeight: 300,
+      expandedHeight: expandedHeight,
       pinned: true,
-      leading: Container(
-        margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
-        child: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), tooltip: 'Back', onPressed: () => Navigator.of(context).pop()),
-      ),
+      leading: isDetailPane
+          ? IconButton(
+              icon: const Icon(Icons.close, color: Colors.white),
+              tooltip: 'Close',
+              onPressed: onClose ?? () => Navigator.of(context).pop(),
+            )
+          : Responsive.isDesktopLayout(context)
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  tooltip: 'Back',
+                  onPressed: () => Navigator.of(context).pop(),
+                )
+              : Container(
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
+                  child: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), tooltip: 'Back', onPressed: () => Navigator.of(context).pop()),
+                ),
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
           fit: StackFit.expand,

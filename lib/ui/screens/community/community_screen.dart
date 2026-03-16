@@ -320,13 +320,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     final sheetTags = Set<String>.from(_selectedTags);
     bool sheetHasImages = _filterHasImages;
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setSheetState) {
           final theme = Theme.of(ctx);

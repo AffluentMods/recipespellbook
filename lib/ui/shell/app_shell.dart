@@ -7,7 +7,6 @@ import '../../providers/auth_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../services/auth_service.dart';
-import '../../router/router.dart';
 import '../../utils/responsive_utils.dart';
 import '../screens/import/import_guides_screen.dart';
 import '../widgets/app_menu_drawer.dart';
@@ -81,14 +80,22 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (_scaffoldKey.currentState?.isEndDrawerOpen ?? false) {
       _scaffoldKey.currentState?.closeEndDrawer();
     }
-    if (shellNavigatorKey.currentState?.canPop() ?? false) {
-      shellNavigatorKey.currentState!.popUntil((route) => route.isFirst);
-    }
-    if (rootNavigatorKey.currentState?.canPop() ?? false) {
-      rootNavigatorKey.currentState!.popUntil((route) => route.isFirst);
-    }
     ref.read(currentNavIndexProvider.notifier).state = index;
     context.go(path);
+  }
+
+  /// Determine the active main-tab index from the current route path.
+  /// Returns 0-3 for main tabs, or -1 for secondary routes (settings, etc.)
+  int _activeTabFromRoute(String location) {
+    if (location == '/' || location.startsWith('/categories') || location.startsWith('/courses')) {
+      return 0; // Home
+    }
+    if (location.startsWith('/cookbooks') || location.startsWith('/cookbook/')) {
+      return 1; // Cookbooks
+    }
+    if (location.startsWith('/planner')) return 2; // Planner
+    if (location.startsWith('/shopping')) return 3; // Shopping
+    return -1; // Secondary section — don't highlight main tabs
   }
 
   @override
@@ -101,12 +108,18 @@ class _AppShellState extends ConsumerState<AppShell> {
       error: (_, __) => null,
     );
 
+    // Determine active tab from route (overrides provider for sidebar display)
+    final location = GoRouterState.of(context).uri.path;
+    final routeTab = _activeTabFromRoute(location);
+    final effectiveIndex = routeTab >= 0 ? routeTab : currentIndex;
+
     // Desktop: Expanded sidebar (≥900dp)
     if (Responsive.useExpandedSidebar(context)) {
       return Row(
         children: [
           _AppSidebar(
-            currentIndex: currentIndex,
+            currentIndex: effectiveIndex,
+            currentPath: location,
             shoppingBadge: shoppingBadge,
             onDestinationSelected: (index) {
               switch (index) {
@@ -136,7 +149,7 @@ class _AppShellState extends ConsumerState<AppShell> {
       return Row(
           children: [
             _AppNavigationRail(
-              currentIndex: currentIndex,
+              currentIndex: effectiveIndex.clamp(0, 3),
               shoppingBadge: shoppingBadge,
               onDestinationSelected: (index) {
                 switch (index) {
@@ -147,12 +160,6 @@ class _AppShellState extends ConsumerState<AppShell> {
                 }
               },
               onMenuTap: () {
-                if (shellNavigatorKey.currentState?.canPop() ?? false) {
-                  shellNavigatorKey.currentState!.popUntil((route) => route.isFirst);
-                }
-                if (rootNavigatorKey.currentState?.canPop() ?? false) {
-                  rootNavigatorKey.currentState!.popUntil((route) => route.isFirst);
-                }
                 _scaffoldKey.currentState?.openEndDrawer();
               },
             ),
@@ -169,13 +176,12 @@ class _AppShellState extends ConsumerState<AppShell> {
     }
 
     // Phone: existing bottom nav bar
-    // TODO: CoinToastOverlay removed — Kitchen Buddy hidden for now
     return Scaffold(
         key: _scaffoldKey,
         body: widget.child,
         endDrawer: const AppMenuDrawer(),
         bottomNavigationBar: _NotchNavBar(
-          currentIndex: currentIndex,
+          currentIndex: effectiveIndex.clamp(0, 3),
           shoppingBadge: shoppingBadge,
           onTap: (index) {
             switch (index) {
@@ -184,12 +190,6 @@ class _AppShellState extends ConsumerState<AppShell> {
               case 2: _navigateTo('/planner', 2);
               case 3: _navigateTo('/shopping', 3);
               case 4:
-                if (shellNavigatorKey.currentState?.canPop() ?? false) {
-                  shellNavigatorKey.currentState!.popUntil((route) => route.isFirst);
-                }
-                if (rootNavigatorKey.currentState?.canPop() ?? false) {
-                  rootNavigatorKey.currentState!.popUntil((route) => route.isFirst);
-                }
                 _scaffoldKey.currentState?.openEndDrawer();
             }
           },
@@ -495,11 +495,13 @@ class _NavDef {
 
 class _AppSidebar extends ConsumerWidget {
   final int currentIndex;
+  final String currentPath;
   final int? shoppingBadge;
   final ValueChanged<int> onDestinationSelected;
 
   const _AppSidebar({
     required this.currentIndex,
+    required this.currentPath,
     this.shoppingBadge,
     required this.onDestinationSelected,
   });
@@ -517,6 +519,12 @@ class _AppSidebar extends ConsumerWidget {
     final bgColor = isDark
         ? Color.lerp(theme.colorScheme.surface, Colors.black, 0.3)!
         : theme.colorScheme.surfaceContainerLow;
+
+    // Route-based highlighting for secondary items
+    final isCommunity = currentPath.startsWith('/community');
+    final isSettings = currentPath.startsWith('/settings') || currentPath == '/about';
+    final isAccount = currentPath == '/settings/account';
+    final isRecipes = currentPath.startsWith('/recipe') || currentPath.startsWith('/search');
 
     return Material(
       color: bgColor,
@@ -537,7 +545,7 @@ class _AppSidebar extends ConsumerWidget {
                     icon: Icons.home_outlined,
                     selectedIcon: Icons.home_rounded,
                     label: l10n.navHome,
-                    isSelected: currentIndex == 0,
+                    isSelected: currentIndex == 0 && !isCommunity && !isSettings && !isRecipes,
                     onTap: () => onDestinationSelected(0),
                     theme: theme,
                   ),
@@ -545,7 +553,7 @@ class _AppSidebar extends ConsumerWidget {
                     icon: Icons.menu_book_outlined,
                     selectedIcon: Icons.menu_book_rounded,
                     label: l10n.navCookbooks,
-                    isSelected: currentIndex == 1,
+                    isSelected: currentIndex == 1 && !isCommunity && !isSettings,
                     onTap: () => onDestinationSelected(1),
                     theme: theme,
                   ),
@@ -553,7 +561,7 @@ class _AppSidebar extends ConsumerWidget {
                     icon: Icons.calendar_today_outlined,
                     selectedIcon: Icons.calendar_today_rounded,
                     label: l10n.navPlanner,
-                    isSelected: currentIndex == 2,
+                    isSelected: currentIndex == 2 && !isCommunity && !isSettings,
                     onTap: () => onDestinationSelected(2),
                     theme: theme,
                   ),
@@ -561,7 +569,7 @@ class _AppSidebar extends ConsumerWidget {
                     icon: Icons.shopping_cart_outlined,
                     selectedIcon: Icons.shopping_cart_rounded,
                     label: l10n.navShopping,
-                    isSelected: currentIndex == 3,
+                    isSelected: currentIndex == 3 && !isCommunity && !isSettings,
                     badge: shoppingBadge,
                     onTap: () => onDestinationSelected(3),
                     theme: theme,
@@ -581,8 +589,9 @@ class _AppSidebar extends ConsumerWidget {
                     icon: Icons.people_outlined,
                     selectedIcon: Icons.people_rounded,
                     label: l10n.navCommunity,
+                    isSelected: isCommunity,
                     iconColor: const Color(0xFF6366F1),
-                    onTap: () => context.push('/community'),
+                    onTap: () => context.go('/community'),
                     theme: theme,
                   ),
                   _SidebarNavItem(
@@ -616,6 +625,8 @@ class _AppSidebar extends ConsumerWidget {
               isDark: isDark,
               authState: authState,
               subStatus: subStatus,
+              isSettingsActive: isSettings && !isAccount,
+              isAccountActive: isAccount,
             ),
           ],
         ),
@@ -765,6 +776,8 @@ class _SidebarBottom extends StatelessWidget {
   final bool isDark;
   final AuthState authState;
   final SubscriptionStatus subStatus;
+  final bool isSettingsActive;
+  final bool isAccountActive;
 
   const _SidebarBottom({
     required this.theme,
@@ -772,6 +785,8 @@ class _SidebarBottom extends StatelessWidget {
     required this.isDark,
     required this.authState,
     required this.subStatus,
+    this.isSettingsActive = false,
+    this.isAccountActive = false,
   });
 
   @override
@@ -807,8 +822,9 @@ class _SidebarBottom extends StatelessWidget {
                 icon: Icons.settings_outlined,
                 selectedIcon: Icons.settings_rounded,
                 label: l10n.settingsTitle,
+                isSelected: isSettingsActive,
                 iconColor: const Color(0xFF6B7280),
-                onTap: () => context.push('/settings'),
+                onTap: () => context.go('/settings'),
                 theme: theme,
               ),
             ],

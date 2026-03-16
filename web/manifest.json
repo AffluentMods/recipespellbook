@@ -1,12 +1,12 @@
 {
-    "name": "recipespellbook",
-    "short_name": "recipespellbook",
+    "name": "Recipe Spellbook",
+    "short_name": "Recipe Spellbook",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#1a1a2e",
+    "theme_color": "#E8A230",
+    "description": "An advanced recipe app for managing, cooking, and sharing recipes across all your devices.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

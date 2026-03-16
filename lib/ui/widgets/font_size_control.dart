@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/responsive_utils.dart';
 
 /// Font size scale provider for recipe reading
 final recipeFontScaleProvider = StateNotifierProvider<RecipeFontScaleNotifier, double>((ref) {
@@ -175,8 +176,8 @@ class FontSizeSheet extends ConsumerWidget {
 
 /// Show font size bottom sheet
 void showFontSizeSheet(BuildContext context) {
-  showModalBottomSheet(
-    context: context,
+  Responsive.showAdaptiveSheet(
+    context,
     builder: (context) => const FontSizeSheet(),
   );
 }

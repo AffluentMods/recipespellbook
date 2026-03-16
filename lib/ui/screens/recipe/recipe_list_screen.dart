@@ -291,6 +291,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
             ? RecipeScreen(
                 key: ValueKey(_selectedRecipeId),
                 recipeId: _selectedRecipeId!,
+                isDetailPane: true,
+                onClose: () => setState(() => _selectedRecipeId = null),
               )
             : null,
       );
@@ -407,8 +409,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     final l10n = AppLocalizations.of(context)!;
     final translator = TaxonomyTranslator.of(context);
     final courses = taxonomy.CourseData.courses;
-    final selected = await showModalBottomSheet<String>(
-      context: context,
+    final selected = await Responsive.showAdaptiveSheet<String>(
+      context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(
@@ -440,8 +442,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     final l10n = AppLocalizations.of(context)!;
     final translator = TaxonomyTranslator.of(context);
     final categories = taxonomy.CategoryData.categories;
-    final selected = await showModalBottomSheet<String>(
-      context: context,
+    final selected = await Responsive.showAdaptiveSheet<String>(
+      context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(
@@ -761,51 +763,70 @@ class _MediumGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(12).copyWith(bottom: 80),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: Responsive.recipeGridColumns(context),
-        childAspectRatio: 0.8,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-      ),
-      itemCount: recipes.length,
-      itemBuilder: (context, index) {
-        final recipe = recipes[index];
-        final l10n = AppLocalizations.of(context)!;
-        return ContextMenuRegion(
-          items: [
-            ContextMenuItem(
-              icon: Icons.open_in_new_rounded,
-              label: l10n.actionView,
-              onTap: () => onTap(recipe.id),
-            ),
-            ContextMenuItem(
-              icon: Icons.edit_rounded,
-              label: l10n.actionEdit,
-              onTap: () => context.push('/recipe/${recipe.id}/edit'),
-            ),
-            ContextMenuItem(
-              icon: Icons.favorite_rounded,
-              label: l10n.bulkFavorite,
-              onTap: () {},
-            ),
-          ],
-          child: _MediumCard(
-            key: ValueKey(recipe.id),
-            recipe: recipe, tagsDao: tagsDao,
-            isSelecting: isSelecting,
-            isSelected: selectedIds.contains(recipe.id),
-            onTap: () => onTap(recipe.id),
-            onLongPress: () => onLongPress(recipe.id),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Use actual available width for column count so the grid
+        // adapts to the master-detail pane width on desktop instead
+        // of using the full screen width from MediaQuery.
+        final availableWidth = constraints.maxWidth;
+        int columns;
+        if (availableWidth >= 1200) {
+          columns = 5;
+        } else if (availableWidth >= 900) {
+          columns = 4;
+        } else if (availableWidth >= 600) {
+          columns = 3;
+        } else {
+          columns = 2;
+        }
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(12).copyWith(bottom: 80),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columns,
+            childAspectRatio: Responsive.isDesktopLayout(context) ? 0.75 : 0.8,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
           ),
+          itemCount: recipes.length,
+          itemBuilder: (context, index) {
+            final recipe = recipes[index];
+            final l10n = AppLocalizations.of(context)!;
+            return ContextMenuRegion(
+              items: [
+                ContextMenuItem(
+                  icon: Icons.open_in_new_rounded,
+                  label: l10n.actionView,
+                  onTap: () => onTap(recipe.id),
+                ),
+                ContextMenuItem(
+                  icon: Icons.edit_rounded,
+                  label: l10n.actionEdit,
+                  onTap: () => context.push('/recipe/${recipe.id}/edit'),
+                ),
+                ContextMenuItem(
+                  icon: Icons.favorite_rounded,
+                  label: l10n.bulkFavorite,
+                  onTap: () {},
+                ),
+              ],
+              child: _MediumCard(
+                key: ValueKey(recipe.id),
+                recipe: recipe, tagsDao: tagsDao,
+                isSelecting: isSelecting,
+                isSelected: selectedIds.contains(recipe.id),
+                onTap: () => onTap(recipe.id),
+                onLongPress: () => onLongPress(recipe.id),
+              ),
+            );
+          },
         );
       },
     );
   }
 }
 
-class _MediumCard extends StatelessWidget {
+class _MediumCard extends StatefulWidget {
   final Recipe recipe;
   final TagsDao tagsDao;
   final bool isSelecting;
@@ -821,10 +842,23 @@ class _MediumCard extends StatelessWidget {
   });
 
   @override
+  State<_MediumCard> createState() => _MediumCardState();
+}
+
+class _MediumCardState extends State<_MediumCard> {
+  bool _hovered = false;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final recipe = widget.recipe;
+    final isSelecting = widget.isSelecting;
+    final isSelected = widget.isSelected;
+    final onTap = widget.onTap;
+    final onLongPress = widget.onLongPress;
+    final isDesktop = Responsive.isDesktopLayout(context);
 
-    return Card(
+    Widget card = Card(
       clipBehavior: Clip.antiAlias,
       shape: isSelected
           ? RoundedRectangleBorder(
@@ -843,6 +877,7 @@ class _MediumCard extends StatelessWidget {
               flex: 3,
               child: Stack(
                 fit: StackFit.expand,
+                clipBehavior: Clip.hardEdge,
                 children: [
                   Container(
                     color: theme.colorScheme.primaryContainer,
@@ -913,7 +948,7 @@ class _MediumCard extends StatelessWidget {
                       ),
                     ),
                     FutureBuilder<List<Tag>>(
-                      future: tagsDao.getTagsForRecipe(recipe.id),
+                      future: widget.tagsDao.getTagsForRecipe(recipe.id),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
                         return Padding(
@@ -931,6 +966,21 @@ class _MediumCard extends StatelessWidget {
         ),
       ),
     );
+
+    if (isDesktop) {
+      card = MouseRegion(
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: AnimatedScale(
+          scale: _hovered ? 1.02 : 1.0,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOut,
+          child: card,
+        ),
+      );
+    }
+
+    return card;
   }
 
   Widget _buildMetaRow(Recipe recipe, ThemeData theme) {

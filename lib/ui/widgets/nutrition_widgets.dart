@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../data/nutrition_data.dart';
+import '../../utils/responsive_utils.dart';
 
 /// Displays nutrition information in a compact card format
 class NutritionCard extends StatelessWidget {
@@ -690,10 +691,8 @@ class AddNutritionButton extends StatelessWidget {
   }
 
   void _showEditSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (context) => NutritionEditSheet(
         initialData: currentData,
         onSave: onSave,

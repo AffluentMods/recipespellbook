@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/subscription_provider.dart';
 import '../services/revenuecat_service.dart';
+import '../utils/responsive_utils.dart';
 
 // ════════════════════════════════════════════════════════════════
 //  FEATURE DEFINITIONS
@@ -212,8 +213,8 @@ bool checkFeatureAccess(
   if (feature.isUnlockedFor(tier)) return true;
 
   // Show upgrade prompt
-  showModalBottomSheet(
-    context: context,
+  Responsive.showAdaptiveSheet(
+    context,
     builder: (ctx) {
       final theme = Theme.of(ctx);
       return Padding(
@@ -295,8 +296,8 @@ bool checkStorageLimit(
   if (currentUsageBytes + newPhotoBytes <= maxBytes) return true;
 
   // Storage limit reached
-  showModalBottomSheet(
-    context: context,
+  Responsive.showAdaptiveSheet(
+    context,
     builder: (ctx) {
       final theme = Theme.of(ctx);
       final usedMB = (currentUsageBytes / (1024 * 1024)).toStringAsFixed(1);

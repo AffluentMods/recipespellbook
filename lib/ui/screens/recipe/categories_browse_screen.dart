@@ -128,7 +128,7 @@ class _CategoriesBrowseScreenState extends ConsumerState<CategoriesBrowseScreen>
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
-            child: Column(
+            child: Responsive.constrainWidth(context, child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // View All Recipes button
@@ -197,7 +197,7 @@ class _CategoriesBrowseScreenState extends ConsumerState<CategoriesBrowseScreen>
 
                 const SizedBox(height: 32),
               ],
-            ),
+            )),
           );
         },
       ),
@@ -224,7 +224,7 @@ class _CategoriesBrowseScreenState extends ConsumerState<CategoriesBrowseScreen>
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: Responsive.browseGridColumns(context),
-        childAspectRatio: 1.5,
+        childAspectRatio: Responsive.isDesktopLayout(context) ? 1.8 : 1.5,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
       ),

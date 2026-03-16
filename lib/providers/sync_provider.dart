@@ -148,11 +148,31 @@ class SyncNotifier extends StateNotifier<SyncState> {
     return result;
   }
 
+  /// Minimum interval between auto-syncs to prevent rapid loops.
+  static const _minAutoSyncInterval = Duration(seconds: 30);
+  DateTime? _lastAutoSync;
+
+  /// Whether we've already attempted a recovery full-sync this session.
+  bool _recoveryAttempted = false;
+
   /// Auto-sync: silently attempt sync. Does not update error state
   /// on failure (to avoid spamming the UI on transient network issues).
+  ///
+  /// Includes automatic recovery: if an incremental sync exchanges only
+  /// metadata (0 recipes/shopping items pushed or pulled) but the client
+  /// has real entities locally, one full sync is triggered to repair
+  /// poisoned timestamps. This only happens once per session.
   Future<void> autoSync() async {
     if (!_isSignedIn || !_hasCloudSync) return;
     if (state.isSyncing) return;
+
+    // Debounce: prevent rapid successive auto-syncs
+    if (_lastAutoSync != null &&
+        DateTime.now().difference(_lastAutoSync!) < _minAutoSyncInterval) {
+      debugPrint('[SyncProvider] Auto-sync skipped — too soon (${DateTime.now().difference(_lastAutoSync!).inSeconds}s)');
+      return;
+    }
+    _lastAutoSync = DateTime.now();
 
     debugPrint('[SyncProvider] Auto-sync starting...');
 
@@ -168,6 +188,31 @@ class SyncNotifier extends StateNotifier<SyncState> {
       );
       debugPrint('[SyncProvider] Auto-sync complete: '
           '+${result.pushedCount} pushed, +${result.pulledCount} pulled');
+
+      // Recovery detection: if incremental sync exchanged only small-table
+      // metadata but we have real content locally, timestamps are poisoned.
+      // Do ONE full sync to repair.
+      if (!_recoveryAttempted && result.pushedCount > 0) {
+        final needsRecovery = await _service.needsFullSyncRecovery();
+        if (needsRecovery) {
+          _recoveryAttempted = true;
+          debugPrint('[SyncProvider] Detected stale sync state — triggering recovery full sync');
+          state = state.copyWith(status: SyncStatus.syncing);
+          final recovery = await _service.sync(fullSync: true);
+          if (recovery.success) {
+            state = state.copyWith(
+              status: SyncStatus.success,
+              lastSyncAt: recovery.syncedAt,
+              pushedCount: recovery.pushedCount,
+              pulledCount: recovery.pulledCount,
+            );
+            debugPrint('[SyncProvider] Recovery sync complete: '
+                '+${recovery.pushedCount} pushed, +${recovery.pulledCount} pulled');
+          }
+        } else {
+          _recoveryAttempted = true; // No recovery needed, don't check again
+        }
+      }
     } else {
       // Silently revert to idle on failure — don't show errors for auto-sync
       state = state.copyWith(status: SyncStatus.idle);

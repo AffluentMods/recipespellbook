@@ -10,6 +10,7 @@ import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../services/ai_import_service.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 
 /// Screen for importing recipes from AI-generated JSON.
@@ -96,10 +97,8 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
     final ingredients = (data['ingredients'] as List?) ?? [];
     final steps = (data['steps'] as List?) ?? [];
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.75,

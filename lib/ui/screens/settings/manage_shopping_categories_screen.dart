@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../../data/localized_defaults.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
@@ -558,8 +559,8 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
               InkWell(
                 onTap: () async {
                   final categories = shoppingCategoryKeywords.keys.toList();
-                  final result = await showModalBottomSheet<String>(
-                    context: ctx,
+                  final result = await Responsive.showAdaptiveSheet<String>(
+                    ctx,
                     builder: (bCtx) => SafeArea(
                       child: ListView(
                         shrinkWrap: true,
@@ -622,9 +623,8 @@ class _MappingsTabState extends ConsumerState<_MappingsTab> {
     final l10n = AppLocalizations.of(context)!;
     final categories = shoppingCategoryKeywords.keys.toList();
 
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,

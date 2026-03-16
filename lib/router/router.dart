@@ -57,203 +57,92 @@ final router = GoRouter(
   navigatorKey: rootNavigatorKey,
   initialLocation: '/splash',
   routes: [
-    // Search (outside shell)
-    GoRoute(
-      path: '/search',
-      name: 'search',
-      builder: (context, state) => const SearchScreen(),
-    ),
+    // ── Screens OUTSIDE the shell (truly modal / fullscreen) ──
     GoRoute(
       path: '/splash',
       name: 'splash',
       builder: (context, state) => const SplashScreen(),
     ),
-    // Filtered recipe list (outside shell)
+
+    // Recipe edit (fullscreen modal — no sidebar)
     GoRoute(
-      path: '/recipes',
-      name: 'recipe-list',
+      path: '/recipe/:id/edit',
+      name: 'recipe-edit',
+      parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) {
-        final courseId = state.uri.queryParameters['course'];
-        final categoryId = state.uri.queryParameters['category'];
-        final cookbookId = state.uri.queryParameters['cookbook'] ?? 'starter';
-        final l10n = AppLocalizations.of(context)!;
-        return RecipeListScreen(
-          title: l10n.recipesTitle,
-          cookbookId: cookbookId,
-          courseId: courseId,
-          categoryId: categoryId,
-        );
+        final id = state.pathParameters['id']!;
+        return RecipeEditScreen(recipeId: id);
       },
     ),
 
-    // Browse all categories (categories first)
+    // New recipe (fullscreen modal — no sidebar)
     GoRoute(
-      path: '/categories',
-      name: 'categories',
-      builder: (context, state) => const CategoriesBrowseScreen(mode: BrowseMode.categories),
-    ),
-
-    // Browse all courses (courses first)
-    GoRoute(
-      path: '/courses',
-      name: 'courses',
-      builder: (context, state) => const CategoriesBrowseScreen(mode: BrowseMode.courses),
-    ),
-
-    // All recipes for a cookbook (View All from categories/courses browse)
-    GoRoute(
-      path: '/recipes/all',
-      name: 'all-recipes',
-      builder: (context, state) {
-        final cookbookId = state.uri.queryParameters['cookbook'] ?? 'starter';
-        final l10n = AppLocalizations.of(context)!;
-        return RecipeListScreen(
-          title: l10n.browseViewAll,
-          cookbookId: cookbookId,
-        );
-      },
-    ),
-
-    // Uncategorized recipes
-    GoRoute(
-      path: '/recipes/uncategorized',
-      name: 'uncategorized-recipes',
-      builder: (context, state) => const UncategorizedRecipesScreen(),
-    ),
-
-    GoRoute(
-      path: '/settings/tags',
-      name: 'manage-tags',
-      builder: (context, state) => const ManageTagsScreen(),
-    ),
-
-    GoRoute(
-      path: '/cookbook/:cookbookId/edit',
-      name: 'cookbook-edit',
+      path: '/cookbook/:cookbookId/new-recipe',
+      name: 'new-recipe',
+      parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) {
         final cookbookId = state.pathParameters['cookbookId']!;
-        return CookbookEditScreen(cookbookId: cookbookId);
-      },
-    ),
-
-    // Recently viewed recipes
-    GoRoute(
-      path: '/recipes/recent',
-      name: 'recent-recipes',
-      builder: (context, state) => const RecentRecipesScreen(),
-    ),
-
-    GoRoute(
-      path: '/settings/appearance',
-      name: 'appearance',
-      builder: (context, state) => const AppearanceScreen(),
-    ),
-
-    GoRoute(
-      path: '/settings/allergies',
-      name: 'allergy-settings',
-      builder: (context, state) => const AllergySettingsScreen(),
-    ),
-
-    GoRoute(
-      path: '/settings/recipe-layout',
-      name: 'recipe-layout',
-      builder: (context, state) => const RecipeLayoutSettingsScreen(),
-    ),
-
-    GoRoute(
-      path: '/settings/ingredient-layout',
-      name: 'ingredient-layout',
-      builder: (context, state) => const IngredientLayoutSettingsScreen(),
-    ),
-
-    GoRoute(
-      path: '/settings/nutrition',
-      name: 'nutrition-settings',
-      builder: (context, state) => const NutritionSettingsScreen(),
-    ),
-
-    GoRoute(
-      path: '/substitutions',
-      name: 'substitutions',
-      builder: (context, state) => IngredientSubstitutionsScreen(
-        initialSearch: state.uri.queryParameters['q'],
-      ),
-    ),
-
-    GoRoute(
-      path: '/settings/quick-access',
-      name: 'quick-access-settings',
-      builder: (context, state) => const QuickAccessSettingsScreen(),
-    ),
-
-    GoRoute(
-      path: '/settings/placeholders',
-      name: 'placeholders',
-      builder: (context, state) => const PlaceholderSettingsScreen(),
-    ),
-
-    GoRoute(
-      path: '/settings/courses',
-      name: 'manage-courses',
-      builder: (context, state) => const ManageCoursesScreen(),
-    ),
-
-    GoRoute(
-      path: '/settings/categories',
-      name: 'manage-categories',
-      builder: (context, state) => const ManageCategoriesScreen(),
-    ),
-
-    GoRoute(
-      path: '/settings/shopping-categories',
-      name: 'manage-shopping-categories',
-      builder: (context, state) => const ManageShoppingCategoriesScreen(),
-    ),
-
-    GoRoute(
-      path: '/recipes/quick-access',
-      name: 'quick-access',
-      builder: (context, state) => const QuickAccessScreen(),
-    ),
-    GoRoute(
-      path: '/recipes/list',
-      name: 'recipes-list-extra',
-      builder: (context, state) {
         final extra = state.extra as Map<String, dynamic>?;
-        return RecipeListScreen(
-          cookbookId: extra?['cookbookId'] ?? 'starter',
-          courseId: extra?['courseId'],
-          categoryId: extra?['categoryId'],
-          title: extra?['title'] ?? 'Recipes',
+        return RecipeEditScreen(
+          cookbookId: cookbookId,
+          importedData: extra,
         );
       },
     ),
 
-    // Favorite recipes
+    // Upgrade paywall (fullscreen modal)
     GoRoute(
-      path: '/recipes/favorites',
-      name: 'favorite-recipes',
-      builder: (context, state) => const FavoriteRecipesScreen(),
+      path: '/upgrade',
+      name: 'upgrade',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const PaywallScreen(),
     ),
 
-    // TODO: Kitchen Buddy routes hidden for now — finish if app grows
-    // GoRoute(
-    //   path: '/kitchen-buddy',
-    //   name: 'kitchen-buddy',
-    //   builder: (context, state) => const KitchenBuddyScreen(),
-    // ),
-    // GoRoute(
-    //   path: '/kitchen-buddy/naming',
-    //   name: 'kitchen-buddy-naming',
-    //   builder: (context, state) => const BuddyNamingScreen(),
-    // ),
+    // Transfer data (fullscreen modal)
+    GoRoute(
+      path: '/transfer',
+      name: 'transfer',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const TransferScreen(),
+    ),
 
-    // Main shell with bottom navigation
+    // Barcode scanner (fullscreen camera)
+    GoRoute(
+      path: '/scan-barcode',
+      name: 'scan-barcode',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const BarcodeScannerScreen(),
+    ),
+
+    // Kroger OAuth callback
+    GoRoute(
+      path: '/kroger-callback',
+      name: 'kroger-callback',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final code = state.uri.queryParameters['code'];
+        final error = state.uri.queryParameters['error'];
+        return KrogerCallbackScreen(authCode: code, error: error);
+      },
+    ),
+
+    // Notifications (fullscreen overlay)
+    GoRoute(
+      path: '/notifications',
+      name: 'notifications',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const NotificationsScreen(),
+    ),
+
+    // ═══════════════════════════════════════════════════════
+    // SHELL ROUTE — sidebar/nav-rail/bottom-nav visible
+    // All screens that should show the sidebar on desktop
+    // ═══════════════════════════════════════════════════════
     ShellRoute(
       navigatorKey: shellNavigatorKey,
       builder: (context, state, child) => AppShell(child: child),
       routes: [
+        // ── Main tabs (no transition animation) ──
         GoRoute(
           path: '/',
           name: 'home',
@@ -282,156 +171,242 @@ final router = GoRouter(
             child: PlannerScreen(),
           ),
         ),
+
+        // ── Recipe browse screens (sidebar visible) ──
+        GoRoute(
+          path: '/recipes',
+          name: 'recipe-list',
+          builder: (context, state) {
+            final courseId = state.uri.queryParameters['course'];
+            final categoryId = state.uri.queryParameters['category'];
+            final cookbookId = state.uri.queryParameters['cookbook'] ?? 'starter';
+            final l10n = AppLocalizations.of(context)!;
+            return RecipeListScreen(
+              title: l10n.recipesTitle,
+              cookbookId: cookbookId,
+              courseId: courseId,
+              categoryId: categoryId,
+            );
+          },
+        ),
+        GoRoute(
+          path: '/recipes/all',
+          name: 'all-recipes',
+          builder: (context, state) {
+            final cookbookId = state.uri.queryParameters['cookbook'] ?? 'starter';
+            final l10n = AppLocalizations.of(context)!;
+            return RecipeListScreen(
+              title: l10n.browseViewAll,
+              cookbookId: cookbookId,
+            );
+          },
+        ),
+        GoRoute(
+          path: '/recipes/uncategorized',
+          name: 'uncategorized-recipes',
+          builder: (context, state) => const UncategorizedRecipesScreen(),
+        ),
+        GoRoute(
+          path: '/recipes/recent',
+          name: 'recent-recipes',
+          builder: (context, state) => const RecentRecipesScreen(),
+        ),
+        GoRoute(
+          path: '/recipes/quick-access',
+          name: 'quick-access',
+          builder: (context, state) => const QuickAccessScreen(),
+        ),
+        GoRoute(
+          path: '/recipes/list',
+          name: 'recipes-list-extra',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            return RecipeListScreen(
+              cookbookId: extra?['cookbookId'] ?? 'starter',
+              courseId: extra?['courseId'],
+              categoryId: extra?['categoryId'],
+              title: extra?['title'] ?? 'Recipes',
+            );
+          },
+        ),
+        GoRoute(
+          path: '/recipes/favorites',
+          name: 'favorite-recipes',
+          builder: (context, state) => const FavoriteRecipesScreen(),
+        ),
+
+        // ── Category/Course browse (sidebar visible) ──
+        GoRoute(
+          path: '/categories',
+          name: 'categories',
+          builder: (context, state) => const CategoriesBrowseScreen(mode: BrowseMode.categories),
+        ),
+        GoRoute(
+          path: '/courses',
+          name: 'courses',
+          builder: (context, state) => const CategoriesBrowseScreen(mode: BrowseMode.courses),
+        ),
+
+        // ── Recipe detail view (sidebar visible on desktop) ──
+        GoRoute(
+          path: '/recipe/:id',
+          name: 'recipe',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return RecipeScreen(recipeId: id);
+          },
+        ),
+
+        // ── Search (sidebar visible) ──
+        GoRoute(
+          path: '/search',
+          name: 'search',
+          builder: (context, state) => const SearchScreen(),
+        ),
+
+        // ── Substitutions (sidebar visible) ──
+        GoRoute(
+          path: '/substitutions',
+          name: 'substitutions',
+          builder: (context, state) => IngredientSubstitutionsScreen(
+            initialSearch: state.uri.queryParameters['q'],
+          ),
+        ),
+
+        // ── Cookbook edit (sidebar visible) ──
+        GoRoute(
+          path: '/cookbook/:cookbookId/edit',
+          name: 'cookbook-edit',
+          builder: (context, state) {
+            final cookbookId = state.pathParameters['cookbookId']!;
+            return CookbookEditScreen(cookbookId: cookbookId);
+          },
+        ),
+
+        // ── Community (sidebar visible) ──
+        GoRoute(
+          path: '/community',
+          name: 'community',
+          builder: (context, state) => const CommunityScreen(),
+        ),
+        GoRoute(
+          path: '/community/publish',
+          name: 'community-publish',
+          builder: (context, state) => const CommunityPublishScreen(),
+        ),
+        GoRoute(
+          path: '/community/my-publications',
+          name: 'community-my-publications',
+          builder: (context, state) => const CommunityMyPublicationsScreen(),
+        ),
+        GoRoute(
+          path: '/community/:id',
+          name: 'community-detail',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return CommunityDetailScreen(publicationId: id);
+          },
+        ),
+        GoRoute(
+          path: '/community/:id/recipe/:index',
+          name: 'community-recipe',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            final recipe = state.extra as CommunityRecipe;
+            return CommunityRecipeFullScreen(
+              publicationId: id,
+              recipe: recipe,
+            );
+          },
+        ),
+
+        // ── Settings (sidebar visible) ──
+        GoRoute(
+          path: '/settings',
+          name: 'settings',
+          builder: (context, state) => const SettingsScreen(),
+        ),
+        GoRoute(
+          path: '/settings/account',
+          name: 'account',
+          builder: (context, state) => const AccountScreen(),
+        ),
+        GoRoute(
+          path: '/settings/tags',
+          name: 'manage-tags',
+          builder: (context, state) => const ManageTagsScreen(),
+        ),
+        GoRoute(
+          path: '/settings/appearance',
+          name: 'appearance',
+          builder: (context, state) => const AppearanceScreen(),
+        ),
+        GoRoute(
+          path: '/settings/allergies',
+          name: 'allergy-settings',
+          builder: (context, state) => const AllergySettingsScreen(),
+        ),
+        GoRoute(
+          path: '/settings/recipe-layout',
+          name: 'recipe-layout',
+          builder: (context, state) => const RecipeLayoutSettingsScreen(),
+        ),
+        GoRoute(
+          path: '/settings/ingredient-layout',
+          name: 'ingredient-layout',
+          builder: (context, state) => const IngredientLayoutSettingsScreen(),
+        ),
+        GoRoute(
+          path: '/settings/nutrition',
+          name: 'nutrition-settings',
+          builder: (context, state) => const NutritionSettingsScreen(),
+        ),
+        GoRoute(
+          path: '/settings/quick-access',
+          name: 'quick-access-settings',
+          builder: (context, state) => const QuickAccessSettingsScreen(),
+        ),
+        GoRoute(
+          path: '/settings/placeholders',
+          name: 'placeholders',
+          builder: (context, state) => const PlaceholderSettingsScreen(),
+        ),
+        GoRoute(
+          path: '/settings/courses',
+          name: 'manage-courses',
+          builder: (context, state) => const ManageCoursesScreen(),
+        ),
+        GoRoute(
+          path: '/settings/categories',
+          name: 'manage-categories',
+          builder: (context, state) => const ManageCategoriesScreen(),
+        ),
+        GoRoute(
+          path: '/settings/shopping-categories',
+          name: 'manage-shopping-categories',
+          builder: (context, state) => const ManageShoppingCategoriesScreen(),
+        ),
+        GoRoute(
+          path: '/settings/trash',
+          name: 'trash',
+          builder: (context, state) => const TrashScreen(),
+        ),
+        GoRoute(
+          path: '/settings/family',
+          name: 'family',
+          builder: (context, state) => const FamilyScreen(),
+        ),
+        GoRoute(
+          path: '/settings/notifications',
+          name: 'notification-settings',
+          builder: (context, state) => const NotificationSettingsScreen(),
+        ),
+        GoRoute(
+          path: '/about',
+          name: 'about',
+          builder: (context, state) => const AboutScreen(),
+        ),
       ],
-    ),
-
-    // Barcode scanner
-    GoRoute(
-      path: '/scan-barcode',
-      name: 'scan-barcode',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const BarcodeScannerScreen(),
-    ),
-
-    // Kroger OAuth callback (deep link: recipespellbook://kroger-callback?code=XXX)
-    GoRoute(
-      path: '/kroger-callback',
-      name: 'kroger-callback',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) {
-        final code = state.uri.queryParameters['code'];
-        final error = state.uri.queryParameters['error'];
-        return KrogerCallbackScreen(authCode: code, error: error);
-      },
-    ),
-
-    // Settings
-    GoRoute(
-      path: '/settings',
-      name: 'settings',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const SettingsScreen(),
-    ),
-    GoRoute(
-      path: '/settings/account',
-      name: 'account',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const AccountScreen(),
-    ),
-    GoRoute(
-      path: '/about',
-      name: 'about',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const AboutScreen(),
-    ),
-
-    // Recipe view
-    GoRoute(
-      path: '/recipe/:id',
-      name: 'recipe',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) {
-        final id = state.pathParameters['id']!;
-        return RecipeScreen(recipeId: id);
-      },
-    ),
-
-    // ── Upgrade & Transfer — full-screen pushes via rootNavigatorKey ──
-    GoRoute(
-      path: '/upgrade',
-      name: 'upgrade',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const PaywallScreen(),
-    ),
-    GoRoute(
-      path: '/transfer',
-      name: 'transfer',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const TransferScreen(),
-    ),
-
-    GoRoute(
-      path: '/settings/trash',
-      name: 'trash',
-      builder: (context, state) => const TrashScreen(),
-    ),
-    GoRoute(
-      path: '/settings/family',
-      name: 'family',
-      builder: (context, state) => const FamilyScreen(),
-    ),
-    GoRoute(
-      path: '/settings/notifications',
-      name: 'notification-settings',
-      builder: (context, state) => const NotificationSettingsScreen(),
-    ),
-    GoRoute(
-      path: '/notifications',
-      name: 'notifications',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const NotificationsScreen(),
-    ),
-
-    // ── Community ──
-    GoRoute(
-      path: '/community',
-      name: 'community',
-      builder: (context, state) => const CommunityScreen(),
-    ),
-    GoRoute(
-      path: '/community/publish',
-      name: 'community-publish',
-      builder: (context, state) => const CommunityPublishScreen(),
-    ),
-    GoRoute(
-      path: '/community/my-publications',
-      name: 'community-my-publications',
-      builder: (context, state) => const CommunityMyPublicationsScreen(),
-    ),
-    GoRoute(
-      path: '/community/:id',
-      name: 'community-detail',
-      builder: (context, state) {
-        final id = state.pathParameters['id']!;
-        return CommunityDetailScreen(publicationId: id);
-      },
-    ),
-    GoRoute(
-      path: '/community/:id/recipe/:index',
-      name: 'community-recipe',
-      builder: (context, state) {
-        final id = state.pathParameters['id']!;
-        final recipe = state.extra as CommunityRecipe;
-        return CommunityRecipeFullScreen(
-          publicationId: id,
-          recipe: recipe,
-        );
-      },
-    ),
-    // Recipe edit (existing recipe)
-    GoRoute(
-      path: '/recipe/:id/edit',
-      name: 'recipe-edit',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) {
-        final id = state.pathParameters['id']!;
-        return RecipeEditScreen(recipeId: id);
-      },
-    ),
-
-    // New recipe (optionally with imported data)
-    GoRoute(
-      path: '/cookbook/:cookbookId/new-recipe',
-      name: 'new-recipe',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) {
-        final cookbookId = state.pathParameters['cookbookId']!;
-        final extra = state.extra as Map<String, dynamic>?;
-        return RecipeEditScreen(
-          cookbookId: cookbookId,
-          importedData: extra,
-        );
-      },
     ),
   ],
 );

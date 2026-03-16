@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
+import '../../utils/responsive_utils.dart';
 import 'app_snackbar.dart';
 // TODO: Kitchen Buddy hidden for now
 // import 'kitchen_buddy/kitchen_buddy_integration.dart';
@@ -18,12 +19,8 @@ void showAddToMealPlanSheet(
     String recipeId,
     String recipeTitle,
     ) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
+  Responsive.showAdaptiveSheet(
+    context,
     builder: (sheetContext) => _AddToMealPlanSheet(
       recipeId: recipeId,
       recipeTitle: recipeTitle,

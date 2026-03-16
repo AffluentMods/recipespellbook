@@ -133,6 +133,47 @@ class SyncService {
     }
   }
 
+  /// Check if a full sync recovery is needed.
+  ///
+  /// Returns true if the client has recipes or shopping items locally
+  /// but the last incremental sync didn't include any of them (suggesting
+  /// timestamps are poisoned — lastSyncAt is newer than all entities'
+  /// updatedAt, so nothing gets pushed or pulled).
+  Future<bool> needsFullSyncRecovery() async {
+    if (_db == null) return false;
+    final db = _db!;
+
+    final lastSync = await getLastSyncAt();
+    if (lastSync == null) return false; // No lastSyncAt = already doing full sync
+
+    // Count local entities that SHOULD exist on server
+    final totalRecipes = await db.select(db.recipes).get();
+    final totalShoppingItems = await db.select(db.shoppingListItems).get();
+
+    if (totalRecipes.isEmpty && totalShoppingItems.isEmpty) return false;
+
+    // Count entities that WOULD be included in an incremental push
+    final recentRecipes = await (db.select(db.recipes)
+      ..where((r) => r.updatedAt.isBiggerThanValue(lastSync)))
+        .get();
+    final recentItems = await (db.select(db.shoppingListItems)
+      ..where((si) => si.updatedAt.isBiggerThanValue(lastSync)))
+        .get();
+
+    // If we have entities but none are recent enough to push, timestamps are stale
+    final hasContent = totalRecipes.isNotEmpty || totalShoppingItems.isNotEmpty;
+    final nothingToPush = recentRecipes.isEmpty && recentItems.isEmpty;
+
+    if (hasContent && nothingToPush) {
+      debugPrint('[Sync] Recovery check: ${totalRecipes.length} recipes, '
+          '${totalShoppingItems.length} shopping items locally, '
+          'but 0 would be pushed (lastSync: ${lastSync.toIso8601String()})');
+      return true;
+    }
+
+    return false;
+  }
+
   // ════════════════════════════════════════════
   //  CORE SYNC
   // ════════════════════════════════════════════
@@ -161,12 +202,18 @@ class SyncService {
       };
 
       int pushedCount = 0;
-      for (final val in localData.values) {
-        if (val is List) pushedCount += val.length;
+      final pushBreakdown = <String>[];
+      for (final entry in localData.entries) {
+        if (entry.value is List) {
+          final len = (entry.value as List).length;
+          pushedCount += len;
+          if (len > 0) pushBreakdown.add('${entry.key}:$len');
+        }
       }
 
       debugPrint('[Sync] Pushing $pushedCount entities '
           '(lastSync: ${lastSyncAt?.toIso8601String() ?? 'never'})');
+      debugPrint('[Sync] Push breakdown: ${pushBreakdown.join(', ')}');
 
       final response = await _auth.post('/v1/sync/push', pushBody);
 
@@ -293,8 +340,15 @@ class SyncService {
   Future<Map<String, dynamic>> _collectLocalData(DateTime? since) async {
     final db = _db!;
 
-    // ── Cookbooks: updatedAt is nullable, always push all (tiny dataset) ──
-    final cookbooks = await db.select(db.cookbooks).get();
+    // ── Cookbooks: filter by updatedAt like other timestamp-tracked tables ──
+    List<Cookbook> cookbooks;
+    if (since != null) {
+      cookbooks = await (db.select(db.cookbooks)
+        ..where((cb) => cb.updatedAt.isNotNull() & cb.updatedAt.isBiggerThanValue(since)))
+          .get();
+    } else {
+      cookbooks = await db.select(db.cookbooks).get();
+    }
 
     // ── Recipes: updatedAt is non-nullable ──
     List<Recipe> recipes;
@@ -340,12 +394,46 @@ class SyncService {
     // This prevents foreign key violations when the backend inserts links sequentially.
     _topologicalSortRecipes(recipeMaps);
 
-    // ── Small tables: no updatedAt, always push all ──
-    final categories = await db.select(db.categories).get();
-    final customCategories = await db.select(db.customCategories).get();
-    final customCourses = await db.select(db.customCourses).get();
-    final tags = await db.select(db.tags).get();
-    final shoppingCategories = await db.select(db.shoppingCategories).get();
+    // ── Small tables: no updatedAt field ──
+    // On full sync (since == null): push all.
+    // On incremental sync: only push items created since lastSync (new items).
+    // The server always returns ALL of these on pull, so existing items
+    // stay in sync without being re-pushed every time.
+    List<Category> categories;
+    List<CustomCategory> customCategories;
+    List<CustomCourse> customCourses;
+    List<Tag> tags;
+    List<ShoppingCategory> shoppingCategories;
+
+    if (since != null) {
+      // Push items that were created OR soft-deleted since last sync
+      categories = await (db.select(db.categories)
+        ..where((c) => c.createdAt.isBiggerThanValue(since) |
+            (c.deletedAt.isNotNull() & c.deletedAt.isBiggerThanValue(since))))
+          .get();
+      customCategories = await (db.select(db.customCategories)
+        ..where((c) => c.createdAt.isBiggerThanValue(since) |
+            (c.deletedAt.isNotNull() & c.deletedAt.isBiggerThanValue(since))))
+          .get();
+      customCourses = await (db.select(db.customCourses)
+        ..where((c) => c.createdAt.isBiggerThanValue(since) |
+            (c.deletedAt.isNotNull() & c.deletedAt.isBiggerThanValue(since))))
+          .get();
+      tags = await (db.select(db.tags)
+        ..where((t) => t.createdAt.isBiggerThanValue(since) |
+            (t.deletedAt.isNotNull() & t.deletedAt.isBiggerThanValue(since))))
+          .get();
+      shoppingCategories = await (db.select(db.shoppingCategories)
+        ..where((sc) => sc.createdAt.isBiggerThanValue(since) |
+            (sc.deletedAt.isNotNull() & sc.deletedAt.isBiggerThanValue(since))))
+          .get();
+    } else {
+      categories = await db.select(db.categories).get();
+      customCategories = await db.select(db.customCategories).get();
+      customCourses = await db.select(db.customCourses).get();
+      tags = await db.select(db.tags).get();
+      shoppingCategories = await db.select(db.shoppingCategories).get();
+    }
 
     // ── Meal Plans: updatedAt non-nullable ──
     List<MealPlan> mealPlans;
@@ -398,17 +486,33 @@ class SyncService {
   Future<int> _applyServerData(Map<String, dynamic> data) async {
     int count = 0;
 
-    // Parent entities first, children after
-    count += await _upsertCookbooks(data['cookbooks']);
-    count += await _upsertCategories(data['categories']);
-    count += await _upsertCustomCategories(data['customCategories']);
-    count += await _upsertCustomCourses(data['customCourses']);
-    count += await _upsertTags(data['tags']);
-    count += await _upsertShoppingCategories(data['shoppingCategories']);
-    count += await _upsertRecipes(data['recipes']);
-    count += await _upsertMealPlans(data['mealPlans']);
-    count += await _upsertShoppingLists(data['shoppingLists']);
-    count += await _upsertShoppingListItems(data['shoppingListItems']);
+    // Log what the server sent back
+    final pullBreakdown = <String>[];
+    for (final key in ['cookbooks', 'recipes', 'categories', 'customCategories',
+        'customCourses', 'tags', 'shoppingCategories', 'shoppingLists',
+        'shoppingListItems', 'mealPlans']) {
+      final list = data[key];
+      if (list is List && list.isNotEmpty) pullBreakdown.add('$key:${list.length}');
+    }
+    debugPrint('[Sync] Pull breakdown: ${pullBreakdown.join(', ')}');
+
+    // Wrap ALL writes in a single transaction so Drift only fires
+    // stream notifications ONCE when the transaction commits,
+    // instead of after every individual insertOnConflictUpdate.
+    final db = _db!;
+    await db.transaction(() async {
+      // Parent entities first, children after
+      count += await _upsertCookbooks(data['cookbooks']);
+      count += await _upsertCategories(data['categories']);
+      count += await _upsertCustomCategories(data['customCategories']);
+      count += await _upsertCustomCourses(data['customCourses']);
+      count += await _upsertTags(data['tags']);
+      count += await _upsertShoppingCategories(data['shoppingCategories']);
+      count += await _upsertRecipes(data['recipes']);
+      count += await _upsertMealPlans(data['mealPlans']);
+      count += await _upsertShoppingLists(data['shoppingLists']);
+      count += await _upsertShoppingListItems(data['shoppingListItems']);
+    });
 
     return count;
   }
@@ -829,28 +933,40 @@ class SyncService {
         }
       }
 
-      // Replace recipe tags
-      if (d['recipeTags'] is List) {
+      // Replace recipe tags — handle both formats:
+      // Push sends 'tags' as flat string IDs, server may echo as 'tags' or 'recipeTags'
+      final tagsList = (d['recipeTags'] ?? d['tags']) as List?;
+      if (tagsList != null && tagsList.isNotEmpty) {
         await (db.delete(db.recipeTags)
           ..where((rt) => rt.recipeId.equals(recipeId)))
             .go();
-        for (final rt in d['recipeTags'] as List) {
-          final tagData = rt as Map<String, dynamic>;
+        for (final rt in tagsList) {
+          // Handle both string IDs and {tagId: ...} objects
+          late final String tagId;
+          if (rt is String) {
+            tagId = rt;
+          } else if (rt is Map<String, dynamic>) {
+            tagId = rt['tagId'] as String;
+          } else {
+            continue;
+          }
           await db.into(db.recipeTags).insert(
             RecipeTagsCompanion.insert(
               recipeId: recipeId,
-              tagId: tagData['tagId'] as String,
+              tagId: tagId,
             ),
           );
         }
       }
 
-      // Replace recipe links
-      if (d['sourceLinks'] is List) {
+      // Replace recipe links — handle both field names:
+      // Push sends 'recipeLinks', server may echo as 'recipeLinks' or 'sourceLinks'
+      final linksList = (d['sourceLinks'] ?? d['recipeLinks']) as List?;
+      if (linksList != null && linksList.isNotEmpty) {
         await (db.delete(db.recipeLinks)
           ..where((rl) => rl.sourceRecipeId.equals(recipeId)))
             .go();
-        for (final link in d['sourceLinks'] as List) {
+        for (final link in linksList) {
           final l = link as Map<String, dynamic>;
           await db.into(db.recipeLinks).insert(
             RecipeLinksCompanion.insert(
@@ -947,11 +1063,16 @@ class SyncService {
 
   String? _iso(DateTime? dt) => dt?.toUtc().toIso8601String();
 
+  /// Parse a date from the server. Uses epoch zero (1970) as fallback
+  /// instead of DateTime.now() to avoid marking pulled entities as "just modified"
+  /// which would trigger re-pushing and cause an infinite sync loop.
+  static final _epoch = DateTime.utc(1970);
+
   DateTime _parseDate(dynamic value) {
-    if (value == null) return DateTime.now();
-    if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+    if (value == null) return _epoch;
+    if (value is String) return DateTime.tryParse(value) ?? _epoch;
     if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
-    return DateTime.now();
+    return _epoch;
   }
 
   DateTime? _parseDateNullable(dynamic value) {

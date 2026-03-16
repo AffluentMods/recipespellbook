@@ -85,11 +85,14 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
     final selectedDate = ref.watch(selectedPlannerDateProvider);
     final mealPlansAsync = ref.watch(mealPlansForDateProvider(selectedDate));
     final mealCountsAsync = ref.watch(mealCountsForWeekProvider(_weekStart));
+    final isDesktop = Responsive.isDesktopLayout(context);
+
+    final weekDates = List.generate(7, (i) => _weekStart.add(Duration(days: i)));
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: Responsive.constrainWidth(context, child: Column(
+        child: Column(
           children: [
             // Header
             _PlannerHeader(
@@ -100,49 +103,61 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
               onMoreOptions: () => _showMoreOptions(context),
             ),
 
-            // Week strip - Mon to Sun
-            _WeekStrip(
-              weekStart: _weekStart,
-              selectedDate: selectedDate,
-              mealCounts: mealCountsAsync.when(
-                data: (counts) => counts,
-                loading: () => {},
-                error: (_, __) => {},
+            if (!isDesktop) ...[
+              // Week strip - Mon to Sun (mobile only)
+              Responsive.constrainWidth(context, child: _WeekStrip(
+                weekStart: _weekStart,
+                selectedDate: selectedDate,
+                mealCounts: mealCountsAsync.when(
+                  data: (counts) => counts,
+                  loading: () => {},
+                  error: (_, __) => {},
+                ),
+                onDateSelected: (date) {
+                  ref.read(selectedPlannerDateProvider.notifier).state = date;
+                },
+              )),
+
+              // Selected date header
+              Responsive.constrainWidth(context, child: _DateHeader(
+                date: selectedDate,
+                onTodayTap: _goToToday,
+              )),
+
+              // Meals for selected day
+              Expanded(
+                child: Responsive.constrainWidth(context, child: mealPlansAsync.when(
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
+                  data: (plans) => plans.isEmpty
+                      ? _EmptyDayState(
+                    date: selectedDate,
+                    onAddMeal: () => _showAddMealSheet(context, selectedDate),
+                  )
+                      : _MealsList(
+                    plans: plans,
+                    date: selectedDate,
+                    onAddMeal: () => _showAddMealSheet(context, selectedDate),
+                  ),
+                )),
               ),
-              onDateSelected: (date) {
-                ref.read(selectedPlannerDateProvider.notifier).state = date;
-              },
-            ),
-
-            // Selected date header
-            _DateHeader(
-              date: selectedDate,
-              onTodayTap: _goToToday,
-            ),
-
-            // Meals for selected day
-            Expanded(
-              child: mealPlansAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
-                data: (plans) => plans.isEmpty
-                    ? _EmptyDayState(
-                  date: selectedDate,
-                  onAddMeal: () => _showAddMealSheet(context, selectedDate),
-                )
-                    : _MealsList(
-                  plans: plans,
-                  date: selectedDate,
-                  onAddMeal: () => _showAddMealSheet(context, selectedDate),
+            ] else ...[
+              // Desktop 7-column week grid
+              Expanded(
+                child: _WeekGridView(
+                  weekDates: weekDates,
+                  onAddMeal: (date) => _showAddMealSheet(context, date),
                 ),
               ),
-            ),
+            ],
           ],
-        )),
+        ),
       ),
-      floatingActionButton: _ModernFAB(
-        onPressed: () => _showAddMealSheet(context, selectedDate),
-      ),
+      floatingActionButton: isDesktop
+          ? null
+          : _ModernFAB(
+              onPressed: () => _showAddMealSheet(context, selectedDate),
+            ),
     );
   }
 
@@ -150,20 +165,26 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
     final l10n = AppLocalizations.of(context)!;
     final selectedDate = ref.read(selectedPlannerDateProvider);
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+    Responsive.showAdaptiveSheet(
+      context,
+      desktopMaxWidth: 400,
+      desktopMaxHeight: 500,
       builder: (ctx) => Container(
-        height: MediaQuery.of(context).size.height * 0.65,
+        height: Responsive.isDesktopLayout(context)
+            ? null
+            : MediaQuery.of(context).size.height * 0.65,
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: Responsive.isDesktopLayout(context)
+              ? BorderRadius.circular(16)
+              : const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           children: [
-            const SizedBox(height: 12),
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+            if (!Responsive.isDesktopLayout(context)) ...[
+              const SizedBox(height: 12),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+            ],
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -204,20 +225,25 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
     final l10n = AppLocalizations.of(context)!;
     final mealPlanDao = ref.read(mealPlanDaoProvider);
 
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
+    Responsive.showAdaptiveSheet(
+      context,
+      desktopMaxWidth: 360,
+      desktopMaxHeight: 300,
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: Responsive.isDesktopLayout(context)
+              ? BorderRadius.circular(16)
+              : const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: 8),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+              if (!Responsive.isDesktopLayout(context)) ...[
+                const SizedBox(height: 8),
+                Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+              ],
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(Icons.share),
@@ -305,11 +331,345 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   }
 
   void _showAddMealSheet(BuildContext context, DateTime date) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => _AddMealSheet(date: date),
+    );
+  }
+}
+
+// ============ WEEK GRID VIEW (DESKTOP) ============
+
+class _WeekGridView extends StatelessWidget {
+  final List<DateTime> weekDates;
+  final ValueChanged<DateTime> onAddMeal;
+
+  const _WeekGridView({
+    required this.weekDates,
+    required this.onAddMeal,
+  });
+
+  static const double _minColumnWidth = 150.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final today = DateTime.now();
+    final todayNormalized = DateTime(today.year, today.month, today.day);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalMinWidth = weekDates.length * _minColumnWidth;
+        final needsScroll = constraints.maxWidth < totalMinWidth;
+
+        Widget buildColumns({required bool useFixedWidth}) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (int i = 0; i < weekDates.length; i++) ...[
+                if (i > 0)
+                  VerticalDivider(width: 1, thickness: 1, color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4)),
+                if (useFixedWidth)
+                  SizedBox(
+                    width: _minColumnWidth,
+                    child: _DayColumn(
+                      date: weekDates[i],
+                      isToday: DateTime(weekDates[i].year, weekDates[i].month, weekDates[i].day) == todayNormalized,
+                      onAddMeal: () => onAddMeal(weekDates[i]),
+                    ),
+                  )
+                else
+                  Expanded(
+                    child: _DayColumn(
+                      date: weekDates[i],
+                      isToday: DateTime(weekDates[i].year, weekDates[i].month, weekDates[i].day) == todayNormalized,
+                      onAddMeal: () => onAddMeal(weekDates[i]),
+                    ),
+                  ),
+              ],
+            ],
+          );
+        }
+
+        if (needsScroll) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: totalMinWidth + (weekDates.length - 1), // account for dividers
+              height: constraints.maxHeight,
+              child: buildColumns(useFixedWidth: true),
+            ),
+          );
+        }
+
+        return buildColumns(useFixedWidth: false);
+      },
+    );
+  }
+}
+
+// ============ DAY COLUMN (DESKTOP) ============
+
+class _DayColumn extends ConsumerWidget {
+  final DateTime date;
+  final bool isToday;
+  final VoidCallback onAddMeal;
+
+  const _DayColumn({
+    required this.date,
+    required this.isToday,
+    required this.onAddMeal,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final mealsAsync = ref.watch(mealPlansForDateProvider(date));
+
+    return Container(
+      color: isToday
+          ? const Color(0xFFE8A860).withValues(alpha: 0.08)
+          : null,
+      child: Column(
+        children: [
+          // Day header
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                ),
+              ),
+              color: isToday
+                  ? const Color(0xFFE8A860).withValues(alpha: 0.15)
+                  : null,
+            ),
+            child: Column(
+              children: [
+                Text(
+                  DateFormat.EEEE(locale).format(date),
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isToday
+                        ? const Color(0xFFE8A860)
+                        : theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: isToday
+                          ? const BoxDecoration(
+                              color: Color(0xFFE8A860),
+                              shape: BoxShape.circle,
+                            )
+                          : null,
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${date.day}',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: isToday
+                              ? Colors.white
+                              : theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      DateFormat.MMM(locale).format(date),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: isToday
+                            ? const Color(0xFFE8A860)
+                            : theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Meal list
+          Expanded(
+            child: mealsAsync.when(
+              loading: () => const Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+              error: (_, __) => const Center(child: Icon(Icons.error_outline, size: 18)),
+              data: (plans) {
+                if (plans.isEmpty) {
+                  return Center(
+                    child: Text(
+                      '',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.outline,
+                      ),
+                    ),
+                  );
+                }
+
+                // Group by meal type and sort
+                final grouped = <String, List<MealPlanWithRecipe>>{};
+                for (final plan in plans) {
+                  grouped.putIfAbsent(plan.mealPlan.mealType, () => []).add(plan);
+                }
+                final orderedTypes = ['Breakfast', 'Lunch', 'Dinner', 'Appetizer', 'Dessert', 'Snack'];
+                final sortedKeys = grouped.keys.toList()
+                  ..sort((a, b) {
+                    final aIdx = orderedTypes.indexOf(a);
+                    final bIdx = orderedTypes.indexOf(b);
+                    return (aIdx == -1 ? 999 : aIdx).compareTo(bIdx == -1 ? 999 : bIdx);
+                  });
+
+                return ListView(
+                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                  children: [
+                    for (final mealType in sortedKeys) ...[
+                      for (final plan in grouped[mealType]!)
+                        _CompactMealCard(plan: plan),
+                    ],
+                  ],
+                );
+              },
+            ),
+          ),
+
+          // Add button at bottom
+          InkWell(
+            onTap: onAddMeal,
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Center(
+                child: Icon(Icons.add, size: 18, color: theme.colorScheme.outline),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============ COMPACT MEAL CARD (DESKTOP) ============
+
+class _CompactMealCard extends ConsumerWidget {
+  final MealPlanWithRecipe plan;
+
+  const _CompactMealCard({required this.plan});
+
+  String _mealTypeEmoji(String mealType) {
+    switch (mealType.toLowerCase()) {
+      case 'breakfast': return '🌅';
+      case 'lunch': return '☀️';
+      case 'dinner': return '🌙';
+      case 'appetizer': return '🥗';
+      case 'dessert': return '🍰';
+      case 'snack': return '🍪';
+      default: return '🍽️';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final recipe = plan.recipe;
+    final mealPlanDao = ref.read(mealPlanDaoProvider);
+    final title = recipe?.title ?? plan.mealPlan.name ?? l10n.meal;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Material(
+        color: theme.colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(8),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () {
+            if (recipe != null) {
+              context.push('/recipe/${recipe.id}');
+            }
+          },
+          onLongPress: () {
+            showDialog(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: Text(l10n.removeMeal),
+                content: Text(l10n.removeMealConfirm(title)),
+                actions: [
+                  TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
+                  FilledButton(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      mealPlanDao.deleteMealPlan(plan.mealPlan.id);
+                      AppSnackbar.info(context, l10n.plannerMealRemoved);
+                    },
+                    style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                    child: Text(l10n.actionRemove),
+                  ),
+                ],
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+            child: Row(
+              children: [
+                if (recipe?.imagePath != null && recipe!.imagePath!.isNotEmpty) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: RecipeImage.thumbnail(
+                        imagePath: recipe.imagePath,
+                        recipeId: recipe.id,
+                        width: 24,
+                        height: 24,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                ],
+                Text(
+                  _mealTypeEmoji(plan.mealPlan.mealType),
+                  style: const TextStyle(fontSize: 12),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

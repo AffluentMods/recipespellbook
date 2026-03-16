@@ -273,8 +273,8 @@ class _CookbookGrid extends ConsumerWidget {
   void _showEditSheet(BuildContext context, WidgetRef ref, Cookbook cookbook) {
     final l10n = AppLocalizations.of(context)!;
 
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -321,8 +321,8 @@ class _CookbookGrid extends ConsumerWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -424,8 +424,8 @@ class _CookbookGrid extends ConsumerWidget {
   void _showLinkResult(BuildContext context, ShareLinkInfo link) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -493,8 +493,8 @@ class _CookbookGrid extends ConsumerWidget {
   void _showUpgradePrompt(BuildContext context, String featureName, String message) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),

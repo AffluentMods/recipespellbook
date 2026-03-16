@@ -20,23 +20,20 @@ import '../screens/import/ai_import_screen.dart';
 import '../screens/import/import_preview_screen.dart';
 import 'app_snackbar.dart';
 import '../../services/barcode_scanner_service.dart';
+import '../../utils/responsive_utils.dart';
 
 /// Shows the MODERN add recipe dialog with 2 options
 Future<void> showNewRecipeDialog(BuildContext context, String cookbookId) {
-  return showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
+  return Responsive.showAdaptiveSheet(
+    context,
     builder: (context) => _AddRecipeChooser(cookbookId: cookbookId),
   );
 }
 
 /// Also expose showImportDialog for direct access to import menu
 Future<void> showImportDialog(BuildContext context, String cookbookId) {
-  return showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
+  return Responsive.showAdaptiveSheet(
+    context,
     builder: (context) => _ImportRecipeSheet(cookbookId: cookbookId),
   );
 }
@@ -321,8 +318,8 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   // ========== IMAGE IMPORT ==========
   Future<void> _importFromImage() async {
     final l10n = AppLocalizations.of(context)!;
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
+    final source = await Responsive.showAdaptiveSheet<ImageSource>(
+      context,
       builder: (ctx) => SafeArea(
         child: Wrap(children: [
           if (supportsCamera)
@@ -398,8 +395,8 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   // ========== TEXT IMPORT ==========
   Future<void> _importFromText() async {
     final l10n = AppLocalizations.of(context)!;
-    final text = await showModalBottomSheet<String>(
-      context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+    final text = await Responsive.showAdaptiveSheet<String>(
+      context,
       builder: (ctx) => const _TextInputSheet(),
     );
     if (text == null || text.isEmpty) return;
@@ -670,7 +667,8 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                         Navigator.push(context,
                             MaterialPageRoute(builder: (_) => const AiImportScreen()));
                       }),
-                      _CircleOptionButton(icon: Icons.qr_code_scanner, label: l10n.scanBarcode, onTap: _importFromBarcode),
+                      if (supportsBarcodeScanner)
+                        _CircleOptionButton(icon: Icons.qr_code_scanner, label: l10n.scanBarcode, onTap: _importFromBarcode),
                     ],
                   ),
                   const SizedBox(height: 16),

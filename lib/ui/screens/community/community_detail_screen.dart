@@ -13,6 +13,7 @@ import '../../../providers/database_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/community_service.dart';
 import '../../../services/image_service.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/community_image.dart';
 import '../../widgets/community_tag_picker.dart';
@@ -239,8 +240,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 
   void _showDownloadChoice() {
     final d = _detail!;
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) {
         final theme = Theme.of(ctx);
         return SafeArea(
@@ -286,8 +287,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
       ('other', l10n.communityReportOther),
     ];
 
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) {
         final theme = Theme.of(ctx);
         final sl10n = AppLocalizations.of(ctx)!;
@@ -333,13 +334,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     final descCtrl = TextEditingController(text: d.description ?? '');
     var editTags = List<String>.from(d.tagList);
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
@@ -549,7 +545,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 
           // ── Content ──
           SliverToBoxAdapter(
-            child: Padding(
+            child: SelectionArea(child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -622,7 +618,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                   const SizedBox(height: 12),
                 ],
               ),
-            ),
+            )),
           ),
 
           // ── Recipe grid ──

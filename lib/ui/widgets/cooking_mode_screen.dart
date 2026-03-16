@@ -10,6 +10,7 @@ import 'package:recipespellbook/providers/database_provider.dart';
 
 import '../../../ui/widgets/nutrition_widgets.dart';
 import '../../ui/widgets/font_size_control.dart';
+import '../../utils/responsive_utils.dart';
 // TODO: Kitchen Buddy hidden for now
 // import 'kitchen_buddy/kitchen_buddy_integration.dart';
 
@@ -161,8 +162,8 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
 
   void _showTimerPicker() {
     final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => Container(
         padding: const EdgeInsets.all(24),
         child: Column(

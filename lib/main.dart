@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
 import 'services/notification_stub.dart' if (dart.library.io) 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,18 @@ import 'services/transfer_service.dart';
 import 'theme/app_theme.dart';
 import 'ui/screens/import/import_preview_screen.dart';
 import 'ui/widgets/app_shortcuts.dart';
+
+/// Custom scroll behavior that enables mouse drag scrolling for horizontal
+/// lists on desktop (trackpad, mouse, stylus all work like touch).
+class AppScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.trackpad,
+    PointerDeviceKind.stylus,
+  };
+}
 
 Future<void> main() async {
   // Global error boundary — catch uncaught async errors
@@ -83,6 +96,7 @@ class RecipeSpellbookApp extends ConsumerWidget {
     return _AppLifecycleManager(
       child: MaterialApp.router(
         title: 'Recipe Spellbook',
+        scrollBehavior: AppScrollBehavior(),
         debugShowCheckedModeBanner: false,
         localizationsDelegates: const [
           AppLocalizations.delegate,

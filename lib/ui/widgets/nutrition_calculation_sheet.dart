@@ -12,6 +12,7 @@ import '../../services/nutrition_calculator.dart';
 import '../../services/usda_service.dart';
 import 'app_snackbar.dart';
 import 'recipe_image.dart';
+import '../../utils/responsive_utils.dart';
 
 /// Shows the nutrition calculation process and results
 class NutritionCalculationSheet extends ConsumerStatefulWidget {
@@ -37,11 +38,8 @@ class NutritionCalculationSheet extends ConsumerStatefulWidget {
     NutritionData? existingNutrition,
     String? recipeId,
   }) {
-    return showModalBottomSheet<NutritionData>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+    return Responsive.showAdaptiveSheet<NutritionData>(
+      context,
       builder: (context) => NutritionCalculationSheet(
         ingredients: ingredients,
         servings: servings,
@@ -1265,11 +1263,8 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
         ?? _dbDefaultScales[ingredientName]
         ?? 1.0;
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (bottomSheetContext) {
         return _LinkedRecipePickerSheet(
           ingredientName: ingredientName,

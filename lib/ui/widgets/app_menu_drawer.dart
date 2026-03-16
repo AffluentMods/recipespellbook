@@ -15,6 +15,7 @@ import '../../services/revenuecat_service.dart';
 import '../../services/sync_service.dart';
 import '../../ui/screens/import/faq_screen.dart';
 import '../../ui/screens/import/import_guides_screen.dart';
+import '../../utils/responsive_utils.dart';
 import 'app_snackbar.dart';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -914,8 +915,8 @@ class _BottomSection extends ConsumerWidget {
     final theme = Theme.of(ctx);
     final l10n = AppLocalizations.of(ctx)!;
     final sub = ref.read(subscriptionProvider.notifier);
-    showModalBottomSheet(
-      context: ctx,
+    Responsive.showAdaptiveSheet(
+      ctx,
       builder: (bCtx) => SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(

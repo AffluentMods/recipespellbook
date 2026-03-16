@@ -91,7 +91,7 @@ class _FaqScreenState extends State<FaqScreen> {
                 ),
               ],
             ),
-      body: Responsive.constrainWidth(context, child: q.isEmpty
+      body: SelectionArea(child: Responsive.constrainWidth(context, child: q.isEmpty
           ? ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
               children: [
@@ -153,7 +153,7 @@ class _FaqScreenState extends State<FaqScreen> {
                 ],
               );
             }),
-      ),
+      )),
     );
   }
 
@@ -643,9 +643,11 @@ class _FaqDetailScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(howTo.title)),
-      body: Responsive.constrainWidth(context, child: ListView(
+      body: SelectionArea(child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
         children: [
+          Responsive.constrainWidth(context, child: Column(
+            children: [
           // ── Hero header ──
           Container(
             padding: const EdgeInsets.all(24),
@@ -705,6 +707,8 @@ class _FaqDetailScreen extends StatelessWidget {
           // ── Steps ──
           for (int i = 0; i < howTo.steps.length; i++)
             _StepCard(step: howTo.steps[i], color: howTo.color, isLast: i == howTo.steps.length - 1),
+            ],
+          )),
         ],
       )),
     );

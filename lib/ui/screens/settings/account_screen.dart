@@ -10,6 +10,7 @@ import '../../../services/grocery_service.dart';
 import '../../../services/revenuecat_service.dart';
 import '../../../services/sync_service.dart';
 import '../../../utils/platform_utils.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 
 // ════════════════════════════════════════════════════════════
@@ -48,11 +49,13 @@ class _SignedOutBody extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
             Container(
               width: 80,
               height: 80,
@@ -174,6 +177,7 @@ class _SignedOutBody extends ConsumerWidget {
               child: Text(l10n.restorePurchases),
             ),
           ],
+          ),
         ),
       ),
     );
@@ -192,33 +196,38 @@ class _SignedInBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final status = ref.watch(subscriptionProvider);
 
-    return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      children: [
-        // ── Profile Header ──
-        _ProfileHeader(user: user),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: ListView(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          children: [
+            // ── Profile Header ──
+            _ProfileHeader(user: user),
 
-        const SizedBox(height: 8),
+            const SizedBox(height: 8),
 
-        // ── Subscription ──
-        _SubscriptionCard(status: status),
+            // ── Subscription ──
+            _SubscriptionCard(status: status),
 
-        // ── Cloud Sync (only if has cloud sync) ──
-        if (status.hasCloudSync) ...[
-          const SizedBox(height: 4),
-          const _CloudSyncCard(),
-        ],
+            // ── Cloud Sync (only if has cloud sync) ──
+            if (status.hasCloudSync) ...[
+              const SizedBox(height: 4),
+              const _CloudSyncCard(),
+            ],
 
-        // ── Integrations ──
-        const SizedBox(height: 4),
-        const _IntegrationsCard(),
+            // ── Integrations ──
+            const SizedBox(height: 4),
+            const _IntegrationsCard(),
 
-        // ── Danger Zone ──
-        const SizedBox(height: 4),
-        const _DangerZoneCard(),
+            // ── Danger Zone ──
+            const SizedBox(height: 4),
+            const _DangerZoneCard(),
 
-        const SizedBox(height: 40),
-      ],
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -663,8 +672,8 @@ class _IntegrationsCardState extends ConsumerState<_IntegrationsCard> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final auth = AuthService.instance;
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(
@@ -731,8 +740,8 @@ class _IntegrationsCardState extends ConsumerState<_IntegrationsCard> {
   void _showKrogerOptions(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(

@@ -10,6 +10,7 @@ import '../../services/family_service.dart';
 import '../../services/revenuecat_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'app_snackbar.dart';
+import '../../utils/responsive_utils.dart';
 
 // ════════════════════════════════════════════
 //  Permission labels
@@ -39,12 +40,8 @@ void showResourceShareSheet(
       required String resourceName,
       bool familyOnly = false,
     }) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
+  Responsive.showAdaptiveSheet(
+    context,
     builder: (ctx) => DraggableScrollableSheet(
       initialChildSize: familyOnly ? 0.5 : 0.6,
       minChildSize: 0.3,

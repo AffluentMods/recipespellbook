@@ -4,6 +4,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import '../utils/platform_utils.dart' show isDesktop;
+import 'desktop_google_auth.dart'
+    if (dart.library.html) 'desktop_google_auth_stub.dart';
 
 /// User model returned from the API after auth.
 class AuthUser {
@@ -178,30 +181,58 @@ class AuthService {
   //  GOOGLE SIGN-IN
   // ════════════════════════════════════════════
 
+  /// Web client ID — used as serverClientId on mobile for google_sign_in plugin.
+  static const _webClientId = '37618075189-003tm8gs83qelruo1jkuadf70ur9drr7.apps.googleusercontent.com';
+
+  /// Desktop OAuth client (installed app type).
+  /// Per Google's docs, the client secret for installed apps is NOT treated
+  /// as a secret — it's embedded in every desktop binary and cannot be hidden.
+  /// See: https://developers.google.com/identity/protocols/oauth2/native-app
+  static const _desktopClientId = '37618075189-2rliu538krbskthdqsf50mdof7635usf.apps.googleusercontent.com';
+  static const _desktopClientSecret = '***REMOVED***';
+
   Future<AuthState> signInWithGoogle() async {
     try {
-      final googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
-        serverClientId: '37618075189-003tm8gs83qelruo1jkuadf70ur9drr7.apps.googleusercontent.com',
-      );
-      final account = await googleSignIn.signIn();
+      String? idToken;
 
-      if (account == null) {
-        // User cancelled
-        return const AuthState.initial();
+      if (isDesktop) {
+        // Desktop: use browser-based OAuth with localhost redirect.
+        // The google_sign_in plugin has no Windows/Linux implementation.
+        idToken = await DesktopGoogleAuth.signIn(
+          clientId: _desktopClientId,
+          clientSecret: _desktopClientSecret,
+        );
+        if (idToken == null) {
+          return const AuthState.initial(); // User cancelled or timed out
+        }
+      } else {
+        // Mobile: use the google_sign_in plugin.
+        final googleSignIn = GoogleSignIn(
+          scopes: ['email', 'profile'],
+          serverClientId: _webClientId,
+        );
+        final account = await googleSignIn.signIn();
+
+        if (account == null) {
+          return const AuthState.initial();
+        }
+
+        final auth = await account.authentication;
+        idToken = auth.idToken;
       }
-
-      final auth = await account.authentication;
-      final idToken = auth.idToken;
 
       if (idToken == null) {
         return AuthState(error: 'Failed to get Google ID token');
       }
 
-      // Exchange with our API
+      // Exchange with our API — include clientId so the backend
+      // can verify the token audience for both web and desktop clients.
       return await _exchangeToken(
         endpoint: '/v1/auth/google',
-        body: {'idToken': idToken},
+        body: {
+          'idToken': idToken,
+          if (isDesktop) 'clientId': _desktopClientId,
+        },
         provider: 'google',
       );
     } catch (e) {
@@ -250,7 +281,8 @@ class AuthService {
     // Try to sign out from Google (no-op if wasn't Google)
     try {
       final provider = await _storage.read(key: _keyProvider);
-      if (provider == 'google') {
+      if (provider == 'google' && !isDesktop) {
+        // google_sign_in plugin only works on mobile — skip on desktop
         await GoogleSignIn().signOut();
       }
     } catch (_) {}

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
 import '../../../l10n/app_localizations.dart';
+import '../utils/responsive_utils.dart';
 
 /// Service for scanning barcodes and looking up product information
 class BarcodeScannerService {
@@ -230,10 +231,8 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   }
 
   void _showProductSheet(ProductInfo product) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => _ProductInfoSheet(
         product: product,
         onAddToShopping: () => _addToShopping(product),
