@@ -3793,7 +3793,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuShareSubtitle => 'Invite your friends and family to start cooking together!';
 
   @override
-  String get menuShareMessage => 'Check out Recipe Spellbook - the best recipe app! https://recipespellbook.app';
+  String get menuShareMessage => 'Check out Recipe Spellbook - the best recipe app! https://recipespellbook.app/get';
 
   @override
   String get signIn => 'Sign in';

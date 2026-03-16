@@ -1661,7 +1661,7 @@
   "menuAppVersion": "Recipe Spellbook v{version}",
   "menuShareApp": "Compartir Recipe Spellbook",
   "menuShareSubtitle": "¡Invita a tus amigos y familiares a cocinar juntos!",
-  "menuShareMessage": "¡Mira Recipe Spellbook — la mejor app de recetas! https://recipespellbook.app",
+  "menuShareMessage": "¡Mira Recipe Spellbook — la mejor app de recetas! https://recipespellbook.app/get",
   "signIn": "Iniciar sesión",
   "helpFromWebsite": "Desde un sitio web",
   "helpFromWebsiteDesc": "Toca + en cualquier recetario, luego pega la URL. Funciona con la mayoría de sitios de recetas.",

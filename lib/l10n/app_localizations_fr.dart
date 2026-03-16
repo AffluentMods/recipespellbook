@@ -3781,7 +3781,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get menuShareSubtitle => 'Invitez vos amis et votre famille à cuisiner ensemble !';
 
   @override
-  String get menuShareMessage => 'Découvrez Recipe Spellbook - la meilleure application de recettes ! https://recipespellbook.app';
+  String get menuShareMessage => 'Découvrez Recipe Spellbook - la meilleure application de recettes ! https://recipespellbook.app/get';
 
   @override
   String get signIn => 'Se connecter';

@@ -3766,7 +3766,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get menuShareSubtitle => '邀请朋友和家人一起烹饪！';
 
   @override
-  String get menuShareMessage => '来看看Recipe Spellbook——最棒的食谱应用！https://recipespellbook.app';
+  String get menuShareMessage => '来看看Recipe Spellbook——最棒的食谱应用！https://recipespellbook.app/get';
 
   @override
   String get signIn => '登录';

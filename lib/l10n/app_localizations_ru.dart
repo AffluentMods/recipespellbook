@@ -3835,7 +3835,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get menuShareSubtitle => 'Пригласите друзей и семью готовить вместе!';
 
   @override
-  String get menuShareMessage => 'Попробуйте Recipe Spellbook — лучшее приложение для рецептов! https://recipespellbook.app';
+  String get menuShareMessage => 'Попробуйте Recipe Spellbook — лучшее приложение для рецептов! https://recipespellbook.app/get';
 
   @override
   String get signIn => 'Войти';

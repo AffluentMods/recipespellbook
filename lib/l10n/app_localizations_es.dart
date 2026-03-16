@@ -3793,7 +3793,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get menuShareSubtitle => '¡Invita a tus amigos y familiares a cocinar juntos!';
 
   @override
-  String get menuShareMessage => '¡Mira Recipe Spellbook — la mejor app de recetas! https://recipespellbook.app';
+  String get menuShareMessage => '¡Mira Recipe Spellbook — la mejor app de recetas! https://recipespellbook.app/get';
 
   @override
   String get signIn => 'Iniciar sesión';

@@ -1831,6 +1831,16 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
   }
 }
 
+// ============ BULK ITEM HELPER ============
+
+class _BulkItem {
+  String displayName;
+  int count;
+  double totalAmount;
+  String? unit;
+  _BulkItem({required this.displayName, required this.count, required this.totalAmount, this.unit});
+}
+
 // ============ MODERN FAB ============
 
 class _ModernFAB extends StatelessWidget {
@@ -2654,25 +2664,96 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
     _showOcrPreview(rawText);
   }
 
-  void _bulkAddItems(List<String> items) {
+  void _bulkAddItems(List<String> items) async {
     if (items.isEmpty) return;
 
     final shoppingDao = ref.read(shoppingDaoProvider);
     final mappingsDao = ref.read(userIngredientMappingsDaoProvider);
 
+    // 1. Consolidate duplicates within the imported batch
+    //    Parse each item to extract amount/name, then group by normalized name
+    final consolidated = <String, _BulkItem>{};
     for (final text in items) {
-      final normalized = normalizeIngredientName(text);
-      final categoryId =
-      getShoppingCategory(text, userMappings: widget.userMappings);
+      final parsed = parseIngredient(text);
+      final normalized = normalizeIngredientName(parsed.name);
+      final amount = parsed.amount ?? 1.0;
+      if (consolidated.containsKey(normalized)) {
+        consolidated[normalized]!.totalAmount += amount;
+        consolidated[normalized]!.count++;
+        // Keep the longest display name (most descriptive)
+        if (parsed.name.length > consolidated[normalized]!.displayName.length) {
+          consolidated[normalized]!.displayName = parsed.name;
+          consolidated[normalized]!.unit = parsed.unit;
+        }
+      } else {
+        consolidated[normalized] = _BulkItem(
+          displayName: parsed.name,
+          count: 1,
+          totalAmount: amount,
+          unit: parsed.unit,
+        );
+      }
+    }
 
-      final id = 'item_${DateTime.now().millisecondsSinceEpoch}_${text.hashCode.abs()}';
-      shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
-        id: id,
-        listId: widget.listId,
-        name: text,
-        sortOrder: const drift.Value(0),
-        shoppingCategoryId: drift.Value(categoryId),
-      ));
+    // 2. Check against existing unchecked items in the list
+    final existingItems = await shoppingDao.getItemsForList(widget.listId);
+    final existingByNorm = <String, ShoppingListItem>{};
+    for (final item in existingItems) {
+      if (item.isChecked) continue;
+      final norm = normalizeIngredientName(parseIngredient(item.name).name);
+      existingByNorm[norm] = item;
+    }
+
+    int addedCount = 0;
+    int mergedCount = 0;
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    for (final entry in consolidated.entries) {
+      final normalized = entry.key;
+      final bulk = entry.value;
+      final categoryId =
+          getShoppingCategory(bulk.displayName, userMappings: widget.userMappings);
+
+      final existing = existingByNorm[normalized];
+      if (existing != null) {
+        // Merge into existing item — combine amounts
+        final existingParsed = parseIngredient(existing.name);
+        final existingAmt = existingParsed.amount ?? 1.0;
+        final newAmt = existingAmt + bulk.totalAmount;
+        final qtyStr = newAmt == newAmt.roundToDouble()
+            ? '${newAmt.round()}'
+            : newAmt.toStringAsFixed(1);
+        final unit = existingParsed.unit ?? bulk.unit ?? '';
+        final namePart = existingParsed.name;
+        final display = unit.isNotEmpty
+            ? '$qtyStr $unit $namePart'
+            : (newAmt > 1 ? '$qtyStr $namePart' : namePart);
+
+        await shoppingDao.updateItem(existing.id,
+          name: display,
+          shoppingCategoryId: categoryId,
+        );
+        mergedCount++;
+      } else {
+        // New item — build display with amount/unit if present
+        final unit = bulk.unit ?? '';
+        final amt = bulk.totalAmount;
+        final amtStr = amt == amt.roundToDouble() ? '${amt.round()}' : amt.toStringAsFixed(1);
+        final hasAmount = amt > 1 || unit.isNotEmpty;
+        final display = hasAmount
+            ? (unit.isNotEmpty ? '$amtStr $unit ${bulk.displayName}' : '$amtStr ${bulk.displayName}')
+            : bulk.displayName;
+
+        final id = 'item_${now}_$addedCount';
+        await shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
+          id: id,
+          listId: widget.listId,
+          name: display,
+          sortOrder: drift.Value(addedCount),
+          shoppingCategoryId: drift.Value(categoryId),
+        ));
+        addedCount++;
+      }
 
       if (!widget.userMappings.containsKey(normalized)) {
         mappingsDao.setMapping(normalized, categoryId);
@@ -2681,15 +2762,18 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
 
     widget.onItemAdded();
 
+    if (!mounted) return;
+
     setState(() {
-      for (final text in items.reversed) {
-        _recentlyAdded.insert(0, text);
+      for (final entry in consolidated.entries) {
+        _recentlyAdded.insert(0, entry.value.displayName);
       }
       while (_recentlyAdded.length > 30) _recentlyAdded.removeLast();
     });
 
     final l10n = AppLocalizations.of(context)!;
-    AppSnackbar.info(context, l10n.shoppingItemsAddedCount(items.length));
+    final total = addedCount + mergedCount;
+    AppSnackbar.info(context, l10n.shoppingItemsAddedCount(total));
     _ensureKeyboardVisible();
   }
 

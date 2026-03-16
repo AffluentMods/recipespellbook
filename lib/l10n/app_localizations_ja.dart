@@ -3766,7 +3766,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get menuShareSubtitle => '友だちや家族を一緒に料理に招待しましょう！';
 
   @override
-  String get menuShareMessage => 'Recipe Spellbookをチェックしてください - 最高のレシピアプリです！ https://recipespellbook.app';
+  String get menuShareMessage => 'Recipe Spellbookをチェックしてください - 最高のレシピアプリです！ https://recipespellbook.app/get';
 
   @override
   String get signIn => 'サインイン';

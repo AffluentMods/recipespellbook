@@ -225,10 +225,12 @@ class AppTheme {
       ),
 
       // ── Filled button ──
+      // maximumSize prevents buttons from stretching full-width on web/desktop
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: palette.primary,
           foregroundColor: palette.onPrimary,
+          maximumSize: const Size(400, double.infinity),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
@@ -245,6 +247,7 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: palette.primary,
           side: BorderSide(color: palette.primary.withValues(alpha: 0.5)),
+          maximumSize: const Size(400, double.infinity),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),

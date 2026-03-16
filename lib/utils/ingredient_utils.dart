@@ -88,13 +88,13 @@ final _unitPattern = RegExp(
   r'ozs?|ounces?|lbs?|pounds?|g|grams?|kg|kilograms?|ml|milliliters?|'
   r'l|liters?|pts?|pints?|qts?|quarts?|gal|gallons?|'
   r'pinch|dash|cloves?|heads?|bunche?s?|cans?|packages?|pkgs?|boxes?|bags?|jars?|bottles?|'
-  r'slices?|pieces?|stalks?|sprigs?|leaves?|large|medium|small|whole|'
+  r'slices?|pieces?|stalks?|sprigs?|leaves?|'
   r'tazas?|cucharadas?|cda|cdta|cucharaditas?|pizca|dientes?|'
   r'cabezas?|manojos?|latas?|paquetes?|rebanadas?|piezas?|'
-  r'grande|mediano|pequeño|entero|'
+  r'entero|'
   r'tassen?|esslöffel|el|teelöffel|tl|prise|spritzer|'
   r'zehen?|köpfe?|bund|dosen?|packungen?|scheiben?|stück|'
-  r'groß|mittel|klein|ganz'
+  r'ganz'
   r')\b\.?',
   caseSensitive: false,
 );
@@ -155,7 +155,7 @@ String _normalizeUnit(String unit) {
 String normalizeIngredientName(String name) {
   name = name.toLowerCase().trim();
   final descriptors = [
-    'fresh', 'dried', 'frozen', 'canned', 'chopped', 'diced', 'minced',
+    'fresh', 'freshly', 'dried', 'frozen', 'canned', 'chopped', 'diced', 'minced',
     'sliced', 'shredded', 'grated', 'crushed', 'ground', 'whole', 'raw',
     'cooked', 'boneless', 'skinless', 'organic', 'large', 'medium', 'small',
     'extra', 'virgin', 'unsalted', 'salted', 'low-fat', 'fat-free', 'reduced-fat',
@@ -163,6 +163,10 @@ String normalizeIngredientName(String name) {
   for (final desc in descriptors) {
     name = name.replaceAll(RegExp('\\b$desc\\b'), '').trim();
   }
+  // Clean up leftover commas/punctuation from descriptor removal
+  name = name.replaceAll(RegExp(r',\s*$'), '').trim();
+  name = name.replaceAll(RegExp(r'^\s*,'), '').trim();
+  name = name.replaceAll(RegExp(r',\s*,'), ',').trim();
   // Strip unit-like words that may appear in the name portion
   // e.g. "garlic cloves" → "garlic", "onion heads" → "onion"
   // Only strip if the name has multiple words (don't strip "cloves" the spice)
@@ -276,6 +280,7 @@ const _exactMatchKeywords = <String, List<String>>{
   'dairy': ['milk', 'cheese', 'butter', 'yogurt', 'cream'],
   'meat': ['chicken', 'beef', 'pork', 'steak', 'bacon'],
   'produce': ['apple', 'banana', 'lettuce', 'tomato', 'onion', 'garlic'],
+  'cookingAndBaking': ['flour', 'sugar', 'oil', 'vinegar', 'yeast', 'vanilla', 'cocoa'],
 };
 
 /// Phrase keywords (checked before word-by-word)
@@ -285,10 +290,12 @@ const _phraseKeywords = <String, List<String>>{
     'frozen meal', 'ice cream', 'frozen yogurt', 'frozen waffle',
     'fish sticks', 'chicken nuggets', 'frozen chicken', 'frozen fish',
     'tv dinner', 'lean cuisine', 'hot pocket',
+    'frozen fries', 'french fries', 'tater tots',
+    'frozen concentrate',
   ],
   'bakery': [
     'blueberry muffin', 'chocolate muffin', 'bran muffin', 'corn muffin',
-    'banana bread', 'zucchini bread', 'pumpkin bread',
+    'banana bread', 'zucchini bread', 'pumpkin bread', 'garlic bread',
     'dinner roll', 'hamburger bun', 'hot dog bun',
     'pie crust', 'puff pastry',
   ],
@@ -299,6 +306,8 @@ const _phraseKeywords = <String, List<String>>{
   'condiments': [
     'salad dressing', 'bbq sauce', 'hot sauce', 'soy sauce',
     'teriyaki sauce', 'pasta sauce', 'tomato sauce', 'pizza sauce',
+    'peanut butter', 'almond butter', 'apple butter', 'cashew butter',
+    'fish sauce', 'oyster sauce', 'steak sauce',
   ],
   'snacks': [
     'potato chips', 'tortilla chips', 'corn chips', 'granola bar',
@@ -308,6 +317,9 @@ const _phraseKeywords = <String, List<String>>{
     'canned tomatoes', 'canned beans', 'canned corn', 'canned tuna',
     'tomato paste', 'tomato sauce', 'diced tomatoes', 'crushed tomatoes',
     'black beans', 'kidney beans', 'chickpeas', 'chicken broth', 'beef broth',
+    'coconut milk', 'coconut cream', 'tomato soup', 'onion soup',
+    'dried tomatoes', 'sun-dried tomatoes', 'sun dried tomatoes',
+    'vegetable broth', 'bone broth', 'tomato concentrate',
   ],
   'pasta': [
     'pasta sauce', 'spaghetti sauce', 'alfredo sauce',
@@ -317,11 +329,24 @@ const _phraseKeywords = <String, List<String>>{
     'onion powder', 'garlic powder', 'celery salt', 'celery seed',
     'chili powder', 'mustard powder', 'dry mustard', 'lemon pepper',
     'garlic salt', 'seasoned salt',
+    'black pepper', 'white pepper', 'cracked pepper', 'ground pepper',
+    'cayenne pepper', 'crushed red pepper', 'red pepper flakes',
   ],
   'cookingAndBaking': [
     'rice vinegar', 'rice flour', 'coconut oil', 'sesame oil',
     'avocado oil', 'olive oil', 'vegetable oil', 'canola oil',
     'peanut oil', 'corn oil',
+  ],
+  'household': [
+    'plastic wrap', 'cling wrap', 'trash bags', 'garbage bags',
+    'paper towels', 'toilet paper', 'dish soap', 'laundry detergent',
+  ],
+  'international': [
+    'curry paste', 'curry leaves', 'pad thai', 'egg rolls', 'spring rolls',
+    'rice paper', 'wonton wrappers', 'dumpling wrappers',
+  ],
+  'grainsAndPasta': [
+    'egg noodles', // prevent "egg" hitting dairy before grains
   ],
 };
 
@@ -329,7 +354,7 @@ const _phraseKeywords = <String, List<String>>{
 bool areUnitsCompatible(String? unit1, String? unit2) {
   if (unit1 == null || unit2 == null) return unit1 == unit2;
   if (unit1 == unit2) return true;
-  final volumeUnits = {'cup', 'tbsp', 'tsp', 'ml', 'l', 'pint', 'quart', 'gallon', 'oz'};
+  final volumeUnits = {'cup', 'tbsp', 'tsp', 'ml', 'l', 'pint', 'quart', 'gallon', 'oz', 'fl oz'};
   final weightUnits = {'g', 'kg', 'lb', 'oz'};
   if (volumeUnits.contains(unit1) && volumeUnits.contains(unit2)) return true;
   if (weightUnits.contains(unit1) && weightUnits.contains(unit2)) return true;
@@ -345,6 +370,7 @@ bool areUnitsCompatible(String? unit1, String? unit2) {
   const volumeToMl = {
     'cup': 236.588, 'tbsp': 14.787, 'tsp': 4.929,
     'ml': 1.0, 'l': 1000.0, 'pint': 473.176, 'quart': 946.353, 'gallon': 3785.41,
+    'oz': 29.5735, 'fl oz': 29.5735,
   };
   const weightToG = {'g': 1.0, 'kg': 1000.0, 'lb': 453.592, 'oz': 28.3495};
 
@@ -387,6 +413,7 @@ const shoppingCategoryKeywords = <String, List<String>>{
     'kiwi', 'pomegranate', 'fig', 'figs', 'coconut', 'avocado',
     'fruit', 'fruits', 'berry', 'berries', 'melon', 'papaya', 'guava', 'passion fruit',
     'dragon fruit', 'lychee', 'starfruit', 'persimmon', 'apricot', 'nectarine', 'clementine',
+    'cranberry', 'cranberries',
     // Vegetables
     'lettuce', 'spinach', 'kale', 'arugula', 'cabbage', 'broccoli', 'cauliflower',
     'brussels sprouts', 'asparagus', 'celery', 'carrot', 'carrots', 'potato', 'potatoes',
@@ -489,7 +516,7 @@ const shoppingCategoryKeywords = <String, List<String>>{
     'frozen waffle', 'frozen pancake', 'frozen breakfast',
     'ice', 'ice cubes',
     'frozen pie', 'frozen cake', 'frozen dessert',
-    'frozen juice', 'concentrate',
+    'frozen juice', 'juice concentrate', 'frozen concentrate',
     'frozen burrito', 'frozen pizza rolls', 'hot pocket',
   ],
 
@@ -526,6 +553,9 @@ const shoppingCategoryKeywords = <String, List<String>>{
     'chocolate chips', 'vanilla extract', 'almond extract',
     'cornstarch', 'corn starch', 'arrowroot', 'tapioca starch',
     'cream of tartar', 'active dry yeast', 'instant yeast',
+    'shortening', 'molasses', 'corn syrup', 'light corn syrup',
+    'food coloring', 'gelatin', 'pectin', 'xanthan gum',
+    'marshmallow', 'marshmallows', 'sprinkles',
     // Oils (prevent matching other categories)
     'olive oil', 'vegetable oil', 'canola oil', 'coconut oil',
     'sesame oil', 'avocado oil', 'peanut oil', 'corn oil',
@@ -548,7 +578,8 @@ const shoppingCategoryKeywords = <String, List<String>>{
     'coconut milk', 'coconut cream',
     'evaporated milk', 'condensed milk', 'sweetened condensed milk',
     'canned tuna', 'canned salmon', 'canned chicken',
-    'artichoke hearts', 'roasted peppers', 'sundried tomatoes',
+    'artichoke hearts', 'roasted peppers', 'sundried tomatoes', 'sun-dried tomatoes', 'sun dried tomatoes',
+    'dried tomatoes',
   ],
 
   // ============ CONDIMENTS & SAUCES ============
@@ -575,6 +606,7 @@ const shoppingCategoryKeywords = <String, List<String>>{
     'turmeric', 'curry', 'curry powder', 'garam masala', 'cumin', 'coriander',
     'cardamom', 'saffron', 'star anise', 'fennel seed', 'anise',
     'oregano', 'basil', 'thyme', 'rosemary', 'sage', 'marjoram', 'tarragon', 'dill',
+    'parsley', 'cilantro', 'mint', 'peppermint', 'spearmint', 'chives',
     'dried oregano', 'dried basil', 'dried thyme', 'dried rosemary', 'dried sage',
     'dried marjoram', 'dried tarragon', 'dried dill', 'dried parsley',
     'bay leaf', 'bay leaves',
@@ -616,6 +648,7 @@ const shoppingCategoryKeywords = <String, List<String>>{
     'tea', 'green tea', 'black tea', 'herbal tea', 'iced tea', 'chai',
     'hot chocolate', 'cocoa mix',
     'chocolate milk',
+    'coconut water', 'kombucha', 'protein powder', 'protein shake',
   ],
 
   // ============ BEER, WINE & SPIRITS ============

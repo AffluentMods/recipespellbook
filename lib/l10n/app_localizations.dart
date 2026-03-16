@@ -7078,7 +7078,7 @@ abstract class AppLocalizations {
   /// No description provided for @menuShareMessage.
   ///
   /// In en, this message translates to:
-  /// **'Check out Recipe Spellbook - the best recipe app! https://recipespellbook.app'**
+  /// **'Check out Recipe Spellbook - the best recipe app! https://recipespellbook.app/get'**
   String get menuShareMessage;
 
   /// No description provided for @signIn.
