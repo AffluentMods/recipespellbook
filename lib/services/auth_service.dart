@@ -182,14 +182,13 @@ class AuthService {
   // ════════════════════════════════════════════
 
   /// Web client ID — used as serverClientId on mobile for google_sign_in plugin.
-  static const _webClientId = '37618075189-003tm8gs83qelruo1jkuadf70ur9drr7.apps.googleusercontent.com';
+  /// Injected at build time via --dart-define-from-file.
+  static const _webClientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
 
   /// Desktop OAuth client (installed app type).
-  /// Per Google's docs, the client secret for installed apps is NOT treated
-  /// as a secret — it's embedded in every desktop binary and cannot be hidden.
-  /// See: https://developers.google.com/identity/protocols/oauth2/native-app
-  static const _desktopClientId = '37618075189-2rliu538krbskthdqsf50mdof7635usf.apps.googleusercontent.com';
-  static const _desktopClientSecret = '***REMOVED***';
+  /// Injected at build time via --dart-define-from-file.
+  static const _desktopClientId = String.fromEnvironment('GOOGLE_DESKTOP_CLIENT_ID');
+  static const _desktopClientSecret = String.fromEnvironment('GOOGLE_DESKTOP_CLIENT_SECRET');
 
   Future<AuthState> signInWithGoogle() async {
     try {

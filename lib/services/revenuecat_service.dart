@@ -11,11 +11,11 @@ import '../utils/platform_utils.dart' show supportsRevenueCatSdk;
 class RCConfig {
   RCConfig._();
 
-  /// Google Play API key
-  static const String googleApiKey = '***REMOVED***';
+  /// Google Play API key (injected via --dart-define-from-file)
+  static const String googleApiKey = String.fromEnvironment('REVENUECAT_GOOGLE_API_KEY');
 
-  /// Apple App Store API key
-  static const String appleApiKey = '***REMOVED***';
+  /// Apple App Store API key (injected via --dart-define-from-file)
+  static const String appleApiKey = String.fromEnvironment('REVENUECAT_APPLE_API_KEY');
 
   /// Entitlement identifiers (must match RC dashboard)
   static const String premiumEntitlement = 'premium';
