@@ -696,37 +696,115 @@ class GroceryService {
 
   static String cleanForSearch(String raw) {
     var s = raw.trim();
+
+    // 1. Strip leading quantity + unit (e.g. "2 cups", "½ lb")
+    //    Uses \b after unit to prevent "l" matching inside "large".
+    //    Repeats to handle compound amounts like "1 14oz can".
+    for (var i = 0; i < 2; i++) {
+      final before = s;
+      s = s.replaceFirst(
+        RegExp(
+          r'^[\d½¼¾⅓⅔⅛⅜⅝⅞/.\s]+'
+          r'(?:'
+          r'cups?|tbsps?|tsps?|tablespoons?|teaspoons?|'
+          r'oz|ounces?|lbs?|pounds?|'
+          r'grams?|kg|ml|liters?|litres?|'
+          r'cloves?|stalks?|heads?|bunche?s?|'
+          r'cans?|jars?|bottles?|packages?|pkgs?|containers?|box(?:es)?|bags?|'
+          r'pieces?|slices?|pinche?s?|dash(?:es)?|'
+          r'large|medium|small|whole'
+          r')\b'
+          r'\s*',
+          caseSensitive: false,
+        ),
+        '',
+      );
+      if (s == before) break; // nothing stripped, stop
+    }
+    // Also strip a bare leading number (e.g. "2 eggs" → "eggs")
+    s = s.replaceFirst(RegExp(r'^[\d½¼¾⅓⅔⅛⅜⅝⅞/.]+\s+'), '');
+
+    // 2. Strip parenthetical content — "(15 oz)", "(softened)", etc.
+    //    Must come before orphan container so "1 (6oz) can paste" → "can paste" → "paste"
+    s = s.replaceAll(RegExp(r'\([^)]*\)'), '').trim();
+
+    // 3. Strip orphaned container words left after qty+unit removal
+    //    "can crushed tomatoes" → "crushed tomatoes"  (from "1 14oz can ...")
+    //    "jar marinara sauce"  → "marinara sauce"
     s = s.replaceFirst(
       RegExp(
-        r'^[\d½¼¾⅓⅔⅛⅜⅝⅞/.\s]+'
-        r'(?:'
-        r'cups?|tbsp|tsp|tablespoons?|teaspoons?|'
-        r'oz|ounces?|lbs?|pounds?|'
-        r'g|kg|ml|l|liters?|litres?|'
-        r'cloves?|stalks?|heads?|bunche?s?|'
-        r'cans?|jars?|bottles?|packages?|pkgs?|'
-        r'pieces?|slices?|pinche?s?|dashes?|'
-        r'large|medium|small|whole'
-        r')?'
-        r'\s*',
+        r'^(?:cans?|jars?|bottles?|box(?:es)?|bags?|containers?|'
+        r'packages?|pkgs?|cartons?|tubs?)\s+(?:of\s+)?',
         caseSensitive: false,
       ),
       '',
     );
-    s = s.split(RegExp(r'[,;(]')).first.trim();
+
+    // 4. Strip leading "of" — "of flour" → "flour"
+    s = s.replaceFirst(RegExp(r'^of\s+', caseSensitive: false), '');
+
+    // 5. Split on comma or semicolon — take first part only
+    //    "chicken breast, boneless skinless" → "chicken breast"
+    s = s.split(RegExp(r'[,;]')).first.trim();
+
+    // 6. Strip "or ..." alternatives — take only the first option
+    //    "milk or half and half" → "milk"
+    //    "butter or margarine" → "butter"
+    s = s.replaceFirst(
+      RegExp(r'\s+or\s+.*', caseSensitive: false),
+      '',
+    );
+
+    // 7. Strip "/" alternatives — take the first option
+    //    "milk/cream" → "milk"
+    if (s.contains('/') && !s.startsWith('/')) {
+      s = s.split('/').first.trim();
+    }
+
+    // 8. Strip ALL leading prep/cooking words (repeating to catch stacked modifiers)
+    //    "bone-in skin-on chicken thighs" → "chicken thighs"
+    //    "finely chopped fresh onion" → "onion"
+    for (var i = 0; i < 3; i++) {
+      final before = s;
+      s = s.replaceFirst(
+        RegExp(
+          r'^(?:(?:finely|thinly|roughly|freshly|coarsely)\s+)?'
+          r'(?:cut|diced|chopped|sliced|minced|grated|shredded|'
+          r'crushed|julienned|cubed|halved|quartered|squeezed|'
+          r'peeled|deveined|trimmed|deboned|drained|rinsed|'
+          r'thawed|frozen|canned|packed|sifted|fresh|dried|'
+          r'bone-in|boneless|skinless|skin-on|'
+          r'unsalted|salted|sweetened|unsweetened)\s+',
+          caseSensitive: false,
+        ),
+        '',
+      );
+      if (s == before) break;
+    }
+
+    // 9. Strip TRAILING prep/state words and everything after
+    //    "chicken thighs bone-in" → "chicken thighs"
+    //    "basil leaves for garnish" → "basil leaves"
     s = s.replaceFirst(
       RegExp(
         r'\s+(?:cut|diced|chopped|sliced|minced|grated|shredded|'
-        r'crushed|julienned|cubed|halved|quartered|'
-        r'peeled|deveined|trimmed|deboned|'
-        r'to taste|for garnish|for serving|as needed|'
-        r'at room temperature|room temp|softened|melted|'
-        r'freshly ground|freshly cracked|finely|thinly|roughly)\b.*',
+        r'crushed|julienned|cubed|halved|quartered|squeezed|'
+        r'peeled|deveined|trimmed|deboned|drained|rinsed|'
+        r'to taste|for garnish|for serving|for topping|as needed|'
+        r'at room temperature|room temp|softened|melted|chilled|'
+        r'freshly ground|freshly cracked|finely|thinly|roughly|'
+        r'optional|if desired|divided|plus more|'
+        r'bone-in|boneless|skinless|skin-on|'
+        r'about|approximately)\b.*',
         caseSensitive: false,
       ),
       '',
     );
+
+    // 10. Collapse whitespace
     s = s.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+    // 11. Fallback: if everything got stripped, use first 3 words of original
     if (s.isEmpty) s = raw.trim().split(RegExp(r'\s+')).take(3).join(' ');
     return s;
   }
@@ -834,6 +912,8 @@ class GroceryService {
       // Don't auto-open — let the dialog's branded CTA button handle the redirect.
       // This ensures the user taps the Instacart-branded button to visit
       // the Shopping List / Recipe landing page URL (per Instacart guidelines).
+      // Instacart auto-matches ALL items and adds them to the cart.
+      // Unknown items appear as unmatched with alternatives on the hosted page.
       return CartAddResult(
         success: true,
         itemsAdded: ingredientNames.length,
@@ -842,11 +922,14 @@ class GroceryService {
       );
     }
 
-    // Fallback: deep link
-    debugPrint('[SendToStore] IDP failed, falling back to deep link');
-    return _sendViaDeepLink(
-      provider: GroceryProvider.instacart,
-      ingredientNames: ingredientNames,
+    // IDP API failed — return error instead of falling back to search page.
+    // We never want to open a search box; the IDP API handles product matching.
+    debugPrint('[SendToStore] IDP API failed, returning error');
+    return CartAddResult(
+      success: false,
+      itemsFailed: ingredientNames.length,
+      failedItems: ingredientNames,
+      message: 'Could not create Instacart shopping list. Please try again.',
     );
   }
 

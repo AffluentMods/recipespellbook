@@ -1231,10 +1231,10 @@ class _OrderOnlineButton extends StatelessWidget {
   }
 
   void _showOrderOptions(BuildContext context) {
-    final itemNames = items.map((i) {
-      final parsed = parseIngredient(i.name);
-      return parsed.name;
-    }).toList();
+    // Pass the FULL ingredient text (e.g. "2 cups flour") so that
+    // buildInstacartLineItem can extract quantity, unit, AND display_text.
+    // The service layer handles cleaning names for search/matching.
+    final itemNames = items.map((i) => i.name).toList();
 
     Responsive.showAdaptiveSheet(
       context,
