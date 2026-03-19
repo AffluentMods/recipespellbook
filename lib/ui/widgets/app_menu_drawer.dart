@@ -117,7 +117,10 @@ class AppMenuDrawer extends ConsumerWidget {
           ),
 
           // ═══ Bottom: Upgrade + Version ═══
-          _BottomSection(subStatus: subStatus),
+          SafeArea(
+            top: false,
+            child: _BottomSection(subStatus: subStatus),
+          ),
         ],
       ),
     );

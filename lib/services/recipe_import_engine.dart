@@ -96,8 +96,9 @@ class RecipeImportEngine {
 
   // ========== SECTION HEADER PATTERNS ==========
 
+  // Note: \S{0,3} allows optional emoji characters between ## and the keyword
   static final _ingredientHeaderPatterns = [
-    RegExp(r'^#{1,6}\s*ingredients?\s*:?\s*$',
+    RegExp(r'^#{1,6}\s*\S{0,3}\s*ingredients?\s*:?\s*$',
         caseSensitive: false, multiLine: true),
     RegExp(r'^\*{0,2}ingredients?\*{0,2}\s*:?\s*$',
         caseSensitive: false, multiLine: true),
@@ -115,7 +116,7 @@ class RecipeImportEngine {
 
   static final _instructionHeaderPatterns = [
     RegExp(
-        r'^#{1,6}\s*(instructions?|directions?|method|steps?|preparation|how\s+to\s+make|procedure)\s*:?\s*$',
+        r'^#{1,6}\s*\S{0,3}\s*(instructions?|directions?|method|steps?|preparation|how\s+to\s+make|procedure)\s*:?\s*$',
         caseSensitive: false,
         multiLine: true),
     RegExp(
@@ -130,7 +131,7 @@ class RecipeImportEngine {
 
   static final _notesHeaderPatterns = [
     RegExp(
-        "^#{1,6}\\s*(notes?|tips?|variations?|chef'?s?\\s+notes?|cook'?s?\\s+notes?)\\s*:?\\s*\$",
+        "^#{1,6}\\s*\\S{0,3}\\s*(notes?|tips?|variations?|chef'?s?\\s+notes?|cook'?s?\\s+notes?)\\s*:?\\s*\$",
         caseSensitive: false,
         multiLine: true),
     RegExp(r'^(notes?|tips?|variations?)\s*:?\s*$',
@@ -544,6 +545,10 @@ class RecipeImportEngine {
             ?? ImportedRecipe(title: 'Imported Recipe', ingredients: [], instructions: []);
       case 'md':
       case 'markdown':
+        // Use Obsidian parser when YAML frontmatter is present
+        if (content.trimLeft().startsWith('---')) {
+          return _parseObsidianMarkdown(content);
+        }
         return _parseMarkdown(content);
       case 'mmf':
       case 'mk':
@@ -2258,11 +2263,20 @@ class RecipeImportEngine {
 
       if (line.isEmpty) continue;
       if (RegExp(r'^[-=_]{3,}$').hasMatch(line)) continue;
+      // Skip Obsidian image embeds
+      if (RegExp(r'^!\[\[.*\]\]$').hasMatch(line)) continue;
 
       // Check for section headers FIRST
       final newSection = _detectSectionHeader(line);
       if (newSection != _Section.unknown) {
         currentSection = newSection;
+        continue;
+      }
+
+      // Skip sub-section headers (### Chicken Filling, ### Assembly, etc.)
+      // within ingredient/instruction sections — they're group labels, not content
+      if (RegExp(r'^#{2,6}\s+').hasMatch(line) &&
+          currentSection != _Section.unknown) {
         continue;
       }
 
@@ -2372,7 +2386,7 @@ class RecipeImportEngine {
     String? imageUrl;
     int? prepTime;
     int? cookTime;
-    int? servings;
+    String? servingsStr;
     List<String>? tags;
     String? cuisine;
     String? course;
@@ -2386,12 +2400,37 @@ class RecipeImportEngine {
       final yaml = frontmatterMatch.group(1) ?? '';
       bodyText = text.substring(frontmatterMatch.end).trim();
 
+      // Parse YAML into a simple key→value map, collecting multi-line lists
+      final yamlMap = <String, String>{};
+      final yamlLists = <String, List<String>>{};
+      String? currentListKey;
+
       for (final line in yaml.split('\n')) {
+        // Check for YAML list item (indented "- value")
+        final listItemMatch = RegExp(r'^\s+-\s+(.+)').firstMatch(line);
+        if (listItemMatch != null && currentListKey != null) {
+          var item = listItemMatch.group(1)!.trim();
+          // Remove quotes
+          if ((item.startsWith('"') && item.endsWith('"')) ||
+              (item.startsWith("'") && item.endsWith("'"))) {
+            item = item.substring(1, item.length - 1);
+          }
+          yamlLists.putIfAbsent(currentListKey, () => []).add(item);
+          continue;
+        }
+
         final colonIdx = line.indexOf(':');
         if (colonIdx == -1) continue;
 
         final key = line.substring(0, colonIdx).trim().toLowerCase();
         var value = line.substring(colonIdx + 1).trim();
+
+        // Empty value after colon means next lines are a list
+        if (value.isEmpty) {
+          currentListKey = key;
+          continue;
+        }
+        currentListKey = null;
 
         // Remove surrounding quotes
         if ((value.startsWith('"') && value.endsWith('"')) ||
@@ -2399,54 +2438,46 @@ class RecipeImportEngine {
           value = value.substring(1, value.length - 1);
         }
 
-        switch (key) {
-          case 'title':
-          case 'name':
-            title = value;
-            break;
-          case 'description':
-          case 'summary':
-            description = value;
-            break;
-          case 'cover':
-          case 'image':
-          case 'photo':
-            imageUrl = value;
-            break;
-          case 'prep time':
-          case 'preptime':
-          case 'prep':
-            prepTime = _parseTimeString(value);
-            break;
-          case 'cook time':
-          case 'cooktime':
-          case 'cook':
-            cookTime = _parseTimeString(value);
-            break;
-          case 'servings':
-          case 'serves':
-          case 'yield':
-            servings = int.tryParse(value.replaceAll(RegExp(r'[^\d]'), ''));
-            break;
-          case 'tags':
-            if (value.startsWith('[') && value.endsWith(']')) {
-              value = value.substring(1, value.length - 1);
-            }
-            tags = value
-                .split(',')
-                .map((t) => t.trim())
-                .where((t) => t.isNotEmpty)
-                .toList();
-            break;
-          case 'cuisine':
-            cuisine = value;
-            break;
-          case 'type':
-          case 'course':
-          case 'category':
-            course = value;
-            break;
+        yamlMap[key] = value;
+      }
+
+      // Extract values from parsed YAML
+      title = yamlMap['title'] ?? yamlMap['name'];
+      description = yamlMap['description'] ?? yamlMap['summary'];
+      imageUrl = yamlMap['cover'] ?? yamlMap['image'] ?? yamlMap['photo'];
+      cuisine = yamlMap['cuisine'];
+
+      // Map course/type to a known course ID
+      final rawCourse = yamlMap['type'] ?? yamlMap['course'] ?? yamlMap['category'];
+      if (rawCourse != null) {
+        course = mapToCourseId(rawCourse);
+      }
+
+      for (final k in ['prep time', 'prep_time', 'preptime', 'prep']) {
+        if (yamlMap.containsKey(k)) { prepTime = _parseTimeString(yamlMap[k]!); break; }
+      }
+      for (final k in ['cook time', 'cook_time', 'cooktime', 'cook']) {
+        if (yamlMap.containsKey(k)) { cookTime = _parseTimeString(yamlMap[k]!); break; }
+      }
+      for (final k in ['servings', 'serves', 'yield']) {
+        if (yamlMap.containsKey(k)) {
+          final raw = yamlMap[k]!;
+          // Extract first number only (e.g. "4–6 taquitos" → "4", "16 pieces" → "16")
+          final firstNum = RegExp(r'\d+').firstMatch(raw);
+          servingsStr = firstNum?.group(0) ?? raw;
+          break;
         }
+      }
+
+      // Tags: support both inline [a, b] and multi-line YAML list
+      if (yamlLists.containsKey('tags')) {
+        tags = yamlLists['tags'];
+      } else if (yamlMap.containsKey('tags')) {
+        var tagStr = yamlMap['tags']!;
+        if (tagStr.startsWith('[') && tagStr.endsWith(']')) {
+          tagStr = tagStr.substring(1, tagStr.length - 1);
+        }
+        tags = tagStr.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList();
       }
     }
 
@@ -2482,7 +2513,7 @@ class RecipeImportEngine {
       imageUrl: imageUrl ?? parsed.imageUrl,
       prepTimeMinutes: prepTime ?? parsed.prepTimeMinutes,
       cookTimeMinutes: cookTime ?? parsed.cookTimeMinutes,
-      servings: servings?.toString() ?? parsed.servings,
+      servings: servingsStr ?? parsed.servings,
       ingredients: parsed.ingredients,
       instructions: parsed.instructions,
       notes: parsed.notes,
@@ -2749,6 +2780,85 @@ class RecipeImportEngine {
 
   // ========== COURSE / CATEGORY DETECTION ==========
 
+  /// Maps a display name or raw string to a known course ID.
+  /// e.g. "Appetizer" → "appetizer", "Main Dish" → "main",
+  /// "Side" → "side", "Beverage" → "beverage"
+  static String? mapToCourseId(String raw) {
+    final lower = raw.toLowerCase().trim();
+
+    // Direct ID match
+    const knownIds = [
+      'appetizer', 'beverage', 'breakfast', 'brunch', 'dessert',
+      'main', 'sauce', 'side', 'snack',
+    ];
+    if (knownIds.contains(lower)) return lower;
+
+    // Name/alias → ID mapping (exact matches only)
+    const nameMap = {
+      'main dish': 'main',
+      'main course': 'main',
+      'entrée': 'main',
+      'entree': 'main',
+      'side dish': 'side',
+      'starter': 'appetizer',
+      'drink': 'beverage',
+      'drinks': 'beverage',
+      'cocktail': 'beverage',
+      'cocktails': 'beverage',
+      'mocktail': 'beverage',
+      'smoothie': 'beverage',
+      'smoothies': 'beverage',
+      'bread': 'snack',
+      'breads': 'snack',
+      'soup': 'main',
+      'soups': 'main',
+      'salad': 'side',
+      'salads': 'side',
+      'dip': 'appetizer',
+      'dips': 'appetizer',
+      'fish': 'main',
+      'seafood': 'main',
+      'cake': 'dessert',
+      'cakes': 'dessert',
+      'pastry': 'dessert',
+      'pastries': 'dessert',
+      'candy': 'dessert',
+      'cookies': 'dessert',
+      'burger': 'main',
+      'burgers': 'main',
+      'chicken': 'main',
+      'beef': 'main',
+      'pork': 'main',
+      'pasta': 'main',
+      'stew': 'main',
+      'stews': 'main',
+      'curry': 'main',
+      'curries': 'main',
+      'casserole': 'main',
+      'casseroles': 'main',
+      'sauces': 'sauce',
+      'dressing': 'sauce',
+      'dressings': 'sauce',
+      'condiment': 'sauce',
+      'condiments': 'sauce',
+      'marinade': 'sauce',
+      'marinades': 'sauce',
+    };
+    if (nameMap.containsKey(lower)) return nameMap[lower]!;
+
+    // Partial match — but only for unambiguous cases
+    // e.g. "Breakfast Burritos" → breakfast, "Dessert Bars" → dessert
+    for (final id in knownIds) {
+      // Must start with the course name to avoid false positives
+      // e.g. "Breakfast Ideas" → breakfast, but "Quick Breakfast" won't match
+      if (lower.startsWith(id)) return id;
+    }
+
+    // Unknown folder — return null so the caller doesn't set a wrong course.
+    // The auto-detection in _detectCourseAndCategory can try based on recipe content.
+    return null;
+  }
+
   static void _detectCourseAndCategory(ImportedRecipe recipe) {
     final allText =
     '${recipe.title} ${recipe.description ?? ''}'.toLowerCase();
@@ -2837,6 +2947,8 @@ class RecipeImportEngine {
         RegExp(r'\[([^\]]+)\]\([^)]+\)'), (m) => m.group(1) ?? '')
         .replaceAllMapped(RegExp(r'`([^`]+)`'), (m) => m.group(1) ?? '')
         .replaceAll(RegExp(r'!\[.*?\][\[(].*?[\])]'), '')
+        // Strip leading emoji characters (food emojis, etc.)
+        .replaceFirst(RegExp(r'^(?:[\u{1F300}-\u{1F9FF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]+\s*)', unicode: true), '')
         .trim();
   }
 
@@ -2970,11 +3082,28 @@ class RecipeImportEngine {
   }
 
   static ImportedRecipe _buildRecipeFromJsonMap(Map json) {
+    // Extract course/category and map to known IDs
+    final rawCourse = json['course']?.toString() ?? json['type']?.toString();
+    final rawCategory = json['category']?.toString();
+    final rawCuisine = json['cuisine']?.toString();
+
+    // Extract tags from various formats
+    List<String>? tags;
+    final rawTags = json['tags'] ?? json['keywords'];
+    if (rawTags is List) {
+      tags = rawTags.map((t) => t.toString().trim()).where((t) => t.isNotEmpty).toList();
+    } else if (rawTags is String && rawTags.isNotEmpty) {
+      tags = rawTags.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList();
+    }
+
+    // Extract notes
+    final notes = json['notes']?.toString() ?? json['note']?.toString() ?? json['tips']?.toString();
+
     return ImportedRecipe(
       title: json['title']?.toString() ??
           json['name']?.toString() ??
           'Imported Recipe',
-      description: json['description']?.toString(),
+      description: json['description']?.toString() ?? json['summary']?.toString(),
       ingredients: _toStringList(
           json['ingredients'] ?? json['recipeIngredient'] ?? []),
       instructions: _toStringList(json['instructions'] ??
@@ -2983,13 +3112,18 @@ class RecipeImportEngine {
           json['steps'] ??
           []),
       servings:
-      json['servings']?.toString() ?? json['yield']?.toString(),
+      json['servings']?.toString() ?? json['yield']?.toString() ?? json['serves']?.toString(),
       prepTimeMinutes:
-      _parseTimeValue(json['prepTime'] ?? json['prep_time']),
+      _parseTimeValue(json['prepTime'] ?? json['prep_time'] ?? json['prep_time_minutes']),
       cookTimeMinutes:
-      _parseTimeValue(json['cookTime'] ?? json['cook_time']),
-      imageUrl: json['image']?.toString() ?? json['imageUrl']?.toString(),
-      sourceUrl: json['url']?.toString() ?? json['sourceUrl']?.toString(),
+      _parseTimeValue(json['cookTime'] ?? json['cook_time'] ?? json['cook_time_minutes']),
+      imageUrl: json['image']?.toString() ?? json['imageUrl']?.toString() ?? json['photo']?.toString(),
+      sourceUrl: json['url']?.toString() ?? json['sourceUrl']?.toString() ?? json['source']?.toString(),
+      suggestedCourse: rawCourse != null ? mapToCourseId(rawCourse) : null,
+      suggestedCategory: rawCategory?.toLowerCase(),
+      cuisine: rawCuisine,
+      tags: tags,
+      notes: notes,
     );
   }
 
@@ -2998,7 +3132,7 @@ class RecipeImportEngine {
     if (data is List) {
       return data.map((e) {
         if (e is String) return e.trim();
-        if (e is Map) return e['text']?.toString().trim() ?? e.toString();
+        if (e is Map) return _flattenMapToString(e);
         return e.toString().trim();
       }).where((s) => s.isNotEmpty).toList();
     }
@@ -3010,6 +3144,42 @@ class RecipeImportEngine {
           .toList();
     }
     return [];
+  }
+
+  /// Flattens a JSON map (ingredient/instruction object) into a readable string.
+  /// Handles common AI-generated formats:
+  ///   {"amount": "1 cup", "name": "flour"} → "1 cup flour"
+  ///   {"quantity": "2", "unit": "tbsp", "ingredient": "oil"} → "2 tbsp oil"
+  ///   {"text": "Mix well"} → "Mix well"
+  ///   {"step": 1, "instruction": "Preheat oven"} → "Preheat oven"
+  static String _flattenMapToString(Map e) {
+    // Direct text/content field
+    final text = e['text'] ?? e['content'] ?? e['instruction'] ?? e['direction'] ?? e['step_text'];
+    if (text is String && text.trim().isNotEmpty) return text.trim();
+
+    // Ingredient object: combine amount/quantity + unit + name/ingredient
+    final amount = e['amount']?.toString() ?? e['quantity']?.toString() ?? '';
+    final unit = e['unit']?.toString() ?? e['measure']?.toString() ?? '';
+    final name = e['name']?.toString() ?? e['ingredient']?.toString() ?? e['item']?.toString() ?? '';
+    final note = e['note']?.toString() ?? e['preparation']?.toString() ?? e['prep']?.toString() ?? '';
+
+    if (name.isNotEmpty) {
+      final parts = <String>[];
+      if (amount.isNotEmpty) parts.add(amount);
+      if (unit.isNotEmpty) parts.add(unit);
+      parts.add(name);
+      if (note.isNotEmpty) parts.add('($note)');
+      return parts.join(' ').trim();
+    }
+
+    // Last resort: join all string values
+    final values = e.values
+        .where((v) => v is String && v.isNotEmpty)
+        .map((v) => v.toString().trim())
+        .toList();
+    if (values.isNotEmpty) return values.join(' ');
+
+    return e.toString();
   }
 
   static List<String> _extractJsonInstructions(dynamic data) {

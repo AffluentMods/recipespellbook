@@ -171,9 +171,9 @@ class OnboardingService {
       await dao.addIngredientRecipeLink(
         'default_white_pizza', 'default_white_pizza_ing_4', 'default_white_pizza_sauce',
       );
-      // Lomo Saltado: "béarnaise sauce, for serving" (ing_15, after 2 headers) → Béarnaise Sauce recipe
+      // Lomo Saltado: "béarnaise sauce, for serving" (ing_17, after 2 headers) → Béarnaise Sauce recipe
       await dao.addIngredientRecipeLink(
-        'default_lomo_saltado', 'default_lomo_saltado_ing_15', 'default_bearnaise_sauce',
+        'default_lomo_saltado', 'default_lomo_saltado_ing_17', 'default_bearnaise_sauce',
       );
     } catch (_) {
       // Links are best-effort

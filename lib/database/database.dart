@@ -180,7 +180,7 @@ class AppDatabase extends _$AppDatabase {
       // Lomo Saltado: béarnaise sauce → Béarnaise Sauce (quarter for serving)
       await into(recipeLinks).insertOnConflictUpdate(RecipeLinksCompanion.insert(
         sourceRecipeId: 'default_lomo_saltado',
-        ingredientId: 'default_lomo_saltado_ing_13',
+        ingredientId: 'default_lomo_saltado_ing_17',
         linkedRecipeId: 'default_bearnaise_sauce',
         scale: const Value(0.25),
       ));
@@ -203,7 +203,7 @@ class AppDatabase extends _$AppDatabase {
       await customStatement(
         "UPDATE recipe_links SET scale = 0.25 "
             "WHERE source_recipe_id = 'default_lomo_saltado' "
-            "AND ingredient_id = 'default_lomo_saltado_ing_13' "
+            "AND ingredient_id = 'default_lomo_saltado_ing_17' "
             "AND linked_recipe_id = 'default_bearnaise_sauce'",
       );
     } catch (_) {

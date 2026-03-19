@@ -79,6 +79,23 @@ class GroceryService {
       'INSTACART_IDP_BASE',
       defaultValue: 'https://connect.instacart.com/idp/v1');
 
+  // Instacart Affiliate tracking
+  static const _instacartPartnerId = String.fromEnvironment(
+      'INSTACART_PARTNER_ID');
+  static const _instacartCampaignId = String.fromEnvironment(
+      'INSTACART_CAMPAIGN_ID', defaultValue: '20313');
+
+  /// Append Instacart affiliate UTM params to a hosted URL.
+  static String _appendInstacartAffiliate(String url) {
+    if (_instacartPartnerId.isEmpty) return url;
+    final sep = url.contains('?') ? '&' : '?';
+    return '$url${sep}utm_campaign=instacart-idp'
+        '&utm_medium=affiliate'
+        '&utm_source=instacart_idp'
+        '&utm_term=partnertype-mediapartner'
+        '&utm_content=campaignid-${_instacartCampaignId}_partnerid-$_instacartPartnerId';
+  }
+
   // Kroger OAuth
   static const _krogerRedirectUri = 'recipespellbook://kroger-callback';
   static const _krogerAuthUrl =
@@ -219,7 +236,8 @@ class GroceryService {
 
       if (resp.statusCode == 200 || resp.statusCode == 201) {
         final data = jsonDecode(resp.body);
-        final url = data['products_link_url']?.toString();
+        final raw = data['products_link_url']?.toString();
+        final url = raw != null ? _appendInstacartAffiliate(raw) : null;
         debugPrint('[Instacart IDP] URL: $url');
         return url;
       }
@@ -283,7 +301,8 @@ class GroceryService {
 
       if (resp.statusCode == 200 || resp.statusCode == 201) {
         final data = jsonDecode(resp.body);
-        final url = data['products_link_url']?.toString();
+        final raw = data['products_link_url']?.toString();
+        final url = raw != null ? _appendInstacartAffiliate(raw) : null;
         debugPrint('[Instacart IDP] URL: $url');
         return url;
       }

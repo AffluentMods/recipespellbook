@@ -656,9 +656,43 @@ class IngredientImages {
     'crackers': IngredientVisual('🍘', 'assets/ingredients/bread.png', 'Snacks'),
   };
 
-  /// Get visual for an ingredient name
-  static IngredientVisual? getVisual(String ingredientName) {
+  // Ingredients that are ambiguous — the same word can mean different things
+  // depending on context (e.g. "pepper" = bell pepper vs black pepper).
+  // When a spice-sized unit is used, we remap to the spice version.
+  static const _spiceAmbiguous = <String, String>{
+    'pepper': 'black pepper',
+    'peppers': 'black pepper',
+    'cinnamon': 'cinnamon',  // already correct, but kept for completeness
+  };
+
+  static const _spiceUnits = {
+    'tsp', 'teaspoon', 'teaspoons',
+    'tbsp', 'tablespoon', 'tablespoons',
+    'pinch', 'pinches',
+    'dash', 'dashes',
+    'g', 'gram', 'grams',
+  };
+
+  /// Get visual for an ingredient name.
+  /// [unit] — if provided, helps disambiguate (e.g. "tsp pepper" → black pepper).
+  /// [amount] — if provided with grams, small amounts (< 30g) suggest a spice.
+  static IngredientVisual? getVisual(String ingredientName, {String? unit, double? amount}) {
     final normalized = ingredientName.toLowerCase().trim();
+
+    // Disambiguate using unit context for ambiguous ingredients
+    if (unit != null && _spiceAmbiguous.containsKey(normalized)) {
+      final unitLower = unit.toLowerCase().trim();
+      final isSpiceUnit = _spiceUnits.contains(unitLower);
+      // For grams, only treat as spice if amount is small (< 30g)
+      final isSmallGrams = (unitLower == 'g' || unitLower == 'gram' || unitLower == 'grams')
+          && amount != null && amount < 30;
+      if (isSpiceUnit || isSmallGrams) {
+        final spiceName = _spiceAmbiguous[normalized]!;
+        if (_ingredients.containsKey(spiceName)) {
+          return _ingredients[spiceName];
+        }
+      }
+    }
 
     // Direct match
     if (_ingredients.containsKey(normalized)) {
@@ -679,14 +713,15 @@ class IngredientImages {
     return bestMatch;
   }
 
-  /// Get emoji for an ingredient (fallback to generic)
-  static String getEmoji(String ingredientName) {
-    return getVisual(ingredientName)?.emoji ?? '🥘';
+  /// Get emoji for an ingredient (fallback to generic).
+  /// [unit] — helps disambiguate (e.g. "tsp pepper" → 🧂 not 🫑).
+  static String getEmoji(String ingredientName, {String? unit, double? amount}) {
+    return getVisual(ingredientName, unit: unit, amount: amount)?.emoji ?? '🥘';
   }
 
   /// Get category for an ingredient
-  static String getCategory(String ingredientName) {
-    return getVisual(ingredientName)?.category ?? 'Other';
+  static String getCategory(String ingredientName, {String? unit, double? amount}) {
+    return getVisual(ingredientName, unit: unit, amount: amount)?.category ?? 'Other';
   }
 
   /// Get all categories

@@ -190,6 +190,14 @@ String normalizeIngredientName(String name) {
   return name;
 }
 
+/// Ambiguous ingredient names that could be produce or spice depending on unit.
+const _spiceBySizeAmbiguous = {'pepper', 'peppers'};
+const _spiceSizedUnits = {
+  'tsp', 'teaspoon', 'teaspoons',
+  'tbsp', 'tablespoon', 'tablespoons',
+  'pinch', 'pinches', 'dash', 'dashes',
+};
+
 /// IMPROVED: Get shopping category for an ingredient
 /// Checks user mappings first, then uses smart detection
 String getShoppingCategory(String ingredientName, {Map<String, String>? userMappings}) {
@@ -209,6 +217,14 @@ String getShoppingCategory(String ingredientName, {Map<String, String>? userMapp
   // 2. Check for "frozen" keyword FIRST (overrides other categories)
   if (lower.contains('frozen') || lower.startsWith('ice ')) {
     return 'frozen';
+  }
+
+  // 2b. Disambiguate spice-sized ingredients (e.g. "1 tsp pepper" → spices)
+  if (_spiceBySizeAmbiguous.contains(normalized)) {
+    final parsed = parseIngredient(ingredientName);
+    if (parsed.unit != null && _spiceSizedUnits.contains(parsed.unit!.toLowerCase())) {
+      return 'spices';
+    }
   }
 
   // 3. Check EXACT matches first (more specific)
@@ -331,11 +347,12 @@ const _phraseKeywords = <String, List<String>>{
     'garlic salt', 'seasoned salt',
     'black pepper', 'white pepper', 'cracked pepper', 'ground pepper',
     'cayenne pepper', 'crushed red pepper', 'red pepper flakes',
+    'chili flakes', 'red chili flakes', 'pepper flakes',
   ],
   'cookingAndBaking': [
     'rice vinegar', 'rice flour', 'coconut oil', 'sesame oil',
     'avocado oil', 'olive oil', 'vegetable oil', 'canola oil',
-    'peanut oil', 'corn oil',
+    'peanut oil', 'corn oil', 'cooking oil',
   ],
   'household': [
     'plastic wrap', 'cling wrap', 'trash bags', 'garbage bags',
@@ -559,6 +576,7 @@ const shoppingCategoryKeywords = <String, List<String>>{
     // Oils (prevent matching other categories)
     'olive oil', 'vegetable oil', 'canola oil', 'coconut oil',
     'sesame oil', 'avocado oil', 'peanut oil', 'corn oil',
+    'cooking oil', 'frying oil', 'neutral oil',
     'cooking spray', 'nonstick spray',
     // Vinegars
     'apple cider vinegar', 'balsamic vinegar', 'red wine vinegar',
@@ -612,6 +630,7 @@ const shoppingCategoryKeywords = <String, List<String>>{
     'bay leaf', 'bay leaves',
     'garlic powder', 'onion powder', 'celery salt', 'celery seed',
     'chili powder', 'chipotle', 'ancho', 'red pepper flakes', 'crushed red pepper',
+    'chili flakes', 'red chili flakes', 'pepper flakes',
     'mustard powder', 'dry mustard', 'wasabi',
     'italian seasoning', 'herbs de provence', 'poultry seasoning', 'old bay',
     'cajun seasoning', 'taco seasoning', 'fajita seasoning', 'ranch seasoning',

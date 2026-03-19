@@ -395,6 +395,9 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       ),
     );
     if (confirmed != true) return;
+    if (count > 5 && mounted) {
+      AppSnackbar.loading(context, l10n.countRecipesMovedToTrash(count));
+    }
     final dao = ref.read(recipeDaoProvider);
     for (final id in _selectedIds) {
       await dao.moveToTrash(id);
@@ -411,21 +414,36 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     final courses = taxonomy.CourseData.courses;
     final selected = await Responsive.showAdaptiveSheet<String>(
       context,
-      builder: (ctx) => SafeArea(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(l10n.setCourse, style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-          ),
-          Flexible(
-            child: ListView(shrinkWrap: true, children: courses.map((c) => ListTile(
-              leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
-              title: Text(translator.translateCourse(c.name)),
-              onTap: () => Navigator.pop(ctx, c.id),
-            )).toList()),
-          ),
-        ]),
-      ),
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        return SafeArea(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.setCourse, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            ),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                children: courses.map((c) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Material(
+                    color: theme.colorScheme.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(12),
+                    child: ListTile(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
+                      title: Text(translator.translateCourse(c.name)),
+                      onTap: () => Navigator.pop(ctx, c.id),
+                    ),
+                  ),
+                )).toList(),
+              ),
+            ),
+          ]),
+        );
+      },
     );
     if (selected == null) return;
     final dao = ref.read(recipeDaoProvider);
@@ -444,21 +462,36 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     final categories = taxonomy.CategoryData.categories;
     final selected = await Responsive.showAdaptiveSheet<String>(
       context,
-      builder: (ctx) => SafeArea(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(l10n.setCategory, style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-          ),
-          Flexible(
-            child: ListView(shrinkWrap: true, children: categories.map((c) => ListTile(
-              leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
-              title: Text(translator.translateCategory(c.name)),
-              onTap: () => Navigator.pop(ctx, c.id),
-            )).toList()),
-          ),
-        ]),
-      ),
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        return SafeArea(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.setCategory, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            ),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                children: categories.map((c) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Material(
+                    color: theme.colorScheme.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(12),
+                    child: ListTile(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
+                      title: Text(translator.translateCategory(c.name)),
+                      onTap: () => Navigator.pop(ctx, c.id),
+                    ),
+                  ),
+                )).toList(),
+              ),
+            ),
+          ]),
+        );
+      },
     );
     if (selected == null) return;
     final dao = ref.read(recipeDaoProvider);
@@ -473,12 +506,16 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
 
   Future<void> _bulkFavorite() async {
     final l10n = AppLocalizations.of(context)!;
+    final count = _selectedIds.length;
+    if (count > 5) {
+      AppSnackbar.loading(context, l10n.countRecipesFavorited(count));
+    }
     final dao = ref.read(recipeDaoProvider);
     for (final id in _selectedIds) {
       await dao.toggleFavorite(id, true);
     }
     if (mounted) {
-      AppSnackbar.info(context, l10n.countRecipesFavorited(_selectedIds.length));
+      AppSnackbar.info(context, l10n.countRecipesFavorited(count));
       _exitSelection();
     }
   }

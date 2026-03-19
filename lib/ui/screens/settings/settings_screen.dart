@@ -1,4 +1,7 @@
+import 'dart:io' show exit;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemNavigator;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
@@ -18,7 +21,6 @@ import '../../../services/export_import_service.dart';
 import '../../../services/family_service.dart';
 import '../../../services/onboarding_service.dart';
 import '../../../services/sync_service.dart';
-import '../home/home_screen.dart';
 import '../../../services/revenuecat_service.dart';
 import '../../widgets/app_snackbar.dart';
 import 'allergy_settings_screen.dart';
@@ -473,18 +475,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _showResetConfirmation(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    showDialog(context: context, builder: (context) => AlertDialog(
+    showDialog(context: context, builder: (dialogCtx) => AlertDialog(
       icon: Icon(Icons.warning_amber_rounded, size: 48, color: theme.colorScheme.error),
       title: Text(l10n.resetApp),
       content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(l10n.resetAppWarning), const SizedBox(height: 20),
         Text(l10n.whatToDelete, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
-        _ResetOptionTile(icon: Icons.phone_android, title: l10n.localData, subtitle: l10n.localDataDesc, color: theme.colorScheme.error, onTap: () { Navigator.pop(context); _showLocalResetConfirmation(context, ref); }),
+        _ResetOptionTile(icon: Icons.phone_android, title: l10n.localData, subtitle: l10n.localDataDesc, color: theme.colorScheme.error, onTap: () { Navigator.pop(dialogCtx); _showLocalResetConfirmation(context, ref); }),
         const SizedBox(height: 8),
-        _ResetOptionTile(icon: Icons.delete_forever, title: l10n.allData, subtitle: l10n.allDataDesc, color: theme.colorScheme.error, onTap: () { Navigator.pop(context); _showAllDataWarning(context, ref); }),
+        _ResetOptionTile(icon: Icons.delete_forever, title: l10n.allData, subtitle: l10n.allDataDesc, color: theme.colorScheme.error, onTap: () { Navigator.pop(dialogCtx); _showAllDataWarning(context, ref); }),
       ]),
-      actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel))],
+      actions: [TextButton(onPressed: () => Navigator.pop(dialogCtx), child: Text(l10n.actionCancel))],
     ));
   }
 
@@ -507,13 +509,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final check1 = ValueNotifier(false);
     final check2 = ValueNotifier(false);
-    showDialog<void>(context: context, builder: (context) {
-      final theme = Theme.of(context);
+    showDialog<void>(context: context, builder: (dialogCtx) {
+      final theme = Theme.of(dialogCtx);
       final errorColor = theme.colorScheme.error;
       return AlertDialog(
         icon: Icon(Icons.warning_amber_rounded, size: 48, color: errorColor),
         title: Text(l10n.allDataWarningTitle),
-        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
           _DeleteBullet(icon: Icons.phone_android, text: l10n.allDataWarningLocalData),
           const SizedBox(height: 6),
           _DeleteBullet(icon: Icons.settings, text: l10n.allDataWarningSettings),
@@ -538,14 +540,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               activeColor: errorColor,
             ),
           ),
-        ]),
+        ])),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
-          ListenableBuilder(listenable: Listenable.merge([check1, check2]), builder: (context, _) {
+          TextButton(onPressed: () => Navigator.pop(dialogCtx), child: Text(l10n.actionCancel)),
+          ListenableBuilder(listenable: Listenable.merge([check1, check2]), builder: (_, __) {
             final ok = check1.value && check2.value;
             return FilledButton(
               style: FilledButton.styleFrom(backgroundColor: errorColor),
-              onPressed: ok ? () { Navigator.pop(context); _showTypeDeleteConfirmation(context, ref, _ResetScope.local); } : null,
+              onPressed: ok ? () { Navigator.pop(dialogCtx); _showTypeDeleteConfirmation(context, ref, _ResetScope.local); } : null,
               child: Text(l10n.actionContinue),
             );
           }),
@@ -559,19 +561,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
     final scopeLabel = switch (scope) { _ResetScope.local => l10n.resetScopeLocal, _ResetScope.all => l10n.resetScopeAll };
-    showDialog<void>(context: context, builder: (context) => AlertDialog(
-      icon: Icon(Icons.delete_forever, size: 48, color: Theme.of(context).colorScheme.error),
+    showDialog<void>(context: context, builder: (dialogCtx) => AlertDialog(
+      icon: Icon(Icons.delete_forever, size: 48, color: Theme.of(dialogCtx).colorScheme.error),
       title: Text(l10n.finalConfirmation),
-      content: Column(mainAxisSize: MainAxisSize.min, children: [
+      content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
         Text(l10n.permanentlyDeleteWarning(scopeLabel)), const SizedBox(height: 16),
         Text(l10n.typeDeleteToConfirm, style: const TextStyle(fontWeight: FontWeight.bold)), const SizedBox(height: 16),
         TextField(controller: controller, decoration: InputDecoration(hintText: l10n.typeDeleteHint, border: const OutlineInputBorder()), textCapitalization: TextCapitalization.characters, autofocus: true),
-      ]),
+      ])),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
-        ListenableBuilder(listenable: controller, builder: (context, _) {
+        TextButton(onPressed: () => Navigator.pop(dialogCtx), child: Text(l10n.actionCancel)),
+        ListenableBuilder(listenable: controller, builder: (btnCtx, _) {
           final ok = controller.text.toUpperCase() == l10n.typeDeleteHint.toUpperCase();
-          return FilledButton(style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error), onPressed: ok ? () => _performReset(context, ref, l10n, scope) : null, child: Text(l10n.actionDelete));
+          return FilledButton(style: FilledButton.styleFrom(backgroundColor: Theme.of(btnCtx).colorScheme.error), onPressed: ok ? () { Navigator.pop(dialogCtx); _performReset(context, ref, l10n, scope); } : null, child: Text(l10n.actionDelete));
         }),
       ],
     )).then((_) => controller.dispose());
@@ -582,13 +584,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final check1 = ValueNotifier(false);
     final check2 = ValueNotifier(false);
-    showDialog<void>(context: context, builder: (context) {
-      final theme = Theme.of(context);
+    showDialog<void>(context: context, builder: (dialogCtx) {
+      final theme = Theme.of(dialogCtx);
       final errorColor = theme.colorScheme.error;
       return AlertDialog(
         icon: Icon(Icons.warning_amber_rounded, size: 48, color: errorColor),
         title: Text(l10n.allDataWarningTitle),
-        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
           // What will be deleted
           _DeleteBullet(icon: Icons.cloud_off, text: l10n.allDataWarningCloudData),
           const SizedBox(height: 6),
@@ -617,14 +619,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               activeColor: errorColor,
             ),
           ),
-        ]),
+        ])),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.actionCancel)),
-          ListenableBuilder(listenable: Listenable.merge([check1, check2]), builder: (context, _) {
+          TextButton(onPressed: () => Navigator.pop(dialogCtx), child: Text(l10n.actionCancel)),
+          ListenableBuilder(listenable: Listenable.merge([check1, check2]), builder: (_, __) {
             final ok = check1.value && check2.value;
             return FilledButton(
               style: FilledButton.styleFrom(backgroundColor: errorColor),
-              onPressed: ok ? () { Navigator.pop(context); _showTypeDeleteConfirmation(context, ref, _ResetScope.all); } : null,
+              onPressed: ok ? () { Navigator.pop(dialogCtx); _showTypeDeleteConfirmation(context, ref, _ResetScope.all); } : null,
               child: Text(l10n.actionContinue),
             );
           }),
@@ -634,47 +636,61 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _performReset(BuildContext context, WidgetRef ref, AppLocalizations l10n, _ResetScope scope) async {
-    // Capture references before navigating away (widget will unmount)
+    // Capture DB reference before any navigation
     final db = ref.read(databaseProvider);
     final settingsNotifier = scope == _ResetScope.all
         ? ref.read(settingsProvider.notifier)
         : null;
 
-    // Pop the confirmation dialog
-    if (context.mounted) Navigator.pop(context);
-
-    // Navigate to splash FIRST — this tears down all data-watching widgets
-    // and prevents framework assertion errors from provider-driven rebuilds
-    // against empty data.
-    if (context.mounted) context.go('/splash');
-
-    // Wait for navigation and widget tree teardown to complete
-    await Future.delayed(const Duration(milliseconds: 300));
+    // Show a simple loading overlay so the user knows it's working
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => PopScope(
+          canPop: false,
+          child: Center(
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(l10n.actionDelete, style: const TextStyle(fontSize: 16)),
+                ]),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     try {
-      // Use proper Drift transaction methods — atomic, triggers stream
-      // notifications so providers update correctly, and re-seeds defaults.
       if (scope == _ResetScope.all) {
-        // Delete account from server (cascades to all synced data).
-        // Subscription is tied to Apple/Google via RevenueCat, not our
-        // user row — it auto-restores on next sign-in.
         await AuthService.instance.deleteAccount();
-        // Wipe local data
         await db.deleteAllUserData();
         settingsNotifier?.resetToDefaults();
       } else {
-        // Local only: delete recipes/cookbooks/planner, keep shopping list
         await db.deleteLocalRecipeData();
-        // Clear sync timestamp so next sync re-pulls from cloud
         await SyncService.instance.clearLastSyncAt();
       }
-
-      // Reset onboarding so the intro flow triggers again —
-      // the onboarding will offer to import default recipes automatically.
-      await OnboardingService.resetOnboarding();
-      HomeScreen.resetOnboardingCheck();
     } catch (e) {
       debugPrint('Reset error: $e');
+    }
+
+    // Force-close the app so it restarts clean.
+    // This avoids all the fragile state management of trying to
+    // navigate while providers are rebuilding against empty data.
+    if (kIsWeb) {
+      // Web: reload the page
+      // ignore: undefined_prefixed_name
+      // Use go_router to navigate to splash as fallback
+      if (context.mounted) context.go('/splash');
+    } else {
+      // Mobile/desktop: close the app — user reopens to fresh state
+      SystemNavigator.pop();
+      // Fallback if SystemNavigator.pop() doesn't work (iOS)
+      exit(0);
     }
   }
 

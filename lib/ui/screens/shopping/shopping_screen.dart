@@ -3293,7 +3293,7 @@ class _ShoppingItemTile extends ConsumerWidget {
     final recipeDao = ref.watch(recipeDaoProvider);
 
     final parsed = parseIngredient(item.name);
-    final emoji = IngredientImages.getEmoji(parsed.name);
+    final emoji = IngredientImages.getEmoji(parsed.name, unit: parsed.unit, amount: parsed.amount);
 
     final sources = ShoppingSourceTracker.getSourceBreakdown(item.note);
     final hasMultipleSources = sources.length > 1;
@@ -3312,7 +3312,31 @@ class _ShoppingItemTile extends ConsumerWidget {
           ),
           child: Icon(Icons.delete, color: theme.colorScheme.onError),
         ),
-        onDismissed: (_) => shoppingDao.deleteItem(item.id),
+        onDismissed: (_) {
+          // Save item data for undo before deleting
+          final deletedItem = item;
+          shoppingDao.deleteItem(item.id);
+
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('${parsed.name} removed'),
+            action: SnackBarAction(
+              label: AppLocalizations.of(context)!.actionUndo,
+              onPressed: () {
+                shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
+                  id: deletedItem.id,
+                  listId: deletedItem.listId,
+                  name: deletedItem.name,
+                  isChecked: drift.Value(deletedItem.isChecked),
+                  sortOrder: drift.Value(deletedItem.sortOrder),
+                  note: drift.Value(deletedItem.note),
+                  shoppingCategoryId: drift.Value(deletedItem.shoppingCategoryId),
+                ));
+              },
+            ),
+            duration: const Duration(seconds: 4),
+          ));
+        },
         child: Container(
           decoration: BoxDecoration(
             color: isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surface,

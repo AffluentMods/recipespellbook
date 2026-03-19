@@ -220,6 +220,8 @@ class FileImportDispatcher {
       for (final file in archive.files) {
         if (!file.isFile || file.size == 0) continue;
         final name = file.name;
+        // Skip README files, they're not recipes
+        if (name.toLowerCase().contains('readme')) continue;
         final ext = _extension(name);
 
         // Only process known text formats
@@ -230,6 +232,41 @@ class FileImportDispatcher {
             final content = _decodeText(
                 Uint8List.fromList(file.content as List<int>));
             final parsed = RecipeImportEngine.parseFromFileBulk(content, name);
+
+            // Use ZIP folder path as category hint
+            // e.g. "Food/Appetizer/file.md" → "Appetizer"
+            // e.g. "Food/Beverage/Alcoholic/TIKI/file.md" → "Beverage"
+            if (parsed.isNotEmpty) {
+              final parts = name.split('/')
+                  .where((p) => p.isNotEmpty)
+                  .toList();
+              // Find first meaningful folder (skip root like "Food")
+              if (parts.length >= 2) {
+                // parts[0] is root folder, parts[1] is top-level category
+                final folderCategory = parts.length >= 3
+                    ? parts[1]  // Skip root, use first category level
+                    : parts[0]; // Only one level deep
+                final cleanCategory = folderCategory
+                    .replaceAll('_', ' ')
+                    .replaceAll('-', ' ');
+                final mappedCourseId = RecipeImportEngine.mapToCourseId(cleanCategory);
+                for (final recipe in parsed) {
+                  recipe.suggestedCourse ??= mappedCourseId;
+                  // Use deeper subfolder as a tag hint
+                  if (parts.length >= 4) {
+                    final subFolder = parts[2]
+                        .replaceAll('_', ' ')
+                        .replaceAll('-', ' ');
+                    recipe.tags ??= [];
+                    if (!recipe.tags!.any((t) =>
+                        t.toLowerCase() == subFolder.toLowerCase())) {
+                      recipe.tags!.add(subFolder);
+                    }
+                  }
+                }
+              }
+            }
+
             recipes.addAll(parsed);
           } catch (_) {}
         }

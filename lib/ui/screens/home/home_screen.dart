@@ -36,8 +36,9 @@ class HomeScreen extends ConsumerWidget {
     if (offered) return;
     if (!context.mounted) return;
 
-    // Use the book intro animation + recipe viewer
-    await Navigator.of(context).push(
+    // Use the ROOT navigator so the onboarding covers the entire screen
+    // including the bottom nav bar — prevents accidental dismissal
+    await Navigator.of(context, rootNavigator: true).push(
       PageRouteBuilder(
         opaque: true,
         pageBuilder: (ctx, animation, secondaryAnimation) =>

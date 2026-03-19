@@ -217,10 +217,14 @@ class _BookIntroScreenState extends ConsumerState<BookIntroScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF1A1206),
       body: Stack(
         fit: StackFit.expand,
         children: [
+          // ── Loading indicator while video loads ──
+          if (!_videoReady && !_videoComplete)
+            const Center(child: CircularProgressIndicator(color: Color(0xFFDAA520))),
+
           // ── Video layer ──
           if (_videoReady)
             AnimatedBuilder(
