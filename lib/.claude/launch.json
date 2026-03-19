@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "recipespellbook-website",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd /d C:\\Users\\discr\\StudioProjects\\recipespellbook-website && npm run dev -- --port 5174"],
+      "port": 5174
+    }
+  ]
+}
