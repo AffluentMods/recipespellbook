@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../utils/responsive_utils.dart';
 
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
@@ -17,7 +18,7 @@ class AboutScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.settingsAbout),
       ),
-      body: SingleChildScrollView(
+      body: Responsive.constrainWidth(context, child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
           children: [
@@ -197,7 +198,7 @@ class AboutScreen extends ConsumerWidget {
             const SizedBox(height: 32),
           ],
         ),
-      ),
+      )),
     );
   }
 

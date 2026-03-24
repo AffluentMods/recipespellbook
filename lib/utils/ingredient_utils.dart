@@ -27,14 +27,94 @@ class ParsedIngredient {
 }
 
 String formatAmount(double amt) {
-  if (amt == amt.roundToDouble()) return amt.round().toString();
+  // Snap near-integers (e.g. 0.999, 2.001 from fraction math)
+  if ((amt - amt.roundToDouble()).abs() < 0.01) return amt.round().toString();
   return _toFraction(amt);
 }
 
+/// Format a scaled amount with optional unit upscaling.
+/// E.g. 3 tsp → 1 tbsp, 4 tbsp → ¼ cup, 16 tbsp → 1 cup, 2 cups → 1 pint, etc.
+/// Returns (formattedAmount, newUnit) — newUnit may differ from input if upscaled.
+(String, String) formatScaledWithUnit(double amount, String? unit) {
+  if (unit == null || unit.isEmpty) return (formatAmount(amount), '');
+  final normalized = unit.toLowerCase().replaceAll('.', '').trim();
+
+  // tsp → tbsp (3 tsp = 1 tbsp)
+  if (_isTsp(normalized) && amount >= 3.0) {
+    final tbsp = amount / 3.0;
+    if (_isCleanFraction(tbsp)) {
+      return (formatAmount(tbsp), 'tbsp');
+    }
+  }
+
+  // tbsp → cup (16 tbsp = 1 cup, so 4 tbsp = ¼ cup)
+  if (_isTbsp(normalized) && amount >= 4.0) {
+    final cups = amount / 16.0;
+    if (_isCleanFraction(cups)) {
+      return (formatAmount(cups), 'cup');
+    }
+  }
+
+  // cups → quart (4 cups = 1 quart)
+  if (_isCup(normalized) && amount >= 4.0) {
+    final qt = amount / 4.0;
+    if (_isCleanFraction(qt)) {
+      return (formatAmount(qt), 'quart');
+    }
+  }
+
+  // oz → lb (16 oz = 1 lb)
+  if (normalized == 'oz' && amount >= 16.0) {
+    final lb = amount / 16.0;
+    if (_isCleanFraction(lb)) {
+      return (formatAmount(lb), 'lb');
+    }
+  }
+
+  // g → kg (1000 g = 1 kg)
+  if (normalized == 'g' && amount >= 1000.0) {
+    final kg = amount / 1000.0;
+    if (_isCleanFraction(kg)) {
+      return (formatAmount(kg), 'kg');
+    }
+  }
+
+  // ml → l (1000 ml = 1 l)
+  if (normalized == 'ml' && amount >= 1000.0) {
+    final l = amount / 1000.0;
+    if (_isCleanFraction(l)) {
+      return (formatAmount(l), 'l');
+    }
+  }
+
+  return (formatAmount(amount), unit);
+}
+
+bool _isTsp(String u) => u == 'tsp' || u == 'teaspoon' || u == 'teaspoons';
+bool _isTbsp(String u) => u == 'tbsp' || u == 'tablespoon' || u == 'tablespoons' || u == 'tbs';
+bool _isCup(String u) => u == 'cup' || u == 'cups' || u == 'c';
+
+/// Check if a value maps to a "clean" displayable fraction (or whole number).
+bool _isCleanFraction(double value) {
+  if ((value - value.roundToDouble()).abs() < 0.01) return true;
+  const cleanFracs = [
+    0.125, 0.166, 0.2, 0.25, 0.333, 0.375, 0.4,
+    0.5, 0.6, 0.625, 0.666, 0.75, 0.8, 0.833, 0.875,
+  ];
+  final frac = value - value.floor();
+  return cleanFracs.any((f) => (frac - f).abs() < 0.05);
+}
+
 String _toFraction(double value) {
+  // Snap near-integers first (handles 0.999, 2.001 from ⅓ math)
+  if ((value - value.roundToDouble()).abs() < 0.01) {
+    return value.round().toString();
+  }
+
   final fractions = <double, String>{
-    0.25: '¼', 0.33: '⅓', 0.5: '½', 0.66: '⅔', 0.75: '¾',
-    0.125: '⅛', 0.375: '⅜', 0.625: '⅝', 0.875: '⅞',
+    0.125: '⅛', 0.166: '⅙', 0.2: '⅕', 0.25: '¼', 0.333: '⅓',
+    0.375: '⅜', 0.4: '⅖', 0.5: '½', 0.6: '⅗', 0.625: '⅝',
+    0.666: '⅔', 0.75: '¾', 0.8: '⅘', 0.833: '⅚', 0.875: '⅞',
   };
   final whole = value.floor();
   final frac = value - whole;
@@ -47,21 +127,20 @@ String _toFraction(double value) {
   if (fracStr != null && minDiff < 0.05) {
     return whole > 0 ? '$whole $fracStr' : fracStr;
   }
-  if (value == value.roundToDouble()) return value.round().toString();
   return value.toStringAsFixed(1);
 }
 
 ParsedIngredient parseIngredient(String text) {
   text = text.trim();
   final amountPattern = RegExp(
-    r'^([½¼¾⅓⅔⅛⅜⅝⅞]|\d+\s+\d+/\d+|\d+\.\d+|\d+/\d+|\d+\s*[½¼¾⅓⅔⅛⅜⅝⅞]?)\s*',
+    r'^([½¼¾⅓⅔⅛⅜⅝⅞⅙⅚⅕⅖⅗⅘]|\d+\s+\d+\s*/\s*\d+|\d+\.\d+|\d+\s*/\s*\d+|\d+\s*[½¼¾⅓⅔⅛⅜⅝⅞⅙⅚⅕⅖⅗⅘]?)\s*',
     caseSensitive: false,
   );
   double? amount;
   String remaining = text;
   final amountMatch = amountPattern.firstMatch(text);
   if (amountMatch != null && amountMatch.group(1)!.isNotEmpty) {
-    amount = _parseAmount(amountMatch.group(1)!);
+    amount = parseAmount(amountMatch.group(1)!);
     remaining = text.substring(amountMatch.end).trim();
   }
   String? unit;
@@ -99,11 +178,14 @@ final _unitPattern = RegExp(
   caseSensitive: false,
 );
 
-double? _parseAmount(String text) {
+double? parseAmount(String text) {
   text = text.trim();
+  if (text.isEmpty) return null;
+
   const unicodeFractions = {
     '½': 0.5, '¼': 0.25, '¾': 0.75, '⅓': 0.333, '⅔': 0.666,
     '⅛': 0.125, '⅜': 0.375, '⅝': 0.625, '⅞': 0.875,
+    '⅙': 0.166, '⅚': 0.833, '⅕': 0.2, '⅖': 0.4, '⅗': 0.6, '⅘': 0.8,
   };
   for (final entry in unicodeFractions.entries) {
     if (text == entry.key) return entry.value;
@@ -113,6 +195,10 @@ double? _parseAmount(String text) {
       return whole + entry.value;
     }
   }
+
+  // Normalize space-padded slashes: "1 / 4" → "1/4", "1 1 / 2" → "1 1/2"
+  text = text.replaceAll(RegExp(r'\s*/\s*'), '/');
+
   if (text.contains('/')) {
     final parts = text.split(RegExp(r'\s+'));
     double total = 0;

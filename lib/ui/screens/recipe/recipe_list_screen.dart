@@ -8,8 +8,8 @@ import 'recipe_screen.dart';
 import '../../../data/course_category_data.dart' as taxonomy;
 import '../../../database/daos/tags_dao.dart';
 import '../../../database/database.dart';
+import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
-import '../../../providers/settings_provider.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/app_context_menu.dart';
 import '../../widgets/app_snackbar.dart';
@@ -97,11 +97,10 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     final recipeDao = ref.watch(recipeDaoProvider);
     final tagsDao = ref.watch(tagsDaoProvider);
 
-    // Get cookbookId from settings if not explicitly passed or use default
-    final settings = ref.watch(settingsProvider);
+    // Get cookbookId from provider if not explicitly passed
     final effectiveCookbookId = widget.cookbookId.isNotEmpty
         ? widget.cookbookId
-        : (settings.currentCookbookId ?? 'starter');
+        : (ref.watch(selectedCookbookIdProvider) ?? 'starter');
 
     // Choose the right stream based on filters
     Stream<List<Recipe>> recipeStream;

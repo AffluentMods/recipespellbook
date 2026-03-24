@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../providers/notification_provider.dart';
+import '../../../utils/responsive_utils.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
@@ -107,7 +108,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             ),
         ],
       ),
-      body: _loading
+      body: Responsive.constrainWidth(context, child: _loading
           ? const Center(child: CircularProgressIndicator())
           : _notifications.isEmpty
               ? Center(
@@ -154,7 +155,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                       },
                     );
                   },
-                ),
+                )),
     );
   }
 }

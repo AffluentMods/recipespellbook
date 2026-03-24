@@ -148,7 +148,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: Responsive.constrainWidth(context, child: Column(
         children: [
           // ── Search bar ──
           Padding(
@@ -256,7 +256,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             ),
           ),
         ],
-      ),
+      )),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/community/publish').then((_) { if (mounted) _load(); }),
         icon: const Icon(Icons.publish),

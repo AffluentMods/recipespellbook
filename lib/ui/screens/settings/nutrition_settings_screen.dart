@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/nutrition_data.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../utils/responsive_utils.dart';
 
 // ============================================================
 // NUTRIENT REGISTRY — single source of truth for all nutrients
@@ -169,7 +170,7 @@ class NutritionSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.nutritionDisplay),
       ),
-      body: ListView(
+      body: Responsive.constrainWidth(context, child: ListView(
         padding: const EdgeInsets.only(bottom: 40),
         children: [
           // ─── LIVE PREVIEW ───
@@ -263,7 +264,7 @@ class NutritionSettingsScreen extends ConsumerWidget {
           // Group by category
           ..._buildNutrientToggleGroups(context, ref, settings),
         ],
-      ),
+      )),
     );
   }
 

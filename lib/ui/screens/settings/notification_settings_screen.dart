@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/notification_provider.dart';
-import '../../../providers/settings_provider.dart';
 import '../../../services/auth_service.dart';
+import '../../../utils/responsive_utils.dart';
 
 class NotificationSettingsScreen extends ConsumerWidget {
   const NotificationSettingsScreen({super.key});
@@ -21,7 +21,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.settingsNotifications),
       ),
-      body: ListView(
+      body: Responsive.constrainWidth(context, child: ListView(
         children: [
           // ── Cooking Reminders ──
           _SectionHeader(title: l10n.settingsNotifCooking, icon: Icons.schedule),
@@ -90,7 +90,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
               ),
             ),
         ],
-      ),
+      )),
     );
   }
 }

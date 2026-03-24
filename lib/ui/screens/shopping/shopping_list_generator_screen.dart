@@ -8,6 +8,7 @@ import '../../../providers/settings_provider.dart';
 import '../../../services/ingredient_resolver_service.dart';
 import '../../../services/pantry_service.dart';
 import '../../../utils/ingredient_utils.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/recipe_image.dart';
 
@@ -207,7 +208,7 @@ class _ShoppingListGeneratorScreenState
             child: _buildStepIndicator(),
           ),
         ),
-        body: PageView(
+        body: Responsive.constrainWidth(context, child: PageView(
           controller: _pageController,
           physics: const NeverScrollableScrollPhysics(),
           children: [
@@ -220,7 +221,7 @@ class _ShoppingListGeneratorScreenState
             // Page 2: Final review + list picker
             _buildFinalStep(),
           ],
-        ),
+        )),
       ),
     );
   }
@@ -624,8 +625,9 @@ class _ShoppingListGeneratorScreenState
                       orElse: () => _result.recipes.first,
                     );
                     final userScale = _userScaleForRecipe(recipeNode.recipeId);
-                    final amt = _scaleAmount(ri.scaledAmount, userScale);
-                    final unit = ri.ingredient.unit ?? '';
+                    final (amt, unit) = _scaleAmountWithUnit(
+                      ri.scaledAmount, ri.scaledUnit, userScale,
+                    );
                     final amountStr =
                     [amt, unit].where((s) => s.isNotEmpty).join(' ');
                     final isColumnar = ref.watch(settingsProvider).ingredientLayout == IngredientLayout.columnar;
@@ -711,25 +713,17 @@ class _ShoppingListGeneratorScreenState
   }
 
   /// Apply user scale multiplier to a formatted amount string.
-  String _scaleAmount(String amountStr, double userScale) {
-    if (userScale == 1.0 || amountStr.isEmpty) return amountStr;
-    const fracs = {
-      '½': 0.5, '¼': 0.25, '¾': 0.75, '⅓': 0.333, '⅔': 0.666,
-      '⅛': 0.125, '⅜': 0.375, '⅝': 0.625, '⅞': 0.875,
-    };
-    double? parsed = double.tryParse(amountStr);
-    if (parsed == null) {
-      for (final e in fracs.entries) {
-        if (amountStr == e.key) { parsed = e.value; break; }
-        if (amountStr.contains(e.key)) {
-          final parts = amountStr.split(e.key);
-          parsed = (double.tryParse(parts[0].trim()) ?? 0) + e.value;
-          break;
-        }
-      }
+  /// Handles all fraction formats: "1/4", "1 / 4", "½", "1 1/2", decimals, etc.
+  /// Also handles unit upscaling (3 tsp → 1 tbsp) when unit is provided.
+  (String, String) _scaleAmountWithUnit(String amountStr, String unit, double userScale) {
+    if (amountStr.isEmpty) return (amountStr, unit);
+    final parsed = parseAmount(amountStr);
+    if (parsed == null) return (amountStr, unit);
+    final scaled = parsed * userScale;
+    if (unit.isNotEmpty) {
+      return formatScaledWithUnit(scaled, unit);
     }
-    if (parsed != null) return formatAmount(parsed * userScale);
-    return amountStr;
+    return (formatAmount(scaled), unit);
   }
 
   /// Get the effective user scale for a recipe (by recipeId).
@@ -772,10 +766,13 @@ class _ShoppingListGeneratorScreenState
             .where((ri) => selected.contains(ri.ingredient.id))
             .map((ri) {
           final categoryId = getShoppingCategory(ri.ingredient.name);
+          final (scaledAmt, scaledUnit) = _scaleAmountWithUnit(
+            ri.scaledAmount, ri.scaledUnit, userScale,
+          );
           return <String, String?>{
             'name': ri.ingredient.name,
-            'amount': _scaleAmount(ri.scaledAmount, userScale),
-            'unit': ri.ingredient.unit ?? '',
+            'amount': scaledAmt,
+            'unit': scaledUnit,
             'categoryId': categoryId,
           };
         }).toList();

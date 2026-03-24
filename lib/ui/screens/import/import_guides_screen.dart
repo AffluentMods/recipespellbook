@@ -111,10 +111,15 @@ class _ImportGuidesScreenState extends State<ImportGuidesScreen> {
                 for (final cat in categories) ...[
                   _CategoryHeader(title: cat.title, icon: cat.icon),
                   const SizedBox(height: 8),
-                  for (final guide in cat.guides) ...[
-                    _GuideCard(guide: guide),
-                    const SizedBox(height: 10),
-                  ],
+                  if (Responsive.useNavRail(context) || Responsive.useExpandedSidebar(context))
+                    // Tablet/desktop: 2-column grid
+                    _GuideGrid(guides: cat.guides)
+                  else
+                    // Phone: single column
+                    for (final guide in cat.guides) ...[
+                      _GuideCard(guide: guide),
+                      const SizedBox(height: 10),
+                    ],
                   const SizedBox(height: 16),
                 ],
               ],
@@ -136,6 +141,12 @@ class _ImportGuidesScreenState extends State<ImportGuidesScreen> {
                       Text(l10n.searchNoResults, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)),
                     ],
                   ),
+                );
+              }
+              if (Responsive.useNavRail(context) || Responsive.useExpandedSidebar(context)) {
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                  child: _GuideGrid(guides: matches),
                 );
               }
               return ListView.separated(
@@ -1444,6 +1455,32 @@ class _CategoryHeader extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// GUIDE GRID — 2-column layout for tablets/desktop
+// ═══════════════════════════════════════════════════════════════════
+
+class _GuideGrid extends StatelessWidget {
+  final List<_ImportGuide> guides;
+  const _GuideGrid({required this.guides});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraints) {
+      final cols = constraints.maxWidth >= 800 ? 3 : 2;
+      final spacing = 10.0;
+      final cardWidth = (constraints.maxWidth - spacing * (cols - 1)) / cols;
+      return Wrap(
+        spacing: spacing,
+        runSpacing: spacing,
+        children: guides.map((guide) => SizedBox(
+          width: cardWidth,
+          child: _GuideCard(guide: guide),
+        )).toList(),
+      );
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // GUIDE CARD — landing page item
 // ═══════════════════════════════════════════════════════════════════
 
@@ -1552,7 +1589,7 @@ class _GuideCard extends StatelessWidget {
 
 class _GuideDetailScreen extends StatelessWidget {
   final _ImportGuide guide;
-  const _GuideDetailScreen({super.key, required this.guide});
+  const _GuideDetailScreen({required this.guide});
 
   @override
   Widget build(BuildContext context) {

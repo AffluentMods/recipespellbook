@@ -123,12 +123,56 @@ class RecipeSpellbookApp extends ConsumerWidget {
         routerConfig: router,
         // ── Text scale + keyboard shortcuts ──
         builder: (context, child) {
-          return MediaQuery(
+          Widget result = MediaQuery(
             data: MediaQuery.of(context).copyWith(
               textScaler: TextScaler.linear(textScale),
             ),
             child: AppShortcuts(child: child!),
           );
+
+          // Scale up touch targets on tablets/desktop
+          final screenWidth = MediaQuery.of(context).size.width;
+          if (screenWidth >= 600) {
+            final baseTheme = Theme.of(context);
+            final tabletPadding = screenWidth >= 900
+                ? const EdgeInsets.symmetric(horizontal: 32, vertical: 16)
+                : const EdgeInsets.symmetric(horizontal: 28, vertical: 14);
+            final tabletMinSize = screenWidth >= 900
+                ? const Size(88, 52)
+                : const Size(80, 48);
+
+            result = Theme(
+              data: baseTheme.copyWith(
+                filledButtonTheme: FilledButtonThemeData(
+                  style: (baseTheme.filledButtonTheme.style ?? const ButtonStyle()).copyWith(
+                    padding: WidgetStatePropertyAll(tabletPadding),
+                    minimumSize: WidgetStatePropertyAll(tabletMinSize),
+                  ),
+                ),
+                elevatedButtonTheme: ElevatedButtonThemeData(
+                  style: (baseTheme.elevatedButtonTheme.style ?? const ButtonStyle()).copyWith(
+                    padding: WidgetStatePropertyAll(tabletPadding),
+                    minimumSize: WidgetStatePropertyAll(tabletMinSize),
+                  ),
+                ),
+                outlinedButtonTheme: OutlinedButtonThemeData(
+                  style: (baseTheme.outlinedButtonTheme.style ?? const ButtonStyle()).copyWith(
+                    padding: WidgetStatePropertyAll(tabletPadding),
+                    minimumSize: WidgetStatePropertyAll(tabletMinSize),
+                  ),
+                ),
+                listTileTheme: baseTheme.listTileTheme.copyWith(
+                  minVerticalPadding: screenWidth >= 900 ? 12 : 10,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: screenWidth >= 900 ? 24 : 20,
+                  ),
+                ),
+              ),
+              child: result,
+            );
+          }
+
+          return result;
         },
       ),
     );

@@ -1,7 +1,6 @@
 // lib/data/kitchen_buddy/kitchen_buddy_models.dart
 // Data models for Kitchen Buddy companion mode
 
-import 'dart:convert';
 
 // ============ COIN ACTIONS ============
 

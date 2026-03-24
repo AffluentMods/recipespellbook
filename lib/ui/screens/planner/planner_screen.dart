@@ -1455,33 +1455,13 @@ class _RecipeSelectTile extends StatelessWidget {
 
 class _ModernFAB extends StatelessWidget {
   final VoidCallback onPressed;
-  final String? label;
-  final IconData icon;
-  const _ModernFAB({required this.onPressed, this.label, this.icon = Icons.add});
+  const _ModernFAB({required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bg = theme.colorScheme.primary;
     final fg = theme.colorScheme.onPrimary;
-
-    if (label != null) {
-      return Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: bg.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))],
-        ),
-        child: FloatingActionButton.extended(
-          onPressed: onPressed,
-          backgroundColor: bg,
-          foregroundColor: fg,
-          elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          icon: Icon(icon, size: 22),
-          label: Text(label!, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-        ),
-      );
-    }
 
     return Container(
       decoration: BoxDecoration(
@@ -1494,7 +1474,7 @@ class _ModernFAB extends StatelessWidget {
         foregroundColor: fg,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Icon(icon, size: 26),
+        child: const Icon(Icons.add, size: 26),
       ),
     );
   }

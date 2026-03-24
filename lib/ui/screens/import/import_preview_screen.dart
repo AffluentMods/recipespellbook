@@ -13,6 +13,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../models/imported_recipe.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/ingredient_utils.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/smart_import_button.dart';
 
@@ -386,7 +387,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
             ),
         ],
       ),
-      body: Stack(
+      body: Responsive.constrainWidth(context, child: Stack(
         children: [
           Column(
             children: [
@@ -467,7 +468,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
           // ── Loading overlay ──
           if (_loading) _LoadingOverlay(progress: _progress),
         ],
-      ),
+      )),
     );
   }
 }

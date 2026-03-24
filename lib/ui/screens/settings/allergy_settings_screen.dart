@@ -5,6 +5,7 @@ import '../../../data/allergen_data.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/recipe_image.dart';
 
@@ -209,9 +210,9 @@ class _AllergySettingsScreenState extends ConsumerState<AllergySettingsScreen>
           controller: _tabController,
           children: [
             // Tab 1: My Allergies
-            _buildAllergiesTab(theme, l10n),
+            Responsive.constrainWidth(context, child: _buildAllergiesTab(theme, l10n)),
             // Tab 2: Disabled Warnings
-            _DisabledWarningsTab(),
+            Responsive.constrainWidth(context, child: _DisabledWarningsTab()),
           ],
         ),
         floatingActionButton: _hasChanges && _tabController.index == 0

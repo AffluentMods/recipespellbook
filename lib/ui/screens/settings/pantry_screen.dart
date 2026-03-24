@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/pantry_service.dart';
+import '../../../utils/responsive_utils.dart';
 
 /// Settings screen for managing pantry items.
 ///
@@ -117,7 +118,7 @@ class _PantryScreenState extends State<PantryScreen> {
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : CustomScrollView(
+          : Responsive.constrainWidth(context, child: CustomScrollView(
         slivers: [
           // Info card
           SliverToBoxAdapter(
@@ -345,7 +346,7 @@ class _PantryScreenState extends State<PantryScreen> {
 
           const SliverToBoxAdapter(child: SizedBox(height: 32)),
         ],
-      ),
+      )),
     );
   }
 }

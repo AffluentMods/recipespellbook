@@ -112,7 +112,7 @@ class _UncategorizedRecipesScreenState
           : AppBar(
         title: Text(isCourse ? l10n.noCourseAssigned : l10n.uncategorized),
       ),
-      body: StreamBuilder<List<Recipe>>(
+      body: Responsive.constrainWidth(context, child: StreamBuilder<List<Recipe>>(
         stream: recipeDao.watchRecipesForCookbook(cookbookId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -256,7 +256,7 @@ class _UncategorizedRecipesScreenState
             ],
           );
         },
-      ),
+      )),
     );
   }
 

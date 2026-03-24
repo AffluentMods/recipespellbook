@@ -5,7 +5,7 @@ import '../../../data/course_category_data.dart' as taxonomy;
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
-import '../../../providers/settings_provider.dart';
+import '../../../providers/cookbook_provider.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../../utils/responsive_utils.dart';
 
@@ -41,8 +41,7 @@ class _CategoriesBrowseScreenState extends ConsumerState<CategoriesBrowseScreen>
 
   Future<void> _loadCustomTaxonomy() async {
     final dao = ref.read(customTaxonomyDaoProvider);
-    final settings = ref.read(settingsProvider);
-    final cookbookId = settings.currentCookbookId ?? 'starter';
+    final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
     final courses = await dao.getCustomCourses(cookbookId);
     final categories = await dao.getCustomCategories(cookbookId);
     if (mounted) {
@@ -58,8 +57,7 @@ class _CategoriesBrowseScreenState extends ConsumerState<CategoriesBrowseScreen>
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final translator = TaxonomyTranslator.of(context);
-    final settings = ref.watch(settingsProvider);
-    final cookbookId = settings.currentCookbookId ?? 'starter';
+    final cookbookId = ref.watch(selectedCookbookIdProvider) ?? 'starter';
     final recipeDao = ref.watch(recipeDaoProvider);
 
     final isCourses = widget.mode == BrowseMode.courses;

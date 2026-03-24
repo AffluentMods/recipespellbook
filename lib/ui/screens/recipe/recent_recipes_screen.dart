@@ -6,6 +6,7 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../widgets/recipe_image.dart';
 
 /// Provider for recently viewed recipes (no limit)
@@ -41,7 +42,7 @@ class RecentRecipesScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: recipesAsync.when(
+      body: Responsive.constrainWidth(context, child: recipesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (recipes) {
@@ -85,7 +86,7 @@ class RecentRecipesScreen extends ConsumerWidget {
             },
           );
         },
-      ),
+      )),
     );
   }
 }

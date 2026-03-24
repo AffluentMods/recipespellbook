@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:drift/drift.dart' as drift;
-import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import '../../../utils/native_file_image.dart';
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +11,7 @@ import '../../../data/app_enums.dart';
 import '../../../data/ingredient_images.dart';
 import '../../../data/localized_units.dart';
 import '../../../data/nutrition_data.dart';
+import '../../../utils/ingredient_utils.dart' show parseAmount, formatScaledWithUnit;
 import '../../../utils/responsive_utils.dart';
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
@@ -417,6 +417,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           onEdit: _navigateToEdit,
           onReload: _loadRecipe,
           onPrint: _printRecipe,
+          onShare: _showShareSheet,
           isTabbed: false,
           isDetailPane: widget.isDetailPane,
           onClose: widget.onClose,
@@ -545,6 +546,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           onEdit: _navigateToEdit,
           onReload: _loadRecipe,
           onPrint: _printRecipe,
+          onShare: _showShareSheet,
           isTabbed: true,
           isDetailPane: widget.isDetailPane,
           onClose: widget.onClose,
@@ -1324,6 +1326,7 @@ class _RecipeAppBar extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onReload;
   final VoidCallback? onPrint;
+  final VoidCallback? onShare;
   final bool isTabbed;
   final bool isDetailPane;
   final VoidCallback? onClose;
@@ -1335,6 +1338,7 @@ class _RecipeAppBar extends StatelessWidget {
     required this.onEdit,
     required this.onReload,
     this.onPrint,
+    this.onShare,
     this.isTabbed = false,
     this.isDetailPane = false,
     this.onClose,
@@ -1432,6 +1436,7 @@ class _RecipeAppBar extends StatelessWidget {
               PopupMenuItem(value: 'cook', child: Row(children: [const Icon(Icons.local_fire_department_outlined), const SizedBox(width: 12), Text(l10n.cookingMode)])),
               const PopupMenuDivider(),
               PopupMenuItem(value: 'layout', child: Row(children: [Icon(isTabbed ? Icons.view_agenda_outlined : Icons.tab_outlined), const SizedBox(width: 12), Text(isTabbed ? l10n.stackedLayout : l10n.tabbedLayout)])),
+              PopupMenuItem(value: 'share', child: Row(children: [const Icon(Icons.share_outlined), const SizedBox(width: 12), Text(l10n.actionShare)])),
               PopupMenuItem(value: 'print', child: Row(children: [const Icon(Icons.print_outlined), const SizedBox(width: 12), Text(l10n.printRecipe)])),
               PopupMenuItem(value: 'pin', child: Row(children: [Icon(recipe.isPinned ? Icons.push_pin : Icons.push_pin_outlined), const SizedBox(width: 12), Text(recipe.isPinned ? l10n.recipeUnpin : l10n.recipePin)])),
               PopupMenuItem(value: 'duplicate', child: Row(children: [const Icon(Icons.copy), const SizedBox(width: 12), Text(l10n.recipeDuplicate)])),
@@ -1452,6 +1457,9 @@ class _RecipeAppBar extends StatelessWidget {
         break;
       case 'layout':
         onToggleLayout?.call();
+        break;
+      case 'share':
+        onShare?.call();
         break;
       case 'print':
         onPrint?.call();
@@ -1533,11 +1541,11 @@ class RecipeRating extends StatelessWidget {
 }
 
 class _MetaItem extends StatelessWidget {
-  final IconData icon; final String label; final String value; final bool highlight;
-  const _MetaItem({required this.icon, required this.label, required this.value, this.highlight = false});
+  final IconData icon; final String label; final String value;
+  const _MetaItem({required this.icon, required this.label, required this.value});
   @override Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(children: [Icon(icon, color: highlight ? theme.colorScheme.tertiary : theme.colorScheme.onSurfaceVariant), const SizedBox(height: 4), Text(value, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: highlight ? theme.colorScheme.tertiary : null)), Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline))]);
+    return Column(children: [Icon(icon, color: theme.colorScheme.onSurfaceVariant), const SizedBox(height: 4), Text(value, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)), Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline))]);
   }
 }
 
@@ -1583,12 +1591,14 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
     String amount = ingredient.amount ?? '';
     String unit = ingredient.unit ?? '';
 
-    // Apply scaling first
+    // Apply scaling first (handles fractions: "1/4", "½", "1 1/2", "1 / 4", etc.)
     if (scaleFactor != 1.0 && amount.isNotEmpty) {
-      final num = double.tryParse(amount.replaceAll(RegExp(r'[^\d.]'), ''));
-      if (num != null) {
-        final scaled = num * scaleFactor;
-        amount = scaled == scaled.roundToDouble() ? scaled.round().toString() : scaled.toStringAsFixed(1);
+      final parsed = parseAmount(amount);
+      if (parsed != null) {
+        final scaled = parsed * scaleFactor;
+        final (newAmt, newUnit) = formatScaledWithUnit(scaled, unit.isNotEmpty ? unit : null);
+        amount = newAmt;
+        if (newUnit.isNotEmpty) unit = newUnit;
       }
     }
 
@@ -1856,8 +1866,7 @@ class _FullScreenImageViewer extends StatelessWidget {
 
 class _ServerImage extends StatefulWidget {
   final String path;
-  final BoxFit fit;
-  const _ServerImage({required this.path, this.fit = BoxFit.cover});
+  const _ServerImage({required this.path});
 
   @override
   State<_ServerImage> createState() => _ServerImageState();
@@ -1893,7 +1902,7 @@ class _ServerImageState extends State<_ServerImage> {
     }
     return Image.network(
       _url!,
-      fit: widget.fit,
+      fit: BoxFit.cover,
       errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image)),
     );
   }

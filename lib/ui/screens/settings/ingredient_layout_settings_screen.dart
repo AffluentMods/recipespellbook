@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../utils/responsive_utils.dart';
 
 class IngredientLayoutSettingsScreen extends ConsumerWidget {
   const IngredientLayoutSettingsScreen({super.key});
@@ -17,7 +18,7 @@ class IngredientLayoutSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.settingsIngredientLayout),
       ),
-      body: ListView(
+      body: Responsive.constrainWidth(context, child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Text(
@@ -77,7 +78,7 @@ class IngredientLayoutSettingsScreen extends ConsumerWidget {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

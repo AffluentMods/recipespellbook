@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../data/app_enums.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../utils/responsive_utils.dart';
 
 class PlaceholderSettingsScreen extends ConsumerWidget {
   const PlaceholderSettingsScreen({super.key});
@@ -21,7 +22,7 @@ class PlaceholderSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.imagePlaceholders),
       ),
-      body: ListView(
+      body: Responsive.constrainWidth(context, child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // Description
@@ -71,7 +72,7 @@ class PlaceholderSettingsScreen extends ConsumerWidget {
             theme: theme,
           ),
         ],
-      ),
+      )),
     );
   }
 }

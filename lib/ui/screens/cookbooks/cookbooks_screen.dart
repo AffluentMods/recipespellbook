@@ -9,7 +9,6 @@ import '../../../database/database.dart';
 import '../../../database/daos/tags_dao.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
-import '../../../providers/settings_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/community_service.dart';
@@ -70,7 +69,7 @@ class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
           ),
         ],
       ),
-      body: cookbooksAsync.when(
+      body: Responsive.constrainWidth(context, child: cookbooksAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('${l10n.errorGeneric}: $e')),
         data: (cookbooks) {
@@ -121,7 +120,7 @@ class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
             ],
           );
         },
-      ),
+      )),
       floatingActionButton: _ModernFAB(
         onPressed: () => _showNewCookbookDialog(context, ref),
         label: l10n.cookbookAdd,
@@ -261,7 +260,7 @@ class _CookbookGrid extends ConsumerWidget {
                 cookbook: cookbook,
                 isSelected: isSelected,
                 onTap: () => onCookbookSelected(cookbook.id),
-                onLongPress: () => _showEditSheet(context, ref, cookbook),
+                onLongPress: (position) => _showContextMenu(context, ref, cookbook, position),
               );
             },
           ),
@@ -270,51 +269,54 @@ class _CookbookGrid extends ConsumerWidget {
     );
   }
 
-  void _showEditSheet(BuildContext context, WidgetRef ref, Cookbook cookbook) {
+  void _showContextMenu(BuildContext context, WidgetRef ref, Cookbook cookbook, Offset position) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
 
-    Responsive.showAdaptiveSheet(
-      context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 8),
-            Container(width: 40, height: 4, decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
-            )),
-            const SizedBox(height: 8),
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: Text(l10n.actionEdit),
-              subtitle: Text(l10n.cookbookEditSubtitle),
-              onTap: () {
-                Navigator.pop(ctx);
-                context.push('/cookbook/${cookbook.id}/edit');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.share),
-              title: Text(l10n.shareCookbook),
-              subtitle: Text(l10n.shareCookbookSubtitle),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showShareSheet(context, ref, cookbook);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
-              title: Text(l10n.actionDelete, style: TextStyle(color: Theme.of(context).colorScheme.error)),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showDeleteConfirmation(context, ref, cookbook);
-              },
-            ),
-          ],
+    showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx, position.dy),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      items: [
+        PopupMenuItem(
+          value: 'edit',
+          child: ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.edit, size: 20),
+            title: Text(l10n.actionEdit),
+          ),
         ),
-      ),
-    );
+        PopupMenuItem(
+          value: 'share',
+          child: ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.share, size: 20),
+            title: Text(l10n.shareCookbook),
+          ),
+        ),
+        PopupMenuItem(
+          value: 'delete',
+          child: ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(Icons.delete, size: 20, color: theme.colorScheme.error),
+            title: Text(l10n.actionDelete, style: TextStyle(color: theme.colorScheme.error)),
+          ),
+        ),
+      ],
+    ).then((value) {
+      if (value == null) return;
+      switch (value) {
+        case 'edit':
+          context.push('/cookbook/${cookbook.id}/edit');
+        case 'share':
+          _showShareSheet(context, ref, cookbook);
+        case 'delete':
+          _showDeleteConfirmation(context, ref, cookbook);
+      }
+    });
   }
 
   void _showShareSheet(BuildContext context, WidgetRef ref, Cookbook cookbook) {
@@ -646,7 +648,7 @@ class _CookbookCard extends StatelessWidget {
   final Cookbook cookbook;
   final bool isSelected;
   final VoidCallback onTap;
-  final VoidCallback onLongPress;
+  final ValueChanged<Offset> onLongPress;
 
   const _CookbookCard({
     required this.cookbook,
@@ -661,7 +663,7 @@ class _CookbookCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      onLongPress: onLongPress,
+      onLongPressStart: (details) => onLongPress(details.globalPosition),
       child: Card(
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
@@ -759,8 +761,7 @@ class _CookbookCard extends StatelessWidget {
 class _ModernFAB extends StatelessWidget {
   final VoidCallback onPressed;
   final String? label;
-  final IconData icon;
-  const _ModernFAB({required this.onPressed, this.label, this.icon = Icons.add});
+  const _ModernFAB({required this.onPressed, this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -780,7 +781,7 @@ class _ModernFAB extends StatelessWidget {
           foregroundColor: fg,
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          icon: Icon(icon, size: 22),
+          icon: const Icon(Icons.add, size: 22),
           label: Text(label!, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
         ),
       );
@@ -797,7 +798,7 @@ class _ModernFAB extends StatelessWidget {
         foregroundColor: fg,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Icon(icon, size: 26),
+        child: const Icon(Icons.add, size: 26),
       ),
     );
   }

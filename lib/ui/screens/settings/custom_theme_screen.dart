@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/app_enums.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../widgets/color_picker_dialog.dart';
 
 // ════════════════════════════════════════════════════════════
@@ -181,7 +182,7 @@ class _CustomThemeScreenState extends ConsumerState<CustomThemeScreen>
         controller: _tabController,
         children: [
           // ── TAB 0: PRIMARY (system default) ──
-          _buildEditorTab(
+          Responsive.constrainWidth(context, child: _buildEditorTab(
             theme: theme, l10n: l10n,
             isDark: _isPrimaryDark,
             bg: _isPrimaryDark ? _darkBg : _lightBg,
@@ -192,10 +193,10 @@ class _CustomThemeScreenState extends ConsumerState<CustomThemeScreen>
             onPrimaryPick: (c) { if (_isPrimaryDark) { _darkPrimary = c; } else { _lightPrimary = c; } },
             onAccentPick: (c) { if (_isPrimaryDark) { _darkAccent = c; } else { _lightAccent = c; } },
             isLinked: false,
-          ),
+          )),
 
           // ── TAB 1: SECONDARY (linked by default) ──
-          _buildEditorTab(
+          Responsive.constrainWidth(context, child: _buildEditorTab(
             theme: theme, l10n: l10n,
             isDark: !_isPrimaryDark,
             bg: !_isPrimaryDark ? _darkBg : _lightBg,
@@ -206,7 +207,7 @@ class _CustomThemeScreenState extends ConsumerState<CustomThemeScreen>
             onPrimaryPick: (c) { if (!_isPrimaryDark) { _darkPrimary = c; } else { _lightPrimary = c; } },
             onAccentPick: (c) { if (!_isPrimaryDark) { _darkAccent = c; } else { _lightAccent = c; } },
             isLinked: _secondaryLinked,
-          ),
+          )),
         ],
       ),
     );
@@ -646,8 +647,6 @@ class _PresetGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themes = AppColorTheme.values.where((t) => !t.isCustom).toList();
-    final theme = Theme.of(context);
-
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),

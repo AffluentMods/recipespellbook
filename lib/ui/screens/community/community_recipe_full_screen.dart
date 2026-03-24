@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../services/community_service.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../widgets/community_image.dart';
 
 // ════════════════════════════════════════════
@@ -29,7 +30,7 @@ class CommunityRecipeFullScreen extends StatelessWidget {
     final hasImage = recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
 
     return Scaffold(
-      body: CustomScrollView(
+      body: Responsive.constrainWidth(context, child: CustomScrollView(
         slivers: [
           // ── Hero image header — always shows (placeholder if no image) ──
           SliverAppBar(
@@ -220,7 +221,7 @@ class CommunityRecipeFullScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

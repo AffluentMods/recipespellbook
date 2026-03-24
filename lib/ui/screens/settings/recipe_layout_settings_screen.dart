@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../utils/responsive_utils.dart';
 
 class RecipeLayoutSettingsScreen extends ConsumerWidget {
   const RecipeLayoutSettingsScreen({super.key});
@@ -17,7 +18,7 @@ class RecipeLayoutSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.settingsRecipeLayout),
       ),
-      body: ListView(
+      body: Responsive.constrainWidth(context, child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // Description
@@ -83,7 +84,7 @@ class RecipeLayoutSettingsScreen extends ConsumerWidget {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

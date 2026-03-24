@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart' hide Category;
@@ -58,12 +59,37 @@ class SyncService {
   static const _legacyLastSyncKey = 'sync_last_sync_at';
 
   AppDatabase? _db;
-  bool _isSyncing = false;
+  Completer<void>? _syncLock;
+  // ignore: unused_field
+  bool _hasPendingChanges = false;
 
   /// Must be called once with the app's database instance.
   void setDatabase(AppDatabase db) => _db = db;
 
-  bool get isSyncing => _isSyncing;
+  bool get isSyncing => _syncLock != null;
+
+  /// Mark that local changes exist that haven't been synced yet.
+  void markPendingChanges() {
+    _hasPendingChanges = true;
+  }
+
+  /// Acquire the sync lock. If another sync is in progress, wait for it.
+  /// Returns true if we should proceed, false if we should bail.
+  Future<bool> _acquireLock() async {
+    // If another sync is running, wait for it to finish, then bail
+    // (the previous sync already handled our changes)
+    if (_syncLock != null) {
+      await _syncLock!.future;
+      return false; // Previous sync covered our changes
+    }
+    _syncLock = Completer<void>();
+    return true;
+  }
+
+  void _releaseLock() {
+    _syncLock?.complete();
+    _syncLock = null;
+  }
 
   // ── Last Sync Tracking (per-account) ──
 
@@ -185,9 +211,9 @@ class SyncService {
   Future<SyncResult> sync({bool fullSync = false}) async {
     if (_db == null) return const SyncResult.failure('Database not initialized');
     if (!_auth.isSignedIn) return const SyncResult.failure('Not signed in');
-    if (_isSyncing) return const SyncResult.failure('Sync already in progress');
 
-    _isSyncing = true;
+    final acquired = await _acquireLock();
+    if (!acquired) return const SyncResult(success: true, pushedCount: 0, pulledCount: 0);
 
     // Capture user ID at sync start — if account switches mid-flight,
     // we must not write the old account's timestamp under the new user.
@@ -252,6 +278,8 @@ class SyncService {
         debugPrint('[Sync] Family pull failed (non-fatal): $e');
       }
 
+      _hasPendingChanges = false;
+
       return SyncResult(
         success: true,
         pushedCount: pushedCount,
@@ -260,13 +288,21 @@ class SyncService {
       );
     } catch (e) {
       final msg = e.toString();
-      if (msg.contains('SocketException') || msg.contains('Failed to fetch') || msg.contains('NetworkError')) {
+      final isNetwork = msg.contains('SocketException') ||
+          msg.contains('Failed to fetch') ||
+          msg.contains('NetworkError') ||
+          msg.contains('TimeoutException') ||
+          msg.contains('ClientException') ||
+          msg.contains('Connection refused') ||
+          msg.contains('Connection reset');
+      if (isNetwork) {
+        _hasPendingChanges = true;
         return const SyncResult.failure('No internet connection');
       }
       debugPrint('[Sync] Error: $e');
       return SyncResult.failure('Sync failed: ${_friendlyError(e)}');
     } finally {
-      _isSyncing = false;
+      _releaseLock();
     }
   }
 
@@ -275,9 +311,10 @@ class SyncService {
   Future<SyncResult> pullOnly() async {
     if (_db == null) return const SyncResult.failure('Database not initialized');
     if (!_auth.isSignedIn) return const SyncResult.failure('Not signed in');
-    if (_isSyncing) return const SyncResult.failure('Sync already in progress');
 
-    _isSyncing = true;
+    final acquired = await _acquireLock();
+    if (!acquired) return const SyncResult(success: true, pushedCount: 0, pulledCount: 0);
+
     final syncUserId = _auth.currentUser!.id;
 
     try {
@@ -323,13 +360,21 @@ class SyncService {
       );
     } catch (e) {
       final msg = e.toString();
-      if (msg.contains('SocketException') || msg.contains('Failed to fetch') || msg.contains('NetworkError')) {
+      final isNetwork = msg.contains('SocketException') ||
+          msg.contains('Failed to fetch') ||
+          msg.contains('NetworkError') ||
+          msg.contains('TimeoutException') ||
+          msg.contains('ClientException') ||
+          msg.contains('Connection refused') ||
+          msg.contains('Connection reset');
+      if (isNetwork) {
+        _hasPendingChanges = true;
         return const SyncResult.failure('No internet connection');
       }
       debugPrint('[Sync] Pull error: $e');
       return SyncResult.failure('Pull failed: ${_friendlyError(e)}');
     } finally {
-      _isSyncing = false;
+      _releaseLock();
     }
   }
 

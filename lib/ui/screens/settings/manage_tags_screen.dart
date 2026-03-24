@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
+import '../../../utils/responsive_utils.dart';
 
 /// Screen for managing recipe tags
 class ManageTagsScreen extends ConsumerStatefulWidget {
@@ -31,7 +32,7 @@ class _ManageTagsScreenState extends ConsumerState<ManageTagsScreen> {
           ),
         ],
       ),
-      body: StreamBuilder<List<Tag>>(
+      body: Responsive.constrainWidth(context, child: StreamBuilder<List<Tag>>(
         stream: db.tagsDao.watchAllTags(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -54,7 +55,7 @@ class _ManageTagsScreenState extends ConsumerState<ManageTagsScreen> {
             },
           );
         },
-      ),
+      )),
     );
   }
 

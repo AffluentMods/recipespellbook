@@ -6,6 +6,7 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../../utils/taxonomy_translator.dart';
 import '../../widgets/app_snackbar.dart';
 
@@ -62,7 +63,7 @@ class _ManageCoursesScreenState extends ConsumerState<ManageCoursesScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
+          : Responsive.constrainWidth(context, child: ListView.builder(
         padding: const EdgeInsets.only(bottom: 80),
         itemCount: _courses.length,
         itemBuilder: (_, i) {
@@ -87,7 +88,7 @@ class _ManageCoursesScreenState extends ConsumerState<ManageCoursesScreen> {
             ),
           );
         },
-      ),
+      )),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addCourse,
         icon: const Icon(Icons.add),

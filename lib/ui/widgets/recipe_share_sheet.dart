@@ -11,6 +11,8 @@ import 'package:share_plus/share_plus.dart';
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
+import '../../services/auth_service.dart';
+import '../../services/family_service.dart';
 import 'app_snackbar.dart';
 import '../../utils/responsive_utils.dart';
 
@@ -107,36 +109,39 @@ class _RecipeShareSheet extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Share options
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _ShareOption(
-                  icon: Icons.link,
-                  label: l10n.shareLink,
-                  onTap: () => _shareLink(context),
-                ),
-                _ShareOption(
-                  icon: Icons.text_fields,
-                  label: l10n.shareAsText,
-                  onTap: () => _shareAsText(context),
-                ),
-                _ShareOption(
-                  icon: Icons.file_copy,
-                  label: l10n.shareExport,
-                  onTap: () => _exportRecipe(context),
-                ),
-                _ShareOption(
-                  icon: Icons.picture_as_pdf,
-                  label: l10n.shareDocument,
-                  onTap: () => _shareAsDocument(context),
-                ),
-                _ShareOption(
-                  icon: Icons.print,
-                  label: l10n.sharePrint,
-                  onTap: () => _printRecipe(context),
-                ),
-              ],
+            // Share options — scrollable to prevent overflow on narrow screens
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _ShareOption(
+                    icon: Icons.link,
+                    label: l10n.shareLink,
+                    onTap: () => _shareLink(context),
+                  ),
+                  _ShareOption(
+                    icon: Icons.text_fields,
+                    label: l10n.shareAsText,
+                    onTap: () => _shareAsText(context),
+                  ),
+                  _ShareOption(
+                    icon: Icons.file_copy,
+                    label: l10n.shareExport,
+                    onTap: () => _exportRecipe(context),
+                  ),
+                  _ShareOption(
+                    icon: Icons.picture_as_pdf,
+                    label: l10n.shareDocument,
+                    onTap: () => _shareAsDocument(context),
+                  ),
+                  _ShareOption(
+                    icon: Icons.print,
+                    label: l10n.sharePrint,
+                    onTap: () => _printRecipe(context),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
           ],
@@ -149,15 +154,37 @@ class _RecipeShareSheet extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     Navigator.pop(context);
 
-    // Use the recipe's actual source URL if available, otherwise share title + attribution
-    final hasSourceUrl = recipe.sourceUrl != null && recipe.sourceUrl!.isNotEmpty;
-    final shareSnippet = hasSourceUrl ? recipe.sourceUrl! : recipe.title;
-    final shareText = '${recipe.title}\n\n'
-        '${hasSourceUrl ? recipe.sourceUrl! : ''}'
-        '${hasSourceUrl ? '\n\n' : ''}'
-        '${l10n.shareFromApp}';
+    // Try to generate a shareable link via the backend (requires sign-in)
+    final isSignedIn = AuthService.instance.isSignedIn;
+    if (isSignedIn) {
+      if (context.mounted) AppSnackbar.loading(context, l10n.generatingLink);
 
-    if (context.mounted) {
+      final link = await FamilyService.instance.createShareLink('recipe', recipe.id);
+
+      if (context.mounted) AppSnackbar.dismiss(context);
+
+      if (link != null) {
+        // Share the generated link directly
+        SharePlus.instance.share(ShareParams(
+          uri: Uri.tryParse(link.url),
+          text: '${recipe.title}\n${link.url}',
+          subject: recipe.title,
+        ));
+        return;
+      }
+      // Fall through to source URL / text fallback if link creation failed
+    }
+
+    // Fallback: share source URL if available
+    final hasSourceUrl = recipe.sourceUrl != null && recipe.sourceUrl!.isNotEmpty;
+    if (hasSourceUrl) {
+      SharePlus.instance.share(ShareParams(
+        uri: Uri.tryParse(recipe.sourceUrl!),
+        text: '${recipe.title}\n${recipe.sourceUrl!}',
+        subject: recipe.title,
+      ));
+    } else if (context.mounted) {
+      // No source URL, not signed in — show sign-in prompt or share as text
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -172,46 +199,10 @@ class _RecipeShareSheet extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(l10n.shareLinkDescription),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        shareSnippet,
-                        style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                          fontFamily: 'monospace',
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.copy, size: 20),
-                      onPressed: () {
-                        Clipboard.setData(ClipboardData(text: shareSnippet));
-                        AppSnackbar.info(context, l10n.successCopied);
-                      },
-                      tooltip: l10n.actionCopy,
-                    ),
-                  ],
-                ),
-              ),
-              if (!hasSourceUrl) ...[
-                const SizedBox(height: 8),
-                Text(
-                  l10n.shareLinkNote,
-                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(ctx).colorScheme.outline,
-                  ),
-                ),
-              ],
+              if (!isSignedIn)
+                Text(l10n.shareSignInRequired)
+              else
+                Text(l10n.shareLinkNote),
             ],
           ),
           actions: [
@@ -222,6 +213,7 @@ class _RecipeShareSheet extends StatelessWidget {
             FilledButton.icon(
               onPressed: () {
                 Navigator.pop(ctx);
+                final shareText = '${recipe.title}\n\n${l10n.shareFromApp}';
                 SharePlus.instance.share(ShareParams(text: shareText, subject: recipe.title));
               },
               icon: const Icon(Icons.share),

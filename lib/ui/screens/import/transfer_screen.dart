@@ -77,13 +77,18 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
         ),
       ),
       body: SafeArea(
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          child: _step == 0
-              ? _buildModePicker(theme, l10n)
-              : _step == 1
-              ? _buildSendMode(theme, l10n)
-              : _buildReceiveMode(theme, l10n),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: _step == 0
+                  ? _buildModePicker(theme, l10n)
+                  : _step == 1
+                  ? _buildSendMode(theme, l10n)
+                  : _buildReceiveMode(theme, l10n),
+            ),
+          ),
         ),
       ),
     );

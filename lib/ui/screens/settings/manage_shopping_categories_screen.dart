@@ -49,8 +49,8 @@ class _ManageShoppingCategoriesScreenState extends ConsumerState<ManageShoppingC
       body: TabBarView(
         controller: _tabController,
         children: [
-          _CategoriesTab(),
-          _MappingsTab(),
+          Responsive.constrainWidth(context, child: _CategoriesTab()),
+          Responsive.constrainWidth(context, child: _MappingsTab()),
         ],
       ),
     );

@@ -395,21 +395,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final db = ref.read(databaseProvider);
     final service = ExportImportService(db);
-    Responsive.showAdaptiveSheet(context, builder: (context) => _ExportOptionsSheet(
+    Responsive.showAdaptiveSheet(context, builder: (sheetCtx) => _ExportOptionsSheet(
       l10n: l10n,
       onExportCookbook: () async {
-        Navigator.pop(context);
+        Navigator.pop(sheetCtx);
         AppSnackbar.loading(context, l10n.exporting);
-        final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
-        final data = await service.exportCookbook(cookbookId);
-        await service.shareExport(data, 'cookbook_export.json');
+        try {
+          final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
+          final data = await service.exportCookbook(cookbookId);
+          await service.shareExport(data, 'cookbook_export.json');
+        } catch (e) {
+          if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
+          return;
+        }
         if (context.mounted) AppSnackbar.dismiss(context);
       },
       onExportSelective: (options) async {
-        Navigator.pop(context);
+        Navigator.pop(sheetCtx);
         AppSnackbar.loading(context, l10n.exporting);
-        final data = await service.exportSelective(options);
-        await service.shareExport(data, 'recipe_spellbook_backup.json');
+        try {
+          final data = await service.exportSelective(options);
+          await service.shareExport(data, 'recipe_spellbook_backup.json');
+        } catch (e) {
+          if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
+          return;
+        }
         if (context.mounted) AppSnackbar.dismiss(context);
       },
     ));
@@ -419,23 +429,44 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
     final db = ref.read(databaseProvider);
     final service = ExportImportService(db);
-    Responsive.showAdaptiveSheet(context, builder: (context) => SafeArea(
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Padding(padding: const EdgeInsets.all(16), child: Text(l10n.settingsImport, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-        ListTile(
-          leading: const Icon(Icons.file_open), title: Text(l10n.importFromJson), subtitle: Text(l10n.importFromJsonSubtitle),
-          onTap: () async {
-            Navigator.pop(context);
-            AppSnackbar.loading(context, l10n.importing);
-            final result = await service.importFromFile();
-            if (context.mounted) {
-              AppSnackbar.dismiss(context);
-              result.success ? AppSnackbar.success(context, result.message) : AppSnackbar.error(context, result.message);
-            }
-          },
-        ),
-        const SizedBox(height: 16),
-      ]),
+    Responsive.showAdaptiveSheet(context, builder: (sheetCtx) => Material(
+      color: Theme.of(sheetCtx).colorScheme.surfaceContainerLow,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      child: SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(padding: const EdgeInsets.all(16), child: Text(l10n.settingsImport, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+          ListTile(
+            leading: const Icon(Icons.file_open), title: Text(l10n.importFromJson), subtitle: Text(l10n.importFromJsonSubtitle),
+            onTap: () async {
+              Navigator.pop(sheetCtx);
+              AppSnackbar.loading(context, '${l10n.importing}...');
+              final result = await service.importFromFile(
+                onProgress: (current, total, label) {
+                  if (context.mounted) {
+                    AppSnackbar.loading(context, '${l10n.importing} $current/$total');
+                  }
+                },
+              );
+              if (context.mounted) {
+                AppSnackbar.dismiss(context);
+                if (result.success) {
+                  // Auto-switch to the imported cookbook and go home
+                  if (result.importedCookbookId != null) {
+                    ref.read(selectedCookbookIdProvider.notifier).state = result.importedCookbookId;
+                    context.go('/');
+                    AppSnackbar.success(context, '${result.message}\nSwitched to imported cookbook');
+                  } else {
+                    AppSnackbar.success(context, result.message);
+                  }
+                } else {
+                  AppSnackbar.error(context, result.message);
+                }
+              }
+            },
+          ),
+          const SizedBox(height: 16),
+        ]),
+      ),
     ));
   }
 
@@ -828,7 +859,7 @@ class _Section extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final bg = isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surfaceContainerLowest;
+    final bg = isDark ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.surfaceContainerLowest;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Padding(
         padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
@@ -859,32 +890,31 @@ class _Tile extends StatelessWidget {
   final String subtitle;
   final VoidCallback onTap;
   final Color? titleColor;
-  final bool enabled;
-  const _Tile({required this.icon, required this.title, required this.subtitle, required this.onTap, this.titleColor, this.enabled = true});
+  const _Tile({required this.icon, required this.title, required this.subtitle, required this.onTap, this.titleColor});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final c = enabled ? (titleColor ?? theme.colorScheme.primary) : theme.colorScheme.outline;
+    final c = titleColor ?? theme.colorScheme.primary;
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
       leading: Container(width: 36, height: 36, decoration: BoxDecoration(color: c.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: Icon(icon, size: 20, color: c)),
-      title: Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: enabled ? titleColor : theme.colorScheme.outline)),
-      subtitle: Text(subtitle, style: TextStyle(fontSize: 13, color: enabled ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.outline)),
-      trailing: enabled ? Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)) : null,
-      onTap: enabled ? onTap : null,
+      title: Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: titleColor)),
+      subtitle: Text(subtitle, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
+      trailing: Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
+      onTap: onTap,
     );
   }
 }
 
 class _ResetOptionTile extends StatelessWidget {
-  final IconData icon; final String title; final String subtitle; final Color color; final bool enabled; final VoidCallback onTap;
-  const _ResetOptionTile({required this.icon, required this.title, required this.subtitle, required this.color, this.enabled = true, required this.onTap});
+  final IconData icon; final String title; final String subtitle; final Color color; final VoidCallback onTap;
+  const _ResetOptionTile({required this.icon, required this.title, required this.subtitle, required this.color, required this.onTap});
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Material(color: Colors.transparent, child: InkWell(onTap: enabled ? onTap : null, borderRadius: BorderRadius.circular(12),
-      child: Opacity(opacity: enabled ? 1.0 : 0.4, child: Container(
+    return Material(color: Colors.transparent, child: InkWell(onTap: onTap, borderRadius: BorderRadius.circular(12),
+      child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(border: Border.all(color: color.withValues(alpha: 0.3)), borderRadius: BorderRadius.circular(12)),
         child: Row(children: [
@@ -893,9 +923,9 @@ class _ResetOptionTile extends StatelessWidget {
             Text(title, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: color)),
             Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           ])),
-          if (enabled) Icon(Icons.chevron_right, color: color, size: 20),
+          Icon(Icons.chevron_right, color: color, size: 20),
         ]),
-      )),
+      ),
     ));
   }
 }
@@ -1364,28 +1394,32 @@ class _ExportOptionsSheetState extends State<_ExportOptionsSheet> {
     final l = widget.l10n;
     final l10n = AppLocalizations.of(context)!;
     final buttonLabel = _allChecked ? l.exportFullBackup : _noneChecked ? l10n.settingsExportNone : l10n.settingsExportPartial;
-    return SafeArea(child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Text(l.settingsExport, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        ListTile(leading: const Icon(Icons.menu_book), title: Text(l.exportCurrentCookbook), trailing: const Icon(Icons.chevron_right), onTap: widget.onExportCookbook),
-        const Divider(),
-        Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Text(l.exportFullBackup, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600))),
-        _Chk(title: l.exportCookbooksRecipes, value: _cookbooks, onChanged: (v) => setState(() => _cookbooks = v ?? true)),
-        _Chk(title: l.exportShoppingLists, value: _shoppingLists, onChanged: (v) => setState(() => _shoppingLists = v ?? false)),
-        _Chk(title: l.exportMealPlans, value: _mealPlans, onChanged: (v) => setState(() => _mealPlans = v ?? false)),
-        _Chk(title: l.exportTags, value: _tags, onChanged: (v) => setState(() => _tags = v ?? false)),
-        _Chk(title: l.exportCategories, value: _customCategories, onChanged: (v) => setState(() => _customCategories = v ?? false)),
-        _Chk(title: l.exportCourses, value: _customCourses, onChanged: (v) => setState(() => _customCourses = v ?? false)),
-        const SizedBox(height: 12),
-        SizedBox(width: double.infinity, child: FilledButton.icon(
-          onPressed: _noneChecked ? null : () => widget.onExportSelective(ExportOptions(cookbooks: _cookbooks, shoppingLists: _shoppingLists, mealPlans: _mealPlans, tags: _tags, customCategories: _customCategories, customCourses: _customCourses)),
-          icon: const Icon(Icons.download), label: Text(buttonLabel),
-        )),
-        const SizedBox(height: 12),
-      ]),
-    ));
+    return Material(
+      color: theme.colorScheme.surfaceContainerLow,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      child: SafeArea(child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text(l.settingsExport, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          ListTile(leading: const Icon(Icons.menu_book), title: Text(l.exportCurrentCookbook), trailing: const Icon(Icons.chevron_right), onTap: widget.onExportCookbook),
+          const Divider(),
+          Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Text(l.exportFullBackup, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600))),
+          _Chk(title: l.exportCookbooksRecipes, value: _cookbooks, onChanged: (v) => setState(() => _cookbooks = v ?? true)),
+          _Chk(title: l.exportShoppingLists, value: _shoppingLists, onChanged: (v) => setState(() => _shoppingLists = v ?? false)),
+          _Chk(title: l.exportMealPlans, value: _mealPlans, onChanged: (v) => setState(() => _mealPlans = v ?? false)),
+          _Chk(title: l.exportTags, value: _tags, onChanged: (v) => setState(() => _tags = v ?? false)),
+          _Chk(title: l.exportCategories, value: _customCategories, onChanged: (v) => setState(() => _customCategories = v ?? false)),
+          _Chk(title: l.exportCourses, value: _customCourses, onChanged: (v) => setState(() => _customCourses = v ?? false)),
+          const SizedBox(height: 12),
+          SizedBox(width: double.infinity, child: FilledButton.icon(
+            onPressed: _noneChecked ? null : () => widget.onExportSelective(ExportOptions(cookbooks: _cookbooks, shoppingLists: _shoppingLists, mealPlans: _mealPlans, tags: _tags, customCategories: _customCategories, customCourses: _customCourses)),
+            icon: const Icon(Icons.download), label: Text(buttonLabel),
+          )),
+          const SizedBox(height: 12),
+        ]),
+      )),
+    );
   }
 }
 

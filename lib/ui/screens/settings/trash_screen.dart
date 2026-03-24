@@ -15,36 +15,126 @@ final deletedRecipesProvider = StreamProvider<List<Recipe>>((ref) {
   return dao.watchDeletedRecipes();
 });
 
-class TrashScreen extends ConsumerWidget {
+class TrashScreen extends ConsumerStatefulWidget {
   const TrashScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TrashScreen> createState() => _TrashScreenState();
+}
+
+class _TrashScreenState extends ConsumerState<TrashScreen> {
+  final Set<String> _selected = {};
+  bool _selectMode = false;
+
+  void _toggleSelect(String id) {
+    setState(() {
+      if (_selected.contains(id)) {
+        _selected.remove(id);
+        if (_selected.isEmpty) _selectMode = false;
+      } else {
+        _selected.add(id);
+      }
+    });
+  }
+
+  void _selectAll(List<Recipe> recipes) {
+    setState(() {
+      _selected.addAll(recipes.map((r) => r.id));
+    });
+  }
+
+  void _deselectAll() {
+    setState(() {
+      _selected.clear();
+      _selectMode = false;
+    });
+  }
+
+  void _enterSelectMode(String id) {
+    setState(() {
+      _selectMode = true;
+      _selected.add(id);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final deletedRecipesAsync = ref.watch(deletedRecipesProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.trashTitle),
+        leading: _selectMode
+            ? IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: _deselectAll,
+              )
+            : null,
+        title: deletedRecipesAsync.when(
+          loading: () => Text(l10n.trashTitle),
+          error: (_, __) => Text(l10n.trashTitle),
+          data: (recipes) {
+            if (_selectMode) {
+              return Text('${_selected.length} selected');
+            }
+            return Text(recipes.isEmpty
+                ? l10n.trashTitle
+                : '${l10n.trashTitle} (${recipes.length})');
+          },
+        ),
         actions: [
-          deletedRecipesAsync.when(
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-            data: (recipes) => recipes.isEmpty
-                ? const SizedBox.shrink()
-                : TextButton.icon(
-              onPressed: () => _showEmptyTrashConfirmation(context, ref),
-              icon: const Icon(Icons.delete_forever),
-              label: Text(l10n.trashEmptyTrash),
-              style: TextButton.styleFrom(
-                foregroundColor: theme.colorScheme.error,
+          if (_selectMode) ...[
+            deletedRecipesAsync.whenOrNull(
+              data: (recipes) => IconButton(
+                icon: Icon(_selected.length == recipes.length
+                    ? Icons.deselect
+                    : Icons.select_all),
+                tooltip: _selected.length == recipes.length
+                    ? l10n.deselectAll
+                    : l10n.selectAll,
+                onPressed: () {
+                  if (_selected.length == recipes.length) {
+                    _deselectAll();
+                  } else {
+                    _selectAll(recipes);
+                  }
+                },
               ),
+            ) ?? const SizedBox.shrink(),
+            IconButton(
+              icon: const Icon(Icons.restore),
+              tooltip: l10n.trashRestore,
+              onPressed: _selected.isEmpty
+                  ? null
+                  : () => _bulkRestore(context, ref),
             ),
-          ),
+            IconButton(
+              icon: Icon(Icons.delete_forever, color: theme.colorScheme.error),
+              tooltip: l10n.trashDeletePermanently,
+              onPressed: _selected.isEmpty
+                  ? null
+                  : () => _showBulkDeleteConfirmation(context, ref),
+            ),
+          ] else ...[
+            deletedRecipesAsync.when(
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+              data: (recipes) => recipes.isEmpty
+                  ? const SizedBox.shrink()
+                  : TextButton.icon(
+                      onPressed: () => _showEmptyTrashConfirmation(context, ref),
+                      icon: const Icon(Icons.delete_forever),
+                      label: Text(l10n.trashEmptyTrash),
+                      style: TextButton.styleFrom(
+                        foregroundColor: theme.colorScheme.error,
+                      ),
+                    ),
+            ),
+          ],
         ],
       ),
-      body: deletedRecipesAsync.when(
+      body: Responsive.constrainWidth(context, child: deletedRecipesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('${l10n.errorGeneric}: $e')),
         data: (recipes) {
@@ -78,23 +168,40 @@ class TrashScreen extends ConsumerWidget {
             );
           }
 
+          // Clean up stale selections
+          _selected.removeWhere((id) => !recipes.any((r) => r.id == id));
+
           return ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: recipes.length,
             itemBuilder: (context, index) {
               final recipe = recipes[index];
               final daysLeft = _daysUntilPermanentDelete(recipe.deletedAt);
+              final isSelected = _selected.contains(recipe.id);
 
               return _DeletedRecipeCard(
                 recipe: recipe,
                 daysLeft: daysLeft,
+                isSelected: isSelected,
+                selectMode: _selectMode,
+                onTap: () {
+                  if (_selectMode) {
+                    _toggleSelect(recipe.id);
+                  } else {
+                    _showRecipeActions(context, ref, recipe);
+                  }
+                },
+                onLongPress: () {
+                  if (!_selectMode) {
+                    _enterSelectMode(recipe.id);
+                  }
+                },
                 onRestore: () => _restoreRecipe(context, ref, recipe),
-                onDeletePermanently: () => _showPermanentDeleteConfirmation(context, ref, recipe),
               );
             },
           );
         },
-      ),
+      )),
     );
   }
 
@@ -103,6 +210,38 @@ class TrashScreen extends ConsumerWidget {
     final expiryDate = deletedAt.add(const Duration(days: 30));
     final now = DateTime.now();
     return expiryDate.difference(now).inDays;
+  }
+
+  void _showRecipeActions(BuildContext context, WidgetRef ref, Recipe recipe) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    Responsive.showAdaptiveSheet(
+      context,
+      isScrollControlled: false,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.restore),
+              title: Text(l10n.trashRestore),
+              onTap: () {
+                Navigator.pop(ctx);
+                _restoreRecipe(context, ref, recipe);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.delete_forever, color: theme.colorScheme.error),
+              title: Text(l10n.trashDeletePermanently, style: TextStyle(color: theme.colorScheme.error)),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showPermanentDeleteConfirmation(context, ref, recipe);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _restoreRecipe(BuildContext context, WidgetRef ref, Recipe recipe) async {
@@ -123,6 +262,61 @@ class TrashScreen extends ConsumerWidget {
         ),
       );
     }
+  }
+
+  Future<void> _bulkRestore(BuildContext context, WidgetRef ref) async {
+    final dao = ref.read(recipeDaoProvider);
+    final count = _selected.length;
+    final ids = Set<String>.from(_selected);
+
+    _deselectAll();
+
+    for (final id in ids) {
+      await dao.restoreRecipe(id);
+    }
+
+    if (context.mounted) {
+      AppSnackbar.success(context, '$count ${count == 1 ? 'recipe' : 'recipes'} restored');
+    }
+  }
+
+  void _showBulkDeleteConfirmation(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final count = _selected.length;
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        icon: Icon(Icons.delete_forever, color: Theme.of(dialogCtx).colorScheme.error),
+        title: Text(l10n.trashDeletePermanently),
+        content: Text('Permanently delete $count ${count == 1 ? 'recipe' : 'recipes'}? This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: Text(l10n.actionCancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(dialogCtx).colorScheme.error,
+            ),
+            onPressed: () async {
+              Navigator.pop(dialogCtx);
+              final dao = ref.read(recipeDaoProvider);
+              final ids = Set<String>.from(_selected);
+              _deselectAll();
+
+              for (final id in ids) {
+                await dao.permanentlyDeleteRecipe(id);
+              }
+
+              if (context.mounted) {
+                AppSnackbar.info(context, '$count ${count == 1 ? 'recipe' : 'recipes'} permanently deleted');
+              }
+            },
+            child: Text(l10n.actionDelete),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showPermanentDeleteConfirmation(BuildContext screenContext, WidgetRef ref, Recipe recipe) {
@@ -162,21 +356,21 @@ class TrashScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+      builder: (dialogCtx) => AlertDialog(
+        icon: Icon(Icons.delete_forever, color: Theme.of(dialogCtx).colorScheme.error),
         title: Text(l10n.trashEmptyTrash),
         content: Text(l10n.trashEmptyConfirm),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogCtx),
             child: Text(l10n.actionCancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
+              backgroundColor: Theme.of(dialogCtx).colorScheme.error,
             ),
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogCtx);
               await ref.read(recipeDaoProvider).emptyTrash();
               if (context.mounted) {
                 AppSnackbar.info(context, l10n.trashEmptied);
@@ -193,14 +387,20 @@ class TrashScreen extends ConsumerWidget {
 class _DeletedRecipeCard extends StatelessWidget {
   final Recipe recipe;
   final int daysLeft;
+  final bool isSelected;
+  final bool selectMode;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
   final VoidCallback onRestore;
-  final VoidCallback onDeletePermanently;
 
   const _DeletedRecipeCard({
     required this.recipe,
     required this.daysLeft,
+    required this.isSelected,
+    required this.selectMode,
+    required this.onTap,
+    required this.onLongPress,
     required this.onRestore,
-    required this.onDeletePermanently,
   });
 
   @override
@@ -213,41 +413,27 @@ class _DeletedRecipeCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      color: isSelected
+          ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
+          : null,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          Responsive.showAdaptiveSheet(
-            context,
-            isScrollControlled: false,
-            builder: (ctx) => SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.restore),
-                    title: Text(l10n.trashRestore),
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      onRestore();
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.delete_forever, color: theme.colorScheme.error),
-                    title: Text(l10n.trashDeletePermanently, style: TextStyle(color: theme.colorScheme.error)),
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      onDeletePermanently();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+        onTap: onTap,
+        onLongPress: onLongPress,
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
+              if (selectMode)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Icon(
+                    isSelected ? Icons.check_circle : Icons.circle_outlined,
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.outline,
+                  ),
+                ),
               Container(
                 width: 64,
                 height: 64,
@@ -258,18 +444,18 @@ class _DeletedRecipeCard extends StatelessWidget {
                 clipBehavior: Clip.antiAlias,
                 child: hasImage
                     ? buildFileImage(
-                  recipe.imagePath!,
-                  fit: BoxFit.cover,
-                  cacheHeight: 128,
-                  errorWidget: Icon(
-                    Icons.restaurant,
-                    color: theme.colorScheme.outline,
-                  ),
-                )
+                        recipe.imagePath!,
+                        fit: BoxFit.cover,
+                        cacheHeight: 128,
+                        errorWidget: Icon(
+                          Icons.restaurant,
+                          color: theme.colorScheme.outline,
+                        ),
+                      )
                     : Icon(
-                  Icons.restaurant,
-                  color: theme.colorScheme.outline,
-                ),
+                        Icons.restaurant,
+                        color: theme.colorScheme.outline,
+                      ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -315,11 +501,12 @@ class _DeletedRecipeCard extends StatelessWidget {
                   ],
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.restore),
-                tooltip: l10n.trashRestore,
-                onPressed: onRestore,
-              ),
+              if (!selectMode)
+                IconButton(
+                  icon: const Icon(Icons.restore),
+                  tooltip: l10n.trashRestore,
+                  onPressed: onRestore,
+                ),
             ],
           ),
         ),

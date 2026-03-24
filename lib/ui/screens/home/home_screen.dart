@@ -296,8 +296,6 @@ class _QuickRecipesWidgetState extends ConsumerState<_QuickRecipesWidget> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final settings = ref.watch(settingsProvider);
-
     // Refresh when cookbook changes, recipe count changes, or on first build
     if (_itemsFuture == null || _lastCookbookId != widget.cookbookId || _lastRecipeCount != widget.recipeCount) {
       _refreshItems();
@@ -981,7 +979,7 @@ class _UncategorizedSectionState extends ConsumerState<_UncategorizedSection> {
           ),
         ),
         SizedBox(
-          height: Responsive.chipRowHeight(context),
+          height: Responsive.quickAccessHeight(context),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
@@ -1010,7 +1008,7 @@ class _UncategorizedRecipeChip extends StatelessWidget {
     return GestureDetector(
       onTap: () => context.push('/recipe/${recipe.id}'),
       child: Container(
-        width: 120,
+        width: 130,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         child: Card(
           margin: EdgeInsets.zero,
@@ -1024,29 +1022,26 @@ class _UncategorizedRecipeChip extends StatelessWidget {
             ),
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image area — cached existence check + thumbnail-sized decode
-              Expanded(
-                flex: 3,
+              // Image
+              SizedBox(
+                height: 90,
+                width: double.infinity,
                 child: RecipeImage.thumbnail(
                   imagePath: recipe.imagePath,
                   recipeId: recipe.id,
                 ),
               ),
-              // Title area
+              // Title
               Expanded(
-                flex: 2,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                  child: Center(
-                    child: Text(
-                      recipe.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
-                      textAlign: TextAlign.center,
-                    ),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  child: Text(
+                    recipe.title,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -1347,8 +1342,7 @@ class _CookbookDropdown extends ConsumerWidget {
 class _ModernFAB extends StatelessWidget {
   final VoidCallback onPressed;
   final String? label;
-  final IconData icon;
-  const _ModernFAB({required this.onPressed, this.label, this.icon = Icons.add});
+  const _ModernFAB({required this.onPressed, this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -1368,7 +1362,7 @@ class _ModernFAB extends StatelessWidget {
           foregroundColor: fg,
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          icon: Icon(icon, size: 22),
+          icon: const Icon(Icons.add, size: 22),
           label: Text(label!, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
         ),
       );
@@ -1385,7 +1379,7 @@ class _ModernFAB extends StatelessWidget {
         foregroundColor: fg,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Icon(icon, size: 26),
+        child: const Icon(Icons.add, size: 26),
       ),
     );
   }

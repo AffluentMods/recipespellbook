@@ -189,7 +189,7 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.communityMyPublications)),
-      body: _loading
+      body: Responsive.constrainWidth(context, child: _loading
           ? const Center(child: CircularProgressIndicator())
           : Column(
         children: [
@@ -243,7 +243,7 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

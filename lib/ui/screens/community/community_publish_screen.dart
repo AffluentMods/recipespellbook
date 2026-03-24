@@ -12,6 +12,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../services/community_service.dart';
 import '../../../services/image_service.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../widgets/community_tag_picker.dart';
 import '../../widgets/recipe_image.dart';
 
@@ -91,11 +92,11 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
             ? IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => setState(() => _step = 1))
             : null,
       ),
-      body: _step == 1
+      body: Responsive.constrainWidth(context, child: _step == 1
           ? _buildStep1CookbookSelection(theme, l10n)
           : _step == 2
           ? _buildStep2Configure(theme, l10n)
-          : _buildStep3Publishing(theme, l10n),
+          : _buildStep3Publishing(theme, l10n)),
     );
   }
 

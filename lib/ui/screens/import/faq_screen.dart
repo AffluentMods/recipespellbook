@@ -633,7 +633,7 @@ class _QuestionCard extends StatelessWidget {
 
 class _FaqDetailScreen extends StatelessWidget {
   final _HowTo howTo;
-  const _FaqDetailScreen({super.key, required this.howTo});
+  const _FaqDetailScreen({required this.howTo});
 
   @override
   Widget build(BuildContext context) {

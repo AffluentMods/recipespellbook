@@ -2344,8 +2344,6 @@ class RecipeImportEngine {
             description = cleanedLine;
           }
           break;
-        default:
-          break;
       }
     }
 

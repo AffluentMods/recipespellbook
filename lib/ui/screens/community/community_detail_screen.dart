@@ -444,7 +444,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     final d = _detail!;
 
     return Scaffold(
-      body: CustomScrollView(
+      body: Responsive.constrainWidth(context, child: CustomScrollView(
         slivers: [
           // ── Cover image header ──
           SliverAppBar(
@@ -640,7 +640,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 

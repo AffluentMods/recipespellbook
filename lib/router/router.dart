@@ -47,6 +47,7 @@ import '../services/community_service.dart' show CommunityRecipe;
 import '../ui/screens/settings/trash_screen.dart';
 import '../ui/screens/shopping/kroger_callback_screen.dart';
 import '../ui/screens/shopping/shopping_screen.dart';
+import '../ui/screens/share/share_viewer_screen.dart';
 import '../ui/screens/splash/splash_screen.dart';
 import '../ui/shell/app_shell.dart';
 
@@ -62,6 +63,16 @@ final router = GoRouter(
       path: '/splash',
       name: 'splash',
       builder: (context, state) => const SplashScreen(),
+    ),
+
+    // Share link viewer (public, no auth required)
+    GoRoute(
+      path: '/s/:code',
+      name: 'share-viewer',
+      builder: (context, state) {
+        final code = state.pathParameters['code']!;
+        return ShareViewerScreen(code: code);
+      },
     ),
 
     // Recipe edit (fullscreen modal — no sidebar)

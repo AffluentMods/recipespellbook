@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../utils/responsive_utils.dart';
 
 class QuickAccessSettingsScreen extends ConsumerWidget {
   const QuickAccessSettingsScreen({super.key});
@@ -16,7 +17,7 @@ class QuickAccessSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.settingsQuickAccess),
       ),
-      body: ListView(
+      body: Responsive.constrainWidth(context, child: ListView(
         children: [
           // Explanation card
           Card(
@@ -193,7 +194,7 @@ class QuickAccessSettingsScreen extends ConsumerWidget {
 
           const SizedBox(height: 32),
         ],
-      ),
+      )),
     );
   }
 }

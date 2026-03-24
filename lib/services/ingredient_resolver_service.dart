@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../database/database.dart';
+import '../utils/ingredient_utils.dart' show formatAmount, formatScaledWithUnit, parseAmount;
 
 // ═══════════════════════════════════════════════════════════════════
 // INGREDIENT RESOLVER SERVICE
@@ -67,24 +68,35 @@ class ResolvedIngredient {
     this.effectiveScale = 1.0,
   });
 
-  String get scaledAmount {
+  /// The scaled amount string (e.g. "1/4" x2 → "½").
+  /// Also applies unit upscaling (3 tsp → 1 tbsp) via [scaledWithUnit].
+  String get scaledAmount => scaledWithUnit.$1;
+
+  /// The potentially upscaled unit (e.g. "tsp" → "tbsp" when amount ≥ 3).
+  String get scaledUnit => scaledWithUnit.$2;
+
+  /// Cached computation of (scaledAmount, scaledUnit).
+  (String, String) get scaledWithUnit {
     final raw = ingredient.amount;
-    if (raw == null || raw.isEmpty || effectiveScale == 1.0) return raw ?? '';
-    final num = double.tryParse(raw.replaceAll(RegExp(r'[^\d.]'), ''));
-    if (num == null) return raw;
-    final scaled = num * effectiveScale;
-    return scaled == scaled.roundToDouble()
-        ? scaled.round().toString()
-        : scaled.toStringAsFixed(1);
+    final unit = ingredient.unit ?? '';
+    if (raw == null || raw.isEmpty || effectiveScale == 1.0) {
+      return (raw ?? '', unit);
+    }
+    final parsed = parseAmount(raw);
+    if (parsed == null) return (raw, unit);
+    final scaled = parsed * effectiveScale;
+    // Try unit upscaling (3 tsp → 1 tbsp, etc.)
+    if (unit.isNotEmpty) {
+      return formatScaledWithUnit(scaled, unit);
+    }
+    return (formatAmount(scaled), unit);
   }
 
   String get displayText {
+    final (amt, unit) = scaledWithUnit;
     final parts = <String>[];
-    final amt = scaledAmount;
     if (amt.isNotEmpty) parts.add(amt);
-    if (ingredient.unit != null && ingredient.unit!.isNotEmpty) {
-      parts.add(ingredient.unit!);
-    }
+    if (unit.isNotEmpty) parts.add(unit);
     parts.add(ingredient.name);
     return parts.join(' ');
   }

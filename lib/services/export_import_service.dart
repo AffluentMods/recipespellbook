@@ -41,6 +41,9 @@ class ExportOptions {
         customCourses = true;
 }
 
+/// Progress callback: (current, total, label)
+typedef ImportProgressCallback = void Function(int current, int total, String label);
+
 // ════════════════════════════════════════════
 //  SERVICE
 // ════════════════════════════════════════════
@@ -296,7 +299,7 @@ class ExportImportService {
   //  IMPORT — FILE PICKER
   // ──────────────────────────────────────────
 
-  Future<ImportResult> importFromFile() async {
+  Future<ImportResult> importFromFile({ImportProgressCallback? onProgress}) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['json'],
@@ -317,7 +320,7 @@ class ExportImportService {
         content = await file.readAsString();
       }
       final data = jsonDecode(content) as Map<String, dynamic>;
-      return await importData(data);
+      return await importData(data, onProgress: onProgress);
     } catch (e) {
       return ImportResult(success: false, message: 'Error reading file: $e');
     }
@@ -365,10 +368,23 @@ class ExportImportService {
   //  IMPORT — MAIN
   // ──────────────────────────────────────────
 
-  Future<ImportResult> importData(Map<String, dynamic> data) async {
+  Future<ImportResult> importData(Map<String, dynamic> data, {ImportProgressCallback? onProgress}) async {
     final version = data['version'] as int? ?? 1;
     int recipesImported = 0, recipesSkipped = 0, cookbooksImported = 0;
     int shoppingListsImported = 0, mealPlansImported = 0, tagsImported = 0;
+    String? lastCookbookId;
+
+    // Count total recipes for progress
+    int totalRecipes = 0;
+    if (data.containsKey('cookbooks')) {
+      for (final cb in data['cookbooks'] as List) {
+        totalRecipes += ((cb as Map)['recipes'] as List?)?.length ?? 0;
+      }
+    } else if (data.containsKey('cookbook')) {
+      totalRecipes = (data['recipes'] as List?)?.length ?? 0;
+    }
+
+    int currentRecipe = 0;
 
     try {
       final existingIds = (await db.select(db.recipes).get()).map((r) => r.id).toSet();
@@ -376,23 +392,49 @@ class ExportImportService {
       // Cookbooks & Recipes
       if (version >= 2 && data.containsKey('cookbooks')) {
         for (final cbData in data['cookbooks'] as List) {
-          final r = await _importCookbookV2(cbData as Map<String, dynamic>, existingIds);
+          final r = await _importCookbookBatched(
+            cbData as Map<String, dynamic>, existingIds,
+            restoreTagAssociations: true,
+            onRecipeImported: () {
+              currentRecipe++;
+              onProgress?.call(currentRecipe, totalRecipes, 'recipes');
+            },
+          );
           cookbooksImported++;
           recipesImported += r.imported;
           recipesSkipped += r.skipped;
+          lastCookbookId = r.cookbookId;
         }
       } else if (data.containsKey('cookbooks')) {
         for (final cbData in data['cookbooks'] as List) {
-          final r = await _importCookbook(cbData as Map<String, dynamic>, existingIds: existingIds);
+          final wrapped = <String, dynamic>{
+            'cookbook': {'id': (cbData as Map)['id'], 'name': cbData['name']},
+            'recipes': cbData['recipes'],
+          };
+          final r = await _importCookbookBatched(
+            wrapped, existingIds,
+            onRecipeImported: () {
+              currentRecipe++;
+              onProgress?.call(currentRecipe, totalRecipes, 'recipes');
+            },
+          );
           cookbooksImported++;
           recipesImported += r.imported;
           recipesSkipped += r.skipped;
+          lastCookbookId = r.cookbookId;
         }
       } else if (data.containsKey('cookbook')) {
-        final r = await _importCookbook(data, existingIds: existingIds);
+        final r = await _importCookbookBatched(
+          data, existingIds,
+          onRecipeImported: () {
+            currentRecipe++;
+            onProgress?.call(currentRecipe, totalRecipes, 'recipes');
+          },
+        );
         cookbooksImported = 1;
         recipesImported = r.imported;
         recipesSkipped = r.skipped;
+        lastCookbookId = r.cookbookId;
       }
 
       // Shopping Lists
@@ -433,6 +475,7 @@ class ExportImportService {
         message: parts.isNotEmpty ? 'Imported ${parts.join(', ')}$skipMsg' : 'Nothing to import',
         cookbooksImported: cookbooksImported,
         recipesImported: recipesImported,
+        importedCookbookId: lastCookbookId,
       );
     } catch (e) {
       return ImportResult(success: false, message: 'Import error: $e');
@@ -440,22 +483,14 @@ class ExportImportService {
   }
 
   // ──────────────────────────────────────────
-  //  IMPORT HELPERS
+  //  IMPORT — BATCHED COOKBOOK
   // ──────────────────────────────────────────
 
-  Future<_ImportCookbookResult> _importCookbookV2(
-      Map<String, dynamic> cbData, Set<String> existingIds) async {
-    final wrapped = <String, dynamic>{
-      'cookbook': {'id': cbData['id'], 'name': cbData['name']},
-      'recipes': cbData['recipes'],
-    };
-    return _importCookbook(wrapped, existingIds: existingIds, restoreTagAssociations: true);
-  }
-
-  Future<_ImportCookbookResult> _importCookbook(
-      Map<String, dynamic> data, {
-        required Set<String> existingIds,
+  Future<_ImportCookbookResult> _importCookbookBatched(
+      Map<String, dynamic> data,
+      Set<String> existingIds, {
         bool restoreTagAssociations = false,
+        VoidCallback? onRecipeImported,
       }) async {
     final cookbookData = data['cookbook'] as Map<String, dynamic>;
     final recipes = data['recipes'] as List;
@@ -470,119 +505,150 @@ class ExportImportService {
       name: '${cookbookData['name']} (imported)',
     ));
 
-    final appDir = await getApplicationDocumentsDirectory();
-    final imagesDir = Directory(p.join(appDir.path, 'images', 'imported'));
-    if (!await imagesDir.exists()) await imagesDir.create(recursive: true);
+    // Prepare images directory (native only)
+    Directory? imagesDir;
+    if (!isWeb) {
+      final appDir = await getApplicationDocumentsDirectory();
+      imagesDir = Directory(p.join(appDir.path, 'images', 'imported'));
+      if (!await imagesDir.exists()) await imagesDir.create(recursive: true);
+    }
 
+    // Process recipes in batches of 50 for better performance
+    const batchSize = 50;
+    for (var batchStart = 0; batchStart < recipes.length; batchStart += batchSize) {
+      final batchEnd = (batchStart + batchSize).clamp(0, recipes.length);
+      final recipeBatch = recipes.sublist(batchStart, batchEnd);
+
+      await db.batch((batch) {
+        for (final recipeData in recipeBatch) {
+          final recipe = recipeData as Map<String, dynamic>;
+          final originalId = recipe['id'] as String? ?? '';
+
+          if (originalId.startsWith('default_') && existingIds.contains(originalId)) {
+            skipped++;
+            recipeIdMap[originalId] = originalId;
+            continue;
+          }
+
+          final newRecipeId = '${newCookbookId}_${recipe['id']}';
+          recipeIdMap[originalId] = newRecipeId;
+
+          // Recipe insert
+          batch.insert(db.recipes, RecipesCompanion.insert(
+            id: newRecipeId,
+            cookbookId: newCookbookId,
+            title: recipe['title'] as String,
+            description: Value(recipe['description'] as String?),
+            servings: Value(recipe['servings'] as String?),
+            prepTimeMinutes: Value(recipe['prepTimeMinutes'] as int?),
+            cookTimeMinutes: Value(recipe['cookTimeMinutes'] as int?),
+            sourceUrl: Value(recipe['sourceUrl'] as String?),
+            categoryId: Value(recipe['categoryId'] as String?),
+            courseId: Value(recipe['courseId'] as String?),
+            rating: Value(recipe['rating'] as int? ?? 0),
+            notes: Value(recipe['notes'] as String?),
+            isFavorite: Value(recipe['isFavorite'] as bool? ?? false),
+            imagePath: Value(null), // Images handled separately
+            nutritionJson: Value(recipe['nutritionJson'] as String?),
+            lastViewedAt: Value(DateTime.now()),
+          ));
+
+          // Ingredients
+          final ingredients = recipe['ingredients'] as List? ?? [];
+          for (final ing in ingredients) {
+            final ingredient = ing as Map<String, dynamic>;
+            final oldIngId = ingredient['id'] as String? ?? '';
+            final newIngId = '${newRecipeId}_ing_${ingredient['sortOrder'] ?? ingredient['id']}';
+            if (oldIngId.isNotEmpty) ingredientIdMap[oldIngId] = newIngId;
+
+            batch.insert(db.ingredients, IngredientsCompanion.insert(
+              id: newIngId,
+              recipeId: newRecipeId,
+              sortOrder: ingredient['sortOrder'] as int? ?? 0,
+              name: ingredient['name'] as String,
+              amount: Value(ingredient['amount'] as String?),
+              unit: Value(ingredient['unit'] as String?),
+              notes: Value(ingredient['notes'] as String?),
+            ));
+          }
+
+          // Steps
+          final steps = recipe['steps'] as List? ?? [];
+          for (final s in steps) {
+            final step = s as Map<String, dynamic>;
+            batch.insert(db.steps, StepsCompanion.insert(
+              id: '${newRecipeId}_step_${step['sortOrder'] ?? step['id']}',
+              recipeId: newRecipeId,
+              sortOrder: step['sortOrder'] as int? ?? 0,
+              instruction: step['instruction'] as String,
+              durationMinutes: Value(step['durationMinutes'] as int?),
+            ));
+          }
+
+          // Tag associations (v2)
+          if (restoreTagAssociations) {
+            final tagIds = recipe['tagIds'] as List? ?? [];
+            for (final tagId in tagIds) {
+              batch.insert(db.recipeTags,
+                RecipeTagsCompanion.insert(recipeId: newRecipeId, tagId: tagId as String),
+                mode: InsertMode.insertOrIgnore,
+              );
+            }
+          }
+
+          imported++;
+        }
+      });
+
+      // Report progress after each batch
+      for (var i = 0; i < recipeBatch.length; i++) {
+        onRecipeImported?.call();
+      }
+
+      // Yield to the event loop so the UI can update
+      await Future.delayed(Duration.zero);
+    }
+
+    // Handle images after batch inserts (I/O-bound, can't batch)
     for (final recipeData in recipes) {
       final recipe = recipeData as Map<String, dynamic>;
       final originalId = recipe['id'] as String? ?? '';
+      if (originalId.startsWith('default_') && existingIds.contains(originalId)) continue;
 
-      if (originalId.startsWith('default_') && existingIds.contains(originalId)) {
-        skipped++;
-        recipeIdMap[originalId] = originalId;
-        continue;
-      }
+      final newRecipeId = recipeIdMap[originalId];
+      if (newRecipeId == null) continue;
 
-      final newRecipeId = '${newCookbookId}_${recipe['id']}';
-      recipeIdMap[originalId] = newRecipeId;
-
-      String? imagePath;
       final imageBase64 = recipe['imageBase64'] as String?;
-      if (imageBase64 != null && imageBase64.isNotEmpty) {
+      if (imageBase64 != null && imageBase64.isNotEmpty && imagesDir != null) {
         try {
           final imageBytes = base64Decode(imageBase64);
           final imageFile = File(p.join(imagesDir.path, '$newRecipeId.jpg'));
           await imageFile.writeAsBytes(imageBytes);
-          imagePath = imageFile.path;
+          // Update recipe with image path
+          await (db.update(db.recipes)..where((t) => t.id.equals(newRecipeId)))
+              .write(RecipesCompanion(imagePath: Value(imageFile.path)));
         } catch (e) {
           debugPrint('[Import] Failed to decode/save recipe image: $e');
         }
       }
-
-      await db.into(db.recipes).insert(RecipesCompanion.insert(
-        id: newRecipeId,
-        cookbookId: newCookbookId,
-        title: recipe['title'] as String,
-        description: Value(recipe['description'] as String?),
-        servings: Value(recipe['servings'] as String?),
-        prepTimeMinutes: Value(recipe['prepTimeMinutes'] as int?),
-        cookTimeMinutes: Value(recipe['cookTimeMinutes'] as int?),
-        sourceUrl: Value(recipe['sourceUrl'] as String?),
-        categoryId: Value(recipe['categoryId'] as String?),
-        courseId: Value(recipe['courseId'] as String?),
-        rating: Value(recipe['rating'] as int? ?? 0),
-        notes: Value(recipe['notes'] as String?),
-        isFavorite: Value(recipe['isFavorite'] as bool? ?? false),
-        imagePath: Value(imagePath),
-        nutritionJson: Value(recipe['nutritionJson'] as String?),
-        lastViewedAt: Value(DateTime.now()),
-      ));
-
-      // Ingredients
-      final ingredients = recipe['ingredients'] as List? ?? [];
-      for (final ing in ingredients) {
-        final ingredient = ing as Map<String, dynamic>;
-        final oldIngId = ingredient['id'] as String? ?? '';
-        final newIngId = '${newRecipeId}_ing_${ingredient['sortOrder'] ?? ingredient['id']}';
-        if (oldIngId.isNotEmpty) ingredientIdMap[oldIngId] = newIngId;
-
-        await db.into(db.ingredients).insert(IngredientsCompanion.insert(
-          id: newIngId,
-          recipeId: newRecipeId,
-          sortOrder: ingredient['sortOrder'] as int? ?? 0,
-          name: ingredient['name'] as String,
-          amount: Value(ingredient['amount'] as String?),
-          unit: Value(ingredient['unit'] as String?),
-          notes: Value(ingredient['notes'] as String?),
-        ));
-      }
-
-      // Steps
-      final steps = recipe['steps'] as List? ?? [];
-      for (final s in steps) {
-        final step = s as Map<String, dynamic>;
-        await db.into(db.steps).insert(StepsCompanion.insert(
-          id: '${newRecipeId}_step_${step['sortOrder'] ?? step['id']}',
-          recipeId: newRecipeId,
-          sortOrder: step['sortOrder'] as int? ?? 0,
-          instruction: step['instruction'] as String,
-          durationMinutes: Value(step['durationMinutes'] as int?),
-        ));
-      }
-
-      // Tag associations (v2)
-      if (restoreTagAssociations) {
-        final tagIds = recipe['tagIds'] as List? ?? [];
-        for (final tagId in tagIds) {
-          try {
-            await db.into(db.recipeTags).insert(
-              RecipeTagsCompanion.insert(recipeId: newRecipeId, tagId: tagId as String),
-              mode: InsertMode.insertOrIgnore,
-            );
-          } catch (_) {}
-        }
-      }
-
-      imported++;
     }
 
     // Recipe links (after all recipes are inserted)
-    for (final recipeData in recipes) {
-      final recipe = recipeData as Map<String, dynamic>;
-      final links = recipe['recipeLinks'] as List? ?? [];
-      if (links.isEmpty) continue;
-      final newSourceId = recipeIdMap[recipe['id'] as String? ?? ''];
-      if (newSourceId == null) continue;
+    await db.batch((batch) {
+      for (final recipeData in recipes) {
+        final recipe = recipeData as Map<String, dynamic>;
+        final links = recipe['recipeLinks'] as List? ?? [];
+        if (links.isEmpty) continue;
+        final newSourceId = recipeIdMap[recipe['id'] as String? ?? ''];
+        if (newSourceId == null) continue;
 
-      for (final linkData in links) {
-        final link = linkData as Map<String, dynamic>;
-        final newIngId = ingredientIdMap[link['ingredientId'] as String? ?? ''];
-        final newLinkedId = recipeIdMap[link['linkedRecipeId'] as String? ?? ''];
-        if (newIngId == null || newLinkedId == null) continue;
+        for (final linkData in links) {
+          final link = linkData as Map<String, dynamic>;
+          final newIngId = ingredientIdMap[link['ingredientId'] as String? ?? ''];
+          final newLinkedId = recipeIdMap[link['linkedRecipeId'] as String? ?? ''];
+          if (newIngId == null || newLinkedId == null) continue;
 
-        try {
-          await db.into(db.recipeLinks).insertOnConflictUpdate(
+          batch.insertAllOnConflictUpdate(db.recipeLinks, [
             RecipeLinksCompanion.insert(
               sourceRecipeId: newSourceId,
               ingredientId: newIngId,
@@ -590,13 +656,17 @@ class ExportImportService {
               scale: Value((link['scale'] as num?)?.toDouble() ?? 1.0),
               sortOrder: Value(link['sortOrder'] as int? ?? 0),
             ),
-          );
-        } catch (_) {}
+          ]);
+        }
       }
-    }
+    });
 
-    return _ImportCookbookResult(imported: imported, skipped: skipped);
+    return _ImportCookbookResult(imported: imported, skipped: skipped, cookbookId: newCookbookId);
   }
+
+  // ──────────────────────────────────────────
+  //  IMPORT HELPERS
+  // ──────────────────────────────────────────
 
   Future<int> _importShoppingLists(List data) async {
     int count = 0;
@@ -612,21 +682,25 @@ class ExportImportService {
       ));
 
       final items = list['items'] as List? ?? [];
-      for (var i = 0; i < items.length; i++) {
-        final item = items[i] as Map<String, dynamic>;
-        await db.into(db.shoppingListItems).insert(ShoppingListItemsCompanion.insert(
-          id: '${newListId}_item_$i',
-          listId: newListId,
-          name: item['name'] as String,
-          quantity: Value(item['quantity'] as String?),
-          unit: Value(item['unit'] as String?),
-          shoppingCategoryId: Value(item['shoppingCategoryId'] as String?),
-          isChecked: Value(item['isChecked'] as bool? ?? false),
-          isFavorite: Value(item['isFavorite'] as bool? ?? false),
-          note: Value(item['note'] as String?),
-          sortOrder: Value(item['sortOrder'] as int? ?? i),
-          recipeId: Value(item['recipeId'] as String?),
-        ));
+      if (items.isNotEmpty) {
+        await db.batch((batch) {
+          for (var i = 0; i < items.length; i++) {
+            final item = items[i] as Map<String, dynamic>;
+            batch.insert(db.shoppingListItems, ShoppingListItemsCompanion.insert(
+              id: '${newListId}_item_$i',
+              listId: newListId,
+              name: item['name'] as String,
+              quantity: Value(item['quantity'] as String?),
+              unit: Value(item['unit'] as String?),
+              shoppingCategoryId: Value(item['shoppingCategoryId'] as String?),
+              isChecked: Value(item['isChecked'] as bool? ?? false),
+              isFavorite: Value(item['isFavorite'] as bool? ?? false),
+              note: Value(item['note'] as String?),
+              sortOrder: Value(item['sortOrder'] as int? ?? i),
+              recipeId: Value(item['recipeId'] as String?),
+            ));
+          }
+        });
       }
       count++;
     }
@@ -634,37 +708,41 @@ class ExportImportService {
   }
 
   Future<int> _importMealPlans(List data) async {
+    if (data.isEmpty) return 0;
     int count = 0;
-    for (final mpData in data) {
-      final mp = mpData as Map<String, dynamic>;
-      final newId = 'imported_mp_${DateTime.now().millisecondsSinceEpoch}_$count';
+    await db.batch((batch) {
+      for (final mpData in data) {
+        final mp = mpData as Map<String, dynamic>;
+        final newId = 'imported_mp_${DateTime.now().millisecondsSinceEpoch}_$count';
 
-      await db.into(db.mealPlans).insert(MealPlansCompanion.insert(
-        id: newId,
-        date: DateTime.parse(mp['date'] as String),
-        time: Value(mp['time'] != null ? DateTime.parse(mp['time'] as String) : null),
-        name: Value(mp['name'] as String?),
-        mealType: Value(mp['mealType'] as String? ?? 'Dinner'),
-        customMeal: Value(mp['customMeal'] as String?),
-        recipeId: Value(mp['recipeId'] as String?),
-        notes: Value(mp['notes'] as String?),
-        alertEnabled: Value(mp['alertEnabled'] as bool? ?? false),
-      ));
-      count++;
-    }
+        batch.insert(db.mealPlans, MealPlansCompanion.insert(
+          id: newId,
+          date: DateTime.parse(mp['date'] as String),
+          time: Value(mp['time'] != null ? DateTime.parse(mp['time'] as String) : null),
+          name: Value(mp['name'] as String?),
+          mealType: Value(mp['mealType'] as String? ?? 'Dinner'),
+          customMeal: Value(mp['customMeal'] as String?),
+          recipeId: Value(mp['recipeId'] as String?),
+          notes: Value(mp['notes'] as String?),
+          alertEnabled: Value(mp['alertEnabled'] as bool? ?? false),
+        ));
+        count++;
+      }
+    });
     return count;
   }
 
   Future<int> _importTags(List data) async {
     int count = 0;
     final existingIds = (await db.select(db.tags).get()).map((t) => t.id).toSet();
+    final toInsert = <TagsCompanion>[];
 
     for (final tagData in data) {
       final tag = tagData as Map<String, dynamic>;
       final id = tag['id'] as String;
       if (existingIds.contains(id)) continue;
 
-      await db.into(db.tags).insert(TagsCompanion.insert(
+      toInsert.add(TagsCompanion.insert(
         id: id,
         name: tag['name'] as String,
         color: Value(tag['color'] as String?),
@@ -674,6 +752,14 @@ class ExportImportService {
       ));
       count++;
     }
+
+    if (toInsert.isNotEmpty) {
+      await db.batch((batch) {
+        for (final t in toInsert) {
+          batch.insert(db.tags, t, mode: InsertMode.insertOrIgnore);
+        }
+      });
+    }
     return count;
   }
 
@@ -682,17 +768,26 @@ class ExportImportService {
         .map((c) => c.name.toLowerCase())
         .toSet();
 
+    final toInsert = <CustomCategoriesCompanion>[];
     for (final catData in data) {
       final cat = catData as Map<String, dynamic>;
       if (existingNames.contains((cat['name'] as String).toLowerCase())) continue;
 
-      await db.into(db.customCategories).insert(CustomCategoriesCompanion.insert(
+      toInsert.add(CustomCategoriesCompanion.insert(
         id: 'imported_cat_${DateTime.now().millisecondsSinceEpoch}_${cat['id']}',
         cookbookId: cat['cookbookId'] as String? ?? 'starter',
         name: cat['name'] as String,
         emoji: Value(cat['emoji'] as String? ?? '🏷️'),
         sortOrder: Value(cat['sortOrder'] as int? ?? 0),
       ));
+    }
+
+    if (toInsert.isNotEmpty) {
+      await db.batch((batch) {
+        for (final c in toInsert) {
+          batch.insert(db.customCategories, c, mode: InsertMode.insertOrIgnore);
+        }
+      });
     }
   }
 
@@ -701,17 +796,26 @@ class ExportImportService {
         .map((c) => c.name.toLowerCase())
         .toSet();
 
+    final toInsert = <CustomCoursesCompanion>[];
     for (final courseData in data) {
       final course = courseData as Map<String, dynamic>;
       if (existingNames.contains((course['name'] as String).toLowerCase())) continue;
 
-      await db.into(db.customCourses).insert(CustomCoursesCompanion.insert(
+      toInsert.add(CustomCoursesCompanion.insert(
         id: 'imported_course_${DateTime.now().millisecondsSinceEpoch}_${course['id']}',
         cookbookId: course['cookbookId'] as String? ?? 'starter',
         name: course['name'] as String,
         emoji: Value(course['emoji'] as String? ?? '🍽️'),
         sortOrder: Value(course['sortOrder'] as int? ?? 0),
       ));
+    }
+
+    if (toInsert.isNotEmpty) {
+      await db.batch((batch) {
+        for (final c in toInsert) {
+          batch.insert(db.customCourses, c, mode: InsertMode.insertOrIgnore);
+        }
+      });
     }
   }
 
@@ -740,7 +844,8 @@ class ExportImportService {
 class _ImportCookbookResult {
   final int imported;
   final int skipped;
-  _ImportCookbookResult({required this.imported, required this.skipped});
+  final String cookbookId;
+  _ImportCookbookResult({required this.imported, required this.skipped, required this.cookbookId});
 }
 
 class ImportResult {
@@ -748,12 +853,14 @@ class ImportResult {
   final String message;
   final int cookbooksImported;
   final int recipesImported;
+  final String? importedCookbookId; // ID of the last imported cookbook
 
   ImportResult({
     required this.success,
     required this.message,
     this.cookbooksImported = 0,
     this.recipesImported = 0,
+    this.importedCookbookId,
   });
 }
 

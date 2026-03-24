@@ -460,7 +460,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
       appBar: AppBar(
         title: Text(l10n.importFromAI),
       ),
-      body: GestureDetector(
+      body: Responsive.constrainWidth(context, child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -715,7 +715,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
             const SizedBox(height: 32),
           ],
         ),
-      ),
+      )),
     );
   }
 }

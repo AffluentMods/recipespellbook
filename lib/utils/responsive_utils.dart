@@ -146,7 +146,10 @@ class Responsive {
     return showModalBottomSheet<T>(
       context: context,
       isScrollControlled: isScrollControlled,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder: builder,
     );
   }

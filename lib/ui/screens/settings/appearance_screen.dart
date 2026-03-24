@@ -5,6 +5,7 @@ import '../../../data/app_enums.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../services/revenuecat_service.dart';
+import '../../../utils/responsive_utils.dart';
 import 'custom_theme_screen.dart';
 
 class AppearanceScreen extends ConsumerWidget {
@@ -21,7 +22,7 @@ class AppearanceScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.settingsAppearance),
       ),
-      body: ListView(
+      body: Responsive.constrainWidth(context, child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // ============ THEME MODE SECTION ============
@@ -72,7 +73,7 @@ class AppearanceScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           _ThemePreview(),
         ],
-      ),
+      )),
     );
   }
 }
