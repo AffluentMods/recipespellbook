@@ -4,6 +4,7 @@ import '../data/nutrition_data.dart';
 import '../database/database.dart';
 import '../services/usda_service.dart';
 import '../ui/widgets/nutrition_system.dart' as local_db;
+import '../utils/ingredient_utils.dart' show parseAmount;
 
 /// Calculates nutrition for a recipe based on its ingredients
 class NutritionCalculator {
@@ -304,31 +305,41 @@ class NutritionCalculator {
     );
   }
 
-  /// Check if a seasoning is used in negligible-calorie amounts.
-  /// Salt has 0 cal, pepper ~3 cal/tsp — both effectively 0 in recipes.
+  /// Check if a seasoning is used in truly negligible amounts.
+  /// Only "pinch", "dash", or no amount are negligible.
+  /// tsp/tbsp have real calories (pepper ~6cal/tsp, ~18cal/tbsp)
+  /// and should go through normal calculation.
   bool _isNegligibleSeasoning(String lower, String? amount, String unit) {
-    const negligibleSeasonings = {
+    // Salt is truly zero-calorie regardless of amount
+    const zeroCalSeasonings = {
       'salt', 'sea salt', 'kosher salt', 'table salt', 'flaky salt',
+    };
+
+    // Pepper and spices have real calories — only negligible at pinch/dash
+    const lowCalSeasonings = {
       'pepper', 'black pepper', 'white pepper', 'ground pepper',
       'cracked pepper', 'peppercorn', 'peppercorns',
     };
 
     // Strip descriptive suffixes: "salt, for pasta water" → "salt"
-    // Also handles "salt (for pasta water)", "salt - to finish"
     final stripped = lower
         .replaceAll(RegExp(r',?\s+for\s+.+$'), '')
         .replaceAll(RegExp(r'\s*\(.*\)'), '')
         .replaceAll(RegExp(r',?\s+-\s+.+$'), '')
         .trim();
 
-    if (!negligibleSeasonings.contains(lower) &&
-        !negligibleSeasonings.contains(stripped)) return false;
+    final isSalt = zeroCalSeasonings.contains(lower) || zeroCalSeasonings.contains(stripped);
+    final isLowCal = lowCalSeasonings.contains(lower) || lowCalSeasonings.contains(stripped);
 
-    // If no amount or small amounts (pinch, tsp, tbsp, dash) → negligible
+    if (!isSalt && !isLowCal) return false;
+
+    // Salt is always negligible (0 cal)
+    if (isSalt) return true;
+
+    // For pepper/spices: only negligible if truly unmeasured
     if (amount == null || amount.isEmpty) return true;
-    final smallUnits = {'pinch', 'pinches', 'dash', 'tsp', 'teaspoon',
-      'teaspoons', 'tbsp', 'tablespoon', 'tablespoons', ''};
-    return smallUnits.contains(unit.toLowerCase().trim());
+    const tinyUnits = {'pinch', 'pinches', 'dash', 'dashes', ''};
+    return tinyUnits.contains(unit.toLowerCase().trim());
   }
 
   /// Check if an ingredient with "to taste" is a typical seasoning/spice
@@ -683,46 +694,9 @@ class NutritionCalculator {
     return null;
   }
 
-  /// Parse a numeric amount, handling fractions
-  double? _parseAmount(String amount) {
-    final trimmed = amount.trim();
-
-    // Handle mixed numbers like "1 1/2"
-    final parts = trimmed.split(RegExp(r'\s+'));
-    double total = 0;
-
-    for (final part in parts) {
-      if (part.contains('/')) {
-        // Handle fraction
-        final fracParts = part.split('/');
-        if (fracParts.length == 2) {
-          final num = double.tryParse(fracParts[0]);
-          final den = double.tryParse(fracParts[1]);
-          if (num != null && den != null && den != 0) {
-            total += num / den;
-          }
-        }
-      } else if (part.contains('-')) {
-        // Handle range like "2-3", use average
-        final rangeParts = part.split('-');
-        if (rangeParts.length == 2) {
-          final low = double.tryParse(rangeParts[0]);
-          final high = double.tryParse(rangeParts[1]);
-          if (low != null && high != null) {
-            total += (low + high) / 2;
-          }
-        }
-      } else {
-        // Regular number
-        final num = double.tryParse(part);
-        if (num != null) {
-          total += num;
-        }
-      }
-    }
-
-    return total > 0 ? total : null;
-  }
+  /// Parse a numeric amount, handling fractions and Unicode fraction characters.
+  /// Delegates to the shared parseAmount from ingredient_utils.dart.
+  double? _parseAmount(String amount) => parseAmount(amount);
 
   /// Convert direct weight measurements to grams
   double? _convertDirectWeight(double amount, String unit) {

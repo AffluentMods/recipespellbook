@@ -275,7 +275,7 @@ class ShoppingDao extends DatabaseAccessor<AppDatabase> with _$ShoppingDaoMixin 
       if (amtStr.isEmpty) continue;
 
       hasAmounts = true;
-      final parsed = double.tryParse(amtStr.replaceAll(RegExp(r'[^\d.]'), ''));
+      final parsed = parseAmount(amtStr);
       if (parsed == null) {
         canCombine = false;
         break;

@@ -102,12 +102,10 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
           // Scale the amount if needed
           String? amount = ingredient.amount;
           if (widget.scaleFactor != 1.0 && amount != null && amount.isNotEmpty) {
-            final num = double.tryParse(amount.replaceAll(RegExp(r'[^\d.]'), ''));
-            if (num != null) {
-              final scaled = num * widget.scaleFactor;
-              amount = scaled == scaled.roundToDouble()
-                  ? scaled.round().toString()
-                  : scaled.toStringAsFixed(1);
+            final parsed = parseAmount(amount);
+            if (parsed != null) {
+              final scaled = parsed * widget.scaleFactor;
+              amount = formatAmount(scaled);
             }
           }
 
@@ -156,12 +154,10 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
         for (final ingredient in selectedIngredients) {
           String? amount = ingredient.amount;
           if (widget.scaleFactor != 1.0 && amount != null && amount.isNotEmpty) {
-            final num = double.tryParse(amount.replaceAll(RegExp(r'[^\d.]'), ''));
-            if (num != null) {
-              final scaled = num * widget.scaleFactor;
-              amount = scaled == scaled.roundToDouble()
-                  ? scaled.round().toString()
-                  : scaled.toStringAsFixed(1);
+            final parsed = parseAmount(amount);
+            if (parsed != null) {
+              final scaled = parsed * widget.scaleFactor;
+              amount = formatAmount(scaled);
             }
           }
 

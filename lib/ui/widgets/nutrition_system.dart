@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/ingredient_utils.dart' show parseAmount;
 
 /// Basic nutrition data for common ingredients (per 100g or per unit)
 /// In a real app, this would come from a nutrition API like USDA or Nutritionix
@@ -614,22 +615,8 @@ class NutritionDatabase {
   static double? _parseAmount(String? amount, String? unit) {
     if (amount == null) return null;
 
-    double? numericAmount;
-
-    // Try to parse fractions
-    if (amount.contains('/')) {
-      final parts = amount.split('/');
-      if (parts.length == 2) {
-        final num = double.tryParse(parts[0].trim());
-        final den = double.tryParse(parts[1].trim());
-        if (num != null && den != null && den != 0) {
-          numericAmount = num / den;
-        }
-      }
-    } else {
-      numericAmount = double.tryParse(amount.replaceAll(RegExp(r'[^\d.]'), ''));
-    }
-
+    // Use shared parseAmount which handles Unicode fractions (¾, ½, etc.)
+    final numericAmount = parseAmount(amount);
     if (numericAmount == null) return null;
 
     // Convert to 100g equivalent
