@@ -14,6 +14,7 @@ import '../../../data/nutrition_data.dart';
 import '../../../utils/ingredient_utils.dart' show parseAmount, formatScaledWithUnit;
 import '../../../utils/responsive_utils.dart';
 import '../../../database/database.dart';
+import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/image_service.dart';
@@ -1440,6 +1441,8 @@ class _RecipeAppBar extends StatelessWidget {
               PopupMenuItem(value: 'print', child: Row(children: [const Icon(Icons.print_outlined), const SizedBox(width: 12), Text(l10n.printRecipe)])),
               PopupMenuItem(value: 'pin', child: Row(children: [Icon(recipe.isPinned ? Icons.push_pin : Icons.push_pin_outlined), const SizedBox(width: 12), Text(recipe.isPinned ? l10n.recipeUnpin : l10n.recipePin)])),
               PopupMenuItem(value: 'duplicate', child: Row(children: [const Icon(Icons.copy), const SizedBox(width: 12), Text(l10n.recipeDuplicate)])),
+              PopupMenuItem(value: 'copy_to', child: Row(children: [const Icon(Icons.book_outlined), const SizedBox(width: 12), const Text('Copy to cookbook')])),
+              PopupMenuItem(value: 'move_to', child: Row(children: [const Icon(Icons.drive_file_move_outlined), const SizedBox(width: 12), const Text('Move to cookbook')])),
               const PopupMenuDivider(),
               PopupMenuItem(value: 'delete', child: Row(children: [const Icon(Icons.delete, color: Colors.red), const SizedBox(width: 12), Text(l10n.actionDelete, style: const TextStyle(color: Colors.red))])),
             ],
@@ -1472,6 +1475,12 @@ class _RecipeAppBar extends StatelessWidget {
       case 'duplicate':
         _duplicateRecipe(context);
         break;
+      case 'copy_to':
+        _showCookbookPicker(context, move: false);
+        break;
+      case 'move_to':
+        _showCookbookPicker(context, move: true);
+        break;
       case 'delete':
         _confirmDelete(context);
         break;
@@ -1492,6 +1501,87 @@ class _RecipeAppBar extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         AppSnackbar.info(context, 'Error: $e');
+      }
+    }
+  }
+
+  void _showCookbookPicker(BuildContext context, {required bool move}) {
+    final theme = Theme.of(context);
+    final cookbooks = ref.read(cookbooksProvider);
+
+    cookbooks.whenData((list) {
+      // Filter out current cookbook
+      final others = list.where((c) => c.id != recipe.cookbookId).toList();
+
+      if (others.isEmpty) {
+        AppSnackbar.info(context, 'No other cookbooks available');
+        return;
+      }
+
+      Responsive.showAdaptiveSheet(
+        context,
+        builder: (ctx) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(width: 40, height: 4, decoration: BoxDecoration(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              )),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  move ? 'Move to cookbook' : 'Copy to cookbook',
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+              const SizedBox(height: 8),
+              ...others.map((cookbook) => ListTile(
+                leading: const Icon(Icons.book_outlined),
+                title: Text(cookbook.name),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await _performCookbookAction(context, cookbook, move: move);
+                },
+              )),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Future<void> _performCookbookAction(BuildContext context, Cookbook targetCookbook, {required bool move}) async {
+    final recipeDao = ref.read(recipeDaoProvider);
+
+    try {
+      if (move) {
+        // Update the recipe's cookbookId
+        await recipeDao.updateRecipeFields(recipe.id, RecipesCompanion(
+          cookbookId: drift.Value(targetCookbook.id),
+        ));
+        onReload();
+        if (context.mounted) {
+          AppSnackbar.success(context, 'Moved to "${targetCookbook.name}"');
+        }
+      } else {
+        // Duplicate into the target cookbook
+        final newId = 'recipe_${DateTime.now().millisecondsSinceEpoch}';
+        await recipeDao.duplicateRecipe(recipe.id, newId);
+        // Update the copy's cookbookId to target
+        await recipeDao.updateRecipeFields(newId, RecipesCompanion(
+          cookbookId: drift.Value(targetCookbook.id),
+        ));
+        if (context.mounted) {
+          AppSnackbar.success(context, 'Copied to "${targetCookbook.name}"');
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppSnackbar.error(context, 'Error: $e');
       }
     }
   }
