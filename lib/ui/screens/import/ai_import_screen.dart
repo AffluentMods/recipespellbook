@@ -90,9 +90,11 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
   }
 
   void _showPreviewSheet(String jsonString) {
-    final data = _parsePreview(jsonString);
-    if (data == null) return;
+    final recipes = _parsePreview(jsonString);
+    if (recipes == null || recipes.isEmpty) return;
 
+    final data = recipes.first;
+    final recipeCount = recipes.length;
     final theme = Theme.of(context);
     final ingredients = (data['ingredients'] as List?) ?? [];
     final steps = (data['steps'] as List?) ?? [];
@@ -140,6 +142,13 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                             style: theme.textTheme.titleLarge
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
+                          if (recipeCount > 1)
+                            Text(
+                              '+ ${recipeCount - 1} more recipe${recipeCount > 2 ? 's' : ''}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.w600),
+                            ),
                           if (data['description'] != null)
                             Text(
                               data['description'],
@@ -367,7 +376,11 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                                 strokeWidth: 2, color: Colors.white))
                         : const Icon(Icons.add),
                     label: Text(
-                        _importing ? 'Importing...' : 'Import to Cookbook'),
+                        _importing
+                            ? 'Importing...'
+                            : recipeCount > 1
+                                ? 'Import $recipeCount Recipes'
+                                : 'Import to Cookbook'),
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
@@ -393,7 +406,7 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
       final cookbookId =
           ref.read(selectedCookbookIdProvider) ?? 'starter';
 
-      final recipeId = await AiImportService.importFromJson(
+      final recipeIds = await AiImportService.importAllFromJson(
         json,
         db,
         cookbookId: cookbookId,
@@ -405,12 +418,19 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
         Navigator.of(context).pop();
         await Future.delayed(const Duration(milliseconds: 100));
         if (context.mounted) {
-          AppSnackbar.successWithAction(
-            context,
-            l10n.recipeImportedSuccess,
-            actionLabel: l10n.actionView,
-            onAction: () => context.push('/recipe/$recipeId'),
-          );
+          if (recipeIds.length == 1) {
+            AppSnackbar.successWithAction(
+              context,
+              l10n.recipeImportedSuccess,
+              actionLabel: l10n.actionView,
+              onAction: () => context.push('/recipe/${recipeIds.first}'),
+            );
+          } else {
+            AppSnackbar.success(
+              context,
+              '${recipeIds.length} recipes imported successfully!',
+            );
+          }
         }
       }
     } catch (e) {
@@ -423,7 +443,8 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
     }
   }
 
-  Map<String, dynamic>? _parsePreview(String jsonString) {
+  /// Returns a list of recipe maps. Supports both single objects and arrays.
+  List<Map<String, dynamic>>? _parsePreview(String jsonString) {
     try {
       final cleaned = jsonString.trim();
       var s = cleaned;
@@ -433,7 +454,11 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
         if (s.endsWith('```')) s = s.substring(0, s.length - 3);
         s = s.trim();
       }
-      return jsonDecode(s) as Map<String, dynamic>;
+      final decoded = jsonDecode(s);
+      if (decoded is List) {
+        return decoded.cast<Map<String, dynamic>>();
+      }
+      return [decoded as Map<String, dynamic>];
     } catch (_) {
       return null;
     }
@@ -562,6 +587,33 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                       ),
                     ),
                   ],
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // ── Bulk / weird format hint ──
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.tips_and_updates_outlined, color: theme.colorScheme.primary, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Have recipes in a weird format? Paste them into any free AI (ChatGPT, Claude, etc.) with this prompt and it\'ll convert them for you \u2014 works with spreadsheets, emails, screenshots, and more!',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

@@ -32,66 +32,113 @@ class AiImportService {
   static const _uuid = Uuid();
 
   /// Validate raw JSON string. Returns error message or null if valid.
+  /// Accepts both a single recipe object and an array of recipe objects.
   static String? validate(String jsonString) {
     try {
       final cleaned = _cleanJson(jsonString);
       final decoded = jsonDecode(cleaned);
 
+      // Support arrays of recipes (bulk import)
+      if (decoded is List) {
+        if (decoded.isEmpty) {
+          return 'Recipe array is empty — need at least one recipe.';
+        }
+        for (var r = 0; r < decoded.length; r++) {
+          if (decoded[r] is! Map<String, dynamic>) {
+            return 'Recipe #${r + 1} is not a valid JSON object.';
+          }
+          final err = _validateSingleRecipe(decoded[r] as Map<String, dynamic>, recipeIndex: r + 1);
+          if (err != null) return err;
+        }
+        return null;
+      }
+
       if (decoded is! Map<String, dynamic>) {
-        return 'Expected a JSON object with recipe data. Got ${decoded.runtimeType}.';
+        return 'Expected a JSON object with recipe data (or an array of recipes). Got ${decoded.runtimeType}.';
       }
 
-      final recipe = decoded;
-
-      // Required: title
-      if (recipe['title'] == null ||
-          (recipe['title'] as String).trim().isEmpty) {
-        return 'Missing required field: "title"';
-      }
-
-      // Required: at least one ingredient
-      if (recipe['ingredients'] == null || recipe['ingredients'] is! List) {
-        return 'Missing required field: "ingredients" (must be an array)';
-      }
-      final ingredients = recipe['ingredients'] as List;
-      if (ingredients.isEmpty) {
-        return '"ingredients" array is empty — need at least one ingredient.';
-      }
-      for (var i = 0; i < ingredients.length; i++) {
-        final ing = ingredients[i];
-        if (ing is! Map<String, dynamic>) {
-          return 'Ingredient #${i + 1} is not a valid object.';
-        }
-        if (ing['name'] == null || (ing['name'] as String).trim().isEmpty) {
-          return 'Ingredient #${i + 1} is missing a "name" field.';
-        }
-      }
-
-      // Required: at least one step
-      if (recipe['steps'] == null || recipe['steps'] is! List) {
-        return 'Missing required field: "steps" (must be an array)';
-      }
-      final steps = recipe['steps'] as List;
-      if (steps.isEmpty) {
-        return '"steps" array is empty — need at least one step.';
-      }
-      for (var i = 0; i < steps.length; i++) {
-        final step = steps[i];
-        if (step is! Map<String, dynamic>) {
-          return 'Step #${i + 1} is not a valid object.';
-        }
-        if (step['instruction'] == null ||
-            (step['instruction'] as String).trim().isEmpty) {
-          return 'Step #${i + 1} is missing an "instruction" field.';
-        }
-      }
-
-      return null; // Valid!
+      return _validateSingleRecipe(decoded);
     } on FormatException catch (e) {
       return 'Invalid JSON: ${e.message}';
     } catch (e) {
       return 'Error parsing recipe: $e';
     }
+  }
+
+  /// Validate a single recipe map. [recipeIndex] is used for error messages in bulk mode.
+  static String? _validateSingleRecipe(Map<String, dynamic> recipe, {int? recipeIndex}) {
+    final prefix = recipeIndex != null ? 'Recipe #$recipeIndex: ' : '';
+
+    // Required: title
+    if (recipe['title'] == null ||
+        (recipe['title'] as String).trim().isEmpty) {
+      return '${prefix}Missing required field: "title"';
+    }
+
+    // Required: at least one ingredient
+    if (recipe['ingredients'] == null || recipe['ingredients'] is! List) {
+      return '${prefix}Missing required field: "ingredients" (must be an array)';
+    }
+    final ingredients = recipe['ingredients'] as List;
+    if (ingredients.isEmpty) {
+      return '$prefix"ingredients" array is empty — need at least one ingredient.';
+    }
+    for (var i = 0; i < ingredients.length; i++) {
+      final ing = ingredients[i];
+      if (ing is! Map<String, dynamic>) {
+        return '${prefix}Ingredient #${i + 1} is not a valid object.';
+      }
+      if (ing['name'] == null || (ing['name'] as String).trim().isEmpty) {
+        return '${prefix}Ingredient #${i + 1} is missing a "name" field.';
+      }
+    }
+
+    // Required: at least one step
+    if (recipe['steps'] == null || recipe['steps'] is! List) {
+      return '${prefix}Missing required field: "steps" (must be an array)';
+    }
+    final steps = recipe['steps'] as List;
+    if (steps.isEmpty) {
+      return '$prefix"steps" array is empty — need at least one step.';
+    }
+    for (var i = 0; i < steps.length; i++) {
+      final step = steps[i];
+      if (step is! Map<String, dynamic>) {
+        return '${prefix}Step #${i + 1} is not a valid object.';
+      }
+      if (step['instruction'] == null ||
+          (step['instruction'] as String).trim().isEmpty) {
+        return '${prefix}Step #${i + 1} is missing an "instruction" field.';
+      }
+    }
+
+    return null; // Valid!
+  }
+
+  /// Parse and import recipe(s) from JSON string into the database.
+  /// Supports both single recipe objects and arrays of recipes.
+  /// Returns a list of created recipe IDs.
+  static Future<List<String>> importAllFromJson(
+      String jsonString,
+      AppDatabase db, {
+        required String cookbookId,
+      }) async {
+    final cleaned = _cleanJson(jsonString);
+    final decoded = jsonDecode(cleaned);
+
+    final List<Map<String, dynamic>> recipeMaps;
+    if (decoded is List) {
+      recipeMaps = decoded.cast<Map<String, dynamic>>();
+    } else {
+      recipeMaps = [decoded as Map<String, dynamic>];
+    }
+
+    final ids = <String>[];
+    for (final data in recipeMaps) {
+      final id = await _importSingleRecipe(data, db, cookbookId: cookbookId);
+      ids.add(id);
+    }
+    return ids;
   }
 
   /// Parse and import a recipe from JSON string into the database.
@@ -102,8 +149,25 @@ class AiImportService {
         required String cookbookId,
       }) async {
     final cleaned = _cleanJson(jsonString);
-    final data = jsonDecode(cleaned) as Map<String, dynamic>;
+    final decoded = jsonDecode(cleaned);
 
+    // Support arrays — import first recipe for backwards compatibility
+    final Map<String, dynamic> data;
+    if (decoded is List) {
+      data = decoded.first as Map<String, dynamic>;
+    } else {
+      data = decoded as Map<String, dynamic>;
+    }
+
+    return _importSingleRecipe(data, db, cookbookId: cookbookId);
+  }
+
+  /// Import a single recipe map into the database. Returns the recipe ID.
+  static Future<String> _importSingleRecipe(
+      Map<String, dynamic> data,
+      AppDatabase db, {
+        required String cookbookId,
+      }) async {
     final recipeId = 'ai_${_uuid.v4()}';
     final now = DateTime.now();
 

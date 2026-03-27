@@ -16,6 +16,7 @@ enum HintId {
   shoppingListGen,
   recipeNotes,
   cookbookOrganization,
+  cookbookSwitcher,
   tagSystem,
 }
 
@@ -55,6 +56,7 @@ class HintDefinition {
       HintId.shoppingListGen => l10n.hintShoppingListGen,
       HintId.recipeNotes => l10n.hintRecipeNotes,
       HintId.cookbookOrganization => l10n.hintCookbookOrganization,
+      HintId.cookbookSwitcher => 'Tap the cookbook name at the top to switch between your cookbooks.',
       HintId.tagSystem => l10n.hintTagSystem,
     };
   }
@@ -124,6 +126,13 @@ class HintDefinition {
           'Create multiple cookbooks to organize your recipes by theme or occasion.',
       triggerScreen: 'home',
       minAppOpens: 4,
+    ),
+    HintDefinition(
+      id: HintId.cookbookSwitcher,
+      message:
+          'Tap the cookbook name at the top to switch between your cookbooks. Your recipes are organized by cookbook!',
+      triggerScreen: 'home',
+      minAppOpens: 2,
     ),
     HintDefinition(
       id: HintId.tagSystem,

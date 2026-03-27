@@ -40,6 +40,10 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   bool _downloading = false;
   String _downloadStatus = '';
 
+  // Selection mode
+  bool _selectMode = false;
+  final Set<int> _selectedIndices = {};
+
   // Rating
   int _myRating = 0;
   double _displayRating = 0;
@@ -96,9 +100,13 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     }
   }
 
-  Future<void> _download({bool withImages = true}) async {
+  Future<void> _download({
+    bool withImages = true,
+    Set<int>? selectedIndices,
+    String? targetCookbookId,
+  }) async {
     if (_downloading) return;
-    setState(() { _downloading = true; _downloadStatus = 'Downloading cookbook...'; });
+    setState(() { _downloading = true; _downloadStatus = 'Downloading cookbook...'; _selectMode = false; _selectedIndices.clear(); });
     final l10n = AppLocalizations.of(context)!;
     const uuid = Uuid();
 
@@ -109,17 +117,23 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         return;
       }
 
+      // Filter to selected recipes if partial download
+      final recipesToDownload = selectedIndices != null
+          ? (selectedIndices.toList()..sort())
+          : List.generate(result.recipes.length, (i) => i);
+
       final db = ref.read(databaseProvider);
-      final cookbookId = 'community_${uuid.v4()}';
+      final cookbookId = targetCookbookId ?? 'community_${uuid.v4()}';
+      final totalRecipes = recipesToDownload.length;
 
       // --- Phase 1: Download images (before DB writes) ---
-      final totalRecipes = result.recipes.length;
-      final List<String?> coverImages = [];
-      final List<List<String?>> stepImages = [];
+      final Map<int, String?> coverImages = {};
+      final Map<int, List<String?>> stepImages = {};
 
-      for (int i = 0; i < totalRecipes; i++) {
+      for (int idx = 0; idx < totalRecipes; idx++) {
+        final i = recipesToDownload[idx];
         final recipe = result.recipes[i];
-        if (mounted) setState(() => _downloadStatus = 'Downloading images... (${i + 1}/$totalRecipes)');
+        if (mounted) setState(() => _downloadStatus = 'Downloading images... (${idx + 1}/$totalRecipes)');
 
         // Cover image
         String? coverPath;
@@ -130,7 +144,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
             coverPath = await ImageService.instance.downloadAndSaveImage(url, filename);
           } catch (_) { /* image fail is non-fatal */ }
         }
-        coverImages.add(coverPath);
+        coverImages[i] = coverPath;
 
         // Step images
         final List<String?> sImgs = [];
@@ -145,21 +159,23 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
           }
           sImgs.add(stepPath);
         }
-        stepImages.add(sImgs);
+        stepImages[i] = sImgs;
       }
 
       // --- Phase 2: Insert everything in a single transaction ---
       if (mounted) setState(() => _downloadStatus = 'Saving recipes...');
 
       await db.transaction(() async {
-        // Create cookbook
-        await db.into(db.cookbooks).insert(CookbooksCompanion.insert(
-          id: cookbookId,
-          name: result.title,
-          description: drift.Value(result.description),
-        ));
+        // Create cookbook only if no target was specified
+        if (targetCookbookId == null) {
+          await db.into(db.cookbooks).insert(CookbooksCompanion.insert(
+            id: cookbookId,
+            name: result.title,
+            description: drift.Value(result.description),
+          ));
+        }
 
-        for (int i = 0; i < totalRecipes; i++) {
+        for (final i in recipesToDownload) {
           final recipe = result.recipes[i];
           final recipeId = 'cr_${uuid.v4()}';
 
@@ -204,13 +220,12 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               sortOrder: step.sortOrder,
               instruction: step.instruction,
               durationMinutes: drift.Value(step.durationMinutes),
-              imagePath: drift.Value(stepImages[i][s]),
+              imagePath: drift.Value(stepImages[i]?[s]),
             ));
           }
 
           // Insert recipe tags
           for (final tag in recipe.tags) {
-            // Ensure the tag exists locally
             final existing = await (db.select(db.tags)..where((t) => t.id.equals(tag))).getSingleOrNull();
             if (existing == null) {
               await db.into(db.tags).insertOnConflictUpdate(TagsCompanion.insert(
@@ -229,7 +244,12 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
       ref.invalidate(cookbooksProvider);
 
       if (mounted) {
-        AppSnackbar.success(context, l10n.communityDownloadSuccess(result.title, result.recipes.length));
+        final count = recipesToDownload.length;
+        final allCount = result.recipes.length;
+        final msg = count == allCount
+            ? l10n.communityDownloadSuccess(result.title, count)
+            : '$count recipes saved from "${result.title}"';
+        AppSnackbar.success(context, msg);
       }
     } catch (e) {
       if (mounted) AppSnackbar.error(context, l10n.communityDownloadFailedError(e.toString()));
@@ -238,8 +258,106 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     }
   }
 
-  void _showDownloadChoice() {
+  void _showDownloadChoice({Set<int>? selectedIndices}) {
     final d = _detail!;
+    final recipeCount = selectedIndices?.length ?? d.recipes.length;
+
+    Responsive.showAdaptiveSheet(
+      context,
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        final l10n = AppLocalizations.of(ctx)!;
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(width: 40, height: 4, decoration: BoxDecoration(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              )),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  selectedIndices != null ? 'Save $recipeCount Recipes' : l10n.communityDownloadOptions,
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+
+              // Destination: new or existing cookbook
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text('Save to:', style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
+              ),
+              const SizedBox(height: 4),
+              ListTile(
+                leading: const Icon(Icons.add_circle_outline),
+                title: const Text('New Cookbook'),
+                subtitle: Text('"${d.title}"'),
+                onTap: () { Navigator.pop(ctx); _showImageChoice(selectedIndices: selectedIndices, targetCookbookId: null); },
+              ),
+              ListTile(
+                leading: const Icon(Icons.book_outlined),
+                title: const Text('Existing Cookbook'),
+                subtitle: const Text('Add to one of your cookbooks'),
+                onTap: () { Navigator.pop(ctx); _showCookbookPicker(selectedIndices: selectedIndices); },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showImageChoice({Set<int>? selectedIndices, String? targetCookbookId}) {
+    final d = _detail!;
+    if (!d.hasImages) {
+      _download(withImages: false, selectedIndices: selectedIndices, targetCookbookId: targetCookbookId);
+      return;
+    }
+
+    Responsive.showAdaptiveSheet(
+      context,
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        final l10n = AppLocalizations.of(ctx)!;
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(width: 40, height: 4, decoration: BoxDecoration(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              )),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(l10n.communityDownloadOptions, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              ),
+              ListTile(
+                leading: const Icon(Icons.image),
+                title: Text(l10n.communityDownloadWithImages(d.downloadSizeLabel)),
+                subtitle: Text(l10n.communityDownloadImagesIncluded(d.imageCount)),
+                onTap: () { Navigator.pop(ctx); _download(withImages: true, selectedIndices: selectedIndices, targetCookbookId: targetCookbookId); },
+              ),
+              ListTile(
+                leading: const Icon(Icons.text_snippet),
+                title: Text(l10n.communityDownloadTextOnly),
+                subtitle: Text(l10n.communityDownloadTextOnlySubtitle),
+                onTap: () { Navigator.pop(ctx); _download(withImages: false, selectedIndices: selectedIndices, targetCookbookId: targetCookbookId); },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showCookbookPicker({Set<int>? selectedIndices}) {
+    final cookbooks = ref.read(cookbooksProvider).valueOrNull ?? [];
+
     Responsive.showAdaptiveSheet(
       context,
       builder: (ctx) {
@@ -255,20 +373,20 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               )),
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text(AppLocalizations.of(ctx)!.communityDownloadOptions, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                child: Text('Choose Cookbook', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
               ),
-              ListTile(
-                leading: const Icon(Icons.image),
-                title: Text(AppLocalizations.of(ctx)!.communityDownloadWithImages(d.downloadSizeLabel)),
-                subtitle: Text(AppLocalizations.of(ctx)!.communityDownloadImagesIncluded(d.imageCount)),
-                onTap: () { Navigator.pop(ctx); _download(withImages: true); },
-              ),
-              ListTile(
-                leading: const Icon(Icons.text_snippet),
-                title: Text(AppLocalizations.of(ctx)!.communityDownloadTextOnly),
-                subtitle: Text(AppLocalizations.of(ctx)!.communityDownloadTextOnlySubtitle),
-                onTap: () { Navigator.pop(ctx); _download(withImages: false); },
-              ),
+              if (cookbooks.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text('No cookbooks yet. Recipes will be saved to a new cookbook.',
+                      style: TextStyle(color: theme.colorScheme.outline)),
+                )
+              else
+                ...cookbooks.map((c) => ListTile(
+                  leading: const Icon(Icons.book),
+                  title: Text(c.name),
+                  onTap: () { Navigator.pop(ctx); _showImageChoice(selectedIndices: selectedIndices, targetCookbookId: c.id); },
+                )),
               const SizedBox(height: 16),
             ],
           ),
@@ -444,7 +562,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     final d = _detail!;
 
     return Scaffold(
-      body: Responsive.constrainWidth(context, child: CustomScrollView(
+      body: Responsive.constrainWidth(context, child: Stack(children: [
+      CustomScrollView(
         slivers: [
           // ── Cover image header ──
           SliverAppBar(
@@ -585,36 +704,53 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                   const SizedBox(height: 12),
 
                   // ── Download section (hidden for own cookbook) ──
-                  if (AuthService.instance.currentUser?.id != d.publisher.id) ...[
+                  if (AuthService.instance.currentUser?.id != d.publisher.id && !_selectMode) ...[
                     _DownloadSection(
                       detail: d,
                       downloading: _downloading,
                       downloadStatus: _downloadStatus,
-                      onDownload: () {
-                        if (d.imageCount > 30) {
-                          _showDownloadChoice();
-                        } else if (d.hasImages) {
-                          _download(withImages: true);
-                        } else {
-                          _download(withImages: false);
-                        }
-                      },
-                      onDownloadChoice: _showDownloadChoice,
+                      onDownload: () => _showDownloadChoice(),
+                      onDownloadChoice: () => _showDownloadChoice(),
+                      onSelectRecipes: () => setState(() => _selectMode = true),
                     ),
                   ],
 
                   const SizedBox(height: 24),
 
                   // ── Recipe list header ──
-                  Text(
-                    l10n.recipesTitle,
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  Row(
+                    children: [
+                      Expanded(child: Text(
+                        _selectMode
+                            ? '${_selectedIndices.length} of ${d.recipes.length} selected'
+                            : l10n.recipesTitle,
+                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      )),
+                      if (_selectMode) ...[
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              if (_selectedIndices.length == d.recipes.length) {
+                                _selectedIndices.clear();
+                              } else {
+                                _selectedIndices.addAll(List.generate(d.recipes.length, (i) => i));
+                              }
+                            });
+                          },
+                          child: Text(_selectedIndices.length == d.recipes.length ? 'Deselect All' : 'Select All'),
+                        ),
+                        TextButton(
+                          onPressed: () => setState(() { _selectMode = false; _selectedIndices.clear(); }),
+                          child: const Text('Cancel'),
+                        ),
+                      ],
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.communityTapToPreview,
-                    style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
-                  ),
+                  if (!_selectMode)
+                    Text(
+                      l10n.communityTapToPreview,
+                      style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
+                    ),
                   const SizedBox(height: 12),
                 ],
               ),
@@ -623,7 +759,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 
           // ── Recipe grid ──
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            padding: EdgeInsets.fromLTRB(16, 0, 16, _selectMode ? 80 : 24),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, i) {
@@ -632,7 +768,21 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                     index: i,
                     recipe: recipe,
                     publicationId: d.id,
-                    onTap: () => _showRecipePreview(i),
+                    selectMode: _selectMode,
+                    isSelected: _selectedIndices.contains(i),
+                    onTap: () {
+                      if (_selectMode) {
+                        setState(() {
+                          if (_selectedIndices.contains(i)) {
+                            _selectedIndices.remove(i);
+                          } else {
+                            _selectedIndices.add(i);
+                          }
+                        });
+                      } else {
+                        _showRecipePreview(i);
+                      }
+                    },
                   );
                 },
                 childCount: d.recipes.length,
@@ -640,7 +790,25 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
             ),
           ),
         ],
-      )),
+      ),
+
+      // ── Selection action bar ──
+      if (_selectMode)
+        Positioned(
+          left: 16, right: 16, bottom: 16,
+          child: SafeArea(
+            child: FilledButton.icon(
+              onPressed: _selectedIndices.isEmpty ? null : () => _showDownloadChoice(selectedIndices: Set.from(_selectedIndices)),
+              icon: const Icon(Icons.download),
+              label: Text('Download ${_selectedIndices.length} Recipes'),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(double.infinity, 52),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+            ),
+          ),
+        ),
+      ])),
     );
   }
 
@@ -851,6 +1019,7 @@ class _DownloadSection extends StatelessWidget {
   final String downloadStatus;
   final VoidCallback onDownload;
   final VoidCallback onDownloadChoice;
+  final VoidCallback onSelectRecipes;
 
   const _DownloadSection({
     required this.detail,
@@ -858,6 +1027,7 @@ class _DownloadSection extends StatelessWidget {
     required this.downloadStatus,
     required this.onDownload,
     required this.onDownloadChoice,
+    required this.onSelectRecipes,
   });
 
   @override
@@ -918,6 +1088,17 @@ class _DownloadSection extends StatelessWidget {
             ],
           ],
         ),
+        const SizedBox(height: 8),
+        // Select individual recipes
+        SizedBox(
+          width: double.infinity,
+          height: 44,
+          child: OutlinedButton.icon(
+            onPressed: downloading ? null : onSelectRecipes,
+            icon: const Icon(Icons.checklist, size: 18),
+            label: const Text('Select Individual Recipes'),
+          ),
+        ),
       ],
     );
   }
@@ -932,12 +1113,16 @@ class _RecipePreviewCard extends StatelessWidget {
   final CommunityRecipe recipe;
   final String publicationId;
   final VoidCallback onTap;
+  final bool selectMode;
+  final bool isSelected;
 
   const _RecipePreviewCard({
     required this.index,
     required this.recipe,
     required this.publicationId,
     required this.onTap,
+    this.selectMode = false,
+    this.isSelected = false,
   });
 
   @override
@@ -959,6 +1144,7 @@ class _RecipePreviewCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       clipBehavior: Clip.antiAlias,
+      color: isSelected ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3) : null,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: InkWell(
         onTap: onTap,
@@ -966,6 +1152,15 @@ class _RecipePreviewCard extends StatelessWidget {
           padding: const EdgeInsets.all(10),
           child: Row(
             children: [
+              // Selection checkbox
+              if (selectMode) ...[
+                Icon(
+                  isSelected ? Icons.check_circle : Icons.circle_outlined,
+                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
+                  size: 22,
+                ),
+                const SizedBox(width: 10),
+              ],
               // Thumbnail
               if (hasImage) ...[
                 ClipRRect(

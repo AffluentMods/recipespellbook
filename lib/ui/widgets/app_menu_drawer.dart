@@ -53,12 +53,12 @@ class AppMenuDrawer extends ConsumerWidget {
                 // ── Main ──
                 _DrawerGroup(children: [
                   _DrawerItem(
-                    icon: Icons.people_rounded,
+                    icon: Icons.menu_book_rounded,
                     iconColor: const Color(0xFF6366F1),
-                    label: l10n.navCommunity,
+                    label: l10n.navCookbooks,
                     onTap: () {
                       Navigator.pop(context);
-                      context.push('/community');
+                      context.push('/cookbooks');
                     },
                   ),
                   _DrawerItem(
@@ -350,7 +350,7 @@ class HelpSupportScreen extends StatelessWidget {
                     return;
                   }
                   setDialogState(() => isSending = true);
-                  final success = await FeedbackService.sendSuggestion(
+                  final (success, error) = await FeedbackService.sendSuggestion(
                     title: titleController.text.trim(),
                     description: descriptionController.text.trim(),
                     contactInfo: contactController.text.trim(),
@@ -360,7 +360,7 @@ class HelpSupportScreen extends StatelessWidget {
                     if (success) {
                       AppSnackbar.success(context, l10n.suggestionSent);
                     } else {
-                      AppSnackbar.warning(context, l10n.feedbackSendError);
+                      AppSnackbar.warning(context, error ?? l10n.feedbackSendError);
                     }
                   }
                 },
@@ -456,7 +456,7 @@ class HelpSupportScreen extends StatelessWidget {
                     return;
                   }
                   setDialogState(() => isSending = true);
-                  final success = await FeedbackService.sendBugReport(
+                  final (success, error) = await FeedbackService.sendBugReport(
                     title: titleController.text.trim(),
                     description: descriptionController.text.trim(),
                     stepsToReproduce: stepsController.text.trim(),
@@ -467,7 +467,7 @@ class HelpSupportScreen extends StatelessWidget {
                     if (success) {
                       AppSnackbar.success(context, l10n.bugReportSent);
                     } else {
-                      AppSnackbar.warning(context, l10n.feedbackSendError);
+                      AppSnackbar.warning(context, error ?? l10n.feedbackSendError);
                     }
                   }
                 },

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -125,6 +126,12 @@ class _BookIntroScreenState extends ConsumerState<BookIntroScreen>
   }
 
   Future<void> _initVideo() async {
+    // Skip video entirely on web — browser codec support is unreliable
+    if (kIsWeb) {
+      if (mounted) _skipToViewer();
+      return;
+    }
+
     _videoController = VideoPlayerController.asset('assets/animations/book_intro.mp4');
 
     try {

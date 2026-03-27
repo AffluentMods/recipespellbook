@@ -8,6 +8,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/revenuecat_service.dart';
+import '../../../utils/platform_utils.dart';
 import '../../widgets/app_snackbar.dart';
 
 /// Custom paywall screen — replaces RevenueCat's default template.
@@ -673,6 +674,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       return;
     }
 
+    // ── Web/Desktop: open RevenueCat Web Purchase Link ──
+    if (!supportsRevenueCatSdk) {
+      await _handleWebPurchase(authState);
+      return;
+    }
+
+    // ── Mobile: use RevenueCat SDK ──
     final l10n = AppLocalizations.of(context)!;
     setState(() => _purchasing = true);
 
@@ -748,6 +756,94 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     } finally {
       if (mounted) setState(() => _purchasing = false);
     }
+  }
+
+  /// Handle purchases on web/desktop via RevenueCat Web Purchase Links.
+  /// Opens a hosted Stripe checkout page, then waits for the user to return.
+  Future<void> _handleWebPurchase(AuthState authState) async {
+    var webLink = RCConfig.webPurchaseLink;
+
+    if (webLink.isEmpty) {
+      if (mounted) _showWebPurchaseUnavailable();
+      return;
+    }
+
+    // Append app_user_id so RevenueCat ties the purchase to this user
+    final userId = authState.user?.id;
+    if (userId != null) {
+      final separator = webLink.contains('?') ? '&' : '?';
+      webLink = '$webLink${separator}app_user_id=$userId';
+    }
+
+    final uri = Uri.tryParse(webLink);
+    if (uri != null && await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+
+      // Show a dialog telling user to refresh after completing purchase
+      if (mounted) {
+        _showWebPurchaseRefreshDialog();
+      }
+    } else if (mounted) {
+      _showWebPurchaseUnavailable();
+    }
+  }
+
+  void _showWebPurchaseRefreshDialog() {
+    final theme = Theme.of(context);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: Icon(Icons.open_in_new, size: 40, color: theme.colorScheme.primary),
+        title: const Text('Complete Your Purchase'),
+        content: const Text(
+          'A checkout page has opened in your browser. '
+          'After completing your purchase, tap "Refresh" below to activate your subscription.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton.icon(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await ref.read(subscriptionProvider.notifier).refreshStatus();
+              if (mounted) {
+                final tier = ref.read(subscriptionProvider).tier;
+                if (tier != SubscriptionTier.free) {
+                  AppSnackbar.success(context, 'Subscription activated! 🎉');
+                  Navigator.pop(context); // Close paywall
+                } else {
+                  AppSnackbar.info(context, 'Purchase not detected yet. It may take a moment — try refreshing again.');
+                }
+              }
+            },
+            icon: const Icon(Icons.refresh),
+            label: const Text('Refresh'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showWebPurchaseUnavailable() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: Icon(Icons.info_outline, size: 40, color: Theme.of(ctx).colorScheme.primary),
+        title: const Text('Web Purchases Coming Soon'),
+        content: const Text(
+          'Web and desktop purchases are being set up. '
+          'In the meantime, you can upgrade through the Android or iOS app and your subscription will sync across all devices.',
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showSignInForPurchase() {

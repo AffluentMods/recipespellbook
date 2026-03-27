@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:device_info_plus/device_info_plus.dart';
@@ -16,7 +17,7 @@ class FeedbackService {
   static const discordInviteUrl = 'https://discord.gg/fqtrekcKFt';
 
   /// Send a suggestion via the backend API
-  static Future<bool> sendSuggestion({
+  static Future<(bool success, String? error)> sendSuggestion({
     required String title,
     required String description,
     String? contactInfo,
@@ -30,7 +31,7 @@ class FeedbackService {
   }
 
   /// Send a bug report via the backend API
-  static Future<bool> sendBugReport({
+  static Future<(bool success, String? error)> sendBugReport({
     required String title,
     required String description,
     String? stepsToReproduce,
@@ -49,7 +50,7 @@ class FeedbackService {
     );
   }
 
-  static Future<bool> _postFeedback({
+  static Future<(bool success, String? error)> _postFeedback({
     required String type,
     required String title,
     required String description,
@@ -67,12 +68,19 @@ class FeedbackService {
           if (email != null && email.isNotEmpty) 'email': email,
           'platform': platformName,
         }),
-      );
+      ).timeout(const Duration(seconds: 10));
 
-      return response.statusCode >= 200 && response.statusCode < 300;
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return (true, null);
+      }
+      debugPrint('FeedbackService: HTTP ${response.statusCode} — ${response.body}');
+      return (false, 'Server error (${response.statusCode}). Please try again later.');
+    } on http.ClientException catch (e) {
+      debugPrint('FeedbackService network error: $e');
+      return (false, 'Could not reach server. Check your internet connection.');
     } catch (e) {
       debugPrint('FeedbackService error: $e');
-      return false;
+      return (false, 'Something went wrong. Please try again later.');
     }
   }
 

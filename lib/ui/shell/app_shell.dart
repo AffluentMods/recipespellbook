@@ -90,8 +90,8 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (location == '/' || location.startsWith('/categories') || location.startsWith('/courses')) {
       return 0; // Home
     }
-    if (location.startsWith('/cookbooks') || location.startsWith('/cookbook/')) {
-      return 1; // Cookbooks
+    if (location.startsWith('/community')) {
+      return 1; // Community
     }
     if (location.startsWith('/planner')) return 2; // Planner
     if (location.startsWith('/shopping')) return 3; // Shopping
@@ -124,7 +124,7 @@ class _AppShellState extends ConsumerState<AppShell> {
             onDestinationSelected: (index) {
               switch (index) {
                 case 0: _navigateTo('/', 0);
-                case 1: _navigateTo('/cookbooks', 1);
+                case 1: _navigateTo('/community', 1);
                 case 2: _navigateTo('/planner', 2);
                 case 3: _navigateTo('/shopping', 3);
               }
@@ -154,7 +154,7 @@ class _AppShellState extends ConsumerState<AppShell> {
               onDestinationSelected: (index) {
                 switch (index) {
                   case 0: _navigateTo('/', 0);
-                  case 1: _navigateTo('/cookbooks', 1);
+                  case 1: _navigateTo('/community', 1);
                   case 2: _navigateTo('/planner', 2);
                   case 3: _navigateTo('/shopping', 3);
                 }
@@ -186,7 +186,7 @@ class _AppShellState extends ConsumerState<AppShell> {
           onTap: (index) {
             switch (index) {
               case 0: _navigateTo('/', 0);
-              case 1: _navigateTo('/cookbooks', 1);
+              case 1: _navigateTo('/community', 1);
               case 2: _navigateTo('/planner', 2);
               case 3: _navigateTo('/shopping', 3);
               case 4:
@@ -277,7 +277,7 @@ class _NotchNavBarState extends State<_NotchNavBar>
 
     final items = [
       _NavDef(Icons.home_outlined, Icons.home_rounded, l10n.navHome),
-      _NavDef(Icons.menu_book_outlined, Icons.menu_book_rounded, l10n.navCookbooks),
+      _NavDef(Icons.people_outlined, Icons.people_rounded, l10n.navCommunity),
       _NavDef(Icons.calendar_today_outlined, Icons.calendar_today_rounded, l10n.navPlanner),
       _NavDef(Icons.shopping_cart_outlined, Icons.shopping_cart_rounded, l10n.navShopping),
       _NavDef(Icons.menu_rounded, Icons.menu_rounded, l10n.navMenu),
@@ -550,10 +550,10 @@ class _AppSidebar extends ConsumerWidget {
                     theme: theme,
                   ),
                   _SidebarNavItem(
-                    icon: Icons.menu_book_outlined,
-                    selectedIcon: Icons.menu_book_rounded,
-                    label: l10n.navCookbooks,
-                    isSelected: currentIndex == 1 && !isCommunity && !isSettings,
+                    icon: Icons.people_outlined,
+                    selectedIcon: Icons.people_rounded,
+                    label: l10n.navCommunity,
+                    isSelected: currentIndex == 1 && !isSettings,
                     onTap: () => onDestinationSelected(1),
                     theme: theme,
                   ),
@@ -584,14 +584,13 @@ class _AppSidebar extends ConsumerWidget {
                     ),
                   ),
 
-                  // ── Secondary nav (from drawer) ──
+                  // ── Secondary nav ──
                   _SidebarNavItem(
-                    icon: Icons.people_outlined,
-                    selectedIcon: Icons.people_rounded,
-                    label: l10n.navCommunity,
-                    isSelected: isCommunity,
+                    icon: Icons.menu_book_outlined,
+                    selectedIcon: Icons.menu_book_rounded,
+                    label: l10n.navCookbooks,
                     iconColor: const Color(0xFF6366F1),
-                    onTap: () => context.go('/community'),
+                    onTap: () => context.go('/cookbooks'),
                     theme: theme,
                   ),
                   _SidebarNavItem(
@@ -1024,9 +1023,9 @@ class _AppNavigationRail extends StatelessWidget {
           label: Text(l10n.navHome),
         ),
         NavigationRailDestination(
-          icon: const Icon(Icons.menu_book_outlined),
-          selectedIcon: const Icon(Icons.menu_book_rounded),
-          label: Text(l10n.navCookbooks),
+          icon: const Icon(Icons.people_outlined),
+          selectedIcon: const Icon(Icons.people_rounded),
+          label: Text(l10n.navCommunity),
         ),
         NavigationRailDestination(
           icon: const Icon(Icons.calendar_today_outlined),

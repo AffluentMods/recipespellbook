@@ -57,6 +57,14 @@ class RCConfig {
       defaultTargetPlatform == TargetPlatform.android
           ? 'rs_cloud_sync_family:yearly'
           : 'rs_cloud_sync_family_yearly';
+
+  // — Web Purchase Link (RevenueCat hosted checkout) —
+  // Single URL — user picks their plan on the checkout page.
+  // Append ?app_user_id=USER_ID to tie the purchase to the logged-in user.
+  static const String webPurchaseLink = 'https://pay.rev.cat/uzbnawbjilwsplvi/';
+
+  /// Whether web purchase link is configured
+  static bool get hasWebPurchaseLink => webPurchaseLink.isNotEmpty;
 }
 
 // ════════════════════════════════════════════════════════════════

@@ -47,6 +47,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
   int _importedCount = 0;
   String? _lastImportedRecipeId;
   double _progress = 0;
+  String _progressStatus = '';
 
   @override
   void initState() {
@@ -147,7 +148,11 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
         imageResults[entry.key] = entry.value;
       }
       if (mounted) {
-        setState(() => _progress = (batch + batchIndices.length) / (selectedRecipes.length * 2));
+        final done = batch + batchIndices.length;
+        setState(() {
+          _progress = done / (selectedRecipes.length * 2);
+          _progressStatus = 'Downloading images ($done/${selectedRecipes.length})...';
+        });
       }
     }
 
@@ -214,7 +219,10 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
       }
 
       if (mounted) {
-        setState(() => _progress = 0.5 + ((idx + 1) / selectedRecipes.length) * 0.5);
+        setState(() {
+          _progress = 0.5 + ((idx + 1) / selectedRecipes.length) * 0.5;
+          _progressStatus = 'Importing ${idx + 1}/${selectedRecipes.length}...';
+        });
       }
     }
 
@@ -466,7 +474,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
           ),
 
           // ── Loading overlay ──
-          if (_loading) _LoadingOverlay(progress: _progress),
+          if (_loading) _LoadingOverlay(progress: _progress, status: _progressStatus),
         ],
       )),
     );
@@ -1081,7 +1089,8 @@ class _BottomActionBar extends StatelessWidget {
 
 class _LoadingOverlay extends StatelessWidget {
   final double progress;
-  const _LoadingOverlay({required this.progress});
+  final String status;
+  const _LoadingOverlay({required this.progress, this.status = ''});
 
   @override
   Widget build(BuildContext context) {
@@ -1116,7 +1125,7 @@ class _LoadingOverlay extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${(progress * 100).toInt()}%',
+                  status.isNotEmpty ? status : '${(progress * 100).toInt()}%',
                   style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
                 ),
               ],

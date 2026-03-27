@@ -631,9 +631,17 @@ class _CookbookGrid extends ConsumerWidget {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
           FilledButton(
-            onPressed: () {
-              ref.read(cookbookDaoProvider).deleteCookbook(cookbook.id);
-              Navigator.pop(ctx);
+            onPressed: () async {
+              await ref.read(cookbookDaoProvider).deleteCookbook(cookbook.id);
+              if (ctx.mounted) Navigator.pop(ctx);
+
+              // If we deleted the currently selected cookbook, switch to another
+              final selectedId = ref.read(selectedCookbookIdProvider);
+              if (selectedId == cookbook.id) {
+                final remaining = ref.read(cookbooksProvider).valueOrNull ?? [];
+                final next = remaining.where((c) => c.id != cookbook.id).firstOrNull;
+                ref.read(selectedCookbookIdProvider.notifier).state = next?.id ?? 'starter';
+              }
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: Text(l10n.actionDelete),

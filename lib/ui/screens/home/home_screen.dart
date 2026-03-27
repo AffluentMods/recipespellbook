@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import '../../../utils/native_file_image.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -16,6 +18,7 @@ import '../onboarding/book_intro_screen.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/hint_banner.dart';
+import '../../../services/community_service.dart';
 import '../../../services/recipe_suggestion_service.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
@@ -168,14 +171,48 @@ class HomeScreen extends ConsumerWidget {
 
 // ============ SURPRISE ME CARD ============
 
-class _SurpriseMeCard extends ConsumerWidget {
+class _SurpriseMeCard extends ConsumerStatefulWidget {
   final List<Recipe> recipes;
 
   const _SurpriseMeCard({required this.recipes});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (recipes.length < 3) return const SizedBox.shrink(); // Need at least a few recipes
+  ConsumerState<_SurpriseMeCard> createState() => _SurpriseMeCardState();
+}
+
+class _SurpriseMeCardState extends ConsumerState<_SurpriseMeCard> {
+  static List<CommunityListItem>? _cachedCommunity;
+  static bool _communityFetched = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCommunityIfNeeded();
+  }
+
+  Future<void> _fetchCommunityIfNeeded() async {
+    if (_communityFetched) return;
+    _communityFetched = true;
+    try {
+      final result = await CommunityService.instance.browse(
+        sort: 'popular', limit: 20,
+      );
+      if (result != null && result.publications.isNotEmpty) {
+        _cachedCommunity = result.publications;
+      }
+    } catch (_) {
+      // Community unavailable — no problem, use local only
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final recipes = widget.recipes;
+    final hasLocal = recipes.length >= 3;
+    final hasCommunity = _cachedCommunity != null && _cachedCommunity!.isNotEmpty;
+
+    // Need at least one source of recipes
+    if (!hasLocal && !hasCommunity) return const SizedBox.shrink();
 
     final showSurprise = ref.watch(settingsProvider.select((s) => s.showSurpriseMe));
     if (!showSurprise) return const SizedBox.shrink();
@@ -195,7 +232,7 @@ class _SurpriseMeCard extends ConsumerWidget {
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => _onSurpriseMe(context, ref),
+          onTap: _onSurpriseMe,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
@@ -244,25 +281,39 @@ class _SurpriseMeCard extends ConsumerWidget {
     );
   }
 
-  void _onSurpriseMe(BuildContext context, WidgetRef ref) {
-    // Convert Recipe objects to the map format the suggestion service expects
-    final recipeMaps = recipes.map((r) => <String, dynamic>{
-      'id': r.id,
-      'title': r.title,
-      'course': r.courseId,
-      'rating': r.rating,
-    }).toList();
+  void _onSurpriseMe() {
+    final random = Random();
+    final hasLocal = widget.recipes.length >= 3;
+    final hasCommunity = _cachedCommunity != null && _cachedCommunity!.isNotEmpty;
 
-    final suggestion = RecipeSuggestionService.suggest(
-      recipes: recipeMaps,
-    );
+    // 50/50 split — falls back to whichever source is available
+    bool useCommunity;
+    if (hasLocal && hasCommunity) {
+      useCommunity = random.nextBool();
+    } else {
+      useCommunity = hasCommunity && !hasLocal;
+    }
 
-    if (suggestion == null) return;
+    if (useCommunity) {
+      // Pick a random community publication
+      final pub = _cachedCommunity![random.nextInt(_cachedCommunity!.length)];
+      context.push('/community/${pub.id}');
+    } else {
+      // Local recipe suggestion
+      final recipeMaps = widget.recipes.map((r) => <String, dynamic>{
+        'id': r.id,
+        'title': r.title,
+        'course': r.courseId,
+        'rating': r.rating,
+      }).toList();
 
-    final recipeId = suggestion['id'] as String;
+      final suggestion = RecipeSuggestionService.suggest(
+        recipes: recipeMaps,
+      );
 
-    // Navigate to recipe
-    context.push('/recipe/$recipeId');
+      if (suggestion == null) return;
+      context.push('/recipe/${suggestion['id']}');
+    }
   }
 }
 
@@ -1181,13 +1232,12 @@ class _CookbookDropdown extends ConsumerWidget {
 
     return cookbooksAsync.when(
       data: (cookbooks) {
-        // Always show as dropdown — even with 1 cookbook, user can manage/add
+        // Cookbook switcher — prominent tappable button in app bar
         return GestureDetector(
           onTap: () => _showCookbookPicker(context, ref, cookbooks),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('✨ ', style: TextStyle(fontSize: 24)),
               Flexible(
                 child: Text(
                   currentCookbook?.name ?? appTitle,
@@ -1197,8 +1247,8 @@ class _CookbookDropdown extends ConsumerWidget {
               const SizedBox(width: 4),
               Icon(
                 Icons.keyboard_arrow_down_rounded,
-                color: theme.colorScheme.onSurface,
-                size: 22,
+                color: theme.colorScheme.primary,
+                size: 24,
               ),
             ],
           ),

@@ -29,38 +29,38 @@ class RecipeSuggestionService {
     // Determine time-of-day meal bias keywords
     final List<String> biasKeywords = _getBiasKeywords(hour);
 
-    // Score each recipe
+    // Score each recipe — randomness dominates so large libraries get variety
     final List<_ScoredRecipe> scored = [];
     for (final recipe in recipes) {
-      double score = 1.0;
+      double score = 0.0;
 
-      // Course matching: +0.3 if course matches time-of-day bias
+      // Course matching: small nudge if course matches time-of-day bias
       if (biasKeywords.isNotEmpty) {
         final course = (recipe['course'] as String?)?.toLowerCase() ?? '';
         if (course.isNotEmpty) {
           for (final keyword in biasKeywords) {
             if (course.contains(keyword)) {
-              score += 0.3;
+              score += 0.15;
               break;
             }
           }
         }
       }
 
-      // Recency penalty: -0.6 if recently viewed/cooked
+      // Recency penalty: strongly avoid recently viewed
       final id = recipe['id'] as String;
       if (recentlyViewedIds.contains(id)) {
-        score -= 0.6;
+        score -= 2.0;
       }
 
-      // Rating bonus: +0.15 for high-rated recipes (4 or 5)
+      // Rating bonus: tiny nudge for high-rated
       final rating = recipe['rating'] as int?;
       if (rating != null && rating >= 4) {
-        score += 0.15;
+        score += 0.1;
       }
 
-      // Random factor: +0.0 to +0.5 for variety
-      score += random.nextDouble() * 0.5;
+      // Random factor dominates: +0.0 to +1.0
+      score += random.nextDouble();
 
       scored.add(_ScoredRecipe(recipe: recipe, score: score));
     }
@@ -68,9 +68,9 @@ class RecipeSuggestionService {
     // Sort by score descending
     scored.sort((a, b) => b.score.compareTo(a.score));
 
-    // Pick randomly from top 3 (or fewer if list is small)
-    final topCount = scored.length.clamp(1, 3);
-    final topCandidates = scored.sublist(0, topCount);
+    // Pick randomly from a wider top pool — scales with library size
+    final topCount = recipes.length < 10 ? 3 : (recipes.length < 50 ? 5 : 10);
+    final topCandidates = scored.sublist(0, topCount.clamp(1, scored.length));
     final selected = topCandidates[random.nextInt(topCandidates.length)];
 
     return selected.recipe;

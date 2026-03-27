@@ -17,6 +17,7 @@ import '../../providers/database_provider.dart';
 import '../../services/ocr_service.dart';
 import '../../services/recipe_import_engine.dart';
 import '../screens/import/ai_import_screen.dart';
+import '../screens/import/import_guides_screen.dart';
 import '../screens/import/import_preview_screen.dart';
 import 'app_snackbar.dart';
 import '../../services/barcode_scanner_service.dart';
@@ -672,6 +673,33 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                     ],
                   ),
                   const SizedBox(height: 16),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const ImportGuidesScreen()),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.help_outline, color: theme.colorScheme.primary, size: 20),
+                          const SizedBox(width: 10),
+                          Expanded(child: Text(
+                            'Need help importing? Check our step-by-step guides',
+                            style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurface),
+                          )),
+                          Icon(Icons.chevron_right, color: theme.colorScheme.primary, size: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   GestureDetector(
                     onTap: _createManually,
                     child: Text(
