@@ -385,72 +385,138 @@ class _RecipeShareSheet extends StatelessWidget {
     Navigator.pop(context);
 
     final dao = ref.read(recipeDaoProvider);
-    final ingredients = await dao.getIngredientsForRecipe(recipe.id);
-    final steps = await dao.getStepsForRecipe(recipe.id);
     final linkedRecipes = await dao.getLinkedRecipes(recipe.id);
 
-    final data = {
-      'title': recipe.title,
-      'description': recipe.description,
-      'servings': recipe.servings,
-      'prepTimeMinutes': recipe.prepTimeMinutes,
-      'cookTimeMinutes': recipe.cookTimeMinutes,
-      'sourceUrl': recipe.sourceUrl,
-      'imagePath': recipe.imagePath,
-      'courseId': recipe.courseId,
-      'categoryId': recipe.categoryId,
-      'rating': recipe.rating,
-      'notes': recipe.notes,
-      'nutritionJson': recipe.nutritionJson,
-      'ingredients': ingredients.map((i) => {
-        'amount': i.amount,
-        'unit': i.unit,
-        'name': i.name,
-        'notes': i.notes,
-      }).toList(),
-      'instructions': steps.map((s) {
-        String? imagePath;
-        int? duration;
-        try {
-          imagePath = s.imagePath;
-          duration = s.durationMinutes;
-        } catch (e) {
-          imagePath = null;
-          duration = null;
+    // If there are linked recipes, ask the user what to export
+    bool includeLinked = false;
+    if (linkedRecipes.isNotEmpty && context.mounted) {
+      final linkedNames = linkedRecipes.map((r) => r.title).join(', ');
+      includeLinked = await showDialog<bool>(
+        context: context,
+        builder: (ctx) {
+          final theme = Theme.of(ctx);
+          return AlertDialog(
+            title: const Text('Export Linked Recipes?'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('This recipe has ${linkedRecipes.length} linked recipe(s):'),
+                const SizedBox(height: 8),
+                Text(
+                  linkedNames,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text('Would you like to include them in the export so the links are preserved when imported?'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text('Only ${recipe.title}'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Export All'),
+              ),
+            ],
+          );
+        },
+      ) ?? false;
+    }
+
+    if (!context.mounted) return;
+
+    final ingredients = await dao.getIngredientsForRecipe(recipe.id);
+    final steps = await dao.getStepsForRecipe(recipe.id);
+
+    // Build ingredient link map: ingredient name -> linked recipe title
+    final ingredientLinks = await dao.getIngredientLinksMap(recipe.id);
+    final ingredientLinkNames = <String, List<String>>{};
+    if (includeLinked) {
+      for (final entry in ingredientLinks.entries) {
+        final ingId = entry.key;
+        final ing = ingredients.where((i) => i.id == ingId).firstOrNull;
+        if (ing != null) {
+          ingredientLinkNames[ing.name] = entry.value.map((li) => li.recipe.title).toList();
         }
-        return {
-          'instruction': s.instruction,
-          'imagePath': imagePath,
-          'durationMinutes': duration,
-        };
-      }).toList(),
-      'linkedRecipes': await Future.wait(linkedRecipes.map((linked) async {
+      }
+    }
+
+    Map<String, dynamic> buildRecipeData(Recipe r, List<Ingredient> ings, List<Step> stps) {
+      return {
+        'title': r.title,
+        'description': r.description,
+        'servings': r.servings,
+        'prepTimeMinutes': r.prepTimeMinutes,
+        'cookTimeMinutes': r.cookTimeMinutes,
+        'sourceUrl': r.sourceUrl,
+        'courseId': r.courseId,
+        'categoryId': r.categoryId,
+        'rating': r.rating,
+        'notes': r.notes,
+        'nutritionJson': r.nutritionJson,
+        'ingredients': ings.map((i) => {
+          'amount': i.amount,
+          'unit': i.unit,
+          'name': i.name,
+          'notes': i.notes,
+        }).toList(),
+        'instructions': stps.map((s) {
+          String? imagePath;
+          int? duration;
+          try {
+            imagePath = s.imagePath;
+            duration = s.durationMinutes;
+          } catch (e) {
+            imagePath = null;
+            duration = null;
+          }
+          return {
+            'instruction': s.instruction,
+            'imagePath': imagePath,
+            'durationMinutes': duration,
+          };
+        }).toList(),
+      };
+    }
+
+    final mainData = buildRecipeData(recipe, ingredients, steps);
+
+    // Add linking info — maps ingredient names to linked recipe titles
+    if (includeLinked && ingredientLinkNames.isNotEmpty) {
+      mainData['ingredientLinks'] = ingredientLinkNames;
+    }
+
+    // Build final export data
+    dynamic exportData;
+    if (includeLinked && linkedRecipes.isNotEmpty) {
+      // Export as array: main recipe + all linked recipes
+      final allRecipes = <Map<String, dynamic>>[mainData];
+      for (final linked in linkedRecipes) {
         final linkedIngs = await dao.getIngredientsForRecipe(linked.id);
         final linkedSteps = await dao.getStepsForRecipe(linked.id);
-        return {
-          'title': linked.title,
-          'description': linked.description,
-          'servings': linked.servings,
-          'prepTimeMinutes': linked.prepTimeMinutes,
-          'cookTimeMinutes': linked.cookTimeMinutes,
-          'notes': linked.notes,
-          'ingredients': linkedIngs.map((i) => {
-            'amount': i.amount,
-            'unit': i.unit,
-            'name': i.name,
-            'notes': i.notes,
-          }).toList(),
-          'instructions': linkedSteps.map((s) => {
-            'instruction': s.instruction,
-          }).toList(),
-        };
-      })),
-      'exportedFrom': 'Recipe Spellbook',
-      'exportDate': DateTime.now().toIso8601String(),
-      'version': '2.0',
-    };
+        allRecipes.add(buildRecipeData(linked, linkedIngs, linkedSteps));
+      }
+      exportData = {
+        'recipes': allRecipes,
+        'links': ingredientLinkNames,
+        'exportedFrom': 'Recipe Spellbook',
+        'exportDate': DateTime.now().toIso8601String(),
+        'version': '3.0',
+      };
+    } else {
+      mainData['exportedFrom'] = 'Recipe Spellbook';
+      mainData['exportDate'] = DateTime.now().toIso8601String();
+      mainData['version'] = '2.0';
+      exportData = mainData;
+    }
 
-    final json = const JsonEncoder.withIndent('  ').convert(data);
+    final json = const JsonEncoder.withIndent('  ').convert(exportData);
 
     final dir = await getTemporaryDirectory();
     final filename = recipe.title.replaceAll(RegExp(r'[^\w\s-]'), '').replaceAll(' ', '_').toLowerCase();

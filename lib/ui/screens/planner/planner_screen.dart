@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart' as drift;
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -1083,91 +1083,306 @@ class _MealTypeHeader extends StatelessWidget {
 
 // ============ MEAL TILE ============
 
-class _MealTile extends ConsumerWidget {
+class _MealTile extends ConsumerStatefulWidget {
   final MealPlanWithRecipe plan;
 
   const _MealTile({required this.plan});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_MealTile> createState() => _MealTileState();
+}
+
+class _MealTileState extends ConsumerState<_MealTile> {
+  bool _isExpanded = false;
+  List<Ingredient>? _ingredients;
+  List<Step>? _steps;
+
+  Future<void> _loadDetails() async {
+    final recipe = widget.plan.recipe;
+    if (recipe == null) return;
+    final dao = ref.read(recipeDaoProvider);
+    final ings = await dao.getIngredientsForRecipe(recipe.id);
+    final steps = await dao.getStepsForRecipe(recipe.id);
+    if (mounted) {
+      setState(() {
+        _ingredients = ings;
+        _steps = steps;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final recipe = plan.recipe;
+    final recipe = widget.plan.recipe;
     final mealPlanDao = ref.read(mealPlanDaoProvider);
+    final title = recipe?.title ?? widget.plan.mealPlan.name ?? l10n.meal;
 
     return Dismissible(
-      key: Key(plan.mealPlan.id),
+      key: Key(widget.plan.mealPlan.id),
       direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
-        color: theme.colorScheme.error,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.error,
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Icon(Icons.delete, color: theme.colorScheme.onError),
       ),
-      onDismissed: (_) => mealPlanDao.deleteMealPlan(plan.mealPlan.id),
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(14),
-        ),
+      onDismissed: (_) => mealPlanDao.deleteMealPlan(widget.plan.mealPlan.id),
+      child: Card(
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         clipBehavior: Clip.antiAlias,
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          leading: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: SizedBox(
-              width: 56,
-              height: 56,
-              child: RecipeImage.thumbnail(
-                imagePath: recipe?.imagePath,
-                recipeId: recipe?.id,
-                width: 56,
-                height: 56,
+        child: Column(
+          children: [
+            // Header — always visible, tappable to expand
+            InkWell(
+              onTap: () {
+                if (recipe != null && !_isExpanded && _ingredients == null) {
+                  _loadDetails();
+                }
+                setState(() => _isExpanded = !_isExpanded);
+              },
+              onLongPress: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text(l10n.removeMeal),
+                    content: Text(l10n.removeMealConfirm(title)),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
+                      FilledButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          mealPlanDao.deleteMealPlan(widget.plan.mealPlan.id);
+                          AppSnackbar.info(context, l10n.plannerMealRemoved);
+                        },
+                        style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                        child: Text(l10n.actionRemove),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    // Recipe thumbnail
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: SizedBox(
+                        width: 52,
+                        height: 52,
+                        child: RecipeImage.thumbnail(
+                          imagePath: recipe?.imagePath,
+                          recipeId: recipe?.id,
+                          width: 52,
+                          height: 52,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // Title and meta
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (recipe != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              [
+                                if (recipe.prepTimeMinutes != null) '${recipe.prepTimeMinutes}${l10n.minutesPrepSuffix}',
+                                if (recipe.cookTimeMinutes != null) '${recipe.cookTimeMinutes}${l10n.minutesCookSuffix}',
+                                if (recipe.servings != null) '${recipe.servings} servings',
+                              ].join(' \u2022 '),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.outline,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    // View recipe button
+                    if (recipe != null)
+                      IconButton(
+                        icon: const Icon(Icons.open_in_new, size: 20),
+                        onPressed: () => context.push('/recipe/${recipe.id}'),
+                        tooltip: l10n.actionView,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    // Expand chevron
+                    AnimatedRotation(
+                      turns: _isExpanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Icon(Icons.expand_more,
+                          color: theme.colorScheme.outline),
+                    ),
+                  ],
+                ),
               ),
             ),
+
+            // Expanded: ingredients and instructions
+            AnimatedCrossFade(
+              duration: const Duration(milliseconds: 250),
+              crossFadeState: _isExpanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              firstChild: const SizedBox(width: double.infinity, height: 0),
+              secondChild: recipe != null ? _buildExpandedContent(theme, l10n) : const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpandedContent(ThemeData theme, AppLocalizations l10n) {
+    if (_ingredients == null || _steps == null) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Divider(height: 1, color: theme.colorScheme.outline.withValues(alpha: 0.1)),
+
+        // Ingredients section
+        if (_ingredients!.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+            child: Row(
+              children: [
+                Icon(Icons.restaurant, size: 14, color: theme.colorScheme.primary),
+                const SizedBox(width: 6),
+                Text(
+                  l10n.tabIngredients,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${_ingredients!.where((i) => i.notes != '__header__').length}',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.outline,
+                  ),
+                ),
+              ],
+            ),
           ),
-          title: Text(
-            recipe?.title ?? plan.mealPlan.name ?? l10n.meal,
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-          ),
-          subtitle: recipe != null
-              ? Text(
-            [
-              if (recipe.prepTimeMinutes != null) '${recipe.prepTimeMinutes}${l10n.minutesPrepSuffix}',
-              if (recipe.cookTimeMinutes != null) '${recipe.cookTimeMinutes}${l10n.minutesCookSuffix}',
-            ].join(' • '),
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-          )
-              : null,
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () {
-            if (recipe != null) {
-              context.push('/recipe/${recipe.id}');
+          ..._ingredients!.map((ing) {
+            if (ing.notes == '__header__') {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 2),
+                child: Text(
+                  ing.name,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              );
             }
-          },
-          onLongPress: () {
-            showDialog(
-              context: context,
-              builder: (ctx) => AlertDialog(
-                title: Text(l10n.removeMeal),
-                content: Text(l10n.removeMealConfirm(recipe?.title ?? plan.mealPlan.name ?? l10n.meal)),
-                actions: [
-                  TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
-                  FilledButton(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      mealPlanDao.deleteMealPlan(plan.mealPlan.id);
-                      AppSnackbar.info(context, l10n.plannerMealRemoved);
-                    },
-                    style: FilledButton.styleFrom(backgroundColor: Colors.red),
-                    child: Text(l10n.actionRemove),
+            final amountParts = <String>[];
+            if (ing.amount != null && ing.amount!.isNotEmpty) amountParts.add(ing.amount!);
+            if (ing.unit != null && ing.unit!.isNotEmpty) amountParts.add(ing.unit!);
+            final amountStr = amountParts.join(' ');
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.fiber_manual_record, size: 6,
+                      color: theme.colorScheme.outline),
+                  const SizedBox(width: 8),
+                  if (amountStr.isNotEmpty)
+                    Text(
+                      '$amountStr ',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  Expanded(
+                    child: Text(
+                      ing.name,
+                      style: theme.textTheme.bodySmall,
+                    ),
                   ),
                 ],
               ),
             );
-          },
-        ),
-      ),
+          }),
+        ],
+
+        // Instructions section
+        if (_steps!.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+            child: Row(
+              children: [
+                Icon(Icons.format_list_numbered, size: 14, color: theme.colorScheme.primary),
+                const SizedBox(width: 6),
+                Text(
+                  l10n.tabInstructions,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ..._steps!.asMap().entries.map((entry) {
+            final idx = entry.key + 1;
+            final step = entry.value;
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 20,
+                    child: Text(
+                      '$idx.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      step.instruction,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+
+        const SizedBox(height: 12),
+      ],
     );
   }
 }

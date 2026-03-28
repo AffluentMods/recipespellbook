@@ -514,14 +514,73 @@ class _ShoppingListGeneratorScreenState
   // STEP 2: FINAL REVIEW + LIST PICKER
   // ═══════════════════════════════════════════════════════════════
 
+  /// Combine ingredients across all recipes by normalized name, summing amounts.
+  List<_CombinedIngredient> _combineIngredients(List<ResolvedIngredient> allSelected) {
+    final combined = <String, _CombinedIngredient>{};
+
+    for (final ri in allSelected) {
+      // Find which recipe this ingredient belongs to for userScale
+      final recipeNode = _result.recipes.firstWhere(
+            (r) => r.directIngredients.any((i) => i.ingredient.id == ri.ingredient.id),
+        orElse: () => _result.recipes.first,
+      );
+      final userScale = _userScaleForRecipe(recipeNode.recipeId);
+      final (amt, unit) = _scaleAmountWithUnit(
+        ri.scaledAmount, ri.scaledUnit, userScale,
+      );
+
+      final normalized = normalizeIngredientName(ri.ingredient.name);
+      final key = normalized;
+
+      if (combined.containsKey(key)) {
+        final existing = combined[key]!;
+        // Try to combine amounts
+        final existingParsed = amt.isNotEmpty ? parseAmount(amt) : null;
+        final existingOldParsed = existing.amount.isNotEmpty ? parseAmount(existing.amount) : null;
+
+        if (existingParsed != null && existingOldParsed != null) {
+          // Both have parseable amounts — combine them
+          final (combinedAmt, combinedUnit) = combineAmounts(
+            existingOldParsed, existing.unit.isNotEmpty ? existing.unit : null,
+            existingParsed, unit.isNotEmpty ? unit : null,
+          );
+          final (fmtAmt, fmtUnit) = combinedUnit != null && combinedUnit.isNotEmpty
+              ? formatScaledWithUnit(combinedAmt, combinedUnit)
+              : (formatAmount(combinedAmt), combinedUnit ?? '');
+          existing.amount = fmtAmt;
+          existing.unit = fmtUnit;
+        } else if (existingParsed != null && existingOldParsed == null) {
+          // Old had no amount, new does
+          existing.amount = amt;
+          existing.unit = unit;
+        }
+        // Otherwise keep existing amount
+
+        existing.sourceRecipes.add(ri.sourceRecipeName);
+      } else {
+        combined[key] = _CombinedIngredient(
+          name: ri.ingredient.name,
+          amount: amt,
+          unit: unit,
+          sourceRecipes: {ri.sourceRecipeName},
+        );
+      }
+    }
+
+    return combined.values.toList();
+  }
+
   Widget _buildFinalStep() {
     final theme = Theme.of(context);
     final allSelected = _getAllSelectedIngredients();
 
-    // Group by source recipe
-    final grouped = <String, List<ResolvedIngredient>>{};
+    // Combine ingredients across all recipes
+    final combinedItems = _combineIngredients(allSelected);
+
+    // Also keep grouped-by-recipe for the raw count
+    final recipeNames = <String>{};
     for (final item in allSelected) {
-      grouped.putIfAbsent(item.sourceRecipeName, () => []).add(item);
+      recipeNames.add(item.sourceRecipeName);
     }
 
     final canConfirm = allSelected.isNotEmpty &&
@@ -549,8 +608,8 @@ class _ShoppingListGeneratorScreenState
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      '${allSelected.length} items from '
-                          '${grouped.length} recipes',
+                      '${combinedItems.length} items from '
+                          '${recipeNames.length} recipes',
                       style: theme.textTheme.bodySmall
                           ?.copyWith(color: theme.colorScheme.outline),
                     ),
@@ -585,59 +644,49 @@ class _ShoppingListGeneratorScreenState
         const SizedBox(height: 8),
         Divider(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
 
-        // Combined ingredient list grouped by recipe
+        // Combined ingredient list
         Expanded(
           child: ListView(
             padding: const EdgeInsets.all(16),
-            children: grouped.entries.map((entry) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Recipe name header
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8, top: 12),
-                    child: Row(
-                      children: [
-                        Icon(Icons.restaurant_menu,
-                            size: 16, color: theme.colorScheme.primary),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            entry.key,
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          '${entry.value.length} items',
-                          style: theme.textTheme.labelSmall
-                              ?.copyWith(color: theme.colorScheme.outline),
-                        ),
-                      ],
+            children: [
+              // Section header
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: [
+                    Icon(Icons.merge_type, size: 16, color: theme.colorScheme.primary),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Combined Ingredients',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  ...entry.value.map((ri) {
-                    // Find which recipe this ingredient belongs to for userScale
-                    final recipeNode = _result.recipes.firstWhere(
-                          (r) => r.directIngredients.any((i) => i.ingredient.id == ri.ingredient.id),
-                      orElse: () => _result.recipes.first,
-                    );
-                    final userScale = _userScaleForRecipe(recipeNode.recipeId);
-                    final (amt, unit) = _scaleAmountWithUnit(
-                      ri.scaledAmount, ri.scaledUnit, userScale,
-                    );
-                    final amountStr =
-                    [amt, unit].where((s) => s.isNotEmpty).join(' ');
-                    final isColumnar = ref.watch(settingsProvider).ingredientLayout == IngredientLayout.columnar;
+                  ],
+                ),
+              ),
+              ...combinedItems.map((item) {
+                final amountStr = [item.amount, item.unit]
+                    .where((s) => s.isNotEmpty)
+                    .join(' ');
+                final isColumnar = ref.watch(settingsProvider).ingredientLayout == IngredientLayout.columnar;
+                final fromMultiple = item.sourceRecipes.length > 1;
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 3),
-                      child: Row(
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          Icon(Icons.check_circle_outline,
-                              size: 16, color: theme.colorScheme.primary),
+                          Icon(
+                            fromMultiple ? Icons.call_merge : Icons.check_circle_outline,
+                            size: 16,
+                            color: fromMultiple
+                                ? const Color(0xFFE8A860)
+                                : theme.colorScheme.primary,
+                          ),
                           const SizedBox(width: 10),
                           if (isColumnar) ...[
                             SizedBox(
@@ -651,7 +700,7 @@ class _ShoppingListGeneratorScreenState
                                   : null,
                             ),
                             Expanded(
-                              child: Text(ri.ingredient.name,
+                              child: Text(item.name,
                                   style: theme.textTheme.bodyMedium),
                             ),
                           ] else
@@ -661,18 +710,30 @@ class _ShoppingListGeneratorScreenState
                                   style: theme.textTheme.bodyMedium,
                                   children: [
                                     if (amountStr.isNotEmpty) TextSpan(text: '$amountStr ', style: const TextStyle(fontWeight: FontWeight.w600)),
-                                    TextSpan(text: ri.ingredient.name),
+                                    TextSpan(text: item.name),
                                   ],
                                 ),
                               ),
                             ),
                         ],
                       ),
-                    );
-                  }),
-                ],
-              );
-            }).toList(),
+                      if (fromMultiple)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 26, top: 2),
+                          child: Text(
+                            item.sourceRecipes.join(', '),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.outline,
+                              fontStyle: FontStyle.italic,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              }),
+            ],
           ),
         ),
 
@@ -689,7 +750,7 @@ class _ShoppingListGeneratorScreenState
                 : const Icon(Icons.add_shopping_cart),
             label: Text(_isAdding
                 ? 'Adding...'
-                : 'Add ${allSelected.length} items to list'),
+                : 'Add ${combinedItems.length} items to list'),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
@@ -1642,4 +1703,19 @@ class _RecipeThumbnail extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Helper class for combined ingredients across recipes.
+class _CombinedIngredient {
+  final String name;
+  String amount;
+  String unit;
+  final Set<String> sourceRecipes;
+
+  _CombinedIngredient({
+    required this.name,
+    required this.amount,
+    required this.unit,
+    required this.sourceRecipes,
+  });
 }

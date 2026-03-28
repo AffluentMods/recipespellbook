@@ -8,6 +8,7 @@ import 'package:flutter/material.dart' hide Step;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../router/router.dart' show rootNavigatorKey;
 import 'package:image_picker/image_picker.dart';
 import '../../../utils/platform_utils.dart';
 import 'package:drift/drift.dart' as drift;
@@ -1016,13 +1017,26 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       if (mounted) {
         // Capture router before popping so the View callback works
         final router = GoRouter.of(context);
+        final message = _isEditing ? l10n.recipeUpdated : l10n.successSaved;
+        final viewLabel = l10n.actionView;
+        final savedRecipeId = recipeId;
 
-        AppSnackbar.successWithAction(
-          context,
-          _isEditing ? l10n.recipeUpdated : l10n.successSaved,
-          actionLabel: l10n.actionView,
-          onAction: () => router.push('/recipe/$recipeId'),
-        );
+        // Pop first, then show snackbar on the underlying screen
+        context.pop(true);
+
+        // Use post-frame callback so the snackbar attaches to the
+        // screen revealed after the pop, not the now-disposed edit screen.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final ctx = rootNavigatorKey.currentContext;
+          if (ctx != null && ctx.mounted) {
+            AppSnackbar.successWithAction(
+              ctx,
+              message,
+              actionLabel: viewLabel,
+              onAction: () => router.go('/recipe/$savedRecipeId'),
+            );
+          }
+        });
 
         // TODO: Kitchen Buddy hidden for now
         // if (!_isEditing) {
@@ -1033,8 +1047,6 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         //     KitchenBuddyIntegration.onRecipeSaved(ref);
         //   }
         // }
-
-        context.pop(true);
       }
     } catch (e) {
       if (mounted) AppSnackbar.info(context, '${l10n.errorSavingRecipe}: $e');
@@ -2401,6 +2413,11 @@ class _RecipeLinkScreenState extends State<_RecipeLinkScreen> {
     super.initState();
     _linked = List.from(widget.currentlyLinked);
     _available = List.from(widget.available);
+    // Pre-fill search with the ingredient name to help find matching recipes
+    if (widget.currentlyLinked.isEmpty) {
+      _searchController.text = widget.ingredientName;
+      _search = widget.ingredientName;
+    }
   }
 
   @override

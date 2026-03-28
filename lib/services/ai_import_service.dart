@@ -32,7 +32,8 @@ class AiImportService {
   static const _uuid = Uuid();
 
   /// Validate raw JSON string. Returns error message or null if valid.
-  /// Accepts both a single recipe object and an array of recipe objects.
+  /// Accepts single recipe objects, arrays of recipe objects,
+  /// and v3 export format ({ "recipes": [...], "links": {...}, "version": "3.0" }).
   static String? validate(String jsonString) {
     try {
       final cleaned = _cleanJson(jsonString);
@@ -55,6 +56,22 @@ class AiImportService {
 
       if (decoded is! Map<String, dynamic>) {
         return 'Expected a JSON object with recipe data (or an array of recipes). Got ${decoded.runtimeType}.';
+      }
+
+      // Support v3 export format with "recipes" array and "links"
+      if (decoded.containsKey('recipes') && decoded['recipes'] is List) {
+        final recipes = decoded['recipes'] as List;
+        if (recipes.isEmpty) {
+          return 'Recipe array is empty — need at least one recipe.';
+        }
+        for (var r = 0; r < recipes.length; r++) {
+          if (recipes[r] is! Map<String, dynamic>) {
+            return 'Recipe #${r + 1} is not a valid JSON object.';
+          }
+          final err = _validateSingleRecipe(recipes[r] as Map<String, dynamic>, recipeIndex: r + 1);
+          if (err != null) return err;
+        }
+        return null;
       }
 
       return _validateSingleRecipe(decoded);
@@ -116,7 +133,8 @@ class AiImportService {
   }
 
   /// Parse and import recipe(s) from JSON string into the database.
-  /// Supports both single recipe objects and arrays of recipes.
+  /// Supports single recipe objects, arrays of recipes,
+  /// and v3 export format ({ "recipes": [...], "links": {...} }).
   /// Returns a list of created recipe IDs.
   static Future<List<String>> importAllFromJson(
       String jsonString,
@@ -127,17 +145,64 @@ class AiImportService {
     final decoded = jsonDecode(cleaned);
 
     final List<Map<String, dynamic>> recipeMaps;
+    Map<String, List<String>>? links;
+
     if (decoded is List) {
       recipeMaps = decoded.cast<Map<String, dynamic>>();
+    } else if (decoded is Map<String, dynamic> && decoded.containsKey('recipes') && decoded['recipes'] is List) {
+      // v3 export format with recipes array and links
+      recipeMaps = (decoded['recipes'] as List).cast<Map<String, dynamic>>();
+      if (decoded['links'] is Map) {
+        links = (decoded['links'] as Map<String, dynamic>).map(
+          (k, v) => MapEntry(k, (v as List).cast<String>()),
+        );
+      }
     } else {
       recipeMaps = [decoded as Map<String, dynamic>];
     }
 
+    // Import all recipes and track title -> id mapping
     final ids = <String>[];
+    final titleToId = <String, String>{};
     for (final data in recipeMaps) {
       final id = await _importSingleRecipe(data, db, cookbookId: cookbookId);
       ids.add(id);
+      titleToId[data['title'] as String] = id;
     }
+
+    // Restore ingredient links if present
+    if (links != null && links.isNotEmpty && ids.isNotEmpty) {
+      final mainRecipeId = ids.first;
+      final ingredients = await (db.select(db.ingredients)
+        ..where((t) => t.recipeId.equals(mainRecipeId)))
+          .get();
+
+      for (final entry in links.entries) {
+        final ingredientName = entry.key;
+        final linkedTitles = entry.value;
+
+        // Find the ingredient by name
+        final ing = ingredients.where(
+          (i) => i.name.toLowerCase() == ingredientName.toLowerCase(),
+        ).firstOrNull;
+        if (ing == null) continue;
+
+        for (final linkedTitle in linkedTitles) {
+          final linkedId = titleToId[linkedTitle];
+          if (linkedId == null) continue;
+
+          // Create the link
+          await db.into(db.recipeLinks).insertOnConflictUpdate(
+            RecipeLinksCompanion.insert(
+              sourceRecipeId: mainRecipeId,
+              ingredientId: ing.id,
+              linkedRecipeId: linkedId,
+            ),
+          );
+        }
+      }
+    }
+
     return ids;
   }
 
@@ -591,7 +656,7 @@ Rules:
 
   /// Generate the recipe prompt template for users to copy.
   static String generateRecipePrompt() {
-    return '''Convert the following recipe into this exact JSON format. Output ONLY the JSON object, no extra text or explanation.
+    return '''Convert the following recipe(s) into this exact JSON format. You may import one recipe or many recipes at once.
 
 {
   "title": "Recipe Name",
@@ -619,22 +684,31 @@ Rules:
   ],
   "steps": [
     {
-      "instruction": "Preheat the oven to 375\u00b0F (190\u00b0C).",
+      "instruction": "Preheat the oven to 375 degrees\u00b0F (190\u00b0C).",
       "durationMinutes": 5
     }
   ]
 }
 
+For a SINGLE recipe, output the JSON object above.
+For MULTIPLE recipes, wrap them in a JSON array:
+[
+  { "title": "Recipe 1", "description": "...", "servings": "4", ... },
+  { "title": "Recipe 2", "description": "...", "servings": "6", ... }
+]
+
 Rules:
+- You can import any number of recipes at once (1, 5, 20, etc.) — just wrap them in a JSON array
+- Each recipe in the array uses the exact same format shown above
 - "amount" is a string (supports fractions like "1/2", "1 1/2") or null
 - "unit" is a string (cups, tbsp, tsp, oz, lb, g, kg, ml, etc.) or null if not applicable (e.g. "3 eggs")
 - "notes" on ingredients is for prep details like "diced", "room temperature", "melted"
-- HEADERS: If the recipe has ingredient sections (e.g. "For the sauce", "For the dough"), add a header ingredient with "notes": "__header__" and "name" set to the section title. Set amount and unit to null for headers.
+- HEADERS: If a recipe has ingredient sections (e.g. "For the sauce", "For the dough"), add a header ingredient with "notes": "__header__" and "name" set to the section title. Set amount and unit to null for headers.
 - Only add headers if the recipe clearly has separate sections. Do NOT add headers if there is only one group of ingredients.
 - "durationMinutes" on steps is optional (null if not specified)
 - "course" must be one of: Appetizer, Beverage, Breakfast, Brunch, Dessert, Main Dish, Sauce, Side Dish, Snack
 - "category" must be one of: Bean, Beverage, Bread, Burrito/Taco, Casserole, Chicken/Steak/Meat, Dessert, Fish, Fruit, Muffin, Pasta, Rice, Salad, Sandwich, Sauce, Soup, Vegetable
-- Pick the single best-matching course and category for the recipe
+- Pick the single best-matching course and category for each recipe
 - Keep step instructions clear and concise
 - Output valid JSON only — no markdown, no backticks, no commentary
 ''';
