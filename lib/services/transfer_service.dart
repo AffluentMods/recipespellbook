@@ -1,9 +1,14 @@
 import 'dart:convert';
+import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart' hide Category;
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 import '../database/database.dart';
 import '../services/auth_service.dart';
 import '../services/sync_service.dart';
+import '../utils/platform_utils.dart';
 
 // ════════════════════════════════════════════════════════════════
 //  TRANSFER RESULT
@@ -195,8 +200,12 @@ class TransferService {
         ..where((rl) => rl.sourceRecipeId.equals(recipe.id)))
           .get();
 
+      // Encode cover image as base64 for transfer
+      final coverBase64 = await _encodeImage(recipe.imagePath);
+
       recipeMaps.add({
         ..._serializeRecipe(recipe),
+        'imageBase64': coverBase64,
         'ingredients': ingredients.map(_serializeIngredient).toList(),
         'steps': steps.map(_serializeStep).toList(),
         'recipeTags': recipeTags.map((rt) => {'tagId': rt.tagId}).toList(),
@@ -239,21 +248,33 @@ class TransferService {
   /// Upserts the transfer data into the local database.
   /// Uses the same logic as SyncService to handle conflicts.
   Future<int> _importData(Map<String, dynamic> data) async {
-    // Delegate to SyncService which already has all the upsert logic.
-    // We set the DB on SyncService and call its apply method indirectly
-    // by restructuring data in the same format the sync pull returns.
+    // Fix H: Validate bundle has required keys
+    final requiredKeys = ['cookbooks', 'recipes'];
+    for (final key in requiredKeys) {
+      if (!data.containsKey(key)) {
+        throw Exception('Invalid transfer bundle: missing "$key" key.');
+      }
+    }
+
     final syncService = SyncService.instance;
     if (syncService.isSyncing) {
       throw Exception('A sync is in progress — try again in a moment.');
     }
 
-    // SyncService._applyServerData is private, so we replicate the
-    // upsert calls here. This is intentional duplication to avoid
-    // exposing SyncService internals, and transfer is a one-time
-    // operation that doesn't need the delta-sync machinery.
-
     int count = 0;
     final db = _db!;
+    final uuid = const Uuid();
+
+    // Fix E: Collect existing recipe IDs for collision detection
+    final existingRecipeIds = (await db.select(db.recipes).get()).map((r) => r.id).toSet();
+
+    // Prepare images directory (native only)
+    Directory? imagesDir;
+    if (!isWeb) {
+      final appDir = await getApplicationDocumentsDirectory();
+      imagesDir = Directory(p.join(appDir.path, 'images', 'transferred'));
+      if (!await imagesDir.exists()) await imagesDir.create(recursive: true);
+    }
 
     // Parent entities first
     count += await _upsertList(db, db.cookbooks, data['cookbooks'], _toCookbookCompanion);
@@ -263,78 +284,118 @@ class TransferService {
     count += await _upsertList(db, db.tags, data['tags'], _toTagCompanion);
     count += await _upsertList(db, db.shoppingCategories, data['shoppingCategories'], _toShoppingCategoryCompanion);
 
+    // Fix E: Build recipe ID remap for collision avoidance
+    final recipeIdMap = <String, String>{};
+
     // Recipes with children
     if (data['recipes'] is List) {
       for (final item in data['recipes'] as List) {
         final d = item as Map<String, dynamic>;
-        final recipeId = d['id'] as String;
+        final originalRecipeId = d['id'] as String;
 
-        await db.into(db.recipes).insertOnConflictUpdate(
-          _toRecipeCompanion(d),
-        );
-
-        // Replace children
-        if (d['ingredients'] is List) {
-          await (db.delete(db.ingredients)..where((i) => i.recipeId.equals(recipeId))).go();
-          for (final ing in d['ingredients'] as List) {
-            final i = ing as Map<String, dynamic>;
-            await db.into(db.ingredients).insert(
-              IngredientsCompanion.insert(
-                id: i['id'] as String,
-                recipeId: recipeId,
-                sortOrder: i['sortOrder'] as int? ?? 0,
-                amount: Value(i['amount'] as String?),
-                unit: Value(i['unit'] as String?),
-                name: i['name'] as String,
-                notes: Value(i['notes'] as String?),
-              ),
-            );
-          }
+        // Fix E: Remap ID if it already exists locally
+        final String recipeId;
+        if (existingRecipeIds.contains(originalRecipeId)) {
+          recipeId = uuid.v4();
+          recipeIdMap[originalRecipeId] = recipeId;
+        } else {
+          recipeId = originalRecipeId;
+          recipeIdMap[originalRecipeId] = originalRecipeId;
         }
 
-        if (d['steps'] is List) {
-          await (db.delete(db.steps)..where((s) => s.recipeId.equals(recipeId))).go();
-          for (final step in d['steps'] as List) {
-            final s = step as Map<String, dynamic>;
-            await db.into(db.steps).insert(
-              StepsCompanion.insert(
-                id: s['id'] as String,
-                recipeId: recipeId,
-                sortOrder: s['sortOrder'] as int? ?? 0,
-                instruction: s['instruction'] as String,
-                durationMinutes: Value(s['durationMinutes'] as int?),
-                imagePath: Value(s['imagePath'] as String?),
-              ),
-            );
-          }
-        }
+        // Fix F: Wrap per-recipe upsert + children in a single transaction
+        await db.transaction(() async {
+          // Build recipe companion with (possibly remapped) ID
+          final remappedRecipe = Map<String, dynamic>.from(d);
+          remappedRecipe['id'] = recipeId;
 
-        if (d['recipeTags'] is List) {
-          await (db.delete(db.recipeTags)..where((rt) => rt.recipeId.equals(recipeId))).go();
-          for (final rt in d['recipeTags'] as List) {
-            final tagData = rt as Map<String, dynamic>;
-            await db.into(db.recipeTags).insert(
-              RecipeTagsCompanion.insert(
-                recipeId: recipeId,
-                tagId: tagData['tagId'] as String,
-              ),
-            );
-          }
-        }
+          await db.into(db.recipes).insertOnConflictUpdate(
+            _toRecipeCompanion(remappedRecipe),
+          );
 
-        if (d['sourceLinks'] is List) {
-          await (db.delete(db.recipeLinks)..where((rl) => rl.sourceRecipeId.equals(recipeId))).go();
-          for (final link in d['sourceLinks'] as List) {
-            final l = link as Map<String, dynamic>;
-            await db.into(db.recipeLinks).insert(
-              RecipeLinksCompanion.insert(
-                sourceRecipeId: recipeId,
-                ingredientId: l['ingredientId'] as String,
-                linkedRecipeId: l['linkedRecipeId'] as String,
-                scale: Value((l['scale'] as num?)?.toDouble() ?? 1.0),
-                sortOrder: Value(l['sortOrder'] as int? ?? 0),
-              ),
-            );
+          // Replace children
+          if (d['ingredients'] is List) {
+            await (db.delete(db.ingredients)..where((i) => i.recipeId.equals(recipeId))).go();
+            for (final ing in d['ingredients'] as List) {
+              final i = ing as Map<String, dynamic>;
+              // Remap ingredient recipeId FK
+              final newIngId = recipeId == originalRecipeId
+                  ? i['id'] as String
+                  : '${recipeId}_${i['id']}';
+              await db.into(db.ingredients).insert(
+                IngredientsCompanion.insert(
+                  id: newIngId,
+                  recipeId: recipeId,
+                  sortOrder: i['sortOrder'] as int? ?? 0,
+                  amount: Value(i['amount'] as String?),
+                  unit: Value(i['unit'] as String?),
+                  name: i['name'] as String,
+                  notes: Value(i['notes'] as String?),
+                ),
+              );
+            }
+          }
+
+          if (d['steps'] is List) {
+            await (db.delete(db.steps)..where((s) => s.recipeId.equals(recipeId))).go();
+            for (final step in d['steps'] as List) {
+              final s = step as Map<String, dynamic>;
+              final newStepId = recipeId == originalRecipeId
+                  ? s['id'] as String
+                  : '${recipeId}_${s['id']}';
+              await db.into(db.steps).insert(
+                StepsCompanion.insert(
+                  id: newStepId,
+                  recipeId: recipeId,
+                  sortOrder: s['sortOrder'] as int? ?? 0,
+                  instruction: s['instruction'] as String,
+                  durationMinutes: Value(s['durationMinutes'] as int?),
+                ),
+              );
+            }
+          }
+
+          if (d['recipeTags'] is List) {
+            await (db.delete(db.recipeTags)..where((rt) => rt.recipeId.equals(recipeId))).go();
+            for (final rt in d['recipeTags'] as List) {
+              final tagData = rt as Map<String, dynamic>;
+              await db.into(db.recipeTags).insert(
+                RecipeTagsCompanion.insert(
+                  recipeId: recipeId,
+                  tagId: tagData['tagId'] as String,
+                ),
+              );
+            }
+          }
+
+          if (d['sourceLinks'] is List) {
+            await (db.delete(db.recipeLinks)..where((rl) => rl.sourceRecipeId.equals(recipeId))).go();
+            for (final link in d['sourceLinks'] as List) {
+              final l = link as Map<String, dynamic>;
+              await db.into(db.recipeLinks).insert(
+                RecipeLinksCompanion.insert(
+                  sourceRecipeId: recipeId,
+                  ingredientId: l['ingredientId'] as String,
+                  linkedRecipeId: recipeIdMap[l['linkedRecipeId'] as String] ?? l['linkedRecipeId'] as String,
+                  scale: Value((l['scale'] as num?)?.toDouble() ?? 1.0),
+                  sortOrder: Value(l['sortOrder'] as int? ?? 0),
+                ),
+              );
+            }
+          }
+        });
+
+        // Fix D: Decode cover image from base64 and save to disk
+        final imageBase64 = d['imageBase64'] as String?;
+        if (imageBase64 != null && imageBase64.isNotEmpty && imagesDir != null) {
+          try {
+            final imageBytes = base64Decode(imageBase64);
+            final imageFile = File(p.join(imagesDir.path, '$recipeId.jpg'));
+            await imageFile.writeAsBytes(imageBytes);
+            await (db.update(db.recipes)..where((t) => t.id.equals(recipeId)))
+                .write(RecipesCompanion(imagePath: Value(imageFile.path)));
+          } catch (e) {
+            debugPrint('[Transfer] Failed to decode/save cover image: $e');
           }
         }
 
@@ -370,70 +431,84 @@ class TransferService {
   //  COMPANION BUILDERS (JSON → Drift Companion)
   // ════════════════════════════════════════════════════════════════
 
-  CookbooksCompanion _toCookbookCompanion(Map<String, dynamic> d) =>
-      CookbooksCompanion(
+  CookbooksCompanion _toCookbookCompanion(Map<String, dynamic> d) {
+      final createdAt = _parseDate(d['createdAt']);
+      return CookbooksCompanion(
         id: Value(d['id'] as String),
         name: Value(d['name'] as String),
         description: Value(d['description'] as String?),
         imagePath: Value(d['imagePath'] as String?),
-        createdAt: Value(_parseDate(d['createdAt'])),
+        createdAt: createdAt != null ? Value(createdAt) : const Value.absent(),
         updatedAt: Value(_parseDateNullable(d['updatedAt'])),
       );
+  }
 
-  CategoriesCompanion _toCategoryCompanion(Map<String, dynamic> d) =>
-      CategoriesCompanion(
+  CategoriesCompanion _toCategoryCompanion(Map<String, dynamic> d) {
+      final createdAt = _parseDate(d['createdAt']);
+      return CategoriesCompanion(
         id: Value(d['id'] as String),
         name: Value(d['name'] as String),
         sortOrder: Value(d['sortOrder'] as int? ?? 0),
         isDefault: Value(d['isDefault'] as bool? ?? false),
         isHidden: Value(d['isHidden'] as bool? ?? false),
-        createdAt: Value(_parseDate(d['createdAt'])),
+        createdAt: createdAt != null ? Value(createdAt) : const Value.absent(),
       );
+  }
 
-  CustomCategoriesCompanion _toCustomCategoryCompanion(Map<String, dynamic> d) =>
-      CustomCategoriesCompanion(
+  CustomCategoriesCompanion _toCustomCategoryCompanion(Map<String, dynamic> d) {
+      final createdAt = _parseDate(d['createdAt']);
+      return CustomCategoriesCompanion(
         id: Value(d['id'] as String),
         cookbookId: Value(d['cookbookId'] as String),
         name: Value(d['name'] as String),
         emoji: Value(d['emoji'] as String? ?? '🏷️'),
         sortOrder: Value(d['sortOrder'] as int? ?? 0),
-        createdAt: Value(_parseDate(d['createdAt'])),
+        createdAt: createdAt != null ? Value(createdAt) : const Value.absent(),
       );
+  }
 
-  CustomCoursesCompanion _toCustomCourseCompanion(Map<String, dynamic> d) =>
-      CustomCoursesCompanion(
+  CustomCoursesCompanion _toCustomCourseCompanion(Map<String, dynamic> d) {
+      final createdAt = _parseDate(d['createdAt']);
+      return CustomCoursesCompanion(
         id: Value(d['id'] as String),
         cookbookId: Value(d['cookbookId'] as String),
         name: Value(d['name'] as String),
         emoji: Value(d['emoji'] as String? ?? '🍽️'),
         sortOrder: Value(d['sortOrder'] as int? ?? 0),
-        createdAt: Value(_parseDate(d['createdAt'])),
+        createdAt: createdAt != null ? Value(createdAt) : const Value.absent(),
       );
+  }
 
-  TagsCompanion _toTagCompanion(Map<String, dynamic> d) =>
-      TagsCompanion(
+  TagsCompanion _toTagCompanion(Map<String, dynamic> d) {
+      final createdAt = _parseDate(d['createdAt']);
+      return TagsCompanion(
         id: Value(d['id'] as String),
         name: Value(d['name'] as String),
         color: Value(d['color'] as String?),
         icon: Value(d['icon'] as String?),
         sortOrder: Value(d['sortOrder'] as int? ?? 0),
         isBuiltIn: Value(d['isBuiltIn'] as bool? ?? false),
-        createdAt: Value(_parseDate(d['createdAt'])),
+        createdAt: createdAt != null ? Value(createdAt) : const Value.absent(),
       );
+  }
 
-  ShoppingCategoriesCompanion _toShoppingCategoryCompanion(Map<String, dynamic> d) =>
-      ShoppingCategoriesCompanion(
+  ShoppingCategoriesCompanion _toShoppingCategoryCompanion(Map<String, dynamic> d) {
+      final createdAt = _parseDate(d['createdAt']);
+      return ShoppingCategoriesCompanion(
         id: Value(d['id'] as String),
         name: Value(d['name'] as String),
         iconName: Value(d['iconName'] as String?),
         sortOrder: Value(d['sortOrder'] as int? ?? 0),
         isDefault: Value(d['isDefault'] as bool? ?? false),
         isHidden: Value(d['isHidden'] as bool? ?? false),
-        createdAt: Value(_parseDate(d['createdAt'])),
+        createdAt: createdAt != null ? Value(createdAt) : const Value.absent(),
       );
+  }
 
-  RecipesCompanion _toRecipeCompanion(Map<String, dynamic> d) =>
-      RecipesCompanion(
+  RecipesCompanion _toRecipeCompanion(Map<String, dynamic> d) {
+      final createdAt = _parseDate(d['createdAt']);
+      final updatedAt = _parseDate(d['updatedAt']);
+      return RecipesCompanion(
         id: Value(d['id'] as String),
         cookbookId: Value(d['cookbookId'] as String),
         title: Value(d['title'] as String),
@@ -452,14 +527,18 @@ class TransferService {
         isPinned: Value(d['isPinned'] as bool? ?? false),
         deletedAt: Value(_parseDateNullable(d['deletedAt'])),
         lastViewedAt: Value(_parseDateNullable(d['lastViewedAt'])),
-        createdAt: Value(_parseDate(d['createdAt'])),
-        updatedAt: Value(_parseDate(d['updatedAt'])),
+        createdAt: createdAt != null ? Value(createdAt) : const Value.absent(),
+        updatedAt: updatedAt != null ? Value(updatedAt) : const Value.absent(),
       );
+  }
 
-  MealPlansCompanion _toMealPlanCompanion(Map<String, dynamic> d) =>
-      MealPlansCompanion(
+  MealPlansCompanion _toMealPlanCompanion(Map<String, dynamic> d) {
+      final date = _parseDate(d['date']);
+      final createdAt = _parseDate(d['createdAt']);
+      final updatedAt = _parseDate(d['updatedAt']);
+      return MealPlansCompanion(
         id: Value(d['id'] as String),
-        date: Value(_parseDate(d['date'])),
+        date: date != null ? Value(date) : const Value.absent(),
         time: Value(_parseDateNullable(d['time'])),
         name: Value(d['name'] as String?),
         mealType: Value(d['mealType'] as String? ?? 'Dinner'),
@@ -468,22 +547,28 @@ class TransferService {
         notes: Value(d['notes'] as String?),
         alertEnabled: Value(d['alertEnabled'] as bool? ?? false),
         alertSent: Value(d['alertSent'] as bool? ?? false),
-        createdAt: Value(_parseDate(d['createdAt'])),
-        updatedAt: Value(_parseDate(d['updatedAt'])),
+        createdAt: createdAt != null ? Value(createdAt) : const Value.absent(),
+        updatedAt: updatedAt != null ? Value(updatedAt) : const Value.absent(),
       );
+  }
 
-  ShoppingListsCompanion _toShoppingListCompanion(Map<String, dynamic> d) =>
-      ShoppingListsCompanion(
+  ShoppingListsCompanion _toShoppingListCompanion(Map<String, dynamic> d) {
+      final createdAt = _parseDate(d['createdAt']);
+      final updatedAt = _parseDate(d['updatedAt']);
+      return ShoppingListsCompanion(
         id: Value(d['id'] as String),
         name: Value(d['name'] as String),
         color: Value(d['color'] as String?),
         isDefault: Value(d['isDefault'] as bool? ?? false),
-        createdAt: Value(_parseDate(d['createdAt'])),
-        updatedAt: Value(_parseDate(d['updatedAt'])),
+        createdAt: createdAt != null ? Value(createdAt) : const Value.absent(),
+        updatedAt: updatedAt != null ? Value(updatedAt) : const Value.absent(),
       );
+  }
 
-  ShoppingListItemsCompanion _toShoppingListItemCompanion(Map<String, dynamic> d) =>
-      ShoppingListItemsCompanion(
+  ShoppingListItemsCompanion _toShoppingListItemCompanion(Map<String, dynamic> d) {
+      final createdAt = _parseDate(d['createdAt']);
+      final updatedAt = _parseDate(d['updatedAt']);
+      return ShoppingListItemsCompanion(
         id: Value(d['id'] as String),
         listId: Value(d['listId'] as String),
         name: Value(d['name'] as String),
@@ -496,9 +581,10 @@ class TransferService {
         note: Value(d['note'] as String?),
         sortOrder: Value(d['sortOrder'] as int? ?? 0),
         recipeId: Value(d['recipeId'] as String?),
-        createdAt: Value(_parseDate(d['createdAt'])),
-        updatedAt: Value(_parseDate(d['updatedAt'])),
+        createdAt: createdAt != null ? Value(createdAt) : const Value.absent(),
+        updatedAt: updatedAt != null ? Value(updatedAt) : const Value.absent(),
       );
+  }
 
   // ════════════════════════════════════════════════════════════════
   //  SERIALIZATION (Drift → JSON) — mirrors SyncService
@@ -600,11 +686,28 @@ class TransferService {
   //  UTILITIES
   // ════════════════════════════════════════════════════════════════
 
-  DateTime _parseDate(dynamic value) {
-    if (value == null) return DateTime.now();
-    if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+  /// Encodes an image file to base64 for transfer.
+  /// Returns null if the file doesn't exist or exceeds 5 MB.
+  Future<String?> _encodeImage(String? imagePath) async {
+    if (imagePath == null || imagePath.isEmpty || isWeb) return null;
+    try {
+      final file = File(imagePath);
+      if (!await file.exists()) return null;
+      final bytes = await file.readAsBytes();
+      if (bytes.length > 5 * 1024 * 1024) return null;
+      return base64Encode(bytes);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Parses a date from various formats. Returns null when parsing fails
+  /// so the caller / Drift default can handle missing dates appropriately.
+  DateTime? _parseDate(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return DateTime.tryParse(value);
     if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
-    return DateTime.now();
+    return null;
   }
 
   DateTime? _parseDateNullable(dynamic value) {

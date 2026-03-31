@@ -656,7 +656,7 @@ Rules:
 
   /// Generate the recipe prompt template for users to copy.
   static String generateRecipePrompt() {
-    return '''Convert the following recipe(s) into this exact JSON format. You may import one recipe or many recipes at once.
+    return '''Convert the following recipe(s) into this exact JSON format. You may import one recipe or many recipes at once. This works with any format — text, spreadsheets, screenshots, emails, websites, or anything else.
 
 {
   "title": "Recipe Name",
@@ -666,6 +666,8 @@ Rules:
   "cookTimeMinutes": 30,
   "course": "Main Dish",
   "category": "Pasta",
+  "cuisine": "Italian",
+  "tags": ["quick", "weeknight", "comfort food"],
   "sourceUrl": "",
   "notes": "",
   "ingredients": [
@@ -693,12 +695,12 @@ Rules:
 For a SINGLE recipe, output the JSON object above.
 For MULTIPLE recipes, wrap them in a JSON array:
 [
-  { "title": "Recipe 1", "description": "...", "servings": "4", ... },
-  { "title": "Recipe 2", "description": "...", "servings": "6", ... }
+  { "title": "Recipe 1", ... },
+  { "title": "Recipe 2", ... }
 ]
 
 Rules:
-- You can import any number of recipes at once (1, 5, 20, etc.) — just wrap them in a JSON array
+- You can import any number of recipes at once (1, 5, 20, 100+) — just wrap them in a JSON array
 - Each recipe in the array uses the exact same format shown above
 - "amount" is a string (supports fractions like "1/2", "1 1/2") or null
 - "unit" is a string (cups, tbsp, tsp, oz, lb, g, kg, ml, etc.) or null if not applicable (e.g. "3 eggs")
@@ -708,6 +710,8 @@ Rules:
 - "durationMinutes" on steps is optional (null if not specified)
 - "course" must be one of: Appetizer, Beverage, Breakfast, Brunch, Dessert, Main Dish, Sauce, Side Dish, Snack
 - "category" must be one of: Bean, Beverage, Bread, Burrito/Taco, Casserole, Chicken/Steak/Meat, Dessert, Fish, Fruit, Muffin, Pasta, Rice, Salad, Sandwich, Sauce, Soup, Vegetable
+- "cuisine" is a free-text string like "Italian", "Mexican", "Japanese", "American", etc.
+- "tags" is an array of short descriptive tags like "quick", "weeknight", "comfort food", "spicy", "gluten-free"
 - Pick the single best-matching course and category for each recipe
 - Keep step instructions clear and concise
 - Output valid JSON only — no markdown, no backticks, no commentary

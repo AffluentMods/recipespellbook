@@ -152,6 +152,16 @@ class ExportImportService {
         ..where((t) => t.recipeId.equals(recipe.id)))
           .get();
 
+      // Encode step images
+      final stepMaps = <Map<String, dynamic>>[];
+      for (final s in steps) {
+        stepMaps.add({
+          'id': s.id, 'sortOrder': s.sortOrder,
+          'instruction': s.instruction, 'durationMinutes': s.durationMinutes,
+          'imageBase64': await _encodeImage(s.imagePath),
+        });
+      }
+
       recipesData.add({
         'id': recipe.id,
         'title': recipe.title,
@@ -173,10 +183,7 @@ class ExportImportService {
           'id': i.id, 'sortOrder': i.sortOrder, 'amount': i.amount,
           'unit': i.unit, 'name': i.name, 'notes': i.notes,
         }).toList(),
-        'steps': steps.map((s) => {
-          'id': s.id, 'sortOrder': s.sortOrder,
-          'instruction': s.instruction, 'durationMinutes': s.durationMinutes,
-        }).toList(),
+        'steps': stepMaps,
         'recipeLinks': links.map((l) => {
           'ingredientId': l.ingredientId, 'linkedRecipeId': l.linkedRecipeId,
           'scale': l.scale, 'sortOrder': l.sortOrder,
@@ -618,6 +625,7 @@ class ExportImportService {
       final newRecipeId = recipeIdMap[originalId];
       if (newRecipeId == null) continue;
 
+      // Decode cover image
       final imageBase64 = recipe['imageBase64'] as String?;
       if (imageBase64 != null && imageBase64.isNotEmpty && imagesDir != null) {
         try {
@@ -629,6 +637,27 @@ class ExportImportService {
               .write(RecipesCompanion(imagePath: Value(imageFile.path)));
         } catch (e) {
           debugPrint('[Import] Failed to decode/save recipe image: $e');
+        }
+      }
+
+      // Decode step images
+      if (imagesDir != null) {
+        final steps = recipe['steps'] as List? ?? [];
+        for (var i = 0; i < steps.length; i++) {
+          final step = steps[i] as Map<String, dynamic>;
+          final stepImageBase64 = step['imageBase64'] as String?;
+          if (stepImageBase64 != null && stepImageBase64.isNotEmpty) {
+            try {
+              final imageBytes = base64Decode(stepImageBase64);
+              final stepImageFile = File(p.join(imagesDir.path, '${newRecipeId}_step_$i.jpg'));
+              await stepImageFile.writeAsBytes(imageBytes);
+              final stepId = '${newRecipeId}_step_${step['sortOrder'] ?? step['id']}';
+              await (db.update(db.steps)..where((t) => t.id.equals(stepId)))
+                  .write(StepsCompanion(imagePath: Value(stepImageFile.path)));
+            } catch (e) {
+              debugPrint('[Import] Failed to decode/save step image: $e');
+            }
+          }
         }
       }
     }
@@ -823,14 +852,14 @@ class ExportImportService {
   //  IMAGE ENCODING
   // ──────────────────────────────────────────
 
+  /// Encodes an image file to base64.
+  /// Returns null if the file doesn't exist.
   Future<String?> _encodeImage(String? imagePath) async {
     if (imagePath == null || imagePath.isEmpty) return null;
     try {
       final file = File(imagePath);
       if (!await file.exists()) return null;
-      final bytes = await file.readAsBytes();
-      if (bytes.length > 2 * 1024 * 1024) return null;
-      return base64Encode(bytes);
+      return base64Encode(await file.readAsBytes());
     } catch (_) {
       return null;
     }

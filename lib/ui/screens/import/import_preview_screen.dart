@@ -117,6 +117,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
 
     final db = ref.read(databaseProvider);
     final errors = <String>[];
+    final imageFailures = <String>[];
 
     // Phase 1: Download all images in parallel (max 5 concurrent)
     final imageResults = <int, String?>{};
@@ -145,6 +146,10 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
       final results = await Future.wait(futures);
       for (final entry in results) {
         imageResults[entry.key] = entry.value;
+        // Track failed image downloads for recipes that had an image source
+        if (entry.value == null) {
+          imageFailures.add(selectedRecipes[entry.key].title);
+        }
       }
       if (mounted) {
         final done = batch + batchIndices.length;
@@ -213,7 +218,8 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
         _importedCount++;
         _lastImportedRecipeId = recipeId;
       } catch (e) {
-        errors.add('${recipe.title}: $e');
+        final message = _sanitizeError(e);
+        errors.add('${recipe.title}: $message');
         debugPrint('[Import] Failed to import "${recipe.title}": $e');
       }
 
@@ -228,23 +234,26 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     if (mounted) {
       final router = GoRouter.of(context);
       final lastId = _lastImportedRecipeId;
+      final imgFailSuffix = imageFailures.isNotEmpty
+          ? ' (${imageFailures.length} image${imageFailures.length == 1 ? '' : 's'} failed to download)'
+          : '';
 
       if (errors.isNotEmpty) {
         AppSnackbar.errorWithAction(
           context,
-          '$_importedCount imported, ${errors.length} failed',
+          '$_importedCount imported, ${errors.length} failed$imgFailSuffix',
           actionLabel: 'Details',
           onAction: () => _showErrorDetails(errors),
         );
       } else if (_importedCount == 1 && lastId != null) {
         AppSnackbar.successWithAction(
           context,
-          '${_importedCount} recipe imported',
+          '${_importedCount} recipe imported$imgFailSuffix',
           actionLabel: l10n.actionView,
           onAction: () => router.push('/recipe/$lastId'),
         );
       } else {
-        AppSnackbar.success(context, '$_importedCount recipes imported');
+        AppSnackbar.success(context, '$_importedCount recipes imported$imgFailSuffix');
       }
 
       Navigator.of(context).pop();
@@ -331,6 +340,30 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     if (lower.endsWith('.webp')) return '.webp';
     if (lower.endsWith('.gif')) return '.gif';
     return '.jpg';
+  }
+
+  /// Extracts a user-friendly message from a raw exception.
+  static String _sanitizeError(Object e) {
+    var msg = e.toString();
+    // Strip Dart exception class prefixes
+    for (final prefix in [
+      'SqliteException',
+      'DriftRemoteException',
+      'FormatException',
+      'Exception: ',
+      'StateError: ',
+    ]) {
+      final idx = msg.indexOf(prefix);
+      if (idx >= 0) {
+        msg = msg.substring(idx);
+        break;
+      }
+    }
+    // Truncate overly long messages
+    if (msg.length > 120) {
+      msg = '${msg.substring(0, 117)}...';
+    }
+    return msg;
   }
 
   void _showErrorDetails(List<String> errors) {
@@ -785,6 +818,37 @@ class _ExpandedContent extends StatelessWidget {
           Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
           const SizedBox(height: 8),
 
+          // Course / Category / Cuisine chips
+          if (recipe.suggestedCourse != null ||
+              recipe.suggestedCategory != null ||
+              recipe.cuisine != null) ...[
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                if (recipe.suggestedCourse != null)
+                  _CategoryChip(
+                    icon: Icons.restaurant_menu,
+                    label: recipe.suggestedCourse!,
+                    theme: theme,
+                  ),
+                if (recipe.suggestedCategory != null)
+                  _CategoryChip(
+                    icon: Icons.category,
+                    label: recipe.suggestedCategory!,
+                    theme: theme,
+                  ),
+                if (recipe.cuisine != null)
+                  _CategoryChip(
+                    icon: Icons.public,
+                    label: recipe.cuisine!,
+                    theme: theme,
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
+
           // Description
           if (recipe.description != null && recipe.description!.isNotEmpty) ...[
             Text(
@@ -976,6 +1040,42 @@ class _MetaChip extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Category Chip (icon + label with background)
+// ═══════════════════════════════════════════════════════════════════
+
+class _CategoryChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final ThemeData theme;
+
+  const _CategoryChip({required this.icon, required this.label, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: theme.colorScheme.primary),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

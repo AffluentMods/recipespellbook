@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -105,6 +106,10 @@ class _ImportGuidesScreenState extends State<ImportGuidesScreen> {
 
                 // ── Quick tip ──
                 _QuickTipCard(theme: theme),
+                const SizedBox(height: 12),
+
+                // ── Transfer / Backup ──
+                _TransferCard(theme: theme),
                 const SizedBox(height: 24),
 
                 // ── Guide categories ──
@@ -1417,6 +1422,72 @@ class _QuickTipCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TRANSFER / BACKUP CARD
+// ═══════════════════════════════════════════════════════════════════
+
+class _TransferCard extends StatelessWidget {
+  final ThemeData theme;
+  const _TransferCard({required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.35),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: () => context.push('/transfer'),
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.15),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.sync_alt, size: 20, color: theme.colorScheme.primary),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Transfer / Backup',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Move recipes between devices or create a backup',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: theme.colorScheme.outline, size: 20),
+            ],
+          ),
+        ),
       ),
     );
   }

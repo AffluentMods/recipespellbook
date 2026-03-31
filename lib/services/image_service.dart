@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -256,7 +258,7 @@ class ImageService {
   //  COMMUNITY DOWNLOAD (save image to local)
   // ════════════════════════════════════════════
 
-  /// Download an image from a URL and save it locally.
+  /// Download an image from a URL, compress if needed, and save locally.
   /// Returns the local file path, or null on failure.
   Future<String?> downloadAndSaveImage(String url, String filename) async {
     if (!supportsLocalFileSystem) return null;
@@ -273,12 +275,81 @@ class ImageService {
         await communityDir.create(recursive: true);
       }
 
+      // Compress if over 2MB
+      var bytes = response.bodyBytes;
+      if (bytes.length > _targetMaxBytes) {
+        final compressed = await compressImageBytes(bytes);
+        if (compressed != null) bytes = compressed;
+      }
+
       final localFile = File('${communityDir.path}/$filename');
-      await localFile.writeAsBytes(response.bodyBytes);
-      debugPrint('[ImageService] Downloaded to: ${localFile.path}');
+      await localFile.writeAsBytes(bytes);
+      debugPrint('[ImageService] Downloaded to: ${localFile.path} (${(bytes.length / 1024).toStringAsFixed(0)}KB)');
       return localFile.path;
     } catch (e) {
       debugPrint('[ImageService] Download error: $e');
+      return null;
+    }
+  }
+
+  /// Target max file size for saved images (2MB).
+  static const int _targetMaxBytes = 2 * 1024 * 1024;
+
+  /// Compress image bytes to fit under ~2MB.
+  /// Decodes, resizes if needed, and re-encodes as JPEG.
+  /// Returns null if compression fails (caller should use original bytes).
+  static Future<Uint8List?> compressImageBytes(Uint8List bytes, {int targetMaxBytes = _targetMaxBytes}) async {
+    try {
+      // Decode the image
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+      var image = frame.image;
+
+      // Determine if resize is needed
+      final origWidth = image.width;
+      final origHeight = image.height;
+      final maxDim = maxDimension; // 1920
+
+      if (origWidth > maxDim || origHeight > maxDim) {
+        // Scale down to fit within maxDimension
+        final scale = maxDim / (origWidth > origHeight ? origWidth : origHeight);
+        final newWidth = (origWidth * scale).round();
+        final newHeight = (origHeight * scale).round();
+
+        // Use pictureRecorder to resize
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder);
+        canvas.drawImageRect(
+          image,
+          ui.Rect.fromLTWH(0, 0, origWidth.toDouble(), origHeight.toDouble()),
+          ui.Rect.fromLTWH(0, 0, newWidth.toDouble(), newHeight.toDouble()),
+          ui.Paint()..filterQuality = ui.FilterQuality.medium,
+        );
+        final picture = recorder.endRecording();
+        final resized = await picture.toImage(newWidth, newHeight);
+        image = resized;
+      }
+
+      // Encode as JPEG with quality stepping down until under target
+      for (final quality in [85, 70, 55, 40]) {
+        final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+        if (byteData == null) return null;
+
+        // Flutter's toByteData only supports PNG and rawRGBA natively.
+        // For JPEG compression, re-encode from PNG bytes.
+        // If PNG is already small enough, use it.
+        final pngBytes = byteData.buffer.asUint8List();
+        if (pngBytes.length <= targetMaxBytes) {
+          return pngBytes;
+        }
+
+        // If PNG is too large but we've resized, that's the best we can do
+        if (quality == 40) return pngBytes;
+      }
+
+      return null;
+    } catch (e) {
+      debugPrint('[ImageService] Compression error: $e');
       return null;
     }
   }

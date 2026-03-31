@@ -93,11 +93,8 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
     final recipes = _parsePreview(jsonString);
     if (recipes == null || recipes.isEmpty) return;
 
-    final data = recipes.first;
     final recipeCount = recipes.length;
     final theme = Theme.of(context);
-    final ingredients = (data['ingredients'] as List?) ?? [];
-    final steps = (data['steps'] as List?) ?? [];
 
     Responsive.showAdaptiveSheet(
       context,
@@ -134,219 +131,41 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
                         color: theme.colorScheme.primary),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            data['title'] ?? 'Untitled Recipe',
-                            style: theme.textTheme.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          if (recipeCount > 1)
-                            Text(
-                              '+ ${recipeCount - 1} more recipe${recipeCount > 2 ? 's' : ''}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          if (data['description'] != null)
-                            Text(
-                              data['description'],
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.outline),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                        ],
+                      child: Text(
+                        '$recipeCount ${recipeCount == 1 ? 'Recipe' : 'Recipes'} Found',
+                        style: theme.textTheme.titleLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
                 ),
               ),
 
-              // Meta chips
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  children: [
-                    if (data['servings'] != null)
-                      _MetaChip(
-                          icon: Icons.people,
-                          label: '${data['servings']} servings'),
-                    if (data['prepTimeMinutes'] != null)
-                      _MetaChip(
-                          icon: Icons.timer_outlined,
-                          label: '${data['prepTimeMinutes']}m prep'),
-                    if (data['cookTimeMinutes'] != null)
-                      _MetaChip(
-                          icon: Icons.local_fire_department,
-                          label: '${data['cookTimeMinutes']}m cook'),
-                    if (data['course'] != null)
-                      _MetaChip(
-                          icon: Icons.restaurant_menu,
-                          label: data['course']),
-                    if (data['category'] != null)
-                      _MetaChip(
-                          icon: Icons.category, label: data['category']),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 8),
               Divider(
                   color:
                       theme.colorScheme.outline.withValues(alpha: 0.1)),
 
-              // Scrollable content
+              // Scrollable recipe list
               Expanded(
-                child: ListView(
+                child: ListView.builder(
                   controller: scrollController,
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    // Ingredients
-                    Text(
-                      'Ingredients (${ingredients.where((i) => (i['notes'] ?? '') != '__header__').length})',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ...ingredients.map((ing) {
-                      final name = ing['name'] ?? '';
-                      final notes = ing['notes'] ?? '';
-                      final isHeader = notes == '__header__';
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  itemCount: recipes.length,
+                  itemBuilder: (ctx, index) {
+                    final data = recipes[index];
+                    final ingredients = (data['ingredients'] as List?) ?? [];
+                    final steps = (data['steps'] as List?) ?? [];
+                    final ingCount = ingredients
+                        .where((i) => (i['notes'] ?? '') != '__header__')
+                        .length;
 
-                      if (isHeader) {
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 12, bottom: 4),
-                          child: Text(
-                            name,
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                          ),
-                        );
-                      }
-
-                      final amount = ing['amount'] ?? '';
-                      final unit = ing['unit'] ?? '';
-                      final amountStr = [amount, unit]
-                          .where((s) => s.toString().isNotEmpty)
-                          .join(' ');
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 3),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(Icons.check_circle_outline,
-                                size: 16,
-                                color: theme.colorScheme.primary),
-                            const SizedBox(width: 8),
-                            SizedBox(
-                              width: 72,
-                              child: amountStr.isNotEmpty
-                                  ? Text(amountStr,
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                              fontWeight: FontWeight.w600))
-                                  : null,
-                            ),
-                            Expanded(
-                              child: Text.rich(
-                                TextSpan(
-                                  text: name,
-                                  children: [
-                                    if (notes.toString().isNotEmpty)
-                                      TextSpan(
-                                        text: ', $notes',
-                                        style: TextStyle(
-                                          fontStyle: FontStyle.italic,
-                                          color: theme.colorScheme.outline,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                                style: theme.textTheme.bodyMedium,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-
-                    const SizedBox(height: 16),
-
-                    // Steps
-                    Text(
-                      'Steps (${steps.length})',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ...steps.asMap().entries.map((entry) {
-                      final i = entry.key;
-                      final step = entry.value;
-                      final dur = step['durationMinutes'];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primaryContainer,
-                                shape: BoxShape.circle,
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                '${i + 1}',
-                                style:
-                                    theme.textTheme.labelSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme
-                                      .colorScheme.onPrimaryContainer,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    step['instruction'] ?? '',
-                                    style: theme.textTheme.bodyMedium,
-                                  ),
-                                  if (dur != null)
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.only(top: 2),
-                                      child: Text(
-                                        '${dur}m',
-                                        style: theme.textTheme.bodySmall
-                                            ?.copyWith(
-                                          color:
-                                              theme.colorScheme.outline,
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-                  ],
+                    return _AiRecipePreviewCard(
+                      data: data,
+                      ingredientCount: ingCount,
+                      stepCount: steps.length,
+                      theme: theme,
+                    );
+                  },
                 ),
               ),
 
@@ -773,6 +592,235 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
 }
 
 // ── Helper widgets ──
+
+/// Expandable card for each recipe in the AI import preview sheet.
+class _AiRecipePreviewCard extends StatefulWidget {
+  final Map<String, dynamic> data;
+  final int ingredientCount;
+  final int stepCount;
+  final ThemeData theme;
+
+  const _AiRecipePreviewCard({
+    required this.data,
+    required this.ingredientCount,
+    required this.stepCount,
+    required this.theme,
+  });
+
+  @override
+  State<_AiRecipePreviewCard> createState() => _AiRecipePreviewCardState();
+}
+
+class _AiRecipePreviewCardState extends State<_AiRecipePreviewCard> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = widget.theme;
+    final data = widget.data;
+    final ingredients = (data['ingredients'] as List?) ?? [];
+    final steps = (data['steps'] as List?) ?? [];
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Column(
+          children: [
+            // Collapsed header
+            InkWell(
+              onTap: () => setState(() => _expanded = !_expanded),
+              borderRadius: BorderRadius.circular(14),
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            data['title'] ?? 'Untitled Recipe',
+                            style: theme.textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: [
+                              _MetaChip(
+                                  icon: Icons.egg_outlined,
+                                  label: '${widget.ingredientCount} ingredients'),
+                              _MetaChip(
+                                  icon: Icons.format_list_numbered,
+                                  label: '${widget.stepCount} steps'),
+                              if (data['course'] != null)
+                                _MetaChip(
+                                    icon: Icons.restaurant_menu,
+                                    label: data['course']),
+                              if (data['category'] != null)
+                                _MetaChip(
+                                    icon: Icons.category,
+                                    label: data['category']),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    AnimatedRotation(
+                      turns: _expanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Icon(
+                        Icons.expand_more,
+                        color: theme.colorScheme.outline,
+                        size: 20,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Expanded details
+            AnimatedCrossFade(
+              firstChild: const SizedBox.shrink(),
+              secondChild: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
+
+                    if (data['description'] != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        data['description'],
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.outline,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+
+                    // Meta chips row
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: [
+                        if (data['servings'] != null)
+                          _MetaChip(
+                              icon: Icons.people,
+                              label: '${data['servings']} servings'),
+                        if (data['prepTimeMinutes'] != null)
+                          _MetaChip(
+                              icon: Icons.timer_outlined,
+                              label: '${data['prepTimeMinutes']}m prep'),
+                        if (data['cookTimeMinutes'] != null)
+                          _MetaChip(
+                              icon: Icons.local_fire_department,
+                              label: '${data['cookTimeMinutes']}m cook'),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Ingredients
+                    Text(
+                      'Ingredients (${widget.ingredientCount})',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    ...ingredients.take(8).map((ing) {
+                      final name = ing['name'] ?? '';
+                      final notes = ing['notes'] ?? '';
+                      if (notes == '__header__') {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 6, bottom: 2),
+                          child: Text(name,
+                              style: theme.textTheme.labelSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold)),
+                        );
+                      }
+                      final amount = ing['amount'] ?? '';
+                      final unit = ing['unit'] ?? '';
+                      final prefix = [amount, unit]
+                          .where((s) => s.toString().isNotEmpty)
+                          .join(' ');
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 1),
+                        child: Text(
+                          prefix.isNotEmpty ? '$prefix $name' : name,
+                          style: theme.textTheme.bodySmall,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }),
+                    if (ingredients.length > 8)
+                      Text(
+                        '+${ingredients.length - 8} more',
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: theme.colorScheme.outline, fontStyle: FontStyle.italic),
+                      ),
+
+                    const SizedBox(height: 10),
+
+                    // Steps
+                    Text(
+                      'Steps (${steps.length})',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    ...steps.take(3).toList().asMap().entries.map((entry) {
+                      final step = entry.value;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          '${entry.key + 1}. ${step['instruction'] ?? ''}',
+                          style: theme.textTheme.bodySmall,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }),
+                    if (steps.length > 3)
+                      Text(
+                        '+${steps.length - 3} more steps',
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: theme.colorScheme.outline, fontStyle: FontStyle.italic),
+                      ),
+                  ],
+                ),
+              ),
+              crossFadeState: _expanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              duration: const Duration(milliseconds: 200),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class _MetaChip extends StatelessWidget {
   final IconData icon;
