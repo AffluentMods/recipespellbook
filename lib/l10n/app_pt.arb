@@ -2330,40 +2330,6 @@
   "textSize": "Tamanho do texto",
   "ingredientPreview": "Visualização de ingredientes",
   "resetToDefault": "Reset to Default",
-  "smartImportSuccess": "Receita analisada novamente pela IA",
-  "smartImportSuccessWithRemaining": "Receita analisada pela IA • {remaining} importações restantes este mês",
-  "@smartImportSuccessWithRemaining": {
-    "placeholders": {
-      "remaining": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportLimitTitle": "Limite de importação inteligente atingido",
-  "smartImportLimitMessage": "Você usou as {limit} importações inteligentes deste mês.",
-  "@smartImportLimitMessage": {
-    "placeholders": {
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportUpgradeHint": "Atualize para Premium para 200 importações/mês.",
-  "smartImportParsing": "IA analisando...",
-  "smartImportFix": "Corrigir com importação inteligente ✨",
-  "smartImportRemaining": "{remaining} de {limit} importações inteligentes restantes este mês",
-  "@smartImportRemaining": {
-    "placeholders": {
-      "remaining": {
-        "type": "int"
-      },
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportHintTitle": "A importação não parece correta?",
-  "smartImportHintSubtitle": "Assine para importação inteligente — análise de receitas por IA",
   "learnMore": "Saiba mais",
   "retry": "Tentar novamente",
   "upgrade": "Atualizar",
@@ -3158,7 +3124,6 @@
   "splashRecipe": "Receita",
   "splashSpellbook": "Grimório",
   "splashTagline": "Sua aventura culinária espera por você",
-  "smartImportReparsed": "Reanalisado pela IA — confira a receita atualizada acima",
   "servingSizeHint": "ex.: 1 xícara, 100g",
   "mainNutrients": "Nutrientes principais",
   "additionalNutrients": "Nutrientes adicionais",
@@ -3343,11 +3308,6 @@
   "kitchenBuddyNameLabel": "Buddy Name",
   "kitchenBuddyNameHint": "Enter a name...",
   "kitchenBuddyCreate": "Create Buddy",
-  "featureSmartImport": "AI Smart Import",
-  "compareSmartImport": "AI Smart Import",
-  "compareSmartImportNone": "—",
-  "compareSmartImportPremium": "2/mo",
-  "compareSmartImportCloud": "10/mo",
   "cloudSyncFreeTrial": "Try free for 1 week",
   "subscribeCloudSyncMonthlyTrialCta": "Start free trial — then $2.99/mo",
   "subscribeCloudSyncYearlyTrialCta": "Start free trial — then $29.99/yr",

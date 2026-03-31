@@ -380,7 +380,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 
   bool _isFamilyTierUnlocked() {
     final tier = ref.read(subscriptionProvider).tier;
-    return tier.index >= SubscriptionTier.cloudSync.index;
+    return tier.index >= SubscriptionTier.premium.index;
   }
 
   void _showUpgradePrompt(BuildContext context, String featureName, String message) {

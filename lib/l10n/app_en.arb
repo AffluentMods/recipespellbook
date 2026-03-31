@@ -919,7 +919,7 @@
       }
     }
   },
-  "shareFromApp": "Shared from Recipe Spellbook ✨",
+  "shareFromApp": "Shared from Recipe Spellbook",
   "shareCreatingCard": "Creating recipe card...",
   "shareCheckRecipe": "Check out this recipe: {title}",
   "@shareCheckRecipe": {
@@ -1863,10 +1863,10 @@
     }
   },
   "manageSubscription": "Manage Subscription",
-  "tierPremium": "Premium",
+  "tierPremium": "PREMIUM",
   "tierStandard": "Standard",
   "tierBasic": "Basic",
-  "tierFree": "Free",
+  "tierFree": "FREE",
   "tierPlan": "{tier} Plan",
   "@tierPlan": {
     "placeholders": {
@@ -2297,7 +2297,6 @@
   "featureCloudSyncPersonal": "Cloud sync (personal)",
   "featurePhotosOnSteps": "Photos on steps",
   "featureCloudStorageLimited": "Cloud storage — Limited",
-  "featureSmartImport": "AI Smart Import",
   "featureFamilySharing5": "Family sharing (5 members)",
   "featureCloudStorage": "Cloud storage",
   "featureSharedLists": "Shared shopping lists",
@@ -2307,7 +2306,7 @@
   "featureFamilySharing10": "Family sharing (10 members)",
   "featurePrioritySync": "Priority sync performance",
   "featureFutureAdvanced": "Future advanced features included",
-  "tierCloudSync": "Cloud\nSync",
+  "tierCloudSync": "CLOUD SYNC",
   "tierCloudSyncPlus": "Cloud\nSync+",
   "comparePrice": "Price",
   "priceFree": "$0",
@@ -2324,10 +2323,6 @@
   "compareSharedCookbooks": "Shared cookbooks",
   "compareSharedMealPlan": "Shared meal plan",
   "compareBackups": "Backups",
-  "compareSmartImport": "AI Smart Import",
-  "compareSmartImportNone": "—",
-  "compareSmartImportPremium": "Trial",
-  "compareSmartImportCloud": "Standard",
   "compareCloudStorage": "Cloud Storage",
   "compareCloudStorageBasic": "Basic",
   "compareCloudStorageStandard": "Standard",
@@ -2349,40 +2344,6 @@
   "textSize": "Text Size",
   "ingredientPreview": "Ingredient Preview",
   "resetToDefault": "Reset to Default",
-  "smartImportSuccess": "Recipe re-parsed by AI",
-  "smartImportSuccessWithRemaining": "Recipe re-parsed by AI • {remaining} imports left this month",
-  "@smartImportSuccessWithRemaining": {
-    "placeholders": {
-      "remaining": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportLimitTitle": "Smart Import Limit Reached",
-  "smartImportLimitMessage": "You''ve used all {limit} smart imports this month.",
-  "@smartImportLimitMessage": {
-    "placeholders": {
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportUpgradeHint": "Upgrade to Premium for 200 imports/month.",
-  "smartImportParsing": "AI is parsing...",
-  "smartImportFix": "Fix with Smart Import ✨",
-  "smartImportRemaining": "{remaining} of {limit} smart imports remaining this month",
-  "@smartImportRemaining": {
-    "placeholders": {
-      "remaining": {
-        "type": "int"
-      },
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportHintTitle": "Import not looking right?",
-  "smartImportHintSubtitle": "Subscribe for Smart Import — AI-powered recipe parsing",
   "learnMore": "Learn more",
   "retry": "Retry",
   "upgrade": "Upgrade",
@@ -3319,7 +3280,6 @@
   "splashRecipe": "Recipe",
   "splashSpellbook": "Spellbook",
   "splashTagline": "Your culinary adventure awaits",
-  "smartImportReparsed": "Re-parsed by AI — review the updated recipe above",
   "servingSizeHint": "e.g., 1 cup, 100g",
   "mainNutrients": "Main Nutrients",
   "additionalNutrients": "Additional Nutrients",
@@ -4005,13 +3965,11 @@
   "hintRecipeNotes": "Add personal notes to any recipe - tips, modifications, or memories.",
   "hintCookbookOrganization": "Create multiple cookbooks to organize your recipes by theme or occasion.",
   "hintTagSystem": "Tag recipes for easy filtering - create custom tags like 'Quick', 'Favorite', etc.",
-
   "allergyMyAllergies": "My Allergies",
   "allergyDisabledTab": "Disabled",
   "allergyNoDisabledTitle": "No Disabled Warnings",
   "allergyNoDisabledSubtitle": "When you dismiss allergy warnings on recipes, they will appear here so you can restore them later.",
   "allergyDisabledInfo": "These recipes have had their allergy warnings disabled. Tap to restore warnings.",
-
   "trashRestoredMessage": "\"{title}\" restored",
   "@trashRestoredMessage": {
     "placeholders": {
@@ -4020,7 +3978,6 @@
       }
     }
   },
-
   "nutrientCalories": "Calories",
   "nutrientTotalFat": "Total Fat",
   "nutrientSaturatedFat": "Saturated Fat",
@@ -4028,7 +3985,7 @@
   "nutrientMonounsaturatedFat": "Monounsaturated Fat",
   "nutrientPolyunsaturatedFat": "Polyunsaturated Fat",
   "nutrientCarbohydrates": "Carbohydrates",
-  "nutrientFiber": "Dietary Fiber",
+  "nutrientFiber": "Fiber",
   "nutrientSugars": "Sugars",
   "nutrientProtein": "Protein",
   "nutrientCholesterol": "Cholesterol",
@@ -4076,8 +4033,6 @@
       }
     }
   },
-
-  "shareCookbook": "Share Cookbook",
   "shareShoppingList": "Share Shopping List",
   "shareOneTimeLink": "One-Time Link",
   "shareOneTimeLinkSubtitle": "Free • 24h expiry • View/download only",
@@ -4097,12 +4052,23 @@
   "shareAddFamilyMembers": "Add family members",
   "shareWith": "Share with",
   "shareSharedWithMember": "Shared with {name}",
-  "@shareSharedWithMember": {"placeholders": {"name": {"type": "String"}}},
+  "@shareSharedWithMember": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "shareShareFailed": "Failed to share",
   "shareLinkCopied": "Link copied!",
   "shareLinkExpiresIn": "Expires in {hours}h",
-  "@shareLinkExpiresIn": {"placeholders": {"hours": {"type": "int"}}},
-  "shareFromApp": "Shared from Recipe Spellbook",
+  "@shareLinkExpiresIn": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
   "shareRevoke": "Revoke",
   "shareUpgrade": "Upgrade",
   "sharePermReadOnly": "Read Only",
@@ -4116,7 +4082,6 @@
   "sharePermAddItems": "Can add items, edit own",
   "sharePermEditItems": "Can edit & delete items",
   "shareUnknownMember": "Unknown",
-
   "subscriptionTitle": "Subscription",
   "subscriptionUpgradeToPro": "Upgrade to Pro",
   "subscriptionUnlockFeatures": "Unlock cloud sync, smart import, and more.",
@@ -4124,10 +4089,22 @@
   "subscriptionRestored": "Purchases restored successfully!",
   "subscriptionNoPurchases": "No previous purchases found.",
   "subscriptionRestoreFailed": "Restore failed: {error}",
-  "@subscriptionRestoreFailed": {"placeholders": {"error": {"type": "String"}}},
+  "@subscriptionRestoreFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "subscriptionRestorePurchases": "Restore purchases",
   "subscriptionCancelledUntil": "Cancelled — access until {date}",
-  "@subscriptionCancelledUntil": {"placeholders": {"date": {"type": "String"}}},
+  "@subscriptionCancelledUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "subscriptionRenews": "Renews",
   "subscriptionPlan": "Plan",
   "subscriptionLifetime": "Lifetime — never expires",
@@ -4135,7 +4112,6 @@
   "subscriptionUnknownDate": "Unknown",
   "subscriptionUpgradeToUnlock": "Upgrade to Pro to unlock",
   "subscriptionProBadge": "PRO",
-
   "customThemeTitle": "Custom Theme",
   "customThemeColors": "Colors",
   "customThemeBackground": "Background",
@@ -4148,24 +4124,28 @@
   "customThemeLightMode": "Light",
   "customThemeDarkMode": "Dark",
   "customThemeLinkedOverlay": "Colors are auto-generated from your {mode} theme",
-  "@customThemeLinkedOverlay": {"placeholders": {"mode": {"type": "String"}}},
+  "@customThemeLinkedOverlay": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
   "customThemeUnlockButton": "Customize colors",
   "customThemeLinkButton": "Link to {mode}",
-  "@customThemeLinkButton": {"placeholders": {"mode": {"type": "String"}}},
+  "@customThemeLinkButton": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
   "customThemeLivePreview": "Live Preview",
-
-  "settingsVersion": "Version {version}",
-  "@settingsVersion": {"placeholders": {"version": {"type": "String"}}},
   "settingsUserFallback": "User",
-  "settingsAdvanced": "Advanced Settings",
   "settingsManageSection": "Manage",
   "settingsExportNone": "None Selected",
   "settingsExportPartial": "Partial Backup",
   "settingsSystemLanguage": "System",
-
-  "tierFree": "FREE",
-  "tierPremium": "PREMIUM",
-  "tierCloudSync": "CLOUD SYNC",
   "tierFamily": "FAMILY",
   "tierCreator": "CREATOR",
   "tierFreeName": "Free",
@@ -4173,53 +4153,82 @@
   "tierCloudSyncName": "Cloud Sync",
   "tierCloudSyncFamilyName": "Cloud Sync Family",
   "tierCreatorName": "Creator",
-
   "nutritionEstimated": "Estimated values",
   "nutritionTipMatch": "Tap any ingredient to change its USDA food match",
   "nutritionTipManual": "Enter exact nutrition values if you know them",
   "nutritionTipSpecific": "Choose specific types (e.g., \"all-purpose flour\" not just \"flour\")",
   "nutritionTipSaved": "Your corrections are saved for future recipes",
   "nutritionGotIt": "Got it",
-  "nutritionCustomScale": "Custom Scale",
   "nutritionScaleMultiplier": "Scale multiplier",
-  "nutritionScaleHint": "e.g. 0.5, 1.5, 3.0",
   "nutritionScaleHelper": "1.0 = full recipe",
   "nutritionOpenRecipe": "Open {title}",
-  "@nutritionOpenRecipe": {"placeholders": {"title": {"type": "String"}}},
-  "nutritionApplyRecalculate": "Apply & Recalculate",
-  "nutritionSet": "Set",
+  "@nutritionOpenRecipe": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "nutrientCal": "Cal",
-  "nutrientFiber": "Fiber",
   "nutrientSugar": "Sugar",
-
   "appearanceCustomThemeRequiresPremium": "Custom theme requires Premium",
   "appearancePremiumBadge": "Premium",
-
   "substitutionsAll": "All",
   "substitutionsCount": "{count} substitutes • {category}",
-  "@substitutionsCount": {"placeholders": {"count": {"type": "int"}, "category": {"type": "String"}}},
-
+  "@substitutionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
   "colorPickerTitle": "Pick a color",
   "colorPickerHex": "Hex",
   "colorPickerSelect": "Select",
-
   "scanSelectPages": "Select multiple pages",
   "scanNoTextPdf": "No text found in PDF. Try using a clearer scan or the Text paste option instead.",
   "scanLittleTextPdf": "Very little text detected in PDF ({count} characters). The scan may be too blurry. Try a higher quality PDF, or use the Text paste option instead.",
-  "@scanLittleTextPdf": {"placeholders": {"count": {"type": "int"}}},
+  "@scanLittleTextPdf": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "scanNoTextImage": "No text found in image. Try taking the photo in better lighting, or use the Text paste option instead.",
   "scanLittleTextImage": "Very little text detected ({count} characters). Try a clearer photo with better lighting, or use the Text paste option instead.",
-  "@scanLittleTextImage": {"placeholders": {"count": {"type": "int"}}},
+  "@scanLittleTextImage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "scanProgress": "Scanning page {current} of {total}...",
-  "@scanProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
-
+  "@scanProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "communityTagHint": "Add custom tag...",
   "tagPickerOrganize": "Tags help you organize your recipes",
   "tagPickerLoadDefaults": "Load Default Tags",
   "tagPickerExampleHint": "e.g., Date Night",
-
   "drawerProTier": "Pro · {tier}",
-  "@drawerProTier": {"placeholders": {"tier": {"type": "String"}}},
-
+  "@drawerProTier": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
   "accountStoreFallback": "Store"
 }

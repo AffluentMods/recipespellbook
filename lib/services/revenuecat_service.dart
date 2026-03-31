@@ -19,44 +19,16 @@ class RCConfig {
 
   /// Entitlement identifiers (must match RC dashboard)
   static const String premiumEntitlement = 'premium';
-  static const String cloudSyncEntitlement = 'cloud_sync';
-  static const String cloudSyncFamilyEntitlement = 'cloud_sync_family';
-  static const String creatorEntitlement = 'creator';
+  static const String familyEntitlement = 'cloud_sync_family';
 
   /// Offering identifier
   static const String defaultOfferingId = 'default';
 
-  /// Product identifiers — used by paywall_screen to find the right package.
-  ///
-  /// **Google Play note:** For subscriptions with base plans, the store product
-  /// identifier format is `subscription_id:base_plan_id` (e.g. `rs_cloud_sync:monthly`).
-  /// **App Store:** Product IDs are flat strings matching what you create in ASC.
-  ///
-  /// Prefer matching packages by [PackageType] (monthly, annual, lifetime) rather
-  /// than raw store IDs when possible — the RC SDK handles platform differences.
+  /// Product identifiers — both are one-time lifetime purchases.
+  /// Premium: $6.99 — single user, cloud sync included.
+  /// Family:  $19.99 — family sharing, cloud sync included.
   static const String premiumLifetimeId = 'rs_premium_lifetime';
-
-  // — Cloud Sync (per-platform) —
-  static String get cloudSyncMonthlyId =>
-      defaultTargetPlatform == TargetPlatform.android
-          ? 'rs_cloud_sync:monthly'
-          : 'rs_cloud_sync_monthly';
-
-  static String get cloudSyncYearlyId =>
-      defaultTargetPlatform == TargetPlatform.android
-          ? 'rs_cloud_sync:yearly'
-          : 'rs_cloud_sync_yearly';
-
-  // — Cloud Sync Family (create these in RC + stores when ready) —
-  static String get cloudSyncFamilyMonthlyId =>
-      defaultTargetPlatform == TargetPlatform.android
-          ? 'rs_cloud_sync_family:monthly'
-          : 'rs_cloud_sync_family_monthly';
-
-  static String get cloudSyncFamilyYearlyId =>
-      defaultTargetPlatform == TargetPlatform.android
-          ? 'rs_cloud_sync_family:yearly'
-          : 'rs_cloud_sync_family_yearly';
+  static const String familyLifetimeId = 'rs_family_lifetime';
 
   // — Web Purchase Link (RevenueCat hosted checkout) —
   // Single URL — user picks their plan on the checkout page.
@@ -75,10 +47,13 @@ class RCConfig {
 ///   `tier.index >= requiredTier.index`
 enum SubscriptionTier {
   free,
-  premium,
-  cloudSync,
-  cloudSyncFamily,
-  creator;
+  premium,   // $6.99 one-time — single user, cloud sync included
+  family;    // $19.99 one-time — family sharing, cloud sync included
+
+  // Keep old names as aliases so backend strings still resolve
+  static const cloudSync = premium;
+  static const cloudSyncFamily = family;
+  static const creator = family;
 
   String get displayName {
     switch (this) {
@@ -86,12 +61,8 @@ enum SubscriptionTier {
         return 'Free';
       case premium:
         return 'Premium';
-      case cloudSync:
-        return 'Cloud Sync';
-      case cloudSyncFamily:
-        return 'Cloud Sync Family';
-      case creator:
-        return 'Creator';
+      case family:
+        return 'Family';
     }
   }
 
@@ -101,13 +72,9 @@ enum SubscriptionTier {
       case free:
         return 50 * 1024 * 1024; // 50 MB
       case premium:
-        return 500 * 1024 * 1024; // 500 MB
-      case cloudSync:
         return 2 * 1024 * 1024 * 1024; // 2 GB
-      case cloudSyncFamily:
+      case family:
         return 5 * 1024 * 1024 * 1024; // 5 GB
-      case creator:
-        return 10 * 1024 * 1024 * 1024; // 10 GB
     }
   }
 
@@ -116,36 +83,30 @@ enum SubscriptionTier {
       case free:
         return '50 MB';
       case premium:
-        return '500 MB';
-      case cloudSync:
         return '2 GB';
-      case cloudSyncFamily:
+      case family:
         return '5 GB';
-      case creator:
-        return '10 GB';
     }
   }
 
   /// Whether this tier includes cloud sync capability.
-  bool get hasCloudSync => index >= SubscriptionTier.premium.index;
+  bool get hasCloudSync => this != SubscriptionTier.free;
 
   /// Whether this tier includes family/sharing features.
-  bool get hasSharing => index >= SubscriptionTier.cloudSync.index;
+  bool get hasSharing => this == SubscriptionTier.family;
 
   /// Map a backend tier string (from User.tier) to the enum.
-  /// Now a direct 1:1 mapping — backend and Flutter use the same tier names.
   static SubscriptionTier fromBackendString(String? tier) {
     switch (tier?.toLowerCase()) {
       case 'premium':
-        return SubscriptionTier.premium;
       case 'cloudsync':
-        return SubscriptionTier.cloudSync;
+        return SubscriptionTier.premium;
+      case 'family':
       case 'cloudsyncfamily':
-        return SubscriptionTier.cloudSyncFamily;
+        return SubscriptionTier.family;
       case 'creator':
-        return SubscriptionTier.creator;
       case 'admin':
-        return SubscriptionTier.creator; // admin grants creator-level access
+        return SubscriptionTier.family;
       default:
         return SubscriptionTier.free;
     }
@@ -158,12 +119,8 @@ enum SubscriptionTier {
         return '';
       case premium:
         return RCConfig.premiumEntitlement;
-      case cloudSync:
-        return RCConfig.cloudSyncEntitlement;
-      case cloudSyncFamily:
-        return RCConfig.cloudSyncFamilyEntitlement;
-      case creator:
-        return RCConfig.creatorEntitlement;
+      case family:
+        return RCConfig.familyEntitlement;
     }
   }
 }
@@ -433,12 +390,8 @@ class RevenueCatService {
     final oldTier = _currentTier;
     final entitlements = info.entitlements.active;
 
-    if (entitlements.containsKey(RCConfig.creatorEntitlement)) {
-      _currentTier = SubscriptionTier.creator;
-    } else if (entitlements.containsKey(RCConfig.cloudSyncFamilyEntitlement)) {
-      _currentTier = SubscriptionTier.cloudSyncFamily;
-    } else if (entitlements.containsKey(RCConfig.cloudSyncEntitlement)) {
-      _currentTier = SubscriptionTier.cloudSync;
+    if (entitlements.containsKey(RCConfig.familyEntitlement)) {
+      _currentTier = SubscriptionTier.family;
     } else if (entitlements.containsKey(RCConfig.premiumEntitlement)) {
       _currentTier = SubscriptionTier.premium;
     } else {

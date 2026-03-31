@@ -2330,40 +2330,6 @@
   "textSize": "Tekstgrootte",
   "ingredientPreview": "Ingrediëntenvoorbeeld",
   "resetToDefault": "Reset to Default",
-  "smartImportSuccess": "Recept opnieuw verwerkt door AI",
-  "smartImportSuccessWithRemaining": "Recept verwerkt door AI • {remaining} importen over deze maand",
-  "@smartImportSuccessWithRemaining": {
-    "placeholders": {
-      "remaining": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportLimitTitle": "Limiet voor slim importeren bereikt",
-  "smartImportLimitMessage": "Je hebt de {limit} slimme importen van deze maand gebruikt.",
-  "@smartImportLimitMessage": {
-    "placeholders": {
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportUpgradeHint": "Upgrade naar Premium voor 200 importen/maand.",
-  "smartImportParsing": "AI verwerkt...",
-  "smartImportFix": "Corrigeren met slim importeren ✨",
-  "smartImportRemaining": "{remaining} van {limit} slimme importen over deze maand",
-  "@smartImportRemaining": {
-    "placeholders": {
-      "remaining": {
-        "type": "int"
-      },
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportHintTitle": "Ziet de import er niet correct uit?",
-  "smartImportHintSubtitle": "Abonneer voor slim importeren — AI-receptverwerking",
   "learnMore": "Meer informatie",
   "retry": "Opnieuw proberen",
   "upgrade": "Upgraden",
@@ -3158,7 +3124,6 @@
   "splashRecipe": "Recept",
   "splashSpellbook": "Spreukenboek",
   "splashTagline": "Je culinaire avontuur wacht",
-  "smartImportReparsed": "Opnieuw geanalyseerd door AI — controleer het bijgewerkte recept hierboven",
   "servingSizeHint": "bijv. 1 kopje, 100g",
   "mainNutrients": "Hoofdvoedingsstoffen",
   "additionalNutrients": "Overige voedingsstoffen",
@@ -3343,11 +3308,6 @@
   "kitchenBuddyNameLabel": "Buddy Name",
   "kitchenBuddyNameHint": "Enter a name...",
   "kitchenBuddyCreate": "Create Buddy",
-  "featureSmartImport": "AI Smart Import",
-  "compareSmartImport": "AI Smart Import",
-  "compareSmartImportNone": "—",
-  "compareSmartImportPremium": "2/mo",
-  "compareSmartImportCloud": "10/mo",
   "cloudSyncFreeTrial": "Try free for 1 week",
   "subscribeCloudSyncMonthlyTrialCta": "Start free trial — then $2.99/mo",
   "subscribeCloudSyncYearlyTrialCta": "Start free trial — then $29.99/yr",

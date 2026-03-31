@@ -11,7 +11,7 @@ class OcrResult {
   final String text;
   final double confidence; // 0.0 - 1.0 overall confidence
   final int pageCount;
-  final List<String> imagePaths; // original image paths for Smart Import
+  final List<String> imagePaths; // original image paths
 
   const OcrResult({
     required this.text,

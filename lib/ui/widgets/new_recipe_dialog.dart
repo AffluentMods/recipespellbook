@@ -496,7 +496,6 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
         }
         return;
       }
-      // All imports route through preview for Smart Import fallback
       _showImportPreview(recipes);
     } catch (e) {
       _hideLoading();

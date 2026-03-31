@@ -19,25 +19,25 @@ enum GatedFeature {
   stepPhotos(SubscriptionTier.premium, 'Step Photos', Icons.photo_library),
 
   /// Family sharing (shared cookbooks, lists, meal plans)
-  familySharing(SubscriptionTier.cloudSync, 'Family Sharing', Icons.family_restroom),
+  familySharing(SubscriptionTier.family, 'Family Sharing', Icons.family_restroom),
 
   /// Shared shopping lists
-  sharedLists(SubscriptionTier.cloudSync, 'Shared Lists', Icons.shopping_cart),
+  sharedLists(SubscriptionTier.family, 'Shared Lists', Icons.shopping_cart),
 
   /// Shared cookbooks
-  sharedCookbooks(SubscriptionTier.cloudSync, 'Shared Cookbooks', Icons.menu_book),
+  sharedCookbooks(SubscriptionTier.family, 'Shared Cookbooks', Icons.menu_book),
 
   /// Shared meal planning
-  sharedMealPlan(SubscriptionTier.cloudSync, 'Shared Meal Plan', Icons.calendar_month),
+  sharedMealPlan(SubscriptionTier.family, 'Shared Meal Plan', Icons.calendar_month),
 
   /// Automatic backups
-  backups(SubscriptionTier.cloudSync, 'Backups', Icons.backup),
+  backups(SubscriptionTier.premium, 'Backups', Icons.backup),
 
   /// Community creator page
-  creatorPage(SubscriptionTier.cloudSync, 'Creator Page', Icons.storefront),
+  creatorPage(SubscriptionTier.premium, 'Creator Page', Icons.storefront),
 
   /// Custom domain for creator page
-  customDomain(SubscriptionTier.creator, 'Custom Domain', Icons.language),
+  customDomain(SubscriptionTier.family, 'Custom Domain', Icons.language),
   ;
 
   final SubscriptionTier minimumTier;

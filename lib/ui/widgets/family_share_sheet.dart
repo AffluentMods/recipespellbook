@@ -89,7 +89,7 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
   bool get _isCookbook => widget.resourceType == 'cookbook';
   bool get _hasFamilyTier {
     final tier = ref.read(subscriptionProvider).tier;
-    return tier.index >= SubscriptionTier.cloudSync.index;
+    return tier.index >= SubscriptionTier.premium.index;
   }
   List<(String, String, String)> _permOptions(AppLocalizations l10n) => _isCookbook ? _cookbookPerms(l10n) : _listPerms(l10n);
 

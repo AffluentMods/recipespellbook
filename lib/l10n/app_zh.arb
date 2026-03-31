@@ -2330,40 +2330,6 @@
   "textSize": "字体大小",
   "ingredientPreview": "食材预览",
   "resetToDefault": "Reset to Default",
-  "smartImportSuccess": "AI已重新分析食谱",
-  "smartImportSuccessWithRemaining": "AI已分析食谱 • 本月剩余{remaining}次",
-  "@smartImportSuccessWithRemaining": {
-    "placeholders": {
-      "remaining": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportLimitTitle": "已达到智能导入限制",
-  "smartImportLimitMessage": "您已使用本月{limit}次智能导入。",
-  "@smartImportLimitMessage": {
-    "placeholders": {
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportUpgradeHint": "升级到高级版获得每月200次导入。",
-  "smartImportParsing": "AI分析中...",
-  "smartImportFix": "用智能导入修复 ✨",
-  "smartImportRemaining": "本月剩余{remaining}/{limit}次智能导入",
-  "@smartImportRemaining": {
-    "placeholders": {
-      "remaining": {
-        "type": "int"
-      },
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportHintTitle": "导入看起来不正确？",
-  "smartImportHintSubtitle": "订阅智能导入 — AI食谱分析",
   "learnMore": "了解更多",
   "retry": "重试",
   "upgrade": "升级",
@@ -3158,7 +3124,6 @@
   "splashRecipe": "食谱",
   "splashSpellbook": "魔法书",
   "splashTagline": "你的烹饪冒险即将开始",
-  "smartImportReparsed": "已由AI重新解析 — 请查看上方更新后的食谱",
   "servingSizeHint": "例如：1杯、100克",
   "mainNutrients": "主要营养素",
   "additionalNutrients": "其他营养素",
@@ -3343,11 +3308,6 @@
   "kitchenBuddyNameLabel": "Buddy Name",
   "kitchenBuddyNameHint": "Enter a name...",
   "kitchenBuddyCreate": "Create Buddy",
-  "featureSmartImport": "AI Smart Import",
-  "compareSmartImport": "AI Smart Import",
-  "compareSmartImportNone": "—",
-  "compareSmartImportPremium": "2/mo",
-  "compareSmartImportCloud": "10/mo",
   "cloudSyncFreeTrial": "Try free for 1 week",
   "subscribeCloudSyncMonthlyTrialCta": "Start free trial — then $2.99/mo",
   "subscribeCloudSyncYearlyTrialCta": "Start free trial — then $29.99/yr",

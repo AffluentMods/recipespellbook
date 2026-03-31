@@ -4674,9 +4674,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get featureCloudStorageLimited => 'Cloud storage — Limited';
 
   @override
-  String get featureSmartImport => 'AI Smart Import';
-
-  @override
   String get featureFamilySharing5 => 'Семейный доступ (5 человек)';
 
   @override
@@ -4755,18 +4752,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get compareBackups => 'Резервные копии';
 
   @override
-  String get compareSmartImport => 'AI Smart Import';
-
-  @override
-  String get compareSmartImportNone => '—';
-
-  @override
-  String get compareSmartImportPremium => '2/mo';
-
-  @override
-  String get compareSmartImportCloud => '10/mo';
-
-  @override
   String get compareCloudStorage => 'Облачное хранилище';
 
   @override
@@ -4828,42 +4813,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get resetToDefault => 'Reset to Default';
-
-  @override
-  String get smartImportSuccess => 'Рецепт повторно проанализирован AI';
-
-  @override
-  String smartImportSuccessWithRemaining(int remaining) {
-    return 'Рецепт проанализирован AI • $remaining импортов осталось в этом месяце';
-  }
-
-  @override
-  String get smartImportLimitTitle => 'Достигнут лимит умного импорта';
-
-  @override
-  String smartImportLimitMessage(int limit) {
-    return 'Вы использовали $limit умных импортов за этот месяц.';
-  }
-
-  @override
-  String get smartImportUpgradeHint => 'Перейдите на Premium для 200 импортов/месяц.';
-
-  @override
-  String get smartImportParsing => 'AI анализирует...';
-
-  @override
-  String get smartImportFix => 'Исправить умным импортом ✨';
-
-  @override
-  String smartImportRemaining(int remaining, int limit) {
-    return '$remaining из $limit умных импортов осталось в этом месяце';
-  }
-
-  @override
-  String get smartImportHintTitle => 'Импорт выглядит неправильным?';
-
-  @override
-  String get smartImportHintSubtitle => 'Подпишитесь на умный импорт — анализ рецептов AI';
 
   @override
   String get learnMore => 'Узнать больше';
@@ -6472,9 +6421,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get splashTagline => 'Ваше кулинарное приключение ждёт';
-
-  @override
-  String get smartImportReparsed => 'Повторно проанализировано ИИ — проверьте обновлённый рецепт выше';
 
   @override
   String get servingSizeHint => 'напр., 1 стакан, 100г';

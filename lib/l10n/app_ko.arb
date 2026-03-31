@@ -2330,40 +2330,6 @@
   "textSize": "글자 크기",
   "ingredientPreview": "재료 미리보기",
   "resetToDefault": "Reset to Default",
-  "smartImportSuccess": "AI가 레시피를 다시 분석했습니다",
-  "smartImportSuccessWithRemaining": "AI가 레시피를 분석했습니다 • 이번 달 {remaining}회 남음",
-  "@smartImportSuccessWithRemaining": {
-    "placeholders": {
-      "remaining": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportLimitTitle": "스마트 가져오기 한도에 도달했습니다",
-  "smartImportLimitMessage": "이번 달 {limit}회의 스마트 가져오기를 모두 사용했습니다.",
-  "@smartImportLimitMessage": {
-    "placeholders": {
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportUpgradeHint": "프리미엄으로 업그레이드하여 월 200회 가져오기.",
-  "smartImportParsing": "AI 분석 중...",
-  "smartImportFix": "스마트 가져오기로 수정 ✨",
-  "smartImportRemaining": "이번 달 {remaining}/{limit}회의 스마트 가져오기 남음",
-  "@smartImportRemaining": {
-    "placeholders": {
-      "remaining": {
-        "type": "int"
-      },
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportHintTitle": "가져오기가 올바르지 않아 보이나요?",
-  "smartImportHintSubtitle": "스마트 가져오기 구독 — AI 레시피 분석",
   "learnMore": "자세히 알아보기",
   "retry": "다시 시도",
   "upgrade": "업그레이드",
@@ -3158,7 +3124,6 @@
   "splashRecipe": "레시피",
   "splashSpellbook": "마법서",
   "splashTagline": "당신의 요리 모험이 기다립니다",
-  "smartImportReparsed": "AI가 다시 분석했습니다 — 위의 업데이트된 레시피를 확인하세요",
   "servingSizeHint": "예: 1컵, 100g",
   "mainNutrients": "주요 영양소",
   "additionalNutrients": "추가 영양소",
@@ -3343,11 +3308,6 @@
   "kitchenBuddyNameLabel": "Buddy Name",
   "kitchenBuddyNameHint": "Enter a name...",
   "kitchenBuddyCreate": "Create Buddy",
-  "featureSmartImport": "AI Smart Import",
-  "compareSmartImport": "AI Smart Import",
-  "compareSmartImportNone": "—",
-  "compareSmartImportPremium": "2/mo",
-  "compareSmartImportCloud": "10/mo",
   "cloudSyncFreeTrial": "Try free for 1 week",
   "subscribeCloudSyncMonthlyTrialCta": "Start free trial — then $2.99/mo",
   "subscribeCloudSyncYearlyTrialCta": "Start free trial — then $29.99/yr",

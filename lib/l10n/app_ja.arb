@@ -2330,40 +2330,6 @@
   "textSize": "文字サイズ",
   "ingredientPreview": "材料プレビュー",
   "resetToDefault": "Reset to Default",
-  "smartImportSuccess": "AIがレシピを再解析しました",
-  "smartImportSuccessWithRemaining": "AIがレシピを解析しました • 今月残り{remaining}回",
-  "@smartImportSuccessWithRemaining": {
-    "placeholders": {
-      "remaining": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportLimitTitle": "スマートインポートの上限に達しました",
-  "smartImportLimitMessage": "今月の{limit}回のスマートインポートを使い切りました。",
-  "@smartImportLimitMessage": {
-    "placeholders": {
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportUpgradeHint": "プレミアムにアップグレードして月200回のインポートを。",
-  "smartImportParsing": "AIが解析中...",
-  "smartImportFix": "スマートインポートで修正 ✨",
-  "smartImportRemaining": "今月残り{remaining}/{limit}回のスマートインポート",
-  "@smartImportRemaining": {
-    "placeholders": {
-      "remaining": {
-        "type": "int"
-      },
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportHintTitle": "インポートが正しくないですか？",
-  "smartImportHintSubtitle": "スマートインポートを購読 — AIレシピ解析",
   "learnMore": "詳細を見る",
   "retry": "再試行",
   "upgrade": "アップグレード",
@@ -3158,7 +3124,6 @@
   "splashRecipe": "レシピ",
   "splashSpellbook": "魔法書",
   "splashTagline": "あなたの料理の冒険が待っています",
-  "smartImportReparsed": "AIが再解析しました — 上の更新されたレシピを確認してください",
   "servingSizeHint": "例: 1カップ、100g",
   "mainNutrients": "主要栄養素",
   "additionalNutrients": "その他の栄養素",
@@ -3343,11 +3308,6 @@
   "kitchenBuddyNameLabel": "Buddy Name",
   "kitchenBuddyNameHint": "Enter a name...",
   "kitchenBuddyCreate": "Create Buddy",
-  "featureSmartImport": "AI Smart Import",
-  "compareSmartImport": "AI Smart Import",
-  "compareSmartImportNone": "—",
-  "compareSmartImportPremium": "2/mo",
-  "compareSmartImportCloud": "10/mo",
   "cloudSyncFreeTrial": "Try free for 1 week",
   "subscribeCloudSyncMonthlyTrialCta": "Start free trial — then $2.99/mo",
   "subscribeCloudSyncYearlyTrialCta": "Start free trial — then $29.99/yr",

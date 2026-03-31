@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/auth_service.dart';
 import '../services/notification_service.dart';
 import '../services/revenuecat_service.dart';
-import '../services/smart_import_service.dart';
 import '../services/sync_service.dart';
 import '../utils/platform_utils.dart';
 
@@ -166,7 +165,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final jwt = _service.currentJwt;
     final user = _service.currentUser;
     if (jwt != null) {
-      SmartImportService.instance.setAuthToken(jwt);
       if (supportsFirebaseMessaging) {
         NotificationService.instance.registerOnLogin(jwt);
       }
@@ -182,7 +180,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   void _clearAuthFromServices() {
-    SmartImportService.instance.clearAuth();
     if (supportsFirebaseMessaging) {
       NotificationService.instance.clearAuth();
     }

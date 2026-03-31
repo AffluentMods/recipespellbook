@@ -4622,9 +4622,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get featureCloudStorageLimited => 'Cloud storage — Limited';
 
   @override
-  String get featureSmartImport => 'AI Smart Import';
-
-  @override
   String get featureFamilySharing5 => 'Family sharing (5 members)';
 
   @override
@@ -4703,18 +4700,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get compareBackups => 'Backups';
 
   @override
-  String get compareSmartImport => 'AI Smart Import';
-
-  @override
-  String get compareSmartImportNone => '—';
-
-  @override
-  String get compareSmartImportPremium => 'Trial';
-
-  @override
-  String get compareSmartImportCloud => 'Standard';
-
-  @override
   String get compareCloudStorage => 'Cloud Storage';
 
   @override
@@ -4776,42 +4761,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetToDefault => 'Reset to Default';
-
-  @override
-  String get smartImportSuccess => 'Recipe re-parsed by AI';
-
-  @override
-  String smartImportSuccessWithRemaining(int remaining) {
-    return 'Recipe re-parsed by AI • $remaining imports left this month';
-  }
-
-  @override
-  String get smartImportLimitTitle => 'Smart Import Limit Reached';
-
-  @override
-  String smartImportLimitMessage(int limit) {
-    return 'You\'\'ve used all $limit smart imports this month.';
-  }
-
-  @override
-  String get smartImportUpgradeHint => 'Upgrade to Premium for 200 imports/month.';
-
-  @override
-  String get smartImportParsing => 'AI is parsing...';
-
-  @override
-  String get smartImportFix => 'Fix with Smart Import ✨';
-
-  @override
-  String smartImportRemaining(int remaining, int limit) {
-    return '$remaining of $limit smart imports remaining this month';
-  }
-
-  @override
-  String get smartImportHintTitle => 'Import not looking right?';
-
-  @override
-  String get smartImportHintSubtitle => 'Subscribe for Smart Import — AI-powered recipe parsing';
 
   @override
   String get learnMore => 'Learn more';
@@ -6406,9 +6355,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get splashTagline => 'Your culinary adventure awaits';
-
-  @override
-  String get smartImportReparsed => 'Re-parsed by AI — review the updated recipe above';
 
   @override
   String get servingSizeHint => 'e.g., 1 cup, 100g';

@@ -4622,9 +4622,6 @@ class AppLocalizationsNl extends AppLocalizations {
   String get featureCloudStorageLimited => 'Cloud storage — Limited';
 
   @override
-  String get featureSmartImport => 'AI Smart Import';
-
-  @override
   String get featureFamilySharing5 => 'Gezinsdeling (5 leden)';
 
   @override
@@ -4703,18 +4700,6 @@ class AppLocalizationsNl extends AppLocalizations {
   String get compareBackups => 'Back-ups';
 
   @override
-  String get compareSmartImport => 'AI Smart Import';
-
-  @override
-  String get compareSmartImportNone => '—';
-
-  @override
-  String get compareSmartImportPremium => '2/mo';
-
-  @override
-  String get compareSmartImportCloud => '10/mo';
-
-  @override
   String get compareCloudStorage => 'Cloudopslag';
 
   @override
@@ -4776,42 +4761,6 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get resetToDefault => 'Reset to Default';
-
-  @override
-  String get smartImportSuccess => 'Recept opnieuw verwerkt door AI';
-
-  @override
-  String smartImportSuccessWithRemaining(int remaining) {
-    return 'Recept verwerkt door AI • $remaining importen over deze maand';
-  }
-
-  @override
-  String get smartImportLimitTitle => 'Limiet voor slim importeren bereikt';
-
-  @override
-  String smartImportLimitMessage(int limit) {
-    return 'Je hebt de $limit slimme importen van deze maand gebruikt.';
-  }
-
-  @override
-  String get smartImportUpgradeHint => 'Upgrade naar Premium voor 200 importen/maand.';
-
-  @override
-  String get smartImportParsing => 'AI verwerkt...';
-
-  @override
-  String get smartImportFix => 'Corrigeren met slim importeren ✨';
-
-  @override
-  String smartImportRemaining(int remaining, int limit) {
-    return '$remaining van $limit slimme importen over deze maand';
-  }
-
-  @override
-  String get smartImportHintTitle => 'Ziet de import er niet correct uit?';
-
-  @override
-  String get smartImportHintSubtitle => 'Abonneer voor slim importeren — AI-receptverwerking';
 
   @override
   String get learnMore => 'Meer informatie';
@@ -6406,9 +6355,6 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get splashTagline => 'Je culinaire avontuur wacht';
-
-  @override
-  String get smartImportReparsed => 'Opnieuw geanalyseerd door AI — controleer het bijgewerkte recept hierboven';
 
   @override
   String get servingSizeHint => 'bijv. 1 kopje, 100g';

@@ -489,7 +489,7 @@ class _CookbookGrid extends ConsumerWidget {
 
   bool _isFamilyTierUnlocked(WidgetRef ref) {
     final tier = ref.read(subscriptionProvider).tier;
-    return tier.index >= SubscriptionTier.cloudSync.index;
+    return tier.index >= SubscriptionTier.premium.index;
   }
 
   void _showUpgradePrompt(BuildContext context, String featureName, String message) {

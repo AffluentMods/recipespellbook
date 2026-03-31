@@ -15,7 +15,6 @@ import '../../../providers/database_provider.dart';
 import '../../../utils/ingredient_utils.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
-import '../../widgets/smart_import_button.dart';
 
 /// Full-screen import preview — lets users review, select/deselect, and spot
 /// duplicates before committing recipes to a cookbook.
@@ -424,31 +423,6 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                       isSelected: _selected[index],
                       isExpanded: _expanded[index],
                       isDuplicate: isDupe,
-                      sourceText: widget.sourceText,
-                      sourceUrl: recipe.sourceUrl ?? widget.sourceUrl,
-                      onSmartImportResult: (result) {
-                        setState(() {
-                          _recipes[index] = ImportedRecipe(
-                            title: result['title'] as String? ?? _recipes[index].title,
-                            description: result['description'] as String? ?? _recipes[index].description,
-                            servings: result['servings']?.toString() ?? _recipes[index].servings,
-                            prepTimeMinutes: result['prepTimeMinutes'] as int? ?? _recipes[index].prepTimeMinutes,
-                            cookTimeMinutes: result['cookTimeMinutes'] as int? ?? _recipes[index].cookTimeMinutes,
-                            ingredients: (result['ingredients'] as List?)?.cast<String>() ?? _recipes[index].ingredients,
-                            instructions: (result['instructions'] as List?)?.cast<String>() ?? _recipes[index].instructions,
-                            sourceUrl: _recipes[index].sourceUrl,
-                            sourceApp: _recipes[index].sourceApp,
-                            suggestedCourse: result['course'] as String? ?? _recipes[index].suggestedCourse,
-                            suggestedCategory: result['category'] as String? ?? _recipes[index].suggestedCategory,
-                            notes: result['notes'] as String? ?? _recipes[index].notes,
-                            imageUrl: _recipes[index].imageUrl,
-                            imageData: _recipes[index].imageData,
-                            tags: _recipes[index].tags,
-                            cuisine: result['cuisine'] as String? ?? _recipes[index].cuisine,
-                            rating: _recipes[index].rating,
-                          );
-                        });
-                      },
                       onSelectedChanged: (val) {
                         setState(() => _selected[index] = val);
                       },
@@ -580,9 +554,6 @@ class _RecipePreviewCard extends StatelessWidget {
   final bool isSelected;
   final bool isExpanded;
   final bool isDuplicate;
-  final String? sourceText;
-  final String? sourceUrl;
-  final ValueChanged<Map<String, dynamic>>? onSmartImportResult;
   final ValueChanged<bool> onSelectedChanged;
   final VoidCallback onExpandToggle;
 
@@ -592,9 +563,6 @@ class _RecipePreviewCard extends StatelessWidget {
     required this.isSelected,
     required this.isExpanded,
     required this.isDuplicate,
-    this.sourceText,
-    this.sourceUrl,
-    this.onSmartImportResult,
     required this.onSelectedChanged,
     required this.onExpandToggle,
   });
@@ -761,9 +729,6 @@ class _RecipePreviewCard extends StatelessWidget {
               firstChild: const SizedBox.shrink(),
               secondChild: _ExpandedContent(
                 recipe: recipe,
-                sourceText: sourceText,
-                sourceUrl: sourceUrl,
-                onSmartImportResult: onSmartImportResult,
               ),
               crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
               duration: const Duration(milliseconds: 200),
@@ -802,15 +767,9 @@ class _RecipePreviewCard extends StatelessWidget {
 
 class _ExpandedContent extends StatelessWidget {
   final ImportedRecipe recipe;
-  final String? sourceText;
-  final String? sourceUrl;
-  final ValueChanged<Map<String, dynamic>>? onSmartImportResult;
 
   const _ExpandedContent({
     required this.recipe,
-    this.sourceText,
-    this.sourceUrl,
-    this.onSmartImportResult,
   });
 
   @override
@@ -825,21 +784,6 @@ class _ExpandedContent extends StatelessWidget {
         children: [
           Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
           const SizedBox(height: 8),
-
-          // Smart Import button (when source data is available)
-          if (sourceText != null || sourceUrl != null)
-            SmartImportButton(
-              sourceText: sourceText,
-              sourceUrl: sourceUrl,
-              existingParse: {
-                'title': recipe.title,
-                if (recipe.description != null) 'description': recipe.description,
-                if (recipe.servings != null) 'servings': recipe.servings,
-                'ingredients': recipe.ingredients,
-                'instructions': recipe.instructions,
-              },
-              onResult: (result) => onSmartImportResult?.call(result),
-            ),
 
           // Description
           if (recipe.description != null && recipe.description!.isNotEmpty) ...[

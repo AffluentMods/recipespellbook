@@ -270,8 +270,8 @@ class _DetailRow extends StatelessWidget {
 /// Usage:
 /// ```dart
 /// ProGate(
-///   child: SmartImportButton(...),
-///   feature: 'Smart Import',
+///   child: MyPremiumWidget(...),
+///   feature: 'Premium Feature',
 /// )
 /// ```
 class ProGate extends ConsumerWidget {

@@ -8521,12 +8521,6 @@ abstract class AppLocalizations {
   /// **'Cloud storage — Limited'**
   String get featureCloudStorageLimited;
 
-  /// No description provided for @featureSmartImport.
-  ///
-  /// In en, this message translates to:
-  /// **'AI Smart Import'**
-  String get featureSmartImport;
-
   /// No description provided for @featureFamilySharing5.
   ///
   /// In en, this message translates to:
@@ -8683,30 +8677,6 @@ abstract class AppLocalizations {
   /// **'Backups'**
   String get compareBackups;
 
-  /// No description provided for @compareSmartImport.
-  ///
-  /// In en, this message translates to:
-  /// **'AI Smart Import'**
-  String get compareSmartImport;
-
-  /// No description provided for @compareSmartImportNone.
-  ///
-  /// In en, this message translates to:
-  /// **'—'**
-  String get compareSmartImportNone;
-
-  /// No description provided for @compareSmartImportPremium.
-  ///
-  /// In en, this message translates to:
-  /// **'Trial'**
-  String get compareSmartImportPremium;
-
-  /// No description provided for @compareSmartImportCloud.
-  ///
-  /// In en, this message translates to:
-  /// **'Standard'**
-  String get compareSmartImportCloud;
-
   /// No description provided for @compareCloudStorage.
   ///
   /// In en, this message translates to:
@@ -8832,66 +8802,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset to Default'**
   String get resetToDefault;
-
-  /// No description provided for @smartImportSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Recipe re-parsed by AI'**
-  String get smartImportSuccess;
-
-  /// No description provided for @smartImportSuccessWithRemaining.
-  ///
-  /// In en, this message translates to:
-  /// **'Recipe re-parsed by AI • {remaining} imports left this month'**
-  String smartImportSuccessWithRemaining(int remaining);
-
-  /// No description provided for @smartImportLimitTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Smart Import Limit Reached'**
-  String get smartImportLimitTitle;
-
-  /// No description provided for @smartImportLimitMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'\'ve used all {limit} smart imports this month.'**
-  String smartImportLimitMessage(int limit);
-
-  /// No description provided for @smartImportUpgradeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Upgrade to Premium for 200 imports/month.'**
-  String get smartImportUpgradeHint;
-
-  /// No description provided for @smartImportParsing.
-  ///
-  /// In en, this message translates to:
-  /// **'AI is parsing...'**
-  String get smartImportParsing;
-
-  /// No description provided for @smartImportFix.
-  ///
-  /// In en, this message translates to:
-  /// **'Fix with Smart Import ✨'**
-  String get smartImportFix;
-
-  /// No description provided for @smartImportRemaining.
-  ///
-  /// In en, this message translates to:
-  /// **'{remaining} of {limit} smart imports remaining this month'**
-  String smartImportRemaining(int remaining, int limit);
-
-  /// No description provided for @smartImportHintTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Import not looking right?'**
-  String get smartImportHintTitle;
-
-  /// No description provided for @smartImportHintSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscribe for Smart Import — AI-powered recipe parsing'**
-  String get smartImportHintSubtitle;
 
   /// No description provided for @learnMore.
   ///
@@ -11760,12 +11670,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your culinary adventure awaits'**
   String get splashTagline;
-
-  /// No description provided for @smartImportReparsed.
-  ///
-  /// In en, this message translates to:
-  /// **'Re-parsed by AI — review the updated recipe above'**
-  String get smartImportReparsed;
 
   /// No description provided for @servingSizeHint.
   ///

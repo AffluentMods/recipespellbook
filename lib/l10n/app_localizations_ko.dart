@@ -4590,9 +4590,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get featureCloudStorageLimited => 'Cloud storage — Limited';
 
   @override
-  String get featureSmartImport => 'AI Smart Import';
-
-  @override
   String get featureFamilySharing5 => '가족 공유 (5명)';
 
   @override
@@ -4671,18 +4668,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get compareBackups => '백업';
 
   @override
-  String get compareSmartImport => 'AI Smart Import';
-
-  @override
-  String get compareSmartImportNone => '—';
-
-  @override
-  String get compareSmartImportPremium => '2/mo';
-
-  @override
-  String get compareSmartImportCloud => '10/mo';
-
-  @override
   String get compareCloudStorage => '클라우드 저장소';
 
   @override
@@ -4744,42 +4729,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get resetToDefault => 'Reset to Default';
-
-  @override
-  String get smartImportSuccess => 'AI가 레시피를 다시 분석했습니다';
-
-  @override
-  String smartImportSuccessWithRemaining(int remaining) {
-    return 'AI가 레시피를 분석했습니다 • 이번 달 $remaining회 남음';
-  }
-
-  @override
-  String get smartImportLimitTitle => '스마트 가져오기 한도에 도달했습니다';
-
-  @override
-  String smartImportLimitMessage(int limit) {
-    return '이번 달 $limit회의 스마트 가져오기를 모두 사용했습니다.';
-  }
-
-  @override
-  String get smartImportUpgradeHint => '프리미엄으로 업그레이드하여 월 200회 가져오기.';
-
-  @override
-  String get smartImportParsing => 'AI 분석 중...';
-
-  @override
-  String get smartImportFix => '스마트 가져오기로 수정 ✨';
-
-  @override
-  String smartImportRemaining(int remaining, int limit) {
-    return '이번 달 $remaining/$limit회의 스마트 가져오기 남음';
-  }
-
-  @override
-  String get smartImportHintTitle => '가져오기가 올바르지 않아 보이나요?';
-
-  @override
-  String get smartImportHintSubtitle => '스마트 가져오기 구독 — AI 레시피 분석';
 
   @override
   String get learnMore => '자세히 알아보기';
@@ -6354,9 +6303,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get splashTagline => '당신의 요리 모험이 기다립니다';
-
-  @override
-  String get smartImportReparsed => 'AI가 다시 분석했습니다 — 위의 업데이트된 레시피를 확인하세요';
 
   @override
   String get servingSizeHint => '예: 1컵, 100g';

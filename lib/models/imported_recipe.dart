@@ -24,7 +24,7 @@ class ImportedRecipe {
 
   // OCR quality metadata
   double? parseConfidence; // 0.0 - 1.0 confidence score from OCR/parsing
-  String? rawOcrText; // Original OCR text for Smart Import fallback
+  String? rawOcrText; // Original OCR text
 
   ImportedRecipe({
     required this.title,

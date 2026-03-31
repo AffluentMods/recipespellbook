@@ -22,57 +22,16 @@ class PaywallScreen extends ConsumerStatefulWidget {
 }
 
 class _PaywallScreenState extends ConsumerState<PaywallScreen> {
-  // 0 = Premium (one-time), 1 = Cloud Sync (subscription)
-  int _tabIndex = 0;
-  // For Cloud Sync: 0 = monthly, 1 = yearly
-  int _billingCycle = 1; // default yearly (better value)
-  // Which subscription tier is selected: 0 = Cloud Sync, 1 = Cloud Sync Family
-  int _subTierIndex = 0;
+  // 0 = Premium ($6.99), 1 = Family ($19.99)
+  int _selectedPlan = 0;
   bool _purchasing = false;
-  bool _trialEligible = true; // assume eligible until checked
-
-  /// Set to true to show Cloud Sync Family in the subscription tab.
-  /// Hidden for now until launch — all wiring is in place.
-  static const _showCloudSyncFamily = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // If user already has premium, default to Cloud Sync tab
-      final sub = ref.read(subscriptionProvider);
-      if (sub.tier == SubscriptionTier.premium) {
-        setState(() => _tabIndex = 1);
-      }
-      // Check free trial eligibility
-      _checkTrialEligibility();
-    });
-  }
-
-  Future<void> _checkTrialEligibility() async {
-    final eligible = await RevenueCatService.instance.checkTrialEligibility([
-      RCConfig.cloudSyncMonthlyId,
-      RCConfig.cloudSyncYearlyId,
-    ]);
-    if (mounted) {
-      setState(() => _trialEligible = eligible);
-    }
-  }
-
-  bool get _hasPremium =>
-      ref.read(subscriptionProvider).tier == SubscriptionTier.premium;
-
-  /// Whether we're currently showing the premium (one-time) tab
-  bool get _isOnPremiumTab => _tabIndex == 0 && !_hasPremium;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final isDark = theme.brightness == Brightness.dark;
     final authState = ref.watch(authProvider);
-    final subStatus = ref.watch(subscriptionProvider);
-    final hasPremium = subStatus.tier == SubscriptionTier.premium;
+    ref.watch(subscriptionProvider); // watch for tier changes
 
     return Scaffold(
       body: SafeArea(
@@ -131,48 +90,65 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // ── Tab toggle: Premium | Cloud Sync ──
-                    // (hidden if user already owns premium)
-                    if (!hasPremium) ...[
-                      _buildTabToggle(theme, isDark, l10n),
-                      const SizedBox(height: 20),
-                    ],
-
-                    // ── Tab content ──
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 250),
-                      child: _tabIndex == 0 && !hasPremium
-                          ? _buildPremiumTab(theme, isDark, l10n)
-                          : _buildSubscriptionTab(theme, isDark, l10n),
+                    // ── Plan cards ──
+                    _PlanCard(
+                      title: 'Premium',
+                      price: '\$6.99',
+                      subtitle: 'One-time purchase · For you',
+                      features: const [
+                        'Cloud sync across all devices',
+                        'Unlimited recipe storage',
+                        '2 GB photo storage',
+                        'Automatic backups',
+                        'Step-by-step photos',
+                      ],
+                      isSelected: _selectedPlan == 0,
+                      onTap: () => setState(() => _selectedPlan = 0),
+                      badge: 'Most Popular',
+                      theme: theme,
+                    ),
+                    const SizedBox(height: 12),
+                    _PlanCard(
+                      title: 'Family',
+                      price: '\$19.99',
+                      subtitle: 'One-time purchase · For the whole family',
+                      features: const [
+                        'Everything in Premium',
+                        'Share cookbooks with family',
+                        'Shared shopping lists',
+                        'Shared meal plans',
+                        '5 GB photo storage',
+                      ],
+                      isSelected: _selectedPlan == 1,
+                      onTap: () => setState(() => _selectedPlan = 1),
+                      theme: theme,
                     ),
 
                     const SizedBox(height: 16),
 
-                    // ── Compare all plans ──
+                    // ── Info notice ──
+                    _buildInfoCard(
+                      theme,
+                      icon: Icons.info_outline,
+                      text: 'One-time purchase. No subscriptions. Works on all your devices forever.',
+                    ),
+
+                    const SizedBox(height: 12),
+
                     TextButton.icon(
                       onPressed: () => _showCompareSheet(context),
                       icon: const Icon(Icons.compare_arrows, size: 18),
                       label: Text(l10n.compareAllPlans),
                     ),
 
-                    const SizedBox(height: 8),
-
-                    // ── Info notice for premium tab ──
-                    if (_tabIndex == 0 && !hasPremium)
-                      _buildInfoCard(
-                        theme,
-                        icon: Icons.info_outline,
-                        text: l10n.premiumInfoNotice,
-                      ),
-
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
             ),
 
             // ── Purchase button + footer ──
-            _buildPurchaseFooter(theme, isDark, authState, l10n),
+            _buildPurchaseFooter(theme, theme.brightness == Brightness.dark, authState, l10n),
           ],
         ),
       ),
@@ -182,326 +158,6 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   // ════════════════════════════════════════════════════════════════
   //  TAB TOGGLE — Premium | Cloud Sync
   // ════════════════════════════════════════════════════════════════
-
-  Widget _buildTabToggle(ThemeData theme, bool isDark, AppLocalizations l10n) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark
-            ? theme.colorScheme.surfaceContainerHighest
-            : theme.colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      padding: const EdgeInsets.all(4),
-      child: Row(
-        children: [
-          _tabButton(
-            label: l10n.tierPremium,
-            index: 0,
-            theme: theme,
-            isDark: isDark,
-          ),
-          _tabButton(
-            label: l10n.cloudSyncFeature,
-            index: 1,
-            theme: theme,
-            isDark: isDark,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _tabButton({
-    required String label,
-    required int index,
-    required ThemeData theme,
-    required bool isDark,
-  }) {
-    final selected = _tabIndex == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _tabIndex = index),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: selected
-                ? (isDark ? theme.colorScheme.surface : Colors.white)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(11),
-            boxShadow: selected
-                ? [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 4,
-                offset: const Offset(0, 1),
-              ),
-            ]
-                : null,
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: selected ? FontWeight.bold : FontWeight.w500,
-              color: selected
-                  ? theme.colorScheme.onSurface
-                  : theme.colorScheme.outline,
-              fontSize: 14,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ════════════════════════════════════════════════════════════════
-  //  PREMIUM TAB — One-Time Purchase
-  // ════════════════════════════════════════════════════════════════
-
-  Widget _buildPremiumTab(ThemeData theme, bool isDark, AppLocalizations l10n) {
-    return Column(
-      key: const ValueKey('premium'),
-      children: [
-        // "One Time" pill — sits where the billing toggle would be
-        _buildOneTimePill(theme, isDark, l10n),
-        const SizedBox(height: 16),
-
-        _PlanCard(
-          title: l10n.tierPremium,
-          price: '\$6.99',
-          subtitle: l10n.payOnceKeepForever,
-          isSelected: true,
-          accentColor: Colors.amber,
-          theme: theme,
-          isDark: isDark,
-          badge: l10n.bestValue,
-          onTap: () {},
-          features: [
-            _Feature(icon: Icons.cloud_sync, text: l10n.featureCloudSyncPersonal),
-            _Feature(icon: Icons.photo_library, text: l10n.featurePhotosOnSteps),
-            _Feature(icon: Icons.cloud, text: l10n.featureCloudStorageLimited),
-            _Feature(icon: Icons.auto_awesome, text: l10n.featureSmartImport),
-          ],
-        ),
-      ],
-    );
-  }
-
-  /// Amber-tinted "One Time" badge in the billing toggle position
-  Widget _buildOneTimePill(
-      ThemeData theme, bool isDark, AppLocalizations l10n) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark
-            ? theme.colorScheme.surfaceContainerHighest
-            : theme.colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      padding: const EdgeInsets.all(3),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.amber.withValues(alpha: isDark ? 0.15 : 0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Colors.amber.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.diamond_outlined,
-                size: 16, color: Colors.amber.shade700),
-            const SizedBox(width: 6),
-            Text(
-              l10n.oneTimeTab,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: Colors.amber.shade700,
-                fontSize: 13,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ════════════════════════════════════════════════════════════════
-  //  SUBSCRIPTION TAB — Cloud Sync
-  // ════════════════════════════════════════════════════════════════
-
-  Widget _buildSubscriptionTab(
-      ThemeData theme, bool isDark, AppLocalizations l10n) {
-    return Column(
-      key: const ValueKey('subscription'),
-      children: [
-        // Monthly / Yearly toggle with savings badge
-        _buildBillingToggle(theme, isDark, l10n),
-        const SizedBox(height: 16),
-
-        // Cloud Sync card
-        _PlanCard(
-          title: l10n.cloudSyncFeature,
-          price: _billingCycle == 0 ? '\$2.99/mo' : '\$29.99/yr',
-          subtitle: _trialEligible
-              ? '${l10n.cloudSyncFreeTrial} · ${_billingCycle == 1 ? l10n.save16Yearly : l10n.billedMonthly}'
-              : _billingCycle == 1 ? l10n.save16Yearly : l10n.billedMonthly,
-          isSelected: _subTierIndex == 0,
-          accentColor: Colors.blue,
-          theme: theme,
-          isDark: isDark,
-          badge: _billingCycle == 1 ? l10n.save16Badge : null,
-          onTap: () => setState(() => _subTierIndex = 0),
-          features: [
-            _Feature(
-                icon: Icons.family_restroom,
-                text: l10n.featureFamilySharing5),
-            _Feature(
-                icon: Icons.cloud, text: l10n.featureCloudStorage),
-            _Feature(icon: Icons.shopping_cart, text: l10n.featureSharedLists),
-            _Feature(
-                icon: Icons.menu_book, text: l10n.featureSharedCookbooks),
-            _Feature(
-                icon: Icons.calendar_month, text: l10n.featureSharedMealPlan),
-            _Feature(icon: Icons.backup, text: l10n.featureAutoBackups),
-          ],
-        ),
-        const SizedBox(height: 12),
-
-        // Cloud Sync Family (hidden until launch — flip _showCloudSyncFamily)
-        if (_showCloudSyncFamily) ...[
-          _PlanCard(
-            title: l10n.cloudSyncFamilyFeature,
-            price: _billingCycle == 0 ? '\$4.99/mo' : '\$49.99/yr',
-            subtitle:
-            _billingCycle == 1 ? l10n.save17Yearly : l10n.billedMonthly,
-            isSelected: _subTierIndex == 1,
-            accentColor: Colors.deepPurple,
-            theme: theme,
-            isDark: isDark,
-            badge: null,
-            onTap: () => setState(() => _subTierIndex = 1),
-            features: [
-              _Feature(
-                  icon: Icons.family_restroom,
-                  text: l10n.featureFamilySharing10),
-              _Feature(
-                  icon: Icons.cloud,
-                  text: l10n.featureCloudStorage),
-              _Feature(icon: Icons.speed, text: l10n.featurePrioritySync),
-              _Feature(
-                  icon: Icons.auto_awesome,
-                  text: l10n.featureFutureAdvanced),
-            ],
-          ),
-        ],
-
-        const SizedBox(height: 12),
-
-        // "Includes everything in Premium" notice
-        _buildInfoCard(
-          theme,
-          icon: Icons.check_circle_outline,
-          text: l10n.subscriptionsIncludePremium,
-          color: Colors.green,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBillingToggle(
-      ThemeData theme, bool isDark, AppLocalizations l10n) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark
-            ? theme.colorScheme.surfaceContainerHighest
-            : theme.colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      padding: const EdgeInsets.all(3),
-      child: Row(
-        children: [
-          _billingButton(l10n.monthly, 0, theme, isDark),
-          _billingButton(l10n.yearly, 1, theme, isDark,
-              savingsBadge: l10n.save16Badge),
-        ],
-      ),
-    );
-  }
-
-  Widget _billingButton(
-      String label,
-      int index,
-      ThemeData theme,
-      bool isDark, {
-        String? savingsBadge,
-      }) {
-    final selected = _billingCycle == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _billingCycle = index),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: selected
-                ? (isDark ? theme.colorScheme.surface : Colors.white)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: selected
-                ? [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 3,
-                offset: const Offset(0, 1),
-              ),
-            ]
-                : null,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontWeight: selected ? FontWeight.bold : FontWeight.w500,
-                  color: selected
-                      ? theme.colorScheme.onSurface
-                      : theme.colorScheme.outline,
-                  fontSize: 13,
-                ),
-              ),
-              // Show savings badge on yearly when selected
-              if (savingsBadge != null && selected) ...[
-                const SizedBox(width: 6),
-                Container(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    savingsBadge,
-                    style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   // ════════════════════════════════════════════════════════════════
   //  PURCHASE FOOTER
@@ -513,30 +169,16 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       AuthState authState,
       AppLocalizations l10n,
       ) {
-    final buttonLabel = _isOnPremiumTab
-        ? l10n.purchasePremiumCta
-        : _subTierIndex == 0
-        ? (_trialEligible
-            ? (_billingCycle == 0
-                ? l10n.subscribeCloudSyncMonthlyTrialCta
-                : l10n.subscribeCloudSyncYearlyTrialCta)
-            : (_billingCycle == 0
-                ? l10n.subscribeCloudSyncMonthlyCta
-                : l10n.subscribeCloudSyncYearlyCta))
-        : (_billingCycle == 0
-        ? l10n.subscribeCloudSyncPlusMonthlyCta
-        : l10n.subscribeCloudSyncPlusYearlyCta);
+    final buttonLabel = _selectedPlan == 0
+        ? 'Get Premium — \$6.99'
+        : 'Get Family — \$19.99';
 
-    final gradientColors = _isOnPremiumTab
+    final gradientColors = _selectedPlan == 0
         ? [Colors.amber.shade600, Colors.orange.shade500]
-        : _subTierIndex == 0
-        ? [Colors.blue.shade500, Colors.blue.shade700]
         : [Colors.deepPurple.shade400, Colors.deepPurple.shade700];
 
-    final glowColor = _isOnPremiumTab
+    final glowColor = _selectedPlan == 0
         ? Colors.amber
-        : _subTierIndex == 0
-        ? Colors.blue
         : Colors.deepPurple;
 
     return Container(
@@ -685,18 +327,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     setState(() => _purchasing = true);
 
     try {
-      String productId;
-      if (_isOnPremiumTab) {
-        productId = RCConfig.premiumLifetimeId;
-      } else if (_subTierIndex == 0) {
-        productId = _billingCycle == 0
-            ? RCConfig.cloudSyncMonthlyId
-            : RCConfig.cloudSyncYearlyId;
-      } else {
-        productId = _billingCycle == 0
-            ? RCConfig.cloudSyncFamilyMonthlyId
-            : RCConfig.cloudSyncFamilyYearlyId;
-      }
+      final productId = _selectedPlan == 0
+          ? RCConfig.premiumLifetimeId
+          : RCConfig.familyLifetimeId;
 
       final service = RevenueCatService.instance;
       final offerings = await service.getOfferings();
@@ -718,14 +351,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
       final packages = current.availablePackages;
 
-      // Match by PackageType first (most reliable across platforms),
-      // then fall back to product ID string match.
-      PackageType? targetType;
-      if (_isOnPremiumTab) {
-        targetType = PackageType.lifetime;
-      } else {
-        targetType = _billingCycle == 0 ? PackageType.monthly : PackageType.annual;
-      }
+      // Both plans are lifetime purchases
+      const targetType = PackageType.lifetime;
 
       var matchIdx = packages.indexWhere((p) => p.packageType == targetType);
 
@@ -976,7 +603,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 child: SingleChildScrollView(
                   controller: scrollController,
                   padding: const EdgeInsets.all(16),
-                  child: _CompareTable(theme: theme, showFamily: _showCloudSyncFamily),
+                  child: _CompareTable(theme: theme),
                 ),
               ),
             ],
@@ -1057,179 +684,6 @@ class _HeroIcon extends StatelessWidget {
 //  PLAN CARD — Polished with larger price, divider, feature circles
 // ═══════════════════════════════════════════════════════════════════
 
-class _PlanCard extends StatelessWidget {
-  final String title;
-  final String price;
-  final String subtitle;
-  final bool isSelected;
-  final Color accentColor;
-  final ThemeData theme;
-  final bool isDark;
-  final String? badge;
-  final VoidCallback onTap;
-  final List<_Feature> features;
-
-  const _PlanCard({
-    required this.title,
-    required this.price,
-    required this.subtitle,
-    required this.isSelected,
-    required this.accentColor,
-    required this.theme,
-    required this.isDark,
-    this.badge,
-    required this.onTap,
-    required this.features,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: isDark
-              ? theme.colorScheme.surfaceContainerHigh
-              : theme.colorScheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected
-                ? accentColor
-                : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-            width: isSelected ? 2 : 1,
-          ),
-          boxShadow: isSelected
-              ? [
-            BoxShadow(
-              color: accentColor.withValues(alpha: 0.12),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ]
-              : null,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Title row with badge ──
-            Row(
-              children: [
-                if (isSelected)
-                  Container(
-                    width: 24,
-                    height: 24,
-                    margin: const EdgeInsets.only(right: 10),
-                    decoration: BoxDecoration(
-                      color: accentColor,
-                      shape: BoxShape.circle,
-                    ),
-                    child:
-                    const Icon(Icons.check, size: 14, color: Colors.white),
-                  ),
-                Text(
-                  title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-                const Spacer(),
-                if (badge != null)
-                  Container(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: accentColor.withValues(alpha: 0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      badge!,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: accentColor,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // ── Price — large and prominent ──
-            Text(
-              price,
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: accentColor,
-                letterSpacing: -0.5,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.outline,
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // ── Divider ──
-            Divider(
-              height: 1,
-              color:
-              theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
-            ),
-
-            const SizedBox(height: 14),
-
-            // ── Features with icon circles ──
-            ...features.map((f) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 22,
-                    height: 22,
-                    decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child:
-                    Icon(f.icon, size: 12, color: accentColor),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      f.text,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        height: 1.3,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            )),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Feature {
-  final IconData icon;
-  final String text;
-  const _Feature({required this.icon, required this.text});
-}
 
 // ═══════════════════════════════════════════════════════════════════
 //  COMPARE TABLE
@@ -1237,12 +691,10 @@ class _Feature {
 
 class _CompareTable extends StatelessWidget {
   final ThemeData theme;
-  final bool showFamily;
-  const _CompareTable({required this.theme, required this.showFamily});
+  const _CompareTable({required this.theme});
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final headerStyle = TextStyle(
       fontWeight: FontWeight.bold,
       fontSize: 11,
@@ -1253,12 +705,11 @@ class _CompareTable extends StatelessWidget {
     );
 
     return Table(
-      columnWidths: {
-        0: const FlexColumnWidth(2.2),
-        1: const FlexColumnWidth(1.4),
-        2: const FlexColumnWidth(1.4),
-        3: const FlexColumnWidth(1.4),
-        if (showFamily) 4: const FlexColumnWidth(1.4),
+      columnWidths: const {
+        0: FlexColumnWidth(2.2),
+        1: FlexColumnWidth(1.4),
+        2: FlexColumnWidth(1.4),
+        3: FlexColumnWidth(1.4),
       },
       defaultVerticalAlignment: TableCellVerticalAlignment.middle,
       children: [
@@ -1271,35 +722,20 @@ class _CompareTable extends StatelessWidget {
           ),
           children: [
             const SizedBox(height: 36),
-            _headerCell(l10n.tierFree, Colors.grey, headerStyle),
-            _headerCell(l10n.tierPremium, Colors.amber, headerStyle),
-            _headerCell(l10n.tierCloudSync, Colors.blue, headerStyle),
-            if (showFamily)
-              _headerCell(
-                  l10n.tierCloudSyncPlus, Colors.deepPurple, headerStyle),
+            _headerCell('Free', Colors.grey, headerStyle),
+            _headerCell('Premium', Colors.amber, headerStyle),
+            _headerCell('Family', Colors.deepPurple, headerStyle),
           ],
         ),
-        _row(l10n.comparePrice,
-            [l10n.priceFree, l10n.pricePremium, l10n.priceCloudSync, if (showFamily) l10n.priceCloudSyncPlus],
-            cellStyle),
-        _row(l10n.compareDeviceTransfer,
-            [l10n.qrCode, l10n.cloud, l10n.cloud, if (showFamily) l10n.cloud], cellStyle),
-        _row(l10n.compareCloudStorage,
-            [_x, l10n.compareCloudStorageBasic, l10n.compareCloudStorageStandard, if (showFamily) l10n.compareCloudStorageExtended], cellStyle),
-        _row(l10n.compareStepPhotos,
-            [_x, _check, _check, if (showFamily) _check], cellStyle),
-        _row(l10n.compareFamilySharing,
-            [_x, _x, '5', if (showFamily) '10'], cellStyle),
-        _row(l10n.compareSharedLists,
-            [_x, _x, _check, if (showFamily) _check], cellStyle),
-        _row(l10n.compareSharedCookbooks,
-            [_x, _x, _check, if (showFamily) _check], cellStyle),
-        _row(l10n.compareSharedMealPlan,
-            [_x, _x, _check, if (showFamily) _check], cellStyle),
-        _row(l10n.compareBackups,
-            [_x, _x, _check, if (showFamily) _check], cellStyle),
-        _row(l10n.compareSmartImport,
-            [l10n.compareSmartImportNone, l10n.compareSmartImportPremium, l10n.compareSmartImportCloud, if (showFamily) l10n.compareSmartImportCloud], cellStyle),
+        _row('Price', ['Free', '\$6.99', '\$19.99'], cellStyle),
+        _row('Cloud Sync', [_x, _check, _check], cellStyle),
+        _row('Cloud Storage', [_x, '2 GB', '5 GB'], cellStyle),
+        _row('Step Photos', [_x, _check, _check], cellStyle),
+        _row('Family Sharing', [_x, _x, _check], cellStyle),
+        _row('Shared Lists', [_x, _x, _check], cellStyle),
+        _row('Shared Cookbooks', [_x, _x, _check], cellStyle),
+        _row('Shared Meal Plan', [_x, _x, _check], cellStyle),
+        _row('Backups', [_x, _check, _check], cellStyle),
       ],
     );
   }
@@ -1363,6 +799,133 @@ class _CompareTable extends StatelessWidget {
           ),
         )),
       ],
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  PLAN CARD
+// ════════════════════════════════════════════════════════════════
+
+class _PlanCard extends StatelessWidget {
+  final String title;
+  final String price;
+  final String subtitle;
+  final List<String> features;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final String? badge;
+  final ThemeData theme;
+
+  const _PlanCard({
+    required this.title,
+    required this.price,
+    required this.subtitle,
+    required this.features,
+    required this.isSelected,
+    required this.onTap,
+    required this.theme,
+    this.badge,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = isSelected
+        ? theme.colorScheme.primary
+        : theme.colorScheme.outlineVariant;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: borderColor,
+            width: isSelected ? 2.5 : 1,
+          ),
+          color: isSelected
+              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.15)
+              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  isSelected ? Icons.check_circle : Icons.circle_outlined,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.outline,
+                  size: 22,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                if (badge != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
+                    ),
+                    child: Text(
+                      badge!,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber.shade700,
+                      ),
+                    ),
+                  ),
+                const SizedBox(width: 8),
+                Text(
+                  price,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.only(left: 32),
+              child: Text(
+                subtitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...features.map((f) => Padding(
+              padding: const EdgeInsets.only(left: 32, bottom: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.check, size: 16, color: Colors.green.shade400),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      f,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ),
+                ],
+              ),
+            )),
+          ],
+        ),
+      ),
     );
   }
 }

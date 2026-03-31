@@ -4590,9 +4590,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get featureCloudStorageLimited => 'Cloud storage — Limited';
 
   @override
-  String get featureSmartImport => 'AI Smart Import';
-
-  @override
   String get featureFamilySharing5 => '家庭共享（5人）';
 
   @override
@@ -4671,18 +4668,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get compareBackups => '备份';
 
   @override
-  String get compareSmartImport => 'AI Smart Import';
-
-  @override
-  String get compareSmartImportNone => '—';
-
-  @override
-  String get compareSmartImportPremium => '2/mo';
-
-  @override
-  String get compareSmartImportCloud => '10/mo';
-
-  @override
   String get compareCloudStorage => '云存储';
 
   @override
@@ -4744,42 +4729,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get resetToDefault => 'Reset to Default';
-
-  @override
-  String get smartImportSuccess => 'AI已重新分析食谱';
-
-  @override
-  String smartImportSuccessWithRemaining(int remaining) {
-    return 'AI已分析食谱 • 本月剩余$remaining次';
-  }
-
-  @override
-  String get smartImportLimitTitle => '已达到智能导入限制';
-
-  @override
-  String smartImportLimitMessage(int limit) {
-    return '您已使用本月$limit次智能导入。';
-  }
-
-  @override
-  String get smartImportUpgradeHint => '升级到高级版获得每月200次导入。';
-
-  @override
-  String get smartImportParsing => 'AI分析中...';
-
-  @override
-  String get smartImportFix => '用智能导入修复 ✨';
-
-  @override
-  String smartImportRemaining(int remaining, int limit) {
-    return '本月剩余$remaining/$limit次智能导入';
-  }
-
-  @override
-  String get smartImportHintTitle => '导入看起来不正确？';
-
-  @override
-  String get smartImportHintSubtitle => '订阅智能导入 — AI食谱分析';
 
   @override
   String get learnMore => '了解更多';
@@ -6354,9 +6303,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get splashTagline => '你的烹饪冒险即将开始';
-
-  @override
-  String get smartImportReparsed => '已由AI重新解析 — 请查看上方更新后的食谱';
 
   @override
   String get servingSizeHint => '例如：1杯、100克';

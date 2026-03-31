@@ -2330,40 +2330,6 @@
   "textSize": "Размер текста",
   "ingredientPreview": "Предпросмотр ингредиентов",
   "resetToDefault": "Reset to Default",
-  "smartImportSuccess": "Рецепт повторно проанализирован AI",
-  "smartImportSuccessWithRemaining": "Рецепт проанализирован AI • {remaining} импортов осталось в этом месяце",
-  "@smartImportSuccessWithRemaining": {
-    "placeholders": {
-      "remaining": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportLimitTitle": "Достигнут лимит умного импорта",
-  "smartImportLimitMessage": "Вы использовали {limit} умных импортов за этот месяц.",
-  "@smartImportLimitMessage": {
-    "placeholders": {
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportUpgradeHint": "Перейдите на Premium для 200 импортов/месяц.",
-  "smartImportParsing": "AI анализирует...",
-  "smartImportFix": "Исправить умным импортом ✨",
-  "smartImportRemaining": "{remaining} из {limit} умных импортов осталось в этом месяце",
-  "@smartImportRemaining": {
-    "placeholders": {
-      "remaining": {
-        "type": "int"
-      },
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
-  "smartImportHintTitle": "Импорт выглядит неправильным?",
-  "smartImportHintSubtitle": "Подпишитесь на умный импорт — анализ рецептов AI",
   "learnMore": "Узнать больше",
   "retry": "Повторить",
   "upgrade": "Улучшить",
@@ -3158,7 +3124,6 @@
   "splashRecipe": "Рецепт",
   "splashSpellbook": "Книга заклинаний",
   "splashTagline": "Ваше кулинарное приключение ждёт",
-  "smartImportReparsed": "Повторно проанализировано ИИ — проверьте обновлённый рецепт выше",
   "servingSizeHint": "напр., 1 стакан, 100г",
   "mainNutrients": "Основные нутриенты",
   "additionalNutrients": "Дополнительные нутриенты",
@@ -3343,11 +3308,6 @@
   "kitchenBuddyNameLabel": "Buddy Name",
   "kitchenBuddyNameHint": "Enter a name...",
   "kitchenBuddyCreate": "Create Buddy",
-  "featureSmartImport": "AI Smart Import",
-  "compareSmartImport": "AI Smart Import",
-  "compareSmartImportNone": "—",
-  "compareSmartImportPremium": "2/mo",
-  "compareSmartImportCloud": "10/mo",
   "cloudSyncFreeTrial": "Try free for 1 week",
   "subscribeCloudSyncMonthlyTrialCta": "Start free trial — then $2.99/mo",
   "subscribeCloudSyncYearlyTrialCta": "Start free trial — then $29.99/yr",

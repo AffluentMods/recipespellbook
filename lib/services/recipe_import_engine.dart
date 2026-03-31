@@ -312,7 +312,7 @@ class RecipeImportEngine {
     }
 
     // Last resort: return the caption as a single-instruction recipe
-    // so the user can at least see the text and use Smart Import
+    // so the user can at least see the text
     return ImportedRecipe(
       title: _cleanSocialTitle(authorName.isNotEmpty ? '$authorName\'s Recipe' : 'TikTok Recipe'),
       ingredients: [],
@@ -715,7 +715,7 @@ class RecipeImportEngine {
     // Score parse confidence
     final confidence = _scoreParseConfidence(recipe, cleaned);
     recipe.parseConfidence = confidence;
-    recipe.rawOcrText = text; // Keep original for Smart Import fallback
+    recipe.rawOcrText = text;
 
     return recipe;
   }

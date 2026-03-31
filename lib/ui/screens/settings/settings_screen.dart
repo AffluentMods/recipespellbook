@@ -831,9 +831,7 @@ class _TierBadge extends ConsumerWidget {
     final (label, color) = switch (tier) {
       SubscriptionTier.free => (l10n.tierFree, Theme.of(context).colorScheme.outline),
       SubscriptionTier.premium => (l10n.tierPremium, Colors.amber.shade700),
-      SubscriptionTier.cloudSync => (l10n.tierCloudSync, Colors.blue),
-      SubscriptionTier.cloudSyncFamily => (l10n.tierFamily, Colors.deepPurple),
-      SubscriptionTier.creator => (l10n.tierCreator, Colors.deepPurple),
+      SubscriptionTier.family => (l10n.tierFamily, Colors.deepPurple),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),

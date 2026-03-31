@@ -4590,9 +4590,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featureCloudStorageLimited => 'Cloud storage — Limited';
 
   @override
-  String get featureSmartImport => 'AI Smart Import';
-
-  @override
   String get featureFamilySharing5 => 'ファミリー共有（5名）';
 
   @override
@@ -4671,18 +4668,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get compareBackups => 'バックアップ';
 
   @override
-  String get compareSmartImport => 'AI Smart Import';
-
-  @override
-  String get compareSmartImportNone => '—';
-
-  @override
-  String get compareSmartImportPremium => '2/mo';
-
-  @override
-  String get compareSmartImportCloud => '10/mo';
-
-  @override
   String get compareCloudStorage => 'クラウドストレージ';
 
   @override
@@ -4744,42 +4729,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get resetToDefault => 'Reset to Default';
-
-  @override
-  String get smartImportSuccess => 'AIがレシピを再解析しました';
-
-  @override
-  String smartImportSuccessWithRemaining(int remaining) {
-    return 'AIがレシピを解析しました • 今月残り$remaining回';
-  }
-
-  @override
-  String get smartImportLimitTitle => 'スマートインポートの上限に達しました';
-
-  @override
-  String smartImportLimitMessage(int limit) {
-    return '今月の$limit回のスマートインポートを使い切りました。';
-  }
-
-  @override
-  String get smartImportUpgradeHint => 'プレミアムにアップグレードして月200回のインポートを。';
-
-  @override
-  String get smartImportParsing => 'AIが解析中...';
-
-  @override
-  String get smartImportFix => 'スマートインポートで修正 ✨';
-
-  @override
-  String smartImportRemaining(int remaining, int limit) {
-    return '今月残り$remaining/$limit回のスマートインポート';
-  }
-
-  @override
-  String get smartImportHintTitle => 'インポートが正しくないですか？';
-
-  @override
-  String get smartImportHintSubtitle => 'スマートインポートを購読 — AIレシピ解析';
 
   @override
   String get learnMore => '詳細を見る';
@@ -6354,9 +6303,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get splashTagline => 'あなたの料理の冒険が待っています';
-
-  @override
-  String get smartImportReparsed => 'AIが再解析しました — 上の更新されたレシピを確認してください';
 
   @override
   String get servingSizeHint => '例: 1カップ、100g';

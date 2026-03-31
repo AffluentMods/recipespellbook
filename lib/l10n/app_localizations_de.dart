@@ -4622,9 +4622,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get featureCloudStorageLimited => 'Cloud storage — Limited';
 
   @override
-  String get featureSmartImport => 'AI Smart Import';
-
-  @override
   String get featureFamilySharing5 => 'Familienfreigabe (5 Mitglieder)';
 
   @override
@@ -4703,18 +4700,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get compareBackups => 'Backups';
 
   @override
-  String get compareSmartImport => 'AI Smart Import';
-
-  @override
-  String get compareSmartImportNone => '—';
-
-  @override
-  String get compareSmartImportPremium => '2/mo';
-
-  @override
-  String get compareSmartImportCloud => '10/mo';
-
-  @override
   String get compareCloudStorage => 'Cloud-Speicher';
 
   @override
@@ -4776,42 +4761,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get resetToDefault => 'Auf Standard zurücksetzen';
-
-  @override
-  String get smartImportSuccess => 'Rezept von KI neu analysiert';
-
-  @override
-  String smartImportSuccessWithRemaining(int remaining) {
-    return 'Rezept von KI neu analysiert • $remaining Importe diesen Monat übrig';
-  }
-
-  @override
-  String get smartImportLimitTitle => 'Smart-Import-Limit erreicht';
-
-  @override
-  String smartImportLimitMessage(int limit) {
-    return 'Du hast alle $limit Smart-Importe diesen Monat verbraucht.';
-  }
-
-  @override
-  String get smartImportUpgradeHint => 'Upgrade auf Premium für 200 Importe/Monat.';
-
-  @override
-  String get smartImportParsing => 'KI analysiert...';
-
-  @override
-  String get smartImportFix => 'Mit Smart Import korrigieren ✨';
-
-  @override
-  String smartImportRemaining(int remaining, int limit) {
-    return '$remaining von $limit Smart-Importen diesen Monat übrig';
-  }
-
-  @override
-  String get smartImportHintTitle => 'Import sieht nicht richtig aus?';
-
-  @override
-  String get smartImportHintSubtitle => 'Abonniere Smart Import — KI-gestützte Rezeptanalyse';
 
   @override
   String get learnMore => 'Mehr erfahren';
@@ -6406,9 +6355,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get splashTagline => 'Dein kulinarisches Abenteuer wartet';
-
-  @override
-  String get smartImportReparsed => 'Von KI neu analysiert — überprüfe das aktualisierte Rezept oben';
 
   @override
   String get servingSizeHint => 'z.B. 1 Tasse, 100g';
