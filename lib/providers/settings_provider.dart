@@ -101,7 +101,7 @@ class AppSettings {
     this.currentCookbookId,
     this.languageCode = 'system',
     this.quickAccessShowHistory = true,
-    this.quickAccessHistoryCount = 10,
+    this.quickAccessHistoryCount = 20,
     this.quickAccessShowMealPlan = true,
     this.quickAccessShowPinned = true,
     this.recipePlaceholderMode = PlaceholderImageMode.custom,

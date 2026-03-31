@@ -462,6 +462,9 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                       onExpandToggle: () {
                         setState(() => _expanded[index] = !_expanded[index]);
                       },
+                      onRenameTitle: (newTitle) {
+                        setState(() => _recipes[index].title = newTitle);
+                      },
                     );
                   },
                 ),
@@ -589,6 +592,7 @@ class _RecipePreviewCard extends StatelessWidget {
   final bool isDuplicate;
   final ValueChanged<bool> onSelectedChanged;
   final VoidCallback onExpandToggle;
+  final ValueChanged<String>? onRenameTitle;
 
   const _RecipePreviewCard({
     required this.recipe,
@@ -598,7 +602,45 @@ class _RecipePreviewCard extends StatelessWidget {
     required this.isDuplicate,
     required this.onSelectedChanged,
     required this.onExpandToggle,
+    this.onRenameTitle,
   });
+
+  void _showRenameDialog(BuildContext context) {
+    final controller = TextEditingController(text: recipe.title);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Rename Recipe'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Title',
+            border: OutlineInputBorder(),
+          ),
+          onSubmitted: (val) {
+            if (val.trim().isNotEmpty) {
+              onRenameTitle?.call(val.trim());
+              Navigator.pop(ctx);
+            }
+          },
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              final val = controller.text.trim();
+              if (val.isNotEmpty) {
+                onRenameTitle?.call(val);
+                Navigator.pop(ctx);
+              }
+            },
+            child: const Text('Rename'),
+          ),
+        ],
+      ),
+    ).then((_) => controller.dispose());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -660,6 +702,14 @@ class _RecipePreviewCard extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              if (onRenameTitle != null)
+                                GestureDetector(
+                                  onTap: () => _showRenameDialog(context),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 4),
+                                    child: Icon(Icons.edit, size: 16, color: theme.colorScheme.outline),
+                                  ),
+                                ),
                               if (isDuplicate) ...[
                                 const SizedBox(width: 8),
                                 Container(
