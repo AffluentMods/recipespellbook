@@ -48,7 +48,7 @@ class _KrogerCallbackScreenState extends State<KrogerCallbackScreen> {
       return;
     }
 
-    debugPrint('[KrogerCallback] Exchanging code: ${widget.authCode!.substring(0, 8)}...');
+    debugPrint('[KrogerCallback] Exchanging auth code...');
 
     final ok = await GroceryService.krogerExchangeAuthCode(widget.authCode!);
 

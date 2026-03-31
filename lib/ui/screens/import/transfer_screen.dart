@@ -508,7 +508,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen> {
   Future<void> _submitCode() async {
     final l10n = AppLocalizations.of(context)!;
     final code = _codeController.text.trim().toUpperCase();
-    if (code.length != 6) {
+    if (!RegExp(r'^[A-Z0-9]{6}$').hasMatch(code)) {
       setState(() => _receiveError = l10n.transferCodeLength);
       return;
     }

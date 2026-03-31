@@ -90,9 +90,9 @@ class TransferService {
       'data': data,
     };
 
-    // If user is signed in, include auth info so receiver auto-signs-in
+    // If user is signed in, include display info (NOT the JWT — auth
+    // is handled via the Authorization header on the request itself).
     if (_auth.isSignedIn) {
-      body['authToken'] = _auth.currentJwt;
       body['displayName'] = _auth.currentUser?.name;
       body['email'] = _auth.currentUser?.email;
       body['avatarUrl'] = _auth.currentUser?.avatarUrl;

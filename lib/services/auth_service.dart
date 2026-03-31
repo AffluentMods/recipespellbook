@@ -355,7 +355,7 @@ class AuthService {
   /// URL to open in browser to start Discord OAuth link flow.
   /// Backend handles the entire OAuth dance; user just authorizes and closes the tab.
   String get discordLinkUrl =>
-      '$_apiBaseUrl/v1/auth/discord/link?token=$_currentJwt';
+      '$_apiBaseUrl/v1/auth/discord/link#token=$_currentJwt';
 
   /// Check if current user has Discord linked.
   Future<({bool linked, String? discordId})> getDiscordStatus() async {

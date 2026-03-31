@@ -230,7 +230,7 @@ class GroceryService {
           'Accept': 'application/json',
         },
         body: jsonEncode(body),
-      );
+      ).timeout(const Duration(seconds: 15));
 
       debugPrint('[Instacart IDP] Shopping list → ${resp.statusCode}');
 
@@ -295,7 +295,7 @@ class GroceryService {
           'Accept': 'application/json',
         },
         body: jsonEncode(body),
-      );
+      ).timeout(const Duration(seconds: 15));
 
       debugPrint('[Instacart IDP] Recipe page → ${resp.statusCode}');
 
@@ -436,7 +436,7 @@ class GroceryService {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: 'grant_type=client_credentials&scope=product.compact',
-      );
+      ).timeout(const Duration(seconds: 15));
       debugPrint('[Kroger] Auth → ${resp.statusCode}');
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
@@ -484,7 +484,7 @@ class GroceryService {
         body: 'grant_type=authorization_code'
             '&code=${Uri.encodeComponent(authCode)}'
             '&redirect_uri=${Uri.encodeComponent(_krogerRedirectUri)}',
-      );
+      ).timeout(const Duration(seconds: 15));
       debugPrint('[Kroger] Token exchange → ${resp.statusCode}');
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
@@ -522,7 +522,7 @@ class GroceryService {
         },
         body: 'grant_type=refresh_token'
             '&refresh_token=${Uri.encodeComponent(refreshToken)}',
-      );
+      ).timeout(const Duration(seconds: 15));
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
         await _storage.write(key: _krogerCartToken, value: data['access_token']);
@@ -578,7 +578,7 @@ class GroceryService {
       final resp = await http.get(Uri.parse(url), headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
-      });
+      }).timeout(const Duration(seconds: 15));
       debugPrint('[Kroger] → ${resp.statusCode}');
 
       if (resp.statusCode == 401) {
@@ -647,7 +647,7 @@ class GroceryService {
           'Accept': 'application/json',
         },
         body: jsonEncode({'items': cartItems}),
-      );
+      ).timeout(const Duration(seconds: 15));
       debugPrint('[Kroger] Cart → ${resp.statusCode}');
 
       if (resp.statusCode == 204 || resp.statusCode == 200) {
@@ -689,7 +689,7 @@ class GroceryService {
         Uri.parse('https://api.kroger.com/v1/locations'
             '?filter.zipCode.near=$zipCode&filter.limit=5'),
         headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
-      );
+      ).timeout(const Duration(seconds: 15));
       if (resp.statusCode == 200) {
         final locs = (jsonDecode(resp.body)['data'] as List?) ?? [];
         return locs
@@ -1032,7 +1032,6 @@ class GroceryService {
 
   // ── Logging helper ──
   static void _logResponse(String tag, http.Response resp) {
-    final body = resp.body.length > 250 ? resp.body.substring(0, 250) : resp.body;
-    debugPrint('$tag ${resp.statusCode}: $body');
+    debugPrint('$tag ${resp.statusCode}');
   }
 }

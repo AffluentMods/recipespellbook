@@ -112,7 +112,7 @@ class DesktopGoogleAuth {
       ).timeout(const Duration(seconds: 15));
 
       if (tokenResponse.statusCode != 200) {
-        debugPrint('[DesktopGoogleAuth] Token exchange failed: ${tokenResponse.statusCode} ${tokenResponse.body}');
+        debugPrint('[DesktopGoogleAuth] Token exchange failed: ${tokenResponse.statusCode}');
         return null;
       }
 
