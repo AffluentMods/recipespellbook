@@ -134,26 +134,41 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
             ? TextField(
           controller: _searchController,
           autofocus: true,
+          style: theme.textTheme.bodyLarge,
           decoration: InputDecoration(
-            hintText: '${AppLocalizations.of(context)!.searchHint}',
+            hintText: AppLocalizations.of(context)!.searchHint,
             border: InputBorder.none,
+            suffixIcon: _searchController.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear, size: 20),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() => _searchQuery = '');
+                    },
+                  )
+                : null,
           ),
           onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
         )
             : Text(widget.title),
+        leading: _isSearching
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  setState(() {
+                    _isSearching = false;
+                    _searchController.clear();
+                    _searchQuery = '';
+                  });
+                },
+              )
+            : null,
         actions: [
+          if (!_isSearching) ...[
           IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            icon: const Icon(Icons.search),
             tooltip: AppLocalizations.of(context)!.searchRecipes,
-            onPressed: () {
-              setState(() {
-                _isSearching = !_isSearching;
-                if (!_isSearching) {
-                  _searchController.clear();
-                  _searchQuery = '';
-                }
-              });
-            },
+            onPressed: () => setState(() => _isSearching = true),
           ),
           IconButton(
             icon: Badge(
@@ -194,6 +209,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
               );
             }).toList(),
           ),
+          ], // end !_isSearching
         ],
       ),
       body: Column(
@@ -269,6 +285,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
               onSetCourse: () => _bulkSetCourse(context),
               onSetCategory: () => _bulkSetCategory(context),
               onFavorite: () => _bulkFavorite(),
+              onCopyToCookbook: () => _bulkCopyToCookbook(context),
+              onMoveToCookbook: () => _bulkMoveToCookbook(context),
             ),
         ],
       ),
@@ -411,36 +429,47 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     final l10n = AppLocalizations.of(context)!;
     final translator = TaxonomyTranslator.of(context);
     final courses = taxonomy.CourseData.courses;
-    final selected = await Responsive.showAdaptiveSheet<String>(
-      context,
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (ctx) {
         final theme = Theme.of(ctx);
-        return SafeArea(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(l10n.setCourse, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-            ),
-            Flexible(
-              child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                children: courses.map((c) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Material(
-                    color: theme.colorScheme.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(12),
-                    child: ListTile(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
-                      title: Text(translator.translateCourse(c.name)),
-                      onTap: () => Navigator.pop(ctx, c.id),
-                    ),
-                  ),
-                )).toList(),
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          minChildSize: 0.3,
+          maxChildSize: 0.8,
+          expand: false,
+          builder: (_, scrollController) => SafeArea(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const SizedBox(height: 8),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(l10n.setCourse, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
               ),
-            ),
-          ]),
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  children: courses.map((c) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Material(
+                      color: theme.colorScheme.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(12),
+                      child: ListTile(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
+                        title: Text(translator.translateCourse(c.name)),
+                        onTap: () => Navigator.pop(ctx, c.id),
+                      ),
+                    ),
+                  )).toList(),
+                ),
+              ),
+            ]),
+          ),
         );
       },
     );
@@ -459,36 +488,47 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     final l10n = AppLocalizations.of(context)!;
     final translator = TaxonomyTranslator.of(context);
     final categories = taxonomy.CategoryData.categories;
-    final selected = await Responsive.showAdaptiveSheet<String>(
-      context,
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (ctx) {
         final theme = Theme.of(ctx);
-        return SafeArea(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(l10n.setCategory, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-            ),
-            Flexible(
-              child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                children: categories.map((c) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Material(
-                    color: theme.colorScheme.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(12),
-                    child: ListTile(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
-                      title: Text(translator.translateCategory(c.name)),
-                      onTap: () => Navigator.pop(ctx, c.id),
-                    ),
-                  ),
-                )).toList(),
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          minChildSize: 0.3,
+          maxChildSize: 0.8,
+          expand: false,
+          builder: (_, scrollController) => SafeArea(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const SizedBox(height: 8),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(l10n.setCategory, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
               ),
-            ),
-          ]),
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  children: categories.map((c) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Material(
+                      color: theme.colorScheme.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(12),
+                      child: ListTile(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
+                        title: Text(translator.translateCategory(c.name)),
+                        onTap: () => Navigator.pop(ctx, c.id),
+                      ),
+                    ),
+                  )).toList(),
+                ),
+              ),
+            ]),
+          ),
         );
       },
     );
@@ -515,6 +555,92 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     }
     if (mounted) {
       AppSnackbar.info(context, l10n.countRecipesFavorited(count));
+      _exitSelection();
+    }
+  }
+
+  Future<void> _bulkCopyToCookbook(BuildContext context) async {
+    final cookbooks = ref.read(cookbooksProvider).valueOrNull ?? [];
+    if (cookbooks.length < 2) {
+      AppSnackbar.info(context, 'Create another cookbook first');
+      return;
+    }
+
+    final targetId = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        return SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const SizedBox(height: 8),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text('Copy to Cookbook', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          ),
+          ...cookbooks.map((c) => ListTile(
+            leading: const Icon(Icons.book),
+            title: Text(c.name),
+            onTap: () => Navigator.pop(ctx, c.id),
+          )),
+          const SizedBox(height: 16),
+        ]));
+      },
+    );
+    if (targetId == null || !mounted) return;
+
+    final count = _selectedIds.length;
+    AppSnackbar.loading(context, 'Copying $count recipes...');
+    final dao = ref.read(recipeDaoProvider);
+    for (final id in _selectedIds) {
+      await dao.duplicateRecipe(id, targetCookbookId: targetId);
+    }
+    if (mounted) {
+      AppSnackbar.success(context, '$count recipes copied');
+      _exitSelection();
+    }
+  }
+
+  Future<void> _bulkMoveToCookbook(BuildContext context) async {
+    final cookbooks = ref.read(cookbooksProvider).valueOrNull ?? [];
+    if (cookbooks.length < 2) {
+      AppSnackbar.info(context, 'Create another cookbook first');
+      return;
+    }
+
+    final targetId = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        return SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const SizedBox(height: 8),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text('Move to Cookbook', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          ),
+          ...cookbooks.map((c) => ListTile(
+            leading: const Icon(Icons.book),
+            title: Text(c.name),
+            onTap: () => Navigator.pop(ctx, c.id),
+          )),
+          const SizedBox(height: 16),
+        ]));
+      },
+    );
+    if (targetId == null || !mounted) return;
+
+    final count = _selectedIds.length;
+    AppSnackbar.loading(context, 'Moving $count recipes...');
+    final dao = ref.read(recipeDaoProvider);
+    for (final id in _selectedIds) {
+      await dao.updateRecipeFields(id, RecipesCompanion(cookbookId: Value(targetId)));
+    }
+    if (mounted) {
+      AppSnackbar.success(context, '$count recipes moved');
       _exitSelection();
     }
   }
@@ -704,6 +830,7 @@ class _SmallListView extends StatelessWidget {
     final theme = Theme.of(context);
 
     return ListView.builder(
+      key: const PageStorageKey('recipe_list_small'),
       padding: const EdgeInsets.only(bottom: 80),
       itemCount: recipes.length,
       itemBuilder: (context, index) {
@@ -817,6 +944,7 @@ class _MediumGridView extends StatelessWidget {
         }
 
         return GridView.builder(
+          key: const PageStorageKey('recipe_list_medium'),
           padding: const EdgeInsets.all(12).copyWith(bottom: 80),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
@@ -1067,6 +1195,7 @@ class _LargeCardView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      key: const PageStorageKey('recipe_list_large'),
       padding: const EdgeInsets.all(12).copyWith(bottom: 80),
       itemCount: recipes.length,
       itemBuilder: (context, index) => _LargeCard(
@@ -1479,6 +1608,8 @@ class _BulkActionBar extends StatelessWidget {
   final VoidCallback onSetCourse;
   final VoidCallback onSetCategory;
   final VoidCallback onFavorite;
+  final VoidCallback onCopyToCookbook;
+  final VoidCallback onMoveToCookbook;
 
   const _BulkActionBar({
     required this.selectedCount,
@@ -1486,25 +1617,32 @@ class _BulkActionBar extends StatelessWidget {
     required this.onSetCourse,
     required this.onSetCategory,
     required this.onFavorite,
+    required this.onCopyToCookbook,
+    required this.onMoveToCookbook,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: EdgeInsets.fromLTRB(8, 8, 8, 8 + MediaQuery.of(context).padding.bottom),
+      padding: EdgeInsets.fromLTRB(4, 8, 4, 8 + MediaQuery.of(context).padding.bottom),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
         border: Border(top: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2))),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _BulkAction(icon: Icons.restaurant_menu, label: 'Course', onTap: onSetCourse),
-          _BulkAction(icon: Icons.category, label: 'Category', onTap: onSetCategory),
-          _BulkAction(icon: Icons.star_outline, label: 'Favorite', onTap: onFavorite),
-          _BulkAction(icon: Icons.delete_outline, label: 'Delete', onTap: onDelete, color: Colors.red),
-        ],
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _BulkAction(icon: Icons.restaurant_menu, label: 'Course', onTap: onSetCourse),
+            _BulkAction(icon: Icons.category, label: 'Category', onTap: onSetCategory),
+            _BulkAction(icon: Icons.star_outline, label: 'Favorite', onTap: onFavorite),
+            _BulkAction(icon: Icons.copy, label: 'Copy', onTap: onCopyToCookbook),
+            _BulkAction(icon: Icons.drive_file_move_outline, label: 'Move', onTap: onMoveToCookbook),
+            _BulkAction(icon: Icons.delete_outline, label: 'Delete', onTap: onDelete, color: Colors.red),
+          ],
+        ),
       ),
     );
   }

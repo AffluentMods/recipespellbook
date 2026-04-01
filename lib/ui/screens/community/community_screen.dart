@@ -6,7 +6,9 @@ import 'package:timeago/timeago.dart' as timeago;
 
 import '../../../data/community_tags_data.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../services/admin_service.dart';
 import '../../../services/community_service.dart';
+import '../admin/admin_moderation_screen.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/community_image.dart';
 
@@ -38,12 +40,18 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   final Set<String> _selectedTags = {};
   bool _filterHasImages = false;
 
+  // Admin: hidden 10-tap trigger
+  int _adminTapCount = 0;
+  DateTime? _adminTapStart;
+  int _pendingAdminCount = 0;
+
   @override
   void initState() {
     super.initState();
     _loadViewMode();
     _load();
     _scrollController.addListener(_onScroll);
+    _loadAdminCount();
   }
 
   @override
@@ -51,6 +59,30 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadAdminCount() async {
+    if (!AdminService.instance.isAdmin) return;
+    final count = await AdminService.instance.getPendingCount();
+    if (mounted) setState(() => _pendingAdminCount = count);
+  }
+
+  void _handleAdminTap() {
+    if (!AdminService.instance.isAdmin) return;
+    final now = DateTime.now();
+    if (_adminTapStart == null || now.difference(_adminTapStart!) > const Duration(seconds: 3)) {
+      _adminTapCount = 1;
+      _adminTapStart = now;
+    } else {
+      _adminTapCount++;
+      if (_adminTapCount >= 10) {
+        _adminTapCount = 0;
+        _adminTapStart = null;
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => const AdminModerationScreen(),
+        )).then((_) => _loadAdminCount());
+      }
+    }
   }
 
   Future<void> _loadViewMode() async {
@@ -119,7 +151,29 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.navCommunity),
+        title: GestureDetector(
+          onTap: _handleAdminTap,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(l10n.navCommunity),
+              if (_pendingAdminCount > 0 && AdminService.instance.isAdmin) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '$_pendingAdminCount',
+                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
         actions: [
           // Tag filter icon
           IconButton(

@@ -15,6 +15,7 @@ class AuthUser {
   final String? name;
   final String? avatarUrl;
   final String tier; // free, basic, standard, premium
+  final String role; // user, admin
   final String? discordId;
   final DateTime? createdAt;
 
@@ -24,9 +25,12 @@ class AuthUser {
     this.name,
     this.avatarUrl,
     this.tier = 'free',
+    this.role = 'user',
     this.discordId,
     this.createdAt,
   });
+
+  bool get isAdmin => role == 'admin';
 
   factory AuthUser.fromJson(Map<String, dynamic> json) {
     return AuthUser(
@@ -35,6 +39,7 @@ class AuthUser {
       name: json['name'] as String?,
       avatarUrl: json['avatarUrl'] as String? ?? json['avatar_url'] as String?,
       tier: json['tier'] as String? ?? 'free',
+      role: json['role'] as String? ?? 'user',
       discordId: json['discordId'] as String? ?? json['discord_id'] as String?,
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'] as String)

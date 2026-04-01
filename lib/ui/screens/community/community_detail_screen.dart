@@ -562,8 +562,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     final d = _detail!;
 
     return Scaffold(
-      body: Responsive.constrainWidth(context, child: Stack(children: [
-      CustomScrollView(
+      body: Stack(children: [
+      Responsive.constrainWidth(context, child: CustomScrollView(
         slivers: [
           // ── Cover image header ──
           SliverAppBar(
@@ -790,7 +790,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
             ),
           ),
         ],
-      ),
+      )),
 
       // ── Selection action bar ──
       if (_selectMode)
@@ -808,7 +808,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
             ),
           ),
         ),
-      ])),
+      ]),
     );
   }
 

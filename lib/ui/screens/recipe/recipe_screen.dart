@@ -33,7 +33,6 @@ import '../../widgets/recipe_tags_display.dart';
 // ============ DISMISSED ALLERGY WARNINGS ============
 // Canonical provider is in allergy_settings_screen.dart — imported via:
 import '../settings/allergy_settings_screen.dart' show dismissedAllergyWarningsProvider;
-import '../settings/ingredient_substitutions_screen.dart';
 import '../settings/nutrition_settings_screen.dart';
 
 // ============ SESSION DISMISSED WARNINGS (temporary) ============
@@ -1493,7 +1492,7 @@ class _RecipeAppBar extends StatelessWidget {
     final newId = 'recipe_${DateTime.now().millisecondsSinceEpoch}';
 
     try {
-      await recipeDao.duplicateRecipe(recipe.id, newId);
+      await recipeDao.duplicateRecipe(recipe.id, newId: newId);
       if (context.mounted) {
         AppSnackbar.info(context, l10n.recipeDuplicated);
         context.push('/recipe/$newId');
@@ -1569,12 +1568,7 @@ class _RecipeAppBar extends StatelessWidget {
         }
       } else {
         // Duplicate into the target cookbook
-        final newId = 'recipe_${DateTime.now().millisecondsSinceEpoch}';
-        await recipeDao.duplicateRecipe(recipe.id, newId);
-        // Update the copy's cookbookId to target
-        await recipeDao.updateRecipeFields(newId, RecipesCompanion(
-          cookbookId: drift.Value(targetCookbook.id),
-        ));
+        await recipeDao.duplicateRecipe(recipe.id, targetCookbookId: targetCookbook.id);
         if (context.mounted) {
           AppSnackbar.success(context, 'Copied to "${targetCookbook.name}"');
         }
@@ -1710,44 +1704,42 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
     final userAllergyKeys = userAllergies.map((a) => a.key).toSet();
     final matchingAllergens = detectedAllergens.where((a) => userAllergyKeys.contains(a)).toList();
 
-    return GestureDetector(
-      onLongPress: () => showIngredientSubsSheet(context, ingredient.name),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(IngredientImages.getEmoji(ingredient.name), style: const TextStyle(fontSize: 18)),
-              const SizedBox(width: 10),
-              if (settings.ingredientLayout == IngredientLayout.columnar) ...[
-                SizedBox(
-                  width: 72,
-                  child: Text.rich(
-                    TextSpan(
-                      style: theme.textTheme.bodyLarge,
-                      children: [
-                        if (amount.isNotEmpty) TextSpan(text: amount, style: const TextStyle(fontWeight: FontWeight.w600)),
-                        if (unit.isNotEmpty) TextSpan(text: ' $unit'),
-                      ],
-                    ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(IngredientImages.getEmoji(ingredient.name), style: const TextStyle(fontSize: 18)),
+            const SizedBox(width: 10),
+            if (settings.ingredientLayout == IngredientLayout.columnar) ...[
+              SizedBox(
+                width: 72,
+                child: Text.rich(
+                  TextSpan(
+                    style: theme.textTheme.bodyLarge,
+                    children: [
+                      if (amount.isNotEmpty) TextSpan(text: amount, style: const TextStyle(fontWeight: FontWeight.w600)),
+                      if (unit.isNotEmpty) TextSpan(text: ' $unit'),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(child: Text(ingredient.name, style: theme.textTheme.bodyLarge)),
-              ] else
-                Expanded(
-                  child: RichText(
-                    text: TextSpan(
-                      style: theme.textTheme.bodyLarge,
-                      children: [
-                        if (amount.isNotEmpty) TextSpan(text: '$amount ', style: const TextStyle(fontWeight: FontWeight.w600)),
-                        if (unit.isNotEmpty) TextSpan(text: '$unit '),
-                        TextSpan(text: ingredient.name),
-                      ],
-                    ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(child: Text(ingredient.name, style: theme.textTheme.bodyLarge)),
+            ] else
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    style: theme.textTheme.bodyLarge,
+                    children: [
+                      if (amount.isNotEmpty) TextSpan(text: '$amount ', style: const TextStyle(fontWeight: FontWeight.w600)),
+                      if (unit.isNotEmpty) TextSpan(text: '$unit '),
+                      TextSpan(text: ingredient.name),
+                    ],
                   ),
                 ),
+              ),
               if (matchingAllergens.isNotEmpty)
                 Tooltip(
                   message: '${l10n.allergenContains}: ${matchingAllergens.join(", ")}',
@@ -1799,7 +1791,6 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
             }),
           ],
         ),
-      ),
     );
   }
 }

@@ -304,11 +304,13 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
               final ids = Set<String>.from(_selected);
               _deselectAll();
 
+              if (context.mounted) AppSnackbar.loading(context, 'Deleting $count recipes...');
               for (final id in ids) {
                 await dao.permanentlyDeleteRecipe(id);
               }
 
               if (context.mounted) {
+                AppSnackbar.dismiss(context);
                 AppSnackbar.info(context, '$count ${count == 1 ? 'recipe' : 'recipes'} permanently deleted');
               }
             },
@@ -371,8 +373,10 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
             ),
             onPressed: () async {
               Navigator.pop(dialogCtx);
+              if (context.mounted) AppSnackbar.loading(context, 'Deleting recipes...');
               await ref.read(recipeDaoProvider).emptyTrash();
               if (context.mounted) {
+                AppSnackbar.dismiss(context);
                 AppSnackbar.info(context, l10n.trashEmptied);
               }
             },

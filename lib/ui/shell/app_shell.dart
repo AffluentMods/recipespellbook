@@ -169,6 +169,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                 key: _scaffoldKey,
                 body: widget.child,
                 endDrawer: const AppMenuDrawer(),
+                endDrawerEnableOpenDragGesture: false,
               ),
             ),
           ],
@@ -180,6 +181,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         key: _scaffoldKey,
         body: widget.child,
         endDrawer: const AppMenuDrawer(),
+        endDrawerEnableOpenDragGesture: false,
         bottomNavigationBar: _NotchNavBar(
           currentIndex: effectiveIndex.clamp(0, 3),
           shoppingBadge: shoppingBadge,

@@ -93,8 +93,13 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
         .watch();
   }
 
-  /// Get recipe by ID
+  /// Get recipe by ID (excludes soft-deleted recipes)
   Future<Recipe?> getRecipeById(String id) {
+    return (select(recipes)..where((t) => t.id.equals(id) & t.deletedAt.isNull())).getSingleOrNull();
+  }
+
+  /// Get recipe by ID including soft-deleted (for restore/trash operations)
+  Future<Recipe?> getRecipeByIdIncludingDeleted(String id) {
     return (select(recipes)..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
@@ -435,16 +440,19 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
         .get();
   }
 
-  Future<void> duplicateRecipe(String recipeId, String newId) async {
+  Future<void> duplicateRecipe(String recipeId, {String? newId, String? targetCookbookId}) async {
+    final id = newId ?? 'recipe_${DateTime.now().millisecondsSinceEpoch}';
     // Get the original recipe
     final recipe = await getRecipeById(recipeId);
     if (recipe == null) throw Exception('Recipe not found');
 
+    final isCopy = targetCookbookId == null || targetCookbookId == recipe.cookbookId;
+
     // Insert the duplicated recipe
     await insertRecipe(RecipesCompanion.insert(
-      id: newId,
-      cookbookId: recipe.cookbookId,
-      title: '${recipe.title} (Copy)',
+      id: id,
+      cookbookId: targetCookbookId ?? recipe.cookbookId,
+      title: isCopy ? '${recipe.title} (Copy)' : recipe.title,
       description: Value(recipe.description),
       servings: Value(recipe.servings),
       prepTimeMinutes: Value(recipe.prepTimeMinutes),
@@ -465,8 +473,8 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
     for (var i = 0; i < ings.length; i++) {
       final ing = ings[i];
       await insertIngredient(IngredientsCompanion.insert(
-        id: '${newId}_ing_$i',
-        recipeId: newId,
+        id: '${id}_ing_$i',
+        recipeId: id,
         sortOrder: ing.sortOrder,
         name: ing.name,
         amount: Value(ing.amount),
@@ -480,8 +488,8 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
     for (var i = 0; i < stps.length; i++) {
       final stp = stps[i];
       await insertStep(StepsCompanion.insert(
-        id: '${newId}_step_$i',
-        recipeId: newId,
+        id: '${id}_step_$i',
+        recipeId: id,
         sortOrder: stp.sortOrder,
         instruction: stp.instruction,
         durationMinutes: Value(stp.durationMinutes),
@@ -505,26 +513,30 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
 
   // ============ RECIPE LINKS (per-ingredient) ============
 
-  /// Add a link from a specific ingredient to a recipe
+  /// Add a link from a specific ingredient to a recipe.
+  /// Wrapped in a transaction to prevent race conditions when multiple
+  /// links are added concurrently (e.g. editing 4 ingredients at once).
   Future<void> addIngredientRecipeLink(String sourceId, String ingredientId, String linkedId, {double scale = 1.0}) async {
-    final existing = await (select(recipeLinks)
-      ..where((l) => l.sourceRecipeId.equals(sourceId))
-      ..where((l) => l.ingredientId.equals(ingredientId))
-      ..orderBy([(l) => OrderingTerm.desc(l.sortOrder)])
-      ..limit(1))
-        .get();
-    final nextOrder = existing.isEmpty ? 0 : existing.first.sortOrder + 1;
+    await transaction(() async {
+      final existing = await (select(recipeLinks)
+        ..where((l) => l.sourceRecipeId.equals(sourceId))
+        ..where((l) => l.ingredientId.equals(ingredientId))
+        ..orderBy([(l) => OrderingTerm.desc(l.sortOrder)])
+        ..limit(1))
+          .get();
+      final nextOrder = existing.isEmpty ? 0 : existing.first.sortOrder + 1;
 
-    await into(recipeLinks).insertOnConflictUpdate(RecipeLinksCompanion.insert(
-      sourceRecipeId: sourceId,
-      ingredientId: ingredientId,
-      linkedRecipeId: linkedId,
-      scale: drift.Value(scale),
-      sortOrder: drift.Value(nextOrder),
-    ));
+      await into(recipeLinks).insertOnConflictUpdate(RecipeLinksCompanion.insert(
+        sourceRecipeId: sourceId,
+        ingredientId: ingredientId,
+        linkedRecipeId: linkedId,
+        scale: drift.Value(scale),
+        sortOrder: drift.Value(nextOrder),
+      ));
 
-    await (update(recipes)..where((r) => r.id.equals(sourceId)))
-        .write(RecipesCompanion(updatedAt: drift.Value(DateTime.now())));
+      await (update(recipes)..where((r) => r.id.equals(sourceId)))
+          .write(RecipesCompanion(updatedAt: drift.Value(DateTime.now())));
+    });
   }
 
   /// Remove a link from a specific ingredient to a specific recipe

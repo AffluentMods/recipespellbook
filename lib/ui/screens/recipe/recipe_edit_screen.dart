@@ -89,12 +89,17 @@ class _ImageCropDialogState extends State<_ImageCropDialog> {
       final boundary = _boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) return widget.imagePath;
 
-      // Capture at 3x pixel ratio for high-res output
-      final image = await boundary.toImage(pixelRatio: 3.0);
+      // Use the device's pixel ratio for accurate capture
+      final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+      final image = await boundary.toImage(pixelRatio: devicePixelRatio.clamp(1.0, 3.0));
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) return widget.imagePath;
 
-      final bytes = byteData.buffer.asUint8List();
+      // Compress the captured image if it's too large
+      var bytes = byteData.buffer.asUint8List();
+      final compressed = await ImageService.compressImageBytes(bytes);
+      if (compressed != null) bytes = compressed;
+
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/crop_${DateTime.now().millisecondsSinceEpoch}.png');
       await file.writeAsBytes(bytes);
