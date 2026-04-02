@@ -220,6 +220,80 @@ class CommunityFeedResult {
   });
 }
 
+/// A single recipe from the community recipe feed.
+class CommunityRecipeFeedItem {
+  final String title;
+  final String? description;
+  final String? imagePath;
+  final String? servings;
+  final int? prepTimeMinutes;
+  final int? cookTimeMinutes;
+  final String? courseId;
+  final List<String> tags;
+  final List<CommunityIngredient> ingredients;
+  final List<CommunityStep> steps;
+  final CommunityRecipeCookbookInfo cookbook;
+
+  const CommunityRecipeFeedItem({
+    required this.title, this.description, this.imagePath,
+    this.servings, this.prepTimeMinutes, this.cookTimeMinutes,
+    this.courseId, this.tags = const [],
+    this.ingredients = const [], this.steps = const [],
+    required this.cookbook,
+  });
+
+  factory CommunityRecipeFeedItem.fromJson(Map<String, dynamic> json) {
+    final cb = json['cookbook'] as Map<String, dynamic>? ?? {};
+    final pub = cb['publisher'] as Map<String, dynamic>? ?? {};
+    return CommunityRecipeFeedItem(
+      title: json['title'] as String? ?? 'Untitled',
+      description: json['description'] as String?,
+      imagePath: json['imagePath'] as String?,
+      servings: json['servings']?.toString(),
+      prepTimeMinutes: json['prepTimeMinutes'] as int?,
+      cookTimeMinutes: json['cookTimeMinutes'] as int?,
+      courseId: json['courseId'] as String?,
+      tags: (json['tags'] as List?)?.map((t) => t.toString()).toList() ?? [],
+      ingredients: (json['ingredients'] as List?)
+          ?.map((i) => CommunityIngredient.fromJson(i as Map<String, dynamic>))
+          .toList() ?? [],
+      steps: (json['steps'] as List?)
+          ?.map((s) => CommunityStep.fromJson(s as Map<String, dynamic>))
+          .toList() ?? [],
+      cookbook: CommunityRecipeCookbookInfo(
+        id: cb['id'] as String? ?? '',
+        title: cb['title'] as String? ?? '',
+        publisherName: pub['name'] as String? ?? 'Unknown',
+        publisherAvatarUrl: pub['avatarUrl'] as String?,
+      ),
+    );
+  }
+}
+
+class CommunityRecipeCookbookInfo {
+  final String id;
+  final String title;
+  final String publisherName;
+  final String? publisherAvatarUrl;
+
+  const CommunityRecipeCookbookInfo({
+    required this.id, required this.title,
+    required this.publisherName, this.publisherAvatarUrl,
+  });
+}
+
+class CommunityRecipeFeedResult {
+  final List<CommunityRecipeFeedItem> recipes;
+  final int page;
+  final int total;
+  final int totalPages;
+
+  const CommunityRecipeFeedResult({
+    required this.recipes, required this.page,
+    required this.total, required this.totalPages,
+  });
+}
+
 class MyPublication {
   final String id;
   final String title;
@@ -437,6 +511,46 @@ class CommunityService {
       }
     } catch (e) {
       debugPrint('[Community] browse: $e');
+    }
+    return null;
+  }
+
+  /// Fetch individual recipes from across all community cookbooks.
+  /// [sort]: 'recent', 'popular', 'random'
+  Future<CommunityRecipeFeedResult?> browseRecipes({
+    String sort = 'recent',
+    int page = 1,
+    int limit = 20,
+    String? query,
+    List<String>? tags,
+    bool? hasImages,
+  }) async {
+    try {
+      final params = <String, String>{
+        'sort': sort,
+        'page': page.toString(),
+        'limit': limit.toString(),
+      };
+      if (query != null && query.isNotEmpty) params['q'] = query;
+      if (tags != null && tags.isNotEmpty) params['tags'] = tags.join(',');
+      if (hasImages == true) params['hasImages'] = '1';
+
+      final queryString = params.entries.map((e) => '${e.key}=${Uri.encodeComponent(e.value)}').join('&');
+      final r = await _auth.get('/v1/community/recipes?$queryString');
+
+      if (r.statusCode == 200) {
+        final data = jsonDecode(r.body);
+        return CommunityRecipeFeedResult(
+          recipes: (data['recipes'] as List)
+              .map((p) => CommunityRecipeFeedItem.fromJson(p as Map<String, dynamic>))
+              .toList(),
+          page: data['page'] as int? ?? 1,
+          total: data['total'] as int? ?? 0,
+          totalPages: data['totalPages'] as int? ?? 1,
+        );
+      }
+    } catch (e) {
+      debugPrint('[Community] browseRecipes: $e');
     }
     return null;
   }

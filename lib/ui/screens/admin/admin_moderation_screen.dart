@@ -15,11 +15,16 @@ class _AdminModerationScreenState extends State<AdminModerationScreen> {
   List<Map<String, dynamic>> _pendingPubs = [];
   List<Map<String, dynamic>> _pendingFlags = [];
   bool _loading = true;
+  bool _canGoBack = false;
 
   @override
   void initState() {
     super.initState();
     _load();
+    // Delay back button to prevent accidental closure from tap spam
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) setState(() => _canGoBack = true);
+    });
   }
 
   Future<void> _load() async {
@@ -41,6 +46,9 @@ class _AdminModerationScreenState extends State<AdminModerationScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: _canGoBack
+            ? IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context))
+            : const SizedBox.shrink(),
         title: const Text('Moderation Panel'),
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: _load),

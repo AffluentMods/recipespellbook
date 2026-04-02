@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../../../data/community_tags_data.dart';
@@ -187,8 +188,17 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
     final l10n = AppLocalizations.of(context)!;
     final progress = publishProgressNotifier.value;
 
+    final isUploading = progress != null && progress.status != 'done' && progress.status != 'error';
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.communityMyPublications)),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: isUploading ? null : () => context.push('/community/publish').then((_) { if (mounted) _load(); }),
+        icon: Icon(isUploading ? Icons.hourglass_top : Icons.publish),
+        label: Text(isUploading ? 'Uploading...' : l10n.communityPublish),
+        backgroundColor: isUploading ? theme.colorScheme.surfaceContainerHighest : null,
+        foregroundColor: isUploading ? theme.colorScheme.outline : null,
+      ),
       body: Responsive.constrainWidth(context, child: _loading
           ? const Center(child: CircularProgressIndicator())
           : Column(

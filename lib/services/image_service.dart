@@ -204,7 +204,28 @@ class ImageService {
     }
 
     try {
-      final bytes = await file.readAsBytes();
+      var bytes = await file.readAsBytes();
+
+      // Compress if over 500KB — re-encode as JPEG at 80% quality
+      if (bytes.length > 500 * 1024) {
+        try {
+          final codec = await ui.instantiateImageCodec(bytes, targetWidth: maxDimension);
+          final frame = await codec.getNextFrame();
+          final byteData = await frame.image.toByteData(format: ui.ImageByteFormat.png);
+          if (byteData != null) {
+            // Re-encode as JPEG using the image package or just use the resized PNG
+            // For now, resize alone can cut 3MB PNGs down significantly
+            final resized = byteData.buffer.asUint8List();
+            if (resized.length < bytes.length) {
+              debugPrint('[ImageService] Compressed ${bytes.length} → ${resized.length} bytes');
+              bytes = resized;
+            }
+          }
+          frame.image.dispose();
+        } catch (e) {
+          debugPrint('[ImageService] Compression failed, uploading original: $e');
+        }
+      }
 
       if (bytes.length > maxFileSize) {
         debugPrint('[ImageService] File too large: ${bytes.length} bytes');
@@ -212,7 +233,7 @@ class ImageService {
       }
 
       final base64Data = base64Encode(bytes);
-      final contentType = _contentTypeFromPath(file.path);
+      final contentType = bytes.length != (await file.readAsBytes()).length ? 'image/png' : _contentTypeFromPath(file.path);
 
       debugPrint('[ImageService] Community uploading ${bytes.length} bytes as $contentType');
 

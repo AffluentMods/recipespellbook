@@ -43,6 +43,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
 
   // Step 3 state
   bool _isPublishing = false;
+  bool _publishCancelled = false;
 
   @override
   void dispose() {
@@ -85,7 +86,14 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
       );
     }
 
-    return Scaffold(
+    return PopScope(
+      canPop: !_isPublishing,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _isPublishing) {
+          AppSnackbar.info(context, 'Publishing in progress — cancel the upload first');
+        }
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: Text(_step == 1 ? l10n.communityPublishCookbook : l10n.communityConfigurePublication),
         leading: _step > 1 && !_isPublishing
@@ -97,7 +105,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
           : _step == 2
           ? _buildStep2Configure(theme, l10n)
           : _buildStep3Publishing(theme, l10n)),
-    );
+    ));
   }
 
   // ── Step 1: Select cookbook ──
@@ -368,6 +376,15 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                     style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
                     textAlign: TextAlign.center,
                   ),
+                  if (status == 'uploading') ...[
+                    const SizedBox(height: 16),
+                    TextButton.icon(
+                      onPressed: () => setState(() => _publishCancelled = true),
+                      icon: const Icon(Icons.cancel_outlined),
+                      label: const Text('Cancel Upload'),
+                      style: TextButton.styleFrom(foregroundColor: theme.colorScheme.error),
+                    ),
+                  ],
                 ],
               ],
             );
@@ -381,7 +398,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
     final title = _titleController.text.trim();
     if (title.isEmpty) return;
 
-    setState(() { _isPublishing = true; _step = 3; });
+    setState(() { _isPublishing = true; _publishCancelled = false; _step = 3; });
 
     publishProgressNotifier.value = const PublishProgress(status: 'preparing');
 
@@ -463,6 +480,11 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         );
 
         for (int i = 0; i < uniquePaths.length; i++) {
+          if (_publishCancelled) {
+            publishProgressNotifier.value = const PublishProgress(status: 'error', errorMessage: 'Upload cancelled');
+            setState(() => _isPublishing = false);
+            return;
+          }
           final localPath = uniquePaths[i];
           final result = await ImageService.instance.communityUploadLocalPath(localPath);
 

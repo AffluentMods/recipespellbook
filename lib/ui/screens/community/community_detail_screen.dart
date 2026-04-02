@@ -797,13 +797,16 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         Positioned(
           left: 16, right: 16, bottom: 16,
           child: SafeArea(
-            child: FilledButton.icon(
-              onPressed: _selectedIndices.isEmpty ? null : () => _showDownloadChoice(selectedIndices: Set.from(_selectedIndices)),
-              icon: const Icon(Icons.download),
-              label: Text('Download ${_selectedIndices.length} Recipes'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(double.infinity, 52),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            child: SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: FilledButton.icon(
+                onPressed: _selectedIndices.isEmpty ? null : () => _showDownloadChoice(selectedIndices: Set.from(_selectedIndices)),
+                icon: const Icon(Icons.download),
+                label: Text('Download ${_selectedIndices.length} Recipes'),
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
               ),
             ),
           ),

@@ -17,6 +17,7 @@ import '../../widgets/community_image.dart';
 // ════════════════════════════════════════════
 
 enum _ViewMode { grid, list }
+enum _BrowseMode { recipes, cookbooks }
 
 class CommunityScreen extends ConsumerStatefulWidget {
   const CommunityScreen({super.key});
@@ -31,12 +32,14 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   final _scrollController = ScrollController();
 
   _ViewMode _viewMode = _ViewMode.list;
+  _BrowseMode _browseMode = _BrowseMode.recipes; // Default to recipes
   String _sort = 'recent';
   String _query = '';
   int _page = 1;
   bool _loading = false;
   bool _hasMore = true;
   List<CommunityListItem> _items = [];
+  List<CommunityRecipeFeedItem> _recipeItems = [];
   final Set<String> _selectedTags = {};
   bool _filterHasImages = false;
 
@@ -105,20 +108,36 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   Future<void> _load() async {
     setState(() { _loading = true; _page = 1; });
 
-    final result = await _community.browse(
-      sort: _sort,
-      page: 1,
-      query: _query.isEmpty ? null : _query,
-      tags: _selectedTags.isNotEmpty ? _selectedTags.toList() : null,
-      hasImages: _filterHasImages ? true : null,
-    );
-
-    if (mounted) {
-      setState(() {
-        _items = result?.publications ?? [];
-        _hasMore = (result?.page ?? 1) < (result?.totalPages ?? 1);
-        _loading = false;
-      });
+    if (_browseMode == _BrowseMode.recipes) {
+      final result = await _community.browseRecipes(
+        sort: _sort == 'top_rated' ? 'popular' : _sort,
+        page: 1,
+        query: _query.isEmpty ? null : _query,
+        tags: _selectedTags.isNotEmpty ? _selectedTags.toList() : null,
+        hasImages: _filterHasImages ? true : null,
+      );
+      if (mounted) {
+        setState(() {
+          _recipeItems = result?.recipes ?? [];
+          _hasMore = (result?.page ?? 1) < (result?.totalPages ?? 1);
+          _loading = false;
+        });
+      }
+    } else {
+      final result = await _community.browse(
+        sort: _sort,
+        page: 1,
+        query: _query.isEmpty ? null : _query,
+        tags: _selectedTags.isNotEmpty ? _selectedTags.toList() : null,
+        hasImages: _filterHasImages ? true : null,
+      );
+      if (mounted) {
+        setState(() {
+          _items = result?.publications ?? [];
+          _hasMore = (result?.page ?? 1) < (result?.totalPages ?? 1);
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -127,20 +146,36 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     setState(() => _loading = true);
     _page++;
 
-    final result = await _community.browse(
-      sort: _sort,
-      page: _page,
-      query: _query.isEmpty ? null : _query,
-      tags: _selectedTags.isNotEmpty ? _selectedTags.toList() : null,
-      hasImages: _filterHasImages ? true : null,
-    );
-
-    if (mounted) {
-      setState(() {
-        _items.addAll(result?.publications ?? []);
-        _hasMore = (result?.page ?? 1) < (result?.totalPages ?? 1);
-        _loading = false;
-      });
+    if (_browseMode == _BrowseMode.recipes) {
+      final result = await _community.browseRecipes(
+        sort: _sort == 'top_rated' ? 'popular' : _sort,
+        page: _page,
+        query: _query.isEmpty ? null : _query,
+        tags: _selectedTags.isNotEmpty ? _selectedTags.toList() : null,
+        hasImages: _filterHasImages ? true : null,
+      );
+      if (mounted) {
+        setState(() {
+          _recipeItems.addAll(result?.recipes ?? []);
+          _hasMore = (result?.page ?? 1) < (result?.totalPages ?? 1);
+          _loading = false;
+        });
+      }
+    } else {
+      final result = await _community.browse(
+        sort: _sort,
+        page: _page,
+        query: _query.isEmpty ? null : _query,
+        tags: _selectedTags.isNotEmpty ? _selectedTags.toList() : null,
+        hasImages: _filterHasImages ? true : null,
+      );
+      if (mounted) {
+        setState(() {
+          _items.addAll(result?.publications ?? []);
+          _hasMore = (result?.page ?? 1) < (result?.totalPages ?? 1);
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -234,9 +269,36 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             ),
           ),
 
+          // ── Browse mode toggle ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: SegmentedButton<_BrowseMode>(
+                    segments: const [
+                      ButtonSegment(value: _BrowseMode.recipes, label: Text('Recipes'), icon: Icon(Icons.restaurant_menu, size: 16)),
+                      ButtonSegment(value: _BrowseMode.cookbooks, label: Text('Cookbooks'), icon: Icon(Icons.book, size: 16)),
+                    ],
+                    selected: {_browseMode},
+                    onSelectionChanged: (v) {
+                      setState(() => _browseMode = v.first);
+                      _load();
+                    },
+                    showSelectedIcon: false,
+                    style: ButtonStyle(
+                      visualDensity: VisualDensity.compact,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           // ── Sort chips ──
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -282,7 +344,9 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async => _load(),
-              child: _items.isEmpty && !_loading
+              child: _browseMode == _BrowseMode.recipes
+                  ? _buildRecipeFeed(context, theme, l10n)
+                  : (_items.isEmpty && !_loading
                   ? ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
@@ -306,7 +370,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
               )
                   : _viewMode == _ViewMode.grid
                   ? _buildGridView(context)
-                  : _buildListView(context),
+                  : _buildListView(context)),
             ),
           ),
         ],
@@ -318,6 +382,137 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
               label: Text(l10n.communityPublish),
             )
           : null,
+    );
+  }
+
+  Widget _buildRecipeFeed(BuildContext context, ThemeData theme, AppLocalizations l10n) {
+    if (_recipeItems.isEmpty && !_loading) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+          Icon(Icons.restaurant_menu, size: 64, color: theme.colorScheme.outline),
+          const SizedBox(height: 16),
+          Center(
+            child: Text(
+              _query.isNotEmpty ? l10n.communityNoResultsFor(_query) : 'No community recipes yet',
+              style: TextStyle(color: theme.colorScheme.outline, fontSize: 16),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return ListView.builder(
+      controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 80),
+      itemCount: _recipeItems.length + (_loading ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index >= _recipeItems.length) {
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final recipe = _recipeItems[index];
+        final hasImage = recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () {
+              // Show recipe preview dialog
+              showDialog(
+                context: context,
+                builder: (_) => _CommunityRecipeFeedPreview(
+                  recipe: recipe,
+                  onViewCookbook: () {
+                    Navigator.pop(context);
+                    context.push('/community/${recipe.cookbook.id}');
+                  },
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  // Thumbnail
+                  if (hasImage)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: CommunityImage(
+                        publicationId: recipe.cookbook.id,
+                        imagePath: recipe.imagePath,
+                        width: 64,
+                        height: 64,
+                        fit: BoxFit.cover,
+                        memCacheWidth: 128,
+                        memCacheHeight: 128,
+                      ),
+                    )
+                  else
+                    Container(
+                      width: 64, height: 64,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.restaurant, color: theme.colorScheme.onPrimaryContainer),
+                    ),
+                  const SizedBox(width: 12),
+
+                  // Content
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          recipe.title,
+                          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'from ${recipe.cookbook.title}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            if (recipe.prepTimeMinutes != null || recipe.cookTimeMinutes != null)
+                              Text(
+                                '${(recipe.prepTimeMinutes ?? 0) + (recipe.cookTimeMinutes ?? 0)} min',
+                                style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline),
+                              ),
+                            if (recipe.ingredients.isNotEmpty) ...[
+                              if (recipe.prepTimeMinutes != null || recipe.cookTimeMinutes != null)
+                                Text(' · ', style: TextStyle(color: theme.colorScheme.outline)),
+                              Text(
+                                '${recipe.ingredients.length} ingredients',
+                                style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -857,6 +1052,132 @@ class _TagChips extends StatelessWidget {
         if (remaining > 0)
           Text('+$remaining', style: TextStyle(fontSize: 9, color: theme.colorScheme.outline)),
       ],
+    );
+  }
+}
+
+// ════════════════════════════════════════════
+//  RECIPE FEED PREVIEW DIALOG
+// ════════════════════════════════════════════
+
+class _CommunityRecipeFeedPreview extends StatelessWidget {
+  final CommunityRecipeFeedItem recipe;
+  final VoidCallback onViewCookbook;
+
+  const _CommunityRecipeFeedPreview({
+    required this.recipe,
+    required this.onViewCookbook,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      clipBehavior: Clip.antiAlias,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.all(16),
+              color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(recipe.title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        GestureDetector(
+                          onTap: onViewCookbook,
+                          child: Text(
+                            'from ${recipe.cookbook.title} · by ${recipe.cookbook.publisherName}',
+                            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+
+            // Content
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Meta
+                    if (recipe.prepTimeMinutes != null || recipe.cookTimeMinutes != null || recipe.servings != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Wrap(
+                          spacing: 12,
+                          children: [
+                            if (recipe.prepTimeMinutes != null)
+                              Text('Prep: ${recipe.prepTimeMinutes} min', style: theme.textTheme.bodySmall),
+                            if (recipe.cookTimeMinutes != null)
+                              Text('Cook: ${recipe.cookTimeMinutes} min', style: theme.textTheme.bodySmall),
+                            if (recipe.servings != null)
+                              Text('Serves: ${recipe.servings}', style: theme.textTheme.bodySmall),
+                          ],
+                        ),
+                      ),
+
+                    // Ingredients
+                    if (recipe.ingredients.isNotEmpty) ...[
+                      Text('Ingredients', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      ...recipe.ingredients.map((ing) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Text('• ${[ing.amount ?? '', ing.unit ?? '', ing.name].where((s) => s.isNotEmpty).join(' ')}'),
+                      )),
+                      const SizedBox(height: 12),
+                    ],
+
+                    // Instructions
+                    if (recipe.steps.isNotEmpty) ...[
+                      Text('Instructions', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      ...recipe.steps.asMap().entries.map((e) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Text('${e.key + 1}. ${e.value.instruction}'),
+                      )),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+
+            // Actions
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onViewCookbook,
+                      icon: const Icon(Icons.book, size: 18),
+                      label: const Text('View Cookbook'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
