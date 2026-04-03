@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../data/course_category_data.dart' as taxonomy;
 import '../../../database/database.dart';
 import '../../../database/daos/tags_dao.dart';
 import '../../../l10n/app_localizations.dart';
@@ -481,14 +482,27 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
           'tags': tags.map((t) => t.name).toList(),
         });
 
-        // Auto-add course/category as tags if recipe has no tags
+        // Auto-add course/category display names as tags if recipe has no tags
         final recipeTags = recipeMaps.last['tags'] as List;
         if (recipeTags.isEmpty) {
           if (r.courseId != null && r.courseId!.isNotEmpty) {
-            recipeTags.add(r.courseId!);
+            // Look up display name from CourseData, fallback to ID
+            final course = taxonomy.CourseData.courses.where((c) => c.id == r.courseId).firstOrNull;
+            final courseName = course?.name ?? r.courseId!;
+            // Skip custom IDs that look like database IDs
+            if (!courseName.contains('_')) {
+              recipeTags.add(courseName.toLowerCase());
+            }
           }
           if (r.categoryId != null && r.categoryId!.isNotEmpty && r.categoryId != r.courseId) {
-            recipeTags.add(r.categoryId!);
+            final category = taxonomy.CategoryData.categories.where((c) => c.id == r.categoryId).firstOrNull;
+            final categoryName = category?.name ?? r.categoryId!;
+            if (!categoryName.contains('_')) {
+              final normalized = categoryName.toLowerCase();
+              if (!recipeTags.contains(normalized)) {
+                recipeTags.add(normalized);
+              }
+            }
           }
         }
       }

@@ -622,39 +622,40 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
         ),
         const SizedBox(height: 10),
 
-        // ── Avatar (centered, 64dp) ──
+        // ── Profile area (avatar + name + email) — all tappable → account ──
         GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: () {
             Navigator.pop(context);
             context.push('/settings/account');
           },
-          child: _UserAvatar(user: user, radius: 32),
-        ),
-        const SizedBox(height: 8),
-
-        // ── Display name ──
-        Text(
-          user.displayName,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: isDark ? Colors.white : theme.colorScheme.onSurface,
+          child: Column(
+            children: [
+              _UserAvatar(user: user, radius: 32),
+              const SizedBox(height: 8),
+              Text(
+                user.displayName,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                user.email,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? Colors.white.withValues(alpha: 0.6) : theme.colorScheme.outline,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 2),
-
-        // ── Email ──
-        Text(
-          user.email,
-          style: TextStyle(
-            fontSize: 12,
-            color: isDark ? Colors.white.withValues(alpha: 0.6) : theme.colorScheme.outline,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),
 

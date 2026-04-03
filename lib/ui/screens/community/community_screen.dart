@@ -1558,6 +1558,12 @@ class _TagChips extends StatelessWidget {
   }
 }
 
+String _resolveAvatarUrl(String avatarUrl) {
+  if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) return avatarUrl;
+  const apiUrl = String.fromEnvironment('API_URL', defaultValue: 'https://api.recipespellbook.app');
+  return '$apiUrl/v1/web/avatar/$avatarUrl';
+}
+
 // ════════════════════════════════════════════
 //  RECIPE FEED PREVIEW DIALOG
 // ════════════════════════════════════════════
@@ -1689,10 +1695,16 @@ class _CommunityRecipeFeedPreview extends StatelessWidget {
                     CircleAvatar(
                       radius: 14,
                       backgroundColor: const Color(0xFFC75B39).withValues(alpha: 0.18),
-                      child: Text(
-                        recipe.cookbook.publisherName.isNotEmpty ? recipe.cookbook.publisherName[0].toUpperCase() : '?',
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFC75B39)),
-                      ),
+                      backgroundImage: recipe.cookbook.publisherAvatarUrl != null && recipe.cookbook.publisherAvatarUrl!.isNotEmpty
+                          ? NetworkImage(_resolveAvatarUrl(recipe.cookbook.publisherAvatarUrl!))
+                          : null,
+                      onBackgroundImageError: recipe.cookbook.publisherAvatarUrl != null ? (_, __) {} : null,
+                      child: (recipe.cookbook.publisherAvatarUrl == null || recipe.cookbook.publisherAvatarUrl!.isEmpty)
+                          ? Text(
+                              recipe.cookbook.publisherName.isNotEmpty ? recipe.cookbook.publisherName[0].toUpperCase() : '?',
+                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFC75B39)),
+                            )
+                          : null,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
