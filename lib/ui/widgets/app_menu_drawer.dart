@@ -758,22 +758,42 @@ class _CommunityStrip extends ConsumerWidget {
   final bool isDark;
   const _CommunityStrip({required this.isDark});
 
+  // Cache to prevent flash on drawer re-open
+  static _CommunityStats? _cachedStats;
+  static bool _fetchedOnce = false;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Check if user has published anything
-    // For now, use a FutureBuilder on community service
-    return FutureBuilder<_CommunityStats?>(
-      future: _fetchStats(),
-      builder: (context, snapshot) {
-        final stats = snapshot.data;
-        final hasPublished = stats != null;
+    // Use cached stats if available to avoid CTA flash
+    if (_cachedStats != null) {
+      // Refresh in background but show cached immediately
+      _fetchStats().then((stats) { _cachedStats = stats; });
+      return _buildStats(context, _cachedStats!);
+    }
 
-        if (hasPublished) {
+    return FutureBuilder<_CommunityStats?>(
+      future: _fetchOnce(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting && !_fetchedOnce) {
+          // Show nothing while loading first time (avoids CTA flash)
+          return const SizedBox.shrink();
+        }
+
+        final stats = snapshot.data ?? _cachedStats;
+        if (stats != null) {
           return _buildStats(context, stats);
         }
         return _buildCTA(context);
       },
     );
+  }
+
+  Future<_CommunityStats?> _fetchOnce() async {
+    if (_fetchedOnce && _cachedStats == null) return null;
+    final stats = await _fetchStats();
+    _fetchedOnce = true;
+    _cachedStats = stats;
+    return stats;
   }
 
   Future<_CommunityStats?> _fetchStats() async {
