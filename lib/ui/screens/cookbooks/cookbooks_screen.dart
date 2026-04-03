@@ -244,12 +244,12 @@ class _CookbookGrid extends ConsumerWidget {
         // Grid
         Expanded(
           child: GridView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 80),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: Responsive.cookbookColumns(context),
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 1.1,
+              mainAxisSpacing: 6,
+              crossAxisSpacing: 6,
+              childAspectRatio: 1.0,
             ),
             itemCount: cookbooks.length,
             itemBuilder: (context, index) {

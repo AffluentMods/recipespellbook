@@ -945,12 +945,12 @@ class _MediumGridView extends StatelessWidget {
 
         return GridView.builder(
           key: const PageStorageKey('recipe_list_medium'),
-          padding: const EdgeInsets.all(12).copyWith(bottom: 80),
+          padding: const EdgeInsets.fromLTRB(6, 4, 6, 80),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
-            childAspectRatio: Responsive.isDesktopLayout(context) ? 0.75 : 0.8,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
+            childAspectRatio: Responsive.isDesktopLayout(context) ? 0.75 : 0.78,
+            crossAxisSpacing: 6,
+            mainAxisSpacing: 6,
           ),
           itemCount: recipes.length,
           itemBuilder: (context, index) {

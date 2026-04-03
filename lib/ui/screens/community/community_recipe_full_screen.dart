@@ -1,9 +1,19 @@
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../data/ingredient_images.dart';
+import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../providers/cookbook_provider.dart';
+import '../../../providers/database_provider.dart';
 import '../../../services/community_service.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../../utils/native_file_image.dart';
+import '../../widgets/app_snackbar.dart';
 import '../../widgets/community_image.dart';
+import '../../widgets/placeholder_image.dart';
+import '../../widgets/recipe_image.dart';
 
 // ════════════════════════════════════════════
 //  FULL READ-ONLY RECIPE PREVIEW
@@ -13,7 +23,7 @@ import '../../widgets/community_image.dart';
 // Displays the complete recipe in read-only mode:
 //   hero image, title, description, stats, ingredients, steps, notes.
 
-class CommunityRecipeFullScreen extends StatelessWidget {
+class CommunityRecipeFullScreen extends ConsumerWidget {
   final CommunityRecipe recipe;
   final String publicationId;
 
@@ -24,7 +34,7 @@ class CommunityRecipeFullScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final hasImage = recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
@@ -37,29 +47,37 @@ class CommunityRecipeFullScreen extends StatelessWidget {
             expandedHeight: 280,
             pinned: true,
             leading: Container(
-              margin: const EdgeInsets.all(8),
+              margin: const EdgeInsets.all(6),
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.3),
+                color: Colors.black.withValues(alpha: 0.4),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                icon: const Icon(Icons.arrow_back, color: Colors.white, size: 26),
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ),
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                recipe.title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  shadows: [Shadow(color: Colors.black54, blurRadius: 8)],
+            actions: [
+              Container(
+                margin: const EdgeInsets.all(6),
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  shape: BoxShape.circle,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                child: IconButton(
+                  constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                  icon: const Icon(Icons.download_rounded, color: Colors.white, size: 26),
+                  tooltip: l10n.communitySaveRecipe,
+                  onPressed: () => _showSavePicker(context, ref, recipe),
+                ),
               ),
-              titlePadding: const EdgeInsets.only(left: 56, bottom: 16, right: 56),
+            ],
+            flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -224,6 +242,118 @@ class CommunityRecipeFullScreen extends StatelessWidget {
       )),
     );
   }
+
+  static void _showSavePicker(BuildContext context, WidgetRef ref, CommunityRecipe recipe) {
+    final l10n = AppLocalizations.of(context)!;
+    final cookbooks = ref.read(cookbooksProvider).valueOrNull ?? [];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        return SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const SizedBox(height: 8),
+          Container(width: 40, height: 4, decoration: BoxDecoration(
+            color: theme.colorScheme.outline.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(2),
+          )),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(l10n.communitySaveRecipeTo(recipe.title), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          ),
+          if (cookbooks.isEmpty)
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: Text(l10n.communityNoCookbooksYetCreate),
+              subtitle: Text(l10n.communityCreateCookbookFirst),
+            )
+          else
+            ...cookbooks.map((c) => ListTile(
+              leading: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: SizedBox(
+                  width: 40, height: 40,
+                  child: c.imagePath != null && c.imagePath!.isNotEmpty && FileExistsCache.exists(c.imagePath!)
+                      ? buildFileImage(c.imagePath!, fit: BoxFit.cover, cacheHeight: 80)
+                      : const CookbookPlaceholderImage(width: 40, height: 40),
+                ),
+              ),
+              title: Text(c.name),
+              onTap: () async {
+                Navigator.pop(ctx);
+                await _saveRecipe(context, ref, recipe, c.id);
+              },
+            )),
+          const SizedBox(height: 16),
+        ]));
+      },
+    );
+  }
+
+  static Future<void> _saveRecipe(BuildContext context, WidgetRef ref, CommunityRecipe recipe, String cookbookId) async {
+    final l10n = AppLocalizations.of(context)!;
+    final db = ref.read(databaseProvider);
+    final id = 'cr_${DateTime.now().millisecondsSinceEpoch}';
+
+    try {
+      AppSnackbar.loading(context, l10n.communitySavingRecipe);
+
+      await db.transaction(() async {
+        await db.into(db.recipes).insert(RecipesCompanion.insert(
+          id: id,
+          cookbookId: cookbookId,
+          title: recipe.title,
+          description: drift.Value(recipe.description),
+          servings: drift.Value(recipe.servings),
+          prepTimeMinutes: drift.Value(recipe.prepTimeMinutes),
+          cookTimeMinutes: drift.Value(recipe.cookTimeMinutes),
+          sourceUrl: drift.Value(recipe.sourceUrl),
+          courseId: drift.Value(recipe.courseId),
+          categoryId: drift.Value(recipe.categoryId),
+          rating: drift.Value(recipe.rating),
+          notes: drift.Value(recipe.notes),
+          nutritionJson: drift.Value(recipe.nutritionJson),
+          lastViewedAt: drift.Value(DateTime.now()),
+        ));
+
+        for (var i = 0; i < recipe.ingredients.length; i++) {
+          final ing = recipe.ingredients[i];
+          await db.into(db.ingredients).insert(IngredientsCompanion.insert(
+            id: '${id}_ing_$i',
+            recipeId: id,
+            sortOrder: ing.sortOrder,
+            name: ing.name,
+            amount: drift.Value(ing.amount),
+            unit: drift.Value(ing.unit),
+            notes: drift.Value(ing.notes),
+          ));
+        }
+
+        for (var i = 0; i < recipe.steps.length; i++) {
+          final step = recipe.steps[i];
+          await db.into(db.steps).insert(StepsCompanion.insert(
+            id: '${id}_step_$i',
+            recipeId: id,
+            sortOrder: step.sortOrder,
+            instruction: step.instruction,
+            durationMinutes: drift.Value(step.durationMinutes),
+          ));
+        }
+      });
+
+      if (context.mounted) {
+        AppSnackbar.dismiss(context);
+        AppSnackbar.success(context, l10n.communityRecipeSaved(recipe.title));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppSnackbar.dismiss(context);
+        AppSnackbar.error(context, l10n.communityFailedToSave(e.toString()));
+      }
+    }
+  }
 }
 
 // ════════════════════════════════════════════
@@ -327,13 +457,9 @@ class _IngredientRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 6, height: 6,
-            margin: const EdgeInsets.only(top: 6),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary,
-              shape: BoxShape.circle,
-            ),
+          Text(
+            IngredientImages.getEmoji(ingredient.name, unit: ingredient.unit),
+            style: const TextStyle(fontSize: 18),
           ),
           const SizedBox(width: 10),
           if (amount.isNotEmpty) ...[
@@ -439,4 +565,5 @@ class _StepCard extends StatelessWidget {
       ),
     );
   }
+
 }

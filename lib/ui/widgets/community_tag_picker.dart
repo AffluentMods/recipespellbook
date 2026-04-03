@@ -38,11 +38,13 @@ class _CommunityTagPickerState extends State<CommunityTagPicker> {
     }
   }
 
+  static const _maxTags = 5;
+
   void _toggle(String tagId) {
     setState(() {
       if (_selected.contains(tagId)) {
         _selected.remove(tagId);
-      } else {
+      } else if (_selected.length < _maxTags) {
         _selected.add(tagId);
       }
     });
@@ -50,6 +52,7 @@ class _CommunityTagPickerState extends State<CommunityTagPicker> {
   }
 
   void _addCustomTag() {
+    if (_selected.length >= _maxTags) return;
     final tag = _customController.text.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9-]'), '-');
     if (tag.isNotEmpty && !_selected.contains(tag)) {
       setState(() => _selected.add(tag));
@@ -73,9 +76,22 @@ class _CommunityTagPickerState extends State<CommunityTagPicker> {
     final predefinedIds = communityTags.map((t) => t.id).toSet();
     final customTags = _selected.where((t) => !predefinedIds.contains(t)).toList();
 
+    final atLimit = _selected.length >= _maxTags;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (_selected.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Text(
+              '${_selected.length}/$_maxTags tags selected',
+              style: TextStyle(
+                fontSize: 12,
+                color: atLimit ? theme.colorScheme.error : theme.colorScheme.outline,
+              ),
+            ),
+          ),
         Wrap(
           spacing: 8,
           runSpacing: 4,

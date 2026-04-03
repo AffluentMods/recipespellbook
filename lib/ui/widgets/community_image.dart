@@ -45,15 +45,19 @@ class CommunityImage extends StatelessWidget {
 
     final url = CommunityService.communityImageUrl(publicationId, imagePath!);
 
-    Widget image = CachedNetworkImage(
-      imageUrl: url,
-      width: width,
-      height: height,
-      fit: fit,
-      memCacheWidth: memCacheWidth,
-      memCacheHeight: memCacheHeight,
-      placeholder: (_, __) => _shimmer(context),
-      errorWidget: (_, __, ___) => _placeholder(context),
+    Widget image = Container(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: CachedNetworkImage(
+        imageUrl: url,
+        width: width,
+        height: height,
+        fit: fit,
+        alignment: Alignment.center,
+        memCacheWidth: memCacheWidth,
+        memCacheHeight: memCacheHeight,
+        placeholder: (_, __) => _shimmer(context),
+        errorWidget: (_, __, ___) => _placeholder(context),
+      ),
     );
 
     if (borderRadius != null) {

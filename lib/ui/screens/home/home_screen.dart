@@ -181,7 +181,7 @@ class _SurpriseMeCard extends ConsumerStatefulWidget {
 }
 
 class _SurpriseMeCardState extends ConsumerState<_SurpriseMeCard> {
-  static List<CommunityListItem>? _cachedCommunity;
+  static List<CommunityRecipeFeedItem>? _cachedCommunityRecipes;
   static bool _communityFetched = false;
 
   @override
@@ -194,11 +194,11 @@ class _SurpriseMeCardState extends ConsumerState<_SurpriseMeCard> {
     if (_communityFetched) return;
     _communityFetched = true;
     try {
-      final result = await CommunityService.instance.browse(
-        sort: 'popular', limit: 20,
+      final result = await CommunityService.instance.browseRecipes(
+        sort: 'popular', limit: 30,
       );
-      if (result != null && result.publications.isNotEmpty) {
-        _cachedCommunity = result.publications;
+      if (result != null && result.recipes.isNotEmpty) {
+        _cachedCommunityRecipes = result.recipes;
       }
     } catch (_) {
       // Community unavailable — no problem, use local only
@@ -209,7 +209,7 @@ class _SurpriseMeCardState extends ConsumerState<_SurpriseMeCard> {
   Widget build(BuildContext context) {
     final recipes = widget.recipes;
     final hasLocal = recipes.length >= 3;
-    final hasCommunity = _cachedCommunity != null && _cachedCommunity!.isNotEmpty;
+    final hasCommunity = _cachedCommunityRecipes != null && _cachedCommunityRecipes!.isNotEmpty;
 
     // Need at least one source of recipes
     if (!hasLocal && !hasCommunity) return const SizedBox.shrink();
@@ -284,7 +284,7 @@ class _SurpriseMeCardState extends ConsumerState<_SurpriseMeCard> {
   void _onSurpriseMe() {
     final random = Random();
     final hasLocal = widget.recipes.length >= 3;
-    final hasCommunity = _cachedCommunity != null && _cachedCommunity!.isNotEmpty;
+    final hasCommunity = _cachedCommunityRecipes != null && _cachedCommunityRecipes!.isNotEmpty;
 
     // 50/50 split — falls back to whichever source is available
     bool useCommunity;
@@ -295,9 +295,9 @@ class _SurpriseMeCardState extends ConsumerState<_SurpriseMeCard> {
     }
 
     if (useCommunity) {
-      // Pick a random community publication
-      final pub = _cachedCommunity![random.nextInt(_cachedCommunity!.length)];
-      context.push('/community/${pub.id}');
+      // Pick a random community recipe and show preview
+      final recipe = _cachedCommunityRecipes![random.nextInt(_cachedCommunityRecipes!.length)];
+      context.push('/community/${recipe.cookbook.id}');
     } else {
       // Local recipe suggestion
       final recipeMaps = widget.recipes.map((r) => <String, dynamic>{

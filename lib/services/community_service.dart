@@ -222,6 +222,7 @@ class CommunityFeedResult {
 
 /// A single recipe from the community recipe feed.
 class CommunityRecipeFeedItem {
+  final String? id;
   final String title;
   final String? description;
   final String? imagePath;
@@ -229,15 +230,16 @@ class CommunityRecipeFeedItem {
   final int? prepTimeMinutes;
   final int? cookTimeMinutes;
   final String? courseId;
+  final int downloadCount;
   final List<String> tags;
   final List<CommunityIngredient> ingredients;
   final List<CommunityStep> steps;
   final CommunityRecipeCookbookInfo cookbook;
 
   const CommunityRecipeFeedItem({
-    required this.title, this.description, this.imagePath,
+    this.id, required this.title, this.description, this.imagePath,
     this.servings, this.prepTimeMinutes, this.cookTimeMinutes,
-    this.courseId, this.tags = const [],
+    this.courseId, this.downloadCount = 0, this.tags = const [],
     this.ingredients = const [], this.steps = const [],
     required this.cookbook,
   });
@@ -246,12 +248,14 @@ class CommunityRecipeFeedItem {
     final cb = json['cookbook'] as Map<String, dynamic>? ?? {};
     final pub = cb['publisher'] as Map<String, dynamic>? ?? {};
     return CommunityRecipeFeedItem(
+      id: json['id'] as String?,
       title: json['title'] as String? ?? 'Untitled',
       description: json['description'] as String?,
       imagePath: json['imagePath'] as String?,
       servings: json['servings']?.toString(),
       prepTimeMinutes: json['prepTimeMinutes'] as int?,
       cookTimeMinutes: json['cookTimeMinutes'] as int?,
+      downloadCount: json['downloadCount'] as int? ?? 0,
       courseId: json['courseId'] as String?,
       tags: (json['tags'] as List?)?.map((t) => t.toString()).toList() ?? [],
       ingredients: (json['ingredients'] as List?)
@@ -263,6 +267,7 @@ class CommunityRecipeFeedItem {
       cookbook: CommunityRecipeCookbookInfo(
         id: cb['id'] as String? ?? '',
         title: cb['title'] as String? ?? '',
+        publisherId: pub['id'] as String?,
         publisherName: pub['name'] as String? ?? 'Unknown',
         publisherAvatarUrl: pub['avatarUrl'] as String?,
       ),
@@ -273,11 +278,13 @@ class CommunityRecipeFeedItem {
 class CommunityRecipeCookbookInfo {
   final String id;
   final String title;
+  final String? publisherId;
   final String publisherName;
   final String? publisherAvatarUrl;
 
   const CommunityRecipeCookbookInfo({
     required this.id, required this.title,
+    this.publisherId,
     required this.publisherName, this.publisherAvatarUrl,
   });
 }
@@ -370,6 +377,60 @@ class UploadStatus {
     dailyLimitBytes: (json['dailyLimitBytes'] as num?)?.toInt() ?? 2147483647,
     maxCookbookBytes: (json['maxCookbookBytes'] as num?)?.toInt() ?? 524288000,
   );
+}
+
+// ════════════════════════════════════════════
+//  CREATOR PROFILE
+// ════════════════════════════════════════════
+
+class CreatorProfile {
+  final String id;
+  final String name;
+  final String? avatarUrl;
+  final DateTime memberSince;
+  final int totalRecipes;
+  final int totalDownloads;
+  final int totalCookbooks;
+  final double averageRating;
+  final int followerCount;
+  final int followingCount;
+  final bool isFollowing;
+  final List<CommunityListItem> publications;
+
+  const CreatorProfile({
+    required this.id, required this.name, this.avatarUrl,
+    required this.memberSince, required this.totalRecipes,
+    required this.totalDownloads, required this.totalCookbooks,
+    required this.averageRating,
+    this.followerCount = 0, this.followingCount = 0, this.isFollowing = false,
+    required this.publications,
+  });
+
+  factory CreatorProfile.fromJson(Map<String, dynamic> json) {
+    final user = json['user'] as Map<String, dynamic>;
+    final stats = json['stats'] as Map<String, dynamic>;
+    final pubs = (json['publications'] as List?)
+        ?.map((p) => CommunityListItem.fromJson({
+          ...p as Map<String, dynamic>,
+          'publisher': user,
+        }))
+        .toList() ?? [];
+
+    return CreatorProfile(
+      id: user['id'] as String,
+      name: user['name'] as String? ?? 'Anonymous',
+      avatarUrl: user['avatarUrl'] as String?,
+      memberSince: DateTime.parse(user['memberSince'] as String),
+      totalRecipes: stats['totalRecipes'] as int? ?? 0,
+      totalDownloads: stats['totalDownloads'] as int? ?? 0,
+      totalCookbooks: stats['totalCookbooks'] as int? ?? 0,
+      averageRating: (stats['averageRating'] as num?)?.toDouble() ?? 0,
+      followerCount: stats['followerCount'] as int? ?? 0,
+      followingCount: stats['followingCount'] as int? ?? 0,
+      isFollowing: json['isFollowing'] as bool? ?? false,
+      publications: pubs,
+    );
+  }
 }
 
 // ════════════════════════════════════════════
@@ -569,6 +630,55 @@ class CommunityService {
   }
 
   // ────────────────────────────────────
+  //  Creator Profile
+  // ────────────────────────────────────
+
+  /// Fetch a creator's public profile with their publications.
+  Future<CreatorProfile?> getCreatorProfile(String userId) async {
+    try {
+      final r = await _auth.get('/v1/community/creator/$userId');
+      if (r.statusCode == 200) {
+        return CreatorProfile.fromJson(jsonDecode(r.body));
+      }
+    } catch (e) {
+      debugPrint('[Community] getCreatorProfile: $e');
+    }
+    return null;
+  }
+
+  // ────────────────────────────────────
+  //  Follow / Unfollow
+  // ────────────────────────────────────
+
+  /// Follow a creator. Returns updated follow state + follower count.
+  Future<({bool following, int followerCount})> followCreator(String userId) async {
+    try {
+      final r = await _auth.post('/v1/community/creator/$userId/follow', {});
+      if (r.statusCode == 200) {
+        final data = jsonDecode(r.body);
+        return (following: data['following'] as bool, followerCount: data['followerCount'] as int);
+      }
+    } catch (e) {
+      debugPrint('[Community] follow: $e');
+    }
+    return (following: false, followerCount: 0);
+  }
+
+  /// Unfollow a creator. Returns updated follow state + follower count.
+  Future<({bool following, int followerCount})> unfollowCreator(String userId) async {
+    try {
+      final r = await _auth.delete('/v1/community/creator/$userId/follow');
+      if (r.statusCode == 200) {
+        final data = jsonDecode(r.body);
+        return (following: data['following'] as bool, followerCount: data['followerCount'] as int);
+      }
+    } catch (e) {
+      debugPrint('[Community] unfollow: $e');
+    }
+    return (following: false, followerCount: 0);
+  }
+
+  // ────────────────────────────────────
   //  Download
   // ────────────────────────────────────
 
@@ -595,6 +705,15 @@ class CommunityService {
       debugPrint('[Community] download: $e');
     }
     return null;
+  }
+
+  /// Track download of a single community recipe.
+  Future<void> trackRecipeDownload(String recipeId) async {
+    try {
+      await _auth.post('/v1/community/recipes/$recipeId/download', {});
+    } catch (e) {
+      debugPrint('[Community] trackRecipeDownload: $e');
+    }
   }
 
   // ────────────────────────────────────
@@ -752,6 +871,23 @@ class CommunityService {
   // ────────────────────────────────────
   //  Report
   // ────────────────────────────────────
+
+  /// Report an account/creator.
+  /// Returns a record with success and optional error string.
+  Future<({bool success, String? error})> reportAccount(String userId, String reason) async {
+    try {
+      final r = await _auth.post('/v1/community/creator/$userId/report', {'reason': reason});
+      if (r.statusCode == 200) return (success: true, error: null);
+      // Parse error
+      try {
+        final data = jsonDecode(r.body);
+        return (success: false, error: data['error'] as String?);
+      } catch (_) {}
+      return (success: false, error: 'Request failed');
+    } catch (_) {
+      return (success: false, error: 'Connection error');
+    }
+  }
 
   /// Report a publication.
   Future<bool> report(String publicationId, String reason, {String? details}) async {

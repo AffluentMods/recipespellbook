@@ -13564,7 +13564,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityHasImages.
   ///
   /// In en, this message translates to:
-  /// **'Has Images'**
+  /// **'Has images'**
   String get communityHasImages;
 
   /// No description provided for @communityListView.
@@ -13594,7 +13594,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityDownloadImagesIncluded.
   ///
   /// In en, this message translates to:
-  /// **'{count} images included'**
+  /// **'{count} photos included'**
   String communityDownloadImagesIncluded(int count);
 
   /// No description provided for @communityDownloadTextOnly.
@@ -13606,37 +13606,37 @@ abstract class AppLocalizations {
   /// No description provided for @communityDownloadTextOnlySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Faster download, no images'**
+  /// **'Just recipes, no images'**
   String get communityDownloadTextOnlySubtitle;
 
   /// No description provided for @communityTapToPreview.
   ///
   /// In en, this message translates to:
-  /// **'Tap a recipe to preview'**
+  /// **'Tap any recipe to preview'**
   String get communityTapToPreview;
 
   /// No description provided for @communityImageCountLabel.
   ///
   /// In en, this message translates to:
-  /// **'{count} images'**
+  /// **'{count} photos'**
   String communityImageCountLabel(int count);
 
   /// No description provided for @communityYourRating.
   ///
   /// In en, this message translates to:
-  /// **'Your rating:'**
+  /// **'Your rating'**
   String get communityYourRating;
 
   /// No description provided for @communityRateThis.
   ///
   /// In en, this message translates to:
-  /// **'Rate this cookbook:'**
+  /// **'Rate this'**
   String get communityRateThis;
 
   /// No description provided for @communityDownloadingImages.
   ///
   /// In en, this message translates to:
-  /// **'Downloading images... {current}/{total}'**
+  /// **'Downloading images... ({current}/{total})'**
   String communityDownloadingImages(int current, int total);
 
   /// No description provided for @communityViewFullRecipe.
@@ -13654,7 +13654,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityStepCount.
   ///
   /// In en, this message translates to:
-  /// **'{count} steps'**
+  /// **'{count, plural, =1{1 Step} other{{count} Steps}}'**
   String communityStepCount(int count);
 
   /// No description provided for @communityNotes.
@@ -13708,7 +13708,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityEditDescriptionHint.
   ///
   /// In en, this message translates to:
-  /// **'Tell people about this cookbook...'**
+  /// **'Add a description...'**
   String get communityEditDescriptionHint;
 
   /// No description provided for @communityEditTags.
@@ -13720,7 +13720,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityEditSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Publication updated!'**
+  /// **'Publication updated'**
   String get communityEditSuccess;
 
   /// No description provided for @communityEditFailed.
@@ -13762,25 +13762,25 @@ abstract class AppLocalizations {
   /// No description provided for @communityPublishPreparing.
   ///
   /// In en, this message translates to:
-  /// **'Preparing cookbook...'**
+  /// **'Preparing...'**
   String get communityPublishPreparing;
 
   /// No description provided for @communityPublishUploading.
   ///
   /// In en, this message translates to:
-  /// **'Uploading images ({current}/{total})'**
+  /// **'Uploading images ({current}/{total})...'**
   String communityPublishUploading(int current, int total);
 
   /// No description provided for @communityPublishPublishing.
   ///
   /// In en, this message translates to:
-  /// **'Publishing to community...'**
+  /// **'Publishing...'**
   String get communityPublishPublishing;
 
   /// No description provided for @communityPublishBackground.
   ///
   /// In en, this message translates to:
-  /// **'You can leave this screen — publishing continues in the background.'**
+  /// **'You can browse while publishing continues in the background.'**
   String get communityPublishBackground;
 
   /// No description provided for @communityPublishDone.
@@ -13792,13 +13792,13 @@ abstract class AppLocalizations {
   /// No description provided for @communityPublishImagesSkipped.
   ///
   /// In en, this message translates to:
-  /// **'{count} images were skipped (rejected by moderation)'**
+  /// **'{count} images were skipped'**
   String communityPublishImagesSkipped(int count);
 
   /// No description provided for @communityPublishRejected.
   ///
   /// In en, this message translates to:
-  /// **'{count} rejected by moderation'**
+  /// **'{count} images rejected'**
   String communityPublishRejected(int count);
 
   /// No description provided for @communityConfigurePublication.
@@ -13828,7 +13828,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityPublishDescriptionHint.
   ///
   /// In en, this message translates to:
-  /// **'Tell people about this cookbook...'**
+  /// **'Describe your cookbook...'**
   String get communityPublishDescriptionHint;
 
   /// No description provided for @communityPublishTags.
@@ -13840,13 +13840,13 @@ abstract class AppLocalizations {
   /// No description provided for @communityPublishIncludeImages.
   ///
   /// In en, this message translates to:
-  /// **'Include images'**
+  /// **'Include Images'**
   String get communityPublishIncludeImages;
 
   /// No description provided for @communityPublishIncludeImagesSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Upload recipe images with this cookbook. Images are scanned for safety.'**
+  /// **'Upload recipe photos with the cookbook'**
   String get communityPublishIncludeImagesSubtitle;
 
   /// No description provided for @communityPublishSummary.
@@ -13858,7 +13858,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityPublishRecipesSummary.
   ///
   /// In en, this message translates to:
-  /// **'{count} recipes'**
+  /// **'{count} recipes will be published'**
   String communityPublishRecipesSummary(int count);
 
   /// No description provided for @communityPublishImagesWillUpload.
@@ -13870,7 +13870,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityPublishTextOnlyNoImages.
   ///
   /// In en, this message translates to:
-  /// **'Text only (no images)'**
+  /// **'Text only — no images'**
   String get communityPublishTextOnlyNoImages;
 
   /// No description provided for @communityPublishTryAgain.
@@ -13882,7 +13882,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityPublishUploadInProgress.
   ///
   /// In en, this message translates to:
-  /// **'Publishing in progress... ({current}/{total} images)'**
+  /// **'Upload in progress ({current}/{total}). Wait for it to finish before publishing again.'**
   String communityPublishUploadInProgress(int current, int total);
 
   /// No description provided for @surpriseMeTitle.
@@ -14886,6 +14886,1332 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Store'**
   String get accountStoreFallback;
+
+  /// No description provided for @communityUnpublishDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpublish this cookbook?'**
+  String get communityUnpublishDialogTitle;
+
+  /// No description provided for @communityUnpublishDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It will be removed from the community. Your recipes are unaffected.'**
+  String get communityUnpublishDialogMessage;
+
+  /// No description provided for @communityPublishAnotherCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Publish another cookbook'**
+  String get communityPublishAnotherCookbook;
+
+  /// No description provided for @communityShareMoreWithCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Share more with the community'**
+  String get communityShareMoreWithCommunity;
+
+  /// No description provided for @communityUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading...'**
+  String get communityUploading;
+
+  /// No description provided for @communityStatRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'recipes'**
+  String get communityStatRecipes;
+
+  /// No description provided for @communityStatDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'downloads'**
+  String get communityStatDownloads;
+
+  /// No description provided for @communityStatRating.
+  ///
+  /// In en, this message translates to:
+  /// **'rating'**
+  String get communityStatRating;
+
+  /// No description provided for @communityRemovedByModerator.
+  ///
+  /// In en, this message translates to:
+  /// **'This cookbook was removed by a moderator.'**
+  String get communityRemovedByModerator;
+
+  /// No description provided for @communityBrowseRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get communityBrowseRecipes;
+
+  /// No description provided for @communityBrowseCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookbooks'**
+  String get communityBrowseCookbooks;
+
+  /// No description provided for @communityNoRecipesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No community recipes yet'**
+  String get communityNoRecipesYet;
+
+  /// No description provided for @communityTryDifferentSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term or clear your filters'**
+  String get communityTryDifferentSearch;
+
+  /// No description provided for @communityBeFirstToShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Be the first to share a cookbook with the community!'**
+  String get communityBeFirstToShare;
+
+  /// No description provided for @communityPublishToShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish a cookbook to share your recipes with everyone!'**
+  String get communityPublishToShare;
+
+  /// No description provided for @communityFromCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'from {name}'**
+  String communityFromCookbook(String name);
+
+  /// No description provided for @communityIngredientsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} ingredients'**
+  String communityIngredientsCount(int count);
+
+  /// No description provided for @communitySaveRecipeTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Save \"{title}\" to...'**
+  String communitySaveRecipeTo(String title);
+
+  /// No description provided for @communityNewCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'New Cookbook'**
+  String get communityNewCookbook;
+
+  /// No description provided for @communityExistingCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing Cookbook'**
+  String get communityExistingCookbook;
+
+  /// No description provided for @communityAddToExistingCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to one of your cookbooks'**
+  String get communityAddToExistingCookbook;
+
+  /// No description provided for @communityChooseCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Cookbook'**
+  String get communityChooseCookbook;
+
+  /// No description provided for @communityNoCookbooksYetSaveNew.
+  ///
+  /// In en, this message translates to:
+  /// **'No cookbooks yet. Recipes will be saved to a new cookbook.'**
+  String get communityNoCookbooksYetSaveNew;
+
+  /// No description provided for @communityCreateCookbookFirstToSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a cookbook first to save recipes'**
+  String get communityCreateCookbookFirstToSave;
+
+  /// No description provided for @communitySaveTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to:'**
+  String get communitySaveTo;
+
+  /// No description provided for @communitySaveRecipeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Save {count} Recipes'**
+  String communitySaveRecipeCount(int count);
+
+  /// No description provided for @communityFailedToSaveRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save rating. Please try again.'**
+  String get communityFailedToSaveRating;
+
+  /// No description provided for @communityDownloadingCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading cookbook...'**
+  String get communityDownloadingCookbook;
+
+  /// No description provided for @communitySavingRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving recipes...'**
+  String get communitySavingRecipes;
+
+  /// No description provided for @communityPartialDownloadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recipes saved from \"{title}\"'**
+  String communityPartialDownloadSuccess(int count, String title);
+
+  /// No description provided for @communityCannotReportOwn.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot report your own publication'**
+  String get communityCannotReportOwn;
+
+  /// No description provided for @communityEditCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Cookbook'**
+  String get communityEditCookbook;
+
+  /// No description provided for @communityEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get communityEditTitle;
+
+  /// No description provided for @communityEditDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get communityEditDescriptionLabel;
+
+  /// No description provided for @communityEditTagsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get communityEditTagsLabel;
+
+  /// No description provided for @communityCookbookUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookbook updated'**
+  String get communityCookbookUpdated;
+
+  /// No description provided for @communityFailedToUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update'**
+  String get communityFailedToUpdate;
+
+  /// No description provided for @communitySaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get communitySaveChanges;
+
+  /// No description provided for @communityEditTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get communityEditTooltip;
+
+  /// No description provided for @communitySelectAllRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get communitySelectAllRecipes;
+
+  /// No description provided for @communityDeselectAllRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect All'**
+  String get communityDeselectAllRecipes;
+
+  /// No description provided for @communitySelectedOfTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{selected} of {total} selected'**
+  String communitySelectedOfTotal(int selected, int total);
+
+  /// No description provided for @communityDownloadRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Download {count} Recipes'**
+  String communityDownloadRecipes(int count);
+
+  /// No description provided for @communityNotCurrentlyRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Not currently rated'**
+  String get communityNotCurrentlyRated;
+
+  /// No description provided for @communityCannotRateOwnCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot rate your own cookbook'**
+  String get communityCannotRateOwnCookbook;
+
+  /// No description provided for @communitySelectIndividualRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Individual Recipes'**
+  String get communitySelectIndividualRecipes;
+
+  /// No description provided for @communityWithImages.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} with images'**
+  String communityWithImages(String size);
+
+  /// No description provided for @communitySaveRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Recipe'**
+  String get communitySaveRecipe;
+
+  /// No description provided for @communityNoCookbooksYetCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'No cookbooks yet'**
+  String get communityNoCookbooksYetCreate;
+
+  /// No description provided for @communityCreateCookbookFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a cookbook first'**
+  String get communityCreateCookbookFirst;
+
+  /// No description provided for @communitySavingRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving recipe...'**
+  String get communitySavingRecipe;
+
+  /// No description provided for @communityRecipeSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{title}\" saved!'**
+  String communityRecipeSaved(String title);
+
+  /// No description provided for @communityFailedToSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save: {error}'**
+  String communityFailedToSave(String error);
+
+  /// No description provided for @communitySaveToMyCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to My Cookbooks'**
+  String get communitySaveToMyCookbooks;
+
+  /// No description provided for @communityViewCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'View Cookbook'**
+  String get communityViewCookbook;
+
+  /// No description provided for @communityPublishInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing in progress — cancel the upload first'**
+  String get communityPublishInProgress;
+
+  /// No description provided for @communityUnknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown error'**
+  String get communityUnknownError;
+
+  /// No description provided for @communityUploadCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload cancelled'**
+  String get communityUploadCancelled;
+
+  /// No description provided for @communityCancelUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Upload'**
+  String get communityCancelUpload;
+
+  /// No description provided for @communityCancelling.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling...'**
+  String get communityCancelling;
+
+  /// No description provided for @communityPublishingFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing failed'**
+  String get communityPublishingFailed;
+
+  /// No description provided for @communityTagsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tags'**
+  String communityTagsSummary(int count);
+
+  /// No description provided for @creatorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Creator not found'**
+  String get creatorNotFound;
+
+  /// No description provided for @creatorMemberSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Member since {date}'**
+  String creatorMemberSince(String date);
+
+  /// No description provided for @creatorStatRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get creatorStatRecipes;
+
+  /// No description provided for @creatorStatCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookbooks'**
+  String get creatorStatCookbooks;
+
+  /// No description provided for @creatorStatDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads'**
+  String get creatorStatDownloads;
+
+  /// No description provided for @creatorStatAvgRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Rating'**
+  String get creatorStatAvgRating;
+
+  /// No description provided for @creatorPublishedCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Published Cookbooks'**
+  String get creatorPublishedCookbooks;
+
+  /// No description provided for @creatorNoCookbooksYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No published cookbooks yet'**
+  String get creatorNoCookbooksYet;
+
+  /// No description provided for @creatorRecipesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recipes'**
+  String creatorRecipesCount(int count);
+
+  /// No description provided for @follow.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow'**
+  String get follow;
+
+  /// No description provided for @following.
+  ///
+  /// In en, this message translates to:
+  /// **'Following'**
+  String get following;
+
+  /// No description provided for @unfollow.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfollow'**
+  String get unfollow;
+
+  /// No description provided for @followers.
+  ///
+  /// In en, this message translates to:
+  /// **'Followers'**
+  String get followers;
+
+  /// No description provided for @followingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Following'**
+  String get followingLabel;
+
+  /// No description provided for @cannotFollowSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot follow yourself'**
+  String get cannotFollowSelf;
+
+  /// No description provided for @paywallUpgradeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade Recipe Spellbook'**
+  String get paywallUpgradeTitle;
+
+  /// No description provided for @paywallSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your recipes on every device.\nForever.'**
+  String get paywallSubtitle;
+
+  /// No description provided for @paywallPremiumTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get paywallPremiumTitle;
+
+  /// No description provided for @paywallFamilyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get paywallFamilyTitle;
+
+  /// No description provided for @paywallPremiumFeature1.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync across all devices'**
+  String get paywallPremiumFeature1;
+
+  /// No description provided for @paywallPremiumFeature2.
+  ///
+  /// In en, this message translates to:
+  /// **'Step-by-step photos'**
+  String get paywallPremiumFeature2;
+
+  /// No description provided for @paywallPremiumFeature3.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic backups'**
+  String get paywallPremiumFeature3;
+
+  /// No description provided for @paywallFamilyFeature1.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in Premium'**
+  String get paywallFamilyFeature1;
+
+  /// No description provided for @paywallFamilyFeature2.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 5 family members sync together'**
+  String get paywallFamilyFeature2;
+
+  /// No description provided for @paywallFamilyFeature3.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared cookbooks & shopping lists'**
+  String get paywallFamilyFeature3;
+
+  /// No description provided for @paywallValueProp.
+  ///
+  /// In en, this message translates to:
+  /// **'Most recipe apps charge \$5–10/month. This isn\'t that.'**
+  String get paywallValueProp;
+
+  /// No description provided for @paywallGetPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Get {planName} — {planPrice}'**
+  String paywallGetPlan(String planName, String planPrice);
+
+  /// No description provided for @paywallOneTimePurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time purchase · No subscription · Yours forever'**
+  String get paywallOneTimePurchase;
+
+  /// No description provided for @paywallRestorePurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get paywallRestorePurchases;
+
+  /// No description provided for @paywallCompleteYourPurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Your Purchase'**
+  String get paywallCompleteYourPurchase;
+
+  /// No description provided for @paywallCompleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'After completing your purchase, tap \"Refresh\" below to activate it.'**
+  String get paywallCompleteMessage;
+
+  /// No description provided for @paywallRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get paywallRefresh;
+
+  /// No description provided for @paywallYoureAllSet.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all set!'**
+  String get paywallYoureAllSet;
+
+  /// No description provided for @paywallPurchaseNotDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase not detected yet — try refreshing again.'**
+  String get paywallPurchaseNotDetected;
+
+  /// No description provided for @paywallWebComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Web Purchases Coming Soon'**
+  String get paywallWebComingSoon;
+
+  /// No description provided for @paywallWebMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'In the meantime, upgrade on Android or iOS and it syncs everywhere.'**
+  String get paywallWebMessage;
+
+  /// No description provided for @paywallFreeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get paywallFreeLabel;
+
+  /// No description provided for @paywallPremiumLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get paywallPremiumLabel;
+
+  /// No description provided for @paywallFamilyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get paywallFamilyLabel;
+
+  /// No description provided for @paywallUnlimitedRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited recipes'**
+  String get paywallUnlimitedRecipes;
+
+  /// No description provided for @paywallCloudSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync'**
+  String get paywallCloudSync;
+
+  /// No description provided for @paywallFamilySharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Family sharing'**
+  String get paywallFamilySharing;
+
+  /// No description provided for @adminModerationPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderation Panel'**
+  String get adminModerationPanel;
+
+  /// No description provided for @adminPendingReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Review'**
+  String get adminPendingReview;
+
+  /// No description provided for @adminPendingFlags.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Flags'**
+  String get adminPendingFlags;
+
+  /// No description provided for @adminPendingReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Reports'**
+  String get adminPendingReports;
+
+  /// No description provided for @adminUserReports.
+  ///
+  /// In en, this message translates to:
+  /// **'User Reports'**
+  String get adminUserReports;
+
+  /// No description provided for @adminAllClear.
+  ///
+  /// In en, this message translates to:
+  /// **'All clear!'**
+  String get adminAllClear;
+
+  /// No description provided for @adminNoPendingItems.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending items to review.'**
+  String get adminNoPendingItems;
+
+  /// No description provided for @adminFailedToApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to approve'**
+  String get adminFailedToApprove;
+
+  /// No description provided for @adminFailedToRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to remove'**
+  String get adminFailedToRemove;
+
+  /// No description provided for @adminFlagApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Flag approved (publication removed)'**
+  String get adminFlagApproved;
+
+  /// No description provided for @adminFailedToApproveFlag.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to approve flag'**
+  String get adminFailedToApproveFlag;
+
+  /// No description provided for @adminFlagRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Flag rejected (publication kept)'**
+  String get adminFlagRejected;
+
+  /// No description provided for @adminFailedToRejectFlag.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to reject flag'**
+  String get adminFailedToRejectFlag;
+
+  /// No description provided for @adminContentRemovedResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Content removed & report resolved'**
+  String get adminContentRemovedResolved;
+
+  /// No description provided for @adminReportDismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Report dismissed'**
+  String get adminReportDismissed;
+
+  /// No description provided for @adminFailedToResolveReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to resolve report'**
+  String get adminFailedToResolveReport;
+
+  /// No description provided for @adminByPublisher.
+  ///
+  /// In en, this message translates to:
+  /// **'By {name} · {count} recipes'**
+  String adminByPublisher(String name, int count);
+
+  /// No description provided for @adminApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get adminApprove;
+
+  /// No description provided for @adminRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get adminRemove;
+
+  /// No description provided for @adminReportedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported by: {name}'**
+  String adminReportedBy(String name);
+
+  /// No description provided for @adminReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason}'**
+  String adminReason(String reason);
+
+  /// No description provided for @adminRemoveContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Content'**
+  String get adminRemoveContent;
+
+  /// No description provided for @adminDismissReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss Report'**
+  String get adminDismissReport;
+
+  /// No description provided for @adminDismissFlag.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss Flag'**
+  String get adminDismissFlag;
+
+  /// No description provided for @accountProfileUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated'**
+  String get accountProfileUpdated;
+
+  /// No description provided for @accountProfileUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update profile'**
+  String get accountProfileUpdateFailed;
+
+  /// No description provided for @accountProfilePictureUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile picture updated'**
+  String get accountProfilePictureUpdated;
+
+  /// No description provided for @accountProfilePictureUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update profile picture'**
+  String get accountProfilePictureUpdateFailed;
+
+  /// No description provided for @accountFailedToUploadImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to upload image'**
+  String get accountFailedToUploadImage;
+
+  /// No description provided for @accountDisplayNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get accountDisplayNameHint;
+
+  /// No description provided for @menuDrawerYourStuff.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Stuff'**
+  String get menuDrawerYourStuff;
+
+  /// No description provided for @menuDrawerOrganize.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize your recipe collections'**
+  String get menuDrawerOrganize;
+
+  /// No description provided for @menuDrawerImportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'From any URL, photo or file'**
+  String get menuDrawerImportSubtitle;
+
+  /// No description provided for @menuDrawerTransferSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move recipes between devices'**
+  String get menuDrawerTransferSubtitle;
+
+  /// No description provided for @menuDrawerApp.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get menuDrawerApp;
+
+  /// No description provided for @menuDrawerSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme, language & preferences'**
+  String get menuDrawerSettingsSubtitle;
+
+  /// No description provided for @menuDrawerCouldNotOpenUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open {url}'**
+  String menuDrawerCouldNotOpenUrl(String url);
+
+  /// No description provided for @menuDrawerCouldNotOpenLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open link: {error}'**
+  String menuDrawerCouldNotOpenLink(String error);
+
+  /// No description provided for @menuDrawerCouldNotOpenEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open email client'**
+  String get menuDrawerCouldNotOpenEmail;
+
+  /// No description provided for @menuDrawerCouldNotOpenEmailError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open email: {error}'**
+  String menuDrawerCouldNotOpenEmailError(String error);
+
+  /// No description provided for @menuDrawerGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get menuDrawerGuest;
+
+  /// No description provided for @menuDrawerCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'COMMUNITY'**
+  String get menuDrawerCommunity;
+
+  /// No description provided for @menuDrawerPublishToBuildStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish a cookbook to start building your stats here'**
+  String get menuDrawerPublishToBuildStats;
+
+  /// No description provided for @menuDrawerRecipesUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'recipes\nuploaded'**
+  String get menuDrawerRecipesUploaded;
+
+  /// No description provided for @menuDrawerDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'downloads'**
+  String get menuDrawerDownloads;
+
+  /// No description provided for @menuDrawerRating.
+  ///
+  /// In en, this message translates to:
+  /// **'rating'**
+  String get menuDrawerRating;
+
+  /// No description provided for @recipeListCopyToCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy to Cookbook'**
+  String get recipeListCopyToCookbook;
+
+  /// No description provided for @recipeListMoveToCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to Cookbook'**
+  String get recipeListMoveToCookbook;
+
+  /// No description provided for @recipeListCopyingRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Copying {count} recipes...'**
+  String recipeListCopyingRecipes(int count);
+
+  /// No description provided for @recipeListMovingRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Moving {count} recipes...'**
+  String recipeListMovingRecipes(int count);
+
+  /// No description provided for @recipeListCreateAnotherFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Create another cookbook first'**
+  String get recipeListCreateAnotherFirst;
+
+  /// No description provided for @recipeListSortNewest.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get recipeListSortNewest;
+
+  /// No description provided for @recipeListSortOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest'**
+  String get recipeListSortOldest;
+
+  /// No description provided for @recipeListSortRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get recipeListSortRating;
+
+  /// No description provided for @recipeListSortQuickest.
+  ///
+  /// In en, this message translates to:
+  /// **'Quickest'**
+  String get recipeListSortQuickest;
+
+  /// No description provided for @recipeListSizeSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get recipeListSizeSmall;
+
+  /// No description provided for @recipeListSizeMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get recipeListSizeMedium;
+
+  /// No description provided for @recipeListSizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get recipeListSizeLarge;
+
+  /// No description provided for @recipeListPinned.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned'**
+  String get recipeListPinned;
+
+  /// No description provided for @recipeListDeselectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect all'**
+  String get recipeListDeselectAll;
+
+  /// No description provided for @recipeListSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get recipeListSelectAll;
+
+  /// No description provided for @plannerPreviousWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous week'**
+  String get plannerPreviousWeek;
+
+  /// No description provided for @plannerNextWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Next week'**
+  String get plannerNextWeek;
+
+  /// No description provided for @plannerMoreOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get plannerMoreOptions;
+
+  /// No description provided for @homeScreenSwitchCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch Cookbook'**
+  String get homeScreenSwitchCookbook;
+
+  /// No description provided for @homeScreenNewCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'New Cookbook'**
+  String get homeScreenNewCookbook;
+
+  /// No description provided for @shareViewerSharedRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared Recipe'**
+  String get shareViewerSharedRecipe;
+
+  /// No description provided for @shareViewerGoHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Home'**
+  String get shareViewerGoHome;
+
+  /// No description provided for @shareViewerSharedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared by {name}'**
+  String shareViewerSharedBy(String name);
+
+  /// No description provided for @shareViewerExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires: {date}'**
+  String shareViewerExpires(String date);
+
+  /// No description provided for @importIssues.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Issues'**
+  String get importIssues;
+
+  /// No description provided for @trashPermanentlyDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete {count} {count, plural, =1{recipe} other{recipes}}? This cannot be undone.'**
+  String trashPermanentlyDeleteConfirm(int count);
+
+  /// No description provided for @trashDeletingRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting {count} recipes...'**
+  String trashDeletingRecipes(int count);
+
+  /// No description provided for @trashDeletingAllRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting recipes...'**
+  String get trashDeletingAllRecipes;
+
+  /// No description provided for @cookbooksError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String cookbooksError(String error);
+
+  /// No description provided for @cookbooksShareFromApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared from Recipe Spellbook'**
+  String get cookbooksShareFromApp;
+
+  /// No description provided for @cookbooksPublishFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish failed'**
+  String get cookbooksPublishFailed;
+
+  /// No description provided for @displayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Display Name'**
+  String get displayName;
+
+  /// No description provided for @editDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Display Name'**
+  String get editDisplayName;
+
+  /// No description provided for @displayNameHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Used on your profile and in the community.'**
+  String get displayNameHelper;
+
+  /// No description provided for @saveName.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Name'**
+  String get saveName;
+
+  /// No description provided for @nameContainsUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Name contains unsupported characters'**
+  String get nameContainsUnsupported;
+
+  /// No description provided for @nameTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Name must be at least 2 characters'**
+  String get nameTooShort;
+
+  /// No description provided for @communitySection.
+  ///
+  /// In en, this message translates to:
+  /// **'COMMUNITY'**
+  String get communitySection;
+
+  /// No description provided for @subscriptionSection.
+  ///
+  /// In en, this message translates to:
+  /// **'SUBSCRIPTION'**
+  String get subscriptionSection;
+
+  /// No description provided for @integrationsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'INTEGRATIONS'**
+  String get integrationsSection;
+
+  /// No description provided for @dangerZoneSection.
+  ///
+  /// In en, this message translates to:
+  /// **'DANGER ZONE'**
+  String get dangerZoneSection;
+
+  /// No description provided for @unlockPremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock Premium'**
+  String get unlockPremium;
+
+  /// No description provided for @oneTimePurchaseDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time purchase · yours forever · no subscription'**
+  String get oneTimePurchaseDesc;
+
+  /// No description provided for @viewPlansPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'View Plans — \$6.99'**
+  String get viewPlansPrice;
+
+  /// No description provided for @premiumActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium — Active'**
+  String get premiumActive;
+
+  /// No description provided for @familyActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Family — Active'**
+  String get familyActive;
+
+  /// No description provided for @cloudSyncEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync enabled'**
+  String get cloudSyncEnabled;
+
+  /// No description provided for @sharedWithMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared with up to 5 members'**
+  String get sharedWithMembers;
+
+  /// No description provided for @yourForever.
+  ///
+  /// In en, this message translates to:
+  /// **'yours forever'**
+  String get yourForever;
+
+  /// No description provided for @publishCookbookToStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish a cookbook to start building your stats here'**
+  String get publishCookbookToStart;
+
+  /// No description provided for @removePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get removePhoto;
+
+  /// No description provided for @chooseFromLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from library'**
+  String get chooseFromLibrary;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete your account?'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This will delete:\n· All your saved recipes\n· All your cookbooks\n· Your community publications\n· All account data\n\nThis cannot be undone.'**
+  String get deleteAccountWarning;
+
+  /// No description provided for @typeDeleteToConfirmAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Type DELETE to confirm:'**
+  String get typeDeleteToConfirmAccount;
+
+  /// No description provided for @deleteForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Forever'**
+  String get deleteForever;
+
+  /// No description provided for @nameCooldownMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change your name again on {date}'**
+  String nameCooldownMessage(String date);
+
+  /// No description provided for @reportAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Report this account'**
+  String get reportAccount;
+
+  /// No description provided for @reportAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why are you reporting this account?'**
+  String get reportAccountTitle;
+
+  /// No description provided for @reportSpam.
+  ///
+  /// In en, this message translates to:
+  /// **'Spam or fake account'**
+  String get reportSpam;
+
+  /// No description provided for @reportInappropriate.
+  ///
+  /// In en, this message translates to:
+  /// **'Inappropriate content'**
+  String get reportInappropriate;
+
+  /// No description provided for @reportStolen.
+  ///
+  /// In en, this message translates to:
+  /// **'Stolen recipes / copyright'**
+  String get reportStolen;
+
+  /// No description provided for @reportHarassment.
+  ///
+  /// In en, this message translates to:
+  /// **'Harassment'**
+  String get reportHarassment;
+
+  /// No description provided for @reportOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get reportOther;
+
+  /// No description provided for @submitReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Report'**
+  String get submitReport;
+
+  /// No description provided for @reportSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for your report. We\'ll review it shortly.'**
+  String get reportSubmitted;
+
+  /// No description provided for @alreadyReportedRecently.
+  ///
+  /// In en, this message translates to:
+  /// **'You already reported this account recently'**
+  String get alreadyReportedRecently;
+
+  /// No description provided for @cannotReportSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot report yourself'**
+  String get cannotReportSelf;
+
+  /// No description provided for @pendingAccountReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Reports'**
+  String get pendingAccountReports;
+
+  /// No description provided for @accountReportsResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Account report resolved'**
+  String get accountReportsResolved;
+
+  /// No description provided for @accountReportDismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Account report dismissed'**
+  String get accountReportDismissed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

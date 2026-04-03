@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:uuid/uuid.dart';
 
@@ -34,6 +35,12 @@ class CommunityDetailScreen extends ConsumerStatefulWidget {
 
 class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   final _community = CommunityService.instance;
+
+  static String _resolveAvatarUrl(String avatarUrl) {
+    if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) return avatarUrl;
+    const apiUrl = String.fromEnvironment('API_URL', defaultValue: 'https://api.recipespellbook.app');
+    return '$apiUrl/v1/web/avatar/$avatarUrl';
+  }
 
   CommunityDetail? _detail;
   bool _loading = true;
@@ -76,6 +83,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   }
 
   Future<void> _rate(int stars) async {
+    final l10n = AppLocalizations.of(context)!;
     if (_ratingLoading) return;
     setState(() {
       _ratingLoading = true;
@@ -94,7 +102,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
       } else {
         // Rating failed — revert optimistic update
         setState(() => _myRating = 0);
-        AppSnackbar.error(context, 'Failed to save rating. Please try again.');
+        AppSnackbar.error(context, l10n.communityFailedToSaveRating);
       }
       setState(() => _ratingLoading = false);
     }
@@ -106,8 +114,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
     String? targetCookbookId,
   }) async {
     if (_downloading) return;
-    setState(() { _downloading = true; _downloadStatus = 'Downloading cookbook...'; _selectMode = false; _selectedIndices.clear(); });
     final l10n = AppLocalizations.of(context)!;
+    setState(() { _downloading = true; _downloadStatus = l10n.communityDownloadingCookbook; _selectMode = false; _selectedIndices.clear(); });
     const uuid = Uuid();
 
     try {
@@ -133,7 +141,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
       for (int idx = 0; idx < totalRecipes; idx++) {
         final i = recipesToDownload[idx];
         final recipe = result.recipes[i];
-        if (mounted) setState(() => _downloadStatus = 'Downloading images... (${idx + 1}/$totalRecipes)');
+        if (mounted) setState(() => _downloadStatus = l10n.communityDownloadingImages(idx + 1, totalRecipes));
 
         // Cover image
         String? coverPath;
@@ -163,7 +171,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
       }
 
       // --- Phase 2: Insert everything in a single transaction ---
-      if (mounted) setState(() => _downloadStatus = 'Saving recipes...');
+      if (mounted) setState(() => _downloadStatus = l10n.communitySavingRecipes);
 
       await db.transaction(() async {
         // Create cookbook only if no target was specified
@@ -248,7 +256,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         final allCount = result.recipes.length;
         final msg = count == allCount
             ? l10n.communityDownloadSuccess(result.title, count)
-            : '$count recipes saved from "${result.title}"';
+            : l10n.communityPartialDownloadSuccess(count, result.title);
         AppSnackbar.success(context, msg);
       }
     } catch (e) {
@@ -279,7 +287,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  selectedIndices != null ? 'Save $recipeCount Recipes' : l10n.communityDownloadOptions,
+                  selectedIndices != null ? l10n.communitySaveRecipeCount(recipeCount) : l10n.communityDownloadOptions,
                   style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -287,19 +295,19 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               // Destination: new or existing cookbook
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text('Save to:', style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
+                child: Text(l10n.communitySaveTo, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
               ),
               const SizedBox(height: 4),
               ListTile(
                 leading: const Icon(Icons.add_circle_outline),
-                title: const Text('New Cookbook'),
+                title: Text(l10n.communityNewCookbook),
                 subtitle: Text('"${d.title}"'),
                 onTap: () { Navigator.pop(ctx); _showImageChoice(selectedIndices: selectedIndices, targetCookbookId: null); },
               ),
               ListTile(
                 leading: const Icon(Icons.book_outlined),
-                title: const Text('Existing Cookbook'),
-                subtitle: const Text('Add to one of your cookbooks'),
+                title: Text(l10n.communityExistingCookbook),
+                subtitle: Text(l10n.communityAddToExistingCookbook),
                 onTap: () { Navigator.pop(ctx); _showCookbookPicker(selectedIndices: selectedIndices); },
               ),
               const SizedBox(height: 16),
@@ -356,6 +364,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   }
 
   void _showCookbookPicker({Set<int>? selectedIndices}) {
+    final l10n = AppLocalizations.of(context)!;
     final cookbooks = ref.read(cookbooksProvider).valueOrNull ?? [];
 
     Responsive.showAdaptiveSheet(
@@ -373,12 +382,12 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               )),
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text('Choose Cookbook', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                child: Text(l10n.communityChooseCookbook, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
               ),
               if (cookbooks.isEmpty)
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Text('No cookbooks yet. Recipes will be saved to a new cookbook.',
+                  child: Text(l10n.communityNoCookbooksYetSaveNew,
                       style: TextStyle(color: theme.colorScheme.outline)),
                 )
               else
@@ -428,6 +437,11 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                 title: Text(r.$2),
                 onTap: () async {
                   Navigator.pop(ctx);
+                  // Can't report own publication
+                  if (AuthService.instance.currentUser?.id == _detail?.publisher.id) {
+                    if (mounted) AppSnackbar.info(context, l10n.communityCannotReportOwn);
+                    return;
+                  }
                   final ok = await _community.report(widget.publicationId, r.$1);
                   if (mounted) {
                     if (ok) {
@@ -458,6 +472,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
             final theme = Theme.of(ctx);
+            final l10n = AppLocalizations.of(ctx)!;
             return DraggableScrollableSheet(
               initialChildSize: 0.85,
               minChildSize: 0.4,
@@ -477,12 +492,12 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                           decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)),
                         ),
                       ),
-                      Text('Edit Cookbook', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      Text(l10n.communityEditCookbook, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 16),
                       TextField(
                         controller: titleCtrl,
                         decoration: InputDecoration(
-                          labelText: 'Title',
+                          labelText: l10n.communityEditTitle,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                       ),
@@ -491,12 +506,12 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                         controller: descCtrl,
                         maxLines: 3,
                         decoration: InputDecoration(
-                          labelText: 'Description',
+                          labelText: l10n.communityEditDescriptionLabel,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Text('Tags', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                      Text(l10n.communityEditTagsLabel, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
                       CommunityTagPicker(
                         selectedTags: editTags,
@@ -519,14 +534,14 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 
                           if (mounted) {
                             if (success) {
-                              AppSnackbar.success(context, 'Cookbook updated');
+                              AppSnackbar.success(context, l10n.communityCookbookUpdated);
                               _load(); // Refresh
                             } else {
-                              AppSnackbar.error(context, 'Failed to update');
+                              AppSnackbar.error(context, l10n.communityFailedToUpdate);
                             }
                           }
                         },
-                        child: const Text('Save Changes'),
+                        child: Text(l10n.communitySaveChanges),
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -569,17 +584,48 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
           SliverAppBar(
             expandedHeight: 220,
             pinned: true,
+            leading: Container(
+              margin: const EdgeInsets.only(left: 8),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.35),
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+                constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                padding: EdgeInsets.zero,
+              ),
+            ),
             actions: [
               if (AuthService.instance.currentUser?.id == d.publisher.id)
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  tooltip: 'Edit',
-                  onPressed: () => _showEditSheet(),
+                Container(
+                  margin: const EdgeInsets.only(right: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.35),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.white),
+                    tooltip: l10n.communityEditTooltip,
+                    onPressed: () => _showEditSheet(),
+                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                    padding: EdgeInsets.zero,
+                  ),
                 ),
-              IconButton(
-                icon: const Icon(Icons.flag_outlined),
-                tooltip: l10n.communityReport,
-                onPressed: _showReportSheet,
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.flag_outlined, color: Colors.white),
+                  tooltip: l10n.communityReport,
+                  onPressed: _showReportSheet,
+                  constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                  padding: EdgeInsets.zero,
+                ),
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
@@ -614,45 +660,39 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                           d.title,
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            shadows: [Shadow(blurRadius: 6, color: Colors.black54)],
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            shadows: [Shadow(blurRadius: 8, color: Colors.black87), Shadow(blurRadius: 4, color: Colors.black54)],
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            if (d.publisher.avatarUrl != null)
+                        const SizedBox(height: 6),
+                        GestureDetector(
+                          onTap: () => context.push('/community/creator/${d.publisher.id}'),
+                          child: Row(
+                            children: [
                               CircleAvatar(
-                                radius: 10,
-                                backgroundImage: NetworkImage(d.publisher.avatarUrl!),
-                              )
-                            else
-                              CircleAvatar(
-                                radius: 10,
-                                child: Text(d.publisher.displayName[0].toUpperCase(), style: const TextStyle(fontSize: 8)),
+                                radius: 20,
+                                backgroundColor: const Color(0xFFC75B39).withValues(alpha: 0.18),
+                                backgroundImage: d.publisher.avatarUrl != null
+                                    ? NetworkImage(_resolveAvatarUrl(d.publisher.avatarUrl!))
+                                    : null,
+                                onBackgroundImageError: (_, __) {},
+                                child: d.publisher.avatarUrl == null
+                                    ? Text(d.publisher.displayName[0].toUpperCase(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFC75B39)))
+                                    : null,
                               ),
-                            const SizedBox(width: 6),
-                            Text(
-                              d.publisher.displayName,
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.9),
-                                fontSize: 13,
-                                shadows: const [Shadow(blurRadius: 4, color: Colors.black54)],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '·  ${timeago.format(d.createdAt)}',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.7),
-                                fontSize: 12,
-                                shadows: const [Shadow(blurRadius: 4, color: Colors.black54)],
-                              ),
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              Expanded(child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(d.publisher.displayName, style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 15, fontWeight: FontWeight.w500)),
+                                  Text(timeago.format(d.createdAt), style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
+                                ],
+                              )),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -737,11 +777,11 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                               }
                             });
                           },
-                          child: Text(_selectedIndices.length == d.recipes.length ? 'Deselect All' : 'Select All'),
+                          child: Text(_selectedIndices.length == d.recipes.length ? l10n.communityDeselectAllRecipes : l10n.communitySelectAllRecipes),
                         ),
                         TextButton(
                           onPressed: () => setState(() { _selectMode = false; _selectedIndices.clear(); }),
-                          child: const Text('Cancel'),
+                          child: Text(l10n.actionCancel),
                         ),
                       ],
                     ],
@@ -803,7 +843,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               child: FilledButton.icon(
                 onPressed: _selectedIndices.isEmpty ? null : () => _showDownloadChoice(selectedIndices: Set.from(_selectedIndices)),
                 icon: const Icon(Icons.download),
-                label: Text('Download ${_selectedIndices.length} Recipes'),
+                label: Text(l10n.communityDownloadRecipes(_selectedIndices.length)),
                 style: FilledButton.styleFrom(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
@@ -846,7 +886,10 @@ class _StatsRow extends StatelessWidget {
       children: [
         _StatBadge(icon: Icons.restaurant_menu, label: l10n.communityRecipeCount(recipeCount)),
         const SizedBox(width: 10),
-        _StatBadge(icon: Icons.download, label: l10n.communityDownloadCount(downloadCount)),
+        Opacity(
+          opacity: downloadCount == 0 ? 0.6 : 1.0,
+          child: _StatBadge(icon: Icons.download, label: l10n.communityDownloadCount(downloadCount)),
+        ),
         if (imageCount > 0) ...[
           const SizedBox(width: 10),
           _StatBadge(icon: Icons.image, label: AppLocalizations.of(context)!.communityImageCountLabel(imageCount)),
@@ -905,6 +948,21 @@ class _RatingSection extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
+    // Own cookbook with no ratings — simple text, no stars
+    if (isOwnPublication && ratingCount == 0) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          l10n.communityNotCurrentlyRated,
+          style: TextStyle(fontSize: 13, color: theme.colorScheme.outline, fontStyle: FontStyle.italic),
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -934,7 +992,7 @@ class _RatingSection extends StatelessWidget {
           // My rating — interactive (hidden for own cookbook)
           if (isOwnPublication)
             Text(
-              'You cannot rate your own cookbook',
+              l10n.communityCannotRateOwnCookbook,
               style: TextStyle(fontSize: 13, color: theme.colorScheme.outline, fontStyle: FontStyle.italic),
             )
           else
@@ -1050,7 +1108,7 @@ class _DownloadSection extends StatelessWidget {
                 Icon(Icons.storage, size: 14, color: theme.colorScheme.outline),
                 const SizedBox(width: 6),
                 Text(
-                  '${detail.downloadSizeLabel} with images',
+                  l10n.communityWithImages(detail.downloadSizeLabel),
                   style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
                 ),
               ],
@@ -1099,7 +1157,7 @@ class _DownloadSection extends StatelessWidget {
           child: OutlinedButton.icon(
             onPressed: downloading ? null : onSelectRecipes,
             icon: const Icon(Icons.checklist, size: 18),
-            label: const Text('Select Individual Recipes'),
+            label: Text(l10n.communitySelectIndividualRecipes),
           ),
         ),
       ],

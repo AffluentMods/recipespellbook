@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/rendering.dart';
 import 'package:go_router/go_router.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -11,8 +11,6 @@ import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/community_image.dart';
 import '../../widgets/community_tag_picker.dart';
-import '../../widgets/placeholder_image.dart';
-import 'community_screen.dart'; // StarRating
 
 // ════════════════════════════════════════════
 //  MY PUBLICATIONS — Manage published cookbooks
@@ -27,8 +25,10 @@ class CommunityMyPublicationsScreen extends StatefulWidget {
 
 class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsScreen> {
   final _community = CommunityService.instance;
+  final _scrollController = ScrollController();
 
   bool _loading = true;
+  bool _fabVisible = true;
   List<MyPublication> _pubs = [];
 
   @override
@@ -36,12 +36,24 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
     super.initState();
     _load();
     publishProgressNotifier.addListener(_onProgressChange);
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     publishProgressNotifier.removeListener(_onProgressChange);
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    final direction = _scrollController.position.userScrollDirection;
+    if (direction == ScrollDirection.reverse && _fabVisible) {
+      setState(() => _fabVisible = false);
+    } else if (direction == ScrollDirection.forward && !_fabVisible) {
+      setState(() => _fabVisible = true);
+    }
   }
 
   void _onProgressChange() {
@@ -59,40 +71,45 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
     if (mounted) setState(() { _pubs = pubs; _loading = false; });
   }
 
-  Future<void> _unpublish(MyPublication pub) async {
+  Future<void> _unpublish(String publicationId) async {
     final l10n = AppLocalizations.of(context)!;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        final dl10n = AppLocalizations.of(ctx)!;
-        return AlertDialog(
-          icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
-          title: Text(dl10n.communityUnpublishConfirmTitle),
-          content: Text(dl10n.communityUnpublishConfirmMessage(pub.title)),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(dl10n.actionCancel)),
-            FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(dl10n.communityUnpublish),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirmed != true) return;
-
-    final ok = await _community.unpublish(pub.id);
+    final ok = await _community.unpublish(publicationId);
     if (mounted) {
       if (ok) {
-        AppSnackbar.success(context, l10n.communityUnpublishSuccess(pub.title));
+        AppSnackbar.success(context, l10n.communityUnpublishSuccess(
+          _pubs.firstWhere((p) => p.id == publicationId).title,
+        ));
         _load();
       } else {
         AppSnackbar.error(context, l10n.communityUnpublishFailed);
       }
     }
+  }
+
+  void _confirmUnpublish(MyPublication pub) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.communityUnpublishDialogTitle),
+        content: Text(l10n.communityUnpublishDialogMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.actionCancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: theme.colorScheme.error),
+            onPressed: () {
+              Navigator.pop(ctx);
+              _unpublish(pub.id);
+            },
+            child: Text(l10n.communityUnpublish),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _editPublication(MyPublication pub) async {
@@ -101,57 +118,49 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
     final currentTags = pub.tags?.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList() ?? <String>[];
     List<String> selectedTags = List.from(currentTags);
 
-    final result = await Responsive.showAdaptiveSheet<bool>(
-      context,
+    final result = await showDialog<bool>(
+      context: context,
+      useSafeArea: false,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheetState) {
+        builder: (ctx, setDialogState) {
           final theme = Theme.of(ctx);
-          return Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.of(ctx).viewInsets.bottom + 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(width: 40, height: 4, decoration: BoxDecoration(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  )),
+          return Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(ctx, false),
+              ),
+              title: Text(l10n.communityEditPublication),
+              actions: [
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: Text(l10n.actionSave),
                 ),
-                const SizedBox(height: 16),
-                Text(l10n.communityEditPublication, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 16),
+                const SizedBox(width: 8),
+              ],
+            ),
+            body: Responsive.constrainWidth(ctx, child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
                 Text(l10n.communityEditDescription, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 TextField(
                   controller: descController,
-                  maxLines: 3,
+                  maxLines: 5,
                   decoration: InputDecoration(
                     hintText: l10n.communityEditDescriptionHint,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 Text(l10n.communityEditTags, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 CommunityTagPicker(
                   selectedTags: selectedTags,
-                  onChanged: (tags) => setSheetState(() => selectedTags = tags),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.actionCancel)),
-                    const SizedBox(width: 8),
-                    FilledButton(
-                      onPressed: () => Navigator.pop(ctx, true),
-                      child: Text(l10n.actionSave),
-                    ),
-                  ],
+                  onChanged: (tags) => setDialogState(() => selectedTags = tags),
                 ),
               ],
-            ),
+            )),
           );
         },
       ),
@@ -192,13 +201,15 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.communityMyPublications)),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: isUploading ? null : () => context.push('/community/publish').then((_) { if (mounted) _load(); }),
-        icon: Icon(isUploading ? Icons.hourglass_top : Icons.publish),
-        label: Text(isUploading ? 'Uploading...' : l10n.communityPublish),
-        backgroundColor: isUploading ? theme.colorScheme.surfaceContainerHighest : null,
-        foregroundColor: isUploading ? theme.colorScheme.outline : null,
-      ),
+      floatingActionButton: _fabVisible
+          ? FloatingActionButton.extended(
+              onPressed: isUploading ? null : () => context.push('/community/publish').then((_) { if (mounted) _load(); }),
+              icon: Icon(isUploading ? Icons.hourglass_top : Icons.publish),
+              label: Text(isUploading ? l10n.communityUploading : l10n.communityPublish),
+              backgroundColor: isUploading ? theme.colorScheme.surfaceContainerHighest : null,
+              foregroundColor: isUploading ? theme.colorScheme.outline : null,
+            )
+          : null,
       body: Responsive.constrainWidth(context, child: _loading
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -242,13 +253,50 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
                 : RefreshIndicator(
               onRefresh: () async => _load(),
               child: ListView.builder(
-                padding: const EdgeInsets.all(12),
-                itemCount: _pubs.length,
-                itemBuilder: (ctx, i) => _PublicationCard(
-                  pub: _pubs[i],
-                  onUnpublish: () => _unpublish(_pubs[i]),
-                  onEdit: () => _editPublication(_pubs[i]),
-                ),
+                controller: _scrollController,
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+                itemCount: _pubs.length + (_pubs.length < 5 ? 1 : 0),
+                itemBuilder: (ctx, i) {
+                  if (i < _pubs.length) {
+                    return _PublicationCard(
+                      pub: _pubs[i],
+                      onUnpublish: () => _confirmUnpublish(_pubs[i]),
+                      onEdit: () => _editPublication(_pubs[i]),
+                    );
+                  }
+                  // "Publish another" nudge
+                  return GestureDetector(
+                    onTap: () => context.push('/community/publish'),
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.amber.withValues(alpha: 0.4),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(l10n.communityPublishAnotherCookbook,
+                                    style: TextStyle(fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
+                                const SizedBox(height: 4),
+                                Text(l10n.communityShareMoreWithCommunity,
+                                    style: TextStyle(fontSize: 13, color: theme.colorScheme.outline)),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.arrow_forward_ios, size: 14, color: Colors.amber.shade600),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -320,10 +368,10 @@ class _UploadProgressBanner extends StatelessWidget {
 }
 
 // ════════════════════════════════════════════
-//  PUBLICATION CARD (hero image design)
+//  PUBLICATION CARD (vertical layout)
 // ════════════════════════════════════════════
 
-class _PublicationCard extends ConsumerWidget {
+class _PublicationCard extends StatelessWidget {
   final MyPublication pub;
   final VoidCallback onUnpublish;
   final VoidCallback onEdit;
@@ -331,221 +379,159 @@ class _PublicationCard extends ConsumerWidget {
   const _PublicationCard({required this.pub, required this.onUnpublish, required this.onEdit});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final tagList = pub.tags?.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList() ?? <String>[];
+    final hasImage = pub.imagePath != null && pub.imagePath!.isNotEmpty;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 14),
       clipBehavior: Clip.antiAlias,
-      elevation: 2,
-      shadowColor: theme.colorScheme.shadow.withValues(alpha: 0.3),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.colorScheme.surfaceContainerHighest, width: 0.5),
+      ),
+      color: theme.colorScheme.surfaceContainer,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Hero image (full width) ──
-          SizedBox(
-            height: 160,
+          // ── Hero image ──
+          AspectRatio(
+            aspectRatio: 1.6,
             child: Stack(
               fit: StackFit.expand,
               children: [
-                // Image or gradient placeholder
-                pub.imagePath != null && pub.imagePath!.isNotEmpty
-                    ? CommunityImage(
-                        publicationId: pub.id,
-                        imagePath: pub.imagePath,
-                        fit: BoxFit.cover,
-                        memCacheWidth: 600,
-                        memCacheHeight: 320,
-                      )
-                    : const CookbookPlaceholderImage(),
-
-                // Gradient overlay for text contrast
+                if (hasImage)
+                  CommunityImage(publicationId: pub.id, imagePath: pub.imagePath, fit: BoxFit.cover)
+                else
+                  Container(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    child: Icon(Icons.book, size: 48, color: theme.colorScheme.outline),
+                  ),
+                // Bottom gradient scrim
                 Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: 80,
+                  bottom: 0, left: 0, right: 0, height: 80,
                   child: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Colors.black.withValues(alpha: 0.7)],
+                        colors: [Colors.transparent, Colors.black.withValues(alpha: 0.65)],
                       ),
                     ),
                   ),
                 ),
-
-                // Title overlay
+                // Title on scrim
                 Positioned(
-                  bottom: 10,
-                  left: 14,
-                  right: 70,
+                  bottom: 12, left: 14, right: 14,
                   child: Text(
                     pub.title,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                    style: const TextStyle(
                       color: Colors.white,
-                      shadows: const [Shadow(blurRadius: 4, color: Colors.black54)],
-                      decoration: pub.status == 'removed' ? TextDecoration.lineThrough : null,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      shadows: [Shadow(blurRadius: 6, color: Colors.black54)],
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-
-                // Status badge overlay
+                // Status badge top-right
                 Positioned(
-                  top: 10,
-                  right: 10,
+                  top: 10, right: 10,
                   child: _StatusBadge(status: pub.status),
                 ),
               ],
             ),
           ),
 
-          // ── Content area ──
+          // ── Content below image ──
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 4),
+            padding: const EdgeInsets.all(14),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Stats row
+                _StatsRow(
+                  recipeCount: pub.recipeCount,
+                  downloadCount: pub.downloadCount,
+                  averageRating: pub.averageRating,
+                  ratingCount: pub.ratingCount,
+                  theme: theme,
+                ),
+                const SizedBox(height: 12),
+
+                // Tags + timestamp
                 Row(
                   children: [
-                    _StatChip(Icons.restaurant_menu, '${pub.recipeCount}', theme),
-                    const SizedBox(width: 14),
-                    _StatChip(Icons.download_outlined, '${pub.downloadCount}', theme),
-                    if (pub.imageCount > 0) ...[
-                      const SizedBox(width: 14),
-                      _StatChip(Icons.image_outlined, '${pub.imageCount}', theme),
+                    if (pub.tags != null && pub.tags!.isNotEmpty) ...[
+                      _TagChip(tag: pub.tags!.split(',').first.trim()),
+                      Text('  ·  ', style: TextStyle(color: theme.colorScheme.outline)),
                     ],
-                    const Spacer(),
-                    // Rating
-                    if (pub.ratingCount > 0)
-                      StarRating(rating: pub.averageRating, count: pub.ratingCount, size: 14)
-                    else
-                      Text(
-                        l10n.communityNoRatingsYet,
-                        style: TextStyle(fontSize: 11, color: theme.colorScheme.outline, fontStyle: FontStyle.italic),
+                    Text(
+                      timeago.format(pub.createdAt),
+                      style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // Action buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 44,
+                        child: OutlinedButton.icon(
+                          onPressed: onEdit,
+                          icon: const Text('\u270f', style: TextStyle(fontSize: 14)),
+                          label: Text(l10n.actionEdit),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: Colors.amber.shade600),
+                            foregroundColor: Colors.amber.shade600,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
                       ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: SizedBox(
+                        height: 44,
+                        child: OutlinedButton.icon(
+                          onPressed: onUnpublish,
+                          icon: const Text('\ud83d\uddd1', style: TextStyle(fontSize: 14)),
+                          label: Text(l10n.communityUnpublish),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: theme.colorScheme.error),
+                            foregroundColor: theme.colorScheme.error,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
 
-                // Tags (horizontal scroll, single row — never overflows)
-                if (tagList.isNotEmpty) ...[
+                // Moderation notice
+                if (pub.status == 'pending_review' || pub.status == 'removed') ...[
                   const SizedBox(height: 10),
-                  SizedBox(
-                    height: 24,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: tagList.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 6),
-                      itemBuilder: (ctx, i) {
-                        final tagId = tagList[i];
-                        final tagData = communityTags.where((ct) => ct.id == tagId).firstOrNull;
-                        return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            tagData != null ? '${tagData.emoji} ${tagData.name}' : tagId,
-                            style: TextStyle(fontSize: 11, color: theme.colorScheme.onPrimaryContainer, fontWeight: FontWeight.w500),
-                          ),
-                        );
-                      },
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                  ),
-                ],
-
-                // Date
-                const SizedBox(height: 6),
-                Text(
-                  timeago.format(pub.createdAt),
-                  style: TextStyle(fontSize: 11, color: theme.colorScheme.outline),
-                ),
-              ],
-            ),
-          ),
-
-          // ── Moderation notice ──
-          if (pub.status == 'removed')
-            Container(
-              margin: const EdgeInsets.fromLTRB(14, 4, 14, 0),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.warning_amber_rounded, size: 16, color: theme.colorScheme.error),
-                  const SizedBox(width: 8),
-                  Expanded(
                     child: Text(
-                      l10n.communityRemovedByModeration,
+                      pub.status == 'pending_review'
+                          ? l10n.communityUnderReview
+                          : l10n.communityRemovedByModerator,
                       style: TextStyle(fontSize: 12, color: theme.colorScheme.error),
                     ),
                   ),
                 ],
-              ),
-            )
-          else if (pub.status == 'pending_review')
-            Container(
-              margin: const EdgeInsets.fromLTRB(14, 4, 14, 0),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.hourglass_top, size: 16, color: Colors.amber),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      l10n.communityUnderReview,
-                      style: TextStyle(fontSize: 12, color: Colors.amber.shade800),
-                    ),
-                  ),
-                ],
-              ),
+              ],
             ),
-
-          // ── Action buttons ──
-          if (pub.status != 'removed')
-            Padding(
-              padding: const EdgeInsets.fromLTRB(6, 2, 6, 6),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton.icon(
-                    onPressed: onEdit,
-                    icon: const Icon(Icons.edit_outlined, size: 16),
-                    label: Text(l10n.actionEdit),
-                    style: TextButton.styleFrom(
-                      textStyle: const TextStyle(fontSize: 12),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  TextButton.icon(
-                    onPressed: onUnpublish,
-                    icon: Icon(Icons.delete_outline, size: 16, color: theme.colorScheme.error),
-                    label: Text(l10n.communityUnpublish, style: TextStyle(color: theme.colorScheme.error)),
-                    style: TextButton.styleFrom(
-                      textStyle: const TextStyle(fontSize: 12),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          ),
         ],
       ),
     );
@@ -553,25 +539,79 @@ class _PublicationCard extends ConsumerWidget {
 }
 
 // ════════════════════════════════════════════
-//  STAT CHIP (icon + value)
+//  STATS ROW (recipes / downloads / rating)
 // ════════════════════════════════════════════
 
-class _StatChip extends StatelessWidget {
-  final IconData icon;
-  final String value;
+class _StatsRow extends StatelessWidget {
+  final int recipeCount;
+  final int downloadCount;
+  final double averageRating;
+  final int ratingCount;
   final ThemeData theme;
 
-  const _StatChip(this.icon, this.value, this.theme);
+  const _StatsRow({
+    required this.recipeCount,
+    required this.downloadCount,
+    required this.averageRating,
+    required this.ratingCount,
+    required this.theme,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 15, color: theme.colorScheme.outline),
-        const SizedBox(width: 3),
-        Text(value, style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.w500)),
-      ],
+    return IntrinsicHeight(
+      child: Row(
+        children: [
+          _statCol('$recipeCount', AppLocalizations.of(context)!.communityStatRecipes),
+          VerticalDivider(width: 1, color: theme.colorScheme.surfaceContainerHighest),
+          _statCol('$downloadCount', AppLocalizations.of(context)!.communityStatDownloads),
+          VerticalDivider(width: 1, color: theme.colorScheme.surfaceContainerHighest),
+          _statCol(
+            ratingCount > 0 ? averageRating.toStringAsFixed(1) : '\u2014',
+            AppLocalizations.of(context)!.communityStatRating,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statCol(String value, String label) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: theme.colorScheme.onSurface)),
+          const SizedBox(height: 2),
+          Text(label, style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
+        ],
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════
+//  TAG CHIP
+// ════════════════════════════════════════════
+
+class _TagChip extends StatelessWidget {
+  final String tag;
+  const _TagChip({required this.tag});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tagData = communityTags.where((ct) => ct.id == tag).firstOrNull;
+    final label = tagData != null ? '${tagData.emoji} ${tagData.name}' : tag;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(fontSize: 11, color: theme.colorScheme.onPrimaryContainer, fontWeight: FontWeight.w500),
+      ),
     );
   }
 }
@@ -587,6 +627,7 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
 
     Color bgColor;
     Color textColor;
@@ -594,18 +635,18 @@ class _StatusBadge extends StatelessWidget {
 
     switch (status) {
       case 'published':
-        bgColor = Colors.green.shade800;
-        textColor = Colors.white;
+        bgColor = Colors.amber;
+        textColor = Colors.black;
         label = l10n.communityStatusPublished;
         break;
       case 'pending_review':
-        bgColor = Colors.amber.shade700;
-        textColor = Colors.white;
+        bgColor = theme.colorScheme.tertiary;
+        textColor = theme.colorScheme.onTertiary;
         label = l10n.communityStatusUnderReview;
         break;
       case 'removed':
-        bgColor = Colors.red.shade700;
-        textColor = Colors.white;
+        bgColor = theme.colorScheme.error;
+        textColor = theme.colorScheme.onError;
         label = l10n.communityStatusRemoved;
         break;
       default:
@@ -620,7 +661,7 @@ class _StatusBadge extends StatelessWidget {
         color: bgColor.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(6),
       ),
-      child: Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: textColor)),
+      child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: textColor)),
     );
   }
 }

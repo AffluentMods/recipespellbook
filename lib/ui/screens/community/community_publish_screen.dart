@@ -90,7 +90,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
       canPop: !_isPublishing,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop && _isPublishing) {
-          AppSnackbar.info(context, 'Publishing in progress — cancel the upload first');
+          AppSnackbar.info(context, l10n.communityPublishInProgress);
         }
       },
       child: Scaffold(
@@ -99,6 +99,10 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         leading: _step > 1 && !_isPublishing
             ? IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => setState(() => _step = 1))
             : null,
+        bottom: _isPublishing ? null : PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: _StepIndicator(currentStep: _step, totalSteps: 3),
+        ),
       ),
       body: Responsive.constrainWidth(context, child: _step == 1
           ? _buildStep1CookbookSelection(theme, l10n)
@@ -284,7 +288,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                 const SizedBox(height: 8),
                 _SummaryRow(icon: Icons.restaurant_menu, label: l10n.communityPublishRecipesSummary(_recipeCount)),
                 if (_selectedTags.isNotEmpty)
-                  _SummaryRow(icon: Icons.tag, label: '${_selectedTags.length} tags'),
+                  _SummaryRow(icon: Icons.tag, label: l10n.communityTagsSummary(_selectedTags.length)),
                 _SummaryRow(
                   icon: Icons.image,
                   label: _includeImages ? l10n.communityPublishImagesWillUpload : l10n.communityPublishTextOnlyNoImages,
@@ -343,7 +347,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                   const SizedBox(height: 16),
                   Text(l10n.communityPublishFailed, style: theme.textTheme.headlineSmall),
                   const SizedBox(height: 8),
-                  Text(progress?.errorMessage ?? 'Unknown error',
+                  Text(progress?.errorMessage ?? l10n.communityUnknownError,
                       style: TextStyle(color: theme.colorScheme.error), textAlign: TextAlign.center),
                   const SizedBox(height: 24),
                   FilledButton(onPressed: () => setState(() { _step = 2; _isPublishing = false; }), child: Text(l10n.communityPublishTryAgain)),
@@ -376,14 +380,28 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
                     style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
                     textAlign: TextAlign.center,
                   ),
-                  if (status == 'uploading') ...[
+                  if (status == 'uploading' && !_publishCancelled) ...[
                     const SizedBox(height: 16),
                     TextButton.icon(
-                      onPressed: () => setState(() => _publishCancelled = true),
+                      onPressed: () {
+                        setState(() {
+                          _publishCancelled = true;
+                          _isPublishing = false;
+                        });
+                        publishProgressNotifier.value = PublishProgress(
+                          status: 'error',
+                          errorMessage: l10n.communityUploadCancelled,
+                        );
+                        AppSnackbar.info(context, l10n.communityUploadCancelled);
+                      },
                       icon: const Icon(Icons.cancel_outlined),
-                      label: const Text('Cancel Upload'),
+                      label: Text(l10n.communityCancelUpload),
                       style: TextButton.styleFrom(foregroundColor: theme.colorScheme.error),
                     ),
+                  ],
+                  if (_publishCancelled && status == 'uploading') ...[
+                    const SizedBox(height: 16),
+                    Text(l10n.communityCancelling, style: TextStyle(color: theme.colorScheme.outline)),
                   ],
                 ],
               ],
@@ -395,6 +413,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
   }
 
   Future<void> _startPublish() async {
+    final l10n = AppLocalizations.of(context)!;
     final title = _titleController.text.trim();
     if (title.isEmpty) return;
 
@@ -463,6 +482,35 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         });
       }
 
+      // ── Auto-suggest cookbook tags from recipe tags (top 5 most common) ──
+      if (_selectedTags.isEmpty) {
+        final tagCounts = <String, int>{};
+        for (final rm in recipeMaps) {
+          final recipeTags = rm['tags'] as List? ?? [];
+          for (final t in recipeTags) {
+            final tag = t.toString().toLowerCase().trim();
+            if (tag.isNotEmpty) tagCounts[tag] = (tagCounts[tag] ?? 0) + 1;
+          }
+        }
+        if (tagCounts.isNotEmpty) {
+          final sorted = tagCounts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+          _selectedTags = sorted.take(5).map((e) => e.key).toList();
+        }
+      }
+
+      // Enforce max 5 tags on cookbook level
+      if (_selectedTags.length > 5) {
+        _selectedTags = _selectedTags.take(5).toList();
+      }
+
+      // Enforce max 5 tags per recipe
+      for (final rm in recipeMaps) {
+        final recipeTags = rm['tags'] as List? ?? [];
+        if (recipeTags.length > 5) {
+          rm['tags'] = recipeTags.take(5).toList();
+        }
+      }
+
       // ── Upload images (if enabled) ──
       int totalImageBytes = 0;
       int skippedImages = 0;
@@ -481,7 +529,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
 
         for (int i = 0; i < uniquePaths.length; i++) {
           if (_publishCancelled) {
-            publishProgressNotifier.value = const PublishProgress(status: 'error', errorMessage: 'Upload cancelled');
+            publishProgressNotifier.value = PublishProgress(status: 'error', errorMessage: l10n.communityUploadCancelled);
             setState(() => _isPublishing = false);
             return;
           }
@@ -569,7 +617,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
       } else {
         publishProgressNotifier.value = PublishProgress(
           status: 'error',
-          errorMessage: result.error ?? 'Publishing failed',
+          errorMessage: result.error ?? l10n.communityPublishingFailed,
         );
       }
     } catch (e) {
@@ -646,6 +694,61 @@ class _SummaryRow extends StatelessWidget {
           const SizedBox(width: 8),
           Text(label, style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurface)),
         ],
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════
+//  STEP INDICATOR
+// ════════════════════════════════════════════
+
+class _StepIndicator extends StatelessWidget {
+  final int currentStep;
+  final int totalSteps;
+  const _StepIndicator({required this.currentStep, required this.totalSteps});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+      child: Row(
+        children: List.generate(totalSteps * 2 - 1, (i) {
+          if (i.isEven) {
+            final step = i ~/ 2 + 1;
+            final isActive = step <= currentStep;
+            final isCurrent = step == currentStep;
+            return Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: isActive ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
+                shape: BoxShape.circle,
+                border: isCurrent ? Border.all(color: theme.colorScheme.primary, width: 2) : null,
+              ),
+              child: Center(
+                child: Text(
+                  '$step',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: isActive ? theme.colorScheme.onPrimary : theme.colorScheme.outline,
+                  ),
+                ),
+              ),
+            );
+          } else {
+            final beforeStep = i ~/ 2 + 1;
+            final isActive = beforeStep < currentStep;
+            return Expanded(
+              child: Container(
+                height: 2,
+                color: isActive ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
+              ),
+            );
+          }
+        }),
       ),
     );
   }

@@ -12,18 +12,29 @@ class AdminService {
   /// Check if current user is admin
   bool get isAdmin => _auth.currentUser?.role == 'admin';
 
-  /// Get pending review count
-  Future<int> getPendingCount() async {
+  /// Get pending review count (includes reports if available)
+  Future<Map<String, int>> getPendingCounts() async {
     try {
       final r = await _auth.get('/v1/admin/stats');
       if (r.statusCode == 200) {
         final data = jsonDecode(r.body);
-        return (data['pendingReviewCount'] as int?) ?? 0;
+        return {
+          'pendingReview': (data['pendingReviewCount'] as int?) ?? 0,
+          'pendingFlags': (data['pendingFlags'] as int?) ?? 0,
+          'pendingReports': (data['pendingReports'] as int?) ?? 0,
+          'pendingAccountReports': (data['pendingAccountReports'] as int?) ?? 0,
+        };
       }
     } catch (e) {
-      debugPrint('[Admin] getPendingCount: $e');
+      debugPrint('[Admin] getPendingCounts: $e');
     }
-    return 0;
+    return {'pendingReview': 0, 'pendingFlags': 0, 'pendingReports': 0, 'pendingAccountReports': 0};
+  }
+
+  /// Get pending review count (legacy convenience method)
+  Future<int> getPendingCount() async {
+    final counts = await getPendingCounts();
+    return counts['pendingReview'] ?? 0;
   }
 
   /// Get pending publications
@@ -88,6 +99,54 @@ class AdminService {
   Future<bool> removePublication(String pubId) async {
     try {
       final r = await _auth.post('/v1/admin/publications/$pubId/remove', {});
+      return r.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Get pending reports
+  Future<List<Map<String, dynamic>>> getPendingReports() async {
+    try {
+      final r = await _auth.get('/v1/admin/reports?status=pending&limit=50');
+      if (r.statusCode == 200) {
+        final data = jsonDecode(r.body);
+        return (data['reports'] as List).cast<Map<String, dynamic>>();
+      }
+    } catch (e) {
+      debugPrint('[Admin] getPendingReports: $e');
+    }
+    return [];
+  }
+
+  /// Resolve a report ('remove' or 'dismiss')
+  Future<bool> resolveReport(String reportId, String action) async {
+    try {
+      final r = await _auth.post('/v1/admin/reports/$reportId/resolve', {'action': action});
+      return r.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Get pending account reports
+  Future<List<Map<String, dynamic>>> getPendingAccountReports() async {
+    try {
+      final r = await _auth.get('/v1/admin/account-reports?status=pending&limit=50');
+      if (r.statusCode == 200) {
+        final data = jsonDecode(r.body);
+        return (data['reports'] as List).cast<Map<String, dynamic>>();
+      }
+    } catch (e) {
+      debugPrint('[Admin] getPendingAccountReports: $e');
+    }
+    return [];
+  }
+
+  /// Resolve an account report ('ban', 'warn', 'dismiss')
+  Future<bool> resolveAccountReport(String id, String action) async {
+    try {
+      final r = await _auth.post('/v1/admin/account-reports/$id/resolve', {'action': action});
       return r.statusCode == 200;
     } catch (_) {
       return false;

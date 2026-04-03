@@ -4230,5 +4230,565 @@
       }
     }
   },
-  "accountStoreFallback": "Store"
+  "accountStoreFallback": "Store",
+
+  "communityUnpublishDialogTitle": "Unpublish this cookbook?",
+  "communityUnpublishDialogMessage": "It will be removed from the community. Your recipes are unaffected.",
+  "communityPublishAnotherCookbook": "+ Publish another cookbook",
+  "communityShareMoreWithCommunity": "Share more with the community",
+  "communityUploading": "Uploading...",
+  "communityStatRecipes": "recipes",
+  "communityStatDownloads": "downloads",
+  "communityStatRating": "rating",
+  "communityRemovedByModerator": "This cookbook was removed by a moderator.",
+  "communityBrowseRecipes": "Recipes",
+  "communityBrowseCookbooks": "Cookbooks",
+  "communityNoRecipesYet": "No community recipes yet",
+  "communityTryDifferentSearch": "Try a different search term or clear your filters",
+  "communityBeFirstToShare": "Be the first to share a cookbook with the community!",
+  "communityPublishToShare": "Publish a cookbook to share your recipes with everyone!",
+  "communityFromCookbook": "from {name}",
+  "@communityFromCookbook": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "communityIngredientsCount": "{count} ingredients",
+  "@communityIngredientsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communitySaveRecipeTo": "Save \"{title}\" to...",
+  "@communitySaveRecipeTo": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "communityNewCookbook": "New Cookbook",
+  "communityExistingCookbook": "Existing Cookbook",
+  "communityAddToExistingCookbook": "Add to one of your cookbooks",
+  "communityChooseCookbook": "Choose Cookbook",
+  "communityNoCookbooksYetSaveNew": "No cookbooks yet. Recipes will be saved to a new cookbook.",
+  "communityCreateCookbookFirstToSave": "Create a cookbook first to save recipes",
+  "communitySaveTo": "Save to:",
+  "communitySaveRecipeCount": "Save {count} Recipes",
+  "@communitySaveRecipeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityFailedToSaveRating": "Failed to save rating. Please try again.",
+  "communityDownloadingCookbook": "Downloading cookbook...",
+  "communityDownloadingImages": "Downloading images... ({current}/{total})",
+  "@communityDownloadingImages": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communitySavingRecipes": "Saving recipes...",
+  "communityPartialDownloadSuccess": "{count} recipes saved from \"{title}\"",
+  "@communityPartialDownloadSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "communityCannotReportOwn": "You cannot report your own publication",
+  "communityEditCookbook": "Edit Cookbook",
+  "communityEditTitle": "Title",
+  "communityEditDescriptionLabel": "Description",
+  "communityEditTagsLabel": "Tags",
+  "communityCookbookUpdated": "Cookbook updated",
+  "communityFailedToUpdate": "Failed to update",
+  "communitySaveChanges": "Save Changes",
+  "communityEditTooltip": "Edit",
+  "communitySelectAllRecipes": "Select All",
+  "communityDeselectAllRecipes": "Deselect All",
+  "communitySelectedOfTotal": "{selected} of {total} selected",
+  "@communitySelectedOfTotal": {
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityDownloadRecipes": "Download {count} Recipes",
+  "@communityDownloadRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityNotCurrentlyRated": "Not currently rated",
+  "communityCannotRateOwnCookbook": "You cannot rate your own cookbook",
+  "communitySelectIndividualRecipes": "Select Individual Recipes",
+  "communityWithImages": "{size} with images",
+  "@communityWithImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "communitySaveRecipe": "Save Recipe",
+  "communityNoCookbooksYetCreate": "No cookbooks yet",
+  "communityCreateCookbookFirst": "Create a cookbook first",
+  "communitySavingRecipe": "Saving recipe...",
+  "communityRecipeSaved": "\"{title}\" saved!",
+  "@communityRecipeSaved": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "communityFailedToSave": "Failed to save: {error}",
+  "@communityFailedToSave": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "communityViewFullRecipe": "View Full Recipe",
+  "communitySaveToMyCookbooks": "Save to My Cookbooks",
+  "communityViewCookbook": "View Cookbook",
+  "communityPublishInProgress": "Publishing in progress — cancel the upload first",
+  "communityUnknownError": "Unknown error",
+  "communityUploadCancelled": "Upload cancelled",
+  "communityCancelUpload": "Cancel Upload",
+  "communityCancelling": "Cancelling...",
+  "communityPublishingFailed": "Publishing failed",
+  "communityTagsSummary": "{count} tags",
+  "@communityTagsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "creatorNotFound": "Creator not found",
+  "creatorMemberSince": "Member since {date}",
+  "@creatorMemberSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "creatorStatRecipes": "Recipes",
+  "creatorStatCookbooks": "Cookbooks",
+  "creatorStatDownloads": "Downloads",
+  "creatorStatAvgRating": "Avg Rating",
+  "creatorPublishedCookbooks": "Published Cookbooks",
+  "creatorNoCookbooksYet": "No published cookbooks yet",
+  "creatorRecipesCount": "{count} recipes",
+  "@creatorRecipesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "follow": "Follow",
+  "following": "Following",
+  "unfollow": "Unfollow",
+  "followers": "Followers",
+  "followingLabel": "Following",
+  "cannotFollowSelf": "You cannot follow yourself",
+  "paywallUpgradeTitle": "Upgrade Recipe Spellbook",
+  "paywallSubtitle": "Your recipes on every device.\nForever.",
+  "paywallPremiumTitle": "Premium",
+  "paywallFamilyTitle": "Family",
+  "paywallPremiumFeature1": "Cloud sync across all devices",
+  "paywallPremiumFeature2": "Step-by-step photos",
+  "paywallPremiumFeature3": "Automatic backups",
+  "paywallFamilyFeature1": "Everything in Premium",
+  "paywallFamilyFeature2": "Up to 5 family members sync together",
+  "paywallFamilyFeature3": "Shared cookbooks & shopping lists",
+  "paywallValueProp": "Most recipe apps charge $5–10/month. This isn't that.",
+  "paywallGetPlan": "Get {planName} — {planPrice}",
+  "@paywallGetPlan": {
+    "placeholders": {
+      "planName": {
+        "type": "String"
+      },
+      "planPrice": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallOneTimePurchase": "One-time purchase · No subscription · Yours forever",
+  "paywallRestorePurchases": "Restore purchases",
+  "paywallCompleteYourPurchase": "Complete Your Purchase",
+  "paywallCompleteMessage": "After completing your purchase, tap \"Refresh\" below to activate it.",
+  "paywallRefresh": "Refresh",
+  "paywallYoureAllSet": "You're all set!",
+  "paywallPurchaseNotDetected": "Purchase not detected yet — try refreshing again.",
+  "paywallWebComingSoon": "Web Purchases Coming Soon",
+  "paywallWebMessage": "In the meantime, upgrade on Android or iOS and it syncs everywhere.",
+  "paywallFreeLabel": "Free",
+  "paywallPremiumLabel": "Premium",
+  "paywallFamilyLabel": "Family",
+  "paywallUnlimitedRecipes": "Unlimited recipes",
+  "paywallCloudSync": "Cloud sync",
+  "paywallFamilySharing": "Family sharing",
+  "adminModerationPanel": "Moderation Panel",
+  "adminPendingReview": "Pending Review",
+  "adminPendingFlags": "Pending Flags",
+  "adminPendingReports": "Pending Reports",
+  "adminUserReports": "User Reports",
+  "adminAllClear": "All clear!",
+  "adminNoPendingItems": "No pending items to review.",
+  "adminFailedToApprove": "Failed to approve",
+  "adminFailedToRemove": "Failed to remove",
+  "adminFlagApproved": "Flag approved (publication removed)",
+  "adminFailedToApproveFlag": "Failed to approve flag",
+  "adminFlagRejected": "Flag rejected (publication kept)",
+  "adminFailedToRejectFlag": "Failed to reject flag",
+  "adminContentRemovedResolved": "Content removed & report resolved",
+  "adminReportDismissed": "Report dismissed",
+  "adminFailedToResolveReport": "Failed to resolve report",
+  "adminByPublisher": "By {name} · {count} recipes",
+  "@adminByPublisher": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminApprove": "Approve",
+  "adminRemove": "Remove",
+  "adminReportedBy": "Reported by: {name}",
+  "@adminReportedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminReason": "Reason: {reason}",
+  "@adminReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "adminRemoveContent": "Remove Content",
+  "adminDismissReport": "Dismiss Report",
+  "adminDismissFlag": "Dismiss Flag",
+  "accountProfileUpdated": "Profile updated",
+  "accountProfileUpdateFailed": "Failed to update profile",
+  "accountProfilePictureUpdated": "Profile picture updated",
+  "accountProfilePictureUpdateFailed": "Failed to update profile picture",
+  "accountFailedToUploadImage": "Failed to upload image",
+  "accountDisplayNameHint": "Display name",
+  "menuDrawerYourStuff": "Your Stuff",
+  "menuDrawerOrganize": "Organize your recipe collections",
+  "menuDrawerImportSubtitle": "From any URL, photo or file",
+  "menuDrawerTransferSubtitle": "Move recipes between devices",
+  "menuDrawerApp": "App",
+  "menuDrawerSettingsSubtitle": "Theme, language & preferences",
+  "menuDrawerCouldNotOpenUrl": "Could not open {url}",
+  "@menuDrawerCouldNotOpenUrl": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "menuDrawerCouldNotOpenLink": "Could not open link: {error}",
+  "@menuDrawerCouldNotOpenLink": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "menuDrawerCouldNotOpenEmail": "Could not open email client",
+  "menuDrawerCouldNotOpenEmailError": "Could not open email: {error}",
+  "@menuDrawerCouldNotOpenEmailError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "menuDrawerGuest": "Guest",
+  "menuDrawerCommunity": "COMMUNITY",
+  "menuDrawerPublishToBuildStats": "Publish a cookbook to start building your stats here",
+  "menuDrawerRecipesUploaded": "recipes\nuploaded",
+  "menuDrawerDownloads": "downloads",
+  "menuDrawerRating": "rating",
+  "recipeListCopyToCookbook": "Copy to Cookbook",
+  "recipeListMoveToCookbook": "Move to Cookbook",
+  "recipeListCopyingRecipes": "Copying {count} recipes...",
+  "@recipeListCopyingRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeListMovingRecipes": "Moving {count} recipes...",
+  "@recipeListMovingRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recipeListCreateAnotherFirst": "Create another cookbook first",
+  "recipeListSortNewest": "Newest",
+  "recipeListSortOldest": "Oldest",
+  "recipeListSortRating": "Rating",
+  "recipeListSortQuickest": "Quickest",
+  "recipeListSizeSmall": "Small",
+  "recipeListSizeMedium": "Medium",
+  "recipeListSizeLarge": "Large",
+  "recipeListPinned": "Pinned",
+  "recipeListDeselectAll": "Deselect all",
+  "recipeListSelectAll": "Select all",
+  "plannerPreviousWeek": "Previous week",
+  "plannerNextWeek": "Next week",
+  "plannerMoreOptions": "More options",
+  "homeScreenSwitchCookbook": "Switch Cookbook",
+  "homeScreenNewCookbook": "New Cookbook",
+  "shareViewerSharedRecipe": "Shared Recipe",
+  "shareViewerGoHome": "Go Home",
+  "shareViewerSharedBy": "Shared by {name}",
+  "@shareViewerSharedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shareViewerExpires": "Expires: {date}",
+  "@shareViewerExpires": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "importIssues": "Import Issues",
+  "trashPermanentlyDeleteConfirm": "Permanently delete {count} {count, plural, =1{recipe} other{recipes}}? This cannot be undone.",
+  "@trashPermanentlyDeleteConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trashDeletingRecipes": "Deleting {count} recipes...",
+  "@trashDeletingRecipes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trashDeletingAllRecipes": "Deleting recipes...",
+  "cookbooksError": "Error: {error}",
+  "@cookbooksError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cookbooksShareFromApp": "Shared from Recipe Spellbook",
+  "cookbooksPublishFailed": "Publish failed",
+  "communityGridView": "Grid view",
+  "communityListView": "List view",
+  "communitySortTopRated": "Top Rated",
+  "communityHasImages": "Has images",
+  "communityStatusPublished": "Published",
+  "communityStatusUnderReview": "Under Review",
+  "communityStatusRemoved": "Removed",
+  "communityUnderReview": "This cookbook is under review by our moderation team.",
+  "communityConfigurePublication": "Configure Publication",
+  "communityPublishTitle": "Title",
+  "communityPublishTitleHint": "Cookbook title",
+  "communityPublishDescription": "Description",
+  "communityPublishDescriptionHint": "Describe your cookbook...",
+  "communityPublishTags": "Tags",
+  "communityPublishIncludeImages": "Include Images",
+  "communityPublishIncludeImagesSubtitle": "Upload recipe photos with the cookbook",
+  "communityPublishSummary": "Summary",
+  "communityPublishRecipesSummary": "{count} recipes will be published",
+  "@communityPublishRecipesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishImagesWillUpload": "Images will be uploaded",
+  "communityPublishTextOnlyNoImages": "Text only — no images",
+  "communityPublishDone": "Published!",
+  "communityPublishImagesSkipped": "{count} images were skipped",
+  "@communityPublishImagesSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishTryAgain": "Try Again",
+  "communityPublishPreparing": "Preparing...",
+  "communityPublishUploading": "Uploading images ({current}/{total})...",
+  "@communityPublishUploading": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishPublishing": "Publishing...",
+  "communityPublishBackground": "You can browse while publishing continues in the background.",
+  "communityPublishRejected": "{count} images rejected",
+  "@communityPublishRejected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityPublishUploadInProgress": "Upload in progress ({current}/{total}). Wait for it to finish before publishing again.",
+  "@communityPublishUploadInProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "communityEditPublication": "Edit Publication",
+  "communityEditDescription": "Description",
+  "communityEditDescriptionHint": "Add a description...",
+  "communityEditTags": "Tags",
+  "communityEditSuccess": "Publication updated",
+  "communityEditFailed": "Failed to update publication",
+  "communityDownloadOptions": "Download Options",
+  "communityDownloadWithImages": "With images ({size})",
+  "@communityDownloadWithImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "communityDownloadImagesIncluded": "{count} photos included",
+  "@communityDownloadImagesIncluded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityDownloadTextOnly": "Text only",
+  "communityDownloadTextOnlySubtitle": "Just recipes, no images",
+  "communityYourRating": "Your rating",
+  "communityRateThis": "Rate this",
+  "communityTapToPreview": "Tap any recipe to preview",
+  "communityImageCountLabel": "{count} photos",
+  "@communityImageCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityStepCount": "{count, plural, =1{1 Step} other{{count} Steps}}",
+  "@communityStepCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "communityNotes": "Notes",
+  "communityStatPrep": "Prep",
+  "communityStatCook": "Cook",
+  "communityStatTotal": "Total",
+  "communityStatServings": "Servings",
+  "displayName": "Display Name",
+  "editDisplayName": "Edit Display Name",
+  "displayNameHelper": "Used on your profile and in the community.",
+  "saveName": "Save Name",
+  "nameContainsUnsupported": "Name contains unsupported characters",
+  "nameTooShort": "Name must be at least 2 characters",
+  "communitySection": "COMMUNITY",
+  "subscriptionSection": "SUBSCRIPTION",
+  "integrationsSection": "INTEGRATIONS",
+  "dangerZoneSection": "DANGER ZONE",
+  "unlockPremium": "Unlock Premium",
+  "oneTimePurchaseDesc": "One-time purchase \u00b7 yours forever \u00b7 no subscription",
+  "viewPlansPrice": "View Plans \u2014 $6.99",
+  "premiumActive": "Premium \u2014 Active",
+  "familyActive": "Family \u2014 Active",
+  "cloudSyncEnabled": "Cloud sync enabled",
+  "sharedWithMembers": "Shared with up to 5 members",
+  "yourForever": "yours forever",
+  "publishCookbookToStart": "Publish a cookbook to start building your stats here",
+  "removePhoto": "Remove photo",
+  "chooseFromLibrary": "Choose from library",
+  "deleteAccountTitle": "Permanently delete your account?",
+  "deleteAccountWarning": "This will delete:\n\u00b7 All your saved recipes\n\u00b7 All your cookbooks\n\u00b7 Your community publications\n\u00b7 All account data\n\nThis cannot be undone.",
+  "typeDeleteToConfirmAccount": "Type DELETE to confirm:",
+  "deleteForever": "Delete Forever",
+
+  "nameCooldownMessage": "You can change your name again on {date}",
+  "@nameCooldownMessage": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "reportAccount": "Report this account",
+  "reportAccountTitle": "Why are you reporting this account?",
+  "reportSpam": "Spam or fake account",
+  "reportInappropriate": "Inappropriate content",
+  "reportStolen": "Stolen recipes / copyright",
+  "reportHarassment": "Harassment",
+  "reportOther": "Other",
+  "submitReport": "Submit Report",
+  "reportSubmitted": "Thanks for your report. We'll review it shortly.",
+  "alreadyReportedRecently": "You already reported this account recently",
+  "cannotReportSelf": "You cannot report yourself",
+  "pendingAccountReports": "Account Reports",
+  "accountReportsResolved": "Account report resolved",
+  "accountReportDismissed": "Account report dismissed"
 }

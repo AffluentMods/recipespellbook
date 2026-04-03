@@ -5,14 +5,13 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/notification_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../router/router.dart';
 import '../../services/auth_service.dart';
+import '../../services/community_service.dart';
 import '../../services/feedback_service.dart';
 import '../../services/revenuecat_service.dart';
-import '../../services/sync_service.dart';
 import '../../ui/screens/import/faq_screen.dart';
 import '../../ui/screens/import/import_guides_screen.dart';
 import '../../utils/responsive_utils.dart';
@@ -31,9 +30,6 @@ class AppMenuDrawer extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final subStatus = ref.watch(subscriptionProvider);
     final authState = ref.watch(authProvider);
-    // TODO: Kitchen Buddy hidden for now
-    // final settings = ref.watch(settingsProvider);
-    // final isKitchenBuddyEnabled = settings.kitchenBuddyEnabled;
     final isDark = theme.brightness == Brightness.dark;
 
     return Drawer(
@@ -50,21 +46,27 @@ class AppMenuDrawer extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(14, 16, 14, 8),
               children: [
-                // ── Main ──
+                // ── Group 1: Your Stuff ──
+                _DrawerGroupLabel(label: l10n.navCookbooks.isNotEmpty ? 'Your Stuff' : 'Your Stuff'),
+                const SizedBox(height: 8),
                 _DrawerGroup(children: [
                   _DrawerItem(
+                    index: 0,
                     icon: Icons.menu_book_rounded,
                     iconColor: const Color(0xFF6366F1),
                     label: l10n.navCookbooks,
+                    subtitle: 'Organize your recipe collections',
                     onTap: () {
                       Navigator.pop(context);
                       context.push('/cookbooks');
                     },
                   ),
                   _DrawerItem(
+                    index: 1,
                     icon: Icons.download_rounded,
                     iconColor: Colors.teal,
                     label: l10n.importGuides,
+                    subtitle: 'From any URL, photo or file',
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).push(
@@ -73,9 +75,11 @@ class AppMenuDrawer extends ConsumerWidget {
                     },
                   ),
                   _DrawerItem(
+                    index: 2,
                     icon: Icons.swap_horiz_rounded,
                     iconColor: const Color(0xFF0EA5E9),
                     label: l10n.transferTitle,
+                    subtitle: 'Move recipes between devices',
                     onTap: () {
                       Navigator.pop(context);
                       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -85,14 +89,29 @@ class AppMenuDrawer extends ConsumerWidget {
                   ),
                 ]),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 20),
 
-                // ── Help & Settings ──
+                // ── Group 2: App ──
+                const _DrawerGroupLabel(label: 'App'),
+                const SizedBox(height: 8),
                 _DrawerGroup(children: [
                   _DrawerItem(
+                    index: 3,
+                    icon: Icons.settings_rounded,
+                    iconColor: const Color(0xFF6B7280),
+                    label: l10n.settingsTitle,
+                    subtitle: 'Theme, language & preferences',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push('/settings');
+                    },
+                  ),
+                  _DrawerItem(
+                    index: 4,
                     icon: Icons.headset_mic_rounded,
                     iconColor: const Color(0xFFEC4899),
                     label: l10n.helpTitle,
+                    subtitle: 'FAQ, guides & contact us',
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.of(context).push(
@@ -100,18 +119,9 @@ class AppMenuDrawer extends ConsumerWidget {
                       );
                     },
                   ),
-                  _DrawerItem(
-                    icon: Icons.settings_rounded,
-                    iconColor: const Color(0xFF6B7280),
-                    label: l10n.settingsTitle,
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push('/settings');
-                    },
-                  ),
                 ]),
 
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -537,7 +547,7 @@ class _SupportCard extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// PROFILE HEADER — avatar + name top row with notification bell
+// PROFILE HEADER — avatar + name + plan pill
 // ═══════════════════════════════════════════════════════════════════
 
 class _ProfileHeader extends ConsumerStatefulWidget {
@@ -555,14 +565,16 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
     final isSignedIn = widget.authState.isSignedIn;
     final isLoading = widget.authState.isLoading;
 
-    final gradientColors = isDark
-        ? [theme.colorScheme.primary.withValues(alpha: 0.35), theme.colorScheme.tertiary.withValues(alpha: 0.2)]
-        : [theme.colorScheme.primary.withValues(alpha: 0.12), theme.colorScheme.tertiary.withValues(alpha: 0.08)];
-
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: gradientColors, begin: Alignment.topLeft, end: Alignment.bottomRight),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: isDark
+              ? [const Color(0xFF6B3A1F), const Color(0xFF1C1A17)]
+              : [const Color(0xFFD4956B).withValues(alpha: 0.4), theme.colorScheme.surfaceContainerLow],
+        ),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(20),
           bottomRight: Radius.circular(20),
@@ -571,7 +583,7 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 16, 24),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: isLoading
               ? _buildLoading(theme)
               : isSignedIn
@@ -584,104 +596,70 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
 
   Widget _buildLoading(ThemeData theme) {
     final l10n = AppLocalizations.of(context)!;
-    return Row(
-      children: [
-        _buildAppIcon(theme),
-        const SizedBox(width: 14),
-        SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.primary)),
-        const SizedBox(width: 10),
-        Text(l10n.menuSigningIn, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-      ],
+    return Center(
+      child: Column(
+        children: [
+          const SizedBox(height: 32),
+          SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.primary)),
+          const SizedBox(height: 8),
+          Text(l10n.menuSigningIn, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+        ],
+      ),
     );
   }
 
   Widget _buildSignedIn(ThemeData theme, AuthState authState) {
     final user = authState.user!;
     final subStatus = ref.watch(subscriptionProvider);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Tappable profile area → opens account screen
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                  context.push('/settings/account');
-                },
-                behavior: HitTestBehavior.opaque,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Larger avatar
-                    _UserAvatar(user: user, radius: 32),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 4),
-                          Text(user.displayName,
-                              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 17),
-                              maxLines: 1, overflow: TextOverflow.ellipsis),
-                          const SizedBox(height: 2),
-                          Text(user.email,
-                              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, fontSize: 12),
-                              maxLines: 1, overflow: TextOverflow.ellipsis),
-                          const SizedBox(height: 6),
-                          // Subscription tier badge
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: subStatus.isPro
-                                  ? Colors.amber.withValues(alpha: 0.2)
-                                  : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(
-                                color: subStatus.isPro
-                                    ? Colors.amber.withValues(alpha: 0.5)
-                                    : theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
-                                width: 0.5,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (subStatus.isPro)
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 4),
-                                    child: Icon(Icons.star_rounded, size: 12, color: Colors.amber.shade700),
-                                  ),
-                                Text(
-                                  subStatus.isPro ? subStatus.tier.displayName : 'Free',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: subStatus.isPro ? Colors.amber.shade700 : theme.colorScheme.outline,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Column(
-              children: [
-                _NotificationBell(),
-                if (subStatus.tier.hasCloudSync)
-                  _SyncButton(),
-              ],
-            ),
-          ],
+        // ── Plan pill (top left) ──
+        Align(
+          alignment: Alignment.centerLeft,
+          child: _PlanPill(subStatus: subStatus),
         ),
+        const SizedBox(height: 10),
+
+        // ── Avatar (centered, 64dp) ──
+        GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+            context.push('/settings/account');
+          },
+          child: _UserAvatar(user: user, radius: 32),
+        ),
+        const SizedBox(height: 8),
+
+        // ── Display name ──
+        Text(
+          user.displayName,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: isDark ? Colors.white : theme.colorScheme.onSurface,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 2),
+
+        // ── Email ──
+        Text(
+          user.email,
+          style: TextStyle(
+            fontSize: 12,
+            color: isDark ? Colors.white.withValues(alpha: 0.6) : theme.colorScheme.outline,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+
+        // ── Community strip ──
+        _CommunityStrip(isDark: isDark),
       ],
     );
   }
@@ -689,41 +667,37 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
   Widget _buildSignedOut(BuildContext context, ThemeData theme) {
     final l10n = AppLocalizations.of(context)!;
     final authNotifier = ref.read(authProvider.notifier);
+    final isDark = theme.brightness == Brightness.dark;
+    final subStatus = ref.watch(subscriptionProvider);
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                  context.push('/settings/account');
-                },
-                behavior: HitTestBehavior.opaque,
-                child: Row(
-                  children: [
-                    _buildAppIcon(theme, size: 52),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Recipe Spellbook', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 2),
-                          Text(l10n.menuSignInSync,
-                              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, fontSize: 12)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            _NotificationBell(),
-          ],
+        // Plan pill
+        Align(
+          alignment: Alignment.centerLeft,
+          child: _PlanPill(subStatus: subStatus),
         ),
+        const SizedBox(height: 10),
+
+        // App icon as avatar
+        Container(
+          width: 64, height: 64,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: const Color(0xFFC75B39).withValues(alpha: 0.18),
+          ),
+          child: Center(
+            child: Text('?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFFC75B39))),
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        Text('Guest', style: theme.textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: isDark ? Colors.white : theme.colorScheme.onSurface,
+        )),
+        const SizedBox(height: 2),
+        Text(l10n.menuSignInSync, style: TextStyle(fontSize: 12, color: isDark ? Colors.white.withValues(alpha: 0.6) : theme.colorScheme.outline)),
         const SizedBox(height: 16),
 
         // Google sign-in
@@ -733,16 +707,16 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
             onPressed: () { Navigator.pop(context); authNotifier.signInWithGoogle(); },
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 11),
-              side: BorderSide(color: theme.colorScheme.outlineVariant, width: 1),
+              side: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.3) : theme.colorScheme.outlineVariant),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('G', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
+                Text('G', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : theme.colorScheme.onSurface)),
                 const SizedBox(width: 10),
                 Text(l10n.continueWithGoogle,
-                    style: TextStyle(fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface, fontSize: 14)),
+                    style: TextStyle(fontWeight: FontWeight.w500, color: isDark ? Colors.white : theme.colorScheme.onSurface, fontSize: 14)),
               ],
             ),
           ),
@@ -755,15 +729,15 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
             child: FilledButton(
               onPressed: () { Navigator.pop(context); authNotifier.signInWithApple(); },
               style: FilledButton.styleFrom(
-                backgroundColor: theme.brightness == Brightness.dark ? Colors.white : Colors.black,
-                foregroundColor: theme.brightness == Brightness.dark ? Colors.black : Colors.white,
+                backgroundColor: isDark ? Colors.white : Colors.black,
+                foregroundColor: isDark ? Colors.black : Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 11),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.apple, size: 20, color: theme.brightness == Brightness.dark ? Colors.black : Colors.white),
+                  Icon(Icons.apple, size: 20, color: isDark ? Colors.black : Colors.white),
                   const SizedBox(width: 10),
                   Text(l10n.continueWithApple, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
                 ],
@@ -774,26 +748,171 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
       ],
     );
   }
+}
 
-  Widget _buildAppIcon(ThemeData theme, {double size = 44}) {
-    return Container(
-      width: size, height: size,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(size * 0.27),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(size * 0.27),
-        child: Image.asset('assets/icon/app_icon.png', width: size, height: size, fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [theme.colorScheme.primary, theme.colorScheme.tertiary], begin: Alignment.topLeft, end: Alignment.bottomRight),
-              borderRadius: BorderRadius.circular(size * 0.27),
+// ═══════════════════════════════════════════════════════════════════
+// COMMUNITY STRIP — stats or CTA inside the profile header
+// ═══════════════════════════════════════════════════════════════════
+
+class _CommunityStrip extends ConsumerWidget {
+  final bool isDark;
+  const _CommunityStrip({required this.isDark});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Check if user has published anything
+    // For now, use a FutureBuilder on community service
+    return FutureBuilder<_CommunityStats?>(
+      future: _fetchStats(),
+      builder: (context, snapshot) {
+        final stats = snapshot.data;
+        final hasPublished = stats != null && stats.recipeCount > 0;
+
+        if (hasPublished) {
+          return _buildStats(context, stats);
+        }
+        return _buildCTA(context);
+      },
+    );
+  }
+
+  Future<_CommunityStats?> _fetchStats() async {
+    try {
+      final service = CommunityService.instance;
+      final pubs = await service.getMyPublications();
+      if (pubs.isEmpty) return null;
+
+      int totalRecipes = 0;
+      int totalDownloads = 0;
+      double avgRating = 0;
+      int ratingCount = 0;
+
+      for (final pub in pubs) {
+        totalRecipes += pub.recipeCount;
+        totalDownloads += pub.downloadCount;
+        if (pub.averageRating > 0) {
+          avgRating += pub.averageRating;
+          ratingCount++;
+        }
+      }
+
+      return _CommunityStats(
+        recipeCount: totalRecipes,
+        downloadCount: totalDownloads,
+        averageRating: ratingCount > 0 ? avgRating / ratingCount : 0,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Widget _buildCTA(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+        context.go('/community');
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text('COMMUNITY', style: TextStyle(
+                    fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 0.8,
+                    color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.4),
+                  )),
+                  const SizedBox(height: 3),
+                  Text(
+                    'Publish a cookbook to start building your stats here',
+                    style: TextStyle(fontSize: 11, color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.6)),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
-            child: Icon(Icons.menu_book_rounded, size: size * 0.5, color: theme.colorScheme.onPrimary),
-          ),
+            const SizedBox(width: 8),
+            Icon(Icons.arrow_forward_ios, size: 14, color: Colors.amber.shade600),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildStats(BuildContext context, _CommunityStats stats) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+        context.go('/community');
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text('COMMUNITY', style: TextStyle(
+              fontSize: 10, fontWeight: FontWeight.w600, letterSpacing: 0.8,
+              color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.4),
+            )),
+            const SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _StatColumn(value: '${stats.recipeCount}', label: 'recipes\nuploaded', isDark: isDark),
+                _StatColumn(value: '${stats.downloadCount}', label: 'downloads', isDark: isDark),
+                _StatColumn(
+                  value: stats.averageRating > 0 ? '${stats.averageRating.toStringAsFixed(1)}★' : '—',
+                  label: 'rating',
+                  isDark: isDark,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CommunityStats {
+  final int recipeCount;
+  final int downloadCount;
+  final double averageRating;
+  const _CommunityStats({required this.recipeCount, required this.downloadCount, required this.averageRating});
+}
+
+class _StatColumn extends StatelessWidget {
+  final String value;
+  final String label;
+  final bool isDark;
+  const _StatColumn({required this.value, required this.label, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(value, style: TextStyle(
+          fontSize: 18, fontWeight: FontWeight.w700,
+          color: isDark ? Colors.white : Colors.black87,
+        )),
+        const SizedBox(height: 2),
+        Text(label, style: TextStyle(
+          fontSize: 10,
+          color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.5),
+        ), textAlign: TextAlign.center),
+      ],
     );
   }
 }
@@ -815,21 +934,26 @@ class _BottomSection extends ConsumerWidget {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: GestureDetector(
+        // Invite Friends — full-width tappable row
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
             onTap: () {
               Navigator.pop(context);
               SharePlus.instance.share(ShareParams(text: l10n.menuShareMessage, subject: 'Recipe Spellbook'));
             },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.favorite_rounded, size: 15, color: Color(0xFFE53935)),
-                const SizedBox(width: 6),
-                Text(l10n.inviteFriends,
-                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline.withValues(alpha: 0.7), fontSize: 13)),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                children: [
+                  Icon(Icons.share_rounded, size: 18, color: theme.colorScheme.outline.withValues(alpha: 0.7)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(l10n.inviteFriends,
+                        style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface, fontSize: 13, fontWeight: FontWeight.w500)),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -838,10 +962,11 @@ class _BottomSection extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
           child: isPro ? _buildProBadge(context, ref, theme) : _buildUpgradeButton(context, theme),
         ),
+        // Version number — tiny muted, separate from button
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: Text(l10n.menuAppVersion(version),
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline.withValues(alpha: 0.45), fontSize: 11)),
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline.withValues(alpha: 0.40), fontSize: 10)),
         ),
       ],
     );
@@ -876,7 +1001,6 @@ class _BottomSection extends ConsumerWidget {
   }
 
   Widget _buildUpgradeButton(BuildContext context, ThemeData theme) {
-    final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       width: double.infinity,
       child: Container(
@@ -902,7 +1026,7 @@ class _BottomSection extends ConsumerWidget {
                 children: [
                   const Icon(Icons.star_rounded, size: 18, color: Colors.white),
                   const SizedBox(width: 6),
-                  Text(l10n.upgradeToPro, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
+                  const Text('\u2726 Unlock Premium \u2014 \$6.99', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
                 ],
               ),
             ),
@@ -984,83 +1108,80 @@ class _BottomSection extends ConsumerWidget {
 // SHARED WIDGETS
 // ═══════════════════════════════════════════════════════════════════
 
-class _NotificationBell extends ConsumerWidget {
+/// Plan pill shown in the profile header.
+/// Free users get a tappable amber pill that opens /upgrade.
+/// Pro users get a non-tappable pill showing their tier.
+class _PlanPill extends StatelessWidget {
+  final SubscriptionStatus subStatus;
+  const _PlanPill({required this.subStatus});
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final unread = ref.watch(unreadNotificationCountProvider);
-    return Stack(
-      children: [
-        IconButton(
-          onPressed: () => context.push('/notifications'),
-          icon: Icon(Icons.notifications_outlined, size: 22, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
-          style: IconButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
-            padding: const EdgeInsets.all(8),
-            minimumSize: const Size(36, 36),
-          ),
+  Widget build(BuildContext context) {
+    final isPro = subStatus.isPro;
+    final label = isPro
+        ? '\u2726 ${subStatus.tier == SubscriptionTier.family ? 'Family' : 'Premium'}'
+        : '\u2726 Free Plan';
+
+    final pill = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: isPro
+            ? Colors.amber.withValues(alpha: 0.20)
+            : Colors.amber.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.amber.withValues(alpha: isPro ? 0.5 : 0.4),
+          width: 0.5,
         ),
-        if (unread > 0)
-          Positioned(
-            right: 2,
-            top: 2,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-              child: Text('$unread', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-            ),
-          ),
-      ],
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: Colors.amber.shade800,
+        ),
+      ),
+    );
+
+    if (isPro) return pill;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          rootNavigatorKey.currentContext?.push('/upgrade');
+        });
+      },
+      child: pill,
     );
   }
 }
 
-class _SyncButton extends StatefulWidget {
-  @override
-  State<_SyncButton> createState() => _SyncButtonState();
-}
-
-class _SyncButtonState extends State<_SyncButton> {
-  bool _syncing = false;
-
-  Future<void> _sync() async {
-    if (_syncing) return;
-    setState(() => _syncing = true);
-    try {
-      final result = await SyncService.instance.sync();
-      if (mounted) {
-        final pushed = result.pushedCount;
-        final pulled = result.pulledCount;
-        if (result.success) {
-          AppSnackbar.success(context, 'Synced! ↑$pushed ↓$pulled');
-        } else {
-          AppSnackbar.error(context, result.error ?? 'Sync failed');
-        }
-      }
-    } catch (e) {
-      if (mounted) AppSnackbar.error(context, 'Sync failed');
-    } finally {
-      if (mounted) setState(() => _syncing = false);
-    }
-  }
+/// Group label ("Your Stuff", "App") rendered above a _DrawerGroup.
+class _DrawerGroupLabel extends StatelessWidget {
+  final String label;
+  const _DrawerGroupLabel({required this.label});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return IconButton(
-      onPressed: _syncing ? null : _sync,
-      icon: _syncing
-          ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.primary))
-          : Icon(Icons.sync_rounded, size: 22, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
-      style: IconButton.styleFrom(
-        backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.5),
-        padding: const EdgeInsets.all(8),
-        minimumSize: const Size(36, 36),
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        label.toUpperCase(),
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: theme.colorScheme.outline.withValues(alpha: 0.6),
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.8,
+          fontSize: 11,
+        ),
       ),
     );
   }
 }
 
+/// Kitchen Stats Card — shows recipe count, cookbook count, last sync.
 
 class _DrawerGroup extends StatelessWidget {
   final List<Widget> children;
@@ -1093,7 +1214,7 @@ class _DrawerGroup extends StatelessWidget {
               Divider(
                 height: 0.5,
                 thickness: 0.5,
-                indent: 56,
+                indent: 60,
                 color: theme.colorScheme.outlineVariant.withValues(alpha: isDark ? 0.2 : 0.3),
               ),
           ],
@@ -1103,53 +1224,111 @@ class _DrawerGroup extends StatelessWidget {
   }
 }
 
-class _DrawerItem extends StatelessWidget {
+class _DrawerItem extends StatefulWidget {
+  final int index;
   final IconData icon;
   final Color iconColor;
   final String label;
+  final String subtitle;
   final VoidCallback onTap;
-  const _DrawerItem({required this.icon, required this.iconColor, required this.label, required this.onTap});
+  const _DrawerItem({
+    required this.index,
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  State<_DrawerItem> createState() => _DrawerItemState();
+}
+
+class _DrawerItemState extends State<_DrawerItem> {
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final c = theme.colorScheme.onSurface;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(9),
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: Duration(milliseconds: 300 + 30 * widget.index),
+      curve: Curves.easeOut,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value.clamp(0.0, 1.0),
+          child: Transform.translate(
+            offset: Offset(20 * (1 - value), 0),
+            child: child,
+          ),
+        );
+      },
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) {
+          setState(() => _pressed = false);
+          widget.onTap();
+        },
+        onTapCancel: () => setState(() => _pressed = false),
+        child: AnimatedScale(
+          scale: _pressed ? 0.98 : 1.0,
+          duration: const Duration(milliseconds: 100),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(14),
+              onTap: null, // handled by GestureDetector
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: widget.iconColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(widget.icon, size: 20, color: widget.iconColor),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.label,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: c,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            widget.subtitle,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 20,
+                      color: theme.colorScheme.outline.withValues(alpha: 0.4),
+                    ),
+                  ],
                 ),
-                child: Icon(icon, size: 19, color: iconColor),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: c,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: theme.colorScheme.outline.withValues(alpha: 0.4),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -1161,24 +1340,41 @@ class _DrawerItem extends StatelessWidget {
 class _UserAvatar extends StatelessWidget {
   final AuthUser user;
   final double radius;
-  const _UserAvatar({required this.user, this.radius = 22});
+  const _UserAvatar({required this.user, this.radius = 28});
+
+  String _resolveAvatarUrl(String avatarUrl) {
+    if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) return avatarUrl;
+    const apiUrl = String.fromEnvironment('API_URL', defaultValue: 'https://api.recipespellbook.app');
+    return '$apiUrl/v1/web/avatar/$avatarUrl';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    Widget avatar;
-    if (user.avatarUrl != null) {
-      avatar = CircleAvatar(radius: radius, backgroundImage: NetworkImage(user.avatarUrl!), backgroundColor: theme.colorScheme.primaryContainer);
-    } else {
-      avatar = CircleAvatar(radius: radius, backgroundColor: theme.colorScheme.primaryContainer,
-          child: Text(user.initials, style: TextStyle(fontSize: radius * 0.6, fontWeight: FontWeight.bold, color: theme.colorScheme.onPrimaryContainer)));
+    final initial = user.displayName.isNotEmpty ? user.displayName[0].toUpperCase() : '?';
+    final hasAvatar = user.avatarUrl != null && user.avatarUrl!.isNotEmpty;
+
+    if (hasAvatar) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: const Color(0xFFC75B39).withValues(alpha: 0.18),
+        backgroundImage: NetworkImage(_resolveAvatarUrl(user.avatarUrl!)),
+        onBackgroundImageError: (_, __) {},
+        child: null,
+      );
     }
-    return Stack(children: [
-      avatar,
-      Positioned(bottom: 0, right: 0,
-          child: Container(width: 14, height: 14,
-              decoration: BoxDecoration(color: const Color(0xFF4CAF50), shape: BoxShape.circle,
-                  border: Border.all(color: theme.colorScheme.surface, width: 2.5)))),
-    ]);
+
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: const Color(0xFFC75B39).withValues(alpha: 0.18),
+      child: Text(
+        initial,
+        style: TextStyle(
+          fontSize: radius * 0.65,
+          fontWeight: FontWeight.bold,
+          color: const Color(0xFFC75B39),
+        ),
+      ),
+    );
   }
 }
 

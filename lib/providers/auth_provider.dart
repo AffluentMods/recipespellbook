@@ -154,6 +154,28 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  /// Update the user's display name and/or avatar URL.
+  /// Returns true on success. Updates the auth state with the new user data.
+  ///
+  /// If [errorCallback] is provided, it will be called with the HTTP status
+  /// code and parsed response body on failure (e.g. for name_cooldown).
+  Future<bool> updateProfile({
+    String? name,
+    String? avatarUrl,
+    void Function(int statusCode, Map<String, dynamic> body)? errorCallback,
+  }) async {
+    final updated = await _service.updateProfile(
+      name: name,
+      avatarUrl: avatarUrl,
+      errorCallback: errorCallback,
+    );
+    if (updated != null) {
+      state = state.copyWith(user: updated);
+      return true;
+    }
+    return false;
+  }
+
   /// Clear any auth error (e.g. after user dismisses error dialog).
   void clearError() {
     state = state.copyWith(error: null);

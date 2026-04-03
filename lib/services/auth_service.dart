@@ -406,6 +406,59 @@ class AuthService {
   }
 
   // ════════════════════════════════════════════
+  //  PROFILE UPDATE
+  // ════════════════════════════════════════════
+
+  /// Update display name and/or avatar URL on the server.
+  /// Returns the updated [AuthUser] on success, or null on failure.
+  ///
+  /// If [errorCallback] is provided, it will be called with the error code
+  /// and the full response body on non-200 responses (e.g. name_cooldown).
+  Future<AuthUser?> updateProfile({
+    String? name,
+    String? avatarUrl,
+    void Function(int statusCode, Map<String, dynamic> body)? errorCallback,
+  }) async {
+    try {
+      final body = <String, dynamic>{};
+      if (name != null) body['name'] = name;
+      if (avatarUrl != null) body['avatarUrl'] = avatarUrl;
+
+      final response = await patch('/v1/auth/profile', body);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        // Build updated user preserving fields not returned by this endpoint
+        final updated = AuthUser(
+          id: data['id'] as String,
+          email: data['email'] as String? ?? '',
+          name: data['name'] as String?,
+          avatarUrl: data['avatarUrl'] as String?,
+          tier: data['tier'] as String? ?? _currentUser?.tier ?? 'free',
+          role: data['role'] as String? ?? _currentUser?.role ?? 'user',
+          discordId: _currentUser?.discordId,
+          createdAt: _currentUser?.createdAt,
+        );
+        _currentUser = updated;
+        await _saveUser(updated);
+        return updated;
+      }
+
+      // Non-200: parse error and notify caller
+      if (errorCallback != null) {
+        try {
+          final errData = jsonDecode(response.body) as Map<String, dynamic>;
+          errorCallback(response.statusCode, errData);
+        } catch (_) {
+          errorCallback(response.statusCode, {'error': 'Unknown error'});
+        }
+      }
+    } catch (e) {
+      debugPrint('[Auth] updateProfile error: $e');
+    }
+    return null;
+  }
+
+  // ════════════════════════════════════════════
   //  AUTHENTICATED REQUESTS
   // ════════════════════════════════════════════
 

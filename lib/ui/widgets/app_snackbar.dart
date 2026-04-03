@@ -253,11 +253,11 @@ class _TopSnackbarWidget extends StatelessWidget {
             child: Material(
               color: Colors.transparent,
               child: Container(
-                padding: EdgeInsets.only(top: topPadding),
+                padding: EdgeInsets.only(top: topPadding + 12),
                 alignment: Alignment.topCenter,
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: _maxWidth),
-                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  margin: const EdgeInsets.fromLTRB(16, 4, 16, 0),
                   padding: const EdgeInsets.symmetric(
                       horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(

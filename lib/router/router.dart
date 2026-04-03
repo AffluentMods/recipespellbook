@@ -43,6 +43,7 @@ import '../ui/screens/community/community_detail_screen.dart';
 import '../ui/screens/community/community_publish_screen.dart';
 import '../ui/screens/community/community_my_publications_screen.dart';
 import '../ui/screens/community/community_recipe_full_screen.dart';
+import '../ui/screens/community/creator_profile_screen.dart';
 import '../services/community_service.dart' show CommunityRecipe;
 import '../ui/screens/settings/trash_screen.dart';
 import '../ui/screens/shopping/kroger_callback_screen.dart';
@@ -309,6 +310,14 @@ final router = GoRouter(
           path: '/community/my-publications',
           name: 'community-my-publications',
           builder: (context, state) => const CommunityMyPublicationsScreen(),
+        ),
+        GoRoute(
+          path: '/community/creator/:userId',
+          name: 'creator-profile',
+          builder: (context, state) {
+            final userId = state.pathParameters['userId']!;
+            return CreatorProfileScreen(userId: userId);
+          },
         ),
         GoRoute(
           path: '/community/:id',

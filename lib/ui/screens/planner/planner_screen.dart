@@ -931,7 +931,7 @@ class _DateHeader extends StatelessWidget {
 
 // ============ MEALS LIST ============
 
-class _MealsList extends ConsumerWidget {
+class _MealsList extends ConsumerStatefulWidget {
   final List<MealPlanWithRecipe> plans;
   final DateTime date;
   final VoidCallback onAddMeal;
@@ -943,11 +943,39 @@ class _MealsList extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_MealsList> createState() => _MealsListState();
+}
+
+class _MealsListState extends ConsumerState<_MealsList> {
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _launchShopping(BuildContext context, List<String> recipeIds) {
+    launchShoppingListGeneratorFromMealPlan(
+      context,
+      ref,
+      recipeIds: recipeIds,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
     // Group by meal type
     final grouped = <String, List<MealPlanWithRecipe>>{};
-    for (final plan in plans) {
+    for (final plan in widget.plans) {
       final type = plan.mealPlan.mealType;
       grouped.putIfAbsent(type, () => []).add(plan);
     }
@@ -962,52 +990,68 @@ class _MealsList extends ConsumerWidget {
       });
 
     // Collect recipe IDs for shopping list
-    final recipeIds = plans
+    final recipeIds = widget.plans
         .where((p) => p.recipe != null)
         .map((p) => p.recipe!.id)
         .toSet()
         .toList();
 
+    final hasRecipes = recipeIds.isNotEmpty;
+
     return ListView(
+      controller: _scrollController,
       padding: const EdgeInsets.only(bottom: 100),
       children: [
-        // Send day to shopping list button (top)
-        if (recipeIds.isNotEmpty)
+        // Shopping button at top
+        if (hasRecipes)
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-            child: OutlinedButton.icon(
-              onPressed: () => launchShoppingListGeneratorFromMealPlan(
-                context,
-                ref,
-                recipeIds: recipeIds,
-              ),
-              icon: const Icon(Icons.add_shopping_cart, size: 18),
-              label: Text(l10n.addDayToShoppingList),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                side: BorderSide(color: const Color(0xFFE8A860).withValues(alpha: 0.5)),
-                foregroundColor: const Color(0xFFE8A860),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton.icon(
+                onPressed: () => _launchShopping(context, recipeIds),
+                icon: const Icon(Icons.shopping_cart_outlined, size: 18),
+                label: Text(l10n.addDayToShoppingList),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: const Color(0xFFE8A860).withValues(alpha: 0.5)),
+                  foregroundColor: const Color(0xFFE8A860),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
               ),
             ),
           ),
 
-        for (final mealType in sortedKeys) ...[
-          _MealTypeHeader(mealType: mealType),
-          const SizedBox(height: 4),
-          for (final plan in grouped[mealType]!) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: _MealTile(plan: plan),
+        // Meal section cards
+        for (final mealType in sortedKeys)
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: theme.colorScheme.surfaceContainerHighest,
+                width: 0.5,
+              ),
             ),
-            const SizedBox(height: 4),
-          ],
-          const SizedBox(height: 8),
-        ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _MealTypeHeader(mealType: mealType),
+                ...grouped[mealType]!.map((plan) => Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: _MealTile(plan: plan),
+                )),
+              ],
+            ),
+          ),
+
         // Add meal button
         Padding(
           padding: const EdgeInsets.all(16),
           child: OutlinedButton.icon(
-            onPressed: onAddMeal,
+            onPressed: widget.onAddMeal,
             icon: const Icon(Icons.add),
             label: Text(l10n.addAnotherMeal),
             style: OutlinedButton.styleFrom(
@@ -1015,24 +1059,7 @@ class _MealsList extends ConsumerWidget {
             ),
           ),
         ),
-        // Send day to shopping list button (bottom)
-        if (recipeIds.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: FilledButton.icon(
-              onPressed: () => launchShoppingListGeneratorFromMealPlan(
-                context,
-                ref,
-                recipeIds: recipeIds,
-              ),
-              icon: const Icon(Icons.add_shopping_cart, size: 18),
-              label: Text(l10n.sendDayToShoppingList),
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                backgroundColor: const Color(0xFFE8A860),
-              ),
-            ),
-          ),
+
       ],
     );
   }
@@ -1062,7 +1089,7 @@ class _MealTypeHeader extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 16, 4),
+      padding: const EdgeInsets.fromLTRB(4, 4, 4, 4),
       child: Row(
         children: [
           Text(_emoji, style: const TextStyle(fontSize: 18)),
@@ -1424,12 +1451,6 @@ class _EmptyDayState extends StatelessWidget {
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.outline,
               ),
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: onAddMeal,
-              icon: const Icon(Icons.add),
-              label: Text(l10n.addMeal),
             ),
           ],
         ),
