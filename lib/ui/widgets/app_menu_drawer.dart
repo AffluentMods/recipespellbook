@@ -766,7 +766,7 @@ class _CommunityStrip extends ConsumerWidget {
       future: _fetchStats(),
       builder: (context, snapshot) {
         final stats = snapshot.data;
-        final hasPublished = stats != null && stats.recipeCount > 0;
+        final hasPublished = stats != null;
 
         if (hasPublished) {
           return _buildStats(context, stats);
@@ -778,28 +778,28 @@ class _CommunityStrip extends ConsumerWidget {
 
   Future<_CommunityStats?> _fetchStats() async {
     try {
+      final userId = AuthService.instance.currentUser?.id;
+      if (userId == null) return null;
+
       final service = CommunityService.instance;
+
+      // Fetch publications for download count
       final pubs = await service.getMyPublications();
-      if (pubs.isEmpty) return null;
 
-      int totalRecipes = 0;
+      // Fetch creator profile for follower/following counts
+      final profile = await service.getCreatorProfile(userId);
+
+      if (pubs.isEmpty && (profile == null || profile.followerCount == 0)) return null;
+
       int totalDownloads = 0;
-      double avgRating = 0;
-      int ratingCount = 0;
-
       for (final pub in pubs) {
-        totalRecipes += pub.recipeCount;
         totalDownloads += pub.downloadCount;
-        if (pub.averageRating > 0) {
-          avgRating += pub.averageRating;
-          ratingCount++;
-        }
       }
 
       return _CommunityStats(
-        recipeCount: totalRecipes,
         downloadCount: totalDownloads,
-        averageRating: ratingCount > 0 ? avgRating / ratingCount : 0,
+        followerCount: profile?.followerCount ?? 0,
+        followingCount: profile?.followingCount ?? 0,
       );
     } catch (_) {
       return null;
@@ -870,13 +870,9 @@ class _CommunityStrip extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _StatColumn(value: '${stats.recipeCount}', label: 'recipes\nuploaded', isDark: isDark),
+                _StatColumn(value: '${stats.followerCount}', label: 'followers', isDark: isDark),
+                _StatColumn(value: '${stats.followingCount}', label: 'following', isDark: isDark),
                 _StatColumn(value: '${stats.downloadCount}', label: 'downloads', isDark: isDark),
-                _StatColumn(
-                  value: stats.averageRating > 0 ? '${stats.averageRating.toStringAsFixed(1)}★' : '—',
-                  label: 'rating',
-                  isDark: isDark,
-                ),
               ],
             ),
           ],
@@ -887,10 +883,10 @@ class _CommunityStrip extends ConsumerWidget {
 }
 
 class _CommunityStats {
-  final int recipeCount;
   final int downloadCount;
-  final double averageRating;
-  const _CommunityStats({required this.recipeCount, required this.downloadCount, required this.averageRating});
+  final int followerCount;
+  final int followingCount;
+  const _CommunityStats({required this.downloadCount, required this.followerCount, required this.followingCount});
 }
 
 class _StatColumn extends StatelessWidget {

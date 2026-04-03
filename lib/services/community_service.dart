@@ -341,7 +341,7 @@ class MyPublication {
   );
 }
 
-/// Community tag from the server.
+/// Community tag from the server (legacy curated tags endpoint).
 class CommunityTag {
   final String id;
   final String name;
@@ -354,6 +354,33 @@ class CommunityTag {
     name: json['name'] as String,
     emoji: json['emoji'] as String,
   );
+}
+
+/// Dynamic community tag from the trending/search endpoints.
+class CommunityTagItem {
+  final String tagName;
+  final String displayName;
+  final String? emoji;
+  final bool isCurated;
+  final int useCount;
+
+  const CommunityTagItem({
+    required this.tagName,
+    required this.displayName,
+    this.emoji,
+    this.isCurated = false,
+    this.useCount = 0,
+  });
+
+  factory CommunityTagItem.fromJson(Map<String, dynamic> json) => CommunityTagItem(
+    tagName: json['tagName'] as String,
+    displayName: json['displayName'] as String? ?? json['tagName'] as String,
+    emoji: json['emoji'] as String?,
+    isCurated: json['isCurated'] as bool? ?? false,
+    useCount: json['useCount'] as int? ?? 0,
+  );
+
+  String get displayEmoji => emoji ?? '#';
 }
 
 /// Upload status returned from the backend.
@@ -512,7 +539,7 @@ class CommunityService {
 
   List<CommunityTag>? _cachedTags;
 
-  /// Fetch available community tags.
+  /// Fetch available community tags (legacy curated list).
   Future<List<CommunityTag>> getTags() async {
     if (_cachedTags != null) return _cachedTags!;
     try {
@@ -526,6 +553,38 @@ class CommunityService {
       }
     } catch (e) {
       debugPrint('[Community] getTags: $e');
+    }
+    return [];
+  }
+
+  /// Fetch trending community tags (dynamic, from CommunityTag table).
+  Future<List<CommunityTagItem>> getTrendingTags({int limit = 8}) async {
+    try {
+      final r = await _auth.get('/v1/community/tags/trending?limit=$limit');
+      if (r.statusCode == 200) {
+        final data = jsonDecode(r.body);
+        return (data['tags'] as List)
+            .map((t) => CommunityTagItem.fromJson(t as Map<String, dynamic>))
+            .toList();
+      }
+    } catch (e) {
+      debugPrint('[Community] getTrendingTags: $e');
+    }
+    return [];
+  }
+
+  /// Search community tags by name.
+  Future<List<CommunityTagItem>> searchTags(String query, {int limit = 10}) async {
+    try {
+      final r = await _auth.get('/v1/community/tags/search?q=${Uri.encodeComponent(query)}&limit=$limit');
+      if (r.statusCode == 200) {
+        final data = jsonDecode(r.body);
+        return (data['tags'] as List)
+            .map((t) => CommunityTagItem.fromJson(t as Map<String, dynamic>))
+            .toList();
+      }
+    } catch (e) {
+      debugPrint('[Community] searchTags: $e');
     }
     return [];
   }

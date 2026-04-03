@@ -4790,5 +4790,16 @@
   "cannotReportSelf": "You cannot report yourself",
   "pendingAccountReports": "Account Reports",
   "accountReportsResolved": "Account report resolved",
-  "accountReportDismissed": "Account report dismissed"
+  "accountReportDismissed": "Account report dismissed",
+  "communityTrending": "TRENDING",
+  "communitySearchTags": "Search tags...",
+  "communityNoTagsFound": "No tags found for \"{query}\"",
+  "@communityNoTagsFound": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "communityConfirm": "Confirm"
 }

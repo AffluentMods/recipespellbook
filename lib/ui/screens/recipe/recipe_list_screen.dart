@@ -46,7 +46,6 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
   String _searchQuery = '';
   bool _isSearching = false;
   Set<String> _selectedTagIds = {};
-  bool _showTagFilter = false;
   String? _selectedRecipeId; // Desktop master-detail
 
   final TextEditingController _searchController = TextEditingController();
@@ -72,6 +71,111 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       _isSelecting = true;
       _selectedIds.add(id);
     });
+  }
+
+  void _showTagSheet(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final tagsDao = ref.read(tagsDaoProvider);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: theme.colorScheme.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          minChildSize: 0.3,
+          maxChildSize: 0.8,
+          expand: false,
+          builder: (_, scrollController) => StatefulBuilder(
+            builder: (ctx, setSheetState) => Column(
+              children: [
+                const SizedBox(height: 8),
+                Container(width: 40, height: 4, decoration: BoxDecoration(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                )),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Text(l10n.recipeFieldTags, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      const Spacer(),
+                      if (_selectedTagIds.isNotEmpty)
+                        TextButton(
+                          onPressed: () {
+                            setState(() => _selectedTagIds.clear());
+                            setSheetState(() {});
+                          },
+                          child: Text(l10n.actionClear),
+                        ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: StreamBuilder<List<Tag>>(
+                    stream: tagsDao.watchAllTags(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                      final tags = snapshot.data!;
+                      if (tags.isEmpty) {
+                        return Center(child: Text(l10n.tagsNoTags, style: TextStyle(color: theme.colorScheme.outline)));
+                      }
+                      return ListView.builder(
+                        controller: scrollController,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: tags.length,
+                        itemBuilder: (context, index) {
+                          final tag = tags[index];
+                          final isSelected = _selectedTagIds.contains(tag.id);
+                          final color = tag.color != null
+                              ? Color(int.parse(tag.color!.replaceFirst('#', '0xFF')))
+                              : theme.colorScheme.primary;
+
+                          return CheckboxListTile(
+                            value: isSelected,
+                            onChanged: (val) {
+                              setState(() {
+                                if (val == true) {
+                                  _selectedTagIds.add(tag.id);
+                                } else {
+                                  _selectedTagIds.remove(tag.id);
+                                }
+                              });
+                              setSheetState(() {});
+                            },
+                            title: Row(
+                              children: [
+                                if (tag.icon != null) ...[
+                                  Text(tag.icon!, style: const TextStyle(fontSize: 18)),
+                                  const SizedBox(width: 8),
+                                ],
+                                Container(
+                                  width: 12, height: 12,
+                                  decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(tag.name, style: theme.textTheme.bodyLarge),
+                              ],
+                            ),
+                            activeColor: color,
+                            controlAffinity: ListTileControlAffinity.trailing,
+                            dense: true,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _exitSelection() {
@@ -174,10 +278,10 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
             icon: Badge(
               isLabelVisible: _selectedTagIds.isNotEmpty,
               label: Text('${_selectedTagIds.length}'),
-              child: Icon(_showTagFilter ? Icons.label : Icons.label_outline),
+              child: const Icon(Icons.label_outlined),
             ),
             tooltip: AppLocalizations.of(context)!.recipeFieldTags,
-            onPressed: () => setState(() => _showTagFilter = !_showTagFilter),
+            onPressed: () => _showTagSheet(context),
           ),
           PopupMenuButton<_ViewSize>(
             icon: Icon(_viewSize.icon),
@@ -222,21 +326,6 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
               onSelectAll: () => _selectAll(_currentVisibleRecipes),
             ),
 
-          // Tag filter bar
-          if (_showTagFilter && !_isSelecting)
-            _TagFilterBar(
-              selectedTagIds: _selectedTagIds,
-              onTagToggled: (tagId, selected) {
-                setState(() {
-                  if (selected) {
-                    _selectedTagIds.add(tagId);
-                  } else {
-                    _selectedTagIds.remove(tagId);
-                  }
-                });
-              },
-              onClearAll: () => setState(() => _selectedTagIds.clear()),
-            ),
 
           // Recipe list
           Expanded(
@@ -673,114 +762,6 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
 }
 
 // ============ TAG FILTER BAR ============
-
-class _TagFilterBar extends ConsumerWidget {
-  final Set<String> selectedTagIds;
-  final void Function(String tagId, bool selected) onTagToggled;
-  final VoidCallback onClearAll;
-
-  const _TagFilterBar({
-    required this.selectedTagIds,
-    required this.onTagToggled,
-    required this.onClearAll,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final tagsDao = ref.watch(tagsDaoProvider);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        border: Border(
-          bottom: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
-            child: Row(
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.recipeFieldTags,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-                const Spacer(),
-                if (selectedTagIds.isNotEmpty)
-                  TextButton(
-                    onPressed: onClearAll,
-                    child: Text(AppLocalizations.of(context)!.actionClear),
-                  ),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 48,
-            child: StreamBuilder<List<Tag>>(
-              stream: tagsDao.watchAllTags(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                final tags = snapshot.data!;
-                if (tags.isEmpty) {
-                  return Center(
-                    child: Text(
-                      AppLocalizations.of(context)!.tagsNoTags,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.outline,
-                      ),
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  itemCount: tags.length,
-                  itemBuilder: (context, index) {
-                    final tag = tags[index];
-                    final isSelected = selectedTagIds.contains(tag.id);
-                    final color = tag.color != null
-                        ? Color(int.parse(tag.color!.replaceFirst('#', '0xFF')))
-                        : theme.colorScheme.primary;
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: FilterChip(
-                        avatar: tag.icon != null
-                            ? Text(tag.icon!, style: const TextStyle(fontSize: 14))
-                            : null,
-                        label: Text(tag.name),
-                        selected: isSelected,
-                        onSelected: (selected) => onTagToggled(tag.id, selected),
-                        selectedColor: color.withValues(alpha: 0.2),
-                        checkmarkColor: color,
-                        labelStyle: TextStyle(
-                          color: isSelected ? color : null,
-                          fontWeight: isSelected ? FontWeight.bold : null,
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
-      ),
-    );
-  }
-}
 
 // ============ ENUMS ============
 

@@ -439,6 +439,8 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
                                         }
                                       }
                                       cooldownError ??= l10n.nameCooldownMessage('soon');
+                                    } else if (statusCode == 400) {
+                                      cooldownError = body['error']?.toString() ?? l10n.accountProfileUpdateFailed;
                                     }
                                   },
                                 );

@@ -480,6 +480,17 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
           }).toList(),
           'tags': tags.map((t) => t.name).toList(),
         });
+
+        // Auto-add course/category as tags if recipe has no tags
+        final recipeTags = recipeMaps.last['tags'] as List;
+        if (recipeTags.isEmpty) {
+          if (r.courseId != null && r.courseId!.isNotEmpty) {
+            recipeTags.add(r.courseId!);
+          }
+          if (r.categoryId != null && r.categoryId!.isNotEmpty && r.categoryId != r.courseId) {
+            recipeTags.add(r.categoryId!);
+          }
+        }
       }
 
       // ── Auto-suggest cookbook tags from recipe tags (top 5 most common) ──

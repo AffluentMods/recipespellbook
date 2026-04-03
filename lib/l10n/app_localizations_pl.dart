@@ -8864,4 +8864,18 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get accountReportDismissed => 'Account report dismissed';
+
+  @override
+  String get communityTrending => 'TRENDING';
+
+  @override
+  String get communitySearchTags => 'Search tags...';
+
+  @override
+  String communityNoTagsFound(String query) {
+    return 'No tags found for \"$query\"';
+  }
+
+  @override
+  String get communityConfirm => 'Confirm';
 }

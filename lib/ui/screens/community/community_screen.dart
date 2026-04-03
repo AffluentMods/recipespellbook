@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../../utils/native_file_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -237,7 +239,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             icon: Badge(
               isLabelVisible: _selectedTags.isNotEmpty || _filterHasImages,
               label: Text('${_selectedTags.length + (_filterHasImages ? 1 : 0)}'),
-              child: const Icon(Icons.filter_list),
+              child: const Icon(Icons.label_outlined),
             ),
             tooltip: l10n.communityPublishTags,
             onPressed: _showFilterSheet,
@@ -892,113 +894,268 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
   void _showFilterSheet() {
     final l10n = AppLocalizations.of(context)!;
-    // Take a snapshot of current state for the sheet
+    // Snapshot current state for the sheet
     final sheetTags = Set<String>.from(_selectedTags);
     bool sheetHasImages = _filterHasImages;
 
-    Responsive.showAdaptiveSheet(
-      context,
+    // Trending tags & search state
+    List<CommunityTagItem> trendingTags = [];
+    List<CommunityTagItem> searchResults = [];
+    bool trendingLoaded = false;
+    bool searching = false;
+    String searchQuery = '';
+    final tagSearchController = TextEditingController();
+    Timer? debounceTimer;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setSheetState) {
           final theme = Theme.of(ctx);
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(width: 40, height: 4, decoration: BoxDecoration(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  )),
-                ),
-                const SizedBox(height: 16),
-                Text(l10n.communityPublishTags, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  children: communityTags.map((tag) {
-                    final isSelected = sheetTags.contains(tag.id);
-                    return FilterChip(
-                      avatar: Text(tag.emoji, style: TextStyle(fontSize: isSelected ? 16 : 14)),
-                      label: Text(
-                        tag.name,
-                        style: TextStyle(
-                          fontSize: isSelected ? 13 : 12,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                          color: isSelected ? theme.colorScheme.onPrimary : null,
+
+          // Load trending on first build
+          if (!trendingLoaded) {
+            trendingLoaded = true;
+            _community.getTrendingTags(limit: 12).then((tags) {
+              if (ctx.mounted) {
+                setSheetState(() => trendingTags = tags);
+              }
+            });
+          }
+
+          void onSearchChanged(String value) {
+            debounceTimer?.cancel();
+            final q = value.trim();
+            if (q.isEmpty) {
+              setSheetState(() { searchQuery = ''; searchResults = []; searching = false; });
+              return;
+            }
+            setSheetState(() { searchQuery = q; searching = true; });
+            debounceTimer = Timer(const Duration(milliseconds: 350), () {
+              _community.searchTags(q, limit: 15).then((results) {
+                if (ctx.mounted) {
+                  setSheetState(() { searchResults = results; searching = false; });
+                }
+              });
+            });
+          }
+
+          // Build the tag list to show (search results or trending + curated fallback)
+          final bool isSearching = searchQuery.isNotEmpty;
+          final displayTags = isSearching ? searchResults : trendingTags;
+
+          // Also build curated tags as fallback when trending is empty
+          final curatedFallback = communityTags.map((t) => CommunityTagItem(
+            tagName: t.id,
+            displayName: t.name,
+            emoji: t.emoji,
+            isCurated: true,
+          )).toList();
+
+          final tagsToShow = displayTags.isEmpty && !isSearching ? curatedFallback : displayTags;
+
+          return DraggableScrollableSheet(
+            initialChildSize: 0.55,
+            minChildSize: 0.35,
+            maxChildSize: 0.85,
+            builder: (_, scrollController) => Container(
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  // ── Drag handle ──
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12, bottom: 8),
+                    child: Center(
+                      child: Container(width: 40, height: 4, decoration: BoxDecoration(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      )),
+                    ),
+                  ),
+
+                  // ── Selected chips row ──
+                  if (sheetTags.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      child: SizedBox(
+                        height: 36,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: sheetTags.map((tagId) {
+                            // Find display info from any source
+                            final curated = communityTags.where((t) => t.id == tagId).firstOrNull;
+                            final label = curated != null ? '${curated.emoji} ${curated.name}' : '#$tagId';
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: InputChip(
+                                label: Text(label, style: const TextStyle(fontSize: 12)),
+                                onDeleted: () => setSheetState(() => sheetTags.remove(tagId)),
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                visualDensity: VisualDensity.compact,
+                                selectedColor: theme.colorScheme.primaryContainer,
+                                selected: true,
+                              ),
+                            );
+                          }).toList(),
                         ),
                       ),
-                      selected: isSelected,
-                      onSelected: (_) {
-                        setSheetState(() {
-                          if (isSelected) {
-                            sheetTags.remove(tag.id);
-                          } else {
-                            sheetTags.add(tag.id);
-                          }
-                        });
-                      },
-                      showCheckmark: false,
-                      selectedColor: theme.colorScheme.primary,
-                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                      side: isSelected
-                          ? BorderSide(color: theme.colorScheme.primary, width: 2)
-                          : BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3)),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isSelected ? 10 : 8,
-                        vertical: isSelected ? 6 : 4,
+                    ),
+
+                  // ── Search field ──
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: TextField(
+                      controller: tagSearchController,
+                      decoration: InputDecoration(
+                        hintText: l10n.communitySearchTags,
+                        prefixIcon: const Icon(Icons.search, size: 20),
+                        suffixIcon: searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear, size: 18),
+                                onPressed: () {
+                                  tagSearchController.clear();
+                                  onSearchChanged('');
+                                },
+                              )
+                            : null,
+                        filled: true,
+                        fillColor: theme.colorScheme.surfaceContainerHighest,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                        isDense: true,
                       ),
-                      elevation: isSelected ? 2 : 0,
-                      visualDensity: VisualDensity.compact,
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 16),
-                // Has images toggle
-                SwitchListTile(
-                  title: Text(l10n.communityHasImages, style: const TextStyle(fontSize: 14)),
-                  secondary: const Icon(Icons.image_outlined),
-                  value: sheetHasImages,
-                  onChanged: (v) => setSheetState(() => sheetHasImages = v),
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          setSheetState(() {
-                            sheetTags.clear();
-                            sheetHasImages = false;
-                          });
-                        },
-                        child: Text(l10n.communityClearSearch),
+                      onChanged: onSearchChanged,
+                    ),
+                  ),
+
+                  // ── Section header ──
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                    child: Row(
+                      children: [
+                        Text(
+                          isSearching ? l10n.communityPublishTags : l10n.communityTrending,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.outline,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // ── Tag list ──
+                  Expanded(
+                    child: searching
+                        ? const Center(child: CircularProgressIndicator())
+                        : tagsToShow.isEmpty && isSearching
+                            ? Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Text(
+                                    l10n.communityNoTagsFound(searchQuery),
+                                    style: TextStyle(color: theme.colorScheme.outline),
+                                  ),
+                                ),
+                              )
+                            : ListView.builder(
+                                controller: scrollController,
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                itemCount: tagsToShow.length,
+                                itemBuilder: (_, i) {
+                                  final tag = tagsToShow[i];
+                                  final isSelected = sheetTags.contains(tag.tagName);
+                                  return ListTile(
+                                    dense: true,
+                                    visualDensity: VisualDensity.compact,
+                                    leading: Text(tag.displayEmoji, style: const TextStyle(fontSize: 20)),
+                                    title: Text(
+                                      '#${tag.displayName}',
+                                      style: TextStyle(
+                                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                        color: isSelected ? theme.colorScheme.primary : null,
+                                      ),
+                                    ),
+                                    subtitle: tag.useCount > 0
+                                        ? Text('${tag.useCount} uses', style: TextStyle(fontSize: 11, color: theme.colorScheme.outline))
+                                        : null,
+                                    trailing: isSelected
+                                        ? Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20)
+                                        : Icon(Icons.chevron_right, color: theme.colorScheme.outline.withValues(alpha: 0.4), size: 20),
+                                    onTap: () {
+                                      setSheetState(() {
+                                        if (isSelected) {
+                                          sheetTags.remove(tag.tagName);
+                                        } else {
+                                          sheetTags.add(tag.tagName);
+                                        }
+                                      });
+                                    },
+                                  );
+                                },
+                              ),
+                  ),
+
+                  // ── Has images toggle ──
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: SwitchListTile(
+                      title: Text(l10n.communityHasImages, style: const TextStyle(fontSize: 14)),
+                      secondary: const Icon(Icons.image_outlined),
+                      value: sheetHasImages,
+                      onChanged: (v) => setSheetState(() => sheetHasImages = v),
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                    ),
+                  ),
+
+                  // ── Clear + Confirm buttons ──
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                    child: SafeArea(
+                      top: false,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                setSheetState(() {
+                                  sheetTags.clear();
+                                  sheetHasImages = false;
+                                });
+                              },
+                              child: Text(l10n.communityClearSearch),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: () {
+                                debounceTimer?.cancel();
+                                Navigator.pop(ctx);
+                                setState(() {
+                                  _selectedTags
+                                    ..clear()
+                                    ..addAll(sheetTags);
+                                  _filterHasImages = sheetHasImages;
+                                });
+                                _load();
+                              },
+                              child: Text(l10n.communityConfirm),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          setState(() {
-                            _selectedTags
-                              ..clear()
-                              ..addAll(sheetTags);
-                            _filterHasImages = sheetHasImages;
-                          });
-                          _load();
-                        },
-                        child: Text(l10n.actionConfirm),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -1523,40 +1680,45 @@ class _CommunityRecipeFeedPreview extends StatelessWidget {
             InkWell(
               onTap: onViewCookbook,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 child: Row(
                   children: [
-                    Icon(Icons.book, size: 16, color: theme.colorScheme.primary),
-                    const SizedBox(width: 8),
-                    Flexible(
+                    // Publisher avatar
+                    CircleAvatar(
+                      radius: 14,
+                      backgroundColor: const Color(0xFFC75B39).withValues(alpha: 0.18),
                       child: Text(
-                        recipe.cookbook.title,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        recipe.cookbook.publisherName.isNotEmpty ? recipe.cookbook.publisherName[0].toUpperCase() : '?',
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFC75B39)),
                       ),
                     ),
-                    Text(' · by ', style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.7),
-                    )),
-                    GestureDetector(
-                      onTap: recipe.cookbook.publisherId != null
-                          ? () => context.push('/community/creator/${recipe.cookbook.publisherId}')
-                          : null,
-                      child: Text(
-                        recipe.cookbook.publisherName,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            recipe.cookbook.title,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            'by ${recipe.cookbook.publisherName}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.outline,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    Icon(Icons.chevron_right, size: 16, color: theme.colorScheme.primary),
+                    Icon(Icons.chevron_right, size: 18, color: theme.colorScheme.primary),
                   ],
                 ),
               ),

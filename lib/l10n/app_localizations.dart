@@ -16212,6 +16212,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Account report dismissed'**
   String get accountReportDismissed;
+
+  /// No description provided for @communityTrending.
+  ///
+  /// In en, this message translates to:
+  /// **'TRENDING'**
+  String get communityTrending;
+
+  /// No description provided for @communitySearchTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Search tags...'**
+  String get communitySearchTags;
+
+  /// No description provided for @communityNoTagsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No tags found for \"{query}\"'**
+  String communityNoTagsFound(String query);
+
+  /// No description provided for @communityConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get communityConfirm;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

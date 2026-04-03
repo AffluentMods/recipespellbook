@@ -2420,7 +2420,8 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
         title: Text(l10n.importFromText),
         content: SizedBox(
           width: double.maxFinite,
-          child: Column(
+          child: SingleChildScrollView(
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -2433,8 +2434,8 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
               TextField(
                 controller: textController,
                 autofocus: true,
-                maxLines: 8,
-                minLines: 4,
+                maxLines: 6,
+                minLines: 3,
                 decoration: InputDecoration(
                   hintText: l10n.shoppingImportTextHint,
                   hintStyle: TextStyle(
@@ -2446,7 +2447,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                 ),
               ),
             ],
-          ),
+          )),
         ),
         actions: [
           TextButton(
