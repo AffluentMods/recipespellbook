@@ -918,7 +918,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           // Load trending on first build
           if (!trendingLoaded) {
             trendingLoaded = true;
-            _community.getTrendingTags(limit: 12).then((tags) {
+            final tagContext = _browseMode == _BrowseMode.recipes ? 'recipes' : 'cookbooks';
+            _community.getTrendingTags(limit: 12, context: tagContext).then((tags) {
               if (ctx.mounted) {
                 setSheetState(() => trendingTags = tags);
               }

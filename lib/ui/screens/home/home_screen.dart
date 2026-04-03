@@ -1350,6 +1350,7 @@ class _CookbookDropdown extends ConsumerWidget {
                   ),
                   onTap: () {
                     ref.read(selectedCookbookIdProvider.notifier).state = cookbook.id;
+                    ref.read(settingsProvider.notifier).setCurrentCookbook(cookbook.id);
                     Navigator.pop(ctx);
                   },
                 );

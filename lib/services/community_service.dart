@@ -558,9 +558,9 @@ class CommunityService {
   }
 
   /// Fetch trending community tags (dynamic, from CommunityTag table).
-  Future<List<CommunityTagItem>> getTrendingTags({int limit = 8}) async {
+  Future<List<CommunityTagItem>> getTrendingTags({int limit = 8, String context = 'all'}) async {
     try {
-      final r = await _auth.get('/v1/community/tags/trending?limit=$limit');
+      final r = await _auth.get('/v1/community/tags/trending?limit=$limit&context=$context');
       if (r.statusCode == 200) {
         final data = jsonDecode(r.body);
         return (data['tags'] as List)
