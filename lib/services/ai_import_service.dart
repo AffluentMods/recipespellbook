@@ -699,9 +699,24 @@ For MULTIPLE recipes, wrap them in a JSON array:
   { "title": "Recipe 2", ... }
 ]
 
+For LINKED recipes (a main recipe with sub-recipes as ingredients), use this format:
+{
+  "recipes": [
+    { "title": "Main Recipe", "ingredients": [{"name": "Pastry Cream", ...}, ...], "steps": [...], ... },
+    { "title": "Pastry Cream", "ingredients": [...], "steps": [...], ... },
+    { "title": "Pie Crust", "ingredients": [...], "steps": [...], ... }
+  ],
+  "links": {
+    "Pastry Cream": ["Pastry Cream"],
+    "Pie Crust": ["Pie Crust"]
+  }
+}
+The "links" object maps ingredient names in the main recipe to the titles of sub-recipes they should link to.
+
 Rules:
 - You can import any number of recipes at once (1, 5, 20, 100+) — just wrap them in a JSON array
 - Each recipe in the array uses the exact same format shown above
+- If a recipe has components that are themselves recipes (e.g. a cake with separate frosting, filling, crust recipes), use the linked format above
 - "amount" is a string (supports fractions like "1/2", "1 1/2") or null
 - "unit" is a string (cups, tbsp, tsp, oz, lb, g, kg, ml, etc.) or null if not applicable (e.g. "3 eggs")
 - "notes" on ingredients is for prep details like "diced", "room temperature", "melted"

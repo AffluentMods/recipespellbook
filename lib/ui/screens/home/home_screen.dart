@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import '../../../utils/native_file_image.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -18,8 +16,7 @@ import '../onboarding/book_intro_screen.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/hint_banner.dart';
-import '../../../services/community_service.dart';
-import '../../../services/recipe_suggestion_service.dart';
+import '../craving/craving_screen.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
 import '../../../utils/responsive_utils.dart';
@@ -171,49 +168,13 @@ class HomeScreen extends ConsumerWidget {
 
 // ============ SURPRISE ME CARD ============
 
-class _SurpriseMeCard extends ConsumerStatefulWidget {
+class _SurpriseMeCard extends ConsumerWidget {
   final List<Recipe> recipes;
 
   const _SurpriseMeCard({required this.recipes});
 
   @override
-  ConsumerState<_SurpriseMeCard> createState() => _SurpriseMeCardState();
-}
-
-class _SurpriseMeCardState extends ConsumerState<_SurpriseMeCard> {
-  static List<CommunityRecipeFeedItem>? _cachedCommunityRecipes;
-  static bool _communityFetched = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchCommunityIfNeeded();
-  }
-
-  Future<void> _fetchCommunityIfNeeded() async {
-    if (_communityFetched) return;
-    _communityFetched = true;
-    try {
-      final result = await CommunityService.instance.browseRecipes(
-        sort: 'popular', limit: 30,
-      );
-      if (result != null && result.recipes.isNotEmpty) {
-        _cachedCommunityRecipes = result.recipes;
-      }
-    } catch (_) {
-      // Community unavailable — no problem, use local only
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final recipes = widget.recipes;
-    final hasLocal = recipes.length >= 3;
-    final hasCommunity = _cachedCommunityRecipes != null && _cachedCommunityRecipes!.isNotEmpty;
-
-    // Need at least one source of recipes
-    if (!hasLocal && !hasCommunity) return const SizedBox.shrink();
-
+  Widget build(BuildContext context, WidgetRef ref) {
     final showSurprise = ref.watch(settingsProvider.select((s) => s.showSurpriseMe));
     if (!showSurprise) return const SizedBox.shrink();
 
@@ -232,7 +193,14 @@ class _SurpriseMeCardState extends ConsumerState<_SurpriseMeCard> {
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: _onSurpriseMe,
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                fullscreenDialog: true,
+                builder: (_) => const CravingScreen(),
+              ),
+            );
+          },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
@@ -242,11 +210,11 @@ class _SurpriseMeCardState extends ConsumerState<_SurpriseMeCard> {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    color: const Color(0xFFE8A860).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Center(
-                    child: Icon(Icons.casino, color: theme.colorScheme.primary, size: 24),
+                  child: const Center(
+                    child: Icon(Icons.auto_awesome, color: Color(0xFFE8A860), size: 24),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -256,13 +224,13 @@ class _SurpriseMeCardState extends ConsumerState<_SurpriseMeCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        AppLocalizations.of(context)!.surpriseMeTitle,
+                        'What are you craving?',
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        AppLocalizations.of(context)!.surpriseMeSubtitle,
+                        'Find recipes that match your mood',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.outline,
                         ),
@@ -279,41 +247,6 @@ class _SurpriseMeCardState extends ConsumerState<_SurpriseMeCard> {
         ),
       ),
     );
-  }
-
-  void _onSurpriseMe() {
-    final random = Random();
-    final hasLocal = widget.recipes.length >= 3;
-    final hasCommunity = _cachedCommunityRecipes != null && _cachedCommunityRecipes!.isNotEmpty;
-
-    // 50/50 split — falls back to whichever source is available
-    bool useCommunity;
-    if (hasLocal && hasCommunity) {
-      useCommunity = random.nextBool();
-    } else {
-      useCommunity = hasCommunity && !hasLocal;
-    }
-
-    if (useCommunity) {
-      // Pick a random community recipe and show preview
-      final recipe = _cachedCommunityRecipes![random.nextInt(_cachedCommunityRecipes!.length)];
-      context.push('/community/${recipe.cookbook.id}');
-    } else {
-      // Local recipe suggestion
-      final recipeMaps = widget.recipes.map((r) => <String, dynamic>{
-        'id': r.id,
-        'title': r.title,
-        'course': r.courseId,
-        'rating': r.rating,
-      }).toList();
-
-      final suggestion = RecipeSuggestionService.suggest(
-        recipes: recipeMaps,
-      );
-
-      if (suggestion == null) return;
-      context.push('/recipe/${suggestion['id']}');
-    }
   }
 }
 

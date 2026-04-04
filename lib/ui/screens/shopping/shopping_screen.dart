@@ -1058,21 +1058,30 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     );
   }
 
-  /// Delayed check: item stays in place for 1.5s before moving to "checked"
+  /// Delayed check: item stays in place for ~1s with visual feedback,
+  /// then persists to database. Tapping again during the delay cancels.
   void _onItemChecked(String itemId) {
-    final shoppingDao = ref.read(shoppingDaoProvider);
-    shoppingDao.toggleItemChecked(itemId, true);
     setState(() => _recentlyCheckedIds.add(itemId));
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted) setState(() => _recentlyCheckedIds.remove(itemId));
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      if (!mounted) return;
+      // If still in the "recently checked" set, persist it
+      if (_recentlyCheckedIds.contains(itemId)) {
+        final shoppingDao = ref.read(shoppingDaoProvider);
+        shoppingDao.toggleItemChecked(itemId, true);
+        setState(() => _recentlyCheckedIds.remove(itemId));
+      }
     });
   }
 
   /// Instant uncheck — no delay needed
   void _onItemUnchecked(String itemId) {
+    // If the item is still in the delay window, just cancel it
+    if (_recentlyCheckedIds.contains(itemId)) {
+      setState(() => _recentlyCheckedIds.remove(itemId));
+      return;
+    }
     final shoppingDao = ref.read(shoppingDaoProvider);
     shoppingDao.toggleItemChecked(itemId, false);
-    setState(() => _recentlyCheckedIds.remove(itemId));
   }
 }
 

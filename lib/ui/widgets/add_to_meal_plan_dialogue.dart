@@ -168,7 +168,7 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
                 const SizedBox(width: 8),
                 _QuickDateButton(
                   label: l10n.mealPlanThisWeekend,
-                  isSelected: false,
+                  isSelected: _selectedDate.weekday == DateTime.saturday || _selectedDate.weekday == DateTime.sunday,
                   onTap: () => setState(() => _selectedDate = _nextWeekend()),
                 ),
               ],
@@ -303,8 +303,22 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
 
   DateTime _nextWeekend() {
     final now = DateTime.now();
-    final daysUntilSaturday = (DateTime.saturday - now.weekday) % 7;
-    return now.add(Duration(days: daysUntilSaturday == 0 ? 7 : daysUntilSaturday));
+    final today = DateTime(now.year, now.month, now.day);
+    final selected = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+
+    // If currently viewing Saturday, toggle to Sunday
+    if (selected.weekday == DateTime.saturday) {
+      return selected.add(const Duration(days: 1));
+    }
+
+    // If currently viewing Sunday, go to next Saturday
+    if (selected.weekday == DateTime.sunday) {
+      return today.add(Duration(days: (DateTime.saturday - today.weekday) % 7 + 7));
+    }
+
+    // Otherwise, go to the nearest Saturday
+    final daysUntilSaturday = (DateTime.saturday - today.weekday) % 7;
+    return today.add(Duration(days: daysUntilSaturday == 0 ? 7 : daysUntilSaturday));
   }
 
   IconData _getMealIcon(String mealType) {

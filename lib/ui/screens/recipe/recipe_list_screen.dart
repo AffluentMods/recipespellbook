@@ -474,6 +474,13 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
           return aTime.compareTo(bTime);
         });
         break;
+      case _SortMode.favorites:
+        sorted.sort((a, b) {
+          if (a.isFavorite && !b.isFavorite) return -1;
+          if (!a.isFavorite && b.isFavorite) return 1;
+          return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+        });
+        break;
     }
 
     return sorted;
@@ -782,7 +789,8 @@ enum _SortMode {
   newest('Newest', Icons.arrow_downward),
   oldest('Oldest', Icons.arrow_upward),
   rating('Rating', Icons.star),
-  quickest('Quickest', Icons.timer);
+  quickest('Quickest', Icons.timer),
+  favorites('Favorites', Icons.favorite);
 
   final String label;
   final IconData icon;
@@ -915,23 +923,23 @@ class _MediumGridView extends StatelessWidget {
         final availableWidth = constraints.maxWidth;
         int columns;
         if (availableWidth >= 1200) {
-          columns = 5;
-        } else if (availableWidth >= 900) {
           columns = 4;
-        } else if (availableWidth >= 600) {
+        } else if (availableWidth >= 900) {
           columns = 3;
+        } else if (availableWidth >= 600) {
+          columns = 2;
         } else {
           columns = 2;
         }
 
         return GridView.builder(
           key: const PageStorageKey('recipe_list_medium'),
-          padding: const EdgeInsets.fromLTRB(6, 4, 6, 80),
+          padding: const EdgeInsets.fromLTRB(8, 4, 8, 80),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
-            childAspectRatio: Responsive.isDesktopLayout(context) ? 0.75 : 0.78,
-            crossAxisSpacing: 6,
-            mainAxisSpacing: 6,
+            childAspectRatio: Responsive.isDesktopLayout(context) ? 0.72 : 0.7,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
           ),
           itemCount: recipes.length,
           itemBuilder: (context, index) {
