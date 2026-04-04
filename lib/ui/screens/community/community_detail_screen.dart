@@ -743,8 +743,8 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // ── Download section (hidden for own cookbook) ──
-                  if (AuthService.instance.currentUser?.id != d.publisher.id && !_selectMode) ...[
+                  // ── Download section ──
+                  if (!_selectMode) ...[
                     _DownloadSection(
                       detail: d,
                       downloading: _downloading,

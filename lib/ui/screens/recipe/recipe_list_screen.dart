@@ -923,23 +923,23 @@ class _MediumGridView extends StatelessWidget {
         final availableWidth = constraints.maxWidth;
         int columns;
         if (availableWidth >= 1200) {
-          columns = 4;
+          columns = 5;
         } else if (availableWidth >= 900) {
-          columns = 3;
+          columns = 4;
         } else if (availableWidth >= 600) {
-          columns = 2;
+          columns = 3;
         } else {
           columns = 2;
         }
 
         return GridView.builder(
           key: const PageStorageKey('recipe_list_medium'),
-          padding: const EdgeInsets.fromLTRB(8, 4, 8, 80),
+          padding: const EdgeInsets.fromLTRB(6, 4, 6, 80),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
-            childAspectRatio: Responsive.isDesktopLayout(context) ? 0.72 : 0.7,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
+            childAspectRatio: 1.0,
+            crossAxisSpacing: 4,
+            mainAxisSpacing: 4,
           ),
           itemCount: recipes.length,
           itemBuilder: (context, index) {
@@ -1011,108 +1011,118 @@ class _MediumCardState extends State<_MediumCard> {
     final onLongPress = widget.onLongPress;
     final isDesktop = Responsive.isDesktopLayout(context);
 
+    final totalTime = (recipe.prepTimeMinutes ?? 0) + (recipe.cookTimeMinutes ?? 0);
+    final metaText = [
+      if (totalTime > 0) _formatTime(totalTime),
+      if (recipe.servings != null && recipe.servings!.isNotEmpty) '${recipe.servings} srv',
+    ].join(' · ');
+
     Widget card = Card(
       clipBehavior: Clip.antiAlias,
-      shape: isSelected
-          ? RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: theme.colorScheme.primary, width: 2.5),
-      )
-          : null,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: isSelected
+            ? BorderSide(color: theme.colorScheme.primary, width: 2.5)
+            : BorderSide.none,
+      ),
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            // Image with overlayed badges
-            Expanded(
-              flex: 3,
-              child: Stack(
-                fit: StackFit.expand,
-                clipBehavior: Clip.hardEdge,
-                children: [
-                  Container(
-                    color: theme.colorScheme.primaryContainer,
-                    child: RecipeImage.medium(
-                      imagePath: recipe.imagePath,
-                      recipeId: recipe.id,
-                    ),
-                  ),
-                  // Selection indicator
-                  if (isSelecting)
-                    Positioned(
-                      top: 8,
-                      left: 8,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: isSelected ? theme.colorScheme.primary : Colors.black.withValues(alpha: 0.4),
-                          shape: BoxShape.circle,
-                        ),
-                        padding: const EdgeInsets.all(2),
-                        child: Icon(
-                          isSelected ? Icons.check : Icons.circle_outlined,
-                          size: 20, color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  // Badges
-                  if (!isSelecting && (recipe.isPinned || recipe.isFavorite))
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (recipe.isPinned)
-                            Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(color: Colors.orange, borderRadius: BorderRadius.circular(4)),
-                              child: const Icon(Icons.push_pin, size: 14, color: Colors.white),
-                            ),
-                          if (recipe.isPinned && recipe.isFavorite) const SizedBox(width: 4),
-                          if (recipe.isFavorite)
-                            Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(color: theme.colorScheme.error, borderRadius: BorderRadius.circular(4)),
-                              child: const Icon(Icons.favorite, size: 14, color: Colors.white),
-                            ),
-                        ],
-                      ),
-                    ),
-                ],
+            // Full image background
+            Container(
+              color: theme.colorScheme.primaryContainer,
+              child: RecipeImage.medium(
+                imagePath: recipe.imagePath,
+                recipeId: recipe.id,
               ),
             ),
-            // Title, meta, and tags
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // Gradient at bottom
+            Positioned(
+              bottom: 0, left: 0, right: 0, height: 90,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Colors.black.withValues(alpha: 0.75)],
+                  ),
+                ),
+              ),
+            ),
+            // Selection indicator (top-left)
+            if (isSelecting)
+              Positioned(
+                top: 6, left: 6,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isSelected ? theme.colorScheme.primary : Colors.black.withValues(alpha: 0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  padding: const EdgeInsets.all(2),
+                  child: Icon(
+                    isSelected ? Icons.check : Icons.circle_outlined,
+                    size: 18, color: Colors.white,
+                  ),
+                ),
+              ),
+            // Badges (top-right)
+            if (!isSelecting && (recipe.isPinned || recipe.isFavorite))
+              Positioned(
+                top: 6, right: 6,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Flexible(
-                      child: Text(
-                        recipe.title,
-                        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                    if (recipe.isPinned)
+                      Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(Icons.push_pin, size: 12, color: Colors.orange),
                       ),
-                    ),
-                    FutureBuilder<List<Tag>>(
-                      future: widget.tagsDao.getTagsForRecipe(recipe.id),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: _CompactTagChips(tags: snapshot.data!, maxVisible: 2),
-                        );
-                      },
-                    ),
-                    _buildMetaRow(recipe, theme),
+                    if (recipe.isPinned && recipe.isFavorite) const SizedBox(width: 4),
+                    if (recipe.isFavorite)
+                      Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(Icons.favorite, size: 12, color: Colors.redAccent),
+                      ),
                   ],
                 ),
+              ),
+            // Title + meta at bottom
+            Positioned(
+              bottom: 8, left: 8, right: 8,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    recipe.title,
+                    style: const TextStyle(
+                      color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold,
+                      shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (metaText.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      metaText,
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 10),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
               ),
             ),
           ],
@@ -1134,27 +1144,6 @@ class _MediumCardState extends State<_MediumCard> {
     }
 
     return card;
-  }
-
-  Widget _buildMetaRow(Recipe recipe, ThemeData theme) {
-    final totalTime = (recipe.prepTimeMinutes ?? 0) + (recipe.cookTimeMinutes ?? 0);
-
-    return Row(
-      children: [
-        if (totalTime > 0) ...[
-          Icon(Icons.timer, size: 14, color: theme.colorScheme.outline),
-          const SizedBox(width: 4),
-          Text(_formatTime(totalTime), style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
-        ],
-        const Spacer(),
-        if (recipe.rating != null && recipe.rating! > 0)
-          Row(children: [
-            const Icon(Icons.star, size: 14, color: Colors.amber),
-            const SizedBox(width: 2),
-            Text('${recipe.rating}', style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
-          ]),
-      ],
-    );
   }
 
   String _formatTime(int minutes) {

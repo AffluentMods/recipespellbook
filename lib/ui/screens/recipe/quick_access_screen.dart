@@ -5,7 +5,6 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
-import '../../../utils/responsive_utils.dart';
 import '../../widgets/recipe_image.dart';
 
 /// Screen showing all quick access recipes (meal plan + pinned + recent)
@@ -140,6 +139,11 @@ class _QuickAccessScreenState extends ConsumerState<QuickAccessScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final items = _filteredAndSortedItems;
+
+    // Reactively refresh when recently-viewed recipes change
+    ref.listen(recentRecipesProvider, (_, __) {
+      if (mounted) _loadItems();
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -335,7 +339,6 @@ class _MediumGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = Responsive.isDesktopLayout(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
@@ -350,12 +353,12 @@ class _MediumGridView extends StatelessWidget {
           columns = 2;
         }
         return GridView.builder(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.fromLTRB(6, 4, 6, 80),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
-            childAspectRatio: isDesktop ? 0.75 : 0.85,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
+            childAspectRatio: 1.0,
+            crossAxisSpacing: 4,
+            mainAxisSpacing: 4,
           ),
           itemCount: items.length,
           itemBuilder: (context, index) {
@@ -375,79 +378,79 @@ class _MediumCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final timeStr = _formatTime(item.recipe);
+
     return Card(
       clipBehavior: Clip.antiAlias,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: InkWell(
         onTap: () => context.push('/recipe/${item.recipe.id}'),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            // Image
-            Expanded(
-              flex: 3,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Container(
-                    color: theme.colorScheme.primaryContainer,
-                    child: RecipeImage.thumbnail(
-                      imagePath: item.recipe.imagePath,
-                      recipeId: item.recipe.id,
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
-                  ),
-                  // Source badge
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: _SourceBadge(source: item.source),
-                  ),
-                  // Favorite icon
-                  if (item.recipe.isFavorite)
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.favorite, color: Colors.red, size: 16),
-                      ),
-                    ),
-                ],
+            // Full image background
+            Container(
+              color: theme.colorScheme.primaryContainer,
+              child: RecipeImage.medium(
+                imagePath: item.recipe.imagePath,
+                recipeId: item.recipe.id,
               ),
             ),
-            // Title
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.recipe.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    const Spacer(),
-                    if (item.recipe.prepTimeMinutes != null || item.recipe.cookTimeMinutes != null)
-                      Row(
-                        children: [
-                          Icon(Icons.timer, size: 14, color: theme.colorScheme.outline),
-                          const SizedBox(width: 4),
-                          Text(
-                            _formatTime(item.recipe),
-                            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-                          ),
-                        ],
-                      ),
-                  ],
+            // Gradient at bottom
+            Positioned(
+              bottom: 0, left: 0, right: 0, height: 90,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Colors.black.withValues(alpha: 0.75)],
+                  ),
                 ),
+              ),
+            ),
+            // Source badge (top-left)
+            Positioned(
+              top: 6, left: 6,
+              child: _SourceBadge(source: item.source),
+            ),
+            // Favorite (top-right)
+            if (item.recipe.isFavorite)
+              Positioned(
+                top: 6, right: 6,
+                child: Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Icon(Icons.favorite, size: 12, color: Colors.redAccent),
+                ),
+              ),
+            // Title + time at bottom
+            Positioned(
+              bottom: 8, left: 8, right: 8,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.recipe.title,
+                    style: const TextStyle(
+                      color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold,
+                      shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (timeStr.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      timeStr,
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 10),
+                    ),
+                  ],
+                ],
               ),
             ),
           ],

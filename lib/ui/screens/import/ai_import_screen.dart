@@ -1,4 +1,3 @@
-import 'dart:convert';
 import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -264,23 +263,8 @@ class _AiImportScreenState extends ConsumerState<AiImportScreen> {
 
   /// Returns a list of recipe maps. Supports both single objects and arrays.
   List<Map<String, dynamic>>? _parsePreview(String jsonString) {
-    try {
-      final cleaned = jsonString.trim();
-      var s = cleaned;
-      if (s.startsWith('```')) {
-        final nl = s.indexOf('\n');
-        if (nl != -1) s = s.substring(nl + 1);
-        if (s.endsWith('```')) s = s.substring(0, s.length - 3);
-        s = s.trim();
-      }
-      final decoded = jsonDecode(s);
-      if (decoded is List) {
-        return decoded.cast<Map<String, dynamic>>();
-      }
-      return [decoded as Map<String, dynamic>];
-    } catch (_) {
-      return null;
-    }
+    final recipes = AiImportService.extractRecipes(jsonString);
+    return recipes.isEmpty ? null : recipes;
   }
 
   void _copyPrompt() {

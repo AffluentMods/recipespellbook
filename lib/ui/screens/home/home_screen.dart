@@ -224,13 +224,13 @@ class _SurpriseMeCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'What are you craving?',
+                        AppLocalizations.of(context)!.cravingCardTitle,
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        'Find recipes that match your mood',
+                        AppLocalizations.of(context)!.cravingCardSubtitle,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.outline,
                         ),

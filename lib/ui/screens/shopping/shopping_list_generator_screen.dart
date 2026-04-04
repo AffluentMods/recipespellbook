@@ -657,7 +657,7 @@ class _ShoppingListGeneratorScreenState
                     Icon(Icons.merge_type, size: 16, color: theme.colorScheme.primary),
                     const SizedBox(width: 8),
                     Text(
-                      'Combined Ingredients',
+                      AppLocalizations.of(context)!.combinedIngredients,
                       style: theme.textTheme.labelLarge?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,

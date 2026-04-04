@@ -12,27 +12,24 @@ import 'community_service.dart';
 // ═══════════════════════════════════════════════════════════════
 
 enum CravingMood {
-  sweet('Sweet', '🍰'),
-  savory('Savory', '🍖'),
-  light('Light', '🥗'),
-  filling('Filling', '🍜'),
-  quick('Quick', '⚡'),
-  special('Something Special', '🎉');
+  sweet('🍰'),
+  savory('🍖'),
+  light('🥗'),
+  filling('🍜'),
+  quick('⚡'),
+  special('🎉');
 
-  final String label;
   final String emoji;
-  const CravingMood(this.label, this.emoji);
+  const CravingMood(this.emoji);
 }
 
 enum CravingSource {
-  myRecipes('My saved recipes', '📚', 'From your personal library'),
-  community('Discover something new', '🌍', 'From the community'),
-  both('Both — surprise me', '✨', 'Mix of yours and community');
+  myRecipes('📚'),
+  community('🌍'),
+  both('✨');
 
-  final String label;
   final String emoji;
-  final String subtitle;
-  const CravingSource(this.label, this.emoji, this.subtitle);
+  const CravingSource(this.emoji);
 }
 
 /// A unified recipe result from either local DB or community.
@@ -59,6 +56,10 @@ class CravingResult {
   final List<String> stepTexts;
   final int totalSteps;
 
+  /// Original community item (for community recipes) — used for navigation
+  /// to show the full recipe detail instead of the cookbook view.
+  final CommunityRecipeFeedItem? communitySource;
+
   const CravingResult({
     required this.id,
     required this.title,
@@ -77,6 +78,7 @@ class CravingResult {
     this.totalIngredients = 0,
     this.stepTexts = const [],
     this.totalSteps = 0,
+    this.communitySource,
   });
 
   int get totalTimeMinutes => (prepTimeMinutes ?? 0) + (cookTimeMinutes ?? 0);
@@ -103,62 +105,64 @@ const _moodCategories = <CravingMood, Set<String>>{
 };
 
 /// Category options shown in Step 2 for each mood.
+/// Each tuple: (labelKey, emoji, id, isCourse)
 const _moodCategoryOptions = <CravingMood, List<_CategoryOption>>{
   CravingMood.sweet: [
-    _CategoryOption('Dessert', 'dessert', true),
-    _CategoryOption('Pastry', 'muffin', false),
-    _CategoryOption('Baked Goods', 'bread', false),
-    _CategoryOption('Breakfast', 'breakfast', true),
+    _CategoryOption('dessert_label', '🍰', 'dessert', true),
+    _CategoryOption('pastry', '🥐', 'muffin', false),
+    _CategoryOption('baked_goods', '🍞', 'bread', false),
+    _CategoryOption('breakfast_label', '🍳', 'breakfast', true),
   ],
   CravingMood.savory: [
-    _CategoryOption('Dinner', 'main', true),
-    _CategoryOption('Lunch', 'main', true),
-    _CategoryOption('Appetizer', 'appetizer', true),
-    _CategoryOption('Soup', 'soup', false),
-    _CategoryOption('Sauce', 'sauce', true),
+    _CategoryOption('dinner', '🍖', 'main', true),
+    _CategoryOption('lunch', '🥪', 'main', true),
+    _CategoryOption('appetizer_label', '🥟', 'appetizer', true),
+    _CategoryOption('soup_label', '🍜', 'soup', false),
+    _CategoryOption('sauce_label', '🫗', 'sauce', true),
   ],
   CravingMood.light: [
-    _CategoryOption('Salad', 'salad', false),
-    _CategoryOption('Snack', 'snack', true),
-    _CategoryOption('Breakfast', 'breakfast', true),
+    _CategoryOption('salad_label', '🥗', 'salad', false),
+    _CategoryOption('snack_label', '🍿', 'snack', true),
+    _CategoryOption('breakfast_label', '🍳', 'breakfast', true),
   ],
   CravingMood.filling: [
-    _CategoryOption('Main Dish', 'main', true),
-    _CategoryOption('Pasta', 'pasta', false),
-    _CategoryOption('Rice Dishes', 'rice', false),
-    _CategoryOption('Casserole', 'casserole', false),
+    _CategoryOption('main_dish', '🍖', 'main', true),
+    _CategoryOption('pasta_label', '🍝', 'pasta', false),
+    _CategoryOption('rice_label', '🍚', 'rice', false),
+    _CategoryOption('casserole_label', '🍲', 'casserole', false),
   ],
   CravingMood.quick: [
-    _CategoryOption('Under 20 min', '__under20', false),
-    _CategoryOption('Under 30 min', '__under30', false),
-    _CategoryOption('5 ingredients or less', '__5ings', false),
+    _CategoryOption('under20', '⚡', '__under20', false),
+    _CategoryOption('under30', '⏱️', '__under30', false),
+    _CategoryOption('five_ings', '🎯', '__5ings', false),
   ],
   CravingMood.special: [
-    _CategoryOption('Impressive', '__impressive', false),
-    _CategoryOption('Crowd Pleaser', '__crowd', false),
-    _CategoryOption('Favorites', '__favorites', false),
+    _CategoryOption('impressive', '🎩', '__impressive', false),
+    _CategoryOption('crowd_pleaser', '🎉', '__crowd', false),
+    _CategoryOption('favorites_label', '❤️', '__favorites', false),
   ],
 };
 
 class _CategoryOption {
-  final String label;
+  final String labelKey;
+  final String emoji;
   final String id;
   final bool isCourse; // true = course ID, false = category ID
 
-  const _CategoryOption(this.label, this.id, this.isCourse);
+  const _CategoryOption(this.labelKey, this.emoji, this.id, this.isCourse);
 }
 
 /// Get the category chip options for the user's selected moods.
-List<({String label, String id})> getCategoryOptionsForMoods(Set<CravingMood> moods) {
+List<({String labelKey, String emoji, String id})> getCategoryOptionsForMoods(Set<CravingMood> moods) {
   final seen = <String>{};
-  final result = <({String label, String id})>[];
+  final result = <({String labelKey, String emoji, String id})>[];
 
   if (moods.isEmpty) {
     // Show all if no mood selected
     for (final entry in _moodCategoryOptions.values) {
       for (final opt in entry) {
         if (seen.add(opt.id)) {
-          result.add((label: opt.label, id: opt.id));
+          result.add((labelKey: opt.labelKey, emoji: opt.emoji, id: opt.id));
         }
       }
     }
@@ -169,7 +173,7 @@ List<({String label, String id})> getCategoryOptionsForMoods(Set<CravingMood> mo
     final options = _moodCategoryOptions[mood] ?? [];
     for (final opt in options) {
       if (seen.add(opt.id)) {
-        result.add((label: opt.label, id: opt.id));
+        result.add((labelKey: opt.labelKey, emoji: opt.emoji, id: opt.id));
       }
     }
   }
@@ -363,6 +367,7 @@ class CravingService {
           courseId: r.courseId,
           isLocal: false,
           cookbookId: r.cookbook.id,
+          communitySource: r,
           ingredientNames: realIngs.take(4).map((i) {
             final parts = <String>[];
             if (i.amount != null && i.amount!.isNotEmpty) parts.add(i.amount!);

@@ -399,8 +399,14 @@ class ExportImportService {
       // Cookbooks & Recipes
       if (version >= 2 && data.containsKey('cookbooks')) {
         for (final cbData in data['cookbooks'] as List) {
+          final cbMap = cbData as Map<String, dynamic>;
+          // Wrap v2 format into the shape expected by _importCookbookBatched
+          final wrapped = <String, dynamic>{
+            'cookbook': {'id': cbMap['id'], 'name': cbMap['name']},
+            'recipes': cbMap['recipes'] ?? [],
+          };
           final r = await _importCookbookBatched(
-            cbData as Map<String, dynamic>, existingIds,
+            wrapped, existingIds,
             restoreTagAssociations: true,
             onRecipeImported: () {
               currentRecipe++;

@@ -16236,6 +16236,408 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm'**
   String get communityConfirm;
+
+  /// No description provided for @cravingCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you craving?'**
+  String get cravingCardTitle;
+
+  /// No description provided for @cravingCardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find recipes that match your mood'**
+  String get cravingCardSubtitle;
+
+  /// No description provided for @cravingStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you feeling?'**
+  String get cravingStep1Title;
+
+  /// No description provided for @cravingStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything more specific?'**
+  String get cravingStep2Title;
+
+  /// No description provided for @cravingStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Where should we look?'**
+  String get cravingStep3Title;
+
+  /// No description provided for @cravingResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Here\'s what we found'**
+  String get cravingResultsTitle;
+
+  /// No description provided for @cravingPickOneOrMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one or more'**
+  String get cravingPickOneOrMore;
+
+  /// No description provided for @cravingMoodHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll find something you\'ll love'**
+  String get cravingMoodHint;
+
+  /// No description provided for @cravingCountSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String cravingCountSelected(int count);
+
+  /// No description provided for @cravingCategoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional — skip if you\'re open to anything'**
+  String get cravingCategoryHint;
+
+  /// No description provided for @cravingCategoryNarrowHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Narrow it down or skip ahead'**
+  String get cravingCategoryNarrowHint;
+
+  /// No description provided for @cravingMoodSweet.
+  ///
+  /// In en, this message translates to:
+  /// **'Sweet'**
+  String get cravingMoodSweet;
+
+  /// No description provided for @cravingMoodSavory.
+  ///
+  /// In en, this message translates to:
+  /// **'Savory'**
+  String get cravingMoodSavory;
+
+  /// No description provided for @cravingMoodLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get cravingMoodLight;
+
+  /// No description provided for @cravingMoodFilling.
+  ///
+  /// In en, this message translates to:
+  /// **'Filling'**
+  String get cravingMoodFilling;
+
+  /// No description provided for @cravingMoodQuick.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick'**
+  String get cravingMoodQuick;
+
+  /// No description provided for @cravingMoodSpecial.
+  ///
+  /// In en, this message translates to:
+  /// **'Something Special'**
+  String get cravingMoodSpecial;
+
+  /// No description provided for @cravingCatDessert.
+  ///
+  /// In en, this message translates to:
+  /// **'Dessert'**
+  String get cravingCatDessert;
+
+  /// No description provided for @cravingCatPastry.
+  ///
+  /// In en, this message translates to:
+  /// **'Pastry'**
+  String get cravingCatPastry;
+
+  /// No description provided for @cravingCatBakedGoods.
+  ///
+  /// In en, this message translates to:
+  /// **'Baked Goods'**
+  String get cravingCatBakedGoods;
+
+  /// No description provided for @cravingCatBreakfast.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakfast'**
+  String get cravingCatBreakfast;
+
+  /// No description provided for @cravingCatDinner.
+  ///
+  /// In en, this message translates to:
+  /// **'Dinner'**
+  String get cravingCatDinner;
+
+  /// No description provided for @cravingCatLunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Lunch'**
+  String get cravingCatLunch;
+
+  /// No description provided for @cravingCatAppetizer.
+  ///
+  /// In en, this message translates to:
+  /// **'Appetizer'**
+  String get cravingCatAppetizer;
+
+  /// No description provided for @cravingCatSoup.
+  ///
+  /// In en, this message translates to:
+  /// **'Soup'**
+  String get cravingCatSoup;
+
+  /// No description provided for @cravingCatSauce.
+  ///
+  /// In en, this message translates to:
+  /// **'Sauce'**
+  String get cravingCatSauce;
+
+  /// No description provided for @cravingCatSalad.
+  ///
+  /// In en, this message translates to:
+  /// **'Salad'**
+  String get cravingCatSalad;
+
+  /// No description provided for @cravingCatSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Snack'**
+  String get cravingCatSnack;
+
+  /// No description provided for @cravingCatMainDish.
+  ///
+  /// In en, this message translates to:
+  /// **'Main Dish'**
+  String get cravingCatMainDish;
+
+  /// No description provided for @cravingCatPasta.
+  ///
+  /// In en, this message translates to:
+  /// **'Pasta'**
+  String get cravingCatPasta;
+
+  /// No description provided for @cravingCatRice.
+  ///
+  /// In en, this message translates to:
+  /// **'Rice Dishes'**
+  String get cravingCatRice;
+
+  /// No description provided for @cravingCatCasserole.
+  ///
+  /// In en, this message translates to:
+  /// **'Casserole'**
+  String get cravingCatCasserole;
+
+  /// No description provided for @cravingCatUnder20.
+  ///
+  /// In en, this message translates to:
+  /// **'Under 20 min'**
+  String get cravingCatUnder20;
+
+  /// No description provided for @cravingCatUnder30.
+  ///
+  /// In en, this message translates to:
+  /// **'Under 30 min'**
+  String get cravingCatUnder30;
+
+  /// No description provided for @cravingCat5Ings.
+  ///
+  /// In en, this message translates to:
+  /// **'5 ingredients or less'**
+  String get cravingCat5Ings;
+
+  /// No description provided for @cravingCatImpressive.
+  ///
+  /// In en, this message translates to:
+  /// **'Impressive'**
+  String get cravingCatImpressive;
+
+  /// No description provided for @cravingCatCrowdPleaser.
+  ///
+  /// In en, this message translates to:
+  /// **'Crowd Pleaser'**
+  String get cravingCatCrowdPleaser;
+
+  /// No description provided for @cravingCatFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get cravingCatFavorites;
+
+  /// No description provided for @cravingSourceMyRecipesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My saved recipes'**
+  String get cravingSourceMyRecipesTitle;
+
+  /// No description provided for @cravingSourceMyRecipesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'From your personal library'**
+  String get cravingSourceMyRecipesSubtitle;
+
+  /// No description provided for @cravingSourceCommunityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover something new'**
+  String get cravingSourceCommunityTitle;
+
+  /// No description provided for @cravingSourceCommunitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'From the community'**
+  String get cravingSourceCommunitySubtitle;
+
+  /// No description provided for @cravingSourceBothTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Both — surprise me'**
+  String get cravingSourceBothTitle;
+
+  /// No description provided for @cravingSourceBothSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mix of yours and community'**
+  String get cravingSourceBothSubtitle;
+
+  /// No description provided for @cravingReshuffle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reshuffle'**
+  String get cravingReshuffle;
+
+  /// No description provided for @cravingFoundRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Found {count} recipes matching your vibe'**
+  String cravingFoundRecipes(int count);
+
+  /// No description provided for @cravingNothingFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found for these filters'**
+  String get cravingNothingFound;
+
+  /// No description provided for @cravingTryBroader.
+  ///
+  /// In en, this message translates to:
+  /// **'Try broader options or reshuffle'**
+  String get cravingTryBroader;
+
+  /// No description provided for @cravingAdjustFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust filters'**
+  String get cravingAdjustFilters;
+
+  /// No description provided for @cravingCookThis.
+  ///
+  /// In en, this message translates to:
+  /// **'Cook this recipe'**
+  String get cravingCookThis;
+
+  /// No description provided for @cravingViewRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'View recipe'**
+  String get cravingViewRecipe;
+
+  /// No description provided for @cravingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get cravingNext;
+
+  /// No description provided for @cravingBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get cravingBack;
+
+  /// No description provided for @cravingSkipStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip this step →'**
+  String get cravingSkipStep;
+
+  /// No description provided for @cravingFindRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Find recipes'**
+  String get cravingFindRecipes;
+
+  /// No description provided for @mergeCookbooksMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge cookbooks'**
+  String get mergeCookbooksMenu;
+
+  /// No description provided for @mergeCookbooksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge Cookbooks'**
+  String get mergeCookbooksTitle;
+
+  /// No description provided for @mergeCookbooksNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New cookbook name'**
+  String get mergeCookbooksNameLabel;
+
+  /// No description provided for @mergeCookbooksDefaultName.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged Cookbook'**
+  String get mergeCookbooksDefaultName;
+
+  /// No description provided for @mergeCookbooksNeedTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'You need at least 2 cookbooks to merge'**
+  String get mergeCookbooksNeedTwo;
+
+  /// No description provided for @mergeCookbooksNoRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes to merge'**
+  String get mergeCookbooksNoRecipes;
+
+  /// No description provided for @mergeCookbooksMerging.
+  ///
+  /// In en, this message translates to:
+  /// **'Merging {count} recipes...'**
+  String mergeCookbooksMerging(int count);
+
+  /// No description provided for @mergeCookbooksCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created \"{name}\" with {count} recipes'**
+  String mergeCookbooksCreated(String name, int count);
+
+  /// No description provided for @mergeCookbooksFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge failed: {error}'**
+  String mergeCookbooksFailed(String error);
+
+  /// No description provided for @mergeCookbooksButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge {count} cookbooks'**
+  String mergeCookbooksButton(int count);
+
+  /// No description provided for @mergeCookbooksCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get mergeCookbooksCancel;
+
+  /// No description provided for @combinedIngredients.
+  ///
+  /// In en, this message translates to:
+  /// **'Combined Ingredients'**
+  String get combinedIngredients;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

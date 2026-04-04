@@ -8812,4 +8812,217 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get communityConfirm => 'Confirm';
+
+  @override
+  String get cravingCardTitle => 'What are you craving?';
+
+  @override
+  String get cravingCardSubtitle => 'Find recipes that match your mood';
+
+  @override
+  String get cravingStep1Title => 'What are you feeling?';
+
+  @override
+  String get cravingStep2Title => 'Anything more specific?';
+
+  @override
+  String get cravingStep3Title => 'Where should we look?';
+
+  @override
+  String get cravingResultsTitle => 'Here\'s what we found';
+
+  @override
+  String get cravingPickOneOrMore => 'Pick one or more';
+
+  @override
+  String get cravingMoodHint => 'We\'ll find something you\'ll love';
+
+  @override
+  String cravingCountSelected(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get cravingCategoryHint => 'Optional — skip if you\'re open to anything';
+
+  @override
+  String get cravingCategoryNarrowHint => 'Narrow it down or skip ahead';
+
+  @override
+  String get cravingMoodSweet => 'Sweet';
+
+  @override
+  String get cravingMoodSavory => 'Savory';
+
+  @override
+  String get cravingMoodLight => 'Light';
+
+  @override
+  String get cravingMoodFilling => 'Filling';
+
+  @override
+  String get cravingMoodQuick => 'Quick';
+
+  @override
+  String get cravingMoodSpecial => 'Something Special';
+
+  @override
+  String get cravingCatDessert => 'Dessert';
+
+  @override
+  String get cravingCatPastry => 'Pastry';
+
+  @override
+  String get cravingCatBakedGoods => 'Baked Goods';
+
+  @override
+  String get cravingCatBreakfast => 'Breakfast';
+
+  @override
+  String get cravingCatDinner => 'Dinner';
+
+  @override
+  String get cravingCatLunch => 'Lunch';
+
+  @override
+  String get cravingCatAppetizer => 'Appetizer';
+
+  @override
+  String get cravingCatSoup => 'Soup';
+
+  @override
+  String get cravingCatSauce => 'Sauce';
+
+  @override
+  String get cravingCatSalad => 'Salad';
+
+  @override
+  String get cravingCatSnack => 'Snack';
+
+  @override
+  String get cravingCatMainDish => 'Main Dish';
+
+  @override
+  String get cravingCatPasta => 'Pasta';
+
+  @override
+  String get cravingCatRice => 'Rice Dishes';
+
+  @override
+  String get cravingCatCasserole => 'Casserole';
+
+  @override
+  String get cravingCatUnder20 => 'Under 20 min';
+
+  @override
+  String get cravingCatUnder30 => 'Under 30 min';
+
+  @override
+  String get cravingCat5Ings => '5 ingredients or less';
+
+  @override
+  String get cravingCatImpressive => 'Impressive';
+
+  @override
+  String get cravingCatCrowdPleaser => 'Crowd Pleaser';
+
+  @override
+  String get cravingCatFavorites => 'Favorites';
+
+  @override
+  String get cravingSourceMyRecipesTitle => 'My saved recipes';
+
+  @override
+  String get cravingSourceMyRecipesSubtitle => 'From your personal library';
+
+  @override
+  String get cravingSourceCommunityTitle => 'Discover something new';
+
+  @override
+  String get cravingSourceCommunitySubtitle => 'From the community';
+
+  @override
+  String get cravingSourceBothTitle => 'Both — surprise me';
+
+  @override
+  String get cravingSourceBothSubtitle => 'Mix of yours and community';
+
+  @override
+  String get cravingReshuffle => 'Reshuffle';
+
+  @override
+  String cravingFoundRecipes(int count) {
+    return 'Found $count recipes matching your vibe';
+  }
+
+  @override
+  String get cravingNothingFound => 'Nothing found for these filters';
+
+  @override
+  String get cravingTryBroader => 'Try broader options or reshuffle';
+
+  @override
+  String get cravingAdjustFilters => 'Adjust filters';
+
+  @override
+  String get cravingCookThis => 'Cook this recipe';
+
+  @override
+  String get cravingViewRecipe => 'View recipe';
+
+  @override
+  String get cravingNext => 'Next';
+
+  @override
+  String get cravingBack => 'Back';
+
+  @override
+  String get cravingSkipStep => 'Skip this step →';
+
+  @override
+  String get cravingFindRecipes => 'Find recipes';
+
+  @override
+  String get mergeCookbooksMenu => 'Merge cookbooks';
+
+  @override
+  String get mergeCookbooksTitle => 'Merge Cookbooks';
+
+  @override
+  String get mergeCookbooksNameLabel => 'New cookbook name';
+
+  @override
+  String get mergeCookbooksDefaultName => 'Merged Cookbook';
+
+  @override
+  String get mergeCookbooksNeedTwo => 'You need at least 2 cookbooks to merge';
+
+  @override
+  String get mergeCookbooksNoRecipes => 'No recipes to merge';
+
+  @override
+  String mergeCookbooksMerging(int count) {
+    return 'Merging $count recipes...';
+  }
+
+  @override
+  String mergeCookbooksCreated(String name, int count) {
+    return 'Created \"$name\" with $count recipes';
+  }
+
+  @override
+  String mergeCookbooksFailed(String error) {
+    return 'Merge failed: $error';
+  }
+
+  @override
+  String mergeCookbooksButton(int count) {
+    return 'Merge $count cookbooks';
+  }
+
+  @override
+  String get mergeCookbooksCancel => 'Cancel';
+
+  @override
+  String get combinedIngredients => 'Combined Ingredients';
 }

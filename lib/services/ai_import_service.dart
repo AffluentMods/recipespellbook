@@ -34,47 +34,33 @@ class AiImportService {
   /// Validate raw JSON string. Returns error message or null if valid.
   /// Accepts single recipe objects, arrays of recipe objects,
   /// and v3 export format ({ "recipes": [...], "links": {...}, "version": "3.0" }).
+  /// Extract all recipe maps from the JSON string (without validation/import).
+  /// Handles single objects, arrays, v3 linked format, and multiple concatenated blobs.
+  /// Returns an empty list if parsing fails.
+  static List<Map<String, dynamic>> extractRecipes(String jsonString) {
+    try {
+      final cleaned = _cleanJson(jsonString);
+      final (allRecipes, _) = _decodeMultipleBlobs(cleaned);
+      return allRecipes;
+    } catch (_) {
+      return [];
+    }
+  }
+
   static String? validate(String jsonString) {
     try {
       final cleaned = _cleanJson(jsonString);
-      final decoded = jsonDecode(cleaned);
+      final (allRecipes, _) = _decodeMultipleBlobs(cleaned);
 
-      // Support arrays of recipes (bulk import)
-      if (decoded is List) {
-        if (decoded.isEmpty) {
-          return 'Recipe array is empty — need at least one recipe.';
-        }
-        for (var r = 0; r < decoded.length; r++) {
-          if (decoded[r] is! Map<String, dynamic>) {
-            return 'Recipe #${r + 1} is not a valid JSON object.';
-          }
-          final err = _validateSingleRecipe(decoded[r] as Map<String, dynamic>, recipeIndex: r + 1);
-          if (err != null) return err;
-        }
-        return null;
+      if (allRecipes.isEmpty) {
+        return 'No recipes found — need at least one recipe.';
       }
 
-      if (decoded is! Map<String, dynamic>) {
-        return 'Expected a JSON object with recipe data (or an array of recipes). Got ${decoded.runtimeType}.';
+      for (var r = 0; r < allRecipes.length; r++) {
+        final err = _validateSingleRecipe(allRecipes[r], recipeIndex: r + 1);
+        if (err != null) return err;
       }
-
-      // Support v3 export format with "recipes" array and "links"
-      if (decoded.containsKey('recipes') && decoded['recipes'] is List) {
-        final recipes = decoded['recipes'] as List;
-        if (recipes.isEmpty) {
-          return 'Recipe array is empty — need at least one recipe.';
-        }
-        for (var r = 0; r < recipes.length; r++) {
-          if (recipes[r] is! Map<String, dynamic>) {
-            return 'Recipe #${r + 1} is not a valid JSON object.';
-          }
-          final err = _validateSingleRecipe(recipes[r] as Map<String, dynamic>, recipeIndex: r + 1);
-          if (err != null) return err;
-        }
-        return null;
-      }
-
-      return _validateSingleRecipe(decoded);
+      return null;
     } on FormatException catch (e) {
       return 'Invalid JSON: ${e.message}';
     } catch (e) {
@@ -134,7 +120,8 @@ class AiImportService {
 
   /// Parse and import recipe(s) from JSON string into the database.
   /// Supports single recipe objects, arrays of recipes,
-  /// and v3 export format ({ "recipes": [...], "links": {...} }).
+  /// v3 export format ({ "recipes": [...], "links": {...} }),
+  /// AND multiple concatenated JSON blobs (common AI mistake).
   /// Returns a list of created recipe IDs.
   static Future<List<String>> importAllFromJson(
       String jsonString,
@@ -142,42 +129,27 @@ class AiImportService {
         required String cookbookId,
       }) async {
     final cleaned = _cleanJson(jsonString);
-    final decoded = jsonDecode(cleaned);
-
-    final List<Map<String, dynamic>> recipeMaps;
-    Map<String, List<String>>? links;
-
-    if (decoded is List) {
-      recipeMaps = decoded.cast<Map<String, dynamic>>();
-    } else if (decoded is Map<String, dynamic> && decoded.containsKey('recipes') && decoded['recipes'] is List) {
-      // v3 export format with recipes array and links
-      recipeMaps = (decoded['recipes'] as List).cast<Map<String, dynamic>>();
-      if (decoded['links'] is Map) {
-        links = (decoded['links'] as Map<String, dynamic>).map(
-          (k, v) => MapEntry(k, (v as List).cast<String>()),
-        );
-      }
-    } else {
-      recipeMaps = [decoded as Map<String, dynamic>];
-    }
+    final (allRecipes, linkedBlobs) = _decodeMultipleBlobs(cleaned);
 
     // Import all recipes and track title -> id mapping
     final ids = <String>[];
     final titleToId = <String, String>{};
-    for (final data in recipeMaps) {
+    for (final data in allRecipes) {
       final id = await _importSingleRecipe(data, db, cookbookId: cookbookId);
       ids.add(id);
       titleToId[data['title'] as String] = id;
     }
 
-    // Restore ingredient links if present
-    if (links != null && links.isNotEmpty && ids.isNotEmpty) {
-      final mainRecipeId = ids.first;
+    // Restore ingredient links from each linked blob
+    for (final blob in linkedBlobs) {
+      final mainRecipeId = titleToId[blob.mainRecipeTitle];
+      if (mainRecipeId == null) continue;
+
       final ingredients = await (db.select(db.ingredients)
         ..where((t) => t.recipeId.equals(mainRecipeId)))
           .get();
 
-      for (final entry in links.entries) {
+      for (final entry in blob.links.entries) {
         final ingredientName = entry.key;
         final linkedTitles = entry.value;
 
@@ -214,17 +186,11 @@ class AiImportService {
         required String cookbookId,
       }) async {
     final cleaned = _cleanJson(jsonString);
-    final decoded = jsonDecode(cleaned);
-
-    // Support arrays — import first recipe for backwards compatibility
-    final Map<String, dynamic> data;
-    if (decoded is List) {
-      data = decoded.first as Map<String, dynamic>;
-    } else {
-      data = decoded as Map<String, dynamic>;
+    final (allRecipes, _) = _decodeMultipleBlobs(cleaned);
+    if (allRecipes.isEmpty) {
+      throw const FormatException('No recipes found in JSON');
     }
-
-    return _importSingleRecipe(data, db, cookbookId: cookbookId);
+    return _importSingleRecipe(allRecipes.first, db, cookbookId: cookbookId);
   }
 
   /// Import a single recipe map into the database. Returns the recipe ID.
@@ -353,6 +319,121 @@ class AiImportService {
     }
 
     return s.trim();
+  }
+
+  /// Split a string that may contain multiple concatenated JSON values
+  /// (objects/arrays separated by whitespace or nothing) into individual JSON strings.
+  /// Returns a list of trimmed JSON strings. If only one value exists, returns [s].
+  static List<String> _splitMultipleJson(String s) {
+    final results = <String>[];
+    var i = 0;
+    while (i < s.length) {
+      // Skip whitespace
+      while (i < s.length && (s[i] == ' ' || s[i] == '\n' || s[i] == '\r' || s[i] == '\t')) {
+        i++;
+      }
+      if (i >= s.length) break;
+
+      final startChar = s[i];
+      if (startChar != '{' && startChar != '[') {
+        // Not a JSON value — stop here
+        break;
+      }
+
+      final openChar = startChar;
+      final closeChar = startChar == '{' ? '}' : ']';
+      final start = i;
+      var depth = 0;
+      var inString = false;
+      var escape = false;
+
+      while (i < s.length) {
+        final c = s[i];
+        if (escape) {
+          escape = false;
+          i++;
+          continue;
+        }
+        if (inString) {
+          if (c == r'\') {
+            escape = true;
+          } else if (c == '"') {
+            inString = false;
+          }
+          i++;
+          continue;
+        }
+        if (c == '"') {
+          inString = true;
+        } else if (c == openChar) {
+          depth++;
+        } else if (c == closeChar) {
+          depth--;
+          if (depth == 0) {
+            i++;
+            results.add(s.substring(start, i).trim());
+            break;
+          }
+        }
+        i++;
+      }
+
+      if (depth != 0) {
+        // Unbalanced — just return the single input as a fallback
+        return [s];
+      }
+    }
+    return results.isEmpty ? [s] : results;
+  }
+
+  /// Parse potentially-multiple JSON blobs and return a combined structure.
+  /// Merges recipe arrays from all blobs. Links from each {recipes, links} blob
+  /// are tracked per-blob with a main recipe reference.
+  static (List<Map<String, dynamic>>, List<_LinkedBlob>) _decodeMultipleBlobs(String cleaned) {
+    final blobs = _splitMultipleJson(cleaned);
+    final allRecipes = <Map<String, dynamic>>[];
+    final linkedBlobs = <_LinkedBlob>[];
+
+    void processMapElement(Map<String, dynamic> m) {
+      if (m.containsKey('recipes') && m['recipes'] is List) {
+        // Linked recipe format
+        final blobRecipes = <Map<String, dynamic>>[];
+        for (final r in m['recipes'] as List) {
+          if (r is Map<String, dynamic>) {
+            blobRecipes.add(r);
+            allRecipes.add(r);
+          }
+        }
+        Map<String, List<String>>? blobLinks;
+        if (m['links'] is Map) {
+          blobLinks = (m['links'] as Map<String, dynamic>).map(
+            (k, v) => MapEntry(k, (v as List).cast<String>()),
+          );
+        }
+        if (blobLinks != null && blobRecipes.isNotEmpty) {
+          linkedBlobs.add(_LinkedBlob(
+            mainRecipeTitle: blobRecipes.first['title'] as String,
+            links: blobLinks,
+          ));
+        }
+      } else {
+        // Single recipe object
+        allRecipes.add(m);
+      }
+    }
+
+    for (final blob in blobs) {
+      final decoded = jsonDecode(blob);
+      if (decoded is List) {
+        // Array of items — each can be a recipe OR a linked set
+        for (final r in decoded) {
+          if (r is Map<String, dynamic>) processMapElement(r);
+        }
+      } else if (decoded is Map<String, dynamic>) {
+        processMapElement(decoded);
+      }
+    }
+    return (allRecipes, linkedBlobs);
   }
 
   static String? _optString(dynamic value) {
@@ -713,10 +794,20 @@ For LINKED recipes (a main recipe with sub-recipes as ingredients), use this for
 }
 The "links" object maps ingredient names in the main recipe to the titles of sub-recipes they should link to.
 
+For MIXED imports (multiple standalone recipes AND multiple linked sets in one paste), wrap everything into one top-level array. The importer accepts a single array where each element is either a plain recipe object OR a linked set:
+[
+  { "title": "Simple Recipe 1", ... },
+  { "title": "Simple Recipe 2", ... },
+  { "recipes": [...], "links": {...} },
+  { "recipes": [...], "links": {...} }
+]
+This is the PREFERRED format for any multi-recipe import.
+
 Rules:
 - You can import any number of recipes at once (1, 5, 20, 100+) — just wrap them in a JSON array
 - Each recipe in the array uses the exact same format shown above
 - If a recipe has components that are themselves recipes (e.g. a cake with separate frosting, filling, crust recipes), use the linked format above
+- CRITICAL: Output ONE top-level JSON value. Do NOT output multiple separate JSON blobs separated by blank lines — that is invalid JSON. Combine everything into one array or object.
 - "amount" is a string (supports fractions like "1/2", "1 1/2") or null
 - "unit" is a string (cups, tbsp, tsp, oz, lb, g, kg, ml, etc.) or null if not applicable (e.g. "3 eggs")
 - "notes" on ingredients is for prep details like "diced", "room temperature", "melted"
@@ -732,4 +823,11 @@ Rules:
 - Output valid JSON only — no markdown, no backticks, no commentary
 ''';
   }
+}
+
+/// Internal helper: tracks a linked-recipe blob for restoring links after import.
+class _LinkedBlob {
+  final String mainRecipeTitle;
+  final Map<String, List<String>> links;
+  const _LinkedBlob({required this.mainRecipeTitle, required this.links});
 }

@@ -244,11 +244,11 @@ class _CookbookGrid extends ConsumerWidget {
         // Grid
         Expanded(
           child: GridView.builder(
-            padding: const EdgeInsets.fromLTRB(8, 8, 8, 80),
+            padding: const EdgeInsets.fromLTRB(6, 4, 6, 80),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: Responsive.cookbookColumns(context),
-              mainAxisSpacing: 6,
-              crossAxisSpacing: 6,
+              mainAxisSpacing: 4,
+              crossAxisSpacing: 4,
               childAspectRatio: 1.0,
             ),
             itemCount: cookbooks.length,
@@ -297,6 +297,15 @@ class _CookbookGrid extends ConsumerWidget {
           ),
         ),
         PopupMenuItem(
+          value: 'merge',
+          child: ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.merge_type, size: 20),
+            title: Text(l10n.mergeCookbooksMenu),
+          ),
+        ),
+        PopupMenuItem(
           value: 'delete',
           child: ListTile(
             dense: true,
@@ -313,6 +322,8 @@ class _CookbookGrid extends ConsumerWidget {
           context.push('/cookbook/${cookbook.id}/edit');
         case 'share':
           _showShareSheet(context, ref, cookbook);
+        case 'merge':
+          _showMergeCookbooksSheet(context, ref, initialCookbookId: cookbook.id);
         case 'delete':
           _showDeleteConfirmation(context, ref, cookbook);
       }
@@ -620,6 +631,95 @@ class _CookbookGrid extends ConsumerWidget {
     }
   }
 
+  void _showMergeCookbooksSheet(
+    BuildContext context,
+    WidgetRef ref, {
+    required String initialCookbookId,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final allCookbooks = ref.read(cookbooksProvider).valueOrNull ?? [];
+    if (allCookbooks.length < 2) {
+      AppSnackbar.info(context, l10n.mergeCookbooksNeedTwo);
+      return;
+    }
+
+    Responsive.showAdaptiveSheet(
+      context,
+      builder: (ctx) => _MergeCookbooksSheet(
+        allCookbooks: allCookbooks,
+        initialCookbookId: initialCookbookId,
+        onMerge: (selectedIds, newName) async {
+          Navigator.pop(ctx);
+          await _performMerge(context, ref, selectedIds, newName);
+        },
+      ),
+    );
+  }
+
+  Future<void> _performMerge(
+    BuildContext context,
+    WidgetRef ref,
+    List<String> cookbookIds,
+    String newName,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final recipeDao = ref.read(recipeDaoProvider);
+    final cookbookDao = ref.read(cookbookDaoProvider);
+    final finalName = newName.trim().isEmpty ? l10n.mergeCookbooksDefaultName : newName.trim();
+
+    // Count recipes across all selected cookbooks
+    final allRecipes = <Recipe>[];
+    for (final cbId in cookbookIds) {
+      allRecipes.addAll(await recipeDao.getRecipesForCookbook(cbId));
+    }
+
+    if (allRecipes.isEmpty) {
+      if (context.mounted) AppSnackbar.info(context, l10n.mergeCookbooksNoRecipes);
+      return;
+    }
+
+    if (context.mounted) {
+      AppSnackbar.loading(context, l10n.mergeCookbooksMerging(allRecipes.length));
+    }
+
+    try {
+      // Create new cookbook
+      final newCookbookId = 'cookbook_${DateTime.now().millisecondsSinceEpoch}';
+      await cookbookDao.insertCookbook(CookbooksCompanion.insert(
+        id: newCookbookId,
+        name: finalName,
+      ));
+
+      // Copy all recipes into the new cookbook with unique IDs per iteration
+      for (var i = 0; i < allRecipes.length; i++) {
+        final recipe = allRecipes[i];
+        final uniqueId = 'recipe_${DateTime.now().millisecondsSinceEpoch}_$i';
+        await recipeDao.duplicateRecipe(
+          recipe.id,
+          newId: uniqueId,
+          targetCookbookId: newCookbookId,
+        );
+      }
+
+      // Always dismiss the loading snackbar
+      AppSnackbar.dismiss(context);
+
+      if (context.mounted) {
+        AppSnackbar.success(
+          context,
+          l10n.mergeCookbooksCreated(finalName, allRecipes.length),
+        );
+        // Switch to the new cookbook
+        ref.read(selectedCookbookIdProvider.notifier).state = newCookbookId;
+      }
+    } catch (e) {
+      AppSnackbar.dismiss(context);
+      if (context.mounted) {
+        AppSnackbar.error(context, l10n.mergeCookbooksFailed(e.toString()));
+      }
+    }
+  }
+
   void _showDeleteConfirmation(BuildContext context, WidgetRef ref, Cookbook cookbook) {
     final l10n = AppLocalizations.of(context)!;
 
@@ -807,6 +907,169 @@ class _ModernFAB extends StatelessWidget {
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: const Icon(Icons.add, size: 26),
+      ),
+    );
+  }
+}
+
+class _MergeCookbooksSheet extends StatefulWidget {
+  final List<Cookbook> allCookbooks;
+  final String initialCookbookId;
+  final void Function(List<String> cookbookIds, String newName) onMerge;
+
+  const _MergeCookbooksSheet({
+    required this.allCookbooks,
+    required this.initialCookbookId,
+    required this.onMerge,
+  });
+
+  @override
+  State<_MergeCookbooksSheet> createState() => _MergeCookbooksSheetState();
+}
+
+class _MergeCookbooksSheetState extends State<_MergeCookbooksSheet> {
+  late Set<String> _selectedIds;
+  late TextEditingController _nameController;
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIds = {widget.initialCookbookId};
+    _nameController = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _nameController.text = AppLocalizations.of(context)!.mergeCookbooksDefaultName;
+      _initialized = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final canMerge = _selectedIds.length >= 2;
+
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 8),
+          Container(
+            width: 40, height: 4,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.outline.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Row(
+              children: [
+                Icon(Icons.merge_type, color: theme.colorScheme.primary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.mergeCookbooksTitle,
+                        style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        l10n.cravingCountSelected(_selectedIds.length),
+                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // New cookbook name field
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: TextField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                labelText: l10n.mergeCookbooksNameLabel,
+                prefixIcon: const Icon(Icons.book_outlined),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+          // Cookbook selection list
+          Flexible(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.4,
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                itemCount: widget.allCookbooks.length,
+                itemBuilder: (context, index) {
+                  final cb = widget.allCookbooks[index];
+                  final isSelected = _selectedIds.contains(cb.id);
+                  return CheckboxListTile(
+                    value: isSelected,
+                    onChanged: (v) {
+                      setState(() {
+                        if (v == true) {
+                          _selectedIds.add(cb.id);
+                        } else {
+                          _selectedIds.remove(cb.id);
+                        }
+                      });
+                    },
+                    title: Text(cb.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    subtitle: cb.description != null && cb.description!.isNotEmpty
+                        ? Text(cb.description!, maxLines: 1, overflow: TextOverflow.ellipsis)
+                        : null,
+                    secondary: const Icon(Icons.book),
+                    controlAffinity: ListTileControlAffinity.trailing,
+                  );
+                },
+              ),
+            ),
+          ),
+          // Action buttons
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+            child: Row(
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(l10n.mergeCookbooksCancel),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: canMerge
+                        ? () => widget.onMerge(_selectedIds.toList(), _nameController.text)
+                        : null,
+                    icon: const Icon(Icons.merge_type, size: 18),
+                    label: Text(l10n.mergeCookbooksButton(_selectedIds.length)),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
