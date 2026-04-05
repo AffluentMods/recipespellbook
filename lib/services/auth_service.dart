@@ -4,7 +4,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import '../utils/platform_utils.dart' show isDesktop;
+import 'package:url_launcher/url_launcher.dart';
+import '../utils/platform_utils.dart' show isDesktop, isWeb;
 import 'desktop_google_auth.dart'
     if (dart.library.html) 'desktop_google_auth_stub.dart';
 
@@ -199,7 +200,19 @@ class AuthService {
     try {
       String? idToken;
 
-      if (isDesktop) {
+      if (isWeb) {
+        // Web: redirect to our server-side OAuth bridge. The bridge handles
+        // the Google OAuth flow and redirects back to /app/#rsb_jwt=... which
+        // auth_provider.dart picks up on startup via restoreFromTransfer.
+        // The legacy google_sign_in popup flow no longer works in modern
+        // browsers due to COOP/COEP policies on accounts.google.com.
+        await launchUrl(
+          Uri.parse('/app-auth/google'),
+          webOnlyWindowName: '_self',
+        );
+        // The page will navigate away — return loading state (won't matter).
+        return const AuthState.loading();
+      } else if (isDesktop) {
         // Desktop: use browser-based OAuth with localhost redirect.
         // The google_sign_in plugin has no Windows/Linux implementation.
         idToken = await DesktopGoogleAuth.signIn(

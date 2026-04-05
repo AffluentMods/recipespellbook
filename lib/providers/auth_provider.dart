@@ -42,12 +42,59 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Call once at app startup to restore saved session.
   Future<void> initialize() async {
     state = const AuthState.loading();
+
+    // Web: detect OAuth bridge token in URL fragment (from /app-auth/callback)
+    if (kIsWeb) {
+      final bridgeResult = await _tryWebBridgeSignIn();
+      if (bridgeResult != null && bridgeResult.isSignedIn) {
+        state = bridgeResult;
+        await _service.saveLastBoundUserId(bridgeResult.user!.id);
+        _syncAuthToServices();
+        return;
+      }
+    }
+
     final result = await _service.initialize();
     state = result;
     if (result.isSignedIn) {
       await _service.saveLastBoundUserId(result.user!.id);
     }
     _syncAuthToServices();
+  }
+
+  /// Parse URL fragment for OAuth bridge token and sign in.
+  /// Returns the new AuthState if successful, null otherwise.
+  Future<AuthState?> _tryWebBridgeSignIn() async {
+    try {
+      final uri = Uri.parse(Uri.base.toString());
+      final fragment = uri.fragment;
+      if (fragment.isEmpty || !fragment.contains('rsb_jwt=')) return null;
+
+      // Fragment can be either "rsb_jwt=..." (raw query string)
+      // or "/?rsb_jwt=..." (hash-based routing with query params)
+      Map<String, String> params;
+      if (fragment.startsWith('/') || fragment.contains('?')) {
+        final fragUri = Uri.parse(fragment);
+        params = fragUri.queryParameters;
+      } else {
+        params = Uri.splitQueryString(fragment);
+      }
+      final jwt = params['rsb_jwt'];
+      final userId = params['rsb_user_id'];
+      if (jwt == null || jwt.isEmpty || userId == null || userId.isEmpty) return null;
+
+      final result = await _service.restoreFromTransfer(
+        token: jwt,
+        userId: userId,
+        displayName: params['rsb_name'],
+        email: params['rsb_email'],
+        avatarUrl: params['rsb_avatar'],
+      );
+      return result;
+    } catch (e) {
+      debugPrint('[Auth] Web bridge sign-in failed: $e');
+      return null;
+    }
   }
 
   /// Sign in with Google OAuth.
