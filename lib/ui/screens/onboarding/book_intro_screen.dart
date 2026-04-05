@@ -162,7 +162,10 @@ class _BookIntroScreenState extends ConsumerState<BookIntroScreen>
   void _skipToViewer() {
     if (_videoComplete) return;
     setState(() => _videoComplete = true);
-    _videoController.pause();
+    // Skip video pause on web — controller was never initialized there
+    if (!kIsWeb) {
+      _videoController.pause();
+    }
     _crossfadeController.forward();
 
     // Start auto-flip after a short delay
@@ -183,8 +186,10 @@ class _BookIntroScreenState extends ConsumerState<BookIntroScreen>
 
   @override
   void dispose() {
-    _videoController.removeListener(_onVideoUpdate);
-    _videoController.dispose();
+    if (!kIsWeb) {
+      _videoController.removeListener(_onVideoUpdate);
+      _videoController.dispose();
+    }
     _crossfadeController.dispose();
     _pageController.dispose();
     _autoFlipController.dispose();
