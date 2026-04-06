@@ -30,16 +30,28 @@ class RCConfig {
   static const String premiumLifetimeId = 'rs_premium_lifetime';
   static const String familyLifetimeId = 'rs_family_lifetime';
 
-  // — Web Purchase Link (RevenueCat hosted checkout) —
-  // Single URL — user picks their plan on the checkout page.
-  // Append ?app_user_id=USER_ID to tie the purchase to the logged-in user.
-  static const String webPurchaseLink = String.fromEnvironment(
-    'RC_WEB_PURCHASE_LINK',
-    defaultValue: 'https://pay.rev.cat/uzbnawbjilwsplvi/',
+  // — Stripe Payment Links (for web/desktop checkout) —
+  // Two separate hosted Stripe Checkout links, one per product.
+  // Append ?client_reference_id=USER_ID so the backend webhook can match
+  // the purchase to the logged-in user.
+  static const String stripePremiumUrl = String.fromEnvironment(
+    'STRIPE_PREMIUM_URL',
+    defaultValue: '',
+  );
+  static const String stripeFamilyUrl = String.fromEnvironment(
+    'STRIPE_FAMILY_URL',
+    defaultValue: '',
   );
 
-  /// Whether web purchase link is configured
-  static bool get hasWebPurchaseLink => webPurchaseLink.isNotEmpty;
+  /// Whether Stripe checkout links are configured.
+  static bool get hasWebPurchaseLink =>
+      stripePremiumUrl.isNotEmpty && stripeFamilyUrl.isNotEmpty;
+
+  /// Get the right Stripe checkout link for a given plan.
+  /// planIndex: 0 = Premium, 1 = Family
+  static String webPurchaseLinkForPlan(int planIndex) {
+    return planIndex == 0 ? stripePremiumUrl : stripeFamilyUrl;
+  }
 }
 
 // ════════════════════════════════════════════════════════════════

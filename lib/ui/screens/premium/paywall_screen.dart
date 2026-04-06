@@ -368,7 +368,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
   }
 
   Future<void> _handleWebPurchase(AuthState authState) async {
-    var webLink = RCConfig.webPurchaseLink;
+    // Pick the Stripe checkout link matching the selected plan.
+    var webLink = RCConfig.webPurchaseLinkForPlan(_selectedPlan);
     if (webLink.isEmpty) {
       if (mounted) _showWebPurchaseUnavailable();
       return;
@@ -376,8 +377,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
 
     final userId = authState.user?.id;
     if (userId != null) {
+      // Stripe Payment Links pass client_reference_id through to the webhook
+      // so the backend can match the purchase to the logged-in user.
       final separator = webLink.contains('?') ? '&' : '?';
-      webLink = '$webLink${separator}app_user_id=$userId';
+      webLink = '$webLink${separator}client_reference_id=$userId';
     }
 
     final uri = Uri.tryParse(webLink);
