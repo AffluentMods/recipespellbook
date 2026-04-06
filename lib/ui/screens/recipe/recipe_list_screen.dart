@@ -1635,58 +1635,110 @@ class _BulkActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final bottomPad = MediaQuery.of(context).padding.bottom;
+
     return Container(
-      padding: EdgeInsets.fromLTRB(4, 8, 4, 8 + MediaQuery.of(context).padding.bottom),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
-        border: Border(top: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2))),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _BulkAction(icon: Icons.restaurant_menu, label: AppLocalizations.of(context)!.bulkCourse, onTap: onSetCourse),
-            _BulkAction(icon: Icons.category, label: AppLocalizations.of(context)!.bulkCategory, onTap: onSetCategory),
-            _BulkAction(icon: Icons.star_outline, label: AppLocalizations.of(context)!.bulkFavorite, onTap: onFavorite),
-            _BulkAction(icon: Icons.copy, label: AppLocalizations.of(context)!.bulkCopyLabel, onTap: onCopyToCookbook),
-            _BulkAction(icon: Icons.drive_file_move_outline, label: AppLocalizations.of(context)!.bulkMoveLabel, onTap: onMoveToCookbook),
-            _BulkAction(icon: Icons.delete_outline, label: AppLocalizations.of(context)!.bulkDeleteLabel, onTap: onDelete, color: Colors.red),
-          ],
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ── Drag handle ──
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 4),
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+
+          // ── Safe actions row (icon-only) ──
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _BulkActionIcon(icon: Icons.restaurant_menu, tooltip: l10n.bulkCourse, onTap: onSetCourse),
+                _BulkActionIcon(icon: Icons.category_outlined, tooltip: l10n.bulkCategory, onTap: onSetCategory),
+                _BulkActionIcon(icon: Icons.star_outline, tooltip: l10n.bulkFavorite, onTap: onFavorite),
+                _BulkActionIcon(icon: Icons.copy_rounded, tooltip: l10n.bulkCopyLabel, onTap: onCopyToCookbook),
+                _BulkActionIcon(icon: Icons.drive_file_move_outlined, tooltip: l10n.bulkMoveLabel, onTap: onMoveToCookbook),
+              ],
+            ),
+          ),
+
+          // ── Divider ──
+          Divider(height: 1, color: theme.colorScheme.outline.withValues(alpha: 0.15)),
+
+          // ── Delete row ──
+          InkWell(
+            onTap: onDelete,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(16, 10, 16, 10 + bottomPad),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.delete_outline, size: 20, color: theme.colorScheme.error),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.deleteCountRecipes(selectedCount),
+                    style: TextStyle(
+                      color: theme.colorScheme.error,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _BulkAction extends StatelessWidget {
+class _BulkActionIcon extends StatelessWidget {
   final IconData icon;
-  final String label;
+  final String tooltip;
   final VoidCallback onTap;
-  final Color? color;
 
-  const _BulkAction({
+  const _BulkActionIcon({
     required this.icon,
-    required this.label,
+    required this.tooltip,
     required this.onTap,
-    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    final c = color ?? Theme.of(context).colorScheme.onSurface;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 22, color: c),
-            const SizedBox(height: 4),
-            Text(label, style: TextStyle(fontSize: 11, color: c)),
-          ],
+    final theme = Theme.of(context);
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            width: 48,
+            height: 48,
+            alignment: Alignment.center,
+            child: Icon(icon, size: 24, color: theme.colorScheme.onSurface),
+          ),
         ),
       ),
     );

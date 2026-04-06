@@ -6,6 +6,8 @@ import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
+import '../../../utils/responsive_utils.dart';
+import '../../widgets/app_snackbar.dart';
 import '../../widgets/recipe_image.dart';
 
 /// Search query provider
@@ -267,6 +269,7 @@ class _SearchResultCard extends ConsumerWidget {
           ref.read(recipeDaoProvider).updateLastViewed(recipe.id);
           context.pushNamed('recipe', pathParameters: {'id': recipe.id});
         },
+        onLongPress: () => _showRecipeActions(context, ref, recipe),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -322,6 +325,186 @@ class _SearchResultCard extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  void _showRecipeActions(BuildContext context, WidgetRef ref, Recipe recipe) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    Responsive.showAdaptiveSheet(
+      context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(width: 40, height: 4, decoration: BoxDecoration(
+              color: theme.colorScheme.outline.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(2),
+            )),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                recipe.title,
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            ListTile(
+              leading: Icon(recipe.isFavorite ? Icons.star_outline : Icons.star, color: Colors.amber),
+              title: Text(recipe.isFavorite ? l10n.recipeUnfavorite : l10n.recipeFavorite),
+              onTap: () async {
+                Navigator.pop(ctx);
+                await ref.read(recipeDaoProvider).updateRecipeFields(
+                  recipe.id,
+                  RecipesCompanion(isFavorite: Value(!recipe.isFavorite)),
+                );
+                ref.invalidate(searchResultsProvider);
+                if (context.mounted) {
+                  AppSnackbar.success(context, recipe.isFavorite ? l10n.favoritesRemoved : l10n.recipeFavorite);
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.copy),
+              title: Text(l10n.copyToCookbook),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showCookbookPicker(context, ref, recipe, move: false);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.drive_file_move_outlined),
+              title: Text(l10n.moveToCookbook),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showCookbookPicker(context, ref, recipe, move: true);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.delete_outline, color: theme.colorScheme.error),
+              title: Text(l10n.deleteRecipeTitle, style: TextStyle(color: theme.colorScheme.error)),
+              onTap: () async {
+                Navigator.pop(ctx);
+                await ref.read(recipeDaoProvider).softDeleteRecipe(recipe.id);
+                ref.invalidate(searchResultsProvider);
+                if (context.mounted) {
+                  AppSnackbar.info(context, l10n.recipeDeleted);
+                }
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showCookbookPicker(BuildContext context, WidgetRef ref, Recipe recipe, {required bool move}) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final cookbooks = ref.read(cookbooksProvider);
+
+    cookbooks.whenData((list) {
+      final others = list.where((c) => c.id != recipe.cookbookId).toList();
+
+      Responsive.showAdaptiveSheet(
+        context,
+        builder: (ctx) {
+          final newNameCtrl = TextEditingController();
+
+          createAndAction(String name) async {
+            final dao = ref.read(cookbookDaoProvider);
+            final newId = 'cb_${DateTime.now().millisecondsSinceEpoch}';
+            await dao.insertCookbook(CookbooksCompanion.insert(id: newId, name: name));
+            ref.invalidate(cookbooksProvider);
+            final cb = Cookbook(id: newId, name: name, createdAt: DateTime.now());
+            if (context.mounted) {
+              Navigator.pop(ctx);
+              await _performCookbookAction(context, ref, recipe, cb, move: move);
+            }
+          }
+
+          return StatefulBuilder(
+            builder: (ctx, setSheetState) => SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 8),
+                  Container(width: 40, height: 4, decoration: BoxDecoration(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  )),
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(move ? l10n.moveToCookbook : l10n.copyToCookbook, style: theme.textTheme.titleMedium),
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: newNameCtrl,
+                            decoration: InputDecoration(
+                              hintText: l10n.newCookbook,
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (val) { if (val.trim().isNotEmpty) createAndAction(val.trim()); },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton.filled(
+                          icon: const Icon(Icons.add),
+                          onPressed: () { final n = newNameCtrl.text.trim(); if (n.isNotEmpty) createAndAction(n); },
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (others.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    const Divider(height: 1),
+                    ...others.map((cookbook) => ListTile(
+                      leading: const Icon(Icons.book_outlined),
+                      title: Text(cookbook.name),
+                      onTap: () async {
+                        Navigator.pop(ctx);
+                        await _performCookbookAction(context, ref, recipe, cookbook, move: move);
+                      },
+                    )),
+                  ],
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    });
+  }
+
+  Future<void> _performCookbookAction(BuildContext context, WidgetRef ref, Recipe recipe, Cookbook target, {required bool move}) async {
+    final l10n = AppLocalizations.of(context)!;
+    final recipeDao = ref.read(recipeDaoProvider);
+    try {
+      if (move) {
+        await recipeDao.updateRecipeFields(recipe.id, RecipesCompanion(cookbookId: Value(target.id)));
+        ref.invalidate(searchResultsProvider);
+        if (context.mounted) AppSnackbar.success(context, '${l10n.moveToCookbook}: "${target.name}"');
+      } else {
+        await recipeDao.duplicateRecipe(recipe.id, targetCookbookId: target.id);
+        if (context.mounted) AppSnackbar.success(context, '${l10n.copyToCookbook}: "${target.name}"');
+      }
+    } catch (e) {
+      if (context.mounted) AppSnackbar.error(context, '${l10n.errorGeneric}: $e');
+    }
   }
 
   String _formatTime(int minutes) {

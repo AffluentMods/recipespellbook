@@ -100,7 +100,7 @@ class TransferService {
 
     debugPrint('[Transfer] Uploading bundle...');
 
-    final response = await _auth.post('/v1/transfer/create', body);
+    final response = await _auth.post('/v1/transfer/create', body, timeout: const Duration(seconds: 120));
 
     if (response.statusCode != 200) {
       final msg = _parseError(response);
@@ -133,7 +133,7 @@ class TransferService {
     debugPrint('[Transfer] Claiming code=$code...');
 
     // The claim endpoint doesn't require auth (receiver might not be signed in)
-    final response = await _auth.get('/v1/transfer/$code');
+    final response = await _auth.get('/v1/transfer/$code', timeout: const Duration(seconds: 120));
 
     if (response.statusCode == 404) {
       throw Exception('Transfer code not found. Check the code and try again.');

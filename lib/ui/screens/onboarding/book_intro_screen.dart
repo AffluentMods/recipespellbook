@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import '../../../utils/platform_utils.dart' show isMobile;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
@@ -126,8 +126,8 @@ class _BookIntroScreenState extends ConsumerState<BookIntroScreen>
   }
 
   Future<void> _initVideo() async {
-    // Skip video entirely on web — browser codec support is unreliable
-    if (kIsWeb) {
+    // Only play video on mobile — skip on web and desktop
+    if (!isMobile) {
       if (mounted) _skipToViewer();
       return;
     }
@@ -162,8 +162,8 @@ class _BookIntroScreenState extends ConsumerState<BookIntroScreen>
   void _skipToViewer() {
     if (_videoComplete) return;
     setState(() => _videoComplete = true);
-    // Skip video pause on web — controller was never initialized there
-    if (!kIsWeb) {
+    // Only pause video on mobile — controller was never initialized elsewhere
+    if (isMobile) {
       _videoController.pause();
     }
     _crossfadeController.forward();
@@ -186,7 +186,7 @@ class _BookIntroScreenState extends ConsumerState<BookIntroScreen>
 
   @override
   void dispose() {
-    if (!kIsWeb) {
+    if (isMobile) {
       _videoController.removeListener(_onVideoUpdate);
       _videoController.dispose();
     }

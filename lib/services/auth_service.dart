@@ -476,22 +476,22 @@ class AuthService {
   // ════════════════════════════════════════════
 
   /// Make an authenticated GET request to the main API.
-  Future<http.Response> get(String path) => _authRequest('GET', path);
+  Future<http.Response> get(String path, {Duration? timeout}) => _authRequest('GET', path, timeout: timeout);
 
   /// Make an authenticated POST request to the main API.
-  Future<http.Response> post(String path, Map<String, dynamic> body) =>
-      _authRequest('POST', path, body: body);
+  Future<http.Response> post(String path, Map<String, dynamic> body, {Duration? timeout}) =>
+      _authRequest('POST', path, body: body, timeout: timeout);
 
   /// Make an authenticated PUT request to the main API.
-  Future<http.Response> put(String path, Map<String, dynamic> body) =>
-      _authRequest('PUT', path, body: body);
+  Future<http.Response> put(String path, Map<String, dynamic> body, {Duration? timeout}) =>
+      _authRequest('PUT', path, body: body, timeout: timeout);
 
   /// Make an authenticated PATCH request to the main API.
-  Future<http.Response> patch(String path, Map<String, dynamic> body) =>
-      _authRequest('PATCH', path, body: body);
+  Future<http.Response> patch(String path, Map<String, dynamic> body, {Duration? timeout}) =>
+      _authRequest('PATCH', path, body: body, timeout: timeout);
 
   /// Make an authenticated DELETE request to the main API.
-  Future<http.Response> delete(String path) => _authRequest('DELETE', path);
+  Future<http.Response> delete(String path, {Duration? timeout}) => _authRequest('DELETE', path, timeout: timeout);
 
   // ════════════════════════════════════════════
   //  INTERNALS
@@ -584,27 +584,29 @@ class AuthService {
       String method,
       String path, {
         Map<String, dynamic>? body,
+        Duration? timeout,
       }) async {
     final uri = Uri.parse('$_apiBaseUrl$path');
     final headers = <String, String>{
       'Content-Type': 'application/json',
       if (_currentJwt != null) 'Authorization': 'Bearer $_currentJwt',
     };
+    final t = timeout ?? const Duration(seconds: 15);
 
     switch (method) {
       case 'GET':
-        return http.get(uri, headers: headers).timeout(const Duration(seconds: 15));
+        return http.get(uri, headers: headers).timeout(t);
       case 'POST':
         return http.post(uri, headers: headers, body: body != null ? jsonEncode(body) : null)
-            .timeout(const Duration(seconds: 15));
+            .timeout(t);
       case 'PUT':
         return http.put(uri, headers: headers, body: body != null ? jsonEncode(body) : null)
-            .timeout(const Duration(seconds: 15));
+            .timeout(t);
       case 'PATCH':
         return http.patch(uri, headers: headers, body: body != null ? jsonEncode(body) : null)
-            .timeout(const Duration(seconds: 15));
+            .timeout(t);
       case 'DELETE':
-        return http.delete(uri, headers: headers).timeout(const Duration(seconds: 15));
+        return http.delete(uri, headers: headers).timeout(t);
       default:
         throw ArgumentError('Unsupported method: $method');
     }
