@@ -16656,6 +16656,384 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Move to cookbook'**
   String get moveToCookbook;
+
+  /// No description provided for @hintCookbookSwitcher.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the cookbook name at the top to switch between your cookbooks!'**
+  String get hintCookbookSwitcher;
+
+  /// No description provided for @paywallPlanPremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get paywallPlanPremium;
+
+  /// No description provided for @paywallPricePremium.
+  ///
+  /// In en, this message translates to:
+  /// **'\$4.99/month'**
+  String get paywallPricePremium;
+
+  /// No description provided for @paywallSublinePremium.
+  ///
+  /// In en, this message translates to:
+  /// **'For serious home cooks'**
+  String get paywallSublinePremium;
+
+  /// No description provided for @paywallFeatureCloudSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync across devices'**
+  String get paywallFeatureCloudSync;
+
+  /// No description provided for @paywallFeatureStepPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Step-by-step photos'**
+  String get paywallFeatureStepPhotos;
+
+  /// No description provided for @paywallFeatureAutoBackups.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic backups'**
+  String get paywallFeatureAutoBackups;
+
+  /// No description provided for @paywallPlanFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get paywallPlanFamily;
+
+  /// No description provided for @paywallPriceFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'\$7.99/month'**
+  String get paywallPriceFamily;
+
+  /// No description provided for @paywallSublineFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Cook together'**
+  String get paywallSublineFamily;
+
+  /// No description provided for @paywallFeatureEverythingPremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in Premium'**
+  String get paywallFeatureEverythingPremium;
+
+  /// No description provided for @paywallFeatureFamilySync.
+  ///
+  /// In en, this message translates to:
+  /// **'Family sync for up to 6'**
+  String get paywallFeatureFamilySync;
+
+  /// No description provided for @paywallFeatureSharedCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared cookbooks'**
+  String get paywallFeatureSharedCookbooks;
+
+  /// No description provided for @paywallPriceAnchor.
+  ///
+  /// In en, this message translates to:
+  /// **'Less than a cup of coffee per month'**
+  String get paywallPriceAnchor;
+
+  /// No description provided for @paywallTrustLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel anytime. No questions asked.'**
+  String get paywallTrustLine;
+
+  /// No description provided for @paywallPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get paywallPrivacyPolicy;
+
+  /// No description provided for @paywallTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms'**
+  String get paywallTerms;
+
+  /// No description provided for @paywallPurchaseSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase successful!'**
+  String get paywallPurchaseSuccess;
+
+  /// No description provided for @paywallCheckoutOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your purchase in the browser window that just opened.'**
+  String get paywallCheckoutOpened;
+
+  /// No description provided for @paywallWebComingSoonDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'In-app purchases for web are coming soon. Please use the mobile app to subscribe.'**
+  String get paywallWebComingSoonDesc;
+
+  /// No description provided for @paywallCompareFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get paywallCompareFree;
+
+  /// No description provided for @paywallCompareUnlimitedRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited recipes'**
+  String get paywallCompareUnlimitedRecipes;
+
+  /// No description provided for @paywallCompareCloudSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync'**
+  String get paywallCompareCloudSync;
+
+  /// No description provided for @paywallCompareFamilySharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Family sharing'**
+  String get paywallCompareFamilySharing;
+
+  /// No description provided for @linkCurrentlyLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} currently linked'**
+  String linkCurrentlyLinked(int count);
+
+  /// No description provided for @linkSearchRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Search recipes...'**
+  String get linkSearchRecipes;
+
+  /// No description provided for @linkAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} available'**
+  String linkAvailable(int count);
+
+  /// No description provided for @linkNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No match for \"{query}\"'**
+  String linkNoMatch(String query);
+
+  /// No description provided for @linkNoRecipesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes available'**
+  String get linkNoRecipesAvailable;
+
+  /// No description provided for @linkFoundInOtherCookbooks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} found in other cookbooks'**
+  String linkFoundInOtherCookbooks(int count);
+
+  /// No description provided for @linkCopyToCookbookNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes from other cookbooks will be copied to this cookbook when linked.'**
+  String get linkCopyToCookbookNote;
+
+  /// No description provided for @linkWillBeCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Will be copied to this cookbook'**
+  String get linkWillBeCopied;
+
+  /// No description provided for @bulkCopyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get bulkCopyLabel;
+
+  /// No description provided for @bulkDeleteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get bulkDeleteLabel;
+
+  /// No description provided for @bulkMoveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get bulkMoveLabel;
+
+  /// No description provided for @bulkPinned.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned'**
+  String get bulkPinned;
+
+  /// No description provided for @recipeListCreateCookbookFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Create another cookbook first'**
+  String get recipeListCreateCookbookFirst;
+
+  /// No description provided for @recipeListRecipesCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recipes copied'**
+  String recipeListRecipesCopied(int count);
+
+  /// No description provided for @recipeListRecipesMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recipes moved'**
+  String recipeListRecipesMoved(int count);
+
+  /// No description provided for @selectAllBar.
+  ///
+  /// In en, this message translates to:
+  /// **'{selectedCount} of {totalCount} selected'**
+  String selectAllBar(int selectedCount, int totalCount);
+
+  /// No description provided for @sortAToZ.
+  ///
+  /// In en, this message translates to:
+  /// **'A to Z'**
+  String get sortAToZ;
+
+  /// No description provided for @sortZToA.
+  ///
+  /// In en, this message translates to:
+  /// **'Z to A'**
+  String get sortZToA;
+
+  /// No description provided for @sortNewest.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get sortNewest;
+
+  /// No description provided for @sortOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest'**
+  String get sortOldest;
+
+  /// No description provided for @sortRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get sortRating;
+
+  /// No description provided for @sortQuickest.
+  ///
+  /// In en, this message translates to:
+  /// **'Quickest'**
+  String get sortQuickest;
+
+  /// No description provided for @sortFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get sortFavorites;
+
+  /// No description provided for @viewSizeSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get viewSizeSmall;
+
+  /// No description provided for @viewSizeMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get viewSizeMedium;
+
+  /// No description provided for @viewSizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get viewSizeLarge;
+
+  /// No description provided for @trashSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String trashSelectedCount(int count);
+
+  /// No description provided for @trashBulkRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recipes restored'**
+  String trashBulkRestored(int count);
+
+  /// No description provided for @trashBulkDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete {count} recipes? This cannot be undone.'**
+  String trashBulkDeleteConfirm(int count);
+
+  /// No description provided for @trashDeletingCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting {count} recipes...'**
+  String trashDeletingCount(int count);
+
+  /// No description provided for @trashBulkDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recipes deleted'**
+  String trashBulkDeleted(int count);
+
+  /// No description provided for @shareViewerExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This share link has expired'**
+  String get shareViewerExpired;
+
+  /// No description provided for @shareViewerExpiredLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get shareViewerExpiredLabel;
+
+  /// No description provided for @shareViewerFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load shared recipes'**
+  String get shareViewerFailed;
+
+  /// No description provided for @shareViewerNoConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get shareViewerNoConnection;
+
+  /// No description provided for @shareViewerHoursRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h remaining'**
+  String shareViewerHoursRemaining(int hours);
+
+  /// No description provided for @shareViewerMinutesRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m remaining'**
+  String shareViewerMinutesRemaining(int minutes);
+
+  /// No description provided for @shareViewerRecipeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recipes'**
+  String shareViewerRecipeCount(int count);
+
+  /// No description provided for @shareViewerUntitled.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled Recipe'**
+  String get shareViewerUntitled;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

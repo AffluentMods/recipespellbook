@@ -9034,4 +9034,223 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get moveToCookbook => 'Move to cookbook';
+
+  @override
+  String get hintCookbookSwitcher => 'Tap the cookbook name at the top to switch between your cookbooks!';
+
+  @override
+  String get paywallPlanPremium => 'Premium';
+
+  @override
+  String get paywallPricePremium => '\$4.99/month';
+
+  @override
+  String get paywallSublinePremium => 'For serious home cooks';
+
+  @override
+  String get paywallFeatureCloudSync => 'Cloud sync across devices';
+
+  @override
+  String get paywallFeatureStepPhotos => 'Step-by-step photos';
+
+  @override
+  String get paywallFeatureAutoBackups => 'Automatic backups';
+
+  @override
+  String get paywallPlanFamily => 'Family';
+
+  @override
+  String get paywallPriceFamily => '\$7.99/month';
+
+  @override
+  String get paywallSublineFamily => 'Cook together';
+
+  @override
+  String get paywallFeatureEverythingPremium => 'Everything in Premium';
+
+  @override
+  String get paywallFeatureFamilySync => 'Family sync for up to 6';
+
+  @override
+  String get paywallFeatureSharedCookbooks => 'Shared cookbooks';
+
+  @override
+  String get paywallPriceAnchor => 'Less than a cup of coffee per month';
+
+  @override
+  String get paywallTrustLine => 'Cancel anytime. No questions asked.';
+
+  @override
+  String get paywallPrivacyPolicy => 'Privacy Policy';
+
+  @override
+  String get paywallTerms => 'Terms';
+
+  @override
+  String get paywallPurchaseSuccess => 'Purchase successful!';
+
+  @override
+  String get paywallCheckoutOpened => 'Complete your purchase in the browser window that just opened.';
+
+  @override
+  String get paywallWebComingSoonDesc => 'In-app purchases for web are coming soon. Please use the mobile app to subscribe.';
+
+  @override
+  String get paywallCompareFree => 'Free';
+
+  @override
+  String get paywallCompareUnlimitedRecipes => 'Unlimited recipes';
+
+  @override
+  String get paywallCompareCloudSync => 'Cloud sync';
+
+  @override
+  String get paywallCompareFamilySharing => 'Family sharing';
+
+  @override
+  String linkCurrentlyLinked(int count) {
+    return '$count currently linked';
+  }
+
+  @override
+  String get linkSearchRecipes => 'Search recipes...';
+
+  @override
+  String linkAvailable(int count) {
+    return '$count available';
+  }
+
+  @override
+  String linkNoMatch(String query) {
+    return 'No match for \"$query\"';
+  }
+
+  @override
+  String get linkNoRecipesAvailable => 'No recipes available';
+
+  @override
+  String linkFoundInOtherCookbooks(int count) {
+    return '$count found in other cookbooks';
+  }
+
+  @override
+  String get linkCopyToCookbookNote => 'Recipes from other cookbooks will be copied to this cookbook when linked.';
+
+  @override
+  String get linkWillBeCopied => 'Will be copied to this cookbook';
+
+  @override
+  String get bulkCopyLabel => 'Copy';
+
+  @override
+  String get bulkDeleteLabel => 'Delete';
+
+  @override
+  String get bulkMoveLabel => 'Move';
+
+  @override
+  String get bulkPinned => 'Pinned';
+
+  @override
+  String get recipeListCreateCookbookFirst => 'Create another cookbook first';
+
+  @override
+  String recipeListRecipesCopied(int count) {
+    return '$count recipes copied';
+  }
+
+  @override
+  String recipeListRecipesMoved(int count) {
+    return '$count recipes moved';
+  }
+
+  @override
+  String selectAllBar(int selectedCount, int totalCount) {
+    return '$selectedCount of $totalCount selected';
+  }
+
+  @override
+  String get sortAToZ => 'A to Z';
+
+  @override
+  String get sortZToA => 'Z to A';
+
+  @override
+  String get sortNewest => 'Newest';
+
+  @override
+  String get sortOldest => 'Oldest';
+
+  @override
+  String get sortRating => 'Rating';
+
+  @override
+  String get sortQuickest => 'Quickest';
+
+  @override
+  String get sortFavorites => 'Favorites';
+
+  @override
+  String get viewSizeSmall => 'Small';
+
+  @override
+  String get viewSizeMedium => 'Medium';
+
+  @override
+  String get viewSizeLarge => 'Large';
+
+  @override
+  String trashSelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String trashBulkRestored(int count) {
+    return '$count recipes restored';
+  }
+
+  @override
+  String trashBulkDeleteConfirm(int count) {
+    return 'Permanently delete $count recipes? This cannot be undone.';
+  }
+
+  @override
+  String trashDeletingCount(int count) {
+    return 'Deleting $count recipes...';
+  }
+
+  @override
+  String trashBulkDeleted(int count) {
+    return '$count recipes deleted';
+  }
+
+  @override
+  String get shareViewerExpired => 'This share link has expired';
+
+  @override
+  String get shareViewerExpiredLabel => 'Expired';
+
+  @override
+  String get shareViewerFailed => 'Failed to load shared recipes';
+
+  @override
+  String get shareViewerNoConnection => 'No internet connection';
+
+  @override
+  String shareViewerHoursRemaining(int hours) {
+    return '${hours}h remaining';
+  }
+
+  @override
+  String shareViewerMinutesRemaining(int minutes) {
+    return '${minutes}m remaining';
+  }
+
+  @override
+  String shareViewerRecipeCount(int count) {
+    return '$count recipes';
+  }
+
+  @override
+  String get shareViewerUntitled => 'Untitled Recipe';
 }
