@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import '../../../l10n/app_localizations.dart';
 import '../../../utils/responsive_utils.dart';
 
 /// Displays shared content from a `/s/:code` link.
@@ -40,19 +41,19 @@ class _ShareViewerScreenState extends State<ShareViewerScreen> {
         });
       } else if (response.statusCode == 404) {
         setState(() {
-          _error = 'This share link has expired or doesn\'t exist.';
+          _error = 'expired';
           _loading = false;
         });
       } else {
         setState(() {
-          _error = 'Failed to load shared content.';
+          _error = 'failed';
           _loading = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Could not connect to server.';
+          _error = 'no_connection';
           _loading = false;
         });
       }
@@ -62,10 +63,11 @@ class _ShareViewerScreenState extends State<ShareViewerScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_data?['cookbook']?['name'] ?? 'Shared Recipe'),
+        title: Text(_data?['cookbook']?['name'] ?? l10n.shareViewerSharedRecipe),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => context.go('/'),
@@ -76,11 +78,19 @@ class _ShareViewerScreenState extends State<ShareViewerScreen> {
   }
 
   Widget _buildBody(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (_error != null) {
+      String errorText;
+      switch (_error) {
+        case 'expired': errorText = l10n.shareViewerExpired; break;
+        case 'no_connection': errorText = l10n.shareViewerNoConnection; break;
+        default: errorText = l10n.shareViewerFailed;
+      }
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -89,11 +99,11 @@ class _ShareViewerScreenState extends State<ShareViewerScreen> {
             children: [
               Icon(Icons.link_off, size: 64, color: theme.colorScheme.outline),
               const SizedBox(height: 16),
-              Text(_error!, style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
+              Text(errorText, style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: () => context.go('/'),
-                child: const Text('Go Home'),
+                child: Text(l10n.shareViewerGoHome),
               ),
             ],
           ),
@@ -123,7 +133,7 @@ class _ShareViewerScreenState extends State<ShareViewerScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Shared by $sharedBy',
+                        l10n.shareViewerSharedBy(sharedBy),
                         style: theme.textTheme.titleMedium,
                       ),
                     ),
@@ -132,7 +142,7 @@ class _ShareViewerScreenState extends State<ShareViewerScreen> {
                 if (expiresAt != null) ...[
                   const SizedBox(height: 8),
                   Text(
-                    'Expires: ${_formatExpiry(expiresAt)}',
+                    l10n.shareViewerExpires(_formatExpiry(expiresAt, l10n)),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.outline,
                     ),
@@ -140,7 +150,7 @@ class _ShareViewerScreenState extends State<ShareViewerScreen> {
                 ],
                 const SizedBox(height: 8),
                 Text(
-                  '${recipes.length} ${recipes.length == 1 ? 'recipe' : 'recipes'}',
+                  l10n.shareViewerRecipeCount(recipes.length),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.outline,
                   ),
@@ -157,11 +167,11 @@ class _ShareViewerScreenState extends State<ShareViewerScreen> {
     );
   }
 
-  String _formatExpiry(DateTime expiry) {
+  String _formatExpiry(DateTime expiry, AppLocalizations l10n) {
     final diff = expiry.difference(DateTime.now());
-    if (diff.inHours > 0) return '${diff.inHours}h remaining';
-    if (diff.inMinutes > 0) return '${diff.inMinutes}m remaining';
-    return 'Expired';
+    if (diff.inHours > 0) return l10n.shareViewerHoursRemaining(diff.inHours);
+    if (diff.inMinutes > 0) return l10n.shareViewerMinutesRemaining(diff.inMinutes);
+    return l10n.shareViewerExpiredLabel;
   }
 }
 
@@ -173,7 +183,8 @@ class _RecipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = recipe['title'] ?? 'Untitled';
+    final l10n = AppLocalizations.of(context)!;
+    final title = recipe['title'] ?? l10n.shareViewerUntitled;
     final description = recipe['description'] as String?;
     final ingredients = (recipe['ingredients'] as List?) ?? [];
     final steps = (recipe['steps'] as List?) ?? [];
@@ -193,7 +204,7 @@ class _RecipeCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (ingredients.isNotEmpty) ...[
-                  Text('Ingredients', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(l10n.ingredientsTitle, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   ...ingredients.map((ing) {
                     final amount = ing['amount']?.toString() ?? '';
@@ -207,7 +218,7 @@ class _RecipeCard extends StatelessWidget {
                   const SizedBox(height: 12),
                 ],
                 if (steps.isNotEmpty) ...[
-                  Text('Instructions', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(l10n.instructionsTitle, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   ...steps.asMap().entries.map((entry) {
                     final instruction = entry.value['instruction']?.toString() ?? '';

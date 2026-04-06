@@ -287,31 +287,37 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
             icon: Icon(_viewSize.icon),
             tooltip: AppLocalizations.of(context)!.tooltipViewSize,
             onSelected: (size) => setState(() => _viewSize = size),
-            itemBuilder: (ctx) => _ViewSize.values.map((size) {
-              return PopupMenuItem(
-                value: size,
-                child: Row(children: [
-                  Icon(size.icon, color: _viewSize == size ? theme.colorScheme.primary : null),
-                  const SizedBox(width: 12),
-                  Text(size.label),
-                ]),
-              );
-            }).toList(),
+            itemBuilder: (ctx) {
+              final l10n = AppLocalizations.of(ctx)!;
+              return _ViewSize.values.map((size) {
+                return PopupMenuItem(
+                  value: size,
+                  child: Row(children: [
+                    Icon(size.icon, color: _viewSize == size ? theme.colorScheme.primary : null),
+                    const SizedBox(width: 12),
+                    Text(size.label(l10n)),
+                  ]),
+                );
+              }).toList();
+            },
           ),
           PopupMenuButton<_SortMode>(
             icon: const Icon(Icons.sort),
             tooltip: AppLocalizations.of(context)!.sortOrder,
             onSelected: (sort) => setState(() => _sort = sort),
-            itemBuilder: (ctx) => _SortMode.values.map((sort) {
-              return PopupMenuItem(
-                value: sort,
-                child: Row(children: [
-                  Icon(sort.icon, color: _sort == sort ? theme.colorScheme.primary : null),
-                  const SizedBox(width: 12),
-                  Text(sort.label),
-                ]),
-              );
-            }).toList(),
+            itemBuilder: (ctx) {
+              final l10n = AppLocalizations.of(ctx)!;
+              return _SortMode.values.map((sort) {
+                return PopupMenuItem(
+                  value: sort,
+                  child: Row(children: [
+                    Icon(sort.icon, color: _sort == sort ? theme.colorScheme.primary : null),
+                    const SizedBox(width: 12),
+                    Text(sort.label(l10n)),
+                  ]),
+                );
+              }).toList();
+            },
           ),
           ], // end !_isSearching
         ],
@@ -656,9 +662,10 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
   }
 
   Future<void> _bulkCopyToCookbook(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final cookbooks = ref.read(cookbooksProvider).valueOrNull ?? [];
     if (cookbooks.length < 2) {
-      AppSnackbar.info(context, 'Create another cookbook first');
+      AppSnackbar.info(context, l10n.recipeListCreateCookbookFirst);
       return;
     }
 
@@ -673,7 +680,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
           Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text('Copy to Cookbook', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            child: Text(l10n.recipeListCopyToCookbook, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           ),
           ...cookbooks.map((c) => ListTile(
             leading: const Icon(Icons.book),
@@ -687,21 +694,22 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     if (targetId == null || !mounted) return;
 
     final count = _selectedIds.length;
-    AppSnackbar.loading(context, 'Copying $count recipes...');
+    AppSnackbar.loading(context, l10n.recipeListCopyingRecipes(count));
     final dao = ref.read(recipeDaoProvider);
     for (final id in _selectedIds) {
       await dao.duplicateRecipe(id, targetCookbookId: targetId);
     }
     if (mounted) {
-      AppSnackbar.success(context, '$count recipes copied');
+      AppSnackbar.success(context, l10n.recipeListRecipesCopied(count));
       _exitSelection();
     }
   }
 
   Future<void> _bulkMoveToCookbook(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final cookbooks = ref.read(cookbooksProvider).valueOrNull ?? [];
     if (cookbooks.length < 2) {
-      AppSnackbar.info(context, 'Create another cookbook first');
+      AppSnackbar.info(context, l10n.recipeListCreateCookbookFirst);
       return;
     }
 
@@ -716,7 +724,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
           Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text('Move to Cookbook', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            child: Text(l10n.recipeListMoveToCookbook, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           ),
           ...cookbooks.map((c) => ListTile(
             leading: const Icon(Icons.book),
@@ -730,13 +738,20 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     if (targetId == null || !mounted) return;
 
     final count = _selectedIds.length;
-    AppSnackbar.loading(context, 'Moving $count recipes...');
+    AppSnackbar.loading(context, l10n.recipeListMovingRecipes(count));
     final dao = ref.read(recipeDaoProvider);
     for (final id in _selectedIds) {
       await dao.updateRecipeFields(id, RecipesCompanion(cookbookId: Value(targetId)));
+      // Also move linked sub-recipes to the same cookbook
+      final linkedRecipes = await dao.getLinkedRecipes(id);
+      for (final linked in linkedRecipes) {
+        if (linked.cookbookId != targetId) {
+          await dao.updateRecipeFields(linked.id, RecipesCompanion(cookbookId: Value(targetId)));
+        }
+      }
     }
     if (mounted) {
-      AppSnackbar.success(context, '$count recipes moved');
+      AppSnackbar.success(context, l10n.recipeListRecipesMoved(count));
       _exitSelection();
     }
   }
@@ -773,29 +788,47 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
 // ============ ENUMS ============
 
 enum _ViewSize {
-  small('Small', Icons.view_list),
-  medium('Medium', Icons.grid_view),
-  large('Large', Icons.view_agenda);
+  small(Icons.view_list),
+  medium(Icons.grid_view),
+  large(Icons.view_agenda);
 
-  final String label;
   final IconData icon;
 
-  const _ViewSize(this.label, this.icon);
+  const _ViewSize(this.icon);
+
+  String label(AppLocalizations l10n) {
+    switch (this) {
+      case _ViewSize.small: return l10n.viewSizeSmall;
+      case _ViewSize.medium: return l10n.viewSizeMedium;
+      case _ViewSize.large: return l10n.viewSizeLarge;
+    }
+  }
 }
 
 enum _SortMode {
-  aToZ('A → Z', Icons.sort_by_alpha),
-  zToA('Z → A', Icons.sort_by_alpha),
-  newest('Newest', Icons.arrow_downward),
-  oldest('Oldest', Icons.arrow_upward),
-  rating('Rating', Icons.star),
-  quickest('Quickest', Icons.timer),
-  favorites('Favorites', Icons.favorite);
+  aToZ(Icons.sort_by_alpha),
+  zToA(Icons.sort_by_alpha),
+  newest(Icons.arrow_downward),
+  oldest(Icons.arrow_upward),
+  rating(Icons.star),
+  quickest(Icons.timer),
+  favorites(Icons.favorite);
 
-  final String label;
   final IconData icon;
 
-  const _SortMode(this.label, this.icon);
+  const _SortMode(this.icon);
+
+  String label(AppLocalizations l10n) {
+    switch (this) {
+      case _SortMode.aToZ: return l10n.sortAToZ;
+      case _SortMode.zToA: return l10n.sortZToA;
+      case _SortMode.newest: return l10n.sortNewest;
+      case _SortMode.oldest: return l10n.sortOldest;
+      case _SortMode.rating: return l10n.sortRating;
+      case _SortMode.quickest: return l10n.sortQuickest;
+      case _SortMode.favorites: return l10n.sortFavorites;
+    }
+  }
 }
 
 // ============ SMALL LIST VIEW ============
@@ -1273,12 +1306,12 @@ class _LargeCard extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(color: Colors.orange, borderRadius: BorderRadius.circular(12)),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.push_pin, size: 14, color: Colors.white),
-                              SizedBox(width: 4),
-                              Text('Pinned', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                              const Icon(Icons.push_pin, size: 14, color: Colors.white),
+                              const SizedBox(width: 4),
+                              Text(AppLocalizations.of(context)!.bulkPinned, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
@@ -1565,12 +1598,12 @@ class _SelectAllBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Row(
         children: [
-          Text('$selectedCount of $totalCount',
+          Text(AppLocalizations.of(context)!.selectAllBar(selectedCount, totalCount),
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
           const Spacer(),
           TextButton(
             onPressed: onSelectAll,
-            child: Text(selectedCount >= totalCount ? 'Deselect all' : 'Select all'),
+            child: Text(selectedCount >= totalCount ? AppLocalizations.of(context)!.deselectAll : AppLocalizations.of(context)!.selectAll),
           ),
         ],
       ),
@@ -1613,12 +1646,12 @@ class _BulkActionBar extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _BulkAction(icon: Icons.restaurant_menu, label: 'Course', onTap: onSetCourse),
-            _BulkAction(icon: Icons.category, label: 'Category', onTap: onSetCategory),
-            _BulkAction(icon: Icons.star_outline, label: 'Favorite', onTap: onFavorite),
-            _BulkAction(icon: Icons.copy, label: 'Copy', onTap: onCopyToCookbook),
-            _BulkAction(icon: Icons.drive_file_move_outline, label: 'Move', onTap: onMoveToCookbook),
-            _BulkAction(icon: Icons.delete_outline, label: 'Delete', onTap: onDelete, color: Colors.red),
+            _BulkAction(icon: Icons.restaurant_menu, label: AppLocalizations.of(context)!.bulkCourse, onTap: onSetCourse),
+            _BulkAction(icon: Icons.category, label: AppLocalizations.of(context)!.bulkCategory, onTap: onSetCategory),
+            _BulkAction(icon: Icons.star_outline, label: AppLocalizations.of(context)!.bulkFavorite, onTap: onFavorite),
+            _BulkAction(icon: Icons.copy, label: AppLocalizations.of(context)!.bulkCopyLabel, onTap: onCopyToCookbook),
+            _BulkAction(icon: Icons.drive_file_move_outline, label: AppLocalizations.of(context)!.bulkMoveLabel, onTap: onMoveToCookbook),
+            _BulkAction(icon: Icons.delete_outline, label: AppLocalizations.of(context)!.bulkDeleteLabel, onTap: onDelete, color: Colors.red),
           ],
         ),
       ),

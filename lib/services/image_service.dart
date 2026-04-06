@@ -96,10 +96,19 @@ class ImageService {
     }
 
     try {
-      final bytes = await file.readAsBytes();
+      var bytes = await file.readAsBytes();
+
+      // Compress if over 1MB — significant size savings with minimal quality loss
+      if (bytes.length > 1024 * 1024) {
+        final compressed = await compressImageBytes(bytes);
+        if (compressed != null && compressed.length < bytes.length) {
+          debugPrint('[ImageService] Compressed ${bytes.length} → ${compressed.length} bytes');
+          bytes = compressed;
+        }
+      }
 
       if (bytes.length > maxFileSize) {
-        debugPrint('[ImageService] File too large: ${bytes.length} bytes');
+        debugPrint('[ImageService] File too large after compression: ${bytes.length} bytes');
         return null;
       }
 

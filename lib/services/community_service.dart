@@ -146,6 +146,7 @@ class CommunityRecipe {
   final List<CommunityIngredient> ingredients;
   final List<CommunityStep> steps;
   final List<String> tags;
+  final List<CommunityRecipeLink> recipeLinks;
 
   const CommunityRecipe({
     required this.title, this.description, this.servings,
@@ -153,6 +154,7 @@ class CommunityRecipe {
     this.imagePath, this.categoryId, this.courseId,
     this.rating, this.notes, this.nutritionJson,
     required this.ingredients, required this.steps, required this.tags,
+    this.recipeLinks = const [],
   });
 
   factory CommunityRecipe.fromJson(Map<String, dynamic> json) => CommunityRecipe(
@@ -171,6 +173,25 @@ class CommunityRecipe {
     ingredients: (json['ingredients'] as List?)?.map((i) => CommunityIngredient.fromJson(i as Map<String, dynamic>)).toList() ?? [],
     steps: (json['steps'] as List?)?.map((s) => CommunityStep.fromJson(s as Map<String, dynamic>)).toList() ?? [],
     tags: (json['tags'] as List?)?.map((t) => t.toString()).toList() ?? [],
+    recipeLinks: (json['recipeLinks'] as List?)?.map((l) => CommunityRecipeLink.fromJson(l as Map<String, dynamic>)).toList() ?? [],
+  );
+}
+
+class CommunityRecipeLink {
+  final int ingredientIndex;
+  final int linkedRecipeIndex;
+  final double scale;
+
+  const CommunityRecipeLink({
+    required this.ingredientIndex,
+    required this.linkedRecipeIndex,
+    this.scale = 1.0,
+  });
+
+  factory CommunityRecipeLink.fromJson(Map<String, dynamic> json) => CommunityRecipeLink(
+    ingredientIndex: json['ingredientIndex'] as int? ?? 0,
+    linkedRecipeIndex: json['linkedRecipeIndex'] as int? ?? 0,
+    scale: (json['scale'] as num?)?.toDouble() ?? 1.0,
   );
 }
 

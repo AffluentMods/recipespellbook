@@ -496,6 +496,32 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
         imagePath: Value(stp.imagePath),
       ));
     }
+
+    // Copy recipe links (ingredient→sub-recipe references)
+    final origLinks = await (select(recipeLinks)
+      ..where((l) => l.sourceRecipeId.equals(recipeId)))
+      .get();
+
+    if (origLinks.isNotEmpty) {
+      // Build a map from old ingredient IDs to new ingredient IDs (by index/sortOrder)
+      final ingIdMap = <String, String>{};
+      for (var i = 0; i < ings.length; i++) {
+        ingIdMap[ings[i].id] = '${id}_ing_$i';
+      }
+
+      for (final link in origLinks) {
+        final newIngId = ingIdMap[link.ingredientId];
+        if (newIngId == null) continue;
+
+        await into(recipeLinks).insertOnConflictUpdate(RecipeLinksCompanion.insert(
+          sourceRecipeId: id,
+          ingredientId: newIngId,
+          linkedRecipeId: link.linkedRecipeId,
+          scale: Value(link.scale),
+          sortOrder: Value(link.sortOrder),
+        ));
+      }
+    }
   }
 
   /// Toggle pin status (takes recipeId and new pin state)

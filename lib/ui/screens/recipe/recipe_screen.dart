@@ -1506,49 +1506,90 @@ class _RecipeAppBar extends StatelessWidget {
 
   void _showCookbookPicker(BuildContext context, {required bool move}) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final cookbooks = ref.read(cookbooksProvider);
 
     cookbooks.whenData((list) {
       // Filter out current cookbook
       final others = list.where((c) => c.id != recipe.cookbookId).toList();
 
-      if (others.isEmpty) {
-        AppSnackbar.info(context, 'No other cookbooks available');
-        return;
-      }
-
       Responsive.showAdaptiveSheet(
         context,
-        builder: (ctx) => SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              Container(width: 40, height: 4, decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              )),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  move ? 'Move to cookbook' : 'Copy to cookbook',
-                  style: theme.textTheme.titleMedium,
-                ),
+        builder: (ctx) {
+          final newNameCtrl = TextEditingController();
+          return StatefulBuilder(
+            builder: (ctx, setSheetState) => SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 8),
+                  Container(width: 40, height: 4, decoration: BoxDecoration(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  )),
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      move ? l10n.moveToCookbook : l10n.copyToCookbook,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // ── Create new cookbook inline ──
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: newNameCtrl,
+                            decoration: InputDecoration(
+                              hintText: l10n.newCookbook,
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (val) async {
+                              final name = val.trim();
+                              if (name.isEmpty) return;
+                              Navigator.pop(ctx);
+                              await _createCookbookAndPerformAction(context, name, move: move);
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton.filled(
+                          icon: const Icon(Icons.add),
+                          onPressed: () async {
+                            final name = newNameCtrl.text.trim();
+                            if (name.isEmpty) return;
+                            Navigator.pop(ctx);
+                            await _createCookbookAndPerformAction(context, name, move: move);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (others.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    const Divider(height: 1),
+                    ...others.map((cookbook) => ListTile(
+                      leading: const Icon(Icons.book_outlined),
+                      title: Text(cookbook.name),
+                      onTap: () async {
+                        Navigator.pop(ctx);
+                        await _performCookbookAction(context, cookbook, move: move);
+                      },
+                    )),
+                  ],
+                  const SizedBox(height: 8),
+                ],
               ),
-              const SizedBox(height: 8),
-              ...others.map((cookbook) => ListTile(
-                leading: const Icon(Icons.book_outlined),
-                title: Text(cookbook.name),
-                onTap: () async {
-                  Navigator.pop(ctx);
-                  await _performCookbookAction(context, cookbook, move: move);
-                },
-              )),
-              const SizedBox(height: 8),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       );
     });
   }
@@ -1572,6 +1613,27 @@ class _RecipeAppBar extends StatelessWidget {
         if (context.mounted) {
           AppSnackbar.success(context, 'Copied to "${targetCookbook.name}"');
         }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppSnackbar.error(context, 'Error: $e');
+      }
+    }
+  }
+
+  Future<void> _createCookbookAndPerformAction(BuildContext context, String name, {required bool move}) async {
+    try {
+      final cookbookDao = ref.read(cookbookDaoProvider);
+      final newId = 'cb_${DateTime.now().millisecondsSinceEpoch}';
+      await cookbookDao.insertCookbook(CookbooksCompanion.insert(
+        id: newId,
+        name: name,
+      ));
+      // Refresh cookbooks provider so UI updates
+      ref.invalidate(cookbooksProvider);
+      final newCookbook = Cookbook(id: newId, name: name, createdAt: DateTime.now());
+      if (context.mounted) {
+        await _performCookbookAction(context, newCookbook, move: move);
       }
     } catch (e) {
       if (context.mounted) {

@@ -76,7 +76,7 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
           error: (_, __) => Text(l10n.trashTitle),
           data: (recipes) {
             if (_selectMode) {
-              return Text('${_selected.length} selected');
+              return Text(l10n.trashSelectedCount(_selected.length));
             }
             return Text(recipes.isEmpty
                 ? l10n.trashTitle
@@ -265,6 +265,7 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
   }
 
   Future<void> _bulkRestore(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final dao = ref.read(recipeDaoProvider);
     final count = _selected.length;
     final ids = Set<String>.from(_selected);
@@ -276,7 +277,7 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
     }
 
     if (context.mounted) {
-      AppSnackbar.success(context, '$count ${count == 1 ? 'recipe' : 'recipes'} restored');
+      AppSnackbar.success(context, l10n.trashBulkRestored(count));
     }
   }
 
@@ -288,7 +289,7 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
       builder: (dialogCtx) => AlertDialog(
         icon: Icon(Icons.delete_forever, color: Theme.of(dialogCtx).colorScheme.error),
         title: Text(l10n.trashDeletePermanently),
-        content: Text('Permanently delete $count ${count == 1 ? 'recipe' : 'recipes'}? This cannot be undone.'),
+        content: Text(l10n.trashBulkDeleteConfirm(count)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx),
@@ -304,14 +305,14 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
               final ids = Set<String>.from(_selected);
               _deselectAll();
 
-              if (context.mounted) AppSnackbar.loading(context, 'Deleting $count recipes...');
+              if (context.mounted) AppSnackbar.loading(context, l10n.trashDeletingCount(count));
               for (final id in ids) {
                 await dao.permanentlyDeleteRecipe(id);
               }
 
               if (context.mounted) {
                 AppSnackbar.dismiss(context);
-                AppSnackbar.info(context, '$count ${count == 1 ? 'recipe' : 'recipes'} permanently deleted');
+                AppSnackbar.info(context, l10n.trashBulkDeleted(count));
               }
             },
             child: Text(l10n.actionDelete),
@@ -373,7 +374,7 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
             ),
             onPressed: () async {
               Navigator.pop(dialogCtx);
-              if (context.mounted) AppSnackbar.loading(context, 'Deleting recipes...');
+              if (context.mounted) AppSnackbar.loading(context, l10n.trashDeletingAllRecipes);
               await ref.read(recipeDaoProvider).emptyTrash();
               if (context.mounted) {
                 AppSnackbar.dismiss(context);

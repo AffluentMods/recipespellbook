@@ -817,11 +817,18 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     if (widget.recipeId == null) return;
     final recipeDao = ref.read(recipeDaoProvider);
     final allRecipes = await recipeDao.getAllRecipes();
+    final currentRecipe = await recipeDao.getRecipeById(widget.recipeId!);
+    final cookbookId = currentRecipe?.cookbookId ?? '';
     final currentLinkInfos = _ingredientLinksMap[ingredientId] ?? [];
     final currentLinks = currentLinkInfos.map((info) => info.recipe).toList();
     final linkedIds = currentLinks.map((r) => r.id).toSet();
-    final available = allRecipes
-        .where((r) => r.id != widget.recipeId && !linkedIds.contains(r.id))
+
+    // Split into same cookbook and other cookbooks
+    final sameCookbook = allRecipes
+        .where((r) => r.id != widget.recipeId && !linkedIds.contains(r.id) && r.cookbookId == cookbookId)
+        .toList();
+    final otherCookbooks = allRecipes
+        .where((r) => r.id != widget.recipeId && !linkedIds.contains(r.id) && r.cookbookId != cookbookId)
         .toList();
 
     if (!mounted) return;
@@ -830,11 +837,22 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       context,
       MaterialPageRoute(
         builder: (_) => _RecipeLinkScreen(
-          available: available,
+          available: sameCookbook,
+          otherCookbookRecipes: otherCookbooks,
           currentlyLinked: currentLinks,
           ingredientName: ingredientName,
+          cookbookId: cookbookId,
           onLink: (recipe) async {
             await _linkRecipeToIngredient(ingredientId, recipe);
+          },
+          onLinkFromOtherCookbook: (recipe) async {
+            // Duplicate the recipe into this cookbook first, then link
+            final newId = 'recipe_${DateTime.now().millisecondsSinceEpoch}';
+            await recipeDao.duplicateRecipe(recipe.id, newId: newId, targetCookbookId: cookbookId);
+            final copied = await recipeDao.getRecipeById(newId);
+            if (copied != null) {
+              await _linkRecipeToIngredient(ingredientId, copied);
+            }
           },
           onUnlink: (id) async {
             await _unlinkRecipeFromIngredient(ingredientId, id);
@@ -2389,17 +2407,23 @@ class _NutritionSection extends StatelessWidget {
 // ============ FULL-SCREEN RECIPE LINK PICKER ============
 
 class _RecipeLinkScreen extends StatefulWidget {
-  final List<Recipe> available;
+  final List<Recipe> available; // Same cookbook recipes
+  final List<Recipe> otherCookbookRecipes; // Other cookbook recipes
   final List<Recipe> currentlyLinked;
   final String ingredientName;
+  final String cookbookId;
   final Future<void> Function(Recipe) onLink;
+  final Future<void> Function(Recipe) onLinkFromOtherCookbook;
   final Future<void> Function(String) onUnlink;
 
   const _RecipeLinkScreen({
     required this.available,
+    this.otherCookbookRecipes = const [],
     required this.currentlyLinked,
     required this.ingredientName,
+    required this.cookbookId,
     required this.onLink,
+    required this.onLinkFromOtherCookbook,
     required this.onUnlink,
   });
 
@@ -2412,12 +2436,15 @@ class _RecipeLinkScreenState extends State<_RecipeLinkScreen> {
   String _search = '';
   late List<Recipe> _linked;
   late List<Recipe> _available;
+  late List<Recipe> _otherCookbook;
+  bool _showOtherCookbooks = false;
 
   @override
   void initState() {
     super.initState();
     _linked = List.from(widget.currentlyLinked);
     _available = List.from(widget.available);
+    _otherCookbook = List.from(widget.otherCookbookRecipes);
     // Pre-fill search with the ingredient name to help find matching recipes
     if (widget.currentlyLinked.isEmpty) {
       _searchController.text = widget.ingredientName;
@@ -2435,6 +2462,12 @@ class _RecipeLinkScreenState extends State<_RecipeLinkScreen> {
     if (_search.isEmpty) return _available;
     final q = _search.toLowerCase();
     return _available.where((r) => r.title.toLowerCase().contains(q)).toList();
+  }
+
+  List<Recipe> get _filteredOtherCookbook {
+    if (_search.isEmpty) return _otherCookbook;
+    final q = _search.toLowerCase();
+    return _otherCookbook.where((r) => r.title.toLowerCase().contains(q)).toList();
   }
 
   Future<void> _handleLink(Recipe recipe) async {
@@ -2479,7 +2512,7 @@ class _RecipeLinkScreenState extends State<_RecipeLinkScreen> {
                   Icon(Icons.link, size: 18, color: theme.colorScheme.primary),
                   const SizedBox(width: 8),
                   Text(
-                    'Currently Linked (${_linked.length})',
+                    l10n.linkCurrentlyLinked(_linked.length),
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.primary,
@@ -2513,7 +2546,7 @@ class _RecipeLinkScreenState extends State<_RecipeLinkScreen> {
               controller: _searchController,
               onChanged: (v) => setState(() => _search = v),
               decoration: InputDecoration(
-                hintText: 'Search recipes to link...',
+                hintText: l10n.linkSearchRecipes,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _search.isNotEmpty
                     ? IconButton(
@@ -2539,7 +2572,7 @@ class _RecipeLinkScreenState extends State<_RecipeLinkScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              'Available (${filtered.length})',
+              l10n.linkAvailable(filtered.length),
               style: theme.textTheme.labelMedium?.copyWith(
                 color: theme.colorScheme.outline,
               ),
@@ -2549,34 +2582,94 @@ class _RecipeLinkScreenState extends State<_RecipeLinkScreen> {
 
           // Available recipes list
           Expanded(
-            child: filtered.isEmpty
-                ? Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.search_off, size: 48, color: theme.colorScheme.outline),
-                  const SizedBox(height: 12),
-                  Text(
-                    _search.isNotEmpty
-                        ? 'No recipes match "$_search"'
-                        : 'No recipes available to link',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.outline,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+              children: [
+                // Same cookbook recipes
+                if (filtered.isEmpty && _filteredOtherCookbook.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 48),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.search_off, size: 48, color: theme.colorScheme.outline),
+                          const SizedBox(height: 12),
+                          Text(
+                            _search.isNotEmpty
+                                ? l10n.linkNoMatch(_search)
+                                : l10n.linkNoRecipesAvailable,
+                            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else ...[
+                  ...filtered.map((recipe) => _AvailableRecipeCard(
+                    recipe: recipe,
+                    onLink: () => _handleLink(recipe),
+                  )),
+                ],
+
+                // Other cookbooks section
+                if (_filteredOtherCookbook.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  InkWell(
+                    onTap: () => setState(() => _showOtherCookbooks = !_showOtherCookbooks),
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.book_outlined, size: 18, color: theme.colorScheme.outline),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              l10n.linkFoundInOtherCookbooks(_filteredOtherCookbook.length),
+                              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+                            ),
+                          ),
+                          Icon(
+                            _showOtherCookbooks ? Icons.expand_less : Icons.expand_more,
+                            color: theme.colorScheme.outline,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
+                  if (_showOtherCookbooks) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 4),
+                      child: Text(
+                        l10n.linkCopyToCookbookNote,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.outline,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                    ..._filteredOtherCookbook.map((recipe) => _AvailableRecipeCard(
+                      recipe: recipe,
+                      onLink: () async {
+                        await widget.onLinkFromOtherCookbook(recipe);
+                        setState(() {
+                          _otherCookbook.removeWhere((r) => r.id == recipe.id);
+                        });
+                        // Refresh links
+                        if (mounted) {
+                          Navigator.pop(context, true);
+                        }
+                      },
+                      subtitle: l10n.linkWillBeCopied,
+                    )),
+                  ],
                 ],
-              ),
-            )
-                : ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
-              itemCount: filtered.length,
-              itemBuilder: (_, i) {
-                final recipe = filtered[i];
-                return _AvailableRecipeCard(
-                  recipe: recipe,
-                  onLink: () => _handleLink(recipe),
-                );
-              },
+              ],
             ),
           ),
         ],
@@ -2653,8 +2746,9 @@ class _LinkedRecipeCard extends StatelessWidget {
 class _AvailableRecipeCard extends StatelessWidget {
   final Recipe recipe;
   final VoidCallback onLink;
+  final String? subtitle;
 
-  const _AvailableRecipeCard({required this.recipe, required this.onLink});
+  const _AvailableRecipeCard({required this.recipe, required this.onLink, this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -2703,7 +2797,18 @@ class _AvailableRecipeCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (recipe.description != null) ...[
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.amber.shade600,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ] else if (recipe.description != null) ...[
                       const SizedBox(height: 2),
                       Text(
                         recipe.description!,

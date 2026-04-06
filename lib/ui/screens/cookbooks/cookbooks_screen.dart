@@ -129,44 +129,7 @@ class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
   }
 
   void _showNewCookbookDialog(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.cookbookAdd),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(
-            labelText: l10n.recipeFieldTitle,
-            hintText: l10n.cookbookNameHint,
-          ),
-          textCapitalization: TextCapitalization.words,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.actionCancel),
-          ),
-          FilledButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                final dao = ref.read(cookbookDaoProvider);
-                final id = DateTime.now().millisecondsSinceEpoch.toString();
-                dao.insertCookbook(CookbooksCompanion.insert(
-                  id: id,
-                  name: controller.text.trim(),
-                ));
-                Navigator.pop(context);
-              }
-            },
-            child: Text(l10n.actionAdd),
-          ),
-        ],
-      ),
-    );
+    context.push('/cookbook/new/edit');
   }
 }
 

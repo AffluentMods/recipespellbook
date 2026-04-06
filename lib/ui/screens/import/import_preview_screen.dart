@@ -238,25 +238,26 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
           ? ' (${imageFailures.length} image${imageFailures.length == 1 ? '' : 's'} failed to download)'
           : '';
 
-      if (errors.isNotEmpty) {
-        AppSnackbar.errorWithAction(
-          context,
-          '$_importedCount imported, ${errors.length} failed$imgFailSuffix',
-          actionLabel: 'Details',
-          onAction: () => _showErrorDetails(errors),
-        );
-      } else if (_importedCount == 1 && lastId != null) {
-        AppSnackbar.successWithAction(
-          context,
-          '${_importedCount} recipe imported$imgFailSuffix',
-          actionLabel: l10n.actionView,
-          onAction: () => router.push('/recipe/$lastId'),
-        );
-      } else {
-        AppSnackbar.success(context, '$_importedCount recipes imported$imgFailSuffix');
-      }
-
+      // Pop the import screen first so snackbar shows on the underlying screen
       Navigator.of(context).pop();
+
+      // Brief delay for the pop animation, then show result snackbar
+      await Future.delayed(const Duration(milliseconds: 150));
+      final navContext = router.routerDelegate.navigatorKey.currentContext;
+      if (navContext != null && navContext.mounted) {
+        if (errors.isNotEmpty) {
+          AppSnackbar.error(navContext, '$_importedCount imported, ${errors.length} failed$imgFailSuffix');
+        } else if (_importedCount == 1 && lastId != null) {
+          AppSnackbar.successWithAction(
+            navContext,
+            '${_importedCount} recipe imported$imgFailSuffix',
+            actionLabel: l10n.actionView,
+            onAction: () => router.push('/recipe/$lastId'),
+          );
+        } else {
+          AppSnackbar.success(navContext, '$_importedCount recipes imported$imgFailSuffix');
+        }
+      }
     }
   }
 

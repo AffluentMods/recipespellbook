@@ -97,7 +97,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
 
                         // ── Header ──
                         Text(
-                          'Upgrade Recipe Spellbook',
+                          l10n.paywallUpgradeTitle,
                           style: theme.textTheme.labelLarge?.copyWith(
                             color: theme.colorScheme.outline,
                             letterSpacing: 0.5,
@@ -105,7 +105,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Your recipes on every device.\nForever.',
+                          l10n.paywallSubtitle,
                           style: theme.textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             height: 1.2,
@@ -120,13 +120,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
 
                         // ── Plan cards ──
                         _PlanCard(
-                          title: 'Premium',
-                          price: '\$6.99',
-                          subline: 'one-time · yours forever',
-                          features: const [
-                            'Cloud sync across all devices',
-                            'Step-by-step photos',
-                            'Automatic backups',
+                          title: l10n.paywallPlanPremium,
+                          price: l10n.paywallPricePremium,
+                          subline: l10n.paywallSublinePremium,
+                          features: [
+                            l10n.paywallFeatureCloudSync,
+                            l10n.paywallFeatureStepPhotos,
+                            l10n.paywallFeatureAutoBackups,
                           ],
                           isSelected: _selectedPlan == 0,
                           onTap: () => setState(() => _selectedPlan = 0),
@@ -134,17 +134,17 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                         ),
                         const SizedBox(height: 10),
                         _PlanCard(
-                          title: 'Family',
-                          price: '\$19.99',
-                          subline: 'one-time · share with 5 people',
-                          features: const [
-                            'Everything in Premium',
-                            'Up to 5 family members sync together',
-                            'Shared cookbooks & shopping lists',
+                          title: l10n.paywallPlanFamily,
+                          price: l10n.paywallPriceFamily,
+                          subline: l10n.paywallSublineFamily,
+                          features: [
+                            l10n.paywallFeatureEverythingPremium,
+                            l10n.paywallFeatureFamilySync,
+                            l10n.paywallFeatureSharedCookbooks,
                           ],
                           isSelected: _selectedPlan == 1,
                           onTap: () => setState(() => _selectedPlan = 1),
-                          badge: 'BEST VALUE',
+                          badge: l10n.bestValue,
                           theme: theme,
                         ),
 
@@ -152,7 +152,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
 
                         // ── Price anchoring ──
                         Text(
-                          'Most recipe apps charge \$5–10/month. This isn\'t that.',
+                          l10n.paywallPriceAnchor,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.outline,
                             fontStyle: FontStyle.italic,
@@ -198,8 +198,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
   // ════════════════════════════════════════════════════════════════
 
   Widget _buildCTA(ThemeData theme, bool isDark, AuthState authState, AppLocalizations l10n) {
-    final planName = _selectedPlan == 0 ? 'Premium' : 'Family';
-    final planPrice = _selectedPlan == 0 ? '\$6.99' : '\$19.99';
+    final planName = _selectedPlan == 0 ? l10n.paywallPlanPremium : l10n.paywallPlanFamily;
+    final planPrice = _selectedPlan == 0 ? l10n.paywallPricePremium : l10n.paywallPriceFamily;
     final accentColor = isDark ? Colors.amber.shade400 : Colors.amber.shade700;
 
     return Container(
@@ -244,7 +244,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                               child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
                             )
                           : Text(
-                              'Get $planName — $planPrice',
+                              l10n.paywallGetPlan(planName, planPrice),
                               style: TextStyle(
                                 color: isDark ? Colors.black : Colors.white,
                                 fontWeight: FontWeight.w700,
@@ -258,7 +258,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
             ),
             const SizedBox(height: 6),
             Text(
-              'One-time purchase · No subscription · Yours forever',
+              l10n.paywallTrustLine,
               style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline),
             ),
             const SizedBox(height: 8),
@@ -267,16 +267,16 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _trustLink('Restore purchases', () {
+                _trustLink(l10n.paywallRestorePurchases, () {
                   ref.read(subscriptionProvider.notifier).restorePurchases();
                   AppSnackbar.info(context, l10n.restoringPurchases);
                 }, theme),
                 _trustDot(theme),
-                _trustLink('Privacy Policy', () {
+                _trustLink(l10n.paywallPrivacyPolicy, () {
                   launchUrl(Uri.parse('https://recipespellbook.app/privacy'), mode: LaunchMode.externalApplication);
                 }, theme),
                 _trustDot(theme),
-                _trustLink('Terms', () {
+                _trustLink(l10n.paywallTerms, () {
                   launchUrl(Uri.parse('https://recipespellbook.app/terms'), mode: LaunchMode.externalApplication);
                 }, theme),
               ],
@@ -352,7 +352,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
         await ref.read(subscriptionProvider.notifier).refreshStatus();
         if (mounted) {
           // Brief success then dismiss
-          AppSnackbar.success(context, 'You\'re all set! 🎉');
+          AppSnackbar.success(context, '${l10n.paywallPurchaseSuccess} 🎉');
           await Future.delayed(const Duration(milliseconds: 800));
           if (mounted) Navigator.pop(context);
         }
@@ -394,17 +394,15 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
 
   void _showWebPurchaseRefreshDialog() {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         icon: Icon(Icons.open_in_new, size: 40, color: theme.colorScheme.primary),
-        title: const Text('Complete Your Purchase'),
-        content: const Text(
-          'A checkout page has opened in your browser. '
-          'After completing your purchase, tap "Refresh" below to activate it.',
-        ),
+        title: Text(l10n.paywallCompleteYourPurchase),
+        content: Text(l10n.paywallCheckoutOpened),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
           FilledButton.icon(
             onPressed: () async {
               Navigator.pop(ctx);
@@ -412,15 +410,15 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
               if (mounted) {
                 final tier = ref.read(subscriptionProvider).tier;
                 if (tier != SubscriptionTier.free) {
-                  AppSnackbar.success(context, 'You\'re all set! 🎉');
+                  AppSnackbar.success(context, '${l10n.paywallPurchaseSuccess} 🎉');
                   Navigator.pop(context);
                 } else {
-                  AppSnackbar.info(context, 'Purchase not detected yet — try refreshing again.');
+                  AppSnackbar.info(context, l10n.paywallPurchaseNotDetected);
                 }
               }
             },
             icon: const Icon(Icons.refresh),
-            label: const Text('Refresh'),
+            label: Text(l10n.paywallRefresh),
           ),
         ],
       ),
@@ -428,17 +426,15 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
   }
 
   void _showWebPurchaseUnavailable() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         icon: Icon(Icons.info_outline, size: 40, color: Theme.of(ctx).colorScheme.primary),
-        title: const Text('Web Purchases Coming Soon'),
-        content: const Text(
-          'Web and desktop purchases are being set up. '
-          'In the meantime, upgrade on Android or iOS and it syncs everywhere.',
-        ),
+        title: Text(l10n.paywallWebComingSoon),
+        content: Text(l10n.paywallWebComingSoonDesc),
         actions: [
-          FilledButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
+          FilledButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionOk)),
         ],
       ),
     );
@@ -609,6 +605,7 @@ class _MiniCompare extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final muted = theme.colorScheme.outline;
     final check = Icon(Icons.check_rounded, size: 16, color: Colors.green.shade400);
     final dash = Text('—', style: TextStyle(color: muted, fontSize: 14), textAlign: TextAlign.center);
@@ -631,18 +628,18 @@ class _MiniCompare extends StatelessWidget {
           Row(
             children: [
               const Expanded(flex: 2, child: SizedBox()),
-              cell(Text('Free', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: muted))),
-              cell(Text('Premium', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.amber.shade700))),
-              cell(Text('Family', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.deepPurple))),
+              cell(Text(l10n.paywallCompareFree, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: muted))),
+              cell(Text(l10n.paywallPlanPremium, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.amber.shade700))),
+              cell(Text(l10n.paywallPlanFamily, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.deepPurple))),
             ],
           ),
           Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4), height: 16),
           // Rows
-          _compareRow(label('Unlimited recipes'), cell(check), cell(check), cell(check)),
+          _compareRow(label(l10n.paywallCompareUnlimitedRecipes), cell(check), cell(check), cell(check)),
           const SizedBox(height: 8),
-          _compareRow(label('Cloud sync'), cell(dash), cell(check), cell(check)),
+          _compareRow(label(l10n.paywallCompareCloudSync), cell(dash), cell(check), cell(check)),
           const SizedBox(height: 8),
-          _compareRow(label('Family sharing'), cell(dash), cell(dash), cell(check)),
+          _compareRow(label(l10n.paywallCompareFamilySharing), cell(dash), cell(dash), cell(check)),
         ],
       ),
     );

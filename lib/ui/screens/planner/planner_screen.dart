@@ -708,7 +708,7 @@ class _PlannerHeader extends StatelessWidget {
             icon: const Icon(Icons.chevron_left),
             onPressed: onPreviousWeek,
             visualDensity: VisualDensity.compact,
-            tooltip: 'Previous week',
+            tooltip: AppLocalizations.of(context)!.plannerPreviousWeek,
           ),
           Expanded(
             child: GestureDetector(
@@ -726,7 +726,7 @@ class _PlannerHeader extends StatelessWidget {
             icon: const Icon(Icons.chevron_right),
             onPressed: onNextWeek,
             visualDensity: VisualDensity.compact,
-            tooltip: 'Next week',
+            tooltip: AppLocalizations.of(context)!.plannerNextWeek,
           ),
           IconButton(
             icon: const Icon(Icons.calendar_month_outlined),
@@ -736,7 +736,7 @@ class _PlannerHeader extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.more_vert),
             onPressed: onMoreOptions,
-            tooltip: 'More options',
+            tooltip: AppLocalizations.of(context)!.plannerMoreOptions,
           ),
         ],
       ),

@@ -36,7 +36,7 @@ class _CookbookEditScreenState extends ConsumerState<CookbookEditScreen> {
   bool _isSaving = false;
   Cookbook? _cookbook;
 
-  bool get _isEditing => widget.cookbookId != null;
+  bool get _isEditing => widget.cookbookId != null && widget.cookbookId != 'new';
 
   @override
   void initState() {

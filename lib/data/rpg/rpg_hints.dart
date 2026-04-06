@@ -56,7 +56,7 @@ class HintDefinition {
       HintId.shoppingListGen => l10n.hintShoppingListGen,
       HintId.recipeNotes => l10n.hintRecipeNotes,
       HintId.cookbookOrganization => l10n.hintCookbookOrganization,
-      HintId.cookbookSwitcher => 'Tap the cookbook name at the top to switch between your cookbooks.',
+      HintId.cookbookSwitcher => l10n.hintCookbookSwitcher,
       HintId.tagSystem => l10n.hintTagSystem,
     };
   }

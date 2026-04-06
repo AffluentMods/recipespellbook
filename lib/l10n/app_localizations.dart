@@ -13780,7 +13780,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityPublishBackground.
   ///
   /// In en, this message translates to:
-  /// **'You can browse while publishing continues in the background.'**
+  /// **'You can browse while publishing continues.\nKeep the app open — switching apps may cause uploads to fail.'**
   String get communityPublishBackground;
 
   /// No description provided for @communityPublishDone.
@@ -13792,13 +13792,13 @@ abstract class AppLocalizations {
   /// No description provided for @communityPublishImagesSkipped.
   ///
   /// In en, this message translates to:
-  /// **'{count} images were skipped'**
+  /// **'{count} images could not be uploaded (upload failed or rejected)'**
   String communityPublishImagesSkipped(int count);
 
   /// No description provided for @communityPublishRejected.
   ///
   /// In en, this message translates to:
-  /// **'{count} images rejected'**
+  /// **'{count} images failed to upload'**
   String communityPublishRejected(int count);
 
   /// No description provided for @communityConfigurePublication.
@@ -16638,6 +16638,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Combined Ingredients'**
   String get combinedIngredients;
+
+  /// No description provided for @communitySubRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Sub-recipe'**
+  String get communitySubRecipe;
+
+  /// No description provided for @copyToCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy to cookbook'**
+  String get copyToCookbook;
+
+  /// No description provided for @moveToCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to cookbook'**
+  String get moveToCookbook;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

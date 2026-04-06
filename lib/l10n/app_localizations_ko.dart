@@ -8973,4 +8973,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get combinedIngredients => 'Combined Ingredients';
+
+  @override
+  String get communitySubRecipe => 'Sub-recipe';
+
+  @override
+  String get copyToCookbook => 'Copy to cookbook';
+
+  @override
+  String get moveToCookbook => 'Move to cookbook';
 }

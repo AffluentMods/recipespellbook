@@ -88,12 +88,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
     }
 
     return PopScope(
-      canPop: !_isPublishing,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && _isPublishing) {
-          AppSnackbar.info(context, l10n.communityPublishInProgress);
-        }
-      },
+      canPop: true,
       child: Scaffold(
       appBar: AppBar(
         title: Text(_step == 1 ? l10n.communityPublishCookbook : l10n.communityConfigurePublication),
@@ -436,6 +431,12 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         localImagePaths.add(_selectedCookbook!.imagePath!);
       }
 
+      // Build a map of recipe ID → index for recipe link references
+      final recipeIdToIndex = <String, int>{};
+      for (var i = 0; i < recipes.length; i++) {
+        recipeIdToIndex[recipes[i].id] = i;
+      }
+
       for (final r in recipes) {
         final ingredients = await recipeDao.getIngredientsForRecipe(r.id);
         final steps = await recipeDao.getStepsForRecipe(r.id);
@@ -450,6 +451,26 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         for (final s in steps) {
           if (_includeImages && s.imagePath != null) {
             localImagePaths.add(s.imagePath!);
+          }
+        }
+
+        // Gather recipe links (ingredient→sub-recipe references)
+        final linksMap = await recipeDao.getIngredientLinksMap(r.id);
+        final recipeLinksData = <Map<String, dynamic>>[];
+        for (var ingIdx = 0; ingIdx < ingredients.length; ingIdx++) {
+          final ing = ingredients[ingIdx];
+          final ingLinks = linksMap[ing.id];
+          if (ingLinks != null) {
+            for (final link in ingLinks) {
+              final linkedIndex = recipeIdToIndex[link.recipe.id];
+              if (linkedIndex != null) {
+                recipeLinksData.add({
+                  'ingredientIndex': ingIdx,
+                  'linkedRecipeIndex': linkedIndex,
+                  'scale': link.scale,
+                });
+              }
+            }
           }
         }
 
@@ -480,6 +501,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
             'imagePath': s.imagePath, // Will be replaced with server path
           }).toList(),
           'tags': tags.map((t) => t.name).toList(),
+          if (recipeLinksData.isNotEmpty) 'recipeLinks': recipeLinksData,
         });
 
         // Auto-add course/category display names as tags if recipe has no tags
@@ -552,6 +574,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
           totalImages: uniquePaths.length,
         );
 
+        const maxRetries = 3;
         for (int i = 0; i < uniquePaths.length; i++) {
           if (_publishCancelled) {
             publishProgressNotifier.value = PublishProgress(status: 'error', errorMessage: l10n.communityUploadCancelled);
@@ -559,13 +582,23 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
             return;
           }
           final localPath = uniquePaths[i];
-          final result = await ImageService.instance.communityUploadLocalPath(localPath);
+
+          // Retry up to maxRetries times for transient failures (e.g. app backgrounded)
+          ImageUploadResult? result;
+          for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            result = await ImageService.instance.communityUploadLocalPath(localPath);
+            if (result != null) break;
+            if (attempt < maxRetries) {
+              debugPrint('[Publish] Image upload failed (attempt $attempt/$maxRetries), retrying in ${attempt * 2}s: $localPath');
+              await Future.delayed(Duration(seconds: attempt * 2));
+            }
+          }
 
           if (result != null) {
             pathMapping[localPath] = result.path;
-            // Estimate bytes from the path (we don't have exact server-side size)
             totalImageBytes += File(localPath).lengthSync();
           } else {
+            debugPrint('[Publish] Image skipped after $maxRetries attempts: $localPath');
             skippedImages++;
           }
 

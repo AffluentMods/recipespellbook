@@ -4654,7 +4654,7 @@
   "communityPublishImagesWillUpload": "Images will be uploaded",
   "communityPublishTextOnlyNoImages": "Text only — no images",
   "communityPublishDone": "Published!",
-  "communityPublishImagesSkipped": "{count} images were skipped",
+  "communityPublishImagesSkipped": "{count} images could not be uploaded (upload failed or rejected)",
   "@communityPublishImagesSkipped": {
     "placeholders": {
       "count": {
@@ -4676,8 +4676,8 @@
     }
   },
   "communityPublishPublishing": "Publishing...",
-  "communityPublishBackground": "You can browse while publishing continues in the background.",
-  "communityPublishRejected": "{count} images rejected",
+  "communityPublishBackground": "You can browse while publishing continues.\nKeep the app open — switching apps may cause uploads to fail.",
+  "communityPublishRejected": "{count} images failed to upload",
   "@communityPublishRejected": {
     "placeholders": {
       "count": {
@@ -4877,5 +4877,9 @@
   "@mergeCookbooksButton": { "placeholders": { "count": { "type": "int" } } },
   "mergeCookbooksCancel": "Cancel",
 
-  "combinedIngredients": "Combined Ingredients"
+  "combinedIngredients": "Combined Ingredients",
+
+  "communitySubRecipe": "Sub-recipe",
+  "copyToCookbook": "Copy to cookbook",
+  "moveToCookbook": "Move to cookbook"
 }

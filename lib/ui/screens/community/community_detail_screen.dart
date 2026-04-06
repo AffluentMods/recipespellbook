@@ -183,9 +183,16 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
           ));
         }
 
+        // Track generated IDs for recipe link restoration
+        // Maps original recipe index → new local recipe ID
+        final recipeIdByIndex = <int, String>{};
+        // Maps (original recipe index, ingredient index) → new local ingredient ID
+        final ingredientIdByIndex = <String, String>{};
+
         for (final i in recipesToDownload) {
           final recipe = result.recipes[i];
           final recipeId = 'cr_${uuid.v4()}';
+          recipeIdByIndex[i] = recipeId;
 
           // Insert recipe
           await db.into(db.recipes).insert(RecipesCompanion.insert(
@@ -207,9 +214,12 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
           ));
 
           // Insert ingredients
-          for (final ing in recipe.ingredients) {
+          for (var ingIdx = 0; ingIdx < recipe.ingredients.length; ingIdx++) {
+            final ing = recipe.ingredients[ingIdx];
+            final ingId = 'ci_${uuid.v4()}';
+            ingredientIdByIndex['${i}_$ingIdx'] = ingId;
             await db.into(db.ingredients).insert(IngredientsCompanion.insert(
-              id: 'ci_${uuid.v4()}',
+              id: ingId,
               recipeId: recipeId,
               sortOrder: ing.sortOrder,
               amount: drift.Value(ing.amount),
@@ -245,6 +255,28 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               recipeId: recipeId,
               tagId: tag,
             ));
+          }
+        }
+
+        // Restore recipe links (ingredient→sub-recipe references)
+        for (final i in recipesToDownload) {
+          final recipe = result.recipes[i];
+          final sourceRecipeId = recipeIdByIndex[i];
+          if (sourceRecipeId == null) continue;
+
+          for (final link in recipe.recipeLinks) {
+            final linkedRecipeId = recipeIdByIndex[link.linkedRecipeIndex];
+            final ingredientId = ingredientIdByIndex['${i}_${link.ingredientIndex}'];
+            if (linkedRecipeId == null || ingredientId == null) continue;
+
+            await db.into(db.recipeLinks).insertOnConflictUpdate(
+              RecipeLinksCompanion.insert(
+                sourceRecipeId: sourceRecipeId,
+                ingredientId: ingredientId,
+                linkedRecipeId: linkedRecipeId,
+                scale: drift.Value(link.scale),
+              ),
+            );
           }
         }
       });
@@ -797,35 +829,12 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
             )),
           ),
 
-          // ── Recipe grid ──
+          // ── Recipe grid (with sub-recipe hierarchy) ──
           SliverPadding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, _selectMode ? 80 : 24),
             sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, i) {
-                  final recipe = d.recipes[i];
-                  return _RecipePreviewCard(
-                    index: i,
-                    recipe: recipe,
-                    publicationId: d.id,
-                    selectMode: _selectMode,
-                    isSelected: _selectedIndices.contains(i),
-                    onTap: () {
-                      if (_selectMode) {
-                        setState(() {
-                          if (_selectedIndices.contains(i)) {
-                            _selectedIndices.remove(i);
-                          } else {
-                            _selectedIndices.add(i);
-                          }
-                        });
-                      } else {
-                        _showRecipePreview(i);
-                      }
-                    },
-                  );
-                },
-                childCount: d.recipes.length,
+              delegate: SliverChildListDelegate(
+                _buildRecipeListWithHierarchy(d, l10n, theme),
               ),
             ),
           ),
@@ -853,6 +862,66 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         ),
       ]),
     );
+  }
+
+  /// Builds a flat widget list with sub-recipes indented below their parent.
+  List<Widget> _buildRecipeListWithHierarchy(CommunityDetail d, AppLocalizations l10n, ThemeData theme) {
+    // Collect all indices that are linked as sub-recipes
+    final childIndices = <int>{};
+    final childrenOf = <int, List<int>>{}; // parent index → [child indices]
+    for (int i = 0; i < d.recipes.length; i++) {
+      for (final link in d.recipes[i].recipeLinks) {
+        final childIdx = link.linkedRecipeIndex;
+        if (childIdx >= 0 && childIdx < d.recipes.length && childIdx != i) {
+          childIndices.add(childIdx);
+          childrenOf.putIfAbsent(i, () => []).add(childIdx);
+        }
+      }
+    }
+
+    Widget buildCard(int i, {bool isSubRecipe = false}) {
+      final recipe = d.recipes[i];
+      return _RecipePreviewCard(
+        index: i,
+        recipe: recipe,
+        publicationId: d.id,
+        selectMode: _selectMode,
+        isSelected: _selectedIndices.contains(i),
+        isSubRecipe: isSubRecipe,
+        hasSubRecipes: childrenOf.containsKey(i),
+        onTap: () {
+          if (_selectMode) {
+            setState(() {
+              if (_selectedIndices.contains(i)) {
+                _selectedIndices.remove(i);
+              } else {
+                _selectedIndices.add(i);
+              }
+            });
+          } else {
+            _showRecipePreview(i);
+          }
+        },
+      );
+    }
+
+    final widgets = <Widget>[];
+    for (int i = 0; i < d.recipes.length; i++) {
+      // Skip recipes that only appear as children
+      if (childIndices.contains(i)) continue;
+
+      widgets.add(buildCard(i));
+
+      // Show sub-recipes indented below parent
+      final children = childrenOf[i];
+      if (children != null) {
+        for (final childIdx in children) {
+          widgets.add(buildCard(childIdx, isSubRecipe: true));
+        }
+      }
+    }
+
+    return widgets;
   }
 
   void _showRecipePreview(int index) {
@@ -1176,6 +1245,8 @@ class _RecipePreviewCard extends StatelessWidget {
   final VoidCallback onTap;
   final bool selectMode;
   final bool isSelected;
+  final bool isSubRecipe;
+  final bool hasSubRecipes;
 
   const _RecipePreviewCard({
     required this.index,
@@ -1184,6 +1255,8 @@ class _RecipePreviewCard extends StatelessWidget {
     required this.onTap,
     this.selectMode = false,
     this.isSelected = false,
+    this.isSubRecipe = false,
+    this.hasSubRecipes = false,
   });
 
   @override
@@ -1202,90 +1275,126 @@ class _RecipePreviewCard extends StatelessWidget {
 
     final hasImage = recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      clipBehavior: Clip.antiAlias,
-      color: isSelected ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3) : null,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            children: [
-              // Selection checkbox
-              if (selectMode) ...[
-                Icon(
-                  isSelected ? Icons.check_circle : Icons.circle_outlined,
-                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
-                  size: 22,
-                ),
-                const SizedBox(width: 10),
-              ],
-              // Thumbnail
-              if (hasImage) ...[
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: CommunityImage(
-                    publicationId: publicationId,
-                    imagePath: recipe.imagePath,
-                    width: 56,
-                    height: 56,
-                    fit: BoxFit.cover,
-                    memCacheWidth: 112,
-                    memCacheHeight: 112,
+    return Padding(
+      padding: EdgeInsets.only(left: isSubRecipe ? 28 : 0),
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 8),
+        clipBehavior: Clip.antiAlias,
+        color: isSelected ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3) : null,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              children: [
+                // Selection checkbox
+                if (selectMode) ...[
+                  Icon(
+                    isSelected ? Icons.check_circle : Icons.circle_outlined,
+                    color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
+                    size: 22,
+                  ),
+                  const SizedBox(width: 10),
+                ],
+
+                // Sub-recipe link indicator
+                if (isSubRecipe) ...[
+                  Icon(Icons.subdirectory_arrow_right, size: 18, color: theme.colorScheme.outline),
+                  const SizedBox(width: 6),
+                ],
+
+                // Thumbnail
+                if (hasImage) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: CommunityImage(
+                      publicationId: publicationId,
+                      imagePath: recipe.imagePath,
+                      width: isSubRecipe ? 44 : 56,
+                      height: isSubRecipe ? 44 : 56,
+                      fit: BoxFit.cover,
+                      memCacheWidth: 112,
+                      memCacheHeight: 112,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ] else ...[
+                  CircleAvatar(
+                    radius: isSubRecipe ? 12 : 16,
+                    backgroundColor: isSubRecipe
+                        ? theme.colorScheme.surfaceContainerHighest
+                        : theme.colorScheme.primaryContainer,
+                    child: Icon(
+                      isSubRecipe ? Icons.link : Icons.restaurant,
+                      size: isSubRecipe ? 12 : 14,
+                      color: isSubRecipe ? theme.colorScheme.outline : theme.colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              recipe.title,
+                              style: TextStyle(
+                                fontSize: isSubRecipe ? 13 : 14,
+                                fontWeight: FontWeight.w500,
+                                color: isSubRecipe ? theme.colorScheme.onSurfaceVariant : null,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (hasSubRecipes && !selectMode)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 4),
+                              child: Icon(Icons.account_tree_outlined, size: 14, color: theme.colorScheme.outline),
+                            ),
+                        ],
+                      ),
+                      if (isSubRecipe)
+                        Text(
+                          l10n.communitySubRecipe,
+                          style: TextStyle(fontSize: 10, color: theme.colorScheme.outline),
+                        )
+                      else if (parts.isNotEmpty)
+                        Text(
+                          parts.join(' · '),
+                          style: TextStyle(fontSize: 11, color: theme.colorScheme.outline),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      if (recipe.rating != null && recipe.rating! > 0)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(5, (i) {
+                              final star = i + 1;
+                              return Icon(
+                                star <= recipe.rating! ? Icons.star : Icons.star_border,
+                                size: 14,
+                                color: star <= recipe.rating! ? Colors.amber : theme.colorScheme.outline.withValues(alpha: 0.3),
+                              );
+                            }),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 12),
-              ] else ...[
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: theme.colorScheme.primaryContainer,
-                  child: Text('${index + 1}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
-                ),
-                const SizedBox(width: 12),
+
+                // Chevron
+                Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline),
               ],
-
-              // Content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      recipe.title,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (parts.isNotEmpty)
-                      Text(
-                        parts.join(' · '),
-                        style: TextStyle(fontSize: 11, color: theme.colorScheme.outline),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    if (recipe.rating != null && recipe.rating! > 0)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: List.generate(5, (i) {
-                            final star = i + 1;
-                            return Icon(
-                              star <= recipe.rating! ? Icons.star : Icons.star_border,
-                              size: 14,
-                              color: star <= recipe.rating! ? Colors.amber : theme.colorScheme.outline.withValues(alpha: 0.3),
-                            );
-                          }),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-
-              // Chevron
-              Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline),
-            ],
+            ),
           ),
         ),
       ),
