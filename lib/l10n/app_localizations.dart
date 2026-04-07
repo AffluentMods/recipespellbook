@@ -952,7 +952,7 @@ abstract class AppLocalizations {
   /// No description provided for @importFromFile.
   ///
   /// In en, this message translates to:
-  /// **'From File'**
+  /// **'Import from file'**
   String get importFromFile;
 
   /// No description provided for @importFromText.
@@ -17034,6 +17034,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Untitled Recipe'**
   String get shareViewerUntitled;
+
+  /// No description provided for @exportFullZip.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Backup (ZIP)'**
+  String get exportFullZip;
+
+  /// No description provided for @exportFullZipSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All data + images in a portable archive'**
+  String get exportFullZipSubtitle;
+
+  /// No description provided for @importFromFileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Supports .json and .zip backup files'**
+  String get importFromFileSubtitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

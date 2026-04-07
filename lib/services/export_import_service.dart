@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
+import 'package:archive/archive.dart';
 import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -303,26 +304,352 @@ class ExportImportService {
   }
 
   // ──────────────────────────────────────────
-  //  IMPORT — FILE PICKER
+  //  FULL EXPORT — ZIP (data + images + schema.org)
+  // ──────────────────────────────────────────
+
+  /// Export everything as a .zip containing:
+  ///   manifest.json  — metadata (version, date, counts)
+  ///   data.json      — full native data (all tables, image refs as relative paths)
+  ///   images/        — all recipe/cookbook/step images
+  ///   recipes/       — individual schema.org Recipe JSON-LD files (for other apps)
+  Future<Uint8List> exportFullZip({void Function(String status)? onProgress}) async {
+    final archive = Archive();
+
+    onProgress?.call('Collecting data...');
+    final data = await exportAll();
+    final cookbooks = data['cookbooks'] as List? ?? [];
+
+    // Track image paths we've added to avoid duplicates
+    final addedImages = <String>{};
+    int imageCount = 0;
+
+    // ── Rewrite image paths: replace base64 with relative zip paths, collect files ──
+    for (final cbData in cookbooks) {
+      final cbMap = cbData as Map<String, dynamic>;
+      final recipes = cbMap['recipes'] as List? ?? [];
+      for (final recData in recipes) {
+        final r = recData as Map<String, dynamic>;
+        final recipeId = r['id'] as String? ?? 'unknown';
+
+        // Cover image
+        final coverBase64 = r.remove('imageBase64') as String?;
+        if (coverBase64 != null && coverBase64.isNotEmpty) {
+          final imgPath = 'images/recipes/${recipeId}_cover.jpg';
+          if (addedImages.add(imgPath)) {
+            try {
+              archive.addFile(ArchiveFile(imgPath, 0, base64Decode(coverBase64)));
+              imageCount++;
+            } catch (_) {}
+          }
+          r['imagePath'] = imgPath;
+        } else {
+          r['imagePath'] = null;
+        }
+
+        // Step images
+        final steps = r['steps'] as List? ?? [];
+        for (final stepData in steps) {
+          final s = stepData as Map<String, dynamic>;
+          final stepBase64 = s.remove('imageBase64') as String?;
+          if (stepBase64 != null && stepBase64.isNotEmpty) {
+            final imgPath = 'images/recipes/${recipeId}_step_${s['sortOrder']}.jpg';
+            if (addedImages.add(imgPath)) {
+              try {
+                archive.addFile(ArchiveFile(imgPath, 0, base64Decode(stepBase64)));
+                imageCount++;
+              } catch (_) {}
+            }
+            s['imagePath'] = imgPath;
+          } else {
+            s['imagePath'] = null;
+          }
+        }
+      }
+    }
+
+    // ── manifest.json ──
+    int totalRecipes = 0;
+    for (final cb in cookbooks) {
+      totalRecipes += ((cb as Map)['recipes'] as List?)?.length ?? 0;
+    }
+    final manifest = {
+      'app': 'Recipe Spellbook',
+      'version': 2,
+      'exportedAt': DateTime.now().toUtc().toIso8601String(),
+      'cookbookCount': cookbooks.length,
+      'recipeCount': totalRecipes,
+      'imageCount': imageCount,
+      'shoppingListCount': (data['shoppingLists'] as List?)?.length ?? 0,
+      'mealPlanCount': (data['mealPlans'] as List?)?.length ?? 0,
+    };
+
+    onProgress?.call('Writing data...');
+    archive.addFile(ArchiveFile(
+      'manifest.json', 0,
+      utf8.encode(const JsonEncoder.withIndent('  ').convert(manifest)),
+    ));
+    archive.addFile(ArchiveFile(
+      'data.json', 0,
+      utf8.encode(const JsonEncoder.withIndent('  ').convert(data)),
+    ));
+
+    // ── schema.org Recipe JSON-LD files (for interop with other apps) ──
+    onProgress?.call('Writing recipe files...');
+    for (final cbData in cookbooks) {
+      final cbMap = cbData as Map<String, dynamic>;
+      final cbName = cbMap['name'] as String? ?? 'Cookbook';
+      final recipes = cbMap['recipes'] as List? ?? [];
+
+      for (final recData in recipes) {
+        final r = recData as Map<String, dynamic>;
+        final title = r['title'] as String? ?? 'Untitled';
+        final safeTitle = title.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+
+        final schemaRecipe = _toSchemaOrgRecipe(r, cbName);
+        archive.addFile(ArchiveFile(
+          'recipes/$safeTitle.json', 0,
+          utf8.encode(const JsonEncoder.withIndent('  ').convert(schemaRecipe)),
+        ));
+      }
+    }
+
+    onProgress?.call('Compressing...');
+    final zipBytes = ZipEncoder().encode(archive);
+    return Uint8List.fromList(zipBytes!);
+  }
+
+  /// Save the full zip export to a file via file picker.
+  Future<bool> saveFullZipExport({void Function(String status)? onProgress}) async {
+    final zipBytes = await exportFullZip(onProgress: onProgress);
+    final date = DateTime.now();
+    final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    final filename = 'RecipeSpellbook_Export_$dateStr.zip';
+
+    if (isWeb) {
+      final result = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save full backup',
+        fileName: filename,
+        type: FileType.custom,
+        allowedExtensions: ['zip'],
+        bytes: zipBytes,
+      );
+      return result != null;
+    }
+
+    final result = await FilePicker.platform.saveFile(
+      dialogTitle: 'Save full backup',
+      fileName: filename,
+      type: FileType.custom,
+      allowedExtensions: ['zip'],
+    );
+    if (result != null) {
+      await File(result).writeAsBytes(zipBytes);
+      return true;
+    }
+    return false;
+  }
+
+  /// Share the full zip export.
+  Future<void> shareFullZipExport({void Function(String status)? onProgress}) async {
+    final zipBytes = await exportFullZip(onProgress: onProgress);
+    final date = DateTime.now();
+    final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    final filename = 'RecipeSpellbook_Export_$dateStr.zip';
+
+    if (isWeb) {
+      await SharePlus.instance.share(ShareParams(
+        files: [XFile.fromData(zipBytes, name: filename, mimeType: 'application/zip')],
+        subject: 'Recipe Spellbook Full Backup',
+      ));
+    } else {
+      final dir = await getTemporaryDirectory();
+      final file = File(p.join(dir.path, filename));
+      await file.writeAsBytes(zipBytes);
+      await SharePlus.instance.share(ShareParams(
+        files: [XFile(file.path)],
+        subject: 'Recipe Spellbook Full Backup',
+      ));
+    }
+  }
+
+  /// Convert a recipe map to schema.org Recipe JSON-LD format.
+  /// This is the standard format that other recipe apps can import.
+  Map<String, dynamic> _toSchemaOrgRecipe(Map<String, dynamic> r, String cookbookName) {
+    final ingredients = (r['ingredients'] as List?) ?? [];
+    final steps = (r['steps'] as List?) ?? [];
+    final prepMins = r['prepTimeMinutes'] as int?;
+    final cookMins = r['cookTimeMinutes'] as int?;
+    final totalMins = (prepMins ?? 0) + (cookMins ?? 0);
+
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'Recipe',
+      'name': r['title'] ?? 'Untitled',
+      'description': r['description'],
+      if (r['imagePath'] != null) 'image': r['imagePath'],
+      'author': {
+        '@type': 'Organization',
+        'name': 'Recipe Spellbook',
+      },
+      if (prepMins != null) 'prepTime': 'PT${prepMins}M',
+      if (cookMins != null) 'cookTime': 'PT${cookMins}M',
+      if (totalMins > 0) 'totalTime': 'PT${totalMins}M',
+      if (r['servings'] != null) 'recipeYield': r['servings'],
+      'recipeCategory': r['categoryId'],
+      'recipeIngredient': ingredients.map((i) {
+        final ing = i as Map<String, dynamic>;
+        final parts = <String>[];
+        if (ing['amount'] != null) parts.add(ing['amount'] as String);
+        if (ing['unit'] != null) parts.add(ing['unit'] as String);
+        parts.add(ing['name'] as String? ?? '');
+        return parts.join(' ').trim();
+      }).toList(),
+      'recipeInstructions': steps.map((s) {
+        final step = s as Map<String, dynamic>;
+        return {
+          '@type': 'HowToStep',
+          'text': step['instruction'] ?? '',
+          if (step['imagePath'] != null) 'image': step['imagePath'],
+        };
+      }).toList(),
+      if (r['notes'] != null) 'comment': r['notes'],
+      if (r['sourceUrl'] != null) 'url': r['sourceUrl'],
+      if (r['rating'] != null && (r['rating'] as int) > 0)
+        'aggregateRating': {
+          '@type': 'AggregateRating',
+          'ratingValue': r['rating'],
+          'ratingCount': 1,
+        },
+      // Extra metadata for Recipe Spellbook reimport
+      'recipeCuisine': cookbookName,
+      '_spellbook': {
+        'recipeId': r['id'],
+        'isFavorite': r['isFavorite'],
+        'nutritionJson': r['nutritionJson'],
+        'tagIds': r['tagIds'],
+      },
+    };
+  }
+
+  // ──────────────────────────────────────────
+  //  IMPORT — ZIP
+  // ──────────────────────────────────────────
+
+  /// Import from a .zip file exported by [exportFullZip].
+  /// Reads data.json and restores images from the images/ folder.
+  Future<ImportResult> importFromZipFile({ImportProgressCallback? onProgress}) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['zip'],
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty || result.files.single.bytes == null) {
+      return ImportResult(success: false, message: 'No file selected');
+    }
+
+    try {
+      return await importFromZipBytes(result.files.single.bytes!, onProgress: onProgress);
+    } catch (e) {
+      return ImportResult(success: false, message: 'Error reading zip: $e');
+    }
+  }
+
+  /// Import from zip bytes.
+  Future<ImportResult> importFromZipBytes(Uint8List zipBytes, {ImportProgressCallback? onProgress}) async {
+    final archive = ZipDecoder().decodeBytes(zipBytes);
+
+    // Find data.json
+    final dataFile = archive.findFile('data.json');
+    if (dataFile == null) {
+      return ImportResult(success: false, message: 'Invalid backup: missing data.json');
+    }
+
+    final dataStr = utf8.decode(dataFile.content as List<int>);
+    final data = jsonDecode(dataStr) as Map<String, dynamic>;
+
+    // Extract images to local storage
+    Directory? imagesDir;
+    final imagePathMap = <String, String>{}; // zip path → local path
+    if (!isWeb) {
+      final appDir = await getApplicationDocumentsDirectory();
+      imagesDir = Directory(p.join(appDir.path, 'images', 'imported'));
+      if (!await imagesDir.exists()) await imagesDir.create(recursive: true);
+
+      for (final file in archive.files) {
+        if (file.name.startsWith('images/') && file.isFile) {
+          final localFile = File(p.join(imagesDir.path, file.name.replaceAll('images/', '')));
+          final parentDir = localFile.parent;
+          if (!await parentDir.exists()) await parentDir.create(recursive: true);
+          await localFile.writeAsBytes(file.content as List<int>);
+          imagePathMap[file.name] = localFile.path;
+        }
+      }
+    }
+
+    // Rewrite image paths in data.json from zip-relative to local absolute
+    if (imagePathMap.isNotEmpty) {
+      final cookbooks = data['cookbooks'] as List? ?? [];
+      for (final cbData in cookbooks) {
+        final recipes = (cbData as Map<String, dynamic>)['recipes'] as List? ?? [];
+        for (final recData in recipes) {
+          final r = recData as Map<String, dynamic>;
+          final imgPath = r['imagePath'] as String?;
+          if (imgPath != null && imagePathMap.containsKey(imgPath)) {
+            r['imagePath'] = imagePathMap[imgPath];
+            // Also set imageBase64 to null so the import doesn't try to decode it
+            r.remove('imageBase64');
+          }
+
+          final steps = r['steps'] as List? ?? [];
+          for (final stepData in steps) {
+            final s = stepData as Map<String, dynamic>;
+            final sImgPath = s['imagePath'] as String?;
+            if (sImgPath != null && imagePathMap.containsKey(sImgPath)) {
+              s['imagePath'] = imagePathMap[sImgPath];
+              s.remove('imageBase64');
+            }
+          }
+        }
+      }
+    }
+
+    // Now import using the standard import path
+    return await importData(data, onProgress: onProgress);
+  }
+
+  // ──────────────────────────────────────────
+  //  IMPORT — JSON FILE PICKER
   // ──────────────────────────────────────────
 
   Future<ImportResult> importFromFile({ImportProgressCallback? onProgress}) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['json'],
-      withData: isWeb, // On web, read bytes directly since path is unavailable
+      allowedExtensions: ['json', 'zip'],
+      withData: true,
     );
     if (result == null || result.files.isEmpty) {
       return ImportResult(success: false, message: 'No file selected');
     }
     try {
-      String content;
       final pickedFile = result.files.single;
+      final ext = p.extension(pickedFile.name).toLowerCase();
+
+      // Route .zip files to the zip importer
+      if (ext == '.zip') {
+        final bytes = pickedFile.bytes;
+        if (bytes == null) {
+          final path = pickedFile.path;
+          if (path == null) return ImportResult(success: false, message: 'Could not read zip file');
+          return importFromZipBytes(await File(path).readAsBytes(), onProgress: onProgress);
+        }
+        return importFromZipBytes(bytes, onProgress: onProgress);
+      }
+
+      // Standard .json import
+      String content;
       if (pickedFile.bytes != null) {
-        // Web: bytes are available directly
         content = utf8.decode(pickedFile.bytes!);
       } else {
-        // Native: read from file path
         final file = File(pickedFile.path!);
         content = await file.readAsString();
       }

@@ -397,6 +397,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final service = ExportImportService(db);
     Responsive.showAdaptiveSheet(context, builder: (sheetCtx) => _ExportOptionsSheet(
       l10n: l10n,
+      onExportFullZip: () async {
+        Navigator.pop(sheetCtx);
+        AppSnackbar.loading(context, l10n.exporting);
+        try {
+          await service.shareFullZipExport(
+            onProgress: (status) {
+              if (context.mounted) AppSnackbar.loading(context, status);
+            },
+          );
+        } catch (e) {
+          if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
+          return;
+        }
+        if (context.mounted) AppSnackbar.dismiss(context);
+      },
       onExportCookbook: () async {
         Navigator.pop(sheetCtx);
         AppSnackbar.loading(context, l10n.exporting);
@@ -436,7 +451,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(padding: const EdgeInsets.all(16), child: Text(l10n.settingsImport, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
           ListTile(
-            leading: const Icon(Icons.file_open), title: Text(l10n.importFromJson), subtitle: Text(l10n.importFromJsonSubtitle),
+            leading: const Icon(Icons.file_open), title: Text(l10n.importFromFile), subtitle: Text(l10n.importFromFileSubtitle),
             onTap: () async {
               Navigator.pop(sheetCtx);
               AppSnackbar.loading(context, '${l10n.importing}...');
@@ -1373,7 +1388,8 @@ class _ExportOptionsSheet extends StatefulWidget {
   final AppLocalizations l10n;
   final VoidCallback onExportCookbook;
   final ValueChanged<ExportOptions> onExportSelective;
-  const _ExportOptionsSheet({required this.l10n, required this.onExportCookbook, required this.onExportSelective});
+  final VoidCallback? onExportFullZip;
+  const _ExportOptionsSheet({required this.l10n, required this.onExportCookbook, required this.onExportSelective, this.onExportFullZip});
   @override
   State<_ExportOptionsSheet> createState() => _ExportOptionsSheetState();
 }
@@ -1400,6 +1416,16 @@ class _ExportOptionsSheetState extends State<_ExportOptionsSheet> {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Text(l.settingsExport, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
+          if (widget.onExportFullZip != null) ...[
+            ListTile(
+              leading: const Icon(Icons.archive_outlined),
+              title: Text(l10n.exportFullZip),
+              subtitle: Text(l10n.exportFullZipSubtitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: widget.onExportFullZip,
+            ),
+            const Divider(),
+          ],
           ListTile(leading: const Icon(Icons.menu_book), title: Text(l.exportCurrentCookbook), trailing: const Icon(Icons.chevron_right), onTap: widget.onExportCookbook),
           const Divider(),
           Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Text(l.exportFullBackup, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600))),

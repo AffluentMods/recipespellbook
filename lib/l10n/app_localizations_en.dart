@@ -448,7 +448,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importFromImage => 'From Image';
 
   @override
-  String get importFromFile => 'From File';
+  String get importFromFile => 'Import from file';
 
   @override
   String get importFromText => 'Import from Text';
@@ -9259,4 +9259,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shareViewerUntitled => 'Untitled Recipe';
+
+  @override
+  String get exportFullZip => 'Full Backup (ZIP)';
+
+  @override
+  String get exportFullZipSubtitle => 'All data + images in a portable archive';
+
+  @override
+  String get importFromFileSubtitle => 'Supports .json and .zip backup files';
 }

@@ -671,8 +671,10 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
 
     final targetId = await showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
       builder: (ctx) {
         final theme = Theme.of(ctx);
         return SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -682,11 +684,18 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
             padding: const EdgeInsets.all(16),
             child: Text(l10n.recipeListCopyToCookbook, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           ),
-          ...cookbooks.map((c) => ListTile(
-            leading: const Icon(Icons.book),
-            title: Text(c.name),
-            onTap: () => Navigator.pop(ctx, c.id),
-          )),
+          Flexible(
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                ...cookbooks.map((c) => ListTile(
+                  leading: const Icon(Icons.book),
+                  title: Text(c.name),
+                  onTap: () => Navigator.pop(ctx, c.id),
+                )),
+              ],
+            ),
+          ),
           const SizedBox(height: 16),
         ]));
       },
@@ -715,8 +724,10 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
 
     final targetId = await showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
       builder: (ctx) {
         final theme = Theme.of(ctx);
         return SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -726,11 +737,18 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
             padding: const EdgeInsets.all(16),
             child: Text(l10n.recipeListMoveToCookbook, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           ),
-          ...cookbooks.map((c) => ListTile(
-            leading: const Icon(Icons.book),
-            title: Text(c.name),
-            onTap: () => Navigator.pop(ctx, c.id),
-          )),
+          Flexible(
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                ...cookbooks.map((c) => ListTile(
+                  leading: const Icon(Icons.book),
+                  title: Text(c.name),
+                  onTap: () => Navigator.pop(ctx, c.id),
+                )),
+              ],
+            ),
+          ),
           const SizedBox(height: 16),
         ]));
       },

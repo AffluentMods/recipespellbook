@@ -9241,4 +9241,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get shareViewerUntitled => 'Untitled Recipe';
+
+  @override
+  String get exportFullZip => 'Full Backup (ZIP)';
+
+  @override
+  String get exportFullZipSubtitle => 'All data + images in a portable archive';
+
+  @override
+  String get importFromFileSubtitle => 'Supports .json and .zip backup files';
 }

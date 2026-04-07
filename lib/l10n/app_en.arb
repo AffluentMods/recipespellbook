@@ -4965,5 +4965,10 @@
   "@shareViewerMinutesRemaining": { "placeholders": { "minutes": { "type": "int" } } },
   "shareViewerRecipeCount": "{count} recipes",
   "@shareViewerRecipeCount": { "placeholders": { "count": { "type": "int" } } },
-  "shareViewerUntitled": "Untitled Recipe"
+  "shareViewerUntitled": "Untitled Recipe",
+
+  "exportFullZip": "Full Backup (ZIP)",
+  "exportFullZipSubtitle": "All data + images in a portable archive",
+  "importFromFile": "Import from file",
+  "importFromFileSubtitle": "Supports .json and .zip backup files"
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
 import '../../../l10n/app_localizations.dart';
+import '../data/additive_data.dart';
 import '../utils/responsive_utils.dart';
 
 /// Service for scanning barcodes and looking up product information
@@ -59,6 +60,11 @@ class ProductInfo {
   final Map<String, dynamic>? nutrition;
   final List<String>? ingredients;
   final String? servingSize;
+  final int? novaGroup;          // NOVA 1-4 food processing classification
+  final String? nutriScoreGrade; // A-E nutritional quality
+  final List<String> additivesTags;  // Open Food Facts additive tags
+  final List<String> allergensTags;  // Allergen tags
+  final List<String> ingredientsAnalysisTags; // vegan/vegetarian/palm-oil
 
   ProductInfo({
     required this.barcode,
@@ -69,6 +75,11 @@ class ProductInfo {
     this.nutrition,
     this.ingredients,
     this.servingSize,
+    this.novaGroup,
+    this.nutriScoreGrade,
+    this.additivesTags = const [],
+    this.allergensTags = const [],
+    this.ingredientsAnalysisTags = const [],
   });
 
   factory ProductInfo.fromOpenFoodFacts(Map<String, dynamic> data) {
@@ -107,6 +118,11 @@ class ProductInfo {
       nutrition: nutrition,
       ingredients: ingredientsList,
       servingSize: data['serving_size'],
+      novaGroup: data['nova_group'] as int?,
+      nutriScoreGrade: (data['nutriscore_grade'] ?? data['nutrition_grades']) as String?,
+      additivesTags: (data['additives_tags'] as List?)?.cast<String>() ?? [],
+      allergensTags: (data['allergens_tags'] as List?)?.cast<String>() ?? [],
+      ingredientsAnalysisTags: (data['ingredients_analysis_tags'] as List?)?.cast<String>() ?? [],
     );
   }
 
@@ -642,6 +658,27 @@ class _ProductInfoSheet extends StatelessWidget {
                       const SizedBox(height: 24),
                     ],
 
+                    // NOVA & Nutri-Score badges
+                    if (product.novaGroup != null || product.nutriScoreGrade != null) ...[
+                      Row(
+                        children: [
+                          if (product.novaGroup != null)
+                            Expanded(child: _NovaBadge(group: product.novaGroup!)),
+                          if (product.novaGroup != null && product.nutriScoreGrade != null)
+                            const SizedBox(width: 12),
+                          if (product.nutriScoreGrade != null)
+                            Expanded(child: _NutriScoreBadge(grade: product.nutriScoreGrade!)),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+
+                    // Additives breakdown
+                    if (product.additivesTags.isNotEmpty) ...[
+                      _AdditivesSection(tags: product.additivesTags),
+                      const SizedBox(height: 24),
+                    ],
+
                     // Actions
                     FilledButton.icon(
                       onPressed: onAddToShopping,
@@ -707,6 +744,251 @@ class _NutritionChip extends StatelessWidget {
           Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
         ],
       ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════
+//  NOVA Score Badge
+// ════════════════════════════════════════════
+
+class _NovaBadge extends StatelessWidget {
+  final int group;
+  const _NovaBadge({required this.group});
+
+  static const _labels = {
+    1: 'Unprocessed',
+    2: 'Processed ingredients',
+    3: 'Processed food',
+    4: 'Ultra-processed',
+  };
+
+  static const _colors = {
+    1: Color(0xFF2E7D32), // green
+    2: Color(0xFF558B2F), // light green
+    3: Color(0xFFEF6C00), // orange
+    4: Color(0xFFC62828), // red
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = _colors[group] ?? Colors.grey;
+    final label = _labels[group] ?? 'Unknown';
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('NOVA', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: theme.colorScheme.outline, letterSpacing: 1)),
+              const SizedBox(width: 6),
+              Container(
+                width: 28, height: 28,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                alignment: Alignment.center,
+                child: Text('$group', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(label, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
+        ],
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════
+//  Nutri-Score Badge
+// ════════════════════════════════════════════
+
+class _NutriScoreBadge extends StatelessWidget {
+  final String grade;
+  const _NutriScoreBadge({required this.grade});
+
+  static const _gradeColors = {
+    'a': Color(0xFF1B5E20),
+    'b': Color(0xFF558B2F),
+    'c': Color(0xFFF9A825),
+    'd': Color(0xFFEF6C00),
+    'e': Color(0xFFC62828),
+  };
+
+  static const _gradeLabels = {
+    'a': 'Excellent',
+    'b': 'Good',
+    'c': 'Average',
+    'd': 'Poor',
+    'e': 'Bad',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final g = grade.toLowerCase();
+    final color = _gradeColors[g] ?? Colors.grey;
+    final label = _gradeLabels[g] ?? '';
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Nutri-Score', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: theme.colorScheme.outline, letterSpacing: 0.5)),
+              const SizedBox(width: 6),
+              Container(
+                width: 28, height: 28,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                alignment: Alignment.center,
+                child: Text(grade.toUpperCase(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(label, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
+        ],
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════
+//  Additives Section
+// ════════════════════════════════════════════
+
+class _AdditivesSection extends StatelessWidget {
+  final List<String> tags;
+  const _AdditivesSection({required this.tags});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final matched = getAdditives(tags);
+    final unmatched = tags.where((t) => lookupAdditive(t) == null).toList();
+
+    if (matched.isEmpty && unmatched.isEmpty) return const SizedBox.shrink();
+
+    // Sort: caution first, then moderate, then safe
+    matched.sort((a, b) => b.value.concern.index.compareTo(a.value.concern.index));
+
+    final cautionCount = matched.where((e) => e.value.concern == AdditiveConcernLevel.caution).length;
+    final moderateCount = matched.where((e) => e.value.concern == AdditiveConcernLevel.moderate).length;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text('Additives', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(width: 8),
+            Text('${matched.length + unmatched.length} found', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+          ],
+        ),
+        const SizedBox(height: 8),
+
+        // Summary chips
+        if (cautionCount > 0 || moderateCount > 0)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: [
+                if (cautionCount > 0)
+                  _ConcernChip(
+                    label: '$cautionCount worth noting',
+                    color: const Color(0xFFC62828),
+                  ),
+                if (moderateCount > 0)
+                  _ConcernChip(
+                    label: '$moderateCount moderate',
+                    color: const Color(0xFFEF6C00),
+                  ),
+              ],
+            ),
+          ),
+
+        // Individual additives
+        ...matched.map((entry) {
+          final info = entry.value;
+          final Color dotColor;
+          switch (info.concern) {
+            case AdditiveConcernLevel.safe:
+              dotColor = const Color(0xFF2E7D32);
+            case AdditiveConcernLevel.moderate:
+              dotColor = const Color(0xFFEF6C00);
+            case AdditiveConcernLevel.caution:
+              dotColor = const Color(0xFFC62828);
+          }
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Container(width: 8, height: 8, decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle)),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(info.name, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
+                      Text(info.description, style: TextStyle(fontSize: 12, color: theme.colorScheme.outline, height: 1.3)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+
+        // Unmatched additives (not in our database)
+        if (unmatched.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              'Also contains: ${unmatched.map((t) => t.replaceAll('en:', '').toUpperCase()).join(', ')}',
+              style: TextStyle(fontSize: 11, color: theme.colorScheme.outline),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _ConcernChip extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _ConcernChip({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Text(label, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600)),
     );
   }
 }
