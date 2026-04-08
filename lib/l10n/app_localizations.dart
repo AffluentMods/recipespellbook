@@ -17052,6 +17052,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Supports .json and .zip backup files'**
   String get importFromFileSubtitle;
+
+  /// No description provided for @exportAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced options'**
+  String get exportAdvanced;
+
+  /// No description provided for @exportCurrentCookbookSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'JSON file of current cookbook only'**
+  String get exportCurrentCookbookSubtitle;
+
+  /// No description provided for @exportJsonCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom JSON export'**
+  String get exportJsonCustom;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

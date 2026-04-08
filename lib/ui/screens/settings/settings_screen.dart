@@ -1395,6 +1395,7 @@ class _ExportOptionsSheet extends StatefulWidget {
 }
 
 class _ExportOptionsSheetState extends State<_ExportOptionsSheet> {
+  bool _showAdvanced = false;
   bool _cookbooks = true, _shoppingLists = true, _mealPlans = true;
   bool _tags = true, _customCategories = true, _customCourses = true;
 
@@ -1415,31 +1416,70 @@ class _ExportOptionsSheetState extends State<_ExportOptionsSheet> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Text(l.settingsExport, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          if (widget.onExportFullZip != null) ...[
+          const SizedBox(height: 12),
+
+          // ── Primary: Full ZIP backup ──
+          if (widget.onExportFullZip != null)
             ListTile(
               leading: const Icon(Icons.archive_outlined),
               title: Text(l10n.exportFullZip),
               subtitle: Text(l10n.exportFullZipSubtitle),
               trailing: const Icon(Icons.chevron_right),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              tileColor: theme.colorScheme.primaryContainer.withValues(alpha: 0.15),
               onTap: widget.onExportFullZip,
             ),
-            const Divider(),
-          ],
-          ListTile(leading: const Icon(Icons.menu_book), title: Text(l.exportCurrentCookbook), trailing: const Icon(Icons.chevron_right), onTap: widget.onExportCookbook),
-          const Divider(),
-          Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Text(l.exportFullBackup, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600))),
-          _Chk(title: l.exportCookbooksRecipes, value: _cookbooks, onChanged: (v) => setState(() => _cookbooks = v ?? true)),
-          _Chk(title: l.exportShoppingLists, value: _shoppingLists, onChanged: (v) => setState(() => _shoppingLists = v ?? false)),
-          _Chk(title: l.exportMealPlans, value: _mealPlans, onChanged: (v) => setState(() => _mealPlans = v ?? false)),
-          _Chk(title: l.exportTags, value: _tags, onChanged: (v) => setState(() => _tags = v ?? false)),
-          _Chk(title: l.exportCategories, value: _customCategories, onChanged: (v) => setState(() => _customCategories = v ?? false)),
-          _Chk(title: l.exportCourses, value: _customCourses, onChanged: (v) => setState(() => _customCourses = v ?? false)),
+
           const SizedBox(height: 12),
-          SizedBox(width: double.infinity, child: FilledButton.icon(
-            onPressed: _noneChecked ? null : () => widget.onExportSelective(ExportOptions(cookbooks: _cookbooks, shoppingLists: _shoppingLists, mealPlans: _mealPlans, tags: _tags, customCategories: _customCategories, customCourses: _customCourses)),
-            icon: const Icon(Icons.download), label: Text(buttonLabel),
-          )),
+
+          // ── Advanced toggle ──
+          InkWell(
+            onTap: () => setState(() => _showAdvanced = !_showAdvanced),
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  Icon(
+                    _showAdvanced ? Icons.expand_less : Icons.expand_more,
+                    size: 20,
+                    color: theme.colorScheme.outline,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.exportAdvanced,
+                    style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // ── Advanced options (collapsed by default) ──
+          if (_showAdvanced) ...[
+            const SizedBox(height: 4),
+            ListTile(
+              leading: const Icon(Icons.menu_book),
+              title: Text(l.exportCurrentCookbook),
+              subtitle: Text(l10n.exportCurrentCookbookSubtitle),
+              trailing: const Icon(Icons.chevron_right),
+              dense: true,
+              onTap: widget.onExportCookbook,
+            ),
+            const Divider(height: 1),
+            Padding(padding: const EdgeInsets.only(top: 12, bottom: 4), child: Text(l10n.exportJsonCustom, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600))),
+            _Chk(title: l.exportCookbooksRecipes, value: _cookbooks, onChanged: (v) => setState(() => _cookbooks = v ?? true)),
+            _Chk(title: l.exportShoppingLists, value: _shoppingLists, onChanged: (v) => setState(() => _shoppingLists = v ?? false)),
+            _Chk(title: l.exportMealPlans, value: _mealPlans, onChanged: (v) => setState(() => _mealPlans = v ?? false)),
+            _Chk(title: l.exportTags, value: _tags, onChanged: (v) => setState(() => _tags = v ?? false)),
+            _Chk(title: l.exportCategories, value: _customCategories, onChanged: (v) => setState(() => _customCategories = v ?? false)),
+            _Chk(title: l.exportCourses, value: _customCourses, onChanged: (v) => setState(() => _customCourses = v ?? false)),
+            const SizedBox(height: 8),
+            SizedBox(width: double.infinity, child: OutlinedButton.icon(
+              onPressed: _noneChecked ? null : () => widget.onExportSelective(ExportOptions(cookbooks: _cookbooks, shoppingLists: _shoppingLists, mealPlans: _mealPlans, tags: _tags, customCategories: _customCategories, customCourses: _customCourses)),
+              icon: const Icon(Icons.download, size: 18), label: Text(buttonLabel),
+            )),
+          ],
           const SizedBox(height: 12),
         ]),
       )),

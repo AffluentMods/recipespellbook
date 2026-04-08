@@ -4970,5 +4970,9 @@
   "exportFullZip": "Full Backup (ZIP)",
   "exportFullZipSubtitle": "All data + images in a portable archive",
   "importFromFile": "Import from file",
-  "importFromFileSubtitle": "Supports .json and .zip backup files"
+  "importFromFileSubtitle": "Supports .json and .zip backup files",
+
+  "exportAdvanced": "Advanced options",
+  "exportCurrentCookbookSubtitle": "JSON file of current cookbook only",
+  "exportJsonCustom": "Custom JSON export"
 }

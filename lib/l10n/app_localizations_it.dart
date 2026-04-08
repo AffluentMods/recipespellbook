@@ -9250,4 +9250,13 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get importFromFileSubtitle => 'Supports .json and .zip backup files';
+
+  @override
+  String get exportAdvanced => 'Advanced options';
+
+  @override
+  String get exportCurrentCookbookSubtitle => 'JSON file of current cookbook only';
+
+  @override
+  String get exportJsonCustom => 'Custom JSON export';
 }

@@ -2458,16 +2458,36 @@ class _RecipeLinkScreenState extends State<_RecipeLinkScreen> {
     super.dispose();
   }
 
+  /// Word-based matching: extract meaningful words from search query,
+  /// match recipes where the title contains ALL of those words.
+  /// Strips parenthetical text like "(see X recipe)" and common filler words.
+  static const _linkSearchStopWords = {'see', 'the', 'a', 'an', 'and', 'or', 'for', 'of', 'to', 'in', 'recipe', 'recipes'};
+
+  List<String> get _searchWords {
+    // Strip parenthetical content like "(see Strawberry Puree recipe)"
+    final cleaned = _search.replaceAll(RegExp(r'\([^)]*\)'), '').toLowerCase().trim();
+    return cleaned
+        .split(RegExp(r'[\s,.\-—–;:!?/]+'))
+        .where((w) => w.length > 1)
+        .where((w) => !_linkSearchStopWords.contains(w))
+        .toList();
+  }
+
+  bool _matchesSearch(String title) {
+    final words = _searchWords;
+    if (words.isEmpty) return true;
+    final lowerTitle = title.toLowerCase();
+    return words.every((w) => lowerTitle.contains(w));
+  }
+
   List<Recipe> get _filteredAvailable {
     if (_search.isEmpty) return _available;
-    final q = _search.toLowerCase();
-    return _available.where((r) => r.title.toLowerCase().contains(q)).toList();
+    return _available.where((r) => _matchesSearch(r.title)).toList();
   }
 
   List<Recipe> get _filteredOtherCookbook {
     if (_search.isEmpty) return _otherCookbook;
-    final q = _search.toLowerCase();
-    return _otherCookbook.where((r) => r.title.toLowerCase().contains(q)).toList();
+    return _otherCookbook.where((r) => _matchesSearch(r.title)).toList();
   }
 
   Future<void> _handleLink(Recipe recipe) async {

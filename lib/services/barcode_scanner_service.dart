@@ -136,6 +136,11 @@ class ProductInfo {
     );
   }
 
+  /// Whether the nutri-score is a valid A-E grade (not "not-applicable", "unknown", etc.)
+  bool get hasValidNutriScore =>
+      nutriScoreGrade != null &&
+      const {'a', 'b', 'c', 'd', 'e'}.contains(nutriScoreGrade!.toLowerCase());
+
   /// Get display name (brand + name)
   String get displayName {
     if (brand != null && name != null) {
@@ -659,16 +664,19 @@ class _ProductInfoSheet extends StatelessWidget {
                     ],
 
                     // NOVA & Nutri-Score badges
-                    if (product.novaGroup != null || product.nutriScoreGrade != null) ...[
-                      Row(
-                        children: [
-                          if (product.novaGroup != null)
-                            Expanded(child: _NovaBadge(group: product.novaGroup!)),
-                          if (product.novaGroup != null && product.nutriScoreGrade != null)
-                            const SizedBox(width: 12),
-                          if (product.nutriScoreGrade != null)
-                            Expanded(child: _NutriScoreBadge(grade: product.nutriScoreGrade!)),
-                        ],
+                    if (product.novaGroup != null || product.hasValidNutriScore) ...[
+                      IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (product.novaGroup != null)
+                              Expanded(child: _NovaBadge(group: product.novaGroup!)),
+                            if (product.novaGroup != null && product.hasValidNutriScore)
+                              const SizedBox(width: 12),
+                            if (product.hasValidNutriScore)
+                              Expanded(child: _NutriScoreBadge(grade: product.nutriScoreGrade!)),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 24),
                     ],
@@ -680,33 +688,36 @@ class _ProductInfoSheet extends StatelessWidget {
                     ],
 
                     // Actions
-                    FilledButton.icon(
-                      onPressed: onAddToShopping,
-                      icon: const Icon(Icons.add_shopping_cart),
-                      label: Text(l10n.addToShoppingList),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 48),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: FilledButton.icon(
+                        onPressed: onAddToShopping,
+                        icon: const Icon(Icons.add_shopping_cart),
+                        label: Text(l10n.addToShoppingList),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: onSearchRecipes,
-                      icon: const Icon(Icons.search),
-                      label: Text(l10n.findRecipesWithThis),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 48),
-                      ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton.icon(
+                            onPressed: onSearchRecipes,
+                            icon: const Icon(Icons.search, size: 18),
+                            label: Text(l10n.findRecipesWithThis, style: const TextStyle(fontSize: 12)),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextButton.icon(
+                            onPressed: onSaveAsRecipe,
+                            icon: const Icon(Icons.menu_book, size: 18),
+                            label: Text(l10n.saveAsRecipe, style: const TextStyle(fontSize: 12)),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: onSaveAsRecipe,
-                      icon: const Icon(Icons.menu_book),
-                      label: Text(l10n.saveAsRecipe),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 48),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 4),
                     TextButton(
                       onPressed: onScanAnother,
                       child: Text(l10n.scanAnother),
@@ -911,7 +922,7 @@ class _AdditivesSection extends StatelessWidget {
               children: [
                 if (cautionCount > 0)
                   _ConcernChip(
-                    label: '$cautionCount worth noting',
+                    label: '$cautionCount caution',
                     color: const Color(0xFFC62828),
                   ),
                 if (moderateCount > 0)
@@ -960,15 +971,32 @@ class _AdditivesSection extends StatelessWidget {
           );
         }),
 
-        // Unmatched additives (not in our database)
-        if (unmatched.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(
-              'Also contains: ${unmatched.map((t) => t.replaceAll('en:', '').toUpperCase()).join(', ')}',
-              style: TextStyle(fontSize: 11, color: theme.colorScheme.outline),
+        // Unmatched additives (not in our database — show with grey dot)
+        ...unmatched.map((tag) {
+          final code = tag.replaceAll('en:', '').toUpperCase();
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Container(width: 8, height: 8, decoration: BoxDecoration(color: theme.colorScheme.outline, shape: BoxShape.circle)),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(code, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
+                      Text('Not in database', style: TextStyle(fontSize: 12, color: theme.colorScheme.outline, height: 1.3)),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ),
+          );
+        }),
       ],
     );
   }

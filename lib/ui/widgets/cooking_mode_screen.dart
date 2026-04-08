@@ -271,6 +271,8 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
                   stepNumber: index + 1,
                   totalSteps: _steps.length,
                   allIngredients: _ingredients,
+                  allSteps: _steps,
+                  stepIndex: index,
                 ),
               ),
             ),
@@ -405,114 +407,123 @@ class _StepView extends ConsumerWidget {
   final int stepNumber;
   final int totalSteps;
   final List<Ingredient> allIngredients;
+  final List<Step> allSteps;
+  final int stepIndex;
 
-  const _StepView({required this.step, required this.stepNumber, required this.totalSteps, required this.allIngredients});
+  const _StepView({required this.step, required this.stepNumber, required this.totalSteps, required this.allIngredients, required this.allSteps, required this.stepIndex});
 
-  /// Fuzzy-match ingredients mentioned in the step instruction.
-  /// Uses stemming, bidirectional token matching, and smart thresholds.
-  /// Skips header ingredients (notes == '__header__').
+  /// Smart ingredient matching: assigns each ingredient to its BEST step,
+  /// so duplicates like "eggs" appearing 3x get distributed correctly.
   List<Ingredient> _matchIngredients() {
+    // Step 1: Score every ingredient against every step
+    final scores = <String, List<int>>{}; // ingredientId → [score per step]
+    final nonHeaders = allIngredients.where((i) => i.notes != '__header__').toList();
+
+    for (final ing in nonHeaders) {
+      final ingScores = <int>[];
+      for (final s in allSteps) {
+        ingScores.add(_scoreIngredientForStep(ing, s));
+      }
+      scores[ing.id] = ingScores;
+    }
+
+    // Step 2: Assign each ingredient to the step where it scores highest.
+    // If tied, assign to the earliest step (ingredients are usually used in order).
+    // An ingredient appears in a step if:
+    //   a) This step is the best match for it, OR
+    //   b) It scores > 0 here AND it's the only step that mentions it
+    final result = <Ingredient>[];
+    for (final ing in nonHeaders) {
+      final ingScores = scores[ing.id]!;
+      final myScore = ingScores[stepIndex];
+      if (myScore == 0) continue;
+
+      final maxScore = ingScores.reduce((a, b) => a > b ? a : b);
+      if (myScore < maxScore) continue; // A different step is a better match
+
+      // If tied with an earlier step, only show in the earliest
+      final firstBest = ingScores.indexOf(maxScore);
+      if (firstBest != stepIndex) continue;
+
+      result.add(ing);
+    }
+
+    // Step 3: Header-based context boost — if step mentions a section name,
+    // pull in any unassigned ingredients from that section.
+    final headerSections = _buildHeaderSections();
     final instruction = step.instruction.toLowerCase();
     final instructionTokens = instruction
         .split(RegExp(r'[\s,.\-—–;:!?()]+'))
         .where((t) => t.length > 2)
         .map(_stem)
         .toSet();
-    final matched = <Ingredient>[];
 
-    for (final ing in allIngredients) {
-      // Skip section headers — they are display-only dividers
-      if (ing.notes == '__header__') continue;
-
-      final name = ing.name.toLowerCase().trim();
-      if (name.isEmpty) continue;
-
-      // 1. Direct substring match (handles multi-word like "olive oil")
-      if (instruction.contains(name)) {
-        matched.add(ing);
-        continue;
-      }
-
-      // 2. Stemmed direct match — stem the full name and check
-      final stemmedName = _stem(name);
-      if (stemmedName.length > 3 && instruction.contains(stemmedName)) {
-        matched.add(ing);
-        continue;
-      }
-
-      // 3. Token-based matching with stemming
-      final nameTokens = name
-          .split(RegExp(r'[\s,/()]+'))
-          .where((t) => t.length > 2)
-          .where((t) => !_commonWords.contains(t))
-          .map(_stem)
-          .where((t) => t.length > 2)
-          .toList();
-
-      if (nameTokens.isEmpty) continue;
-
-      // Count how many ingredient tokens appear in the instruction
-      int matchCount = 0;
-      for (final token in nameTokens) {
-        // Check if stemmed token appears in instruction text directly
-        if (instruction.contains(token)) {
-          matchCount++;
-          continue;
-        }
-        // Check if any instruction word stems to the same thing
-        if (instructionTokens.contains(token)) {
-          matchCount++;
-        }
-      }
-
-      // Adaptive threshold:
-      // - Single significant token (e.g., "garlic"): must match
-      // - 2 tokens (e.g., "red onion"): at least 1 must match
-      // - 3+ tokens: at least 50% must match
-      final threshold = nameTokens.length == 1
-          ? 1
-          : nameTokens.length == 2
-          ? 1
-          : (nameTokens.length * 0.5).ceil();
-
-      if (matchCount >= threshold && matchCount > 0) {
-        matched.add(ing);
-      }
-    }
-
-    // ── Header-based context boost ──
-    // If the step mentions a section keyword (e.g., "dough", "filling", "sauce")
-    // that matches a header name, include all non-matched ingredients from that section.
-    // This helps when a step says "combine the dough ingredients" without listing each one.
-    final headerSections = _buildHeaderSections();
     for (final section in headerSections.entries) {
-      final headerName = section.key.toLowerCase();
-      // Extract keywords from header (strip "for the", "para el", etc.)
-      final headerKeywords = headerName
+      final headerKeywords = section.key.toLowerCase()
           .replaceAll(RegExp(r'^(for\s+the\s+|para\s+(el|la|los|las)\s+|für\s+(den|die|das)\s+)', caseSensitive: false), '')
           .split(RegExp(r'[\s,]+'))
           .where((w) => w.length > 2)
           .map(_stem)
           .toSet();
 
-      // Check if instruction mentions any header keyword
-      final mentionsSection = headerKeywords.any((kw) =>
-          instructionTokens.contains(kw) || instruction.contains(kw));
-
-      if (mentionsSection) {
+      if (headerKeywords.any((kw) => instructionTokens.contains(kw) || instruction.contains(kw))) {
         for (final ing in section.value) {
-          if (!matched.contains(ing)) {
-            matched.add(ing);
-          }
+          if (!result.contains(ing)) result.add(ing);
         }
       }
     }
 
-    return matched;
+    return result;
+  }
+
+  /// Score how well an ingredient matches a step (0 = no match).
+  static int _scoreIngredientForStep(Ingredient ing, Step step) {
+    final instruction = step.instruction.toLowerCase();
+    final name = ing.name.toLowerCase().trim();
+    if (name.isEmpty) return 0;
+
+    final instructionTokens = instruction
+        .split(RegExp(r'[\s,.\-—–;:!?()]+'))
+        .where((t) => t.length > 2)
+        .map(_stem)
+        .toSet();
+
+    int score = 0;
+
+    // 1. Exact substring match (strongest signal)
+    if (instruction.contains(name)) return 10;
+
+    // 2. Stemmed full-name match
+    final stemmedName = _stem(name);
+    if (stemmedName.length > 3 && instruction.contains(stemmedName)) return 8;
+
+    // 3. Token-based matching
+    final nameTokens = name
+        .split(RegExp(r'[\s,/()]+'))
+        .where((t) => t.length > 2)
+        .where((t) => !_commonWords.contains(t))
+        .map(_stem)
+        .where((t) => t.length > 2)
+        .toList();
+
+    if (nameTokens.isEmpty) return 0;
+
+    for (final token in nameTokens) {
+      if (instruction.contains(token) || instructionTokens.contains(token)) {
+        score += 3;
+      }
+    }
+
+    // Require meaningful match ratio
+    final ratio = score / (nameTokens.length * 3);
+    if (nameTokens.length == 1 && score >= 3) return score;
+    if (nameTokens.length == 2 && score >= 3) return score;
+    if (nameTokens.length >= 3 && ratio >= 0.5) return score;
+
+    return 0;
   }
 
   /// Build a map of header name → ingredients in that section.
-  /// Only returns sections that actually have headers.
   Map<String, List<Ingredient>> _buildHeaderSections() {
     final sections = <String, List<Ingredient>>{};
     String? currentHeader;
@@ -609,43 +620,48 @@ class _StepView extends ConsumerWidget {
           const SizedBox(height: 16),
           Text('${l10n.stepNumber(stepNumber)} / $totalSteps', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 16)),
 
-          // Matched ingredients chips
+          // Matched ingredients chips (scrollable, max 40% of screen)
           if (matched.isNotEmpty) ...[
             const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-              ),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 6,
-                children: matched.map((ing) {
-                  final label = [
-                    if (ing.amount != null) ing.amount!,
-                    if (ing.unit != null) ing.unit!,
-                    ing.name,
-                  ].join(' ');
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8A860).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFE8A860).withValues(alpha: 0.3)),
-                    ),
-                    child: Text(
-                      label,
-                      style: TextStyle(
-                        color: const Color(0xFFE8A860),
-                        fontSize: 13 * fontScale,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  );
-                }).toList(),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.35),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                ),
+                child: SingleChildScrollView(
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: matched.map((ing) {
+                      final label = [
+                        if (ing.amount != null) ing.amount!,
+                        if (ing.unit != null) ing.unit!,
+                        ing.name,
+                      ].join(' ');
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8A860).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: const Color(0xFFE8A860).withValues(alpha: 0.3)),
+                        ),
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            color: const Color(0xFFE8A860),
+                            fontSize: 13 * fontScale,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
               ),
             ),
           ],

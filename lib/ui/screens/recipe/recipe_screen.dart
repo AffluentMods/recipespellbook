@@ -632,6 +632,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
         children: [
           // Nutrition tab (swipe left from center)
           SingleChildScrollView(
+            key: const PageStorageKey('nutrition_tab'),
             padding: const EdgeInsets.all(16),
             child: NutritionWidget(
               nutrition: _nutrition,
@@ -1285,6 +1286,7 @@ class _IngredientsTab extends ConsumerWidget {
     final theme = Theme.of(context);
     if (ingredients.isEmpty) return Center(child: Text(l10n.ingredientsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)));
     return SelectionArea(child: ListView(
+      key: const PageStorageKey('ingredients_tab'),
       padding: const EdgeInsets.all(16),
       children: [
         ...ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: scaleFactor, unitConversion: unitConversion, linkedRecipes: (ingredientLinksMap[ing.id] ?? []).map((info) => info.recipe).toList())),
@@ -1305,7 +1307,7 @@ class _InstructionsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     if (steps.isEmpty) return Center(child: Text(l10n.instructionsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)));
-    return SelectionArea(child: ListView(padding: const EdgeInsets.all(16), children: [
+    return SelectionArea(child: ListView(key: const PageStorageKey('instructions_tab'), padding: const EdgeInsets.all(16), children: [
       ...steps.asMap().entries.map((entry) => _InstructionStep(stepNumber: entry.key + 1, step: entry.value)),
       if (notes != null && notes!.isNotEmpty) ...[
         const SizedBox(height: 24),

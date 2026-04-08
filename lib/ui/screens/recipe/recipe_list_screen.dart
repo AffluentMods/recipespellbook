@@ -1654,76 +1654,25 @@ class _BulkActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final bottomPad = MediaQuery.of(context).padding.bottom;
 
     return Container(
+      padding: EdgeInsets.fromLTRB(4, 8, 4, 8 + MediaQuery.of(context).padding.bottom),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
+        border: Border(top: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2))),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // ── Drag handle ──
-          Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 4),
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-
-          // ── Safe actions row (icon-only) ──
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _BulkActionIcon(icon: Icons.restaurant_menu, tooltip: l10n.bulkCourse, onTap: onSetCourse),
-                _BulkActionIcon(icon: Icons.category_outlined, tooltip: l10n.bulkCategory, onTap: onSetCategory),
-                _BulkActionIcon(icon: Icons.star_outline, tooltip: l10n.bulkFavorite, onTap: onFavorite),
-                _BulkActionIcon(icon: Icons.copy_rounded, tooltip: l10n.bulkCopyLabel, onTap: onCopyToCookbook),
-                _BulkActionIcon(icon: Icons.drive_file_move_outlined, tooltip: l10n.bulkMoveLabel, onTap: onMoveToCookbook),
-              ],
-            ),
-          ),
-
-          // ── Divider ──
-          Divider(height: 1, color: theme.colorScheme.outline.withValues(alpha: 0.15)),
-
-          // ── Delete row ──
-          InkWell(
-            onTap: onDelete,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16, 10, 16, 10 + bottomPad),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.delete_outline, size: 20, color: theme.colorScheme.error),
-                  const SizedBox(width: 8),
-                  Text(
-                    l10n.deleteCountRecipes(selectedCount),
-                    style: TextStyle(
-                      color: theme.colorScheme.error,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          _BulkActionIcon(icon: Icons.restaurant_menu, label: l10n.bulkCourse, onTap: onSetCourse),
+          _BulkActionIcon(icon: Icons.category_outlined, label: l10n.bulkCategory, onTap: onSetCategory),
+          _BulkActionIcon(icon: Icons.star_outline, label: l10n.bulkFavorite, onTap: onFavorite),
+          _BulkActionIcon(icon: Icons.copy_rounded, label: l10n.bulkCopyLabel, onTap: onCopyToCookbook),
+          _BulkActionIcon(icon: Icons.drive_file_move_outlined, label: l10n.bulkMoveLabel, onTap: onMoveToCookbook),
+          // Thin vertical divider
+          Container(width: 1, height: 36, color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+          // Delete — red, pushed to end
+          _BulkActionIcon(icon: Icons.delete_outline, label: l10n.bulkDeleteLabel, onTap: onDelete, color: theme.colorScheme.error),
         ],
       ),
     );
@@ -1732,31 +1681,32 @@ class _BulkActionBar extends StatelessWidget {
 
 class _BulkActionIcon extends StatelessWidget {
   final IconData icon;
-  final String tooltip;
+  final String label;
   final VoidCallback onTap;
+  final Color? color;
 
   const _BulkActionIcon({
     required this.icon,
-    required this.tooltip,
+    required this.label,
     required this.onTap,
+    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            width: 48,
-            height: 48,
-            alignment: Alignment.center,
-            child: Icon(icon, size: 24, color: theme.colorScheme.onSurface),
-          ),
+    final c = color ?? Theme.of(context).colorScheme.onSurface;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 22, color: c),
+            const SizedBox(height: 2),
+            Text(label, style: TextStyle(fontSize: 10, color: c)),
+          ],
         ),
       ),
     );
