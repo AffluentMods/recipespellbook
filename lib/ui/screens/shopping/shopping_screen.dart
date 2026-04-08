@@ -159,6 +159,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           onRefreshMappings: _loadUserMappings,
           onItemChecked: _onItemChecked,
           onItemUnchecked: _onItemUnchecked,
+          recentlyCheckedIds: _recentlyCheckedIds,
         );
       case ShoppingGroupMode.recipe:
         return _RecipeGroupedList(
@@ -169,6 +170,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           onCategoryChanged: _onItemCategoryChanged,
           onItemChecked: _onItemChecked,
           onItemUnchecked: _onItemUnchecked,
+          recentlyCheckedIds: _recentlyCheckedIds,
         );
       case ShoppingGroupMode.ungrouped:
         return _UngroupedList(
@@ -179,6 +181,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           onCategoryChanged: _onItemCategoryChanged,
           onItemChecked: _onItemChecked,
           onItemUnchecked: _onItemUnchecked,
+          recentlyCheckedIds: _recentlyCheckedIds,
         );
     }
   }
@@ -1058,11 +1061,12 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     );
   }
 
-  /// Delayed check: item stays in place for ~1s with visual feedback,
-  /// then persists to database. Tapping again during the delay cancels.
+  /// Delayed check: item stays in place for 1.5s with visual feedback
+  /// (checkbox filled, text struck through), then moves to checked section.
+  /// Tapping again during the delay cancels the check.
   void _onItemChecked(String itemId) {
     setState(() => _recentlyCheckedIds.add(itemId));
-    Future.delayed(const Duration(milliseconds: 1000), () {
+    Future.delayed(const Duration(milliseconds: 1500), () {
       if (!mounted) return;
       // If still in the "recently checked" set, persist it
       if (_recentlyCheckedIds.contains(itemId)) {
@@ -3010,6 +3014,7 @@ class _SectionGroupedList extends ConsumerWidget {
   final VoidCallback onRefreshMappings;
   final ValueChanged<String> onItemChecked;
   final ValueChanged<String> onItemUnchecked;
+  final Set<String> recentlyCheckedIds;
 
   const _SectionGroupedList({
     required this.items,
@@ -3020,6 +3025,7 @@ class _SectionGroupedList extends ConsumerWidget {
     required this.onRefreshMappings,
     required this.onItemChecked,
     required this.onItemUnchecked,
+    required this.recentlyCheckedIds,
   });
 
   @override
@@ -3088,6 +3094,7 @@ class _SectionGroupedList extends ConsumerWidget {
                     onCategoryChanged: onCategoryChanged,
                     onItemChecked: onItemChecked,
                     onItemUnchecked: onItemUnchecked,
+                    pendingCheck: recentlyCheckedIds.contains(item.id),
                   ),
               ],
             ),
@@ -3159,6 +3166,7 @@ class _RecipeGroupedList extends ConsumerWidget {
   final Function(String, String, String) onCategoryChanged;
   final ValueChanged<String> onItemChecked;
   final ValueChanged<String> onItemUnchecked;
+  final Set<String> recentlyCheckedIds;
 
   const _RecipeGroupedList({
     required this.items,
@@ -3168,6 +3176,7 @@ class _RecipeGroupedList extends ConsumerWidget {
     required this.onCategoryChanged,
     required this.onItemChecked,
     required this.onItemUnchecked,
+    required this.recentlyCheckedIds,
   });
 
   @override
@@ -3230,6 +3239,7 @@ class _RecipeGroupedList extends ConsumerWidget {
               onItemChecked: onItemChecked,
               onItemUnchecked: onItemUnchecked,
               showRecipeLink: false,
+              pendingCheck: recentlyCheckedIds.contains(item.id),
             ),
         ],
         if (checkedItems.isNotEmpty)
@@ -3249,6 +3259,7 @@ class _UngroupedList extends StatelessWidget {
   final Function(String, String, String) onCategoryChanged;
   final ValueChanged<String> onItemChecked;
   final ValueChanged<String> onItemUnchecked;
+  final Set<String> recentlyCheckedIds;
 
   const _UngroupedList({
     required this.items,
@@ -3258,6 +3269,7 @@ class _UngroupedList extends StatelessWidget {
     required this.onCategoryChanged,
     required this.onItemChecked,
     required this.onItemUnchecked,
+    required this.recentlyCheckedIds,
   });
 
   @override
@@ -3266,7 +3278,7 @@ class _UngroupedList extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 100),
       children: [
         for (final item in items)
-          _ShoppingItemTile(item: item, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemChecked: onItemChecked, onItemUnchecked: onItemUnchecked),
+          _ShoppingItemTile(item: item, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemChecked: onItemChecked, onItemUnchecked: onItemUnchecked, pendingCheck: recentlyCheckedIds.contains(item.id)),
         if (checkedItems.isNotEmpty)
           _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemUnchecked: onItemUnchecked),
       ],
@@ -3284,6 +3296,7 @@ class _ShoppingItemTile extends ConsumerWidget {
   final ValueChanged<String>? onItemChecked;
   final ValueChanged<String>? onItemUnchecked;
   final bool showRecipeLink;
+  final bool pendingCheck;
 
   const _ShoppingItemTile({
     required this.item,
@@ -3293,6 +3306,7 @@ class _ShoppingItemTile extends ConsumerWidget {
     this.onItemChecked,
     this.onItemUnchecked,
     this.showRecipeLink = true,
+    this.pendingCheck = false,
   });
 
   @override
@@ -3403,8 +3417,8 @@ class _ShoppingItemTile extends ConsumerWidget {
                         Text(
                           item.name,
                           style: theme.textTheme.bodyLarge?.copyWith(
-                            decoration: item.isChecked ? TextDecoration.lineThrough : null,
-                            color: item.isChecked ? theme.colorScheme.outline : null,
+                            decoration: (item.isChecked || pendingCheck) ? TextDecoration.lineThrough : null,
+                            color: (item.isChecked || pendingCheck) ? theme.colorScheme.outline : null,
                           ),
                         ),
                         if (showRecipeLink && hasMultipleSources && !item.isChecked)
@@ -3495,9 +3509,9 @@ class _ShoppingItemTile extends ConsumerWidget {
                   Transform.scale(
                     scale: 1.2,
                     child: Checkbox(
-                      value: item.isChecked,
+                      value: item.isChecked || pendingCheck,
                       onChanged: (_) {
-                        if (item.isChecked) {
+                        if (item.isChecked || pendingCheck) {
                           (onItemUnchecked ?? (_) => shoppingDao.toggleItemChecked(item.id, false))(item.id);
                         } else {
                           (onItemChecked ?? (_) => shoppingDao.toggleItemChecked(item.id, true))(item.id);
