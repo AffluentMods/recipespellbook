@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'auth_service.dart';
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  ENUMS & DATA CLASSES
@@ -58,31 +59,19 @@ class GroceryService {
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
   );
 
-  // Secure storage keys
-  static const _instacartApiKey = 'grocery_instacart_api_key';
-  static const _krogerClientId = 'grocery_kroger_client_id';
-  static const _krogerClientSecret = 'grocery_kroger_client_secret';
+  // Secure storage keys — user-specific tokens (safe to store on device)
   static const _krogerSearchToken = 'grocery_kroger_search_token';
   static const _krogerCartToken = 'grocery_kroger_cart_token';
   static const _krogerCartRefreshToken = 'grocery_kroger_cart_refresh_token';
   static const _krogerLocationId = 'grocery_kroger_location_id';
   static const _krogerTokenExpiry = 'grocery_kroger_token_expiry';
 
-  static const _defaultInstacartKey = String.fromEnvironment(
-      'INSTACART_API_KEY');
-  static const _defaultKrogerClientId = String.fromEnvironment(
+  // Kroger OAuth client ID is public by design (embedded in user-facing
+  // auth URLs). The client secret lives on the server only.
+  static const _krogerPublicClientId = String.fromEnvironment(
       'KROGER_CLIENT_ID');
-  static const _defaultKrogerSecret = String.fromEnvironment(
-      'KROGER_CLIENT_SECRET');
 
-  // Instacart Developer Platform (IDP) endpoint
-  // Development: https://connect.dev.instacart.tools/idp/v1
-  // Production:  https://connect.instacart.com/idp/v1
-  static const _instacartIdpBase = String.fromEnvironment(
-      'INSTACART_IDP_BASE',
-      defaultValue: 'https://connect.instacart.com/idp/v1');
-
-  // Instacart Affiliate tracking
+  // Instacart Affiliate tracking (public values — safe to ship)
   static const _instacartPartnerId = String.fromEnvironment(
       'INSTACART_PARTNER_ID');
   static const _instacartCampaignId = String.fromEnvironment(
@@ -107,29 +96,10 @@ class GroceryService {
       'https://api.kroger.com/v1/connect/oauth2/token';
 
   // ────────────────────────────────────────────
-  //  KEY RETRIEVAL (secure storage override → embedded default)
-  // ────────────────────────────────────────────
-
-  static Future<String> _getInstacartKey() async {
-    final stored = await _storage.read(key: _instacartApiKey);
-    return (stored != null && stored.isNotEmpty) ? stored : _defaultInstacartKey;
-  }
-
-  static Future<String> _getKrogerClientId() async {
-    final stored = await _storage.read(key: _krogerClientId);
-    return (stored != null && stored.isNotEmpty) ? stored : _defaultKrogerClientId;
-  }
-
-  static Future<String> _getKrogerSecret() async {
-    final stored = await _storage.read(key: _krogerClientSecret);
-    return (stored != null && stored.isNotEmpty) ? stored : _defaultKrogerSecret;
-  }
-
-  // ────────────────────────────────────────────
   //  CONFIGURATION STATUS
   // ────────────────────────────────────────────
 
-  /// Instacart: always true (embedded key).
+  /// Instacart: always true (proxied via server).
   /// Kroger: true only after user completes OAuth login.
   static Future<bool> isConfigured(GroceryProvider provider) async {
     switch (provider) {
@@ -148,18 +118,6 @@ class GroceryService {
     return krogerAuthenticateForSearch();
   }
 
-  static Future<void> configureInstacart({required String apiKey}) async {
-    await _storage.write(key: _instacartApiKey, value: apiKey);
-  }
-
-  static Future<void> configureKroger({
-    required String clientId,
-    required String clientSecret,
-  }) async {
-    await _storage.write(key: _krogerClientId, value: clientId);
-    await _storage.write(key: _krogerClientSecret, value: clientSecret);
-  }
-
   static Future<void> setKrogerLocation(String locationId) async {
     await _storage.write(key: _krogerLocationId, value: locationId);
   }
@@ -171,11 +129,10 @@ class GroceryService {
   static Future<void> disconnect(GroceryProvider provider) async {
     switch (provider) {
       case GroceryProvider.instacart:
-        await _storage.delete(key: _instacartApiKey);
+        // Nothing stored locally — Instacart is fully server-proxied.
         break;
       case GroceryProvider.kroger:
         for (final k in [
-          _krogerClientId, _krogerClientSecret,
           _krogerSearchToken, _krogerCartToken,
           _krogerCartRefreshToken, _krogerLocationId,
           _krogerTokenExpiry,
@@ -207,7 +164,6 @@ class GroceryService {
     bool enablePantryItems = true,
     int expiresInDays = 7,
   }) async {
-    final apiKey = await _getInstacartKey();
     try {
       final body = <String, dynamic>{
         'title': title,
@@ -222,18 +178,11 @@ class GroceryService {
         if (imageUrl != null) 'image_url': imageUrl,
       };
 
-      debugPrint('[Instacart IDP] Creating shopping list page: '
+      debugPrint('[Instacart IDP] Creating shopping list page via proxy: '
           '${lineItems.length} items, title="$title"');
 
-      final resp = await http.post(
-        Uri.parse('$_instacartIdpBase/products/products_link'),
-        headers: {
-          'Authorization': 'Bearer $apiKey',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode(body),
-      ).timeout(const Duration(seconds: 15));
+      // Server proxies to Instacart — no API key in the request from here.
+      final resp = await AuthService.instance.post('/v1/grocery/instacart/products-link', body);
 
       debugPrint('[Instacart IDP] Shopping list → ${resp.statusCode}');
 
@@ -268,7 +217,6 @@ class GroceryService {
     bool enablePantryItems = true,
     int expiresInDays = 30,
   }) async {
-    final apiKey = await _getInstacartKey();
     try {
       final body = <String, dynamic>{
         'title': title,
@@ -287,18 +235,10 @@ class GroceryService {
           'instructions': instructions,
       };
 
-      debugPrint('[Instacart IDP] Creating recipe page: '
+      debugPrint('[Instacart IDP] Creating recipe page via proxy: '
           '${ingredients.length} ingredients, title="$title"');
 
-      final resp = await http.post(
-        Uri.parse('$_instacartIdpBase/products/recipe'),
-        headers: {
-          'Authorization': 'Bearer $apiKey',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode(body),
-      ).timeout(const Duration(seconds: 15));
+      final resp = await AuthService.instance.post('/v1/grocery/instacart/recipe', body);
 
       debugPrint('[Instacart IDP] Recipe page → ${resp.statusCode}');
 
@@ -424,22 +364,12 @@ class GroceryService {
   //  KROGER
   // ════════════════════════════════════════════
 
-  // ── Search auth (client_credentials) ──
+  // ── Search auth (client_credentials via server proxy) ──
 
   static Future<bool> krogerAuthenticateForSearch() async {
-    final clientId = await _getKrogerClientId();
-    final clientSecret = await _getKrogerSecret();
     try {
-      final creds = base64Encode(utf8.encode('$clientId:$clientSecret'));
-      debugPrint('[Kroger] Auth (client_credentials)...');
-      final resp = await http.post(
-        Uri.parse(_krogerTokenUrl),
-        headers: {
-          'Authorization': 'Basic $creds',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'grant_type=client_credentials&scope=product.compact',
-      ).timeout(const Duration(seconds: 15));
+      debugPrint('[Kroger] Search token via proxy...');
+      final resp = await AuthService.instance.post('/v1/grocery/kroger/search-token', {});
       debugPrint('[Kroger] Auth → ${resp.statusCode}');
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
@@ -456,11 +386,14 @@ class GroceryService {
   // ── Cart auth (authorization_code — user login) ──
 
   static Future<bool> krogerStartOAuthLogin() async {
-    final clientId = await _getKrogerClientId();
+    if (_krogerPublicClientId.isEmpty) {
+      debugPrint('[Kroger] Missing KROGER_CLIENT_ID — cannot start OAuth flow');
+      return false;
+    }
     final authUri = Uri.parse(_krogerAuthUrl).replace(queryParameters: {
       'scope': 'cart.basic:write product.compact',
       'response_type': 'code',
-      'client_id': clientId,
+      'client_id': _krogerPublicClientId,
       'redirect_uri': _krogerRedirectUri,
     });
     debugPrint('[Kroger] OAuth URL: $authUri');
@@ -473,21 +406,12 @@ class GroceryService {
   }
 
   static Future<bool> krogerExchangeAuthCode(String authCode) async {
-    final clientId = await _getKrogerClientId();
-    final clientSecret = await _getKrogerSecret();
     try {
-      final creds = base64Encode(utf8.encode('$clientId:$clientSecret'));
-      debugPrint('[Kroger] Exchanging auth code...');
-      final resp = await http.post(
-        Uri.parse(_krogerTokenUrl),
-        headers: {
-          'Authorization': 'Basic $creds',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'grant_type=authorization_code'
-            '&code=${Uri.encodeComponent(authCode)}'
-            '&redirect_uri=${Uri.encodeComponent(_krogerRedirectUri)}',
-      ).timeout(const Duration(seconds: 15));
+      debugPrint('[Kroger] Exchanging auth code via proxy...');
+      final resp = await AuthService.instance.post('/v1/grocery/kroger/exchange-code', {
+        'code': authCode,
+        'redirect_uri': _krogerRedirectUri,
+      });
       debugPrint('[Kroger] Token exchange → ${resp.statusCode}');
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
@@ -512,20 +436,11 @@ class GroceryService {
   static Future<bool> _krogerRefreshCartToken() async {
     final refreshToken = await _storage.read(key: _krogerCartRefreshToken);
     if (refreshToken == null) return false;
-    final clientId = await _getKrogerClientId();
-    final clientSecret = await _getKrogerSecret();
     try {
-      final creds = base64Encode(utf8.encode('$clientId:$clientSecret'));
-      debugPrint('[Kroger] Refreshing cart token...');
-      final resp = await http.post(
-        Uri.parse(_krogerTokenUrl),
-        headers: {
-          'Authorization': 'Basic $creds',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'grant_type=refresh_token'
-            '&refresh_token=${Uri.encodeComponent(refreshToken)}',
-      ).timeout(const Duration(seconds: 15));
+      debugPrint('[Kroger] Refreshing cart token via proxy...');
+      final resp = await AuthService.instance.post('/v1/grocery/kroger/refresh-token', {
+        'refresh_token': refreshToken,
+      });
       if (resp.statusCode == 200) {
         final data = jsonDecode(resp.body);
         await _storage.write(key: _krogerCartToken, value: data['access_token']);
