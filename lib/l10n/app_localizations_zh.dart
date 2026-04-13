@@ -3605,28 +3605,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get allDataDesc => '本地数据和设置 — 完全重置';
 
   @override
-  String get allDataWarningTitle => 'This will delete everything';
+  String get allDataWarningTitle => '这将删除所有内容';
 
   @override
-  String get allDataWarningCloudData => 'All recipes, cookbooks, and meal plans synced to the cloud';
+  String get allDataWarningCloudData => '所有已同步到云端的食谱、食谱书和餐食计划';
 
   @override
-  String get allDataWarningLocalData => 'All local data on this device';
+  String get allDataWarningLocalData => '此设备上的所有本地数据';
 
   @override
-  String get allDataWarningAccount => 'Your account (subscription restores automatically on sign-in)';
+  String get allDataWarningAccount => '你的账号（登录时订阅会自动恢复）';
 
   @override
-  String get allDataWarningSettings => 'All app settings and preferences';
+  String get allDataWarningSettings => '所有应用设置和偏好';
 
   @override
-  String get allDataIUnderstand => 'I understand this will permanently delete all my data';
+  String get allDataIUnderstand => '我理解这将永久删除我的所有数据';
 
   @override
-  String get allDataNoUndo => 'I understand this action cannot be undone';
+  String get allDataNoUndo => '我理解此操作无法撤销';
 
   @override
-  String get localNoCloudWarning => 'You don\'t have Cloud Sync — there is no backup to recover from';
+  String get localNoCloudWarning => '你没有 Cloud Sync - 没有可恢复的备份';
 
   @override
   String permanentDeleteWarning(String scope) {
@@ -8023,1200 +8023,1194 @@ class AppLocalizationsZh extends AppLocalizations {
   String get accountStoreFallback => '商店';
 
   @override
-  String get communityUnpublishDialogTitle => 'Unpublish this cookbook?';
+  String get communityUnpublishDialogTitle => '取消发布此食谱书？';
 
   @override
-  String get communityUnpublishDialogMessage => 'It will be removed from the community. Your recipes are unaffected.';
+  String get communityUnpublishDialogMessage => '食谱书将从社区中移除，你的食谱不会受到影响。';
 
   @override
-  String get communityPublishAnotherCookbook => '+ Publish another cookbook';
+  String get communityPublishAnotherCookbook => '+ 发布另一本食谱书';
 
   @override
-  String get communityShareMoreWithCommunity => 'Share more with the community';
+  String get communityShareMoreWithCommunity => '与社区分享更多';
 
   @override
-  String get communityUploading => 'Uploading...';
+  String get communityUploading => '上传中...';
 
   @override
-  String get communityStatRecipes => 'recipes';
+  String get communityStatRecipes => '食谱';
 
   @override
-  String get communityStatDownloads => 'downloads';
+  String get communityStatDownloads => '下载';
 
   @override
-  String get communityStatRating => 'rating';
+  String get communityStatRating => '评分';
 
   @override
-  String get communityRemovedByModerator => 'This cookbook was removed by a moderator.';
+  String get communityRemovedByModerator => '此食谱书已被管理员移除。';
 
   @override
-  String get communityBrowseRecipes => 'Recipes';
+  String get communityBrowseRecipes => '食谱';
 
   @override
-  String get communityBrowseCookbooks => 'Cookbooks';
+  String get communityBrowseCookbooks => '食谱书';
 
   @override
-  String get communityNoRecipesYet => 'No community recipes yet';
+  String get communityNoRecipesYet => '还没有社区食谱';
 
   @override
-  String get communityTryDifferentSearch => 'Try a different search term or clear your filters';
+  String get communityTryDifferentSearch => '试试其他搜索词或清除筛选条件';
 
   @override
-  String get communityBeFirstToShare => 'Be the first to share a cookbook with the community!';
+  String get communityBeFirstToShare => '成为第一个与社区分享食谱书的人吧！';
 
   @override
-  String get communityPublishToShare => 'Publish a cookbook to share your recipes with everyone!';
+  String get communityPublishToShare => '发布食谱书，与大家分享你的食谱吧！';
 
   @override
   String communityFromCookbook(String name) {
-    return 'from $name';
+    return '来自 $name';
   }
 
   @override
   String communityIngredientsCount(int count) {
-    return '$count ingredients';
+    return '$count 种食材';
   }
 
   @override
   String communitySaveRecipeTo(String title) {
-    return 'Save \"$title\" to...';
+    return '保存\"$title\"到...';
   }
 
   @override
-  String get communityNewCookbook => 'New Cookbook';
+  String get communityNewCookbook => '新建食谱书';
 
   @override
-  String get communityExistingCookbook => 'Existing Cookbook';
+  String get communityExistingCookbook => '已有食谱书';
 
   @override
-  String get communityAddToExistingCookbook => 'Add to one of your cookbooks';
+  String get communityAddToExistingCookbook => '添加到你的食谱书';
 
   @override
-  String get communityChooseCookbook => 'Choose Cookbook';
+  String get communityChooseCookbook => '选择食谱书';
 
   @override
-  String get communityNoCookbooksYetSaveNew => 'No cookbooks yet. Recipes will be saved to a new cookbook.';
+  String get communityNoCookbooksYetSaveNew => '还没有食谱书。食谱将保存到新食谱书中。';
 
   @override
-  String get communityCreateCookbookFirstToSave => 'Create a cookbook first to save recipes';
+  String get communityCreateCookbookFirstToSave => '请先创建食谱书才能保存食谱';
 
   @override
-  String get communitySaveTo => 'Save to:';
+  String get communitySaveTo => '保存到：';
 
   @override
   String communitySaveRecipeCount(int count) {
-    return 'Save $count Recipes';
+    return '保存 $count 个食谱';
   }
 
   @override
-  String get communityFailedToSaveRating => 'Failed to save rating. Please try again.';
+  String get communityFailedToSaveRating => '保存评分失败，请重试。';
 
   @override
-  String get communityDownloadingCookbook => 'Downloading cookbook...';
+  String get communityDownloadingCookbook => '正在下载食谱书...';
 
   @override
-  String get communitySavingRecipes => 'Saving recipes...';
+  String get communitySavingRecipes => '正在保存食谱...';
 
   @override
   String communityPartialDownloadSuccess(int count, String title) {
-    return '$count recipes saved from \"$title\"';
+    return '从\"$title\"中保存了 $count 个食谱';
   }
 
   @override
-  String get communityCannotReportOwn => 'You cannot report your own publication';
+  String get communityCannotReportOwn => '不能举报自己的发布';
 
   @override
-  String get communityEditCookbook => 'Edit Cookbook';
+  String get communityEditCookbook => '编辑食谱书';
 
   @override
-  String get communityEditTitle => 'Title';
+  String get communityEditTitle => '标题';
 
   @override
-  String get communityEditDescriptionLabel => 'Description';
+  String get communityEditDescriptionLabel => '描述';
 
   @override
-  String get communityEditTagsLabel => 'Tags';
+  String get communityEditTagsLabel => '标签';
 
   @override
-  String get communityCookbookUpdated => 'Cookbook updated';
+  String get communityCookbookUpdated => '食谱书已更新';
 
   @override
-  String get communityFailedToUpdate => 'Failed to update';
+  String get communityFailedToUpdate => '更新失败';
 
   @override
-  String get communitySaveChanges => 'Save Changes';
+  String get communitySaveChanges => '保存更改';
 
   @override
-  String get communityEditTooltip => 'Edit';
+  String get communityEditTooltip => '编辑';
 
   @override
-  String get communitySelectAllRecipes => 'Select All';
+  String get communitySelectAllRecipes => '全选';
 
   @override
-  String get communityDeselectAllRecipes => 'Deselect All';
+  String get communityDeselectAllRecipes => '取消全选';
 
   @override
   String communitySelectedOfTotal(int selected, int total) {
-    return '$selected of $total selected';
+    return '已选 $selected/$total';
   }
 
   @override
   String communityDownloadRecipes(int count) {
-    return 'Download $count Recipes';
+    return '下载 $count 个食谱';
   }
 
   @override
-  String get communityNotCurrentlyRated => 'Not currently rated';
+  String get communityNotCurrentlyRated => '暂无评分';
 
   @override
-  String get communityCannotRateOwnCookbook => 'You cannot rate your own cookbook';
+  String get communityCannotRateOwnCookbook => '不能给自己的食谱书评分';
 
   @override
-  String get communitySelectIndividualRecipes => 'Select Individual Recipes';
+  String get communitySelectIndividualRecipes => '选择单个食谱';
 
   @override
   String communityWithImages(String size) {
-    return '$size with images';
+    return '$size（含图片）';
   }
 
   @override
-  String get communitySaveRecipe => 'Save Recipe';
+  String get communitySaveRecipe => '保存食谱';
 
   @override
-  String get communityNoCookbooksYetCreate => 'No cookbooks yet';
+  String get communityNoCookbooksYetCreate => '还没有食谱书';
 
   @override
-  String get communityCreateCookbookFirst => 'Create a cookbook first';
+  String get communityCreateCookbookFirst => '请先创建一本食谱书';
 
   @override
-  String get communitySavingRecipe => 'Saving recipe...';
+  String get communitySavingRecipe => '正在保存食谱...';
 
   @override
   String communityRecipeSaved(String title) {
-    return '\"$title\" saved!';
+    return '\"$title\" 已保存！';
   }
 
   @override
   String communityFailedToSave(String error) {
-    return 'Failed to save: $error';
+    return '保存失败：$error';
   }
 
   @override
-  String get communitySaveToMyCookbooks => 'Save to My Cookbooks';
+  String get communitySaveToMyCookbooks => '保存到我的食谱书';
 
   @override
-  String get communityViewCookbook => 'View Cookbook';
+  String get communityViewCookbook => '查看食谱书';
 
   @override
-  String get communityPublishInProgress => 'Publishing in progress — cancel the upload first';
+  String get communityPublishInProgress => '正在发布中 - 请先取消上传';
 
   @override
-  String get communityUnknownError => 'Unknown error';
+  String get communityUnknownError => '未知错误';
 
   @override
-  String get communityUploadCancelled => 'Upload cancelled';
+  String get communityUploadCancelled => '上传已取消';
 
   @override
-  String get communityCancelUpload => 'Cancel Upload';
+  String get communityCancelUpload => '取消上传';
 
   @override
-  String get communityCancelling => 'Cancelling...';
+  String get communityCancelling => '正在取消...';
 
   @override
-  String get communityPublishingFailed => 'Publishing failed';
+  String get communityPublishingFailed => '发布失败';
 
   @override
   String communityTagsSummary(int count) {
-    return '$count tags';
+    return '$count 个标签';
   }
 
   @override
-  String get creatorNotFound => 'Creator not found';
+  String get creatorNotFound => '未找到创作者';
 
   @override
   String creatorMemberSince(String date) {
-    return 'Member since $date';
+    return '加入于 $date';
   }
 
   @override
-  String get creatorStatRecipes => 'Recipes';
+  String get creatorStatRecipes => '食谱';
 
   @override
-  String get creatorStatCookbooks => 'Cookbooks';
+  String get creatorStatCookbooks => '食谱书';
 
   @override
-  String get creatorStatDownloads => 'Downloads';
+  String get creatorStatDownloads => '下载';
 
   @override
-  String get creatorStatAvgRating => 'Avg Rating';
+  String get creatorStatAvgRating => '平均评分';
 
   @override
-  String get creatorPublishedCookbooks => 'Published Cookbooks';
+  String get creatorPublishedCookbooks => '已发布的食谱书';
 
   @override
-  String get creatorNoCookbooksYet => 'No published cookbooks yet';
+  String get creatorNoCookbooksYet => '还没有已发布的食谱书';
 
   @override
   String creatorRecipesCount(int count) {
-    return '$count recipes';
+    return '$count 个食谱';
   }
 
   @override
-  String get follow => 'Follow';
+  String get follow => '关注';
 
   @override
-  String get following => 'Following';
+  String get following => '关注中';
 
   @override
-  String get unfollow => 'Unfollow';
+  String get unfollow => '取消关注';
 
   @override
-  String get followers => 'Followers';
+  String get followers => '粉丝';
 
   @override
-  String get followingLabel => 'Following';
+  String get followingLabel => '关注中';
 
   @override
-  String get cannotFollowSelf => 'You cannot follow yourself';
+  String get cannotFollowSelf => '不能关注自己';
 
   @override
-  String get paywallUpgradeTitle => 'Upgrade Recipe Spellbook';
+  String get paywallUpgradeTitle => '升级 Recipe Spellbook';
 
   @override
-  String get paywallSubtitle => 'Your recipes on every device.\nForever.';
+  String get paywallSubtitle => '你的食谱，在每台设备上。\n永远。';
 
   @override
-  String get paywallPremiumTitle => 'Premium';
+  String get paywallPremiumTitle => '高级版';
 
   @override
-  String get paywallFamilyTitle => 'Family';
+  String get paywallFamilyTitle => '家庭版';
 
   @override
-  String get paywallPremiumFeature1 => 'Cloud sync across all devices';
+  String get paywallPremiumFeature1 => '所有设备云同步';
 
   @override
-  String get paywallPremiumFeature2 => 'Step-by-step photos';
+  String get paywallPremiumFeature2 => '分步骤照片';
 
   @override
-  String get paywallPremiumFeature3 => 'Automatic backups';
+  String get paywallPremiumFeature3 => '自动备份';
 
   @override
-  String get paywallFamilyFeature1 => 'Everything in Premium';
+  String get paywallFamilyFeature1 => '包含高级版全部功能';
 
   @override
-  String get paywallFamilyFeature2 => 'Up to 5 family members sync together';
+  String get paywallFamilyFeature2 => '最多5位家庭成员同步';
 
   @override
-  String get paywallFamilyFeature3 => 'Shared cookbooks & shopping lists';
+  String get paywallFamilyFeature3 => '共享食谱书和购物清单';
 
   @override
-  String get paywallValueProp => 'Most recipe apps charge \$5–10/month. This isn\'t that.';
+  String get paywallValueProp => '大多数食谱应用每月收费 \$5–10。这个不一样。';
 
   @override
   String paywallGetPlan(String planName, String planPrice) {
-    return 'Get $planName — $planPrice';
+    return '选择 $planName — $planPrice';
   }
 
   @override
-  String get paywallOneTimePurchase => 'One-time purchase · No subscription · Yours forever';
+  String get paywallOneTimePurchase => '一次性购买 · 无订阅 · 永久拥有';
 
   @override
-  String get paywallRestorePurchases => 'Restore purchases';
+  String get paywallRestorePurchases => '恢复购买';
 
   @override
-  String get paywallCompleteYourPurchase => 'Complete Your Purchase';
+  String get paywallCompleteYourPurchase => '完成购买';
 
   @override
-  String get paywallCompleteMessage => 'After completing your purchase, tap \"Refresh\" below to activate it.';
+  String get paywallCompleteMessage => '完成购买后，点击下方的\'刷新\'来激活。';
 
   @override
-  String get paywallRefresh => 'Refresh';
+  String get paywallRefresh => '刷新';
 
   @override
-  String get paywallYoureAllSet => 'You\'re all set!';
+  String get paywallYoureAllSet => '一切就绪！';
 
   @override
-  String get paywallPurchaseNotDetected => 'Purchase not detected yet — try refreshing again.';
+  String get paywallPurchaseNotDetected => '尚未检测到购买 - 请再次刷新试试。';
 
   @override
-  String get paywallWebComingSoon => 'Web Purchases Coming Soon';
+  String get paywallWebComingSoon => '网页端购买即将上线';
 
   @override
-  String get paywallWebMessage => 'In the meantime, upgrade on Android or iOS and it syncs everywhere.';
+  String get paywallWebMessage => '目前可在 Android 或 iOS 上升级，同步到所有设备。';
 
   @override
-  String get paywallFreeLabel => 'Free';
+  String get paywallFreeLabel => '免费';
 
   @override
-  String get paywallPremiumLabel => 'Premium';
+  String get paywallPremiumLabel => '高级版';
 
   @override
-  String get paywallFamilyLabel => 'Family';
+  String get paywallFamilyLabel => '家庭版';
 
   @override
-  String get paywallUnlimitedRecipes => 'Unlimited recipes';
+  String get paywallUnlimitedRecipes => '无限食谱';
 
   @override
-  String get paywallCloudSync => 'Cloud sync';
+  String get paywallCloudSync => '云同步';
 
   @override
-  String get paywallFamilySharing => 'Family sharing';
+  String get paywallFamilySharing => '家庭共享';
 
   @override
-  String get adminModerationPanel => 'Moderation Panel';
+  String get adminModerationPanel => '审核面板';
 
   @override
-  String get adminPendingReview => 'Pending Review';
+  String get adminPendingReview => '待审核';
 
   @override
-  String get adminPendingFlags => 'Pending Flags';
+  String get adminPendingFlags => '待处理标记';
 
   @override
-  String get adminPendingReports => 'Pending Reports';
+  String get adminPendingReports => '待处理举报';
 
   @override
-  String get adminUserReports => 'User Reports';
+  String get adminUserReports => '用户举报';
 
   @override
-  String get adminAllClear => 'All clear!';
+  String get adminAllClear => '全部搞定！';
 
   @override
-  String get adminNoPendingItems => 'No pending items to review.';
+  String get adminNoPendingItems => '没有待审核的项目。';
 
   @override
-  String get adminFailedToApprove => 'Failed to approve';
+  String get adminFailedToApprove => '批准失败';
 
   @override
-  String get adminFailedToRemove => 'Failed to remove';
+  String get adminFailedToRemove => '移除失败';
 
   @override
-  String get adminFlagApproved => 'Flag approved (publication removed)';
+  String get adminFlagApproved => '标记已批准（发布已移除）';
 
   @override
-  String get adminFailedToApproveFlag => 'Failed to approve flag';
+  String get adminFailedToApproveFlag => '标记批准失败';
 
   @override
-  String get adminFlagRejected => 'Flag rejected (publication kept)';
+  String get adminFlagRejected => '标记已拒绝（发布已保留）';
 
   @override
-  String get adminFailedToRejectFlag => 'Failed to reject flag';
+  String get adminFailedToRejectFlag => '标记拒绝失败';
 
   @override
-  String get adminContentRemovedResolved => 'Content removed & report resolved';
+  String get adminContentRemovedResolved => '内容已移除，举报已处理';
 
   @override
-  String get adminReportDismissed => 'Report dismissed';
+  String get adminReportDismissed => '举报已驳回';
 
   @override
-  String get adminFailedToResolveReport => 'Failed to resolve report';
+  String get adminFailedToResolveReport => '举报处理失败';
 
   @override
   String adminByPublisher(String name, int count) {
-    return 'By $name · $count recipes';
+    return '$name · $count 个食谱';
   }
 
   @override
-  String get adminApprove => 'Approve';
+  String get adminApprove => '批准';
 
   @override
-  String get adminRemove => 'Remove';
+  String get adminRemove => '移除';
 
   @override
   String adminReportedBy(String name) {
-    return 'Reported by: $name';
+    return '举报人：$name';
   }
 
   @override
   String adminReason(String reason) {
-    return 'Reason: $reason';
+    return '原因：$reason';
   }
 
   @override
-  String get adminRemoveContent => 'Remove Content';
+  String get adminRemoveContent => '移除内容';
 
   @override
-  String get adminDismissReport => 'Dismiss Report';
+  String get adminDismissReport => '驳回举报';
 
   @override
-  String get adminDismissFlag => 'Dismiss Flag';
+  String get adminDismissFlag => '驳回标记';
 
   @override
-  String get accountProfileUpdated => 'Profile updated';
+  String get accountProfileUpdated => '个人资料已更新';
 
   @override
-  String get accountProfileUpdateFailed => 'Failed to update profile';
+  String get accountProfileUpdateFailed => '更新个人资料失败';
 
   @override
-  String get accountProfilePictureUpdated => 'Profile picture updated';
+  String get accountProfilePictureUpdated => '头像已更新';
 
   @override
-  String get accountProfilePictureUpdateFailed => 'Failed to update profile picture';
+  String get accountProfilePictureUpdateFailed => '更新头像失败';
 
   @override
-  String get accountFailedToUploadImage => 'Failed to upload image';
+  String get accountFailedToUploadImage => '上传图片失败';
 
   @override
-  String get accountDisplayNameHint => 'Display name';
+  String get accountDisplayNameHint => '显示名称';
 
   @override
-  String get menuDrawerYourStuff => 'Your Stuff';
+  String get menuDrawerYourStuff => '我的内容';
 
   @override
-  String get menuDrawerOrganize => 'Organize your recipe collections';
+  String get menuDrawerOrganize => '整理你的食谱收藏';
 
   @override
-  String get menuDrawerImportSubtitle => 'From any URL, photo or file';
+  String get menuDrawerImportSubtitle => '从任意 URL、照片或文件导入';
 
   @override
-  String get menuDrawerTransferSubtitle => 'Move recipes between devices';
+  String get menuDrawerTransferSubtitle => '在设备之间转移食谱';
 
   @override
-  String get menuDrawerApp => 'App';
+  String get menuDrawerApp => '应用';
 
   @override
-  String get menuDrawerSettingsSubtitle => 'Theme, language & preferences';
+  String get menuDrawerSettingsSubtitle => '主题、语言和偏好设置';
 
   @override
   String menuDrawerCouldNotOpenUrl(String url) {
-    return 'Could not open $url';
+    return '无法打开 $url';
   }
 
   @override
   String menuDrawerCouldNotOpenLink(String error) {
-    return 'Could not open link: $error';
+    return '无法打开链接：$error';
   }
 
   @override
-  String get menuDrawerCouldNotOpenEmail => 'Could not open email client';
+  String get menuDrawerCouldNotOpenEmail => '无法打开邮件客户端';
 
   @override
   String menuDrawerCouldNotOpenEmailError(String error) {
-    return 'Could not open email: $error';
+    return '无法打开邮件：$error';
   }
 
   @override
-  String get menuDrawerGuest => 'Guest';
+  String get menuDrawerGuest => '游客';
 
   @override
-  String get menuDrawerCommunity => 'COMMUNITY';
+  String get menuDrawerCommunity => '社区';
 
   @override
-  String get menuDrawerPublishToBuildStats => 'Publish a cookbook to start building your stats here';
+  String get menuDrawerPublishToBuildStats => '发布食谱书，开始积累你的统计数据';
 
   @override
-  String get menuDrawerRecipesUploaded => 'recipes\nuploaded';
+  String get menuDrawerRecipesUploaded => '已上传\n食谱';
 
   @override
-  String get menuDrawerDownloads => 'downloads';
+  String get menuDrawerDownloads => '下载';
 
   @override
-  String get menuDrawerRating => 'rating';
+  String get menuDrawerRating => '评分';
 
   @override
-  String get recipeListCopyToCookbook => 'Copy to Cookbook';
+  String get recipeListCopyToCookbook => '复制到食谱书';
 
   @override
-  String get recipeListMoveToCookbook => 'Move to Cookbook';
+  String get recipeListMoveToCookbook => '移动到食谱书';
 
   @override
   String recipeListCopyingRecipes(int count) {
-    return 'Copying $count recipes...';
+    return '正在复制 $count 个食谱...';
   }
 
   @override
   String recipeListMovingRecipes(int count) {
-    return 'Moving $count recipes...';
+    return '正在移动 $count 个食谱...';
   }
 
   @override
-  String get recipeListCreateAnotherFirst => 'Create another cookbook first';
+  String get recipeListCreateAnotherFirst => '请先创建另一本食谱书';
 
   @override
-  String get recipeListSortNewest => 'Newest';
+  String get recipeListSortNewest => '最新';
 
   @override
-  String get recipeListSortOldest => 'Oldest';
+  String get recipeListSortOldest => '最早';
 
   @override
-  String get recipeListSortRating => 'Rating';
+  String get recipeListSortRating => '评分';
 
   @override
-  String get recipeListSortQuickest => 'Quickest';
+  String get recipeListSortQuickest => '最快';
 
   @override
-  String get recipeListSizeSmall => 'Small';
+  String get recipeListSizeSmall => '小';
 
   @override
-  String get recipeListSizeMedium => 'Medium';
+  String get recipeListSizeMedium => '中';
 
   @override
-  String get recipeListSizeLarge => 'Large';
+  String get recipeListSizeLarge => '大';
 
   @override
-  String get recipeListPinned => 'Pinned';
+  String get recipeListPinned => '已置顶';
 
   @override
-  String get recipeListDeselectAll => 'Deselect all';
+  String get recipeListDeselectAll => '取消全选';
 
   @override
-  String get recipeListSelectAll => 'Select all';
+  String get recipeListSelectAll => '全选';
 
   @override
-  String get plannerPreviousWeek => 'Previous week';
+  String get plannerPreviousWeek => '上一周';
 
   @override
-  String get plannerNextWeek => 'Next week';
+  String get plannerNextWeek => '下一周';
 
   @override
-  String get plannerMoreOptions => 'More options';
+  String get plannerMoreOptions => '更多选项';
 
   @override
-  String get homeScreenSwitchCookbook => 'Switch Cookbook';
+  String get homeScreenSwitchCookbook => '切换食谱书';
 
   @override
-  String get homeScreenNewCookbook => 'New Cookbook';
+  String get homeScreenNewCookbook => '新建食谱书';
 
   @override
-  String get shareViewerSharedRecipe => 'Shared Recipe';
+  String get shareViewerSharedRecipe => '共享食谱';
 
   @override
-  String get shareViewerGoHome => 'Go Home';
+  String get shareViewerGoHome => '返回首页';
 
   @override
   String shareViewerSharedBy(String name) {
-    return 'Shared by $name';
+    return '$name 分享';
   }
 
   @override
   String shareViewerExpires(String date) {
-    return 'Expires: $date';
+    return '过期时间：$date';
   }
 
   @override
-  String get importIssues => 'Import Issues';
+  String get importIssues => '导入问题';
 
   @override
   String trashPermanentlyDeleteConfirm(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'recipes',
-      one: 'recipe',
-    );
-    return 'Permanently delete $count $_temp0? This cannot be undone.';
+    return '永久删除 $count 个食谱？此操作无法撤销。';
   }
 
   @override
   String trashDeletingRecipes(int count) {
-    return 'Deleting $count recipes...';
+    return '正在删除 $count 个食谱...';
   }
 
   @override
-  String get trashDeletingAllRecipes => 'Deleting recipes...';
+  String get trashDeletingAllRecipes => '正在删除食谱...';
 
   @override
   String cookbooksError(String error) {
-    return 'Error: $error';
+    return '错误：$error';
   }
 
   @override
-  String get cookbooksShareFromApp => 'Shared from Recipe Spellbook';
+  String get cookbooksShareFromApp => '来自 Recipe Spellbook 的分享';
 
   @override
-  String get cookbooksPublishFailed => 'Publish failed';
+  String get cookbooksPublishFailed => '发布失败';
 
   @override
-  String get displayName => 'Display Name';
+  String get displayName => '显示名称';
 
   @override
-  String get editDisplayName => 'Edit Display Name';
+  String get editDisplayName => '编辑显示名称';
 
   @override
-  String get displayNameHelper => 'Used on your profile and in the community.';
+  String get displayNameHelper => '用于你的个人资料和社区。';
 
   @override
-  String get saveName => 'Save Name';
+  String get saveName => '保存名称';
 
   @override
-  String get nameContainsUnsupported => 'Name contains unsupported characters';
+  String get nameContainsUnsupported => '名称包含不支持的字符';
 
   @override
-  String get nameTooShort => 'Name must be at least 2 characters';
+  String get nameTooShort => '名称至少需要2个字符';
 
   @override
-  String get communitySection => 'COMMUNITY';
+  String get communitySection => '社区';
 
   @override
-  String get subscriptionSection => 'SUBSCRIPTION';
+  String get subscriptionSection => '订阅';
 
   @override
-  String get integrationsSection => 'INTEGRATIONS';
+  String get integrationsSection => '集成';
 
   @override
-  String get dangerZoneSection => 'DANGER ZONE';
+  String get dangerZoneSection => '危险操作';
 
   @override
-  String get unlockPremium => 'Unlock Premium';
+  String get unlockPremium => '解锁高级版';
 
   @override
-  String get oneTimePurchaseDesc => 'One-time purchase · yours forever · no subscription';
+  String get oneTimePurchaseDesc => '一次性购买 · 永久拥有 · 无订阅';
 
   @override
-  String get viewPlansPrice => 'View Plans — \$6.99';
+  String get viewPlansPrice => '查看方案 — \$6.99';
 
   @override
-  String get premiumActive => 'Premium — Active';
+  String get premiumActive => '高级版 - 已激活';
 
   @override
-  String get familyActive => 'Family — Active';
+  String get familyActive => '家庭版 - 已激活';
 
   @override
-  String get cloudSyncEnabled => 'Cloud sync enabled';
+  String get cloudSyncEnabled => '云同步已启用';
 
   @override
-  String get sharedWithMembers => 'Shared with up to 5 members';
+  String get sharedWithMembers => '最多与5名成员共享';
 
   @override
-  String get yourForever => 'yours forever';
+  String get yourForever => '永久拥有';
 
   @override
-  String get publishCookbookToStart => 'Publish a cookbook to start building your stats here';
+  String get publishCookbookToStart => '发布食谱书，开始积累你的统计数据';
 
   @override
-  String get removePhoto => 'Remove photo';
+  String get removePhoto => '移除照片';
 
   @override
-  String get chooseFromLibrary => 'Choose from library';
+  String get chooseFromLibrary => '从图库中选择';
 
   @override
-  String get deleteAccountTitle => 'Permanently delete your account?';
+  String get deleteAccountTitle => '永久删除你的账号？';
 
   @override
-  String get deleteAccountWarning => 'This will delete:\n· All your saved recipes\n· All your cookbooks\n· Your community publications\n· All account data\n\nThis cannot be undone.';
+  String get deleteAccountWarning => '以下内容将被删除：\n· 所有保存的食谱\n· 所有食谱书\n· 社区发布内容\n· 所有账号数据\n\n此操作无法撤销。';
 
   @override
-  String get typeDeleteToConfirmAccount => 'Type DELETE to confirm:';
+  String get typeDeleteToConfirmAccount => '输入 DELETE 以确认：';
 
   @override
-  String get deleteForever => 'Delete Forever';
+  String get deleteForever => '永久删除';
 
   @override
   String nameCooldownMessage(String date) {
-    return 'You can change your name again on $date';
+    return '你可以在 $date 再次更改名称';
   }
 
   @override
-  String get reportAccount => 'Report this account';
+  String get reportAccount => '举报此账号';
 
   @override
-  String get reportAccountTitle => 'Why are you reporting this account?';
+  String get reportAccountTitle => '你为什么要举报此账号？';
 
   @override
-  String get reportSpam => 'Spam or fake account';
+  String get reportSpam => '垃圾信息或虚假账号';
 
   @override
-  String get reportInappropriate => 'Inappropriate content';
+  String get reportInappropriate => '不当内容';
 
   @override
-  String get reportStolen => 'Stolen recipes / copyright';
+  String get reportStolen => '盗用食谱/侵犯版权';
 
   @override
-  String get reportHarassment => 'Harassment';
+  String get reportHarassment => '骚扰';
 
   @override
-  String get reportOther => 'Other';
+  String get reportOther => '其他';
 
   @override
-  String get submitReport => 'Submit Report';
+  String get submitReport => '提交举报';
 
   @override
-  String get reportSubmitted => 'Thanks for your report. We\'ll review it shortly.';
+  String get reportSubmitted => '感谢你的举报，我们会尽快审核。';
 
   @override
-  String get alreadyReportedRecently => 'You already reported this account recently';
+  String get alreadyReportedRecently => '你最近已经举报过此账号';
 
   @override
-  String get cannotReportSelf => 'You cannot report yourself';
+  String get cannotReportSelf => '不能举报自己';
 
   @override
-  String get pendingAccountReports => 'Account Reports';
+  String get pendingAccountReports => '账号举报';
 
   @override
-  String get accountReportsResolved => 'Account report resolved';
+  String get accountReportsResolved => '账号举报已处理';
 
   @override
-  String get accountReportDismissed => 'Account report dismissed';
+  String get accountReportDismissed => '账号举报已驳回';
 
   @override
-  String get communityTrending => 'TRENDING';
+  String get communityTrending => '热门';
 
   @override
-  String get communitySearchTags => 'Search tags...';
+  String get communitySearchTags => '搜索标签...';
 
   @override
   String communityNoTagsFound(String query) {
-    return 'No tags found for \"$query\"';
+    return '未找到\"$query\"相关标签';
   }
 
   @override
-  String get communityConfirm => 'Confirm';
+  String get communityConfirm => '确认';
 
   @override
-  String get cravingCardTitle => 'What are you craving?';
+  String get cravingCardTitle => '想吃什么？';
 
   @override
-  String get cravingCardSubtitle => 'Find recipes that match your mood';
+  String get cravingCardSubtitle => '找到符合你心情的食谱';
 
   @override
-  String get cravingStep1Title => 'What are you feeling?';
+  String get cravingStep1Title => '你现在想吃什么？';
 
   @override
-  String get cravingStep2Title => 'Anything more specific?';
+  String get cravingStep2Title => '更具体一些？';
 
   @override
-  String get cravingStep3Title => 'Where should we look?';
+  String get cravingStep3Title => '从哪里找？';
 
   @override
-  String get cravingResultsTitle => 'Here\'s what we found';
+  String get cravingResultsTitle => '为你找到了这些';
 
   @override
-  String get cravingPickOneOrMore => 'Pick one or more';
+  String get cravingPickOneOrMore => '选择一个或多个';
 
   @override
-  String get cravingMoodHint => 'We\'ll find something you\'ll love';
+  String get cravingMoodHint => '我们会帮你找到喜欢的';
 
   @override
   String cravingCountSelected(int count) {
-    return '$count selected';
+    return '已选 $count 个';
   }
 
   @override
-  String get cravingCategoryHint => 'Optional — skip if you\'re open to anything';
+  String get cravingCategoryHint => '可选 - 什么都行就跳过吧';
 
   @override
-  String get cravingCategoryNarrowHint => 'Narrow it down or skip ahead';
+  String get cravingCategoryNarrowHint => '缩小范围或跳过';
 
   @override
-  String get cravingMoodSweet => 'Sweet';
+  String get cravingMoodSweet => '甜的';
 
   @override
-  String get cravingMoodSavory => 'Savory';
+  String get cravingMoodSavory => '咸鲜';
 
   @override
-  String get cravingMoodLight => 'Light';
+  String get cravingMoodLight => '清淡';
 
   @override
-  String get cravingMoodFilling => 'Filling';
+  String get cravingMoodFilling => '管饱';
 
   @override
-  String get cravingMoodQuick => 'Quick';
+  String get cravingMoodQuick => '快手';
 
   @override
-  String get cravingMoodSpecial => 'Something Special';
+  String get cravingMoodSpecial => '来点特别的';
 
   @override
-  String get cravingCatDessert => 'Dessert';
+  String get cravingCatDessert => '甜点';
 
   @override
-  String get cravingCatPastry => 'Pastry';
+  String get cravingCatPastry => '糕点';
 
   @override
-  String get cravingCatBakedGoods => 'Baked Goods';
+  String get cravingCatBakedGoods => '烘焙';
 
   @override
-  String get cravingCatBreakfast => 'Breakfast';
+  String get cravingCatBreakfast => '早餐';
 
   @override
-  String get cravingCatDinner => 'Dinner';
+  String get cravingCatDinner => '晚餐';
 
   @override
-  String get cravingCatLunch => 'Lunch';
+  String get cravingCatLunch => '午餐';
 
   @override
-  String get cravingCatAppetizer => 'Appetizer';
+  String get cravingCatAppetizer => '开胃菜';
 
   @override
-  String get cravingCatSoup => 'Soup';
+  String get cravingCatSoup => '汤';
 
   @override
-  String get cravingCatSauce => 'Sauce';
+  String get cravingCatSauce => '酱料';
 
   @override
-  String get cravingCatSalad => 'Salad';
+  String get cravingCatSalad => '沙拉';
 
   @override
-  String get cravingCatSnack => 'Snack';
+  String get cravingCatSnack => '小吃';
 
   @override
-  String get cravingCatMainDish => 'Main Dish';
+  String get cravingCatMainDish => '主菜';
 
   @override
-  String get cravingCatPasta => 'Pasta';
+  String get cravingCatPasta => '意面';
 
   @override
-  String get cravingCatRice => 'Rice Dishes';
+  String get cravingCatRice => '米饭类';
 
   @override
-  String get cravingCatCasserole => 'Casserole';
+  String get cravingCatCasserole => '砂锅菜';
 
   @override
-  String get cravingCatUnder20 => 'Under 20 min';
+  String get cravingCatUnder20 => '20分钟以内';
 
   @override
-  String get cravingCatUnder30 => 'Under 30 min';
+  String get cravingCatUnder30 => '30分钟以内';
 
   @override
-  String get cravingCat5Ings => '5 ingredients or less';
+  String get cravingCat5Ings => '5种食材以内';
 
   @override
-  String get cravingCatImpressive => 'Impressive';
+  String get cravingCatImpressive => '惊艳菜式';
 
   @override
-  String get cravingCatCrowdPleaser => 'Crowd Pleaser';
+  String get cravingCatCrowdPleaser => '聚会佳选';
 
   @override
-  String get cravingCatFavorites => 'Favorites';
+  String get cravingCatFavorites => '收藏';
 
   @override
-  String get cravingSourceMyRecipesTitle => 'My saved recipes';
+  String get cravingSourceMyRecipesTitle => '我保存的食谱';
 
   @override
-  String get cravingSourceMyRecipesSubtitle => 'From your personal library';
+  String get cravingSourceMyRecipesSubtitle => '来自你的个人收藏';
 
   @override
-  String get cravingSourceCommunityTitle => 'Discover something new';
+  String get cravingSourceCommunityTitle => '发现新食谱';
 
   @override
-  String get cravingSourceCommunitySubtitle => 'From the community';
+  String get cravingSourceCommunitySubtitle => '来自社区';
 
   @override
-  String get cravingSourceBothTitle => 'Both — surprise me';
+  String get cravingSourceBothTitle => '都来点 - 给我惊喜';
 
   @override
-  String get cravingSourceBothSubtitle => 'Mix of yours and community';
+  String get cravingSourceBothSubtitle => '你的食谱和社区食谱混合';
 
   @override
-  String get cravingReshuffle => 'Reshuffle';
+  String get cravingReshuffle => '换一批';
 
   @override
   String cravingFoundRecipes(int count) {
-    return 'Found $count recipes matching your vibe';
+    return '找到 $count 个符合你口味的食谱';
   }
 
   @override
-  String get cravingNothingFound => 'Nothing found for these filters';
+  String get cravingNothingFound => '这些筛选条件没有找到结果';
 
   @override
-  String get cravingTryBroader => 'Try broader options or reshuffle';
+  String get cravingTryBroader => '试试更宽泛的选项或换一批';
 
   @override
-  String get cravingAdjustFilters => 'Adjust filters';
+  String get cravingAdjustFilters => '调整筛选';
 
   @override
-  String get cravingCookThis => 'Cook this recipe';
+  String get cravingCookThis => '做这道菜';
 
   @override
-  String get cravingViewRecipe => 'View recipe';
+  String get cravingViewRecipe => '查看食谱';
 
   @override
-  String get cravingNext => 'Next';
+  String get cravingNext => '下一步';
 
   @override
-  String get cravingBack => 'Back';
+  String get cravingBack => '返回';
 
   @override
-  String get cravingSkipStep => 'Skip this step →';
+  String get cravingSkipStep => '跳过此步 →';
 
   @override
-  String get cravingFindRecipes => 'Find recipes';
+  String get cravingFindRecipes => '查找食谱';
 
   @override
-  String get mergeCookbooksMenu => 'Merge cookbooks';
+  String get mergeCookbooksMenu => '合并食谱书';
 
   @override
-  String get mergeCookbooksTitle => 'Merge Cookbooks';
+  String get mergeCookbooksTitle => '合并食谱书';
 
   @override
-  String get mergeCookbooksNameLabel => 'New cookbook name';
+  String get mergeCookbooksNameLabel => '新食谱书名称';
 
   @override
-  String get mergeCookbooksDefaultName => 'Merged Cookbook';
+  String get mergeCookbooksDefaultName => '合并的食谱书';
 
   @override
-  String get mergeCookbooksNeedTwo => 'You need at least 2 cookbooks to merge';
+  String get mergeCookbooksNeedTwo => '至少需要2本食谱书才能合并';
 
   @override
-  String get mergeCookbooksNoRecipes => 'No recipes to merge';
+  String get mergeCookbooksNoRecipes => '没有可合并的食谱';
 
   @override
   String mergeCookbooksMerging(int count) {
-    return 'Merging $count recipes...';
+    return '正在合并 $count 个食谱...';
   }
 
   @override
   String mergeCookbooksCreated(String name, int count) {
-    return 'Created \"$name\" with $count recipes';
+    return '已创建\"$name\"，包含 $count 个食谱';
   }
 
   @override
   String mergeCookbooksFailed(String error) {
-    return 'Merge failed: $error';
+    return '合并失败：$error';
   }
 
   @override
   String mergeCookbooksButton(int count) {
-    return 'Merge $count cookbooks';
+    return '合并 $count 本食谱书';
   }
 
   @override
-  String get mergeCookbooksCancel => 'Cancel';
+  String get mergeCookbooksCancel => '取消';
 
   @override
-  String get combinedIngredients => 'Combined Ingredients';
+  String get combinedIngredients => '合并食材';
 
   @override
-  String get communitySubRecipe => 'Sub-recipe';
+  String get communitySubRecipe => '子食谱';
 
   @override
-  String get copyToCookbook => 'Copy to cookbook';
+  String get copyToCookbook => '复制到食谱书';
 
   @override
-  String get moveToCookbook => 'Move to cookbook';
+  String get moveToCookbook => '移动到食谱书';
 
   @override
-  String get hintCookbookSwitcher => 'Tap the cookbook name at the top to switch between your cookbooks!';
+  String get hintCookbookSwitcher => '点击顶部食谱书名称可以切换食谱书！';
 
   @override
-  String get paywallPlanPremium => 'Premium';
+  String get paywallPlanPremium => '高级版';
 
   @override
-  String get paywallPricePremium => '\$4.99/month';
+  String get paywallPricePremium => '\$6.99';
 
   @override
-  String get paywallSublinePremium => 'For serious home cooks';
+  String get paywallSublinePremium => '一次性 · 永久拥有';
 
   @override
-  String get paywallFeatureCloudSync => 'Cloud sync across devices';
+  String get paywallFeatureCloudSync => '跨设备云同步';
 
   @override
-  String get paywallFeatureStepPhotos => 'Step-by-step photos';
+  String get paywallFeatureStepPhotos => '分步骤照片';
 
   @override
-  String get paywallFeatureAutoBackups => 'Automatic backups';
+  String get paywallFeatureAutoBackups => '自动备份';
 
   @override
-  String get paywallPlanFamily => 'Family';
+  String get paywallPlanFamily => '家庭版';
 
   @override
-  String get paywallPriceFamily => '\$7.99/month';
+  String get paywallPriceFamily => '\$19.99';
 
   @override
-  String get paywallSublineFamily => 'Cook together';
+  String get paywallSublineFamily => '一次性 · 与5人共享';
 
   @override
-  String get paywallFeatureEverythingPremium => 'Everything in Premium';
+  String get paywallFeatureEverythingPremium => '包含高级版全部功能';
 
   @override
-  String get paywallFeatureFamilySync => 'Family sync for up to 6';
+  String get paywallFeatureFamilySync => '最多5位家庭成员同步';
 
   @override
-  String get paywallFeatureSharedCookbooks => 'Shared cookbooks';
+  String get paywallFeatureSharedCookbooks => '共享食谱书和购物清单';
 
   @override
-  String get paywallPriceAnchor => 'Less than a cup of coffee per month';
+  String get paywallPriceAnchor => '大多数食谱应用每月收费 \$5–10。这个不一样。';
 
   @override
-  String get paywallTrustLine => 'Cancel anytime. No questions asked.';
+  String get paywallTrustLine => '一次付款，永久拥有。';
 
   @override
-  String get paywallPrivacyPolicy => 'Privacy Policy';
+  String get paywallPrivacyPolicy => '隐私政策';
 
   @override
-  String get paywallTerms => 'Terms';
+  String get paywallTerms => '条款';
 
   @override
-  String get paywallPurchaseSuccess => 'Purchase successful!';
+  String get paywallPurchaseSuccess => '购买成功！';
 
   @override
-  String get paywallCheckoutOpened => 'Complete your purchase in the browser window that just opened.';
+  String get paywallCheckoutOpened => '请在刚打开的浏览器窗口中完成购买。';
 
   @override
-  String get paywallWebComingSoonDesc => 'In-app purchases for web are coming soon. Please use the mobile app to subscribe.';
+  String get paywallWebComingSoonDesc => '网页端应用内购买即将推出，请先使用移动端应用订阅。';
 
   @override
-  String get paywallCompareFree => 'Free';
+  String get paywallCompareFree => '免费';
 
   @override
-  String get paywallCompareUnlimitedRecipes => 'Unlimited recipes';
+  String get paywallCompareUnlimitedRecipes => '无限食谱';
 
   @override
-  String get paywallCompareCloudSync => 'Cloud sync';
+  String get paywallCompareCloudSync => '云同步';
 
   @override
-  String get paywallCompareFamilySharing => 'Family sharing';
+  String get paywallCompareFamilySharing => '家庭共享';
 
   @override
   String linkCurrentlyLinked(int count) {
-    return '$count currently linked';
+    return '已关联 $count 个';
   }
 
   @override
-  String get linkSearchRecipes => 'Search recipes...';
+  String get linkSearchRecipes => '搜索食谱...';
 
   @override
   String linkAvailable(int count) {
-    return '$count available';
+    return '$count 个可用';
   }
 
   @override
   String linkNoMatch(String query) {
-    return 'No match for \"$query\"';
+    return '未找到\"$query\"的匹配项';
   }
 
   @override
-  String get linkNoRecipesAvailable => 'No recipes available';
+  String get linkNoRecipesAvailable => '没有可用食谱';
 
   @override
   String linkFoundInOtherCookbooks(int count) {
-    return '$count found in other cookbooks';
+    return '在其他食谱书中找到 $count 个';
   }
 
   @override
-  String get linkCopyToCookbookNote => 'Recipes from other cookbooks will be copied to this cookbook when linked.';
+  String get linkCopyToCookbookNote => '关联后，其他食谱书中的食谱将被复制到此食谱书。';
 
   @override
-  String get linkWillBeCopied => 'Will be copied to this cookbook';
+  String get linkWillBeCopied => '将被复制到此食谱书';
 
   @override
-  String get bulkCopyLabel => 'Copy';
+  String get bulkCopyLabel => '复制';
 
   @override
-  String get bulkDeleteLabel => 'Delete';
+  String get bulkDeleteLabel => '删除';
 
   @override
-  String get bulkMoveLabel => 'Move';
+  String get bulkMoveLabel => '移动';
 
   @override
-  String get bulkPinned => 'Pinned';
+  String get bulkPinned => '已置顶';
 
   @override
-  String get recipeListCreateCookbookFirst => 'Create another cookbook first';
+  String get recipeListCreateCookbookFirst => '请先创建另一本食谱书';
 
   @override
   String recipeListRecipesCopied(int count) {
-    return '$count recipes copied';
+    return '已复制 $count 个食谱';
   }
 
   @override
   String recipeListRecipesMoved(int count) {
-    return '$count recipes moved';
+    return '已移动 $count 个食谱';
   }
 
   @override
   String selectAllBar(int selectedCount, int totalCount) {
-    return '$selectedCount of $totalCount selected';
+    return '已选 $selectedCount/$totalCount';
   }
 
   @override
-  String get sortAToZ => 'A to Z';
+  String get sortAToZ => 'A 到 Z';
 
   @override
-  String get sortZToA => 'Z to A';
+  String get sortZToA => 'Z 到 A';
 
   @override
-  String get sortNewest => 'Newest';
+  String get sortNewest => '最新';
 
   @override
-  String get sortOldest => 'Oldest';
+  String get sortOldest => '最早';
 
   @override
-  String get sortRating => 'Rating';
+  String get sortRating => '评分';
 
   @override
-  String get sortQuickest => 'Quickest';
+  String get sortQuickest => '最快';
 
   @override
-  String get sortFavorites => 'Favorites';
+  String get sortFavorites => '收藏';
 
   @override
-  String get viewSizeSmall => 'Small';
+  String get viewSizeSmall => '小';
 
   @override
-  String get viewSizeMedium => 'Medium';
+  String get viewSizeMedium => '中';
 
   @override
-  String get viewSizeLarge => 'Large';
+  String get viewSizeLarge => '大';
 
   @override
   String trashSelectedCount(int count) {
-    return '$count selected';
+    return '已选 $count 个';
   }
 
   @override
   String trashBulkRestored(int count) {
-    return '$count recipes restored';
+    return '已恢复 $count 个食谱';
   }
 
   @override
   String trashBulkDeleteConfirm(int count) {
-    return 'Permanently delete $count recipes? This cannot be undone.';
+    return '永久删除 $count 个食谱？此操作无法撤销。';
   }
 
   @override
   String trashDeletingCount(int count) {
-    return 'Deleting $count recipes...';
+    return '正在删除 $count 个食谱...';
   }
 
   @override
   String trashBulkDeleted(int count) {
-    return '$count recipes deleted';
+    return '已删除 $count 个食谱';
   }
 
   @override
-  String get shareViewerExpired => 'This share link has expired';
+  String get shareViewerExpired => '此分享链接已过期';
 
   @override
-  String get shareViewerExpiredLabel => 'Expired';
+  String get shareViewerExpiredLabel => '已过期';
 
   @override
-  String get shareViewerFailed => 'Failed to load shared recipes';
+  String get shareViewerFailed => '加载共享食谱失败';
 
   @override
-  String get shareViewerNoConnection => 'No internet connection';
+  String get shareViewerNoConnection => '无网络连接';
 
   @override
   String shareViewerHoursRemaining(int hours) {
-    return '${hours}h remaining';
+    return '剩余 $hours 小时';
   }
 
   @override
   String shareViewerMinutesRemaining(int minutes) {
-    return '${minutes}m remaining';
+    return '剩余 $minutes 分钟';
   }
 
   @override
   String shareViewerRecipeCount(int count) {
-    return '$count recipes';
+    return '$count 个食谱';
   }
 
   @override
-  String get shareViewerUntitled => 'Untitled Recipe';
+  String get shareViewerUntitled => '无标题食谱';
 
   @override
-  String get exportFullZip => 'Full Backup (ZIP)';
+  String get exportFullZip => '完整备份 (ZIP)';
 
   @override
-  String get exportFullZipSubtitle => 'All data + images in a portable archive';
+  String get exportFullZipSubtitle => '所有数据 + 图片打包为便携归档';
 
   @override
-  String get importFromFileSubtitle => 'Supports .json and .zip backup files';
+  String get importFromFileSubtitle => '支持 .json 和 .zip 备份文件';
 
   @override
-  String get exportAdvanced => 'Advanced options';
+  String get exportAdvanced => '高级选项';
 
   @override
-  String get exportCurrentCookbookSubtitle => 'JSON file of current cookbook only';
+  String get exportCurrentCookbookSubtitle => '仅导出当前食谱书的 JSON 文件';
 
   @override
-  String get exportJsonCustom => 'Custom JSON export';
+  String get exportJsonCustom => '自定义 JSON 导出';
 }

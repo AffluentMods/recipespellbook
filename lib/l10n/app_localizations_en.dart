@@ -9048,10 +9048,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallPlanPremium => 'Premium';
 
   @override
-  String get paywallPricePremium => '\$4.99/month';
+  String get paywallPricePremium => '\$6.99';
 
   @override
-  String get paywallSublinePremium => 'For serious home cooks';
+  String get paywallSublinePremium => 'one-time · yours forever';
 
   @override
   String get paywallFeatureCloudSync => 'Cloud sync across devices';
@@ -9066,25 +9066,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallPlanFamily => 'Family';
 
   @override
-  String get paywallPriceFamily => '\$7.99/month';
+  String get paywallPriceFamily => '\$19.99';
 
   @override
-  String get paywallSublineFamily => 'Cook together';
+  String get paywallSublineFamily => 'one-time · share with 5 people';
 
   @override
   String get paywallFeatureEverythingPremium => 'Everything in Premium';
 
   @override
-  String get paywallFeatureFamilySync => 'Family sync for up to 6';
+  String get paywallFeatureFamilySync => 'Up to 5 family members sync together';
 
   @override
-  String get paywallFeatureSharedCookbooks => 'Shared cookbooks';
+  String get paywallFeatureSharedCookbooks => 'Shared cookbooks & shopping lists';
 
   @override
-  String get paywallPriceAnchor => 'Less than a cup of coffee per month';
+  String get paywallPriceAnchor => 'Most recipe apps charge \$5–10/month. This isn\'t that.';
 
   @override
-  String get paywallTrustLine => 'Cancel anytime. No questions asked.';
+  String get paywallTrustLine => 'Pay once, yours forever.';
 
   @override
   String get paywallPrivacyPolicy => 'Privacy Policy';

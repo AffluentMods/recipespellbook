@@ -3632,28 +3632,28 @@ class AppLocalizationsNl extends AppLocalizations {
   String get allDataDesc => 'Lokale gegevens en instellingen — volledige reset';
 
   @override
-  String get allDataWarningTitle => 'This will delete everything';
+  String get allDataWarningTitle => 'Dit verwijdert alles';
 
   @override
-  String get allDataWarningCloudData => 'All recipes, cookbooks, and meal plans synced to the cloud';
+  String get allDataWarningCloudData => 'Alle recepten, kookboeken en maaltijdplannen gesynchroniseerd met de cloud';
 
   @override
-  String get allDataWarningLocalData => 'All local data on this device';
+  String get allDataWarningLocalData => 'Alle lokale gegevens op dit apparaat';
 
   @override
-  String get allDataWarningAccount => 'Your account (subscription restores automatically on sign-in)';
+  String get allDataWarningAccount => 'Je account (abonnement wordt automatisch hersteld bij inloggen)';
 
   @override
-  String get allDataWarningSettings => 'All app settings and preferences';
+  String get allDataWarningSettings => 'Alle app-instellingen en voorkeuren';
 
   @override
-  String get allDataIUnderstand => 'I understand this will permanently delete all my data';
+  String get allDataIUnderstand => 'Ik begrijp dat al mijn gegevens permanent worden verwijderd';
 
   @override
-  String get allDataNoUndo => 'I understand this action cannot be undone';
+  String get allDataNoUndo => 'Ik begrijp dat deze actie niet ongedaan kan worden gemaakt';
 
   @override
-  String get localNoCloudWarning => 'You don\'t have Cloud Sync — there is no backup to recover from';
+  String get localNoCloudWarning => 'Je hebt geen Cloud Sync — er is geen back-up om van te herstellen';
 
   @override
   String permanentDeleteWarning(String scope) {
@@ -8075,207 +8075,207 @@ class AppLocalizationsNl extends AppLocalizations {
   String get accountStoreFallback => 'Winkel';
 
   @override
-  String get communityUnpublishDialogTitle => 'Unpublish this cookbook?';
+  String get communityUnpublishDialogTitle => 'Dit kookboek depubliceren?';
 
   @override
-  String get communityUnpublishDialogMessage => 'It will be removed from the community. Your recipes are unaffected.';
+  String get communityUnpublishDialogMessage => 'Het wordt verwijderd uit de community. Je recepten worden niet beïnvloed.';
 
   @override
-  String get communityPublishAnotherCookbook => '+ Publish another cookbook';
+  String get communityPublishAnotherCookbook => '+ Nog een kookboek publiceren';
 
   @override
-  String get communityShareMoreWithCommunity => 'Share more with the community';
+  String get communityShareMoreWithCommunity => 'Deel meer met de community';
 
   @override
-  String get communityUploading => 'Uploading...';
+  String get communityUploading => 'Uploaden...';
 
   @override
-  String get communityStatRecipes => 'recipes';
+  String get communityStatRecipes => 'recepten';
 
   @override
   String get communityStatDownloads => 'downloads';
 
   @override
-  String get communityStatRating => 'rating';
+  String get communityStatRating => 'beoordeling';
 
   @override
-  String get communityRemovedByModerator => 'This cookbook was removed by a moderator.';
+  String get communityRemovedByModerator => 'Dit kookboek is verwijderd door een moderator.';
 
   @override
-  String get communityBrowseRecipes => 'Recipes';
+  String get communityBrowseRecipes => 'Recepten';
 
   @override
-  String get communityBrowseCookbooks => 'Cookbooks';
+  String get communityBrowseCookbooks => 'Kookboeken';
 
   @override
-  String get communityNoRecipesYet => 'No community recipes yet';
+  String get communityNoRecipesYet => 'Nog geen communityrecepten';
 
   @override
-  String get communityTryDifferentSearch => 'Try a different search term or clear your filters';
+  String get communityTryDifferentSearch => 'Probeer een andere zoekterm of wis je filters';
 
   @override
-  String get communityBeFirstToShare => 'Be the first to share a cookbook with the community!';
+  String get communityBeFirstToShare => 'Wees de eerste om een kookboek te delen met de community!';
 
   @override
-  String get communityPublishToShare => 'Publish a cookbook to share your recipes with everyone!';
+  String get communityPublishToShare => 'Publiceer een kookboek om je recepten met iedereen te delen!';
 
   @override
   String communityFromCookbook(String name) {
-    return 'from $name';
+    return 'uit $name';
   }
 
   @override
   String communityIngredientsCount(int count) {
-    return '$count ingredients';
+    return '$count ingrediënten';
   }
 
   @override
   String communitySaveRecipeTo(String title) {
-    return 'Save \"$title\" to...';
+    return '\"$title\" opslaan naar...';
   }
 
   @override
-  String get communityNewCookbook => 'New Cookbook';
+  String get communityNewCookbook => 'Nieuw kookboek';
 
   @override
-  String get communityExistingCookbook => 'Existing Cookbook';
+  String get communityExistingCookbook => 'Bestaand kookboek';
 
   @override
-  String get communityAddToExistingCookbook => 'Add to one of your cookbooks';
+  String get communityAddToExistingCookbook => 'Toevoegen aan een bestaand kookboek';
 
   @override
-  String get communityChooseCookbook => 'Choose Cookbook';
+  String get communityChooseCookbook => 'Kies kookboek';
 
   @override
-  String get communityNoCookbooksYetSaveNew => 'No cookbooks yet. Recipes will be saved to a new cookbook.';
+  String get communityNoCookbooksYetSaveNew => 'Nog geen kookboeken. Recepten worden opgeslagen in een nieuw kookboek.';
 
   @override
-  String get communityCreateCookbookFirstToSave => 'Create a cookbook first to save recipes';
+  String get communityCreateCookbookFirstToSave => 'Maak eerst een kookboek om recepten op te slaan';
 
   @override
-  String get communitySaveTo => 'Save to:';
+  String get communitySaveTo => 'Opslaan naar:';
 
   @override
   String communitySaveRecipeCount(int count) {
-    return 'Save $count Recipes';
+    return '$count recepten opslaan';
   }
 
   @override
-  String get communityFailedToSaveRating => 'Failed to save rating. Please try again.';
+  String get communityFailedToSaveRating => 'Beoordeling opslaan mislukt. Probeer het opnieuw.';
 
   @override
-  String get communityDownloadingCookbook => 'Downloading cookbook...';
+  String get communityDownloadingCookbook => 'Kookboek downloaden...';
 
   @override
-  String get communitySavingRecipes => 'Saving recipes...';
+  String get communitySavingRecipes => 'Recepten opslaan...';
 
   @override
   String communityPartialDownloadSuccess(int count, String title) {
-    return '$count recipes saved from \"$title\"';
+    return '$count recepten opgeslagen uit \"$title\"';
   }
 
   @override
-  String get communityCannotReportOwn => 'You cannot report your own publication';
+  String get communityCannotReportOwn => 'Je kunt je eigen publicatie niet melden';
 
   @override
-  String get communityEditCookbook => 'Edit Cookbook';
+  String get communityEditCookbook => 'Kookboek bewerken';
 
   @override
-  String get communityEditTitle => 'Title';
+  String get communityEditTitle => 'Titel';
 
   @override
-  String get communityEditDescriptionLabel => 'Description';
+  String get communityEditDescriptionLabel => 'Beschrijving';
 
   @override
   String get communityEditTagsLabel => 'Tags';
 
   @override
-  String get communityCookbookUpdated => 'Cookbook updated';
+  String get communityCookbookUpdated => 'Kookboek bijgewerkt';
 
   @override
-  String get communityFailedToUpdate => 'Failed to update';
+  String get communityFailedToUpdate => 'Bijwerken mislukt';
 
   @override
-  String get communitySaveChanges => 'Save Changes';
+  String get communitySaveChanges => 'Wijzigingen opslaan';
 
   @override
-  String get communityEditTooltip => 'Edit';
+  String get communityEditTooltip => 'Bewerken';
 
   @override
-  String get communitySelectAllRecipes => 'Select All';
+  String get communitySelectAllRecipes => 'Alles selecteren';
 
   @override
-  String get communityDeselectAllRecipes => 'Deselect All';
+  String get communityDeselectAllRecipes => 'Alles deselecteren';
 
   @override
   String communitySelectedOfTotal(int selected, int total) {
-    return '$selected of $total selected';
+    return '$selected van $total geselecteerd';
   }
 
   @override
   String communityDownloadRecipes(int count) {
-    return 'Download $count Recipes';
+    return '$count recepten downloaden';
   }
 
   @override
-  String get communityNotCurrentlyRated => 'Not currently rated';
+  String get communityNotCurrentlyRated => 'Nog niet beoordeeld';
 
   @override
-  String get communityCannotRateOwnCookbook => 'You cannot rate your own cookbook';
+  String get communityCannotRateOwnCookbook => 'Je kunt je eigen kookboek niet beoordelen';
 
   @override
-  String get communitySelectIndividualRecipes => 'Select Individual Recipes';
+  String get communitySelectIndividualRecipes => 'Individuele recepten selecteren';
 
   @override
   String communityWithImages(String size) {
-    return '$size with images';
+    return '$size met afbeeldingen';
   }
 
   @override
-  String get communitySaveRecipe => 'Save Recipe';
+  String get communitySaveRecipe => 'Recept opslaan';
 
   @override
-  String get communityNoCookbooksYetCreate => 'No cookbooks yet';
+  String get communityNoCookbooksYetCreate => 'Nog geen kookboeken';
 
   @override
-  String get communityCreateCookbookFirst => 'Create a cookbook first';
+  String get communityCreateCookbookFirst => 'Maak eerst een kookboek';
 
   @override
-  String get communitySavingRecipe => 'Saving recipe...';
+  String get communitySavingRecipe => 'Recept opslaan...';
 
   @override
   String communityRecipeSaved(String title) {
-    return '\"$title\" saved!';
+    return '\"$title\" opgeslagen!';
   }
 
   @override
   String communityFailedToSave(String error) {
-    return 'Failed to save: $error';
+    return 'Opslaan mislukt: $error';
   }
 
   @override
-  String get communitySaveToMyCookbooks => 'Save to My Cookbooks';
+  String get communitySaveToMyCookbooks => 'Opslaan in mijn kookboeken';
 
   @override
-  String get communityViewCookbook => 'View Cookbook';
+  String get communityViewCookbook => 'Kookboek bekijken';
 
   @override
-  String get communityPublishInProgress => 'Publishing in progress — cancel the upload first';
+  String get communityPublishInProgress => 'Publicatie bezig — annuleer eerst de upload';
 
   @override
-  String get communityUnknownError => 'Unknown error';
+  String get communityUnknownError => 'Onbekende fout';
 
   @override
-  String get communityUploadCancelled => 'Upload cancelled';
+  String get communityUploadCancelled => 'Upload geannuleerd';
 
   @override
-  String get communityCancelUpload => 'Cancel Upload';
+  String get communityCancelUpload => 'Upload annuleren';
 
   @override
-  String get communityCancelling => 'Cancelling...';
+  String get communityCancelling => 'Annuleren...';
 
   @override
-  String get communityPublishingFailed => 'Publishing failed';
+  String get communityPublishingFailed => 'Publiceren mislukt';
 
   @override
   String communityTagsSummary(int count) {
@@ -8283,992 +8283,986 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get creatorNotFound => 'Creator not found';
+  String get creatorNotFound => 'Maker niet gevonden';
 
   @override
   String creatorMemberSince(String date) {
-    return 'Member since $date';
+    return 'Lid sinds $date';
   }
 
   @override
-  String get creatorStatRecipes => 'Recipes';
+  String get creatorStatRecipes => 'Recepten';
 
   @override
-  String get creatorStatCookbooks => 'Cookbooks';
+  String get creatorStatCookbooks => 'Kookboeken';
 
   @override
   String get creatorStatDownloads => 'Downloads';
 
   @override
-  String get creatorStatAvgRating => 'Avg Rating';
+  String get creatorStatAvgRating => 'Gem. beoordeling';
 
   @override
-  String get creatorPublishedCookbooks => 'Published Cookbooks';
+  String get creatorPublishedCookbooks => 'Gepubliceerde kookboeken';
 
   @override
-  String get creatorNoCookbooksYet => 'No published cookbooks yet';
+  String get creatorNoCookbooksYet => 'Nog geen gepubliceerde kookboeken';
 
   @override
   String creatorRecipesCount(int count) {
-    return '$count recipes';
+    return '$count recepten';
   }
 
   @override
-  String get follow => 'Follow';
+  String get follow => 'Volgen';
 
   @override
-  String get following => 'Following';
+  String get following => 'Volgend';
 
   @override
-  String get unfollow => 'Unfollow';
+  String get unfollow => 'Ontvolgen';
 
   @override
-  String get followers => 'Followers';
+  String get followers => 'Volgers';
 
   @override
-  String get followingLabel => 'Following';
+  String get followingLabel => 'Volgend';
 
   @override
-  String get cannotFollowSelf => 'You cannot follow yourself';
+  String get cannotFollowSelf => 'Je kunt jezelf niet volgen';
 
   @override
   String get paywallUpgradeTitle => 'Upgrade Recipe Spellbook';
 
   @override
-  String get paywallSubtitle => 'Your recipes on every device.\nForever.';
+  String get paywallSubtitle => 'Je recepten op elk apparaat.\nVoor altijd.';
 
   @override
   String get paywallPremiumTitle => 'Premium';
 
   @override
-  String get paywallFamilyTitle => 'Family';
+  String get paywallFamilyTitle => 'Familie';
 
   @override
-  String get paywallPremiumFeature1 => 'Cloud sync across all devices';
+  String get paywallPremiumFeature1 => 'Cloudsynchronisatie op al je apparaten';
 
   @override
-  String get paywallPremiumFeature2 => 'Step-by-step photos';
+  String get paywallPremiumFeature2 => 'Stap-voor-stap foto\'s';
 
   @override
-  String get paywallPremiumFeature3 => 'Automatic backups';
+  String get paywallPremiumFeature3 => 'Automatische back-ups';
 
   @override
-  String get paywallFamilyFeature1 => 'Everything in Premium';
+  String get paywallFamilyFeature1 => 'Alles in Premium';
 
   @override
-  String get paywallFamilyFeature2 => 'Up to 5 family members sync together';
+  String get paywallFamilyFeature2 => 'Tot 5 gezinsleden samen synchroniseren';
 
   @override
-  String get paywallFamilyFeature3 => 'Shared cookbooks & shopping lists';
+  String get paywallFamilyFeature3 => 'Gedeelde kookboeken & boodschappenlijsten';
 
   @override
-  String get paywallValueProp => 'Most recipe apps charge \$5–10/month. This isn\'t that.';
+  String get paywallValueProp => 'De meeste receptenapps kosten \$5–10/maand. Dit is anders.';
 
   @override
   String paywallGetPlan(String planName, String planPrice) {
-    return 'Get $planName — $planPrice';
+    return '$planName kiezen — $planPrice';
   }
 
   @override
-  String get paywallOneTimePurchase => 'One-time purchase · No subscription · Yours forever';
+  String get paywallOneTimePurchase => 'Eenmalige aankoop · Geen abonnement · Voor altijd van jou';
 
   @override
-  String get paywallRestorePurchases => 'Restore purchases';
+  String get paywallRestorePurchases => 'Aankopen herstellen';
 
   @override
-  String get paywallCompleteYourPurchase => 'Complete Your Purchase';
+  String get paywallCompleteYourPurchase => 'Voltooi je aankoop';
 
   @override
-  String get paywallCompleteMessage => 'After completing your purchase, tap \"Refresh\" below to activate it.';
+  String get paywallCompleteMessage => 'Tik na het voltooien van je aankoop hieronder op \"Vernieuwen\" om te activeren.';
 
   @override
-  String get paywallRefresh => 'Refresh';
+  String get paywallRefresh => 'Vernieuwen';
 
   @override
-  String get paywallYoureAllSet => 'You\'re all set!';
+  String get paywallYoureAllSet => 'Je bent helemaal klaar!';
 
   @override
-  String get paywallPurchaseNotDetected => 'Purchase not detected yet — try refreshing again.';
+  String get paywallPurchaseNotDetected => 'Aankoop nog niet gedetecteerd — probeer opnieuw te vernieuwen.';
 
   @override
-  String get paywallWebComingSoon => 'Web Purchases Coming Soon';
+  String get paywallWebComingSoon => 'Webaankopen binnenkort beschikbaar';
 
   @override
-  String get paywallWebMessage => 'In the meantime, upgrade on Android or iOS and it syncs everywhere.';
+  String get paywallWebMessage => 'Upgrade in de tussentijd op Android of iOS en het synchroniseert overal.';
 
   @override
-  String get paywallFreeLabel => 'Free';
+  String get paywallFreeLabel => 'Gratis';
 
   @override
   String get paywallPremiumLabel => 'Premium';
 
   @override
-  String get paywallFamilyLabel => 'Family';
+  String get paywallFamilyLabel => 'Familie';
 
   @override
-  String get paywallUnlimitedRecipes => 'Unlimited recipes';
+  String get paywallUnlimitedRecipes => 'Onbeperkt recepten';
 
   @override
-  String get paywallCloudSync => 'Cloud sync';
+  String get paywallCloudSync => 'Cloudsynchronisatie';
 
   @override
-  String get paywallFamilySharing => 'Family sharing';
+  String get paywallFamilySharing => 'Delen met familie';
 
   @override
-  String get adminModerationPanel => 'Moderation Panel';
+  String get adminModerationPanel => 'Moderatiepaneel';
 
   @override
-  String get adminPendingReview => 'Pending Review';
+  String get adminPendingReview => 'Wacht op beoordeling';
 
   @override
-  String get adminPendingFlags => 'Pending Flags';
+  String get adminPendingFlags => 'Openstaande markeringen';
 
   @override
-  String get adminPendingReports => 'Pending Reports';
+  String get adminPendingReports => 'Openstaande meldingen';
 
   @override
-  String get adminUserReports => 'User Reports';
+  String get adminUserReports => 'Gebruikersmeldingen';
 
   @override
-  String get adminAllClear => 'All clear!';
+  String get adminAllClear => 'Alles in orde!';
 
   @override
-  String get adminNoPendingItems => 'No pending items to review.';
+  String get adminNoPendingItems => 'Geen openstaande items om te beoordelen.';
 
   @override
-  String get adminFailedToApprove => 'Failed to approve';
+  String get adminFailedToApprove => 'Goedkeuren mislukt';
 
   @override
-  String get adminFailedToRemove => 'Failed to remove';
+  String get adminFailedToRemove => 'Verwijderen mislukt';
 
   @override
-  String get adminFlagApproved => 'Flag approved (publication removed)';
+  String get adminFlagApproved => 'Markering goedgekeurd (publicatie verwijderd)';
 
   @override
-  String get adminFailedToApproveFlag => 'Failed to approve flag';
+  String get adminFailedToApproveFlag => 'Markering goedkeuren mislukt';
 
   @override
-  String get adminFlagRejected => 'Flag rejected (publication kept)';
+  String get adminFlagRejected => 'Markering afgewezen (publicatie behouden)';
 
   @override
-  String get adminFailedToRejectFlag => 'Failed to reject flag';
+  String get adminFailedToRejectFlag => 'Markering afwijzen mislukt';
 
   @override
-  String get adminContentRemovedResolved => 'Content removed & report resolved';
+  String get adminContentRemovedResolved => 'Inhoud verwijderd & melding opgelost';
 
   @override
-  String get adminReportDismissed => 'Report dismissed';
+  String get adminReportDismissed => 'Melding afgewezen';
 
   @override
-  String get adminFailedToResolveReport => 'Failed to resolve report';
+  String get adminFailedToResolveReport => 'Melding oplossen mislukt';
 
   @override
   String adminByPublisher(String name, int count) {
-    return 'By $name · $count recipes';
+    return 'Door $name · $count recepten';
   }
 
   @override
-  String get adminApprove => 'Approve';
+  String get adminApprove => 'Goedkeuren';
 
   @override
-  String get adminRemove => 'Remove';
+  String get adminRemove => 'Verwijderen';
 
   @override
   String adminReportedBy(String name) {
-    return 'Reported by: $name';
+    return 'Gemeld door: $name';
   }
 
   @override
   String adminReason(String reason) {
-    return 'Reason: $reason';
+    return 'Reden: $reason';
   }
 
   @override
-  String get adminRemoveContent => 'Remove Content';
+  String get adminRemoveContent => 'Inhoud verwijderen';
 
   @override
-  String get adminDismissReport => 'Dismiss Report';
+  String get adminDismissReport => 'Melding afwijzen';
 
   @override
-  String get adminDismissFlag => 'Dismiss Flag';
+  String get adminDismissFlag => 'Markering afwijzen';
 
   @override
-  String get accountProfileUpdated => 'Profile updated';
+  String get accountProfileUpdated => 'Profiel bijgewerkt';
 
   @override
-  String get accountProfileUpdateFailed => 'Failed to update profile';
+  String get accountProfileUpdateFailed => 'Profiel bijwerken mislukt';
 
   @override
-  String get accountProfilePictureUpdated => 'Profile picture updated';
+  String get accountProfilePictureUpdated => 'Profielfoto bijgewerkt';
 
   @override
-  String get accountProfilePictureUpdateFailed => 'Failed to update profile picture';
+  String get accountProfilePictureUpdateFailed => 'Profielfoto bijwerken mislukt';
 
   @override
-  String get accountFailedToUploadImage => 'Failed to upload image';
+  String get accountFailedToUploadImage => 'Afbeelding uploaden mislukt';
 
   @override
-  String get accountDisplayNameHint => 'Display name';
+  String get accountDisplayNameHint => 'Weergavenaam';
 
   @override
-  String get menuDrawerYourStuff => 'Your Stuff';
+  String get menuDrawerYourStuff => 'Jouw spullen';
 
   @override
-  String get menuDrawerOrganize => 'Organize your recipe collections';
+  String get menuDrawerOrganize => 'Organiseer je receptenverzamelingen';
 
   @override
-  String get menuDrawerImportSubtitle => 'From any URL, photo or file';
+  String get menuDrawerImportSubtitle => 'Van elke URL, foto of bestand';
 
   @override
-  String get menuDrawerTransferSubtitle => 'Move recipes between devices';
+  String get menuDrawerTransferSubtitle => 'Verplaats recepten tussen apparaten';
 
   @override
   String get menuDrawerApp => 'App';
 
   @override
-  String get menuDrawerSettingsSubtitle => 'Theme, language & preferences';
+  String get menuDrawerSettingsSubtitle => 'Thema, taal & voorkeuren';
 
   @override
   String menuDrawerCouldNotOpenUrl(String url) {
-    return 'Could not open $url';
+    return 'Kan $url niet openen';
   }
 
   @override
   String menuDrawerCouldNotOpenLink(String error) {
-    return 'Could not open link: $error';
+    return 'Kan link niet openen: $error';
   }
 
   @override
-  String get menuDrawerCouldNotOpenEmail => 'Could not open email client';
+  String get menuDrawerCouldNotOpenEmail => 'Kan e-mailclient niet openen';
 
   @override
   String menuDrawerCouldNotOpenEmailError(String error) {
-    return 'Could not open email: $error';
+    return 'Kan e-mail niet openen: $error';
   }
 
   @override
-  String get menuDrawerGuest => 'Guest';
+  String get menuDrawerGuest => 'Gast';
 
   @override
   String get menuDrawerCommunity => 'COMMUNITY';
 
   @override
-  String get menuDrawerPublishToBuildStats => 'Publish a cookbook to start building your stats here';
+  String get menuDrawerPublishToBuildStats => 'Publiceer een kookboek om hier je statistieken op te bouwen';
 
   @override
-  String get menuDrawerRecipesUploaded => 'recipes\nuploaded';
+  String get menuDrawerRecipesUploaded => 'recepten\ngeüpload';
 
   @override
   String get menuDrawerDownloads => 'downloads';
 
   @override
-  String get menuDrawerRating => 'rating';
+  String get menuDrawerRating => 'beoordeling';
 
   @override
-  String get recipeListCopyToCookbook => 'Copy to Cookbook';
+  String get recipeListCopyToCookbook => 'Kopieer naar kookboek';
 
   @override
-  String get recipeListMoveToCookbook => 'Move to Cookbook';
+  String get recipeListMoveToCookbook => 'Verplaats naar kookboek';
 
   @override
   String recipeListCopyingRecipes(int count) {
-    return 'Copying $count recipes...';
+    return '$count recepten kopiëren...';
   }
 
   @override
   String recipeListMovingRecipes(int count) {
-    return 'Moving $count recipes...';
+    return '$count recepten verplaatsen...';
   }
 
   @override
-  String get recipeListCreateAnotherFirst => 'Create another cookbook first';
+  String get recipeListCreateAnotherFirst => 'Maak eerst een ander kookboek';
 
   @override
-  String get recipeListSortNewest => 'Newest';
+  String get recipeListSortNewest => 'Nieuwste';
 
   @override
-  String get recipeListSortOldest => 'Oldest';
+  String get recipeListSortOldest => 'Oudste';
 
   @override
-  String get recipeListSortRating => 'Rating';
+  String get recipeListSortRating => 'Beoordeling';
 
   @override
-  String get recipeListSortQuickest => 'Quickest';
+  String get recipeListSortQuickest => 'Snelste';
 
   @override
-  String get recipeListSizeSmall => 'Small';
+  String get recipeListSizeSmall => 'Klein';
 
   @override
-  String get recipeListSizeMedium => 'Medium';
+  String get recipeListSizeMedium => 'Middel';
 
   @override
-  String get recipeListSizeLarge => 'Large';
+  String get recipeListSizeLarge => 'Groot';
 
   @override
-  String get recipeListPinned => 'Pinned';
+  String get recipeListPinned => 'Vastgepind';
 
   @override
-  String get recipeListDeselectAll => 'Deselect all';
+  String get recipeListDeselectAll => 'Alles deselecteren';
 
   @override
-  String get recipeListSelectAll => 'Select all';
+  String get recipeListSelectAll => 'Alles selecteren';
 
   @override
-  String get plannerPreviousWeek => 'Previous week';
+  String get plannerPreviousWeek => 'Vorige week';
 
   @override
-  String get plannerNextWeek => 'Next week';
+  String get plannerNextWeek => 'Volgende week';
 
   @override
-  String get plannerMoreOptions => 'More options';
+  String get plannerMoreOptions => 'Meer opties';
 
   @override
-  String get homeScreenSwitchCookbook => 'Switch Cookbook';
+  String get homeScreenSwitchCookbook => 'Wissel van kookboek';
 
   @override
-  String get homeScreenNewCookbook => 'New Cookbook';
+  String get homeScreenNewCookbook => 'Nieuw kookboek';
 
   @override
-  String get shareViewerSharedRecipe => 'Shared Recipe';
+  String get shareViewerSharedRecipe => 'Gedeeld recept';
 
   @override
-  String get shareViewerGoHome => 'Go Home';
+  String get shareViewerGoHome => 'Naar startpagina';
 
   @override
   String shareViewerSharedBy(String name) {
-    return 'Shared by $name';
+    return 'Gedeeld door $name';
   }
 
   @override
   String shareViewerExpires(String date) {
-    return 'Expires: $date';
+    return 'Verloopt: $date';
   }
 
   @override
-  String get importIssues => 'Import Issues';
+  String get importIssues => 'Importproblemen';
 
   @override
   String trashPermanentlyDeleteConfirm(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'recipes',
-      one: 'recipe',
-    );
-    return 'Permanently delete $count $_temp0? This cannot be undone.';
+    return '$count recepten permanent verwijderen? Dit kan niet ongedaan worden gemaakt.';
   }
 
   @override
   String trashDeletingRecipes(int count) {
-    return 'Deleting $count recipes...';
+    return '$count recepten verwijderen...';
   }
 
   @override
-  String get trashDeletingAllRecipes => 'Deleting recipes...';
+  String get trashDeletingAllRecipes => 'Recepten verwijderen...';
 
   @override
   String cookbooksError(String error) {
-    return 'Error: $error';
+    return 'Fout: $error';
   }
 
   @override
-  String get cookbooksShareFromApp => 'Shared from Recipe Spellbook';
+  String get cookbooksShareFromApp => 'Gedeeld vanuit Recipe Spellbook';
 
   @override
-  String get cookbooksPublishFailed => 'Publish failed';
+  String get cookbooksPublishFailed => 'Publiceren mislukt';
 
   @override
-  String get displayName => 'Display Name';
+  String get displayName => 'Weergavenaam';
 
   @override
-  String get editDisplayName => 'Edit Display Name';
+  String get editDisplayName => 'Weergavenaam bewerken';
 
   @override
-  String get displayNameHelper => 'Used on your profile and in the community.';
+  String get displayNameHelper => 'Wordt gebruikt op je profiel en in de community.';
 
   @override
-  String get saveName => 'Save Name';
+  String get saveName => 'Naam opslaan';
 
   @override
-  String get nameContainsUnsupported => 'Name contains unsupported characters';
+  String get nameContainsUnsupported => 'Naam bevat niet-ondersteunde tekens';
 
   @override
-  String get nameTooShort => 'Name must be at least 2 characters';
+  String get nameTooShort => 'Naam moet minstens 2 tekens lang zijn';
 
   @override
   String get communitySection => 'COMMUNITY';
 
   @override
-  String get subscriptionSection => 'SUBSCRIPTION';
+  String get subscriptionSection => 'ABONNEMENT';
 
   @override
-  String get integrationsSection => 'INTEGRATIONS';
+  String get integrationsSection => 'INTEGRATIES';
 
   @override
-  String get dangerZoneSection => 'DANGER ZONE';
+  String get dangerZoneSection => 'GEVARENZONE';
 
   @override
-  String get unlockPremium => 'Unlock Premium';
+  String get unlockPremium => 'Premium ontgrendelen';
 
   @override
-  String get oneTimePurchaseDesc => 'One-time purchase · yours forever · no subscription';
+  String get oneTimePurchaseDesc => 'Eenmalige aankoop · voor altijd van jou · geen abonnement';
 
   @override
-  String get viewPlansPrice => 'View Plans — \$6.99';
+  String get viewPlansPrice => 'Plannen bekijken — \$6.99';
 
   @override
-  String get premiumActive => 'Premium — Active';
+  String get premiumActive => 'Premium — Actief';
 
   @override
-  String get familyActive => 'Family — Active';
+  String get familyActive => 'Familie — Actief';
 
   @override
-  String get cloudSyncEnabled => 'Cloud sync enabled';
+  String get cloudSyncEnabled => 'Cloudsynchronisatie ingeschakeld';
 
   @override
-  String get sharedWithMembers => 'Shared with up to 5 members';
+  String get sharedWithMembers => 'Gedeeld met maximaal 5 leden';
 
   @override
-  String get yourForever => 'yours forever';
+  String get yourForever => 'voor altijd van jou';
 
   @override
-  String get publishCookbookToStart => 'Publish a cookbook to start building your stats here';
+  String get publishCookbookToStart => 'Publiceer een kookboek om hier je statistieken op te bouwen';
 
   @override
-  String get removePhoto => 'Remove photo';
+  String get removePhoto => 'Foto verwijderen';
 
   @override
-  String get chooseFromLibrary => 'Choose from library';
+  String get chooseFromLibrary => 'Kies uit bibliotheek';
 
   @override
-  String get deleteAccountTitle => 'Permanently delete your account?';
+  String get deleteAccountTitle => 'Account permanent verwijderen?';
 
   @override
-  String get deleteAccountWarning => 'This will delete:\n· All your saved recipes\n· All your cookbooks\n· Your community publications\n· All account data\n\nThis cannot be undone.';
+  String get deleteAccountWarning => 'Dit verwijdert:\n· Al je opgeslagen recepten\n· Al je kookboeken\n· Je communitypublicaties\n· Alle accountgegevens\n\nDit kan niet ongedaan worden gemaakt.';
 
   @override
-  String get typeDeleteToConfirmAccount => 'Type DELETE to confirm:';
+  String get typeDeleteToConfirmAccount => 'Typ DELETE om te bevestigen:';
 
   @override
-  String get deleteForever => 'Delete Forever';
+  String get deleteForever => 'Permanent verwijderen';
 
   @override
   String nameCooldownMessage(String date) {
-    return 'You can change your name again on $date';
+    return 'Je kunt je naam weer wijzigen op $date';
   }
 
   @override
-  String get reportAccount => 'Report this account';
+  String get reportAccount => 'Dit account melden';
 
   @override
-  String get reportAccountTitle => 'Why are you reporting this account?';
+  String get reportAccountTitle => 'Waarom meld je dit account?';
 
   @override
-  String get reportSpam => 'Spam or fake account';
+  String get reportSpam => 'Spam of nep-account';
 
   @override
-  String get reportInappropriate => 'Inappropriate content';
+  String get reportInappropriate => 'Ongepaste inhoud';
 
   @override
-  String get reportStolen => 'Stolen recipes / copyright';
+  String get reportStolen => 'Gestolen recepten / auteursrecht';
 
   @override
-  String get reportHarassment => 'Harassment';
+  String get reportHarassment => 'Intimidatie';
 
   @override
-  String get reportOther => 'Other';
+  String get reportOther => 'Anders';
 
   @override
-  String get submitReport => 'Submit Report';
+  String get submitReport => 'Melding indienen';
 
   @override
-  String get reportSubmitted => 'Thanks for your report. We\'ll review it shortly.';
+  String get reportSubmitted => 'Bedankt voor je melding. We bekijken het binnenkort.';
 
   @override
-  String get alreadyReportedRecently => 'You already reported this account recently';
+  String get alreadyReportedRecently => 'Je hebt dit account al recent gemeld';
 
   @override
-  String get cannotReportSelf => 'You cannot report yourself';
+  String get cannotReportSelf => 'Je kunt jezelf niet melden';
 
   @override
-  String get pendingAccountReports => 'Account Reports';
+  String get pendingAccountReports => 'Accountmeldingen';
 
   @override
-  String get accountReportsResolved => 'Account report resolved';
+  String get accountReportsResolved => 'Accountmelding opgelost';
 
   @override
-  String get accountReportDismissed => 'Account report dismissed';
+  String get accountReportDismissed => 'Accountmelding afgewezen';
 
   @override
   String get communityTrending => 'TRENDING';
 
   @override
-  String get communitySearchTags => 'Search tags...';
+  String get communitySearchTags => 'Tags zoeken...';
 
   @override
   String communityNoTagsFound(String query) {
-    return 'No tags found for \"$query\"';
+    return 'Geen tags gevonden voor \"$query\"';
   }
 
   @override
-  String get communityConfirm => 'Confirm';
+  String get communityConfirm => 'Bevestigen';
 
   @override
-  String get cravingCardTitle => 'What are you craving?';
+  String get cravingCardTitle => 'Waar heb je trek in?';
 
   @override
-  String get cravingCardSubtitle => 'Find recipes that match your mood';
+  String get cravingCardSubtitle => 'Vind recepten die bij je stemming passen';
 
   @override
-  String get cravingStep1Title => 'What are you feeling?';
+  String get cravingStep1Title => 'Waar heb je zin in?';
 
   @override
-  String get cravingStep2Title => 'Anything more specific?';
+  String get cravingStep2Title => 'Iets specifieker?';
 
   @override
-  String get cravingStep3Title => 'Where should we look?';
+  String get cravingStep3Title => 'Waar moeten we zoeken?';
 
   @override
-  String get cravingResultsTitle => 'Here\'s what we found';
+  String get cravingResultsTitle => 'Dit hebben we gevonden';
 
   @override
-  String get cravingPickOneOrMore => 'Pick one or more';
+  String get cravingPickOneOrMore => 'Kies een of meer';
 
   @override
-  String get cravingMoodHint => 'We\'ll find something you\'ll love';
+  String get cravingMoodHint => 'We vinden iets dat je lekker vindt';
 
   @override
   String cravingCountSelected(int count) {
-    return '$count selected';
+    return '$count geselecteerd';
   }
 
   @override
-  String get cravingCategoryHint => 'Optional — skip if you\'re open to anything';
+  String get cravingCategoryHint => 'Optioneel — sla over als je voor alles openstaat';
 
   @override
-  String get cravingCategoryNarrowHint => 'Narrow it down or skip ahead';
+  String get cravingCategoryNarrowHint => 'Verfijn of sla over';
 
   @override
-  String get cravingMoodSweet => 'Sweet';
+  String get cravingMoodSweet => 'Zoet';
 
   @override
-  String get cravingMoodSavory => 'Savory';
+  String get cravingMoodSavory => 'Hartig';
 
   @override
-  String get cravingMoodLight => 'Light';
+  String get cravingMoodLight => 'Licht';
 
   @override
-  String get cravingMoodFilling => 'Filling';
+  String get cravingMoodFilling => 'Stevig';
 
   @override
-  String get cravingMoodQuick => 'Quick';
+  String get cravingMoodQuick => 'Snel';
 
   @override
-  String get cravingMoodSpecial => 'Something Special';
+  String get cravingMoodSpecial => 'Iets speciaals';
 
   @override
   String get cravingCatDessert => 'Dessert';
 
   @override
-  String get cravingCatPastry => 'Pastry';
+  String get cravingCatPastry => 'Gebak';
 
   @override
-  String get cravingCatBakedGoods => 'Baked Goods';
+  String get cravingCatBakedGoods => 'Gebak';
 
   @override
-  String get cravingCatBreakfast => 'Breakfast';
+  String get cravingCatBreakfast => 'Ontbijt';
 
   @override
-  String get cravingCatDinner => 'Dinner';
+  String get cravingCatDinner => 'Avondeten';
 
   @override
   String get cravingCatLunch => 'Lunch';
 
   @override
-  String get cravingCatAppetizer => 'Appetizer';
+  String get cravingCatAppetizer => 'Voorgerecht';
 
   @override
-  String get cravingCatSoup => 'Soup';
+  String get cravingCatSoup => 'Soep';
 
   @override
-  String get cravingCatSauce => 'Sauce';
+  String get cravingCatSauce => 'Saus';
 
   @override
-  String get cravingCatSalad => 'Salad';
+  String get cravingCatSalad => 'Salade';
 
   @override
   String get cravingCatSnack => 'Snack';
 
   @override
-  String get cravingCatMainDish => 'Main Dish';
+  String get cravingCatMainDish => 'Hoofdgerecht';
 
   @override
   String get cravingCatPasta => 'Pasta';
 
   @override
-  String get cravingCatRice => 'Rice Dishes';
+  String get cravingCatRice => 'Rijstgerechten';
 
   @override
-  String get cravingCatCasserole => 'Casserole';
+  String get cravingCatCasserole => 'Ovenschotel';
 
   @override
-  String get cravingCatUnder20 => 'Under 20 min';
+  String get cravingCatUnder20 => 'Onder 20 min';
 
   @override
-  String get cravingCatUnder30 => 'Under 30 min';
+  String get cravingCatUnder30 => 'Onder 30 min';
 
   @override
-  String get cravingCat5Ings => '5 ingredients or less';
+  String get cravingCat5Ings => '5 ingrediënten of minder';
 
   @override
-  String get cravingCatImpressive => 'Impressive';
+  String get cravingCatImpressive => 'Indrukwekkend';
 
   @override
-  String get cravingCatCrowdPleaser => 'Crowd Pleaser';
+  String get cravingCatCrowdPleaser => 'Publiekslieveling';
 
   @override
-  String get cravingCatFavorites => 'Favorites';
+  String get cravingCatFavorites => 'Favorieten';
 
   @override
-  String get cravingSourceMyRecipesTitle => 'My saved recipes';
+  String get cravingSourceMyRecipesTitle => 'Mijn opgeslagen recepten';
 
   @override
-  String get cravingSourceMyRecipesSubtitle => 'From your personal library';
+  String get cravingSourceMyRecipesSubtitle => 'Uit je persoonlijke bibliotheek';
 
   @override
-  String get cravingSourceCommunityTitle => 'Discover something new';
+  String get cravingSourceCommunityTitle => 'Ontdek iets nieuws';
 
   @override
-  String get cravingSourceCommunitySubtitle => 'From the community';
+  String get cravingSourceCommunitySubtitle => 'Van de community';
 
   @override
-  String get cravingSourceBothTitle => 'Both — surprise me';
+  String get cravingSourceBothTitle => 'Beide — verras me';
 
   @override
-  String get cravingSourceBothSubtitle => 'Mix of yours and community';
+  String get cravingSourceBothSubtitle => 'Mix van jouw recepten en community';
 
   @override
-  String get cravingReshuffle => 'Reshuffle';
+  String get cravingReshuffle => 'Opnieuw schudden';
 
   @override
   String cravingFoundRecipes(int count) {
-    return 'Found $count recipes matching your vibe';
+    return '$count recepten gevonden die bij je passen';
   }
 
   @override
-  String get cravingNothingFound => 'Nothing found for these filters';
+  String get cravingNothingFound => 'Niets gevonden voor deze filters';
 
   @override
-  String get cravingTryBroader => 'Try broader options or reshuffle';
+  String get cravingTryBroader => 'Probeer bredere opties of schud opnieuw';
 
   @override
-  String get cravingAdjustFilters => 'Adjust filters';
+  String get cravingAdjustFilters => 'Filters aanpassen';
 
   @override
-  String get cravingCookThis => 'Cook this recipe';
+  String get cravingCookThis => 'Dit recept koken';
 
   @override
-  String get cravingViewRecipe => 'View recipe';
+  String get cravingViewRecipe => 'Recept bekijken';
 
   @override
-  String get cravingNext => 'Next';
+  String get cravingNext => 'Volgende';
 
   @override
-  String get cravingBack => 'Back';
+  String get cravingBack => 'Terug';
 
   @override
-  String get cravingSkipStep => 'Skip this step →';
+  String get cravingSkipStep => 'Deze stap overslaan →';
 
   @override
-  String get cravingFindRecipes => 'Find recipes';
+  String get cravingFindRecipes => 'Recepten zoeken';
 
   @override
-  String get mergeCookbooksMenu => 'Merge cookbooks';
+  String get mergeCookbooksMenu => 'Kookboeken samenvoegen';
 
   @override
-  String get mergeCookbooksTitle => 'Merge Cookbooks';
+  String get mergeCookbooksTitle => 'Kookboeken samenvoegen';
 
   @override
-  String get mergeCookbooksNameLabel => 'New cookbook name';
+  String get mergeCookbooksNameLabel => 'Nieuwe kookboeknaam';
 
   @override
-  String get mergeCookbooksDefaultName => 'Merged Cookbook';
+  String get mergeCookbooksDefaultName => 'Samengevoegd kookboek';
 
   @override
-  String get mergeCookbooksNeedTwo => 'You need at least 2 cookbooks to merge';
+  String get mergeCookbooksNeedTwo => 'Je hebt minstens 2 kookboeken nodig om samen te voegen';
 
   @override
-  String get mergeCookbooksNoRecipes => 'No recipes to merge';
+  String get mergeCookbooksNoRecipes => 'Geen recepten om samen te voegen';
 
   @override
   String mergeCookbooksMerging(int count) {
-    return 'Merging $count recipes...';
+    return '$count recepten samenvoegen...';
   }
 
   @override
   String mergeCookbooksCreated(String name, int count) {
-    return 'Created \"$name\" with $count recipes';
+    return '\"$name\" aangemaakt met $count recepten';
   }
 
   @override
   String mergeCookbooksFailed(String error) {
-    return 'Merge failed: $error';
+    return 'Samenvoegen mislukt: $error';
   }
 
   @override
   String mergeCookbooksButton(int count) {
-    return 'Merge $count cookbooks';
+    return '$count kookboeken samenvoegen';
   }
 
   @override
-  String get mergeCookbooksCancel => 'Cancel';
+  String get mergeCookbooksCancel => 'Annuleren';
 
   @override
-  String get combinedIngredients => 'Combined Ingredients';
+  String get combinedIngredients => 'Gecombineerde ingrediënten';
 
   @override
-  String get communitySubRecipe => 'Sub-recipe';
+  String get communitySubRecipe => 'Subrecept';
 
   @override
-  String get copyToCookbook => 'Copy to cookbook';
+  String get copyToCookbook => 'Kopieer naar kookboek';
 
   @override
-  String get moveToCookbook => 'Move to cookbook';
+  String get moveToCookbook => 'Verplaats naar kookboek';
 
   @override
-  String get hintCookbookSwitcher => 'Tap the cookbook name at the top to switch between your cookbooks!';
+  String get hintCookbookSwitcher => 'Tik op de kookboeknaam bovenaan om te wisselen tussen je kookboeken!';
 
   @override
   String get paywallPlanPremium => 'Premium';
 
   @override
-  String get paywallPricePremium => '\$4.99/month';
+  String get paywallPricePremium => '\$6.99';
 
   @override
-  String get paywallSublinePremium => 'For serious home cooks';
+  String get paywallSublinePremium => 'eenmalig · voor altijd van jou';
 
   @override
-  String get paywallFeatureCloudSync => 'Cloud sync across devices';
+  String get paywallFeatureCloudSync => 'Cloudsynchronisatie tussen apparaten';
 
   @override
-  String get paywallFeatureStepPhotos => 'Step-by-step photos';
+  String get paywallFeatureStepPhotos => 'Stap-voor-stap foto\'s';
 
   @override
-  String get paywallFeatureAutoBackups => 'Automatic backups';
+  String get paywallFeatureAutoBackups => 'Automatische back-ups';
 
   @override
-  String get paywallPlanFamily => 'Family';
+  String get paywallPlanFamily => 'Familie';
 
   @override
-  String get paywallPriceFamily => '\$7.99/month';
+  String get paywallPriceFamily => '\$19.99';
 
   @override
-  String get paywallSublineFamily => 'Cook together';
+  String get paywallSublineFamily => 'eenmalig · delen met 5 personen';
 
   @override
-  String get paywallFeatureEverythingPremium => 'Everything in Premium';
+  String get paywallFeatureEverythingPremium => 'Alles in Premium';
 
   @override
-  String get paywallFeatureFamilySync => 'Family sync for up to 6';
+  String get paywallFeatureFamilySync => 'Tot 5 gezinsleden samen synchroniseren';
 
   @override
-  String get paywallFeatureSharedCookbooks => 'Shared cookbooks';
+  String get paywallFeatureSharedCookbooks => 'Gedeelde kookboeken & boodschappenlijsten';
 
   @override
-  String get paywallPriceAnchor => 'Less than a cup of coffee per month';
+  String get paywallPriceAnchor => 'De meeste receptenapps kosten \$5–10/maand. Dit is anders.';
 
   @override
-  String get paywallTrustLine => 'Cancel anytime. No questions asked.';
+  String get paywallTrustLine => 'Eenmaal betalen, voor altijd van jou.';
 
   @override
-  String get paywallPrivacyPolicy => 'Privacy Policy';
+  String get paywallPrivacyPolicy => 'Privacybeleid';
 
   @override
-  String get paywallTerms => 'Terms';
+  String get paywallTerms => 'Voorwaarden';
 
   @override
-  String get paywallPurchaseSuccess => 'Purchase successful!';
+  String get paywallPurchaseSuccess => 'Aankoop geslaagd!';
 
   @override
-  String get paywallCheckoutOpened => 'Complete your purchase in the browser window that just opened.';
+  String get paywallCheckoutOpened => 'Voltooi je aankoop in het browservenster dat zojuist is geopend.';
 
   @override
-  String get paywallWebComingSoonDesc => 'In-app purchases for web are coming soon. Please use the mobile app to subscribe.';
+  String get paywallWebComingSoonDesc => 'In-app aankopen voor web komen binnenkort. Gebruik de mobiele app om te abonneren.';
 
   @override
-  String get paywallCompareFree => 'Free';
+  String get paywallCompareFree => 'Gratis';
 
   @override
-  String get paywallCompareUnlimitedRecipes => 'Unlimited recipes';
+  String get paywallCompareUnlimitedRecipes => 'Onbeperkt recepten';
 
   @override
-  String get paywallCompareCloudSync => 'Cloud sync';
+  String get paywallCompareCloudSync => 'Cloudsynchronisatie';
 
   @override
-  String get paywallCompareFamilySharing => 'Family sharing';
+  String get paywallCompareFamilySharing => 'Delen met familie';
 
   @override
   String linkCurrentlyLinked(int count) {
-    return '$count currently linked';
+    return '$count momenteel gekoppeld';
   }
 
   @override
-  String get linkSearchRecipes => 'Search recipes...';
+  String get linkSearchRecipes => 'Recepten zoeken...';
 
   @override
   String linkAvailable(int count) {
-    return '$count available';
+    return '$count beschikbaar';
   }
 
   @override
   String linkNoMatch(String query) {
-    return 'No match for \"$query\"';
+    return 'Geen resultaat voor \"$query\"';
   }
 
   @override
-  String get linkNoRecipesAvailable => 'No recipes available';
+  String get linkNoRecipesAvailable => 'Geen recepten beschikbaar';
 
   @override
   String linkFoundInOtherCookbooks(int count) {
-    return '$count found in other cookbooks';
+    return '$count gevonden in andere kookboeken';
   }
 
   @override
-  String get linkCopyToCookbookNote => 'Recipes from other cookbooks will be copied to this cookbook when linked.';
+  String get linkCopyToCookbookNote => 'Recepten uit andere kookboeken worden gekopieerd naar dit kookboek wanneer gekoppeld.';
 
   @override
-  String get linkWillBeCopied => 'Will be copied to this cookbook';
+  String get linkWillBeCopied => 'Wordt gekopieerd naar dit kookboek';
 
   @override
-  String get bulkCopyLabel => 'Copy';
+  String get bulkCopyLabel => 'Kopieer';
 
   @override
-  String get bulkDeleteLabel => 'Delete';
+  String get bulkDeleteLabel => 'Verwijder';
 
   @override
-  String get bulkMoveLabel => 'Move';
+  String get bulkMoveLabel => 'Verplaats';
 
   @override
-  String get bulkPinned => 'Pinned';
+  String get bulkPinned => 'Vastgepind';
 
   @override
-  String get recipeListCreateCookbookFirst => 'Create another cookbook first';
+  String get recipeListCreateCookbookFirst => 'Maak eerst een ander kookboek';
 
   @override
   String recipeListRecipesCopied(int count) {
-    return '$count recipes copied';
+    return '$count recepten gekopieerd';
   }
 
   @override
   String recipeListRecipesMoved(int count) {
-    return '$count recipes moved';
+    return '$count recepten verplaatst';
   }
 
   @override
   String selectAllBar(int selectedCount, int totalCount) {
-    return '$selectedCount of $totalCount selected';
+    return '$selectedCount van $totalCount geselecteerd';
   }
 
   @override
-  String get sortAToZ => 'A to Z';
+  String get sortAToZ => 'A tot Z';
 
   @override
-  String get sortZToA => 'Z to A';
+  String get sortZToA => 'Z tot A';
 
   @override
-  String get sortNewest => 'Newest';
+  String get sortNewest => 'Nieuwste';
 
   @override
-  String get sortOldest => 'Oldest';
+  String get sortOldest => 'Oudste';
 
   @override
-  String get sortRating => 'Rating';
+  String get sortRating => 'Beoordeling';
 
   @override
-  String get sortQuickest => 'Quickest';
+  String get sortQuickest => 'Snelste';
 
   @override
-  String get sortFavorites => 'Favorites';
+  String get sortFavorites => 'Favorieten';
 
   @override
-  String get viewSizeSmall => 'Small';
+  String get viewSizeSmall => 'Klein';
 
   @override
-  String get viewSizeMedium => 'Medium';
+  String get viewSizeMedium => 'Middel';
 
   @override
-  String get viewSizeLarge => 'Large';
+  String get viewSizeLarge => 'Groot';
 
   @override
   String trashSelectedCount(int count) {
-    return '$count selected';
+    return '$count geselecteerd';
   }
 
   @override
   String trashBulkRestored(int count) {
-    return '$count recipes restored';
+    return '$count recepten hersteld';
   }
 
   @override
   String trashBulkDeleteConfirm(int count) {
-    return 'Permanently delete $count recipes? This cannot be undone.';
+    return '$count recepten permanent verwijderen? Dit kan niet ongedaan worden gemaakt.';
   }
 
   @override
   String trashDeletingCount(int count) {
-    return 'Deleting $count recipes...';
+    return '$count recepten verwijderen...';
   }
 
   @override
   String trashBulkDeleted(int count) {
-    return '$count recipes deleted';
+    return '$count recepten verwijderd';
   }
 
   @override
-  String get shareViewerExpired => 'This share link has expired';
+  String get shareViewerExpired => 'Deze deellink is verlopen';
 
   @override
-  String get shareViewerExpiredLabel => 'Expired';
+  String get shareViewerExpiredLabel => 'Verlopen';
 
   @override
-  String get shareViewerFailed => 'Failed to load shared recipes';
+  String get shareViewerFailed => 'Gedeelde recepten laden mislukt';
 
   @override
-  String get shareViewerNoConnection => 'No internet connection';
+  String get shareViewerNoConnection => 'Geen internetverbinding';
 
   @override
   String shareViewerHoursRemaining(int hours) {
-    return '${hours}h remaining';
+    return '${hours}u resterend';
   }
 
   @override
   String shareViewerMinutesRemaining(int minutes) {
-    return '${minutes}m remaining';
+    return '${minutes}m resterend';
   }
 
   @override
   String shareViewerRecipeCount(int count) {
-    return '$count recipes';
+    return '$count recepten';
   }
 
   @override
-  String get shareViewerUntitled => 'Untitled Recipe';
+  String get shareViewerUntitled => 'Naamloos recept';
 
   @override
-  String get exportFullZip => 'Full Backup (ZIP)';
+  String get exportFullZip => 'Volledige back-up (ZIP)';
 
   @override
-  String get exportFullZipSubtitle => 'All data + images in a portable archive';
+  String get exportFullZipSubtitle => 'Alle gegevens + afbeeldingen in een draagbaar archief';
 
   @override
-  String get importFromFileSubtitle => 'Supports .json and .zip backup files';
+  String get importFromFileSubtitle => 'Ondersteunt .json en .zip back-upbestanden';
 
   @override
-  String get exportAdvanced => 'Advanced options';
+  String get exportAdvanced => 'Geavanceerde opties';
 
   @override
-  String get exportCurrentCookbookSubtitle => 'JSON file of current cookbook only';
+  String get exportCurrentCookbookSubtitle => 'JSON-bestand van alleen het huidige kookboek';
 
   @override
-  String get exportJsonCustom => 'Custom JSON export';
+  String get exportJsonCustom => 'Aangepaste JSON-export';
 }

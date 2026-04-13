@@ -16672,13 +16672,13 @@ abstract class AppLocalizations {
   /// No description provided for @paywallPricePremium.
   ///
   /// In en, this message translates to:
-  /// **'\$4.99/month'**
+  /// **'\$6.99'**
   String get paywallPricePremium;
 
   /// No description provided for @paywallSublinePremium.
   ///
   /// In en, this message translates to:
-  /// **'For serious home cooks'**
+  /// **'one-time · yours forever'**
   String get paywallSublinePremium;
 
   /// No description provided for @paywallFeatureCloudSync.
@@ -16708,13 +16708,13 @@ abstract class AppLocalizations {
   /// No description provided for @paywallPriceFamily.
   ///
   /// In en, this message translates to:
-  /// **'\$7.99/month'**
+  /// **'\$19.99'**
   String get paywallPriceFamily;
 
   /// No description provided for @paywallSublineFamily.
   ///
   /// In en, this message translates to:
-  /// **'Cook together'**
+  /// **'one-time · share with 5 people'**
   String get paywallSublineFamily;
 
   /// No description provided for @paywallFeatureEverythingPremium.
@@ -16726,25 +16726,25 @@ abstract class AppLocalizations {
   /// No description provided for @paywallFeatureFamilySync.
   ///
   /// In en, this message translates to:
-  /// **'Family sync for up to 6'**
+  /// **'Up to 5 family members sync together'**
   String get paywallFeatureFamilySync;
 
   /// No description provided for @paywallFeatureSharedCookbooks.
   ///
   /// In en, this message translates to:
-  /// **'Shared cookbooks'**
+  /// **'Shared cookbooks & shopping lists'**
   String get paywallFeatureSharedCookbooks;
 
   /// No description provided for @paywallPriceAnchor.
   ///
   /// In en, this message translates to:
-  /// **'Less than a cup of coffee per month'**
+  /// **'Most recipe apps charge \$5–10/month. This isn\'t that.'**
   String get paywallPriceAnchor;
 
   /// No description provided for @paywallTrustLine.
   ///
   /// In en, this message translates to:
-  /// **'Cancel anytime. No questions asked.'**
+  /// **'Pay once, yours forever.'**
   String get paywallTrustLine;
 
   /// No description provided for @paywallPrivacyPolicy.

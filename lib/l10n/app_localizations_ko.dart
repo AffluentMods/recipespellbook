@@ -3605,28 +3605,28 @@ class AppLocalizationsKo extends AppLocalizations {
   String get allDataDesc => '로컬 데이터 및 설정 — 전체 초기화';
 
   @override
-  String get allDataWarningTitle => 'This will delete everything';
+  String get allDataWarningTitle => '모든 것이 삭제됩니다';
 
   @override
-  String get allDataWarningCloudData => 'All recipes, cookbooks, and meal plans synced to the cloud';
+  String get allDataWarningCloudData => '클라우드에 동기화된 모든 레시피, 요리책 및 식사 계획';
 
   @override
-  String get allDataWarningLocalData => 'All local data on this device';
+  String get allDataWarningLocalData => '이 기기의 모든 로컬 데이터';
 
   @override
-  String get allDataWarningAccount => 'Your account (subscription restores automatically on sign-in)';
+  String get allDataWarningAccount => '계정 (로그인 시 구독이 자동으로 복원됨)';
 
   @override
-  String get allDataWarningSettings => 'All app settings and preferences';
+  String get allDataWarningSettings => '모든 앱 설정 및 환경설정';
 
   @override
-  String get allDataIUnderstand => 'I understand this will permanently delete all my data';
+  String get allDataIUnderstand => '모든 데이터가 영구적으로 삭제된다는 것을 이해합니다';
 
   @override
-  String get allDataNoUndo => 'I understand this action cannot be undone';
+  String get allDataNoUndo => '이 작업은 되돌릴 수 없다는 것을 이해합니다';
 
   @override
-  String get localNoCloudWarning => 'You don\'t have Cloud Sync — there is no backup to recover from';
+  String get localNoCloudWarning => 'Cloud Sync가 없습니다 — 복구할 백업이 없습니다';
 
   @override
   String permanentDeleteWarning(String scope) {
@@ -8023,1200 +8023,1194 @@ class AppLocalizationsKo extends AppLocalizations {
   String get accountStoreFallback => '스토어';
 
   @override
-  String get communityUnpublishDialogTitle => 'Unpublish this cookbook?';
+  String get communityUnpublishDialogTitle => '이 요리책을 게시 취소하시겠습니까?';
 
   @override
-  String get communityUnpublishDialogMessage => 'It will be removed from the community. Your recipes are unaffected.';
+  String get communityUnpublishDialogMessage => '커뮤니티에서 제거됩니다. 레시피에는 영향이 없습니다.';
 
   @override
-  String get communityPublishAnotherCookbook => '+ Publish another cookbook';
+  String get communityPublishAnotherCookbook => '+ 다른 요리책 게시';
 
   @override
-  String get communityShareMoreWithCommunity => 'Share more with the community';
+  String get communityShareMoreWithCommunity => '커뮤니티와 더 많이 공유하세요';
 
   @override
-  String get communityUploading => 'Uploading...';
+  String get communityUploading => '업로드 중...';
 
   @override
-  String get communityStatRecipes => 'recipes';
+  String get communityStatRecipes => '레시피';
 
   @override
-  String get communityStatDownloads => 'downloads';
+  String get communityStatDownloads => '다운로드';
 
   @override
-  String get communityStatRating => 'rating';
+  String get communityStatRating => '평점';
 
   @override
-  String get communityRemovedByModerator => 'This cookbook was removed by a moderator.';
+  String get communityRemovedByModerator => '이 요리책은 관리자에 의해 제거되었습니다.';
 
   @override
-  String get communityBrowseRecipes => 'Recipes';
+  String get communityBrowseRecipes => '레시피';
 
   @override
-  String get communityBrowseCookbooks => 'Cookbooks';
+  String get communityBrowseCookbooks => '요리책';
 
   @override
-  String get communityNoRecipesYet => 'No community recipes yet';
+  String get communityNoRecipesYet => '아직 커뮤니티 레시피가 없습니다';
 
   @override
-  String get communityTryDifferentSearch => 'Try a different search term or clear your filters';
+  String get communityTryDifferentSearch => '다른 검색어를 시도하거나 필터를 지우세요';
 
   @override
-  String get communityBeFirstToShare => 'Be the first to share a cookbook with the community!';
+  String get communityBeFirstToShare => '커뮤니티에 첫 번째로 요리책을 공유해 보세요!';
 
   @override
-  String get communityPublishToShare => 'Publish a cookbook to share your recipes with everyone!';
+  String get communityPublishToShare => '요리책을 게시하여 모두와 레시피를 공유하세요!';
 
   @override
   String communityFromCookbook(String name) {
-    return 'from $name';
+    return '$name에서';
   }
 
   @override
   String communityIngredientsCount(int count) {
-    return '$count ingredients';
+    return '재료 $count개';
   }
 
   @override
   String communitySaveRecipeTo(String title) {
-    return 'Save \"$title\" to...';
+    return '\"$title\" 저장 위치...';
   }
 
   @override
-  String get communityNewCookbook => 'New Cookbook';
+  String get communityNewCookbook => '새 요리책';
 
   @override
-  String get communityExistingCookbook => 'Existing Cookbook';
+  String get communityExistingCookbook => '기존 요리책';
 
   @override
-  String get communityAddToExistingCookbook => 'Add to one of your cookbooks';
+  String get communityAddToExistingCookbook => '기존 요리책에 추가';
 
   @override
-  String get communityChooseCookbook => 'Choose Cookbook';
+  String get communityChooseCookbook => '요리책 선택';
 
   @override
-  String get communityNoCookbooksYetSaveNew => 'No cookbooks yet. Recipes will be saved to a new cookbook.';
+  String get communityNoCookbooksYetSaveNew => '아직 요리책이 없습니다. 레시피는 새 요리책에 저장됩니다.';
 
   @override
-  String get communityCreateCookbookFirstToSave => 'Create a cookbook first to save recipes';
+  String get communityCreateCookbookFirstToSave => '레시피를 저장하려면 먼저 요리책을 만드세요';
 
   @override
-  String get communitySaveTo => 'Save to:';
+  String get communitySaveTo => '저장 위치:';
 
   @override
   String communitySaveRecipeCount(int count) {
-    return 'Save $count Recipes';
+    return '레시피 $count개 저장';
   }
 
   @override
-  String get communityFailedToSaveRating => 'Failed to save rating. Please try again.';
+  String get communityFailedToSaveRating => '평가 저장에 실패했습니다. 다시 시도해 주세요.';
 
   @override
-  String get communityDownloadingCookbook => 'Downloading cookbook...';
+  String get communityDownloadingCookbook => '요리책 다운로드 중...';
 
   @override
-  String get communitySavingRecipes => 'Saving recipes...';
+  String get communitySavingRecipes => '레시피 저장 중...';
 
   @override
   String communityPartialDownloadSuccess(int count, String title) {
-    return '$count recipes saved from \"$title\"';
+    return '\"$title\"에서 레시피 $count개 저장됨';
   }
 
   @override
-  String get communityCannotReportOwn => 'You cannot report your own publication';
+  String get communityCannotReportOwn => '자신의 게시물을 신고할 수 없습니다';
 
   @override
-  String get communityEditCookbook => 'Edit Cookbook';
+  String get communityEditCookbook => '요리책 편집';
 
   @override
-  String get communityEditTitle => 'Title';
+  String get communityEditTitle => '제목';
 
   @override
-  String get communityEditDescriptionLabel => 'Description';
+  String get communityEditDescriptionLabel => '설명';
 
   @override
-  String get communityEditTagsLabel => 'Tags';
+  String get communityEditTagsLabel => '태그';
 
   @override
-  String get communityCookbookUpdated => 'Cookbook updated';
+  String get communityCookbookUpdated => '요리책이 업데이트되었습니다';
 
   @override
-  String get communityFailedToUpdate => 'Failed to update';
+  String get communityFailedToUpdate => '업데이트 실패';
 
   @override
-  String get communitySaveChanges => 'Save Changes';
+  String get communitySaveChanges => '변경사항 저장';
 
   @override
-  String get communityEditTooltip => 'Edit';
+  String get communityEditTooltip => '편집';
 
   @override
-  String get communitySelectAllRecipes => 'Select All';
+  String get communitySelectAllRecipes => '전체 선택';
 
   @override
-  String get communityDeselectAllRecipes => 'Deselect All';
+  String get communityDeselectAllRecipes => '전체 선택 해제';
 
   @override
   String communitySelectedOfTotal(int selected, int total) {
-    return '$selected of $total selected';
+    return '$total개 중 $selected개 선택됨';
   }
 
   @override
   String communityDownloadRecipes(int count) {
-    return 'Download $count Recipes';
+    return '레시피 $count개 다운로드';
   }
 
   @override
-  String get communityNotCurrentlyRated => 'Not currently rated';
+  String get communityNotCurrentlyRated => '아직 평가되지 않음';
 
   @override
-  String get communityCannotRateOwnCookbook => 'You cannot rate your own cookbook';
+  String get communityCannotRateOwnCookbook => '자신의 요리책에 평가할 수 없습니다';
 
   @override
-  String get communitySelectIndividualRecipes => 'Select Individual Recipes';
+  String get communitySelectIndividualRecipes => '개별 레시피 선택';
 
   @override
   String communityWithImages(String size) {
-    return '$size with images';
+    return '이미지 포함 $size';
   }
 
   @override
-  String get communitySaveRecipe => 'Save Recipe';
+  String get communitySaveRecipe => '레시피 저장';
 
   @override
-  String get communityNoCookbooksYetCreate => 'No cookbooks yet';
+  String get communityNoCookbooksYetCreate => '아직 요리책이 없습니다';
 
   @override
-  String get communityCreateCookbookFirst => 'Create a cookbook first';
+  String get communityCreateCookbookFirst => '먼저 요리책을 만드세요';
 
   @override
-  String get communitySavingRecipe => 'Saving recipe...';
+  String get communitySavingRecipe => '레시피 저장 중...';
 
   @override
   String communityRecipeSaved(String title) {
-    return '\"$title\" saved!';
+    return '\"$title\" 저장됨!';
   }
 
   @override
   String communityFailedToSave(String error) {
-    return 'Failed to save: $error';
+    return '저장 실패: $error';
   }
 
   @override
-  String get communitySaveToMyCookbooks => 'Save to My Cookbooks';
+  String get communitySaveToMyCookbooks => '내 요리책에 저장';
 
   @override
-  String get communityViewCookbook => 'View Cookbook';
+  String get communityViewCookbook => '요리책 보기';
 
   @override
-  String get communityPublishInProgress => 'Publishing in progress — cancel the upload first';
+  String get communityPublishInProgress => '게시 진행 중 — 먼저 업로드를 취소하세요';
 
   @override
-  String get communityUnknownError => 'Unknown error';
+  String get communityUnknownError => '알 수 없는 오류';
 
   @override
-  String get communityUploadCancelled => 'Upload cancelled';
+  String get communityUploadCancelled => '업로드 취소됨';
 
   @override
-  String get communityCancelUpload => 'Cancel Upload';
+  String get communityCancelUpload => '업로드 취소';
 
   @override
-  String get communityCancelling => 'Cancelling...';
+  String get communityCancelling => '취소 중...';
 
   @override
-  String get communityPublishingFailed => 'Publishing failed';
+  String get communityPublishingFailed => '게시 실패';
 
   @override
   String communityTagsSummary(int count) {
-    return '$count tags';
+    return '태그 $count개';
   }
 
   @override
-  String get creatorNotFound => 'Creator not found';
+  String get creatorNotFound => '크리에이터를 찾을 수 없습니다';
 
   @override
   String creatorMemberSince(String date) {
-    return 'Member since $date';
+    return '$date부터 회원';
   }
 
   @override
-  String get creatorStatRecipes => 'Recipes';
+  String get creatorStatRecipes => '레시피';
 
   @override
-  String get creatorStatCookbooks => 'Cookbooks';
+  String get creatorStatCookbooks => '요리책';
 
   @override
-  String get creatorStatDownloads => 'Downloads';
+  String get creatorStatDownloads => '다운로드';
 
   @override
-  String get creatorStatAvgRating => 'Avg Rating';
+  String get creatorStatAvgRating => '평균 평점';
 
   @override
-  String get creatorPublishedCookbooks => 'Published Cookbooks';
+  String get creatorPublishedCookbooks => '게시된 요리책';
 
   @override
-  String get creatorNoCookbooksYet => 'No published cookbooks yet';
+  String get creatorNoCookbooksYet => '아직 게시된 요리책이 없습니다';
 
   @override
   String creatorRecipesCount(int count) {
-    return '$count recipes';
+    return '레시피 $count개';
   }
 
   @override
-  String get follow => 'Follow';
+  String get follow => '팔로우';
 
   @override
-  String get following => 'Following';
+  String get following => '팔로잉';
 
   @override
-  String get unfollow => 'Unfollow';
+  String get unfollow => '팔로우 취소';
 
   @override
-  String get followers => 'Followers';
+  String get followers => '팔로워';
 
   @override
-  String get followingLabel => 'Following';
+  String get followingLabel => '팔로잉';
 
   @override
-  String get cannotFollowSelf => 'You cannot follow yourself';
+  String get cannotFollowSelf => '자신을 팔로우할 수 없습니다';
 
   @override
-  String get paywallUpgradeTitle => 'Upgrade Recipe Spellbook';
+  String get paywallUpgradeTitle => 'Recipe Spellbook 업그레이드';
 
   @override
-  String get paywallSubtitle => 'Your recipes on every device.\nForever.';
+  String get paywallSubtitle => '모든 기기에서 내 레시피를.\n영원히.';
 
   @override
-  String get paywallPremiumTitle => 'Premium';
+  String get paywallPremiumTitle => '프리미엄';
 
   @override
-  String get paywallFamilyTitle => 'Family';
+  String get paywallFamilyTitle => '패밀리';
 
   @override
-  String get paywallPremiumFeature1 => 'Cloud sync across all devices';
+  String get paywallPremiumFeature1 => '모든 기기에서 클라우드 동기화';
 
   @override
-  String get paywallPremiumFeature2 => 'Step-by-step photos';
+  String get paywallPremiumFeature2 => '단계별 사진';
 
   @override
-  String get paywallPremiumFeature3 => 'Automatic backups';
+  String get paywallPremiumFeature3 => '자동 백업';
 
   @override
-  String get paywallFamilyFeature1 => 'Everything in Premium';
+  String get paywallFamilyFeature1 => '프리미엄의 모든 기능';
 
   @override
-  String get paywallFamilyFeature2 => 'Up to 5 family members sync together';
+  String get paywallFamilyFeature2 => '최대 5명의 가족과 함께 동기화';
 
   @override
-  String get paywallFamilyFeature3 => 'Shared cookbooks & shopping lists';
+  String get paywallFamilyFeature3 => '공유 요리책 & 쇼핑 목록';
 
   @override
-  String get paywallValueProp => 'Most recipe apps charge \$5–10/month. This isn\'t that.';
+  String get paywallValueProp => '대부분의 레시피 앱은 월 \$5~10을 청구합니다. 이 앱은 다릅니다.';
 
   @override
   String paywallGetPlan(String planName, String planPrice) {
-    return 'Get $planName — $planPrice';
+    return '$planName 구매 — $planPrice';
   }
 
   @override
-  String get paywallOneTimePurchase => 'One-time purchase · No subscription · Yours forever';
+  String get paywallOneTimePurchase => '일회성 구매 · 구독 없음 · 영원히 소유';
 
   @override
-  String get paywallRestorePurchases => 'Restore purchases';
+  String get paywallRestorePurchases => '구매 복원';
 
   @override
-  String get paywallCompleteYourPurchase => 'Complete Your Purchase';
+  String get paywallCompleteYourPurchase => '구매 완료';
 
   @override
-  String get paywallCompleteMessage => 'After completing your purchase, tap \"Refresh\" below to activate it.';
+  String get paywallCompleteMessage => '구매를 완료한 후 아래 \"새로고침\" 을 탭하여 활성화하세요.';
 
   @override
-  String get paywallRefresh => 'Refresh';
+  String get paywallRefresh => '새로고침';
 
   @override
-  String get paywallYoureAllSet => 'You\'re all set!';
+  String get paywallYoureAllSet => '모두 준비되었습니다!';
 
   @override
-  String get paywallPurchaseNotDetected => 'Purchase not detected yet — try refreshing again.';
+  String get paywallPurchaseNotDetected => '아직 구매가 감지되지 않았습니다 — 다시 새로고침해 보세요.';
 
   @override
-  String get paywallWebComingSoon => 'Web Purchases Coming Soon';
+  String get paywallWebComingSoon => '웹 구매 곧 출시';
 
   @override
-  String get paywallWebMessage => 'In the meantime, upgrade on Android or iOS and it syncs everywhere.';
+  String get paywallWebMessage => '그동안 Android 또는 iOS에서 업그레이드하면 모든 곳에서 동기화됩니다.';
 
   @override
-  String get paywallFreeLabel => 'Free';
+  String get paywallFreeLabel => '무료';
 
   @override
-  String get paywallPremiumLabel => 'Premium';
+  String get paywallPremiumLabel => '프리미엄';
 
   @override
-  String get paywallFamilyLabel => 'Family';
+  String get paywallFamilyLabel => '패밀리';
 
   @override
-  String get paywallUnlimitedRecipes => 'Unlimited recipes';
+  String get paywallUnlimitedRecipes => '무제한 레시피';
 
   @override
-  String get paywallCloudSync => 'Cloud sync';
+  String get paywallCloudSync => '클라우드 동기화';
 
   @override
-  String get paywallFamilySharing => 'Family sharing';
+  String get paywallFamilySharing => '가족 공유';
 
   @override
-  String get adminModerationPanel => 'Moderation Panel';
+  String get adminModerationPanel => '관리 패널';
 
   @override
-  String get adminPendingReview => 'Pending Review';
+  String get adminPendingReview => '검토 대기 중';
 
   @override
-  String get adminPendingFlags => 'Pending Flags';
+  String get adminPendingFlags => '대기 중인 플래그';
 
   @override
-  String get adminPendingReports => 'Pending Reports';
+  String get adminPendingReports => '대기 중인 신고';
 
   @override
-  String get adminUserReports => 'User Reports';
+  String get adminUserReports => '사용자 신고';
 
   @override
-  String get adminAllClear => 'All clear!';
+  String get adminAllClear => '모두 완료!';
 
   @override
-  String get adminNoPendingItems => 'No pending items to review.';
+  String get adminNoPendingItems => '검토할 항목이 없습니다.';
 
   @override
-  String get adminFailedToApprove => 'Failed to approve';
+  String get adminFailedToApprove => '승인 실패';
 
   @override
-  String get adminFailedToRemove => 'Failed to remove';
+  String get adminFailedToRemove => '제거 실패';
 
   @override
-  String get adminFlagApproved => 'Flag approved (publication removed)';
+  String get adminFlagApproved => '플래그 승인됨 (게시물 제거됨)';
 
   @override
-  String get adminFailedToApproveFlag => 'Failed to approve flag';
+  String get adminFailedToApproveFlag => '플래그 승인 실패';
 
   @override
-  String get adminFlagRejected => 'Flag rejected (publication kept)';
+  String get adminFlagRejected => '플래그 거부됨 (게시물 유지됨)';
 
   @override
-  String get adminFailedToRejectFlag => 'Failed to reject flag';
+  String get adminFailedToRejectFlag => '플래그 거부 실패';
 
   @override
-  String get adminContentRemovedResolved => 'Content removed & report resolved';
+  String get adminContentRemovedResolved => '콘텐츠 제거 및 신고 해결';
 
   @override
-  String get adminReportDismissed => 'Report dismissed';
+  String get adminReportDismissed => '신고가 기각되었습니다';
 
   @override
-  String get adminFailedToResolveReport => 'Failed to resolve report';
+  String get adminFailedToResolveReport => '신고 해결 실패';
 
   @override
   String adminByPublisher(String name, int count) {
-    return 'By $name · $count recipes';
+    return '$name · 레시피 $count개';
   }
 
   @override
-  String get adminApprove => 'Approve';
+  String get adminApprove => '승인';
 
   @override
-  String get adminRemove => 'Remove';
+  String get adminRemove => '제거';
 
   @override
   String adminReportedBy(String name) {
-    return 'Reported by: $name';
+    return '신고자: $name';
   }
 
   @override
   String adminReason(String reason) {
-    return 'Reason: $reason';
+    return '사유: $reason';
   }
 
   @override
-  String get adminRemoveContent => 'Remove Content';
+  String get adminRemoveContent => '콘텐츠 제거';
 
   @override
-  String get adminDismissReport => 'Dismiss Report';
+  String get adminDismissReport => '신고 기각';
 
   @override
-  String get adminDismissFlag => 'Dismiss Flag';
+  String get adminDismissFlag => '플래그 기각';
 
   @override
-  String get accountProfileUpdated => 'Profile updated';
+  String get accountProfileUpdated => '프로필이 업데이트되었습니다';
 
   @override
-  String get accountProfileUpdateFailed => 'Failed to update profile';
+  String get accountProfileUpdateFailed => '프로필 업데이트 실패';
 
   @override
-  String get accountProfilePictureUpdated => 'Profile picture updated';
+  String get accountProfilePictureUpdated => '프로필 사진이 업데이트되었습니다';
 
   @override
-  String get accountProfilePictureUpdateFailed => 'Failed to update profile picture';
+  String get accountProfilePictureUpdateFailed => '프로필 사진 업데이트 실패';
 
   @override
-  String get accountFailedToUploadImage => 'Failed to upload image';
+  String get accountFailedToUploadImage => '이미지 업로드 실패';
 
   @override
-  String get accountDisplayNameHint => 'Display name';
+  String get accountDisplayNameHint => '표시 이름';
 
   @override
-  String get menuDrawerYourStuff => 'Your Stuff';
+  String get menuDrawerYourStuff => '내 항목';
 
   @override
-  String get menuDrawerOrganize => 'Organize your recipe collections';
+  String get menuDrawerOrganize => '레시피 컬렉션 정리';
 
   @override
-  String get menuDrawerImportSubtitle => 'From any URL, photo or file';
+  String get menuDrawerImportSubtitle => 'URL, 사진 또는 파일에서';
 
   @override
-  String get menuDrawerTransferSubtitle => 'Move recipes between devices';
+  String get menuDrawerTransferSubtitle => '기기 간 레시피 이동';
 
   @override
-  String get menuDrawerApp => 'App';
+  String get menuDrawerApp => '앱';
 
   @override
-  String get menuDrawerSettingsSubtitle => 'Theme, language & preferences';
+  String get menuDrawerSettingsSubtitle => '테마, 언어 및 환경설정';
 
   @override
   String menuDrawerCouldNotOpenUrl(String url) {
-    return 'Could not open $url';
+    return '$url을(를) 열 수 없습니다';
   }
 
   @override
   String menuDrawerCouldNotOpenLink(String error) {
-    return 'Could not open link: $error';
+    return '링크를 열 수 없습니다: $error';
   }
 
   @override
-  String get menuDrawerCouldNotOpenEmail => 'Could not open email client';
+  String get menuDrawerCouldNotOpenEmail => '이메일 클라이언트를 열 수 없습니다';
 
   @override
   String menuDrawerCouldNotOpenEmailError(String error) {
-    return 'Could not open email: $error';
+    return '이메일을 열 수 없습니다: $error';
   }
 
   @override
-  String get menuDrawerGuest => 'Guest';
+  String get menuDrawerGuest => '게스트';
 
   @override
-  String get menuDrawerCommunity => 'COMMUNITY';
+  String get menuDrawerCommunity => '커뮤니티';
 
   @override
-  String get menuDrawerPublishToBuildStats => 'Publish a cookbook to start building your stats here';
+  String get menuDrawerPublishToBuildStats => '요리책을 게시하여 여기에서 통계를 쌓으세요';
 
   @override
-  String get menuDrawerRecipesUploaded => 'recipes\nuploaded';
+  String get menuDrawerRecipesUploaded => '업로드된\n레시피';
 
   @override
-  String get menuDrawerDownloads => 'downloads';
+  String get menuDrawerDownloads => '다운로드';
 
   @override
-  String get menuDrawerRating => 'rating';
+  String get menuDrawerRating => '평점';
 
   @override
-  String get recipeListCopyToCookbook => 'Copy to Cookbook';
+  String get recipeListCopyToCookbook => '요리책으로 복사';
 
   @override
-  String get recipeListMoveToCookbook => 'Move to Cookbook';
+  String get recipeListMoveToCookbook => '요리책으로 이동';
 
   @override
   String recipeListCopyingRecipes(int count) {
-    return 'Copying $count recipes...';
+    return '레시피 $count개 복사 중...';
   }
 
   @override
   String recipeListMovingRecipes(int count) {
-    return 'Moving $count recipes...';
+    return '레시피 $count개 이동 중...';
   }
 
   @override
-  String get recipeListCreateAnotherFirst => 'Create another cookbook first';
+  String get recipeListCreateAnotherFirst => '먼저 다른 요리책을 만드세요';
 
   @override
-  String get recipeListSortNewest => 'Newest';
+  String get recipeListSortNewest => '최신순';
 
   @override
-  String get recipeListSortOldest => 'Oldest';
+  String get recipeListSortOldest => '오래된순';
 
   @override
-  String get recipeListSortRating => 'Rating';
+  String get recipeListSortRating => '평점순';
 
   @override
-  String get recipeListSortQuickest => 'Quickest';
+  String get recipeListSortQuickest => '빠른순';
 
   @override
-  String get recipeListSizeSmall => 'Small';
+  String get recipeListSizeSmall => '작게';
 
   @override
-  String get recipeListSizeMedium => 'Medium';
+  String get recipeListSizeMedium => '보통';
 
   @override
-  String get recipeListSizeLarge => 'Large';
+  String get recipeListSizeLarge => '크게';
 
   @override
-  String get recipeListPinned => 'Pinned';
+  String get recipeListPinned => '고정됨';
 
   @override
-  String get recipeListDeselectAll => 'Deselect all';
+  String get recipeListDeselectAll => '전체 선택 해제';
 
   @override
-  String get recipeListSelectAll => 'Select all';
+  String get recipeListSelectAll => '전체 선택';
 
   @override
-  String get plannerPreviousWeek => 'Previous week';
+  String get plannerPreviousWeek => '이전 주';
 
   @override
-  String get plannerNextWeek => 'Next week';
+  String get plannerNextWeek => '다음 주';
 
   @override
-  String get plannerMoreOptions => 'More options';
+  String get plannerMoreOptions => '더 많은 옵션';
 
   @override
-  String get homeScreenSwitchCookbook => 'Switch Cookbook';
+  String get homeScreenSwitchCookbook => '요리책 전환';
 
   @override
-  String get homeScreenNewCookbook => 'New Cookbook';
+  String get homeScreenNewCookbook => '새 요리책';
 
   @override
-  String get shareViewerSharedRecipe => 'Shared Recipe';
+  String get shareViewerSharedRecipe => '공유된 레시피';
 
   @override
-  String get shareViewerGoHome => 'Go Home';
+  String get shareViewerGoHome => '홈으로';
 
   @override
   String shareViewerSharedBy(String name) {
-    return 'Shared by $name';
+    return '$name이(가) 공유함';
   }
 
   @override
   String shareViewerExpires(String date) {
-    return 'Expires: $date';
+    return '만료: $date';
   }
 
   @override
-  String get importIssues => 'Import Issues';
+  String get importIssues => '가져오기 문제';
 
   @override
   String trashPermanentlyDeleteConfirm(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'recipes',
-      one: 'recipe',
-    );
-    return 'Permanently delete $count $_temp0? This cannot be undone.';
+    return '레시피 $count개를 영구적으로 삭제하시겠습니까? 되돌릴 수 없습니다.';
   }
 
   @override
   String trashDeletingRecipes(int count) {
-    return 'Deleting $count recipes...';
+    return '레시피 $count개 삭제 중...';
   }
 
   @override
-  String get trashDeletingAllRecipes => 'Deleting recipes...';
+  String get trashDeletingAllRecipes => '레시피 삭제 중...';
 
   @override
   String cookbooksError(String error) {
-    return 'Error: $error';
+    return '오류: $error';
   }
 
   @override
-  String get cookbooksShareFromApp => 'Shared from Recipe Spellbook';
+  String get cookbooksShareFromApp => 'Recipe Spellbook에서 공유됨';
 
   @override
-  String get cookbooksPublishFailed => 'Publish failed';
+  String get cookbooksPublishFailed => '게시 실패';
 
   @override
-  String get displayName => 'Display Name';
+  String get displayName => '표시 이름';
 
   @override
-  String get editDisplayName => 'Edit Display Name';
+  String get editDisplayName => '표시 이름 편집';
 
   @override
-  String get displayNameHelper => 'Used on your profile and in the community.';
+  String get displayNameHelper => '프로필과 커뮤니티에서 사용됩니다.';
 
   @override
-  String get saveName => 'Save Name';
+  String get saveName => '이름 저장';
 
   @override
-  String get nameContainsUnsupported => 'Name contains unsupported characters';
+  String get nameContainsUnsupported => '이름에 지원되지 않는 문자가 포함되어 있습니다';
 
   @override
-  String get nameTooShort => 'Name must be at least 2 characters';
+  String get nameTooShort => '이름은 최소 2자 이상이어야 합니다';
 
   @override
-  String get communitySection => 'COMMUNITY';
+  String get communitySection => '커뮤니티';
 
   @override
-  String get subscriptionSection => 'SUBSCRIPTION';
+  String get subscriptionSection => '구독';
 
   @override
-  String get integrationsSection => 'INTEGRATIONS';
+  String get integrationsSection => '연동';
 
   @override
-  String get dangerZoneSection => 'DANGER ZONE';
+  String get dangerZoneSection => '위험 영역';
 
   @override
-  String get unlockPremium => 'Unlock Premium';
+  String get unlockPremium => '프리미엄 잠금 해제';
 
   @override
-  String get oneTimePurchaseDesc => 'One-time purchase · yours forever · no subscription';
+  String get oneTimePurchaseDesc => '일회성 구매 · 영원히 소유 · 구독 없음';
 
   @override
-  String get viewPlansPrice => 'View Plans — \$6.99';
+  String get viewPlansPrice => '플랜 보기 — \$6.99';
 
   @override
-  String get premiumActive => 'Premium — Active';
+  String get premiumActive => '프리미엄 — 활성';
 
   @override
-  String get familyActive => 'Family — Active';
+  String get familyActive => '패밀리 — 활성';
 
   @override
-  String get cloudSyncEnabled => 'Cloud sync enabled';
+  String get cloudSyncEnabled => '클라우드 동기화 활성화됨';
 
   @override
-  String get sharedWithMembers => 'Shared with up to 5 members';
+  String get sharedWithMembers => '최대 5명과 공유';
 
   @override
-  String get yourForever => 'yours forever';
+  String get yourForever => '영원히 소유';
 
   @override
-  String get publishCookbookToStart => 'Publish a cookbook to start building your stats here';
+  String get publishCookbookToStart => '요리책을 게시하여 여기에서 통계를 쌓으세요';
 
   @override
-  String get removePhoto => 'Remove photo';
+  String get removePhoto => '사진 제거';
 
   @override
-  String get chooseFromLibrary => 'Choose from library';
+  String get chooseFromLibrary => '라이브러리에서 선택';
 
   @override
-  String get deleteAccountTitle => 'Permanently delete your account?';
+  String get deleteAccountTitle => '계정을 영구적으로 삭제하시겠습니까?';
 
   @override
-  String get deleteAccountWarning => 'This will delete:\n· All your saved recipes\n· All your cookbooks\n· Your community publications\n· All account data\n\nThis cannot be undone.';
+  String get deleteAccountWarning => '다음이 삭제됩니다:\n· 저장된 모든 레시피\n· 모든 요리책\n· 커뮤니티 게시물\n· 모든 계정 데이터\n\n이 작업은 되돌릴 수 없습니다.';
 
   @override
-  String get typeDeleteToConfirmAccount => 'Type DELETE to confirm:';
+  String get typeDeleteToConfirmAccount => '확인하려면 DELETE를 입력하세요:';
 
   @override
-  String get deleteForever => 'Delete Forever';
+  String get deleteForever => '영구 삭제';
 
   @override
   String nameCooldownMessage(String date) {
-    return 'You can change your name again on $date';
+    return '$date에 다시 이름을 변경할 수 있습니다';
   }
 
   @override
-  String get reportAccount => 'Report this account';
+  String get reportAccount => '이 계정 신고';
 
   @override
-  String get reportAccountTitle => 'Why are you reporting this account?';
+  String get reportAccountTitle => '이 계정을 신고하는 이유는 무엇인가요?';
 
   @override
-  String get reportSpam => 'Spam or fake account';
+  String get reportSpam => '스팸 또는 가짜 계정';
 
   @override
-  String get reportInappropriate => 'Inappropriate content';
+  String get reportInappropriate => '부적절한 콘텐츠';
 
   @override
-  String get reportStolen => 'Stolen recipes / copyright';
+  String get reportStolen => '도용된 레시피 / 저작권';
 
   @override
-  String get reportHarassment => 'Harassment';
+  String get reportHarassment => '괴롭힘';
 
   @override
-  String get reportOther => 'Other';
+  String get reportOther => '기타';
 
   @override
-  String get submitReport => 'Submit Report';
+  String get submitReport => '신고 제출';
 
   @override
-  String get reportSubmitted => 'Thanks for your report. We\'ll review it shortly.';
+  String get reportSubmitted => '신고해 주셔서 감사합니다. 곧 검토하겠습니다.';
 
   @override
-  String get alreadyReportedRecently => 'You already reported this account recently';
+  String get alreadyReportedRecently => '이미 최근에 이 계정을 신고했습니다';
 
   @override
-  String get cannotReportSelf => 'You cannot report yourself';
+  String get cannotReportSelf => '자신을 신고할 수 없습니다';
 
   @override
-  String get pendingAccountReports => 'Account Reports';
+  String get pendingAccountReports => '계정 신고';
 
   @override
-  String get accountReportsResolved => 'Account report resolved';
+  String get accountReportsResolved => '계정 신고가 해결되었습니다';
 
   @override
-  String get accountReportDismissed => 'Account report dismissed';
+  String get accountReportDismissed => '계정 신고가 기각되었습니다';
 
   @override
-  String get communityTrending => 'TRENDING';
+  String get communityTrending => '인기';
 
   @override
-  String get communitySearchTags => 'Search tags...';
+  String get communitySearchTags => '태그 검색...';
 
   @override
   String communityNoTagsFound(String query) {
-    return 'No tags found for \"$query\"';
+    return '\"$query\"에 대한 태그를 찾을 수 없습니다';
   }
 
   @override
-  String get communityConfirm => 'Confirm';
+  String get communityConfirm => '확인';
 
   @override
-  String get cravingCardTitle => 'What are you craving?';
+  String get cravingCardTitle => '무엇이 먹고 싶나요?';
 
   @override
-  String get cravingCardSubtitle => 'Find recipes that match your mood';
+  String get cravingCardSubtitle => '기분에 맞는 레시피를 찾아보세요';
 
   @override
-  String get cravingStep1Title => 'What are you feeling?';
+  String get cravingStep1Title => '어떤 기분이세요?';
 
   @override
-  String get cravingStep2Title => 'Anything more specific?';
+  String get cravingStep2Title => '좀 더 구체적으로?';
 
   @override
-  String get cravingStep3Title => 'Where should we look?';
+  String get cravingStep3Title => '어디서 찾아볼까요?';
 
   @override
-  String get cravingResultsTitle => 'Here\'s what we found';
+  String get cravingResultsTitle => '이런 걸 찾았어요';
 
   @override
-  String get cravingPickOneOrMore => 'Pick one or more';
+  String get cravingPickOneOrMore => '하나 이상 선택하세요';
 
   @override
-  String get cravingMoodHint => 'We\'ll find something you\'ll love';
+  String get cravingMoodHint => '좋아할 만한 걸 찾아드릴게요';
 
   @override
   String cravingCountSelected(int count) {
-    return '$count selected';
+    return '$count개 선택됨';
   }
 
   @override
-  String get cravingCategoryHint => 'Optional — skip if you\'re open to anything';
+  String get cravingCategoryHint => '선택 사항 — 아무거나 괜찮으면 건너뛰세요';
 
   @override
-  String get cravingCategoryNarrowHint => 'Narrow it down or skip ahead';
+  String get cravingCategoryNarrowHint => '범위를 좁히거나 건너뛰세요';
 
   @override
-  String get cravingMoodSweet => 'Sweet';
+  String get cravingMoodSweet => '달콤한';
 
   @override
-  String get cravingMoodSavory => 'Savory';
+  String get cravingMoodSavory => '짭짤한';
 
   @override
-  String get cravingMoodLight => 'Light';
+  String get cravingMoodLight => '가벼운';
 
   @override
-  String get cravingMoodFilling => 'Filling';
+  String get cravingMoodFilling => '든든한';
 
   @override
-  String get cravingMoodQuick => 'Quick';
+  String get cravingMoodQuick => '빠른';
 
   @override
-  String get cravingMoodSpecial => 'Something Special';
+  String get cravingMoodSpecial => '특별한 것';
 
   @override
-  String get cravingCatDessert => 'Dessert';
+  String get cravingCatDessert => '디저트';
 
   @override
-  String get cravingCatPastry => 'Pastry';
+  String get cravingCatPastry => '페이스트리';
 
   @override
-  String get cravingCatBakedGoods => 'Baked Goods';
+  String get cravingCatBakedGoods => '베이킹';
 
   @override
-  String get cravingCatBreakfast => 'Breakfast';
+  String get cravingCatBreakfast => '아침 식사';
 
   @override
-  String get cravingCatDinner => 'Dinner';
+  String get cravingCatDinner => '저녁 식사';
 
   @override
-  String get cravingCatLunch => 'Lunch';
+  String get cravingCatLunch => '점심 식사';
 
   @override
-  String get cravingCatAppetizer => 'Appetizer';
+  String get cravingCatAppetizer => '전채요리';
 
   @override
-  String get cravingCatSoup => 'Soup';
+  String get cravingCatSoup => '수프';
 
   @override
-  String get cravingCatSauce => 'Sauce';
+  String get cravingCatSauce => '소스';
 
   @override
-  String get cravingCatSalad => 'Salad';
+  String get cravingCatSalad => '샐러드';
 
   @override
-  String get cravingCatSnack => 'Snack';
+  String get cravingCatSnack => '간식';
 
   @override
-  String get cravingCatMainDish => 'Main Dish';
+  String get cravingCatMainDish => '메인 요리';
 
   @override
-  String get cravingCatPasta => 'Pasta';
+  String get cravingCatPasta => '파스타';
 
   @override
-  String get cravingCatRice => 'Rice Dishes';
+  String get cravingCatRice => '밥 요리';
 
   @override
-  String get cravingCatCasserole => 'Casserole';
+  String get cravingCatCasserole => '캐서롤';
 
   @override
-  String get cravingCatUnder20 => 'Under 20 min';
+  String get cravingCatUnder20 => '20분 이내';
 
   @override
-  String get cravingCatUnder30 => 'Under 30 min';
+  String get cravingCatUnder30 => '30분 이내';
 
   @override
-  String get cravingCat5Ings => '5 ingredients or less';
+  String get cravingCat5Ings => '재료 5개 이하';
 
   @override
-  String get cravingCatImpressive => 'Impressive';
+  String get cravingCatImpressive => '특별한 요리';
 
   @override
-  String get cravingCatCrowdPleaser => 'Crowd Pleaser';
+  String get cravingCatCrowdPleaser => '인기 메뉴';
 
   @override
-  String get cravingCatFavorites => 'Favorites';
+  String get cravingCatFavorites => '즐겨찾기';
 
   @override
-  String get cravingSourceMyRecipesTitle => 'My saved recipes';
+  String get cravingSourceMyRecipesTitle => '내 저장된 레시피';
 
   @override
-  String get cravingSourceMyRecipesSubtitle => 'From your personal library';
+  String get cravingSourceMyRecipesSubtitle => '내 개인 라이브러리에서';
 
   @override
-  String get cravingSourceCommunityTitle => 'Discover something new';
+  String get cravingSourceCommunityTitle => '새로운 것을 발견하기';
 
   @override
-  String get cravingSourceCommunitySubtitle => 'From the community';
+  String get cravingSourceCommunitySubtitle => '커뮤니티에서';
 
   @override
-  String get cravingSourceBothTitle => 'Both — surprise me';
+  String get cravingSourceBothTitle => '둘 다 — 서프라이즈';
 
   @override
-  String get cravingSourceBothSubtitle => 'Mix of yours and community';
+  String get cravingSourceBothSubtitle => '내 레시피와 커뮤니티 혼합';
 
   @override
-  String get cravingReshuffle => 'Reshuffle';
+  String get cravingReshuffle => '다시 섞기';
 
   @override
   String cravingFoundRecipes(int count) {
-    return 'Found $count recipes matching your vibe';
+    return '분위기에 맞는 레시피 $count개를 찾았습니다';
   }
 
   @override
-  String get cravingNothingFound => 'Nothing found for these filters';
+  String get cravingNothingFound => '이 필터에 맞는 결과가 없습니다';
 
   @override
-  String get cravingTryBroader => 'Try broader options or reshuffle';
+  String get cravingTryBroader => '더 넓은 옵션을 시도하거나 다시 섞어보세요';
 
   @override
-  String get cravingAdjustFilters => 'Adjust filters';
+  String get cravingAdjustFilters => '필터 조정';
 
   @override
-  String get cravingCookThis => 'Cook this recipe';
+  String get cravingCookThis => '이 레시피 요리하기';
 
   @override
-  String get cravingViewRecipe => 'View recipe';
+  String get cravingViewRecipe => '레시피 보기';
 
   @override
-  String get cravingNext => 'Next';
+  String get cravingNext => '다음';
 
   @override
-  String get cravingBack => 'Back';
+  String get cravingBack => '뒤로';
 
   @override
-  String get cravingSkipStep => 'Skip this step →';
+  String get cravingSkipStep => '이 단계 건너뛰기 →';
 
   @override
-  String get cravingFindRecipes => 'Find recipes';
+  String get cravingFindRecipes => '레시피 찾기';
 
   @override
-  String get mergeCookbooksMenu => 'Merge cookbooks';
+  String get mergeCookbooksMenu => '요리책 병합';
 
   @override
-  String get mergeCookbooksTitle => 'Merge Cookbooks';
+  String get mergeCookbooksTitle => '요리책 병합';
 
   @override
-  String get mergeCookbooksNameLabel => 'New cookbook name';
+  String get mergeCookbooksNameLabel => '새 요리책 이름';
 
   @override
-  String get mergeCookbooksDefaultName => 'Merged Cookbook';
+  String get mergeCookbooksDefaultName => '병합된 요리책';
 
   @override
-  String get mergeCookbooksNeedTwo => 'You need at least 2 cookbooks to merge';
+  String get mergeCookbooksNeedTwo => '병합하려면 최소 2개의 요리책이 필요합니다';
 
   @override
-  String get mergeCookbooksNoRecipes => 'No recipes to merge';
+  String get mergeCookbooksNoRecipes => '병합할 레시피가 없습니다';
 
   @override
   String mergeCookbooksMerging(int count) {
-    return 'Merging $count recipes...';
+    return '레시피 $count개 병합 중...';
   }
 
   @override
   String mergeCookbooksCreated(String name, int count) {
-    return 'Created \"$name\" with $count recipes';
+    return '레시피 $count개로 \"$name\" 생성됨';
   }
 
   @override
   String mergeCookbooksFailed(String error) {
-    return 'Merge failed: $error';
+    return '병합 실패: $error';
   }
 
   @override
   String mergeCookbooksButton(int count) {
-    return 'Merge $count cookbooks';
+    return '요리책 $count개 병합';
   }
 
   @override
-  String get mergeCookbooksCancel => 'Cancel';
+  String get mergeCookbooksCancel => '취소';
 
   @override
-  String get combinedIngredients => 'Combined Ingredients';
+  String get combinedIngredients => '통합 재료';
 
   @override
-  String get communitySubRecipe => 'Sub-recipe';
+  String get communitySubRecipe => '서브 레시피';
 
   @override
-  String get copyToCookbook => 'Copy to cookbook';
+  String get copyToCookbook => '요리책으로 복사';
 
   @override
-  String get moveToCookbook => 'Move to cookbook';
+  String get moveToCookbook => '요리책으로 이동';
 
   @override
-  String get hintCookbookSwitcher => 'Tap the cookbook name at the top to switch between your cookbooks!';
+  String get hintCookbookSwitcher => '상단의 요리책 이름을 탭하여 요리책을 전환하세요!';
 
   @override
-  String get paywallPlanPremium => 'Premium';
+  String get paywallPlanPremium => '프리미엄';
 
   @override
-  String get paywallPricePremium => '\$4.99/month';
+  String get paywallPricePremium => '\$6.99';
 
   @override
-  String get paywallSublinePremium => 'For serious home cooks';
+  String get paywallSublinePremium => '일회성 · 영원히 소유';
 
   @override
-  String get paywallFeatureCloudSync => 'Cloud sync across devices';
+  String get paywallFeatureCloudSync => '기기 간 클라우드 동기화';
 
   @override
-  String get paywallFeatureStepPhotos => 'Step-by-step photos';
+  String get paywallFeatureStepPhotos => '단계별 사진';
 
   @override
-  String get paywallFeatureAutoBackups => 'Automatic backups';
+  String get paywallFeatureAutoBackups => '자동 백업';
 
   @override
-  String get paywallPlanFamily => 'Family';
+  String get paywallPlanFamily => '패밀리';
 
   @override
-  String get paywallPriceFamily => '\$7.99/month';
+  String get paywallPriceFamily => '\$19.99';
 
   @override
-  String get paywallSublineFamily => 'Cook together';
+  String get paywallSublineFamily => '일회성 · 5명과 공유';
 
   @override
-  String get paywallFeatureEverythingPremium => 'Everything in Premium';
+  String get paywallFeatureEverythingPremium => '프리미엄의 모든 기능';
 
   @override
-  String get paywallFeatureFamilySync => 'Family sync for up to 6';
+  String get paywallFeatureFamilySync => '최대 5명의 가족과 함께 동기화';
 
   @override
-  String get paywallFeatureSharedCookbooks => 'Shared cookbooks';
+  String get paywallFeatureSharedCookbooks => '공유 요리책 & 쇼핑 목록';
 
   @override
-  String get paywallPriceAnchor => 'Less than a cup of coffee per month';
+  String get paywallPriceAnchor => '대부분의 레시피 앱은 월 \$5~10을 청구합니다. 이 앱은 다릅니다.';
 
   @override
-  String get paywallTrustLine => 'Cancel anytime. No questions asked.';
+  String get paywallTrustLine => '한 번 결제, 영원히 소유.';
 
   @override
-  String get paywallPrivacyPolicy => 'Privacy Policy';
+  String get paywallPrivacyPolicy => '개인정보 처리방침';
 
   @override
-  String get paywallTerms => 'Terms';
+  String get paywallTerms => '약관';
 
   @override
-  String get paywallPurchaseSuccess => 'Purchase successful!';
+  String get paywallPurchaseSuccess => '구매 성공!';
 
   @override
-  String get paywallCheckoutOpened => 'Complete your purchase in the browser window that just opened.';
+  String get paywallCheckoutOpened => '방금 열린 브라우저 창에서 구매를 완료하세요.';
 
   @override
-  String get paywallWebComingSoonDesc => 'In-app purchases for web are coming soon. Please use the mobile app to subscribe.';
+  String get paywallWebComingSoonDesc => '웹 인앱 구매가 곧 출시됩니다. 모바일 앱에서 구독해 주세요.';
 
   @override
-  String get paywallCompareFree => 'Free';
+  String get paywallCompareFree => '무료';
 
   @override
-  String get paywallCompareUnlimitedRecipes => 'Unlimited recipes';
+  String get paywallCompareUnlimitedRecipes => '무제한 레시피';
 
   @override
-  String get paywallCompareCloudSync => 'Cloud sync';
+  String get paywallCompareCloudSync => '클라우드 동기화';
 
   @override
-  String get paywallCompareFamilySharing => 'Family sharing';
+  String get paywallCompareFamilySharing => '가족 공유';
 
   @override
   String linkCurrentlyLinked(int count) {
-    return '$count currently linked';
+    return '현재 $count개 연결됨';
   }
 
   @override
-  String get linkSearchRecipes => 'Search recipes...';
+  String get linkSearchRecipes => '레시피 검색...';
 
   @override
   String linkAvailable(int count) {
-    return '$count available';
+    return '$count개 사용 가능';
   }
 
   @override
   String linkNoMatch(String query) {
-    return 'No match for \"$query\"';
+    return '\"$query\"에 대한 검색 결과가 없습니다';
   }
 
   @override
-  String get linkNoRecipesAvailable => 'No recipes available';
+  String get linkNoRecipesAvailable => '사용 가능한 레시피가 없습니다';
 
   @override
   String linkFoundInOtherCookbooks(int count) {
-    return '$count found in other cookbooks';
+    return '다른 요리책에서 $count개 발견';
   }
 
   @override
-  String get linkCopyToCookbookNote => 'Recipes from other cookbooks will be copied to this cookbook when linked.';
+  String get linkCopyToCookbookNote => '다른 요리책의 레시피가 연결 시 이 요리책으로 복사됩니다.';
 
   @override
-  String get linkWillBeCopied => 'Will be copied to this cookbook';
+  String get linkWillBeCopied => '이 요리책으로 복사됩니다';
 
   @override
-  String get bulkCopyLabel => 'Copy';
+  String get bulkCopyLabel => '복사';
 
   @override
-  String get bulkDeleteLabel => 'Delete';
+  String get bulkDeleteLabel => '삭제';
 
   @override
-  String get bulkMoveLabel => 'Move';
+  String get bulkMoveLabel => '이동';
 
   @override
-  String get bulkPinned => 'Pinned';
+  String get bulkPinned => '고정됨';
 
   @override
-  String get recipeListCreateCookbookFirst => 'Create another cookbook first';
+  String get recipeListCreateCookbookFirst => '먼저 다른 요리책을 만드세요';
 
   @override
   String recipeListRecipesCopied(int count) {
-    return '$count recipes copied';
+    return '레시피 $count개 복사됨';
   }
 
   @override
   String recipeListRecipesMoved(int count) {
-    return '$count recipes moved';
+    return '레시피 $count개 이동됨';
   }
 
   @override
   String selectAllBar(int selectedCount, int totalCount) {
-    return '$selectedCount of $totalCount selected';
+    return '$totalCount개 중 $selectedCount개 선택됨';
   }
 
   @override
-  String get sortAToZ => 'A to Z';
+  String get sortAToZ => '가나다순';
 
   @override
-  String get sortZToA => 'Z to A';
+  String get sortZToA => '가나다 역순';
 
   @override
-  String get sortNewest => 'Newest';
+  String get sortNewest => '최신순';
 
   @override
-  String get sortOldest => 'Oldest';
+  String get sortOldest => '오래된순';
 
   @override
-  String get sortRating => 'Rating';
+  String get sortRating => '평점순';
 
   @override
-  String get sortQuickest => 'Quickest';
+  String get sortQuickest => '빠른순';
 
   @override
-  String get sortFavorites => 'Favorites';
+  String get sortFavorites => '즐겨찾기';
 
   @override
-  String get viewSizeSmall => 'Small';
+  String get viewSizeSmall => '작게';
 
   @override
-  String get viewSizeMedium => 'Medium';
+  String get viewSizeMedium => '보통';
 
   @override
-  String get viewSizeLarge => 'Large';
+  String get viewSizeLarge => '크게';
 
   @override
   String trashSelectedCount(int count) {
-    return '$count selected';
+    return '$count개 선택됨';
   }
 
   @override
   String trashBulkRestored(int count) {
-    return '$count recipes restored';
+    return '레시피 $count개 복원됨';
   }
 
   @override
   String trashBulkDeleteConfirm(int count) {
-    return 'Permanently delete $count recipes? This cannot be undone.';
+    return '레시피 $count개를 영구적으로 삭제하시겠습니까? 되돌릴 수 없습니다.';
   }
 
   @override
   String trashDeletingCount(int count) {
-    return 'Deleting $count recipes...';
+    return '레시피 $count개 삭제 중...';
   }
 
   @override
   String trashBulkDeleted(int count) {
-    return '$count recipes deleted';
+    return '레시피 $count개 삭제됨';
   }
 
   @override
-  String get shareViewerExpired => 'This share link has expired';
+  String get shareViewerExpired => '이 공유 링크가 만료되었습니다';
 
   @override
-  String get shareViewerExpiredLabel => 'Expired';
+  String get shareViewerExpiredLabel => '만료됨';
 
   @override
-  String get shareViewerFailed => 'Failed to load shared recipes';
+  String get shareViewerFailed => '공유된 레시피를 불러오지 못했습니다';
 
   @override
-  String get shareViewerNoConnection => 'No internet connection';
+  String get shareViewerNoConnection => '인터넷 연결이 없습니다';
 
   @override
   String shareViewerHoursRemaining(int hours) {
-    return '${hours}h remaining';
+    return '$hours시간 남음';
   }
 
   @override
   String shareViewerMinutesRemaining(int minutes) {
-    return '${minutes}m remaining';
+    return '$minutes분 남음';
   }
 
   @override
   String shareViewerRecipeCount(int count) {
-    return '$count recipes';
+    return '레시피 $count개';
   }
 
   @override
-  String get shareViewerUntitled => 'Untitled Recipe';
+  String get shareViewerUntitled => '제목 없는 레시피';
 
   @override
-  String get exportFullZip => 'Full Backup (ZIP)';
+  String get exportFullZip => '전체 백업 (ZIP)';
 
   @override
-  String get exportFullZipSubtitle => 'All data + images in a portable archive';
+  String get exportFullZipSubtitle => '모든 데이터 + 이미지를 포터블 아카이브로';
 
   @override
-  String get importFromFileSubtitle => 'Supports .json and .zip backup files';
+  String get importFromFileSubtitle => '.json 및 .zip 백업 파일 지원';
 
   @override
-  String get exportAdvanced => 'Advanced options';
+  String get exportAdvanced => '고급 옵션';
 
   @override
-  String get exportCurrentCookbookSubtitle => 'JSON file of current cookbook only';
+  String get exportCurrentCookbookSubtitle => '현재 요리책만 JSON 파일로';
 
   @override
-  String get exportJsonCustom => 'Custom JSON export';
+  String get exportJsonCustom => '사용자 지정 JSON 내보내기';
 }

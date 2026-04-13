@@ -555,23 +555,30 @@ class _PlanCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Plan name
-                Text(title, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                if (badge != null) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: accentColor.withValues(alpha: 0.4)),
-                    ),
-                    child: Text(badge!,
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: accentColor, letterSpacing: 0.8)),
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(title, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                      if (badge != null) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: accentColor.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: accentColor.withValues(alpha: 0.4)),
+                          ),
+                          child: Text(badge!,
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: accentColor, letterSpacing: 0.8)),
+                        ),
+                      ],
+                    ],
                   ),
-                ],
-                const Spacer(),
+                ),
+                const SizedBox(width: 8),
                 // Price — big and bold
-                Text(price, style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: theme.colorScheme.onSurface)),
+                Text(price, style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: theme.colorScheme.onSurface)),
               ],
             ),
             Text(subline, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),

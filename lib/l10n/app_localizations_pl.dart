@@ -3674,28 +3674,28 @@ class AppLocalizationsPl extends AppLocalizations {
   String get allDataDesc => 'Dane lokalne i ustawienia — pełny reset';
 
   @override
-  String get allDataWarningTitle => 'This will delete everything';
+  String get allDataWarningTitle => 'To usunie wszystko';
 
   @override
-  String get allDataWarningCloudData => 'All recipes, cookbooks, and meal plans synced to the cloud';
+  String get allDataWarningCloudData => 'Wszystkie przepisy, książki kucharskie i plany posiłków zsynchronizowane z chmurą';
 
   @override
-  String get allDataWarningLocalData => 'All local data on this device';
+  String get allDataWarningLocalData => 'Wszystkie dane lokalne na tym urządzeniu';
 
   @override
-  String get allDataWarningAccount => 'Your account (subscription restores automatically on sign-in)';
+  String get allDataWarningAccount => 'Twoje konto (subskrypcja zostanie automatycznie przywrócona po zalogowaniu)';
 
   @override
-  String get allDataWarningSettings => 'All app settings and preferences';
+  String get allDataWarningSettings => 'Wszystkie ustawienia i preferencje aplikacji';
 
   @override
-  String get allDataIUnderstand => 'I understand this will permanently delete all my data';
+  String get allDataIUnderstand => 'Rozumiem, że wszystkie moje dane zostaną trwale usunięte';
 
   @override
-  String get allDataNoUndo => 'I understand this action cannot be undone';
+  String get allDataNoUndo => 'Rozumiem, że tej operacji nie można cofnąć';
 
   @override
-  String get localNoCloudWarning => 'You don\'t have Cloud Sync — there is no backup to recover from';
+  String get localNoCloudWarning => 'Nie masz Cloud Sync — nie ma kopii zapasowej do odzyskania';
 
   @override
   String permanentDeleteWarning(String scope) {
@@ -8141,1200 +8141,1194 @@ class AppLocalizationsPl extends AppLocalizations {
   String get accountStoreFallback => 'Sklep';
 
   @override
-  String get communityUnpublishDialogTitle => 'Unpublish this cookbook?';
+  String get communityUnpublishDialogTitle => 'Cofnąć publikację tej książki kucharskiej?';
 
   @override
-  String get communityUnpublishDialogMessage => 'It will be removed from the community. Your recipes are unaffected.';
+  String get communityUnpublishDialogMessage => 'Zostanie usunięta ze społeczności. Twoje przepisy nie zostaną naruszone.';
 
   @override
-  String get communityPublishAnotherCookbook => '+ Publish another cookbook';
+  String get communityPublishAnotherCookbook => '+ Opublikuj kolejną książkę kucharską';
 
   @override
-  String get communityShareMoreWithCommunity => 'Share more with the community';
+  String get communityShareMoreWithCommunity => 'Podziel się więcej ze społecznością';
 
   @override
-  String get communityUploading => 'Uploading...';
+  String get communityUploading => 'Przesyłanie...';
 
   @override
-  String get communityStatRecipes => 'recipes';
+  String get communityStatRecipes => 'przepisy';
 
   @override
-  String get communityStatDownloads => 'downloads';
+  String get communityStatDownloads => 'pobrania';
 
   @override
-  String get communityStatRating => 'rating';
+  String get communityStatRating => 'ocena';
 
   @override
-  String get communityRemovedByModerator => 'This cookbook was removed by a moderator.';
+  String get communityRemovedByModerator => 'Ta książka kucharska została usunięta przez moderatora.';
 
   @override
-  String get communityBrowseRecipes => 'Recipes';
+  String get communityBrowseRecipes => 'Przepisy';
 
   @override
-  String get communityBrowseCookbooks => 'Cookbooks';
+  String get communityBrowseCookbooks => 'Książki kucharskie';
 
   @override
-  String get communityNoRecipesYet => 'No community recipes yet';
+  String get communityNoRecipesYet => 'Brak przepisów społeczności';
 
   @override
-  String get communityTryDifferentSearch => 'Try a different search term or clear your filters';
+  String get communityTryDifferentSearch => 'Spróbuj innego wyszukiwania lub wyczyść filtry';
 
   @override
-  String get communityBeFirstToShare => 'Be the first to share a cookbook with the community!';
+  String get communityBeFirstToShare => 'Bądź pierwszą osobą, która podzieli się książką kucharską ze społecznością!';
 
   @override
-  String get communityPublishToShare => 'Publish a cookbook to share your recipes with everyone!';
+  String get communityPublishToShare => 'Opublikuj książkę kucharską, aby podzielić się przepisami ze wszystkimi!';
 
   @override
   String communityFromCookbook(String name) {
-    return 'from $name';
+    return 'z $name';
   }
 
   @override
   String communityIngredientsCount(int count) {
-    return '$count ingredients';
+    return '$count składników';
   }
 
   @override
   String communitySaveRecipeTo(String title) {
-    return 'Save \"$title\" to...';
+    return 'Zapisz \"$title\" do...';
   }
 
   @override
-  String get communityNewCookbook => 'New Cookbook';
+  String get communityNewCookbook => 'Nowa książka kucharska';
 
   @override
-  String get communityExistingCookbook => 'Existing Cookbook';
+  String get communityExistingCookbook => 'Istniejąca książka kucharska';
 
   @override
-  String get communityAddToExistingCookbook => 'Add to one of your cookbooks';
+  String get communityAddToExistingCookbook => 'Dodaj do jednej ze swoich książek kucharskich';
 
   @override
-  String get communityChooseCookbook => 'Choose Cookbook';
+  String get communityChooseCookbook => 'Wybierz książkę kucharską';
 
   @override
-  String get communityNoCookbooksYetSaveNew => 'No cookbooks yet. Recipes will be saved to a new cookbook.';
+  String get communityNoCookbooksYetSaveNew => 'Brak książek kucharskich. Przepisy zostaną zapisane w nowej książce kucharskiej.';
 
   @override
-  String get communityCreateCookbookFirstToSave => 'Create a cookbook first to save recipes';
+  String get communityCreateCookbookFirstToSave => 'Najpierw utwórz książkę kucharską, aby zapisać przepisy';
 
   @override
-  String get communitySaveTo => 'Save to:';
+  String get communitySaveTo => 'Zapisz do:';
 
   @override
   String communitySaveRecipeCount(int count) {
-    return 'Save $count Recipes';
+    return 'Zapisz $count przepisów';
   }
 
   @override
-  String get communityFailedToSaveRating => 'Failed to save rating. Please try again.';
+  String get communityFailedToSaveRating => 'Nie udało się zapisać oceny. Spróbuj ponownie.';
 
   @override
-  String get communityDownloadingCookbook => 'Downloading cookbook...';
+  String get communityDownloadingCookbook => 'Pobieranie książki kucharskiej...';
 
   @override
-  String get communitySavingRecipes => 'Saving recipes...';
+  String get communitySavingRecipes => 'Zapisywanie przepisów...';
 
   @override
   String communityPartialDownloadSuccess(int count, String title) {
-    return '$count recipes saved from \"$title\"';
+    return '$count przepisów zapisanych z \"$title\"';
   }
 
   @override
-  String get communityCannotReportOwn => 'You cannot report your own publication';
+  String get communityCannotReportOwn => 'Nie możesz zgłosić własnej publikacji';
 
   @override
-  String get communityEditCookbook => 'Edit Cookbook';
+  String get communityEditCookbook => 'Edytuj książkę kucharską';
 
   @override
-  String get communityEditTitle => 'Title';
+  String get communityEditTitle => 'Tytuł';
 
   @override
-  String get communityEditDescriptionLabel => 'Description';
+  String get communityEditDescriptionLabel => 'Opis';
 
   @override
-  String get communityEditTagsLabel => 'Tags';
+  String get communityEditTagsLabel => 'Tagi';
 
   @override
-  String get communityCookbookUpdated => 'Cookbook updated';
+  String get communityCookbookUpdated => 'Książka kucharska zaktualizowana';
 
   @override
-  String get communityFailedToUpdate => 'Failed to update';
+  String get communityFailedToUpdate => 'Nie udało się zaktualizować';
 
   @override
-  String get communitySaveChanges => 'Save Changes';
+  String get communitySaveChanges => 'Zapisz zmiany';
 
   @override
-  String get communityEditTooltip => 'Edit';
+  String get communityEditTooltip => 'Edytuj';
 
   @override
-  String get communitySelectAllRecipes => 'Select All';
+  String get communitySelectAllRecipes => 'Zaznacz wszystko';
 
   @override
-  String get communityDeselectAllRecipes => 'Deselect All';
+  String get communityDeselectAllRecipes => 'Odznacz wszystko';
 
   @override
   String communitySelectedOfTotal(int selected, int total) {
-    return '$selected of $total selected';
+    return '$selected z $total zaznaczonych';
   }
 
   @override
   String communityDownloadRecipes(int count) {
-    return 'Download $count Recipes';
+    return 'Pobierz $count przepisów';
   }
 
   @override
-  String get communityNotCurrentlyRated => 'Not currently rated';
+  String get communityNotCurrentlyRated => 'Jeszcze nieoceniony';
 
   @override
-  String get communityCannotRateOwnCookbook => 'You cannot rate your own cookbook';
+  String get communityCannotRateOwnCookbook => 'Nie możesz oceniać własnej książki kucharskiej';
 
   @override
-  String get communitySelectIndividualRecipes => 'Select Individual Recipes';
+  String get communitySelectIndividualRecipes => 'Wybierz poszczególne przepisy';
 
   @override
   String communityWithImages(String size) {
-    return '$size with images';
+    return '$size ze zdjęciami';
   }
 
   @override
-  String get communitySaveRecipe => 'Save Recipe';
+  String get communitySaveRecipe => 'Zapisz przepis';
 
   @override
-  String get communityNoCookbooksYetCreate => 'No cookbooks yet';
+  String get communityNoCookbooksYetCreate => 'Brak książek kucharskich';
 
   @override
-  String get communityCreateCookbookFirst => 'Create a cookbook first';
+  String get communityCreateCookbookFirst => 'Najpierw utwórz książkę kucharską';
 
   @override
-  String get communitySavingRecipe => 'Saving recipe...';
+  String get communitySavingRecipe => 'Zapisywanie przepisu...';
 
   @override
   String communityRecipeSaved(String title) {
-    return '\"$title\" saved!';
+    return '\"$title\" zapisany!';
   }
 
   @override
   String communityFailedToSave(String error) {
-    return 'Failed to save: $error';
+    return 'Nie udało się zapisać: $error';
   }
 
   @override
-  String get communitySaveToMyCookbooks => 'Save to My Cookbooks';
+  String get communitySaveToMyCookbooks => 'Zapisz w moich książkach kucharskich';
 
   @override
-  String get communityViewCookbook => 'View Cookbook';
+  String get communityViewCookbook => 'Zobacz książkę kucharską';
 
   @override
-  String get communityPublishInProgress => 'Publishing in progress — cancel the upload first';
+  String get communityPublishInProgress => 'Publikowanie w toku — najpierw anuluj przesyłanie';
 
   @override
-  String get communityUnknownError => 'Unknown error';
+  String get communityUnknownError => 'Nieznany błąd';
 
   @override
-  String get communityUploadCancelled => 'Upload cancelled';
+  String get communityUploadCancelled => 'Przesyłanie anulowane';
 
   @override
-  String get communityCancelUpload => 'Cancel Upload';
+  String get communityCancelUpload => 'Anuluj przesyłanie';
 
   @override
-  String get communityCancelling => 'Cancelling...';
+  String get communityCancelling => 'Anulowanie...';
 
   @override
-  String get communityPublishingFailed => 'Publishing failed';
+  String get communityPublishingFailed => 'Publikowanie nie powiodło się';
 
   @override
   String communityTagsSummary(int count) {
-    return '$count tags';
+    return '$count tagów';
   }
 
   @override
-  String get creatorNotFound => 'Creator not found';
+  String get creatorNotFound => 'Nie znaleziono twórcy';
 
   @override
   String creatorMemberSince(String date) {
-    return 'Member since $date';
+    return 'Członek od $date';
   }
 
   @override
-  String get creatorStatRecipes => 'Recipes';
+  String get creatorStatRecipes => 'Przepisy';
 
   @override
-  String get creatorStatCookbooks => 'Cookbooks';
+  String get creatorStatCookbooks => 'Książki kucharskie';
 
   @override
-  String get creatorStatDownloads => 'Downloads';
+  String get creatorStatDownloads => 'Pobrania';
 
   @override
-  String get creatorStatAvgRating => 'Avg Rating';
+  String get creatorStatAvgRating => 'Śr. ocena';
 
   @override
-  String get creatorPublishedCookbooks => 'Published Cookbooks';
+  String get creatorPublishedCookbooks => 'Opublikowane książki kucharskie';
 
   @override
-  String get creatorNoCookbooksYet => 'No published cookbooks yet';
+  String get creatorNoCookbooksYet => 'Brak opublikowanych książek kucharskich';
 
   @override
   String creatorRecipesCount(int count) {
-    return '$count recipes';
+    return '$count przepisów';
   }
 
   @override
-  String get follow => 'Follow';
+  String get follow => 'Obserwuj';
 
   @override
-  String get following => 'Following';
+  String get following => 'Obserwowani';
 
   @override
-  String get unfollow => 'Unfollow';
+  String get unfollow => 'Przestań obserwować';
 
   @override
-  String get followers => 'Followers';
+  String get followers => 'Obserwujący';
 
   @override
-  String get followingLabel => 'Following';
+  String get followingLabel => 'Obserwowani';
 
   @override
-  String get cannotFollowSelf => 'You cannot follow yourself';
+  String get cannotFollowSelf => 'Nie możesz obserwować siebie';
 
   @override
-  String get paywallUpgradeTitle => 'Upgrade Recipe Spellbook';
+  String get paywallUpgradeTitle => 'Ulepsz Recipe Spellbook';
 
   @override
-  String get paywallSubtitle => 'Your recipes on every device.\nForever.';
+  String get paywallSubtitle => 'Twoje przepisy na każdym urządzeniu.\nNa zawsze.';
 
   @override
   String get paywallPremiumTitle => 'Premium';
 
   @override
-  String get paywallFamilyTitle => 'Family';
+  String get paywallFamilyTitle => 'Rodzina';
 
   @override
-  String get paywallPremiumFeature1 => 'Cloud sync across all devices';
+  String get paywallPremiumFeature1 => 'Synchronizacja z chmurą na wszystkich urządzeniach';
 
   @override
-  String get paywallPremiumFeature2 => 'Step-by-step photos';
+  String get paywallPremiumFeature2 => 'Zdjęcia krok po kroku';
 
   @override
-  String get paywallPremiumFeature3 => 'Automatic backups';
+  String get paywallPremiumFeature3 => 'Automatyczne kopie zapasowe';
 
   @override
-  String get paywallFamilyFeature1 => 'Everything in Premium';
+  String get paywallFamilyFeature1 => 'Wszystko w Premium';
 
   @override
-  String get paywallFamilyFeature2 => 'Up to 5 family members sync together';
+  String get paywallFamilyFeature2 => 'Do 5 członków rodziny synchronizuje się razem';
 
   @override
-  String get paywallFamilyFeature3 => 'Shared cookbooks & shopping lists';
+  String get paywallFamilyFeature3 => 'Współdzielone książki kucharskie i listy zakupów';
 
   @override
-  String get paywallValueProp => 'Most recipe apps charge \$5–10/month. This isn\'t that.';
+  String get paywallValueProp => 'Większość aplikacji z przepisami kosztuje \$5–10/miesiąc. To coś innego.';
 
   @override
   String paywallGetPlan(String planName, String planPrice) {
-    return 'Get $planName — $planPrice';
+    return 'Wybierz $planName — $planPrice';
   }
 
   @override
-  String get paywallOneTimePurchase => 'One-time purchase · No subscription · Yours forever';
+  String get paywallOneTimePurchase => 'Jednorazowy zakup · Bez subskrypcji · Twój na zawsze';
 
   @override
-  String get paywallRestorePurchases => 'Restore purchases';
+  String get paywallRestorePurchases => 'Przywróć zakupy';
 
   @override
-  String get paywallCompleteYourPurchase => 'Complete Your Purchase';
+  String get paywallCompleteYourPurchase => 'Dokończ zakup';
 
   @override
-  String get paywallCompleteMessage => 'After completing your purchase, tap \"Refresh\" below to activate it.';
+  String get paywallCompleteMessage => 'Po dokonaniu zakupu dotknij poniżej \"Odśwież\", aby aktywować.';
 
   @override
-  String get paywallRefresh => 'Refresh';
+  String get paywallRefresh => 'Odśwież';
 
   @override
-  String get paywallYoureAllSet => 'You\'re all set!';
+  String get paywallYoureAllSet => 'Wszystko gotowe!';
 
   @override
-  String get paywallPurchaseNotDetected => 'Purchase not detected yet — try refreshing again.';
+  String get paywallPurchaseNotDetected => 'Zakup jeszcze nie wykryty — spróbuj odświeżyć ponownie.';
 
   @override
-  String get paywallWebComingSoon => 'Web Purchases Coming Soon';
+  String get paywallWebComingSoon => 'Zakupy przez stronę wkrótce';
 
   @override
-  String get paywallWebMessage => 'In the meantime, upgrade on Android or iOS and it syncs everywhere.';
+  String get paywallWebMessage => 'W międzyczasie uaktualnij na Androidzie lub iOS, a zsynchronizuje się wszędzie.';
 
   @override
-  String get paywallFreeLabel => 'Free';
+  String get paywallFreeLabel => 'Bezpłatny';
 
   @override
   String get paywallPremiumLabel => 'Premium';
 
   @override
-  String get paywallFamilyLabel => 'Family';
+  String get paywallFamilyLabel => 'Rodzina';
 
   @override
-  String get paywallUnlimitedRecipes => 'Unlimited recipes';
+  String get paywallUnlimitedRecipes => 'Nieograniczona liczba przepisów';
 
   @override
-  String get paywallCloudSync => 'Cloud sync';
+  String get paywallCloudSync => 'Synchronizacja z chmurą';
 
   @override
-  String get paywallFamilySharing => 'Family sharing';
+  String get paywallFamilySharing => 'Udostępnianie rodzinne';
 
   @override
-  String get adminModerationPanel => 'Moderation Panel';
+  String get adminModerationPanel => 'Panel moderacji';
 
   @override
-  String get adminPendingReview => 'Pending Review';
+  String get adminPendingReview => 'Oczekuje na przejrzenie';
 
   @override
-  String get adminPendingFlags => 'Pending Flags';
+  String get adminPendingFlags => 'Oczekujące flagi';
 
   @override
-  String get adminPendingReports => 'Pending Reports';
+  String get adminPendingReports => 'Oczekujące zgłoszenia';
 
   @override
-  String get adminUserReports => 'User Reports';
+  String get adminUserReports => 'Zgłoszenia użytkowników';
 
   @override
-  String get adminAllClear => 'All clear!';
+  String get adminAllClear => 'Wszystko czyste!';
 
   @override
-  String get adminNoPendingItems => 'No pending items to review.';
+  String get adminNoPendingItems => 'Brak elementów do przejrzenia.';
 
   @override
-  String get adminFailedToApprove => 'Failed to approve';
+  String get adminFailedToApprove => 'Nie udało się zatwierdzić';
 
   @override
-  String get adminFailedToRemove => 'Failed to remove';
+  String get adminFailedToRemove => 'Nie udało się usunąć';
 
   @override
-  String get adminFlagApproved => 'Flag approved (publication removed)';
+  String get adminFlagApproved => 'Flaga zatwierdzona (publikacja usunięta)';
 
   @override
-  String get adminFailedToApproveFlag => 'Failed to approve flag';
+  String get adminFailedToApproveFlag => 'Nie udało się zatwierdzić flagi';
 
   @override
-  String get adminFlagRejected => 'Flag rejected (publication kept)';
+  String get adminFlagRejected => 'Flaga odrzucona (publikacja zachowana)';
 
   @override
-  String get adminFailedToRejectFlag => 'Failed to reject flag';
+  String get adminFailedToRejectFlag => 'Nie udało się odrzucić flagi';
 
   @override
-  String get adminContentRemovedResolved => 'Content removed & report resolved';
+  String get adminContentRemovedResolved => 'Treść usunięta i zgłoszenie rozwiązane';
 
   @override
-  String get adminReportDismissed => 'Report dismissed';
+  String get adminReportDismissed => 'Zgłoszenie odrzucone';
 
   @override
-  String get adminFailedToResolveReport => 'Failed to resolve report';
+  String get adminFailedToResolveReport => 'Nie udało się rozwiązać zgłoszenia';
 
   @override
   String adminByPublisher(String name, int count) {
-    return 'By $name · $count recipes';
+    return 'Autor: $name · $count przepisów';
   }
 
   @override
-  String get adminApprove => 'Approve';
+  String get adminApprove => 'Zatwierdź';
 
   @override
-  String get adminRemove => 'Remove';
+  String get adminRemove => 'Usuń';
 
   @override
   String adminReportedBy(String name) {
-    return 'Reported by: $name';
+    return 'Zgłoszone przez: $name';
   }
 
   @override
   String adminReason(String reason) {
-    return 'Reason: $reason';
+    return 'Powód: $reason';
   }
 
   @override
-  String get adminRemoveContent => 'Remove Content';
+  String get adminRemoveContent => 'Usuń treść';
 
   @override
-  String get adminDismissReport => 'Dismiss Report';
+  String get adminDismissReport => 'Odrzuć zgłoszenie';
 
   @override
-  String get adminDismissFlag => 'Dismiss Flag';
+  String get adminDismissFlag => 'Odrzuć flagę';
 
   @override
-  String get accountProfileUpdated => 'Profile updated';
+  String get accountProfileUpdated => 'Profil zaktualizowany';
 
   @override
-  String get accountProfileUpdateFailed => 'Failed to update profile';
+  String get accountProfileUpdateFailed => 'Nie udało się zaktualizować profilu';
 
   @override
-  String get accountProfilePictureUpdated => 'Profile picture updated';
+  String get accountProfilePictureUpdated => 'Zdjęcie profilowe zaktualizowane';
 
   @override
-  String get accountProfilePictureUpdateFailed => 'Failed to update profile picture';
+  String get accountProfilePictureUpdateFailed => 'Nie udało się zaktualizować zdjęcia profilowego';
 
   @override
-  String get accountFailedToUploadImage => 'Failed to upload image';
+  String get accountFailedToUploadImage => 'Nie udało się przesłać zdjęcia';
 
   @override
-  String get accountDisplayNameHint => 'Display name';
+  String get accountDisplayNameHint => 'Nazwa wyświetlana';
 
   @override
-  String get menuDrawerYourStuff => 'Your Stuff';
+  String get menuDrawerYourStuff => 'Twoje rzeczy';
 
   @override
-  String get menuDrawerOrganize => 'Organize your recipe collections';
+  String get menuDrawerOrganize => 'Organizuj swoje kolekcje przepisów';
 
   @override
-  String get menuDrawerImportSubtitle => 'From any URL, photo or file';
+  String get menuDrawerImportSubtitle => 'Z dowolnego URL, zdjęcia lub pliku';
 
   @override
-  String get menuDrawerTransferSubtitle => 'Move recipes between devices';
+  String get menuDrawerTransferSubtitle => 'Przenoś przepisy między urządzeniami';
 
   @override
-  String get menuDrawerApp => 'App';
+  String get menuDrawerApp => 'Aplikacja';
 
   @override
-  String get menuDrawerSettingsSubtitle => 'Theme, language & preferences';
+  String get menuDrawerSettingsSubtitle => 'Motyw, język i preferencje';
 
   @override
   String menuDrawerCouldNotOpenUrl(String url) {
-    return 'Could not open $url';
+    return 'Nie można otworzyć $url';
   }
 
   @override
   String menuDrawerCouldNotOpenLink(String error) {
-    return 'Could not open link: $error';
+    return 'Nie można otworzyć linku: $error';
   }
 
   @override
-  String get menuDrawerCouldNotOpenEmail => 'Could not open email client';
+  String get menuDrawerCouldNotOpenEmail => 'Nie można otworzyć klienta e-mail';
 
   @override
   String menuDrawerCouldNotOpenEmailError(String error) {
-    return 'Could not open email: $error';
+    return 'Nie można otworzyć e-maila: $error';
   }
 
   @override
-  String get menuDrawerGuest => 'Guest';
+  String get menuDrawerGuest => 'Gość';
 
   @override
-  String get menuDrawerCommunity => 'COMMUNITY';
+  String get menuDrawerCommunity => 'SPOŁECZNOŚĆ';
 
   @override
-  String get menuDrawerPublishToBuildStats => 'Publish a cookbook to start building your stats here';
+  String get menuDrawerPublishToBuildStats => 'Opublikuj książkę kucharską, aby zacząć budować statystyki';
 
   @override
-  String get menuDrawerRecipesUploaded => 'recipes\nuploaded';
+  String get menuDrawerRecipesUploaded => 'przesłane\nprzepisy';
 
   @override
-  String get menuDrawerDownloads => 'downloads';
+  String get menuDrawerDownloads => 'pobrania';
 
   @override
-  String get menuDrawerRating => 'rating';
+  String get menuDrawerRating => 'ocena';
 
   @override
-  String get recipeListCopyToCookbook => 'Copy to Cookbook';
+  String get recipeListCopyToCookbook => 'Kopiuj do książki kucharskiej';
 
   @override
-  String get recipeListMoveToCookbook => 'Move to Cookbook';
+  String get recipeListMoveToCookbook => 'Przenieś do książki kucharskiej';
 
   @override
   String recipeListCopyingRecipes(int count) {
-    return 'Copying $count recipes...';
+    return 'Kopiowanie $count przepisów...';
   }
 
   @override
   String recipeListMovingRecipes(int count) {
-    return 'Moving $count recipes...';
+    return 'Przenoszenie $count przepisów...';
   }
 
   @override
-  String get recipeListCreateAnotherFirst => 'Create another cookbook first';
+  String get recipeListCreateAnotherFirst => 'Najpierw utwórz inną książkę kucharską';
 
   @override
-  String get recipeListSortNewest => 'Newest';
+  String get recipeListSortNewest => 'Najnowsze';
 
   @override
-  String get recipeListSortOldest => 'Oldest';
+  String get recipeListSortOldest => 'Najstarsze';
 
   @override
-  String get recipeListSortRating => 'Rating';
+  String get recipeListSortRating => 'Ocena';
 
   @override
-  String get recipeListSortQuickest => 'Quickest';
+  String get recipeListSortQuickest => 'Najszybsze';
 
   @override
-  String get recipeListSizeSmall => 'Small';
+  String get recipeListSizeSmall => 'Mały';
 
   @override
-  String get recipeListSizeMedium => 'Medium';
+  String get recipeListSizeMedium => 'Średni';
 
   @override
-  String get recipeListSizeLarge => 'Large';
+  String get recipeListSizeLarge => 'Duży';
 
   @override
-  String get recipeListPinned => 'Pinned';
+  String get recipeListPinned => 'Przypięty';
 
   @override
-  String get recipeListDeselectAll => 'Deselect all';
+  String get recipeListDeselectAll => 'Odznacz wszystko';
 
   @override
-  String get recipeListSelectAll => 'Select all';
+  String get recipeListSelectAll => 'Zaznacz wszystko';
 
   @override
-  String get plannerPreviousWeek => 'Previous week';
+  String get plannerPreviousWeek => 'Poprzedni tydzień';
 
   @override
-  String get plannerNextWeek => 'Next week';
+  String get plannerNextWeek => 'Następny tydzień';
 
   @override
-  String get plannerMoreOptions => 'More options';
+  String get plannerMoreOptions => 'Więcej opcji';
 
   @override
-  String get homeScreenSwitchCookbook => 'Switch Cookbook';
+  String get homeScreenSwitchCookbook => 'Zmień książkę kucharską';
 
   @override
-  String get homeScreenNewCookbook => 'New Cookbook';
+  String get homeScreenNewCookbook => 'Nowa książka kucharska';
 
   @override
-  String get shareViewerSharedRecipe => 'Shared Recipe';
+  String get shareViewerSharedRecipe => 'Udostępniony przepis';
 
   @override
-  String get shareViewerGoHome => 'Go Home';
+  String get shareViewerGoHome => 'Strona główna';
 
   @override
   String shareViewerSharedBy(String name) {
-    return 'Shared by $name';
+    return 'Udostępnione przez $name';
   }
 
   @override
   String shareViewerExpires(String date) {
-    return 'Expires: $date';
+    return 'Wygasa: $date';
   }
 
   @override
-  String get importIssues => 'Import Issues';
+  String get importIssues => 'Problemy z importem';
 
   @override
   String trashPermanentlyDeleteConfirm(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'recipes',
-      one: 'recipe',
-    );
-    return 'Permanently delete $count $_temp0? This cannot be undone.';
+    return 'Trwale usunąć $count przepisów? Tej operacji nie można cofnąć.';
   }
 
   @override
   String trashDeletingRecipes(int count) {
-    return 'Deleting $count recipes...';
+    return 'Usuwanie $count przepisów...';
   }
 
   @override
-  String get trashDeletingAllRecipes => 'Deleting recipes...';
+  String get trashDeletingAllRecipes => 'Usuwanie przepisów...';
 
   @override
   String cookbooksError(String error) {
-    return 'Error: $error';
+    return 'Błąd: $error';
   }
 
   @override
-  String get cookbooksShareFromApp => 'Shared from Recipe Spellbook';
+  String get cookbooksShareFromApp => 'Udostępnione z Recipe Spellbook';
 
   @override
-  String get cookbooksPublishFailed => 'Publish failed';
+  String get cookbooksPublishFailed => 'Publikowanie nie powiodło się';
 
   @override
-  String get displayName => 'Display Name';
+  String get displayName => 'Nazwa wyświetlana';
 
   @override
-  String get editDisplayName => 'Edit Display Name';
+  String get editDisplayName => 'Edytuj nazwę wyświetlaną';
 
   @override
-  String get displayNameHelper => 'Used on your profile and in the community.';
+  String get displayNameHelper => 'Używana na Twoim profilu i w społeczności.';
 
   @override
-  String get saveName => 'Save Name';
+  String get saveName => 'Zapisz nazwę';
 
   @override
-  String get nameContainsUnsupported => 'Name contains unsupported characters';
+  String get nameContainsUnsupported => 'Nazwa zawiera nieobsługiwane znaki';
 
   @override
-  String get nameTooShort => 'Name must be at least 2 characters';
+  String get nameTooShort => 'Nazwa musi mieć co najmniej 2 znaki';
 
   @override
-  String get communitySection => 'COMMUNITY';
+  String get communitySection => 'SPOŁECZNOŚĆ';
 
   @override
-  String get subscriptionSection => 'SUBSCRIPTION';
+  String get subscriptionSection => 'SUBSKRYPCJA';
 
   @override
-  String get integrationsSection => 'INTEGRATIONS';
+  String get integrationsSection => 'INTEGRACJE';
 
   @override
-  String get dangerZoneSection => 'DANGER ZONE';
+  String get dangerZoneSection => 'STREFA ZAGROŻENIA';
 
   @override
-  String get unlockPremium => 'Unlock Premium';
+  String get unlockPremium => 'Odblokuj Premium';
 
   @override
-  String get oneTimePurchaseDesc => 'One-time purchase · yours forever · no subscription';
+  String get oneTimePurchaseDesc => 'Jednorazowy zakup · Twój na zawsze · bez subskrypcji';
 
   @override
-  String get viewPlansPrice => 'View Plans — \$6.99';
+  String get viewPlansPrice => 'Pokaż plany — \$6.99';
 
   @override
-  String get premiumActive => 'Premium — Active';
+  String get premiumActive => 'Premium — Aktywny';
 
   @override
-  String get familyActive => 'Family — Active';
+  String get familyActive => 'Rodzina — Aktywny';
 
   @override
-  String get cloudSyncEnabled => 'Cloud sync enabled';
+  String get cloudSyncEnabled => 'Synchronizacja z chmurą włączona';
 
   @override
-  String get sharedWithMembers => 'Shared with up to 5 members';
+  String get sharedWithMembers => 'Udostępniony do 5 członków';
 
   @override
-  String get yourForever => 'yours forever';
+  String get yourForever => 'Twój na zawsze';
 
   @override
-  String get publishCookbookToStart => 'Publish a cookbook to start building your stats here';
+  String get publishCookbookToStart => 'Opublikuj książkę kucharską, aby zacząć budować statystyki';
 
   @override
-  String get removePhoto => 'Remove photo';
+  String get removePhoto => 'Usuń zdjęcie';
 
   @override
-  String get chooseFromLibrary => 'Choose from library';
+  String get chooseFromLibrary => 'Wybierz z biblioteki';
 
   @override
-  String get deleteAccountTitle => 'Permanently delete your account?';
+  String get deleteAccountTitle => 'Trwale usunąć konto?';
 
   @override
-  String get deleteAccountWarning => 'This will delete:\n· All your saved recipes\n· All your cookbooks\n· Your community publications\n· All account data\n\nThis cannot be undone.';
+  String get deleteAccountWarning => 'To usunie:\n· Wszystkie zapisane przepisy\n· Wszystkie książki kucharskie\n· Twoje publikacje społecznościowe\n· Wszystkie dane konta\n\nTej operacji nie można cofnąć.';
 
   @override
-  String get typeDeleteToConfirmAccount => 'Type DELETE to confirm:';
+  String get typeDeleteToConfirmAccount => 'Wpisz DELETE, aby potwierdzić:';
 
   @override
-  String get deleteForever => 'Delete Forever';
+  String get deleteForever => 'Usuń na zawsze';
 
   @override
   String nameCooldownMessage(String date) {
-    return 'You can change your name again on $date';
+    return 'Możesz ponownie zmienić nazwę $date';
   }
 
   @override
-  String get reportAccount => 'Report this account';
+  String get reportAccount => 'Zgłoś to konto';
 
   @override
-  String get reportAccountTitle => 'Why are you reporting this account?';
+  String get reportAccountTitle => 'Dlaczego zgłaszasz to konto?';
 
   @override
-  String get reportSpam => 'Spam or fake account';
+  String get reportSpam => 'Spam lub fałszywe konto';
 
   @override
-  String get reportInappropriate => 'Inappropriate content';
+  String get reportInappropriate => 'Nieodpowiednia treść';
 
   @override
-  String get reportStolen => 'Stolen recipes / copyright';
+  String get reportStolen => 'Skradzione przepisy / prawa autorskie';
 
   @override
-  String get reportHarassment => 'Harassment';
+  String get reportHarassment => 'Nękanie';
 
   @override
-  String get reportOther => 'Other';
+  String get reportOther => 'Inne';
 
   @override
-  String get submitReport => 'Submit Report';
+  String get submitReport => 'Wyślij zgłoszenie';
 
   @override
-  String get reportSubmitted => 'Thanks for your report. We\'ll review it shortly.';
+  String get reportSubmitted => 'Dziękujemy za zgłoszenie. Wkrótce je sprawdzimy.';
 
   @override
-  String get alreadyReportedRecently => 'You already reported this account recently';
+  String get alreadyReportedRecently => 'Już niedawno zgłosiłeś to konto';
 
   @override
-  String get cannotReportSelf => 'You cannot report yourself';
+  String get cannotReportSelf => 'Nie możesz zgłosić siebie';
 
   @override
-  String get pendingAccountReports => 'Account Reports';
+  String get pendingAccountReports => 'Zgłoszenia kont';
 
   @override
-  String get accountReportsResolved => 'Account report resolved';
+  String get accountReportsResolved => 'Zgłoszenie konta rozwiązane';
 
   @override
-  String get accountReportDismissed => 'Account report dismissed';
+  String get accountReportDismissed => 'Zgłoszenie konta odrzucone';
 
   @override
-  String get communityTrending => 'TRENDING';
+  String get communityTrending => 'POPULARNE';
 
   @override
-  String get communitySearchTags => 'Search tags...';
+  String get communitySearchTags => 'Szukaj tagów...';
 
   @override
   String communityNoTagsFound(String query) {
-    return 'No tags found for \"$query\"';
+    return 'Nie znaleziono tagów dla \"$query\"';
   }
 
   @override
-  String get communityConfirm => 'Confirm';
+  String get communityConfirm => 'Potwierdź';
 
   @override
-  String get cravingCardTitle => 'What are you craving?';
+  String get cravingCardTitle => 'Na co masz ochotę?';
 
   @override
-  String get cravingCardSubtitle => 'Find recipes that match your mood';
+  String get cravingCardSubtitle => 'Znajdź przepisy pasujące do Twojego nastroju';
 
   @override
-  String get cravingStep1Title => 'What are you feeling?';
+  String get cravingStep1Title => 'Na co masz ochotę?';
 
   @override
-  String get cravingStep2Title => 'Anything more specific?';
+  String get cravingStep2Title => 'Coś bardziej konkretnego?';
 
   @override
-  String get cravingStep3Title => 'Where should we look?';
+  String get cravingStep3Title => 'Gdzie szukać?';
 
   @override
-  String get cravingResultsTitle => 'Here\'s what we found';
+  String get cravingResultsTitle => 'Oto co znaleźliśmy';
 
   @override
-  String get cravingPickOneOrMore => 'Pick one or more';
+  String get cravingPickOneOrMore => 'Wybierz jedną lub więcej';
 
   @override
-  String get cravingMoodHint => 'We\'ll find something you\'ll love';
+  String get cravingMoodHint => 'Znajdziemy coś, co polubisz';
 
   @override
   String cravingCountSelected(int count) {
-    return '$count selected';
+    return '$count wybranych';
   }
 
   @override
-  String get cravingCategoryHint => 'Optional — skip if you\'re open to anything';
+  String get cravingCategoryHint => 'Opcjonalnie — pomiń, jeśli jesteś otwarty na wszystko';
 
   @override
-  String get cravingCategoryNarrowHint => 'Narrow it down or skip ahead';
+  String get cravingCategoryNarrowHint => 'Zawęź wybór lub pomiń';
 
   @override
-  String get cravingMoodSweet => 'Sweet';
+  String get cravingMoodSweet => 'Słodki';
 
   @override
-  String get cravingMoodSavory => 'Savory';
+  String get cravingMoodSavory => 'Wytrawny';
 
   @override
-  String get cravingMoodLight => 'Light';
+  String get cravingMoodLight => 'Lekki';
 
   @override
-  String get cravingMoodFilling => 'Filling';
+  String get cravingMoodFilling => 'Sycący';
 
   @override
-  String get cravingMoodQuick => 'Quick';
+  String get cravingMoodQuick => 'Szybki';
 
   @override
-  String get cravingMoodSpecial => 'Something Special';
+  String get cravingMoodSpecial => 'Coś wyjątkowego';
 
   @override
-  String get cravingCatDessert => 'Dessert';
+  String get cravingCatDessert => 'Deser';
 
   @override
-  String get cravingCatPastry => 'Pastry';
+  String get cravingCatPastry => 'Ciasto';
 
   @override
-  String get cravingCatBakedGoods => 'Baked Goods';
+  String get cravingCatBakedGoods => 'Wypieki';
 
   @override
-  String get cravingCatBreakfast => 'Breakfast';
+  String get cravingCatBreakfast => 'Śniadanie';
 
   @override
-  String get cravingCatDinner => 'Dinner';
+  String get cravingCatDinner => 'Kolacja';
 
   @override
-  String get cravingCatLunch => 'Lunch';
+  String get cravingCatLunch => 'Obiad';
 
   @override
-  String get cravingCatAppetizer => 'Appetizer';
+  String get cravingCatAppetizer => 'Przekąska';
 
   @override
-  String get cravingCatSoup => 'Soup';
+  String get cravingCatSoup => 'Zupa';
 
   @override
-  String get cravingCatSauce => 'Sauce';
+  String get cravingCatSauce => 'Sos';
 
   @override
-  String get cravingCatSalad => 'Salad';
+  String get cravingCatSalad => 'Sałatka';
 
   @override
-  String get cravingCatSnack => 'Snack';
+  String get cravingCatSnack => 'Przekąska';
 
   @override
-  String get cravingCatMainDish => 'Main Dish';
+  String get cravingCatMainDish => 'Danie główne';
 
   @override
-  String get cravingCatPasta => 'Pasta';
+  String get cravingCatPasta => 'Makaron';
 
   @override
-  String get cravingCatRice => 'Rice Dishes';
+  String get cravingCatRice => 'Dania ryżowe';
 
   @override
-  String get cravingCatCasserole => 'Casserole';
+  String get cravingCatCasserole => 'Zapiekanka';
 
   @override
-  String get cravingCatUnder20 => 'Under 20 min';
+  String get cravingCatUnder20 => 'Poniżej 20 min';
 
   @override
-  String get cravingCatUnder30 => 'Under 30 min';
+  String get cravingCatUnder30 => 'Poniżej 30 min';
 
   @override
-  String get cravingCat5Ings => '5 ingredients or less';
+  String get cravingCat5Ings => '5 składników lub mniej';
 
   @override
-  String get cravingCatImpressive => 'Impressive';
+  String get cravingCatImpressive => 'Robi wrażenie';
 
   @override
-  String get cravingCatCrowdPleaser => 'Crowd Pleaser';
+  String get cravingCatCrowdPleaser => 'Ulubieniec tłumów';
 
   @override
-  String get cravingCatFavorites => 'Favorites';
+  String get cravingCatFavorites => 'Ulubione';
 
   @override
-  String get cravingSourceMyRecipesTitle => 'My saved recipes';
+  String get cravingSourceMyRecipesTitle => 'Moje zapisane przepisy';
 
   @override
-  String get cravingSourceMyRecipesSubtitle => 'From your personal library';
+  String get cravingSourceMyRecipesSubtitle => 'Z Twojej osobistej biblioteki';
 
   @override
-  String get cravingSourceCommunityTitle => 'Discover something new';
+  String get cravingSourceCommunityTitle => 'Odkryj coś nowego';
 
   @override
-  String get cravingSourceCommunitySubtitle => 'From the community';
+  String get cravingSourceCommunitySubtitle => 'Ze społeczności';
 
   @override
-  String get cravingSourceBothTitle => 'Both — surprise me';
+  String get cravingSourceBothTitle => 'Oba — zaskocz mnie';
 
   @override
-  String get cravingSourceBothSubtitle => 'Mix of yours and community';
+  String get cravingSourceBothSubtitle => 'Mix Twoich i społeczności';
 
   @override
-  String get cravingReshuffle => 'Reshuffle';
+  String get cravingReshuffle => 'Przetasuj';
 
   @override
   String cravingFoundRecipes(int count) {
-    return 'Found $count recipes matching your vibe';
+    return 'Znaleziono $count przepisów pasujących do Twojego nastroju';
   }
 
   @override
-  String get cravingNothingFound => 'Nothing found for these filters';
+  String get cravingNothingFound => 'Nic nie znaleziono dla tych filtrów';
 
   @override
-  String get cravingTryBroader => 'Try broader options or reshuffle';
+  String get cravingTryBroader => 'Spróbuj szerszych opcji lub przetasuj';
 
   @override
-  String get cravingAdjustFilters => 'Adjust filters';
+  String get cravingAdjustFilters => 'Dostosuj filtry';
 
   @override
-  String get cravingCookThis => 'Cook this recipe';
+  String get cravingCookThis => 'Ugotuj ten przepis';
 
   @override
-  String get cravingViewRecipe => 'View recipe';
+  String get cravingViewRecipe => 'Zobacz przepis';
 
   @override
-  String get cravingNext => 'Next';
+  String get cravingNext => 'Dalej';
 
   @override
-  String get cravingBack => 'Back';
+  String get cravingBack => 'Wstecz';
 
   @override
-  String get cravingSkipStep => 'Skip this step →';
+  String get cravingSkipStep => 'Pomiń ten krok →';
 
   @override
-  String get cravingFindRecipes => 'Find recipes';
+  String get cravingFindRecipes => 'Znajdź przepisy';
 
   @override
-  String get mergeCookbooksMenu => 'Merge cookbooks';
+  String get mergeCookbooksMenu => 'Połącz książki kucharskie';
 
   @override
-  String get mergeCookbooksTitle => 'Merge Cookbooks';
+  String get mergeCookbooksTitle => 'Połącz książki kucharskie';
 
   @override
-  String get mergeCookbooksNameLabel => 'New cookbook name';
+  String get mergeCookbooksNameLabel => 'Nazwa nowej książki kucharskiej';
 
   @override
-  String get mergeCookbooksDefaultName => 'Merged Cookbook';
+  String get mergeCookbooksDefaultName => 'Połączona książka kucharska';
 
   @override
-  String get mergeCookbooksNeedTwo => 'You need at least 2 cookbooks to merge';
+  String get mergeCookbooksNeedTwo => 'Potrzebujesz co najmniej 2 książek kucharskich do połączenia';
 
   @override
-  String get mergeCookbooksNoRecipes => 'No recipes to merge';
+  String get mergeCookbooksNoRecipes => 'Brak przepisów do połączenia';
 
   @override
   String mergeCookbooksMerging(int count) {
-    return 'Merging $count recipes...';
+    return 'Łączenie $count przepisów...';
   }
 
   @override
   String mergeCookbooksCreated(String name, int count) {
-    return 'Created \"$name\" with $count recipes';
+    return 'Utworzono \"$name\" z $count przepisami';
   }
 
   @override
   String mergeCookbooksFailed(String error) {
-    return 'Merge failed: $error';
+    return 'Łączenie nie powiodło się: $error';
   }
 
   @override
   String mergeCookbooksButton(int count) {
-    return 'Merge $count cookbooks';
+    return 'Połącz $count książek kucharskich';
   }
 
   @override
-  String get mergeCookbooksCancel => 'Cancel';
+  String get mergeCookbooksCancel => 'Anuluj';
 
   @override
-  String get combinedIngredients => 'Combined Ingredients';
+  String get combinedIngredients => 'Połączone składniki';
 
   @override
-  String get communitySubRecipe => 'Sub-recipe';
+  String get communitySubRecipe => 'Podprzepis';
 
   @override
-  String get copyToCookbook => 'Copy to cookbook';
+  String get copyToCookbook => 'Kopiuj do książki kucharskiej';
 
   @override
-  String get moveToCookbook => 'Move to cookbook';
+  String get moveToCookbook => 'Przenieś do książki kucharskiej';
 
   @override
-  String get hintCookbookSwitcher => 'Tap the cookbook name at the top to switch between your cookbooks!';
+  String get hintCookbookSwitcher => 'Dotknij nazwy książki kucharskiej na górze, aby przełączać między książkami!';
 
   @override
   String get paywallPlanPremium => 'Premium';
 
   @override
-  String get paywallPricePremium => '\$4.99/month';
+  String get paywallPricePremium => '\$6.99';
 
   @override
-  String get paywallSublinePremium => 'For serious home cooks';
+  String get paywallSublinePremium => 'jednorazowo · Twój na zawsze';
 
   @override
-  String get paywallFeatureCloudSync => 'Cloud sync across devices';
+  String get paywallFeatureCloudSync => 'Synchronizacja z chmurą na wszystkich urządzeniach';
 
   @override
-  String get paywallFeatureStepPhotos => 'Step-by-step photos';
+  String get paywallFeatureStepPhotos => 'Zdjęcia krok po kroku';
 
   @override
-  String get paywallFeatureAutoBackups => 'Automatic backups';
+  String get paywallFeatureAutoBackups => 'Automatyczne kopie zapasowe';
 
   @override
-  String get paywallPlanFamily => 'Family';
+  String get paywallPlanFamily => 'Rodzina';
 
   @override
-  String get paywallPriceFamily => '\$7.99/month';
+  String get paywallPriceFamily => '\$19.99';
 
   @override
-  String get paywallSublineFamily => 'Cook together';
+  String get paywallSublineFamily => 'jednorazowo · udostępnij 5 osobom';
 
   @override
-  String get paywallFeatureEverythingPremium => 'Everything in Premium';
+  String get paywallFeatureEverythingPremium => 'Wszystko w Premium';
 
   @override
-  String get paywallFeatureFamilySync => 'Family sync for up to 6';
+  String get paywallFeatureFamilySync => 'Do 5 członków rodziny synchronizuje się razem';
 
   @override
-  String get paywallFeatureSharedCookbooks => 'Shared cookbooks';
+  String get paywallFeatureSharedCookbooks => 'Współdzielone książki kucharskie i listy zakupów';
 
   @override
-  String get paywallPriceAnchor => 'Less than a cup of coffee per month';
+  String get paywallPriceAnchor => 'Większość aplikacji z przepisami kosztuje \$5–10/miesiąc. To coś innego.';
 
   @override
-  String get paywallTrustLine => 'Cancel anytime. No questions asked.';
+  String get paywallTrustLine => 'Zapłać raz, Twój na zawsze.';
 
   @override
-  String get paywallPrivacyPolicy => 'Privacy Policy';
+  String get paywallPrivacyPolicy => 'Polityka prywatności';
 
   @override
-  String get paywallTerms => 'Terms';
+  String get paywallTerms => 'Regulamin';
 
   @override
-  String get paywallPurchaseSuccess => 'Purchase successful!';
+  String get paywallPurchaseSuccess => 'Zakup udał się!';
 
   @override
-  String get paywallCheckoutOpened => 'Complete your purchase in the browser window that just opened.';
+  String get paywallCheckoutOpened => 'Dokończ zakup w oknie przeglądarki, które właśnie się otworzyło.';
 
   @override
-  String get paywallWebComingSoonDesc => 'In-app purchases for web are coming soon. Please use the mobile app to subscribe.';
+  String get paywallWebComingSoonDesc => 'Zakupy w aplikacji dla wersji web pojawią się wkrótce. Użyj aplikacji mobilnej, aby subskrybować.';
 
   @override
-  String get paywallCompareFree => 'Free';
+  String get paywallCompareFree => 'Bezpłatny';
 
   @override
-  String get paywallCompareUnlimitedRecipes => 'Unlimited recipes';
+  String get paywallCompareUnlimitedRecipes => 'Nieograniczona liczba przepisów';
 
   @override
-  String get paywallCompareCloudSync => 'Cloud sync';
+  String get paywallCompareCloudSync => 'Synchronizacja z chmurą';
 
   @override
-  String get paywallCompareFamilySharing => 'Family sharing';
+  String get paywallCompareFamilySharing => 'Udostępnianie rodzinne';
 
   @override
   String linkCurrentlyLinked(int count) {
-    return '$count currently linked';
+    return '$count aktualnie połączonych';
   }
 
   @override
-  String get linkSearchRecipes => 'Search recipes...';
+  String get linkSearchRecipes => 'Szukaj przepisów...';
 
   @override
   String linkAvailable(int count) {
-    return '$count available';
+    return '$count dostępnych';
   }
 
   @override
   String linkNoMatch(String query) {
-    return 'No match for \"$query\"';
+    return 'Brak wyników dla \"$query\"';
   }
 
   @override
-  String get linkNoRecipesAvailable => 'No recipes available';
+  String get linkNoRecipesAvailable => 'Brak dostępnych przepisów';
 
   @override
   String linkFoundInOtherCookbooks(int count) {
-    return '$count found in other cookbooks';
+    return '$count znalezionych w innych książkach kucharskich';
   }
 
   @override
-  String get linkCopyToCookbookNote => 'Recipes from other cookbooks will be copied to this cookbook when linked.';
+  String get linkCopyToCookbookNote => 'Przepisy z innych książek kucharskich zostaną skopiowane do tej książki po połączeniu.';
 
   @override
-  String get linkWillBeCopied => 'Will be copied to this cookbook';
+  String get linkWillBeCopied => 'Zostanie skopiowany do tej książki kucharskiej';
 
   @override
-  String get bulkCopyLabel => 'Copy';
+  String get bulkCopyLabel => 'Kopiuj';
 
   @override
-  String get bulkDeleteLabel => 'Delete';
+  String get bulkDeleteLabel => 'Usuń';
 
   @override
-  String get bulkMoveLabel => 'Move';
+  String get bulkMoveLabel => 'Przenieś';
 
   @override
-  String get bulkPinned => 'Pinned';
+  String get bulkPinned => 'Przypięty';
 
   @override
-  String get recipeListCreateCookbookFirst => 'Create another cookbook first';
+  String get recipeListCreateCookbookFirst => 'Najpierw utwórz inną książkę kucharską';
 
   @override
   String recipeListRecipesCopied(int count) {
-    return '$count recipes copied';
+    return '$count przepisów skopiowanych';
   }
 
   @override
   String recipeListRecipesMoved(int count) {
-    return '$count recipes moved';
+    return '$count przepisów przeniesionych';
   }
 
   @override
   String selectAllBar(int selectedCount, int totalCount) {
-    return '$selectedCount of $totalCount selected';
+    return '$selectedCount z $totalCount zaznaczonych';
   }
 
   @override
-  String get sortAToZ => 'A to Z';
+  String get sortAToZ => 'A do Z';
 
   @override
-  String get sortZToA => 'Z to A';
+  String get sortZToA => 'Z do A';
 
   @override
-  String get sortNewest => 'Newest';
+  String get sortNewest => 'Najnowsze';
 
   @override
-  String get sortOldest => 'Oldest';
+  String get sortOldest => 'Najstarsze';
 
   @override
-  String get sortRating => 'Rating';
+  String get sortRating => 'Ocena';
 
   @override
-  String get sortQuickest => 'Quickest';
+  String get sortQuickest => 'Najszybsze';
 
   @override
-  String get sortFavorites => 'Favorites';
+  String get sortFavorites => 'Ulubione';
 
   @override
-  String get viewSizeSmall => 'Small';
+  String get viewSizeSmall => 'Mały';
 
   @override
-  String get viewSizeMedium => 'Medium';
+  String get viewSizeMedium => 'Średni';
 
   @override
-  String get viewSizeLarge => 'Large';
+  String get viewSizeLarge => 'Duży';
 
   @override
   String trashSelectedCount(int count) {
-    return '$count selected';
+    return '$count zaznaczonych';
   }
 
   @override
   String trashBulkRestored(int count) {
-    return '$count recipes restored';
+    return '$count przepisów przywróconych';
   }
 
   @override
   String trashBulkDeleteConfirm(int count) {
-    return 'Permanently delete $count recipes? This cannot be undone.';
+    return 'Trwale usunąć $count przepisów? Tej operacji nie można cofnąć.';
   }
 
   @override
   String trashDeletingCount(int count) {
-    return 'Deleting $count recipes...';
+    return 'Usuwanie $count przepisów...';
   }
 
   @override
   String trashBulkDeleted(int count) {
-    return '$count recipes deleted';
+    return '$count przepisów usuniętych';
   }
 
   @override
-  String get shareViewerExpired => 'This share link has expired';
+  String get shareViewerExpired => 'Ten link udostępniania wygasł';
 
   @override
-  String get shareViewerExpiredLabel => 'Expired';
+  String get shareViewerExpiredLabel => 'Wygasły';
 
   @override
-  String get shareViewerFailed => 'Failed to load shared recipes';
+  String get shareViewerFailed => 'Nie udało się załadować udostępnionych przepisów';
 
   @override
-  String get shareViewerNoConnection => 'No internet connection';
+  String get shareViewerNoConnection => 'Brak połączenia z internetem';
 
   @override
   String shareViewerHoursRemaining(int hours) {
-    return '${hours}h remaining';
+    return 'Pozostało $hours godz.';
   }
 
   @override
   String shareViewerMinutesRemaining(int minutes) {
-    return '${minutes}m remaining';
+    return 'Pozostało $minutes min';
   }
 
   @override
   String shareViewerRecipeCount(int count) {
-    return '$count recipes';
+    return '$count przepisów';
   }
 
   @override
-  String get shareViewerUntitled => 'Untitled Recipe';
+  String get shareViewerUntitled => 'Przepis bez tytułu';
 
   @override
-  String get exportFullZip => 'Full Backup (ZIP)';
+  String get exportFullZip => 'Pełna kopia zapasowa (ZIP)';
 
   @override
-  String get exportFullZipSubtitle => 'All data + images in a portable archive';
+  String get exportFullZipSubtitle => 'Wszystkie dane + zdjęcia w przenośnym archiwum';
 
   @override
-  String get importFromFileSubtitle => 'Supports .json and .zip backup files';
+  String get importFromFileSubtitle => 'Obsługuje pliki .json i .zip';
 
   @override
-  String get exportAdvanced => 'Advanced options';
+  String get exportAdvanced => 'Opcje zaawansowane';
 
   @override
-  String get exportCurrentCookbookSubtitle => 'JSON file of current cookbook only';
+  String get exportCurrentCookbookSubtitle => 'Plik JSON tylko bieżącej książki kucharskiej';
 
   @override
-  String get exportJsonCustom => 'Custom JSON export';
+  String get exportJsonCustom => 'Niestandardowy eksport JSON';
 }
