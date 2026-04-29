@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
+import '../../widgets/app_refresh_indicator.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/recipe_image.dart';
 
@@ -171,11 +172,12 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
           // Clean up stale selections
           _selected.removeWhere((id) => !recipes.any((r) => r.id == id));
 
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            itemCount: recipes.length,
-            itemBuilder: (context, index) {
-              final recipe = recipes[index];
+          return AppRefreshIndicator(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              itemCount: recipes.length,
+              itemBuilder: (context, index) {
+                final recipe = recipes[index];
               final daysLeft = _daysUntilPermanentDelete(recipe.deletedAt);
               final isSelected = _selected.contains(recipe.id);
 
@@ -199,6 +201,7 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
                 onRestore: () => _restoreRecipe(context, ref, recipe),
               );
             },
+            ),
           );
         },
       )),

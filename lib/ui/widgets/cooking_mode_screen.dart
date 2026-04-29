@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter/services.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipespellbook/data/nutrition_data.dart';
 import 'package:recipespellbook/database/database.dart';
@@ -61,6 +62,9 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
     _pageController = PageController();
     _loadRecipe();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    // Keep the screen on while cooking — nothing worse than your phone locking
+    // mid-recipe with messy hands.
+    WakelockPlus.enable();
   }
 
   @override
@@ -68,6 +72,7 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
     _timer?.cancel();
     _pageController.dispose();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    WakelockPlus.disable();
     super.dispose();
   }
 

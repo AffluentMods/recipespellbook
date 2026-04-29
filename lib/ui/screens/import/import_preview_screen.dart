@@ -13,6 +13,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../models/imported_recipe.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/ingredient_utils.dart';
+import '../../../utils/recipe_similarity.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 
@@ -40,7 +41,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
   late List<ImportedRecipe> _recipes;
   late List<bool> _selected;
   late List<bool> _expanded;
-  Set<String> _existingTitles = {};
+  late List<DuplicateStatus> _dupStatus;
   bool _loading = false;
   bool _checkedDuplicates = false;
   int _importedCount = 0;
@@ -54,19 +55,35 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     _recipes = List.from(widget.recipes);
     _selected = List.filled(_recipes.length, true);
     _expanded = List.filled(_recipes.length, false);
+    _dupStatus = List.filled(_recipes.length, DuplicateStatus.none);
     _checkForDuplicates();
   }
 
   Future<void> _checkForDuplicates() async {
     final recipeDao = ref.read(recipeDaoProvider);
     final existing = await recipeDao.getAllRecipes();
+
+    // Pre-fetch ingredient names for each existing recipe (needed for near-dup scoring)
+    final existingIngredients = <String, List<String>>{};
+    for (final r in existing) {
+      final ings = await recipeDao.getIngredientsForRecipe(r.id);
+      existingIngredients[r.id] = ings.map((i) => i.name).toList();
+    }
+
+    final dupStatus = ImportDuplicateChecker.check(
+      imports: _recipes,
+      existing: existing,
+      existingIngredients: existingIngredients,
+    );
+
     setState(() {
-      _existingTitles = existing.map((r) => r.title.toLowerCase().trim()).toSet();
+      _dupStatus = dupStatus;
       _checkedDuplicates = true;
 
-      // Auto-deselect exact duplicates
+      // Auto-deselect exact duplicates only — leave near-duplicates checked
+      // but visually flagged so the user can decide.
       for (var i = 0; i < _recipes.length; i++) {
-        if (_isDuplicate(_recipes[i].title)) {
+        if (_dupStatus[i] == DuplicateStatus.exactExisting) {
           _selected[i] = false;
         }
       }
@@ -74,14 +91,22 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
   }
 
   bool _isDuplicate(String title) {
-    return _existingTitles.contains(title.toLowerCase().trim());
+    // Compatibility shim — checks any kind of duplicate flag for the recipe.
+    final idx = _recipes.indexWhere((r) => r.title == title);
+    return idx >= 0 && _dupStatus[idx] != DuplicateStatus.none;
   }
 
   int get _selectedCount => _selected.where((s) => s).length;
   int get _duplicateCount {
     if (!_checkedDuplicates) return 0;
-    return _recipes.where((r) => _isDuplicate(r.title)).length;
+    return _dupStatus.where((s) => s != DuplicateStatus.none).length;
   }
+  int get _exactDupCount =>
+      _dupStatus.where((s) => s == DuplicateStatus.exactExisting).length;
+  int get _nearDupCount =>
+      _dupStatus.where((s) =>
+          s == DuplicateStatus.nearExisting ||
+          s == DuplicateStatus.nearInternal).length;
 
   void _toggleAll(bool value) {
     setState(() {
@@ -94,7 +119,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
   void _selectNonDuplicates() {
     setState(() {
       for (var i = 0; i < _selected.length; i++) {
-        _selected[i] = !_isDuplicate(_recipes[i].title);
+        _selected[i] = _dupStatus[i] == DuplicateStatus.none;
       }
     });
   }
@@ -124,9 +149,10 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     final imageIndices = <int>[];
     for (var i = 0; i < selectedRecipes.length; i++) {
       final r = selectedRecipes[i];
-      if ((r.imageUrl != null && r.imageUrl!.isNotEmpty) || (r.imageData != null && r.imageData!.isNotEmpty)) {
-        imageIndices.add(i);
-      }
+      final hasAny = (r.imageUrl != null && r.imageUrl!.isNotEmpty) ||
+          (r.imageData != null && r.imageData!.isNotEmpty) ||
+          (r.imagePath != null && r.imagePath!.isNotEmpty);
+      if (hasAny) imageIndices.add(i);
     }
 
     // Download in batches of 5
@@ -135,7 +161,10 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
       final batchIndices = imageIndices.sublist(batch, end);
       final futures = batchIndices.map((i) async {
         final r = selectedRecipes[i];
-        // Try URL download first, then base64 decode
+        // Local file path takes priority (from PDF page extraction)
+        if (r.imagePath != null && r.imagePath!.isNotEmpty) {
+          return MapEntry(i, r.imagePath);
+        }
         if (r.imageUrl != null && r.imageUrl!.isNotEmpty) {
           return MapEntry(i, await _downloadRecipeImage(r.imageUrl!));
         } else if (r.imageData != null && r.imageData!.isNotEmpty) {
@@ -449,7 +478,8 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                   itemCount: _recipes.length,
                   itemBuilder: (context, index) {
                     final recipe = _recipes[index];
-                    final isDupe = _checkedDuplicates && _isDuplicate(recipe.title);
+                    final dupStatus = _checkedDuplicates ? _dupStatus[index] : DuplicateStatus.none;
+                    final isDupe = dupStatus != DuplicateStatus.none;
 
                     return _RecipePreviewCard(
                       recipe: recipe,
@@ -457,6 +487,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
                       isSelected: _selected[index],
                       isExpanded: _expanded[index],
                       isDuplicate: isDupe,
+                      duplicateStatus: dupStatus,
                       onSelectedChanged: (val) {
                         setState(() => _selected[index] = val);
                       },
@@ -591,6 +622,7 @@ class _RecipePreviewCard extends StatelessWidget {
   final bool isSelected;
   final bool isExpanded;
   final bool isDuplicate;
+  final DuplicateStatus duplicateStatus;
   final ValueChanged<bool> onSelectedChanged;
   final VoidCallback onExpandToggle;
   final ValueChanged<String>? onRenameTitle;
@@ -601,6 +633,7 @@ class _RecipePreviewCard extends StatelessWidget {
     required this.isSelected,
     required this.isExpanded,
     required this.isDuplicate,
+    this.duplicateStatus = DuplicateStatus.none,
     required this.onSelectedChanged,
     required this.onExpandToggle,
     this.onRenameTitle,
@@ -713,19 +746,10 @@ class _RecipePreviewCard extends StatelessWidget {
                                 ),
                               if (isDuplicate) ...[
                                 const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.tertiaryContainer,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    l10n.duplicate,
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      color: theme.colorScheme.onTertiaryContainer,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                                _DuplicateBadge(
+                                  status: duplicateStatus,
+                                  l10n: l10n,
+                                  theme: theme,
                                 ),
                               ],
                             ],
@@ -1059,6 +1083,67 @@ class _ExpandedContent extends StatelessWidget {
               ],
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Duplicate Badge — color/label by exact vs near, internal vs existing
+// ═══════════════════════════════════════════════════════════════════
+
+class _DuplicateBadge extends StatelessWidget {
+  final DuplicateStatus status;
+  final AppLocalizations l10n;
+  final ThemeData theme;
+  const _DuplicateBadge({required this.status, required this.l10n, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    final Color bg;
+    final Color fg;
+    final String label;
+    final IconData icon;
+
+    switch (status) {
+      case DuplicateStatus.exactExisting:
+        bg = theme.colorScheme.errorContainer;
+        fg = theme.colorScheme.onErrorContainer;
+        label = l10n.duplicate;
+        icon = Icons.error_outline;
+      case DuplicateStatus.nearExisting:
+        bg = theme.colorScheme.tertiaryContainer;
+        fg = theme.colorScheme.onTertiaryContainer;
+        label = l10n.importNearDuplicateExisting;
+        icon = Icons.copy_all_outlined;
+      case DuplicateStatus.nearInternal:
+        bg = theme.colorScheme.secondaryContainer;
+        fg = theme.colorScheme.onSecondaryContainer;
+        label = l10n.importNearDuplicateInternal;
+        icon = Icons.compare_arrows;
+      case DuplicateStatus.none:
+        return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: fg),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: fg,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );

@@ -15,6 +15,10 @@ import '../../widgets/app_context_menu.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/new_recipe_dialog.dart';
 import '../../widgets/recipe_image.dart';
+import '../../widgets/sub_recipe_selection_sheet.dart';
+import '../../../services/sync_service.dart';
+import '../../../services/auth_service.dart';
+import '../../../providers/subscription_provider.dart';
 import '../../layouts/master_detail_layout.dart';
 import '../../../utils/responsive_utils.dart';
 
@@ -333,42 +337,45 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
             ),
 
 
-          // Recipe list
+          // Recipe list (pull-to-refresh triggers cloud sync if available)
           Expanded(
-            child: StreamBuilder<List<Recipe>>(
-              stream: recipeStream,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+            child: RefreshIndicator(
+              onRefresh: _onRefresh,
+              child: StreamBuilder<List<Recipe>>(
+                stream: recipeStream,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                var recipes = snapshot.data ?? [];
+                  var recipes = snapshot.data ?? [];
 
-                if (_searchQuery.isNotEmpty) {
-                  recipes = recipes.where((r) =>
-                  r.title.toLowerCase().contains(_searchQuery) ||
-                      (r.description?.toLowerCase().contains(_searchQuery) ?? false)
-                  ).toList();
-                }
+                  if (_searchQuery.isNotEmpty) {
+                    recipes = recipes.where((r) =>
+                    r.title.toLowerCase().contains(_searchQuery) ||
+                        (r.description?.toLowerCase().contains(_searchQuery) ?? false)
+                    ).toList();
+                  }
 
-                if (_selectedTagIds.isNotEmpty) {
-                  return FutureBuilder<List<Recipe>>(
-                    future: _filterByTags(recipes, tagsDao),
-                    builder: (context, tagSnapshot) {
-                      if (!tagSnapshot.hasData) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      final filteredRecipes = _sortRecipes(tagSnapshot.data!);
-                      _currentVisibleRecipes = filteredRecipes;
-                      return _buildRecipeList(filteredRecipes, effectiveCookbookId, tagsDao);
-                    },
-                  );
-                }
+                  if (_selectedTagIds.isNotEmpty) {
+                    return FutureBuilder<List<Recipe>>(
+                      future: _filterByTags(recipes, tagsDao),
+                      builder: (context, tagSnapshot) {
+                        if (!tagSnapshot.hasData) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        final filteredRecipes = _sortRecipes(tagSnapshot.data!);
+                        _currentVisibleRecipes = filteredRecipes;
+                        return _buildRecipeList(filteredRecipes, effectiveCookbookId, tagsDao);
+                      },
+                    );
+                  }
 
-                recipes = _sortRecipes(recipes);
-                _currentVisibleRecipes = recipes;
-                return _buildRecipeList(recipes, effectiveCookbookId, tagsDao);
-              },
+                  recipes = _sortRecipes(recipes);
+                  _currentVisibleRecipes = recipes;
+                  return _buildRecipeList(recipes, effectiveCookbookId, tagsDao);
+                },
+              ),
             ),
           ),
 
@@ -492,39 +499,83 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     return sorted;
   }
 
+  /// Pull-to-refresh: trigger a sync if cloud sync is available, otherwise
+  /// just briefly show the indicator (the Drift stream is already live).
+  Future<void> _onRefresh() async {
+    if (AuthService.instance.isSignedIn && ref.read(subscriptionProvider).tier.hasCloudSync) {
+      try {
+        await SyncService.instance.sync();
+      } catch (_) {/* swallow — UX is more important than the error here */}
+    } else {
+      await Future.delayed(const Duration(milliseconds: 400));
+    }
+  }
+
   // ── Bulk actions ──
 
   Future<void> _bulkDelete(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final count = _selectedIds.length;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        icon: const Icon(Icons.delete_outline, size: 32, color: Colors.red),
-        title: Text(l10n.deleteCountRecipes(count)),
-        content: Text(l10n.confirmDeleteMessage),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.actionCancel)),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(l10n.actionDelete),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-    if (count > 5 && mounted) {
-      AppSnackbar.loading(context, l10n.countRecipesMovedToTrash(count));
-    }
+
+    // Use the sub-recipe sheet — it shows ALL selected recipes + linked sub-recipes
+    // with usage counts, and skips itself when there are no sub-recipes (falls back
+    // to a simple confirm dialog for that case).
     final dao = ref.read(recipeDaoProvider);
-    for (final id in _selectedIds) {
+    final hasAnyLinks = await _hasAnyLinkedSubRecipes(dao, _selectedIds);
+
+    Set<String> idsToDelete;
+
+    if (hasAnyLinks) {
+      final selection = await showSubRecipeSelectionSheetMulti(
+        context: context,
+        ref: ref,
+        parentRecipeIds: _selectedIds.toList(),
+        action: SubRecipeAction.delete,
+      );
+      if (selection == null || !selection.confirmed) return;
+      idsToDelete = selection.selectedIds;
+    } else {
+      // No sub-recipes — keep the simple confirm dialog
+      final count = _selectedIds.length;
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          icon: const Icon(Icons.delete_outline, size: 32, color: Colors.red),
+          title: Text(l10n.deleteCountRecipes(count)),
+          content: Text(l10n.confirmDeleteMessage),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.actionCancel)),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              child: Text(l10n.actionDelete),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+      idsToDelete = Set.from(_selectedIds);
+    }
+
+    final deleteCount = idsToDelete.length;
+    if (deleteCount > 5 && mounted) {
+      AppSnackbar.loading(context, l10n.countRecipesMovedToTrash(deleteCount));
+    }
+    for (final id in idsToDelete) {
       await dao.moveToTrash(id);
     }
     if (mounted) {
-      AppSnackbar.info(context, l10n.countRecipesMovedToTrash(count));
+      AppSnackbar.info(context, l10n.countRecipesMovedToTrash(deleteCount));
       _exitSelection();
     }
+  }
+
+  /// Quick check: do any of the given recipe IDs have linked sub-recipes?
+  Future<bool> _hasAnyLinkedSubRecipes(RecipeDao dao, Set<String> ids) async {
+    for (final id in ids) {
+      final linked = await dao.getLinkedRecipes(id);
+      if (linked.isNotEmpty) return true;
+    }
+    return false;
   }
 
   Future<void> _bulkSetCourse(BuildContext context) async {
@@ -702,10 +753,25 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     );
     if (targetId == null || !mounted) return;
 
-    final count = _selectedIds.length;
-    AppSnackbar.loading(context, l10n.recipeListCopyingRecipes(count));
     final dao = ref.read(recipeDaoProvider);
-    for (final id in _selectedIds) {
+
+    // If any selected recipe has linked sub-recipes, show the selection sheet
+    final hasLinks = await _hasAnyLinkedSubRecipes(dao, _selectedIds);
+    Set<String> idsToCopy = Set.from(_selectedIds);
+    if (hasLinks && mounted) {
+      final selection = await showSubRecipeSelectionSheetMulti(
+        context: context,
+        ref: ref,
+        parentRecipeIds: _selectedIds.toList(),
+        action: SubRecipeAction.copy,
+      );
+      if (selection == null || !selection.confirmed) return;
+      idsToCopy = selection.selectedIds;
+    }
+
+    final count = idsToCopy.length;
+    if (mounted) AppSnackbar.loading(context, l10n.recipeListCopyingRecipes(count));
+    for (final id in idsToCopy) {
       await dao.duplicateRecipe(id, targetCookbookId: targetId);
     }
     if (mounted) {
@@ -755,18 +821,26 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     );
     if (targetId == null || !mounted) return;
 
-    final count = _selectedIds.length;
-    AppSnackbar.loading(context, l10n.recipeListMovingRecipes(count));
     final dao = ref.read(recipeDaoProvider);
-    for (final id in _selectedIds) {
+
+    // If any selected recipe has linked sub-recipes, show the selection sheet
+    final hasLinks = await _hasAnyLinkedSubRecipes(dao, _selectedIds);
+    Set<String> idsToMove = Set.from(_selectedIds);
+    if (hasLinks && mounted) {
+      final selection = await showSubRecipeSelectionSheetMulti(
+        context: context,
+        ref: ref,
+        parentRecipeIds: _selectedIds.toList(),
+        action: SubRecipeAction.move,
+      );
+      if (selection == null || !selection.confirmed) return;
+      idsToMove = selection.selectedIds;
+    }
+
+    final count = idsToMove.length;
+    if (mounted) AppSnackbar.loading(context, l10n.recipeListMovingRecipes(count));
+    for (final id in idsToMove) {
       await dao.updateRecipeFields(id, RecipesCompanion(cookbookId: Value(targetId)));
-      // Also move linked sub-recipes to the same cookbook
-      final linkedRecipes = await dao.getLinkedRecipes(id);
-      for (final linked in linkedRecipes) {
-        if (linked.cookbookId != targetId) {
-          await dao.updateRecipeFields(linked.id, RecipesCompanion(cookbookId: Value(targetId)));
-        }
-      }
     }
     if (mounted) {
       AppSnackbar.success(context, l10n.recipeListRecipesMoved(count));

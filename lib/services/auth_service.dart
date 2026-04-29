@@ -191,10 +191,9 @@ class AuthService {
   /// Injected at build time via --dart-define-from-file.
   static const _webClientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
 
-  /// Desktop OAuth client (installed app type).
-  /// Injected at build time via --dart-define-from-file.
+  /// Desktop OAuth client ID (installed app type — public, safe to ship).
+  /// The client SECRET stays on the server and is never shipped to the app.
   static const _desktopClientId = String.fromEnvironment('GOOGLE_DESKTOP_CLIENT_ID');
-  static const _desktopClientSecret = String.fromEnvironment('GOOGLE_DESKTOP_CLIENT_SECRET');
 
   Future<AuthState> signInWithGoogle() async {
     try {
@@ -215,13 +214,24 @@ class AuthService {
       } else if (isDesktop) {
         // Desktop: use browser-based OAuth with localhost redirect.
         // The google_sign_in plugin has no Windows/Linux implementation.
-        idToken = await DesktopGoogleAuth.signIn(
+        // Auth code + PKCE verifier are sent to the server which holds the
+        // client secret and exchanges with Google server-side.
+        final authResult = await DesktopGoogleAuth.signIn(
           clientId: _desktopClientId,
-          clientSecret: _desktopClientSecret,
         );
-        if (idToken == null) {
+        if (authResult == null) {
           return const AuthState.initial(); // User cancelled or timed out
         }
+        // Server exchanges auth code for id_token and creates/logs in user — all in one.
+        return await _exchangeToken(
+          endpoint: '/v1/auth/google/desktop-exchange',
+          body: {
+            'code': authResult.code,
+            'code_verifier': authResult.codeVerifier,
+            'redirect_uri': authResult.redirectUri,
+          },
+          provider: 'google',
+        );
       } else {
         // Mobile: use the google_sign_in plugin.
         final googleSignIn = GoogleSignIn(
@@ -242,14 +252,10 @@ class AuthService {
         return AuthState(error: 'Failed to get Google ID token');
       }
 
-      // Exchange with our API — include clientId so the backend
-      // can verify the token audience for both web and desktop clients.
+      // Exchange with our API (mobile only — desktop/web return earlier)
       return await _exchangeToken(
         endpoint: '/v1/auth/google',
-        body: {
-          'idToken': idToken,
-          if (isDesktop) 'clientId': _desktopClientId,
-        },
+        body: {'idToken': idToken},
         provider: 'google',
       );
     } catch (e) {

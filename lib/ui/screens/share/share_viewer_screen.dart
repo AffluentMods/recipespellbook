@@ -67,7 +67,11 @@ class _ShareViewerScreenState extends State<ShareViewerScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_data?['cookbook']?['name'] ?? l10n.shareViewerSharedRecipe),
+        title: Text(
+          _data?['cookbook']?['name']
+            ?? _data?['recipe']?['title']
+            ?? l10n.shareViewerSharedRecipe,
+        ),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => context.go('/'),
@@ -111,7 +115,14 @@ class _ShareViewerScreenState extends State<ShareViewerScreen> {
       );
     }
 
-    final recipes = (_data?['recipes'] as List?) ?? [];
+    // Single-recipe shares return `recipe`, cookbook shares return `recipes` array.
+    // Normalize both shapes into a unified `recipes` list for rendering.
+    final List recipes;
+    if (_data?['recipe'] != null) {
+      recipes = [_data!['recipe']];
+    } else {
+      recipes = (_data?['recipes'] as List?) ?? [];
+    }
     final sharedBy = _data?['sharedBy']?['name'] ?? 'Someone';
     final expiresAt = _data?['expiresAt'] != null
         ? DateTime.tryParse(_data!['expiresAt'])

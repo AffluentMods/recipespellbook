@@ -15,6 +15,7 @@ import '../../../services/community_service.dart';
 import '../../../services/family_service.dart';
 import '../../../services/revenuecat_service.dart';
 import '../../shell/app_shell.dart';
+import '../../widgets/app_refresh_indicator.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/family_share_sheet.dart';
 import '../../widgets/placeholder_image.dart';
@@ -206,6 +207,7 @@ class _CookbookGrid extends ConsumerWidget {
 
         // Grid
         Expanded(
+          child: AppRefreshIndicator(
           child: GridView.builder(
             padding: const EdgeInsets.fromLTRB(6, 4, 6, 80),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -226,6 +228,7 @@ class _CookbookGrid extends ConsumerWidget {
                 onLongPress: (position) => _showContextMenu(context, ref, cookbook, position),
               );
             },
+          ),
           ),
         ),
       ],

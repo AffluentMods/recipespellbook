@@ -11,6 +11,7 @@ import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/onboarding_service.dart';
 import '../../../utils/taxonomy_translator.dart';
+import '../../widgets/backup_reminder_banner.dart';
 import '../../widgets/new_recipe_dialog.dart';
 import '../onboarding/book_intro_screen.dart';
 import '../../widgets/placeholder_image.dart';
@@ -124,6 +125,10 @@ class HomeScreen extends ConsumerWidget {
 
                         // "Surprise Me!" card
                         _SurpriseMeCard(recipes: recipes),
+
+                        // Backup reminder for free-tier users — auto-hides
+                        // when recently backed up or on cloud sync.
+                        const BackupReminderBanner(),
 
                         // Quick Recipes Widget (meal plan + pinned + recent)
                         _QuickRecipesWidget(cookbookId: cookbookId, recipeCount: recipes.length),
@@ -263,31 +268,36 @@ class _QuickRecipesWidget extends ConsumerStatefulWidget {
 }
 
 class _QuickRecipesWidgetState extends ConsumerState<_QuickRecipesWidget> {
-  Future<List<_QuickRecipeItem>>? _itemsFuture;
-  String? _lastCookbookId;
-  int? _lastRecipeCount;
-
-  void _refreshItems() {
-    final recipeDao = ref.read(recipeDaoProvider);
-    final mealPlanDao = ref.read(mealPlanDaoProvider);
-    final settings = ref.read(settingsProvider);
-    _lastCookbookId = widget.cookbookId;
-    _lastRecipeCount = widget.recipeCount;
-    _itemsFuture = _loadItems(recipeDao, mealPlanDao, settings);
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    // Refresh when cookbook changes, recipe count changes, or on first build
-    if (_itemsFuture == null || _lastCookbookId != widget.cookbookId || _lastRecipeCount != widget.recipeCount) {
-      _refreshItems();
-    }
 
-    return FutureBuilder<List<_QuickRecipeItem>>(
-      future: _itemsFuture,
-      builder: (context, snapshot) {
+    // Watch the recipe stream so quick access auto-refreshes when ANY recipe
+    // changes (favorite toggle, pin toggle, edit, delete, etc.) — not just
+    // on count changes.
+    final recipeDao = ref.watch(recipeDaoProvider);
+    final mealPlanDao = ref.watch(mealPlanDaoProvider);
+    final settings = ref.watch(settingsProvider);
+
+    return StreamBuilder<List<Recipe>>(
+      stream: recipeDao.watchRecipesForCookbook(widget.cookbookId),
+      builder: (context, recipeSnapshot) {
+        // Re-fetch quick access items whenever the underlying recipes change.
+        final itemsFuture = _loadItems(recipeDao, mealPlanDao, settings);
+        return FutureBuilder<List<_QuickRecipeItem>>(
+          future: itemsFuture,
+          builder: (context, snapshot) {
+            return _buildQuickAccessList(context, l10n, theme, snapshot);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildQuickAccessList(BuildContext context, AppLocalizations l10n, ThemeData theme, AsyncSnapshot<List<_QuickRecipeItem>> snapshot) {
+    return Builder(
+      builder: (context) {
         final items = snapshot.data ?? [];
 
         if (items.isEmpty) {

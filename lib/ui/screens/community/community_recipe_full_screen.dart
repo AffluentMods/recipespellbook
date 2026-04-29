@@ -253,41 +253,49 @@ class CommunityRecipeFullScreen extends ConsumerWidget {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (ctx) {
         final theme = Theme.of(ctx);
-        return SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const SizedBox(height: 8),
-          Container(width: 40, height: 4, decoration: BoxDecoration(
-            color: theme.colorScheme.outline.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(2),
-          )),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(l10n.communitySaveRecipeTo(recipe.title), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-          ),
-          if (cookbooks.isEmpty)
-            ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: Text(l10n.communityNoCookbooksYetCreate),
-              subtitle: Text(l10n.communityCreateCookbookFirst),
-            )
-          else
-            ...cookbooks.map((c) => ListTile(
-              leading: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: SizedBox(
-                  width: 40, height: 40,
-                  child: c.imagePath != null && c.imagePath!.isNotEmpty && FileExistsCache.exists(c.imagePath!)
-                      ? buildFileImage(c.imagePath!, fit: BoxFit.cover, cacheHeight: 80)
-                      : const CookbookPlaceholderImage(width: 40, height: 40),
+        return SafeArea(child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.7),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const SizedBox(height: 8),
+            Container(width: 40, height: 4, decoration: BoxDecoration(
+              color: theme.colorScheme.outline.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(2),
+            )),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.communitySaveRecipeTo(recipe.title), style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            ),
+            if (cookbooks.isEmpty)
+              ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: Text(l10n.communityNoCookbooksYetCreate),
+                subtitle: Text(l10n.communityCreateCookbookFirst),
+              )
+            else
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: cookbooks.map((c) => ListTile(
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: SizedBox(
+                        width: 40, height: 40,
+                        child: c.imagePath != null && c.imagePath!.isNotEmpty && FileExistsCache.exists(c.imagePath!)
+                            ? buildFileImage(c.imagePath!, fit: BoxFit.cover, cacheHeight: 80)
+                            : const CookbookPlaceholderImage(width: 40, height: 40),
+                      ),
+                    ),
+                    title: Text(c.name),
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      await _saveRecipe(context, ref, recipe, c.id);
+                    },
+                  )).toList(),
                 ),
               ),
-              title: Text(c.name),
-              onTap: () async {
-                Navigator.pop(ctx);
-                await _saveRecipe(context, ref, recipe, c.id);
-              },
-            )),
-          const SizedBox(height: 16),
-        ]));
+            const SizedBox(height: 16),
+          ]),
+        ));
       },
     );
   }

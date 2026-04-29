@@ -582,6 +582,8 @@ class _ProductInfoSheet extends StatelessWidget {
                               width: 100,
                               height: 100,
                               fit: BoxFit.cover,
+                              cacheWidth: 200, // 2x for retina
+                              cacheHeight: 200,
                               errorBuilder: (_, __, ___) => Container(
                                 width: 100,
                                 height: 100,

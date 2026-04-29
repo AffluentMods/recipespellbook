@@ -301,15 +301,57 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       }
 
       _showLoading(l10n.parsingRecipe);
-      final recipe = RecipeImportEngine.parseOcrText(result.text);
-      recipe.parseConfidence = result.confidence;
-      recipe.rawOcrText = result.text;
-      // Use filename as fallback title
-      if (recipe.title.isEmpty || recipe.title == 'Untitled Recipe') {
-        recipe.title = p.basenameWithoutExtension(path).replaceAll(RegExp(r'[-_]'), ' ');
+
+      // Try multi-recipe parser first — handles cookbook PDFs with many recipes.
+      // Pass per-page metadata so each recipe gets a cover image extracted from
+      // the PDF page where it starts. Falls back to single-recipe parse if only
+      // one recipe is detected.
+      final recipes = RecipeImportEngine.parseOcrTextMulti(
+        result.text,
+        pageImagePaths: result.pageImagePaths,
+        pageStartLines: result.pageStartLines,
+        pageImageScores: result.pageImageScores,
+      );
+
+      // Use filename as fallback title only when there's a single result
+      // (otherwise each recipe should keep its own recovered title)
+      if (recipes.length == 1) {
+        final r = recipes.first;
+        r.parseConfidence = result.confidence;
+        r.rawOcrText = result.text;
+        if (RecipeImportEngine.isTitleSuspicious(r.title)) {
+          r.title = p.basenameWithoutExtension(path).replaceAll(RegExp(r'[-_]'), ' ');
+        }
+        // For single-recipe PDFs, use the highest-scoring page image as cover.
+        // Skip null entries (pages with no extractable photo).
+        if (r.imagePath == null || r.imagePath!.isEmpty) {
+          String? best;
+          double bestScore = -1;
+          for (var p = 0; p < result.pageImagePaths.length; p++) {
+            final path = result.pageImagePaths[p];
+            if (path == null) continue;
+            final score = p < result.pageImageScores.length ? result.pageImageScores[p] : 0.0;
+            if (score > bestScore) {
+              bestScore = score;
+              best = path;
+            }
+          }
+          if (best != null) r.imagePath = best;
+        }
+      } else {
+        // Number recipes that survived with bad titles — better than showing
+        // "Macros per serving 511 calories..." or "Ingredients (4 servings)"
+        for (var i = 0; i < recipes.length; i++) {
+          final r = recipes[i];
+          if (RecipeImportEngine.isTitleSuspicious(r.title)) {
+            final base = p.basenameWithoutExtension(path).replaceAll(RegExp(r'[-_]'), ' ');
+            r.title = '$base — Recipe ${i + 1}';
+          }
+        }
       }
+
       _hideLoading();
-      _showImportPreview([recipe], sourceText: result.text);
+      _showImportPreview(recipes, sourceText: result.text);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedToImport(e.toString()));
@@ -381,12 +423,28 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
       }
 
       _showLoading(l10n.parsingRecipe);
-      final recipe = RecipeImportEngine.parseOcrText(result.text);
-      recipe.imageUrl = imagePaths.first; // Use first image as recipe cover
-      recipe.parseConfidence = result.confidence;
-      recipe.rawOcrText = result.text;
+
+      // Try multi-recipe parser first — handles photos of cookbook pages where
+      // multiple recipes appear in one batch. Falls back to single-recipe if
+      // the text only looks like one recipe.
+      final recipes = RecipeImportEngine.parseOcrTextMulti(result.text);
+
+      if (recipes.length == 1) {
+        // Single-recipe path — use the first picked image as the cover
+        final r = recipes.first;
+        r.imageUrl = imagePaths.first;
+        r.parseConfidence = result.confidence;
+        r.rawOcrText = result.text;
+      } else {
+        // Multi-recipe path — assign each image as a cover round-robin
+        // (best-effort; user can swap covers in preview)
+        for (var i = 0; i < recipes.length; i++) {
+          recipes[i].imageUrl = imagePaths[i % imagePaths.length];
+        }
+      }
+
       _hideLoading();
-      _showImportPreview([recipe], sourceText: result.text);
+      _showImportPreview(recipes, sourceText: result.text);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedProcessImage(e.toString()));
@@ -404,9 +462,10 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
     _showLoading(l10n.parsingRecipe);
     try {
-      final recipe = RecipeImportEngine.parseFromText(text);
+      // Try multi-recipe parser — pasted text might be a whole cookbook section
+      final recipes = RecipeImportEngine.parseOcrTextMulti(text);
       _hideLoading();
-      _showImportPreview([recipe], sourceText: text);
+      _showImportPreview(recipes, sourceText: text);
     } catch (e) {
       _hideLoading();
       _showError(l10n.failedToParse(e.toString()));

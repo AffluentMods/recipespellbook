@@ -30,6 +30,7 @@ import '../../widgets/recipe_share_sheet.dart';
 import '../../widgets/hint_banner.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/recipe_tags_display.dart';
+import '../../widgets/sub_recipe_selection_sheet.dart';
 // ============ DISMISSED ALLERGY WARNINGS ============
 // Canonical provider is in allergy_settings_screen.dart — imported via:
 import '../settings/allergy_settings_screen.dart' show dismissedAllergyWarningsProvider;
@@ -1521,73 +1522,81 @@ class _RecipeAppBar extends StatelessWidget {
           final newNameCtrl = TextEditingController();
           return StatefulBuilder(
             builder: (ctx, setSheetState) => SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(height: 8),
-                  Container(width: 40, height: 4, decoration: BoxDecoration(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  )),
-                  const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      move ? l10n.moveToCookbook : l10n.copyToCookbook,
-                      style: theme.textTheme.titleMedium,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.7),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 8),
+                    Container(width: 40, height: 4, decoration: BoxDecoration(
+                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    )),
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        move ? l10n.moveToCookbook : l10n.copyToCookbook,
+                        style: theme.textTheme.titleMedium,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  // ── Create new cookbook inline ──
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: newNameCtrl,
-                            decoration: InputDecoration(
-                              hintText: l10n.newCookbook,
-                              isDense: true,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    const SizedBox(height: 12),
+                    // ── Create new cookbook inline ──
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: newNameCtrl,
+                              decoration: InputDecoration(
+                                hintText: l10n.newCookbook,
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              textInputAction: TextInputAction.done,
+                              onSubmitted: (val) async {
+                                final name = val.trim();
+                                if (name.isEmpty) return;
+                                Navigator.pop(ctx);
+                                await _createCookbookAndPerformAction(context, name, move: move);
+                              },
                             ),
-                            textInputAction: TextInputAction.done,
-                            onSubmitted: (val) async {
-                              final name = val.trim();
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton.filled(
+                            icon: const Icon(Icons.add),
+                            onPressed: () async {
+                              final name = newNameCtrl.text.trim();
                               if (name.isEmpty) return;
                               Navigator.pop(ctx);
                               await _createCookbookAndPerformAction(context, name, move: move);
                             },
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton.filled(
-                          icon: const Icon(Icons.add),
-                          onPressed: () async {
-                            final name = newNameCtrl.text.trim();
-                            if (name.isEmpty) return;
-                            Navigator.pop(ctx);
-                            await _createCookbookAndPerformAction(context, name, move: move);
-                          },
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  if (others.isNotEmpty) ...[
+                    if (others.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      const Divider(height: 1),
+                      Flexible(
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: others.map((cookbook) => ListTile(
+                            leading: const Icon(Icons.book_outlined),
+                            title: Text(cookbook.name),
+                            onTap: () async {
+                              Navigator.pop(ctx);
+                              await _performCookbookAction(context, cookbook, move: move);
+                            },
+                          )).toList(),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 8),
-                    const Divider(height: 1),
-                    ...others.map((cookbook) => ListTile(
-                      leading: const Icon(Icons.book_outlined),
-                      title: Text(cookbook.name),
-                      onTap: () async {
-                        Navigator.pop(ctx);
-                        await _performCookbookAction(context, cookbook, move: move);
-                      },
-                    )),
                   ],
-                  const SizedBox(height: 8),
-                ],
+                ),
               ),
             ),
           );
@@ -1599,21 +1608,39 @@ class _RecipeAppBar extends StatelessWidget {
   Future<void> _performCookbookAction(BuildContext context, Cookbook targetCookbook, {required bool move}) async {
     final recipeDao = ref.read(recipeDaoProvider);
 
+    // Ask the user whether to include sub-recipes (only shows the sheet if there are any)
+    final selection = await showSubRecipeSelectionSheet(
+      context: context,
+      ref: ref,
+      parentRecipeId: recipe.id,
+      action: move ? SubRecipeAction.move : SubRecipeAction.copy,
+    );
+    if (selection == null || !selection.confirmed) return;
+
+    final ids = selection.selectedIds;
+    final count = ids.length;
+
     try {
       if (move) {
-        // Update the recipe's cookbookId
-        await recipeDao.updateRecipeFields(recipe.id, RecipesCompanion(
-          cookbookId: drift.Value(targetCookbook.id),
-        ));
+        for (final id in ids) {
+          await recipeDao.updateRecipeFields(id, RecipesCompanion(
+            cookbookId: drift.Value(targetCookbook.id),
+          ));
+        }
         onReload();
         if (context.mounted) {
-          AppSnackbar.success(context, 'Moved to "${targetCookbook.name}"');
+          AppSnackbar.success(context, count == 1
+              ? 'Moved to "${targetCookbook.name}"'
+              : 'Moved $count recipes to "${targetCookbook.name}"');
         }
       } else {
-        // Duplicate into the target cookbook
-        await recipeDao.duplicateRecipe(recipe.id, targetCookbookId: targetCookbook.id);
+        for (final id in ids) {
+          await recipeDao.duplicateRecipe(id, targetCookbookId: targetCookbook.id);
+        }
         if (context.mounted) {
-          AppSnackbar.success(context, 'Copied to "${targetCookbook.name}"');
+          AppSnackbar.success(context, count == 1
+              ? 'Copied to "${targetCookbook.name}"'
+              : 'Copied $count recipes to "${targetCookbook.name}"');
         }
       }
     } catch (e) {
@@ -1644,30 +1671,59 @@ class _RecipeAppBar extends StatelessWidget {
     }
   }
 
-  void _confirmDelete(BuildContext context) {
+  Future<void> _confirmDelete(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    showDialog(
+    final dao = ref.read(recipeDaoProvider);
+
+    // Check if the recipe has linked sub-recipes — if so, show the selection sheet
+    // so the user can decide which to delete (with usage counts).
+    final linked = await dao.getLinkedRecipes(recipe.id);
+
+    if (linked.isEmpty) {
+      // No sub-recipes — simple confirmation dialog
+      if (!context.mounted) return;
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l10n.deleteRecipeTitle),
+          content: Text(l10n.deleteRecipeConfirm),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n.actionDelete),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !context.mounted) return;
+      await dao.moveToTrash(recipe.id);
+      if (context.mounted) {
+        context.pop();
+        AppSnackbar.info(context, l10n.recipeDeleted);
+      }
+      return;
+    }
+
+    // Has sub-recipes — show the selection sheet with usage counts
+    final selection = await showSubRecipeSelectionSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.deleteRecipeTitle),
-        content: Text(l10n.deleteRecipeConfirm),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () async {
-              await ref.read(recipeDaoProvider).moveToTrash(recipe.id);
-              if (ctx.mounted) Navigator.pop(ctx);
-              if (context.mounted) {
-                context.pop();
-                AppSnackbar.info(context, l10n.recipeDeleted);
-              }
-            },
-            child: Text(l10n.actionDelete),
-          ),
-        ],
-      ),
+      ref: ref,
+      parentRecipeId: recipe.id,
+      action: SubRecipeAction.delete,
     );
+    if (selection == null || !selection.confirmed) return;
+
+    for (final id in selection.selectedIds) {
+      await dao.moveToTrash(id);
+    }
+    if (context.mounted) {
+      context.pop();
+      AppSnackbar.info(context, selection.selectedIds.length == 1
+          ? l10n.recipeDeleted
+          : '${selection.selectedIds.length} recipes moved to trash');
+    }
   }
 }
 

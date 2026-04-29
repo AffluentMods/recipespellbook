@@ -7,13 +7,23 @@ import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../../database/daos/recipe_dao.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/recipe_image.dart';
+import '../../widgets/sub_recipe_selection_sheet.dart';
 
 /// Search query provider
 final searchQueryProvider = StateProvider<String>((ref) => '');
 
-/// Search results provider
+/// Search results provider — relevance-ranked.
+///
+/// Ranking (highest first):
+///   100 — exact title match
+///    80 — title starts with query
+///    60 — title contains query
+///    30 — description contains query
+///    10 — ingredient name contains query
+/// Ties broken by favorite > recently viewed > title alphabetical.
 final searchResultsProvider = FutureProvider<List<Recipe>>((ref) async {
   final query = ref.watch(searchQueryProvider);
   if (query.trim().isEmpty) return [];
@@ -21,16 +31,16 @@ final searchResultsProvider = FutureProvider<List<Recipe>>((ref) async {
   final cookbookId = ref.watch(selectedCookbookIdProvider) ?? 'starter';
   final db = ref.watch(databaseProvider);
 
-  final searchTerm = '%${query.toLowerCase()}%';
+  final q = query.toLowerCase().trim();
+  final searchTerm = '%$q%';
 
-  // Search in title and description using custom query
-  final results = await db.customSelect(
+  // One query: title/description matches in the cookbook
+  final titleDescRows = await db.customSelect(
     '''
-    SELECT * FROM recipes 
-    WHERE cookbook_id = ? 
+    SELECT * FROM recipes
+    WHERE cookbook_id = ?
     AND deleted_at IS NULL
     AND (LOWER(title) LIKE ? OR LOWER(description) LIKE ?)
-    ORDER BY title
     ''',
     variables: [
       Variable.withString(cookbookId),
@@ -40,12 +50,12 @@ final searchResultsProvider = FutureProvider<List<Recipe>>((ref) async {
     readsFrom: {db.recipes},
   ).get();
 
-  // Also search ingredients
-  final ingredientMatches = await db.customSelect(
+  // Ingredient matches (separate so we can score them differently)
+  final ingredientRows = await db.customSelect(
     '''
     SELECT DISTINCT r.* FROM recipes r
     INNER JOIN ingredients i ON i.recipe_id = r.id
-    WHERE r.cookbook_id = ? 
+    WHERE r.cookbook_id = ?
     AND r.deleted_at IS NULL
     AND LOWER(i.name) LIKE ?
     ''',
@@ -56,26 +66,63 @@ final searchResultsProvider = FutureProvider<List<Recipe>>((ref) async {
     readsFrom: {db.recipes, db.ingredients},
   ).get();
 
-  // Combine and dedupe
-  final allIds = <String>{};
-  final recipes = <Recipe>[];
+  // Score each match
+  final scored = <String, _ScoredRecipe>{};
 
-  for (final row in results) {
+  void addOrBumpScore(QueryRow row, int score) {
     final id = row.data['id'] as String;
-    if (allIds.add(id)) {
-      recipes.add(_rowToRecipe(row));
+    final existing = scored[id];
+    if (existing == null || score > existing.score) {
+      scored[id] = _ScoredRecipe(recipe: _rowToRecipe(row), score: score);
     }
   }
 
-  for (final row in ingredientMatches) {
-    final id = row.data['id'] as String;
-    if (allIds.add(id)) {
-      recipes.add(_rowToRecipe(row));
+  for (final row in titleDescRows) {
+    final title = (row.data['title'] as String? ?? '').toLowerCase();
+    final desc = (row.data['description'] as String? ?? '').toLowerCase();
+
+    int score;
+    if (title == q) {
+      score = 100;
+    } else if (title.startsWith(q)) {
+      score = 80;
+    } else if (title.contains(q)) {
+      score = 60;
+    } else if (desc.contains(q)) {
+      score = 30;
+    } else {
+      score = 10; // shouldn't happen given the WHERE clause, but be safe
     }
+    addOrBumpScore(row, score);
   }
 
-  return recipes;
+  // Ingredient matches — only add if not already scored higher
+  for (final row in ingredientRows) {
+    final id = row.data['id'] as String;
+    if (scored.containsKey(id)) continue; // title/desc already scored higher
+    addOrBumpScore(row, 10);
+  }
+
+  // Sort by score desc, then favorite, then last viewed, then title
+  final ranked = scored.values.toList()..sort((a, b) {
+    if (a.score != b.score) return b.score.compareTo(a.score);
+    if (a.recipe.isFavorite != b.recipe.isFavorite) return a.recipe.isFavorite ? -1 : 1;
+    final aViewed = a.recipe.lastViewedAt;
+    final bViewed = b.recipe.lastViewedAt;
+    if (aViewed != null && bViewed != null) return bViewed.compareTo(aViewed);
+    if (aViewed != null) return -1;
+    if (bViewed != null) return 1;
+    return a.recipe.title.toLowerCase().compareTo(b.recipe.title.toLowerCase());
+  });
+
+  return ranked.map((s) => s.recipe).toList();
 });
+
+class _ScoredRecipe {
+  final Recipe recipe;
+  final int score;
+  const _ScoredRecipe({required this.recipe, required this.score});
+}
 
 Recipe _rowToRecipe(QueryRow row) {
   final data = row.data;
@@ -235,26 +282,340 @@ class _NoResultsState extends StatelessWidget {
   }
 }
 
-class _SearchResults extends ConsumerWidget {
+class _SearchResults extends ConsumerStatefulWidget {
   final List<Recipe> results;
   const _SearchResults({required this.results});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: results.length,
-      itemBuilder: (context, index) {
-        final recipe = results[index];
-        return _SearchResultCard(recipe: recipe);
+  ConsumerState<_SearchResults> createState() => _SearchResultsState();
+}
+
+class _SearchResultsState extends ConsumerState<_SearchResults> {
+  bool _isSelecting = false;
+  final Set<String> _selectedIds = {};
+
+  void _toggleSelection(String id) {
+    setState(() {
+      if (_selectedIds.contains(id)) {
+        _selectedIds.remove(id);
+        if (_selectedIds.isEmpty) _isSelecting = false;
+      } else {
+        _selectedIds.add(id);
+      }
+    });
+  }
+
+  void _enterSelection(String id) {
+    setState(() {
+      _isSelecting = true;
+      _selectedIds.add(id);
+    });
+  }
+
+  void _exitSelection() {
+    setState(() {
+      _isSelecting = false;
+      _selectedIds.clear();
+    });
+  }
+
+  void _selectAll() {
+    setState(() => _selectedIds.addAll(widget.results.map((r) => r.id)));
+  }
+
+  Future<void> _bulkFavorite() async {
+    final dao = ref.read(recipeDaoProvider);
+    // If ALL selected are already favorites, unfavorite them; else favorite all.
+    final selected = widget.results.where((r) => _selectedIds.contains(r.id)).toList();
+    final allFav = selected.every((r) => r.isFavorite);
+    final newValue = !allFav;
+    for (final r in selected) {
+      if (r.isFavorite != newValue) {
+        await dao.updateRecipeFields(r.id, RecipesCompanion(isFavorite: Value(newValue)));
+      }
+    }
+    ref.invalidate(searchResultsProvider);
+    if (mounted) {
+      AppSnackbar.success(context, newValue
+          ? AppLocalizations.of(context)!.recipeFavorite
+          : AppLocalizations.of(context)!.favoritesRemoved);
+      _exitSelection();
+    }
+  }
+
+  Future<void> _bulkCopyOrMove({required bool move}) async {
+    final l10n = AppLocalizations.of(context)!;
+    final cookbooks = ref.read(cookbooksProvider).valueOrNull ?? [];
+    if (cookbooks.isEmpty) {
+      AppSnackbar.info(context, l10n.recipeListCreateCookbookFirst);
+      return;
+    }
+
+    // Pick target cookbook
+    final targetId = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(width: 40, height: 4, decoration: BoxDecoration(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              )),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  move ? l10n.moveToCookbook : l10n.copyToCookbook,
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: cookbooks.map((c) => ListTile(
+                    leading: const Icon(Icons.book),
+                    title: Text(c.name),
+                    onTap: () => Navigator.pop(ctx, c.id),
+                  )).toList(),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
       },
+    );
+    if (targetId == null || !mounted) return;
+
+    final dao = ref.read(recipeDaoProvider);
+    // Use the sub-recipe selection sheet for transparency about linked recipes
+    final hasLinks = await _hasAnyLinks(dao, _selectedIds);
+    Set<String> idsToProcess = Set.from(_selectedIds);
+    if (hasLinks && mounted) {
+      final selection = await showSubRecipeSelectionSheetMulti(
+        context: context,
+        ref: ref,
+        parentRecipeIds: _selectedIds.toList(),
+        action: move ? SubRecipeAction.move : SubRecipeAction.copy,
+      );
+      if (selection == null || !selection.confirmed) return;
+      idsToProcess = selection.selectedIds;
+    }
+
+    final count = idsToProcess.length;
+    if (move) {
+      for (final id in idsToProcess) {
+        await dao.updateRecipeFields(id, RecipesCompanion(cookbookId: Value(targetId)));
+      }
+    } else {
+      for (final id in idsToProcess) {
+        await dao.duplicateRecipe(id, targetCookbookId: targetId);
+      }
+    }
+    ref.invalidate(searchResultsProvider);
+    if (mounted) {
+      AppSnackbar.success(context, move
+          ? l10n.recipeListRecipesMoved(count)
+          : l10n.recipeListRecipesCopied(count));
+      _exitSelection();
+    }
+  }
+
+  Future<bool> _hasAnyLinks(RecipeDao dao, Set<String> ids) async {
+    for (final id in ids) {
+      final linked = await dao.getLinkedRecipes(id);
+      if (linked.isNotEmpty) return true;
+    }
+    return false;
+  }
+
+  Future<void> _bulkDelete() async {
+    final l10n = AppLocalizations.of(context)!;
+    final dao = ref.read(recipeDaoProvider);
+
+    final hasLinks = await _hasAnyLinks(dao, _selectedIds);
+    Set<String> idsToDelete;
+
+    if (hasLinks) {
+      final selection = await showSubRecipeSelectionSheetMulti(
+        context: context,
+        ref: ref,
+        parentRecipeIds: _selectedIds.toList(),
+        action: SubRecipeAction.delete,
+      );
+      if (selection == null || !selection.confirmed) return;
+      idsToDelete = selection.selectedIds;
+    } else {
+      final count = _selectedIds.length;
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          icon: const Icon(Icons.delete_outline, size: 32, color: Colors.red),
+          title: Text(l10n.deleteCountRecipes(count)),
+          content: Text(l10n.confirmDeleteMessage),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.actionCancel)),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              child: Text(l10n.actionDelete),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+      idsToDelete = Set.from(_selectedIds);
+    }
+
+    for (final id in idsToDelete) {
+      await dao.moveToTrash(id);
+    }
+    ref.invalidate(searchResultsProvider);
+    if (mounted) {
+      AppSnackbar.info(context, l10n.countRecipesMovedToTrash(idsToDelete.length));
+      _exitSelection();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    return Stack(
+      children: [
+        Column(
+          children: [
+            // Selection bar
+            if (_isSelecting)
+              Container(
+                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: _exitSelection,
+                    ),
+                    Expanded(
+                      child: Text(
+                        l10n.selectAllBar(_selectedIds.length, widget.results.length),
+                        style: theme.textTheme.titleMedium,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: _selectedIds.length == widget.results.length
+                          ? _exitSelection
+                          : _selectAll,
+                      child: Text(_selectedIds.length == widget.results.length
+                          ? l10n.communityDeselectAllRecipes
+                          : l10n.communitySelectAllRecipes),
+                    ),
+                  ],
+                ),
+              ),
+            Expanded(
+              child: ListView.builder(
+                padding: EdgeInsets.fromLTRB(0, 8, 0, _isSelecting ? 80 : 8),
+                itemCount: widget.results.length,
+                itemBuilder: (context, index) {
+                  final recipe = widget.results[index];
+                  final selected = _selectedIds.contains(recipe.id);
+                  return _SearchResultCard(
+                    recipe: recipe,
+                    isSelecting: _isSelecting,
+                    isSelected: selected,
+                    onTap: () {
+                      if (_isSelecting) {
+                        _toggleSelection(recipe.id);
+                      } else {
+                        ref.read(recipeDaoProvider).updateLastViewed(recipe.id);
+                        context.pushNamed('recipe', pathParameters: {'id': recipe.id});
+                      }
+                    },
+                    onLongPress: () => _enterSelection(recipe.id),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+        // Bulk action bar
+        if (_isSelecting && _selectedIds.isNotEmpty)
+          Positioned(
+            left: 0, right: 0, bottom: 0,
+            child: Container(
+              padding: EdgeInsets.fromLTRB(4, 8, 4, 8 + MediaQuery.of(context).padding.bottom),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                border: Border(top: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2))),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _SearchBulkAction(icon: Icons.star_outline, label: l10n.bulkFavorite, onTap: _bulkFavorite),
+                  _SearchBulkAction(icon: Icons.copy_rounded, label: l10n.bulkCopyLabel, onTap: () => _bulkCopyOrMove(move: false)),
+                  _SearchBulkAction(icon: Icons.drive_file_move_outlined, label: l10n.bulkMoveLabel, onTap: () => _bulkCopyOrMove(move: true)),
+                  Container(width: 1, height: 36, color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+                  _SearchBulkAction(icon: Icons.delete_outline, label: l10n.bulkDeleteLabel, onTap: _bulkDelete, color: theme.colorScheme.error),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _SearchBulkAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color? color;
+  const _SearchBulkAction({required this.icon, required this.label, required this.onTap, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = color ?? Theme.of(context).colorScheme.onSurface;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 22, color: c),
+            const SizedBox(height: 2),
+            Text(label, style: TextStyle(fontSize: 10, color: c)),
+          ],
+        ),
+      ),
     );
   }
 }
 
 class _SearchResultCard extends ConsumerWidget {
   final Recipe recipe;
-  const _SearchResultCard({required this.recipe});
+  final bool isSelecting;
+  final bool isSelected;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+
+  const _SearchResultCard({
+    required this.recipe,
+    this.isSelecting = false,
+    this.isSelected = false,
+    this.onTap,
+    this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -264,17 +625,28 @@ class _SearchResultCard extends ConsumerWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      color: isSelected
+          ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
+          : null,
       child: InkWell(
-        onTap: () {
+        onTap: onTap ?? () {
           ref.read(recipeDaoProvider).updateLastViewed(recipe.id);
           context.pushNamed('recipe', pathParameters: {'id': recipe.id});
         },
-        onLongPress: () => _showRecipeActions(context, ref, recipe),
+        onLongPress: onLongPress ?? () => _showRecipeActions(context, ref, recipe),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
+              if (isSelecting) ...[
+                Icon(
+                  isSelected ? Icons.check_circle : Icons.circle_outlined,
+                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+              ],
               _SearchResultImage(recipe: recipe, size: 64),
               const SizedBox(width: 12),
               Expanded(

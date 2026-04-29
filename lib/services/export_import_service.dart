@@ -11,6 +11,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../database/database.dart';
 import '../utils/platform_utils.dart';
+import 'backup_reminder_service.dart';
 
 // ════════════════════════════════════════════
 //  EXPORT / IMPORT OPTIONS
@@ -444,6 +445,7 @@ class ExportImportService {
     );
     if (result != null) {
       await File(result).writeAsBytes(zipBytes);
+      await BackupReminderService.markBackupDone();
       return true;
     }
     return false;
@@ -470,6 +472,7 @@ class ExportImportService {
         subject: 'Recipe Spellbook Full Backup',
       ));
     }
+    await BackupReminderService.markBackupDone();
   }
 
   /// Convert a recipe map to schema.org Recipe JSON-LD format.

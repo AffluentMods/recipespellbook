@@ -5,6 +5,7 @@ class ImportedRecipe {
   String? description;
   String? imageUrl;
   String? imageData; // Base64 encoded (from Paprika, etc.)
+  String? imagePath; // Local file path (from PDF page extraction, etc.)
   int? prepTimeMinutes;
   int? cookTimeMinutes;
   String? servings;
@@ -31,6 +32,7 @@ class ImportedRecipe {
     this.description,
     this.imageUrl,
     this.imageData,
+    this.imagePath,
     this.prepTimeMinutes,
     this.cookTimeMinutes,
     this.servings,
@@ -56,6 +58,7 @@ class ImportedRecipe {
       'description': description,
       'imageUrl': imageUrl,
       'imageData': imageData,
+      'imagePath': imagePath,
       'prepTimeMinutes': prepTimeMinutes,
       'cookTimeMinutes': cookTimeMinutes,
       'servings': servings,

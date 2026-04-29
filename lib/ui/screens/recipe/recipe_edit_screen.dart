@@ -28,6 +28,7 @@ import '../../widgets/nutrition_calculation_sheet.dart';
 // import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
 import '../../widgets/recipe_edit_instructions.dart';
 import '../../../services/image_service.dart';
+import '../../../services/sub_recipe_autolinker.dart';
 import '../../../services/auth_service.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../providers/subscription_provider.dart';
@@ -1037,10 +1038,33 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
 
       await tagsDao.setTagsForRecipe(recipeId, _selectedTagIds);
 
+      // ── Auto-link sub-recipe references ──
+      // Scan ingredient names for [[Recipe Name]] / "see X recipe" patterns
+      // and create links to matching recipes in the same cookbook.
+      AutoLinkResult? autoLinkResult;
+      if (widget.cookbookId != null) {
+        try {
+          final db = ref.read(databaseProvider);
+          final savedIngredients = await recipeDao.getIngredientsForRecipe(recipeId);
+          autoLinkResult = await SubRecipeAutoLinker.autoLinkIngredients(
+            db: db,
+            recipeId: recipeId,
+            cookbookId: widget.cookbookId!,
+            ingredients: savedIngredients,
+          );
+        } catch (e) {
+          debugPrint('[AutoLink] Failed: $e');
+        }
+      }
+
       if (mounted) {
         // Capture router before popping so the View callback works
         final router = GoRouter.of(context);
-        final message = _isEditing ? l10n.recipeUpdated : l10n.successSaved;
+        var message = _isEditing ? l10n.recipeUpdated : l10n.successSaved;
+        // Append auto-link summary if anything got linked
+        if (autoLinkResult != null && autoLinkResult.linkedTitles.isNotEmpty) {
+          message = '$message · ${l10n.autoLinkedSubRecipes(autoLinkResult.linkedTitles.length)}';
+        }
         final viewLabel = l10n.actionView;
         final savedRecipeId = recipeId;
 

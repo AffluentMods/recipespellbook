@@ -11,12 +11,27 @@ import '../models/imported_recipe.dart';
 /// text parsing (structured, markdown, Obsidian/YAML frontmatter),
 /// OCR text cleanup, file parsing (JSON, MD, TXT), and bulk HTML import.
 class RecipeImportEngine {
+  // Full Chrome UA — incomplete UAs (e.g. just Mozilla/5.0... AppleWebKit) get
+  // flagged by Cloudflare/Akamai as bots and return 4xx/5xx codes.
   static const _userAgent =
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 
   // Platform-specific user agents (some sites block generic crawlers)
   static const _mobileUserAgent =
       'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+
+  /// Standard browser-like headers to bypass basic bot detection.
+  /// Used as the base for all default fetches; specific platforms can override.
+  static const _browserHeaders = {
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Upgrade-Insecure-Requests': '1',
+  };
 
   // ========== PLATFORM DETECTION ==========
 
@@ -71,26 +86,59 @@ class RecipeImportEngine {
     return normalized;
   }
 
-  /// Get appropriate headers for a given platform
+  /// Fetch a URL with browser-like headers. If the response is rejected
+  /// (4xx/5xx — often WAF bot detection like 403, 451, 455, 503), retry once
+  /// with the mobile UA which more sites accept by default.
+  static Future<http.Response> _fetchWithFallback(String url, _Platform platform) async {
+    final primaryHeaders = _headersForPlatform(platform);
+    var resp = await http
+        .get(Uri.parse(url), headers: primaryHeaders)
+        .timeout(const Duration(seconds: 20));
+
+    // If primary succeeded or got a "real" non-bot error (404, 410), don't retry.
+    if (resp.statusCode == 200) return resp;
+    if (resp.statusCode == 404 || resp.statusCode == 410) return resp;
+
+    // Already used the mobile UA — nothing else to try.
+    final usedMobile = primaryHeaders['User-Agent'] == _mobileUserAgent;
+    if (usedMobile) return resp;
+
+    // Retry with mobile UA + browser headers. Sites blocking desktop crawlers
+    // often let mobile Safari through.
+    try {
+      final fallbackResp = await http.get(
+        Uri.parse(url),
+        headers: {
+          ..._browserHeaders,
+          'User-Agent': _mobileUserAgent,
+        },
+      ).timeout(const Duration(seconds: 20));
+      if (fallbackResp.statusCode == 200) return fallbackResp;
+      // Return whichever has a body
+      return fallbackResp.body.isNotEmpty ? fallbackResp : resp;
+    } catch (_) {
+      return resp;
+    }
+  }
+
+  /// Get appropriate headers for a given platform.
+  /// All variants include the standard browser-like headers so bot-detection
+  /// WAFs (Cloudflare/Akamai/etc.) accept the request.
   static Map<String, String> _headersForPlatform(_Platform platform) {
     switch (platform) {
       case _Platform.instagram:
       case _Platform.tiktok:
-      // Social media often serves better meta tags to mobile user agents
-        return {
-          'User-Agent': _mobileUserAgent,
-          'Accept': 'text/html,application/xhtml+xml',
-          'Accept-Language': 'en-US,en;q=0.9',
-        };
       case _Platform.pinterest:
-      // Pinterest also serves better content to mobile UAs
+        // Social media often serves better meta tags to mobile user agents
         return {
+          ..._browserHeaders,
           'User-Agent': _mobileUserAgent,
-          'Accept': 'text/html,application/xhtml+xml',
-          'Accept-Language': 'en-US,en;q=0.9',
         };
       default:
-        return {'User-Agent': _userAgent};
+        return {
+          ..._browserHeaders,
+          'User-Agent': _userAgent,
+        };
     }
   }
 
@@ -458,14 +506,24 @@ class RecipeImportEngine {
         }
       }
 
-      // 3. Standard HTML scraping pipeline
-      final headers = _headersForPlatform(platform);
-      final response = await http
-          .get(Uri.parse(normalized), headers: headers)
-          .timeout(const Duration(seconds: 20));
+      // 3. Standard HTML scraping pipeline.
+      // Try the platform's preferred headers first; if the upstream rejects us
+      // (often a WAF returning 4xx/5xx), retry with mobile UA before giving up.
+      final response = await _fetchWithFallback(normalized, platform);
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to fetch URL (${response.statusCode})');
+        // Give the user a clue what went wrong rather than a raw status code
+        final code = response.statusCode;
+        if (code == 403 || code == 401 || code == 451 || code == 455) {
+          throw Exception('The site blocked our request. Try copying the recipe text and using "Paste" instead.');
+        } else if (code == 404 || code == 410) {
+          throw Exception('Page not found — check the URL.');
+        } else if (code == 429) {
+          throw Exception('The site is rate-limiting us. Try again in a minute.');
+        } else if (code >= 500 && code < 600) {
+          throw Exception('The site is having issues right now (HTTP $code). Try again later.');
+        }
+        throw Exception('Failed to fetch URL (HTTP $code)');
       }
 
       final document = html_parser.parse(response.body);
@@ -704,6 +762,399 @@ class RecipeImportEngine {
     }
 
     return recipes;
+  }
+
+  /// Parse OCR text from a multi-recipe document (e.g. cookbook PDF).
+  ///
+  /// Detects recipe boundaries using multiple signal types:
+  ///   - Nutrition/macros lines ("Macros per serving X cal Yg protein...")
+  ///   - Section headers ("Ingredients (...)", "How to make", "Method:", "Directions:")
+  ///   - Servings/yield lines ("Serves 4", "Yield: 12 cookies", "Makes 6")
+  ///   - Time lines ("Prep time:", "Cook time:", "Total time:")
+  ///   - Title-like lines (short, no trailing punctuation, followed by recipe content)
+  ///   - Page breaks (form feed \f or repeated blank lines)
+  ///
+  /// Optional [pageImagePaths] and [pageStartLines] map each recipe to a
+  /// cover image extracted from the PDF page where the recipe starts.
+  /// [pageImageScores] (parallel to [pageImagePaths]) lets us pick the best
+  /// photo when a recipe spans multiple pages. Pages with `null` paths had
+  /// no extractable photo — we look at the next 1-2 pages in that case.
+  ///
+  /// Each candidate is scored; nearby candidates within 8 lines are clustered
+  /// into a single boundary. If only one recipe is detected, returns a single-
+  /// element list.
+  static List<ImportedRecipe> parseOcrTextMulti(
+    String text, {
+    List<String?>? pageImagePaths,
+    List<int>? pageStartLines,
+    List<double>? pageImageScores,
+  }) {
+    final cleaned = _cleanOcrText(text);
+    final lines = cleaned.split('\n');
+
+    // ── Phase 1: find all candidate boundary lines with confidence scores ──
+    final candidates = <_BoundaryCandidate>[];
+
+    for (var i = 0; i < lines.length; i++) {
+      final line = lines[i].trim();
+      if (line.isEmpty) continue;
+
+      // 1. Macros line — highest confidence (always recipe-specific)
+      if (RegExp(r'^macros?\s+per\s+serving', caseSensitive: false).hasMatch(line) ||
+          RegExp(r'^nutrition\s*(facts|info|per)', caseSensitive: false).hasMatch(line) ||
+          RegExp(r'^\d+\s*(cal|kcal)(ories)?\b', caseSensitive: false).hasMatch(line)) {
+        candidates.add(_BoundaryCandidate(line: i, score: 10, kind: 'macros'));
+        continue;
+      }
+
+      // 2. Ingredients heading with serving info — very strong
+      if (RegExp(r'^ingredients?\s*[\(:](?:.*serving|.*portion|.*\d|.*for)', caseSensitive: false).hasMatch(line) ||
+          RegExp(r'^ingredients?\s*\(', caseSensitive: false).hasMatch(line)) {
+        candidates.add(_BoundaryCandidate(line: i, score: 8, kind: 'ingredients_header'));
+        continue;
+      }
+
+      // 3. Yields / Servings / Makes — strong recipe-start signal
+      if (RegExp(r'^(serves?|yield[s]?|makes|servings?)\s*[:\s]\s*\d', caseSensitive: false).hasMatch(line) ||
+          RegExp(r'^(serves?|yield[s]?|makes)\s+\d', caseSensitive: false).hasMatch(line)) {
+        candidates.add(_BoundaryCandidate(line: i, score: 7, kind: 'yield'));
+        continue;
+      }
+
+      // 4. Prep/cook/total time near the start of a block — moderate signal
+      if (RegExp(r'^(prep|cook|total|active|cooking)\s+time\s*:', caseSensitive: false).hasMatch(line)) {
+        candidates.add(_BoundaryCandidate(line: i, score: 5, kind: 'time'));
+        continue;
+      }
+
+      // 5. "How to make" / "Instructions" / "Method" / "Directions" / "Steps"
+      // Useful but appears AFTER the title, so we'll use it as a back-reference.
+      if (RegExp(r'^\s*(how\s+to\s+make|instructions?|method|directions?|steps?|preparation)\s*[:\s]*$', caseSensitive: false).hasMatch(line)) {
+        candidates.add(_BoundaryCandidate(line: i, score: 6, kind: 'instructions_header'));
+        continue;
+      }
+
+      // 6. Form feed / page break — natural separator (often start of next recipe)
+      if (line == '\f' || lines[i].contains('\f')) {
+        candidates.add(_BoundaryCandidate(line: i, score: 4, kind: 'pagebreak'));
+        continue;
+      }
+
+      // 7. Recipe number patterns: "Recipe 12.", "12. Title", "Chapter 3"
+      if (RegExp(r'^recipe\s+\d+', caseSensitive: false).hasMatch(line)) {
+        candidates.add(_BoundaryCandidate(line: i, score: 9, kind: 'recipe_number'));
+        continue;
+      }
+    }
+
+    // If we have very few candidates, this is likely a single recipe
+    if (candidates.length < 6) {
+      return [parseOcrText(text)];
+    }
+
+    // ── Phase 2: cluster nearby candidates into single boundaries ──
+    //
+    // Within one recipe, the markers (Macros, Ingredients, How to make) can
+    // span ~40-80 lines. Use STRONG anchors only — Macros, Ingredients(...),
+    // Recipe# — to define a boundary. Weaker anchors (instructions header,
+    // time, yield) just contribute confidence to the nearest strong anchor.
+    candidates.sort((a, b) => a.line.compareTo(b.line));
+    const strongKinds = {'macros', 'ingredients_header', 'recipe_number'};
+
+    final strongAnchors = candidates.where((c) => strongKinds.contains(c.kind)).toList();
+    if (strongAnchors.length < 2) {
+      return [parseOcrText(text)];
+    }
+
+    final boundaries = <int>[];
+    for (var i = 0; i < strongAnchors.length; i++) {
+      final anchor = strongAnchors[i];
+
+      // Skip an anchor if a stronger anchor is within 15 lines (same recipe block).
+      // E.g. an "Ingredients (" right after "Macros per serving" — same recipe.
+      if (boundaries.isNotEmpty && anchor.line - boundaries.last < 15) continue;
+
+      // Verify this anchor leads to a real recipe — there should be an
+      // instructions header somewhere after it (within 100 lines) before the
+      // next strong anchor. Otherwise it's just stray text.
+      final nextAnchorLine = i + 1 < strongAnchors.length
+          ? strongAnchors[i + 1].line
+          : lines.length;
+      final hasInstructions = candidates.any((c) =>
+          c.kind == 'instructions_header' &&
+          c.line > anchor.line &&
+          c.line < nextAnchorLine);
+      if (!hasInstructions && i > 0) continue; // first segment can be lenient
+
+      boundaries.add(anchor.line);
+    }
+
+    // Need at least 2 boundaries to make multiple recipes
+    if (boundaries.length < 2) {
+      return [parseOcrText(text)];
+    }
+
+    // ── Phase 3: split text at boundaries and parse each segment ──
+    // We track the START line of each segment so we can map back to a PDF page
+    // for cover image assignment.
+    final segments = <_RecipeSegment>[];
+    for (var i = 0; i < boundaries.length; i++) {
+      final start = boundaries[i];
+      final end = i + 1 < boundaries.length ? boundaries[i + 1] : lines.length;
+      final segment = lines.sublist(start, end).join('\n');
+      if (segment.trim().length > 60) {
+        segments.add(_RecipeSegment(text: segment, startLine: start));
+      }
+    }
+
+    if (segments.length < 2) {
+      return [parseOcrText(text)];
+    }
+
+    // ── Phase 4: parse each segment, recover titles, and assign cover image ──
+    final recipes = <ImportedRecipe>[];
+    for (var i = 0; i < segments.length; i++) {
+      final seg = segments[i];
+      try {
+        final recipe = _parseStructuredText(seg.text);
+
+        // Skip segments with no real content (e.g. orphaned TOC fragments)
+        if (recipe.ingredients.isEmpty && recipe.instructions.isEmpty) continue;
+
+        // Recover title if the parser couldn't figure it out OR latched onto
+        // an obviously-wrong line like the macros/ingredients header.
+        if (_titleNeedsRecovery(recipe.title)) {
+          final recovered = _recoverTitleFromSegment(seg.text);
+          if (recovered != null) recipe.title = recovered;
+        }
+
+        // Assign cover image: find the PDF page whose line range contains
+        // the segment's start line. Cookbook recipes often span multiple pages
+        // (text page + photo page), so look across the start page and the
+        // next 2 pages — pick the one with the highest extraction score.
+        if (pageImagePaths != null && pageStartLines != null && pageImagePaths.length == pageStartLines.length) {
+          final startPageIdx = _findPageForLine(seg.startLine, pageStartLines);
+          if (startPageIdx != null) {
+            String? bestPath;
+            double bestScore = -1;
+            // Look at start page + next 2 pages, but stop if we hit the next
+            // recipe's page (otherwise we'd steal its photo)
+            final maxLookahead = (i + 1 < segments.length)
+                ? _findPageForLine(segments[i + 1].startLine, pageStartLines) ?? pageImagePaths.length
+                : pageImagePaths.length;
+            final endPageIdx = (startPageIdx + 3).clamp(0, maxLookahead);
+            for (var p = startPageIdx; p < endPageIdx && p < pageImagePaths.length; p++) {
+              final path = pageImagePaths[p];
+              if (path == null) continue;
+              final score = (pageImageScores != null && p < pageImageScores.length)
+                  ? pageImageScores[p]
+                  : 0.0;
+              if (score > bestScore) {
+                bestScore = score;
+                bestPath = path;
+              }
+            }
+            if (bestPath != null) recipe.imagePath = bestPath;
+          }
+        }
+
+        recipe.parseConfidence = _scoreParseConfidence(recipe, seg.text);
+        recipe.rawOcrText = seg.text;
+        recipes.add(recipe);
+      } catch (_) {
+        continue;
+      }
+    }
+
+    if (recipes.isEmpty) {
+      return [parseOcrText(text)];
+    }
+
+    return recipes;
+  }
+
+  /// Public version: returns true if the title looks like a parser default
+  /// or clearly a non-title line (macros header, ingredient line, etc.).
+  /// UI code can use this to decide whether to substitute a fallback title.
+  static bool isTitleSuspicious(String title) => _titleNeedsRecovery(title);
+
+  /// Returns true if the parser's auto-picked title looks wrong (empty, default,
+  /// or clearly a section header / numeric / measurement line). Used to decide
+  /// whether to run the segment-based title recovery.
+  static bool _titleNeedsRecovery(String title) {
+    final t = title.trim();
+    if (t.isEmpty || t == 'Untitled Recipe' || t == 'Imported Recipe') return true;
+
+    final lower = t.toLowerCase();
+    // Macros / nutrition / serving header lines
+    if (RegExp(r'^macros?\s+per\s+serving').hasMatch(lower)) return true;
+    if (RegExp(r'^nutrition\s+(facts|info|per)').hasMatch(lower)) return true;
+    if (RegExp(r'^\d+\s*(cal|kcal)(ories)?\b').hasMatch(lower)) return true;
+
+    // Ingredients/instructions section headers
+    if (RegExp(r'^ingredients?\s*[\(:]').hasMatch(lower)) return true;
+    if (RegExp(r'^(how\s+to\s+make|instructions?|method|directions?|steps?|preparation)\s*[:\s]*$').hasMatch(lower)) return true;
+
+    // Yields/serves/makes
+    if (RegExp(r'^(serves?|yield[s]?|makes|servings?)\s*[:\s\d]').hasMatch(lower)) return true;
+
+    // Time lines
+    if (RegExp(r'^(prep|cook|total|active|cooking)\s+time\s*:').hasMatch(lower)) return true;
+
+    // Looks like an ingredient line (starts with a measurement)
+    if (RegExp(r'^\d+\s*(g|ml|oz|lb|lbs|tbsp|tsp|cup|cups|kg|tablespoon|teaspoon|cloves?)\b', caseSensitive: false).hasMatch(t)) return true;
+
+    // Pure number (page number)
+    if (RegExp(r'^\d+\s*$').hasMatch(t)) return true;
+
+    return false;
+  }
+
+  /// Given a line index and the per-page line offsets, return the index of
+  /// the page that contains that line. Uses simple binary search.
+  static int? _findPageForLine(int lineIdx, List<int> pageStartLines) {
+    if (pageStartLines.isEmpty) return null;
+    // Find the largest pageStartLines[i] <= lineIdx
+    int lo = 0, hi = pageStartLines.length - 1;
+    int result = 0;
+    while (lo <= hi) {
+      final mid = (lo + hi) >> 1;
+      if (pageStartLines[mid] <= lineIdx) {
+        result = mid;
+        lo = mid + 1;
+      } else {
+        hi = mid - 1;
+      }
+    }
+    return result;
+  }
+
+  /// Try to recover a recipe title from a multi-recipe segment.
+  /// Uses several heuristics: line right before "How to make"/etc., short
+  /// title-cased line near the top, line between Ingredients and How-to.
+  ///
+  /// Strategy: collect ALL candidate lines that look title-shaped, then pick
+  /// the one that scores best — shorter, more title-case, fewer descriptive
+  /// markers. Single-pass-and-take-first picks descriptions too often.
+  static String? _recoverTitleFromSegment(String segment) {
+    final lines = segment.split('\n').map((l) => l.trim()).toList();
+
+    bool looksLikeTitle(String s) {
+      // Real cookbook titles are 3-50 chars (most are 15-35).
+      // Anything longer is almost certainly a description.
+      if (s.isEmpty || s.length > 50 || s.length < 3) return false;
+      // Don't blanket-reject leading digits — "5 Ingredient Cookies",
+      // "20-Minute Pasta", "3-Hour Pulled Pork" are valid titles. But reject
+      // pure numbers (page) and ingredient measurements (handled below).
+      // Reject sentence-style punctuation at end
+      if (RegExp(r'[.,:!?;]$').hasMatch(s)) return false;
+      // Reject lines with multiple commas — descriptions
+      if (','.allMatches(s).length >= 2) return false;
+      // Section headers
+      if (RegExp(r'^(ingredients?|how to make|macros|how to|method|instructions?|directions?|steps?|preparation|prep time|cook time|total time|serves?|yields?|makes|note[s]?|tip[s]?|nutrition)', caseSensitive: false).hasMatch(s)) return false;
+      // Description-opener phrases — strong signal it's not a title
+      if (RegExp(r'^(one\s+of|a\s+(popular|simple|classic|delicious|quick|healthy|new|tasty|fresh|favorite)|an\s+|the\s+(most|best|easiest|tastiest|perfect)|if\s+you|when\s+you|truly|made\s+with|packed\s+with|perfect\s+for|great\s+for)\b', caseSensitive: false).hasMatch(s)) return false;
+      // Ingredient-quantity lines
+      if (RegExp(r'^\d+\s*(g|ml|oz|tbsp|tsp|cup|cups|kg|lb|lbs|tablespoon|teaspoon|cloves?)\b', caseSensitive: false).hasMatch(s)) return false;
+      // Mostly numbers/punctuation
+      final letterCount = s.runes.where((r) => RegExp(r'[a-zA-Z]').hasMatch(String.fromCharCode(r))).length;
+      if (letterCount < s.length * 0.5) return false;
+      // URLs / pure numbers (page numbers)
+      if (s.contains('://') || s.contains('www.')) return false;
+      if (RegExp(r'^\d+\s*$').hasMatch(s)) return false;
+      return true;
+    }
+
+    /// Score a candidate title — higher is better. Used to pick the best
+    /// among multiple title-shaped lines.
+    int scoreCandidate(String s) {
+      int score = 0;
+      // Prefer 15-35 chars (most cookbook titles); penalize longer
+      final len = s.length;
+      if (len >= 15 && len <= 35) {
+        score += 30;
+      } else if (len >= 10 && len <= 45) {
+        score += 20;
+      } else {
+        score += 10;
+      }
+
+      // Shorter is generally better (within reason)
+      score += (50 - len).clamp(0, 50);
+
+      // Title-case words: count words where first letter is uppercase
+      final words = s.split(RegExp(r'\s+')).where((w) => w.length > 1).toList();
+      if (words.isEmpty) return 0;
+      final titleCaseWords = words.where((w) {
+        final first = w.codeUnitAt(0);
+        return first >= 0x41 && first <= 0x5A; // A-Z
+      }).length;
+      final titleCaseRatio = titleCaseWords / words.length;
+      // Strong title-case (most words capitalized) = much higher score
+      if (titleCaseRatio >= 0.75) score += 40;
+      else if (titleCaseRatio >= 0.5) score += 20;
+
+      // Word count: 2-5 words is ideal for a title
+      if (words.length >= 2 && words.length <= 5) {
+        score += 20;
+      } else if (words.length >= 6 && words.length <= 7) {
+        score += 5;
+      }
+
+      return score;
+    }
+
+    /// Find the best-scoring candidate in a range of lines (inclusive start, exclusive end).
+    String? bestInRange(int start, int end) {
+      String? best;
+      int bestScore = -1;
+      for (var i = start; i < end && i < lines.length; i++) {
+        if (i < 0) continue;
+        final line = lines[i];
+        if (!looksLikeTitle(line)) continue;
+        final score = scoreCandidate(line);
+        if (score > bestScore) {
+          bestScore = score;
+          best = line;
+        }
+      }
+      return best;
+    }
+
+    // Strategy A: best-scoring candidate in 8 lines BEFORE "How to make"
+    int howToIdx = -1;
+    for (var i = 0; i < lines.length; i++) {
+      if (RegExp(r'^(how\s+to\s+make|instructions?|method|directions?|steps?|preparation)\s*[:\s]*$', caseSensitive: false).hasMatch(lines[i])) {
+        howToIdx = i;
+        break;
+      }
+    }
+    if (howToIdx > 0) {
+      final result = bestInRange(howToIdx - 8, howToIdx);
+      if (result != null) return result;
+    }
+
+    // Strategy B: best candidate between Ingredients and How-to
+    int ingIdx = -1;
+    for (var i = 0; i < lines.length; i++) {
+      if (RegExp(r'^ingredients?', caseSensitive: false).hasMatch(lines[i])) {
+        ingIdx = i;
+        break;
+      }
+    }
+    if (ingIdx >= 0 && howToIdx > ingIdx) {
+      final result = bestInRange(ingIdx + 1, howToIdx);
+      if (result != null) return result;
+    }
+
+    // Strategy C: best candidate near the start of the segment (first 12 lines,
+    // skipping the macros line)
+    final macrosIdx = lines.indexWhere((l) => RegExp(r'^macros?\s+per\s+serving', caseSensitive: false).hasMatch(l));
+    final startFrom = macrosIdx >= 0 ? macrosIdx + 1 : 0;
+    final result = bestInRange(startFrom, startFrom + 12);
+    if (result != null) return result;
+
+    return null;
   }
 
   /// Parse OCR text with extra cleanup for camera/scan artifacts.
@@ -2960,11 +3411,35 @@ class RecipeImportEngine {
     int? prepTime;
     int? cookTime;
 
-    final servingsMatch = RegExp(
-        r'(?:serves?|servings?|yields?|makes?|portions?)\s*:?\s*(\d+(?:\s*-\s*\d+)?(?:\s*\w+)?)',
-        caseSensitive: false)
-        .firstMatch(line);
-    if (servingsMatch != null) servings = servingsMatch.group(1);
+    // Skip macros/nutrition lines — "Macros per serving 500 calories" was
+    // matching as "serving 500 calories" → bogus servings value.
+    final lowerLine = line.toLowerCase();
+    final isNutritionLine = RegExp(r'\b(macros?|nutrition|calor(?:ie|y)|kcal|protein|carbs?|fat|sugar|sodium)\b').hasMatch(lowerLine);
+
+    if (!isNutritionLine) {
+      // (a) Word-before-number form: "Serves 4", "Yields 6 cookies", "Makes 12"
+      // (b) Bracketed form: "Ingredients (4 servings)" — number before the word
+      final wordFirst = RegExp(
+          r'(?:^|[\s(])(?:serves?|servings?|yields?|makes?|portions?)\s*:?\s*(\d+(?:\s*-\s*\d+)?)',
+          caseSensitive: false).firstMatch(line);
+      final numberFirst = RegExp(
+          r'(?:^|[\s(])(\d+(?:\s*-\s*\d+)?)\s*(?:serves?|servings?|portions?)\b',
+          caseSensitive: false).firstMatch(line);
+      // Just the number — strip any trailing units. We only want "4" or "4-6",
+      // never "500 calories" or "4 servings of pasta".
+      final raw = wordFirst?.group(1) ?? numberFirst?.group(1);
+      if (raw != null) {
+        final numeric = RegExp(r'^\s*(\d+(?:\s*-\s*\d+)?)').firstMatch(raw)?.group(1)?.trim();
+        if (numeric != null) {
+          final n = int.tryParse(numeric);
+          // Sanity check: real servings are usually 1-50. Reject anything
+          // suspiciously large (probably a calorie count or weight that slipped through).
+          if (numeric.contains('-') || (n != null && n >= 1 && n <= 50)) {
+            servings = numeric;
+          }
+        }
+      }
+    }
 
     final prepMatch = RegExp(
         r'(?:prep(?:aration)?\s*(?:time)?)\s*:?\s*(\d+)\s*(minutes?|mins?|hours?|hrs?)',
@@ -3265,6 +3740,22 @@ class RecipeImportEngine {
 enum _Section { unknown, ingredients, instructions, notes }
 
 enum _Platform { instagram, tiktok, pinterest, youtube, squarespace, generic }
+
+/// One candidate boundary between recipes in a multi-recipe document.
+class _BoundaryCandidate {
+  final int line;
+  final int score;
+  final String kind;
+  const _BoundaryCandidate({required this.line, required this.score, required this.kind});
+}
+
+/// One recipe segment after splitting — text plus its start line in the
+/// original OCR document (used to map back to PDF pages for cover images).
+class _RecipeSegment {
+  final String text;
+  final int startLine;
+  const _RecipeSegment({required this.text, required this.startLine});
+}
 
 class _Metadata {
   final String? servings;

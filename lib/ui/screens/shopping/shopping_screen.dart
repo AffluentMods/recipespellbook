@@ -26,6 +26,7 @@ import '../../../services/auth_service.dart';
 import '../../../services/family_service.dart';
 import '../../../services/revenuecat_service.dart';
 import '../../../utils/ingredient_utils.dart';
+import '../../widgets/app_refresh_indicator.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/family_share_sheet.dart';
 // TODO: Kitchen Buddy hidden for now
@@ -132,11 +133,13 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 if (uncheckedItems.isNotEmpty)
                   Responsive.constrainWidth(context, child: _OrderOnlineButton(items: uncheckedItems)),
 
-                // Items List
+                // Items List (pull to refresh — syncs with cloud if available)
                 Expanded(
                   child: Responsive.constrainWidth(context, child: items.isEmpty
                       ? _EmptyState()
-                      : _buildGroupedList(uncheckedItems, checkedItems)),
+                      : AppRefreshIndicator(
+                          child: _buildGroupedList(uncheckedItems, checkedItems),
+                        )),
                 ),
               ],
             );
@@ -1061,12 +1064,12 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     );
   }
 
-  /// Delayed check: item stays in place for 1.5s with visual feedback
+  /// Delayed check: item stays in place for 2s with visual feedback
   /// (checkbox filled, text struck through), then moves to checked section.
   /// Tapping again during the delay cancels the check.
   void _onItemChecked(String itemId) {
     setState(() => _recentlyCheckedIds.add(itemId));
-    Future.delayed(const Duration(milliseconds: 1500), () {
+    Future.delayed(const Duration(milliseconds: 2000), () {
       if (!mounted) return;
       // If still in the "recently checked" set, persist it
       if (_recentlyCheckedIds.contains(itemId)) {

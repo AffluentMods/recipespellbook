@@ -9664,7 +9664,7 @@ abstract class AppLocalizations {
   /// No description provided for @transferCodeExpires.
   ///
   /// In en, this message translates to:
-  /// **'This code expires in 15 minutes'**
+  /// **'This code expires in 1 hour'**
   String get transferCodeExpires;
 
   /// No description provided for @transferComplete.
@@ -13054,7 +13054,7 @@ abstract class AppLocalizations {
   /// No description provided for @importGuideDeviceTransferStep2Desc.
   ///
   /// In en, this message translates to:
-  /// **'A 6-character code is generated. This code is valid for 15 minutes.'**
+  /// **'A 6-character code is generated. This code is valid for 1 hour.'**
   String get importGuideDeviceTransferStep2Desc;
 
   /// No description provided for @importGuideDeviceTransferStep3Title.
@@ -17034,6 +17034,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Untitled Recipe'**
   String get shareViewerUntitled;
+
+  /// No description provided for @subRecipeSheetCopyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy with sub-recipes?'**
+  String get subRecipeSheetCopyTitle;
+
+  /// No description provided for @subRecipeSheetMoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move with sub-recipes?'**
+  String get subRecipeSheetMoveTitle;
+
+  /// No description provided for @subRecipeSheetDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete recipe and sub-recipes?'**
+  String get subRecipeSheetDeleteTitle;
+
+  /// No description provided for @subRecipeSheetPublishTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish with sub-recipes?'**
+  String get subRecipeSheetPublishTitle;
+
+  /// No description provided for @subRecipeSheetDownloadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download with sub-recipes?'**
+  String get subRecipeSheetDownloadTitle;
+
+  /// No description provided for @subRecipeSheetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This recipe links 1 sub-recipe} other{This recipe links {count} sub-recipes}} — uncheck any you don\'t want to include.'**
+  String subRecipeSheetSubtitle(int count);
+
+  /// No description provided for @subRecipeUsedInOthers.
+  ///
+  /// In en, this message translates to:
+  /// **'Used in {count, plural, =1{1 other recipe} other{{count} other recipes}}'**
+  String subRecipeUsedInOthers(int count);
+
+  /// No description provided for @subRecipeUsedNowhere.
+  ///
+  /// In en, this message translates to:
+  /// **'Not used in any other recipes'**
+  String get subRecipeUsedNowhere;
+
+  /// No description provided for @autoLinkedSubRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{auto-linked 1 sub-recipe} other{auto-linked {count} sub-recipes}}'**
+  String autoLinkedSubRecipes(int count);
+
+  /// No description provided for @importNearDuplicateExisting.
+  ///
+  /// In en, this message translates to:
+  /// **'Similar exists'**
+  String get importNearDuplicateExisting;
+
+  /// No description provided for @importNearDuplicateInternal.
+  ///
+  /// In en, this message translates to:
+  /// **'Similar in batch'**
+  String get importNearDuplicateInternal;
+
+  /// No description provided for @backupReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync isn\'t on'**
+  String get backupReminderTitle;
+
+  /// No description provided for @backupReminderDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Last backup was 1 day ago} other{Last backup was {count} days ago}}'**
+  String backupReminderDaysAgo(int count);
+
+  /// No description provided for @backupReminderNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to keep your recipes synced — or back up manually.'**
+  String get backupReminderNever;
+
+  /// No description provided for @backupReminderAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get backupReminderAction;
+
+  /// No description provided for @backupReminderSnooze.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me later'**
+  String get backupReminderSnooze;
+
+  /// No description provided for @communityDownloadIncludeSubRecipesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Include linked sub-recipes?'**
+  String get communityDownloadIncludeSubRecipesTitle;
+
+  /// No description provided for @communityDownloadIncludeSubRecipesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The recipes you selected reference 1 sub-recipe. Include it so the link doesn\'t break?} other{The recipes you selected reference {count} sub-recipes. Include them so the links don\'t break?}}'**
+  String communityDownloadIncludeSubRecipesBody(int count);
+
+  /// No description provided for @communityDownloadIncludeSubRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Include sub-recipes'**
+  String get communityDownloadIncludeSubRecipes;
+
+  /// No description provided for @communityDownloadSkipSubRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip them'**
+  String get communityDownloadSkipSubRecipes;
+
+  /// No description provided for @actionMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get actionMove;
+
+  /// No description provided for @communityDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get communityDownload;
 
   /// No description provided for @exportFullZip.
   ///

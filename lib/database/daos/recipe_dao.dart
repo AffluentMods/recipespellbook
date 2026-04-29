@@ -653,4 +653,34 @@ class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
         .get();
     return links.map((l) => l.ingredientId).toSet();
   }
+
+  /// Count how many *other* recipes link to the given recipeId.
+  /// Excludes the recipes in [excludeIds] (e.g. the recipe being deleted itself
+  /// and its other sub-recipes that are also being deleted in the same batch).
+  Future<int> countRecipesLinkingTo(String linkedRecipeId, {Set<String> excludeIds = const {}}) async {
+    final links = await (select(recipeLinks)
+      ..where((l) => l.linkedRecipeId.equals(linkedRecipeId)))
+        .get();
+    final sources = links.map((l) => l.sourceRecipeId).toSet();
+    sources.removeAll(excludeIds);
+    // Filter out soft-deleted source recipes
+    if (sources.isEmpty) return 0;
+    final stillAlive = await (select(recipes)
+      ..where((r) => r.id.isIn(sources) & r.deletedAt.isNull()))
+        .get();
+    return stillAlive.length;
+  }
+
+  /// Get the IDs of all recipes that link to [linkedRecipeId] (excluding deleted ones).
+  Future<List<String>> getRecipesLinkingTo(String linkedRecipeId) async {
+    final links = await (select(recipeLinks)
+      ..where((l) => l.linkedRecipeId.equals(linkedRecipeId)))
+        .get();
+    final sources = links.map((l) => l.sourceRecipeId).toSet();
+    if (sources.isEmpty) return [];
+    final stillAlive = await (select(recipes)
+      ..where((r) => r.id.isIn(sources) & r.deletedAt.isNull()))
+        .get();
+    return stillAlive.map((r) => r.id).toList();
+  }
 }

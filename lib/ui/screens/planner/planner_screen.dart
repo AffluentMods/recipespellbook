@@ -104,18 +104,26 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
             ),
 
             if (!isDesktop) ...[
-              // Week strip - Mon to Sun (mobile only)
-              Responsive.constrainWidth(context, child: _WeekStrip(
-                weekStart: _weekStart,
-                selectedDate: selectedDate,
-                mealCounts: mealCountsAsync.when(
-                  data: (counts) => counts,
-                  loading: () => {},
-                  error: (_, __) => {},
-                ),
-                onDateSelected: (date) {
-                  ref.read(selectedPlannerDateProvider.notifier).state = date;
+              // Week strip — wrapped in horizontal swipe to navigate weeks
+              Responsive.constrainWidth(context, child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onHorizontalDragEnd: (details) {
+                  final velocity = details.primaryVelocity ?? 0;
+                  if (velocity < -300) _goToNextWeek();      // swipe left → next
+                  else if (velocity > 300) _goToPreviousWeek(); // swipe right → prev
                 },
+                child: _WeekStrip(
+                  weekStart: _weekStart,
+                  selectedDate: selectedDate,
+                  mealCounts: mealCountsAsync.when(
+                    data: (counts) => counts,
+                    loading: () => {},
+                    error: (_, __) => {},
+                  ),
+                  onDateSelected: (date) {
+                    ref.read(selectedPlannerDateProvider.notifier).state = date;
+                  },
+                ),
               )),
 
               // Selected date header

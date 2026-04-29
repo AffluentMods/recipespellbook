@@ -504,6 +504,8 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
                                 width: 80,
                                 height: 80,
                                 fit: BoxFit.cover,
+                                cacheWidth: 160, // 2x for retina
+                                cacheHeight: 160,
                                 errorBuilder: (_, __, ___) => _avatarFallback(theme, user),
                               ),
                             )

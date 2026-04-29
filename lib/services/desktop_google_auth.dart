@@ -5,8 +5,21 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+
+/// Result of the desktop Google OAuth flow.
+/// Contains the auth code + PKCE verifier for server-side token exchange.
+class DesktopGoogleAuthResult {
+  final String code;
+  final String codeVerifier;
+  final String redirectUri;
+
+  const DesktopGoogleAuthResult({
+    required this.code,
+    required this.codeVerifier,
+    required this.redirectUri,
+  });
+}
 
 /// Desktop Google OAuth sign-in using Authorization Code + PKCE flow.
 ///
@@ -20,10 +33,11 @@ class DesktopGoogleAuth {
 
   /// Perform the full Google OAuth flow on desktop.
   ///
-  /// Returns the Google `id_token` (JWT) on success, or null if cancelled/failed.
-  static Future<String?> signIn({
+  /// Returns the auth code, code verifier, and redirect URI for
+  /// server-side token exchange (secret stays on server).
+  /// Returns null if cancelled/failed.
+  static Future<DesktopGoogleAuthResult?> signIn({
     required String clientId,
-    String? clientSecret,
   }) async {
     // ── 1. Generate PKCE code verifier + challenge ──
     final codeVerifier = _generateCodeVerifier();
@@ -96,40 +110,14 @@ class DesktopGoogleAuth {
       await server.close();
     }
 
-    // ── 6. Exchange auth code for tokens ──
-    try {
-      final tokenResponse = await http.post(
-        Uri.parse('https://oauth2.googleapis.com/token'),
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: {
-          'client_id': clientId,
-          if (clientSecret != null) 'client_secret': clientSecret,
-          'code': authCode,
-          'code_verifier': codeVerifier,
-          'grant_type': 'authorization_code',
-          'redirect_uri': redirectUri,
-        },
-      ).timeout(const Duration(seconds: 15));
-
-      if (tokenResponse.statusCode != 200) {
-        debugPrint('[DesktopGoogleAuth] Token exchange failed: ${tokenResponse.statusCode}');
-        return null;
-      }
-
-      final data = jsonDecode(tokenResponse.body);
-      final idToken = data['id_token'] as String?;
-
-      if (idToken == null) {
-        debugPrint('[DesktopGoogleAuth] No id_token in response');
-        return null;
-      }
-
-      debugPrint('[DesktopGoogleAuth] Got id_token successfully');
-      return idToken;
-    } catch (e) {
-      debugPrint('[DesktopGoogleAuth] Token exchange error: $e');
-      return null;
-    }
+    // ── 6. Return auth code + PKCE verifier for server-side exchange ──
+    // The server holds the client secret and exchanges with Google.
+    debugPrint('[DesktopGoogleAuth] Got auth code, returning for server exchange');
+    return DesktopGoogleAuthResult(
+      code: authCode,
+      codeVerifier: codeVerifier,
+      redirectUri: redirectUri,
+    );
   }
 
   // ── Helpers ──

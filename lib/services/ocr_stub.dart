@@ -2,6 +2,8 @@
 // These satisfy the compiler but should never be called on web
 // (all OCR code paths are guarded with supportsOcr checks).
 
+import 'dart:ui' show Rect;
+
 class InputImage {
   InputImage._();
   static InputImage fromFilePath(String path) => InputImage._();
@@ -15,10 +17,12 @@ class RecognizedText {
 class TextBlock {
   final String text = '';
   final List<TextLine> lines = const [];
+  final Rect boundingBox = Rect.zero;
 }
 
 class TextLine {
   final String text = '';
+  final Rect boundingBox = Rect.zero;
 }
 
 class TextRecognizer {

@@ -16,6 +16,7 @@ import '../../widgets/app_snackbar.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/community_tag_picker.dart';
 import '../../widgets/recipe_image.dart';
+import '../../widgets/sub_recipe_selection_sheet.dart';
 
 // ════════════════════════════════════════════
 //  PUBLISH SCREEN — Select cookbook → Configure → Publish
@@ -413,15 +414,58 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
     final title = _titleController.text.trim();
     if (title.isEmpty) return;
 
-    setState(() { _isPublishing = true; _publishCancelled = false; _step = 3; });
-
     publishProgressNotifier.value = const PublishProgress(status: 'preparing');
 
+    final recipeDao = ref.read(recipeDaoProvider);
+    final tagsDao = TagsDao(ref.read(databaseProvider));
+    var recipes = await recipeDao.getRecipesForCookbook(_selectedCookbook!.id);
+
+    // ── Cross-cookbook sub-recipe detection ──
+    // Find any sub-recipes that live in OTHER cookbooks. Without including
+    // them, those links will break in the published version.
+    final cookbookRecipeIds = recipes.map((r) => r.id).toSet();
+    final externalSubRecipeIds = <String>{};
+    for (final r in recipes) {
+      final linked = await recipeDao.getLinkedRecipes(r.id);
+      for (final sub in linked) {
+        if (!cookbookRecipeIds.contains(sub.id)) {
+          externalSubRecipeIds.add(sub.id);
+        }
+      }
+    }
+
+    // If there are cross-cookbook sub-recipes, ask the user which to include
+    if (externalSubRecipeIds.isNotEmpty && mounted) {
+      final selection = await showSubRecipeSelectionSheetMulti(
+        context: context,
+        ref: ref,
+        // Use the cookbook's recipes as the "parents" — the sheet will surface
+        // their cross-cookbook sub-recipes as the unchecked-by-default extras.
+        parentRecipeIds: recipes.map((r) => r.id).toList(),
+        action: SubRecipeAction.publish,
+      );
+      if (selection == null || !selection.confirmed) {
+        // User cancelled — abort publish
+        return;
+      }
+
+      // Add any external sub-recipes the user kept selected to the publish list.
+      // Recipes already in the cookbook are always included regardless.
+      final extrasToInclude = <Recipe>[];
+      for (final extId in externalSubRecipeIds) {
+        if (selection.selectedIds.contains(extId)) {
+          final extRecipe = await recipeDao.getRecipeById(extId);
+          if (extRecipe != null) extrasToInclude.add(extRecipe);
+        }
+      }
+      if (extrasToInclude.isNotEmpty) {
+        recipes = [...recipes, ...extrasToInclude];
+      }
+    }
+
+    setState(() { _isPublishing = true; _publishCancelled = false; _step = 3; });
+
     try {
-      // Gather recipe data
-      final recipeDao = ref.read(recipeDaoProvider);
-      final tagsDao = TagsDao(ref.read(databaseProvider));
-      final recipes = await recipeDao.getRecipesForCookbook(_selectedCookbook!.id);
 
       final recipeMaps = <Map<String, dynamic>>[];
       final localImagePaths = <String>[]; // Track all local paths for upload

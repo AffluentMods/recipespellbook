@@ -125,9 +125,53 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         return;
       }
 
-      // Filter to selected recipes if partial download
-      final recipesToDownload = selectedIndices != null
-          ? (selectedIndices.toList()..sort())
+      // Filter to selected recipes if partial download.
+      // Auto-include any sub-recipes referenced by the user's selection so links don't break.
+      var effectiveSelection = selectedIndices;
+      if (selectedIndices != null) {
+        final expanded = Set<int>.from(selectedIndices);
+        bool added = true;
+        while (added) {
+          added = false;
+          for (final idx in expanded.toList()) {
+            if (idx < 0 || idx >= result.recipes.length) continue;
+            for (final link in result.recipes[idx].recipeLinks) {
+              final subIdx = link.linkedRecipeIndex;
+              if (subIdx >= 0 && subIdx < result.recipes.length && !expanded.contains(subIdx)) {
+                expanded.add(subIdx);
+                added = true;
+              }
+            }
+          }
+        }
+        final extraCount = expanded.length - selectedIndices.length;
+        if (extraCount > 0 && mounted) {
+          // Quick confirmation — sub-recipes auto-included so links don't break
+          final include = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              icon: const Icon(Icons.account_tree_outlined, size: 32),
+              title: Text(l10n.communityDownloadIncludeSubRecipesTitle),
+              content: Text(l10n.communityDownloadIncludeSubRecipesBody(extraCount)),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: Text(l10n.communityDownloadSkipSubRecipes),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: Text(l10n.communityDownloadIncludeSubRecipes),
+                ),
+              ],
+            ),
+          );
+          if (include == true) {
+            effectiveSelection = expanded;
+          }
+        }
+      }
+      final recipesToDownload = effectiveSelection != null
+          ? (effectiveSelection.toList()..sort())
           : List.generate(result.recipes.length, (i) => i);
 
       final db = ref.read(databaseProvider);
@@ -404,32 +448,40 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
       builder: (ctx) {
         final theme = Theme.of(ctx);
         return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 12),
-              Container(width: 40, height: 4, decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              )),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(l10n.communityChooseCookbook, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-              ),
-              if (cookbooks.isEmpty)
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.7),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 12),
+                Container(width: 40, height: 4, decoration: BoxDecoration(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                )),
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Text(l10n.communityNoCookbooksYetSaveNew,
-                      style: TextStyle(color: theme.colorScheme.outline)),
-                )
-              else
-                ...cookbooks.map((c) => ListTile(
-                  leading: const Icon(Icons.book),
-                  title: Text(c.name),
-                  onTap: () { Navigator.pop(ctx); _showImageChoice(selectedIndices: selectedIndices, targetCookbookId: c.id); },
-                )),
-              const SizedBox(height: 16),
-            ],
+                  child: Text(l10n.communityChooseCookbook, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                ),
+                if (cookbooks.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(l10n.communityNoCookbooksYetSaveNew,
+                        style: TextStyle(color: theme.colorScheme.outline)),
+                  )
+                else
+                  Flexible(
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: cookbooks.map((c) => ListTile(
+                        leading: const Icon(Icons.book),
+                        title: Text(c.name),
+                        onTap: () { Navigator.pop(ctx); _showImageChoice(selectedIndices: selectedIndices, targetCookbookId: c.id); },
+                      )).toList(),
+                    ),
+                  ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         );
       },

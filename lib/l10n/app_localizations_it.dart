@@ -9249,6 +9249,112 @@ class AppLocalizationsIt extends AppLocalizations {
   String get shareViewerUntitled => 'Ricetta senza titolo';
 
   @override
+  String get subRecipeSheetCopyTitle => 'Copy with sub-recipes?';
+
+  @override
+  String get subRecipeSheetMoveTitle => 'Move with sub-recipes?';
+
+  @override
+  String get subRecipeSheetDeleteTitle => 'Delete recipe and sub-recipes?';
+
+  @override
+  String get subRecipeSheetPublishTitle => 'Publish with sub-recipes?';
+
+  @override
+  String get subRecipeSheetDownloadTitle => 'Download with sub-recipes?';
+
+  @override
+  String subRecipeSheetSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'This recipe links $count sub-recipes',
+      one: 'This recipe links 1 sub-recipe',
+    );
+    return '$_temp0 — uncheck any you don\'t want to include.';
+  }
+
+  @override
+  String subRecipeUsedInOthers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count other recipes',
+      one: '1 other recipe',
+    );
+    return 'Used in $_temp0';
+  }
+
+  @override
+  String get subRecipeUsedNowhere => 'Not used in any other recipes';
+
+  @override
+  String autoLinkedSubRecipes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'auto-linked $count sub-recipes',
+      one: 'auto-linked 1 sub-recipe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importNearDuplicateExisting => 'Similar exists';
+
+  @override
+  String get importNearDuplicateInternal => 'Similar in batch';
+
+  @override
+  String get backupReminderTitle => 'Cloud sync isn\'t on';
+
+  @override
+  String backupReminderDaysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Last backup was $count days ago',
+      one: 'Last backup was 1 day ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupReminderNever => 'Sign in to keep your recipes synced — or back up manually.';
+
+  @override
+  String get backupReminderAction => 'Sign in';
+
+  @override
+  String get backupReminderSnooze => 'Remind me later';
+
+  @override
+  String get communityDownloadIncludeSubRecipesTitle => 'Include linked sub-recipes?';
+
+  @override
+  String communityDownloadIncludeSubRecipesBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The recipes you selected reference $count sub-recipes. Include them so the links don\'t break?',
+      one: 'The recipes you selected reference 1 sub-recipe. Include it so the link doesn\'t break?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityDownloadIncludeSubRecipes => 'Include sub-recipes';
+
+  @override
+  String get communityDownloadSkipSubRecipes => 'Skip them';
+
+  @override
+  String get actionMove => 'Move';
+
+  @override
+  String get communityDownload => 'Download';
+
+  @override
   String get exportFullZip => 'Backup completo (ZIP)';
 
   @override

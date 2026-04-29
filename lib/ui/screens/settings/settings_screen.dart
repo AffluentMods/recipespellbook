@@ -810,7 +810,7 @@ class _AccountCard extends ConsumerWidget {
                 width: 48, height: 48,
                 decoration: BoxDecoration(shape: BoxShape.circle, color: theme.colorScheme.primary.withValues(alpha: 0.15)),
                 child: isIn && user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty
-                    ? ClipOval(child: Image.network(user.avatarUrl!, width: 48, height: 48, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _avatar(theme, user.displayName)))
+                    ? ClipOval(child: Image.network(user.avatarUrl!, width: 48, height: 48, fit: BoxFit.cover, cacheWidth: 96, cacheHeight: 96, errorBuilder: (_, __, ___) => _avatar(theme, user.displayName)))
                     : _avatar(theme, user?.displayName),
               ),
               const SizedBox(width: 14),

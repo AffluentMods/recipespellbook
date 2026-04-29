@@ -57,7 +57,7 @@ class TransferClaimResult {
 /// Flow (Send):
 ///   1. Collect ALL local data from Drift DB (full snapshot, not delta)
 ///   2. Upload to server via POST /v1/transfer/create
-///   3. Server returns a 6-char code valid for 15 minutes
+///   3. Server returns a 6-char code valid for 1 hour
 ///
 /// Flow (Receive):
 ///   1. Send code to GET /v1/transfer/:code
