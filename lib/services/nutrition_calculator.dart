@@ -405,6 +405,8 @@ class NutritionCalculator {
           ingredientName: ingredient.name,
         );
 
+        // _parseAmountToGrams now always returns a value (uses default when
+        // amount is missing/unparseable), so the per-100g fallback path is gone.
         if (grams != null && grams > 0) {
           final scale = grams / 100.0;
           final nutrition = NutritionData(
@@ -416,34 +418,17 @@ class NutritionCalculator {
             sugar: per100g.sugar * scale,
             sodium: per100g.sodium * scale,
           );
-          debugPrint('Local match for "${ingredient.name}" → "$matchedKey": ${grams.toStringAsFixed(0)}g → ${(nutrition.calories ?? 0).toStringAsFixed(0)} cal');
+          // Flag as uncertain when there was no amount in the source recipe
+          final isMissingAmount = ingredient.amount == null || ingredient.amount!.trim().isEmpty;
+          debugPrint('Local match for "${ingredient.name}" → "$matchedKey": ${grams.toStringAsFixed(0)}g → ${(nutrition.calories ?? 0).toStringAsFixed(0)} cal${isMissingAmount ? ' (default amount)' : ''}');
           return IngredientNutritionResult(
             ingredient: ingredient,
             isMatched: true,
             nutrition: nutrition,
             gramsUsed: grams,
-            matchStatus: MatchStatus.matched,
+            matchStatus: isMissingAmount ? MatchStatus.uncertain : MatchStatus.matched,
             matchDescription: matchedKey,
-          );
-        } else {
-          // Name matched but couldn't parse amount — return per-100g as fallback
-          debugPrint('Local match for "${ingredient.name}" → "$matchedKey" (amount unparseable, using per-100g)');
-          final nutrition = NutritionData(
-            calories: per100g.calories,
-            protein: per100g.protein,
-            fat: per100g.fat,
-            carbohydrates: per100g.carbs,
-            fiber: per100g.fiber,
-            sugar: per100g.sugar,
-            sodium: per100g.sodium,
-          );
-          return IngredientNutritionResult(
-            ingredient: ingredient,
-            isMatched: true,
-            nutrition: nutrition,
-            matchStatus: MatchStatus.uncertain,
-            matchDescription: matchedKey,
-            errorMessage: 'Could not parse amount, showing per 100g',
+            errorMessage: isMissingAmount ? 'No amount given — using a typical serving' : null,
           );
         }
       }
@@ -661,15 +646,21 @@ class NutritionCalculator {
     required String? unit,
     required String ingredientName,
   }) {
+    // No amount → use a sensible default rather than per-100g, which produces
+    // huge calorie counts (e.g. 884 cal for "vegetable oil" with no amount =
+    // 100g of pure oil). Pick a default based on what kind of ingredient
+    // it is — oils/sauces get 1 tbsp, spices/seeds get 1 tsp, fallback 1 tbsp.
     if (amount == null || amount.isEmpty) {
-      // No amount specified - can't calculate
-      return null;
+      final defaultGrams = _defaultGramsForIngredient(ingredientName);
+      return defaultGrams;
     }
 
     // Parse the numeric amount (handles fractions like "1/2", "1 1/2")
     final numericAmount = _parseAmount(amount);
     if (numericAmount == null || numericAmount <= 0) {
-      return null;
+      // Bad amount but ingredient name matched — assume a default rather
+      // than blowing up to 100g.
+      return _defaultGramsForIngredient(ingredientName);
     }
 
     final normalizedUnit = (unit ?? '').toLowerCase().trim();
@@ -692,6 +683,59 @@ class NutritionCalculator {
     }
 
     return null;
+  }
+
+  /// When no amount is specified, return a sensible default in grams so the
+  /// calculation doesn't blow up to per-100g (e.g. 884 cal for "vegetable oil"
+  /// with no amount). Defaults by category:
+  ///   - Oils, sauces, condiments, syrups, juices  → 1 tbsp (~14g)
+  ///   - Dry seasonings, herbs, spices, seeds      → 1 tsp (~3g)
+  ///   - Pastes (gochujang, miso, tomato paste)    → 1 tbsp (~16g)
+  ///   - Anything else                              → 1 tbsp (~15g) generic
+  double _defaultGramsForIngredient(String ingredientName) {
+    final n = ingredientName.toLowerCase().trim();
+
+    // Oils & fats (1 tbsp)
+    if (n.contains('oil') || n.contains('ghee') || n.contains('butter') || n.contains('lard') || n.contains('shortening')) return 14.0;
+
+    // Sauces, condiments, syrups, juices (1 tbsp ≈ 16g)
+    const sauceKeywords = [
+      'sauce', 'syrup', 'juice', 'vinegar', 'paste', 'ketchup', 'mayo',
+      'mustard', 'honey', 'molasses', 'wine', 'mirin', 'sake', 'extract',
+      'gochujang', 'doenjang', 'ssamjang', 'doubanjiang', 'shaoxing',
+      'tamari', 'ponzu', 'dashi', 'tahini', 'hummus', 'harissa', 'salsa',
+      'pesto', 'crema', 'jam', 'jelly', 'preserves', 'marmalade', 'glaze',
+    ];
+    for (final k in sauceKeywords) {
+      if (n.contains(k)) return 16.0;
+    }
+
+    // Dry spices, seasonings, seeds, dried herbs (1 tsp ≈ 3g)
+    const spiceKeywords = [
+      'salt', 'pepper', 'powder', 'flakes', 'gochugaru', 'paprika',
+      'cumin', 'oregano', 'basil', 'thyme', 'rosemary', 'cinnamon',
+      'nutmeg', 'turmeric', 'chili', 'curry', 'garam', 'masala', 'cayenne',
+      'seeds', 'sesame', 'poppy', 'sumac', 'za\'atar', 'zaatar', 'dukkah',
+      'shichimi', 'togarashi', 'furikake', 'berbere', 'jerk', 'shawarma',
+      'sage', 'tarragon', 'dill', 'chive', 'coriander', 'cardamom',
+      'fenugreek', 'methi', 'amchur', 'asafoetida', 'hing',
+      'biryani', 'chaat', 'five spice', 'sichuan', 'szechuan',
+    ];
+    for (final k in spiceKeywords) {
+      if (n.contains(k)) return 3.0;
+    }
+
+    // Pastes (slightly heavier per spoon — 1 tbsp ≈ 16g)
+    if (n.contains('curry paste') || n.contains('tomato paste')) return 16.0;
+
+    // Sweeteners (1 tbsp granulated)
+    if (n.contains('sugar') || n.contains('jaggery')) return 12.0;
+
+    // Fresh herbs in tiny "garnish" amounts (1 tbsp chopped ≈ 3g)
+    if (n.contains('parsley') || n.contains('cilantro') || n.contains('mint') || n.contains('curry leaf') || n.contains('curry leaves')) return 3.0;
+
+    // Generic fallback — small amount rather than 100g
+    return 15.0;
   }
 
   /// Parse a numeric amount, handling fractions and Unicode fraction characters.

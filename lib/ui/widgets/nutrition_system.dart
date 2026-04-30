@@ -361,6 +361,10 @@ class NutritionDatabase {
     'teriyaki sauce': NutritionData(calories: 89, protein: 5.9, carbs: 16, fat: 0, sugar: 14, sodium: 3833),
     'sriracha': NutritionData(calories: 93, protein: 1.8, carbs: 19, fat: 1, sugar: 15, sodium: 2000),
     'gochujang': NutritionData(calories: 228, protein: 5.3, carbs: 45, fat: 1.6, sodium: 2175),
+    'gochugaru': NutritionData(calories: 282, protein: 12, carbs: 56, fat: 17, fiber: 27, sodium: 30),
+    'korean chili flakes': NutritionData(calories: 282, protein: 12, carbs: 56, fat: 17, fiber: 27, sodium: 30),
+    'korean red pepper flakes': NutritionData(calories: 282, protein: 12, carbs: 56, fat: 17, fiber: 27, sodium: 30),
+    'mirin': NutritionData(calories: 227, protein: 0.2, carbs: 43, fat: 0, sugar: 26, sodium: 4),
     'miso': NutritionData(calories: 199, protein: 12, carbs: 26, fat: 6, fiber: 5.4, sodium: 3728),
     'rice vinegar': NutritionData(calories: 18, protein: 0, carbs: 0.04, fat: 0),
 
@@ -503,6 +507,196 @@ class NutritionDatabase {
     'white wine': NutritionData(calories: 82, protein: 0.1, carbs: 2.6, fat: 0),
     'red wine': NutritionData(calories: 85, protein: 0.1, carbs: 2.6, fat: 0),
     'cooking wine': NutritionData(calories: 50, protein: 0.1, carbs: 6, fat: 0, sodium: 620),
+
+    // ── Ethnic ingredients audit (added April 2026) ──
+    // Sourced from USDA / manufacturer averages where USDA doesn't have entries
+    // for less-common items. All values per 100g unless noted.
+
+    // Korean
+    'doenjang': NutritionData(calories: 198, protein: 13, carbs: 24, fat: 6, fiber: 5, sodium: 4000),
+    'ssamjang': NutritionData(calories: 215, protein: 9, carbs: 32, fat: 4, sodium: 3500),
+    'kimchi': NutritionData(calories: 15, protein: 1.1, carbs: 2.4, fat: 0.5, fiber: 1.6, sodium: 747),
+    'glass noodle': NutritionData(calories: 351, protein: 0.2, carbs: 86, fat: 0.1),
+    'dangmyeon': NutritionData(calories: 351, protein: 0.2, carbs: 86, fat: 0.1),
+
+    // Japanese
+    'sake': NutritionData(calories: 134, protein: 0.5, carbs: 5, fat: 0),
+    'dashi': NutritionData(calories: 7, protein: 0.7, carbs: 0.4, fat: 0.1, sodium: 360),
+    'tamari': NutritionData(calories: 60, protein: 10, carbs: 5.6, fat: 0.1, sodium: 5586),
+    'ponzu': NutritionData(calories: 53, protein: 4, carbs: 9, fat: 0.3, sodium: 4000),
+    'nori': NutritionData(calories: 35, protein: 5.8, carbs: 5.1, fat: 0.3, fiber: 0.3, sodium: 48),
+    'wasabi': NutritionData(calories: 109, protein: 4.8, carbs: 24, fat: 0.6, fiber: 7.8),
+    'shichimi': NutritionData(calories: 327, protein: 13, carbs: 56, fat: 12, fiber: 25),
+    'togarashi': NutritionData(calories: 327, protein: 13, carbs: 56, fat: 12, fiber: 25),
+    'furikake': NutritionData(calories: 380, protein: 15, carbs: 30, fat: 22, sodium: 4500),
+    'bonito flakes': NutritionData(calories: 340, protein: 77, carbs: 0, fat: 4.6, sodium: 480),
+    'katsuobushi': NutritionData(calories: 340, protein: 77, carbs: 0, fat: 4.6, sodium: 480),
+    'sushi rice': NutritionData(calories: 130, protein: 2.4, carbs: 28, fat: 0.2),
+
+    // Chinese
+    'shaoxing wine': NutritionData(calories: 145, protein: 0.5, carbs: 5, fat: 0, sodium: 100),
+    'shaoxing': NutritionData(calories: 145, protein: 0.5, carbs: 5, fat: 0, sodium: 100),
+    'chinese rice wine': NutritionData(calories: 145, protein: 0.5, carbs: 5, fat: 0, sodium: 100),
+    'black vinegar': NutritionData(calories: 80, protein: 1, carbs: 17, fat: 0, sodium: 30),
+    'chinkiang vinegar': NutritionData(calories: 80, protein: 1, carbs: 17, fat: 0, sodium: 30),
+    'doubanjiang': NutritionData(calories: 199, protein: 8, carbs: 26, fat: 7, fiber: 8, sodium: 6000),
+    'chili bean paste': NutritionData(calories: 199, protein: 8, carbs: 26, fat: 7, fiber: 8, sodium: 6000),
+    'sichuan peppercorn': NutritionData(calories: 318, protein: 11, carbs: 65, fat: 8.5, fiber: 26),
+    'szechuan peppercorn': NutritionData(calories: 318, protein: 11, carbs: 65, fat: 8.5, fiber: 26),
+    'xo sauce': NutritionData(calories: 350, protein: 18, carbs: 12, fat: 27, sodium: 4200),
+    'lap cheong': NutritionData(calories: 524, protein: 17, carbs: 8, fat: 47, sodium: 1500),
+    'chinese sausage': NutritionData(calories: 524, protein: 17, carbs: 8, fat: 47, sodium: 1500),
+    'dried shiitake': NutritionData(calories: 296, protein: 9.6, carbs: 75, fat: 1, fiber: 12),
+
+    // Thai / Southeast Asian
+    'palm sugar': NutritionData(calories: 384, protein: 0, carbs: 100, fat: 0, sugar: 87),
+    'galangal': NutritionData(calories: 71, protein: 1, carbs: 15, fat: 0.9, fiber: 2),
+    'lemongrass': NutritionData(calories: 99, protein: 1.8, carbs: 25, fat: 0.5, fiber: 0.4),
+    'thai basil': NutritionData(calories: 23, protein: 3.2, carbs: 2.7, fat: 0.6, fiber: 1.6),
+    'kaffir lime': NutritionData(calories: 30, protein: 0.7, carbs: 11, fat: 0.2, fiber: 2.8),
+    'kaffir lime leaves': NutritionData(calories: 60, protein: 4, carbs: 11, fat: 1.5, fiber: 9),
+    'pandan': NutritionData(calories: 30, protein: 1.5, carbs: 6, fat: 0.5, fiber: 3),
+    'tamarind': NutritionData(calories: 239, protein: 2.8, carbs: 63, fat: 0.6, fiber: 5.1, sugar: 39),
+    'tamarind paste': NutritionData(calories: 239, protein: 2.8, carbs: 63, fat: 0.6, fiber: 5.1, sugar: 39),
+    'shrimp paste': NutritionData(calories: 175, protein: 21, carbs: 12, fat: 4, sodium: 5500),
+    'thai chili': NutritionData(calories: 40, protein: 1.9, carbs: 8.8, fat: 0.4, fiber: 1.5),
+    'birds eye chili': NutritionData(calories: 40, protein: 1.9, carbs: 8.8, fat: 0.4, fiber: 1.5),
+    "bird's eye chili": NutritionData(calories: 40, protein: 1.9, carbs: 8.8, fat: 0.4, fiber: 1.5),
+    'rice paper': NutritionData(calories: 333, protein: 0.5, carbs: 81, fat: 0.5),
+    'red curry paste': NutritionData(calories: 100, protein: 3, carbs: 18, fat: 2.5, sodium: 2300),
+    'green curry paste': NutritionData(calories: 90, protein: 3, carbs: 16, fat: 2, sodium: 2200),
+    'yellow curry paste': NutritionData(calories: 110, protein: 3, carbs: 18, fat: 3, sodium: 2400),
+    'massaman curry paste': NutritionData(calories: 110, protein: 3, carbs: 18, fat: 3, sodium: 2400),
+    'pho noodle': NutritionData(calories: 109, protein: 0.9, carbs: 25, fat: 0.2),
+    'rice stick': NutritionData(calories: 109, protein: 0.9, carbs: 25, fat: 0.2),
+
+    // Indian
+    'paneer': NutritionData(calories: 321, protein: 25, carbs: 3.6, fat: 25),
+    'asafoetida': NutritionData(calories: 297, protein: 4, carbs: 68, fat: 1.1, fiber: 4.4),
+    'hing': NutritionData(calories: 297, protein: 4, carbs: 68, fat: 1.1, fiber: 4.4),
+    'curry leaf': NutritionData(calories: 108, protein: 6.1, carbs: 19, fat: 1, fiber: 6.4),
+    'curry leaves': NutritionData(calories: 108, protein: 6.1, carbs: 19, fat: 1, fiber: 6.4),
+    'fenugreek': NutritionData(calories: 323, protein: 23, carbs: 58, fat: 6.4, fiber: 25),
+    'kasoori methi': NutritionData(calories: 49, protein: 4.4, carbs: 6, fat: 0.9, fiber: 1.1),
+    'mustard seed': NutritionData(calories: 508, protein: 26, carbs: 28, fat: 36, fiber: 12),
+    'cardamom': NutritionData(calories: 311, protein: 11, carbs: 68, fat: 6.7, fiber: 28),
+    'chickpea flour': NutritionData(calories: 387, protein: 22, carbs: 58, fat: 6.7, fiber: 11),
+    'besan': NutritionData(calories: 387, protein: 22, carbs: 58, fat: 6.7, fiber: 11),
+    'gram flour': NutritionData(calories: 387, protein: 22, carbs: 58, fat: 6.7, fiber: 11),
+    'rice flour': NutritionData(calories: 366, protein: 6, carbs: 80, fat: 1.4, fiber: 2.4),
+    'basmati rice': NutritionData(calories: 130, protein: 3.5, carbs: 28, fat: 0.4),
+    'jasmine rice': NutritionData(calories: 130, protein: 2.7, carbs: 28, fat: 0.3, fiber: 0.4),
+    'masoor dal': NutritionData(calories: 116, protein: 9, carbs: 20, fat: 0.4, fiber: 7.9),
+    'red lentil': NutritionData(calories: 116, protein: 9, carbs: 20, fat: 0.4, fiber: 7.9),
+    'chana dal': NutritionData(calories: 364, protein: 22, carbs: 60, fat: 6.7, fiber: 11),
+    'moong dal': NutritionData(calories: 347, protein: 24, carbs: 63, fat: 1.2, fiber: 16),
+    'urad dal': NutritionData(calories: 341, protein: 25, carbs: 59, fat: 1.6, fiber: 18),
+    'jaggery': NutritionData(calories: 383, protein: 0.4, carbs: 98, fat: 0.1, sugar: 95),
+    'chaat masala': NutritionData(calories: 357, protein: 13, carbs: 51, fat: 12, fiber: 21),
+    'amchur': NutritionData(calories: 312, protein: 1.7, carbs: 78, fat: 1, fiber: 14),
+    'biryani masala': NutritionData(calories: 350, protein: 12, carbs: 50, fat: 12, fiber: 25),
+
+    // Middle Eastern / Mediterranean
+    'harissa': NutritionData(calories: 70, protein: 2, carbs: 10, fat: 3, fiber: 4, sodium: 1200),
+    'za\'atar': NutritionData(calories: 280, protein: 9, carbs: 50, fat: 7, fiber: 18),
+    'zaatar': NutritionData(calories: 280, protein: 9, carbs: 50, fat: 7, fiber: 18),
+    'sumac': NutritionData(calories: 297, protein: 4.4, carbs: 71, fat: 4.6, fiber: 30),
+    'pomegranate molasses': NutritionData(calories: 290, protein: 1, carbs: 72, fat: 0, sugar: 65),
+    'labneh': NutritionData(calories: 159, protein: 8, carbs: 5.5, fat: 12),
+    'halloumi': NutritionData(calories: 321, protein: 22, carbs: 2.2, fat: 25, sodium: 1000),
+    'dukkah': NutritionData(calories: 470, protein: 17, carbs: 23, fat: 38, fiber: 11),
+    'freekeh': NutritionData(calories: 365, protein: 13, carbs: 76, fat: 2.7, fiber: 16),
+    'bulgur': NutritionData(calories: 342, protein: 12, carbs: 76, fat: 1.3, fiber: 18),
+    'preserved lemon': NutritionData(calories: 25, protein: 0.5, carbs: 6, fat: 0.2, sodium: 5000),
+    'shawarma seasoning': NutritionData(calories: 300, protein: 12, carbs: 45, fat: 10, fiber: 15),
+    'pearl couscous': NutritionData(calories: 358, protein: 12, carbs: 73, fat: 1.8, fiber: 5),
+    'israeli couscous': NutritionData(calories: 358, protein: 12, carbs: 73, fat: 1.8, fiber: 5),
+
+    // Mexican / Latin
+    'masa harina': NutritionData(calories: 365, protein: 9.3, carbs: 76, fat: 3.8, fiber: 7),
+    'crema': NutritionData(calories: 198, protein: 2.4, carbs: 4.6, fat: 20),
+    'crema mexicana': NutritionData(calories: 198, protein: 2.4, carbs: 4.6, fat: 20),
+    'tomatillo': NutritionData(calories: 32, protein: 1, carbs: 5.8, fat: 1, fiber: 1.9),
+    'epazote': NutritionData(calories: 32, protein: 0.3, carbs: 7.4, fat: 0.5, fiber: 3.8),
+    'achiote': NutritionData(calories: 27, protein: 1.5, carbs: 5, fat: 0.4, fiber: 2.8),
+    'annatto': NutritionData(calories: 27, protein: 1.5, carbs: 5, fat: 0.4, fiber: 2.8),
+    'queso oaxaca': NutritionData(calories: 308, protein: 22, carbs: 3, fat: 24),
+    'mexican chorizo': NutritionData(calories: 455, protein: 24, carbs: 1.9, fat: 38, sodium: 1235),
+    'spanish chorizo': NutritionData(calories: 455, protein: 24, carbs: 1.9, fat: 38, sodium: 1235),
+    'chorizo': NutritionData(calories: 455, protein: 24, carbs: 1.9, fat: 38, sodium: 1235),
+    'plantain': NutritionData(calories: 122, protein: 1.3, carbs: 32, fat: 0.4, fiber: 2.3, sugar: 15),
+    'yuca': NutritionData(calories: 160, protein: 1.4, carbs: 38, fat: 0.3, fiber: 1.8),
+    'cassava': NutritionData(calories: 160, protein: 1.4, carbs: 38, fat: 0.3, fiber: 1.8),
+    'guajillo': NutritionData(calories: 281, protein: 12, carbs: 52, fat: 8.2, fiber: 28),
+    'pasilla': NutritionData(calories: 281, protein: 12, carbs: 52, fat: 8.2, fiber: 28),
+    'arbol chili': NutritionData(calories: 318, protein: 12, carbs: 57, fat: 17, fiber: 27),
+    'chipotle in adobo': NutritionData(calories: 60, protein: 2, carbs: 12, fat: 1, sodium: 700),
+    'adobo sauce': NutritionData(calories: 100, protein: 2, carbs: 16, fat: 3.5, sodium: 800),
+
+    // Caribbean
+    'jerk seasoning': NutritionData(calories: 300, protein: 12, carbs: 45, fat: 10, fiber: 15, sodium: 2500),
+    'scotch bonnet': NutritionData(calories: 40, protein: 1.9, carbs: 8.8, fat: 0.4, fiber: 1.5),
+    'callaloo': NutritionData(calories: 23, protein: 2.9, carbs: 3.6, fat: 0.4, fiber: 2.2),
+
+    // African
+    'berbere': NutritionData(calories: 282, protein: 12, carbs: 56, fat: 13, fiber: 30),
+    'teff': NutritionData(calories: 367, protein: 13, carbs: 73, fat: 2.4, fiber: 8),
+    'fonio': NutritionData(calories: 360, protein: 8.7, carbs: 75, fat: 1, fiber: 4),
+
+    // French / European
+    'crème fraîche': NutritionData(calories: 332, protein: 2.3, carbs: 2.9, fat: 35),
+    'creme fraiche': NutritionData(calories: 332, protein: 2.3, carbs: 2.9, fat: 35),
+    'cornichon': NutritionData(calories: 11, protein: 0.6, carbs: 2.3, fat: 0.2, sodium: 1208),
+    'cornichons': NutritionData(calories: 11, protein: 0.6, carbs: 2.3, fat: 0.2, sodium: 1208),
+    'herbes de provence': NutritionData(calories: 250, protein: 9, carbs: 50, fat: 5, fiber: 35),
+    'fines herbes': NutritionData(calories: 250, protein: 9, carbs: 50, fat: 5, fiber: 35),
+    'comte': NutritionData(calories: 410, protein: 28, carbs: 0, fat: 34),
+    'emmental': NutritionData(calories: 380, protein: 27, carbs: 1.4, fat: 30),
+    'camembert': NutritionData(calories: 300, protein: 20, carbs: 0.5, fat: 24),
+
+    // German / Eastern European
+    'sauerkraut': NutritionData(calories: 19, protein: 0.9, carbs: 4.3, fat: 0.1, fiber: 2.9, sodium: 661),
+    'horseradish': NutritionData(calories: 48, protein: 1.2, carbs: 11, fat: 0.7, fiber: 3.3),
+    'spaetzle': NutritionData(calories: 158, protein: 5, carbs: 32, fat: 1, fiber: 1.5),
+    'kasha': NutritionData(calories: 343, protein: 13, carbs: 71, fat: 3.4, fiber: 10),
+    'buckwheat': NutritionData(calories: 343, protein: 13, carbs: 71, fat: 3.4, fiber: 10),
+    'kielbasa': NutritionData(calories: 309, protein: 13, carbs: 3.4, fat: 27, sodium: 1110),
+    'bratwurst': NutritionData(calories: 333, protein: 12, carbs: 3, fat: 30, sodium: 800),
+
+    // British/Irish
+    'marmite': NutritionData(calories: 250, protein: 39, carbs: 24, fat: 0.1, sodium: 11000),
+    'hp sauce': NutritionData(calories: 110, protein: 1, carbs: 25, fat: 0.1, sodium: 1100),
+
+    // Asian vegetables
+    'daikon': NutritionData(calories: 18, protein: 0.6, carbs: 4.1, fat: 0.1, fiber: 1.6),
+    'napa cabbage': NutritionData(calories: 16, protein: 1.2, carbs: 3.2, fat: 0.2, fiber: 1.2),
+    'gai lan': NutritionData(calories: 22, protein: 1.1, carbs: 4.7, fat: 0.4, fiber: 1.6),
+    'chinese broccoli': NutritionData(calories: 22, protein: 1.1, carbs: 4.7, fat: 0.4, fiber: 1.6),
+    'yu choy': NutritionData(calories: 18, protein: 1.7, carbs: 3, fat: 0.3, fiber: 1.6),
+    'snow pea': NutritionData(calories: 42, protein: 2.8, carbs: 7.6, fat: 0.2, fiber: 2.6),
+    'lotus root': NutritionData(calories: 74, protein: 2.6, carbs: 17, fat: 0.1, fiber: 4.9),
+
+    // Latin American vegetables
+    'chayote': NutritionData(calories: 19, protein: 0.8, carbs: 4.5, fat: 0.1, fiber: 1.7),
+    'jicama': NutritionData(calories: 38, protein: 0.7, carbs: 8.8, fat: 0.1, fiber: 4.9),
+    'okra': NutritionData(calories: 33, protein: 1.9, carbs: 7.5, fat: 0.2, fiber: 3.2),
+    'taro': NutritionData(calories: 112, protein: 1.5, carbs: 26, fat: 0.2, fiber: 4.1),
+    'malanga': NutritionData(calories: 93, protein: 1.5, carbs: 22, fat: 0.4, fiber: 1.5),
+
+    // Eastern Mediterranean / Greek
+    'phyllo': NutritionData(calories: 299, protein: 6.5, carbs: 53, fat: 6, fiber: 1.6),
+    'filo': NutritionData(calories: 299, protein: 6.5, carbs: 53, fat: 6, fiber: 1.6),
+    'orzo': NutritionData(calories: 358, protein: 12, carbs: 73, fat: 1.4, fiber: 3.4),
+    'tzatziki': NutritionData(calories: 89, protein: 4.3, carbs: 4, fat: 6.5),
+
+    // Misc proteins
+    'duck breast': NutritionData(calories: 201, protein: 24, carbs: 0, fat: 11),
+    'duck fat': NutritionData(calories: 882, protein: 0, carbs: 0, fat: 100),
+    'venison': NutritionData(calories: 158, protein: 30, carbs: 0, fat: 3.2),
+    'rabbit': NutritionData(calories: 173, protein: 33, carbs: 0, fat: 3.5),
+    'octopus': NutritionData(calories: 82, protein: 15, carbs: 2.2, fat: 1),
+    'squid': NutritionData(calories: 92, protein: 16, carbs: 3.1, fat: 1.4),
+    'calamari': NutritionData(calories: 92, protein: 16, carbs: 3.1, fat: 1.4),
   };
 
   /// Estimate nutrition for an ingredient
