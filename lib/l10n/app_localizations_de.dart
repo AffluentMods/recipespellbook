@@ -9383,4 +9383,16 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get exportJsonCustom => 'Benutzerdefinierter JSON-Export';
+
+  @override
+  String get editAsText => 'Edit as text';
+
+  @override
+  String get editAsList => 'Edit as list';
+
+  @override
+  String get stepsBulkEditHint => 'Separate each step with a blank line';
+
+  @override
+  String get stepsBulkEditImagesWarning => 'Some step photos may be lost if you change the number of steps.';
 }

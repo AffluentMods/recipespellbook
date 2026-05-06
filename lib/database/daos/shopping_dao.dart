@@ -134,6 +134,49 @@ class ShoppingDao extends DatabaseAccessor<AppDatabase> with _$ShoppingDaoMixin 
     int combinedCount = 0;
     final now = DateTime.now().millisecondsSinceEpoch;
 
+    // ── Pre-aggregate within this recipe ──────────────────────────────
+    // A single recipe can list the same ingredient multiple times — e.g.
+    // "1 cup heavy cream" for the sauce + "2 cups heavy cream" for whipping.
+    // Without this pass, the per-source stacking below would overwrite
+    // each previous entry (since they share recipeId), losing all but the
+    // last occurrence. Sum same-named ingredients into one entry per name
+    // BEFORE matching against the existing list.
+    final aggregated = <String, Map<String, String?>>{};
+    for (final ing in ingredients) {
+      final ingredientName = ing['name'] ?? '';
+      if (ingredientName.isEmpty) continue;
+      final normalized = normalizeIngredientName(ingredientName);
+
+      if (!aggregated.containsKey(normalized)) {
+        aggregated[normalized] = Map<String, String?>.from(ing);
+        continue;
+      }
+
+      // Same ingredient appears again — try to combine amounts
+      final existing = aggregated[normalized]!;
+      final existingAmt = parseAmount(existing['amount'] ?? '');
+      final newAmt = parseAmount(ing['amount'] ?? '');
+      if (existingAmt == null || newAmt == null) {
+        // One of them isn't parseable — keep whichever has an amount
+        if (existingAmt == null && newAmt != null) {
+          aggregated[normalized] = Map<String, String?>.from(ing);
+        }
+        continue;
+      }
+
+      final (sumAmt, sumUnit) = combineAmounts(
+        existingAmt,
+        existing['unit']?.isNotEmpty == true ? existing['unit'] : null,
+        newAmt,
+        ing['unit']?.isNotEmpty == true ? ing['unit'] : null,
+      );
+      final (fmtAmt, fmtUnit) = sumUnit != null && sumUnit.isNotEmpty
+          ? formatScaledWithUnit(sumAmt, sumUnit)
+          : (formatAmount(sumAmt), sumUnit ?? '');
+      existing['amount'] = fmtAmt;
+      existing['unit'] = fmtUnit;
+    }
+
     // Get all unchecked items in the list for matching
     final existingItems = await (select(shoppingListItems)
       ..where((t) => t.listId.equals(listId) & t.isChecked.equals(false)))
@@ -147,7 +190,7 @@ class ShoppingDao extends DatabaseAccessor<AppDatabase> with _$ShoppingDaoMixin 
       existingByName[normalized] = item;
     }
 
-    for (final ing in ingredients) {
+    for (final ing in aggregated.values) {
       final ingredientName = ing['name'] ?? '';
       if (ingredientName.isEmpty) continue;
 

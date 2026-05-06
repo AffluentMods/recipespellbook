@@ -220,6 +220,10 @@ class RecipeEditScreen extends ConsumerStatefulWidget {
 class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
+  // Anchors used to scroll just-added rows into view, so we don't
+  // overshoot past the rest of the form (e.g. all the way to the
+  // Instructions / Notes sections).
+  final _addIngredientButtonKey = GlobalKey();
 
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -526,7 +530,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
             const SizedBox(height: 12),
             _buildIngredientList(),
             if (!_ingredientSortMode)
-              _AddIngredientButton(onTap: _addIngredient, onAddHeader: _addHeader),
+              _AddIngredientButton(key: _addIngredientButtonKey, onTap: _addIngredient, onAddHeader: _addHeader),
             const SizedBox(height: 32),
             InstructionsEditor(
               steps: _steps,
@@ -647,7 +651,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
               const SizedBox(height: 12),
               _buildIngredientList(),
               if (!_ingredientSortMode)
-                _AddIngredientButton(onTap: _addIngredient, onAddHeader: _addHeader),
+                _AddIngredientButton(key: _addIngredientButtonKey, onTap: _addIngredient, onAddHeader: _addHeader),
               const SizedBox(height: 100),
             ],
           ),
@@ -675,8 +679,19 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
 
   void _addIngredient() {
     setState(() => _ingredients.add(_SimpleIngredient(id: DateTime.now().millisecondsSinceEpoch.toString(), text: '')));
+    // Scroll the "Add ingredient" button into view rather than the whole
+    // page bottom — that way the freshly-added (and now-last) ingredient
+    // sits just above it, not somewhere behind the Instructions section.
     Future.delayed(const Duration(milliseconds: 100), () {
-      _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+      final ctx = _addIngredientButtonKey.currentContext;
+      if (ctx != null) {
+        Scrollable.ensureVisible(
+          ctx,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+          alignment: 1.0, // anchor the button at the viewport bottom
+        );
+      }
     });
   }
 
@@ -2245,7 +2260,7 @@ class _IngredientRow extends StatelessWidget {
 class _AddIngredientButton extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback? onAddHeader;
-  const _AddIngredientButton({required this.onTap, this.onAddHeader});
+  const _AddIngredientButton({super.key, required this.onTap, this.onAddHeader});
   @override Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;

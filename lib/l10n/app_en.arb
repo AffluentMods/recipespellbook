@@ -5002,5 +5002,10 @@
 
   "exportAdvanced": "Advanced options",
   "exportCurrentCookbookSubtitle": "JSON file of current cookbook only",
-  "exportJsonCustom": "Custom JSON export"
+  "exportJsonCustom": "Custom JSON export",
+
+  "editAsText": "Edit as text",
+  "editAsList": "Edit as list",
+  "stepsBulkEditHint": "Separate each step with a blank line",
+  "stepsBulkEditImagesWarning": "Some step photos may be lost if you change the number of steps."
 }

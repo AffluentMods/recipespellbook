@@ -17202,6 +17202,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Custom JSON export'**
   String get exportJsonCustom;
+
+  /// No description provided for @editAsText.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit as text'**
+  String get editAsText;
+
+  /// No description provided for @editAsList.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit as list'**
+  String get editAsList;
+
+  /// No description provided for @stepsBulkEditHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Separate each step with a blank line'**
+  String get stepsBulkEditHint;
+
+  /// No description provided for @stepsBulkEditImagesWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Some step photos may be lost if you change the number of steps.'**
+  String get stepsBulkEditImagesWarning;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

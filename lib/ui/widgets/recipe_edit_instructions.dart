@@ -50,6 +50,18 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
   final Set<String> _selectedStepIds = {};
   bool _isSelectionMode = false;
 
+  // ── Bulk text-edit mode ───────────────────────────────────────────
+  // When toggled on, the structured per-step list is replaced with a
+  // single multi-line text field where steps are separated by blank
+  // lines. Images are preserved by index — snapshotted at entry so
+  // they survive intermediate parse results while the user is mid-edit.
+  bool _bulkEditMode = false;
+  TextEditingController? _bulkController;
+  final FocusNode _bulkFocusNode = FocusNode();
+  // Snapshot of (id, imagePath) by index, taken when entering bulk mode.
+  // Used so transient parse states during typing don't churn images.
+  List<({String id, String? imagePath})> _bulkEditSnapshot = const [];
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +76,10 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
       // Clear selection if steps changed externally
       _selectedStepIds.clear();
       _isSelectionMode = false;
+      // If we're in bulk edit, refresh the text content too
+      if (_bulkEditMode && _bulkController != null) {
+        _bulkController!.text = _serializeStepsToBulkText(_steps);
+      }
     }
   }
 
@@ -72,7 +88,93 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
     for (final node in _focusNodes.values) {
       node.dispose();
     }
+    _bulkController?.dispose();
+    _bulkFocusNode.dispose();
     super.dispose();
+  }
+
+  // Convert the step list to a single editable string. Steps are
+  // separated by a blank line (\n\n). Empty trailing steps are dropped.
+  String _serializeStepsToBulkText(List<EditableStep> steps) {
+    return steps
+        .map((s) => s.instruction.trim())
+        .where((s) => s.isNotEmpty)
+        .join('\n\n');
+  }
+
+  // Parse bulk text back into steps using the snapshot of (id, image)
+  // taken at entry time. Splits on blank lines. Preserves IDs and image
+  // paths by index — items dropped past snapshot length get fresh IDs
+  // and no image.
+  List<EditableStep> _parseBulkTextFromSnapshot(String text) {
+    final blocks = text
+        .split(RegExp(r'\n\s*\n'))
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    return [
+      for (var i = 0; i < blocks.length; i++)
+        EditableStep(
+          id: i < _bulkEditSnapshot.length
+              ? _bulkEditSnapshot[i].id
+              : 'step_${now}_$i',
+          instruction: blocks[i],
+          imagePath: i < _bulkEditSnapshot.length
+              ? _bulkEditSnapshot[i].imagePath
+              : null,
+        ),
+    ];
+  }
+
+  void _onBulkTextChanged() {
+    // Re-parse and push to parent on every keystroke. This way the
+    // recipe still saves correctly even if the user navigates away
+    // without explicitly toggling back to list mode.
+    final parsed = _parseBulkTextFromSnapshot(_bulkController?.text ?? '');
+    _steps
+      ..clear()
+      ..addAll(parsed);
+    widget.onStepsChanged(_steps);
+    // Rebuild so the live step count in the header updates.
+    if (mounted) setState(() {});
+  }
+
+  void _enterBulkEditMode() {
+    _bulkEditSnapshot = _steps
+        .map((s) => (id: s.id, imagePath: s.imagePath))
+        .toList(growable: false);
+    final text = _serializeStepsToBulkText(_steps);
+    setState(() {
+      _bulkController?.removeListener(_onBulkTextChanged);
+      _bulkController?.dispose();
+      _bulkController = TextEditingController(text: text)
+        ..addListener(_onBulkTextChanged);
+      _bulkEditMode = true;
+      // Clear any active multi-select state on the list view
+      _selectedStepIds.clear();
+      _isSelectionMode = false;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _bulkFocusNode.requestFocus();
+    });
+  }
+
+  void _exitBulkEditMode() {
+    // _steps was already kept in sync by _onBulkTextChanged. Just flip
+    // the mode flag, prune stale focus nodes, and push one final
+    // notification to the parent.
+    setState(() {
+      _bulkEditMode = false;
+      _bulkController?.removeListener(_onBulkTextChanged);
+      final liveIds = _steps.map((s) => s.id).toSet();
+      final stale = _focusNodes.keys.where((id) => !liveIds.contains(id)).toList();
+      for (final id in stale) {
+        _focusNodes.remove(id)?.dispose();
+      }
+    });
+    widget.onStepsChanged(_steps);
   }
 
   FocusNode _getFocusNode(String id) {
@@ -204,12 +306,19 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header with selection controls
+        // Header with selection / bulk-edit controls
         _buildHeader(theme, l10n),
         const SizedBox(height: 12),
 
+        // ── Bulk text-edit mode ──────────────────────────────────
+        if (_bulkEditMode)
+          _BulkStepsEditor(
+            controller: _bulkController!,
+            focusNode: _bulkFocusNode,
+            hint: l10n.stepsBulkEditHint,
+          )
         // Steps list
-        if (_steps.isEmpty)
+        else if (_steps.isEmpty)
           _EmptyStepsState(onAdd: _addStep)
         else
           ReorderableListView.builder(
@@ -261,8 +370,8 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
 
         const SizedBox(height: 12),
 
-        // Add step button (hidden during selection mode)
-        if (!_isSelectionMode)
+        // Add step button (hidden during selection mode and bulk edit)
+        if (!_isSelectionMode && !_bulkEditMode)
           Center(
             child: OutlinedButton.icon(
               onPressed: _addStep,
@@ -317,18 +426,88 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
       );
     }
 
+    // Count steps live in bulk mode by parsing the current text. This
+    // gives the user feedback as they type / split / merge.
+    final int bulkCount = _bulkEditMode
+        ? (_bulkController?.text ?? '')
+            .split(RegExp(r'\n\s*\n'))
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty)
+            .length
+        : _steps.length;
+
     return Row(
       children: [
         Text(
           l10n.instructionsTitle,
           style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
+        const SizedBox(width: 6),
+        // Toggle: structured cards ↔ single text field
+        TextButton.icon(
+          onPressed: _bulkEditMode ? _exitBulkEditMode : _enterBulkEditMode,
+          icon: Icon(
+            _bulkEditMode ? Icons.format_list_numbered : Icons.notes,
+            size: 18,
+          ),
+          label: Text(_bulkEditMode ? l10n.editAsList : l10n.editAsText),
+          style: TextButton.styleFrom(
+            visualDensity: VisualDensity.compact,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          ),
+        ),
         const Spacer(),
         Text(
-          l10n.stepCount(_steps.length),
+          l10n.stepCount(bulkCount),
           style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
         ),
       ],
+    );
+  }
+}
+
+// ============ BULK STEPS EDITOR ============
+
+/// Single multi-line text field for editing all steps at once.
+/// Steps are separated by blank lines.
+class _BulkStepsEditor extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final String hint;
+
+  const _BulkStepsEditor({
+    required this.controller,
+    required this.focusNode,
+    required this.hint,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+      ),
+      child: TextField(
+        controller: controller,
+        focusNode: focusNode,
+        maxLines: null,
+        minLines: 8,
+        textCapitalization: TextCapitalization.sentences,
+        decoration: InputDecoration(
+          hintText: hint,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.all(16),
+          hintStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.outline.withValues(alpha: 0.5),
+          ),
+        ),
+        style: theme.textTheme.bodyMedium?.copyWith(height: 1.6),
+      ),
     );
   }
 }

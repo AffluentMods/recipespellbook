@@ -959,7 +959,9 @@ class NutritionCalculator {
       if (lowerIngredient.contains('bread') || lowerIngredient.contains('toast')) return count * 30.0;
       if (lowerIngredient.contains('cheese')) return count * 21.0; // deli cheese slice
       if (lowerIngredient.contains('ham') || lowerIngredient.contains('turkey') ||
-          lowerIngredient.contains('salami') || lowerIngredient.contains('deli')) return count * 28.0;
+          lowerIngredient.contains('salami') || lowerIngredient.contains('deli')) {
+        return count * 28.0;
+      }
       if (lowerIngredient.contains('tomato')) return count * 27.0;
       if (lowerIngredient.contains('onion')) return count * 14.0;
       if (lowerIngredient.contains('lemon') || lowerIngredient.contains('lime')) return count * 8.0;
