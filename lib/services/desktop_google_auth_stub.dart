@@ -1,5 +1,6 @@
 /// Stub for web builds where dart:io is unavailable.
 /// Desktop Google OAuth is not used on web — Google Sign-In web plugin handles it.
+library;
 
 class DesktopGoogleAuthResult {
   final String code;

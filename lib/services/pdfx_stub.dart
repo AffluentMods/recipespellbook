@@ -1,4 +1,5 @@
 /// Stub types for pdfx on web where the package isn't available.
+library;
 
 import 'dart:typed_data';
 

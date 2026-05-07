@@ -216,7 +216,9 @@ class KitchenBuddyNotifier extends Notifier<KitchenBuddyState> {
       state.wallet.spiceCoins,
       state.completedAchievements,
       state.ownedItems,
-    )) return false;
+    )) {
+      return false;
+    }
 
     final newOwned = Set<String>.from(state.ownedItems)..add(itemId);
 

@@ -5670,14 +5670,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get communityNoCookbooksToPublish => '没有可发布的食谱书';
 
   @override
-  String get communityPublishInfo => '食谱书至少需要10个食谱才能发布。你的食谱将作为快照分享——更新不会同步。';
+  String get communityPublishInfo => '食谱书至少需要5个食谱才能发布。你的食谱将作为快照分享——更新不会同步。';
 
   @override
   String get communitySelectCookbook => '选择要发布的食谱书';
 
   @override
   String communityNeedMinRecipes(int count) {
-    return '至少需要10个食谱才能发布（当前有$count个）';
+    return '至少需要5个食谱才能发布（当前有$count个）';
   }
 
   @override
@@ -5698,7 +5698,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String communityRecipeCountNeedMore(int count) {
-    return '$count个食谱（需要10个以上）';
+    return '$count个食谱（需要5个以上）';
   }
 
   @override
@@ -9331,4 +9331,25 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get stepsBulkEditImagesWarning => 'Some step photos may be lost if you change the number of steps.';
+
+  @override
+  String get publishToCommunity => 'Publish to community';
+
+  @override
+  String get publishSingleRecipeTitle => 'Publish recipe';
+
+  @override
+  String get publishSingleRecipeBody => 'Share this recipe to the community feed. Updates won\'t sync — re-publish to push changes.';
+
+  @override
+  String get publishSingleRecipeAction => 'Publish';
+
+  @override
+  String get publishSingleRecipeSuccess => 'Published!';
+
+  @override
+  String get creatorsYouFollow => 'Creators you follow';
+
+  @override
+  String get noCreatorsYouFollow => 'Follow creators to see their latest publications here.';
 }

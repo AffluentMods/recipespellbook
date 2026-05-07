@@ -109,8 +109,9 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 behavior: HitTestBehavior.opaque,
                 onHorizontalDragEnd: (details) {
                   final velocity = details.primaryVelocity ?? 0;
-                  if (velocity < -300) _goToNextWeek();      // swipe left → next
-                  else if (velocity > 300) _goToPreviousWeek(); // swipe right → prev
+                  if (velocity < -300) {
+                    _goToNextWeek();      // swipe left → next
+                  } else if (velocity > 300) _goToPreviousWeek(); // swipe right → prev
                 },
                 child: _WeekStrip(
                   weekStart: _weekStart,

@@ -49,7 +49,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
   _SortMode _sort = _SortMode.aToZ;
   String _searchQuery = '';
   bool _isSearching = false;
-  Set<String> _selectedTagIds = {};
+  final Set<String> _selectedTagIds = {};
   String? _selectedRecipeId; // Desktop master-detail
 
   final TextEditingController _searchController = TextEditingController();
@@ -1638,7 +1638,7 @@ class _EmptyState extends StatelessWidget {
             Text(
               isSearching
                   ? AppLocalizations.of(context)!.searchNoResults
-                  : '${AppLocalizations.of(context)!.recipesEmpty}',
+                  : AppLocalizations.of(context)!.recipesEmpty,
               style: theme.textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),

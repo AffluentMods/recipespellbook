@@ -1,5 +1,6 @@
 /// Predefined community tags — mirrors backend data.
 /// Used for offline display before API responds.
+library;
 
 class CommunityTagData {
   final String id;

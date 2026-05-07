@@ -4,6 +4,7 @@
 /// Usage:
 ///   final assetPath = defaultRecipeImageAsset(recipe.id);
 ///   if (assetPath != null) Image.asset(assetPath, fit: BoxFit.cover)
+library;
 
 const _defaultRecipeImages = <String, String>{
   'default_korean_beef_bowls': 'assets/images/default_recipes/korean_beef_bowls.png',

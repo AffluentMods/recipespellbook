@@ -18,7 +18,7 @@ class RecipeLinkInfo {
 
 @DriftAccessor(tables: [Recipes, Ingredients, Steps, RecipeLinks, RecipeTags])
 class RecipeDao extends DatabaseAccessor<AppDatabase> with _$RecipeDaoMixin {
-  RecipeDao(AppDatabase db) : super(db);
+  RecipeDao(super.db);
 
   // ============ RECIPE QUERIES ============
 

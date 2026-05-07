@@ -7,7 +7,7 @@ part 'cookbook_dao.g.dart';
 
 @DriftAccessor(tables: [Cookbooks, Recipes])
 class CookbookDao extends DatabaseAccessor<AppDatabase> with _$CookbookDaoMixin {
-  CookbookDao(AppDatabase db) : super(db);
+  CookbookDao(super.db);
 
   /// Watch all cookbooks
   Stream<List<Cookbook>> watchAllCookbooks() {

@@ -5670,14 +5670,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get communityNoCookbooksToPublish => '公開するレシピ本がありません';
 
   @override
-  String get communityPublishInfo => 'レシピ本には公開に10件以上のレシピが必要です。レシピはスナップショットとして共有され、更新は同期されません。';
+  String get communityPublishInfo => 'レシピ本には公開に5件以上のレシピが必要です。レシピはスナップショットとして共有され、更新は同期されません。';
 
   @override
   String get communitySelectCookbook => '公開するレシピ本を選択';
 
   @override
   String communityNeedMinRecipes(int count) {
-    return '公開には10件以上のレシピが必要です（現在$count件）';
+    return '公開には5件以上のレシピが必要です（現在$count件）';
   }
 
   @override
@@ -5698,7 +5698,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String communityRecipeCountNeedMore(int count) {
-    return '$count件のレシピ（10件以上必要）';
+    return '$count件のレシピ（5件以上必要）';
   }
 
   @override
@@ -9331,4 +9331,25 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get stepsBulkEditImagesWarning => 'Some step photos may be lost if you change the number of steps.';
+
+  @override
+  String get publishToCommunity => 'Publish to community';
+
+  @override
+  String get publishSingleRecipeTitle => 'Publish recipe';
+
+  @override
+  String get publishSingleRecipeBody => 'Share this recipe to the community feed. Updates won\'t sync — re-publish to push changes.';
+
+  @override
+  String get publishSingleRecipeAction => 'Publish';
+
+  @override
+  String get publishSingleRecipeSuccess => 'Published!';
+
+  @override
+  String get creatorsYouFollow => 'Creators you follow';
+
+  @override
+  String get noCreatorsYouFollow => 'Follow creators to see their latest publications here.';
 }

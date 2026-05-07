@@ -934,7 +934,7 @@ class _ResultCard extends StatelessWidget {
                                 if (servStr != null) ...[
                                   Icon(Icons.people_outline, size: 12, color: theme.colorScheme.outline),
                                   const SizedBox(width: 3),
-                                  Text('$servStr', style: theme.textTheme.bodySmall?.copyWith(
+                                  Text(servStr, style: theme.textTheme.bodySmall?.copyWith(
                                     color: theme.colorScheme.outline, fontSize: 12,
                                   )),
                                 ],

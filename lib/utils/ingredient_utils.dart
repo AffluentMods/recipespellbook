@@ -1,6 +1,6 @@
 /// Utilities for parsing and combining ingredients intelligently
 /// ENHANCED VERSION with improved category detection
-library ingredient_utils;
+library;
 
 /// Represents a parsed ingredient with amount, unit, and name
 class ParsedIngredient {

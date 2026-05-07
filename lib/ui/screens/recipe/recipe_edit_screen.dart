@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import '../../../utils/native_file_image.dart';
-import 'dart:ui' as ui;
+import 'package:image/image.dart' as img;
 import 'package:recipespellbook/l10n/app_localizations.dart';
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart' hide Step;
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../router/router.dart' show rootNavigatorKey;
@@ -16,7 +17,6 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import '../../../database/database.dart';
-import '../../../database/daos/recipe_dao.dart' show RecipeLinkInfo;
 import '../../../providers/database_provider.dart';
 import '../../../utils/default_recipe_images.dart';
 import '../../../providers/settings_provider.dart';
@@ -57,7 +57,7 @@ class _ImageCropDialog extends StatefulWidget {
 }
 
 class _ImageCropDialogState extends State<_ImageCropDialog> {
-  final _boundaryKey = GlobalKey();
+  final _viewportKey = GlobalKey();
   final _transformController = TransformationController();
   bool _isSaving = false;
   bool _hasZoomed = false;
@@ -78,32 +78,95 @@ class _ImageCropDialogState extends State<_ImageCropDialog> {
     super.dispose();
   }
 
-  /// Capture the visible cropped region and save to a temp file.
+  /// Crop the *source* image at full resolution to match what the user
+  /// sees inside the InteractiveViewer's clipped viewport.
+  ///
+  /// Approach:
+  ///  1. Read the InteractiveViewer's transform (uniform scale + translate)
+  ///  2. Map the four viewport corners back through the transform AND
+  ///     through the BoxFit.contain layout to get image-pixel coords
+  ///  3. Intersect with the image bounds and crop the original PNG/JPG
+  ///
+  /// This avoids two problems the old `boundary.toImage` approach had:
+  ///  - Letterbox black from BoxFit.contain ending up baked into the file
+  ///  - Quality loss from rasterizing at screen pixel ratio + recompressing
   Future<String?> _captureAndCrop() async {
     if (!_hasZoomed) {
-      // No zoom applied — return original image as-is
+      // No zoom/pan applied — return original image as-is
       return widget.imagePath;
     }
 
     setState(() => _isSaving = true);
     try {
-      final boundary = _boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-      if (boundary == null) return widget.imagePath;
+      // 1. Viewport box (logical pixels)
+      final viewportBox = _viewportKey.currentContext?.findRenderObject() as RenderBox?;
+      if (viewportBox == null) return widget.imagePath;
+      final vw = viewportBox.size.width;
+      final vh = viewportBox.size.height;
+      if (vw <= 0 || vh <= 0) return widget.imagePath;
 
-      // Use the device's pixel ratio for accurate capture
-      final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
-      final image = await boundary.toImage(pixelRatio: devicePixelRatio.clamp(1.0, 3.0));
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null) return widget.imagePath;
+      // 2. Decode source file with the image package (full resolution).
+      //    Done off the UI thread so we don't jank.
+      final src = await File(widget.imagePath).readAsBytes();
+      final decoded = await compute(_decodeImage, src);
+      if (decoded == null) return widget.imagePath;
+      final iw = decoded.width.toDouble();
+      final ih = decoded.height.toDouble();
 
-      // Compress the captured image if it's too large
-      var bytes = byteData.buffer.asUint8List();
-      final compressed = await ImageService.compressImageBytes(bytes);
-      if (compressed != null) bytes = compressed;
+      // 3. BoxFit.contain placement of source inside viewport (pre-zoom).
+      final fitScale = math.min(vw / iw, vh / ih);
+      final fittedW = iw * fitScale;
+      final fittedH = ih * fitScale;
+      final offX = (vw - fittedW) / 2;
+      final offY = (vh - fittedH) / 2;
+
+      // 4. InteractiveViewer transform: uniform scale s + translation (tx,ty).
+      //    Matrix4 in vector_math is column-major.
+      final m = _transformController.value.storage;
+      final s = m[0];           // sx (== sy for uniform scale)
+      final tx = m[12];
+      final ty = m[13];
+      if (s.abs() < 1e-6) return widget.imagePath;
+
+      // 5. Inverse map the viewport rect (0,0)-(vw,vh) → pre-transform child
+      //    space → image-pixel space. With only translate+scale this stays
+      //    axis-aligned, so just transform two corners.
+      double toImgX(double vx) => (((vx - tx) / s) - offX) / fitScale;
+      double toImgY(double vy) => (((vy - ty) / s) - offY) / fitScale;
+
+      var x0 = toImgX(0);
+      var y0 = toImgY(0);
+      var x1 = toImgX(vw);
+      var y1 = toImgY(vh);
+
+      // Clamp to image bounds — user may have zoomed out enough that
+      // viewport corners land off-image.
+      x0 = x0.clamp(0.0, iw);
+      y0 = y0.clamp(0.0, ih);
+      x1 = x1.clamp(0.0, iw);
+      y1 = y1.clamp(0.0, ih);
+
+      final cropX = x0.round();
+      final cropY = y0.round();
+      final cropW = (x1 - x0).round();
+      final cropH = (y1 - y0).round();
+
+      if (cropW < 8 || cropH < 8) {
+        // Degenerate crop — fall back to original
+        return widget.imagePath;
+      }
+
+      // 6. Crop + JPEG-encode on a background isolate.
+      final outBytes = await compute(_cropAndEncodeJpeg, _CropArgs(
+        bytes: src,
+        x: cropX, y: cropY, w: cropW, h: cropH,
+        quality: 90,
+      ));
+      if (outBytes == null) return widget.imagePath;
 
       final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/crop_${DateTime.now().millisecondsSinceEpoch}.png');
-      await file.writeAsBytes(bytes);
+      final file = File('${dir.path}/crop_${DateTime.now().millisecondsSinceEpoch}.jpg');
+      await file.writeAsBytes(outBytes);
       return file.path;
     } catch (e) {
       debugPrint('Crop capture failed: $e');
@@ -130,18 +193,25 @@ class _ImageCropDialogState extends State<_ImageCropDialog> {
       ),
       body: Column(
         children: [
+          // Crop area constrained to 4:3 (close to recipe-card display
+          // aspect). User pinch-zooms within this frame; everything
+          // outside is the dimmed scaffold background, making the crop
+          // area visually obvious.
           Expanded(
-            child: ClipRect(
-              child: RepaintBoundary(
-                key: _boundaryKey,
-                child: InteractiveViewer(
-                  transformationController: _transformController,
-                  minScale: 0.5,
-                  maxScale: 4.0,
-                  child: Center(
-                    child: buildFileImage(
-                      widget.imagePath,
-                      fit: BoxFit.contain,
+            child: Center(
+              child: AspectRatio(
+                aspectRatio: 4 / 3,
+                child: ClipRect(
+                  key: _viewportKey,
+                  child: InteractiveViewer(
+                    transformationController: _transformController,
+                    minScale: 0.5,
+                    maxScale: 4.0,
+                    child: Center(
+                      child: buildFileImage(
+                        widget.imagePath,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 ),
@@ -199,6 +269,41 @@ class _ImageCropDialogState extends State<_ImageCropDialog> {
       ),
     );
   }
+}
+
+// ── Isolate workers for crop dialog ──────────────────────────────────
+
+class _CropArgs {
+  final Uint8List bytes;
+  final int x, y, w, h;
+  final int quality;
+  const _CropArgs({
+    required this.bytes,
+    required this.x,
+    required this.y,
+    required this.w,
+    required this.h,
+    required this.quality,
+  });
+}
+
+/// Decode an image (just to get dimensions) on a background isolate.
+img.Image? _decodeImage(Uint8List bytes) {
+  return img.decodeImage(bytes);
+}
+
+/// Decode → copyCrop → encodeJpg, all on a background isolate.
+Uint8List? _cropAndEncodeJpeg(_CropArgs args) {
+  final decoded = img.decodeImage(args.bytes);
+  if (decoded == null) return null;
+  final cropped = img.copyCrop(
+    decoded,
+    x: args.x,
+    y: args.y,
+    width: args.w,
+    height: args.h,
+  );
+  return Uint8List.fromList(img.encodeJpg(cropped, quality: args.quality));
 }
 
 class RecipeEditScreen extends ConsumerStatefulWidget {
@@ -940,7 +1045,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         }
       }
 
-      final nutritionJson = _nutrition != null && !_nutrition!.isEmpty ? jsonEncode(_nutrition!.toJson()) : null;
+      final nutritionJson = _nutrition != null && _nutrition!.isNotEmpty ? jsonEncode(_nutrition!.toJson()) : null;
       String recipeId;
 
       if (_isEditing) {

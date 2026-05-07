@@ -75,12 +75,19 @@ class AppDatabase extends _$AppDatabase {
 
 
   // Accessors for DAOs
+  @override
   CookbookDao get cookbookDao => CookbookDao(this);
+  @override
   RecipeDao get recipeDao => RecipeDao(this);
+  @override
   CategoryDao get categoryDao => CategoryDao(this);
+  @override
   ShoppingDao get shoppingDao => ShoppingDao(this);
+  @override
   MealPlanDao get mealPlanDao => MealPlanDao(this);
+  @override
   CustomTaxonomyDao get customTaxonomyDao => CustomTaxonomyDao(this);
+  @override
   UsdaDao get usdaDao => UsdaDao(this);
 
   @override

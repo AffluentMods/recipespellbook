@@ -10576,7 +10576,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityPublishInfo.
   ///
   /// In en, this message translates to:
-  /// **'Cookbooks need at least 10 recipes to publish. Your recipes will be shared as a snapshot — updates won\'t sync.'**
+  /// **'Cookbooks need at least 5 recipes to publish. Your recipes will be shared as a snapshot — updates won\'t sync.'**
   String get communityPublishInfo;
 
   /// No description provided for @communitySelectCookbook.
@@ -10588,7 +10588,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityNeedMinRecipes.
   ///
   /// In en, this message translates to:
-  /// **'Need at least 10 recipes to publish (has {count})'**
+  /// **'Need at least 5 recipes to publish (has {count})'**
   String communityNeedMinRecipes(int count);
 
   /// No description provided for @communityPublishConfirmTitle.
@@ -10618,7 +10618,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityRecipeCountNeedMore.
   ///
   /// In en, this message translates to:
-  /// **'{count} recipes (need 10+)'**
+  /// **'{count} recipes (need 5+)'**
   String communityRecipeCountNeedMore(int count);
 
   /// No description provided for @communityNoPublicationsYet.
@@ -17226,6 +17226,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Some step photos may be lost if you change the number of steps.'**
   String get stepsBulkEditImagesWarning;
+
+  /// No description provided for @publishToCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish to community'**
+  String get publishToCommunity;
+
+  /// No description provided for @publishSingleRecipeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish recipe'**
+  String get publishSingleRecipeTitle;
+
+  /// No description provided for @publishSingleRecipeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this recipe to the community feed. Updates won\'t sync — re-publish to push changes.'**
+  String get publishSingleRecipeBody;
+
+  /// No description provided for @publishSingleRecipeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get publishSingleRecipeAction;
+
+  /// No description provided for @publishSingleRecipeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Published!'**
+  String get publishSingleRecipeSuccess;
+
+  /// No description provided for @creatorsYouFollow.
+  ///
+  /// In en, this message translates to:
+  /// **'Creators you follow'**
+  String get creatorsYouFollow;
+
+  /// No description provided for @noCreatorsYouFollow.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow creators to see their latest publications here.'**
+  String get noCreatorsYouFollow;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

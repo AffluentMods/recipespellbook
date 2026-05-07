@@ -6,6 +6,15 @@ import 'package:uuid/uuid.dart';
 import 'auth_service.dart';
 
 // ════════════════════════════════════════════
+//  CONSTANTS
+// ════════════════════════════════════════════
+
+/// Minimum recipes a cookbook needs before it can be published to community.
+/// Single source of truth — if you change this, l10n strings using
+/// `communityPublishInfo` / `communityNeedMinRecipes` should be regenerated.
+const int kMinPublishRecipes = 5;
+
+// ════════════════════════════════════════════
 //  MODELS
 // ════════════════════════════════════════════
 
@@ -37,6 +46,9 @@ class CommunityListItem {
   final double averageRating;
   final int ratingCount;
   final String? tags;
+  /// 'cookbook' (default) or 'recipe' (single-recipe upload). On the
+  /// display side the latter skips cookbook framing.
+  final String kind;
   final DateTime createdAt;
   final CommunityPublisher publisher;
 
@@ -46,6 +58,7 @@ class CommunityListItem {
     this.imageCount = 0, this.totalImageBytes = 0,
     this.averageRating = 0, this.ratingCount = 0,
     this.tags,
+    this.kind = 'cookbook',
     required this.createdAt, required this.publisher,
   });
 
@@ -61,6 +74,7 @@ class CommunityListItem {
     averageRating: (json['averageRating'] as num?)?.toDouble() ?? 0,
     ratingCount: json['ratingCount'] as int? ?? 0,
     tags: json['tags'] as String?,
+    kind: json['kind'] as String? ?? 'cookbook',
     createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
     publisher: CommunityPublisher.fromJson(json['publisher'] as Map<String, dynamic>),
   );
@@ -71,6 +85,9 @@ class CommunityListItem {
 
   /// Whether this publication has any images.
   bool get hasImages => imageCount > 0;
+
+  /// True when this is a single-recipe upload.
+  bool get isSingleRecipe => kind == 'recipe';
 }
 
 class CommunityDetail {
@@ -85,6 +102,8 @@ class CommunityDetail {
   final double averageRating;
   final int ratingCount;
   final String? tags;
+  /// 'cookbook' or 'recipe'. See [CommunityListItem.kind].
+  final String kind;
   final DateTime createdAt;
   final CommunityPublisher publisher;
   final List<CommunityRecipe> recipes;
@@ -95,6 +114,7 @@ class CommunityDetail {
     this.imageCount = 0, this.totalImageBytes = 0,
     this.averageRating = 0, this.ratingCount = 0,
     this.tags,
+    this.kind = 'cookbook',
     required this.createdAt, required this.publisher, required this.recipes,
   });
 
@@ -110,6 +130,7 @@ class CommunityDetail {
     averageRating: (json['averageRating'] as num?)?.toDouble() ?? 0,
     ratingCount: json['ratingCount'] as int? ?? 0,
     tags: json['tags'] as String?,
+    kind: json['kind'] as String? ?? 'cookbook',
     createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
     publisher: CommunityPublisher.fromJson(json['publisher'] as Map<String, dynamic>),
     recipes: (json['recipes'] as List?)?.map((r) => CommunityRecipe.fromJson(r as Map<String, dynamic>)).toList() ?? [],
@@ -119,6 +140,9 @@ class CommunityDetail {
       tags?.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList() ?? [];
 
   bool get hasImages => imageCount > 0;
+
+  /// True when this is a single-recipe upload.
+  bool get isSingleRecipe => kind == 'recipe';
 
   /// Human-readable download size.
   String get downloadSizeLabel {
@@ -333,6 +357,7 @@ class MyPublication {
   final double averageRating;
   final int ratingCount;
   final String? tags;
+  final String kind;
   final String status; // published | pending_review | removed
   final bool isRemoved;
   final DateTime createdAt;
@@ -341,7 +366,7 @@ class MyPublication {
     required this.id, required this.title, this.description, this.imagePath,
     required this.recipeCount, required this.downloadCount,
     this.imageCount = 0, this.averageRating = 0, this.ratingCount = 0,
-    this.tags, this.status = 'published',
+    this.tags, this.kind = 'cookbook', this.status = 'published',
     required this.isRemoved, required this.createdAt,
   });
 
@@ -356,10 +381,67 @@ class MyPublication {
     averageRating: (json['averageRating'] as num?)?.toDouble() ?? 0,
     ratingCount: json['ratingCount'] as int? ?? 0,
     tags: json['tags'] as String?,
+    kind: json['kind'] as String? ?? 'cookbook',
     status: json['status'] as String? ?? 'published',
     isRemoved: json['isRemoved'] as bool? ?? false,
     createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
   );
+
+  bool get isSingleRecipe => kind == 'recipe';
+}
+
+/// Creator I follow, plus a preview of their latest publication.
+class FollowedCreator {
+  final String id;
+  final String name;
+  final String? avatarUrl;
+  final DateTime followedAt;
+  final FollowedCreatorPub? latestPublication;
+
+  const FollowedCreator({
+    required this.id,
+    required this.name,
+    this.avatarUrl,
+    required this.followedAt,
+    this.latestPublication,
+  });
+
+  factory FollowedCreator.fromJson(Map<String, dynamic> json) => FollowedCreator(
+    id: json['id'] as String,
+    name: (json['name'] as String?) ?? 'Unknown',
+    avatarUrl: json['avatarUrl'] as String?,
+    followedAt: DateTime.tryParse(json['followedAt'] as String? ?? '') ?? DateTime.now(),
+    latestPublication: json['latestPublication'] is Map<String, dynamic>
+        ? FollowedCreatorPub.fromJson(json['latestPublication'] as Map<String, dynamic>)
+        : null,
+  );
+}
+
+/// Lightweight publication preview returned by /me/follows.
+class FollowedCreatorPub {
+  final String id;
+  final String title;
+  final String? imagePath;
+  final String kind;
+  final DateTime createdAt;
+
+  const FollowedCreatorPub({
+    required this.id,
+    required this.title,
+    this.imagePath,
+    this.kind = 'cookbook',
+    required this.createdAt,
+  });
+
+  factory FollowedCreatorPub.fromJson(Map<String, dynamic> json) => FollowedCreatorPub(
+    id: json['id'] as String,
+    title: json['title'] as String? ?? '',
+    imagePath: json['imagePath'] as String?,
+    kind: json['kind'] as String? ?? 'cookbook',
+    createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+  );
+
+  bool get isSingleRecipe => kind == 'recipe';
 }
 
 /// Community tag from the server (legacy curated tags endpoint).
@@ -830,6 +912,8 @@ class CommunityService {
     int imageCount = 0,
     int totalImageBytes = 0,
     String? tags,
+    /// 'cookbook' (default) or 'recipe' for single-recipe uploads.
+    String kind = 'cookbook',
   }) async {
     try {
       final r = await _auth.post('/v1/community', {
@@ -840,6 +924,7 @@ class CommunityService {
         'imageCount': imageCount,
         'totalImageBytes': totalImageBytes,
         if (tags != null) 'tags': tags,
+        'kind': kind,
       });
       if (r.statusCode == 201) {
         final data = jsonDecode(r.body);
@@ -922,6 +1007,23 @@ class CommunityService {
   // ────────────────────────────────────
   //  My Publications
   // ────────────────────────────────────
+
+  /// List creators the current user follows. Returns one entry per
+  /// followed creator, each with their latest publication preview.
+  Future<List<FollowedCreator>> getMyFollows({int limit = 50}) async {
+    try {
+      final r = await _auth.get('/v1/community/me/follows?limit=$limit');
+      if (r.statusCode == 200) {
+        final data = jsonDecode(r.body);
+        return (data['creators'] as List)
+            .map((c) => FollowedCreator.fromJson(c as Map<String, dynamic>))
+            .toList();
+      }
+    } catch (e) {
+      debugPrint('[Community] getMyFollows: $e');
+    }
+    return [];
+  }
 
   /// Get my published cookbooks.
   Future<List<MyPublication>> getMyPublications() async {

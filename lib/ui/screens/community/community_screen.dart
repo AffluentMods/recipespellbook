@@ -15,6 +15,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../services/admin_service.dart';
+import '../../../services/auth_service.dart';
 import '../../../services/community_service.dart';
 import '../admin/admin_moderation_screen.dart';
 import '../../../utils/responsive_utils.dart';
@@ -319,6 +320,9 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
               ],
             ),
           ),
+
+          // ── Followed creators rail (only when user has follows) ──
+          const _CreatorsYouFollowRail(),
 
           // ── Sort chips ──
           Padding(
@@ -1344,6 +1348,23 @@ class _CommunityGridCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  // Single-recipe vs cookbook badge (top-left)
+                  Positioned(
+                    top: 6,
+                    left: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        item.isSingleRecipe ? Icons.restaurant_menu : Icons.menu_book,
+                        size: 12,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                   // Gradient overlay at bottom
                   Positioned(
                     bottom: 0,
@@ -1929,6 +1950,121 @@ class _MetaChip extends StatelessWidget {
           const SizedBox(width: 4),
           Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface)),
         ],
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════
+//  CREATORS YOU FOLLOW (horizontal rail)
+// ════════════════════════════════════════════
+
+/// Horizontally-scrolling list of creators the user follows. Hidden when
+/// the user follows nobody (no point taking up vertical space). Tapping
+/// a creator goes to their profile screen. Tapping their latest pub goes
+/// straight to it.
+class _CreatorsYouFollowRail extends ConsumerStatefulWidget {
+  const _CreatorsYouFollowRail();
+
+  @override
+  ConsumerState<_CreatorsYouFollowRail> createState() => _CreatorsYouFollowRailState();
+}
+
+class _CreatorsYouFollowRailState extends ConsumerState<_CreatorsYouFollowRail> {
+  List<FollowedCreator>? _follows;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    if (!AuthService.instance.isSignedIn) {
+      setState(() => _follows = const []);
+      return;
+    }
+    final list = await CommunityService.instance.getMyFollows();
+    if (mounted) setState(() => _follows = list);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final follows = _follows;
+    if (follows == null) return const SizedBox.shrink();
+    if (follows.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.creatorsYouFollow,
+            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 88,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: follows.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (ctx, i) {
+                final c = follows[i];
+                return _CreatorChip(creator: c);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CreatorChip extends StatelessWidget {
+  final FollowedCreator creator;
+  const _CreatorChip({required this.creator});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: () {
+        // Tap creator → their profile
+        context.push('/community/creator/${creator.id}');
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        width: 72,
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: const Color(0xFFC75B39).withValues(alpha: 0.18),
+              backgroundImage: creator.avatarUrl != null
+                  ? NetworkImage(creator.avatarUrl!)
+                  : null,
+              onBackgroundImageError: (_, __) {},
+              child: creator.avatarUrl == null
+                  ? Text(
+                      creator.name.isNotEmpty ? creator.name[0].toUpperCase() : '?',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFC75B39)),
+                    )
+                  : null,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              creator.name,
+              style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w500),
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }

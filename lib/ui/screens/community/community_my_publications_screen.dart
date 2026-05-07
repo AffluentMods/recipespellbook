@@ -441,6 +441,31 @@ class _PublicationCard extends StatelessWidget {
                   top: 10, right: 10,
                   child: _StatusBadge(status: pub.status),
                 ),
+                // Single-recipe vs cookbook badge top-left
+                Positioned(
+                  top: 10, left: 10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.55),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          pub.isSingleRecipe ? Icons.restaurant_menu : Icons.menu_book,
+                          size: 12, color: Colors.white,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          pub.isSingleRecipe ? 'Recipe' : 'Cookbook',
+                          style: const TextStyle(fontSize: 11, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

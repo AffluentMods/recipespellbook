@@ -610,7 +610,7 @@ class _LargeCard extends StatelessWidget {
   String _formatTime(Recipe recipe) {
     final total = (recipe.prepTimeMinutes ?? 0) + (recipe.cookTimeMinutes ?? 0);
     if (total == 0) return '';
-    if (total < 60) return '${total} min';
+    if (total < 60) return '$total min';
     final hours = total ~/ 60;
     final mins = total % 60;
     return mins > 0 ? '${hours}h ${mins}m' : '${hours}h';

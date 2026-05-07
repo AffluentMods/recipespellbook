@@ -48,7 +48,7 @@ class RecipePlaceholderImage extends ConsumerWidget {
         break;
     }
 
-    Widget result = Container(
+    Widget result = SizedBox(
       height: height,
       width: width,
       child: placeholder,
@@ -109,7 +109,7 @@ class CookbookPlaceholderImage extends ConsumerWidget {
         break;
     }
 
-    Widget result = Container(
+    Widget result = SizedBox(
       height: height,
       width: width,
       child: placeholder,

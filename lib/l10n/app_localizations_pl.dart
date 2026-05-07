@@ -5784,14 +5784,14 @@ class AppLocalizationsPl extends AppLocalizations {
   String get communityNoCookbooksToPublish => 'Brak książek do opublikowania';
 
   @override
-  String get communityPublishInfo => 'Książki kucharskie wymagają co najmniej 10 przepisów do opublikowania. Twoje przepisy zostaną udostępnione jako migawka — aktualizacje nie będą synchronizowane.';
+  String get communityPublishInfo => 'Książki kucharskie wymagają co najmniej 5 przepisów do opublikowania. Twoje przepisy zostaną udostępnione jako migawka — aktualizacje nie będą synchronizowane.';
 
   @override
   String get communitySelectCookbook => 'Wybierz książkę do opublikowania';
 
   @override
   String communityNeedMinRecipes(int count) {
-    return 'Potrzeba co najmniej 10 przepisów do publikacji (ma $count)';
+    return 'Potrzeba co najmniej 5 przepisów do publikacji (ma $count)';
   }
 
   @override
@@ -5812,7 +5812,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String communityRecipeCountNeedMore(int count) {
-    return '$count przepisów (potrzeba 10+)';
+    return '$count przepisów (potrzeba 5+)';
   }
 
   @override
@@ -9449,4 +9449,25 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get stepsBulkEditImagesWarning => 'Some step photos may be lost if you change the number of steps.';
+
+  @override
+  String get publishToCommunity => 'Publish to community';
+
+  @override
+  String get publishSingleRecipeTitle => 'Publish recipe';
+
+  @override
+  String get publishSingleRecipeBody => 'Share this recipe to the community feed. Updates won\'t sync — re-publish to push changes.';
+
+  @override
+  String get publishSingleRecipeAction => 'Publish';
+
+  @override
+  String get publishSingleRecipeSuccess => 'Published!';
+
+  @override
+  String get creatorsYouFollow => 'Creators you follow';
+
+  @override
+  String get noCreatorsYouFollow => 'Follow creators to see their latest publications here.';
 }

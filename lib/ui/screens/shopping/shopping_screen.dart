@@ -726,7 +726,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                     Navigator.pop(ctx);
                     final items = await shoppingDao.getItemsForList(_currentListId);
                     final buffer = StringBuffer('$_currentListName\n');
-                    for (final item in items) buffer.writeln('${item.isChecked ? '☑' : '☐'} ${item.name}');
+                    for (final item in items) {
+                      buffer.writeln('${item.isChecked ? '☑' : '☐'} ${item.name}');
+                    }
                     await Clipboard.setData(ClipboardData(text: buffer.toString()));
                     if (mounted) AppSnackbar.info(context, l10n.successCopied);
                   },
@@ -1162,14 +1164,6 @@ class _ModernHeader extends StatelessWidget {
                 child: PopupMenuButton<ShoppingGroupMode>(
                   offset: const Offset(0, 40),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(_getGroupModeLabel(groupMode, l10n), style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
-                      const SizedBox(width: 4),
-                      Icon(Icons.arrow_drop_down, size: 20, color: theme.colorScheme.onSurface),
-                    ],
-                  ),
                   onSelected: onGroupModeChanged,
                   itemBuilder: (ctx) => ShoppingGroupMode.values.map((mode) {
                     return PopupMenuItem(
@@ -1184,6 +1178,14 @@ class _ModernHeader extends StatelessWidget {
                       ),
                     );
                   }).toList(),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(_getGroupModeLabel(groupMode, l10n), style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+                      const SizedBox(width: 4),
+                      Icon(Icons.arrow_drop_down, size: 20, color: theme.colorScheme.onSurface),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -2778,7 +2780,9 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
       for (final entry in consolidated.entries) {
         _recentlyAdded.insert(0, entry.value.displayName);
       }
-      while (_recentlyAdded.length > 30) _recentlyAdded.removeLast();
+      while (_recentlyAdded.length > 30) {
+        _recentlyAdded.removeLast();
+      }
     });
 
     final l10n = AppLocalizations.of(context)!;

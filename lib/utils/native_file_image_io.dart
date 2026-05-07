@@ -1,4 +1,5 @@
 /// Native (mobile/desktop) implementation — uses dart:io File.
+library;
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';

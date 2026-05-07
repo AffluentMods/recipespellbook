@@ -1,9 +1,8 @@
 import 'dart:convert';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
 import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -97,13 +96,16 @@ class ImageService {
 
     try {
       var bytes = await file.readAsBytes();
+      var contentType = _contentTypeFromPath(file.path);
 
-      // Compress if over 1MB — significant size savings with minimal quality loss
+      // Compress if over 1MB — significant size savings with minimal quality loss.
+      // compressImageBytes re-encodes as real JPEG, so update contentType to match.
       if (bytes.length > 1024 * 1024) {
         final compressed = await compressImageBytes(bytes);
         if (compressed != null && compressed.length < bytes.length) {
           debugPrint('[ImageService] Compressed ${bytes.length} → ${compressed.length} bytes');
           bytes = compressed;
+          contentType = 'image/jpeg';
         }
       }
 
@@ -113,7 +115,6 @@ class ImageService {
       }
 
       final base64Data = base64Encode(bytes);
-      final contentType = _contentTypeFromPath(file.path);
 
       debugPrint('[ImageService] Uploading ${bytes.length} bytes as $contentType');
 
@@ -214,25 +215,37 @@ class ImageService {
 
     try {
       var bytes = await file.readAsBytes();
+      var contentType = _contentTypeFromPath(file.path);
+      final origLen = bytes.length;
 
-      // Compress if over 500KB — re-encode as JPEG at 80% quality
-      if (bytes.length > 500 * 1024) {
-        try {
-          final codec = await ui.instantiateImageCodec(bytes, targetWidth: maxDimension);
-          final frame = await codec.getNextFrame();
-          final byteData = await frame.image.toByteData(format: ui.ImageByteFormat.png);
-          if (byteData != null) {
-            // Re-encode as JPEG using the image package or just use the resized PNG
-            // For now, resize alone can cut 3MB PNGs down significantly
-            final resized = byteData.buffer.asUint8List();
-            if (resized.length < bytes.length) {
-              debugPrint('[ImageService] Compressed ${bytes.length} → ${resized.length} bytes');
-              bytes = resized;
-            }
+      // Re-encode as JPEG when the file is large OR not already a JPEG.
+      // Crucially: NEVER upscale — small images stay at their native
+      // resolution. The previous implementation forced every image up
+      // to 1920px wide via `instantiateImageCodec(targetWidth:…)`,
+      // which is what made uploaded photos look "zoomed and stretched".
+      final shouldRecompress = bytes.length > 500 * 1024 ||
+          (contentType != 'image/jpeg' && contentType != 'image/jpg');
+      if (shouldRecompress) {
+        final reencoded = await _decodeResizeJpeg(bytes,
+            maxDimension: maxDimension, quality: 82);
+        if (reencoded != null && reencoded.isNotEmpty) {
+          // Only swap in the re-encoded version if it's actually smaller
+          // OR the original wasn't a JPEG to begin with. This avoids
+          // making a small high-quality JPEG worse for no reason.
+          if (reencoded.length < bytes.length || contentType != 'image/jpeg') {
+            bytes = reencoded;
+            contentType = 'image/jpeg';
           }
-          frame.image.dispose();
-        } catch (e) {
-          debugPrint('[ImageService] Compression failed, uploading original: $e');
+        }
+      }
+
+      if (bytes.length > maxFileSize) {
+        // One last pass at lower quality if we're still over the cap.
+        final shrunk = await _decodeResizeJpeg(bytes,
+            maxDimension: maxDimension, quality: 65);
+        if (shrunk != null && shrunk.length < bytes.length) {
+          bytes = shrunk;
+          contentType = 'image/jpeg';
         }
       }
 
@@ -242,9 +255,8 @@ class ImageService {
       }
 
       final base64Data = base64Encode(bytes);
-      final contentType = bytes.length != (await file.readAsBytes()).length ? 'image/png' : _contentTypeFromPath(file.path);
 
-      debugPrint('[ImageService] Community uploading ${bytes.length} bytes as $contentType');
+      debugPrint('[ImageService] Community uploading ${bytes.length} bytes as $contentType (orig $origLen)');
 
       final response = await _auth.post('/v1/images/community-upload', {
         'base64': base64Data,
@@ -325,63 +337,46 @@ class ImageService {
   /// Target max file size for saved images (2MB).
   static const int _targetMaxBytes = 2 * 1024 * 1024;
 
-  /// Compress image bytes to fit under ~2MB.
-  /// Decodes, resizes if needed, and re-encodes as JPEG.
-  /// Returns null if compression fails (caller should use original bytes).
-  static Future<Uint8List?> compressImageBytes(Uint8List bytes, {int targetMaxBytes = _targetMaxBytes}) async {
+  /// Decode → optionally downscale → re-encode as real JPEG. Never
+  /// upscales: an image already smaller than [maxDimension] on both
+  /// axes is encoded at its native resolution. Returns null on decode
+  /// failure (caller should fall back to original bytes).
+  ///
+  /// This is the core helper used by both upload and download paths.
+  /// Runs on a background isolate so it never jank-blocks the UI.
+  static Future<Uint8List?> _decodeResizeJpeg(
+    Uint8List bytes, {
+    required int maxDimension,
+    required int quality,
+  }) async {
     try {
-      // Decode the image
-      final codec = await ui.instantiateImageCodec(bytes);
-      final frame = await codec.getNextFrame();
-      var image = frame.image;
-
-      // Determine if resize is needed
-      final origWidth = image.width;
-      final origHeight = image.height;
-      final maxDim = maxDimension; // 1920
-
-      if (origWidth > maxDim || origHeight > maxDim) {
-        // Scale down to fit within maxDimension
-        final scale = maxDim / (origWidth > origHeight ? origWidth : origHeight);
-        final newWidth = (origWidth * scale).round();
-        final newHeight = (origHeight * scale).round();
-
-        // Use pictureRecorder to resize
-        final recorder = ui.PictureRecorder();
-        final canvas = ui.Canvas(recorder);
-        canvas.drawImageRect(
-          image,
-          ui.Rect.fromLTWH(0, 0, origWidth.toDouble(), origHeight.toDouble()),
-          ui.Rect.fromLTWH(0, 0, newWidth.toDouble(), newHeight.toDouble()),
-          ui.Paint()..filterQuality = ui.FilterQuality.medium,
-        );
-        final picture = recorder.endRecording();
-        final resized = await picture.toImage(newWidth, newHeight);
-        image = resized;
-      }
-
-      // Encode as JPEG with quality stepping down until under target
-      for (final quality in [85, 70, 55, 40]) {
-        final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-        if (byteData == null) return null;
-
-        // Flutter's toByteData only supports PNG and rawRGBA natively.
-        // For JPEG compression, re-encode from PNG bytes.
-        // If PNG is already small enough, use it.
-        final pngBytes = byteData.buffer.asUint8List();
-        if (pngBytes.length <= targetMaxBytes) {
-          return pngBytes;
-        }
-
-        // If PNG is too large but we've resized, that's the best we can do
-        if (quality == 40) return pngBytes;
-      }
-
-      return null;
+      return await compute(_decodeResizeJpegSync, _ImgWork(
+        bytes: bytes,
+        maxDimension: maxDimension,
+        quality: quality,
+      ));
     } catch (e) {
-      debugPrint('[ImageService] Compression error: $e');
+      debugPrint('[ImageService] decodeResizeJpeg error: $e');
       return null;
     }
+  }
+
+  /// Compress image bytes to fit under ~2MB by re-encoding as JPEG with
+  /// progressively lower quality. Used by the download path.
+  static Future<Uint8List?> compressImageBytes(
+    Uint8List bytes, {
+    int targetMaxBytes = _targetMaxBytes,
+  }) async {
+    // Try normal quality first; step down if still too big.
+    for (final quality in const [82, 70, 55, 40]) {
+      final out = await _decodeResizeJpeg(bytes,
+          maxDimension: maxDimension, quality: quality);
+      if (out == null) return null;
+      if (out.length <= targetMaxBytes || quality == 40) {
+        return out;
+      }
+    }
+    return null;
   }
 
   // ════════════════════════════════════════════
@@ -416,4 +411,51 @@ class ImageService {
       _ => 'image/jpeg',
     };
   }
+}
+
+// ════════════════════════════════════════════
+//  ISOLATE WORKERS (top-level functions)
+// ════════════════════════════════════════════
+
+/// Argument container for the isolate-side decode/resize/encode.
+class _ImgWork {
+  final Uint8List bytes;
+  final int maxDimension;
+  final int quality;
+  const _ImgWork({
+    required this.bytes,
+    required this.maxDimension,
+    required this.quality,
+  });
+}
+
+/// Synchronous decode → optional downscale → JPEG encode.
+/// Top-level so it can run via `compute()`. Never upscales: if both
+/// width and height are already at or below maxDimension, the image is
+/// encoded at native resolution.
+Uint8List? _decodeResizeJpegSync(_ImgWork work) {
+  final decoded = img.decodeImage(work.bytes);
+  if (decoded == null) return null;
+
+  img.Image working = decoded;
+  final w = decoded.width;
+  final h = decoded.height;
+  final maxDim = work.maxDimension;
+  if (w > maxDim || h > maxDim) {
+    if (w >= h) {
+      working = img.copyResize(
+        decoded,
+        width: maxDim,
+        interpolation: img.Interpolation.cubic,
+      );
+    } else {
+      working = img.copyResize(
+        decoded,
+        height: maxDim,
+        interpolation: img.Interpolation.cubic,
+      );
+    }
+  }
+
+  return Uint8List.fromList(img.encodeJpg(working, quality: work.quality));
 }

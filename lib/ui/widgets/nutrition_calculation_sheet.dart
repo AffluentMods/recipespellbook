@@ -1282,8 +1282,8 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
           },
           onOpenRecipe: (recipeId) {
             Navigator.of(bottomSheetContext).pop();
-            Navigator.of(this.context).pop(); // Close nutrition sheet
-            this.context.push('/recipe/$recipeId');
+            Navigator.of(context).pop(); // Close nutrition sheet
+            context.push('/recipe/$recipeId');
           },
         );
       },

@@ -725,7 +725,9 @@ class RecipeImportEngine {
           continue;
         }
         if (line.toLowerCase().contains('amount') &&
-            line.toLowerCase().contains('measure')) continue;
+            line.toLowerCase().contains('measure')) {
+          continue;
+        }
         if (RegExp(r'^[-\s]+$').hasMatch(line) && line.contains('---')) continue;
         if (line.startsWith('*')) continue;
 
@@ -1091,8 +1093,9 @@ class RecipeImportEngine {
       }).length;
       final titleCaseRatio = titleCaseWords / words.length;
       // Strong title-case (most words capitalized) = much higher score
-      if (titleCaseRatio >= 0.75) score += 40;
-      else if (titleCaseRatio >= 0.5) score += 20;
+      if (titleCaseRatio >= 0.75) {
+        score += 40;
+      } else if (titleCaseRatio >= 0.5) score += 20;
 
       // Word count: 2-5 words is ideal for a title
       if (words.length >= 2 && words.length <= 5) {
@@ -1686,7 +1689,9 @@ class RecipeImportEngine {
       if (line.startsWith('#') && line.split('#').length > 2) continue;
       // Skip "follow me" type lines
       if (RegExp(r'follow|subscribe|link in bio|tag|comment|like', caseSensitive: false).hasMatch(line)
-          && line.length < 80) continue;
+          && line.length < 80) {
+        continue;
+      }
 
       final cleaned = line
           .replaceAll(RegExp(r'^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]+\s*', unicode: true), '') // Leading emoji
@@ -2657,9 +2662,7 @@ class RecipeImportEngine {
           ingredients: ingredients,
           instructions: mergedInstructions,
           servings: yield_,
-          tags: categories != null
-              ? categories.split(',').map((c) => c.trim()).where((c) => c.isNotEmpty).toList()
-              : null,
+          tags: categories?.split(',').map((c) => c.trim()).where((c) => c.isNotEmpty).toList(),
           sourceApp: 'mealmaster',
         ));
       }

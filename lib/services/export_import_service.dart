@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import '../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:drift/drift.dart';

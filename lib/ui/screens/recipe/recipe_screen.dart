@@ -35,6 +35,7 @@ import '../../widgets/sub_recipe_selection_sheet.dart';
 // Canonical provider is in allergy_settings_screen.dart — imported via:
 import '../settings/allergy_settings_screen.dart' show dismissedAllergyWarningsProvider;
 import '../settings/nutrition_settings_screen.dart';
+import '../community/community_publish_screen.dart';
 
 // ============ SESSION DISMISSED WARNINGS (temporary) ============
 
@@ -1445,6 +1446,7 @@ class _RecipeAppBar extends StatelessWidget {
               PopupMenuItem(value: 'duplicate', child: Row(children: [const Icon(Icons.copy), const SizedBox(width: 12), Text(l10n.recipeDuplicate)])),
               PopupMenuItem(value: 'copy_to', child: Row(children: [const Icon(Icons.book_outlined), const SizedBox(width: 12), const Text('Copy to cookbook')])),
               PopupMenuItem(value: 'move_to', child: Row(children: [const Icon(Icons.drive_file_move_outlined), const SizedBox(width: 12), const Text('Move to cookbook')])),
+              PopupMenuItem(value: 'publish', child: Row(children: [const Icon(Icons.public_outlined), const SizedBox(width: 12), Text(l10n.publishToCommunity)])),
               const PopupMenuDivider(),
               PopupMenuItem(value: 'delete', child: Row(children: [const Icon(Icons.delete, color: Colors.red), const SizedBox(width: 12), Text(l10n.actionDelete, style: const TextStyle(color: Colors.red))])),
             ],
@@ -1483,10 +1485,21 @@ class _RecipeAppBar extends StatelessWidget {
       case 'move_to':
         _showCookbookPicker(context, move: true);
         break;
+      case 'publish':
+        _showSingleRecipePublish(context);
+        break;
       case 'delete':
         _confirmDelete(context);
         break;
     }
+  }
+
+  void _showSingleRecipePublish(BuildContext context) {
+    Navigator.of(context, rootNavigator: true).push(
+      MaterialPageRoute(
+        builder: (_) => CommunityPublishScreen(singleRecipeId: recipe.id),
+      ),
+    );
   }
 
   void _duplicateRecipe(BuildContext context) async {

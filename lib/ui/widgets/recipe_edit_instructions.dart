@@ -436,12 +436,28 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
             .length
         : _steps.length;
 
+    // Single Premium indicator for the whole section, instead of an
+    // amber star plastered on every step's camera icon.
+    final hasStepPhotoAccess = GatedFeature.stepPhotos
+        .isUnlockedFor(ref.watch(subscriptionProvider).tier);
+
     return Row(
       children: [
         Text(
           l10n.instructionsTitle,
           style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
+        if (!hasStepPhotoAccess) ...[
+          const SizedBox(width: 6),
+          Tooltip(
+            message: l10n.requiresPremium,
+            child: Icon(
+              Icons.workspace_premium_outlined,
+              size: 16,
+              color: theme.colorScheme.outline,
+            ),
+          ),
+        ],
         const SizedBox(width: 6),
         // Toggle: structured cards ↔ single text field
         TextButton.icon(
@@ -676,21 +692,9 @@ class _StepCardState extends State<_StepCard> {
                               color: theme.colorScheme.outline.withValues(alpha: 0.5),
                             ),
                           ),
-                          // Premium badge on camera icon
-                          if (!hasImage && !hasStepPhotoAccess)
-                            Positioned(
-                              right: -4,
-                              top: -4,
-                              child: Container(
-                                width: 16,
-                                height: 16,
-                                decoration: const BoxDecoration(
-                                  color: Colors.amber,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.star, size: 10, color: Colors.white),
-                              ),
-                            ),
+                          // Premium gating is communicated once at the
+                          // section header (see _buildHeader) — no need
+                          // to plaster a badge on every step card.
                         ],
                       ),
                     ),

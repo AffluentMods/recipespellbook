@@ -23,7 +23,12 @@ import '../../widgets/sub_recipe_selection_sheet.dart';
 // ════════════════════════════════════════════
 
 class CommunityPublishScreen extends ConsumerStatefulWidget {
-  const CommunityPublishScreen({super.key});
+  /// When non-null, the publish flow runs in single-recipe mode: the
+  /// cookbook picker is skipped, the recipe is loaded by ID, and the
+  /// resulting publication is created with kind='recipe'.
+  final String? singleRecipeId;
+
+  const CommunityPublishScreen({super.key, this.singleRecipeId});
 
   @override
   ConsumerState<CommunityPublishScreen> createState() => _CommunityPublishScreenState();
@@ -32,10 +37,13 @@ class CommunityPublishScreen extends ConsumerStatefulWidget {
 class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen> {
   final _community = CommunityService.instance;
 
-  // Step 1: selected cookbook, Step 2: configure, Step 3: publishing
+  // Step 1: selected cookbook, Step 2: configure, Step 3: publishing.
+  // Single-recipe mode skips Step 1.
   int _step = 1;
   Cookbook? _selectedCookbook;
   int _recipeCount = 0;
+  // Set when widget.singleRecipeId is provided. Loaded in initState.
+  Recipe? _singleRecipe;
 
   // Step 2 fields
   final _titleController = TextEditingController();
@@ -46,6 +54,31 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
   // Step 3 state
   bool _isPublishing = false;
   bool _publishCancelled = false;
+
+  bool get _isSingleRecipeMode => widget.singleRecipeId != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_isSingleRecipeMode) {
+      // Load the recipe and jump straight to step 2.
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final recipe = await ref.read(recipeDaoProvider).getRecipeById(widget.singleRecipeId!);
+        if (!mounted) return;
+        if (recipe == null) {
+          AppSnackbar.error(context, AppLocalizations.of(context)!.errorGeneric);
+          Navigator.pop(context);
+          return;
+        }
+        setState(() {
+          _singleRecipe = recipe;
+          _titleController.text = recipe.title;
+          _descController.text = recipe.description ?? '';
+          _step = 2;
+        });
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -88,17 +121,25 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
       );
     }
 
+    // In single-recipe mode there's no cookbook-picker step, so the
+    // step indicator is simpler (configure → publish).
+    final totalSteps = _isSingleRecipeMode ? 2 : 3;
+    final displayStep = _isSingleRecipeMode ? (_step - 1).clamp(1, 2) : _step;
+
     return PopScope(
       canPop: true,
       child: Scaffold(
       appBar: AppBar(
-        title: Text(_step == 1 ? l10n.communityPublishCookbook : l10n.communityConfigurePublication),
-        leading: _step > 1 && !_isPublishing
+        title: Text(_step == 1
+            ? l10n.communityPublishCookbook
+            : (_isSingleRecipeMode ? l10n.publishSingleRecipeTitle : l10n.communityConfigurePublication)),
+        // Back: only show if we can return to step 1 (NOT in single-recipe mode).
+        leading: _step > 1 && !_isPublishing && !_isSingleRecipeMode
             ? IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => setState(() => _step = 1))
             : null,
         bottom: _isPublishing ? null : PreferredSize(
           preferredSize: const Size.fromHeight(48),
-          child: _StepIndicator(currentStep: _step, totalSteps: 3),
+          child: _StepIndicator(currentStep: displayStep, totalSteps: totalSteps),
         ),
       ),
       body: Responsive.constrainWidth(context, child: _step == 1
@@ -199,7 +240,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
     final l10n = AppLocalizations.of(context)!;
     final count = await ref.read(recipeDaoProvider).getRecipeCountForCookbook(cookbook.id);
 
-    if (count < 10) {
+    if (count < kMinPublishRecipes) {
       if (mounted) AppSnackbar.error(context, l10n.communityNeedMinRecipes(count));
       return;
     }
@@ -418,18 +459,26 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
 
     final recipeDao = ref.read(recipeDaoProvider);
     final tagsDao = TagsDao(ref.read(databaseProvider));
-    var recipes = await recipeDao.getRecipesForCookbook(_selectedCookbook!.id);
+    var recipes = _isSingleRecipeMode
+        ? <Recipe>[_singleRecipe!]
+        : await recipeDao.getRecipesForCookbook(_selectedCookbook!.id);
 
     // ── Cross-cookbook sub-recipe detection ──
     // Find any sub-recipes that live in OTHER cookbooks. Without including
     // them, those links will break in the published version.
+    // (Skipped in single-recipe mode — sub-recipe handling there is too
+    // confusing for the streamlined UX. The recipe gets published with
+    // any cross-cookbook links broken; user can re-publish as a cookbook
+    // if they need full link integrity.)
     final cookbookRecipeIds = recipes.map((r) => r.id).toSet();
     final externalSubRecipeIds = <String>{};
-    for (final r in recipes) {
-      final linked = await recipeDao.getLinkedRecipes(r.id);
-      for (final sub in linked) {
-        if (!cookbookRecipeIds.contains(sub.id)) {
-          externalSubRecipeIds.add(sub.id);
+    if (!_isSingleRecipeMode) {
+      for (final r in recipes) {
+        final linked = await recipeDao.getLinkedRecipes(r.id);
+        for (final sub in linked) {
+          if (!cookbookRecipeIds.contains(sub.id)) {
+            externalSubRecipeIds.add(sub.id);
+          }
         }
       }
     }
@@ -470,8 +519,9 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
       final recipeMaps = <Map<String, dynamic>>[];
       final localImagePaths = <String>[]; // Track all local paths for upload
 
-      // Collect cookbook cover
-      if (_includeImages && _selectedCookbook!.imagePath != null) {
+      // Collect cookbook cover (only in cookbook mode — single-recipe
+      // publications use the recipe's image as the cover).
+      if (!_isSingleRecipeMode && _includeImages && _selectedCookbook!.imagePath != null) {
         localImagePaths.add(_selectedCookbook!.imagePath!);
       }
 
@@ -656,7 +706,11 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
       }
 
       // ── Replace local paths with server paths ──
-      String? cookbookImagePath = _selectedCookbook!.imagePath;
+      // For cookbook mode use the cookbook cover; for single-recipe mode
+      // fall back to the recipe's own image.
+      String? cookbookImagePath = _isSingleRecipeMode
+          ? _singleRecipe!.imagePath
+          : _selectedCookbook!.imagePath;
       if (cookbookImagePath != null && pathMapping.containsKey(cookbookImagePath)) {
         cookbookImagePath = pathMapping[cookbookImagePath];
       } else if (_includeImages && cookbookImagePath != null && !ImageService.isServerPath(cookbookImagePath)) {
@@ -701,6 +755,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         imageCount: pathMapping.length,
         totalImageBytes: totalImageBytes,
         tags: _selectedTags.isNotEmpty ? _selectedTags.join(',') : null,
+        kind: _isSingleRecipeMode ? 'recipe' : 'cookbook',
       );
 
       if (result.success) {
@@ -750,7 +805,7 @@ class _CookbookSelectTile extends ConsumerWidget {
       future: ref.read(recipeDaoProvider).getRecipeCountForCookbook(cookbook.id),
       builder: (context, snapshot) {
         final count = snapshot.data ?? 0;
-        final canPublish = count >= 10;
+        final canPublish = count >= kMinPublishRecipes;
 
         return Card(
           margin: const EdgeInsets.only(bottom: 8),

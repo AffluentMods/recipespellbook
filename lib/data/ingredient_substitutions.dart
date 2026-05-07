@@ -1,5 +1,6 @@
 /// Static ingredient substitution database
 /// Each entry maps an ingredient to its best substitutes with ratios and notes
+library;
 
 class IngredientSub {
   final String name;

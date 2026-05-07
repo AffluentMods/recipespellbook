@@ -92,7 +92,7 @@ class _ImportGuidesScreenState extends State<ImportGuidesScreen> {
                 IconButton(
                   icon: const Icon(Icons.open_in_browser, size: 22),
                   tooltip: l10n.importGuidesOpenInBrowser,
-                  onPressed: () => _launchUrl('$_kWebGuideBaseUrl'),
+                  onPressed: () => _launchUrl(_kWebGuideBaseUrl),
                 ),
               ],
             ),

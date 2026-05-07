@@ -6,7 +6,7 @@ part 'tags_dao.g.dart';
 
 @DriftAccessor(tables: [Tags, RecipeTags])
 class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
-  TagsDao(AppDatabase db) : super(db);
+  TagsDao(super.db);
 
   // ============ TAG QUERIES ============
 

@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart' as drift;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -65,6 +64,15 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 
   Future<void> _load() async {
     final detail = await _community.getPublication(widget.publicationId);
+
+    // Single-recipe publications skip the cookbook framing entirely:
+    // open the recipe full-screen view instead of this detail screen.
+    if (detail != null && detail.isSingleRecipe && detail.recipes.isNotEmpty && mounted) {
+      // Use replace so back arrow returns to the feed, not this stub.
+      context.pushReplacement('/community/${detail.id}/recipe/0');
+      return;
+    }
+
     if (mounted) {
       setState(() {
         _detail = detail;

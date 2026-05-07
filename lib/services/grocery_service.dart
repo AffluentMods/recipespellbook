@@ -280,8 +280,9 @@ class GroceryService {
       final unitStr = match.group(2)!;
 
       double? qty;
-      if (qtyStr.contains('½')) qty = 0.5;
-      else if (qtyStr.contains('¼')) qty = 0.25;
+      if (qtyStr.contains('½')) {
+        qty = 0.5;
+      } else if (qtyStr.contains('¼')) qty = 0.25;
       else if (qtyStr.contains('¾')) qty = 0.75;
       else if (qtyStr.contains('⅓')) qty = 0.33;
       else if (qtyStr.contains('⅔')) qty = 0.67;
@@ -321,8 +322,9 @@ class GroceryService {
       final unitStr = match.group(2)!;
 
       double? qty;
-      if (qtyStr.contains('½')) qty = 0.5;
-      else if (qtyStr.contains('¼')) qty = 0.25;
+      if (qtyStr.contains('½')) {
+        qty = 0.5;
+      } else if (qtyStr.contains('¼')) qty = 0.25;
       else if (qtyStr.contains('¾')) qty = 0.75;
       else if (qtyStr.contains('⅓')) qty = 0.33;
       else if (qtyStr.contains('⅔')) qty = 0.67;

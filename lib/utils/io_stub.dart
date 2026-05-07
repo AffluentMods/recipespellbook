@@ -2,6 +2,7 @@
 /// On native platforms, this file is never used — dart:io is imported instead.
 /// On web, these stubs satisfy the compiler but should never be called
 /// (all web code paths should be guarded with kIsWeb checks).
+library;
 
 // ignore_for_file: avoid_unused_constructor_parameters
 

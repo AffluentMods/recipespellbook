@@ -1,7 +1,6 @@
 import 'dart:convert';
 import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:drift/drift.dart' as drift;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -279,7 +278,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
         } else if (_importedCount == 1 && lastId != null) {
           AppSnackbar.successWithAction(
             navContext,
-            '${_importedCount} recipe imported$imgFailSuffix',
+            '$_importedCount recipe imported$imgFailSuffix',
             actionLabel: l10n.actionView,
             onAction: () => router.push('/recipe/$lastId'),
           );

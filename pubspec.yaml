@@ -70,13 +70,14 @@ dependencies:
   video_player: ^2.9.2
   window_manager: ^0.4.3
 
+  flutter_native_splash: ^2.3.8
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
   drift_dev: ^2.19.0
   build_runner: ^2.4.13
-  flutter_native_splash: ^2.3.8
   flutter_launcher_icons: ^0.13.1
   msix: ^3.16.8
 

@@ -1,5 +1,6 @@
 /// Web implementation — no local file access.
 /// Shows network images or placeholder.
+library;
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 

@@ -226,7 +226,9 @@ class KitchenBuddyShop {
     if (ownedItems.contains(item.id)) return false;
     if (item.price > coins) return false;
     if (item.requiredAchievementId != null &&
-        !completedAchievements.contains(item.requiredAchievementId)) return false;
+        !completedAchievements.contains(item.requiredAchievementId)) {
+      return false;
+    }
     return true;
   }
 }

@@ -2811,9 +2811,9 @@
   "communitySignInToPublishMessage": "You need an account to share cookbooks with the community.",
   "communityGoToSettings": "Go to Settings",
   "communityNoCookbooksToPublish": "No cookbooks to publish",
-  "communityPublishInfo": "Cookbooks need at least 10 recipes to publish. Your recipes will be shared as a snapshot — updates won't sync.",
+  "communityPublishInfo": "Cookbooks need at least 5 recipes to publish. Your recipes will be shared as a snapshot — updates won't sync.",
   "communitySelectCookbook": "Select a cookbook to publish",
-  "communityNeedMinRecipes": "Need at least 10 recipes to publish (has {count})",
+  "communityNeedMinRecipes": "Need at least 5 recipes to publish (has {count})",
   "@communityNeedMinRecipes": {
     "placeholders": {
       "count": {
@@ -2842,7 +2842,7 @@
     }
   },
   "communityPublishFailed": "Publish failed",
-  "communityRecipeCountNeedMore": "{count} recipes (need 10+)",
+  "communityRecipeCountNeedMore": "{count} recipes (need 5+)",
   "@communityRecipeCountNeedMore": {
     "placeholders": {
       "count": {
@@ -5007,5 +5007,13 @@
   "editAsText": "Edit as text",
   "editAsList": "Edit as list",
   "stepsBulkEditHint": "Separate each step with a blank line",
-  "stepsBulkEditImagesWarning": "Some step photos may be lost if you change the number of steps."
+  "stepsBulkEditImagesWarning": "Some step photos may be lost if you change the number of steps.",
+
+  "publishToCommunity": "Publish to community",
+  "publishSingleRecipeTitle": "Publish recipe",
+  "publishSingleRecipeBody": "Share this recipe to the community feed. Updates won't sync — re-publish to push changes.",
+  "publishSingleRecipeAction": "Publish",
+  "publishSingleRecipeSuccess": "Published!",
+  "creatorsYouFollow": "Creators you follow",
+  "noCreatorsYouFollow": "Follow creators to see their latest publications here."
 }
