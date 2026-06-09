@@ -155,6 +155,8 @@ class CommunityDetail {
 }
 
 class CommunityRecipe {
+  /// Server-side recipe id. Needed for "I cooked this" + per-recipe download.
+  final String? id;
   final String title;
   final String? description;
   final String? servings;
@@ -171,17 +173,22 @@ class CommunityRecipe {
   final List<CommunityStep> steps;
   final List<String> tags;
   final List<CommunityRecipeLink> recipeLinks;
+  /// Distinct-user "I cooked this" count. Surfaced on detail screens.
+  final int cookCount;
 
   const CommunityRecipe({
+    this.id,
     required this.title, this.description, this.servings,
     this.prepTimeMinutes, this.cookTimeMinutes, this.sourceUrl,
     this.imagePath, this.categoryId, this.courseId,
     this.rating, this.notes, this.nutritionJson,
     required this.ingredients, required this.steps, required this.tags,
     this.recipeLinks = const [],
+    this.cookCount = 0,
   });
 
   factory CommunityRecipe.fromJson(Map<String, dynamic> json) => CommunityRecipe(
+    id: json['id'] as String?,
     title: json['title'] as String? ?? 'Untitled',
     description: json['description'] as String?,
     servings: json['servings'] as String?,
@@ -198,6 +205,7 @@ class CommunityRecipe {
     steps: (json['steps'] as List?)?.map((s) => CommunityStep.fromJson(s as Map<String, dynamic>)).toList() ?? [],
     tags: (json['tags'] as List?)?.map((t) => t.toString()).toList() ?? [],
     recipeLinks: (json['recipeLinks'] as List?)?.map((l) => CommunityRecipeLink.fromJson(l as Map<String, dynamic>)).toList() ?? [],
+    cookCount: (json['cookCount'] as num?)?.toInt() ?? 0,
   );
 }
 
@@ -388,6 +396,13 @@ class MyPublication {
   );
 
   bool get isSingleRecipe => kind == 'recipe';
+}
+
+/// Server-side state of a "I cooked this" reaction on a community recipe.
+class CookedState {
+  final bool cooked;
+  final int cookCount;
+  const CookedState({required this.cooked, required this.cookCount});
 }
 
 /// Creator I follow, plus a preview of their latest publication.
@@ -876,6 +891,77 @@ class CommunityService {
     } catch (e) {
       debugPrint('[Community] trackRecipeDownload: $e');
     }
+  }
+
+  // ────────────────────────────────────
+  //  "I cooked this" reactions
+  // ────────────────────────────────────
+
+  /// Toggle the current user's "cooked" reaction on a community recipe.
+  /// Pass [cooked]: true to set, false to clear. Returns the updated
+  /// state from the server, or null on failure.
+  Future<CookedState?> setRecipeCooked(String recipeId, bool cooked) async {
+    try {
+      final r = await _auth.post(
+        '/v1/community/recipes/$recipeId/cooked',
+        {'cooked': cooked},
+      );
+      if (r.statusCode == 200) {
+        final data = jsonDecode(r.body) as Map<String, dynamic>;
+        return CookedState(
+          cooked: data['cooked'] as bool? ?? cooked,
+          cookCount: (data['cookCount'] as num?)?.toInt() ?? 0,
+        );
+      }
+    } catch (e) {
+      debugPrint('[Community] setRecipeCooked: $e');
+    }
+    return null;
+  }
+
+  /// Get current "cooked" state for a recipe (and total count). Works
+  /// without auth — `cooked` will be false for signed-out callers.
+  Future<CookedState?> getRecipeCookedState(String recipeId) async {
+    try {
+      final r = await _auth.get('/v1/community/recipes/$recipeId/cooked');
+      if (r.statusCode == 200) {
+        final data = jsonDecode(r.body) as Map<String, dynamic>;
+        return CookedState(
+          cooked: data['cooked'] as bool? ?? false,
+          cookCount: (data['cookCount'] as num?)?.toInt() ?? 0,
+        );
+      }
+    } catch (e) {
+      debugPrint('[Community] getRecipeCookedState: $e');
+    }
+    return null;
+  }
+
+  // ────────────────────────────────────
+  //  Replace publication recipes (republish-to-update content)
+  // ────────────────────────────────────
+
+  /// Atomically replace the recipes of a publication the caller owns.
+  /// Keeps download counts, ratings, and follower notifications intact.
+  Future<bool> replacePublicationRecipes(
+    String publicationId, {
+    required List<Map<String, dynamic>> recipes,
+    int? imageCount,
+    int? totalImageBytes,
+    String? imagePath,
+  }) async {
+    try {
+      final r = await _auth.put('/v1/community/$publicationId/recipes', {
+        'recipes': recipes,
+        if (imageCount != null) 'imageCount': imageCount,
+        if (totalImageBytes != null) 'totalImageBytes': totalImageBytes,
+        if (imagePath != null) 'imagePath': imagePath,
+      });
+      return r.statusCode == 200;
+    } catch (e) {
+      debugPrint('[Community] replacePublicationRecipes: $e');
+    }
+    return false;
   }
 
   // ────────────────────────────────────

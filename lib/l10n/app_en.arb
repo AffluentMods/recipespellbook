@@ -5015,5 +5015,36 @@
   "publishSingleRecipeAction": "Publish",
   "publishSingleRecipeSuccess": "Published!",
   "creatorsYouFollow": "Creators you follow",
-  "noCreatorsYouFollow": "Follow creators to see their latest publications here."
+  "noCreatorsYouFollow": "Follow creators to see their latest publications here.",
+
+  "shoppingAlsoAddToMealPlan": "Also add to meal plan",
+  "shoppingMealPlanAddedCount": "{count, plural, =1{Added 1 recipe to meal plan} other{Added {count} recipes to meal plan}}",
+  "@shoppingMealPlanAddedCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "communityICookedThis": "I cooked this",
+  "communityICookedThisActive": "Cooked",
+  "communityRepublishRecipes": "Update published version",
+  "communityRepublishRecipesBody": "Replaces the published recipe content with your current version. Ratings and downloads are kept.",
+  "communityRepublishRecipesAction": "Update",
+  "communityRepublishSuccess": "Published version updated",
+  "actionUndo": "Undo",
+  "recipeDeleted": "Recipe deleted",
+  "shoppingItemRemoved": "Item removed",
+  "shoppingItemsRemoved": "{count, plural, =1{1 item removed} other{{count} items removed}}",
+  "@shoppingItemsRemoved": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "publicationUnpublished": "Unpublished",
+  "cookModeVoiceTitle": "Voice control",
+  "cookModeVoiceListening": "Listening… say next, back, pause, or set timer",
+  "cookModeVoiceUnavailable": "Voice control unavailable on this device",
+
+  "chartCompactDonut": "Compact",
+  "nutritionPaletteTitle": "Color palette",
+  "paletteClassic": "Classic",
+  "paletteWarm": "Warm",
+  "paletteCool": "Cool",
+  "paletteMono": "Mono"
 }

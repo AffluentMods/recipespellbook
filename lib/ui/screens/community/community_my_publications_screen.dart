@@ -86,6 +86,34 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
     }
   }
 
+  Future<void> _republish(MyPublication pub) async {
+    final l10n = AppLocalizations.of(context)!;
+    // Confirm — replacement is destructive on the recipe content side
+    // (server deletes old recipe rows in the same transaction). Stats
+    // are preserved.
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.communityRepublishRecipes),
+        content: Text(l10n.communityRepublishRecipesBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.actionCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.communityRepublishRecipesAction),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    // Hand off to the publish screen in republish mode. It runs the
+    // normal publish UI but the final API call swaps to PUT /recipes.
+    context.push('/community/publish?republish=${pub.id}');
+  }
+
   void _confirmUnpublish(MyPublication pub) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
@@ -262,6 +290,7 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
                       pub: _pubs[i],
                       onUnpublish: () => _confirmUnpublish(_pubs[i]),
                       onEdit: () => _editPublication(_pubs[i]),
+                      onRepublish: () => _republish(_pubs[i]),
                     );
                   }
                   // "Publish another" nudge
@@ -371,12 +400,24 @@ class _UploadProgressBanner extends StatelessWidget {
 //  PUBLICATION CARD (vertical layout)
 // ════════════════════════════════════════════
 
+/// Card-level callback for "Update published recipes". Lifted to the
+/// parent so the rebuild flow (load publications → tile picks the
+/// matching cookbook → submit) lives next to the rest of the publish
+/// state, not inside this widget tree.
+typedef _OnRepublishCallback = Future<void> Function(MyPublication pub);
+
 class _PublicationCard extends StatelessWidget {
   final MyPublication pub;
   final VoidCallback onUnpublish;
   final VoidCallback onEdit;
+  final VoidCallback? onRepublish;
 
-  const _PublicationCard({required this.pub, required this.onUnpublish, required this.onEdit});
+  const _PublicationCard({
+    required this.pub,
+    required this.onUnpublish,
+    required this.onEdit,
+    this.onRepublish,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -536,6 +577,26 @@ class _PublicationCard extends StatelessWidget {
                     ),
                   ],
                 ),
+
+                // Republish-to-update \u2014 keeps stats stable, only swaps
+                // out the recipe content. Cookbook publications need a
+                // matching local cookbook of the same title; single-recipe
+                // pubs reuse the original recipe (matched by title).
+                if (onRepublish != null) ...[
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 40,
+                    width: double.infinity,
+                    child: TextButton.icon(
+                      onPressed: onRepublish,
+                      icon: const Icon(Icons.cloud_sync_outlined, size: 18),
+                      label: Text(l10n.communityRepublishRecipes),
+                      style: TextButton.styleFrom(
+                        foregroundColor: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ],
 
                 // Moderation notice
                 if (pub.status == 'pending_review' || pub.status == 'removed') ...[

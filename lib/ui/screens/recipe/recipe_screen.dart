@@ -525,6 +525,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   scaleFactor: _scaleFactor,
                   servings: _recipe!.servings,
                   chartStyle: ref.watch(settingsProvider).nutritionChartStyle,
+                  palette: ref.watch(settingsProvider).nutritionPalette,
                   enabledNutrients: ref.watch(settingsProvider).enabledNutrients,
                   onEmptyTap: _showNutritionCalculation,
                 ),
@@ -641,6 +642,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
               scaleFactor: _scaleFactor,
               servings: _recipe!.servings,
               chartStyle: ref.watch(settingsProvider).nutritionChartStyle,
+              palette: ref.watch(settingsProvider).nutritionPalette,
               enabledNutrients: ref.watch(settingsProvider).enabledNutrients,
               onEmptyTap: _showNutritionCalculation,
             ),
@@ -1714,7 +1716,16 @@ class _RecipeAppBar extends StatelessWidget {
       await dao.moveToTrash(recipe.id);
       if (context.mounted) {
         context.pop();
-        AppSnackbar.info(context, l10n.recipeDeleted);
+        // Soft-delete + 5s undo. moveToTrash sets `deletedAt` rather
+        // than dropping the row, so restoreRecipe is a one-liner.
+        AppSnackbar.successWithAction(
+          context,
+          l10n.recipeDeleted,
+          actionLabel: l10n.actionUndo,
+          onAction: () async {
+            await dao.restoreRecipe(recipe.id);
+          },
+        );
       }
       return;
     }
@@ -1728,14 +1739,24 @@ class _RecipeAppBar extends StatelessWidget {
     );
     if (selection == null || !selection.confirmed) return;
 
-    for (final id in selection.selectedIds) {
+    final deletedIds = selection.selectedIds.toList();
+    for (final id in deletedIds) {
       await dao.moveToTrash(id);
     }
     if (context.mounted) {
       context.pop();
-      AppSnackbar.info(context, selection.selectedIds.length == 1
-          ? l10n.recipeDeleted
-          : '${selection.selectedIds.length} recipes moved to trash');
+      AppSnackbar.successWithAction(
+        context,
+        deletedIds.length == 1
+            ? l10n.recipeDeleted
+            : '${deletedIds.length} recipes moved to trash',
+        actionLabel: l10n.actionUndo,
+        onAction: () async {
+          for (final id in deletedIds) {
+            await dao.restoreRecipe(id);
+          }
+        },
+      );
     }
   }
 }

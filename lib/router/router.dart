@@ -304,7 +304,12 @@ final router = GoRouter(
         GoRoute(
           path: '/community/publish',
           name: 'community-publish',
-          builder: (context, state) => const CommunityPublishScreen(),
+          builder: (context, state) => CommunityPublishScreen(
+            // ?republish=<publicationId> — when present, the publish
+            // flow runs in update mode and swaps the final POST for
+            // PUT /community/:id/recipes (atomic content replace).
+            republishPublicationId: state.uri.queryParameters['republish'],
+          ),
         ),
         GoRoute(
           path: '/community/my-publications',

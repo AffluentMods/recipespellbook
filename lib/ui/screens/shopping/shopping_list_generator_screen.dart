@@ -1,6 +1,8 @@
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
@@ -58,6 +60,18 @@ class _ShoppingListGeneratorScreenState
   String _newListName = '';
   bool _isCreatingNewList = false;
   bool _isAdding = false;
+
+  // Step 2: also-add-to-meal-plan toggle. Pre-checked because the
+  // common case for "I'm shopping from these recipes" is "I plan to
+  // cook them soon"; user can untick if they're just stocking up.
+  bool _alsoAddToMealPlan = true;
+  late DateTime _mealPlanDate = _todayMidnight();
+  String _mealPlanMealType = 'Dinner';
+
+  static DateTime _todayMidnight() {
+    final n = DateTime.now();
+    return DateTime(n.year, n.month, n.day);
+  }
 
   // Expanded recipe cards
   final Set<String> _expandedRecipes = {};
@@ -641,6 +655,24 @@ class _ShoppingListGeneratorScreenState
           ),
         ),
 
+        // ── Also add to meal plan ──
+        // Prominent prechecked card — when the user is generating a
+        // shopping list from recipes, they're usually about to cook
+        // them, so let them schedule it in one tap. Date defaults to
+        // today; meal type defaults to Dinner. User can adjust either
+        // inline before confirming.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: _MealPlanToggleCard(
+            enabled: _alsoAddToMealPlan,
+            date: _mealPlanDate,
+            mealType: _mealPlanMealType,
+            onEnabledChanged: (v) => setState(() => _alsoAddToMealPlan = v),
+            onDateChanged: (d) => setState(() => _mealPlanDate = d),
+            onMealTypeChanged: (t) => setState(() => _mealPlanMealType = t),
+          ),
+        ),
+
         const SizedBox(height: 8),
         Divider(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
 
@@ -846,14 +878,44 @@ class _ShoppingListGeneratorScreenState
         );
       }
 
+      // ── Optionally add the root recipes to the meal plan ──
+      // We only schedule the user-picked (root) recipes — sub-recipes
+      // shouldn't show up as separate meals. We also skip any recipe
+      // that ended up with zero selected ingredients.
+      int mealPlansAdded = 0;
+      if (_alsoAddToMealPlan) {
+        final mealPlanDao = ref.read(mealPlanDaoProvider);
+        final normalizedDate = DateTime(
+          _mealPlanDate.year, _mealPlanDate.month, _mealPlanDate.day,
+        );
+        final now = DateTime.now().millisecondsSinceEpoch;
+        var i = 0;
+        for (final recipe in _result.rootRecipes) {
+          final selected = _selections[recipe.recipeId] ?? const <String>{};
+          if (selected.isEmpty) continue;
+          await mealPlanDao.insertMealPlan(MealPlansCompanion.insert(
+            id: 'meal_${now}_${i++}',
+            date: normalizedDate,
+            mealType: drift.Value(_mealPlanMealType),
+            recipeId: drift.Value(recipe.recipeId),
+          ));
+          mealPlansAdded++;
+        }
+      }
+
       if (mounted) {
         final totalAdded = _totalSelected;
         final router = GoRouter.of(context);
         Navigator.of(context).pop();
         if (context.mounted) {
+          // Surface meal-plan additions in the same snackbar so users
+          // know it actually happened and don't have to dig.
+          final msg = mealPlansAdded > 0
+              ? '${l10n.addedItemsToList(totalAdded)} · ${l10n.shoppingMealPlanAddedCount(mealPlansAdded)}'
+              : l10n.addedItemsToList(totalAdded);
           AppSnackbar.successWithAction(
             context,
-            l10n.addedItemsToList(totalAdded),
+            msg,
             actionLabel: l10n.viewList,
             onAction: () => router.go('/shopping'),
           );
@@ -1718,4 +1780,218 @@ class _CombinedIngredient {
     required this.unit,
     required this.sourceRecipes,
   });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MEAL PLAN TOGGLE CARD
+// Prechecked card on the final review step. Lets the user schedule
+// the recipes onto a specific day + meal type without leaving the
+// shopping flow.
+// ═══════════════════════════════════════════════════════════════════
+
+class _MealPlanToggleCard extends StatelessWidget {
+  final bool enabled;
+  final DateTime date;
+  final String mealType;
+  final ValueChanged<bool> onEnabledChanged;
+  final ValueChanged<DateTime> onDateChanged;
+  final ValueChanged<String> onMealTypeChanged;
+
+  const _MealPlanToggleCard({
+    required this.enabled,
+    required this.date,
+    required this.mealType,
+    required this.onEnabledChanged,
+    required this.onDateChanged,
+    required this.onMealTypeChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    final today = _normalize(DateTime.now());
+    final pickedDate = _normalize(date);
+    final dateLabel = pickedDate == today
+        ? l10n.today
+        : DateFormat.MMMEd().format(pickedDate);
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: enabled
+            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.18)
+            : theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: enabled
+              ? theme.colorScheme.primary.withValues(alpha: 0.35)
+              : theme.colorScheme.outline.withValues(alpha: 0.15),
+          width: enabled ? 1.5 : 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          // Toggle row — whole row tappable
+          InkWell(
+            onTap: () => onEnabledChanged(!enabled),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+              child: Row(
+                children: [
+                  Icon(
+                    enabled ? Icons.event_available : Icons.event_outlined,
+                    color: enabled ? theme.colorScheme.primary : theme.colorScheme.outline,
+                    size: 22,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      l10n.shoppingAlsoAddToMealPlan,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: enabled ? null : theme.colorScheme.outline,
+                      ),
+                    ),
+                  ),
+                  Switch.adaptive(
+                    value: enabled,
+                    onChanged: onEnabledChanged,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Date + meal type row, only when enabled
+          if (enabled)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+              child: Row(
+                children: [
+                  // Date pill
+                  Expanded(
+                    child: _MealPlanInlineButton(
+                      icon: Icons.calendar_today,
+                      label: dateLabel,
+                      onTap: () => _pickDate(context),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Meal-type pill
+                  Expanded(
+                    child: _MealPlanInlineButton(
+                      icon: Icons.restaurant,
+                      label: _localizedMealType(l10n, mealType),
+                      onTap: () => _pickMealType(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickDate(BuildContext context) async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: date,
+      firstDate: DateTime(now.year - 1),
+      lastDate: DateTime(now.year + 2),
+    );
+    if (picked != null) onDateChanged(picked);
+  }
+
+  Future<void> _pickMealType(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final options = <(String, String)>[
+      ('Breakfast', l10n.mealTypeBreakfast),
+      ('Lunch', l10n.mealTypeLunch),
+      ('Dinner', l10n.mealTypeDinner),
+      ('Snack', l10n.mealTypeSnack),
+    ];
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: options.map((opt) {
+            final selected = opt.$1 == mealType;
+            return ListTile(
+              leading: Icon(
+                selected ? Icons.radio_button_checked : Icons.radio_button_off,
+                color: selected ? Theme.of(ctx).colorScheme.primary : null,
+              ),
+              title: Text(opt.$2),
+              onTap: () => Navigator.pop(ctx, opt.$1),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+    if (picked != null) onMealTypeChanged(picked);
+  }
+
+  String _localizedMealType(AppLocalizations l10n, String key) {
+    switch (key) {
+      case 'Breakfast': return l10n.mealTypeBreakfast;
+      case 'Lunch':     return l10n.mealTypeLunch;
+      case 'Dinner':    return l10n.mealTypeDinner;
+      case 'Snack':     return l10n.mealTypeSnack;
+      default:          return key;
+    }
+  }
+
+  static DateTime _normalize(DateTime d) => DateTime(d.year, d.month, d.day);
+}
+
+class _MealPlanInlineButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _MealPlanInlineButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: theme.colorScheme.outline.withValues(alpha: 0.25),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16, color: theme.colorScheme.primary),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label,
+                style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(Icons.expand_more, size: 16, color: theme.colorScheme.outline),
+          ],
+        ),
+      ),
+    );
+  }
 }

@@ -28,7 +28,17 @@ class CommunityPublishScreen extends ConsumerStatefulWidget {
   /// resulting publication is created with kind='recipe'.
   final String? singleRecipeId;
 
-  const CommunityPublishScreen({super.key, this.singleRecipeId});
+  /// When non-null, the flow runs in *republish* mode: the user picks
+  /// a cookbook (or had a single recipe selected) and on submit we
+  /// call PUT /community/:id/recipes instead of POST /community.
+  /// Stats stay intact; only recipe content changes.
+  final String? republishPublicationId;
+
+  const CommunityPublishScreen({
+    super.key,
+    this.singleRecipeId,
+    this.republishPublicationId,
+  });
 
   @override
   ConsumerState<CommunityPublishScreen> createState() => _CommunityPublishScreenState();
@@ -746,6 +756,37 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         totalImages: pathMapping.length,
         skippedImages: skippedImages,
       );
+
+      // Republish-to-update branch: same upload pipeline, different
+      // final API. Stats (downloads, ratings) stay attached to the
+      // existing publication.
+      if (widget.republishPublicationId != null) {
+        final ok = await _community.replacePublicationRecipes(
+          widget.republishPublicationId!,
+          recipes: recipeMaps,
+          imageCount: pathMapping.length,
+          totalImageBytes: totalImageBytes,
+          imagePath: cookbookImagePath,
+        );
+        if (ok) {
+          publishProgressNotifier.value = PublishProgress(
+            status: 'done',
+            uploadedImages: pathMapping.length,
+            totalImages: pathMapping.length,
+            skippedImages: skippedImages,
+            publicationId: widget.republishPublicationId,
+          );
+          if (mounted) {
+            AppSnackbar.success(context, l10n.communityRepublishSuccess);
+          }
+        } else {
+          publishProgressNotifier.value = PublishProgress(
+            status: 'error',
+            errorMessage: l10n.communityPublishingFailed,
+          );
+        }
+        return;
+      }
 
       final result = await _community.publish(
         title: title,

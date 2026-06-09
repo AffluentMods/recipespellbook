@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:recipespellbook/data/nutrition_data.dart';
 import 'package:recipespellbook/database/database.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
@@ -56,6 +58,16 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
   // Page controller for swipeable steps
   late PageController _pageController;
 
+  // ── Voice control ──
+  // Hands-free step navigation while cooking. The mic stays open until
+  // the user toggles it off; we restart listening after each result so
+  // commands keep working without re-tapping. Disabled on web (no
+  // permissions plumbing) and on platforms where init fails.
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _voiceAvailable = false;
+  bool _voiceListening = false;
+  String _lastVoiceText = '';
+
   @override
   void initState() {
     super.initState();
@@ -71,9 +83,110 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
   void dispose() {
     _timer?.cancel();
     _pageController.dispose();
+    if (_voiceListening) _speech.stop();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     WakelockPlus.disable();
     super.dispose();
+  }
+
+  // ── Voice control ────────────────────────────────────────────────
+
+  Future<void> _toggleVoice() async {
+    if (kIsWeb) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.cookModeVoiceUnavailable)),
+      );
+      return;
+    }
+    if (_voiceListening) {
+      await _speech.stop();
+      if (mounted) setState(() => _voiceListening = false);
+      return;
+    }
+    if (!_voiceAvailable) {
+      // Lazy init — avoids the mic-permission prompt on screen open.
+      try {
+        _voiceAvailable = await _speech.initialize(
+          onStatus: (s) {
+            // Auto-restart after a "done" result so the user doesn't
+            // have to tap again between commands.
+            if (s == 'done' && _voiceListening && mounted) {
+              _speech.listen(
+                onResult: _handleVoiceResult,
+                listenFor: const Duration(seconds: 30),
+                partialResults: false,
+                cancelOnError: false,
+              );
+            }
+            if (s == 'notListening' && mounted) {
+              setState(() {});
+            }
+          },
+          onError: (e) {
+            // Don't tear down on transient "no_match" — that fires
+            // whenever the user just doesn't say anything in time.
+            debugPrint('[Voice] error: ${e.errorMsg}');
+          },
+        );
+      } catch (e) {
+        _voiceAvailable = false;
+      }
+      if (!_voiceAvailable) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.cookModeVoiceUnavailable)),
+      );
+        }
+        return;
+      }
+    }
+    await _speech.listen(
+      onResult: _handleVoiceResult,
+      listenFor: const Duration(seconds: 30),
+      partialResults: false,
+      cancelOnError: false,
+    );
+    if (mounted) setState(() => _voiceListening = true);
+  }
+
+  void _handleVoiceResult(dynamic result) {
+    final text = (result.recognizedWords as String? ?? '').toLowerCase().trim();
+    if (text.isEmpty || !mounted) return;
+    setState(() => _lastVoiceText = text);
+
+    // Match coarse commands. Short circuit on first hit so "set timer
+    // for the next ten minutes" doesn't also trigger "next".
+    if (_matches(text, const ['next', 'forward', 'continue'])) {
+      _nextStep();
+      return;
+    }
+    if (_matches(text, const ['back', 'previous', 'go back'])) {
+      _previousStep();
+      return;
+    }
+    if (_matches(text, const ['pause', 'stop', 'stop timer', 'cancel timer'])) {
+      if (_timerRunning) _stopTimer();
+      return;
+    }
+    // "set timer for 5 minutes" / "timer 90 seconds"
+    final mTimer = RegExp(r'(?:set\s+)?timer\s+(?:for\s+)?(\d+)\s*(minute|minutes|min|second|seconds|sec)?')
+        .firstMatch(text);
+    if (mTimer != null) {
+      final n = int.tryParse(mTimer.group(1)!) ?? 0;
+      final unit = mTimer.group(2) ?? 'minute';
+      final seconds = unit.startsWith('sec') ? n : n * 60;
+      if (seconds > 0) _startTimer(seconds);
+      return;
+    }
+  }
+
+  bool _matches(String text, List<String> phrases) {
+    for (final p in phrases) {
+      if (text == p || text.contains(' $p ') || text.startsWith('$p ') || text.endsWith(' $p')) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Future<void> _loadRecipe() async {
@@ -219,6 +332,16 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
 
     return Scaffold(
       backgroundColor: Colors.black,
+      // Voice control toggle floats above the bottom bar so the user
+      // can find it without leaving the recipe view. Hidden on web.
+      floatingActionButton: kIsWeb ? null : FloatingActionButton(
+        backgroundColor: _voiceListening ? const Color(0xFFE8A860) : Colors.black54,
+        foregroundColor: Colors.white,
+        onPressed: _toggleVoice,
+        tooltip: l10n.cookModeVoiceTitle,
+        child: Icon(_voiceListening ? Icons.mic : Icons.mic_none),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: SafeArea(
         child: Column(
           children: [
@@ -239,6 +362,30 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
               onFontSize: () => showFontSizeSheet(context),
               onExit: _confirmExit,
             ),
+
+            // Voice control "listening" hint banner
+            if (_voiceListening)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                color: const Color(0xFFE8A860).withValues(alpha: 0.18),
+                child: Row(
+                  children: [
+                    const Icon(Icons.graphic_eq, size: 14, color: Color(0xFFE8A860)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _lastVoiceText.isNotEmpty
+                            ? '"$_lastVoiceText"'
+                            : l10n.cookModeVoiceListening,
+                        style: const TextStyle(color: Colors.white70, fontSize: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
             // Nutrition banner (when toggled on)
             if (_showNutrition && _nutrition != null && _nutrition!.hasAnyData)

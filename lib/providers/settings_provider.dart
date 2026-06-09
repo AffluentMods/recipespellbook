@@ -24,6 +24,75 @@ enum NutritionChartStyle {
   donut,
   bars,
   numbers,
+  /// Compact ring + macros-on-the-right layout. Donut shrinks, big
+  /// calorie number sits in the center, three macro stats stack to the
+  /// right with percentages on top. Densest of the four.
+  compactDonut,
+}
+
+/// Color set used by nutrition layouts. Picked separately from the chart
+/// style so users can mix-and-match (e.g. "compact donut + warm").
+enum NutritionPalette {
+  /// Classic green/blue/orange — the original.
+  classic,
+  /// Saturated warm — pumpkin / magenta / teal. Matches the dark-mode
+  /// screenshot that inspired the compact layout.
+  warm,
+  /// Cool: indigo / cyan / lime.
+  cool,
+  /// Monochrome (single accent shaded for each macro). Subtle.
+  mono,
+}
+
+/// Resolves the three macro colors (protein, carbs, fat) for a given
+/// palette. Stays a pure function so we can call it from any widget
+/// without pulling Riverpod into a leaf.
+class NutritionColors {
+  final Color protein;
+  final Color carbs;
+  final Color fat;
+  final Color calories;
+  const NutritionColors({
+    required this.protein,
+    required this.carbs,
+    required this.fat,
+    required this.calories,
+  });
+
+  static NutritionColors of(NutritionPalette palette) {
+    switch (palette) {
+      case NutritionPalette.classic:
+        return const NutritionColors(
+          protein: Color(0xFF66BB6A),  // brighter green
+          carbs: Color(0xFF42A5F5),    // brighter blue
+          fat: Color(0xFFFFA726),      // brighter orange
+          calories: Color(0xFFFF7043),
+        );
+      case NutritionPalette.warm:
+        return const NutritionColors(
+          protein: Color(0xFFFFB74D),  // pumpkin
+          carbs: Color(0xFF26C6DA),    // teal
+          fat: Color(0xFFEC407A),      // magenta
+          calories: Color(0xFFFFB74D),
+        );
+      case NutritionPalette.cool:
+        return const NutritionColors(
+          protein: Color(0xFF9CCC65),  // lime
+          carbs: Color(0xFF5C6BC0),    // indigo
+          fat: Color(0xFF26C6DA),      // cyan
+          calories: Color(0xFF7986CB),
+        );
+      case NutritionPalette.mono:
+        // Three shades of the same hue (warm amber). Stays calm but
+        // still segments visually.
+        return const NutritionColors(
+          protein: Color(0xFFFFB300),
+          carbs: Color(0xFFFF8F00),
+          fat: Color(0xFFE65100),
+          calories: Color(0xFFFFB300),
+        );
+    }
+  }
 }
 
 /// Ingredient display layout in recipe view and print
@@ -62,6 +131,7 @@ class AppSettings {
   // Nutrition display settings
   final NutritionDisplayMode defaultNutritionView;
   final NutritionChartStyle nutritionChartStyle;
+  final NutritionPalette nutritionPalette;
   final bool showExpandedNutrition;
   final Set<String> enabledNutrients;
 
@@ -111,6 +181,7 @@ class AppSettings {
     this.recipeEditLayoutMode = RecipeEditLayoutMode.stacked,
     this.defaultNutritionView = NutritionDisplayMode.perServing,
     this.nutritionChartStyle = NutritionChartStyle.donut,
+    this.nutritionPalette = NutritionPalette.classic,
     this.showExpandedNutrition = false,
     this.textScaleFactor = 1.0,
     this.weekStartDay = 1,
@@ -145,6 +216,7 @@ class AppSettings {
     RecipeEditLayoutMode? recipeEditLayoutMode,
     NutritionDisplayMode? defaultNutritionView,
     NutritionChartStyle? nutritionChartStyle,
+    NutritionPalette? nutritionPalette,
     bool? showExpandedNutrition,
     Set<String>? enabledNutrients,
     double? textScaleFactor,
@@ -177,6 +249,7 @@ class AppSettings {
       recipeEditLayoutMode: recipeEditLayoutMode ?? this.recipeEditLayoutMode,
       defaultNutritionView: defaultNutritionView ?? this.defaultNutritionView,
       nutritionChartStyle: nutritionChartStyle ?? this.nutritionChartStyle,
+      nutritionPalette: nutritionPalette ?? this.nutritionPalette,
       showExpandedNutrition: showExpandedNutrition ?? this.showExpandedNutrition,
       enabledNutrients: enabledNutrients ?? this.enabledNutrients,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
@@ -302,6 +375,12 @@ class SettingsNotifier extends Notifier<AppSettings> {
     final chartStyle = NutritionChartStyle.values.firstWhere(
           (e) => e.name == chartStyleString,
       orElse: () => NutritionChartStyle.donut,
+    );
+
+    final paletteString = prefs.getString('nutritionPalette') ?? 'classic';
+    final palette = NutritionPalette.values.firstWhere(
+          (e) => e.name == paletteString,
+      orElse: () => NutritionPalette.classic,
     );
 
     final showExpandedNutrition = prefs.getBool('showExpandedNutrition') ?? false;
@@ -435,6 +514,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
       recipeEditLayoutMode: RecipeEditLayoutMode.values[editLayoutIndex],
       defaultNutritionView: nutritionView,
       nutritionChartStyle: chartStyle,
+      nutritionPalette: palette,
       showExpandedNutrition: showExpandedNutrition,
       enabledNutrients: enabledNutrients,
       textScaleFactor: textScaleFactor,
@@ -467,6 +547,12 @@ class SettingsNotifier extends Notifier<AppSettings> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('nutritionChartStyle', style.name);
     state = state.copyWith(nutritionChartStyle: style);
+  }
+
+  Future<void> setNutritionPalette(NutritionPalette palette) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('nutritionPalette', palette.name);
+    state = state.copyWith(nutritionPalette: palette);
   }
 
   Future<void> setShowExpandedNutrition(bool show) async {

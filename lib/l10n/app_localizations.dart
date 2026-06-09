@@ -6250,7 +6250,7 @@ abstract class AppLocalizations {
   /// No description provided for @recipeDeleted.
   ///
   /// In en, this message translates to:
-  /// **'Recipe moved to trash'**
+  /// **'Recipe deleted'**
   String get recipeDeleted;
 
   /// No description provided for @deleteRecipeTitle.
@@ -17268,6 +17268,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Follow creators to see their latest publications here.'**
   String get noCreatorsYouFollow;
+
+  /// No description provided for @shoppingAlsoAddToMealPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Also add to meal plan'**
+  String get shoppingAlsoAddToMealPlan;
+
+  /// No description provided for @shoppingMealPlanAddedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Added 1 recipe to meal plan} other{Added {count} recipes to meal plan}}'**
+  String shoppingMealPlanAddedCount(int count);
+
+  /// No description provided for @communityICookedThis.
+  ///
+  /// In en, this message translates to:
+  /// **'I cooked this'**
+  String get communityICookedThis;
+
+  /// No description provided for @communityICookedThisActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooked'**
+  String get communityICookedThisActive;
+
+  /// No description provided for @communityRepublishRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Update published version'**
+  String get communityRepublishRecipes;
+
+  /// No description provided for @communityRepublishRecipesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaces the published recipe content with your current version. Ratings and downloads are kept.'**
+  String get communityRepublishRecipesBody;
+
+  /// No description provided for @communityRepublishRecipesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get communityRepublishRecipesAction;
+
+  /// No description provided for @communityRepublishSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Published version updated'**
+  String get communityRepublishSuccess;
+
+  /// No description provided for @shoppingItemRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Item removed'**
+  String get shoppingItemRemoved;
+
+  /// No description provided for @shoppingItemsRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item removed} other{{count} items removed}}'**
+  String shoppingItemsRemoved(int count);
+
+  /// No description provided for @publicationUnpublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpublished'**
+  String get publicationUnpublished;
+
+  /// No description provided for @cookModeVoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice control'**
+  String get cookModeVoiceTitle;
+
+  /// No description provided for @cookModeVoiceListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening… say next, back, pause, or set timer'**
+  String get cookModeVoiceListening;
+
+  /// No description provided for @cookModeVoiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice control unavailable on this device'**
+  String get cookModeVoiceUnavailable;
+
+  /// No description provided for @chartCompactDonut.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact'**
+  String get chartCompactDonut;
+
+  /// No description provided for @nutritionPaletteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Color palette'**
+  String get nutritionPaletteTitle;
+
+  /// No description provided for @paletteClassic.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic'**
+  String get paletteClassic;
+
+  /// No description provided for @paletteWarm.
+  ///
+  /// In en, this message translates to:
+  /// **'Warm'**
+  String get paletteWarm;
+
+  /// No description provided for @paletteCool.
+  ///
+  /// In en, this message translates to:
+  /// **'Cool'**
+  String get paletteCool;
+
+  /// No description provided for @paletteMono.
+  ///
+  /// In en, this message translates to:
+  /// **'Mono'**
+  String get paletteMono;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

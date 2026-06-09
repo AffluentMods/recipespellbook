@@ -138,6 +138,14 @@ class CommunityRecipeFullScreen extends ConsumerWidget {
 
                   const SizedBox(height: 16),
 
+                  // ── "I cooked this" reaction (only when we have an
+                  // id from the server). Lightweight engagement signal:
+                  // one tap, optimistic update, no extra UI overhead.
+                  if (recipe.id != null) ...[
+                    _CookedToggle(recipeId: recipe.id!, initialCount: recipe.cookCount),
+                    const SizedBox(height: 12),
+                  ],
+
                   // ── Quick stats bar ──
                   _StatsBar(recipe: recipe),
 
@@ -574,4 +582,128 @@ class _StepCard extends StatelessWidget {
     );
   }
 
+}
+
+// ════════════════════════════════════════════
+//  "I COOKED THIS" TOGGLE
+// ════════════════════════════════════════════
+
+/// Compact pill-style button that lets the signed-in user mark a
+/// community recipe as "cooked", with an optimistic count update so
+/// the tap feels instant. Refetches state on mount so the count is
+/// fresh even when navigating from a stale list payload.
+class _CookedToggle extends ConsumerStatefulWidget {
+  final String recipeId;
+  final int initialCount;
+
+  const _CookedToggle({required this.recipeId, required this.initialCount});
+
+  @override
+  ConsumerState<_CookedToggle> createState() => _CookedToggleState();
+}
+
+class _CookedToggleState extends ConsumerState<_CookedToggle> {
+  late int _count = widget.initialCount;
+  bool _cooked = false;
+  bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadState();
+  }
+
+  Future<void> _loadState() async {
+    final state = await CommunityService.instance.getRecipeCookedState(widget.recipeId);
+    if (state != null && mounted) {
+      setState(() {
+        _cooked = state.cooked;
+        _count = state.cookCount;
+      });
+    }
+  }
+
+  Future<void> _toggle() async {
+    if (_busy) return;
+    final desired = !_cooked;
+
+    // Optimistic update — feels instant, server is just confirming.
+    setState(() {
+      _busy = true;
+      _cooked = desired;
+      _count = (desired ? _count + 1 : _count - 1).clamp(0, 1 << 30);
+    });
+
+    final state = await CommunityService.instance.setRecipeCooked(widget.recipeId, desired);
+    if (!mounted) return;
+    if (state != null) {
+      setState(() {
+        _cooked = state.cooked;
+        _count = state.cookCount;
+        _busy = false;
+      });
+    } else {
+      // Failed — revert.
+      setState(() {
+        _cooked = !desired;
+        _count = (desired ? _count - 1 : _count + 1).clamp(0, 1 << 30);
+        _busy = false;
+      });
+      AppSnackbar.error(context, AppLocalizations.of(context)!.errorGeneric);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: _toggle,
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: _cooked
+              ? theme.colorScheme.primary.withValues(alpha: 0.16)
+              : theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: _cooked
+                ? theme.colorScheme.primary.withValues(alpha: 0.55)
+                : theme.colorScheme.outline.withValues(alpha: 0.25),
+            width: _cooked ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              _cooked ? Icons.local_fire_department : Icons.local_fire_department_outlined,
+              size: 18,
+              color: _cooked ? theme.colorScheme.primary : theme.colorScheme.outline,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              _cooked
+                  ? AppLocalizations.of(context)!.communityICookedThisActive
+                  : AppLocalizations.of(context)!.communityICookedThis,
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: _cooked ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+              ),
+            ),
+            if (_count > 0) ...[
+              const SizedBox(width: 6),
+              Text(
+                '· $_count',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 }

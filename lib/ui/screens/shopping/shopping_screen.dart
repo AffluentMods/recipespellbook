@@ -3585,8 +3585,30 @@ class _ShoppingItemTile extends ConsumerWidget {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () {
+                        // Snapshot before delete so we can restore if
+                        // the user hits Undo. Editing-sheet delete used
+                        // to be silent — now matches the swipe-to-delete
+                        // behaviour with a 5s undo window.
+                        final snapshot = item;
                         shoppingDao.deleteItem(item.id);
                         Navigator.pop(ctx);
+                        AppSnackbar.successWithAction(
+                          context,
+                          l10n.shoppingItemRemoved,
+                          actionLabel: l10n.actionUndo,
+                          onAction: () {
+                            shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
+                              id: snapshot.id,
+                              listId: snapshot.listId,
+                              name: snapshot.name,
+                              isChecked: drift.Value(snapshot.isChecked),
+                              sortOrder: drift.Value(snapshot.sortOrder),
+                              note: drift.Value(snapshot.note),
+                              shoppingCategoryId: drift.Value(snapshot.shoppingCategoryId),
+                              recipeId: drift.Value(snapshot.recipeId),
+                            ));
+                          },
+                        );
                       },
                       icon: Icon(Icons.delete, color: theme.colorScheme.error),
                       label: Text(l10n.actionDelete, style: TextStyle(color: theme.colorScheme.error)),

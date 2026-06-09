@@ -180,6 +180,7 @@ class NutritionSettingsScreen extends ConsumerWidget {
               nutrition: _sampleNutrition,
               servings: '4',
               chartStyle: settings.nutritionChartStyle,
+              palette: settings.nutritionPalette,
               enabledNutrients: settings.enabledNutrients,
               showSettingsLink: false,
             ),
@@ -200,28 +201,67 @@ class NutritionSettingsScreen extends ConsumerWidget {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SegmentedButton<NutritionChartStyle>(
-              segments: [
-                ButtonSegment(
-                  value: NutritionChartStyle.numbers,
-                  label: Text(l10n.chartNumbers),
-                  icon: const Icon(Icons.tag, size: 18),
-                ),
-                ButtonSegment(
-                  value: NutritionChartStyle.donut,
-                  label: Text(l10n.chartDonut),
-                  icon: const Icon(Icons.donut_large, size: 18),
-                ),
-                ButtonSegment(
-                  value: NutritionChartStyle.bars,
-                  label: Text(l10n.chartBars),
-                  icon: const Icon(Icons.bar_chart, size: 18),
-                ),
+            // SegmentedButton wraps awkwardly with 4 segments on narrow
+            // phones, so let it scroll horizontally if needed.
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SegmentedButton<NutritionChartStyle>(
+                segments: [
+                  ButtonSegment(
+                    value: NutritionChartStyle.numbers,
+                    label: Text(l10n.chartNumbers),
+                    icon: const Icon(Icons.tag, size: 18),
+                  ),
+                  ButtonSegment(
+                    value: NutritionChartStyle.donut,
+                    label: Text(l10n.chartDonut),
+                    icon: const Icon(Icons.donut_large, size: 18),
+                  ),
+                  ButtonSegment(
+                    value: NutritionChartStyle.compactDonut,
+                    label: Text(l10n.chartCompactDonut),
+                    icon: const Icon(Icons.pie_chart_outline, size: 18),
+                  ),
+                  ButtonSegment(
+                    value: NutritionChartStyle.bars,
+                    label: Text(l10n.chartBars),
+                    icon: const Icon(Icons.bar_chart, size: 18),
+                  ),
+                ],
+                selected: {settings.nutritionChartStyle},
+                onSelectionChanged: (selection) {
+                  ref.read(settingsProvider.notifier).setNutritionChartStyle(selection.first);
+                },
+              ),
+            ),
+          ),
+
+          // ─── PALETTE PICKER ───
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(
+              l10n.nutritionPaletteTitle,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final p in NutritionPalette.values)
+                  _PaletteSwatch(
+                    palette: p,
+                    selected: settings.nutritionPalette == p,
+                    label: _paletteLabel(p, l10n),
+                    onTap: () => ref.read(settingsProvider.notifier).setNutritionPalette(p),
+                  ),
               ],
-              selected: {settings.nutritionChartStyle},
-              onSelectionChanged: (selection) {
-                ref.read(settingsProvider.notifier).setNutritionChartStyle(selection.first);
-              },
             ),
           ),
 
@@ -332,6 +372,9 @@ class NutritionWidget extends StatefulWidget {
   final String? servings;
   final double scaleFactor;
   final NutritionChartStyle chartStyle;
+  /// Color set used by the chart. Falls back to classic when omitted —
+  /// keeps existing call-sites working until they pass a value through.
+  final NutritionPalette palette;
   final Set<String> enabledNutrients;
   final bool showSettingsLink;
   final VoidCallback? onEmptyTap;
@@ -342,6 +385,7 @@ class NutritionWidget extends StatefulWidget {
     this.servings,
     this.scaleFactor = 1.0,
     required this.chartStyle,
+    this.palette = NutritionPalette.classic,
     required this.enabledNutrients,
     this.showSettingsLink = true,
     this.onEmptyTap,
@@ -467,6 +511,8 @@ class _NutritionWidgetState extends State<NutritionWidget> {
             _buildDonutView(theme, displayNutrition)
           else if (widget.chartStyle == NutritionChartStyle.bars)
             _buildBarView(theme, displayNutrition)
+          else if (widget.chartStyle == NutritionChartStyle.compactDonut)
+            _buildCompactDonutView(theme, displayNutrition)
           else
             _buildNumbersView(theme, displayNutrition),
 
@@ -607,7 +653,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
                 '${n.calories!.round()}',
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
+                  color: NutritionColors.of(widget.palette).calories,
                 ),
               ),
               const SizedBox(width: 4),
@@ -664,9 +710,10 @@ class _NutritionWidgetState extends State<NutritionWidget> {
     final carbsPct = totalCal > 0 ? carbsCal / totalCal : 0.0;
     final fatPct = totalCal > 0 ? fatCal / totalCal : 0.0;
 
-    final proteinColor = const Color(0xFF4CAF50);
-    final carbsColor = const Color(0xFF2196F3);
-    final fatColor = const Color(0xFFFF9800);
+    final colors = NutritionColors.of(widget.palette);
+    final proteinColor = colors.protein;
+    final carbsColor = colors.carbs;
+    final fatColor = colors.fat;
 
     final enabled = widget.enabledNutrients;
     final servings = _parseServings();
@@ -750,6 +797,132 @@ class _NutritionWidgetState extends State<NutritionWidget> {
     );
   }
 
+  // ─── COMPACT DONUT VIEW ───
+  //
+  // Smaller donut on the left, big calorie number INSIDE the ring,
+  // three macros stacked to the right with `%` on top of each. Reads
+  // closer to the inspiration screenshot than the legacy donut view.
+  Widget _buildCompactDonutView(ThemeData theme, NutritionData n) {
+    final l10n = AppLocalizations.of(context)!;
+    final proteinG = n.protein ?? 0;
+    final carbsG = n.carbohydrates ?? 0;
+    final fatG = n.fat ?? 0;
+
+    final proteinCal = proteinG * 4;
+    final carbsCal = carbsG * 4;
+    final fatCal = fatG * 9;
+    final macroCal = proteinCal + carbsCal + fatCal;
+
+    final proteinPct = macroCal > 0 ? proteinCal / macroCal : 0.0;
+    final carbsPct = macroCal > 0 ? carbsCal / macroCal : 0.0;
+    final fatPct = macroCal > 0 ? fatCal / macroCal : 0.0;
+
+    final colors = NutritionColors.of(widget.palette);
+    final enabled = widget.enabledNutrients;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 120,
+          child: Row(
+            children: [
+              // Donut + centered cal
+              SizedBox(
+                width: 120,
+                height: 120,
+                child: CustomPaint(
+                  painter: _DonutPainter(
+                    segments: [
+                      _DonutSegment(proteinPct, colors.protein),
+                      _DonutSegment(carbsPct, colors.carbs),
+                      _DonutSegment(fatPct, colors.fat),
+                    ],
+                    strokeWidth: 14,
+                    backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.12),
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${n.calories?.round() ?? 0}',
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: theme.colorScheme.onSurface,
+                            height: 1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'cal',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.outline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Three macro stats to the right
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _compactMacroStat(theme, colors.carbs,   '${(carbsPct * 100).round()}%',   '${carbsG.round()} g',   l10n.nutrientCarbs),
+                    _compactMacroStat(theme, colors.fat,     '${(fatPct * 100).round()}%',     '${fatG.round()} g',     l10n.nutrientFat),
+                    _compactMacroStat(theme, colors.protein, '${(proteinPct * 100).round()}%', '${proteinG.round()} g', l10n.nutrientProtein),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Optional extras (fiber/sodium/etc.) below — same logic as donut view
+        if (_hasNonMacroNutrients(enabled, n)) ...[
+          const SizedBox(height: 12),
+          Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
+          const SizedBox(height: 8),
+          ..._buildNutrientRows(theme, n, enabled, skipMacros: true),
+        ],
+      ],
+    );
+  }
+
+  Widget _compactMacroStat(ThemeData theme, Color accent, String pct, String grams, String label) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          pct,
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: accent,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          grams,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.outline,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _legendItem(ThemeData theme, Color color, String label, String value, String pct) {
     return Row(
       children: [
@@ -790,7 +963,8 @@ class _NutritionWidgetState extends State<NutritionWidget> {
 
     return Column(
       children: [
-        // Calories at top
+        // Calories at top — tinted with the chosen palette so the
+        // bars view picks up the user's chosen accent too.
         if (n.calories != null) ...[
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -802,7 +976,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
                 '${n.calories!.round()}',
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
+                  color: NutritionColors.of(widget.palette).calories,
                 ),
               ),
               const SizedBox(width: 4),
@@ -846,9 +1020,21 @@ class _NutritionWidgetState extends State<NutritionWidget> {
         ? (value / info.dailyValue!) * 100
         : null;
 
-    // Color based on %DV
+    // The three macros get a stable palette color so they're
+    // distinguishable at a glance; everything else uses the %DV
+    // threshold gradient (primary → orange → red).
+    final palette = NutritionColors.of(widget.palette);
+    Color? macroOverride;
+    switch (info.key) {
+      case 'protein': macroOverride = palette.protein; break;
+      case 'carbohydrates': macroOverride = palette.carbs; break;
+      case 'fat': macroOverride = palette.fat; break;
+    }
+
     Color barColor;
-    if (dvPct == null) {
+    if (macroOverride != null) {
+      barColor = macroOverride;
+    } else if (dvPct == null) {
       barColor = theme.colorScheme.primary;
     } else if (dvPct > 100) {
       barColor = Colors.red.shade400;
@@ -1063,4 +1249,83 @@ class _NutritionSettingsRoute extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return const NutritionSettingsScreen();
   }
+}
+
+// ============================================================
+// PALETTE PICKER SWATCH
+// ============================================================
+
+String _paletteLabel(NutritionPalette p, AppLocalizations l10n) {
+  switch (p) {
+    case NutritionPalette.classic: return l10n.paletteClassic;
+    case NutritionPalette.warm:    return l10n.paletteWarm;
+    case NutritionPalette.cool:    return l10n.paletteCool;
+    case NutritionPalette.mono:    return l10n.paletteMono;
+  }
+}
+
+/// Small "three-dots" swatch that previews a palette's three macro
+/// colors. The selected one gets a primary-tinted border + label
+/// weight bump so it reads as picked without extra chrome.
+class _PaletteSwatch extends StatelessWidget {
+  final NutritionPalette palette;
+  final bool selected;
+  final String label;
+  final VoidCallback onTap;
+
+  const _PaletteSwatch({
+    required this.palette,
+    required this.selected,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = NutritionColors.of(palette);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected
+              ? theme.colorScheme.primary.withValues(alpha: 0.10)
+              : theme.colorScheme.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.outline.withValues(alpha: 0.2),
+            width: selected ? 1.6 : 1.0,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 3 dots = the 3 macro accents
+            _swatchDot(colors.carbs),
+            const SizedBox(width: 4),
+            _swatchDot(colors.fat),
+            const SizedBox(width: 4),
+            _swatchDot(colors.protein),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _swatchDot(Color c) => Container(
+    width: 12,
+    height: 12,
+    decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+  );
 }

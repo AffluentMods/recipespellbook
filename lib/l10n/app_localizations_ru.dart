@@ -9470,4 +9470,80 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get noCreatorsYouFollow => 'Follow creators to see their latest publications here.';
+
+  @override
+  String get shoppingAlsoAddToMealPlan => 'Also add to meal plan';
+
+  @override
+  String shoppingMealPlanAddedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Added $count recipes to meal plan',
+      one: 'Added 1 recipe to meal plan',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communityICookedThis => 'I cooked this';
+
+  @override
+  String get communityICookedThisActive => 'Cooked';
+
+  @override
+  String get communityRepublishRecipes => 'Update published version';
+
+  @override
+  String get communityRepublishRecipesBody => 'Replaces the published recipe content with your current version. Ratings and downloads are kept.';
+
+  @override
+  String get communityRepublishRecipesAction => 'Update';
+
+  @override
+  String get communityRepublishSuccess => 'Published version updated';
+
+  @override
+  String get shoppingItemRemoved => 'Item removed';
+
+  @override
+  String shoppingItemsRemoved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items removed',
+      one: '1 item removed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationUnpublished => 'Unpublished';
+
+  @override
+  String get cookModeVoiceTitle => 'Voice control';
+
+  @override
+  String get cookModeVoiceListening => 'Listening… say next, back, pause, or set timer';
+
+  @override
+  String get cookModeVoiceUnavailable => 'Voice control unavailable on this device';
+
+  @override
+  String get chartCompactDonut => 'Compact';
+
+  @override
+  String get nutritionPaletteTitle => 'Color palette';
+
+  @override
+  String get paletteClassic => 'Classic';
+
+  @override
+  String get paletteWarm => 'Warm';
+
+  @override
+  String get paletteCool => 'Cool';
+
+  @override
+  String get paletteMono => 'Mono';
 }

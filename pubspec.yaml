@@ -72,6 +72,9 @@ dependencies:
 
   flutter_native_splash: ^2.3.8
 
+  # Voice control in cooking mode (next/back/timer hands-free)
+  speech_to_text: ^7.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
