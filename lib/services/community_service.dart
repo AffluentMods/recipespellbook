@@ -965,6 +965,75 @@ class CommunityService {
   }
 
   // ────────────────────────────────────
+  //  Publish source mapping (local-only)
+  // ────────────────────────────────────
+  //
+  // Publishing is a snapshot — the server doesn't track which local
+  // cookbook / recipe a publication came from. To let "Update published
+  // version" push the right content without making the user re-pick, we
+  // remember the source locally on the device that published. Stored as
+  // a JSON map { publicationId: { "kind": "recipe|cookbook", "sourceId": "..." } }.
+  // Falls back gracefully (picker / message) when the mapping is absent,
+  // e.g. when republishing from a different device.
+
+  static const _publishSourceKey = 'communityPublishSources';
+
+  static Future<void> recordPublishSource(
+    String publicationId, {
+    required String kind,
+    required String sourceId,
+  }) async {
+    if (publicationId.isEmpty || sourceId.isEmpty) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_publishSourceKey);
+      final map = raw != null
+          ? (jsonDecode(raw) as Map<String, dynamic>)
+          : <String, dynamic>{};
+      map[publicationId] = {'kind': kind, 'sourceId': sourceId};
+      await prefs.setString(_publishSourceKey, jsonEncode(map));
+    } catch (e) {
+      debugPrint('[Community] recordPublishSource: $e');
+    }
+  }
+
+  static Future<({String kind, String sourceId})?> lookupPublishSource(
+    String publicationId,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_publishSourceKey);
+      if (raw == null) return null;
+      final map = jsonDecode(raw) as Map<String, dynamic>;
+      final entry = map[publicationId];
+      if (entry is Map) {
+        final kind = entry['kind'] as String?;
+        final sourceId = entry['sourceId'] as String?;
+        if (kind != null && sourceId != null && sourceId.isNotEmpty) {
+          return (kind: kind, sourceId: sourceId);
+        }
+      }
+    } catch (e) {
+      debugPrint('[Community] lookupPublishSource: $e');
+    }
+    return null;
+  }
+
+  static Future<void> removePublishSource(String publicationId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_publishSourceKey);
+      if (raw == null) return;
+      final map = jsonDecode(raw) as Map<String, dynamic>;
+      if (map.remove(publicationId) != null) {
+        await prefs.setString(_publishSourceKey, jsonEncode(map));
+      }
+    } catch (e) {
+      debugPrint('[Community] removePublishSource: $e');
+    }
+  }
+
+  // ────────────────────────────────────
   //  Upload Status
   // ────────────────────────────────────
 

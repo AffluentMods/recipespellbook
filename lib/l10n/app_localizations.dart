@@ -17353,6 +17353,18 @@ abstract class AppLocalizations {
   /// **'Voice control unavailable on this device'**
   String get cookModeVoiceUnavailable;
 
+  /// No description provided for @communityRepublishSourceMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t find the original recipe on this device. Publish it again from the recipe to share an updated version.'**
+  String get communityRepublishSourceMissing;
+
+  /// No description provided for @importNothingSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed — nothing was saved. Please try again.'**
+  String get importNothingSaved;
+
   /// No description provided for @chartCompactDonut.
   ///
   /// In en, this message translates to:

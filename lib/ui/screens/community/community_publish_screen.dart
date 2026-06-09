@@ -34,10 +34,16 @@ class CommunityPublishScreen extends ConsumerStatefulWidget {
   /// Stats stay intact; only recipe content changes.
   final String? republishPublicationId;
 
+  /// When republishing a *cookbook* whose source is known, the cookbook
+  /// to pre-select (skips the picker). Ignored unless
+  /// [republishPublicationId] is also set.
+  final String? republishCookbookId;
+
   const CommunityPublishScreen({
     super.key,
     this.singleRecipeId,
     this.republishPublicationId,
+    this.republishCookbookId,
   });
 
   @override
@@ -82,10 +88,21 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
         }
         setState(() {
           _singleRecipe = recipe;
+          _recipeCount = 1; // single-recipe mode — summary would show 0 otherwise
           _titleController.text = recipe.title;
           _descController.text = recipe.description ?? '';
           _step = 2;
         });
+      });
+    } else if (widget.republishCookbookId != null) {
+      // Republishing a cookbook with a known source — pre-select it so
+      // the user doesn't re-pick (and can't pick the wrong one). If the
+      // cookbook was deleted since publishing, silently fall back to the
+      // picker (we just stay on step 1).
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final cb = await ref.read(cookbookDaoProvider).getCookbookById(widget.republishCookbookId!);
+        if (!mounted || cb == null) return;
+        _selectCookbook(cb);
       });
     }
   }
@@ -800,6 +817,20 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
       );
 
       if (result.success) {
+        // Remember which local recipe/cookbook this publication came
+        // from so "Update published version" can push the right content
+        // later without making the user re-pick.
+        if (result.publicationId != null) {
+          final sourceId = _isSingleRecipeMode ? _singleRecipe?.id : _selectedCookbook?.id;
+          if (sourceId != null && sourceId.isNotEmpty) {
+            await CommunityService.recordPublishSource(
+              result.publicationId!,
+              kind: _isSingleRecipeMode ? 'recipe' : 'cookbook',
+              sourceId: sourceId,
+            );
+          }
+        }
+
         publishProgressNotifier.value = PublishProgress(
           status: 'done',
           uploadedImages: pathMapping.length,

@@ -85,5 +85,9 @@
 		<string>Recipe Spellbook needs camera access to scan recipes from photos and barcodes.</string>
 		<key>NSPhotoLibraryAddUsageDescription</key>
 		<string>Recipe Spellbook needs permission to save recipe images to your photo library.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Recipe Spellbook uses the microphone for hands-free voice commands while you cook.</string>
+		<key>NSSpeechRecognitionUsageDescription</key>
+		<string>Recipe Spellbook uses speech recognition so you can say "next", "back", or "set timer" while cooking.</string>
 	</dict>
 </plist>

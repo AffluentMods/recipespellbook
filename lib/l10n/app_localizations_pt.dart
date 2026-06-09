@@ -9470,6 +9470,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get cookModeVoiceUnavailable => 'Voice control unavailable on this device';
 
   @override
+  String get communityRepublishSourceMissing => 'Couldn\'t find the original recipe on this device. Publish it again from the recipe to share an updated version.';
+
+  @override
+  String get importNothingSaved => 'Import failed — nothing was saved. Please try again.';
+
+  @override
   String get chartCompactDonut => 'Compact';
 
   @override

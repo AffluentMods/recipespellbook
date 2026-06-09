@@ -5041,6 +5041,8 @@
   "cookModeVoiceListening": "Listening… say next, back, pause, or set timer",
   "cookModeVoiceUnavailable": "Voice control unavailable on this device",
 
+  "communityRepublishSourceMissing": "Couldn't find the original recipe on this device. Publish it again from the recipe to share an updated version.",
+  "importNothingSaved": "Import failed — nothing was saved. Please try again.",
   "chartCompactDonut": "Compact",
   "nutritionPaletteTitle": "Color palette",
   "paletteClassic": "Classic",

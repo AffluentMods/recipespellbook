@@ -18,6 +18,9 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
 import '../../../services/barcode_scanner_service.dart';
+import '../../../services/recipe_import_engine.dart';
+import '../../../providers/cookbook_provider.dart';
+import '../import/import_preview_screen.dart';
 import '../../../services/grocery_service.dart';
 import '../../../services/ingredient_suggestion_service.dart';
 import '../../../services/shopping_list_service.dart';
@@ -820,6 +823,40 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     } else if (action == 'searchRecipes') {
       // Navigate to search — user can search for the scanned product
       context.push('/search');
+    } else if (action == 'importFromUrl') {
+      // A recipe-URL QR scanned from the shopping tab. Previously this
+      // action had no handler and was silently dropped (the URL vanished
+      // with no feedback). Route it through the same import engine +
+      // preview the new-recipe dialog uses, into the selected cookbook.
+      final url = result['url'] as String?;
+      if (url == null || url.isEmpty) return;
+      final l10n = AppLocalizations.of(context)!;
+      final messenger = ScaffoldMessenger.of(context);
+      final navigator = Navigator.of(context);
+      final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
+      messenger.showSnackBar(SnackBar(content: Text(l10n.importProgress)));
+      try {
+        final finalUrl = (url.startsWith('http://') || url.startsWith('https://'))
+            ? url
+            : 'https://$url';
+        final recipe = await RecipeImportEngine.parseFromUrl(finalUrl);
+        if (!mounted) return;
+        messenger.hideCurrentSnackBar();
+        navigator.push(MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (_) => ImportPreviewScreen(
+            recipes: [recipe],
+            cookbookId: cookbookId,
+            sourceUrl: finalUrl,
+          ),
+        ));
+      } catch (e) {
+        if (!mounted) return;
+        messenger.hideCurrentSnackBar();
+        messenger.showSnackBar(SnackBar(
+          content: Text(l10n.failedToImport(e.toString().replaceFirst('Exception: ', ''))),
+        ));
+      }
     }
   }
 

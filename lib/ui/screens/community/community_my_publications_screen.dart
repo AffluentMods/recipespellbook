@@ -74,6 +74,10 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
   Future<void> _unpublish(String publicationId) async {
     final l10n = AppLocalizations.of(context)!;
     final ok = await _community.unpublish(publicationId);
+    if (ok) {
+      // Drop the local source mapping — the publication no longer exists.
+      await CommunityService.removePublishSource(publicationId);
+    }
     if (mounted) {
       if (ok) {
         AppSnackbar.success(context, l10n.communityUnpublishSuccess(
@@ -109,9 +113,37 @@ class _CommunityMyPublicationsScreenState extends State<CommunityMyPublicationsS
       ),
     );
     if (ok != true || !mounted) return;
-    // Hand off to the publish screen in republish mode. It runs the
-    // normal publish UI but the final API call swaps to PUT /recipes.
-    context.push('/community/publish?republish=${pub.id}');
+
+    // Resolve which local recipe/cookbook this publication came from.
+    // Recorded at publish time on this device; may be absent if the
+    // publication was created on another device or after a data wipe.
+    final source = await CommunityService.lookupPublishSource(pub.id);
+    if (!mounted) return;
+
+    if (pub.isSingleRecipe) {
+      // A single-recipe publication can ONLY be updated from its source
+      // recipe — there's no cookbook to pick from. If we can't locate
+      // it, bail with a clear message rather than silently doing the
+      // wrong thing (the old behaviour fell through to the cookbook
+      // picker and would replace the recipe with a whole cookbook).
+      if (source != null && source.kind == 'recipe') {
+        // Deleted-recipe case is handled by the publish screen (it pops
+        // with an error if the id no longer resolves).
+        context.push('/community/publish?republish=${pub.id}&recipe=${source.sourceId}');
+      } else {
+        AppSnackbar.error(context, l10n.communityRepublishSourceMissing);
+      }
+      return;
+    }
+
+    // Cookbook publication. With a known source we pre-select it (no
+    // re-picking, no risk of overwriting with the wrong cookbook).
+    // Without one, fall back to the cookbook picker.
+    if (source != null && source.kind == 'cookbook') {
+      context.push('/community/publish?republish=${pub.id}&cookbook=${source.sourceId}');
+    } else {
+      context.push('/community/publish?republish=${pub.id}');
+    }
   }
 
   void _confirmUnpublish(MyPublication pub) {
@@ -399,12 +431,6 @@ class _UploadProgressBanner extends StatelessWidget {
 // ════════════════════════════════════════════
 //  PUBLICATION CARD (vertical layout)
 // ════════════════════════════════════════════
-
-/// Card-level callback for "Update published recipes". Lifted to the
-/// parent so the rebuild flow (load publications → tile picks the
-/// matching cookbook → submit) lives next to the rest of the publish
-/// state, not inside this widget tree.
-typedef _OnRepublishCallback = Future<void> Function(MyPublication pub);
 
 class _PublicationCard extends StatelessWidget {
   final MyPublication pub;

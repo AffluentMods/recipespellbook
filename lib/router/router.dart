@@ -309,6 +309,12 @@ final router = GoRouter(
             // flow runs in update mode and swaps the final POST for
             // PUT /community/:id/recipes (atomic content replace).
             republishPublicationId: state.uri.queryParameters['republish'],
+            // ?recipe=<id> — republish a single-recipe publication from
+            // its source recipe (loads it, skips the cookbook picker).
+            singleRecipeId: state.uri.queryParameters['recipe'],
+            // ?cookbook=<id> — republish a cookbook publication with a
+            // known source (pre-selects it, skips the picker).
+            republishCookbookId: state.uri.queryParameters['cookbook'],
           ),
         ),
         GoRoute(
