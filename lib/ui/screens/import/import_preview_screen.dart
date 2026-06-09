@@ -143,37 +143,6 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
     final errors = <String>[];
     final imageFailures = <String>[];
 
-    // Resolve a guaranteed-valid target cookbook BEFORE inserting.
-    // widget.cookbookId can be a stale/sentinel id — e.g. 'starter' after
-    // the user deleted that cookbook, or a selection that's out of sync.
-    // Foreign-key enforcement is off in this SQLite DB, so inserting a
-    // recipe against a non-existent cookbook does NOT error — it silently
-    // creates an ORPHAN row that never appears in any cookbook view. That
-    // is exactly the "imported 100% but the recipe vanished" bug. Re-point
-    // to a real cookbook (or recreate the default) so the imported recipe
-    // is always findable.
-    String targetCookbookId = widget.cookbookId;
-    final existing = await (db.select(db.cookbooks)
-          ..where((c) => c.id.equals(targetCookbookId) & c.deletedAt.isNull()))
-        .getSingleOrNull();
-    if (existing == null) {
-      final fallback = await (db.select(db.cookbooks)
-            ..where((c) => c.deletedAt.isNull())
-            ..orderBy([(c) => drift.OrderingTerm(expression: c.createdAt)])
-            ..limit(1))
-          .getSingleOrNull();
-      if (fallback != null) {
-        targetCookbookId = fallback.id;
-      } else {
-        // No cookbooks exist at all — recreate the default so we never orphan.
-        targetCookbookId = 'starter';
-        await db.into(db.cookbooks).insert(
-          CookbooksCompanion.insert(id: 'starter', name: 'My Recipes'),
-          mode: drift.InsertMode.insertOrIgnore,
-        );
-      }
-    }
-
     // Phase 1: Download all images in parallel (max 5 concurrent)
     final imageResults = <int, String?>{};
     final imageIndices = <int>[];
@@ -228,7 +197,7 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
         await db.transaction(() async {
           await db.into(db.recipes).insert(RecipesCompanion.insert(
             id: recipeId,
-            cookbookId: targetCookbookId,
+            cookbookId: widget.cookbookId,
             title: recipe.title,
             description: drift.Value(recipe.description),
             servings: drift.Value(recipe.servings),
@@ -246,11 +215,20 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
           await db.batch((batch) {
             for (var i = 0; i < recipe.ingredients.length; i++) {
               final parsed = parseIngredient(recipe.ingredients[i]);
+              // Guard the name against the column constraints (min 1,
+              // max 200). Recipe-site parsers sometimes capture a tip
+              // paragraph as an "ingredient" — without clamping, that one
+              // over-long line throws InvalidDataException and rolls back
+              // the ENTIRE recipe insert (the "imported 100% but the
+              // recipe vanished" bug). Clamp instead of losing everything.
+              var name = parsed.name.trim();
+              if (name.isEmpty) continue; // skip blank lines (violate min:1)
+              if (name.length > 200) name = '${name.substring(0, 197)}…';
               batch.insert(db.ingredients, IngredientsCompanion.insert(
                 id: 'ing_${uuid.v4()}',
                 recipeId: recipeId,
                 sortOrder: i,
-                name: parsed.name,
+                name: name,
                 amount: parsed.amount != null
                     ? drift.Value(formatAmount(parsed.amount!))
                     : const drift.Value.absent(),
@@ -297,39 +275,41 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
           ? ' (${imageFailures.length} image${imageFailures.length == 1 ? '' : 's'} failed to download)'
           : '';
 
-      // Pop the import screen first so snackbar shows on the underlying screen
-      Navigator.of(context).pop();
-
-      // Brief delay for the pop animation, then show result snackbar.
-      // The root navigator context outlives this screen, so the message
-      // survives the pop.
-      await Future.delayed(const Duration(milliseconds: 150));
-      final navContext = router.routerDelegate.navigatorKey.currentContext;
-      if (navContext != null && navContext.mounted) {
-        if (_importedCount == 0) {
-          // Nothing was saved — make the failure LOUD. The progress bar
-          // reaching 100% only means the loop finished, NOT that a recipe
-          // was persisted. Without this branch a total failure closed the
-          // screen silently and the recipe "vanished".
-          AppSnackbar.error(
-            navContext,
-            errors.isNotEmpty
-                ? l10n.failedToImport(errors.first)
-                : l10n.importNothingSaved,
-          );
-        } else if (errors.isNotEmpty) {
-          AppSnackbar.error(navContext, '$_importedCount imported, ${errors.length} failed$imgFailSuffix');
-        } else if (_importedCount == 1 && lastId != null) {
-          AppSnackbar.successWithAction(
-            navContext,
-            '$_importedCount recipe imported$imgFailSuffix',
-            actionLabel: l10n.actionView,
-            onAction: () => router.push('/recipe/$lastId'),
-          );
-        } else {
-          AppSnackbar.success(navContext, '$_importedCount recipes imported$imgFailSuffix');
-        }
+      // Show the result snackbar on THIS screen's context — which sits
+      // below the root Overlay — BEFORE popping. AppSnackbar inserts its
+      // entry into the root overlay (rootOverlay: true), so the message
+      // survives the pop and stays visible on the screen underneath.
+      //
+      // The previous approach showed it on the root navigator's OWN
+      // context after popping, which has no Overlay ancestor (the
+      // Overlay is the navigator's child) — that threw "No Overlay
+      // widget found" and the user got no feedback at all.
+      if (_importedCount == 0) {
+        // Nothing was saved — make the failure LOUD. The progress bar
+        // reaching 100% only means the loop finished, NOT that a recipe
+        // was persisted. Without this branch a total failure closed the
+        // screen silently and the recipe "vanished".
+        AppSnackbar.error(
+          context,
+          errors.isNotEmpty
+              ? l10n.failedToImport(errors.first)
+              : l10n.importNothingSaved,
+        );
+      } else if (errors.isNotEmpty) {
+        AppSnackbar.error(context, '$_importedCount imported, ${errors.length} failed$imgFailSuffix');
+      } else if (_importedCount == 1 && lastId != null) {
+        AppSnackbar.successWithAction(
+          context,
+          '$_importedCount recipe imported$imgFailSuffix',
+          actionLabel: l10n.actionView,
+          onAction: () => router.push('/recipe/$lastId'),
+        );
+      } else {
+        AppSnackbar.success(context, '$_importedCount recipes imported$imgFailSuffix');
       }
+
+      // Now pop the import screen. The root-overlay snackbar persists.
+      Navigator.of(context).pop();
     }
   }
 
