@@ -1357,7 +1357,7 @@ class RecipeImportEngine {
       title: _cleanHtmlText(json['name']?.toString()) ?? 'Imported Recipe',
       description: _cleanHtmlText(json['description']?.toString()),
       imageUrl: _extractImage(json['image']),
-      ingredients: _toStringList(json['recipeIngredient']),
+      ingredients: _filterIngredientProse(_toStringList(json['recipeIngredient'])),
       instructions: _extractJsonInstructions(json['recipeInstructions']),
       prepTimeMinutes: _parseTimeValue(json['prepTime']),
       cookTimeMinutes: _parseTimeValue(json['cookTime']),
@@ -1371,6 +1371,33 @@ class RecipeImportEngine {
   static bool _isRecipeType(dynamic type) {
     if (type == null) return false;
     return type.toString().toLowerCase().contains('recipe');
+  }
+
+  /// Drop "ingredient" lines that are almost certainly prose — tips,
+  /// notes, or instructions that some recipe sites stuff into their
+  /// recipeIngredient data (e.g. "As the curd cooks, whisk slowly…",
+  /// "These bars keep well in the fridge for 4 days…").
+  ///
+  /// Deliberately CONSERVATIVE so real ingredients are never removed: a
+  /// line is only dropped when it is long AND has no leading quantity
+  /// AND reads like a sentence. Real ingredients are short and/or start
+  /// with a quantity, so they pass through untouched.
+  static List<String> _filterIngredientProse(List<String> lines) {
+    bool looksLikeProse(String raw) {
+      final s = raw.trim();
+      if (s.length <= 120) return false; // ingredients are short
+      // A leading quantity (digit or vulgar fraction in the first chars)
+      // strongly indicates a genuine ingredient.
+      final head = s.length >= 24 ? s.substring(0, 24) : s;
+      if (RegExp(r'[0-9¼½¾⅓⅔⅛⅜⅝⅞]').hasMatch(head)) return false;
+      // Sentence-like punctuation mid-line or a trailing period.
+      return RegExp(r'[.!?]\s').hasMatch(s) || s.endsWith('.');
+    }
+    final filtered = lines.where((l) => !looksLikeProse(l)).toList();
+    // Safety net: never let the filter empty out the whole list (in case
+    // a recipe genuinely has unusual long ingredient lines). If it would,
+    // keep the originals rather than returning nothing.
+    return filtered.isEmpty ? lines : filtered;
   }
 
   static ImportedRecipe? _tryMicrodata(Document document) {
@@ -1403,7 +1430,7 @@ class RecipeImportEngine {
       title: root.querySelector('[itemprop="name"]')?.text.trim() ??
           document.querySelector('title')?.text.trim() ??
           'Imported Recipe',
-      ingredients: ingredients,
+      ingredients: _filterIngredientProse(ingredients),
       instructions: instructions,
     );
   }

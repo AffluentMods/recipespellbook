@@ -1289,16 +1289,26 @@ class _IngredientsTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     if (ingredients.isEmpty) return Center(child: Text(l10n.ingredientsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)));
-    return SelectionArea(child: ListView(
+    // NOTE: SingleChildScrollView + Column (not a lazy ListView) on purpose.
+    // SelectionArea over a lazy ListView crashes with "Null check operator
+    // used on a null value" on select-all, because the framework asks
+    // off-screen, not-yet-laid-out children for selection geometry. An
+    // eager Column lays them all out, so select-all/copy works.
+    return SingleChildScrollView(
       key: const PageStorageKey('ingredients_tab'),
       padding: const EdgeInsets.all(16),
-      children: [
-        ...ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: scaleFactor, unitConversion: unitConversion, linkedRecipes: (ingredientLinksMap[ing.id] ?? []).map((info) => info.recipe).toList())),
-        const SizedBox(height: 16),
-        _LargeAddToShoppingButton(onTap: onAddToShopping),
-        const SizedBox(height: 32),
-      ],
-    ));
+      child: SelectionArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: scaleFactor, unitConversion: unitConversion, linkedRecipes: (ingredientLinksMap[ing.id] ?? []).map((info) => info.recipe).toList())),
+            const SizedBox(height: 16),
+            _LargeAddToShoppingButton(onTap: onAddToShopping),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -1311,16 +1321,27 @@ class _InstructionsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     if (steps.isEmpty) return Center(child: Text(l10n.instructionsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)));
-    return SelectionArea(child: ListView(key: const PageStorageKey('instructions_tab'), padding: const EdgeInsets.all(16), children: [
-      ...steps.asMap().entries.map((entry) => _InstructionStep(stepNumber: entry.key + 1, step: entry.value)),
-      if (notes != null && notes!.isNotEmpty) ...[
-        const SizedBox(height: 24),
-        _SectionHeader(title: l10n.recipeFieldNotes),
-        const SizedBox(height: 12),
-        Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)), child: Text(notes!, style: theme.textTheme.bodyMedium)),
-      ],
-      const SizedBox(height: 32),
-    ]));
+    // Eager Column (not lazy ListView) so SelectionArea select-all doesn't
+    // crash on off-screen children — see note in _IngredientsTab.
+    return SingleChildScrollView(
+      key: const PageStorageKey('instructions_tab'),
+      padding: const EdgeInsets.all(16),
+      child: SelectionArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...steps.asMap().entries.map((entry) => _InstructionStep(stepNumber: entry.key + 1, step: entry.value)),
+            if (notes != null && notes!.isNotEmpty) ...[
+              const SizedBox(height: 24),
+              _SectionHeader(title: l10n.recipeFieldNotes),
+              const SizedBox(height: 12),
+              Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)), child: Text(notes!, style: theme.textTheme.bodyMedium)),
+            ],
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
   }
 }
 
