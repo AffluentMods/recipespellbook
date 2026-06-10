@@ -284,6 +284,8 @@ class CommunityRecipeFeedItem {
   final int? cookTimeMinutes;
   final String? courseId;
   final int downloadCount;
+  /// Distinct-user "I cooked this" count from the feed payload.
+  final int cookCount;
   final List<String> tags;
   final List<CommunityIngredient> ingredients;
   final List<CommunityStep> steps;
@@ -292,7 +294,8 @@ class CommunityRecipeFeedItem {
   const CommunityRecipeFeedItem({
     this.id, required this.title, this.description, this.imagePath,
     this.servings, this.prepTimeMinutes, this.cookTimeMinutes,
-    this.courseId, this.downloadCount = 0, this.tags = const [],
+    this.courseId, this.downloadCount = 0, this.cookCount = 0,
+    this.tags = const [],
     this.ingredients = const [], this.steps = const [],
     required this.cookbook,
   });
@@ -309,6 +312,7 @@ class CommunityRecipeFeedItem {
       prepTimeMinutes: json['prepTimeMinutes'] as int?,
       cookTimeMinutes: json['cookTimeMinutes'] as int?,
       downloadCount: json['downloadCount'] as int? ?? 0,
+      cookCount: (json['cookCount'] as num?)?.toInt() ?? 0,
       courseId: json['courseId'] as String?,
       tags: (json['tags'] as List?)?.map((t) => t.toString()).toList() ?? [],
       ingredients: (json['ingredients'] as List?)
