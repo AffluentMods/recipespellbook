@@ -327,6 +327,7 @@ class CommunityRecipeFeedItem {
         publisherId: pub['id'] as String?,
         publisherName: pub['name'] as String? ?? 'Unknown',
         publisherAvatarUrl: pub['avatarUrl'] as String?,
+        kind: cb['kind'] as String? ?? 'cookbook',
       ),
     );
   }
@@ -338,12 +339,18 @@ class CommunityRecipeCookbookInfo {
   final String? publisherId;
   final String publisherName;
   final String? publisherAvatarUrl;
+  /// Source publication kind — 'cookbook' or 'recipe'. When 'recipe',
+  /// cookbook framing (View cookbook, cookbook title row) is hidden.
+  final String kind;
 
   const CommunityRecipeCookbookInfo({
     required this.id, required this.title,
     this.publisherId,
     required this.publisherName, this.publisherAvatarUrl,
+    this.kind = 'cookbook',
   });
+
+  bool get isSingleRecipe => kind == 'recipe';
 }
 
 class CommunityRecipeFeedResult {

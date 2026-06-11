@@ -23,6 +23,67 @@ import '../../widgets/recipe_image.dart';
 // Displays the complete recipe in read-only mode:
 //   hero image, title, description, stats, ingredients, steps, notes.
 
+/// Loads a community recipe by publication id + index, then renders
+/// [CommunityRecipeFullScreen]. Used when the route is entered by URL
+/// only (deep link, or the detail screen's single-recipe redirect) and
+/// no CommunityRecipe object was passed via router extra.
+class CommunityRecipeLoaderScreen extends StatefulWidget {
+  final String publicationId;
+  final int recipeIndex;
+
+  const CommunityRecipeLoaderScreen({
+    super.key,
+    required this.publicationId,
+    required this.recipeIndex,
+  });
+
+  @override
+  State<CommunityRecipeLoaderScreen> createState() => _CommunityRecipeLoaderScreenState();
+}
+
+class _CommunityRecipeLoaderScreenState extends State<CommunityRecipeLoaderScreen> {
+  CommunityRecipe? _recipe;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final detail = await CommunityService.instance.getPublication(widget.publicationId);
+    if (!mounted) return;
+    setState(() {
+      _recipe = (detail != null &&
+              widget.recipeIndex >= 0 &&
+              widget.recipeIndex < detail.recipes.length)
+          ? detail.recipes[widget.recipeIndex]
+          : null;
+      _loading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    final recipe = _recipe;
+    if (recipe == null) {
+      final l10n = AppLocalizations.of(context)!;
+      return Scaffold(
+        appBar: AppBar(),
+        body: Center(child: Text(l10n.errorGeneric)),
+      );
+    }
+    return CommunityRecipeFullScreen(
+      publicationId: widget.publicationId,
+      recipe: recipe,
+    );
+  }
+}
+
 class CommunityRecipeFullScreen extends ConsumerWidget {
   final CommunityRecipe recipe;
   final String publicationId;

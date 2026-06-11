@@ -17365,6 +17365,42 @@ abstract class AppLocalizations {
   /// **'Import failed — nothing was saved. Please try again.'**
   String get importNothingSaved;
 
+  /// No description provided for @communityPublishCookbookOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish a cookbook'**
+  String get communityPublishCookbookOption;
+
+  /// No description provided for @communityPublishCookbookOptionSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Share a whole cookbook (5+ recipes)'**
+  String get communityPublishCookbookOptionSub;
+
+  /// No description provided for @communityPublishSingleRecipeOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish a single recipe'**
+  String get communityPublishSingleRecipeOption;
+
+  /// No description provided for @communityPublishSingleRecipeOptionSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Share one recipe — no cookbook needed'**
+  String get communityPublishSingleRecipeOptionSub;
+
+  /// No description provided for @communityPickRecipeToPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a recipe to publish'**
+  String get communityPickRecipeToPublish;
+
+  /// No description provided for @communitySearchYourRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Search your recipes…'**
+  String get communitySearchYourRecipes;
+
   /// No description provided for @chartCompactDonut.
   ///
   /// In en, this message translates to:

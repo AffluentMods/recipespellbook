@@ -9482,6 +9482,24 @@ class AppLocalizationsEs extends AppLocalizations {
   String get importNothingSaved => 'Import failed — nothing was saved. Please try again.';
 
   @override
+  String get communityPublishCookbookOption => 'Publish a cookbook';
+
+  @override
+  String get communityPublishCookbookOptionSub => 'Share a whole cookbook (5+ recipes)';
+
+  @override
+  String get communityPublishSingleRecipeOption => 'Publish a single recipe';
+
+  @override
+  String get communityPublishSingleRecipeOptionSub => 'Share one recipe — no cookbook needed';
+
+  @override
+  String get communityPickRecipeToPublish => 'Choose a recipe to publish';
+
+  @override
+  String get communitySearchYourRecipes => 'Search your recipes…';
+
+  @override
   String get chartCompactDonut => 'Compact';
 
   @override

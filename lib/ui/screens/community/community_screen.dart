@@ -23,6 +23,7 @@ import '../../widgets/app_snackbar.dart';
 import '../../widgets/community_image.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
+import 'community_publish_screen.dart';
 
 // ════════════════════════════════════════════
 //  COMMUNITY SCREEN — Browse & Search
@@ -158,7 +159,12 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       );
       if (mounted) {
         setState(() {
-          _items = result?.publications ?? [];
+          // The cookbook tab shows cookbook publications only — single
+          // recipes live in the recipes feed. The server filters this
+          // too; this client-side guard covers older backends.
+          _items = (result?.publications ?? [])
+              .where((p) => !p.isSingleRecipe)
+              .toList();
           _hasMore = (result?.page ?? 1) < (result?.totalPages ?? 1);
           _loading = false;
         });
@@ -196,7 +202,10 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       );
       if (mounted) {
         setState(() {
-          _items.addAll(result?.publications ?? []);
+          // Same single-recipe guard as _load (older backends).
+          _items.addAll(
+            (result?.publications ?? []).where((p) => !p.isSingleRecipe),
+          );
           _hasMore = (result?.page ?? 1) < (result?.totalPages ?? 1);
           _loading = false;
         });
@@ -436,7 +445,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                 duration: const Duration(milliseconds: 200),
                 opacity: _fabVisible ? 1.0 : 0.0,
                 child: FloatingActionButton.extended(
-                  onPressed: () => context.push('/community/publish').then((_) { if (mounted) _load(); }),
+                  onPressed: () => _showPublishChooser(context),
                   icon: const Icon(Icons.publish),
                   label: Text(l10n.communityPublish),
                 ),
@@ -483,15 +492,144 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     return _buildRecipeListView(context, theme);
   }
 
+  /// Publish entry point: choose between publishing a whole cookbook
+  /// (the original flow) or a single recipe (search → pick → publish).
+  void _showPublishChooser(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    Responsive.showAdaptiveSheet(
+      context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.menu_book),
+              title: Text(l10n.communityPublishCookbookOption),
+              subtitle: Text(l10n.communityPublishCookbookOptionSub),
+              onTap: () {
+                Navigator.pop(ctx);
+                context.push('/community/publish').then((_) { if (mounted) _load(); });
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.restaurant_menu),
+              title: Text(l10n.communityPublishSingleRecipeOption),
+              subtitle: Text(l10n.communityPublishSingleRecipeOptionSub),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showSingleRecipePicker(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Searchable picker over the user's local recipes; tapping one opens
+  /// the single-recipe publish flow for it.
+  Future<void> _showSingleRecipePicker(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final all = await ref.read(recipeDaoProvider).watchAllRecipesGlobal().first;
+    if (!context.mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        var query = '';
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            final q = query.trim().toLowerCase();
+            final filtered = q.isEmpty
+                ? all
+                : all.where((r) => r.title.toLowerCase().contains(q)).toList();
+            return Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+              child: SizedBox(
+                height: MediaQuery.of(ctx).size.height * 0.7,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      child: Column(
+                        children: [
+                          Text(
+                            l10n.communityPickRecipeToPublish,
+                            style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            autofocus: true,
+                            decoration: InputDecoration(
+                              hintText: l10n.communitySearchYourRecipes,
+                              prefixIcon: const Icon(Icons.search),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                              isDense: true,
+                            ),
+                            onChanged: (v) => setSheetState(() => query = v),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: filtered.isEmpty
+                          ? Center(child: Text(l10n.searchNoResults, style: TextStyle(color: Theme.of(ctx).colorScheme.outline)))
+                          : ListView.builder(
+                              itemCount: filtered.length,
+                              itemBuilder: (_, i) {
+                                final r = filtered[i];
+                                return ListTile(
+                                  leading: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: SizedBox(
+                                      width: 44, height: 44,
+                                      child: RecipeImage.thumbnail(
+                                        imagePath: r.imagePath,
+                                        recipeId: r.id,
+                                        width: 44, height: 44,
+                                      ),
+                                    ),
+                                  ),
+                                  title: Text(r.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  onTap: () {
+                                    Navigator.pop(ctx);
+                                    Navigator.of(context, rootNavigator: true).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => CommunityPublishScreen(singleRecipeId: r.id),
+                                      ),
+                                    ).then((_) { if (mounted) _load(); });
+                                  },
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _onRecipeTap(BuildContext context, CommunityRecipeFeedItem recipe) {
     showDialog(
       context: context,
       builder: (dialogCtx) => _CommunityRecipeFeedPreview(
         recipe: recipe,
-        onViewCookbook: () {
-          Navigator.pop(dialogCtx);
-          context.push('/community/${recipe.cookbook.id}');
-        },
+        // Single-recipe publications have no cookbook to view — null
+        // hides the button and the attribution tap target.
+        onViewCookbook: recipe.cookbook.isSingleRecipe
+            ? null
+            : () {
+                Navigator.pop(dialogCtx);
+                context.push('/community/${recipe.cookbook.id}');
+              },
         onSaveRecipe: () {
           Navigator.pop(dialogCtx);
           _showSaveRecipeSheet(context, recipe);
@@ -500,6 +638,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           Navigator.pop(dialogCtx);
           // Convert feed item to CommunityRecipe for the full screen
           final communityRecipe = CommunityRecipe(
+            id: recipe.id,
+            cookCount: recipe.cookCount,
             title: recipe.title,
             description: recipe.description,
             imagePath: recipe.imagePath,
@@ -1611,7 +1751,9 @@ String _resolveAvatarUrl(String avatarUrl) {
 
 class _CommunityRecipeFeedPreview extends StatelessWidget {
   final CommunityRecipeFeedItem recipe;
-  final VoidCallback onViewCookbook;
+  /// Null when the source publication is a single-recipe upload — there
+  /// is no cookbook to view, so all cookbook framing is hidden.
+  final VoidCallback? onViewCookbook;
   final VoidCallback onSaveRecipe;
   final VoidCallback? onExpandRecipe;
 
@@ -1752,15 +1894,18 @@ class _CommunityRecipeFeedPreview extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            recipe.cookbook.title,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.w600,
+                          // For single-recipe pubs the publication title is
+                          // just the recipe title again — skip the link row.
+                          if (!recipe.cookbook.isSingleRecipe)
+                            Text(
+                              recipe.cookbook.title,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
                           Text(
                             'by ${recipe.cookbook.publisherName}',
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -1904,14 +2049,18 @@ class _CommunityRecipeFeedPreview extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: onViewCookbook,
-                      icon: const Icon(Icons.book, size: 18),
-                      label: Text(l10n.communityViewCookbook),
+                  // No "View cookbook" for single-recipe publications —
+                  // Save expands to full width instead.
+                  if (onViewCookbook != null) ...[
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: onViewCookbook,
+                        icon: const Icon(Icons.book, size: 18),
+                        label: Text(l10n.communityViewCookbook),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
+                    const SizedBox(width: 8),
+                  ],
                   Expanded(
                     child: FilledButton.icon(
                       onPressed: onSaveRecipe,

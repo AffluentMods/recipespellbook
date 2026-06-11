@@ -343,10 +343,25 @@ final router = GoRouter(
           name: 'community-recipe',
           builder: (context, state) {
             final id = state.pathParameters['id']!;
-            final recipe = state.extra as CommunityRecipe;
-            return CommunityRecipeFullScreen(
+            final index = int.tryParse(state.pathParameters['index'] ?? '') ?? 0;
+            // The recipe object is passed via extra when navigating from a
+            // screen that already has it. URL-only navigation (deep links,
+            // pushReplacement redirects for single-recipe publications)
+            // has no extra — the old unconditional cast crashed with
+            // "type 'Null' is not a subtype of type 'CommunityRecipe'".
+            // Fall back to fetching by publication id + index instead.
+            final recipe = state.extra is CommunityRecipe
+                ? state.extra as CommunityRecipe
+                : null;
+            if (recipe != null) {
+              return CommunityRecipeFullScreen(
+                publicationId: id,
+                recipe: recipe,
+              );
+            }
+            return CommunityRecipeLoaderScreen(
               publicationId: id,
-              recipe: recipe,
+              recipeIndex: index,
             );
           },
         ),
