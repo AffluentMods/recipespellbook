@@ -721,7 +721,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         await SyncService.instance.clearLastSyncAt();
       }
     } catch (e) {
+      // The wipe runs in a transaction — an exception means it ROLLED
+      // BACK and nothing was deleted. Don't force-close as if it
+      // succeeded; tell the user and bail so they can retry/report.
       debugPrint('Reset error: $e');
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).maybePop(); // drop progress dialog
+        AppSnackbar.error(context, 'Reset failed — no data was deleted. ($e)');
+      }
+      return;
     }
 
     // Force-close the app so it restarts clean.

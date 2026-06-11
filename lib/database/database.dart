@@ -277,11 +277,23 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> _seedDefaultData() async {
+    // NOTE: every insert here uses insertOrIgnore. This seeder runs on
+    // first launch AND after the reset flows (deleteAllUserData /
+    // deleteLocalRecipeData) — some of which intentionally keep tables
+    // like shopping_categories. A plain insert then hits a UNIQUE
+    // constraint, which aborts the surrounding reset TRANSACTION and
+    // silently rolls the whole wipe back ("delete all data" appearing
+    // to do nothing). insertOrIgnore makes reseeding safe over any
+    // existing state.
+
     // Default cookbook
-    await into(cookbooks).insert(CookbooksCompanion.insert(
-      id: 'starter',
-      name: 'My Recipes',
-    ));
+    await into(cookbooks).insert(
+      CookbooksCompanion.insert(
+        id: 'starter',
+        name: 'My Recipes',
+      ),
+      mode: InsertMode.insertOrIgnore,
+    );
 
     // Default categories
     final defaultCategories = [
@@ -296,12 +308,15 @@ class AppDatabase extends _$AppDatabase {
     await TagsDao(this).seedDefaultTags();
 
     for (final cat in defaultCategories) {
-      await into(categories).insert(CategoriesCompanion.insert(
-        id: cat.$1,
-        name: cat.$2,
-        sortOrder: Value(cat.$3),
-        isDefault: const Value(true),
-      ));
+      await into(categories).insert(
+        CategoriesCompanion.insert(
+          id: cat.$1,
+          name: cat.$2,
+          sortOrder: Value(cat.$3),
+          isDefault: const Value(true),
+        ),
+        mode: InsertMode.insertOrIgnore,
+      );
     }
 
     // Default shopping categories — IDs match ingredient_utils & LocalizedDefaults
@@ -332,20 +347,26 @@ class AppDatabase extends _$AppDatabase {
     ];
 
     for (final cat in defaultShoppingCategories) {
-      await into(shoppingCategories).insert(ShoppingCategoriesCompanion.insert(
-        id: cat.$1,
-        name: cat.$2,
-        sortOrder: Value(cat.$3),
-        isDefault: const Value(true),
-      ));
+      await into(shoppingCategories).insert(
+        ShoppingCategoriesCompanion.insert(
+          id: cat.$1,
+          name: cat.$2,
+          sortOrder: Value(cat.$3),
+          isDefault: const Value(true),
+        ),
+        mode: InsertMode.insertOrIgnore,
+      );
     }
 
     // Default shopping list
-    await into(shoppingLists).insert(ShoppingListsCompanion.insert(
-      id: 'list_default',
-      name: 'Shopping List',
-      isDefault: const Value(true),
-    ));
+    await into(shoppingLists).insert(
+      ShoppingListsCompanion.insert(
+        id: 'list_default',
+        name: 'Shopping List',
+        isDefault: const Value(true),
+      ),
+      mode: InsertMode.insertOrIgnore,
+    );
   }
 }
 

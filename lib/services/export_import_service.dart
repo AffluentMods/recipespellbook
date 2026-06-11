@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../database/database.dart';
 import '../utils/platform_utils.dart';
+import '../utils/zip_stream_stub.dart' if (dart.library.io) '../utils/zip_stream_io.dart';
 import 'backup_reminder_service.dart';
 
 // ════════════════════════════════════════════
@@ -77,7 +78,11 @@ class ExportImportService {
   //  EXPORT — FULL BACKUP (v2)
   // ──────────────────────────────────────────
 
-  Future<Map<String, dynamic>> exportSelective(ExportOptions options) async {
+  /// [embedImages] — when true (default), images are base64-embedded in
+  /// the JSON (standalone .json exports). The streamed zip export passes
+  /// false and gets `localImagePath` fields instead, so image bytes are
+  /// never held in memory.
+  Future<Map<String, dynamic>> exportSelective(ExportOptions options, {bool embedImages = true}) async {
     final data = <String, dynamic>{
       'version': 2,
       'exportedAt': DateTime.now().toIso8601String(),
@@ -85,7 +90,7 @@ class ExportImportService {
     };
 
     if (options.cookbooks) {
-      data['cookbooks'] = await _exportAllCookbooks();
+      data['cookbooks'] = await _exportAllCookbooks(embedImages: embedImages);
     }
     if (options.shoppingLists) {
       data['shoppingLists'] = await _exportShoppingLists();
@@ -114,20 +119,25 @@ class ExportImportService {
   //  EXPORT HELPERS
   // ──────────────────────────────────────────
 
-  Future<List<Map<String, dynamic>>> _exportAllCookbooks() async {
+  Future<List<Map<String, dynamic>>> _exportAllCookbooks({bool embedImages = true}) async {
     final cookbooks = await db.select(db.cookbooks).get();
     final result = <Map<String, dynamic>>[];
     for (final cb in cookbooks) {
       result.add({
         'id': cb.id,
         'name': cb.name,
-        'recipes': await _exportRecipesForCookbook(cb.id),
+        'description': cb.description,
+        // Cookbook covers were missing from exports entirely — restores
+        // lost them. Same embed-vs-path split as recipe images.
+        if (embedImages) 'imageBase64': await _encodeImage(cb.imagePath)
+        else 'localImagePath': cb.imagePath,
+        'recipes': await _exportRecipesForCookbook(cb.id, embedImages: embedImages),
       });
     }
     return result;
   }
 
-  Future<List<Map<String, dynamic>>> _exportRecipesForCookbook(String cookbookId) async {
+  Future<List<Map<String, dynamic>>> _exportRecipesForCookbook(String cookbookId, {bool embedImages = true}) async {
     final recipes = await (db.select(db.recipes)
       ..where((t) => t.cookbookId.equals(cookbookId)))
         .get();
@@ -153,13 +163,14 @@ class ExportImportService {
         ..where((t) => t.recipeId.equals(recipe.id)))
           .get();
 
-      // Encode step images
+      // Encode step images (or pass local paths for the streamed zip export)
       final stepMaps = <Map<String, dynamic>>[];
       for (final s in steps) {
         stepMaps.add({
           'id': s.id, 'sortOrder': s.sortOrder,
           'instruction': s.instruction, 'durationMinutes': s.durationMinutes,
-          'imageBase64': await _encodeImage(s.imagePath),
+          if (embedImages) 'imageBase64': await _encodeImage(s.imagePath)
+          else 'localImagePath': s.imagePath,
         });
       }
 
@@ -178,7 +189,8 @@ class ExportImportService {
         'notes': recipe.notes,
         'nutritionJson': recipe.nutritionJson,
         'createdAt': recipe.createdAt.toIso8601String(),
-        'imageBase64': await _encodeImage(recipe.imagePath),
+        if (embedImages) 'imageBase64': await _encodeImage(recipe.imagePath)
+        else 'localImagePath': recipe.imagePath,
         'tagIds': tagAssocs.map((t) => t.tagId).toList(),
         'ingredients': ingredients.map((i) => {
           'id': i.id, 'sortOrder': i.sortOrder, 'amount': i.amount,
@@ -327,6 +339,22 @@ class ExportImportService {
     for (final cbData in cookbooks) {
       final cbMap = cbData as Map<String, dynamic>;
       final recipes = cbMap['recipes'] as List? ?? [];
+
+      // Cookbook cover
+      final cbId = cbMap['id'] as String? ?? 'cb';
+      final cbBase64 = cbMap.remove('imageBase64') as String?;
+      if (cbBase64 != null && cbBase64.isNotEmpty) {
+        final imgPath = 'images/cookbooks/${cbId}_cover.jpg';
+        if (addedImages.add(imgPath)) {
+          try {
+            archive.addFile(ArchiveFile(imgPath, 0, base64Decode(cbBase64)));
+            imageCount++;
+          } catch (_) {}
+        }
+        cbMap['imagePath'] = imgPath;
+      } else {
+        cbMap['imagePath'] = null;
+      }
       for (final recData in recipes) {
         final r = recData as Map<String, dynamic>;
         final recipeId = r['id'] as String? ?? 'unknown';
@@ -418,14 +446,122 @@ class ExportImportService {
     return Uint8List.fromList(zipBytes!);
   }
 
-  /// Save the full zip export to a file via file picker.
-  Future<bool> saveFullZipExport({void Function(String status)? onProgress}) async {
-    final zipBytes = await exportFullZip(onProgress: onProgress);
+  /// STREAMED full backup export — writes the zip directly to [outPath]
+  /// without ever holding the archive (or any base64 blobs) in memory.
+  ///
+  /// The in-memory [exportFullZip] peaks at roughly 3× the library size
+  /// (base64 JSON + decoded image bytes + final zip). On a 256MB Java
+  /// heap that's a crash for big libraries; this version's peak is one
+  /// image at a time. Use everywhere except web (no file system there).
+  Future<void> exportFullZipToPath(String outPath, {void Function(String status)? onProgress}) async {
+    onProgress?.call('Collecting data...');
+    // No base64 — recipes carry localImagePath fields instead.
+    final data = await exportSelective(const ExportOptions.all(), embedImages: false);
+    final cookbooks = data['cookbooks'] as List? ?? [];
+
+    // Rewrite local image paths to zip-relative ones, collecting the
+    // (local file → zip entry) pairs to stream in afterwards.
+    final imageFiles = <MapEntry<String, String>>[]; // local → zip path
+    final addedImages = <String>{};
+
+    void collectImage(Map<String, dynamic> holder, String? localPath, String zipPath) {
+      if (localPath != null && localPath.isNotEmpty && File(localPath).existsSync()) {
+        holder['imagePath'] = zipPath;
+        if (addedImages.add(zipPath)) {
+          imageFiles.add(MapEntry(localPath, zipPath));
+        }
+      } else {
+        holder['imagePath'] = null;
+      }
+    }
+
+    for (final cbData in cookbooks) {
+      final cbMap = cbData as Map<String, dynamic>;
+      // Cookbook cover
+      final cbId = cbMap['id'] as String? ?? 'cb';
+      collectImage(cbMap, cbMap.remove('localImagePath') as String?, 'images/cookbooks/${cbId}_cover.jpg');
+
+      final recipes = cbMap['recipes'] as List? ?? [];
+      for (final recData in recipes) {
+        final r = recData as Map<String, dynamic>;
+        final recipeId = r['id'] as String? ?? 'unknown';
+        collectImage(r, r.remove('localImagePath') as String?, 'images/recipes/${recipeId}_cover.jpg');
+
+        final steps = r['steps'] as List? ?? [];
+        for (final stepData in steps) {
+          final s = stepData as Map<String, dynamic>;
+          collectImage(s, s.remove('localImagePath') as String?, 'images/recipes/${recipeId}_step_${s['sortOrder']}.jpg');
+        }
+      }
+    }
+
+    int totalRecipes = 0;
+    for (final cb in cookbooks) {
+      totalRecipes += ((cb as Map)['recipes'] as List?)?.length ?? 0;
+    }
+    final manifest = {
+      'app': 'Recipe Spellbook',
+      'version': 2,
+      'exportedAt': DateTime.now().toUtc().toIso8601String(),
+      'cookbookCount': cookbooks.length,
+      'recipeCount': totalRecipes,
+      'imageCount': imageFiles.length,
+      'shoppingListCount': (data['shoppingLists'] as List?)?.length ?? 0,
+      'mealPlanCount': (data['mealPlans'] as List?)?.length ?? 0,
+    };
+
+    onProgress?.call('Writing data...');
+    final writer = StreamedZipWriter()..create(outPath);
+    try {
+      writer.addTextFile('manifest.json',
+          utf8.encode(const JsonEncoder.withIndent('  ').convert(manifest)));
+      writer.addTextFile('data.json',
+          utf8.encode(const JsonEncoder.withIndent('  ').convert(data)));
+
+      // schema.org Recipe JSON-LD files (interop with other apps)
+      for (final cbData in cookbooks) {
+        final cbMap = cbData as Map<String, dynamic>;
+        final cbName = cbMap['name'] as String? ?? 'Cookbook';
+        for (final recData in (cbMap['recipes'] as List? ?? [])) {
+          final r = recData as Map<String, dynamic>;
+          final title = r['title'] as String? ?? 'Untitled';
+          final safeTitle = title.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+          writer.addTextFile('recipes/$safeTitle.json',
+              utf8.encode(const JsonEncoder.withIndent('  ').convert(_toSchemaOrgRecipe(r, cbName))));
+        }
+      }
+
+      // Stream images in one at a time.
+      var done = 0;
+      for (final entry in imageFiles) {
+        try {
+          await writer.addDiskFile(entry.key, entry.value);
+        } catch (_) {
+          // Skip unreadable images rather than failing the whole backup.
+        }
+        done++;
+        if (done % 25 == 0) {
+          onProgress?.call('Adding images ($done/${imageFiles.length})...');
+        }
+      }
+    } finally {
+      await writer.close();
+    }
+  }
+
+  String get _exportFilename {
     final date = DateTime.now();
     final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-    final filename = 'RecipeSpellbook_Export_$dateStr.zip';
+    return 'RecipeSpellbook_Export_$dateStr.zip';
+  }
+
+  /// Save the full zip export to a file via file picker.
+  Future<bool> saveFullZipExport({void Function(String status)? onProgress}) async {
+    final filename = _exportFilename;
 
     if (isWeb) {
+      // Web has no file system — in-memory is the only option there.
+      final zipBytes = await exportFullZip(onProgress: onProgress);
       final result = await FilePicker.platform.saveFile(
         dialogTitle: 'Save full backup',
         fileName: filename,
@@ -436,14 +572,35 @@ class ExportImportService {
       return result != null;
     }
 
+    if (isDesktop) {
+      // Desktop saveFile returns a destination path — stream straight to it.
+      final result = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save full backup',
+        fileName: filename,
+        type: FileType.custom,
+        allowedExtensions: ['zip'],
+      );
+      if (result == null) return false;
+      await exportFullZipToPath(result, onProgress: onProgress);
+      await BackupReminderService.markBackupDone();
+      return true;
+    }
+
+    // Mobile saveFile requires bytes (SAF). Stream the zip to temp first
+    // so peak memory is the finished zip ONCE — not the 3× of the old
+    // in-memory pipeline (base64 JSON + decoded images + zip bytes).
+    final dir = await getTemporaryDirectory();
+    final tmpPath = p.join(dir.path, filename);
+    await exportFullZipToPath(tmpPath, onProgress: onProgress);
+    final zipBytes = await File(tmpPath).readAsBytes();
     final result = await FilePicker.platform.saveFile(
       dialogTitle: 'Save full backup',
       fileName: filename,
       type: FileType.custom,
       allowedExtensions: ['zip'],
+      bytes: zipBytes,
     );
     if (result != null) {
-      await File(result).writeAsBytes(zipBytes);
       await BackupReminderService.markBackupDone();
       return true;
     }
@@ -452,20 +609,20 @@ class ExportImportService {
 
   /// Share the full zip export.
   Future<void> shareFullZipExport({void Function(String status)? onProgress}) async {
-    final zipBytes = await exportFullZip(onProgress: onProgress);
-    final date = DateTime.now();
-    final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-    final filename = 'RecipeSpellbook_Export_$dateStr.zip';
+    final filename = _exportFilename;
 
     if (isWeb) {
+      final zipBytes = await exportFullZip(onProgress: onProgress);
       await SharePlus.instance.share(ShareParams(
         files: [XFile.fromData(zipBytes, name: filename, mimeType: 'application/zip')],
         subject: 'Recipe Spellbook Full Backup',
       ));
     } else {
+      // Fully streamed: zip is written to temp on disk and shared by
+      // path — the archive never exists in memory at all.
       final dir = await getTemporaryDirectory();
       final file = File(p.join(dir.path, filename));
-      await file.writeAsBytes(zipBytes);
+      await exportFullZipToPath(file.path, onProgress: onProgress);
       await SharePlus.instance.share(ShareParams(
         files: [XFile(file.path)],
         subject: 'Recipe Spellbook Full Backup',
@@ -540,26 +697,61 @@ class ExportImportService {
   /// Import from a .zip file exported by [exportFullZip].
   /// Reads data.json and restores images from the images/ folder.
   Future<ImportResult> importFromZipFile({ImportProgressCallback? onProgress}) async {
+    // withData only on web (no file paths there). On mobile/desktop we
+    // stream from the picked path — loading a multi-hundred-MB backup
+    // into memory was OOM-killing the app before it could even error.
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['zip'],
-      withData: true,
+      withData: isWeb,
     );
-    if (result == null || result.files.isEmpty || result.files.single.bytes == null) {
+    if (result == null || result.files.isEmpty) {
       return ImportResult(success: false, message: 'No file selected');
     }
 
     try {
-      return await importFromZipBytes(result.files.single.bytes!, onProgress: onProgress);
+      final picked = result.files.single;
+      if (picked.path != null) {
+        return await importFromZipPath(picked.path!, onProgress: onProgress);
+      }
+      if (picked.bytes != null) {
+        return await importFromZipBytes(picked.bytes!, onProgress: onProgress);
+      }
+      return ImportResult(success: false, message: 'Could not read zip file');
     } catch (e) {
       return ImportResult(success: false, message: 'Error reading zip: $e');
     }
   }
 
-  /// Import from zip bytes.
+  /// Import a backup zip by file path — STREAMED from disk. Use this on
+  /// mobile/desktop: the zip is never loaded into memory whole; entries
+  /// decompress one at a time and are released after writing. Large
+  /// backups (hundreds of MB of images) used to OOM-kill the app when
+  /// the whole archive was decoded from bytes on the UI isolate.
+  Future<ImportResult> importFromZipPath(String path, {ImportProgressCallback? onProgress}) async {
+    final input = openZipInputStream(path);
+    if (input == null) {
+      // No file streams on this platform (web) — caller should use bytes.
+      return importFromZipBytes(await File(path).readAsBytes(), onProgress: onProgress);
+    }
+    try {
+      final archive = ZipDecoder().decodeBuffer(input);
+      return await _importFromArchive(archive, onProgress: onProgress);
+    } finally {
+      closeZipInputStream(input);
+    }
+  }
+
+  /// Import from zip bytes (web fallback — keeps everything in memory).
   Future<ImportResult> importFromZipBytes(Uint8List zipBytes, {ImportProgressCallback? onProgress}) async {
     final archive = ZipDecoder().decodeBytes(zipBytes);
+    return _importFromArchive(archive, onProgress: onProgress);
+  }
 
+  /// Shared archive import: extracts images to disk (releasing each
+  /// entry's decompressed bytes immediately), rewrites image paths in
+  /// data.json, and runs the standard data import.
+  Future<ImportResult> _importFromArchive(Archive archive, {ImportProgressCallback? onProgress}) async {
     // Find data.json
     final dataFile = archive.findFile('data.json');
     if (dataFile == null) {
@@ -567,6 +759,7 @@ class ExportImportService {
     }
 
     final dataStr = utf8.decode(dataFile.content as List<int>);
+    dataFile.clear(); // release decompressed bytes
     final data = jsonDecode(dataStr) as Map<String, dynamic>;
 
     // Extract images to local storage
@@ -583,6 +776,9 @@ class ExportImportService {
           final parentDir = localFile.parent;
           if (!await parentDir.exists()) await parentDir.create(recursive: true);
           await localFile.writeAsBytes(file.content as List<int>);
+          // Critical for large backups: drop this entry's decompressed
+          // bytes now, instead of accumulating every image in RAM.
+          file.clear();
           imagePathMap[file.name] = localFile.path;
         }
       }
@@ -592,7 +788,14 @@ class ExportImportService {
     if (imagePathMap.isNotEmpty) {
       final cookbooks = data['cookbooks'] as List? ?? [];
       for (final cbData in cookbooks) {
-        final recipes = (cbData as Map<String, dynamic>)['recipes'] as List? ?? [];
+        final cbMap = cbData as Map<String, dynamic>;
+        // Cookbook cover
+        final cbImg = cbMap['imagePath'] as String?;
+        if (cbImg != null && imagePathMap.containsKey(cbImg)) {
+          cbMap['imagePath'] = imagePathMap[cbImg];
+          cbMap.remove('imageBase64');
+        }
+        final recipes = cbMap['recipes'] as List? ?? [];
         for (final recData in recipes) {
           final r = recData as Map<String, dynamic>;
           final imgPath = r['imagePath'] as String?;
@@ -624,10 +827,12 @@ class ExportImportService {
   // ──────────────────────────────────────────
 
   Future<ImportResult> importFromFile({ImportProgressCallback? onProgress}) async {
+    // withData only on web — on mobile/desktop the picker hands us a
+    // path and the zip importer streams it (big backups OOM otherwise).
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['json', 'zip'],
-      withData: true,
+      withData: isWeb,
     );
     if (result == null || result.files.isEmpty) {
       return ImportResult(success: false, message: 'No file selected');
@@ -638,13 +843,13 @@ class ExportImportService {
 
       // Route .zip files to the zip importer
       if (ext == '.zip') {
-        final bytes = pickedFile.bytes;
-        if (bytes == null) {
-          final path = pickedFile.path;
-          if (path == null) return ImportResult(success: false, message: 'Could not read zip file');
-          return importFromZipBytes(await File(path).readAsBytes(), onProgress: onProgress);
+        if (pickedFile.path != null) {
+          return importFromZipPath(pickedFile.path!, onProgress: onProgress);
         }
-        return importFromZipBytes(bytes, onProgress: onProgress);
+        if (pickedFile.bytes != null) {
+          return importFromZipBytes(pickedFile.bytes!, onProgress: onProgress);
+        }
+        return ImportResult(success: false, message: 'Could not read zip file');
       }
 
       // Standard .json import
@@ -729,9 +934,17 @@ class ExportImportService {
       if (version >= 2 && data.containsKey('cookbooks')) {
         for (final cbData in data['cookbooks'] as List) {
           final cbMap = cbData as Map<String, dynamic>;
-          // Wrap v2 format into the shape expected by _importCookbookBatched
+          // Wrap v2 format into the shape expected by _importCookbookBatched.
+          // Forward cover/description too — restores used to silently
+          // drop cookbook covers because only id+name passed through.
           final wrapped = <String, dynamic>{
-            'cookbook': {'id': cbMap['id'], 'name': cbMap['name']},
+            'cookbook': {
+              'id': cbMap['id'],
+              'name': cbMap['name'],
+              'description': cbMap['description'],
+              'imagePath': cbMap['imagePath'],
+              'imageBase64': cbMap['imageBase64'],
+            },
             'recipes': cbMap['recipes'] ?? [],
           };
           final r = await _importCookbookBatched(
@@ -838,14 +1051,50 @@ class ExportImportService {
     final recipes = data['recipes'] as List;
     int imported = 0, skipped = 0;
 
-    final newCookbookId = 'imported_${DateTime.now().millisecondsSinceEpoch}';
+    var newCookbookId = 'imported_${DateTime.now().millisecondsSinceEpoch}';
     final recipeIdMap = <String, String>{};
     final ingredientIdMap = <String, String>{};
 
-    await db.into(db.cookbooks).insert(CookbooksCompanion.insert(
-      id: newCookbookId,
-      name: '${cookbookData['name']} (imported)',
-    ));
+    // Name handling: keep the ORIGINAL cookbook name whenever possible.
+    // The old unconditional "(imported)" suffix meant a full restore
+    // left every cookbook renamed — tedious to undo by hand.
+    //  • Same-name cookbook exists but is EMPTY (e.g. the default
+    //    "My Recipes" on a fresh install): import straight into it.
+    //  • Same-name cookbook exists with recipes: suffix to disambiguate.
+    //  • No collision: original name, untouched.
+    final baseName = (cookbookData['name'] as String?)?.trim().isNotEmpty == true
+        ? (cookbookData['name'] as String).trim()
+        : 'Imported Cookbook';
+    final existing = await db.select(db.cookbooks).get();
+    Cookbook? sameName;
+    for (final cb in existing) {
+      if (cb.deletedAt == null && cb.name.trim().toLowerCase() == baseName.toLowerCase()) {
+        sameName = cb;
+        break;
+      }
+    }
+
+    if (sameName != null) {
+      final count = await (db.selectOnly(db.recipes)
+            ..addColumns([db.recipes.id.count()])
+            ..where(db.recipes.cookbookId.equals(sameName.id) & db.recipes.deletedAt.isNull()))
+          .map((row) => row.read(db.recipes.id.count()) ?? 0)
+          .getSingle();
+      if (count == 0) {
+        // Empty twin — fill it instead of creating a renamed duplicate.
+        newCookbookId = sameName.id;
+      } else {
+        await db.into(db.cookbooks).insert(CookbooksCompanion.insert(
+          id: newCookbookId,
+          name: '$baseName (imported)',
+        ));
+      }
+    } else {
+      await db.into(db.cookbooks).insert(CookbooksCompanion.insert(
+        id: newCookbookId,
+        name: baseName,
+      ));
+    }
 
     // Prepare images directory (native only)
     Directory? imagesDir;
@@ -853,6 +1102,31 @@ class ExportImportService {
       final appDir = await getApplicationDocumentsDirectory();
       imagesDir = Directory(p.join(appDir.path, 'images', 'imported'));
       if (!await imagesDir.exists()) await imagesDir.create(recursive: true);
+    }
+
+    // Cookbook description + cover. Cover arrives either as a local file
+    // path (zip restore — already extracted to disk) or base64 (json).
+    final cbDesc = cookbookData['description'] as String?;
+    if (cbDesc != null && cbDesc.isNotEmpty) {
+      await (db.update(db.cookbooks)..where((t) => t.id.equals(newCookbookId)))
+          .write(CookbooksCompanion(description: Value(cbDesc)));
+    }
+    if (!isWeb) {
+      final cbLocalImg = cookbookData['imagePath'] as String?;
+      final cbBase64 = cookbookData['imageBase64'] as String?;
+      if (cbLocalImg != null && cbLocalImg.isNotEmpty && File(cbLocalImg).existsSync()) {
+        await (db.update(db.cookbooks)..where((t) => t.id.equals(newCookbookId)))
+            .write(CookbooksCompanion(imagePath: Value(cbLocalImg)));
+      } else if (cbBase64 != null && cbBase64.isNotEmpty && imagesDir != null) {
+        try {
+          final f = File(p.join(imagesDir.path, '${newCookbookId}_cover.jpg'));
+          await f.writeAsBytes(base64Decode(cbBase64));
+          await (db.update(db.cookbooks)..where((t) => t.id.equals(newCookbookId)))
+              .write(CookbooksCompanion(imagePath: Value(f.path)));
+        } catch (e) {
+          debugPrint('[Import] Failed to decode/save cookbook cover: $e');
+        }
+      }
     }
 
     // Process recipes in batches of 50 for better performance
@@ -960,9 +1234,18 @@ class ExportImportService {
       final newRecipeId = recipeIdMap[originalId];
       if (newRecipeId == null) continue;
 
-      // Decode cover image
+      // Cover image. Two sources, checked in order:
+      //  1. recipe['imagePath'] as a LOCAL file path — zip restores
+      //     extract images to disk first and rewrite this field. The old
+      //     code ignored it entirely (only read imageBase64, which zip
+      //     exports strip) — so zip restores never restored any picture.
+      //  2. recipe['imageBase64'] — standalone .json exports.
+      final localCover = recipe['imagePath'] as String?;
       final imageBase64 = recipe['imageBase64'] as String?;
-      if (imageBase64 != null && imageBase64.isNotEmpty && imagesDir != null) {
+      if (!isWeb && localCover != null && localCover.isNotEmpty && File(localCover).existsSync()) {
+        await (db.update(db.recipes)..where((t) => t.id.equals(newRecipeId)))
+            .write(RecipesCompanion(imagePath: Value(localCover)));
+      } else if (imageBase64 != null && imageBase64.isNotEmpty && imagesDir != null) {
         try {
           final imageBytes = base64Decode(imageBase64);
           final imageFile = File(p.join(imagesDir.path, '$newRecipeId.jpg'));
@@ -975,18 +1258,22 @@ class ExportImportService {
         }
       }
 
-      // Decode step images
+      // Step images — same local-path-first logic as covers.
       if (imagesDir != null) {
         final steps = recipe['steps'] as List? ?? [];
         for (var i = 0; i < steps.length; i++) {
           final step = steps[i] as Map<String, dynamic>;
+          final stepId = '${newRecipeId}_step_${step['sortOrder'] ?? step['id']}';
+          final localStepImg = step['imagePath'] as String?;
           final stepImageBase64 = step['imageBase64'] as String?;
-          if (stepImageBase64 != null && stepImageBase64.isNotEmpty) {
+          if (localStepImg != null && localStepImg.isNotEmpty && File(localStepImg).existsSync()) {
+            await (db.update(db.steps)..where((t) => t.id.equals(stepId)))
+                .write(StepsCompanion(imagePath: Value(localStepImg)));
+          } else if (stepImageBase64 != null && stepImageBase64.isNotEmpty) {
             try {
               final imageBytes = base64Decode(stepImageBase64);
               final stepImageFile = File(p.join(imagesDir.path, '${newRecipeId}_step_$i.jpg'));
               await stepImageFile.writeAsBytes(imageBytes);
-              final stepId = '${newRecipeId}_step_${step['sortOrder'] ?? step['id']}';
               await (db.update(db.steps)..where((t) => t.id.equals(stepId)))
                   .write(StepsCompanion(imagePath: Value(stepImageFile.path)));
             } catch (e) {
@@ -1034,13 +1321,27 @@ class ExportImportService {
 
   Future<int> _importShoppingLists(List data) async {
     int count = 0;
+    // Suffix "(imported)" only when a list with the same name already
+    // exists — restores keep their original names.
+    final existingListNames = (await db.select(db.shoppingLists).get())
+        .where((l) => l.deletedAt == null)
+        .map((l) => l.name.trim().toLowerCase())
+        .toSet();
     for (final listData in data) {
       final list = listData as Map<String, dynamic>;
       final newListId = 'imported_list_${DateTime.now().millisecondsSinceEpoch}_$count';
 
+      final baseName = (list['name'] as String?)?.trim().isNotEmpty == true
+          ? (list['name'] as String).trim()
+          : 'Imported List';
+      final name = existingListNames.contains(baseName.toLowerCase())
+          ? '$baseName (imported)'
+          : baseName;
+      existingListNames.add(name.toLowerCase());
+
       await db.into(db.shoppingLists).insert(ShoppingListsCompanion.insert(
         id: newListId,
-        name: '${list['name']} (imported)',
+        name: name,
         color: Value(list['color'] as String?),
         isDefault: Value(false),
       ));
