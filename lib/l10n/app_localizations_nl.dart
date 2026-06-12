@@ -9470,6 +9470,27 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importNothingSaved => 'Import failed — nothing was saved. Please try again.';
 
   @override
+  String get exportSaveToDevice => 'Save to device';
+
+  @override
+  String get exportSaveToDeviceSubtitle => 'Save the backup zip to your files or Downloads';
+
+  @override
+  String get exportShareZip => 'Share backup';
+
+  @override
+  String get exportShareZipSubtitle => 'Send the backup to another app or device';
+
+  @override
+  String get exportSaved => 'Backup saved';
+
+  @override
+  String get exportZipIncludeShopping => 'Include shopping lists';
+
+  @override
+  String get exportZipIncludeShoppingSubtitle => 'Add your shopping lists to the full backup';
+
+  @override
   String get communityPublishCookbookOption => 'Publish a cookbook';
 
   @override

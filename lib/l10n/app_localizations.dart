@@ -17365,6 +17365,48 @@ abstract class AppLocalizations {
   /// **'Import failed — nothing was saved. Please try again.'**
   String get importNothingSaved;
 
+  /// No description provided for @exportSaveToDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to device'**
+  String get exportSaveToDevice;
+
+  /// No description provided for @exportSaveToDeviceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the backup zip to your files or Downloads'**
+  String get exportSaveToDeviceSubtitle;
+
+  /// No description provided for @exportShareZip.
+  ///
+  /// In en, this message translates to:
+  /// **'Share backup'**
+  String get exportShareZip;
+
+  /// No description provided for @exportShareZipSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send the backup to another app or device'**
+  String get exportShareZipSubtitle;
+
+  /// No description provided for @exportSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved'**
+  String get exportSaved;
+
+  /// No description provided for @exportZipIncludeShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Include shopping lists'**
+  String get exportZipIncludeShopping;
+
+  /// No description provided for @exportZipIncludeShoppingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your shopping lists to the full backup'**
+  String get exportZipIncludeShoppingSubtitle;
+
   /// No description provided for @communityPublishCookbookOption.
   ///
   /// In en, this message translates to:

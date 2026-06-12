@@ -397,11 +397,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final service = ExportImportService(db);
     Responsive.showAdaptiveSheet(context, builder: (sheetCtx) => _ExportOptionsSheet(
       l10n: l10n,
-      onExportFullZip: () async {
+      onSaveFullZip: (options) async {
+        Navigator.pop(sheetCtx);
+        AppSnackbar.loading(context, l10n.exporting);
+        try {
+          final saved = await service.saveFullZipExport(
+            options: options,
+            onProgress: (status) {
+              if (context.mounted) AppSnackbar.loading(context, status);
+            },
+          );
+          if (context.mounted) {
+            AppSnackbar.dismiss(context);
+            if (saved) AppSnackbar.success(context, l10n.exportSaved);
+          }
+        } catch (e) {
+          if (context.mounted) AppSnackbar.error(context, l10n.somethingWentWrong(e.toString()));
+        }
+      },
+      onExportFullZip: (options) async {
         Navigator.pop(sheetCtx);
         AppSnackbar.loading(context, l10n.exporting);
         try {
           await service.shareFullZipExport(
+            options: options,
             onProgress: (status) {
               if (context.mounted) AppSnackbar.loading(context, status);
             },
@@ -1396,8 +1415,9 @@ class _ExportOptionsSheet extends StatefulWidget {
   final AppLocalizations l10n;
   final VoidCallback onExportCookbook;
   final ValueChanged<ExportOptions> onExportSelective;
-  final VoidCallback? onExportFullZip;
-  const _ExportOptionsSheet({required this.l10n, required this.onExportCookbook, required this.onExportSelective, this.onExportFullZip});
+  final ValueChanged<ExportOptions>? onExportFullZip;
+  final ValueChanged<ExportOptions>? onSaveFullZip;
+  const _ExportOptionsSheet({required this.l10n, required this.onExportCookbook, required this.onExportSelective, this.onExportFullZip, this.onSaveFullZip});
   @override
   State<_ExportOptionsSheet> createState() => _ExportOptionsSheetState();
 }
@@ -1406,6 +1426,17 @@ class _ExportOptionsSheetState extends State<_ExportOptionsSheet> {
   bool _showAdvanced = false;
   bool _cookbooks = true, _shoppingLists = true, _mealPlans = true;
   bool _tags = true, _customCategories = true, _customCourses = true;
+  // Applies to the full ZIP backup (Save/Share). Default on.
+  bool _zipIncludeShopping = true;
+
+  ExportOptions get _zipOptions => ExportOptions(
+        cookbooks: true,
+        shoppingLists: _zipIncludeShopping,
+        mealPlans: true,
+        tags: true,
+        customCategories: true,
+        customCourses: true,
+      );
 
   int get _checkedCount => [_cookbooks, _shoppingLists, _mealPlans, _tags, _customCategories, _customCourses].where((b) => b).length;
   bool get _allChecked => _checkedCount == 6;
@@ -1426,16 +1457,29 @@ class _ExportOptionsSheetState extends State<_ExportOptionsSheet> {
           Text(l.settingsExport, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
 
-          // ── Primary: Full ZIP backup ──
-          if (widget.onExportFullZip != null)
+          // ── Primary: save backup to device (normal "Save as…") ──
+          if (widget.onSaveFullZip != null)
             ListTile(
-              leading: const Icon(Icons.archive_outlined),
-              title: Text(l10n.exportFullZip),
-              subtitle: Text(l10n.exportFullZipSubtitle),
+              leading: const Icon(Icons.save_alt),
+              title: Text(l10n.exportSaveToDevice),
+              subtitle: Text(l10n.exportSaveToDeviceSubtitle),
               trailing: const Icon(Icons.chevron_right),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               tileColor: theme.colorScheme.primaryContainer.withValues(alpha: 0.15),
-              onTap: widget.onExportFullZip,
+              onTap: () => widget.onSaveFullZip!(_zipOptions),
+            ),
+          if (widget.onSaveFullZip != null) const SizedBox(height: 8),
+
+          // ── Share backup (send to another app/device) ──
+          if (widget.onExportFullZip != null)
+            ListTile(
+              leading: const Icon(Icons.ios_share),
+              title: Text(l10n.exportShareZip),
+              subtitle: Text(l10n.exportShareZipSubtitle),
+              trailing: const Icon(Icons.chevron_right),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              tileColor: theme.colorScheme.surfaceContainerHigh,
+              onTap: () => widget.onExportFullZip!(_zipOptions),
             ),
 
           const SizedBox(height: 12),
@@ -1466,6 +1510,15 @@ class _ExportOptionsSheetState extends State<_ExportOptionsSheet> {
           // ── Advanced options (collapsed by default) ──
           if (_showAdvanced) ...[
             const SizedBox(height: 4),
+            // Full-zip content toggle: shopping lists in/out (default in)
+            SwitchListTile(
+              dense: true,
+              title: Text(l10n.exportZipIncludeShopping),
+              subtitle: Text(l10n.exportZipIncludeShoppingSubtitle),
+              value: _zipIncludeShopping,
+              onChanged: (v) => setState(() => _zipIncludeShopping = v),
+            ),
+            const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.menu_book),
               title: Text(l.exportCurrentCookbook),

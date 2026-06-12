@@ -33,8 +33,10 @@ class StreamedZipWriter {
   }
 
   /// Streams a file from disk into the zip under [zipPath].
-  Future<void> addDiskFile(String localPath, String zipPath) {
-    return _encoder.addFile(File(localPath), zipPath);
+  /// [store] skips DEFLATE (level 0) — right for JPEG/PNG images, which
+  /// don't compress further; deflating them just burns CPU.
+  Future<void> addDiskFile(String localPath, String zipPath, {bool store = false}) {
+    return _encoder.addFile(File(localPath), zipPath, store ? 0 : null);
   }
 
   Future<void> close() => _encoder.close();

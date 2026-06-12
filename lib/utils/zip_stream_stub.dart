@@ -15,6 +15,6 @@ class StreamedZipWriter {
   void create(String outPath) =>
       throw UnsupportedError('Streamed zip writing is not available on web');
   void addTextFile(String zipPath, List<int> utf8Bytes) {}
-  Future<void> addDiskFile(String localPath, String zipPath) async {}
+  Future<void> addDiskFile(String localPath, String zipPath, {bool store = false}) async {}
   Future<void> close() async {}
 }

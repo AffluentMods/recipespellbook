@@ -5043,6 +5043,13 @@
 
   "communityRepublishSourceMissing": "Couldn't find the original recipe on this device. Publish it again from the recipe to share an updated version.",
   "importNothingSaved": "Import failed — nothing was saved. Please try again.",
+  "exportSaveToDevice": "Save to device",
+  "exportSaveToDeviceSubtitle": "Save the backup zip to your files or Downloads",
+  "exportShareZip": "Share backup",
+  "exportShareZipSubtitle": "Send the backup to another app or device",
+  "exportSaved": "Backup saved",
+  "exportZipIncludeShopping": "Include shopping lists",
+  "exportZipIncludeShoppingSubtitle": "Add your shopping lists to the full backup",
   "communityPublishCookbookOption": "Publish a cookbook",
   "communityPublishCookbookOptionSub": "Share a whole cookbook (5+ recipes)",
   "communityPublishSingleRecipeOption": "Publish a single recipe",

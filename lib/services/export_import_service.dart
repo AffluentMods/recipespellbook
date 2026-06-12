@@ -324,11 +324,14 @@ class ExportImportService {
   ///   data.json      — full native data (all tables, image refs as relative paths)
   ///   images/        — all recipe/cookbook/step images
   ///   recipes/       — individual schema.org Recipe JSON-LD files (for other apps)
-  Future<Uint8List> exportFullZip({void Function(String status)? onProgress}) async {
+  Future<Uint8List> exportFullZip({
+    ExportOptions options = const ExportOptions.all(),
+    void Function(String status)? onProgress,
+  }) async {
     final archive = Archive();
 
     onProgress?.call('Collecting data...');
-    final data = await exportAll();
+    final data = await exportSelective(options);
     final cookbooks = data['cookbooks'] as List? ?? [];
 
     // Track image paths we've added to avoid duplicates
@@ -453,10 +456,14 @@ class ExportImportService {
   /// (base64 JSON + decoded image bytes + final zip). On a 256MB Java
   /// heap that's a crash for big libraries; this version's peak is one
   /// image at a time. Use everywhere except web (no file system there).
-  Future<void> exportFullZipToPath(String outPath, {void Function(String status)? onProgress}) async {
+  Future<void> exportFullZipToPath(
+    String outPath, {
+    ExportOptions options = const ExportOptions.all(),
+    void Function(String status)? onProgress,
+  }) async {
     onProgress?.call('Collecting data...');
     // No base64 — recipes carry localImagePath fields instead.
-    final data = await exportSelective(const ExportOptions.all(), embedImages: false);
+    final data = await exportSelective(options, embedImages: false);
     final cookbooks = data['cookbooks'] as List? ?? [];
 
     // Rewrite local image paths to zip-relative ones, collecting the
@@ -510,43 +517,37 @@ class ExportImportService {
       'mealPlanCount': (data['mealPlans'] as List?)?.length ?? 0,
     };
 
+    // Prepare all text entries on the main isolate (cheap), then hand
+    // the actual zip WRITING to a background isolate. The write phase
+    // is CPU+IO heavy (DEFLATE of data.json, reading hundreds of MB of
+    // images) — doing it on the UI isolate froze the whole phone for
+    // the duration of a large export.
     onProgress?.call('Writing data...');
-    final writer = StreamedZipWriter()..create(outPath);
-    try {
-      writer.addTextFile('manifest.json',
-          utf8.encode(const JsonEncoder.withIndent('  ').convert(manifest)));
-      writer.addTextFile('data.json',
-          utf8.encode(const JsonEncoder.withIndent('  ').convert(data)));
+    final textFiles = <String, String>{
+      'manifest.json': const JsonEncoder.withIndent('  ').convert(manifest),
+      'data.json': const JsonEncoder.withIndent('  ').convert(data),
+    };
 
-      // schema.org Recipe JSON-LD files (interop with other apps)
-      for (final cbData in cookbooks) {
-        final cbMap = cbData as Map<String, dynamic>;
-        final cbName = cbMap['name'] as String? ?? 'Cookbook';
-        for (final recData in (cbMap['recipes'] as List? ?? [])) {
-          final r = recData as Map<String, dynamic>;
-          final title = r['title'] as String? ?? 'Untitled';
-          final safeTitle = title.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
-          writer.addTextFile('recipes/$safeTitle.json',
-              utf8.encode(const JsonEncoder.withIndent('  ').convert(_toSchemaOrgRecipe(r, cbName))));
-        }
+    // schema.org Recipe JSON-LD files (interop with other apps)
+    for (final cbData in cookbooks) {
+      final cbMap = cbData as Map<String, dynamic>;
+      final cbName = cbMap['name'] as String? ?? 'Cookbook';
+      for (final recData in (cbMap['recipes'] as List? ?? [])) {
+        final r = recData as Map<String, dynamic>;
+        final title = r['title'] as String? ?? 'Untitled';
+        final safeTitle = title.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+        textFiles['recipes/$safeTitle.json'] =
+            const JsonEncoder.withIndent('  ').convert(_toSchemaOrgRecipe(r, cbName));
       }
-
-      // Stream images in one at a time.
-      var done = 0;
-      for (final entry in imageFiles) {
-        try {
-          await writer.addDiskFile(entry.key, entry.value);
-        } catch (_) {
-          // Skip unreadable images rather than failing the whole backup.
-        }
-        done++;
-        if (done % 25 == 0) {
-          onProgress?.call('Adding images ($done/${imageFiles.length})...');
-        }
-      }
-    } finally {
-      await writer.close();
     }
+
+    onProgress?.call('Writing backup file (${imageFiles.length} images)...');
+    await compute(_zipWriteWorker, _ZipWriteArgs(
+      outPath: outPath,
+      textFiles: textFiles,
+      // MapEntry isn't isolate-friendly; flatten to plain string pairs.
+      imagePairs: [for (final e in imageFiles) [e.key, e.value]],
+    ));
   }
 
   String get _exportFilename {
@@ -556,12 +557,15 @@ class ExportImportService {
   }
 
   /// Save the full zip export to a file via file picker.
-  Future<bool> saveFullZipExport({void Function(String status)? onProgress}) async {
+  Future<bool> saveFullZipExport({
+    ExportOptions options = const ExportOptions.all(),
+    void Function(String status)? onProgress,
+  }) async {
     final filename = _exportFilename;
 
     if (isWeb) {
       // Web has no file system — in-memory is the only option there.
-      final zipBytes = await exportFullZip(onProgress: onProgress);
+      final zipBytes = await exportFullZip(options: options, onProgress: onProgress);
       final result = await FilePicker.platform.saveFile(
         dialogTitle: 'Save full backup',
         fileName: filename,
@@ -581,7 +585,7 @@ class ExportImportService {
         allowedExtensions: ['zip'],
       );
       if (result == null) return false;
-      await exportFullZipToPath(result, onProgress: onProgress);
+      await exportFullZipToPath(result, options: options, onProgress: onProgress);
       await BackupReminderService.markBackupDone();
       return true;
     }
@@ -591,7 +595,7 @@ class ExportImportService {
     // in-memory pipeline (base64 JSON + decoded images + zip bytes).
     final dir = await getTemporaryDirectory();
     final tmpPath = p.join(dir.path, filename);
-    await exportFullZipToPath(tmpPath, onProgress: onProgress);
+    await exportFullZipToPath(tmpPath, options: options, onProgress: onProgress);
     final zipBytes = await File(tmpPath).readAsBytes();
     final result = await FilePicker.platform.saveFile(
       dialogTitle: 'Save full backup',
@@ -608,11 +612,14 @@ class ExportImportService {
   }
 
   /// Share the full zip export.
-  Future<void> shareFullZipExport({void Function(String status)? onProgress}) async {
+  Future<void> shareFullZipExport({
+    ExportOptions options = const ExportOptions.all(),
+    void Function(String status)? onProgress,
+  }) async {
     final filename = _exportFilename;
 
     if (isWeb) {
-      final zipBytes = await exportFullZip(onProgress: onProgress);
+      final zipBytes = await exportFullZip(options: options, onProgress: onProgress);
       await SharePlus.instance.share(ShareParams(
         files: [XFile.fromData(zipBytes, name: filename, mimeType: 'application/zip')],
         subject: 'Recipe Spellbook Full Backup',
@@ -622,7 +629,7 @@ class ExportImportService {
       // path — the archive never exists in memory at all.
       final dir = await getTemporaryDirectory();
       final file = File(p.join(dir.path, filename));
-      await exportFullZipToPath(file.path, onProgress: onProgress);
+      await exportFullZipToPath(file.path, options: options, onProgress: onProgress);
       await SharePlus.instance.share(ShareParams(
         files: [XFile(file.path)],
         subject: 'Recipe Spellbook Full Backup',
@@ -1557,4 +1564,46 @@ class ImportPreview {
   bool get hasCustomCategories => customCategoryCount > 0;
   bool get hasCustomCourses => customCourseCount > 0;
   bool get isEmpty => cookbookCount == 0 && shoppingListCount == 0 && mealPlanCount == 0 && tagCount == 0;
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  BACKGROUND ZIP WRITER (runs via compute on a worker isolate)
+// ══════════════════════════════════════════════════════════════════
+
+/// Sendable argument bundle for [_zipWriteWorker]. Plain collections of
+/// strings only — crosses the isolate boundary cheaply.
+class _ZipWriteArgs {
+  final String outPath;
+  final Map<String, String> textFiles; // zip path → utf8 content
+  final List<List<String>> imagePairs; // [localPath, zipPath]
+  const _ZipWriteArgs({
+    required this.outPath,
+    required this.textFiles,
+    required this.imagePairs,
+  });
+}
+
+/// Writes the backup zip on a worker isolate so the UI never freezes.
+/// Images are STORED (no DEFLATE) — they're JPEGs already; compressing
+/// them again costs heavy CPU for ~0% size win. Text entries keep
+/// default compression. Returns the number of images written.
+Future<int> _zipWriteWorker(_ZipWriteArgs args) async {
+  final writer = StreamedZipWriter()..create(args.outPath);
+  var written = 0;
+  try {
+    args.textFiles.forEach((zipPath, content) {
+      writer.addTextFile(zipPath, utf8.encode(content));
+    });
+    for (final pair in args.imagePairs) {
+      try {
+        await writer.addDiskFile(pair[0], pair[1], store: true);
+        written++;
+      } catch (_) {
+        // Skip unreadable images rather than failing the whole backup.
+      }
+    }
+  } finally {
+    await writer.close();
+  }
+  return written;
 }
