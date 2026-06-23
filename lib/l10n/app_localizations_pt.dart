@@ -9255,29 +9255,29 @@ class AppLocalizationsPt extends AppLocalizations {
   String get shareViewerUntitled => 'Receita sin título';
 
   @override
-  String get subRecipeSheetCopyTitle => 'Copy with sub-recipes?';
+  String get subRecipeSheetCopyTitle => 'Copiar com sub-receitas?';
 
   @override
-  String get subRecipeSheetMoveTitle => 'Move with sub-recipes?';
+  String get subRecipeSheetMoveTitle => 'Mover com sub-receitas?';
 
   @override
-  String get subRecipeSheetDeleteTitle => 'Delete recipe and sub-recipes?';
+  String get subRecipeSheetDeleteTitle => 'Excluir receita e sub-receitas?';
 
   @override
-  String get subRecipeSheetPublishTitle => 'Publish with sub-recipes?';
+  String get subRecipeSheetPublishTitle => 'Publicar com sub-receitas?';
 
   @override
-  String get subRecipeSheetDownloadTitle => 'Download with sub-recipes?';
+  String get subRecipeSheetDownloadTitle => 'Baixar com sub-receitas?';
 
   @override
   String subRecipeSheetSubtitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'This recipe links $count sub-recipes',
-      one: 'This recipe links 1 sub-recipe',
+      other: 'Esta receita vincula $count sub-receitas',
+      one: 'Esta receita vincula 1 sub-receita',
     );
-    return '$_temp0 — uncheck any you don\'t want to include.';
+    return '$_temp0 — desmarque as que não quiser incluir.';
   }
 
   @override
@@ -9285,80 +9285,80 @@ class AppLocalizationsPt extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count other recipes',
-      one: '1 other recipe',
+      other: '$count outras receitas',
+      one: '1 outra receita',
     );
-    return 'Used in $_temp0';
+    return 'Usada em $_temp0';
   }
 
   @override
-  String get subRecipeUsedNowhere => 'Not used in any other recipes';
+  String get subRecipeUsedNowhere => 'Não usada em nenhuma outra receita';
 
   @override
   String autoLinkedSubRecipes(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'auto-linked $count sub-recipes',
-      one: 'auto-linked 1 sub-recipe',
+      other: '$count sub-receitas vinculadas automaticamente',
+      one: '1 sub-receita vinculada automaticamente',
     );
     return '$_temp0';
   }
 
   @override
-  String get importNearDuplicateExisting => 'Similar exists';
+  String get importNearDuplicateExisting => 'Já existe semelhante';
 
   @override
-  String get importNearDuplicateInternal => 'Similar in batch';
+  String get importNearDuplicateInternal => 'Semelhante no lote';
 
   @override
-  String get backupReminderTitle => 'Cloud sync isn\'t on';
+  String get backupReminderTitle => 'A sincronização na nuvem está desativada';
 
   @override
   String backupReminderDaysAgo(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Last backup was $count days ago',
-      one: 'Last backup was 1 day ago',
+      other: 'Último backup há $count dias',
+      one: 'Último backup há 1 dia',
     );
     return '$_temp0';
   }
 
   @override
-  String get backupReminderNever => 'Sign in to keep your recipes synced — or back up manually.';
+  String get backupReminderNever => 'Entre para manter as receitas sincronizadas — ou faça backup manualmente.';
 
   @override
-  String get backupReminderAction => 'Sign in';
+  String get backupReminderAction => 'Entrar';
 
   @override
-  String get backupReminderSnooze => 'Remind me later';
+  String get backupReminderSnooze => 'Lembrar mais tarde';
 
   @override
-  String get communityDownloadIncludeSubRecipesTitle => 'Include linked sub-recipes?';
+  String get communityDownloadIncludeSubRecipesTitle => 'Incluir sub-receitas vinculadas?';
 
   @override
   String communityDownloadIncludeSubRecipesBody(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'The recipes you selected reference $count sub-recipes. Include them so the links don\'t break?',
-      one: 'The recipes you selected reference 1 sub-recipe. Include it so the link doesn\'t break?',
+      other: 'As receitas selecionadas referenciam $count sub-receitas. Incluí-las para os vínculos não quebrarem?',
+      one: 'As receitas selecionadas referenciam 1 sub-receita. Incluí-la para o vínculo não quebrar?',
     );
     return '$_temp0';
   }
 
   @override
-  String get communityDownloadIncludeSubRecipes => 'Include sub-recipes';
+  String get communityDownloadIncludeSubRecipes => 'Incluir sub-receitas';
 
   @override
-  String get communityDownloadSkipSubRecipes => 'Skip them';
+  String get communityDownloadSkipSubRecipes => 'Ignorar';
 
   @override
-  String get actionMove => 'Move';
+  String get actionMove => 'Mover';
 
   @override
-  String get communityDownload => 'Download';
+  String get communityDownload => 'Baixar';
 
   @override
   String get exportFullZip => 'Copia de seguridad completa (ZIP)';
@@ -9379,155 +9379,181 @@ class AppLocalizationsPt extends AppLocalizations {
   String get exportJsonCustom => 'Exportación JSON personalizada';
 
   @override
-  String get editAsText => 'Edit as text';
+  String get editAsText => 'Editar como texto';
 
   @override
-  String get editAsList => 'Edit as list';
+  String get editAsList => 'Editar como lista';
 
   @override
-  String get stepsBulkEditHint => 'Separate each step with a blank line';
+  String get stepsBulkEditHint => 'Separe cada passo com uma linha em branco';
 
   @override
-  String get stepsBulkEditImagesWarning => 'Some step photos may be lost if you change the number of steps.';
+  String get stepsBulkEditImagesWarning => 'Algumas fotos dos passos podem ser perdidas se você alterar o número de passos.';
 
   @override
-  String get publishToCommunity => 'Publish to community';
+  String get publishToCommunity => 'Publicar na comunidade';
 
   @override
-  String get publishSingleRecipeTitle => 'Publish recipe';
+  String get publishSingleRecipeTitle => 'Publicar receita';
 
   @override
-  String get publishSingleRecipeBody => 'Share this recipe to the community feed. Updates won\'t sync — re-publish to push changes.';
+  String get publishSingleRecipeBody => 'Compartilhe esta receita no feed da comunidade. As atualizações não serão sincronizadas — republique para enviar as alterações.';
 
   @override
-  String get publishSingleRecipeAction => 'Publish';
+  String get publishSingleRecipeAction => 'Publicar';
 
   @override
-  String get publishSingleRecipeSuccess => 'Published!';
+  String get publishSingleRecipeSuccess => 'Publicada!';
 
   @override
-  String get creatorsYouFollow => 'Creators you follow';
+  String get creatorsYouFollow => 'Criadores que você segue';
 
   @override
-  String get noCreatorsYouFollow => 'Follow creators to see their latest publications here.';
+  String get noCreatorsYouFollow => 'Siga criadores para ver as publicações mais recentes deles aqui.';
 
   @override
-  String get shoppingAlsoAddToMealPlan => 'Also add to meal plan';
+  String get shoppingAlsoAddToMealPlan => 'Adicionar também ao plano de refeições';
 
   @override
   String shoppingMealPlanAddedCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Added $count recipes to meal plan',
-      one: 'Added 1 recipe to meal plan',
+      other: '$count receitas adicionadas ao plano de refeições',
+      one: '1 receita adicionada ao plano de refeições',
     );
     return '$_temp0';
   }
 
   @override
-  String get communityICookedThis => 'I cooked this';
+  String get communityICookedThis => 'Eu fiz esta receita';
 
   @override
-  String get communityICookedThisActive => 'Cooked';
+  String get communityICookedThisActive => 'Feita';
 
   @override
-  String get communityRepublishRecipes => 'Update published version';
+  String get communityRepublishRecipes => 'Atualizar versão publicada';
 
   @override
-  String get communityRepublishRecipesBody => 'Replaces the published recipe content with your current version. Ratings and downloads are kept.';
+  String get communityRepublishRecipesBody => 'Substitui o conteúdo da receita publicada pela sua versão atual. As avaliações e os downloads são mantidos.';
 
   @override
-  String get communityRepublishRecipesAction => 'Update';
+  String get communityRepublishRecipesAction => 'Atualizar';
 
   @override
-  String get communityRepublishSuccess => 'Published version updated';
+  String get communityRepublishSuccess => 'Versão publicada atualizada';
 
   @override
-  String get shoppingItemRemoved => 'Item removed';
+  String get shoppingItemRemoved => 'Item removido';
 
   @override
   String shoppingItemsRemoved(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count items removed',
-      one: '1 item removed',
+      other: '$count itens removidos',
+      one: '1 item removido',
     );
     return '$_temp0';
   }
 
   @override
-  String get publicationUnpublished => 'Unpublished';
+  String get publicationUnpublished => 'Despublicada';
 
   @override
-  String get cookModeVoiceTitle => 'Voice control';
+  String get cookModeVoiceTitle => 'Controle por voz';
 
   @override
-  String get cookModeVoiceListening => 'Listening… say next, back, pause, or set timer';
+  String get cookModeVoiceListening => 'Ouvindo… diga \"next\", \"back\", \"pause\" ou \"set timer\"';
 
   @override
-  String get cookModeVoiceUnavailable => 'Voice control unavailable on this device';
+  String get cookModeVoiceUnavailable => 'Controle por voz indisponível neste dispositivo';
 
   @override
-  String get communityRepublishSourceMissing => 'Couldn\'t find the original recipe on this device. Publish it again from the recipe to share an updated version.';
+  String get communityRepublishSourceMissing => 'Não foi possível encontrar a receita original neste dispositivo. Publique-a novamente a partir da receita para compartilhar uma versão atualizada.';
 
   @override
-  String get importNothingSaved => 'Import failed — nothing was saved. Please try again.';
+  String get importNothingSaved => 'Falha na importação — nada foi salvo. Tente novamente.';
 
   @override
-  String get exportSaveToDevice => 'Save to device';
+  String get unsavedChangesBody => 'Você tem alterações não salvas. Sair sem salvar?';
 
   @override
-  String get exportSaveToDeviceSubtitle => 'Save the backup zip to your files or Downloads';
+  String get unsavedKeepEditing => 'Continuar editando';
 
   @override
-  String get exportShareZip => 'Share backup';
+  String get unsavedDiscard => 'Descartar';
 
   @override
-  String get exportShareZipSubtitle => 'Send the backup to another app or device';
+  String get ingredientMakeHeader => 'Transformar em cabeçalho de seção';
 
   @override
-  String get exportSaved => 'Backup saved';
+  String get ingredientMakeIngredient => 'Transformar em ingrediente';
 
   @override
-  String get exportZipIncludeShopping => 'Include shopping lists';
+  String get shoppingMoveToList => 'Mover para a lista';
 
   @override
-  String get exportZipIncludeShoppingSubtitle => 'Add your shopping lists to the full backup';
+  String get shoppingNoOtherLists => 'Nenhuma outra lista para onde mover';
 
   @override
-  String get communityPublishCookbookOption => 'Publish a cookbook';
+  String shoppingMovedToList(String name) {
+    return 'Movido para $name';
+  }
 
   @override
-  String get communityPublishCookbookOptionSub => 'Share a whole cookbook (5+ recipes)';
+  String get exportSaveToDevice => 'Salvar no dispositivo';
 
   @override
-  String get communityPublishSingleRecipeOption => 'Publish a single recipe';
+  String get exportSaveToDeviceSubtitle => 'Salve o zip de backup nos seus arquivos ou em Downloads';
 
   @override
-  String get communityPublishSingleRecipeOptionSub => 'Share one recipe — no cookbook needed';
+  String get exportShareZip => 'Compartilhar backup';
 
   @override
-  String get communityPickRecipeToPublish => 'Choose a recipe to publish';
+  String get exportShareZipSubtitle => 'Envie o backup para outro app ou dispositivo';
 
   @override
-  String get communitySearchYourRecipes => 'Search your recipes…';
+  String get exportSaved => 'Backup salvo';
 
   @override
-  String get chartCompactDonut => 'Compact';
+  String get exportZipIncludeShopping => 'Incluir listas de compras';
 
   @override
-  String get nutritionPaletteTitle => 'Color palette';
+  String get exportZipIncludeShoppingSubtitle => 'Adicione suas listas de compras ao backup completo';
 
   @override
-  String get paletteClassic => 'Classic';
+  String get communityPublishCookbookOption => 'Publicar um livro de receitas';
 
   @override
-  String get paletteWarm => 'Warm';
+  String get communityPublishCookbookOptionSub => 'Compartilhe um livro de receitas inteiro (5+ receitas)';
 
   @override
-  String get paletteCool => 'Cool';
+  String get communityPublishSingleRecipeOption => 'Publicar uma única receita';
+
+  @override
+  String get communityPublishSingleRecipeOptionSub => 'Compartilhe uma receita — sem precisar de livro de receitas';
+
+  @override
+  String get communityPickRecipeToPublish => 'Escolha uma receita para publicar';
+
+  @override
+  String get communitySearchYourRecipes => 'Pesquisar suas receitas…';
+
+  @override
+  String get chartCompactDonut => 'Compacto';
+
+  @override
+  String get nutritionPaletteTitle => 'Paleta de cores';
+
+  @override
+  String get paletteClassic => 'Clássica';
+
+  @override
+  String get paletteWarm => 'Quente';
+
+  @override
+  String get paletteCool => 'Fria';
 
   @override
   String get paletteMono => 'Mono';

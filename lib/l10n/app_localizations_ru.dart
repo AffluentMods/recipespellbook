@@ -9315,29 +9315,31 @@ class AppLocalizationsRu extends AppLocalizations {
   String get shareViewerUntitled => 'Рецепт без названия';
 
   @override
-  String get subRecipeSheetCopyTitle => 'Copy with sub-recipes?';
+  String get subRecipeSheetCopyTitle => 'Скопировать с суб-рецептами?';
 
   @override
-  String get subRecipeSheetMoveTitle => 'Move with sub-recipes?';
+  String get subRecipeSheetMoveTitle => 'Переместить с суб-рецептами?';
 
   @override
-  String get subRecipeSheetDeleteTitle => 'Delete recipe and sub-recipes?';
+  String get subRecipeSheetDeleteTitle => 'Удалить рецепт и суб-рецепты?';
 
   @override
-  String get subRecipeSheetPublishTitle => 'Publish with sub-recipes?';
+  String get subRecipeSheetPublishTitle => 'Опубликовать с суб-рецептами?';
 
   @override
-  String get subRecipeSheetDownloadTitle => 'Download with sub-recipes?';
+  String get subRecipeSheetDownloadTitle => 'Скачать с суб-рецептами?';
 
   @override
   String subRecipeSheetSubtitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'This recipe links $count sub-recipes',
-      one: 'This recipe links 1 sub-recipe',
+      other: 'Этот рецепт ссылается на $count суб-рецепта',
+      many: 'Этот рецепт ссылается на $count суб-рецептов',
+      few: 'Этот рецепт ссылается на $count суб-рецепта',
+      one: 'Этот рецепт ссылается на 1 суб-рецепт',
     );
-    return '$_temp0 — uncheck any you don\'t want to include.';
+    return '$_temp0 — снимите отметку с тех, которые не нужно включать.';
   }
 
   @override
@@ -9345,80 +9347,88 @@ class AppLocalizationsRu extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count other recipes',
-      one: '1 other recipe',
+      other: '$count других рецептах',
+      many: '$count других рецептах',
+      few: '$count других рецептах',
+      one: '1 другом рецепте',
     );
-    return 'Used in $_temp0';
+    return 'Используется в $_temp0';
   }
 
   @override
-  String get subRecipeUsedNowhere => 'Not used in any other recipes';
+  String get subRecipeUsedNowhere => 'Не используется в других рецептах';
 
   @override
   String autoLinkedSubRecipes(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'auto-linked $count sub-recipes',
-      one: 'auto-linked 1 sub-recipe',
+      other: 'автоматически связано $count суб-рецепта',
+      many: 'автоматически связано $count суб-рецептов',
+      few: 'автоматически связано $count суб-рецепта',
+      one: 'автоматически связан 1 суб-рецепт',
     );
     return '$_temp0';
   }
 
   @override
-  String get importNearDuplicateExisting => 'Similar exists';
+  String get importNearDuplicateExisting => 'Похожий уже есть';
 
   @override
-  String get importNearDuplicateInternal => 'Similar in batch';
+  String get importNearDuplicateInternal => 'Похожий в наборе';
 
   @override
-  String get backupReminderTitle => 'Cloud sync isn\'t on';
+  String get backupReminderTitle => 'Облачная синхронизация выключена';
 
   @override
   String backupReminderDaysAgo(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Last backup was $count days ago',
-      one: 'Last backup was 1 day ago',
+      other: 'Последняя резервная копия была $count дня назад',
+      many: 'Последняя резервная копия была $count дней назад',
+      few: 'Последняя резервная копия была $count дня назад',
+      one: 'Последняя резервная копия была 1 день назад',
     );
     return '$_temp0';
   }
 
   @override
-  String get backupReminderNever => 'Sign in to keep your recipes synced — or back up manually.';
+  String get backupReminderNever => 'Войдите, чтобы синхронизировать рецепты, — или сделайте резервную копию вручную.';
 
   @override
-  String get backupReminderAction => 'Sign in';
+  String get backupReminderAction => 'Войти';
 
   @override
-  String get backupReminderSnooze => 'Remind me later';
+  String get backupReminderSnooze => 'Напомнить позже';
 
   @override
-  String get communityDownloadIncludeSubRecipesTitle => 'Include linked sub-recipes?';
+  String get communityDownloadIncludeSubRecipesTitle => 'Включить связанные суб-рецепты?';
 
   @override
   String communityDownloadIncludeSubRecipesBody(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'The recipes you selected reference $count sub-recipes. Include them so the links don\'t break?',
-      one: 'The recipes you selected reference 1 sub-recipe. Include it so the link doesn\'t break?',
+      other: 'Выбранные рецепты ссылаются на $count суб-рецепта. Включить их, чтобы ссылки не сломались?',
+      many: 'Выбранные рецепты ссылаются на $count суб-рецептов. Включить их, чтобы ссылки не сломались?',
+      few: 'Выбранные рецепты ссылаются на $count суб-рецепта. Включить их, чтобы ссылки не сломались?',
+      one: 'Выбранные рецепты ссылаются на 1 суб-рецепт. Включить его, чтобы ссылка не сломалась?',
     );
     return '$_temp0';
   }
 
   @override
-  String get communityDownloadIncludeSubRecipes => 'Include sub-recipes';
+  String get communityDownloadIncludeSubRecipes => 'Включить суб-рецепты';
 
   @override
-  String get communityDownloadSkipSubRecipes => 'Skip them';
+  String get communityDownloadSkipSubRecipes => 'Пропустить их';
 
   @override
-  String get actionMove => 'Move';
+  String get actionMove => 'Переместить';
 
   @override
-  String get communityDownload => 'Download';
+  String get communityDownload => 'Скачать';
 
   @override
   String get exportFullZip => 'Полная резервная копия (ZIP)';
@@ -9439,156 +9449,186 @@ class AppLocalizationsRu extends AppLocalizations {
   String get exportJsonCustom => 'Пользовательский экспорт JSON';
 
   @override
-  String get editAsText => 'Edit as text';
+  String get editAsText => 'Править как текст';
 
   @override
-  String get editAsList => 'Edit as list';
+  String get editAsList => 'Править как список';
 
   @override
-  String get stepsBulkEditHint => 'Separate each step with a blank line';
+  String get stepsBulkEditHint => 'Разделяйте каждый шаг пустой строкой';
 
   @override
-  String get stepsBulkEditImagesWarning => 'Some step photos may be lost if you change the number of steps.';
+  String get stepsBulkEditImagesWarning => 'Некоторые фото шагов могут быть потеряны, если изменить число шагов.';
 
   @override
-  String get publishToCommunity => 'Publish to community';
+  String get publishToCommunity => 'Опубликовать в сообществе';
 
   @override
-  String get publishSingleRecipeTitle => 'Publish recipe';
+  String get publishSingleRecipeTitle => 'Опубликовать рецепт';
 
   @override
-  String get publishSingleRecipeBody => 'Share this recipe to the community feed. Updates won\'t sync — re-publish to push changes.';
+  String get publishSingleRecipeBody => 'Поделитесь этим рецептом в ленте сообщества. Обновления не синхронизируются — опубликуйте заново, чтобы отправить изменения.';
 
   @override
-  String get publishSingleRecipeAction => 'Publish';
+  String get publishSingleRecipeAction => 'Опубликовать';
 
   @override
-  String get publishSingleRecipeSuccess => 'Published!';
+  String get publishSingleRecipeSuccess => 'Опубликовано!';
 
   @override
-  String get creatorsYouFollow => 'Creators you follow';
+  String get creatorsYouFollow => 'Авторы, на которых вы подписаны';
 
   @override
-  String get noCreatorsYouFollow => 'Follow creators to see their latest publications here.';
+  String get noCreatorsYouFollow => 'Подпишитесь на авторов, чтобы видеть здесь их новые публикации.';
 
   @override
-  String get shoppingAlsoAddToMealPlan => 'Also add to meal plan';
+  String get shoppingAlsoAddToMealPlan => 'Также добавить в план питания';
 
   @override
   String shoppingMealPlanAddedCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Added $count recipes to meal plan',
-      one: 'Added 1 recipe to meal plan',
+      other: 'Добавлено $count рецепта в план питания',
+      many: 'Добавлено $count рецептов в план питания',
+      few: 'Добавлено $count рецепта в план питания',
+      one: 'Добавлен 1 рецепт в план питания',
     );
     return '$_temp0';
   }
 
   @override
-  String get communityICookedThis => 'I cooked this';
+  String get communityICookedThis => 'Я это готовил(а)';
 
   @override
-  String get communityICookedThisActive => 'Cooked';
+  String get communityICookedThisActive => 'Приготовлено';
 
   @override
-  String get communityRepublishRecipes => 'Update published version';
+  String get communityRepublishRecipes => 'Обновить опубликованную версию';
 
   @override
-  String get communityRepublishRecipesBody => 'Replaces the published recipe content with your current version. Ratings and downloads are kept.';
+  String get communityRepublishRecipesBody => 'Заменяет содержимое опубликованного рецепта вашей текущей версией. Оценки и скачивания сохраняются.';
 
   @override
-  String get communityRepublishRecipesAction => 'Update';
+  String get communityRepublishRecipesAction => 'Обновить';
 
   @override
-  String get communityRepublishSuccess => 'Published version updated';
+  String get communityRepublishSuccess => 'Опубликованная версия обновлена';
 
   @override
-  String get shoppingItemRemoved => 'Item removed';
+  String get shoppingItemRemoved => 'Позиция удалена';
 
   @override
   String shoppingItemsRemoved(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count items removed',
-      one: '1 item removed',
+      other: 'Удалено $count позиции',
+      many: 'Удалено $count позиций',
+      few: 'Удалено $count позиции',
+      one: 'Удалена 1 позиция',
     );
     return '$_temp0';
   }
 
   @override
-  String get publicationUnpublished => 'Unpublished';
+  String get publicationUnpublished => 'Снято с публикации';
 
   @override
-  String get cookModeVoiceTitle => 'Voice control';
+  String get cookModeVoiceTitle => 'Голосовое управление';
 
   @override
-  String get cookModeVoiceListening => 'Listening… say next, back, pause, or set timer';
+  String get cookModeVoiceListening => 'Слушаю… скажите «next», «back», «pause» или «set timer»';
 
   @override
-  String get cookModeVoiceUnavailable => 'Voice control unavailable on this device';
+  String get cookModeVoiceUnavailable => 'Голосовое управление недоступно на этом устройстве';
 
   @override
-  String get communityRepublishSourceMissing => 'Couldn\'t find the original recipe on this device. Publish it again from the recipe to share an updated version.';
+  String get communityRepublishSourceMissing => 'Не удалось найти исходный рецепт на этом устройстве. Опубликуйте его снова из рецепта, чтобы поделиться обновлённой версией.';
 
   @override
-  String get importNothingSaved => 'Import failed — nothing was saved. Please try again.';
+  String get importNothingSaved => 'Импорт не удался — ничего не сохранено. Попробуйте ещё раз.';
 
   @override
-  String get exportSaveToDevice => 'Save to device';
+  String get unsavedChangesBody => 'У вас есть несохранённые изменения. Выйти без сохранения?';
 
   @override
-  String get exportSaveToDeviceSubtitle => 'Save the backup zip to your files or Downloads';
+  String get unsavedKeepEditing => 'Продолжить редактирование';
 
   @override
-  String get exportShareZip => 'Share backup';
+  String get unsavedDiscard => 'Отменить';
 
   @override
-  String get exportShareZipSubtitle => 'Send the backup to another app or device';
+  String get ingredientMakeHeader => 'Сделать заголовком раздела';
 
   @override
-  String get exportSaved => 'Backup saved';
+  String get ingredientMakeIngredient => 'Сделать ингредиентом';
 
   @override
-  String get exportZipIncludeShopping => 'Include shopping lists';
+  String get shoppingMoveToList => 'Переместить в список';
 
   @override
-  String get exportZipIncludeShoppingSubtitle => 'Add your shopping lists to the full backup';
+  String get shoppingNoOtherLists => 'Нет других списков для перемещения';
 
   @override
-  String get communityPublishCookbookOption => 'Publish a cookbook';
+  String shoppingMovedToList(String name) {
+    return 'Перемещено в $name';
+  }
 
   @override
-  String get communityPublishCookbookOptionSub => 'Share a whole cookbook (5+ recipes)';
+  String get exportSaveToDevice => 'Сохранить на устройство';
 
   @override
-  String get communityPublishSingleRecipeOption => 'Publish a single recipe';
+  String get exportSaveToDeviceSubtitle => 'Сохраните zip-архив резервной копии в файлы или Загрузки';
 
   @override
-  String get communityPublishSingleRecipeOptionSub => 'Share one recipe — no cookbook needed';
+  String get exportShareZip => 'Поделиться копией';
 
   @override
-  String get communityPickRecipeToPublish => 'Choose a recipe to publish';
+  String get exportShareZipSubtitle => 'Отправьте резервную копию в другое приложение или на устройство';
 
   @override
-  String get communitySearchYourRecipes => 'Search your recipes…';
+  String get exportSaved => 'Резервная копия сохранена';
 
   @override
-  String get chartCompactDonut => 'Compact';
+  String get exportZipIncludeShopping => 'Включить списки покупок';
 
   @override
-  String get nutritionPaletteTitle => 'Color palette';
+  String get exportZipIncludeShoppingSubtitle => 'Добавьте списки покупок в полную резервную копию';
 
   @override
-  String get paletteClassic => 'Classic';
+  String get communityPublishCookbookOption => 'Опубликовать кулинарную книгу';
 
   @override
-  String get paletteWarm => 'Warm';
+  String get communityPublishCookbookOptionSub => 'Поделитесь целой кулинарной книгой (от 5 рецептов)';
 
   @override
-  String get paletteCool => 'Cool';
+  String get communityPublishSingleRecipeOption => 'Опубликовать один рецепт';
 
   @override
-  String get paletteMono => 'Mono';
+  String get communityPublishSingleRecipeOptionSub => 'Поделитесь одним рецептом — кулинарная книга не нужна';
+
+  @override
+  String get communityPickRecipeToPublish => 'Выберите рецепт для публикации';
+
+  @override
+  String get communitySearchYourRecipes => 'Поиск по вашим рецептам…';
+
+  @override
+  String get chartCompactDonut => 'Компактно';
+
+  @override
+  String get nutritionPaletteTitle => 'Цветовая палитра';
+
+  @override
+  String get paletteClassic => 'Классическая';
+
+  @override
+  String get paletteWarm => 'Тёплая';
+
+  @override
+  String get paletteCool => 'Холодная';
+
+  @override
+  String get paletteMono => 'Моно';
 }

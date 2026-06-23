@@ -126,7 +126,7 @@
   "importProgress": "Importazione in corso...",
   "importFromURL": "Da URL",
   "importFromImage": "Da immagine",
-  "importFromFile": "Da file",
+  "importFromFile": "Importa da file",
   "importFromText": "Importa da testo",
   "importProcessing": "Elaborazione...",
   "importSuccess": "Ricetta importata con successo",
@@ -2134,8 +2134,8 @@
   "onboardingSkip": "Salta",
   "communitySortTopRated": "Più votati",
   "communityHasImages": "Con immagini",
-  "communityListView": "Vista elenco",
-  "communityGridView": "Vista griglia",
+  "communityListView": "Vista a elenco",
+  "communityGridView": "Vista a griglia",
   "communityDownloadOptions": "Opzioni di download",
   "communityDownloadWithImages": "Con immagini ({size})",
   "@communityDownloadWithImages": {
@@ -2145,7 +2145,7 @@
       }
     }
   },
-  "communityDownloadImagesIncluded": "{count} immagini incluse",
+  "communityDownloadImagesIncluded": "{count} foto incluse",
   "@communityDownloadImagesIncluded": {
     "placeholders": {
       "count": {
@@ -2154,9 +2154,9 @@
     }
   },
   "communityDownloadTextOnly": "Solo testo",
-  "communityDownloadTextOnlySubtitle": "Download più veloce, senza immagini",
+  "communityDownloadTextOnlySubtitle": "Solo ricette, nessuna immagine",
   "communityTapToPreview": "Tocca una ricetta per l'anteprima",
-  "communityImageCountLabel": "{count} immagini",
+  "communityImageCountLabel": "{count} foto",
   "@communityImageCountLabel": {
     "placeholders": {
       "count": {
@@ -2164,9 +2164,9 @@
       }
     }
   },
-  "communityYourRating": "La tua valutazione:",
-  "communityRateThis": "Valuta questo libro di cucina:",
-  "communityDownloadingImages": "Download immagini... {current}/{total}",
+  "communityYourRating": "La tua valutazione",
+  "communityRateThis": "Valuta questo",
+  "communityDownloadingImages": "Download delle immagini... ({current}/{total})",
   "@communityDownloadingImages": {
     "placeholders": {
       "current": {
@@ -2186,7 +2186,7 @@
       }
     }
   },
-  "communityStepCount": "{count} passaggi",
+  "communityStepCount": "{count, plural, =1{1 passaggio} other{{count} passaggi}}",
   "@communityStepCount": {
     "placeholders": {
       "count": {
@@ -2209,17 +2209,17 @@
   },
   "communityEditPublication": "Modifica pubblicazione",
   "communityEditDescription": "Descrizione",
-  "communityEditDescriptionHint": "Racconta di questo libro di cucina...",
+  "communityEditDescriptionHint": "Aggiungi una descrizione...",
   "communityEditTags": "Tag",
-  "communityEditSuccess": "Pubblicazione aggiornata!",
-  "communityEditFailed": "Aggiornamento della pubblicazione fallito",
+  "communityEditSuccess": "Pubblicazione aggiornata",
+  "communityEditFailed": "Aggiornamento fallito",
   "communityNoRatingsYet": "Nessuna valutazione ancora",
   "communityStatusPublished": "Pubblicato",
   "communityStatusUnderReview": "In revisione",
   "communityStatusRemoved": "Rimosso",
-  "communityUnderReview": "Questo libro di cucina è in fase di revisione dal nostro team di moderazione.",
-  "communityPublishPreparing": "Preparazione del libro di cucina...",
-  "communityPublishUploading": "Caricamento immagini ({current}/{total})",
+  "communityUnderReview": "Questo libro è in fase di revisione dal nostro team di moderazione.",
+  "communityPublishPreparing": "Preparazione...",
+  "communityPublishUploading": "Caricamento immagini ({current}/{total})...",
   "@communityPublishUploading": {
     "placeholders": {
       "current": {
@@ -2230,10 +2230,10 @@
       }
     }
   },
-  "communityPublishPublishing": "Pubblicazione nella community...",
-  "communityPublishBackground": "Puoi lasciare questa schermata – la pubblicazione continua in background.",
+  "communityPublishPublishing": "Pubblicazione...",
+  "communityPublishBackground": "Puoi continuare a navigare mentre la pubblicazione è in corso.\nTieni l'app aperta — cambiare app potrebbe causare errori di caricamento.",
   "communityPublishDone": "Pubblicato!",
-  "communityPublishImagesSkipped": "{count} immagini sono state saltate (rifiutate dalla moderazione)",
+  "communityPublishImagesSkipped": "{count} immagini non sono state caricate (caricamento fallito o rifiutato)",
   "@communityPublishImagesSkipped": {
     "placeholders": {
       "count": {
@@ -2241,7 +2241,7 @@
       }
     }
   },
-  "communityPublishRejected": "{count} rifiutate dalla moderazione",
+  "communityPublishRejected": "{count} immagini non sono state caricate",
   "@communityPublishRejected": {
     "placeholders": {
       "count": {
@@ -2251,14 +2251,14 @@
   },
   "communityConfigurePublication": "Configura pubblicazione",
   "communityPublishTitle": "Titolo",
-  "communityPublishTitleHint": "Titolo del libro di cucina",
+  "communityPublishTitleHint": "Titolo del libro",
   "communityPublishDescription": "Descrizione",
-  "communityPublishDescriptionHint": "Racconta di questo libro di cucina...",
+  "communityPublishDescriptionHint": "Descrivi il tuo libro di ricette...",
   "communityPublishTags": "Tag",
   "communityPublishIncludeImages": "Includi immagini",
-  "communityPublishIncludeImagesSubtitle": "Carica le immagini delle ricette con questo libro. Le immagini vengono controllate per la sicurezza.",
+  "communityPublishIncludeImagesSubtitle": "Carica le foto delle ricette con il libro",
   "communityPublishSummary": "Riepilogo",
-  "communityPublishRecipesSummary": "{count} ricette",
+  "communityPublishRecipesSummary": "{count} ricette verranno pubblicate",
   "@communityPublishRecipesSummary": {
     "placeholders": {
       "count": {
@@ -2267,9 +2267,9 @@
     }
   },
   "communityPublishImagesWillUpload": "Le immagini verranno caricate",
-  "communityPublishTextOnlyNoImages": "Solo testo (senza immagini)",
+  "communityPublishTextOnlyNoImages": "Solo testo — nessuna immagine",
   "communityPublishTryAgain": "Riprova",
-  "communityPublishUploadInProgress": "Pubblicazione in corso... ({current}/{total} immagini)",
+  "communityPublishUploadInProgress": "Caricamento in corso ({current}/{total}). Attendi il completamento prima di pubblicare di nuovo.",
   "@communityPublishUploadInProgress": {
     "placeholders": {
       "current": {
@@ -2693,7 +2693,6 @@
       }
     }
   },
-
   "communityUnpublishDialogTitle": "Ritirare questo libro di ricette?",
   "communityUnpublishDialogMessage": "Verrà rimosso dalla comunità. Le tue ricette non saranno modificate.",
   "communityPublishAnotherCookbook": "+ Pubblica un altro libro di ricette",
@@ -2722,7 +2721,6 @@
   "communitySaveRecipeCount": "Salva {count} ricette",
   "communityFailedToSaveRating": "Impossibile salvare la valutazione. Riprova.",
   "communityDownloadingCookbook": "Download del libro in corso...",
-  "communityDownloadingImages": "Download delle immagini... ({current}/{total})",
   "communitySavingRecipes": "Salvataggio delle ricette...",
   "communityPartialDownloadSuccess": "{count} ricette salvate da \"{title}\"",
   "communityCannotReportOwn": "Non puoi segnalare la tua pubblicazione",
@@ -2748,7 +2746,6 @@
   "communitySavingRecipe": "Salvataggio della ricetta...",
   "communityRecipeSaved": "\"{title}\" salvata!",
   "communityFailedToSave": "Salvataggio fallito: {error}",
-  "communityViewFullRecipe": "Vedi ricetta completa",
   "communitySaveToMyCookbooks": "Salva nei miei libri",
   "communityViewCookbook": "Vedi libro",
   "communityPublishInProgress": "Pubblicazione in corso — annulla prima il caricamento",
@@ -2877,56 +2874,6 @@
   "cookbooksError": "Errore: {error}",
   "cookbooksShareFromApp": "Condiviso da Recipe Spellbook",
   "cookbooksPublishFailed": "Pubblicazione fallita",
-  "communityGridView": "Vista a griglia",
-  "communityListView": "Vista a elenco",
-  "communitySortTopRated": "Più votati",
-  "communityHasImages": "Con immagini",
-  "communityStatusPublished": "Pubblicato",
-  "communityStatusUnderReview": "In revisione",
-  "communityStatusRemoved": "Rimosso",
-  "communityUnderReview": "Questo libro è in fase di revisione dal nostro team di moderazione.",
-  "communityConfigurePublication": "Configura pubblicazione",
-  "communityPublishTitle": "Titolo",
-  "communityPublishTitleHint": "Titolo del libro",
-  "communityPublishDescription": "Descrizione",
-  "communityPublishDescriptionHint": "Descrivi il tuo libro di ricette...",
-  "communityPublishTags": "Tag",
-  "communityPublishIncludeImages": "Includi immagini",
-  "communityPublishIncludeImagesSubtitle": "Carica le foto delle ricette con il libro",
-  "communityPublishSummary": "Riepilogo",
-  "communityPublishRecipesSummary": "{count} ricette verranno pubblicate",
-  "communityPublishImagesWillUpload": "Le immagini verranno caricate",
-  "communityPublishTextOnlyNoImages": "Solo testo — nessuna immagine",
-  "communityPublishDone": "Pubblicato!",
-  "communityPublishImagesSkipped": "{count} immagini non sono state caricate (caricamento fallito o rifiutato)",
-  "communityPublishTryAgain": "Riprova",
-  "communityPublishPreparing": "Preparazione...",
-  "communityPublishUploading": "Caricamento immagini ({current}/{total})...",
-  "communityPublishPublishing": "Pubblicazione...",
-  "communityPublishBackground": "Puoi continuare a navigare mentre la pubblicazione è in corso.\nTieni l'app aperta — cambiare app potrebbe causare errori di caricamento.",
-  "communityPublishRejected": "{count} immagini non sono state caricate",
-  "communityPublishUploadInProgress": "Caricamento in corso ({current}/{total}). Attendi il completamento prima di pubblicare di nuovo.",
-  "communityEditPublication": "Modifica pubblicazione",
-  "communityEditDescription": "Descrizione",
-  "communityEditDescriptionHint": "Aggiungi una descrizione...",
-  "communityEditTags": "Tag",
-  "communityEditSuccess": "Pubblicazione aggiornata",
-  "communityEditFailed": "Aggiornamento fallito",
-  "communityDownloadOptions": "Opzioni di download",
-  "communityDownloadWithImages": "Con immagini ({size})",
-  "communityDownloadImagesIncluded": "{count} foto incluse",
-  "communityDownloadTextOnly": "Solo testo",
-  "communityDownloadTextOnlySubtitle": "Solo ricette, nessuna immagine",
-  "communityYourRating": "La tua valutazione",
-  "communityRateThis": "Valuta questo",
-  "communityTapToPreview": "Tocca una ricetta per l'anteprima",
-  "communityImageCountLabel": "{count} foto",
-  "communityStepCount": "{count, plural, =1{1 passaggio} other{{count} passaggi}}",
-  "communityNotes": "Note",
-  "communityStatPrep": "Preparazione",
-  "communityStatCook": "Cottura",
-  "communityStatTotal": "Totale",
-  "communityStatServings": "Porzioni",
   "displayName": "Nome visualizzato",
   "editDisplayName": "Modifica nome",
   "displayNameHelper": "Usato nel tuo profilo e nella comunità.",
@@ -3106,7 +3053,6 @@
   "shareViewerUntitled": "Ricetta senza titolo",
   "exportFullZip": "Backup completo (ZIP)",
   "exportFullZipSubtitle": "Tutti i dati + immagini in un archivio portabile",
-  "importFromFile": "Importa da file",
   "importFromFileSubtitle": "Supporta file .json e .zip di backup",
   "exportAdvanced": "Opzioni avanzate",
   "exportCurrentCookbookSubtitle": "File JSON solo del libro attuale",
@@ -3118,5 +3064,81 @@
   "allDataWarningLocalData": "Tutti i dati locali su questo dispositivo",
   "allDataWarningSettings": "Tutte le impostazioni e preferenze dell'app",
   "allDataWarningTitle": "Questo eliminerà tutto",
-  "localNoCloudWarning": "Non hai Cloud Sync — non c'è backup da cui recuperare"
+  "localNoCloudWarning": "Non hai Cloud Sync — non c'è backup da cui recuperare",
+  "subRecipeSheetCopyTitle": "Copiare con le sotto-ricette?",
+  "subRecipeSheetMoveTitle": "Spostare con le sotto-ricette?",
+  "subRecipeSheetDeleteTitle": "Eliminare la ricetta e le sotto-ricette?",
+  "subRecipeSheetPublishTitle": "Pubblicare con le sotto-ricette?",
+  "subRecipeSheetDownloadTitle": "Scaricare con le sotto-ricette?",
+  "subRecipeSheetSubtitle": "{count, plural, =1{Questa ricetta collega 1 sotto-ricetta} other{Questa ricetta collega {count} sotto-ricette}} — deseleziona quelle che non vuoi includere.",
+  "subRecipeUsedInOthers": "Usata in {count, plural, =1{1 altra ricetta} other{{count} altre ricette}}",
+  "subRecipeUsedNowhere": "Non usata in nessun'altra ricetta",
+  "autoLinkedSubRecipes": "{count, plural, =1{collegata automaticamente 1 sotto-ricetta} other{collegate automaticamente {count} sotto-ricette}}",
+  "importNearDuplicateExisting": "Esiste una simile",
+  "importNearDuplicateInternal": "Simile nel lotto",
+  "backupReminderTitle": "La sincronizzazione cloud è disattivata",
+  "backupReminderDaysAgo": "{count, plural, =1{Ultimo backup 1 giorno fa} other{Ultimo backup {count} giorni fa}}",
+  "backupReminderNever": "Accedi per mantenere le ricette sincronizzate — o esegui un backup manuale.",
+  "backupReminderAction": "Accedi",
+  "backupReminderSnooze": "Ricordamelo più tardi",
+  "communityDownloadIncludeSubRecipesTitle": "Includere le sotto-ricette collegate?",
+  "communityDownloadIncludeSubRecipesBody": "{count, plural, =1{Le ricette selezionate fanno riferimento a 1 sotto-ricetta. Includerla per non interrompere il collegamento?} other{Le ricette selezionate fanno riferimento a {count} sotto-ricette. Includerle per non interrompere i collegamenti?}}",
+  "communityDownloadIncludeSubRecipes": "Includi le sotto-ricette",
+  "communityDownloadSkipSubRecipes": "Ignorale",
+  "actionMove": "Sposta",
+  "communityDownload": "Scarica",
+  "editAsText": "Modifica come testo",
+  "editAsList": "Modifica come elenco",
+  "stepsBulkEditHint": "Separa ogni passaggio con una riga vuota",
+  "stepsBulkEditImagesWarning": "Alcune foto dei passaggi potrebbero andare perse se cambi il numero di passaggi.",
+  "publishToCommunity": "Pubblica nella community",
+  "publishSingleRecipeTitle": "Pubblica ricetta",
+  "publishSingleRecipeBody": "Condividi questa ricetta nel feed della community. Gli aggiornamenti non si sincronizzano — ripubblica per applicare le modifiche.",
+  "publishSingleRecipeAction": "Pubblica",
+  "publishSingleRecipeSuccess": "Pubblicata!",
+  "creatorsYouFollow": "Creator che segui",
+  "noCreatorsYouFollow": "Segui dei creator per vedere qui le loro ultime pubblicazioni.",
+  "shoppingAlsoAddToMealPlan": "Aggiungi anche al piano dei pasti",
+  "shoppingMealPlanAddedCount": "{count, plural, =1{1 ricetta aggiunta al piano dei pasti} other{{count} ricette aggiunte al piano dei pasti}}",
+  "communityICookedThis": "L'ho cucinata",
+  "communityICookedThisActive": "Cucinata",
+  "communityRepublishRecipes": "Aggiorna la versione pubblicata",
+  "communityRepublishRecipesBody": "Sostituisce il contenuto della ricetta pubblicata con la tua versione attuale. Valutazioni e download vengono mantenuti.",
+  "communityRepublishRecipesAction": "Aggiorna",
+  "communityRepublishSuccess": "Versione pubblicata aggiornata",
+  "shoppingItemRemoved": "Articolo rimosso",
+  "shoppingItemsRemoved": "{count, plural, =1{1 articolo rimosso} other{{count} articoli rimossi}}",
+  "publicationUnpublished": "Rimossa dalla pubblicazione",
+  "cookModeVoiceTitle": "Controllo vocale",
+  "cookModeVoiceListening": "In ascolto… di' \"next\", \"back\", \"pause\" o \"set timer\"",
+  "cookModeVoiceUnavailable": "Controllo vocale non disponibile su questo dispositivo",
+  "communityRepublishSourceMissing": "Impossibile trovare la ricetta originale su questo dispositivo. Pubblicala di nuovo dalla ricetta per condividere una versione aggiornata.",
+  "importNothingSaved": "Importazione non riuscita — nessun dato salvato. Riprova.",
+  "unsavedChangesBody": "Hai modifiche non salvate. Uscire senza salvare?",
+  "unsavedKeepEditing": "Continua a modificare",
+  "unsavedDiscard": "Annulla le modifiche",
+  "ingredientMakeHeader": "Trasforma in intestazione di sezione",
+  "ingredientMakeIngredient": "Trasforma in ingrediente",
+  "shoppingMoveToList": "Sposta nell'elenco",
+  "shoppingNoOtherLists": "Nessun altro elenco in cui spostare",
+  "shoppingMovedToList": "Spostato in {name}",
+  "exportSaveToDevice": "Salva sul dispositivo",
+  "exportSaveToDeviceSubtitle": "Salva lo zip del backup nei tuoi file o nei Download",
+  "exportShareZip": "Condividi il backup",
+  "exportShareZipSubtitle": "Invia il backup a un'altra app o dispositivo",
+  "exportSaved": "Backup salvato",
+  "exportZipIncludeShopping": "Includi le liste della spesa",
+  "exportZipIncludeShoppingSubtitle": "Aggiungi le tue liste della spesa al backup completo",
+  "communityPublishCookbookOption": "Pubblica un ricettario",
+  "communityPublishCookbookOptionSub": "Condividi un intero ricettario (5+ ricette)",
+  "communityPublishSingleRecipeOption": "Pubblica una singola ricetta",
+  "communityPublishSingleRecipeOptionSub": "Condividi una sola ricetta — senza bisogno di un ricettario",
+  "communityPickRecipeToPublish": "Scegli una ricetta da pubblicare",
+  "communitySearchYourRecipes": "Cerca tra le tue ricette…",
+  "chartCompactDonut": "Compatto",
+  "nutritionPaletteTitle": "Tavolozza colori",
+  "paletteClassic": "Classica",
+  "paletteWarm": "Calda",
+  "paletteCool": "Fredda",
+  "paletteMono": "Mono"
 }

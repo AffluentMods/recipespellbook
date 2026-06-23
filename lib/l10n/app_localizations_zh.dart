@@ -9197,29 +9197,29 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shareViewerUntitled => '无标题食谱';
 
   @override
-  String get subRecipeSheetCopyTitle => 'Copy with sub-recipes?';
+  String get subRecipeSheetCopyTitle => '连同子食谱一起复制？';
 
   @override
-  String get subRecipeSheetMoveTitle => 'Move with sub-recipes?';
+  String get subRecipeSheetMoveTitle => '连同子食谱一起移动？';
 
   @override
-  String get subRecipeSheetDeleteTitle => 'Delete recipe and sub-recipes?';
+  String get subRecipeSheetDeleteTitle => '删除食谱及其子食谱？';
 
   @override
-  String get subRecipeSheetPublishTitle => 'Publish with sub-recipes?';
+  String get subRecipeSheetPublishTitle => '连同子食谱一起发布？';
 
   @override
-  String get subRecipeSheetDownloadTitle => 'Download with sub-recipes?';
+  String get subRecipeSheetDownloadTitle => '连同子食谱一起下载？';
 
   @override
   String subRecipeSheetSubtitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'This recipe links $count sub-recipes',
-      one: 'This recipe links 1 sub-recipe',
+      other: '此食谱关联了 $count 个子食谱',
+      one: '此食谱关联了 1 个子食谱',
     );
-    return '$_temp0 — uncheck any you don\'t want to include.';
+    return '$_temp0 — 取消勾选你不想包含的项。';
   }
 
   @override
@@ -9227,80 +9227,80 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count other recipes',
-      one: '1 other recipe',
+      other: '另外 $count 个食谱',
+      one: '另外 1 个食谱',
     );
-    return 'Used in $_temp0';
+    return '已用于 $_temp0';
   }
 
   @override
-  String get subRecipeUsedNowhere => 'Not used in any other recipes';
+  String get subRecipeUsedNowhere => '未用于任何其他食谱';
 
   @override
   String autoLinkedSubRecipes(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'auto-linked $count sub-recipes',
-      one: 'auto-linked 1 sub-recipe',
+      other: '已自动关联 $count 个子食谱',
+      one: '已自动关联 1 个子食谱',
     );
     return '$_temp0';
   }
 
   @override
-  String get importNearDuplicateExisting => 'Similar exists';
+  String get importNearDuplicateExisting => '已存在相似项';
 
   @override
-  String get importNearDuplicateInternal => 'Similar in batch';
+  String get importNearDuplicateInternal => '批次中有相似项';
 
   @override
-  String get backupReminderTitle => 'Cloud sync isn\'t on';
+  String get backupReminderTitle => '云同步未开启';
 
   @override
   String backupReminderDaysAgo(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Last backup was $count days ago',
-      one: 'Last backup was 1 day ago',
+      other: '上次备份是 $count 天前',
+      one: '上次备份是 1 天前',
     );
     return '$_temp0';
   }
 
   @override
-  String get backupReminderNever => 'Sign in to keep your recipes synced — or back up manually.';
+  String get backupReminderNever => '登录以保持食谱同步 — 或手动备份。';
 
   @override
-  String get backupReminderAction => 'Sign in';
+  String get backupReminderAction => '登录';
 
   @override
-  String get backupReminderSnooze => 'Remind me later';
+  String get backupReminderSnooze => '稍后提醒我';
 
   @override
-  String get communityDownloadIncludeSubRecipesTitle => 'Include linked sub-recipes?';
+  String get communityDownloadIncludeSubRecipesTitle => '包含关联的子食谱？';
 
   @override
   String communityDownloadIncludeSubRecipesBody(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'The recipes you selected reference $count sub-recipes. Include them so the links don\'t break?',
-      one: 'The recipes you selected reference 1 sub-recipe. Include it so the link doesn\'t break?',
+      other: '你选中的食谱引用了 $count 个子食谱。是否一并包含，以免关联失效？',
+      one: '你选中的食谱引用了 1 个子食谱。是否一并包含，以免关联失效？',
     );
     return '$_temp0';
   }
 
   @override
-  String get communityDownloadIncludeSubRecipes => 'Include sub-recipes';
+  String get communityDownloadIncludeSubRecipes => '包含子食谱';
 
   @override
-  String get communityDownloadSkipSubRecipes => 'Skip them';
+  String get communityDownloadSkipSubRecipes => '跳过它们';
 
   @override
-  String get actionMove => 'Move';
+  String get actionMove => '移动';
 
   @override
-  String get communityDownload => 'Download';
+  String get communityDownload => '下载';
 
   @override
   String get exportFullZip => '完整备份 (ZIP)';
@@ -9321,156 +9321,182 @@ class AppLocalizationsZh extends AppLocalizations {
   String get exportJsonCustom => '自定义 JSON 导出';
 
   @override
-  String get editAsText => 'Edit as text';
+  String get editAsText => '按文本编辑';
 
   @override
-  String get editAsList => 'Edit as list';
+  String get editAsList => '按列表编辑';
 
   @override
-  String get stepsBulkEditHint => 'Separate each step with a blank line';
+  String get stepsBulkEditHint => '每个步骤之间用空行分隔';
 
   @override
-  String get stepsBulkEditImagesWarning => 'Some step photos may be lost if you change the number of steps.';
+  String get stepsBulkEditImagesWarning => '如果更改步骤数量，部分步骤图片可能会丢失。';
 
   @override
-  String get publishToCommunity => 'Publish to community';
+  String get publishToCommunity => '发布到社区';
 
   @override
-  String get publishSingleRecipeTitle => 'Publish recipe';
+  String get publishSingleRecipeTitle => '发布食谱';
 
   @override
-  String get publishSingleRecipeBody => 'Share this recipe to the community feed. Updates won\'t sync — re-publish to push changes.';
+  String get publishSingleRecipeBody => '将此食谱分享到社区动态。更新不会自动同步 — 重新发布以推送更改。';
 
   @override
-  String get publishSingleRecipeAction => 'Publish';
+  String get publishSingleRecipeAction => '发布';
 
   @override
-  String get publishSingleRecipeSuccess => 'Published!';
+  String get publishSingleRecipeSuccess => '已发布！';
 
   @override
-  String get creatorsYouFollow => 'Creators you follow';
+  String get creatorsYouFollow => '你关注的创作者';
 
   @override
-  String get noCreatorsYouFollow => 'Follow creators to see their latest publications here.';
+  String get noCreatorsYouFollow => '关注创作者，即可在此查看他们的最新发布。';
 
   @override
-  String get shoppingAlsoAddToMealPlan => 'Also add to meal plan';
+  String get shoppingAlsoAddToMealPlan => '同时加入膳食计划';
 
   @override
   String shoppingMealPlanAddedCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Added $count recipes to meal plan',
-      one: 'Added 1 recipe to meal plan',
+      other: '已将 $count 个食谱加入膳食计划',
+      one: '已将 1 个食谱加入膳食计划',
     );
     return '$_temp0';
   }
 
   @override
-  String get communityICookedThis => 'I cooked this';
+  String get communityICookedThis => '我做过这道菜';
 
   @override
-  String get communityICookedThisActive => 'Cooked';
+  String get communityICookedThisActive => '已做过';
 
   @override
-  String get communityRepublishRecipes => 'Update published version';
+  String get communityRepublishRecipes => '更新已发布的版本';
 
   @override
-  String get communityRepublishRecipesBody => 'Replaces the published recipe content with your current version. Ratings and downloads are kept.';
+  String get communityRepublishRecipesBody => '用你当前的版本替换已发布的食谱内容。评分和下载次数将保留。';
 
   @override
-  String get communityRepublishRecipesAction => 'Update';
+  String get communityRepublishRecipesAction => '更新';
 
   @override
-  String get communityRepublishSuccess => 'Published version updated';
+  String get communityRepublishSuccess => '已发布版本已更新';
 
   @override
-  String get shoppingItemRemoved => 'Item removed';
+  String get shoppingItemRemoved => '已移除项目';
 
   @override
   String shoppingItemsRemoved(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count items removed',
-      one: '1 item removed',
+      other: '已移除 $count 个项目',
+      one: '已移除 1 个项目',
     );
     return '$_temp0';
   }
 
   @override
-  String get publicationUnpublished => 'Unpublished';
+  String get publicationUnpublished => '已取消发布';
 
   @override
-  String get cookModeVoiceTitle => 'Voice control';
+  String get cookModeVoiceTitle => '语音控制';
 
   @override
-  String get cookModeVoiceListening => 'Listening… say next, back, pause, or set timer';
+  String get cookModeVoiceListening => '正在聆听… 说 “next”、“back”、“pause” 或 “set timer”';
 
   @override
-  String get cookModeVoiceUnavailable => 'Voice control unavailable on this device';
+  String get cookModeVoiceUnavailable => '此设备不支持语音控制';
 
   @override
-  String get communityRepublishSourceMissing => 'Couldn\'t find the original recipe on this device. Publish it again from the recipe to share an updated version.';
+  String get communityRepublishSourceMissing => '在此设备上找不到原始食谱。请从该食谱重新发布，以分享更新后的版本。';
 
   @override
-  String get importNothingSaved => 'Import failed — nothing was saved. Please try again.';
+  String get importNothingSaved => '导入失败 — 未保存任何内容。请重试。';
 
   @override
-  String get exportSaveToDevice => 'Save to device';
+  String get unsavedChangesBody => '你有未保存的更改。要不保存就离开吗？';
 
   @override
-  String get exportSaveToDeviceSubtitle => 'Save the backup zip to your files or Downloads';
+  String get unsavedKeepEditing => '继续编辑';
 
   @override
-  String get exportShareZip => 'Share backup';
+  String get unsavedDiscard => '放弃';
 
   @override
-  String get exportShareZipSubtitle => 'Send the backup to another app or device';
+  String get ingredientMakeHeader => '设为分区标题';
 
   @override
-  String get exportSaved => 'Backup saved';
+  String get ingredientMakeIngredient => '设为食材';
 
   @override
-  String get exportZipIncludeShopping => 'Include shopping lists';
+  String get shoppingMoveToList => '移动到清单';
 
   @override
-  String get exportZipIncludeShoppingSubtitle => 'Add your shopping lists to the full backup';
+  String get shoppingNoOtherLists => '没有其他清单可移动到';
 
   @override
-  String get communityPublishCookbookOption => 'Publish a cookbook';
+  String shoppingMovedToList(String name) {
+    return '已移动到 $name';
+  }
 
   @override
-  String get communityPublishCookbookOptionSub => 'Share a whole cookbook (5+ recipes)';
+  String get exportSaveToDevice => '保存到设备';
 
   @override
-  String get communityPublishSingleRecipeOption => 'Publish a single recipe';
+  String get exportSaveToDeviceSubtitle => '将备份 zip 保存到你的文件或下载文件夹';
 
   @override
-  String get communityPublishSingleRecipeOptionSub => 'Share one recipe — no cookbook needed';
+  String get exportShareZip => '分享备份';
 
   @override
-  String get communityPickRecipeToPublish => 'Choose a recipe to publish';
+  String get exportShareZipSubtitle => '将备份发送到其他应用或设备';
 
   @override
-  String get communitySearchYourRecipes => 'Search your recipes…';
+  String get exportSaved => '备份已保存';
 
   @override
-  String get chartCompactDonut => 'Compact';
+  String get exportZipIncludeShopping => '包含购物清单';
 
   @override
-  String get nutritionPaletteTitle => 'Color palette';
+  String get exportZipIncludeShoppingSubtitle => '将你的购物清单加入完整备份';
 
   @override
-  String get paletteClassic => 'Classic';
+  String get communityPublishCookbookOption => '发布食谱集';
 
   @override
-  String get paletteWarm => 'Warm';
+  String get communityPublishCookbookOptionSub => '分享整本食谱集（5 个及以上食谱）';
 
   @override
-  String get paletteCool => 'Cool';
+  String get communityPublishSingleRecipeOption => '发布单个食谱';
 
   @override
-  String get paletteMono => 'Mono';
+  String get communityPublishSingleRecipeOptionSub => '分享一个食谱 — 无需食谱集';
+
+  @override
+  String get communityPickRecipeToPublish => '选择要发布的食谱';
+
+  @override
+  String get communitySearchYourRecipes => '搜索你的食谱…';
+
+  @override
+  String get chartCompactDonut => '紧凑';
+
+  @override
+  String get nutritionPaletteTitle => '配色方案';
+
+  @override
+  String get paletteClassic => '经典';
+
+  @override
+  String get paletteWarm => '暖色';
+
+  @override
+  String get paletteCool => '冷色';
+
+  @override
+  String get paletteMono => '单色';
 }

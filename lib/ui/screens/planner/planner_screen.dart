@@ -1050,7 +1050,11 @@ class _MealsListState extends ConsumerState<_MealsList> {
                 _MealTypeHeader(mealType: mealType),
                 ...grouped[mealType]!.map((plan) => Padding(
                   padding: const EdgeInsets.only(top: 4),
-                  child: _MealTile(plan: plan),
+                  // Stable key per planned meal — without it Flutter
+                  // recycles a tile's State (cached ingredients/steps +
+                  // expanded flag) onto a DIFFERENT meal when switching
+                  // days, showing one recipe's body under another's title.
+                  child: _MealTile(key: ValueKey(plan.mealPlan.id), plan: plan),
                 )),
               ],
             ),
@@ -1122,7 +1126,7 @@ class _MealTypeHeader extends StatelessWidget {
 class _MealTile extends ConsumerStatefulWidget {
   final MealPlanWithRecipe plan;
 
-  const _MealTile({required this.plan});
+  const _MealTile({super.key, required this.plan});
 
   @override
   ConsumerState<_MealTile> createState() => _MealTileState();
@@ -1132,6 +1136,23 @@ class _MealTileState extends ConsumerState<_MealTile> {
   bool _isExpanded = false;
   List<Ingredient>? _ingredients;
   List<Step>? _steps;
+
+  @override
+  void didUpdateWidget(_MealTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Defensive self-correction: if this State is ever reused for a
+    // different planned meal or recipe, drop the cached details so we
+    // never render one recipe's ingredients/steps under another's title.
+    final changed = oldWidget.plan.mealPlan.id != widget.plan.mealPlan.id ||
+        oldWidget.plan.recipe?.id != widget.plan.recipe?.id;
+    if (changed) {
+      _ingredients = null;
+      _steps = null;
+      if (_isExpanded && widget.plan.recipe != null) {
+        _loadDetails(); // reload for the new recipe
+      }
+    }
+  }
 
   Future<void> _loadDetails() async {
     final recipe = widget.plan.recipe;

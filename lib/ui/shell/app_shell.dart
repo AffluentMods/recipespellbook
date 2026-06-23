@@ -17,11 +17,14 @@ import '../widgets/app_snackbar.dart';
 /// Provider to track current navigation index
 final currentNavIndexProvider = StateProvider<int>((ref) => 0);
 
-/// Provider for shopping item count (for badge)
-final shoppingBadgeCountProvider = StreamProvider<int>((ref) {
-  final shoppingDao = ref.watch(shoppingDaoProvider);
-  return shoppingDao.watchItemsInList('list_default').map((items) =>
-  items.where((i) => !i.isChecked).length
+/// Bottom-nav badge: total unchecked items across ALL lists (so a full
+/// Costco list still nudges you even when you're viewing Safeway).
+/// Counts come from shoppingListCountsProvider (in database_provider).
+final shoppingBadgeCountProvider = Provider<int>((ref) {
+  final counts = ref.watch(shoppingListCountsProvider);
+  return counts.maybeWhen(
+    data: (m) => m.values.fold<int>(0, (a, b) => a + b),
+    orElse: () => 0,
   );
 });
 
@@ -101,12 +104,8 @@ class _AppShellState extends ConsumerState<AppShell> {
   @override
   Widget build(BuildContext context) {
     final currentIndex = ref.watch(currentNavIndexProvider);
-    final shoppingCountAsync = ref.watch(shoppingBadgeCountProvider);
-    final shoppingBadge = shoppingCountAsync.when(
-      data: (count) => count > 0 ? count : null,
-      loading: () => null,
-      error: (_, __) => null,
-    );
+    final shoppingCount = ref.watch(shoppingBadgeCountProvider);
+    final shoppingBadge = shoppingCount > 0 ? shoppingCount : null;
 
     // Determine active tab from route (overrides provider for sidebar display)
     final location = GoRouterState.of(context).uri.path;

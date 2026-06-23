@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:isolate';
 import 'package:flutter/services.dart' show rootBundle;
+import '../utils/text_normalize.dart';
 
 /// A single ingredient entry from the USDA database or supplementary list.
 class IngredientEntry {
@@ -150,7 +151,8 @@ class IngredientSuggestionService {
   List<IngredientResult> search(String query, {int limit = 12}) {
     if (query.trim().isEmpty || !_loaded) return [];
 
-    final q = query.toLowerCase().trim();
+    // Accent-folded so "bernaise" matches "Béarnaise" etc.
+    final q = foldAccents(query.trim());
     final stripped = _stripQuantityAndUnit(q);
     final searchTerm = stripped.isNotEmpty ? stripped : q;
 
@@ -163,8 +165,8 @@ class IngredientSuggestionService {
     final earlyExitThreshold = limit * 2;
 
     for (final entry in _ingredients) {
-      final displayLower = entry.name.toLowerCase();
-      final searchLower = entry.searchText;
+      final displayLower = foldAccents(entry.name);
+      final searchLower = foldAccents(entry.searchText);
 
       if (displayLower == searchTerm || searchLower == searchTerm) {
         exact.add(IngredientResult(

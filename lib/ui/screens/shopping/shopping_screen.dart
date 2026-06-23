@@ -10,6 +10,7 @@ import '../../../services/ocr_stub.dart' if (dart.library.io) '../../../services
 import 'package:image_picker/image_picker.dart';
 import '../../../utils/platform_utils.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../data/ingredient_images.dart';
@@ -60,12 +61,44 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   final Set<String> _recentlyCheckedIds = {};
   Map<String, int> _sharedListCounts = {}; // listId → share count
 
+  static const _lastListKey = 'shoppingLastListId';
+
   @override
   void initState() {
     super.initState();
+    _restoreCurrentList();
     _loadUserMappings();
-    _loadCurrentListName();
     _loadSharedStatus();
+  }
+
+  /// Restore the last-viewed list across screen rebuilds / app restarts.
+  /// Previously _currentListId was ephemeral and snapped back to
+  /// 'list_default' every time you left and returned to the tab.
+  Future<void> _restoreCurrentList() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedId = prefs.getString(_lastListKey) ?? 'list_default';
+    final shoppingDao = ref.read(shoppingDaoProvider);
+    // Fall back to default if the saved list was deleted.
+    final list = await shoppingDao.getListById(savedId) ??
+        await shoppingDao.getListById('list_default');
+    if (mounted && list != null) {
+      setState(() {
+        _currentListId = list.id;
+        _currentListName = list.name;
+      });
+    } else {
+      _loadCurrentListName();
+    }
+  }
+
+  /// Switch the active list AND persist the choice.
+  void _setCurrentList(String id, String name) {
+    setState(() {
+      _currentListId = id;
+      _currentListName = name;
+    });
+    SharedPreferences.getInstance()
+        .then((p) => p.setString(_lastListKey, id));
   }
 
   Future<void> _loadSharedStatus() async {
@@ -107,6 +140,15 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     final theme = Theme.of(context);
     final shoppingDao = ref.watch(shoppingDaoProvider);
 
+    // Unchecked counts across all lists → "items in your other lists" hint.
+    final listCounts = ref.watch(shoppingListCountsProvider).maybeWhen(
+          data: (m) => m,
+          orElse: () => const <String, int>{},
+        );
+    final otherListsCount = listCounts.entries
+        .where((e) => e.key != _currentListId)
+        .fold<int>(0, (a, e) => a + e.value);
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
@@ -125,6 +167,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 Responsive.constrainWidth(context, child: _ModernHeader(
                   listName: _currentListName,
                   itemCount: uncheckedItems.length,
+                  otherListsCount: otherListsCount,
                   groupMode: _groupMode,
                   onGroupModeChanged: (mode) => setState(() => _groupMode = mode),
                   onShare: () => _showShareSheet(context),
@@ -441,6 +484,11 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.read(shoppingDaoProvider);
+    // Per-list unchecked counts to show beside each list name.
+    final listCounts = ref.read(shoppingListCountsProvider).maybeWhen(
+          data: (m) => m,
+          orElse: () => const <String, int>{},
+        );
 
     Responsive.showAdaptiveSheet(
       context,
@@ -495,6 +543,27 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                       title: Row(
                         children: [
                           Flexible(child: Text(list.name)),
+                          // Per-list unchecked count.
+                          if ((listCounts[list.id] ?? 0) > 0) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.primary.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '${listCounts[list.id]}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                          ],
                           if (isShared) ...[
                             const SizedBox(width: 8),
                             Container(
@@ -533,10 +602,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                         ],
                       ),
                       onTap: () {
-                        setState(() {
-                          _currentListId = list.id;
-                          _currentListName = list.name;
-                        });
+                        _setCurrentList(list.id, list.name);
                         Navigator.pop(ctx);
                       },
                     ),
@@ -576,10 +642,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   id: id,
                   name: controller.text.trim(),
                 ));
-                setState(() {
-                  _currentListId = id;
-                  _currentListName = controller.text.trim();
-                });
+                _setCurrentList(id, controller.text.trim());
                 Navigator.pop(ctx);
               }
             },
@@ -1136,6 +1199,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 class _ModernHeader extends StatelessWidget {
   final String listName;
   final int itemCount;
+  final int otherListsCount;
   final ShoppingGroupMode groupMode;
   final ValueChanged<ShoppingGroupMode> onGroupModeChanged;
   final VoidCallback onShare;
@@ -1145,6 +1209,7 @@ class _ModernHeader extends StatelessWidget {
   const _ModernHeader({
     required this.listName,
     required this.itemCount,
+    this.otherListsCount = 0,
     required this.groupMode,
     required this.onGroupModeChanged,
     required this.onShare,
@@ -1170,12 +1235,35 @@ class _ModernHeader extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      listName,
-                      style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                    Flexible(
+                      child: Text(
+                        listName,
+                        style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                     const SizedBox(width: 4),
                     Icon(Icons.arrow_drop_down, color: theme.colorScheme.outline),
+                    // Count of items waiting in OTHER lists — tap to switch.
+                    if (otherListsCount > 0) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          otherListsCount > 99 ? '99+' : '$otherListsCount',
+                          style: TextStyle(
+                            color: theme.colorScheme.onPrimary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -3615,7 +3703,51 @@ class _ShoppingItemTile extends ConsumerWidget {
                   Navigator.pop(ctx);
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
+
+              // Move to another shopping list
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.drive_file_move_outlined),
+                title: Text(l10n.shoppingMoveToList),
+                onTap: () async {
+                  final lists = (await shoppingDao.getAllLists())
+                      .where((l) => l.id != item.listId)
+                      .toList();
+                  if (!ctx.mounted) return;
+                  if (lists.isEmpty) {
+                    AppSnackbar.info(ctx, l10n.shoppingNoOtherLists);
+                    return;
+                  }
+                  final target = await showModalBottomSheet<ShoppingList>(
+                    context: ctx,
+                    builder: (pickCtx) => SafeArea(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(l10n.shoppingMoveToList,
+                                style: Theme.of(pickCtx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                          ),
+                          ...lists.map((l) => ListTile(
+                                leading: const Icon(Icons.list_alt),
+                                title: Text(l.name),
+                                onTap: () => Navigator.pop(pickCtx, l),
+                              )),
+                        ],
+                      ),
+                    ),
+                  );
+                  if (target == null) return;
+                  await shoppingDao.moveItemToList(item.id, target.id);
+                  if (ctx.mounted) Navigator.pop(ctx);
+                  if (context.mounted) {
+                    AppSnackbar.success(context, l10n.shoppingMovedToList(target.name));
+                  }
+                },
+              ),
+              const SizedBox(height: 8),
 
               Row(
                 children: [

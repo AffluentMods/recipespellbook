@@ -9197,29 +9197,29 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shareViewerUntitled => '無題のレシピ';
 
   @override
-  String get subRecipeSheetCopyTitle => 'Copy with sub-recipes?';
+  String get subRecipeSheetCopyTitle => 'サブレシピも一緒にコピーしますか？';
 
   @override
-  String get subRecipeSheetMoveTitle => 'Move with sub-recipes?';
+  String get subRecipeSheetMoveTitle => 'サブレシピも一緒に移動しますか？';
 
   @override
-  String get subRecipeSheetDeleteTitle => 'Delete recipe and sub-recipes?';
+  String get subRecipeSheetDeleteTitle => 'レシピとサブレシピを削除しますか？';
 
   @override
-  String get subRecipeSheetPublishTitle => 'Publish with sub-recipes?';
+  String get subRecipeSheetPublishTitle => 'サブレシピも一緒に公開しますか？';
 
   @override
-  String get subRecipeSheetDownloadTitle => 'Download with sub-recipes?';
+  String get subRecipeSheetDownloadTitle => 'サブレシピも一緒にダウンロードしますか？';
 
   @override
   String subRecipeSheetSubtitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'This recipe links $count sub-recipes',
-      one: 'This recipe links 1 sub-recipe',
+      other: 'このレシピは$count件のサブレシピにリンクしています',
+      one: 'このレシピは1件のサブレシピにリンクしています',
     );
-    return '$_temp0 — uncheck any you don\'t want to include.';
+    return '$_temp0 — 含めたくないものはチェックを外してください。';
   }
 
   @override
@@ -9227,80 +9227,80 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count other recipes',
-      one: '1 other recipe',
+      other: '他の$count件のレシピで使用中',
+      one: '他の1件のレシピで使用中',
     );
-    return 'Used in $_temp0';
+    return '$_temp0';
   }
 
   @override
-  String get subRecipeUsedNowhere => 'Not used in any other recipes';
+  String get subRecipeUsedNowhere => '他のレシピでは使用されていません';
 
   @override
   String autoLinkedSubRecipes(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'auto-linked $count sub-recipes',
-      one: 'auto-linked 1 sub-recipe',
+      other: '$count件のサブレシピを自動リンクしました',
+      one: '1件のサブレシピを自動リンクしました',
     );
     return '$_temp0';
   }
 
   @override
-  String get importNearDuplicateExisting => 'Similar exists';
+  String get importNearDuplicateExisting => '類似あり';
 
   @override
-  String get importNearDuplicateInternal => 'Similar in batch';
+  String get importNearDuplicateInternal => 'バッチ内に類似';
 
   @override
-  String get backupReminderTitle => 'Cloud sync isn\'t on';
+  String get backupReminderTitle => 'クラウド同期がオフです';
 
   @override
   String backupReminderDaysAgo(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Last backup was $count days ago',
-      one: 'Last backup was 1 day ago',
+      other: '前回のバックアップは$count日前です',
+      one: '前回のバックアップは1日前です',
     );
     return '$_temp0';
   }
 
   @override
-  String get backupReminderNever => 'Sign in to keep your recipes synced — or back up manually.';
+  String get backupReminderNever => 'サインインしてレシピを同期するか、手動でバックアップしてください。';
 
   @override
-  String get backupReminderAction => 'Sign in';
+  String get backupReminderAction => 'サインイン';
 
   @override
-  String get backupReminderSnooze => 'Remind me later';
+  String get backupReminderSnooze => '後で通知';
 
   @override
-  String get communityDownloadIncludeSubRecipesTitle => 'Include linked sub-recipes?';
+  String get communityDownloadIncludeSubRecipesTitle => 'リンクされたサブレシピを含めますか？';
 
   @override
   String communityDownloadIncludeSubRecipesBody(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'The recipes you selected reference $count sub-recipes. Include them so the links don\'t break?',
-      one: 'The recipes you selected reference 1 sub-recipe. Include it so the link doesn\'t break?',
+      other: '選択したレシピは$count件のサブレシピを参照しています。リンクが切れないように含めますか？',
+      one: '選択したレシピは1件のサブレシピを参照しています。リンクが切れないように含めますか？',
     );
     return '$_temp0';
   }
 
   @override
-  String get communityDownloadIncludeSubRecipes => 'Include sub-recipes';
+  String get communityDownloadIncludeSubRecipes => 'サブレシピを含める';
 
   @override
-  String get communityDownloadSkipSubRecipes => 'Skip them';
+  String get communityDownloadSkipSubRecipes => '含めない';
 
   @override
-  String get actionMove => 'Move';
+  String get actionMove => '移動';
 
   @override
-  String get communityDownload => 'Download';
+  String get communityDownload => 'ダウンロード';
 
   @override
   String get exportFullZip => 'フルバックアップ (ZIP)';
@@ -9321,156 +9321,182 @@ class AppLocalizationsJa extends AppLocalizations {
   String get exportJsonCustom => 'カスタムJSONエクスポート';
 
   @override
-  String get editAsText => 'Edit as text';
+  String get editAsText => 'テキストで編集';
 
   @override
-  String get editAsList => 'Edit as list';
+  String get editAsList => 'リストで編集';
 
   @override
-  String get stepsBulkEditHint => 'Separate each step with a blank line';
+  String get stepsBulkEditHint => '各手順は空行で区切ってください';
 
   @override
-  String get stepsBulkEditImagesWarning => 'Some step photos may be lost if you change the number of steps.';
+  String get stepsBulkEditImagesWarning => '手順の数を変更すると、一部の手順写真が失われる場合があります。';
 
   @override
-  String get publishToCommunity => 'Publish to community';
+  String get publishToCommunity => 'コミュニティに公開';
 
   @override
-  String get publishSingleRecipeTitle => 'Publish recipe';
+  String get publishSingleRecipeTitle => 'レシピを公開';
 
   @override
-  String get publishSingleRecipeBody => 'Share this recipe to the community feed. Updates won\'t sync — re-publish to push changes.';
+  String get publishSingleRecipeBody => 'このレシピをコミュニティフィードに共有します。更新は同期されません — 変更を反映するには再公開してください。';
 
   @override
-  String get publishSingleRecipeAction => 'Publish';
+  String get publishSingleRecipeAction => '公開';
 
   @override
-  String get publishSingleRecipeSuccess => 'Published!';
+  String get publishSingleRecipeSuccess => '公開しました！';
 
   @override
-  String get creatorsYouFollow => 'Creators you follow';
+  String get creatorsYouFollow => 'フォロー中のクリエイター';
 
   @override
-  String get noCreatorsYouFollow => 'Follow creators to see their latest publications here.';
+  String get noCreatorsYouFollow => 'クリエイターをフォローすると、最新の公開がここに表示されます。';
 
   @override
-  String get shoppingAlsoAddToMealPlan => 'Also add to meal plan';
+  String get shoppingAlsoAddToMealPlan => '献立にも追加';
 
   @override
   String shoppingMealPlanAddedCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Added $count recipes to meal plan',
-      one: 'Added 1 recipe to meal plan',
+      other: '$count件のレシピを献立に追加しました',
+      one: '1件のレシピを献立に追加しました',
     );
     return '$_temp0';
   }
 
   @override
-  String get communityICookedThis => 'I cooked this';
+  String get communityICookedThis => '作ってみた';
 
   @override
-  String get communityICookedThisActive => 'Cooked';
+  String get communityICookedThisActive => '作りました';
 
   @override
-  String get communityRepublishRecipes => 'Update published version';
+  String get communityRepublishRecipes => '公開バージョンを更新';
 
   @override
-  String get communityRepublishRecipesBody => 'Replaces the published recipe content with your current version. Ratings and downloads are kept.';
+  String get communityRepublishRecipesBody => '公開済みのレシピ内容を現在のバージョンに置き換えます。評価とダウンロード数は保持されます。';
 
   @override
-  String get communityRepublishRecipesAction => 'Update';
+  String get communityRepublishRecipesAction => '更新';
 
   @override
-  String get communityRepublishSuccess => 'Published version updated';
+  String get communityRepublishSuccess => '公開バージョンを更新しました';
 
   @override
-  String get shoppingItemRemoved => 'Item removed';
+  String get shoppingItemRemoved => 'アイテムを削除しました';
 
   @override
   String shoppingItemsRemoved(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count items removed',
-      one: '1 item removed',
+      other: '$count件のアイテムを削除しました',
+      one: '1件のアイテムを削除しました',
     );
     return '$_temp0';
   }
 
   @override
-  String get publicationUnpublished => 'Unpublished';
+  String get publicationUnpublished => '公開を取り消しました';
 
   @override
-  String get cookModeVoiceTitle => 'Voice control';
+  String get cookModeVoiceTitle => '音声操作';
 
   @override
-  String get cookModeVoiceListening => 'Listening… say next, back, pause, or set timer';
+  String get cookModeVoiceListening => '聞き取り中… 「next」「back」「pause」「set timer」と話してください';
 
   @override
-  String get cookModeVoiceUnavailable => 'Voice control unavailable on this device';
+  String get cookModeVoiceUnavailable => 'このデバイスでは音声操作を利用できません';
 
   @override
-  String get communityRepublishSourceMissing => 'Couldn\'t find the original recipe on this device. Publish it again from the recipe to share an updated version.';
+  String get communityRepublishSourceMissing => 'このデバイスで元のレシピが見つかりませんでした。更新版を共有するには、レシピから再度公開してください。';
 
   @override
-  String get importNothingSaved => 'Import failed — nothing was saved. Please try again.';
+  String get importNothingSaved => 'インポートに失敗しました — 何も保存されませんでした。もう一度お試しください。';
 
   @override
-  String get exportSaveToDevice => 'Save to device';
+  String get unsavedChangesBody => '保存していない変更があります。保存せずに移動しますか？';
 
   @override
-  String get exportSaveToDeviceSubtitle => 'Save the backup zip to your files or Downloads';
+  String get unsavedKeepEditing => '編集を続ける';
 
   @override
-  String get exportShareZip => 'Share backup';
+  String get unsavedDiscard => '破棄';
 
   @override
-  String get exportShareZipSubtitle => 'Send the backup to another app or device';
+  String get ingredientMakeHeader => 'セクション見出しにする';
 
   @override
-  String get exportSaved => 'Backup saved';
+  String get ingredientMakeIngredient => '材料にする';
 
   @override
-  String get exportZipIncludeShopping => 'Include shopping lists';
+  String get shoppingMoveToList => 'リストに移動';
 
   @override
-  String get exportZipIncludeShoppingSubtitle => 'Add your shopping lists to the full backup';
+  String get shoppingNoOtherLists => '移動先のリストがありません';
 
   @override
-  String get communityPublishCookbookOption => 'Publish a cookbook';
+  String shoppingMovedToList(String name) {
+    return '$nameに移動しました';
+  }
 
   @override
-  String get communityPublishCookbookOptionSub => 'Share a whole cookbook (5+ recipes)';
+  String get exportSaveToDevice => 'デバイスに保存';
 
   @override
-  String get communityPublishSingleRecipeOption => 'Publish a single recipe';
+  String get exportSaveToDeviceSubtitle => 'バックアップのzipをファイルまたはダウンロードに保存します';
 
   @override
-  String get communityPublishSingleRecipeOptionSub => 'Share one recipe — no cookbook needed';
+  String get exportShareZip => 'バックアップを共有';
 
   @override
-  String get communityPickRecipeToPublish => 'Choose a recipe to publish';
+  String get exportShareZipSubtitle => 'バックアップを別のアプリやデバイスに送信します';
 
   @override
-  String get communitySearchYourRecipes => 'Search your recipes…';
+  String get exportSaved => 'バックアップを保存しました';
 
   @override
-  String get chartCompactDonut => 'Compact';
+  String get exportZipIncludeShopping => '買い物リストを含める';
 
   @override
-  String get nutritionPaletteTitle => 'Color palette';
+  String get exportZipIncludeShoppingSubtitle => '完全バックアップに買い物リストを追加します';
 
   @override
-  String get paletteClassic => 'Classic';
+  String get communityPublishCookbookOption => 'クックブックを公開';
 
   @override
-  String get paletteWarm => 'Warm';
+  String get communityPublishCookbookOptionSub => 'クックブック全体を共有（5レシピ以上）';
 
   @override
-  String get paletteCool => 'Cool';
+  String get communityPublishSingleRecipeOption => '単一のレシピを公開';
 
   @override
-  String get paletteMono => 'Mono';
+  String get communityPublishSingleRecipeOptionSub => 'レシピを1件共有 — クックブックは不要';
+
+  @override
+  String get communityPickRecipeToPublish => '公開するレシピを選択';
+
+  @override
+  String get communitySearchYourRecipes => '自分のレシピを検索…';
+
+  @override
+  String get chartCompactDonut => 'コンパクト';
+
+  @override
+  String get nutritionPaletteTitle => 'カラーパレット';
+
+  @override
+  String get paletteClassic => 'クラシック';
+
+  @override
+  String get paletteWarm => 'ウォーム';
+
+  @override
+  String get paletteCool => 'クール';
+
+  @override
+  String get paletteMono => 'モノ';
 }

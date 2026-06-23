@@ -51,6 +51,20 @@ class ShoppingDao extends DatabaseAccessor<AppDatabase> with _$ShoppingDaoMixin 
   // ============ SHOPPING LIST ITEMS ============
 
   /// Watch items in a specific list - this is what shopping_screen uses
+  /// Stream of unchecked-item counts keyed by list id, across ALL lists.
+  /// Powers the bottom-nav total badge, the per-list counts in the list
+  /// dropdown, and the "items in other lists" indicator.
+  Stream<Map<String, int>> watchUncheckedCountsByList() {
+    final query = select(shoppingListItems)..where((t) => t.isChecked.equals(false));
+    return query.watch().map((items) {
+      final counts = <String, int>{};
+      for (final it in items) {
+        counts[it.listId] = (counts[it.listId] ?? 0) + 1;
+      }
+      return counts;
+    });
+  }
+
   Stream<List<ShoppingListItem>> watchItemsInList(String listId) {
     return (select(shoppingListItems)
       ..where((t) => t.listId.equals(listId))
@@ -87,6 +101,15 @@ class ShoppingDao extends DatabaseAccessor<AppDatabase> with _$ShoppingDaoMixin 
 
   Future<void> deleteItem(String id) {
     return (delete(shoppingListItems)..where((t) => t.id.equals(id))).go();
+  }
+
+  /// Move an item to a different shopping list.
+  Future<void> moveItemToList(String id, String targetListId) {
+    return (update(shoppingListItems)..where((t) => t.id.equals(id)))
+        .write(ShoppingListItemsCompanion(
+      listId: Value(targetListId),
+      updatedAt: Value(DateTime.now()),
+    ));
   }
 
   Future<void> toggleItemChecked(String id, bool checked) {

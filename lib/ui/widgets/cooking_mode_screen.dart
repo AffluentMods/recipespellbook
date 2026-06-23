@@ -564,68 +564,88 @@ class _StepView extends ConsumerWidget {
 
   const _StepView({required this.step, required this.stepNumber, required this.totalSteps, required this.allIngredients, required this.allSteps, required this.stepIndex});
 
-  /// Smart ingredient matching: assigns each ingredient to its BEST step,
-  /// so duplicates like "eggs" appearing 3x get distributed correctly.
+  /// Assigns each ingredient to EXACTLY ONE step, then returns those
+  /// assigned to this step. Two-tier logic:
+  ///   1. Direct match — the step's text mentions the ingredient (best
+  ///      scoring step wins; earliest on tie).
+  ///   2. Header grouping — an ingredient never named in any step is
+  ///      attached to the first step that references ITS section header
+  ///      (e.g. "make the sauce" pulls in the unmatched sauce items).
+  /// Ingredients matched by neither stay off the per-step view (they're
+  /// still in the full ingredient list). This replaces the old logic
+  /// that re-pulled a whole section into every step that mentioned it,
+  /// duplicating ingredients across steps.
   List<Ingredient> _matchIngredients() {
-    // Step 1: Score every ingredient against every step
-    final scores = <String, List<int>>{}; // ingredientId → [score per step]
-    final nonHeaders = allIngredients.where((i) => i.notes != '__header__').toList();
+    final nonHeaders =
+        allIngredients.where((i) => i.notes != '__header__').toList();
+    if (nonHeaders.isEmpty || allSteps.isEmpty) return const [];
 
-    for (final ing in nonHeaders) {
-      final ingScores = <int>[];
-      for (final s in allSteps) {
-        ingScores.add(_scoreIngredientForStep(ing, s));
+    // ingredientId → its section header name ('' if none).
+    final sectionOf = <String, String>{};
+    String currentSection = '';
+    for (final ing in allIngredients) {
+      if (ing.notes == '__header__') {
+        currentSection = ing.name;
+      } else {
+        sectionOf[ing.id] = currentSection;
       }
-      scores[ing.id] = ingScores;
     }
 
-    // Step 2: Assign each ingredient to the step where it scores highest.
-    // If tied, assign to the earliest step (ingredients are usually used in order).
-    // An ingredient appears in a step if:
-    //   a) This step is the best match for it, OR
-    //   b) It scores > 0 here AND it's the only step that mentions it
-    final result = <Ingredient>[];
-    for (final ing in nonHeaders) {
-      final ingScores = scores[ing.id]!;
-      final myScore = ingScores[stepIndex];
-      if (myScore == 0) continue;
-
-      final maxScore = ingScores.reduce((a, b) => a > b ? a : b);
-      if (myScore < maxScore) continue; // A different step is a better match
-
-      // If tied with an earlier step, only show in the earliest
-      final firstBest = ingScores.indexOf(maxScore);
-      if (firstBest != stepIndex) continue;
-
-      result.add(ing);
-    }
-
-    // Step 3: Header-based context boost — if step mentions a section name,
-    // pull in any unassigned ingredients from that section.
-    final headerSections = _buildHeaderSections();
-    final instruction = step.instruction.toLowerCase();
-    final instructionTokens = instruction
-        .split(RegExp(r'[\s,.\-—–;:!?()]+'))
-        .where((t) => t.length > 2)
-        .map(_stem)
-        .toSet();
-
-    for (final section in headerSections.entries) {
-      final headerKeywords = section.key.toLowerCase()
-          .replaceAll(RegExp(r'^(for\s+the\s+|para\s+(el|la|los|las)\s+|für\s+(den|die|das)\s+)', caseSensitive: false), '')
+    // section name → earliest step index that references it.
+    final sectionStep = <String, int>{};
+    final sections = _buildHeaderSections();
+    for (final name in sections.keys) {
+      final keywords = name
+          .toLowerCase()
+          .replaceAll(
+              RegExp(r'^(for\s+the\s+|para\s+(el|la|los|las)\s+|für\s+(den|die|das)\s+)',
+                  caseSensitive: false),
+              '')
           .split(RegExp(r'[\s,]+'))
           .where((w) => w.length > 2)
           .map(_stem)
           .toSet();
-
-      if (headerKeywords.any((kw) => instructionTokens.contains(kw) || instruction.contains(kw))) {
-        for (final ing in section.value) {
-          if (!result.contains(ing)) result.add(ing);
+      if (keywords.isEmpty) continue;
+      for (var si = 0; si < allSteps.length; si++) {
+        final instr = allSteps[si].instruction.toLowerCase();
+        final tokens = instr
+            .split(RegExp(r'[\s,.\-—–;:!?()]+'))
+            .where((t) => t.length > 2)
+            .map(_stem)
+            .toSet();
+        if (keywords.any((kw) => tokens.contains(kw) || instr.contains(kw))) {
+          sectionStep[name] = si;
+          break; // earliest wins
         }
       }
     }
 
-    return result;
+    // Global single assignment: ingredientId → stepIndex.
+    final assignment = <String, int>{};
+    for (final ing in nonHeaders) {
+      // Tier 1: direct text match, best (earliest-on-tie) scoring step.
+      var bestStep = -1;
+      var bestScore = 0;
+      for (var si = 0; si < allSteps.length; si++) {
+        final sc = _scoreIngredientForStep(ing, allSteps[si]);
+        if (sc > bestScore) {
+          bestScore = sc;
+          bestStep = si;
+        }
+      }
+      if (bestStep >= 0) {
+        assignment[ing.id] = bestStep;
+        continue;
+      }
+      // Tier 2: header grouping fallback.
+      final sec = sectionOf[ing.id] ?? '';
+      if (sec.isNotEmpty && sectionStep.containsKey(sec)) {
+        assignment[ing.id] = sectionStep[sec]!;
+      }
+      // else: not shown per-step.
+    }
+
+    return nonHeaders.where((i) => assignment[i.id] == stepIndex).toList();
   }
 
   /// Score how well an ingredient matches a step (0 = no match).

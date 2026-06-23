@@ -267,6 +267,59 @@ class AiImportService {
     return recipeId;
   }
 
+  /// Removes `// line` and `/* block */` comments while leaving the
+  /// contents of JSON string literals untouched. Walks the text tracking
+  /// in-string state (honoring `\"` escapes) so `//` inside a URL or any
+  /// value is preserved.
+  static String _stripCommentsOutsideStrings(String s) {
+    final out = StringBuffer();
+    var inString = false;
+    var i = 0;
+    final n = s.length;
+    while (i < n) {
+      final c = s[i];
+      if (inString) {
+        out.write(c);
+        if (c == r'\' && i + 1 < n) {
+          // Preserve the escaped character verbatim.
+          out.write(s[i + 1]);
+          i += 2;
+          continue;
+        }
+        if (c == '"') inString = false;
+        i++;
+        continue;
+      }
+      // Not in a string.
+      if (c == '"') {
+        inString = true;
+        out.write(c);
+        i++;
+        continue;
+      }
+      if (c == '/' && i + 1 < n && s[i + 1] == '/') {
+        // Line comment — skip to end of line (or end of input).
+        i += 2;
+        while (i < n && s[i] != '\n') {
+          i++;
+        }
+        continue;
+      }
+      if (c == '/' && i + 1 < n && s[i + 1] == '*') {
+        // Block comment — skip to closing */ (or end of input).
+        i += 2;
+        while (i + 1 < n && !(s[i] == '*' && s[i + 1] == '/')) {
+          i++;
+        }
+        i += 2;
+        continue;
+      }
+      out.write(c);
+      i++;
+    }
+    return out.toString();
+  }
+
   /// Clean JSON string from common AI output artifacts.
   static String _cleanJson(String raw) {
     var s = raw.trim();
@@ -292,11 +345,11 @@ class AiImportService {
       }
     }
 
-    // Strip single-line comments (// ...)
-    s = s.replaceAll(RegExp(r'//[^\n]*'), '');
-
-    // Strip block comments (/* ... */)
-    s = s.replaceAll(RegExp(r'/\*.*?\*/', dotAll: true), '');
+    // Strip JS-style comments — but ONLY outside string literals. A naive
+    // regex like `//[^\n]*` matches the `//` inside a URL (e.g.
+    // "https://example.com"); on minified single-line JSON that deletes
+    // everything to the end, producing an "unterminated string" error.
+    s = _stripCommentsOutsideStrings(s);
 
     // Remove trailing commas before } or ]
     s = s.replaceAll(RegExp(r',\s*([}\]])'), r'$1');
@@ -767,8 +820,12 @@ Rules:
   ],
   "steps": [
     {
-      "instruction": "Preheat the oven to 375 degrees\u00b0F (190\u00b0C).",
+      "instruction": "Preheat the oven to 375\u00b0F (190\u00b0C).",
       "durationMinutes": 5
+    },
+    {
+      "instruction": "Combine the 2 cups all-purpose flour with the 1 tsp salt, then cut in the 1/2 cup cold butter.",
+      "durationMinutes": 10
     }
   ]
 }
@@ -820,6 +877,7 @@ Rules:
 - "tags" is an array of short descriptive tags like "quick", "weeknight", "comfort food", "spicy", "gluten-free"
 - Pick the single best-matching course and category for each recipe
 - Keep step instructions clear and concise
+- AMOUNTS IN STEPS: When a step uses an ingredient, include its quantity from the ingredient list inline, so the cook never has to scroll back up. Write "Combine 1/4 cup lime juice and 1/3 cup chopped cilantro" — NOT "Combine lime juice and cilantro". Distribute each ingredient's amount across the step(s) that use it (e.g. if 2 cups flour is added in two stages, say "1 cup" each time). Keep the ingredient list itself unchanged with the full amounts.
 - Output valid JSON only — no markdown, no backticks, no commentary
 ''';
   }

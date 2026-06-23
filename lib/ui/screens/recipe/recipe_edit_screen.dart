@@ -363,6 +363,33 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
 
   bool get _isEditing => widget.recipeId != null;
 
+  // ── Unsaved-changes tracking ──
+  // A snapshot of all editable fields captured once the recipe finishes
+  // loading; compared on back-navigation to prompt before discarding.
+  String _initialSnapshot = '';
+  bool _initialCaptured = false;
+
+  String _editSnapshot() => [
+        _titleController.text,
+        _descriptionController.text,
+        _servingsController.text,
+        _prepTimeController.text,
+        _cookTimeController.text,
+        _sourceUrlController.text,
+        _notesController.text,
+        _selectedCourseId ?? '',
+        _selectedCategoryId ?? '',
+        _rating.toString(),
+        _imagePath ?? '',
+        _selectedTagIds.join(','),
+        _ingredients.map((i) => '${i.isHeader ? "H" : "I"}:${i.text}').join('|'),
+        _steps.map((s) => '${s.instruction}~${s.imagePath ?? ""}').join('|'),
+        _nutrition?.toJson().toString() ?? '',
+      ].join('');
+
+  bool get _hasUnsavedChanges =>
+      _initialCaptured && _editSnapshot() != _initialSnapshot;
+
   @override
   void initState() {
     super.initState();
@@ -534,7 +561,42 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       );
     }
 
-    return Scaffold(
+    // Capture the baseline once, on the first build after loading — all
+    // fields are populated by now (we're past the _isLoading guard).
+    if (!_initialCaptured) {
+      _initialCaptured = true;
+      _initialSnapshot = _editSnapshot();
+    }
+
+    return PopScope(
+      // System/AppBar back goes through maybePop and is gated here; the
+      // save button uses a direct context.pop() which bypasses PopScope,
+      // so saving never triggers the discard prompt.
+      canPop: !_hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final nav = Navigator.of(context);
+        final discard = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(l10n.unsavedChangesTitle),
+            content: Text(l10n.unsavedChangesBody),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(l10n.unsavedKeepEditing),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(backgroundColor: theme.colorScheme.error),
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(l10n.unsavedDiscard),
+              ),
+            ],
+          ),
+        );
+        if (discard == true && mounted) nav.pop(result);
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: Text(_isEditing ? l10n.recipeEdit : l10n.recipeAdd),
         actions: [
@@ -567,6 +629,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       body: useTabbed
           ? _buildTabbedLayout(theme, l10n, settings)
           : _buildStackedLayout(theme, l10n, settings),
+      ),
     );
   }
 
@@ -814,9 +877,17 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     final l10n = AppLocalizations.of(context)!;
 
     if (_ingredientSortMode) {
-      return ReorderableListView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
+      // Bounded height + its own scroll physics so ReorderableListView's
+      // built-in edge auto-scroll works. Previously it was shrinkWrapped
+      // with NeverScrollableScrollPhysics inside the page scroll view,
+      // which disabled auto-scroll — dragging item #1 to #30 meant
+      // drag, drop, scroll, drag again. Now holding a row near the top
+      // or bottom edge scrolls automatically.
+      final listHeight =
+          (MediaQuery.of(context).size.height * 0.6).clamp(280.0, 620.0);
+      return SizedBox(
+        height: listHeight,
+        child: ReorderableListView.builder(
         itemCount: _ingredients.length,
         proxyDecorator: (child, index, animation) {
           return AnimatedBuilder(
@@ -866,6 +937,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
             ),
           );
         },
+      ),
       );
     }
 
@@ -879,6 +951,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
             onChanged: (text) => setState(() => _ingredients[entry.key].text = text),
             onDelete: () => setState(() => _ingredients.removeAt(entry.key)),
             onSortMode: _toggleSortMode,
+            onToggleHeader: () => setState(() => _ingredients[entry.key].isHeader = false),
           );
         }
         return _IngredientRow(
@@ -889,6 +962,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
           onLinkRecipe: _isEditing ? () => _showLinkRecipePicker(entry.value.id, entry.value.text) : null,
           linkedRecipes: (_ingredientLinksMap[entry.value.id] ?? []).map((info) => info.recipe).toList(),
           onSortMode: _toggleSortMode,
+          onToggleHeader: () => setState(() => _ingredients[entry.key].isHeader = true),
         );
       }).toList(),
     );
@@ -2262,6 +2336,7 @@ class _IngredientRow extends StatelessWidget {
   final VoidCallback onDelete;
   final VoidCallback? onLinkRecipe;
   final VoidCallback? onSortMode;
+  final VoidCallback? onToggleHeader;
   final List<Recipe> linkedRecipes;
 
   const _IngredientRow({
@@ -2271,6 +2346,7 @@ class _IngredientRow extends StatelessWidget {
     required this.onDelete,
     this.onLinkRecipe,
     this.onSortMode,
+    this.onToggleHeader,
     this.linkedRecipes = const [],
   });
 
@@ -2292,6 +2368,7 @@ class _IngredientRow extends StatelessWidget {
                 case 'delete': onDelete(); break;
                 case 'link_recipe': onLinkRecipe?.call(); break;
                 case 'sort_order': onSortMode?.call(); break;
+                case 'make_header': onToggleHeader?.call(); break;
               }
             },
             itemBuilder: (context) => [
@@ -2302,6 +2379,15 @@ class _IngredientRow extends StatelessWidget {
                     Icon(Icons.link, size: 18, color: theme.colorScheme.primary),
                     const SizedBox(width: 8),
                     Text(l10n.linkRecipe),
+                  ]),
+                ),
+              if (onToggleHeader != null)
+                PopupMenuItem(
+                  value: 'make_header',
+                  child: Row(children: [
+                    Icon(Icons.title, size: 18, color: theme.colorScheme.onSurface),
+                    const SizedBox(width: 8),
+                    Text(l10n.ingredientMakeHeader),
                   ]),
                 ),
               PopupMenuItem(
@@ -2411,6 +2497,7 @@ class _IngredientHeaderRow extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final VoidCallback onDelete;
   final VoidCallback? onSortMode;
+  final VoidCallback? onToggleHeader;
 
   const _IngredientHeaderRow({
     super.key,
@@ -2418,6 +2505,7 @@ class _IngredientHeaderRow extends StatelessWidget {
     required this.onChanged,
     required this.onDelete,
     this.onSortMode,
+    this.onToggleHeader,
   });
 
   @override Widget build(BuildContext context) {
@@ -2450,9 +2538,19 @@ class _IngredientHeaderRow extends StatelessWidget {
           switch (value) {
             case 'sort_order': onSortMode?.call(); break;
             case 'delete': onDelete(); break;
+            case 'make_ingredient': onToggleHeader?.call(); break;
           }
         },
         itemBuilder: (context) => [
+          if (onToggleHeader != null)
+            PopupMenuItem(
+              value: 'make_ingredient',
+              child: Row(children: [
+                Icon(Icons.label_outline, size: 18, color: theme.colorScheme.onSurface),
+                const SizedBox(width: 8),
+                Text(l10n.ingredientMakeIngredient),
+              ]),
+            ),
           PopupMenuItem(
             value: 'sort_order',
             child: Row(children: [

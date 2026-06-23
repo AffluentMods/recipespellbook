@@ -7,6 +7,7 @@ import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../../utils/text_normalize.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/sub_recipe_selection_sheet.dart';
@@ -30,40 +31,35 @@ final searchResultsProvider = FutureProvider<List<Recipe>>((ref) async {
   final cookbookId = ref.watch(selectedCookbookIdProvider) ?? 'starter';
   final db = ref.watch(databaseProvider);
 
-  final q = query.toLowerCase().trim();
-  final searchTerm = '%$q%';
+  // Accent-folded query so "bearnaise"/"bérnaise" match "Béarnaise".
+  // SQLite LIKE can't fold diacritics, so we fetch the cookbook's
+  // recipes + ingredient names and match/score in Dart.
+  final q = foldAccents(query.trim());
 
-  // One query: title/description matches in the cookbook
-  final titleDescRows = await db.customSelect(
-    '''
-    SELECT * FROM recipes
-    WHERE cookbook_id = ?
-    AND deleted_at IS NULL
-    AND (LOWER(title) LIKE ? OR LOWER(description) LIKE ?)
-    ''',
-    variables: [
-      Variable.withString(cookbookId),
-      Variable.withString(searchTerm),
-      Variable.withString(searchTerm),
-    ],
+  final recipeRows = await db.customSelect(
+    'SELECT * FROM recipes WHERE cookbook_id = ? AND deleted_at IS NULL',
+    variables: [Variable.withString(cookbookId)],
     readsFrom: {db.recipes},
   ).get();
 
-  // Ingredient matches (separate so we can score them differently)
   final ingredientRows = await db.customSelect(
     '''
-    SELECT DISTINCT r.* FROM recipes r
-    INNER JOIN ingredients i ON i.recipe_id = r.id
-    WHERE r.cookbook_id = ?
-    AND r.deleted_at IS NULL
-    AND LOWER(i.name) LIKE ?
+    SELECT i.recipe_id AS rid, i.name AS iname FROM ingredients i
+    INNER JOIN recipes r ON r.id = i.recipe_id
+    WHERE r.cookbook_id = ? AND r.deleted_at IS NULL
     ''',
-    variables: [
-      Variable.withString(cookbookId),
-      Variable.withString(searchTerm),
-    ],
+    variables: [Variable.withString(cookbookId)],
     readsFrom: {db.recipes, db.ingredients},
   ).get();
+
+  // recipe_id -> true if any ingredient name folded-contains the query.
+  final ingredientMatch = <String>{};
+  for (final row in ingredientRows) {
+    final name = foldAccents(row.data['iname'] as String? ?? '');
+    if (name.contains(q)) {
+      ingredientMatch.add(row.data['rid'] as String);
+    }
+  }
 
   // Score each match
   final scored = <String, _ScoredRecipe>{};
@@ -76,11 +72,12 @@ final searchResultsProvider = FutureProvider<List<Recipe>>((ref) async {
     }
   }
 
-  for (final row in titleDescRows) {
-    final title = (row.data['title'] as String? ?? '').toLowerCase();
-    final desc = (row.data['description'] as String? ?? '').toLowerCase();
+  for (final row in recipeRows) {
+    final id = row.data['id'] as String;
+    final title = foldAccents(row.data['title'] as String? ?? '');
+    final desc = foldAccents(row.data['description'] as String? ?? '');
 
-    int score;
+    int? score;
     if (title == q) {
       score = 100;
     } else if (title.startsWith(q)) {
@@ -89,17 +86,10 @@ final searchResultsProvider = FutureProvider<List<Recipe>>((ref) async {
       score = 60;
     } else if (desc.contains(q)) {
       score = 30;
-    } else {
-      score = 10; // shouldn't happen given the WHERE clause, but be safe
+    } else if (ingredientMatch.contains(id)) {
+      score = 10;
     }
-    addOrBumpScore(row, score);
-  }
-
-  // Ingredient matches — only add if not already scored higher
-  for (final row in ingredientRows) {
-    final id = row.data['id'] as String;
-    if (scored.containsKey(id)) continue; // title/desc already scored higher
-    addOrBumpScore(row, 10);
+    if (score != null) addOrBumpScore(row, score);
   }
 
   // Sort by score desc, then favorite, then last viewed, then title

@@ -107,6 +107,14 @@ final shoppingListsProvider = StreamProvider<List<ShoppingList>>((ref) {
   return dao.watchAllLists();
 });
 
+/// Unchecked-item counts per shopping-list id, across every list.
+/// Powers the bottom-nav total badge, the shopping screen's
+/// "other lists" indicator, and per-list counts in the list dropdown.
+final shoppingListCountsProvider = StreamProvider<Map<String, int>>((ref) {
+  final dao = ref.watch(shoppingDaoProvider);
+  return dao.watchUncheckedCountsByList();
+});
+
 /// Default shopping list items
 final defaultShoppingItemsProvider = StreamProvider<List<ShoppingListItem>>((ref) {
   final dao = ref.watch(shoppingDaoProvider);

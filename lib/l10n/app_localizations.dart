@@ -5278,7 +5278,7 @@ abstract class AppLocalizations {
   /// No description provided for @unsavedChangesTitle.
   ///
   /// In en, this message translates to:
-  /// **'Unsaved Changes'**
+  /// **'Discard changes?'**
   String get unsavedChangesTitle;
 
   /// No description provided for @unsavedChangesMessage.
@@ -17364,6 +17364,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Import failed — nothing was saved. Please try again.'**
   String get importNothingSaved;
+
+  /// No description provided for @unsavedChangesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes. Leave without saving?'**
+  String get unsavedChangesBody;
+
+  /// No description provided for @unsavedKeepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get unsavedKeepEditing;
+
+  /// No description provided for @unsavedDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get unsavedDiscard;
+
+  /// No description provided for @ingredientMakeHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Make section header'**
+  String get ingredientMakeHeader;
+
+  /// No description provided for @ingredientMakeIngredient.
+  ///
+  /// In en, this message translates to:
+  /// **'Make ingredient'**
+  String get ingredientMakeIngredient;
+
+  /// No description provided for @shoppingMoveToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to list'**
+  String get shoppingMoveToList;
+
+  /// No description provided for @shoppingNoOtherLists.
+  ///
+  /// In en, this message translates to:
+  /// **'No other lists to move to'**
+  String get shoppingNoOtherLists;
+
+  /// No description provided for @shoppingMovedToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to {name}'**
+  String shoppingMovedToList(String name);
 
   /// No description provided for @exportSaveToDevice.
   ///

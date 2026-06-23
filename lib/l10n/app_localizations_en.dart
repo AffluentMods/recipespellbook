@@ -2833,7 +2833,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionDiscard => 'Discard';
 
   @override
-  String get unsavedChangesTitle => 'Unsaved Changes';
+  String get unsavedChangesTitle => 'Discard changes?';
 
   @override
   String get unsavedChangesMessage => 'You have unsaved changes. Do you want to save them?';
@@ -9480,6 +9480,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importNothingSaved => 'Import failed — nothing was saved. Please try again.';
+
+  @override
+  String get unsavedChangesBody => 'You have unsaved changes. Leave without saving?';
+
+  @override
+  String get unsavedKeepEditing => 'Keep editing';
+
+  @override
+  String get unsavedDiscard => 'Discard';
+
+  @override
+  String get ingredientMakeHeader => 'Make section header';
+
+  @override
+  String get ingredientMakeIngredient => 'Make ingredient';
+
+  @override
+  String get shoppingMoveToList => 'Move to list';
+
+  @override
+  String get shoppingNoOtherLists => 'No other lists to move to';
+
+  @override
+  String shoppingMovedToList(String name) {
+    return 'Moved to $name';
+  }
 
   @override
   String get exportSaveToDevice => 'Save to device';
