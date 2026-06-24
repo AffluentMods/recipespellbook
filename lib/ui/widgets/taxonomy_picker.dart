@@ -248,7 +248,9 @@ class _CategoryPickerState extends ConsumerState<CategoryPicker> {
           children: selectedItems.map((item) => Chip(
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             visualDensity: VisualDensity.compact,
-            label: Text('${item.emoji} ${item.name}', style: theme.textTheme.bodySmall),
+            // Name only — the emoji already shows as the field's leading
+            // icon (like Course), so prefixing it here was a duplicate.
+            label: Text(item.name, style: theme.textTheme.bodySmall),
             padding: EdgeInsets.zero,
           )).toList(),
         ),

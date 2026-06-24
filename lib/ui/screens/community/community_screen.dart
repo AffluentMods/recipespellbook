@@ -44,7 +44,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
 
-  _ViewMode _viewMode = _ViewMode.list;
+  _ViewMode _viewMode = _ViewMode.grid; // default to large image tiles
   _BrowseMode _browseMode = _BrowseMode.recipes; // Default to recipes
   String _sort = 'recent';
   String _query = '';
@@ -105,7 +105,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
   Future<void> _loadViewMode() async {
     final prefs = await SharedPreferences.getInstance();
-    final mode = prefs.getString('community_view_mode') ?? 'list';
+    final mode = prefs.getString('community_view_mode') ?? 'grid';
     if (mounted) setState(() => _viewMode = mode == 'list' ? _ViewMode.list : _ViewMode.grid);
   }
 

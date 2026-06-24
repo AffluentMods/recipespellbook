@@ -4,6 +4,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../../data/course_category_data.dart';
 import '../../database/database.dart'; // Keep Step from here
+import '../utils/ingredient_utils.dart' show scaleQuantityString;
 
 /// Strip emoji characters that even Unicode fonts struggle with in PDFs.
 /// With Noto Sans embedded, most special characters (accents, CJK, Cyrillic)
@@ -418,22 +419,8 @@ class RecipePrintService {
   static String? _scaleAmount(String? amount, double scale) {
     if (amount == null) return null;
     if (scale == 1.0) return amount;
-
-    final parsed = double.tryParse(amount.replaceAll(',', '.'));
-    if (parsed == null) return amount;
-
-    final scaled = parsed * scale;
-
-    // Convert to fractions for common values
-    if ((scaled - scaled.roundToDouble()).abs() < 0.01) {
-      return scaled.round().toString();
-    }
-    if ((scaled - 0.25).abs() < 0.01) return '¼';
-    if ((scaled - 0.33).abs() < 0.05) return '⅓';
-    if ((scaled - 0.5).abs() < 0.01) return '½';
-    if ((scaled - 0.67).abs() < 0.05) return '⅔';
-    if ((scaled - 0.75).abs() < 0.01) return '¾';
-
-    return scaled.toStringAsFixed(1);
+    // Range-aware ("3-4" scales both bounds) + fraction-aware single values.
+    // Unit is scaled separately by the caller, so pass '' here.
+    return scaleQuantityString(amount, '', scale).$1;
   }
 }

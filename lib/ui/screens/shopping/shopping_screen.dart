@@ -53,6 +53,168 @@ class ShoppingScreen extends ConsumerStatefulWidget {
   ConsumerState<ShoppingScreen> createState() => _ShoppingScreenState();
 }
 
+/// Multi-select state for the shopping list. Long-press an item to enter
+/// selection mode; selection is "active" whenever the set is non-empty, so
+/// clearing it exits the mode. Holds item ids of the current list only.
+class _ShoppingSelectionNotifier extends StateNotifier<Set<String>> {
+  _ShoppingSelectionNotifier() : super(const {});
+
+  void add(String id) {
+    if (!state.contains(id)) state = {...state, id};
+  }
+
+  void toggle(String id) {
+    final next = {...state};
+    if (!next.remove(id)) next.add(id);
+    state = next;
+  }
+
+  void clear() {
+    if (state.isNotEmpty) state = const {};
+  }
+}
+
+final _shoppingSelectionProvider =
+    StateNotifierProvider<_ShoppingSelectionNotifier, Set<String>>(
+        (ref) => _ShoppingSelectionNotifier());
+
+/// Emoji for a built-in shopping category id (falls back to a box).
+String _categoryEmoji(String categoryId) {
+  switch (categoryId) {
+    case 'produce': return '🥬';
+    case 'dairy': return '🥛';
+    case 'meat': return '🥩';
+    case 'seafood': return '🐟';
+    case 'bakery': return '🍞';
+    case 'frozen': return '🧊';
+    case 'pantry': return '🥫';
+    case 'spices': return '🧂';
+    case 'beverages': return '🥤';
+    case 'snacks': return '🍿';
+    case 'international': return '🌍';
+    case 'deli': return '🥓';
+    case 'breakfast': return '🥣';
+    case 'canned': return '🥫';
+    case 'condiments': return '🍯';
+    case 'grains': return '🌾';
+    case 'baking': return '🧁';
+    case 'baby': return '👶';
+    case 'pet': return '🐕';
+    case 'household': return '🧹';
+    case 'personal': return '🧴';
+    case 'alcohol': return '🍷';
+    default: return '📦';
+  }
+}
+
+/// Header shown in place of the normal shopping header while multi-selecting:
+/// a close button + "N selected".
+class _SelectionHeader extends StatelessWidget {
+  final int count;
+  final VoidCallback onClear;
+  const _SelectionHeader({required this.count, required this.onClear});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 10, 16, 10),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            tooltip: l10n.actionCancel,
+            onPressed: onClear,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            l10n.selectedCount(count),
+            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Bottom action bar for bulk operations on the selected shopping items.
+class _SelectionActionBar extends StatelessWidget {
+  final VoidCallback onDelete;
+  final VoidCallback onCheck;
+  final VoidCallback onMove;
+  final VoidCallback onCategory;
+  const _SelectionActionBar({
+    required this.onDelete,
+    required this.onCheck,
+    required this.onMove,
+    required this.onCategory,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    return SafeArea(
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHigh,
+          border: Border(
+            top: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.12)),
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _SelectionAction(icon: Icons.check_circle_outline, label: l10n.shoppingCheckAll, onTap: onCheck),
+            _SelectionAction(icon: Icons.drive_file_move_outlined, label: l10n.shoppingMoveToList, onTap: onMove),
+            _SelectionAction(icon: Icons.category_outlined, label: l10n.shoppingSelectCategory, onTap: onCategory),
+            _SelectionAction(icon: Icons.delete_outline, label: l10n.actionDelete, color: theme.colorScheme.error, onTap: onDelete),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SelectionAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color? color;
+  const _SelectionAction({required this.icon, required this.label, required this.onTap, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final c = color ?? theme.colorScheme.onSurface;
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: c, size: 24),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelSmall?.copyWith(color: c),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   String _currentListId = 'list_default';
   String _currentListName = 'Shopping List';
@@ -76,11 +238,15 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   /// 'list_default' every time you left and returned to the tab.
   Future<void> _restoreCurrentList() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedId = prefs.getString(_lastListKey) ?? 'list_default';
+    final savedId = prefs.getString(_lastListKey);
     final shoppingDao = ref.read(shoppingDaoProvider);
-    // Fall back to default if the saved list was deleted.
-    final list = await shoppingDao.getListById(savedId) ??
-        await shoppingDao.getListById('list_default');
+    // Prefer the last-viewed list; otherwise the user's marked default list;
+    // otherwise the built-in default.
+    ShoppingList? resolved;
+    if (savedId != null) resolved = await shoppingDao.getListById(savedId);
+    resolved ??= await shoppingDao.getDefaultList();
+    resolved ??= await shoppingDao.getListById('list_default');
+    final list = resolved; // final → promotes inside the setState closure
     if (mounted && list != null) {
       setState(() {
         _currentListId = list.id;
@@ -93,6 +259,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 
   /// Switch the active list AND persist the choice.
   void _setCurrentList(String id, String name) {
+    // Selection holds ids from the old list — drop it when the list changes.
+    ref.read(_shoppingSelectionProvider.notifier).clear();
     setState(() {
       _currentListId = id;
       _currentListName = name;
@@ -149,7 +317,16 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
         .where((e) => e.key != _currentListId)
         .fold<int>(0, (a, e) => a + e.value);
 
-    return Scaffold(
+    final selectedIds = ref.watch(_shoppingSelectionProvider);
+    final selecting = selectedIds.isNotEmpty;
+
+    return PopScope(
+      // While selecting, a back press clears the selection instead of leaving.
+      canPop: !selecting,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && selecting) _clearSelection();
+      },
+      child: Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: StreamBuilder<List<ShoppingListItem>>(
@@ -163,8 +340,13 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 
             return Column(
               children: [
-                // Header with list switcher
-                Responsive.constrainWidth(context, child: _ModernHeader(
+                // Header — swaps to a selection header while multi-selecting.
+                Responsive.constrainWidth(context, child: selecting
+                    ? _SelectionHeader(
+                        count: selectedIds.length,
+                        onClear: _clearSelection,
+                      )
+                    : _ModernHeader(
                   listName: _currentListName,
                   itemCount: uncheckedItems.length,
                   otherListsCount: otherListsCount,
@@ -176,7 +358,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 )),
 
                 // Order Online Button
-                if (uncheckedItems.isNotEmpty)
+                if (uncheckedItems.isNotEmpty && !selecting)
                   Responsive.constrainWidth(context, child: _OrderOnlineButton(items: uncheckedItems)),
 
                 // Items List (pull to refresh — syncs with cloud if available)
@@ -192,7 +374,16 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           },
         ),
       ),
-      floatingActionButton: _ModernFAB(onTap: () => _showAddItemSheet(context)),
+      floatingActionButton: selecting ? null : _ModernFAB(onTap: () => _showAddItemSheet(context)),
+      bottomNavigationBar: selecting
+          ? _SelectionActionBar(
+              onDelete: () => _bulkDelete(selectedIds),
+              onCheck: () => _bulkToggleChecked(selectedIds),
+              onMove: () => _bulkMoveToList(selectedIds),
+              onCategory: () => _bulkChangeCategory(selectedIds),
+            )
+          : null,
+      ),
     );
   }
 
@@ -249,6 +440,163 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 
     // Refresh local cache
     _loadUserMappings();
+  }
+
+  // ────────────────────────────────────
+  //  BULK ACTIONS (multi-select)
+  // ────────────────────────────────────
+
+  void _clearSelection() =>
+      ref.read(_shoppingSelectionProvider.notifier).clear();
+
+  Future<List<ShoppingListItem>> _selectedItems(Set<String> ids) async {
+    final all = await ref.read(shoppingDaoProvider).getItemsForList(_currentListId);
+    return all.where((i) => ids.contains(i.id)).toList();
+  }
+
+  Future<void> _bulkDelete(Set<String> ids) async {
+    final dao = ref.read(shoppingDaoProvider);
+    final snapshot = await _selectedItems(ids);
+    for (final s in snapshot) {
+      await dao.deleteItem(s.id);
+    }
+    _clearSelection();
+    if (!mounted || snapshot.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
+    AppSnackbar.successWithAction(
+      context,
+      l10n.shoppingItemsRemoved(snapshot.length),
+      actionLabel: l10n.actionUndo,
+      onAction: () {
+        for (final s in snapshot) {
+          dao.insertItem(ShoppingListItemsCompanion.insert(
+            id: s.id,
+            listId: s.listId,
+            name: s.name,
+            isChecked: drift.Value(s.isChecked),
+            sortOrder: drift.Value(s.sortOrder),
+            note: drift.Value(s.note),
+            shoppingCategoryId: drift.Value(s.shoppingCategoryId),
+            recipeId: drift.Value(s.recipeId),
+          ));
+        }
+      },
+    );
+  }
+
+  /// Check the selected items off — or uncheck them if they're already all
+  /// checked, so one button covers both directions.
+  Future<void> _bulkToggleChecked(Set<String> ids) async {
+    final dao = ref.read(shoppingDaoProvider);
+    final items = await _selectedItems(ids);
+    final markChecked = !(items.isNotEmpty && items.every((i) => i.isChecked));
+    for (final it in items) {
+      await dao.toggleItemChecked(it.id, markChecked);
+    }
+    _clearSelection();
+  }
+
+  Future<void> _bulkMoveToList(Set<String> ids) async {
+    final dao = ref.read(shoppingDaoProvider);
+    final l10n = AppLocalizations.of(context)!;
+    final lists =
+        (await dao.getAllLists()).where((l) => l.id != _currentListId).toList();
+    if (!mounted) return;
+    if (lists.isEmpty) {
+      AppSnackbar.info(context, l10n.shoppingNoOtherLists);
+      return;
+    }
+    final target = await showModalBottomSheet<ShoppingList>(
+      context: context,
+      builder: (pickCtx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.shoppingMoveToList,
+                  style: Theme.of(pickCtx)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+            ),
+            ...lists.map((l) => ListTile(
+                  leading: const Icon(Icons.list_alt),
+                  title: Text(l.name),
+                  onTap: () => Navigator.pop(pickCtx, l),
+                )),
+          ],
+        ),
+      ),
+    );
+    if (target == null) return;
+    for (final id in ids) {
+      await dao.moveItemToList(id, target.id);
+    }
+    _clearSelection();
+    if (mounted) {
+      AppSnackbar.success(context, l10n.shoppingMovedToList(target.name));
+    }
+  }
+
+  Future<void> _bulkChangeCategory(Set<String> ids) async {
+    final newCategoryId = await _pickCategory(context);
+    if (newCategoryId == null) return;
+    final dao = ref.read(shoppingDaoProvider);
+    final mappingsDao = ref.read(userIngredientMappingsDaoProvider);
+    final items = await _selectedItems(ids);
+    for (final it in items) {
+      await dao.updateItem(it.id, shoppingCategoryId: newCategoryId);
+      await mappingsDao.setMapping(normalizeIngredientName(it.name), newCategoryId);
+    }
+    _clearSelection();
+    await _loadUserMappings();
+  }
+
+  /// Bottom-sheet category chooser shared by the bulk "change category" action.
+  Future<String?> _pickCategory(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final shoppingDao = ref.read(shoppingDaoProvider);
+    return showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        maxChildSize: 0.8,
+        initialChildSize: 0.5,
+        builder: (ctx, scroll) => StreamBuilder<List<ShoppingCategory>>(
+          stream: shoppingDao.watchAllShoppingCategories(),
+          builder: (ctx, snapshot) {
+            final categories =
+                (snapshot.data ?? []).where((c) => c.id != 'other').toList();
+            return ListView(
+              controller: scroll,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(l10n.shoppingSelectCategory,
+                      style: Theme.of(ctx)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold)),
+                ),
+                ...categories.map((cat) => ListTile(
+                      leading: Text(_categoryEmoji(cat.id),
+                          style: const TextStyle(fontSize: 22)),
+                      title: Text(cat.name),
+                      onTap: () => Navigator.pop(ctx, cat.id),
+                    )),
+                ListTile(
+                  leading: const Text('📦', style: TextStyle(fontSize: 22)),
+                  title: Text(l10n.shoppingOther),
+                  onTap: () => Navigator.pop(ctx, 'other'),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
   }
 
   // ────────────────────────────────────
@@ -543,6 +891,20 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                       title: Row(
                         children: [
                           Flexible(child: Text(list.name)),
+                          // "Default" tag — this is the list new sessions and
+                          // the shopping-list generator target by default.
+                          if (list.isDefault) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(l10n.defaultLabel,
+                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: theme.colorScheme.primary)),
+                            ),
+                          ],
                           // Per-list unchecked count.
                           if ((listCounts[list.id] ?? 0) > 0) ...[
                             const SizedBox(width: 8),
@@ -580,6 +942,14 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          // Star = set this list as the default (hidden once it
+                          // already is the default — the tag shows that).
+                          if (!list.isDefault)
+                            IconButton(
+                              icon: const Icon(Icons.star_outline, size: 20),
+                              tooltip: l10n.defaultLabel,
+                              onPressed: () => _setDefaultList(list),
+                            ),
                           IconButton(
                             icon: const Icon(Icons.share_outlined, size: 20),
                             tooltip: l10n.actionShare,
@@ -616,6 +986,12 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
         ),
       ),
     );
+  }
+
+  /// Mark a list as the default. The open switcher (a StreamBuilder on
+  /// watchAllLists) refreshes the tag live, so no extra feedback is needed.
+  Future<void> _setDefaultList(ShoppingList list) async {
+    await ref.read(shoppingDaoProvider).setDefaultList(list.id);
   }
 
   void _createNewList(BuildContext context) {
@@ -3454,11 +3830,18 @@ class _ShoppingItemTile extends ConsumerWidget {
     final sources = ShoppingSourceTracker.getSourceBreakdown(item.note);
     final hasMultipleSources = sources.length > 1;
 
+    // Multi-select state (long-press to enter; tap toggles while active).
+    final selectedIds = ref.watch(_shoppingSelectionProvider);
+    final selecting = selectedIds.isNotEmpty;
+    final isSelected = selectedIds.contains(item.id);
+    final selection = ref.read(_shoppingSelectionProvider.notifier);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       child: Dismissible(
         key: Key(item.id),
-        direction: DismissDirection.endToStart,
+        // Disable swipe-to-delete during selection so it can't fight taps.
+        direction: selecting ? DismissDirection.none : DismissDirection.endToStart,
         background: Container(
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 20),
@@ -3495,15 +3878,25 @@ class _ShoppingItemTile extends ConsumerWidget {
         },
         child: Container(
           decoration: BoxDecoration(
-            color: isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surface,
+            color: isSelected
+                ? theme.colorScheme.primary.withValues(alpha: 0.12)
+                : (isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surface),
             borderRadius: BorderRadius.circular(14),
-            border: isDark ? null : Border.all(
-              color: theme.colorScheme.outline.withValues(alpha: 0.08),
-            ),
+            border: isSelected
+                ? Border.all(color: theme.colorScheme.primary, width: 1.5)
+                : (isDark ? null : Border.all(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.08),
+                  )),
           ),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
-            onTap: () => _showItemOptions(context, ref),
+            onTap: () => selecting
+                ? selection.toggle(item.id)
+                : _showItemOptions(context, ref),
+            onLongPress: () {
+              HapticFeedback.selectionClick();
+              selection.add(item.id);
+            },
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
@@ -3637,22 +4030,33 @@ class _ShoppingItemTile extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  // Checkbox
-                  Transform.scale(
-                    scale: 1.2,
-                    child: Checkbox(
-                      value: item.isChecked || pendingCheck,
-                      onChanged: (_) {
-                        if (item.isChecked || pendingCheck) {
-                          (onItemUnchecked ?? (_) => shoppingDao.toggleItemChecked(item.id, false))(item.id);
-                        } else {
-                          (onItemChecked ?? (_) => shoppingDao.toggleItemChecked(item.id, true))(item.id);
-                        }
-                      },
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                      side: BorderSide(color: theme.colorScheme.outlineVariant, width: 2),
+                  // Trailing: selection indicator while multi-selecting,
+                  // otherwise the normal "checked/done" checkbox.
+                  if (selecting)
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Icon(
+                        isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                        color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outlineVariant,
+                        size: 26,
+                      ),
+                    )
+                  else
+                    Transform.scale(
+                      scale: 1.2,
+                      child: Checkbox(
+                        value: item.isChecked || pendingCheck,
+                        onChanged: (_) {
+                          if (item.isChecked || pendingCheck) {
+                            (onItemUnchecked ?? (_) => shoppingDao.toggleItemChecked(item.id, false))(item.id);
+                          } else {
+                            (onItemChecked ?? (_) => shoppingDao.toggleItemChecked(item.id, true))(item.id);
+                          }
+                        },
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                        side: BorderSide(color: theme.colorScheme.outlineVariant, width: 2),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),

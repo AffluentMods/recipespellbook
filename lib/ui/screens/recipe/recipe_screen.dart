@@ -11,7 +11,7 @@ import '../../../data/app_enums.dart';
 import '../../../data/ingredient_images.dart';
 import '../../../data/localized_units.dart';
 import '../../../data/nutrition_data.dart';
-import '../../../utils/ingredient_utils.dart' show parseAmount, formatScaledWithUnit;
+import '../../../utils/ingredient_utils.dart' show parseAmount, formatScaledWithUnit, scaleInstructionText, scaleQuantityString;
 import '../../../utils/responsive_utils.dart';
 import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
@@ -287,6 +287,13 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     return [...linked, ...rest];
   }
 
+  /// Ingredient names (excluding section headers) used to anchor bare counts
+  /// when scaling amounts embedded in the instruction steps.
+  List<String> get _ingredientNamesForScaling => _ingredients
+      .where((i) => i.notes != '__header__')
+      .map((i) => i.name)
+      .toList();
+
   void _toggleLayout() {
     final current = ref.read(settingsProvider).recipeLayoutMode;
     final newMode = current == RecipeLayoutMode.tabbed
@@ -424,6 +431,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           isDetailPane: widget.isDetailPane,
           onClose: widget.onClose,
           onToggleLayout: _toggleLayout,
+          currentScale: _scaleFactor,
         ),
         // Contextual hint banner for recipe screen
         const SliverToBoxAdapter(child: HintBanner(screenName: 'recipe')),
@@ -473,6 +481,8 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                             ..._steps.asMap().entries.map((entry) => _InstructionStep(
                               stepNumber: entry.key + 1,
                               step: entry.value,
+                              scaleFactor: _scaleFactor,
+                              ingredientNames: _ingredientNamesForScaling,
                             )),
                             if (_recipe!.notes != null && _recipe!.notes!.isNotEmpty) ...[
                               const SizedBox(height: 32),
@@ -504,6 +514,8 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   ..._steps.asMap().entries.map((entry) => _InstructionStep(
                     stepNumber: entry.key + 1,
                     step: entry.value,
+                    scaleFactor: _scaleFactor,
+                    ingredientNames: _ingredientNamesForScaling,
                   )),
                   if (_recipe!.notes != null && _recipe!.notes!.isNotEmpty) ...[
                     const SizedBox(height: 32),
@@ -554,6 +566,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           isDetailPane: widget.isDetailPane,
           onClose: widget.onClose,
           onToggleLayout: _toggleLayout,
+          currentScale: _scaleFactor,
         ),
         SliverToBoxAdapter(
           child: Responsive.constrainWidth(context, child: Padding(
@@ -650,7 +663,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           // Ingredients tab (center — starts here)
           _IngredientsTab(ingredients: _sortedIngredients, scaleFactor: _scaleFactor, l10n: l10n, onAddToShopping: _showAddToShoppingSheet, unitConversion: _unitConversion, ingredientLinksMap: _ingredientLinksMap),
           // Instructions tab (swipe right from center)
-          _InstructionsTab(steps: _steps, notes: _recipe!.notes, l10n: l10n),
+          _InstructionsTab(steps: _steps, notes: _recipe!.notes, l10n: l10n, scaleFactor: _scaleFactor, ingredientNames: _ingredientNamesForScaling),
         ],
       ),
     );
@@ -1316,7 +1329,15 @@ class _InstructionsTab extends StatelessWidget {
   final List<Step> steps;
   final String? notes;
   final AppLocalizations l10n;
-  const _InstructionsTab({required this.steps, this.notes, required this.l10n});
+  final double scaleFactor;
+  final List<String> ingredientNames;
+  const _InstructionsTab({
+    required this.steps,
+    this.notes,
+    required this.l10n,
+    this.scaleFactor = 1.0,
+    this.ingredientNames = const [],
+  });
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1330,7 +1351,7 @@ class _InstructionsTab extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ...steps.asMap().entries.map((entry) => _InstructionStep(stepNumber: entry.key + 1, step: entry.value)),
+            ...steps.asMap().entries.map((entry) => _InstructionStep(stepNumber: entry.key + 1, step: entry.value, scaleFactor: scaleFactor, ingredientNames: ingredientNames)),
             if (notes != null && notes!.isNotEmpty) ...[
               const SizedBox(height: 24),
               _SectionHeader(title: l10n.recipeFieldNotes),
@@ -1358,6 +1379,7 @@ class _RecipeAppBar extends StatelessWidget {
   final bool isDetailPane;
   final VoidCallback? onClose;
   final VoidCallback? onToggleLayout;
+  final double currentScale;
 
   const _RecipeAppBar({
     required this.recipe,
@@ -1370,6 +1392,7 @@ class _RecipeAppBar extends StatelessWidget {
     this.isDetailPane = false,
     this.onClose,
     this.onToggleLayout,
+    this.currentScale = 1.0,
   });
 
   @override
@@ -1483,7 +1506,7 @@ class _RecipeAppBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     switch (action) {
       case 'cook':
-        launchCookingMode(context, recipe.id);
+        launchCookingMode(context, recipe.id, scaleFactor: currentScale);
         break;
       case 'layout':
         onToggleLayout?.call();
@@ -1850,15 +1873,12 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
     String amount = ingredient.amount ?? '';
     String unit = ingredient.unit ?? '';
 
-    // Apply scaling first (handles fractions: "1/4", "½", "1 1/2", "1 / 4", etc.)
+    // Apply scaling first (handles fractions "1/4", "½", "1 1/2" AND ranges
+    // like "3-4" → both bounds scale).
     if (scaleFactor != 1.0 && amount.isNotEmpty) {
-      final parsed = parseAmount(amount);
-      if (parsed != null) {
-        final scaled = parsed * scaleFactor;
-        final (newAmt, newUnit) = formatScaledWithUnit(scaled, unit.isNotEmpty ? unit : null);
-        amount = newAmt;
-        if (newUnit.isNotEmpty) unit = newUnit;
-      }
+      final (newAmt, newUnit) = scaleQuantityString(amount, unit, scaleFactor);
+      amount = newAmt;
+      unit = newUnit;
     }
 
     // Apply unit conversion
@@ -1973,10 +1993,23 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
 class _InstructionStep extends StatelessWidget {
   final int stepNumber;
   final Step step;
-  const _InstructionStep({required this.stepNumber, required this.step});
+  final double scaleFactor;
+  final List<String> ingredientNames;
+  const _InstructionStep({
+    required this.stepNumber,
+    required this.step,
+    this.scaleFactor = 1.0,
+    this.ingredientNames = const [],
+  });
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Scale any ingredient amounts the AI inlined into the step text so they
+    // stay consistent with the (scaled) ingredient list. Times/temps/sizes are
+    // left untouched. No-op at 1×.
+    final instruction = scaleFactor == 1.0
+        ? step.instruction
+        : scaleInstructionText(step.instruction, scaleFactor, ingredientNames);
     final hasImage = step.imagePath != null &&
         step.imagePath!.isNotEmpty &&
         FileExistsCache.exists(step.imagePath!);
@@ -2004,7 +2037,7 @@ class _InstructionStep extends StatelessWidget {
             Expanded(
                 child: Padding(
                     padding: const EdgeInsets.only(top: 4),
-                    child: Text(step.instruction,
+                    child: Text(instruction,
                         style: theme.textTheme.bodyLarge))),
           ]),
           if (hasImage) ...[

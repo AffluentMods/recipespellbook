@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../database/database.dart';
-import '../utils/ingredient_utils.dart' show formatAmount, formatScaledWithUnit, parseAmount;
+import '../utils/ingredient_utils.dart' show scaleQuantityString;
 
 // ═══════════════════════════════════════════════════════════════════
 // INGREDIENT RESOLVER SERVICE
@@ -82,14 +82,8 @@ class ResolvedIngredient {
     if (raw == null || raw.isEmpty || effectiveScale == 1.0) {
       return (raw ?? '', unit);
     }
-    final parsed = parseAmount(raw);
-    if (parsed == null) return (raw, unit);
-    final scaled = parsed * effectiveScale;
-    // Try unit upscaling (3 tsp → 1 tbsp, etc.)
-    if (unit.isNotEmpty) {
-      return formatScaledWithUnit(scaled, unit);
-    }
-    return (formatAmount(scaled), unit);
+    // Range-aware (e.g. "3-4" → both bounds scale) + unit up-scaling.
+    return scaleQuantityString(raw, unit, effectiveScale);
   }
 
   String get displayText {

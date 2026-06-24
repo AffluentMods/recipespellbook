@@ -2,6 +2,8 @@
 /// ENHANCED VERSION with improved category detection
 library;
 
+import 'text_normalize.dart';
+
 /// Represents a parsed ingredient with amount, unit, and name
 class ParsedIngredient {
   final double? amount;
@@ -128,6 +130,237 @@ String _toFraction(double value) {
     return whole > 0 ? '$whole $fracStr' : fracStr;
   }
   return value.toStringAsFixed(1);
+}
+
+// ============================================================================
+// INSTRUCTION-TEXT SCALING
+// ============================================================================
+// When the AI import inlines amounts into the steps ("Mix 2 cups masa and
+// 1 tsp salt"), scaling the recipe must scale those embedded numbers too —
+// but ONLY the ones that are really ingredient amounts. A number is scaled in
+// two cases, and left completely alone otherwise:
+//   A. It is immediately followed by a real measurement unit (cup/tsp/g/…).
+//   B. It is a bare count whose following word is an ingredient that exists in
+//      THIS recipe ("3 jalapeños" → jalapeño is in the list → scale to 6).
+// Times ("2 minutes"), temperatures ("350°F"), dimensions ("9x13", "¼-inch"),
+// percentages, and any unanchored number are never touched. This is a
+// display-only transform — it never mutates stored data, so reverting to 1×
+// shows the original text verbatim.
+
+/// A single quantity token inside prose: "2", "2.5", "1/2", "1 1/2", a unicode
+/// fraction, or a whole+unicode mix ("1 ½").
+const _num =
+    r'(?:\d+[ \t]+\d+[ \t]*/[ \t]*\d+|\d+[ \t]*/[ \t]*\d+|\d+(?:\.\d+)?'
+    r'|[½¼¾⅓⅔⅛⅜⅝⅞⅙⅚⅕⅖⅗⅘])(?:[ \t]*[½¼¾⅓⅔⅛⅜⅝⅞⅙⅚⅕⅖⅗⅘])?';
+
+/// Matches either a RANGE ("2-3", "2–3", "2 to 3" → groups low/high) or a
+/// single quantity (group single). Range is tried first so "2-3" is captured
+/// whole and not double-scaled. The negative lookbehind keeps us from matching
+/// the inner pieces of a decimal/fraction or a number glued to a word.
+final _instrQty = RegExp(
+  '(?<![\\w./])(?:'
+  '(?<low>$_num)(?:[ \\t]*[-–—][ \\t]*|[ \\t]+to[ \\t]+)(?<high>$_num)'
+  '|(?<single>$_num)'
+  ')',
+);
+
+/// Words that, when they follow a number, mean it is a time/temperature/size
+/// and must never be scaled. (Measurement units are intentionally NOT here —
+/// those are matched separately via [_unitPattern] and DO get scaled.)
+const _forbiddenAfterNumber = <String>{
+  'min', 'mins', 'minute', 'minutes', 'sec', 'secs', 'second', 'seconds',
+  'hr', 'hrs', 'hour', 'hours', 'day', 'days', 'week', 'weeks',
+  'month', 'months', 'year', 'years',
+  'degree', 'degrees', 'fahrenheit', 'celsius',
+  'inch', 'inches', 'cm', 'mm', 'ft', 'foot', 'feet', 'percent',
+};
+
+/// Descriptor words that should not be treated as an ingredient head noun when
+/// building the recipe's name index (so "baking soda" indexes as "soda", not
+/// "baking", and a step like "2 baking sheets" is not mistaken for it).
+const _ingredientDescriptorStop = <String>{
+  'fresh', 'freshly', 'dried', 'frozen', 'canned', 'chopped', 'diced',
+  'minced', 'sliced', 'shredded', 'grated', 'crushed', 'ground', 'whole',
+  'raw', 'cooked', 'boneless', 'skinless', 'organic', 'large', 'medium',
+  'small', 'extra', 'virgin', 'unsalted', 'salted', 'ripe', 'peeled',
+  'softened', 'melted', 'cold', 'warm', 'hot', 'room', 'temperature',
+  'packed', 'level', 'heaping', 'optional', 'plus', 'more', 'about',
+  'baking', 'cooking', 'pure', 'light', 'dark', 'low', 'reduced',
+  // Trailing prep participles — keep these from being picked as the head noun
+  // (e.g. "large eggs, beaten" should index as "eggs", not "beaten").
+  'beaten', 'divided', 'separated', 'seeded',
+  'deseeded', 'deveined', 'drained', 'rinsed', 'trimmed', 'halved',
+  'quartered', 'cubed', 'julienned', 'toasted', 'roasted', 'crumbled',
+  'zested', 'juiced', 'mashed', 'pitted', 'cored', 'stemmed',
+};
+
+/// Scale the numeric amounts embedded in one instruction step's [text] by
+/// [factor], anchoring bare counts to the recipe's [ingredientNames]. Returns
+/// [text] unchanged when [factor] is 1.0. See the section header above for the
+/// exact rules. Display-only; never mutates stored data.
+String scaleInstructionText(
+    String text, double factor, Iterable<String> ingredientNames) {
+  if (factor == 1.0 || text.isEmpty) return text;
+  final names = _ingredientNameTokens(ingredientNames);
+
+  return text.replaceAllMapped(_instrQty, (match) {
+    final m = match as RegExpMatch;
+    final whole = m.group(0)!;
+
+    // Don't scale a number inside parentheses — it's a package size, e.g. the
+    // "15" in "1 (15 oz) can". The outer count is handled on its own.
+    final before = text.substring(0, m.start);
+    if (before.trimRight().endsWith('(')) return whole;
+
+    final rest = text.substring(m.end);
+    final afterSpace = rest.replaceFirst(RegExp(r'^[ \t]+'), '');
+
+    // Hard denylist: temperature / percent / clock-time markers right after.
+    if (afterSpace.startsWith('°') || afterSpace.startsWith('%')) return whole;
+    if (rest.startsWith(':')) return whole; // 3:00
+    final nextWord =
+        RegExp(r"^([A-Za-zÀ-ÿ'’-]+)").firstMatch(afterSpace)?.group(1);
+    if (nextWord != null &&
+        _forbiddenAfterNumber.contains(foldAccents(nextWord))) {
+      return whole;
+    }
+
+    // Gate A: a real measurement unit immediately follows → scale.
+    // Gate B: an ingredient name follows within a few words → scale the count.
+    final isMeasured = _unitPattern.hasMatch(afterSpace);
+    if (!isMeasured && !_followedByIngredient(afterSpace, names)) return whole;
+
+    final lowStr = m.namedGroup('low');
+    if (lowStr != null) {
+      final low = parseAmount(lowStr);
+      final high = parseAmount(m.namedGroup('high')!);
+      if (low == null || high == null) return whole;
+      return _scaleRange(low, high, factor);
+    }
+    final parsed = parseAmount(m.namedGroup('single')!);
+    if (parsed == null) return whole;
+    return formatAmount(parsed * factor);
+  });
+}
+
+/// Scale a numeric range ([low]–[high]) by [factor] and format it:
+///   • Both endpoints land on whole numbers → keep the range ("3-6").
+///   • Scaling makes the upper bound fractional → round it DOWN, and if the
+///     range is small collapse to a single approximate "~N"
+///     (2-3 ×1.5 = 3-4.5 → "~4"); if the range is wide keep it as a range
+///     (20-30-style ×1.5 → "30-45") rather than collapsing.
+String _scaleRange(double low, double high, double factor) {
+  final lowS = low * factor;
+  final highS = high * factor;
+  final highIsInt = (highS - highS.roundToDouble()).abs() < 1e-9;
+  final lowOut = lowS.round();
+  var highOut = highIsInt ? highS.round() : highS.floor();
+  if (highOut < lowOut) highOut = lowOut;
+  final isSmall = (highOut - lowOut) <= 2;
+  if (!highIsInt && isSmall) return '~$highOut';
+  return '$lowOut-$highOut';
+}
+
+/// An amount STRING that is entirely a range — "3-4", "3 – 4", "3 to 4".
+/// Group 1 = low bound, group 2 = high bound.
+final _amountRange = RegExp(
+  '^($_num)(?:[ \\t]*[-–—][ \\t]*|[ \\t]+to[ \\t]+)($_num)\$',
+);
+
+/// Scale a quantity STRING (the amount field — e.g. "2", "1/2", "1 1/2", or a
+/// range like "3-4") by [factor], returning (amount, unit). A range scales
+/// BOTH bounds and keeps the range form ("3-4" ×2 → "6-8"); a single value is
+/// fraction-aware with unit up-scaling (3 tsp → 1 tbsp). Returns the input
+/// unchanged when it can't be parsed. This is the one place amount scaling
+/// lives so the recipe list, shopping generator, cooking mode and print all
+/// agree — including on ranges.
+(String, String) scaleQuantityString(String amount, String unit, double factor) {
+  final a = amount.trim();
+  if (a.isEmpty || factor == 1.0) return (a, unit);
+
+  final range = _amountRange.firstMatch(a);
+  if (range != null) {
+    final lo = parseAmount(range.group(1)!);
+    final hi = parseAmount(range.group(2)!);
+    if (lo != null && hi != null) {
+      return ('${formatAmount(lo * factor)}-${formatAmount(hi * factor)}', unit);
+    }
+  }
+
+  final parsed = parseAmount(a);
+  if (parsed == null) return (a, unit);
+  final scaled = parsed * factor;
+  if (unit.isNotEmpty) return formatScaledWithUnit(scaled, unit);
+  return (formatAmount(scaled), unit);
+}
+
+/// Build an "amount unit name" label for an ingredient, scaled by [factor]
+/// (with the same unit up-scaling and range handling as the recipe screen).
+/// Used by cooking mode so its ingredient chips and list stay consistent.
+String scaledIngredientLabel(
+    String? amount, String? unit, String name, double factor) {
+  final (amt, u) =
+      scaleQuantityString((amount ?? '').trim(), (unit ?? '').trim(), factor);
+  return [if (amt.isNotEmpty) amt, if (u.isNotEmpty) u, name].join(' ');
+}
+
+/// True if one of the next few words in [after] is a known ingredient token.
+/// Stops at the next number (range / next quantity) or clause punctuation so a
+/// match can't leak across "3 minutes, then add the eggs".
+bool _followedByIngredient(String after, Set<String> names) {
+  if (names.isEmpty) return false;
+  final tokens =
+      RegExp(r"[A-Za-zÀ-ÿ'’-]+|\d|[.;:!?]").allMatches(after).iterator;
+  var looked = 0;
+  while (tokens.moveNext()) {
+    final tok = tokens.current.group(0)!;
+    final c = tok.codeUnitAt(0);
+    if (c >= 0x30 && c <= 0x39) break; // a digit → boundary
+    if (tok.length == 1 && '.;:!?'.contains(tok)) break; // clause boundary
+    final folded = foldAccents(tok);
+    if (folded.length >= 3 && names.contains(folded)) return true;
+    if (++looked >= 4) break;
+  }
+  return false;
+}
+
+/// Build the set of ingredient "head noun" tokens (plus naive singular/plural
+/// variants, accent-folded) used to anchor bare counts in step text.
+Set<String> _ingredientNameTokens(Iterable<String> rawNames) {
+  final out = <String>{};
+  for (final raw in rawNames) {
+    final name = foldAccents(parseIngredient(raw).name);
+    final words = name
+        .split(RegExp(r'[^a-z]+'))
+        .where((w) => w.length >= 3 && !_ingredientDescriptorStop.contains(w))
+        .toList();
+    if (words.isEmpty) continue;
+    // Single-word ingredient → that word; multiword → the head (last) noun.
+    final heads = words.length == 1 ? words : <String>[words.last];
+    for (final w in heads) {
+      out.add(w);
+      out.addAll(_inflect(w));
+    }
+  }
+  return out;
+}
+
+/// Cheap English singular/plural variants so "egg" matches "eggs",
+/// "berries" matches "berry", "tomatoes" matches "tomato", etc.
+Iterable<String> _inflect(String w) {
+  final v = <String>[];
+  if (w.endsWith('ies') && w.length > 3) {
+    v.add('${w.substring(0, w.length - 3)}y');
+  } else if (w.endsWith('es') && w.length > 2) {
+    v.add(w.substring(0, w.length - 2)); // tomatoes → tomato
+    v.add(w.substring(0, w.length - 1)); // boxes → boxe (harmless)
+  } else if (w.endsWith('s') && w.length > 1) {
+    v.add(w.substring(0, w.length - 1)); // eggs → egg
+  } else {
+    v.add('${w}s'); // egg → eggs
+    v.add('${w}es'); // tomato → tomatoes
+  }
+  return v;
 }
 
 ParsedIngredient parseIngredient(String text) {

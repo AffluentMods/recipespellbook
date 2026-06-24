@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/ingredient_resolver_service.dart';
@@ -137,10 +138,26 @@ class _ShoppingListGeneratorScreenState
   Future<void> _loadLists() async {
     final shoppingDao = ref.read(shoppingDaoProvider);
     final lists = await shoppingDao.getAllLists();
+    // Target the list the user is actually looking at on the Shopping tab
+    // (persisted there), then their default list, then 'list_default', then
+    // whatever's first — instead of blindly grabbing the first/newest.
+    final prefs = await SharedPreferences.getInstance();
+    final activeId = prefs.getString('shoppingLastListId'); // = _lastListKey
     if (mounted) {
       setState(() {
         _existingLists = lists;
-        if (lists.isNotEmpty) _selectedListId = lists.first.id;
+        if (lists.isNotEmpty) {
+          bool has(String? id) => id != null && lists.any((l) => l.id == id);
+          if (has(activeId)) {
+            _selectedListId = activeId;
+          } else if (lists.any((l) => l.isDefault)) {
+            _selectedListId = lists.firstWhere((l) => l.isDefault).id;
+          } else if (has('list_default')) {
+            _selectedListId = 'list_default';
+          } else {
+            _selectedListId = lists.first.id;
+          }
+        }
       });
     }
   }
@@ -809,14 +826,8 @@ class _ShoppingListGeneratorScreenState
   /// Handles all fraction formats: "1/4", "1 / 4", "½", "1 1/2", decimals, etc.
   /// Also handles unit upscaling (3 tsp → 1 tbsp) when unit is provided.
   (String, String) _scaleAmountWithUnit(String amountStr, String unit, double userScale) {
-    if (amountStr.isEmpty) return (amountStr, unit);
-    final parsed = parseAmount(amountStr);
-    if (parsed == null) return (amountStr, unit);
-    final scaled = parsed * userScale;
-    if (unit.isNotEmpty) {
-      return formatScaledWithUnit(scaled, unit);
-    }
-    return (formatAmount(scaled), unit);
+    // Range-aware ("3-4" scales both bounds) — see scaleQuantityString.
+    return scaleQuantityString(amountStr, unit, userScale);
   }
 
   /// Get the effective user scale for a recipe (by recipeId).
@@ -1345,25 +1356,10 @@ class _IngredientRow extends ConsumerWidget {
     final rawAmt = ingredient.scaledAmount;
     final unit = ingredient.ingredient.unit ?? '';
 
-    // Apply user scale to displayed amount
+    // Apply user scale to displayed amount (range-aware: "3-4" scales both).
     String amt = rawAmt;
     if (userScale != 1.0 && rawAmt.isNotEmpty) {
-      const fracs = {
-        '½': 0.5, '¼': 0.25, '¾': 0.75, '⅓': 0.333, '⅔': 0.666,
-        '⅛': 0.125, '⅜': 0.375, '⅝': 0.625, '⅞': 0.875,
-      };
-      double? parsed = double.tryParse(rawAmt);
-      if (parsed == null) {
-        for (final e in fracs.entries) {
-          if (rawAmt == e.key) { parsed = e.value; break; }
-          if (rawAmt.contains(e.key)) {
-            final parts = rawAmt.split(e.key);
-            parsed = (double.tryParse(parts[0].trim()) ?? 0) + e.value;
-            break;
-          }
-        }
-      }
-      if (parsed != null) amt = formatAmount(parsed * userScale);
+      amt = scaleQuantityString(rawAmt, '', userScale).$1;
     }
 
     final amountStr = [amt, unit].where((s) => s.isNotEmpty).join(' ');

@@ -14,15 +14,19 @@ import 'package:recipespellbook/providers/database_provider.dart';
 import '../../../ui/widgets/nutrition_widgets.dart';
 import '../../ui/widgets/font_size_control.dart';
 import '../../utils/responsive_utils.dart';
+import '../../utils/ingredient_utils.dart'
+    show scaleInstructionText, scaledIngredientLabel;
 // TODO: Kitchen Buddy hidden for now
 // import 'kitchen_buddy/kitchen_buddy_integration.dart';
 
 /// Launches cooking mode for a recipe
-void launchCookingMode(BuildContext context, String recipeId) {
+void launchCookingMode(BuildContext context, String recipeId,
+    {double scaleFactor = 1.0}) {
   Navigator.of(context).push(
     MaterialPageRoute(
       fullscreenDialog: true,
-      builder: (context) => CookingModeScreen(recipeId: recipeId),
+      builder: (context) =>
+          CookingModeScreen(recipeId: recipeId, scaleFactor: scaleFactor),
     ),
   );
 }
@@ -30,7 +34,12 @@ void launchCookingMode(BuildContext context, String recipeId) {
 class CookingModeScreen extends ConsumerStatefulWidget {
   final String recipeId;
 
-  const CookingModeScreen({super.key, required this.recipeId});
+  /// Recipe scale carried over from the recipe screen, so embedded amounts in
+  /// the steps and the ingredient list match what the user scaled to. 1.0 = off.
+  final double scaleFactor;
+
+  const CookingModeScreen(
+      {super.key, required this.recipeId, this.scaleFactor = 1.0});
 
   @override
   ConsumerState<CookingModeScreen> createState() => _CookingModeScreenState();
@@ -400,6 +409,7 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
               child: _showIngredients
                   ? _IngredientsView(
                 ingredients: _ingredients,
+                scaleFactor: widget.scaleFactor,
                 checkedIds: _checkedIngredients,
                 onToggle: (id) => setState(() {
                   if (_checkedIngredients.contains(id)) {
@@ -425,6 +435,7 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
                   allIngredients: _ingredients,
                   allSteps: _steps,
                   stepIndex: index,
+                  scaleFactor: widget.scaleFactor,
                 ),
               ),
             ),
@@ -561,8 +572,9 @@ class _StepView extends ConsumerWidget {
   final List<Ingredient> allIngredients;
   final List<Step> allSteps;
   final int stepIndex;
+  final double scaleFactor;
 
-  const _StepView({required this.step, required this.stepNumber, required this.totalSteps, required this.allIngredients, required this.allSteps, required this.stepIndex});
+  const _StepView({required this.step, required this.stepNumber, required this.totalSteps, required this.allIngredients, required this.allSteps, required this.stepIndex, this.scaleFactor = 1.0});
 
   /// Assigns each ingredient to EXACTLY ONE step, then returns those
   /// assigned to this step. Two-tier logic:
@@ -784,13 +796,26 @@ class _StepView extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final fontScale = ref.watch(recipeFontScaleProvider);
     final matched = _matchIngredients();
+    // Ingredient names anchor bare-count scaling in the step text ("3 jalapeños").
+    final ingredientNames = allIngredients
+        .where((i) => i.notes != '__header__')
+        .map((i) => i.name)
+        .toList();
+    final instruction = scaleFactor == 1.0
+        ? step.instruction
+        : scaleInstructionText(step.instruction, scaleFactor, ingredientNames);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
           const SizedBox(height: 16),
-          Text('${l10n.stepNumber(stepNumber)} / $totalSteps', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 16)),
+          Text(
+            scaleFactor == 1.0
+                ? '${l10n.stepNumber(stepNumber)} / $totalSteps'
+                : '${l10n.stepNumber(stepNumber)} / $totalSteps  ·  ${scaleFactor}x',
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 16),
+          ),
 
           // Matched ingredients chips (scrollable, max 40% of screen)
           if (matched.isNotEmpty) ...[
@@ -810,11 +835,8 @@ class _StepView extends ConsumerWidget {
                     spacing: 8,
                     runSpacing: 6,
                     children: matched.map((ing) {
-                      final label = [
-                        if (ing.amount != null) ing.amount!,
-                        if (ing.unit != null) ing.unit!,
-                        ing.name,
-                      ].join(' ');
+                      final label = scaledIngredientLabel(
+                          ing.amount, ing.unit, ing.name, scaleFactor);
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
@@ -845,7 +867,7 @@ class _StepView extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 24),
                   child: Text(
-                    step.instruction,
+                    instruction,
                     style: TextStyle(color: Colors.white, fontSize: 28 * fontScale, height: 1.4),
                     textAlign: TextAlign.center,
                   ),
@@ -861,10 +883,11 @@ class _StepView extends ConsumerWidget {
 
 class _IngredientsView extends ConsumerWidget {
   final List<Ingredient> ingredients;
+  final double scaleFactor;
   final Set<String> checkedIds;
   final Function(String) onToggle;
 
-  const _IngredientsView({required this.ingredients, required this.checkedIds, required this.onToggle});
+  const _IngredientsView({required this.ingredients, this.scaleFactor = 1.0, required this.checkedIds, required this.onToggle});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -888,7 +911,9 @@ class _IngredientsView extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    [if (ing.amount != null) ing.amount!, if (ing.unit != null) ing.unit!, ing.name].join(' '),
+                    ing.notes == '__header__'
+                        ? ing.name
+                        : scaledIngredientLabel(ing.amount, ing.unit, ing.name, scaleFactor),
                     style: TextStyle(color: isChecked ? Colors.white.withValues(alpha: 0.5) : Colors.white, fontSize: 18 * fontScale, decoration: isChecked ? TextDecoration.lineThrough : null),
                   ),
                 ),

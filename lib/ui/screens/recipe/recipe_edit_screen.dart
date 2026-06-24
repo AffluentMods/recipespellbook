@@ -569,13 +569,22 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     }
 
     return PopScope(
-      // System/AppBar back goes through maybePop and is gated here; the
-      // save button uses a direct context.pop() which bypasses PopScope,
-      // so saving never triggers the discard prompt.
-      canPop: !_hasUnsavedChanges,
+      // Always intercept and decide at press-time. We can't use
+      // `canPop: !_hasUnsavedChanges` because canPop is only re-read when the
+      // screen rebuilds, and typing in a TextField (title/description) does
+      // NOT rebuild this widget — so a title-only edit would slip past the
+      // guard. Evaluating _hasUnsavedChanges here reads the live controller
+      // text every time. The save button uses a direct context.pop() which
+      // bypasses PopScope, so saving never triggers the discard prompt.
+      canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         final nav = Navigator.of(context);
+        // Nothing changed → just leave, no prompt.
+        if (!_hasUnsavedChanges) {
+          nav.pop(result);
+          return;
+        }
         final discard = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(

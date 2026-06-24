@@ -27,6 +27,24 @@ class ShoppingDao extends DatabaseAccessor<AppDatabase> with _$ShoppingDaoMixin 
     return (select(shoppingLists)..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
+  /// The user's default shopping list, if one is marked.
+  Future<ShoppingList?> getDefaultList() async {
+    final rows = await (select(shoppingLists)
+          ..where((t) => t.isDefault.equals(true)))
+        .get();
+    return rows.isNotEmpty ? rows.first : null;
+  }
+
+  /// Mark [id] as the single default list, clearing the flag on every other.
+  Future<void> setDefaultList(String id) async {
+    await transaction(() async {
+      await (update(shoppingLists)..where((t) => t.isDefault.equals(true)))
+          .write(const ShoppingListsCompanion(isDefault: Value(false)));
+      await (update(shoppingLists)..where((t) => t.id.equals(id)))
+          .write(const ShoppingListsCompanion(isDefault: Value(true)));
+    });
+  }
+
   Future<void> insertList(ShoppingListsCompanion list) {
     return into(shoppingLists).insert(list);
   }
