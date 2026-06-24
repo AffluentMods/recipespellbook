@@ -576,17 +576,17 @@ class _StepView extends ConsumerWidget {
 
   const _StepView({required this.step, required this.stepNumber, required this.totalSteps, required this.allIngredients, required this.allSteps, required this.stepIndex, this.scaleFactor = 1.0});
 
-  /// Assigns each ingredient to EXACTLY ONE step, then returns those
-  /// assigned to this step. Two-tier logic:
-  ///   1. Direct match — the step's text mentions the ingredient (best
-  ///      scoring step wins; earliest on tie).
-  ///   2. Header grouping — an ingredient never named in any step is
-  ///      attached to the first step that references ITS section header
-  ///      (e.g. "make the sauce" pulls in the unmatched sauce items).
-  /// Ingredients matched by neither stay off the per-step view (they're
-  /// still in the full ingredient list). This replaces the old logic
-  /// that re-pulled a whole section into every step that mentioned it,
-  /// duplicating ingredients across steps.
+  /// Returns the ingredients to show for THIS step. Two-tier logic:
+  ///   1. Direct match (NOT exclusive) — if the step's text names the
+  ///      ingredient, it shows here, even if other steps name it too. An
+  ///      ingredient genuinely used across several steps (water, salt, lime)
+  ///      should appear in all of them.
+  ///   2. Header grouping (exclusive) — an ingredient never named in ANY
+  ///      step is attached to the single first step that references ITS
+  ///      section header (e.g. "make the sauce" pulls in the unnamed sauce
+  ///      items), so a whole section isn't dumped onto every step.
+  /// Ingredients matched by neither stay off the per-step view (they're still
+  /// in the full ingredient list).
   List<Ingredient> _matchIngredients() {
     final nonHeaders =
         allIngredients.where((i) => i.notes != '__header__').toList();
@@ -632,32 +632,22 @@ class _StepView extends ConsumerWidget {
       }
     }
 
-    // Global single assignment: ingredientId → stepIndex.
-    final assignment = <String, int>{};
+    final result = <Ingredient>[];
     for (final ing in nonHeaders) {
-      // Tier 1: direct text match, best (earliest-on-tie) scoring step.
-      var bestStep = -1;
-      var bestScore = 0;
-      for (var si = 0; si < allSteps.length; si++) {
-        final sc = _scoreIngredientForStep(ing, allSteps[si]);
-        if (sc > bestScore) {
-          bestScore = sc;
-          bestStep = si;
-        }
-      }
-      if (bestStep >= 0) {
-        assignment[ing.id] = bestStep;
+      // Tier 1 (non-exclusive): the ingredient is named in THIS step's text.
+      if (_scoreIngredientForStep(ing, allSteps[stepIndex]) > 0) {
+        result.add(ing);
         continue;
       }
-      // Tier 2: header grouping fallback.
+      // Tier 2 (exclusive): only ingredients never named in ANY step fall
+      // back to their section's single anchor step.
       final sec = sectionOf[ing.id] ?? '';
-      if (sec.isNotEmpty && sectionStep.containsKey(sec)) {
-        assignment[ing.id] = sectionStep[sec]!;
-      }
-      // else: not shown per-step.
+      if (sec.isEmpty || sectionStep[sec] != stepIndex) continue;
+      final namedAnywhere =
+          allSteps.any((s) => _scoreIngredientForStep(ing, s) > 0);
+      if (!namedAnywhere) result.add(ing);
     }
-
-    return nonHeaders.where((i) => assignment[i.id] == stepIndex).toList();
+    return result;
   }
 
   /// Score how well an ingredient matches a step (0 = no match).
