@@ -1354,12 +1354,16 @@ class _IngredientRow extends ConsumerWidget {
     final theme = Theme.of(context);
     final isColumnar = ref.watch(settingsProvider).ingredientLayout == IngredientLayout.columnar;
     final rawAmt = ingredient.scaledAmount;
-    final unit = ingredient.ingredient.unit ?? '';
-
-    // Apply user scale to displayed amount (range-aware: "3-4" scales both).
+    // Pair the scaled amount with the scaled unit (the resolver may have
+    // up-scaled e.g. 3 tsp → 1 tbsp); using the original unit here mismatched.
     String amt = rawAmt;
+    String unit = ingredient.scaledUnit;
+
+    // Apply user scale on top of the recipe scale. Range-aware ("3-4" scales
+    // both bounds) and unit-aware (4 tbsp can roll up to ¼ cup), so it stays
+    // consistent with the recipe screen.
     if (userScale != 1.0 && rawAmt.isNotEmpty) {
-      amt = scaleQuantityString(rawAmt, '', userScale).$1;
+      (amt, unit) = scaleQuantityString(rawAmt, unit, userScale);
     }
 
     final amountStr = [amt, unit].where((s) => s.isNotEmpty).join(' ');

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:recipespellbook/data/food_synonyms.dart';
 import 'package:recipespellbook/data/nutrition_data.dart';
 import 'package:recipespellbook/database/database.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
@@ -650,51 +651,45 @@ class _StepView extends ConsumerWidget {
     return result;
   }
 
-  /// Score how well an ingredient matches a step (0 = no match).
+  /// Score how well an ingredient matches a step (0 = no match). Matching is
+  /// WHOLE-WORD (via the tokenized step text), not substring — that's what
+  /// keeps "oil" from matching "boil", "ice" from matching "slice", etc.
   static int _scoreIngredientForStep(Ingredient ing, Step step) {
-    final instruction = step.instruction.toLowerCase();
-    final name = ing.name.toLowerCase().trim();
+    // Collapse synonyms (green onion ↔ scallion, courgette ↔ zucchini, …) on
+    // both sides so either name matches. canonicalizeFoodText also accent-folds
+    // and lowercases.
+    final instruction = canonicalizeFoodText(step.instruction);
+    final name = canonicalizeFoodText(ing.name).trim();
     if (name.isEmpty) return 0;
 
+    // Whole-word, stemmed token set of the step text.
     final instructionTokens = instruction
-        .split(RegExp(r'[\s,.\-—–;:!?()]+'))
+        .split(RegExp(r'[\s,.\-—–;:!?()/]+'))
         .where((t) => t.length > 2)
         .map(_stem)
         .toSet();
 
-    int score = 0;
+    // A multi-word ingredient appearing verbatim ("lime juice") is a strong,
+    // low-false-positive signal. (A single short word as a substring is NOT —
+    // hence no bare instruction.contains(name) for one-word names.)
+    if (name.contains(' ') && instruction.contains(name)) return 10;
 
-    // 1. Exact substring match (strongest signal)
-    if (instruction.contains(name)) return 10;
-
-    // 2. Stemmed full-name match
-    final stemmedName = _stem(name);
-    if (stemmedName.length > 3 && instruction.contains(stemmedName)) return 8;
-
-    // 3. Token-based matching
+    // Meaningful name tokens (drop filler/common words), stemmed.
     final nameTokens = name
         .split(RegExp(r'[\s,/()]+'))
-        .where((t) => t.length > 2)
-        .where((t) => !_commonWords.contains(t))
+        .where((t) => t.length > 2 && !_commonWords.contains(t))
         .map(_stem)
         .where((t) => t.length > 2)
         .toList();
-
     if (nameTokens.isEmpty) return 0;
 
-    for (final token in nameTokens) {
-      if (instruction.contains(token) || instructionTokens.contains(token)) {
-        score += 3;
-      }
-    }
+    // Whole-word matches only.
+    final matched = nameTokens.where(instructionTokens.contains).length;
+    if (matched == 0) return 0;
 
-    // Require meaningful match ratio
-    final ratio = score / (nameTokens.length * 3);
-    if (nameTokens.length == 1 && score >= 3) return score;
-    if (nameTokens.length == 2 && score >= 3) return score;
-    if (nameTokens.length >= 3 && ratio >= 0.5) return score;
-
-    return 0;
+    // 1–2 token names: any whole-word match counts. 3+: need at least half.
+    if (nameTokens.length <= 2) return matched * 3;
+    return (matched / nameTokens.length) >= 0.5 ? matched * 3 : 0;
   }
 
   /// Build a map of header name → ingredients in that section.

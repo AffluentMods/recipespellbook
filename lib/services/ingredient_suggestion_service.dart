@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:isolate';
 import 'package:flutter/services.dart' show rootBundle;
 import '../utils/text_normalize.dart';
+import '../data/food_synonyms.dart';
 
 /// A single ingredient entry from the USDA database or supplementary list.
 class IngredientEntry {
@@ -156,6 +157,10 @@ class IngredientSuggestionService {
     final stripped = _stripQuantityAndUnit(q);
     final searchTerm = stripped.isNotEmpty ? stripped : q;
 
+    // Expand the term through food synonyms so e.g. "scallion" also surfaces
+    // "green onion" entries (and vice-versa). The original term stays first.
+    final terms = foodSearchVariants(searchTerm);
+
     final exact = <IngredientResult>[];
     final startsWith = <IngredientResult>[];
     final wordBoundary = <IngredientResult>[];
@@ -168,19 +173,20 @@ class IngredientSuggestionService {
       final displayLower = foldAccents(entry.name);
       final searchLower = foldAccents(entry.searchText);
 
-      if (displayLower == searchTerm || searchLower == searchTerm) {
+      if (terms.any((t) => displayLower == t || searchLower == t)) {
         exact.add(IngredientResult(
             name: entry.name, category: entry.foodCategory));
-      } else if (displayLower.startsWith(searchTerm) ||
-          searchLower.startsWith(searchTerm)) {
+      } else if (terms.any((t) =>
+          displayLower.startsWith(t) || searchLower.startsWith(t))) {
         startsWith.add(IngredientResult(
             name: entry.name, category: entry.foodCategory));
-      } else if (_matchesWordBoundary(displayLower, searchTerm) ||
-          _matchesWordBoundary(searchLower, searchTerm)) {
+      } else if (terms.any((t) =>
+          _matchesWordBoundary(displayLower, t) ||
+          _matchesWordBoundary(searchLower, t))) {
         wordBoundary.add(IngredientResult(
             name: entry.name, category: entry.foodCategory));
-      } else if (_fuzzyContains(displayLower, searchTerm) ||
-          _fuzzyContains(searchLower, searchTerm)) {
+      } else if (terms.any((t) =>
+          _fuzzyContains(displayLower, t) || _fuzzyContains(searchLower, t))) {
         contains.add(IngredientResult(
             name: entry.name, category: entry.foodCategory));
       }
