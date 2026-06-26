@@ -604,11 +604,12 @@ class _StepView extends ConsumerWidget {
       }
     }
 
-    // section name → earliest step index that references it.
-    final sectionStep = <String, int>{};
     final sections = _buildHeaderSections();
+
+    // Header name → its stemmed keyword set (built once).
+    final sectionKeywords = <String, Set<String>>{};
     for (final name in sections.keys) {
-      final keywords = name
+      final kws = name
           .toLowerCase()
           .replaceAll(
               RegExp(r'^(for\s+the\s+|para\s+(el|la|los|las)\s+|für\s+(den|die|das)\s+)',
@@ -618,25 +619,63 @@ class _StepView extends ConsumerWidget {
           .where((w) => w.length > 2)
           .map(_stem)
           .toSet();
-      if (keywords.isEmpty) continue;
+      if (kws.isNotEmpty) sectionKeywords[name] = kws;
+    }
+
+    // Stemmed token set per step (reused below).
+    final stepTokens = allSteps.map((s) {
+      final instr = s.instruction.toLowerCase();
+      final toks = instr
+          .split(RegExp(r'[\s,.\-—–;:!?()]+'))
+          .where((t) => t.length > 2)
+          .map(_stem)
+          .toSet();
+      return (instr, toks);
+    }).toList();
+
+    bool stepNamesSection(int si, Set<String> kws) {
+      final (instr, toks) = stepTokens[si];
+      return kws.any((kw) => toks.contains(kw) || instr.contains(kw));
+    }
+
+    // section → earliest step that names it (tier-2 fallback anchor).
+    final sectionStep = <String, int>{};
+    for (final entry in sectionKeywords.entries) {
       for (var si = 0; si < allSteps.length; si++) {
-        final instr = allSteps[si].instruction.toLowerCase();
-        final tokens = instr
-            .split(RegExp(r'[\s,.\-—–;:!?()]+'))
-            .where((t) => t.length > 2)
-            .map(_stem)
-            .toSet();
-        if (keywords.any((kw) => tokens.contains(kw) || instr.contains(kw))) {
-          sectionStep[name] = si;
-          break; // earliest wins
+        if (stepNamesSection(si, entry.value)) {
+          sectionStep[entry.key] = si;
+          break;
         }
       }
     }
+
+    // step → its component section, carried forward from the last step that
+    // named one ("Make the pâte sucrée" tags that step and the ones after it,
+    // until another component is named).
+    final stepSection = List<String>.filled(allSteps.length, '');
+    var current = '';
+    for (var si = 0; si < allSteps.length; si++) {
+      for (final entry in sectionKeywords.entries) {
+        if (stepNamesSection(si, entry.value)) {
+          current = entry.key;
+          break;
+        }
+      }
+      stepSection[si] = current;
+    }
+    final curSection = stepSection[stepIndex];
 
     final result = <Ingredient>[];
     for (final ing in nonHeaders) {
       // Tier 1 (non-exclusive): the ingredient is named in THIS step's text.
       if (_scoreIngredientForStep(ing, allSteps[stepIndex]) > 0) {
+        // Cross-component guard: in a recipe with sections, don't pull in an
+        // ingredient from a DIFFERENT component just because this step used a
+        // generic word (sugar/butter/flour) that several components share.
+        final ingSec = sectionOf[ing.id] ?? '';
+        if (curSection.isNotEmpty && ingSec.isNotEmpty && ingSec != curSection) {
+          continue;
+        }
         result.add(ing);
         continue;
       }

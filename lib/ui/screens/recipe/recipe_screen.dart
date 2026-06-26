@@ -112,11 +112,26 @@ class _UnitConverter {
     if (numVal == null) return (amount: amount, unit: unit);
 
     final converted = numVal * rule.factor;
-    final displayAmount = converted < 10
-        ? converted.toStringAsFixed(1)
-        : converted.round().toString();
+    return (amount: _formatConverted(converted), unit: rule.targetUnit);
+  }
 
-    return (amount: displayAmount, unit: rule.targetUnit);
+  /// Format a converted amount with precision that scales to its size, so a
+  /// tiny weight (1 g → 0.035 oz) shows "0.035" instead of rounding to "0.0".
+  /// Trailing zeros are trimmed so normal values stay clean ("0.4", not "0.40").
+  static String _formatConverted(double v) {
+    if (v >= 10) return v.round().toString();
+    final int decimals = v >= 1
+        ? 1
+        : v >= 0.1
+            ? 2
+            : v >= 0.01
+                ? 3
+                : 4;
+    var s = v.toStringAsFixed(decimals);
+    if (s.contains('.')) {
+      s = s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    }
+    return s;
   }
 }
 
@@ -463,7 +478,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                           children: [
                             _SectionHeader(title: l10n.ingredientsTitle, trailing: _scaleFactor != 1.0 ? Text('${_scaleFactor}x', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary)) : null),
                             const SizedBox(height: 12),
-                            ..._sortedIngredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: _scaleFactor, unitConversion: _unitConversion, linkedRecipes: (_ingredientLinksMap[ing.id] ?? []).map((info) => info.recipe).toList())),
+                            _CollapsibleIngredientList(ingredients: _sortedIngredients, recipeId: widget.recipeId, scaleFactor: _scaleFactor, unitConversion: _unitConversion, ingredientLinksMap: _ingredientLinksMap),
                             const SizedBox(height: 16),
                             _LargeAddToShoppingButton(onTap: _showAddToShoppingSheet),
                           ],
@@ -503,7 +518,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   // Mobile/tablet: original vertical layout
                   _SectionHeader(title: l10n.ingredientsTitle, trailing: _scaleFactor != 1.0 ? Text('${_scaleFactor}x', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary)) : null),
                   const SizedBox(height: 12),
-                  ..._sortedIngredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: _scaleFactor, unitConversion: _unitConversion, linkedRecipes: (_ingredientLinksMap[ing.id] ?? []).map((info) => info.recipe).toList())),
+                  _CollapsibleIngredientList(ingredients: _sortedIngredients, recipeId: widget.recipeId, scaleFactor: _scaleFactor, unitConversion: _unitConversion, ingredientLinksMap: _ingredientLinksMap),
 
                   const SizedBox(height: 16),
                   _LargeAddToShoppingButton(onTap: _showAddToShoppingSheet),
@@ -628,40 +643,58 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
             ),
           )),
         ),
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: _SliverTabBarDelegate(
-            TabBar(
-              controller: _tabController,
-              tabs: [
-                Tab(text: l10n.nutritionTitle),
-                Tab(text: l10n.ingredientsTitle),
-                Tab(text: l10n.instructionsTitle),
-              ],
+        // Absorbs the pinned TabBar's overlap so each tab's CustomScrollView
+        // (via SliverOverlapInjector) keeps its OWN scroll position — this is
+        // what stops the Ingredients and Instructions tabs from sharing a
+        // scroll offset.
+        SliverOverlapAbsorber(
+          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+          sliver: SliverPersistentHeader(
+            pinned: true,
+            delegate: _SliverTabBarDelegate(
+              TabBar(
+                controller: _tabController,
+                tabs: [
+                  Tab(text: l10n.nutritionTitle),
+                  Tab(text: l10n.ingredientsTitle),
+                  Tab(text: l10n.instructionsTitle),
+                ],
+              ),
+              theme.colorScheme.surface,
             ),
-            theme.colorScheme.surface,
           ),
         ),
       ],
       body: TabBarView(
         controller: _tabController,
         children: [
-          // Nutrition tab (swipe left from center)
-          SingleChildScrollView(
-            key: const PageStorageKey('nutrition_tab'),
-            padding: const EdgeInsets.all(16),
-            child: NutritionWidget(
-              nutrition: _nutrition,
-              scaleFactor: _scaleFactor,
-              servings: _recipe!.servings,
-              chartStyle: ref.watch(settingsProvider).nutritionChartStyle,
-              palette: ref.watch(settingsProvider).nutritionPalette,
-              enabledNutrients: ref.watch(settingsProvider).enabledNutrients,
-              onEmptyTap: _showNutritionCalculation,
+          // Nutrition tab (swipe left from center). Builder gives a context
+          // under the NestedScrollView body so the overlap handle resolves.
+          Builder(
+            builder: (context) => CustomScrollView(
+              key: const PageStorageKey('nutrition_tab'),
+              slivers: [
+                SliverOverlapInjector(
+                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+                SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverToBoxAdapter(
+                    child: NutritionWidget(
+                      nutrition: _nutrition,
+                      scaleFactor: _scaleFactor,
+                      servings: _recipe!.servings,
+                      chartStyle: ref.watch(settingsProvider).nutritionChartStyle,
+                      palette: ref.watch(settingsProvider).nutritionPalette,
+                      enabledNutrients: ref.watch(settingsProvider).enabledNutrients,
+                      onEmptyTap: _showNutritionCalculation,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           // Ingredients tab (center — starts here)
-          _IngredientsTab(ingredients: _sortedIngredients, scaleFactor: _scaleFactor, l10n: l10n, onAddToShopping: _showAddToShoppingSheet, unitConversion: _unitConversion, ingredientLinksMap: _ingredientLinksMap),
+          _IngredientsTab(ingredients: _sortedIngredients, recipeId: widget.recipeId, scaleFactor: _scaleFactor, l10n: l10n, onAddToShopping: _showAddToShoppingSheet, unitConversion: _unitConversion, ingredientLinksMap: _ingredientLinksMap),
           // Instructions tab (swipe right from center)
           _InstructionsTab(steps: _steps, notes: _recipe!.notes, l10n: l10n, scaleFactor: _scaleFactor, ingredientNames: _ingredientNamesForScaling),
         ],
@@ -1279,10 +1312,157 @@ class _ImprovedAllergyWarningState extends ConsumerState<_ImprovedAllergyWarning
   }
 }
 
+// ============ COLLAPSIBLE INGREDIENT SECTIONS ============
+
+/// Session-only collapse state for ingredient section headers, keyed by
+/// recipeId → set of collapsed header ids. Held in memory (a plain Riverpod
+/// provider, no persistence) so it survives leaving and re-opening a recipe
+/// but is forgotten when the app is closed.
+class _CollapsedSectionsNotifier extends StateNotifier<Map<String, Set<String>>> {
+  _CollapsedSectionsNotifier() : super(const {});
+
+  void toggle(String recipeId, String headerId) {
+    final next = {...state};
+    final set = {...?next[recipeId]};
+    if (!set.remove(headerId)) set.add(headerId);
+    if (set.isEmpty) {
+      next.remove(recipeId);
+    } else {
+      next[recipeId] = set;
+    }
+    state = next;
+  }
+}
+
+final _collapsedSectionsProvider =
+    StateNotifierProvider<_CollapsedSectionsNotifier, Map<String, Set<String>>>(
+        (ref) => _CollapsedSectionsNotifier());
+
+/// Renders an ingredient list where each section header can be tapped to
+/// collapse/expand the ingredients beneath it. Ingredients before the first
+/// header (no section) always show.
+class _CollapsibleIngredientList extends ConsumerWidget {
+  final List<Ingredient> ingredients;
+  final String recipeId;
+  final double scaleFactor;
+  final _UnitConversion unitConversion;
+  final Map<String, List<RecipeLinkInfo>> ingredientLinksMap;
+
+  const _CollapsibleIngredientList({
+    required this.ingredients,
+    required this.recipeId,
+    required this.scaleFactor,
+    this.unitConversion = _UnitConversion.none,
+    this.ingredientLinksMap = const {},
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final collapsed =
+        ref.watch(_collapsedSectionsProvider)[recipeId] ?? const <String>{};
+    final notifier = ref.read(_collapsedSectionsProvider.notifier);
+
+    // Pre-pass: how many ingredients sit under each header (for the count hint).
+    final counts = <String, int>{};
+    String? hdr;
+    for (final ing in ingredients) {
+      if (ing.notes == '__header__') {
+        hdr = ing.id;
+        counts[hdr] = 0;
+      } else if (hdr != null) {
+        counts[hdr] = counts[hdr]! + 1;
+      }
+    }
+
+    final rows = <Widget>[];
+    String? currentHeaderId;
+    var hidden = false;
+    for (final ing in ingredients) {
+      if (ing.notes == '__header__') {
+        currentHeaderId = ing.id;
+        hidden = collapsed.contains(ing.id);
+        rows.add(_CollapsibleHeaderRow(
+          name: ing.name,
+          itemCount: counts[ing.id] ?? 0,
+          collapsed: hidden,
+          onTap: () => notifier.toggle(recipeId, ing.id),
+        ));
+      } else {
+        if (currentHeaderId != null && hidden) continue;
+        rows.add(_IngredientItemWithAllergen(
+          ingredient: ing,
+          scaleFactor: scaleFactor,
+          unitConversion: unitConversion,
+          linkedRecipes: (ingredientLinksMap[ing.id] ?? [])
+              .map((info) => info.recipe)
+              .toList(),
+        ));
+      }
+    }
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: rows);
+  }
+}
+
+class _CollapsibleHeaderRow extends StatelessWidget {
+  final String name;
+  final int itemCount;
+  final bool collapsed;
+  final VoidCallback onTap;
+  const _CollapsibleHeaderRow({
+    required this.name,
+    required this.itemCount,
+    required this.collapsed,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 16, bottom: 4),
+        child: Row(
+          children: [
+            // Chevron points down when expanded, right when collapsed.
+            AnimatedRotation(
+              turns: collapsed ? -0.25 : 0,
+              duration: const Duration(milliseconds: 150),
+              child: Icon(Icons.keyboard_arrow_down,
+                  size: 22, color: theme.colorScheme.primary),
+            ),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                name,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.primary,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ),
+            if (collapsed && itemCount > 0) ...[
+              const SizedBox(width: 6),
+              Text(
+                '($itemCount)',
+                style: theme.textTheme.labelMedium
+                    ?.copyWith(color: theme.colorScheme.outline),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ============ NUTRITION CARD WITH BUG FIX ============
 
 class _IngredientsTab extends ConsumerWidget {
   final List<Ingredient> ingredients;
+  final String recipeId;
   final double scaleFactor;
   final AppLocalizations l10n;
   final VoidCallback onAddToShopping;
@@ -1291,6 +1471,7 @@ class _IngredientsTab extends ConsumerWidget {
 
   const _IngredientsTab({
     required this.ingredients,
+    required this.recipeId,
     required this.scaleFactor,
     required this.l10n,
     required this.onAddToShopping,
@@ -1307,20 +1488,28 @@ class _IngredientsTab extends ConsumerWidget {
     // used on a null value" on select-all, because the framework asks
     // off-screen, not-yet-laid-out children for selection geometry. An
     // eager Column lays them all out, so select-all/copy works.
-    return SingleChildScrollView(
+    return CustomScrollView(
       key: const PageStorageKey('ingredients_tab'),
-      padding: const EdgeInsets.all(16),
-      child: SelectionArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ...ingredients.map((ing) => _IngredientItemWithAllergen(ingredient: ing, scaleFactor: scaleFactor, unitConversion: unitConversion, linkedRecipes: (ingredientLinksMap[ing.id] ?? []).map((info) => info.recipe).toList())),
-            const SizedBox(height: 16),
-            _LargeAddToShoppingButton(onTap: onAddToShopping),
-            const SizedBox(height: 32),
-          ],
+      slivers: [
+        SliverOverlapInjector(
+            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverToBoxAdapter(
+            child: SelectionArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _CollapsibleIngredientList(ingredients: ingredients, recipeId: recipeId, scaleFactor: scaleFactor, unitConversion: unitConversion, ingredientLinksMap: ingredientLinksMap),
+                  const SizedBox(height: 16),
+                  _LargeAddToShoppingButton(onTap: onAddToShopping),
+                  const SizedBox(height: 32),
+                ],
+              ),
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -1344,24 +1533,32 @@ class _InstructionsTab extends StatelessWidget {
     if (steps.isEmpty) return Center(child: Text(l10n.instructionsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)));
     // Eager Column (not lazy ListView) so SelectionArea select-all doesn't
     // crash on off-screen children — see note in _IngredientsTab.
-    return SingleChildScrollView(
+    return CustomScrollView(
       key: const PageStorageKey('instructions_tab'),
-      padding: const EdgeInsets.all(16),
-      child: SelectionArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ...steps.asMap().entries.map((entry) => _InstructionStep(stepNumber: entry.key + 1, step: entry.value, scaleFactor: scaleFactor, ingredientNames: ingredientNames)),
-            if (notes != null && notes!.isNotEmpty) ...[
-              const SizedBox(height: 24),
-              _SectionHeader(title: l10n.recipeFieldNotes),
-              const SizedBox(height: 12),
-              Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)), child: Text(notes!, style: theme.textTheme.bodyMedium)),
-            ],
-            const SizedBox(height: 32),
-          ],
+      slivers: [
+        SliverOverlapInjector(
+            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverToBoxAdapter(
+            child: SelectionArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...steps.asMap().entries.map((entry) => _InstructionStep(stepNumber: entry.key + 1, step: entry.value, scaleFactor: scaleFactor, ingredientNames: ingredientNames)),
+                  if (notes != null && notes!.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    _SectionHeader(title: l10n.recipeFieldNotes),
+                    const SizedBox(height: 12),
+                    Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)), child: Text(notes!, style: theme.textTheme.bodyMedium)),
+                  ],
+                  const SizedBox(height: 32),
+                ],
+              ),
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 }
