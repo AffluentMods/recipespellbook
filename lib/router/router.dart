@@ -299,7 +299,12 @@ final router = GoRouter(
         GoRoute(
           path: '/community',
           name: 'community',
-          builder: (context, state) => const CommunityScreen(),
+          // NoTransitionPage like the other bottom-nav tabs — otherwise this
+          // tab's page animates while the others swap instantly, which leaves
+          // both screens' FABs on screen during a fast tab switch.
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: CommunityScreen(),
+          ),
         ),
         GoRoute(
           path: '/community/publish',
