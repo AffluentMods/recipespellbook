@@ -80,6 +80,11 @@ class MealPlanDao extends DatabaseAccessor<AppDatabase> with _$MealPlanDaoMixin 
         .write(MealPlansCompanion(notes: Value(notes)));
   }
 
+  Future<void> updateMealPlanType(String id, String mealType) {
+    return (update(mealPlans)..where((t) => t.id.equals(id)))
+        .write(MealPlansCompanion(mealType: Value(mealType)));
+  }
+
   Stream<Map<DateTime, int>> watchMealCountsForDateRange(DateTime startDate, DateTime endDate) {
     // Query to get count of meal plans per day in the date range
     final query = customSelect(

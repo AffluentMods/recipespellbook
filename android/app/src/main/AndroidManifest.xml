@@ -68,6 +68,28 @@
                     android:host="kroger-callback"/>
             </intent-filter>
 
+            <!-- Share view links opened in-app (custom scheme, e.g. the web
+                 "Open in App" button uses recipespellbook://import?code=... ) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="recipespellbook" android:host="import"/>
+                <data android:scheme="recipespellbook" android:host="s"/>
+            </intent-filter>
+
+            <!-- Universal (App) Links: https://recipespellbook.app/s/<code>
+                 opens directly in the app. autoVerify checks the domain's
+                 /.well-known/assetlinks.json against the app's signing cert. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https"
+                    android:host="recipespellbook.app"
+                    android:pathPrefix="/s/"/>
+            </intent-filter>
+
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../services/community_service.dart';
+import '../../../services/image_service.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../utils/native_file_image.dart';
 import '../../widgets/app_snackbar.dart';
@@ -134,7 +135,7 @@ class CommunityRecipeFullScreen extends ConsumerWidget {
                   constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
                   icon: const Icon(Icons.download_rounded, color: Colors.white, size: 26),
                   tooltip: l10n.communitySaveRecipe,
-                  onPressed: () => _showSavePicker(context, ref, recipe),
+                  onPressed: () => _showSavePicker(context, ref, recipe, publicationId),
                 ),
               ),
             ],
@@ -312,7 +313,7 @@ class CommunityRecipeFullScreen extends ConsumerWidget {
     );
   }
 
-  static void _showSavePicker(BuildContext context, WidgetRef ref, CommunityRecipe recipe) {
+  static void _showSavePicker(BuildContext context, WidgetRef ref, CommunityRecipe recipe, String publicationId) {
     final l10n = AppLocalizations.of(context)!;
     final cookbooks = ref.read(cookbooksProvider).valueOrNull ?? [];
 
@@ -357,7 +358,7 @@ class CommunityRecipeFullScreen extends ConsumerWidget {
                     title: Text(c.name),
                     onTap: () async {
                       Navigator.pop(ctx);
-                      await _saveRecipe(context, ref, recipe, c.id);
+                      await _saveRecipe(context, ref, recipe, c.id, publicationId);
                     },
                   )).toList(),
                 ),
@@ -369,13 +370,36 @@ class CommunityRecipeFullScreen extends ConsumerWidget {
     );
   }
 
-  static Future<void> _saveRecipe(BuildContext context, WidgetRef ref, CommunityRecipe recipe, String cookbookId) async {
+  static Future<void> _saveRecipe(BuildContext context, WidgetRef ref, CommunityRecipe recipe, String cookbookId, String publicationId) async {
     final l10n = AppLocalizations.of(context)!;
     final db = ref.read(databaseProvider);
     final id = 'cr_${DateTime.now().millisecondsSinceEpoch}';
 
     try {
       AppSnackbar.loading(context, l10n.communitySavingRecipe);
+
+      // Download images to local storage BEFORE the DB transaction (network I/O
+      // must not run inside a transaction). The community image paths are
+      // server-side; resolve them to URLs, then save locally. A failed download
+      // just leaves that image null — the recipe still saves.
+      final imageService = ImageService.instance;
+      String? coverLocalPath;
+      if (recipe.imagePath != null && recipe.imagePath!.isNotEmpty) {
+        coverLocalPath = await imageService.downloadAndSaveImage(
+          CommunityService.communityImageUrl(publicationId, recipe.imagePath!),
+          '${id}_cover.jpg',
+        );
+      }
+      final stepLocalPaths = <int, String?>{};
+      for (var i = 0; i < recipe.steps.length; i++) {
+        final sp = recipe.steps[i].imagePath;
+        if (sp != null && sp.isNotEmpty) {
+          stepLocalPaths[i] = await imageService.downloadAndSaveImage(
+            CommunityService.communityImageUrl(publicationId, sp),
+            '${id}_step_$i.jpg',
+          );
+        }
+      }
 
       await db.transaction(() async {
         await db.into(db.recipes).insert(RecipesCompanion.insert(
@@ -392,6 +416,7 @@ class CommunityRecipeFullScreen extends ConsumerWidget {
           rating: drift.Value(recipe.rating),
           notes: drift.Value(recipe.notes),
           nutritionJson: drift.Value(recipe.nutritionJson),
+          imagePath: drift.Value(coverLocalPath),
           lastViewedAt: drift.Value(DateTime.now()),
         ));
 
@@ -416,6 +441,7 @@ class CommunityRecipeFullScreen extends ConsumerWidget {
             sortOrder: step.sortOrder,
             instruction: step.instruction,
             durationMinutes: drift.Value(step.durationMinutes),
+            imagePath: drift.Value(stepLocalPaths[i]),
           ));
         }
       });

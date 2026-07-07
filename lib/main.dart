@@ -16,6 +16,7 @@ import 'providers/settings_provider.dart';
 import 'providers/subscription_provider.dart';
 import 'providers/sync_provider.dart';
 import 'router/router.dart';
+import 'package:app_links/app_links.dart';
 import 'services/ingredient_suggestion_service.dart';
 import 'services/notification_service.dart';
 import 'services/ocr_service.dart';
@@ -227,6 +228,49 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
 
     // 7. Wire up share intent handling
     _initShareHandler();
+
+    // 8. Wire up deep links (recipe/cookbook/list share view links)
+    _initDeepLinks();
+  }
+
+  // ── Deep-link handling (share view links) ──────────────────────────
+  //  Handles: recipespellbook://import?code=ABC  (web "Open in App")
+  //           recipespellbook://s/ABC
+  //           https://recipespellbook.app/s/ABC  (universal link, if verified)
+  AppLinks? _deepLinks;
+  StreamSubscription<Uri>? _deepLinkSub;
+
+  Future<void> _initDeepLinks() async {
+    try {
+      _deepLinks = AppLinks();
+      final initial = await _deepLinks!.getInitialAppLink();
+      if (initial != null) _handleDeepLink(initial);
+      _deepLinkSub = _deepLinks!.uriLinkStream.listen(
+        _handleDeepLink,
+        onError: (Object e) => debugPrint('[DeepLink] stream error: $e'),
+      );
+    } catch (e) {
+      debugPrint('[DeepLink] init failed: $e');
+    }
+  }
+
+  void _handleDeepLink(Uri uri) {
+    final code = _shareCodeFromUri(uri);
+    if (code == null || code.isEmpty) return;
+    // Open the public share viewer (no auth required).
+    router.push('/s/$code');
+  }
+
+  /// Pull a share code out of the various link shapes we accept.
+  String? _shareCodeFromUri(Uri uri) {
+    final q = uri.queryParameters['code'];
+    if (q != null && q.isNotEmpty) return q;
+    // Look for a `/s/<code>` segment (host counts as the first segment for
+    // custom-scheme links like recipespellbook://s/<code>).
+    final segs = [uri.host, ...uri.pathSegments].where((s) => s.isNotEmpty).toList();
+    final i = segs.indexOf('s');
+    if (i >= 0 && i + 1 < segs.length) return segs[i + 1];
+    return null;
   }
 
   /// Initialize subscription + notifications in background (non-blocking).

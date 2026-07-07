@@ -329,12 +329,18 @@ class FamilyService {
   // ────────────────────────────────────
 
   /// Create a temporary share link (24h expiry, free).
-  Future<ShareLinkInfo?> createShareLink(String resourceType, String resourceId) async {
+  /// Create a 24h share link. Pass [snapshot] for a self-contained recipe
+  /// share (a frozen copy that works even for unsynced recipes and survives
+  /// edits/deletes of the original).
+  Future<ShareLinkInfo?> createShareLink(String resourceType, String resourceId,
+      {Map<String, dynamic>? snapshot}) async {
     try {
-      final r = await _auth.post('/v1/share', {
+      final body = <String, dynamic>{
         'resourceType': resourceType,
         'resourceId': resourceId,
-      });
+        if (snapshot != null) 'snapshot': snapshot,
+      };
+      final r = await _auth.post('/v1/share', body);
       if (r.statusCode == 201) {
         return ShareLinkInfo.fromJson(jsonDecode(r.body));
       }

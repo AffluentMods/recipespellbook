@@ -4802,6 +4802,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plannerMealRemoved => '餐食已删除';
 
   @override
+  String plannerMealsRemoved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count meals removed',
+      one: '1 meal removed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String plannerMealsMoved(String date) {
+    return 'Moved to $date';
+  }
+
+  @override
+  String get plannerChangeMealType => 'Change meal type';
+
+  @override
+  String get plannerMoveToDate => 'Move to date';
+
+  @override
   String get weekStartsOn => '周起始日';
 
   @override

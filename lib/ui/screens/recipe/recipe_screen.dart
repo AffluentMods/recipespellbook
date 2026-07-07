@@ -1530,7 +1530,13 @@ class _InstructionsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    if (steps.isEmpty) return Center(child: Text(l10n.instructionsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)));
+    final hasNotes = notes != null && notes!.isNotEmpty;
+    // Only show the empty state when there's genuinely nothing — otherwise a
+    // recipe that has notes but no steps would hide its notes here (the stacked
+    // layout shows them, so the tabbed layout must too).
+    if (steps.isEmpty && !hasNotes) {
+      return Center(child: Text(l10n.instructionsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)));
+    }
     // Eager Column (not lazy ListView) so SelectionArea select-all doesn't
     // crash on off-screen children — see note in _IngredientsTab.
     return CustomScrollView(
@@ -1546,8 +1552,8 @@ class _InstructionsTab extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ...steps.asMap().entries.map((entry) => _InstructionStep(stepNumber: entry.key + 1, step: entry.value, scaleFactor: scaleFactor, ingredientNames: ingredientNames)),
-                  if (notes != null && notes!.isNotEmpty) ...[
-                    const SizedBox(height: 24),
+                  if (hasNotes) ...[
+                    if (steps.isNotEmpty) const SizedBox(height: 24),
                     _SectionHeader(title: l10n.recipeFieldNotes),
                     const SizedBox(height: 12),
                     Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)), child: Text(notes!, style: theme.textTheme.bodyMedium)),

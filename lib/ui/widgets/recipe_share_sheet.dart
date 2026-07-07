@@ -12,6 +12,7 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/family_service.dart';
+import '../../services/image_service.dart';
 import 'app_snackbar.dart';
 import '../../utils/responsive_utils.dart';
 
@@ -153,12 +154,16 @@ class _RecipeShareSheet extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     Navigator.pop(context);
 
-    // Try to generate a shareable link via the backend (requires sign-in)
+    // Generate a self-contained 24h share link (requires sign-in). We upload a
+    // frozen snapshot of the recipe + its photos, so the link works for anyone
+    // for 24h regardless of sync, and survives later edits/deletes.
     final isSignedIn = AuthService.instance.isSignedIn;
     if (isSignedIn) {
       if (context.mounted) AppSnackbar.loading(context, l10n.generatingLink);
 
-      final link = await FamilyService.instance.createShareLink('recipe', recipe.id);
+      final snapshot = await _buildSnapshot();
+      final link = await FamilyService.instance
+          .createShareLink('recipe', recipe.id, snapshot: snapshot);
 
       if (context.mounted) AppSnackbar.dismiss(context);
 
@@ -222,6 +227,61 @@ class _RecipeShareSheet extends StatelessWidget {
         ),
       );
     }
+  }
+
+  /// Build a self-contained snapshot of this recipe for a share link, uploading
+  /// its local photos to the server (best-effort) so the shared copy shows
+  /// images. A failed image upload just leaves that image null (text still works).
+  Future<Map<String, dynamic>> _buildSnapshot() async {
+    final dao = ref.read(recipeDaoProvider);
+    final ings = await dao.getIngredientsForRecipe(recipe.id);
+    final steps = await dao.getStepsForRecipe(recipe.id);
+    final images = ImageService.instance;
+
+    Future<String?> upload(String? path) async {
+      if (path == null || path.isEmpty) return null;
+      final r = await images.communityUploadLocalPath(path);
+      return r?.path;
+    }
+
+    final coverPath = await upload(recipe.imagePath);
+    final stepPaths = <String, String?>{};
+    for (final s in steps) {
+      stepPaths[s.id] = await upload(s.imagePath);
+    }
+
+    return {
+      'id': recipe.id,
+      'title': recipe.title,
+      'description': recipe.description,
+      'servings': recipe.servings,
+      'prepTimeMinutes': recipe.prepTimeMinutes,
+      'cookTimeMinutes': recipe.cookTimeMinutes,
+      'sourceUrl': recipe.sourceUrl,
+      'imagePath': coverPath,
+      'courseId': recipe.courseId,
+      'categoryId': recipe.categoryId,
+      'rating': recipe.rating,
+      'notes': recipe.notes,
+      'nutritionJson': recipe.nutritionJson,
+      'ingredients': ings
+          .map((i) => {
+                'sortOrder': i.sortOrder,
+                'amount': i.amount,
+                'unit': i.unit,
+                'name': i.name,
+                'notes': i.notes,
+              })
+          .toList(),
+      'steps': steps
+          .map((s) => {
+                'sortOrder': s.sortOrder,
+                'instruction': s.instruction,
+                'durationMinutes': s.durationMinutes,
+                'imagePath': stepPaths[s.id],
+              })
+          .toList(),
+    };
   }
 
   Future<void> _shareAsText(BuildContext context) async {

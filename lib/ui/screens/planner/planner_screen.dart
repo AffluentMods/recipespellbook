@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart' hide Step;
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +25,122 @@ final mealPlansForDateProvider = StreamProvider.family<List<MealPlanWithRecipe>,
   final dao = ref.watch(mealPlanDaoProvider);
   return dao.watchMealPlansWithRecipesForDate(date);
 });
+
+/// Session-only multi-select for the planner (long-press to enter). Holds the
+/// selected meal-plan ids; "active" whenever non-empty. Forgotten on app close.
+class _PlannerSelectionNotifier extends StateNotifier<Set<String>> {
+  _PlannerSelectionNotifier() : super(const {});
+
+  void add(String id) {
+    if (!state.contains(id)) state = {...state, id};
+  }
+
+  void toggle(String id) {
+    final next = {...state};
+    if (!next.remove(id)) next.add(id);
+    state = next;
+  }
+
+  void clear() {
+    if (state.isNotEmpty) state = const {};
+  }
+}
+
+final _plannerSelectionProvider =
+    StateNotifierProvider<_PlannerSelectionNotifier, Set<String>>(
+        (ref) => _PlannerSelectionNotifier());
+
+/// The canonical meal types (value stored in the DB → emoji), in display order.
+const _plannerMealTypes = <(String, String)>[
+  ('Breakfast', '🌅'),
+  ('Lunch', '☀️'),
+  ('Dinner', '🌙'),
+  ('Appetizer', '🥗'),
+  ('Dessert', '🍰'),
+  ('Snack', '🍪'),
+];
+
+String _mealTypeLabel(AppLocalizations l10n, String type) {
+  switch (type) {
+    case 'Breakfast': return l10n.mealTypeBreakfast;
+    case 'Lunch': return l10n.mealTypeLunch;
+    case 'Dinner': return l10n.mealTypeDinner;
+    case 'Appetizer': return l10n.mealTypeAppetizer;
+    case 'Dessert': return l10n.mealTypeDessert;
+    case 'Snack': return l10n.mealTypeSnack;
+    default: return type;
+  }
+}
+
+/// Bottom action bar shown while meals are multi-selected.
+class _PlannerSelectionBar extends StatelessWidget {
+  final int count;
+  final VoidCallback onDelete;
+  final VoidCallback onMoveDate;
+  final VoidCallback onChangeType;
+  const _PlannerSelectionBar({
+    required this.count,
+    required this.onDelete,
+    required this.onMoveDate,
+    required this.onChangeType,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    return SafeArea(
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHigh,
+          border: Border(
+            top: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.12)),
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _PlannerSelectionAction(icon: Icons.event, label: l10n.plannerMoveToDate, onTap: onMoveDate),
+            _PlannerSelectionAction(icon: Icons.restaurant_menu, label: l10n.plannerChangeMealType, onTap: onChangeType),
+            _PlannerSelectionAction(icon: Icons.delete_outline, label: l10n.actionDelete, color: theme.colorScheme.error, onTap: onDelete),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PlannerSelectionAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color? color;
+  const _PlannerSelectionAction({required this.icon, required this.label, required this.onTap, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final c = color ?? theme.colorScheme.onSurface;
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: c, size: 24),
+              const SizedBox(height: 4),
+              Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: theme.textTheme.labelSmall?.copyWith(color: c)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 final mealCountsForWeekProvider = StreamProvider.family<Map<DateTime, int>, DateTime>((ref, weekStart) {
   final dao = ref.watch(mealPlanDaoProvider);
@@ -87,9 +204,23 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
     final mealCountsAsync = ref.watch(mealCountsForWeekProvider(_weekStart));
     final isDesktop = Responsive.isDesktopLayout(context);
 
+    // Only the current day's meals are visible/selectable, so clear the
+    // selection whenever the day changes to avoid acting on hidden meals.
+    ref.listen(selectedPlannerDateProvider, (_, __) {
+      ref.read(_plannerSelectionProvider.notifier).clear();
+    });
+    final selectedIds = ref.watch(_plannerSelectionProvider);
+    final selecting = selectedIds.isNotEmpty;
+    final visiblePlans = mealPlansAsync.valueOrNull ?? const <MealPlanWithRecipe>[];
+
     final weekDates = List.generate(7, (i) => _weekStart.add(Duration(days: i)));
 
-    return Scaffold(
+    return PopScope(
+      canPop: !selecting,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && selecting) ref.read(_plannerSelectionProvider.notifier).clear();
+      },
+      child: Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
@@ -162,12 +293,107 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
           ],
         ),
       ),
-      floatingActionButton: isDesktop
+      floatingActionButton: (isDesktop || selecting)
           ? null
           : _ModernFAB(
               onPressed: () => _showAddMealSheet(context, selectedDate),
             ),
+      bottomNavigationBar: selecting
+          ? _PlannerSelectionBar(
+              count: selectedIds.length,
+              onDelete: () => _bulkDeleteMeals(visiblePlans, selectedIds),
+              onMoveDate: () => _bulkMoveMealsToDate(selectedIds),
+              onChangeType: () => _bulkChangeMealType(selectedIds),
+            )
+          : null,
+      ),
     );
+  }
+
+  // ────────────────────────────────────
+  //  PLANNER BULK ACTIONS (multi-select)
+  // ────────────────────────────────────
+
+  void _clearPlannerSelection() =>
+      ref.read(_plannerSelectionProvider.notifier).clear();
+
+  Future<void> _bulkDeleteMeals(
+      List<MealPlanWithRecipe> visible, Set<String> ids) async {
+    final dao = ref.read(mealPlanDaoProvider);
+    final l10n = AppLocalizations.of(context)!;
+    final snapshot =
+        visible.where((p) => ids.contains(p.mealPlan.id)).map((p) => p.mealPlan).toList();
+    for (final m in snapshot) {
+      await dao.deleteMealPlan(m.id);
+    }
+    _clearPlannerSelection();
+    if (!mounted || snapshot.isEmpty) return;
+    AppSnackbar.successWithAction(
+      context,
+      l10n.plannerMealsRemoved(snapshot.length),
+      actionLabel: l10n.actionUndo,
+      onAction: () {
+        for (final m in snapshot) {
+          dao.insertMealPlan(m.toCompanion(false));
+        }
+      },
+    );
+  }
+
+  Future<void> _bulkMoveMealsToDate(Set<String> ids) async {
+    final dao = ref.read(mealPlanDaoProvider);
+    final l10n = AppLocalizations.of(context)!;
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: ref.read(selectedPlannerDateProvider),
+      firstDate: DateTime(now.year - 1),
+      lastDate: DateTime(now.year + 3),
+    );
+    if (picked == null) return;
+    final target = DateTime(picked.year, picked.month, picked.day);
+    for (final id in ids) {
+      await dao.updateMealPlanDate(id, target);
+    }
+    _clearPlannerSelection();
+    if (mounted) {
+      AppSnackbar.success(
+          context, l10n.plannerMealsMoved(DateFormat.MMMd().format(target)));
+    }
+  }
+
+  Future<void> _bulkChangeMealType(Set<String> ids) async {
+    final l10n = AppLocalizations.of(context)!;
+    final type = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.plannerChangeMealType,
+                  style: Theme.of(ctx)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+            ),
+            for (final (mt, emoji) in _plannerMealTypes)
+              ListTile(
+                leading: Text(emoji, style: const TextStyle(fontSize: 22)),
+                title: Text(_mealTypeLabel(l10n, mt)),
+                onTap: () => Navigator.pop(ctx, mt),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (type == null) return;
+    final dao = ref.read(mealPlanDaoProvider);
+    for (final id in ids) {
+      await dao.updateMealPlanType(id, type);
+    }
+    _clearPlannerSelection();
   }
 
   void _showFullCalendar(BuildContext context) {
@@ -1176,9 +1402,16 @@ class _MealTileState extends ConsumerState<_MealTile> {
     final mealPlanDao = ref.read(mealPlanDaoProvider);
     final title = recipe?.title ?? widget.plan.mealPlan.name ?? l10n.meal;
 
+    // Multi-select state (long-press to enter; tap toggles while active).
+    final selectedIds = ref.watch(_plannerSelectionProvider);
+    final selecting = selectedIds.isNotEmpty;
+    final isSelected = selectedIds.contains(widget.plan.mealPlan.id);
+    final selection = ref.read(_plannerSelectionProvider.notifier);
+
     return Dismissible(
       key: Key(widget.plan.mealPlan.id),
-      direction: DismissDirection.endToStart,
+      // Disable swipe-to-delete while selecting so it can't fight taps.
+      direction: selecting ? DismissDirection.none : DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
@@ -1191,43 +1424,46 @@ class _MealTileState extends ConsumerState<_MealTile> {
       onDismissed: (_) => mealPlanDao.deleteMealPlan(widget.plan.mealPlan.id),
       child: Card(
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: isSelected
+              ? BorderSide(color: theme.colorScheme.primary, width: 2)
+              : BorderSide.none,
+        ),
+        color: isSelected ? theme.colorScheme.primary.withValues(alpha: 0.10) : null,
         clipBehavior: Clip.antiAlias,
         child: Column(
           children: [
             // Header — always visible, tappable to expand
             InkWell(
               onTap: () {
+                if (selecting) {
+                  selection.toggle(widget.plan.mealPlan.id);
+                  return;
+                }
                 if (recipe != null && !_isExpanded && _ingredients == null) {
                   _loadDetails();
                 }
                 setState(() => _isExpanded = !_isExpanded);
               },
               onLongPress: () {
-                showDialog(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: Text(l10n.removeMeal),
-                    content: Text(l10n.removeMealConfirm(title)),
-                    actions: [
-                      TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.actionCancel)),
-                      FilledButton(
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          mealPlanDao.deleteMealPlan(widget.plan.mealPlan.id);
-                          AppSnackbar.info(context, l10n.plannerMealRemoved);
-                        },
-                        style: FilledButton.styleFrom(backgroundColor: Colors.red),
-                        child: Text(l10n.actionRemove),
-                      ),
-                    ],
-                  ),
-                );
+                HapticFeedback.selectionClick();
+                selection.add(widget.plan.mealPlan.id);
               },
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Row(
                   children: [
+                    // Selection check (while selecting) or recipe thumbnail.
+                    if (selecting)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: Icon(
+                          isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                          color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outlineVariant,
+                          size: 28,
+                        ),
+                      ),
                     // Recipe thumbnail
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),

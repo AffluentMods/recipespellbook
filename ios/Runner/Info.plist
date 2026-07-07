@@ -78,6 +78,16 @@
 					<string>com.googleusercontent.apps.37618075189-k3bh6km7r7lurkvg5lld1sgoleo4s3p5</string>
 				</array>
 			</dict>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLName</key>
+				<string>com.recipespellbook.app</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>recipespellbook</string>
+				</array>
+			</dict>
 		</array>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Recipe Spellbook needs access to your photo library to import recipe images and add photos to your recipes.</string>

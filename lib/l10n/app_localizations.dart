@@ -8929,6 +8929,30 @@ abstract class AppLocalizations {
   /// **'Meal removed'**
   String get plannerMealRemoved;
 
+  /// No description provided for @plannerMealsRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 meal removed} other{{count} meals removed}}'**
+  String plannerMealsRemoved(int count);
+
+  /// No description provided for @plannerMealsMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to {date}'**
+  String plannerMealsMoved(String date);
+
+  /// No description provided for @plannerChangeMealType.
+  ///
+  /// In en, this message translates to:
+  /// **'Change meal type'**
+  String get plannerChangeMealType;
+
+  /// No description provided for @plannerMoveToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to date'**
+  String get plannerMoveToDate;
+
   /// No description provided for @weekStartsOn.
   ///
   /// In en, this message translates to:
