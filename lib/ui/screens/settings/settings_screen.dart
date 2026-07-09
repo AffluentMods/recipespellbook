@@ -33,7 +33,6 @@ import 'manage_tags_screen.dart';
 import 'notification_settings_screen.dart';
 import 'nutrition_settings_screen.dart';
 import 'quick_access_settings_screen.dart';
-import 'recipe_layout_settings_screen.dart';
 import 'trash_screen.dart';
 import '../premium/family_screen.dart';
 
@@ -165,17 +164,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               _openSettingsPanel(const QuickAccessSettingsScreen(), maxWidth: 700, maxHeight: 500);
             } else {
               context.push('/settings/quick-access');
-            }
-          },
-        ) : null,
-        _m(l10n.settingsRecipeLayout) ? _Tile(
-          icon: Icons.view_agenda, title: l10n.settingsRecipeLayout,
-          subtitle: s.recipeLayoutMode == RecipeLayoutMode.tabbed ? l10n.layoutTabbed : l10n.layoutStacked,
-          onTap: () {
-            if (Responsive.isDesktopLayout(context)) {
-              _openSettingsPanel(const RecipeLayoutSettingsScreen(), maxWidth: 700, maxHeight: 500);
-            } else {
-              context.push('/settings/recipe-layout');
             }
           },
         ) : null,

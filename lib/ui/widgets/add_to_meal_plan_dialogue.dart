@@ -12,31 +12,82 @@ import 'app_snackbar.dart';
 
 /// Shows a bottom sheet to add a recipe to meal plan
 /// Call this from recipe_screen.dart like:
-/// showAddToMealPlanSheet(context, ref, recipe.id, recipe.title);
+/// showAddToMealPlanSheet(context, ref, recipe.id, recipe.title, courseId: recipe.courseId);
+///
+/// [courseId] (the recipe's course, e.g. 'main', 'breakfast', 'dessert') is used
+/// to pre-select the most likely meal type and its default time.
 void showAddToMealPlanSheet(
     BuildContext context,
     WidgetRef ref,
     String recipeId,
-    String recipeTitle,
-    ) {
+    String recipeTitle, {
+    String? courseId,
+    }) {
   Responsive.showAdaptiveSheet(
     context,
     builder: (sheetContext) => _AddToMealPlanSheet(
       recipeId: recipeId,
       recipeTitle: recipeTitle,
+      courseId: courseId,
       ref: ref,
     ),
   );
 }
 
+/// Maps a recipe's course id to the meal-type bucket it most naturally belongs
+/// to. Falls back to Dinner for mains/sides/sauces and anything unknown.
+String mealTypeForCourse(String? courseId) {
+  switch (courseId) {
+    case 'breakfast':
+      return 'Breakfast';
+    case 'brunch':
+      return 'Lunch';
+    case 'appetizer':
+      return 'Appetizer';
+    case 'dessert':
+      return 'Dessert';
+    case 'snack':
+    case 'beverage':
+      return 'Snack';
+    case 'main':
+    case 'side':
+    case 'sauce':
+    default:
+      return 'Dinner';
+  }
+}
+
+/// Default clock time for each meal type — used to place the meal on the day
+/// timeline and to pre-fill the time chip.
+TimeOfDay defaultTimeForMealType(String type) {
+  switch (type.toLowerCase()) {
+    case 'breakfast':
+      return const TimeOfDay(hour: 8, minute: 0);
+    case 'lunch':
+      return const TimeOfDay(hour: 12, minute: 0);
+    case 'dinner':
+      return const TimeOfDay(hour: 18, minute: 0);
+    case 'snack':
+      return const TimeOfDay(hour: 15, minute: 0);
+    case 'appetizer':
+      return const TimeOfDay(hour: 17, minute: 0);
+    case 'dessert':
+      return const TimeOfDay(hour: 19, minute: 30);
+    default:
+      return const TimeOfDay(hour: 12, minute: 0);
+  }
+}
+
 class _AddToMealPlanSheet extends StatefulWidget {
   final String recipeId;
   final String recipeTitle;
+  final String? courseId;
   final WidgetRef ref;
 
   const _AddToMealPlanSheet({
     required this.recipeId,
     required this.recipeTitle,
+    required this.courseId,
     required this.ref,
   });
 
@@ -46,10 +97,38 @@ class _AddToMealPlanSheet extends StatefulWidget {
 
 class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
   DateTime _selectedDate = DateTime.now();
-  String _selectedMealType = 'Dinner';
+  late String _selectedMealType;
+  late TimeOfDay _selectedTime;
+  bool _timeEdited = false;
   bool _isSaving = false;
 
   static const _mealTypeKeys = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Appetizer', 'Dessert'];
+
+  @override
+  void initState() {
+    super.initState();
+    // Detect the meal type from the recipe's course and pre-fill its default time.
+    _selectedMealType = mealTypeForCourse(widget.courseId);
+    _selectedTime = defaultTimeForMealType(_selectedMealType);
+  }
+
+  void _selectMealType(String type) {
+    setState(() {
+      _selectedMealType = type;
+      // Keep the time in sync with the meal type until the user overrides it.
+      if (!_timeEdited) _selectedTime = defaultTimeForMealType(type);
+    });
+  }
+
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(context: context, initialTime: _selectedTime);
+    if (picked != null && mounted) {
+      setState(() {
+        _selectedTime = picked;
+        _timeEdited = true;
+      });
+    }
+  }
 
   String _localizedMealType(BuildContext context, String type) {
     final l10n = AppLocalizations.of(context)!;
@@ -74,11 +153,26 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
             // Header
             Row(
               children: [
@@ -197,9 +291,37 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
                     ],
                   ),
                   selected: isSelected,
-                  onSelected: (_) => setState(() => _selectedMealType = type),
+                  onSelected: (_) => _selectMealType(type),
                 );
               }).toList(),
+            ),
+            const SizedBox(height: 16),
+
+            // Time — auto-filled from the detected meal type, tappable to change.
+            InkWell(
+              onTap: _pickTime,
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: theme.colorScheme.outlineVariant),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.schedule, size: 18, color: theme.colorScheme.primary),
+                    const SizedBox(width: 8),
+                    Text(
+                      _selectedTime.format(context),
+                      style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(width: 6),
+                    Icon(Icons.edit, size: 14, color: theme.colorScheme.outline),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 24),
 
@@ -246,12 +368,15 @@ class _AddToMealPlanSheetState extends State<_AddToMealPlanSheet> {
 
       // Normalize date to midnight
       final date = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+      // Combine the chosen date + time so the day timeline places it precisely.
+      final time = DateTime(date.year, date.month, date.day, _selectedTime.hour, _selectedTime.minute);
 
       await mealPlanDao.insertMealPlan(MealPlansCompanion.insert(
         id: id,
         date: date,
         mealType: drift.Value(_selectedMealType),
         recipeId: drift.Value(widget.recipeId),
+        time: drift.Value(time),
       ));
 
       // TODO: Kitchen Buddy hidden for now

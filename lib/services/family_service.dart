@@ -120,15 +120,19 @@ class ShareLinkInfo {
   final DateTime expiresAt;
 
   const ShareLinkInfo({
-    required this.code, required this.url, required this.resourceType,
-    required this.resourceId, required this.expiresAt,
+    required this.code, required this.url, this.resourceType = '',
+    this.resourceId = '', required this.expiresAt,
   });
 
+  // The POST /v1/share response only returns { code, url, expiresAt }; the
+  // list endpoint adds resourceType/resourceId. Tolerate either — casting a
+  // missing field to a non-null String used to throw and silently drop the
+  // whole link (falling back to a plain title share).
   factory ShareLinkInfo.fromJson(Map<String, dynamic> json) => ShareLinkInfo(
     code: json['code'] as String,
     url: json['url'] as String,
-    resourceType: json['resourceType'] as String,
-    resourceId: json['resourceId'] as String,
+    resourceType: (json['resourceType'] as String?) ?? '',
+    resourceId: (json['resourceId'] as String?) ?? '',
     expiresAt: DateTime.parse(json['expiresAt'] as String),
   );
 }

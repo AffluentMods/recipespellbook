@@ -1762,9 +1762,14 @@ class $StepsTable extends Steps with TableInfo<$StepsTable, Step> {
   late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
       'image_path', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+      'notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, recipeId, sortOrder, instruction, durationMinutes, imagePath];
+      [id, recipeId, sortOrder, instruction, durationMinutes, imagePath, notes];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1810,6 +1815,10 @@ class $StepsTable extends Steps with TableInfo<$StepsTable, Step> {
       context.handle(_imagePathMeta,
           imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta));
     }
+    if (data.containsKey('notes')) {
+      context.handle(
+          _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+    }
     return context;
   }
 
@@ -1831,6 +1840,8 @@ class $StepsTable extends Steps with TableInfo<$StepsTable, Step> {
           .read(DriftSqlType.int, data['${effectivePrefix}duration_minutes']),
       imagePath: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}image_path']),
+      notes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}notes']),
     );
   }
 
@@ -1847,13 +1858,15 @@ class Step extends DataClass implements Insertable<Step> {
   final String instruction;
   final int? durationMinutes;
   final String? imagePath;
+  final String? notes;
   const Step(
       {required this.id,
       required this.recipeId,
       required this.sortOrder,
       required this.instruction,
       this.durationMinutes,
-      this.imagePath});
+      this.imagePath,
+      this.notes});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1866,6 +1879,9 @@ class Step extends DataClass implements Insertable<Step> {
     }
     if (!nullToAbsent || imagePath != null) {
       map['image_path'] = Variable<String>(imagePath);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
     }
     return map;
   }
@@ -1882,6 +1898,8 @@ class Step extends DataClass implements Insertable<Step> {
       imagePath: imagePath == null && nullToAbsent
           ? const Value.absent()
           : Value(imagePath),
+      notes:
+          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
     );
   }
 
@@ -1895,6 +1913,7 @@ class Step extends DataClass implements Insertable<Step> {
       instruction: serializer.fromJson<String>(json['instruction']),
       durationMinutes: serializer.fromJson<int?>(json['durationMinutes']),
       imagePath: serializer.fromJson<String?>(json['imagePath']),
+      notes: serializer.fromJson<String?>(json['notes']),
     );
   }
   @override
@@ -1907,6 +1926,7 @@ class Step extends DataClass implements Insertable<Step> {
       'instruction': serializer.toJson<String>(instruction),
       'durationMinutes': serializer.toJson<int?>(durationMinutes),
       'imagePath': serializer.toJson<String?>(imagePath),
+      'notes': serializer.toJson<String?>(notes),
     };
   }
 
@@ -1916,7 +1936,8 @@ class Step extends DataClass implements Insertable<Step> {
           int? sortOrder,
           String? instruction,
           Value<int?> durationMinutes = const Value.absent(),
-          Value<String?> imagePath = const Value.absent()}) =>
+          Value<String?> imagePath = const Value.absent(),
+          Value<String?> notes = const Value.absent()}) =>
       Step(
         id: id ?? this.id,
         recipeId: recipeId ?? this.recipeId,
@@ -1926,6 +1947,7 @@ class Step extends DataClass implements Insertable<Step> {
             ? durationMinutes.value
             : this.durationMinutes,
         imagePath: imagePath.present ? imagePath.value : this.imagePath,
+        notes: notes.present ? notes.value : this.notes,
       );
   Step copyWithCompanion(StepsCompanion data) {
     return Step(
@@ -1938,6 +1960,7 @@ class Step extends DataClass implements Insertable<Step> {
           ? data.durationMinutes.value
           : this.durationMinutes,
       imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
+      notes: data.notes.present ? data.notes.value : this.notes,
     );
   }
 
@@ -1949,14 +1972,15 @@ class Step extends DataClass implements Insertable<Step> {
           ..write('sortOrder: $sortOrder, ')
           ..write('instruction: $instruction, ')
           ..write('durationMinutes: $durationMinutes, ')
-          ..write('imagePath: $imagePath')
+          ..write('imagePath: $imagePath, ')
+          ..write('notes: $notes')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(
-      id, recipeId, sortOrder, instruction, durationMinutes, imagePath);
+      id, recipeId, sortOrder, instruction, durationMinutes, imagePath, notes);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1966,7 +1990,8 @@ class Step extends DataClass implements Insertable<Step> {
           other.sortOrder == this.sortOrder &&
           other.instruction == this.instruction &&
           other.durationMinutes == this.durationMinutes &&
-          other.imagePath == this.imagePath);
+          other.imagePath == this.imagePath &&
+          other.notes == this.notes);
 }
 
 class StepsCompanion extends UpdateCompanion<Step> {
@@ -1976,6 +2001,7 @@ class StepsCompanion extends UpdateCompanion<Step> {
   final Value<String> instruction;
   final Value<int?> durationMinutes;
   final Value<String?> imagePath;
+  final Value<String?> notes;
   final Value<int> rowid;
   const StepsCompanion({
     this.id = const Value.absent(),
@@ -1984,6 +2010,7 @@ class StepsCompanion extends UpdateCompanion<Step> {
     this.instruction = const Value.absent(),
     this.durationMinutes = const Value.absent(),
     this.imagePath = const Value.absent(),
+    this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   StepsCompanion.insert({
@@ -1993,6 +2020,7 @@ class StepsCompanion extends UpdateCompanion<Step> {
     required String instruction,
     this.durationMinutes = const Value.absent(),
     this.imagePath = const Value.absent(),
+    this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         recipeId = Value(recipeId),
@@ -2005,6 +2033,7 @@ class StepsCompanion extends UpdateCompanion<Step> {
     Expression<String>? instruction,
     Expression<int>? durationMinutes,
     Expression<String>? imagePath,
+    Expression<String>? notes,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2014,6 +2043,7 @@ class StepsCompanion extends UpdateCompanion<Step> {
       if (instruction != null) 'instruction': instruction,
       if (durationMinutes != null) 'duration_minutes': durationMinutes,
       if (imagePath != null) 'image_path': imagePath,
+      if (notes != null) 'notes': notes,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2025,6 +2055,7 @@ class StepsCompanion extends UpdateCompanion<Step> {
       Value<String>? instruction,
       Value<int?>? durationMinutes,
       Value<String?>? imagePath,
+      Value<String?>? notes,
       Value<int>? rowid}) {
     return StepsCompanion(
       id: id ?? this.id,
@@ -2033,6 +2064,7 @@ class StepsCompanion extends UpdateCompanion<Step> {
       instruction: instruction ?? this.instruction,
       durationMinutes: durationMinutes ?? this.durationMinutes,
       imagePath: imagePath ?? this.imagePath,
+      notes: notes ?? this.notes,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2058,6 +2090,9 @@ class StepsCompanion extends UpdateCompanion<Step> {
     if (imagePath.present) {
       map['image_path'] = Variable<String>(imagePath.value);
     }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2073,6 +2108,7 @@ class StepsCompanion extends UpdateCompanion<Step> {
           ..write('instruction: $instruction, ')
           ..write('durationMinutes: $durationMinutes, ')
           ..write('imagePath: $imagePath, ')
+          ..write('notes: $notes, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -8571,6 +8607,7 @@ typedef $$StepsTableCreateCompanionBuilder = StepsCompanion Function({
   required String instruction,
   Value<int?> durationMinutes,
   Value<String?> imagePath,
+  Value<String?> notes,
   Value<int> rowid,
 });
 typedef $$StepsTableUpdateCompanionBuilder = StepsCompanion Function({
@@ -8580,6 +8617,7 @@ typedef $$StepsTableUpdateCompanionBuilder = StepsCompanion Function({
   Value<String> instruction,
   Value<int?> durationMinutes,
   Value<String?> imagePath,
+  Value<String?> notes,
   Value<int> rowid,
 });
 
@@ -8606,6 +8644,7 @@ class $$StepsTableTableManager extends RootTableManager<
             Value<String> instruction = const Value.absent(),
             Value<int?> durationMinutes = const Value.absent(),
             Value<String?> imagePath = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               StepsCompanion(
@@ -8615,6 +8654,7 @@ class $$StepsTableTableManager extends RootTableManager<
             instruction: instruction,
             durationMinutes: durationMinutes,
             imagePath: imagePath,
+            notes: notes,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -8624,6 +8664,7 @@ class $$StepsTableTableManager extends RootTableManager<
             required String instruction,
             Value<int?> durationMinutes = const Value.absent(),
             Value<String?> imagePath = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               StepsCompanion.insert(
@@ -8633,6 +8674,7 @@ class $$StepsTableTableManager extends RootTableManager<
             instruction: instruction,
             durationMinutes: durationMinutes,
             imagePath: imagePath,
+            notes: notes,
             rowid: rowid,
           ),
         ));
@@ -8670,6 +8712,11 @@ class $$StepsTableFilterComposer
       column: $state.table.imagePath,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get notes => $state.composableBuilder(
+      column: $state.table.notes,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
 }
 
 class $$StepsTableOrderingComposer
@@ -8702,6 +8749,11 @@ class $$StepsTableOrderingComposer
 
   ColumnOrderings<String> get imagePath => $state.composableBuilder(
       column: $state.table.imagePath,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get notes => $state.composableBuilder(
+      column: $state.table.notes,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }

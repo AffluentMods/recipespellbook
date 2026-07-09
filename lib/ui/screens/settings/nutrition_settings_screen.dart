@@ -201,25 +201,13 @@ class NutritionSettingsScreen extends ConsumerWidget {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            // SegmentedButton wraps awkwardly with 4 segments on narrow
-            // phones, so let it scroll horizontally if needed.
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: double.infinity,
               child: SegmentedButton<NutritionChartStyle>(
                 segments: [
                   ButtonSegment(
-                    value: NutritionChartStyle.numbers,
-                    label: Text(l10n.chartNumbers),
-                    icon: const Icon(Icons.tag, size: 18),
-                  ),
-                  ButtonSegment(
                     value: NutritionChartStyle.donut,
                     label: Text(l10n.chartDonut),
-                    icon: const Icon(Icons.donut_large, size: 18),
-                  ),
-                  ButtonSegment(
-                    value: NutritionChartStyle.compactDonut,
-                    label: Text(l10n.chartCompactDonut),
                     icon: const Icon(Icons.pie_chart_outline, size: 18),
                   ),
                   ButtonSegment(
@@ -506,15 +494,12 @@ class _NutritionWidgetState extends State<NutritionWidget> {
           _buildHeader(theme, canToggle, servings),
           const SizedBox(height: 16),
 
-          // Body varies by chart style
-          if (widget.chartStyle == NutritionChartStyle.donut)
-            _buildDonutView(theme, displayNutrition)
-          else if (widget.chartStyle == NutritionChartStyle.bars)
+          // Body varies by chart style: two options — Bars or Donut (the
+          // compact ring). Legacy 'numbers'/full-donut values resolve to Donut.
+          if (widget.chartStyle == NutritionChartStyle.bars)
             _buildBarView(theme, displayNutrition)
-          else if (widget.chartStyle == NutritionChartStyle.compactDonut)
-            _buildCompactDonutView(theme, displayNutrition)
           else
-            _buildNumbersView(theme, displayNutrition),
+            _buildCompactDonutView(theme, displayNutrition),
 
           // Settings link
           if (widget.showSettingsLink) ...[
@@ -632,172 +617,7 @@ class _NutritionWidgetState extends State<NutritionWidget> {
     );
   }
 
-  // ─── NUMBERS VIEW ───
-
-  Widget _buildNumbersView(ThemeData theme, NutritionData n) {
-    final l10n = AppLocalizations.of(context)!;
-    final enabled = widget.enabledNutrients;
-    final servings = _effectiveServings() ?? _parseServings();
-
-    return Column(
-      children: [
-        // Calories — always shown, big display
-        if (n.calories != null) ...[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(l10n.nutrientCalories, style: theme.textTheme.bodyLarge),
-              const Spacer(),
-              Text(
-                '${n.calories!.round()}',
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: NutritionColors.of(widget.palette).calories,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Text('kcal', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
-            ],
-          ),
-          // Per-serving subtitle when showing total
-          if (!_showPerServing && servings != null && servings > 0 && n.calories != null) ...[
-            const SizedBox(height: 2),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                l10n.nutritionKcalPerServing((n.calories! / servings).round()),
-                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-              ),
-            ),
-          ],
-          if (_showPerServing && servings != null && servings > 0 && n.calories != null) ...[
-            const SizedBox(height: 2),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                l10n.nutritionKcalTotal((n.calories! * servings).round()),
-                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-              ),
-            ),
-          ],
-          const SizedBox(height: 8),
-          Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
-          const SizedBox(height: 8),
-        ],
-
-        // All other enabled nutrients
-        ..._buildNutrientRows(theme, n, enabled),
-      ],
-    );
-  }
-
   // ─── DONUT VIEW ───
-
-  Widget _buildDonutView(ThemeData theme, NutritionData n) {
-    final l10n = AppLocalizations.of(context)!;
-    final proteinG = n.protein ?? 0;
-    final carbsG = n.carbohydrates ?? 0;
-    final fatG = n.fat ?? 0;
-
-    // Convert to calories for proportional chart
-    final proteinCal = proteinG * 4;
-    final carbsCal = carbsG * 4;
-    final fatCal = fatG * 9;
-    final totalCal = proteinCal + carbsCal + fatCal;
-
-    final proteinPct = totalCal > 0 ? proteinCal / totalCal : 0.0;
-    final carbsPct = totalCal > 0 ? carbsCal / totalCal : 0.0;
-    final fatPct = totalCal > 0 ? fatCal / totalCal : 0.0;
-
-    final colors = NutritionColors.of(widget.palette);
-    final proteinColor = colors.protein;
-    final carbsColor = colors.carbs;
-    final fatColor = colors.fat;
-
-    final enabled = widget.enabledNutrients;
-    final servings = _parseServings();
-
-    return Column(
-      children: [
-        // Donut chart + center calories
-        SizedBox(
-          height: 180,
-          child: Row(
-            children: [
-              // Donut
-              SizedBox(
-                width: 160,
-                height: 160,
-                child: CustomPaint(
-                  painter: _DonutPainter(
-                    segments: [
-                      _DonutSegment(proteinPct, proteinColor),
-                      _DonutSegment(carbsPct, carbsColor),
-                      _DonutSegment(fatPct, fatColor),
-                    ],
-                    strokeWidth: 24,
-                    backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.1),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '${n.calories?.round() ?? 0}',
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                        Text('kcal', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 20),
-              // Legend
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _legendItem(theme, proteinColor, l10n.nutrientProtein, '${proteinG.round()}g', '${(proteinPct * 100).round()}%'),
-                    const SizedBox(height: 12),
-                    _legendItem(theme, carbsColor, l10n.nutrientCarbs, '${carbsG.round()}g', '${(carbsPct * 100).round()}%'),
-                    const SizedBox(height: 12),
-                    _legendItem(theme, fatColor, l10n.nutrientFat, '${fatG.round()}g', '${(fatPct * 100).round()}%'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Per-serving / total subtitle
-        if (servings != null && servings > 0 && n.calories != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            _showPerServing
-                ? l10n.nutritionKcalTotal((n.calories! * servings).round())
-                : l10n.nutritionKcalPerServing((n.calories! / servings).round()),
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-          ),
-        ],
-
-        // Remaining nutrients below (non-macro)
-        if (_hasNonMacroNutrients(enabled, n)) ...[
-          const SizedBox(height: 12),
-          Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
-          const SizedBox(height: 8),
-          ..._buildNutrientRows(theme, n, enabled, skipMacros: true),
-        ],
-      ],
-    );
-  }
-
-  // ─── COMPACT DONUT VIEW ───
   //
   // Smaller donut on the left, big calorie number INSIDE the ring,
   // three macros stacked to the right with `%` on top of each. Reads
@@ -918,32 +738,6 @@ class _NutritionWidgetState extends State<NutritionWidget> {
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.outline,
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _legendItem(ThemeData theme, Color color, String label, String value, String pct) {
-    return Row(
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(label, style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
-        ),
-        Text(value, style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
-        const SizedBox(width: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(pct, style: theme.textTheme.labelSmall?.copyWith(color: color, fontWeight: FontWeight.bold)),
         ),
       ],
     );

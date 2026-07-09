@@ -16,10 +16,15 @@ class EditableStep {
   String instruction;
   String? imagePath;
 
+  /// Section header/divider (not a real step). Its [instruction] holds the
+  /// section title; saved with notes == '__header__'. Mirrors ingredient headers.
+  bool isHeader;
+
   EditableStep({
     required this.id,
     this.instruction = '',
     this.imagePath,
+    this.isHeader = false,
   });
 }
 
@@ -97,7 +102,11 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
   // separated by a blank line (\n\n). Empty trailing steps are dropped.
   String _serializeStepsToBulkText(List<EditableStep> steps) {
     return steps
-        .map((s) => s.instruction.trim())
+        .map((s) {
+          final t = s.instruction.trim();
+          if (t.isEmpty) return '';
+          return s.isHeader ? '# $t' : t;
+        })
         .where((s) => s.isNotEmpty)
         .join('\n\n');
   }
@@ -116,15 +125,20 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
     final now = DateTime.now().millisecondsSinceEpoch;
     return [
       for (var i = 0; i < blocks.length; i++)
-        EditableStep(
-          id: i < _bulkEditSnapshot.length
-              ? _bulkEditSnapshot[i].id
-              : 'step_${now}_$i',
-          instruction: blocks[i],
-          imagePath: i < _bulkEditSnapshot.length
-              ? _bulkEditSnapshot[i].imagePath
-              : null,
-        ),
+        () {
+          final raw = blocks[i];
+          final isHdr = raw.startsWith('# ');
+          return EditableStep(
+            id: i < _bulkEditSnapshot.length
+                ? _bulkEditSnapshot[i].id
+                : 'step_${now}_$i',
+            instruction: isHdr ? raw.substring(2).trim() : raw,
+            imagePath: isHdr
+                ? null
+                : (i < _bulkEditSnapshot.length ? _bulkEditSnapshot[i].imagePath : null),
+            isHeader: isHdr,
+          );
+        }(),
     ];
   }
 
@@ -193,6 +207,22 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getFocusNode(newStep.id).requestFocus();
+    });
+  }
+
+  void _addSectionHeader() {
+    final header = EditableStep(
+      id: 'shdr_${DateTime.now().millisecondsSinceEpoch}',
+      instruction: '',
+      isHeader: true,
+    );
+    setState(() {
+      _steps.add(header);
+    });
+    widget.onStepsChanged(_steps);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _getFocusNode(header.id).requestFocus();
     });
   }
 
@@ -342,10 +372,16 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
             itemBuilder: (context, index) {
               final step = _steps[index];
               final isSelected = _selectedStepIds.contains(step.id);
+              // Display number excludes section headers.
+              var stepNumber = 0;
+              for (var k = 0; k <= index; k++) {
+                if (!_steps[k].isHeader) stepNumber++;
+              }
 
               return _StepCard(
                 key: ValueKey(step.id),
                 index: index,
+                stepNumber: stepNumber,
                 step: step,
                 focusNode: _getFocusNode(step.id),
                 isPremium: widget.isPremium,
@@ -372,15 +408,27 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
 
         // Add step button (hidden during selection mode and bulk edit)
         if (!_isSelectionMode && !_bulkEditMode)
-          Center(
-            child: OutlinedButton.icon(
-              onPressed: _addStep,
-              icon: const Icon(Icons.add),
-              label: Text(l10n.addStep),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              OutlinedButton.icon(
+                onPressed: _addStep,
+                icon: const Icon(Icons.add),
+                label: Text(l10n.addStep),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                ),
               ),
-            ),
+              const SizedBox(width: 10),
+              OutlinedButton.icon(
+                onPressed: _addSectionHeader,
+                icon: const Icon(Icons.segment, size: 18),
+                label: Text(l10n.ingredientAddHeader),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                ),
+              ),
+            ],
           ),
 
         // Selection action bar
@@ -532,6 +580,7 @@ class _BulkStepsEditor extends StatelessWidget {
 
 class _StepCard extends StatefulWidget {
   final int index;
+  final int stepNumber;
   final EditableStep step;
   final FocusNode focusNode;
   final bool isPremium;
@@ -547,6 +596,7 @@ class _StepCard extends StatefulWidget {
   const _StepCard({
     super.key,
     required this.index,
+    required this.stepNumber,
     required this.step,
     required this.focusNode,
     required this.isPremium,
@@ -607,6 +657,9 @@ class _StepCardState extends State<_StepCard> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    if (step.isHeader) {
+      return _buildHeaderCard(context, theme);
+    }
     final hasImage = step.imagePath != null &&
         step.imagePath!.isNotEmpty &&
         FileExistsCache.exists(step.imagePath!);
@@ -713,7 +766,7 @@ class _StepCardState extends State<_StepCard> {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      '${index + 1}',
+                      '${widget.stepNumber}',
                       style: TextStyle(
                         color: isDark
                             ? Colors.white
@@ -752,6 +805,98 @@ class _StepCardState extends State<_StepCard> {
                 ),
 
                 // Right side: drag handle — 2-bar style
+                if (!isSelectionMode)
+                  ReorderableDragStartListener(
+                    index: index,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 4),
+                      child: Icon(
+                        Icons.drag_handle,
+                        color: theme.colorScheme.outline.withValues(alpha: 0.4),
+                        size: 22,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderCard(BuildContext context, ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: GestureDetector(
+        onLongPress: onLongPress,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.4)
+                : theme.colorScheme.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.primary.withValues(alpha: 0.35),
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            child: Row(
+              children: [
+                if (isSelectionMode)
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+                      border: Border.all(
+                        color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
+                        width: 2,
+                      ),
+                      shape: BoxShape.circle,
+                    ),
+                    child: isSelected
+                        ? const Icon(Icons.check, size: 16, color: Colors.white)
+                        : null,
+                  )
+                else
+                  Icon(Icons.segment, size: 20, color: theme.colorScheme.primary),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: AbsorbPointer(
+                    absorbing: isSelectionMode,
+                    child: TextField(
+                      focusNode: focusNode,
+                      controller: _controller,
+                      maxLines: null,
+                      minLines: 1,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: InputDecoration(
+                        hintText: l10n.ingredientHeader,
+                        hintStyle: theme.textTheme.titleSmall?.copyWith(
+                          color: theme.colorScheme.primary.withValues(alpha: 0.4),
+                          fontWeight: FontWeight.w700,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 4),
+                        isDense: true,
+                      ),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: theme.colorScheme.primary,
+                      ),
+                      onChanged: onTextChanged,
+                    ),
+                  ),
+                ),
                 if (!isSelectionMode)
                   ReorderableDragStartListener(
                     index: index,

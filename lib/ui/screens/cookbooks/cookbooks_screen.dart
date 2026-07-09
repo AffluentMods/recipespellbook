@@ -22,6 +22,41 @@ import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
 import '../../../utils/responsive_utils.dart';
 
+/// One person with access to a shared cookbook (owner or shared-with member).
+class _CookbookMember {
+  final String? name;
+  final String? avatarUrl;
+  const _CookbookMember({this.name, this.avatarUrl});
+  String get initial =>
+      (name != null && name!.trim().isNotEmpty) ? name!.trim()[0].toUpperCase() : '?';
+}
+
+/// Fetches ALL family shares in one call and maps each cookbook id → its
+/// members (owner + everyone it's shared with). Empty when signed out or with
+/// no family, so cookbooks that aren't shared simply show no avatars.
+final _cookbookMembersProvider =
+    FutureProvider<Map<String, List<_CookbookMember>>>((ref) async {
+  final shares = await FamilyService.instance.getAllShares();
+  final map = <String, List<_CookbookMember>>{};
+  final seen = <String, Set<String>>{};
+  void add(String cookbookId, String? name, String? avatarUrl) {
+    if ((name == null || name.isEmpty) && (avatarUrl == null || avatarUrl.isEmpty)) return;
+    final key = '${name ?? ''}|${avatarUrl ?? ''}';
+    if (!seen.putIfAbsent(cookbookId, () => <String>{}).add(key)) return;
+    map.putIfAbsent(cookbookId, () => []).add(_CookbookMember(name: name, avatarUrl: avatarUrl));
+  }
+
+  for (final g in shares.granted.where((s) => s.isCookbook)) {
+    add(g.resourceId, g.ownerName, g.ownerAvatarUrl);
+    add(g.resourceId, g.sharedWithName, g.sharedWithAvatarUrl);
+  }
+  for (final r in shares.received.where((s) => s.isCookbook)) {
+    add(r.resourceId, r.ownerName, r.ownerAvatarUrl);
+    add(r.resourceId, r.sharedWithName, r.sharedWithAvatarUrl);
+  }
+  return map;
+});
+
 class CookbooksScreen extends ConsumerStatefulWidget {
   const CookbooksScreen({super.key});
 
@@ -220,10 +255,14 @@ class _CookbookGrid extends ConsumerWidget {
             itemBuilder: (context, index) {
               final cookbook = cookbooks[index];
               final isSelected = cookbook.id == selectedId;
+              final members = (ref.watch(_cookbookMembersProvider).valueOrNull ??
+                      const <String, List<_CookbookMember>>{})[cookbook.id] ??
+                  const <_CookbookMember>[];
 
               return _CookbookCard(
                 cookbook: cookbook,
                 isSelected: isSelected,
+                members: members,
                 onTap: () => onCookbookSelected(cookbook.id),
                 onLongPress: (position) => _showContextMenu(context, ref, cookbook, position),
               );
@@ -723,13 +762,46 @@ class _CookbookCard extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
   final ValueChanged<Offset> onLongPress;
+  final List<_CookbookMember> members;
 
   const _CookbookCard({
     required this.cookbook,
     required this.isSelected,
     required this.onTap,
     required this.onLongPress,
+    this.members = const [],
   });
+
+  void _showMembers(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+              child: Text(cookbook.name,
+                  style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Text('People in this cookbook',
+                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(color: Theme.of(ctx).colorScheme.outline)),
+            ),
+            for (final m in members)
+              ListTile(
+                leading: _Avatar(member: m, size: 40),
+                title: Text(m.name ?? 'Member'),
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -772,6 +844,17 @@ class _CookbookCard extends StatelessWidget {
                 ),
               ),
             ),
+            // Member avatars — only when the cookbook is shared with others.
+            if (members.length > 1)
+              Positioned(
+                top: 8,
+                left: 8,
+                child: GestureDetector(
+                  onTap: () => _showMembers(context),
+                  child: _AvatarStack(members: members),
+                ),
+              ),
+
             // Name and count
             Positioned(
               left: 12,
@@ -1035,6 +1118,86 @@ class _MergeCookbooksSheetState extends State<_MergeCookbooksSheet> {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+/// A circular member avatar (photo or initial fallback).
+class _Avatar extends StatelessWidget {
+  final _CookbookMember member;
+  final double size;
+  final Color? borderColor;
+  const _Avatar({required this.member, this.size = 24, this.borderColor});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final hasImg = member.avatarUrl != null && member.avatarUrl!.isNotEmpty;
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: theme.colorScheme.primaryContainer,
+        border: Border.all(color: borderColor ?? theme.colorScheme.surface, width: 2),
+        image: hasImg
+            ? DecorationImage(image: NetworkImage(member.avatarUrl!), fit: BoxFit.cover)
+            : null,
+      ),
+      alignment: Alignment.center,
+      child: hasImg
+          ? null
+          : Text(
+              member.initial,
+              style: TextStyle(
+                fontSize: size * 0.42,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+            ),
+    );
+  }
+}
+
+/// Overlapping avatar row for a shared cookbook (shows up to 3 + a "+N" chip).
+class _AvatarStack extends StatelessWidget {
+  final List<_CookbookMember> members;
+  const _AvatarStack({required this.members});
+
+  @override
+  Widget build(BuildContext context) {
+    const size = 26.0;
+    const step = size * 0.62;
+    final show = members.take(3).toList();
+    final extra = members.length - show.length;
+    final slots = show.length + (extra > 0 ? 1 : 0);
+    return SizedBox(
+      width: size + (slots - 1) * step,
+      height: size,
+      child: Stack(
+        children: [
+          for (var i = 0; i < show.length; i++)
+            Positioned(
+              left: i * step,
+              child: _Avatar(member: show[i], size: size, borderColor: Colors.white),
+            ),
+          if (extra > 0)
+            Positioned(
+              left: show.length * step,
+              child: Container(
+                width: size,
+                height: size,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black.withValues(alpha: 0.6),
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                alignment: Alignment.center,
+                child: Text('+$extra',
+                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+              ),
+            ),
         ],
       ),
     );

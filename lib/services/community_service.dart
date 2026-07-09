@@ -250,14 +250,16 @@ class CommunityStep {
   final String instruction;
   final int? durationMinutes;
   final String? imagePath;
+  final String? notes;
 
-  const CommunityStep({required this.sortOrder, required this.instruction, this.durationMinutes, this.imagePath});
+  const CommunityStep({required this.sortOrder, required this.instruction, this.durationMinutes, this.imagePath, this.notes});
 
   factory CommunityStep.fromJson(Map<String, dynamic> json) => CommunityStep(
     sortOrder: json['sortOrder'] as int? ?? 0,
     instruction: json['instruction'] as String? ?? '',
     durationMinutes: json['durationMinutes'] as int?,
     imagePath: json['imagePath'] as String?,
+    notes: json['notes'] as String?,
   );
 }
 

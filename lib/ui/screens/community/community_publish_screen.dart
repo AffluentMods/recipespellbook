@@ -619,6 +619,7 @@ class _CommunityPublishScreenState extends ConsumerState<CommunityPublishScreen>
             'sortOrder': s.sortOrder,
             'instruction': s.instruction,
             'durationMinutes': s.durationMinutes,
+            'notes': s.notes,
             'imagePath': s.imagePath, // Will be replaced with server path
           }).toList(),
           'tags': tags.map((t) => t.name).toList(),

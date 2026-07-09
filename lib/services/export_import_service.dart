@@ -169,6 +169,7 @@ class ExportImportService {
         stepMaps.add({
           'id': s.id, 'sortOrder': s.sortOrder,
           'instruction': s.instruction, 'durationMinutes': s.durationMinutes,
+          if (s.notes != null) 'notes': s.notes,
           if (embedImages) 'imageBase64': await _encodeImage(s.imagePath)
           else 'localImagePath': s.imagePath,
         });
@@ -1205,6 +1206,7 @@ class ExportImportService {
               sortOrder: step['sortOrder'] as int? ?? 0,
               instruction: step['instruction'] as String,
               durationMinutes: Value(step['durationMinutes'] as int?),
+              notes: Value(step['notes'] as String?),
             ));
           }
 

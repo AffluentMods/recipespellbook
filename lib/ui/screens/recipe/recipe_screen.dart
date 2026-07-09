@@ -11,7 +11,7 @@ import '../../../data/app_enums.dart';
 import '../../../data/ingredient_images.dart';
 import '../../../data/localized_units.dart';
 import '../../../data/nutrition_data.dart';
-import '../../../utils/ingredient_utils.dart' show parseAmount, formatScaledWithUnit, scaleInstructionText, scaleQuantityString;
+import '../../../utils/ingredient_utils.dart' show scaleInstructionText, scaleQuantityString;
 import '../../../utils/responsive_utils.dart';
 import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
@@ -27,7 +27,6 @@ import '../../widgets/app_snackbar.dart';
 import '../../widgets/nutrition_calculation_sheet.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_share_sheet.dart';
-import '../../widgets/hint_banner.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/recipe_tags_display.dart';
 import '../../widgets/sub_recipe_selection_sheet.dart';
@@ -36,6 +35,7 @@ import '../../widgets/sub_recipe_selection_sheet.dart';
 import '../settings/allergy_settings_screen.dart' show dismissedAllergyWarningsProvider;
 import '../settings/nutrition_settings_screen.dart';
 import '../community/community_publish_screen.dart';
+import 'recipe_enhance_screen.dart';
 
 // ============ SESSION DISMISSED WARNINGS (temporary) ============
 
@@ -171,7 +171,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
 
     // Apply measurement system preference as default conversion
     final measurementPref = ref.read(settingsProvider).measurementSystem;
@@ -234,7 +234,8 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   }
 
   void _showAddToMealPlanSheet() {
-    showAddToMealPlanSheet(context, ref, widget.recipeId, _recipe?.title ?? '');
+    showAddToMealPlanSheet(context, ref, widget.recipeId, _recipe?.title ?? '',
+        courseId: _recipe?.courseId);
   }
 
   void _showAddToShoppingSheet() {
@@ -309,14 +310,6 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
       .map((i) => i.name)
       .toList();
 
-  void _toggleLayout() {
-    final current = ref.read(settingsProvider).recipeLayoutMode;
-    final newMode = current == RecipeLayoutMode.tabbed
-        ? RecipeLayoutMode.stacked
-        : RecipeLayoutMode.tabbed;
-    ref.read(settingsProvider.notifier).setRecipeLayoutMode(newMode);
-  }
-
   Future<void> _printRecipe() async {
     if (_recipe == null) return;
     final l10n = AppLocalizations.of(context)!;
@@ -344,8 +337,6 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final settings = ref.watch(settingsProvider);
-    final useTabbed = settings.recipeLayoutMode == RecipeLayoutMode.tabbed;
 
     if (_isLoading || _recipe == null) {
       return Scaffold(
@@ -355,215 +346,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     }
 
     return Scaffold(
-      body: useTabbed
-          ? _buildTabbedLayout(theme, l10n)
-          : _buildStackedLayout(theme, l10n),
-    );
-  }
-
-  /// Header content shared by both mobile and desktop stacked layouts.
-  List<Widget> _buildRecipeHeader(ThemeData theme, AppLocalizations l10n) {
-    return [
-      // Title
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Text(
-              _recipe!.title,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          _FavoriteButton(isFavorite: _recipe!.isFavorite, onToggle: _toggleFavorite),
-        ],
-      ),
-      // Star rating
-      if (_recipe!.rating != null && _recipe!.rating! > 0) ...[
-        const SizedBox(height: 8),
-        RecipeRating(rating: _recipe!.rating!),
-      ],
-      // Tags display
-      const SizedBox(height: 12),
-      RecipeTagsDisplay(recipeId: widget.recipeId),
-
-      if (_recipe!.description != null && _recipe!.description!.isNotEmpty) ...[
-        const SizedBox(height: 12),
-        Text(_recipe!.description!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-      ],
-
-      const SizedBox(height: 16),
-
-      // 3 Simple Action Buttons (Meal Plan, Groceries, Share)
-      _ModernQuickActionsRow(
-        onAddToMealPlan: _showAddToMealPlanSheet,
-        onAddToShopping: _showAddToShoppingSheet,
-        onShare: _showShareSheet,
-      ),
-      const SizedBox(height: 20),
-
-      // Recipe meta info (times, servings) — hidden if all empty
-      if (_hasMetaInfo(_recipe!))
-        _RecipeMetaInfoCard(recipe: _recipe!, scaleFactor: _scaleFactor),
-
-      // Separate Scale & Convert buttons
-      const SizedBox(height: 16),
-      _ModernScaleConvertButtons(
-        currentScale: _scaleFactor,
-        servings: _recipe!.servings,
-        onScaleChanged: (scale) => setState(() => _scaleFactor = scale),
-        unitConversion: _unitConversion,
-        onConversionChanged: (mode) => setState(() => _unitConversion = mode),
-      ),
-
-      // Dismissible Allergy warning banner with improved UX
-      const SizedBox(height: 16),
-      _ImprovedAllergyWarning(
-        recipeId: widget.recipeId,
-        ingredientTexts: _ingredients.map((i) => i.name).toList(),
-      ),
-    ];
-  }
-
-  Widget _buildStackedLayout(ThemeData theme, AppLocalizations l10n) {
-    // On wide desktop (full-screen, not detail pane), show ingredients
-    // and instructions side-by-side for a proper desktop recipe experience.
-    final isWideDesktop = Responsive.isDesktopLayout(context) && !widget.isDetailPane;
-
-    return CustomScrollView(
-      slivers: [
-        _RecipeAppBar(
-          recipe: _recipe!,
-          ref: ref,
-          onEdit: _navigateToEdit,
-          onReload: _loadRecipe,
-          onPrint: _printRecipe,
-          onShare: _showShareSheet,
-          isTabbed: false,
-          isDetailPane: widget.isDetailPane,
-          onClose: widget.onClose,
-          onToggleLayout: _toggleLayout,
-          currentScale: _scaleFactor,
-        ),
-        // Contextual hint banner for recipe screen
-        const SliverToBoxAdapter(child: HintBanner(screenName: 'recipe')),
-        SliverToBoxAdapter(
-          child: Center(child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: isWideDesktop ? 1100 : 800),
-            child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ..._buildRecipeHeader(theme, l10n),
-                const SizedBox(height: 24),
-
-                // Wrap recipe content in SelectionArea for desktop text selection
-                SelectionArea(child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                // Desktop: side-by-side layout for ingredients + instructions
-                if (isWideDesktop) ...[
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Left column — Ingredients
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _SectionHeader(title: l10n.ingredientsTitle, trailing: _scaleFactor != 1.0 ? Text('${_scaleFactor}x', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary)) : null),
-                            const SizedBox(height: 12),
-                            _CollapsibleIngredientList(ingredients: _sortedIngredients, recipeId: widget.recipeId, scaleFactor: _scaleFactor, unitConversion: _unitConversion, ingredientLinksMap: _ingredientLinksMap),
-                            const SizedBox(height: 16),
-                            _LargeAddToShoppingButton(onTap: _showAddToShoppingSheet),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 32),
-                      // Right column — Instructions
-                      Expanded(
-                        flex: 3,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _SectionHeader(title: l10n.instructionsTitle),
-                            const SizedBox(height: 12),
-                            ..._steps.asMap().entries.map((entry) => _InstructionStep(
-                              stepNumber: entry.key + 1,
-                              step: entry.value,
-                              scaleFactor: _scaleFactor,
-                              ingredientNames: _ingredientNamesForScaling,
-                            )),
-                            if (_recipe!.notes != null && _recipe!.notes!.isNotEmpty) ...[
-                              const SizedBox(height: 32),
-                              _SectionHeader(title: l10n.recipeFieldNotes),
-                              const SizedBox(height: 12),
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)),
-                                child: Text(_recipe!.notes!, style: theme.textTheme.bodyMedium),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ] else ...[
-                  // Mobile/tablet: original vertical layout
-                  _SectionHeader(title: l10n.ingredientsTitle, trailing: _scaleFactor != 1.0 ? Text('${_scaleFactor}x', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary)) : null),
-                  const SizedBox(height: 12),
-                  _CollapsibleIngredientList(ingredients: _sortedIngredients, recipeId: widget.recipeId, scaleFactor: _scaleFactor, unitConversion: _unitConversion, ingredientLinksMap: _ingredientLinksMap),
-
-                  const SizedBox(height: 16),
-                  _LargeAddToShoppingButton(onTap: _showAddToShoppingSheet),
-
-                  const SizedBox(height: 32),
-                  _SectionHeader(title: l10n.instructionsTitle),
-                  const SizedBox(height: 12),
-                  ..._steps.asMap().entries.map((entry) => _InstructionStep(
-                    stepNumber: entry.key + 1,
-                    step: entry.value,
-                    scaleFactor: _scaleFactor,
-                    ingredientNames: _ingredientNamesForScaling,
-                  )),
-                  if (_recipe!.notes != null && _recipe!.notes!.isNotEmpty) ...[
-                    const SizedBox(height: 32),
-                    _SectionHeader(title: l10n.recipeFieldNotes),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)),
-                      child: Text(_recipe!.notes!, style: theme.textTheme.bodyMedium),
-                    ),
-                  ],
-                ],
-                // Nutrition section — always full width below
-                const SizedBox(height: 32),
-                _SectionHeader(title: l10n.nutritionTitle),
-                const SizedBox(height: 12),
-                NutritionWidget(
-                  nutrition: _nutrition,
-                  scaleFactor: _scaleFactor,
-                  servings: _recipe!.servings,
-                  chartStyle: ref.watch(settingsProvider).nutritionChartStyle,
-                  palette: ref.watch(settingsProvider).nutritionPalette,
-                  enabledNutrients: ref.watch(settingsProvider).enabledNutrients,
-                  onEmptyTap: _showNutritionCalculation,
-                ),
-                  ],
-                )),
-                const SizedBox(height: 100),
-              ],
-            ),
-          ))),
-        ),
-      ],
+      body: _buildTabbedLayout(theme, l10n),
     );
   }
 
@@ -577,10 +360,8 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           onReload: _loadRecipe,
           onPrint: _printRecipe,
           onShare: _showShareSheet,
-          isTabbed: true,
           isDetailPane: widget.isDetailPane,
           onClose: widget.onClose,
-          onToggleLayout: _toggleLayout,
           currentScale: _scaleFactor,
         ),
         SliverToBoxAdapter(
@@ -616,23 +397,20 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   Text(_recipe!.description!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 ],
 
-                // Quick actions
                 const SizedBox(height: 16),
-                _ModernQuickActionsRow(
-                  onAddToMealPlan: _showAddToMealPlanSheet,
-                  onAddToShopping: _showAddToShoppingSheet,
-                  onShare: _showShareSheet,
-                ),
-                const SizedBox(height: 20),
-                if (_hasMetaInfo(_recipe!))
+                if (_hasMetaInfo(_recipe!)) ...[
                   _RecipeMetaInfoCard(recipe: _recipe!, scaleFactor: _scaleFactor),
-                const SizedBox(height: 16),
-                _ModernScaleConvertButtons(
+                  const SizedBox(height: 16),
+                ],
+                _RecipeActionBar(
                   currentScale: _scaleFactor,
                   servings: _recipe!.servings,
                   onScaleChanged: (scale) => setState(() => _scaleFactor = scale),
                   unitConversion: _unitConversion,
                   onConversionChanged: (mode) => setState(() => _unitConversion = mode),
+                  onAddToMealPlan: _showAddToMealPlanSheet,
+                  onAddToShopping: _showAddToShoppingSheet,
+                  onShare: _showShareSheet,
                 ),
                 const SizedBox(height: 16),
                 _ImprovedAllergyWarning(
@@ -654,13 +432,25 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
             delegate: _SliverTabBarDelegate(
               TabBar(
                 controller: _tabController,
+                indicator: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                indicatorSize: TabBarIndicatorSize.tab,
+                indicatorPadding: const EdgeInsets.all(4),
+                dividerColor: Colors.transparent,
+                labelColor: theme.colorScheme.onPrimary,
+                unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
+                labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                splashBorderRadius: BorderRadius.circular(9),
                 tabs: [
-                  Tab(text: l10n.nutritionTitle),
                   Tab(text: l10n.ingredientsTitle),
                   Tab(text: l10n.instructionsTitle),
                 ],
               ),
               theme.colorScheme.surface,
+              theme.colorScheme.surfaceContainerHighest,
             ),
           ),
         ),
@@ -668,49 +458,63 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
       body: TabBarView(
         controller: _tabController,
         children: [
-          // Nutrition tab (swipe left from center). Builder gives a context
-          // under the NestedScrollView body so the overlap handle resolves.
-          Builder(
-            builder: (context) => CustomScrollView(
-              key: const PageStorageKey('nutrition_tab'),
-              slivers: [
-                SliverOverlapInjector(
-                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
-                SliverPadding(
-                  padding: const EdgeInsets.all(16),
-                  sliver: SliverToBoxAdapter(
-                    child: NutritionWidget(
-                      nutrition: _nutrition,
-                      scaleFactor: _scaleFactor,
-                      servings: _recipe!.servings,
-                      chartStyle: ref.watch(settingsProvider).nutritionChartStyle,
-                      palette: ref.watch(settingsProvider).nutritionPalette,
-                      enabledNutrients: ref.watch(settingsProvider).enabledNutrients,
-                      onEmptyTap: _showNutritionCalculation,
-                    ),
+          // Ingredients tab (starts here) — nutrition now lives at the bottom.
+          _IngredientsTab(
+            ingredients: _sortedIngredients,
+            recipeId: widget.recipeId,
+            scaleFactor: _scaleFactor,
+            l10n: l10n,
+            onAddToShopping: _showAddToShoppingSheet,
+            unitConversion: _unitConversion,
+            ingredientLinksMap: _ingredientLinksMap,
+            footer: Padding(
+              padding: const EdgeInsets.only(top: 28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SectionHeader(title: l10n.nutritionTitle),
+                  const SizedBox(height: 12),
+                  NutritionWidget(
+                    nutrition: _nutrition,
+                    scaleFactor: _scaleFactor,
+                    servings: _recipe!.servings,
+                    chartStyle: ref.watch(settingsProvider).nutritionChartStyle,
+                    palette: ref.watch(settingsProvider).nutritionPalette,
+                    enabledNutrients: ref.watch(settingsProvider).enabledNutrients,
+                    onEmptyTap: _showNutritionCalculation,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-          // Ingredients tab (center — starts here)
-          _IngredientsTab(ingredients: _sortedIngredients, recipeId: widget.recipeId, scaleFactor: _scaleFactor, l10n: l10n, onAddToShopping: _showAddToShoppingSheet, unitConversion: _unitConversion, ingredientLinksMap: _ingredientLinksMap),
-          // Instructions tab (swipe right from center)
-          _InstructionsTab(steps: _steps, notes: _recipe!.notes, l10n: l10n, scaleFactor: _scaleFactor, ingredientNames: _ingredientNamesForScaling),
+          // Instructions tab
+          _InstructionsTab(steps: _steps, recipeId: widget.recipeId, notes: _recipe!.notes, l10n: l10n, scaleFactor: _scaleFactor, ingredientNames: _ingredientNamesForScaling),
         ],
       ),
     );
   }
 }
 
-// ============ MODERN 3-BUTTON QUICK ACTIONS ============
+// ============ RECIPE ACTION BAR ============
 
-class _ModernQuickActionsRow extends StatelessWidget {
+/// The hero action area: a servings stepper pill (− N servings +) and a Share
+/// pill on top, with Meal plan / Groceries / Convert beneath.
+class _RecipeActionBar extends StatelessWidget {
+  final double currentScale;
+  final String? servings;
+  final ValueChanged<double> onScaleChanged;
+  final _UnitConversion unitConversion;
+  final ValueChanged<_UnitConversion> onConversionChanged;
   final VoidCallback onAddToMealPlan;
   final VoidCallback onAddToShopping;
   final VoidCallback onShare;
 
-  const _ModernQuickActionsRow({
+  const _RecipeActionBar({
+    required this.currentScale,
+    required this.servings,
+    required this.onScaleChanged,
+    required this.unitConversion,
+    required this.onConversionChanged,
     required this.onAddToMealPlan,
     required this.onAddToShopping,
     required this.onShare,
@@ -719,33 +523,275 @@ class _ModernQuickActionsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: _ModernActionButton(
-            icon: Icons.calendar_month_outlined,
-            label: l10n.mealPlanButton,
-            onTap: onAddToMealPlan,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: _ServingStepperPill(
+                currentScale: currentScale,
+                servings: servings,
+                onScaleChanged: onScaleChanged,
+                onOpenSheet: () => _showScaleSheet(context),
+              ),
+            ),
+            const SizedBox(width: 12),
+            _SharePill(onTap: onShare),
+          ],
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _ModernActionButton(
-            icon: Icons.add_shopping_cart_rounded,
-            label: l10n.groceriesButton,
-            onTap: onAddToShopping,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _ModernActionButton(
-            icon: Icons.share_outlined,
-            label: l10n.actionShare,
-            onTap: onShare,
-          ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _ModernActionButton(
+                icon: Icons.calendar_month_outlined,
+                label: l10n.mealPlanButton,
+                onTap: onAddToMealPlan,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _ModernActionButton(
+                icon: Icons.add_shopping_cart_rounded,
+                label: l10n.groceriesButton,
+                onTap: onAddToShopping,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _ModernActionButton(
+                icon: Icons.swap_horiz_rounded,
+                label: l10n.convertUnitsButton,
+                onTap: () => _showConvertDialog(context),
+                active: unitConversion != _UnitConversion.none,
+              ),
+            ),
+          ],
         ),
       ],
+    );
+  }
+
+  void _showScaleSheet(BuildContext context) {
+    Responsive.showAdaptiveSheet(
+      context,
+      builder: (ctx) => _ScaleSheet(
+        initialScale: currentScale,
+        servings: servings,
+        onScaleChanged: onScaleChanged,
+      ),
+    );
+  }
+
+  void _showConvertDialog(BuildContext context) {
+    final theme = Theme.of(context);
+    final units = LocalizedUnits.of(context);
+    Responsive.showAdaptiveSheet(
+      context,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(units.convertUnitsTitle, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: Icon(Icons.straighten, color: unitConversion == _UnitConversion.toImperial ? theme.colorScheme.tertiary : null),
+              title: Text(units.convertMetricToImperial),
+              subtitle: Text(units.convertMetricToImperialDesc),
+              trailing: unitConversion == _UnitConversion.toImperial ? Icon(Icons.check_circle, color: theme.colorScheme.tertiary) : null,
+              onTap: () {
+                Navigator.pop(ctx);
+                onConversionChanged(unitConversion == _UnitConversion.toImperial ? _UnitConversion.none : _UnitConversion.toImperial);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.square_foot, color: unitConversion == _UnitConversion.toMetric ? theme.colorScheme.tertiary : null),
+              title: Text(units.convertImperialToMetric),
+              subtitle: Text(units.convertImperialToMetricDesc),
+              trailing: unitConversion == _UnitConversion.toMetric ? Icon(Icons.check_circle, color: theme.colorScheme.tertiary) : null,
+              onTap: () {
+                Navigator.pop(ctx);
+                onConversionChanged(unitConversion == _UnitConversion.toMetric ? _UnitConversion.none : _UnitConversion.toMetric);
+              },
+            ),
+            if (unitConversion != _UnitConversion.none)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    onConversionChanged(_UnitConversion.none);
+                  },
+                  child: Text(units.convertResetToOriginal),
+                ),
+              ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A servings stepper: − N servings +. The − / + change the scale so the
+/// servings step by one; tapping the middle opens the full scale sheet
+/// (presets + custom). Falls back to a scale (×) ladder when the recipe has no
+/// numeric servings.
+class _ServingStepperPill extends StatelessWidget {
+  final double currentScale;
+  final String? servings;
+  final ValueChanged<double> onScaleChanged;
+  final VoidCallback onOpenSheet;
+  const _ServingStepperPill({
+    required this.currentScale,
+    required this.servings,
+    required this.onScaleChanged,
+    required this.onOpenSheet,
+  });
+
+  static const _ladder = [0.25, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0];
+
+  double? _baseServings() {
+    if (servings == null) return null;
+    final m = RegExp(r'(\d+\.?\d*)').firstMatch(servings!);
+    if (m == null) return null;
+    final v = double.tryParse(m.group(1)!);
+    return (v != null && v > 0) ? v : null;
+  }
+
+  void _step(int dir) {
+    final base = _baseServings();
+    if (base != null) {
+      var target = (base * currentScale).round() + dir;
+      if (target < 1) target = 1;
+      onScaleChanged(target / base);
+    } else {
+      var idx = 0;
+      var best = double.infinity;
+      for (var i = 0; i < _ladder.length; i++) {
+        final d = (_ladder[i] - currentScale).abs();
+        if (d < best) {
+          best = d;
+          idx = i;
+        }
+      }
+      idx = (idx + dir).clamp(0, _ladder.length - 1);
+      onScaleChanged(_ladder[idx]);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final base = _baseServings();
+    final scaled = currentScale != 1.0;
+
+    String label;
+    if (base != null) {
+      final s = base * currentScale;
+      final sStr = s == s.roundToDouble() ? s.round().toString() : s.toStringAsFixed(1);
+      label = '$sStr ${l10n.servingsUnit}';
+    } else {
+      label = scaled
+          ? (currentScale == currentScale.roundToDouble()
+              ? '${currentScale.round()}×'
+              : '$currentScale×')
+          : l10n.scaleOriginalLabel;
+    }
+
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        color: scaled
+            ? theme.colorScheme.tertiaryContainer.withValues(alpha: 0.4)
+            : theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(14),
+        border: scaled
+            ? Border.all(color: theme.colorScheme.tertiary.withValues(alpha: 0.55))
+            : null,
+      ),
+      child: Row(
+        children: [
+          _stepButton(theme, Icons.remove_rounded, () => _step(-1)),
+          Expanded(
+            child: InkWell(
+              onTap: onOpenSheet,
+              borderRadius: BorderRadius.circular(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.restaurant_menu_rounded,
+                      size: 16, color: theme.colorScheme.onSurfaceVariant),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          _stepButton(theme, Icons.add_rounded, () => _step(1)),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepButton(ThemeData theme, IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Icon(icon, size: 20, color: theme.colorScheme.primary),
+      ),
+    );
+  }
+}
+
+class _SharePill extends StatelessWidget {
+  final VoidCallback onTap;
+  const _SharePill({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    return SizedBox(
+      height: 48,
+      child: FilledButton.icon(
+        onPressed: onTap,
+        icon: const Icon(Icons.ios_share_rounded, size: 18),
+        label: Text(l10n.actionShare),
+        style: FilledButton.styleFrom(
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: theme.colorScheme.onPrimary,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+        ),
+      ),
     );
   }
 }
@@ -754,29 +800,40 @@ class _ModernActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool active;
 
   const _ModernActionButton({
     required this.icon,
     required this.label,
     required this.onTap,
+    this.active = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final accent = active ? theme.colorScheme.tertiary : theme.colorScheme.primary;
 
     return Material(
-      color: theme.colorScheme.surfaceContainerHighest,
+      color: active
+          ? theme.colorScheme.tertiaryContainer.withValues(alpha: 0.4)
+          : theme.colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
+        child: Container(
+          decoration: active
+              ? BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: theme.colorScheme.tertiary.withValues(alpha: 0.55)),
+                )
+              : null,
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 22, color: theme.colorScheme.primary),
+              Icon(icon, size: 22, color: accent),
               const SizedBox(height: 4),
               Text(
                 label,
@@ -868,197 +925,208 @@ class _RecipeMetaInfoCard extends StatelessWidget {
   }
 }
 
-// ============ MODERN SCALE & CONVERT BUTTONS ============
-
-class _ModernScaleConvertButtons extends StatelessWidget {
-  final double currentScale;
+/// Bottom sheet for scaling a recipe. A slider on top gives fine control;
+/// quick-multiplier chips beneath (0.5×, 1×, 1.5×, 2×, 3×, Custom) jump to a
+/// preset. Applies live as the user drags, so the recipe rescales underneath.
+class _ScaleSheet extends StatefulWidget {
+  final double initialScale;
   final String? servings;
   final ValueChanged<double> onScaleChanged;
-  final _UnitConversion unitConversion;
-  final ValueChanged<_UnitConversion> onConversionChanged;
 
-  const _ModernScaleConvertButtons({
-    required this.currentScale,
-    this.servings,
+  const _ScaleSheet({
+    required this.initialScale,
+    required this.servings,
     required this.onScaleChanged,
-    this.unitConversion = _UnitConversion.none,
-    required this.onConversionChanged,
   });
+
+  @override
+  State<_ScaleSheet> createState() => _ScaleSheetState();
+}
+
+class _ScaleSheetState extends State<_ScaleSheet> {
+  static const double _min = 0.25;
+  static const double _max = 8.0;
+  static const _quick = [0.5, 1.0, 1.5, 2.0, 3.0];
+
+  late double _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _scale = widget.initialScale > 0 ? widget.initialScale : 1.0;
+  }
+
+  double? _baseServings() {
+    if (widget.servings == null) return null;
+    final m = RegExp(r'(\d+\.?\d*)').firstMatch(widget.servings!);
+    if (m == null) return null;
+    final v = double.tryParse(m.group(1)!);
+    return (v != null && v > 0) ? v : null;
+  }
+
+  /// Trim trailing zeros: 1.50 → "1.5", 2.00 → "2", 1.25 → "1.25".
+  String _trim(double v) {
+    var s = v.toStringAsFixed(2);
+    if (s.contains('.')) {
+      s = s.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    }
+    return s;
+  }
+
+  String _fmtScale(double s) => '${_trim(s)}×';
+
+  void _apply(double s) {
+    final clamped = double.parse(s.clamp(_min, 100.0).toStringAsFixed(2));
+    setState(() => _scale = clamped);
+    widget.onScaleChanged(clamped);
+  }
+
+  Future<void> _promptCustom() async {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController(text: _trim(_scale));
+    double? parse(String v) {
+      final s = double.tryParse(v.trim());
+      return (s != null && s > 0 && s <= 100) ? s : null;
+    }
+
+    final result = await showDialog<double>(
+      context: context,
+      builder: (dctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(l10n.scaleCustom),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            hintText: 'e.g. 2.5',
+            suffixText: '×',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          onSubmitted: (v) => Navigator.pop(dctx, parse(v)),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dctx), child: Text(l10n.actionCancel)),
+          FilledButton(
+            onPressed: () => Navigator.pop(dctx, parse(controller.text)),
+            child: Text(l10n.actionDone),
+          ),
+        ],
+      ),
+    );
+    if (result != null) _apply(result);
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    final base = _baseServings();
+    final scaled = _scale != 1.0;
+    final accent = theme.colorScheme.tertiary;
 
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: () => _showScaleDialog(context),
-            icon: const Icon(Icons.scale, size: 18),
-            label: Text(currentScale == 1.0 ? l10n.scaleRecipeButton : '${currentScale}x'),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              side: BorderSide(
-                color: currentScale != 1.0
-                    ? theme.colorScheme.tertiary
-                    : theme.colorScheme.outline.withValues(alpha: 0.5),
+    String readout;
+    if (base != null) {
+      final s = base * _scale;
+      final str = s == s.roundToDouble() ? s.round().toString() : s.toStringAsFixed(1);
+      readout = '$str ${l10n.servingsUnit}';
+    } else {
+      readout = scaled ? _fmtScale(_scale) : l10n.scaleOriginalLabel;
+    }
+
+    final isCustom = !_quick.any((q) => (_scale - q).abs() < 0.001);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.outlineVariant,
+                borderRadius: BorderRadius.circular(2),
               ),
-              foregroundColor: currentScale != 1.0
-                  ? theme.colorScheme.tertiary
-                  : theme.colorScheme.onSurface,
             ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: () => _showConvertDialog(context),
-            icon: const Icon(Icons.swap_horiz, size: 18),
-            label: Text(l10n.convertUnitsButton),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              side: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showScaleDialog(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final presets = [0.5, 1.0, 1.5, 2.0, 3.0, 4.0];
-    final controller = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 18),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(l10n.scaleRecipe, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
+              Text(l10n.scaleRecipe,
+                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+              const Spacer(),
               Text(
-                servings != null ? l10n.scaleOriginal(servings!) : l10n.scaleAdjustQuantities,
-                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
-              ),
-              const SizedBox(height: 20),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: presets.map((preset) => _ScaleChip(
-                  label: preset == 1.0 ? l10n.scaleOriginalLabel : '${preset}x',
-                  isSelected: currentScale == preset,
-                  onTap: () {
-                    onScaleChanged(preset);
-                    Navigator.pop(ctx);
-                  },
-                )).toList(),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: controller,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  labelText: l10n.scaleCustom,
-                  hintText: 'e.g., 2.5',
-                  suffixText: 'x',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                readout,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: scaled ? accent : theme.colorScheme.onSurface,
                 ),
-                onSubmitted: (value) {
-                  final scale = double.tryParse(value);
-                  if (scale != null && scale > 0 && scale <= 100) {
-                    onScaleChanged(scale);
-                    Navigator.pop(ctx);
-                  }
-                },
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    child: Text(l10n.actionCancel),
-                  ),
-                ],
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  void _showConvertDialog(BuildContext context) {
-    final theme = Theme.of(context);
-    final units = LocalizedUnits.of(context);
-    Responsive.showAdaptiveSheet(
-      context,
-      builder: (ctx) => Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+          const SizedBox(height: 2),
+          Text(
+            base != null ? '${_fmtScale(_scale)} · ${l10n.scaleOriginal(widget.servings!)}' : l10n.scaleAdjustQuantities,
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+          ),
+          const SizedBox(height: 8),
+          // Slider (fine control). The max grows to fit an out-of-range custom
+          // value so the thumb, label and state never disagree.
+          Builder(builder: (context) {
+            final sliderMax = _scale > _max ? _scale : _max;
+            return SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                activeTrackColor: accent,
+                thumbColor: accent,
+                overlayColor: accent.withValues(alpha: 0.15),
+                inactiveTrackColor: theme.colorScheme.surfaceContainerHighest,
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(units.convertUnitsTitle, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: Icon(Icons.straighten, color: unitConversion == _UnitConversion.toImperial ? theme.colorScheme.tertiary : null),
-              title: Text(units.convertMetricToImperial),
-              subtitle: Text(units.convertMetricToImperialDesc),
-              trailing: unitConversion == _UnitConversion.toImperial ? Icon(Icons.check_circle, color: theme.colorScheme.tertiary) : null,
-              onTap: () {
-                Navigator.pop(ctx);
-                onConversionChanged(unitConversion == _UnitConversion.toImperial ? _UnitConversion.none : _UnitConversion.toImperial);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.square_foot, color: unitConversion == _UnitConversion.toMetric ? theme.colorScheme.tertiary : null),
-              title: Text(units.convertImperialToMetric),
-              subtitle: Text(units.convertImperialToMetricDesc),
-              trailing: unitConversion == _UnitConversion.toMetric ? Icon(Icons.check_circle, color: theme.colorScheme.tertiary) : null,
-              onTap: () {
-                Navigator.pop(ctx);
-                onConversionChanged(unitConversion == _UnitConversion.toMetric ? _UnitConversion.none : _UnitConversion.toMetric);
-              },
-            ),
-            if (unitConversion != _UnitConversion.none)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    onConversionChanged(_UnitConversion.none);
-                  },
-                  child: Text(units.convertResetToOriginal),
-                ),
+              child: Slider(
+                value: _scale.clamp(_min, sliderMax),
+                min: _min,
+                max: sliderMax,
+                divisions: ((sliderMax - _min) / 0.25).round().clamp(1, 400),
+                label: _fmtScale(_scale),
+                onChanged: _apply,
               ),
-            const SizedBox(height: 16),
-          ],
-        ),
+            );
+          }),
+          const SizedBox(height: 4),
+          // Quick presets + custom
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final q in _quick)
+                _ScaleChip(
+                  label: q == 1.0 ? l10n.scaleOriginalLabel : _fmtScale(q),
+                  isSelected: (_scale - q).abs() < 0.001,
+                  onTap: () => _apply(q),
+                ),
+              _ScaleChip(
+                label: l10n.scaleCustom,
+                isSelected: isCustom,
+                onTap: _promptCustom,
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.actionDone),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1312,12 +1380,12 @@ class _ImprovedAllergyWarningState extends ConsumerState<_ImprovedAllergyWarning
   }
 }
 
-// ============ COLLAPSIBLE INGREDIENT SECTIONS ============
+// ============ SESSION CHECK / COLLAPSE STATE ============
 
-/// Session-only collapse state for ingredient section headers, keyed by
-/// recipeId → set of collapsed header ids. Held in memory (a plain Riverpod
-/// provider, no persistence) so it survives leaving and re-opening a recipe
-/// but is forgotten when the app is closed.
+/// Session-only collapse state for section headers, keyed by recipeId → set of
+/// collapsed header ids. Held in memory (a plain Riverpod provider, no
+/// persistence) so it survives leaving and re-opening a recipe but is
+/// forgotten when the app is closed.
 class _CollapsedSectionsNotifier extends StateNotifier<Map<String, Set<String>>> {
   _CollapsedSectionsNotifier() : super(const {});
 
@@ -1338,9 +1406,33 @@ final _collapsedSectionsProvider =
     StateNotifierProvider<_CollapsedSectionsNotifier, Map<String, Set<String>>>(
         (ref) => _CollapsedSectionsNotifier());
 
-/// Renders an ingredient list where each section header can be tapped to
-/// collapse/expand the ingredients beneath it. Ingredients before the first
-/// header (no section) always show.
+/// Session-only "checked off" state for ingredient and step rows, keyed by
+/// recipeId → set of item ids. Same lifetime as the collapse state: persists
+/// while you leave and re-open the recipe, cleared when the app closes.
+class _CheckedItemsNotifier extends StateNotifier<Map<String, Set<String>>> {
+  _CheckedItemsNotifier() : super(const {});
+
+  void toggle(String recipeId, String itemId) {
+    final next = {...state};
+    final set = {...?next[recipeId]};
+    if (!set.remove(itemId)) set.add(itemId);
+    if (set.isEmpty) {
+      next.remove(recipeId);
+    } else {
+      next[recipeId] = set;
+    }
+    state = next;
+  }
+}
+
+final _checkedItemsProvider =
+    StateNotifierProvider<_CheckedItemsNotifier, Map<String, Set<String>>>(
+        (ref) => _CheckedItemsNotifier());
+
+/// Renders ingredients grouped into boxed sections by their `__header__`
+/// dividers. Each titled section can be collapsed; each ingredient row can be
+/// checked off (strike-through). Ingredients before the first header form a
+/// leading untitled box.
 class _CollapsibleIngredientList extends ConsumerWidget {
   final List<Ingredient> ingredients;
   final String recipeId;
@@ -1358,101 +1450,143 @@ class _CollapsibleIngredientList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final collapsed =
-        ref.watch(_collapsedSectionsProvider)[recipeId] ?? const <String>{};
-    final notifier = ref.read(_collapsedSectionsProvider.notifier);
-
-    // Pre-pass: how many ingredients sit under each header (for the count hint).
-    final counts = <String, int>{};
-    String? hdr;
-    for (final ing in ingredients) {
-      if (ing.notes == '__header__') {
-        hdr = ing.id;
-        counts[hdr] = 0;
-      } else if (hdr != null) {
-        counts[hdr] = counts[hdr]! + 1;
+    final sections = <({Ingredient? header, List<Ingredient> items})>[];
+    var current = <Ingredient>[];
+    Ingredient? currentHeader;
+    void flush() {
+      if (currentHeader != null || current.isNotEmpty) {
+        sections.add((header: currentHeader, items: current));
       }
     }
 
-    final rows = <Widget>[];
-    String? currentHeaderId;
-    var hidden = false;
     for (final ing in ingredients) {
       if (ing.notes == '__header__') {
-        currentHeaderId = ing.id;
-        hidden = collapsed.contains(ing.id);
-        rows.add(_CollapsibleHeaderRow(
-          name: ing.name,
-          itemCount: counts[ing.id] ?? 0,
-          collapsed: hidden,
-          onTap: () => notifier.toggle(recipeId, ing.id),
-        ));
+        flush();
+        currentHeader = ing;
+        current = [];
       } else {
-        if (currentHeaderId != null && hidden) continue;
-        rows.add(_IngredientItemWithAllergen(
-          ingredient: ing,
-          scaleFactor: scaleFactor,
-          unitConversion: unitConversion,
-          linkedRecipes: (ingredientLinksMap[ing.id] ?? [])
-              .map((info) => info.recipe)
-              .toList(),
-        ));
+        current.add(ing);
       }
     }
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: rows);
+    flush();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final s in sections)
+          _IngredientSectionBox(
+            header: s.header,
+            items: s.items,
+            recipeId: recipeId,
+            scaleFactor: scaleFactor,
+            unitConversion: unitConversion,
+            ingredientLinksMap: ingredientLinksMap,
+          ),
+      ],
+    );
   }
 }
 
-class _CollapsibleHeaderRow extends StatelessWidget {
-  final String name;
-  final int itemCount;
-  final bool collapsed;
-  final VoidCallback onTap;
-  const _CollapsibleHeaderRow({
-    required this.name,
-    required this.itemCount,
-    required this.collapsed,
-    required this.onTap,
+/// One boxed ingredient section — a titled, collapsible card (or an untitled
+/// card for ingredients that precede the first header).
+class _IngredientSectionBox extends ConsumerWidget {
+  final Ingredient? header;
+  final List<Ingredient> items;
+  final String recipeId;
+  final double scaleFactor;
+  final _UnitConversion unitConversion;
+  final Map<String, List<RecipeLinkInfo>> ingredientLinksMap;
+
+  const _IngredientSectionBox({
+    required this.header,
+    required this.items,
+    required this.recipeId,
+    required this.scaleFactor,
+    required this.unitConversion,
+    required this.ingredientLinksMap,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 16, bottom: 4),
-        child: Row(
-          children: [
-            // Chevron points down when expanded, right when collapsed.
-            AnimatedRotation(
-              turns: collapsed ? -0.25 : 0,
-              duration: const Duration(milliseconds: 150),
-              child: Icon(Icons.keyboard_arrow_down,
-                  size: 22, color: theme.colorScheme.primary),
-            ),
-            const SizedBox(width: 4),
-            Flexible(
-              child: Text(
-                name,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.primary,
-                  letterSpacing: 0.3,
+    final collapsedSet =
+        ref.watch(_collapsedSectionsProvider)[recipeId] ?? const <String>{};
+    final collapsed = header != null && collapsedSet.contains(header!.id);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (header != null)
+            InkWell(
+              onTap: () => ref
+                  .read(_collapsedSectionsProvider.notifier)
+                  .toggle(recipeId, header!.id),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 4,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary,
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        header!.name,
+                        style: theme.textTheme.titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                    if (collapsed)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: Text('${items.length}',
+                            style: theme.textTheme.labelMedium
+                                ?.copyWith(color: theme.colorScheme.outline)),
+                      ),
+                    AnimatedRotation(
+                      turns: collapsed ? -0.25 : 0,
+                      duration: const Duration(milliseconds: 150),
+                      child: Icon(Icons.keyboard_arrow_down,
+                          color: theme.colorScheme.outline),
+                    ),
+                  ],
                 ),
               ),
             ),
-            if (collapsed && itemCount > 0) ...[
-              const SizedBox(width: 6),
-              Text(
-                '($itemCount)',
-                style: theme.textTheme.labelMedium
-                    ?.copyWith(color: theme.colorScheme.outline),
+          if (!collapsed)
+            Padding(
+              padding: EdgeInsets.fromLTRB(8, header != null ? 0 : 6, 10, 6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final ing in items)
+                    _CheckableIngredientRow(
+                      ingredient: ing,
+                      recipeId: recipeId,
+                      scaleFactor: scaleFactor,
+                      unitConversion: unitConversion,
+                      linkedRecipes: (ingredientLinksMap[ing.id] ?? [])
+                          .map((info) => info.recipe)
+                          .toList(),
+                    ),
+                ],
               ),
-            ],
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
@@ -1468,6 +1602,7 @@ class _IngredientsTab extends ConsumerWidget {
   final VoidCallback onAddToShopping;
   final _UnitConversion unitConversion;
   final Map<String, List<RecipeLinkInfo>> ingredientLinksMap;
+  final Widget? footer;
 
   const _IngredientsTab({
     required this.ingredients,
@@ -1477,6 +1612,7 @@ class _IngredientsTab extends ConsumerWidget {
     required this.onAddToShopping,
     this.unitConversion = _UnitConversion.none,
     this.ingredientLinksMap = const {},
+    this.footer,
   });
 
   @override
@@ -1503,6 +1639,7 @@ class _IngredientsTab extends ConsumerWidget {
                   _CollapsibleIngredientList(ingredients: ingredients, recipeId: recipeId, scaleFactor: scaleFactor, unitConversion: unitConversion, ingredientLinksMap: ingredientLinksMap),
                   const SizedBox(height: 16),
                   _LargeAddToShoppingButton(onTap: onAddToShopping),
+                  if (footer != null) footer!,
                   const SizedBox(height: 32),
                 ],
               ),
@@ -1516,12 +1653,14 @@ class _IngredientsTab extends ConsumerWidget {
 
 class _InstructionsTab extends StatelessWidget {
   final List<Step> steps;
+  final String recipeId;
   final String? notes;
   final AppLocalizations l10n;
   final double scaleFactor;
   final List<String> ingredientNames;
   const _InstructionsTab({
     required this.steps,
+    required this.recipeId,
     this.notes,
     required this.l10n,
     this.scaleFactor = 1.0,
@@ -1532,11 +1671,57 @@ class _InstructionsTab extends StatelessWidget {
     final theme = Theme.of(context);
     final hasNotes = notes != null && notes!.isNotEmpty;
     // Only show the empty state when there's genuinely nothing — otherwise a
-    // recipe that has notes but no steps would hide its notes here (the stacked
-    // layout shows them, so the tabbed layout must too).
+    // recipe that has notes but no steps would hide its notes here.
     if (steps.isEmpty && !hasNotes) {
       return Center(child: Text(l10n.instructionsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)));
     }
+
+    // Group steps into sections at `__header__` markers (mirrors ingredients).
+    // Steps before the first header — or a recipe with no headers — render as a
+    // flat numbered list; titled sections become collapsible boxes.
+    final sections = <({Step? header, List<Step> items})>[];
+    var cur = <Step>[];
+    Step? curHeader;
+    void flush() {
+      if (curHeader != null || cur.isNotEmpty) {
+        sections.add((header: curHeader, items: cur));
+      }
+    }
+
+    for (final s in steps) {
+      if (s.notes == '__header__') {
+        flush();
+        curHeader = s;
+        cur = [];
+      } else {
+        cur.add(s);
+      }
+    }
+    flush();
+
+    final children = <Widget>[];
+    for (final sec in sections) {
+      if (sec.header != null) {
+        children.add(_InstructionSectionBox(
+          header: sec.header!,
+          steps: sec.items,
+          recipeId: recipeId,
+          scaleFactor: scaleFactor,
+          ingredientNames: ingredientNames,
+        ));
+      } else {
+        for (var i = 0; i < sec.items.length; i++) {
+          children.add(_InstructionStep(
+            stepNumber: i + 1,
+            step: sec.items[i],
+            recipeId: recipeId,
+            scaleFactor: scaleFactor,
+            ingredientNames: ingredientNames,
+          ));
+        }
+      }
+    }
+
     // Eager Column (not lazy ListView) so SelectionArea select-all doesn't
     // crash on off-screen children — see note in _IngredientsTab.
     return CustomScrollView(
@@ -1551,7 +1736,7 @@ class _InstructionsTab extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ...steps.asMap().entries.map((entry) => _InstructionStep(stepNumber: entry.key + 1, step: entry.value, scaleFactor: scaleFactor, ingredientNames: ingredientNames)),
+                  ...children,
                   if (hasNotes) ...[
                     if (steps.isNotEmpty) const SizedBox(height: 24),
                     _SectionHeader(title: l10n.recipeFieldNotes),
@@ -1569,6 +1754,106 @@ class _InstructionsTab extends StatelessWidget {
   }
 }
 
+/// One boxed instruction section — a titled, collapsible card whose steps are
+/// numbered from 1 (natural for multi-component / sub-recipe methods).
+class _InstructionSectionBox extends ConsumerWidget {
+  final Step header;
+  final List<Step> steps;
+  final String recipeId;
+  final double scaleFactor;
+  final List<String> ingredientNames;
+
+  const _InstructionSectionBox({
+    required this.header,
+    required this.steps,
+    required this.recipeId,
+    required this.scaleFactor,
+    required this.ingredientNames,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final collapsedSet =
+        ref.watch(_collapsedSectionsProvider)[recipeId] ?? const <String>{};
+    final collapsed = collapsedSet.contains(header.id);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () => ref
+                .read(_collapsedSectionsProvider.notifier)
+                .toggle(recipeId, header.id),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.tertiary,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      header.instruction,
+                      style: theme.textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  if (collapsed)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: Text('${steps.length}',
+                          style: theme.textTheme.labelMedium
+                              ?.copyWith(color: theme.colorScheme.outline)),
+                    ),
+                  AnimatedRotation(
+                    turns: collapsed ? -0.25 : 0,
+                    duration: const Duration(milliseconds: 150),
+                    child: Icon(Icons.keyboard_arrow_down,
+                        color: theme.colorScheme.outline),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (!collapsed)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 2),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var i = 0; i < steps.length; i++)
+                    _InstructionStep(
+                      stepNumber: i + 1,
+                      step: steps[i],
+                      recipeId: recipeId,
+                      scaleFactor: scaleFactor,
+                      ingredientNames: ingredientNames,
+                    ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 // ============ APP BAR WITH RPG RARITY GLOW BORDER ============
 
 class _RecipeAppBar extends StatelessWidget {
@@ -1578,10 +1863,8 @@ class _RecipeAppBar extends StatelessWidget {
   final VoidCallback onReload;
   final VoidCallback? onPrint;
   final VoidCallback? onShare;
-  final bool isTabbed;
   final bool isDetailPane;
   final VoidCallback? onClose;
-  final VoidCallback? onToggleLayout;
   final double currentScale;
 
   const _RecipeAppBar({
@@ -1591,10 +1874,8 @@ class _RecipeAppBar extends StatelessWidget {
     required this.onReload,
     this.onPrint,
     this.onShare,
-    this.isTabbed = false,
     this.isDetailPane = false,
     this.onClose,
-    this.onToggleLayout,
     this.currentScale = 1.0,
   });
 
@@ -1687,8 +1968,8 @@ class _RecipeAppBar extends StatelessWidget {
             onSelected: (value) => _handleMenuAction(context, value),
             itemBuilder: (context) => [
               PopupMenuItem(value: 'cook', child: Row(children: [const Icon(Icons.local_fire_department_outlined), const SizedBox(width: 12), Text(l10n.cookingMode)])),
+              PopupMenuItem(value: 'enhance', child: Row(children: [const Icon(Icons.auto_awesome_outlined), const SizedBox(width: 12), const Text('Enhance with AI')])),
               const PopupMenuDivider(),
-              PopupMenuItem(value: 'layout', child: Row(children: [Icon(isTabbed ? Icons.view_agenda_outlined : Icons.tab_outlined), const SizedBox(width: 12), Text(isTabbed ? l10n.stackedLayout : l10n.tabbedLayout)])),
               PopupMenuItem(value: 'share', child: Row(children: [const Icon(Icons.share_outlined), const SizedBox(width: 12), Text(l10n.actionShare)])),
               PopupMenuItem(value: 'print', child: Row(children: [const Icon(Icons.print_outlined), const SizedBox(width: 12), Text(l10n.printRecipe)])),
               PopupMenuItem(value: 'pin', child: Row(children: [Icon(recipe.isPinned ? Icons.push_pin : Icons.push_pin_outlined), const SizedBox(width: 12), Text(recipe.isPinned ? l10n.recipeUnpin : l10n.recipePin)])),
@@ -1711,8 +1992,11 @@ class _RecipeAppBar extends StatelessWidget {
       case 'cook':
         launchCookingMode(context, recipe.id, scaleFactor: currentScale);
         break;
-      case 'layout':
-        onToggleLayout?.call();
+      case 'enhance':
+        final changed = await Navigator.of(context).push<bool>(
+          MaterialPageRoute(builder: (_) => RecipeEnhanceScreen(recipeId: recipe.id)),
+        );
+        if (changed == true) onReload();
         break;
       case 'share':
         onShare?.call();
@@ -2035,43 +2319,38 @@ class _MetaItem extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  final String title; final Widget? trailing;
-  const _SectionHeader({required this.title, this.trailing});
+  final String title;
+  const _SectionHeader({required this.title});
   @override Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Row(children: [Text(title, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)), if (trailing != null) ...[const Spacer(), trailing!]]);
+    return Text(title, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold));
   }
 }
 
-class _IngredientItemWithAllergen extends ConsumerWidget {
+class _CheckableIngredientRow extends ConsumerWidget {
   final Ingredient ingredient;
+  final String recipeId;
   final double scaleFactor;
   final _UnitConversion unitConversion;
   final List<Recipe> linkedRecipes;
-  const _IngredientItemWithAllergen({required this.ingredient, required this.scaleFactor, this.unitConversion = _UnitConversion.none, this.linkedRecipes = const []});
+  const _CheckableIngredientRow({
+    required this.ingredient,
+    required this.recipeId,
+    required this.scaleFactor,
+    this.unitConversion = _UnitConversion.none,
+    this.linkedRecipes = const [],
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-
-    // Render section headers (ingredient dividers)
-    if (ingredient.notes == '__header__') {
-      return Padding(
-        padding: const EdgeInsets.only(top: 16, bottom: 4),
-        child: Text(
-          ingredient.name,
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: theme.colorScheme.primary,
-            letterSpacing: 0.3,
-          ),
-        ),
-      );
-    }
-
     final settings = ref.watch(settingsProvider);
     final userAllergies = settings.allergens;
+
+    final checkedSet =
+        ref.watch(_checkedItemsProvider)[recipeId] ?? const <String>{};
+    final isChecked = checkedSet.contains(ingredient.id);
 
     String amount = ingredient.amount ?? '';
     String unit = ingredient.unit ?? '';
@@ -2097,116 +2376,170 @@ class _IngredientItemWithAllergen extends ConsumerWidget {
       unit = LocalizedUnits.of(context).localizeUnit(unit, numAmount);
     }
 
-    // Check for allergens
     final detectedAllergens = AllergenData.detectAllergens(ingredient.name);
     final userAllergyKeys = userAllergies.map((a) => a.key).toSet();
-    final matchingAllergens = detectedAllergens.where((a) => userAllergyKeys.contains(a)).toList();
+    final matchingAllergens =
+        detectedAllergens.where((a) => userAllergyKeys.contains(a)).toList();
+
+    final baseStyle = theme.textTheme.bodyLarge?.copyWith(
+      decoration: isChecked ? TextDecoration.lineThrough : null,
+      color: isChecked ? theme.colorScheme.outline : null,
+    );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(IngredientImages.getEmoji(ingredient.name), style: const TextStyle(fontSize: 18)),
+            // Checkbox — its own tap target so it doesn't fight SelectionArea's
+            // text selection. Tapping strikes the ingredient through.
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => ref
+                  .read(_checkedItemsProvider.notifier)
+                  .toggle(recipeId, ingredient.id),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 1, right: 10, bottom: 1),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 120),
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color:
+                        isChecked ? theme.colorScheme.primary : Colors.transparent,
+                    border: Border.all(
+                      color: isChecked
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.outline,
+                      width: 2,
+                    ),
+                  ),
+                  child: isChecked
+                      ? Icon(Icons.check,
+                          size: 14, color: theme.colorScheme.onPrimary)
+                      : null,
+                ),
+              ),
+            ),
+            Opacity(
+              opacity: isChecked ? 0.5 : 1,
+              child: Text(IngredientImages.getEmoji(ingredient.name),
+                  style: const TextStyle(fontSize: 18)),
+            ),
             const SizedBox(width: 10),
             if (settings.ingredientLayout == IngredientLayout.columnar) ...[
               SizedBox(
                 width: 72,
                 child: Text.rich(
                   TextSpan(
-                    style: theme.textTheme.bodyLarge,
+                    style: baseStyle,
                     children: [
-                      if (amount.isNotEmpty) TextSpan(text: amount, style: const TextStyle(fontWeight: FontWeight.w600)),
+                      if (amount.isNotEmpty)
+                        TextSpan(
+                            text: amount,
+                            style: const TextStyle(fontWeight: FontWeight.w600)),
                       if (unit.isNotEmpty) TextSpan(text: ' $unit'),
                     ],
                   ),
                 ),
               ),
               const SizedBox(width: 8),
-              Expanded(child: Text(ingredient.name, style: theme.textTheme.bodyLarge)),
+              Expanded(child: Text(ingredient.name, style: baseStyle)),
             ] else
               Expanded(
                 child: Text.rich(
                   TextSpan(
-                    style: theme.textTheme.bodyLarge,
+                    style: baseStyle,
                     children: [
-                      if (amount.isNotEmpty) TextSpan(text: '$amount ', style: const TextStyle(fontWeight: FontWeight.w600)),
+                      if (amount.isNotEmpty)
+                        TextSpan(
+                            text: '$amount ',
+                            style: const TextStyle(fontWeight: FontWeight.w600)),
                       if (unit.isNotEmpty) TextSpan(text: '$unit '),
                       TextSpan(text: ingredient.name),
                     ],
                   ),
                 ),
               ),
-              if (matchingAllergens.isNotEmpty)
-                Tooltip(
-                  message: '${l10n.allergenContains}: ${matchingAllergens.join(", ")}',
-                  child: Icon(Icons.warning_amber_rounded, size: 18, color: Colors.red.shade700),
-                ),
-            ]),
-            // Linked recipes for this ingredient (with thumbnails)
-            ...linkedRecipes.map((linkedRecipe) {
-              return Padding(
-                padding: const EdgeInsets.only(left: 20, top: 4),
-                child: GestureDetector(
-                  onTap: () => context.push('/recipe/${linkedRecipe.id}'),
-                  child: Row(
-                    children: [
-                      Icon(Icons.subdirectory_arrow_right, size: 14, color: theme.colorScheme.primary),
-                      const SizedBox(width: 6),
-                      // Recipe thumbnail
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: SizedBox(
-                          width: 24, height: 24,
-                          child: RecipeImage.thumbnail(
-                            imagePath: linkedRecipe.imagePath,
-                            recipeId: linkedRecipe.id,
-                            width: 24,
-                            height: 24,
-                          ),
+            if (matchingAllergens.isNotEmpty)
+              Tooltip(
+                message:
+                    '${l10n.allergenContains}: ${matchingAllergens.join(", ")}',
+                child: Icon(Icons.warning_amber_rounded,
+                    size: 18, color: Colors.red.shade700),
+              ),
+          ]),
+          ...linkedRecipes.map((linkedRecipe) {
+            return Padding(
+              padding: const EdgeInsets.only(left: 42, top: 4),
+              child: GestureDetector(
+                onTap: () => context.push('/recipe/${linkedRecipe.id}'),
+                child: Row(
+                  children: [
+                    Icon(Icons.subdirectory_arrow_right,
+                        size: 14, color: theme.colorScheme.primary),
+                    const SizedBox(width: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: RecipeImage.thumbnail(
+                          imagePath: linkedRecipe.imagePath,
+                          recipeId: linkedRecipe.id,
+                          width: 24,
+                          height: 24,
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      Flexible(
-                        child: Text(
-                          linkedRecipe.title,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.primary,
-                            decoration: TextDecoration.underline,
-                            decorationColor: theme.colorScheme.primary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        linkedRecipe.title,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                          decorationColor: theme.colorScheme.primary,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(width: 4),
-                      Icon(Icons.open_in_new, size: 12, color: theme.colorScheme.primary),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.open_in_new,
+                        size: 12, color: theme.colorScheme.primary),
+                  ],
                 ),
-              );
-            }),
-          ],
-        ),
+              ),
+            );
+          }),
+        ],
+      ),
     );
   }
 }
 
-class _InstructionStep extends StatelessWidget {
+class _InstructionStep extends ConsumerWidget {
   final int stepNumber;
   final Step step;
+  final String recipeId;
   final double scaleFactor;
   final List<String> ingredientNames;
   const _InstructionStep({
     required this.stepNumber,
     required this.step,
+    required this.recipeId,
     this.scaleFactor = 1.0,
     this.ingredientNames = const [],
   });
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final checkedSet =
+        ref.watch(_checkedItemsProvider)[recipeId] ?? const <String>{};
+    final isChecked = checkedSet.contains(step.id);
     // Scale any ingredient amounts the AI inlined into the step text so they
     // stay consistent with the (scaled) ingredient list. Times/temps/sizes are
     // left untouched. No-op at 1×.
@@ -2223,25 +2556,41 @@ class _InstructionStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                  color: theme.colorScheme.tertiary,
-                  borderRadius: BorderRadius.circular(8)),
-              child: Center(
-                  child: Text('$stepNumber',
-                      style: TextStyle(
-                          color: theme.colorScheme.onTertiary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14))),
+            // Number badge doubles as the "done" checkbox — tap to strike out.
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => ref
+                  .read(_checkedItemsProvider.notifier)
+                  .toggle(recipeId, step.id),
+              child: Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                    color: isChecked
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.tertiary,
+                    borderRadius: BorderRadius.circular(8)),
+                child: Center(
+                    child: isChecked
+                        ? Icon(Icons.check,
+                            size: 16, color: theme.colorScheme.onPrimary)
+                        : Text('$stepNumber',
+                            style: TextStyle(
+                                color: theme.colorScheme.onTertiary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14))),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
                 child: Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(instruction,
-                        style: theme.textTheme.bodyLarge))),
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          decoration:
+                              isChecked ? TextDecoration.lineThrough : null,
+                          color: isChecked ? theme.colorScheme.outline : null,
+                        )))),
           ]),
           if (hasImage) ...[
             const SizedBox(height: 10),
@@ -2280,10 +2629,23 @@ class _InstructionStep extends StatelessWidget {
 class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
   final TabBar _tabBar;
   final Color _backgroundColor;
-  _SliverTabBarDelegate(this._tabBar, this._backgroundColor);
-  @override double get minExtent => _tabBar.preferredSize.height;
-  @override double get maxExtent => _tabBar.preferredSize.height;
-  @override Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => Container(color: _backgroundColor, child: _tabBar);
+  final Color _segmentColor;
+  _SliverTabBarDelegate(this._tabBar, this._backgroundColor, this._segmentColor);
+  static const double _pad = 8;
+  @override double get minExtent => _tabBar.preferredSize.height + _pad * 2;
+  @override double get maxExtent => _tabBar.preferredSize.height + _pad * 2;
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => Container(
+        color: _backgroundColor,
+        padding: const EdgeInsets.fromLTRB(16, _pad, 16, _pad),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: _segmentColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: _tabBar,
+        ),
+      );
   @override bool shouldRebuild(_SliverTabBarDelegate oldDelegate) => false;
 }
 

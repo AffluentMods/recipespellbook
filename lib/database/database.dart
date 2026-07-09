@@ -71,7 +71,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
 
   // Accessors for DAOs
@@ -161,6 +161,13 @@ class AppDatabase extends _$AppDatabase {
           );
           await customStatement(
             'CREATE INDEX IF NOT EXISTS idx_meal_plans_date ON meal_plans (date)',
+          );
+        }
+        if (from < 6) {
+          // Section headers inside instructions: a step with notes == '__header__'
+          // is a divider whose `instruction` holds the section title.
+          await customStatement(
+            'ALTER TABLE steps ADD COLUMN notes TEXT',
           );
         }
       },

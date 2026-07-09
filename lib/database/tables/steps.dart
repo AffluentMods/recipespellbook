@@ -18,6 +18,10 @@ class Steps extends Table {
   // Optional image path for this step
   TextColumn get imagePath => text().nullable()();
 
+  // Section marker: a step with notes == '__header__' is a section header whose
+  // `instruction` holds the section title (mirrors the Ingredients convention).
+  TextColumn get notes => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

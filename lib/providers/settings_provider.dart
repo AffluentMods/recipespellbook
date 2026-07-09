@@ -21,13 +21,14 @@ enum NutritionDisplayMode {
 }
 
 enum NutritionChartStyle {
-  donut,
+  /// Horizontal macro bars (calories on top, protein/carbs/fat as filled bars).
   bars,
-  numbers,
-  /// Compact ring + macros-on-the-right layout. Donut shrinks, big
-  /// calorie number sits in the center, three macro stats stack to the
-  /// right with percentages on top. Densest of the four.
-  compactDonut,
+
+  /// Compact ring + macros-on-the-right layout: the calorie number sits inside
+  /// the ring with three macro stats (%, grams) to the right. This is the only
+  /// ring style now and is shown to the user simply as "Donut". Older saved
+  /// values ('numbers', legacy 'donut', 'compactDonut') all resolve here.
+  donut,
 }
 
 /// Color set used by nutrition layouts. Picked separately from the chart

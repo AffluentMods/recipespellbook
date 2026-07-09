@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../database/database.dart';
+import '../data/course_category_data.dart';
 
 /// Service that parses and imports recipes from AI-generated JSON.
 ///
@@ -261,6 +262,7 @@ class AiImportService {
         sortOrder: i,
         instruction: (step['instruction'] as String).trim(),
         durationMinutes: Value(_optInt(step['durationMinutes'])),
+        notes: Value(step['notes'] as String?),
       ));
     }
 
@@ -820,12 +822,16 @@ Rules:
   ],
   "steps": [
     {
-      "instruction": "Preheat the oven to 375\u00b0F (190\u00b0C).",
-      "durationMinutes": 5
+      "instruction": "For the dough",
+      "notes": "__header__"
     },
     {
       "instruction": "Combine the 2 cups all-purpose flour with the 1 tsp salt, then cut in the 1/2 cup cold butter.",
       "durationMinutes": 10
+    },
+    {
+      "instruction": "Preheat the oven to 375\u00b0F (190\u00b0C).",
+      "durationMinutes": 5
     }
   ]
 }
@@ -868,8 +874,9 @@ Rules:
 - "amount" is a string (supports fractions like "1/2", "1 1/2") or null
 - "unit" is a string (cups, tbsp, tsp, oz, lb, g, kg, ml, etc.) or null if not applicable (e.g. "3 eggs")
 - "notes" on ingredients is for prep details like "diced", "room temperature", "melted"
-- HEADERS: If a recipe has ingredient sections (e.g. "For the sauce", "For the dough"), add a header ingredient with "notes": "__header__" and "name" set to the section title. Set amount and unit to null for headers.
-- Only add headers if the recipe clearly has separate sections. Do NOT add headers if there is only one group of ingredients.
+- INGREDIENT HEADERS: If a recipe has ingredient sections (e.g. "For the sauce", "For the dough"), add a header ingredient with "notes": "__header__" and "name" set to the section title. Set amount and unit to null for headers.
+- STEP HEADERS: If the method has distinct phases or sub-recipes (e.g. "Make the sauce", "Cook the pasta", "Assemble"), add a header step with "notes": "__header__" and "instruction" set to the section title (omit or null durationMinutes). Put the steps for each phase directly after its header. Whenever ingredients and steps share the same sections, use the SAME section titles for both so the recipe reads as clean matching sections on the Ingredients and Instructions tabs.
+- Only add headers when the recipe clearly has separate sections/phases. Do NOT add headers when there is just one group. For a recipe with 2+ components or sub-recipes that are followed together in one recipe (not linked as separate recipes), USE headers to group both the ingredients and the steps of each component — do not flatten everything into one list.
 - "durationMinutes" on steps is optional (null if not specified)
 - "course" must be one of: Appetizer, Beverage, Breakfast, Brunch, Dessert, Main Dish, Sauce, Side Dish, Snack
 - "category" must be one of: Bean, Beverage, Bread, Burrito/Taco, Casserole, Chicken/Steak/Meat, Dessert, Fish, Fruit, Muffin, Pasta, Rice, Salad, Sandwich, Sauce, Soup, Vegetable
@@ -880,6 +887,255 @@ Rules:
 - AMOUNTS IN STEPS: When a step uses an ingredient, include its quantity from the ingredient list inline, so the cook never has to scroll back up. Write "Combine 1/4 cup lime juice and 1/3 cup chopped cilantro" — NOT "Combine lime juice and cilantro". Distribute each ingredient's amount across the step(s) that use it (e.g. if 2 cups flour is added in two stages, say "1 cup" each time). Keep the ingredient list itself unchanged with the full amounts.
 - Output valid JSON only — no markdown, no backticks, no commentary
 ''';
+  }
+
+  // ══════════════════════════════════════════
+  //  ENHANCE — reformat an EXISTING recipe
+  // ══════════════════════════════════════════
+
+  /// Serialize an existing recipe into the enhance JSON shape (course/category
+  /// as names, `__header__` markers preserved) so it can be handed to an AI.
+  static Map<String, dynamic> serializeRecipeForEnhance(
+    Recipe recipe,
+    List<Ingredient> ingredients,
+    List<Step> steps,
+  ) {
+    return {
+      'title': recipe.title,
+      'description': recipe.description ?? '',
+      'servings': recipe.servings ?? '',
+      'prepTimeMinutes': recipe.prepTimeMinutes,
+      'cookTimeMinutes': recipe.cookTimeMinutes,
+      'course': recipe.courseId != null ? CourseData.getById(recipe.courseId!)?.name : null,
+      'category': recipe.categoryId != null ? CategoryData.getById(recipe.categoryId!)?.name : null,
+      'sourceUrl': recipe.sourceUrl ?? '',
+      'notes': recipe.notes ?? '',
+      'ingredients': ingredients
+          .map((i) => {'amount': i.amount, 'unit': i.unit, 'name': i.name, 'notes': i.notes})
+          .toList(),
+      'steps': steps
+          .map((s) => {'instruction': s.instruction, 'durationMinutes': s.durationMinutes, 'notes': s.notes})
+          .toList(),
+    };
+  }
+
+  /// The full copy-paste blob for the "Use Your Own AI" enhance path:
+  /// enhance instructions + the recipe JSON, ready to paste into any AI.
+  static String buildEnhanceBlob(
+    Recipe recipe,
+    List<Ingredient> ingredients,
+    List<Step> steps,
+  ) {
+    final json = const JsonEncoder.withIndent('  ')
+        .convert(serializeRecipeForEnhance(recipe, ingredients, steps));
+    return '${generateEnhancePrompt()}\n\nHERE IS THE RECIPE TO ENHANCE:\n$json';
+  }
+
+  /// The enhance system prompt — reformat for readability, faithful to content.
+  static String generateEnhancePrompt() {
+    return '''You are reformatting an EXISTING recipe to make it clearer and easier to follow. Return the SAME recipe as improved JSON in the exact format below. Output ONE JSON object only — no markdown, no backticks, no commentary.
+
+DO (formatting and structure only):
+- Add SECTION HEADERS where the recipe has distinct parts. An ingredient header is an entry with "notes": "__header__", "name" set to the section title, and amount/unit null. A step header is a step with "notes": "__header__" and "instruction" set to the section title. Use the SAME section titles for matching ingredient and step sections (e.g. "For the sauce").
+- INLINE the exact ingredient amounts into the steps that use them, so the cook never scrolls back up. Write "Add the 1/2 cup cream and 2 oz vodka" — not "Add the cream and vodka". Distribute an amount across the steps that use it. Keep the ingredient list amounts unchanged.
+- Improve wording/clarity of steps and fill in obviously-missing metadata (course, category) — only when clearly implied.
+
+DO NOT (never change the actual recipe):
+- Do NOT add, remove, rename, or re-quantify ingredients. Keep every ingredient and its exact amount/unit.
+- Do NOT change the method, temperatures, times, or the set of real steps (you may split a run-on step or add headers, but do not invent new cooking actions).
+- Do NOT drop the sourceUrl or the user's existing notes.
+
+FORMAT:
+{
+  "title": "Recipe Name",
+  "description": "Brief description",
+  "servings": "4",
+  "prepTimeMinutes": 15,
+  "cookTimeMinutes": 30,
+  "course": "Main Dish",
+  "category": "Pasta",
+  "sourceUrl": "",
+  "notes": "",
+  "ingredients": [
+    { "amount": null, "unit": null, "name": "For the sauce", "notes": "__header__" },
+    { "amount": "2", "unit": "cups", "name": "crushed tomatoes", "notes": null }
+  ],
+  "steps": [
+    { "instruction": "For the sauce", "notes": "__header__" },
+    { "instruction": "Simmer the 2 cups crushed tomatoes for 20 minutes.", "durationMinutes": 20 }
+  ]
+}
+
+RULES:
+- "amount" is a string ("1/2", "1 1/2") or null. "unit" is a string or null (e.g. "3 eggs" -> unit null).
+- "course" must be one of: Appetizer, Beverage, Breakfast, Brunch, Dessert, Main Dish, Sauce, Side Dish, Snack
+- "category" must be one of: Bean, Beverage, Bread, Burrito/Taco, Casserole, Chicken/Steak/Meat, Dessert, Fish, Fruit, Muffin, Pasta, Rice, Salad, Sandwich, Sauce, Soup, Vegetable
+- Only add headers if the recipe genuinely has separate sections. A simple one-part recipe needs no headers.
+- Output valid JSON only — no markdown, no backticks, no commentary.''';
+  }
+
+  /// Parse a pasted enhance result into a single recipe map (lenient about
+  /// markdown fences / stray text). Throws [FormatException] with a friendly
+  /// message if it isn't valid recipe JSON.
+  static Map<String, dynamic> parseSingleEnhancedRecipe(String jsonString) {
+    final cleaned = _cleanJson(jsonString);
+    final (allRecipes, _) = _decodeMultipleBlobs(cleaned);
+    if (allRecipes.isEmpty) {
+      throw const FormatException("That didn't look like valid recipe JSON.");
+    }
+    final recipe = allRecipes.first;
+    final err = _validateSingleRecipe(recipe);
+    if (err != null) throw FormatException(err);
+    return recipe;
+  }
+
+  /// Apply an enhanced recipe map onto the EXISTING recipe (update in place).
+  /// Preserves photos (cover + step images by order), rating/favorite/cook
+  /// count, sourceUrl, and merges notes (append). Replaces the content fields.
+  static Future<void> applyEnhancement({
+    required String recipeId,
+    required Map<String, dynamic> enhanced,
+    required AppDatabase db,
+  }) async {
+    final existing = await (db.select(db.recipes)..where((t) => t.id.equals(recipeId))).getSingleOrNull();
+    if (existing == null) return;
+
+    final oldSteps = await (db.select(db.steps)
+          ..where((t) => t.recipeId.equals(recipeId))
+          ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
+        .get();
+    // Real (non-header) step images, in order, to re-attach after restructure.
+    final oldStepImages =
+        oldSteps.where((s) => s.notes != '__header__').map((s) => s.imagePath).toList();
+
+    // Preserve sub-recipe links across the rebuild. Ingredient ids are
+    // regenerated, so key each link to a stable "name#occurrence" slot (the Nth
+    // ingredient named X). This survives header shifts AND handles duplicate
+    // ingredient names (e.g. "salt" in two sections) without mis-attaching.
+    final oldIngredients = await (db.select(db.ingredients)
+          ..where((t) => t.recipeId.equals(recipeId))
+          ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
+        .get();
+    final oldLinks =
+        await (db.select(db.recipeLinks)..where((t) => t.sourceRecipeId.equals(recipeId))).get();
+    final oldIngKey = <String, String>{}; // old ingredientId -> "name#occ"
+    final oldOcc = <String, int>{};
+    for (final ing in oldIngredients) {
+      final name = ing.name.toLowerCase().trim();
+      final occ = oldOcc.update(name, (v) => v + 1, ifAbsent: () => 0);
+      oldIngKey[ing.id] = '$name#$occ';
+    }
+    final linksByKey = <String, List<RecipeLink>>{};
+    for (final link in oldLinks) {
+      final key = oldIngKey[link.ingredientId];
+      if (key != null) linksByKey.putIfAbsent(key, () => []).add(link);
+    }
+
+    final courseId = _resolveCourseId(_optString(enhanced['course'])) ?? existing.courseId;
+    final categoryId = _resolveCategoryId(_optString(enhanced['category'])) ?? existing.categoryId;
+    final title = _optString(enhanced['title'])?.trim();
+
+    await db.transaction(() async {
+      await (db.update(db.recipes)..where((t) => t.id.equals(recipeId))).write(RecipesCompanion(
+        title: Value(title != null && title.isNotEmpty ? title : existing.title),
+        description: Value(_optString(enhanced['description']) ?? existing.description),
+        servings: Value(_optString(enhanced['servings']) ?? existing.servings),
+        prepTimeMinutes: Value(_optInt(enhanced['prepTimeMinutes']) ?? existing.prepTimeMinutes),
+        cookTimeMinutes: Value(_optInt(enhanced['cookTimeMinutes']) ?? existing.cookTimeMinutes),
+        courseId: Value(courseId),
+        categoryId: Value(categoryId),
+        notes: Value(_mergeNotes(existing.notes, _optString(enhanced['notes']))),
+        updatedAt: Value(DateTime.now()),
+        // Preserved (omitted → unchanged): sourceUrl, rating, isFavorite,
+        // isPinned, cookCount, imagePath, cookbookId, createdAt.
+      ));
+
+      await (db.delete(db.ingredients)..where((t) => t.recipeId.equals(recipeId))).go();
+      final ings = (enhanced['ingredients'] as List?) ?? const [];
+      final newIdByKey = <String, String>{}; // "name#occ" -> new ingredientId
+      final newOcc = <String, int>{};
+      for (var i = 0; i < ings.length; i++) {
+        final ing = ings[i] as Map<String, dynamic>;
+        final name = (_optString(ing['name']) ?? '').trim();
+        final id = '${recipeId}_ing_$i';
+        await db.into(db.ingredients).insert(IngredientsCompanion.insert(
+          id: id,
+          recipeId: recipeId,
+          sortOrder: i,
+          name: name,
+          amount: Value(_optString(ing['amount'])),
+          unit: Value(_optString(ing['unit'])),
+          notes: Value(_normalizeHeaderMarker(_optString(ing['notes']))),
+        ));
+        final lower = name.toLowerCase();
+        final occ = newOcc.update(lower, (v) => v + 1, ifAbsent: () => 0);
+        newIdByKey['$lower#$occ'] = id;
+      }
+
+      await (db.delete(db.steps)..where((t) => t.recipeId.equals(recipeId))).go();
+      final steps = (enhanced['steps'] as List?) ?? const [];
+      var realIdx = 0;
+      for (var i = 0; i < steps.length; i++) {
+        final step = steps[i] as Map<String, dynamic>;
+        final isHeader = _normalizeHeaderMarker(_optString(step['notes'])) == '__header__';
+        String? img;
+        if (!isHeader) {
+          if (realIdx < oldStepImages.length) img = oldStepImages[realIdx];
+          realIdx++;
+        }
+        await db.into(db.steps).insert(StepsCompanion.insert(
+          id: '${recipeId}_step_$i',
+          recipeId: recipeId,
+          sortOrder: i,
+          instruction: (_optString(step['instruction']) ?? '').trim(),
+          durationMinutes: Value(isHeader ? null : _optInt(step['durationMinutes'])),
+          imagePath: Value(img),
+          notes: Value(isHeader ? '__header__' : null),
+        ));
+      }
+
+      // Re-attach sub-recipe links to the matching new ingredient slot.
+      await (db.delete(db.recipeLinks)..where((t) => t.sourceRecipeId.equals(recipeId))).go();
+      for (final entry in linksByKey.entries) {
+        final newIngId = newIdByKey[entry.key];
+        if (newIngId == null) continue;
+        for (final link in entry.value) {
+          // insertOnConflictUpdate so a collapsed {source, ingredient, linked}
+          // duplicate updates instead of throwing and rolling back the enhance.
+          await db.into(db.recipeLinks).insertOnConflictUpdate(RecipeLinksCompanion.insert(
+            sourceRecipeId: recipeId,
+            ingredientId: newIngId,
+            linkedRecipeId: link.linkedRecipeId,
+            scale: Value(link.scale),
+          ));
+        }
+      }
+    });
+  }
+
+  /// Accept both "header" (build-doc schema) and "__header__" (app marker);
+  /// emit "__header__". Other notes pass through.
+  static String? _normalizeHeaderMarker(String? notes) {
+    if (notes == null) return null;
+    final t = notes.trim();
+    if (t == 'header' || t == '__header__') return '__header__';
+    return notes;
+  }
+
+  /// Merge notes: keep the original, append the AI's only if it adds something.
+  /// Compares whitespace-insensitively in BOTH directions so a reworded or
+  /// expanded echo of the original isn't appended to itself (keeps re-enhance
+  /// idempotent rather than growing the notes on every pass).
+  static String? _mergeNotes(String? original, String? ai) {
+    final o = (original ?? '').trim();
+    final a = (ai ?? '').trim();
+    if (a.isEmpty) return o.isEmpty ? null : o;
+    if (o.isEmpty) return a;
+    final on = o.replaceAll(RegExp(r'\s+'), ' ');
+    final an = a.replaceAll(RegExp(r'\s+'), ' ');
+    if (on.contains(an)) return o; // AI notes already covered by the original
+    if (an.contains(on)) return a; // AI notes are a superset — take them
+    return '$o\n\n$a';
   }
 }
 

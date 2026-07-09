@@ -383,7 +383,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         _imagePath ?? '',
         _selectedTagIds.join(','),
         _ingredients.map((i) => '${i.isHeader ? "H" : "I"}:${i.text}').join('|'),
-        _steps.map((s) => '${s.instruction}~${s.imagePath ?? ""}').join('|'),
+        _steps.map((s) => '${s.isHeader ? "H:" : ""}${s.instruction}~${s.imagePath ?? ""}').join('|'),
         _nutrition?.toJson().toString() ?? '',
       ].join('');
 
@@ -487,6 +487,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         id: step.id,
         instruction: step.instruction,
         imagePath: step.imagePath,
+        isHeader: step.notes == '__header__',
       ));
     }
 
@@ -1181,6 +1182,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
               instruction: step.instruction.trim(),
               durationMinutes: const drift.Value(null),
               imagePath: drift.Value(stepImagePath),
+              notes: drift.Value(step.isHeader ? '__header__' : null),
             ));
           }
         }
@@ -1234,6 +1236,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
               instruction: step.instruction.trim(),
               durationMinutes: const drift.Value(null),
               imagePath: drift.Value(stepImagePath),
+              notes: drift.Value(step.isHeader ? '__header__' : null),
             ));
           }
         }

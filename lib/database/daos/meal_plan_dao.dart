@@ -85,6 +85,25 @@ class MealPlanDao extends DatabaseAccessor<AppDatabase> with _$MealPlanDaoMixin 
         .write(MealPlansCompanion(mealType: Value(mealType)));
   }
 
+  /// Update the explicit clock time (null clears it, falling back to the
+  /// meal-type's default slot on the timeline).
+  Future<void> updateMealPlanTime(String id, DateTime? time) {
+    return (update(mealPlans)..where((t) => t.id.equals(id)))
+        .write(MealPlansCompanion(time: Value(time)));
+  }
+
+  /// Move a meal to a new day, carrying its clock time (hour/minute) over.
+  Future<void> updateMealPlanSchedule(String id, DateTime date, DateTime? time) {
+    return (update(mealPlans)..where((t) => t.id.equals(id)))
+        .write(MealPlansCompanion(date: Value(date), time: Value(time)));
+  }
+
+  /// Swap the recipe a meal points at (used by "Replace meal").
+  Future<void> updateMealPlanRecipe(String id, String recipeId) {
+    return (update(mealPlans)..where((t) => t.id.equals(id)))
+        .write(MealPlansCompanion(recipeId: Value(recipeId)));
+  }
+
   Stream<Map<DateTime, int>> watchMealCountsForDateRange(DateTime startDate, DateTime endDate) {
     // Query to get count of meal plans per day in the date range
     final query = customSelect(

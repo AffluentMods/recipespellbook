@@ -13,6 +13,7 @@ import '../../providers/database_provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/family_service.dart';
 import '../../services/image_service.dart';
+import '../../providers/auth_provider.dart';
 import 'app_snackbar.dart';
 import '../../utils/responsive_utils.dart';
 
@@ -152,81 +153,115 @@ class _RecipeShareSheet extends StatelessWidget {
 
   Future<void> _shareLink(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
+
+    // A share link needs an account (it hosts a 24h copy of the recipe). If the
+    // user isn't signed in, prompt sign-in — not a useless title-only share.
+    if (!AuthService.instance.isSignedIn) {
+      _promptSignIn(context);
+      return;
+    }
+
     Navigator.pop(context);
 
-    // Generate a self-contained 24h share link (requires sign-in). We upload a
-    // frozen snapshot of the recipe + its photos, so the link works for anyone
-    // for 24h regardless of sync, and survives later edits/deletes.
-    final isSignedIn = AuthService.instance.isSignedIn;
-    if (isSignedIn) {
-      if (context.mounted) AppSnackbar.loading(context, l10n.generatingLink);
+    // Loading shows on the ROOT overlay and dismiss() is context-independent
+    // (static), so we must NOT guard dismiss on context.mounted — the share
+    // sheet's context unmounts once we pop it, which would otherwise leave the
+    // spinner stuck for its full 30s timeout.
+    AppSnackbar.loading(context, l10n.generatingLink);
 
-      final snapshot = await _buildSnapshot();
-      final link = await FamilyService.instance
-          .createShareLink('recipe', recipe.id, snapshot: snapshot);
-
-      if (context.mounted) AppSnackbar.dismiss(context);
-
-      if (link != null) {
-        // Share the generated link directly
-        SharePlus.instance.share(ShareParams(
-          uri: Uri.tryParse(link.url),
-          text: '${recipe.title}\n${link.url}',
-          subject: recipe.title,
-        ));
-        return;
-      }
-      // Fall through to source URL / text fallback if link creation failed
+    ShareLinkInfo? link;
+    try {
+      // Cap the whole thing so a slow/unresponsive server can never leave the
+      // spinner stuck — fall back to a plain share instead.
+      final snapshot = await _buildSnapshot().timeout(const Duration(seconds: 45));
+      link = await FamilyService.instance
+          .createShareLink('recipe', recipe.id, snapshot: snapshot)
+          .timeout(const Duration(seconds: 20));
+    } catch (e) {
+      debugPrint('[Share] link generation failed: $e');
+    } finally {
+      AppSnackbar.dismiss(context);
     }
 
-    // Fallback: share source URL if available
-    final hasSourceUrl = recipe.sourceUrl != null && recipe.sourceUrl!.isNotEmpty;
-    if (hasSourceUrl) {
+    if (link != null) {
+      // share_plus rejects uri + text together — send the link inside the text
+      // so the title comes along with it.
       SharePlus.instance.share(ShareParams(
-        uri: Uri.tryParse(recipe.sourceUrl!),
-        text: '${recipe.title}\n${recipe.sourceUrl!}',
+        text: '${recipe.title}\n${link.url}',
         subject: recipe.title,
       ));
-    } else if (context.mounted) {
-      // No source URL, not signed in — show sign-in prompt or share as text
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Row(
-            children: [
-              const Icon(Icons.link),
-              const SizedBox(width: 12),
-              Expanded(child: Text(l10n.shareLink)),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (!isSignedIn)
-                Text(l10n.shareSignInRequired)
-              else
-                Text(l10n.shareLinkNote),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(l10n.actionClose),
+      return;
+    }
+
+    // Signed in but link creation failed — degrade to the source URL if we have
+    // one, otherwise a plain title share.
+    final hasSourceUrl = recipe.sourceUrl != null && recipe.sourceUrl!.isNotEmpty;
+    SharePlus.instance.share(ShareParams(
+      text: hasSourceUrl
+          ? '${recipe.title}\n${recipe.sourceUrl!}'
+          : '${recipe.title}\n\n${l10n.shareFromApp}',
+      subject: recipe.title,
+    ));
+  }
+
+  /// Prompt sign-in (Google / Apple) so the user can create a share link.
+  void _promptSignIn(BuildContext context) {
+    final authNotifier = ref.read(authProvider.notifier);
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    Responsive.showAdaptiveSheet(
+      context,
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(width: 40, height: 4, decoration: BoxDecoration(
+              color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2),
+            )),
+            const SizedBox(height: 24),
+            Icon(Icons.ios_share, size: 48, color: theme.colorScheme.primary),
+            const SizedBox(height: 16),
+            Text(l10n.signInToContinue, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text(l10n.shareSignInRequired,
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                textAlign: TextAlign.center),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () async { Navigator.pop(ctx); await authNotifier.signInWithGoogle(); },
+                icon: const Text('G', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                label: Text(l10n.continueWithGoogle),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
             ),
-            FilledButton.icon(
-              onPressed: () {
-                Navigator.pop(ctx);
-                final shareText = '${recipe.title}\n\n${l10n.shareFromApp}';
-                SharePlus.instance.share(ShareParams(text: shareText, subject: recipe.title));
-              },
-              icon: const Icon(Icons.share),
-              label: Text(l10n.actionShare),
-            ),
+            if (isAppleSignInAvailable) ...[
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () async { Navigator.pop(ctx); await authNotifier.signInWithApple(); },
+                  icon: const Icon(Icons.apple, size: 22),
+                  label: Text(l10n.continueWithApple),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: theme.brightness == Brightness.dark ? Colors.white : Colors.black,
+                    foregroundColor: theme.brightness == Brightness.dark ? Colors.black : Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 16),
           ],
         ),
-      );
-    }
+      ),
+    );
   }
 
   /// Build a self-contained snapshot of this recipe for a share link, uploading
@@ -234,54 +269,92 @@ class _RecipeShareSheet extends StatelessWidget {
   /// images. A failed image upload just leaves that image null (text still works).
   Future<Map<String, dynamic>> _buildSnapshot() async {
     final dao = ref.read(recipeDaoProvider);
-    final ings = await dao.getIngredientsForRecipe(recipe.id);
-    final steps = await dao.getStepsForRecipe(recipe.id);
     final images = ImageService.instance;
 
     Future<String?> upload(String? path) async {
       if (path == null || path.isEmpty) return null;
-      final r = await images.communityUploadLocalPath(path);
-      return r?.path;
+      try {
+        final r = await images
+            .communityUploadLocalPath(path)
+            .timeout(const Duration(seconds: 20));
+        return r?.path;
+      } catch (e) {
+        debugPrint('[Share] image upload skipped: $e');
+        return null; // best-effort: recipe still shares without this photo
+      }
     }
 
-    final coverPath = await upload(recipe.imagePath);
-    final stepPaths = <String, String?>{};
-    for (final s in steps) {
-      stepPaths[s.id] = await upload(s.imagePath);
+    // Snapshot one recipe (ingredients, steps, uploaded images).
+    Future<Map<String, dynamic>> snapOne(Recipe r) async {
+      final ings = await dao.getIngredientsForRecipe(r.id);
+      final steps = await dao.getStepsForRecipe(r.id);
+      final coverPath = await upload(r.imagePath);
+      final stepPaths = <String, String?>{};
+      for (final s in steps) {
+        stepPaths[s.id] = await upload(s.imagePath);
+      }
+      return {
+        'id': r.id,
+        'title': r.title,
+        'description': r.description,
+        'servings': r.servings,
+        'prepTimeMinutes': r.prepTimeMinutes,
+        'cookTimeMinutes': r.cookTimeMinutes,
+        'sourceUrl': r.sourceUrl,
+        'imagePath': coverPath,
+        'courseId': r.courseId,
+        'categoryId': r.categoryId,
+        'rating': r.rating,
+        'notes': r.notes,
+        'nutritionJson': r.nutritionJson,
+        'ingredients': ings
+            .map((i) => {
+                  'sortOrder': i.sortOrder,
+                  'amount': i.amount,
+                  'unit': i.unit,
+                  'name': i.name,
+                  'notes': i.notes,
+                })
+            .toList(),
+        'steps': steps
+            .map((s) => {
+                  'sortOrder': s.sortOrder,
+                  'instruction': s.instruction,
+                  'durationMinutes': s.durationMinutes,
+                  'notes': s.notes,
+                  'imagePath': stepPaths[s.id],
+                })
+            .toList(),
+      };
     }
 
-    return {
-      'id': recipe.id,
-      'title': recipe.title,
-      'description': recipe.description,
-      'servings': recipe.servings,
-      'prepTimeMinutes': recipe.prepTimeMinutes,
-      'cookTimeMinutes': recipe.cookTimeMinutes,
-      'sourceUrl': recipe.sourceUrl,
-      'imagePath': coverPath,
-      'courseId': recipe.courseId,
-      'categoryId': recipe.categoryId,
-      'rating': recipe.rating,
-      'notes': recipe.notes,
-      'nutritionJson': recipe.nutritionJson,
-      'ingredients': ings
-          .map((i) => {
-                'sortOrder': i.sortOrder,
-                'amount': i.amount,
-                'unit': i.unit,
-                'name': i.name,
-                'notes': i.notes,
-              })
-          .toList(),
-      'steps': steps
-          .map((s) => {
-                'sortOrder': s.sortOrder,
-                'instruction': s.instruction,
-                'durationMinutes': s.durationMinutes,
-                'imagePath': stepPaths[s.id],
-              })
-          .toList(),
-    };
+    final snapshot = await snapOne(recipe);
+
+    // Include up to 6 linked sub-recipes so the shared copy is self-contained.
+    final ings = await dao.getIngredientsForRecipe(recipe.id);
+    final ingIdToName = {for (final i in ings) i.id: i.name};
+    final linkMap = await dao.getIngredientLinksMap(recipe.id);
+    final subs = <String, Recipe>{};
+    final links = <Map<String, dynamic>>[];
+    for (final entry in linkMap.entries) {
+      final ingName = ingIdToName[entry.key];
+      for (final info in entry.value) {
+        subs[info.recipe.id] = info.recipe;
+        links.add({'ingredientName': ingName, 'title': info.recipe.title, 'subId': info.recipe.id});
+      }
+    }
+    final capped = subs.values.take(6).toList();
+    if (capped.isNotEmpty) {
+      final linkedSnaps = <Map<String, dynamic>>[];
+      for (final sub in capped) {
+        linkedSnaps.add(await snapOne(sub));
+      }
+      final cappedIds = capped.map((r) => r.id).toSet();
+      snapshot['linkedRecipes'] = linkedSnaps;
+      snapshot['links'] = links.where((l) => cappedIds.contains(l['subId'])).toList();
+    }
+
+    return snapshot;
   }
 
   Future<void> _shareAsText(BuildContext context) async {
@@ -539,6 +612,7 @@ class _RecipeShareSheet extends StatelessWidget {
             'instruction': s.instruction,
             'imagePath': imagePath,
             'durationMinutes': duration,
+            'notes': s.notes,
           };
         }).toList(),
       };

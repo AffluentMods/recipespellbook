@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
-import '../../../providers/settings_provider.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../services/shopping_list_generator.dart';
 import '../../widgets/app_snackbar.dart';
@@ -70,6 +69,16 @@ String _mealTypeLabel(AppLocalizations l10n, String type) {
     case 'Snack': return l10n.mealTypeSnack;
     default: return type;
   }
+}
+
+/// A fitting meal type for a given hour of day — used when the user taps the
+/// "+" on a specific hour row so the new meal gets a sensible colour/label.
+String _mealTypeForHour(int hour) {
+  if (hour < 11) return 'Breakfast';
+  if (hour < 15) return 'Lunch';
+  if (hour < 17) return 'Snack';
+  if (hour < 21) return 'Dinner';
+  return 'Dessert';
 }
 
 /// Bottom action bar shown while meals are multi-selected.
@@ -167,10 +176,10 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   }
 
   DateTime _getWeekStart(DateTime date) {
-    // Get the start of week based on user's preferred start day
-    final settings = ref.read(settingsProvider);
-    final startDay = settings.weekStartDay; // 1=Mon, 7=Sun
-    int diff = (date.weekday - startDay) % 7;
+    // Planner always runs Monday → Sunday (Monday leftmost), independent of the
+    // global week-start setting, to match the redesigned week strip.
+    const startDay = DateTime.monday; // 1
+    final diff = (date.weekday - startDay) % 7;
     return DateTime(date.year, date.month, date.day - diff);
   }
 
@@ -225,59 +234,71 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header
+            // Header: back · month (tap to jump day/month/year) · more
             _PlannerHeader(
-              weekStart: _weekStart,
-              onPreviousWeek: _goToPreviousWeek,
-              onNextWeek: _goToNextWeek,
-              onCalendarTap: () => _showFullCalendar(context),
+              date: selectedDate,
+              onBack: () {
+                // Pop if this planner was pushed (e.g. deep link); otherwise
+                // fall back to the home tab.
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go('/');
+                }
+              },
+              onPickDate: () => _showFullCalendar(context),
               onMoreOptions: () => _showMoreOptions(context),
             ),
 
             if (!isDesktop) ...[
-              // Week strip — wrapped in horizontal swipe to navigate weeks
-              Responsive.constrainWidth(context, child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onHorizontalDragEnd: (details) {
-                  final velocity = details.primaryVelocity ?? 0;
-                  if (velocity < -300) {
-                    _goToNextWeek();      // swipe left → next
-                  } else if (velocity > 300) _goToPreviousWeek(); // swipe right → prev
-                },
-                child: _WeekStrip(
-                  weekStart: _weekStart,
-                  selectedDate: selectedDate,
-                  mealCounts: mealCountsAsync.when(
-                    data: (counts) => counts,
-                    loading: () => {},
-                    error: (_, __) => {},
-                  ),
-                  onDateSelected: (date) {
-                    ref.read(selectedPlannerDateProvider.notifier).state = date;
+              // Week-at-a-glance strip in its own card (swipe to change weeks).
+              Responsive.constrainWidth(context, child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onHorizontalDragEnd: (details) {
+                    final velocity = details.primaryVelocity ?? 0;
+                    if (velocity < -300) {
+                      _goToNextWeek();      // swipe left → next
+                    } else if (velocity > 300) {
+                      _goToPreviousWeek();  // swipe right → prev
+                    }
                   },
+                  child: _PlannerCard(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    child: _WeekStrip(
+                      weekStart: _weekStart,
+                      selectedDate: selectedDate,
+                      mealCounts: mealCountsAsync.when(
+                        data: (counts) => counts,
+                        loading: () => {},
+                        error: (_, __) => {},
+                      ),
+                      onDateSelected: (date) {
+                        ref.read(selectedPlannerDateProvider.notifier).state = date;
+                      },
+                    ),
+                  ),
                 ),
               )),
 
-              // Selected date header
-              Responsive.constrainWidth(context, child: _DateHeader(
-                date: selectedDate,
-                onTodayTap: _goToToday,
-              )),
-
-              // Meals for selected day
+              // Hour-by-hour day timeline in its own card. Always shown so every
+              // hour offers a "+" to add a meal at that slot, even on empty days.
               Expanded(
-                child: Responsive.constrainWidth(context, child: mealPlansAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
-                  data: (plans) => plans.isEmpty
-                      ? _EmptyDayState(
-                    date: selectedDate,
-                    onAddMeal: () => _showAddMealSheet(context, selectedDate),
-                  )
-                      : _MealsList(
-                    plans: plans,
-                    date: selectedDate,
-                    onAddMeal: () => _showAddMealSheet(context, selectedDate),
+                child: Responsive.constrainWidth(context, child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                  child: _PlannerCard(
+                    padding: EdgeInsets.zero,
+                    child: mealPlansAsync.when(
+                      loading: () => const Center(child: CircularProgressIndicator()),
+                      error: (e, _) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
+                      data: (plans) => _DayTimeline(
+                        plans: plans,
+                        date: selectedDate,
+                        onAddAt: (time) => _showAddMealSheet(context, selectedDate, initialTime: time),
+                        onEditMeal: (plan) => _showEditMealSheet(context, plan, selectedDate),
+                      ),
+                    ),
                   ),
                 )),
               ),
@@ -565,10 +586,17 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
     );
   }
 
-  void _showAddMealSheet(BuildContext context, DateTime date) {
+  void _showAddMealSheet(BuildContext context, DateTime date, {TimeOfDay? initialTime}) {
     Responsive.showAdaptiveSheet(
       context,
-      builder: (ctx) => _AddMealSheet(date: date),
+      builder: (ctx) => _AddMealSheet(date: date, initialTime: initialTime),
+    );
+  }
+
+  void _showEditMealSheet(BuildContext context, MealPlanWithRecipe plan, DateTime date) {
+    Responsive.showAdaptiveSheet(
+      context,
+      builder: (ctx) => _EditMealSheet(plan: plan, date: date),
     );
   }
 }
@@ -912,64 +940,59 @@ class _CompactMealCard extends ConsumerWidget {
 // ============ HEADER ============
 
 class _PlannerHeader extends StatelessWidget {
-  final DateTime weekStart;
-  final VoidCallback onPreviousWeek;
-  final VoidCallback onNextWeek;
-  final VoidCallback onCalendarTap;
+  final DateTime date;
+  final VoidCallback onBack;
+  final VoidCallback onPickDate;
   final VoidCallback onMoreOptions;
 
   const _PlannerHeader({
-    required this.weekStart,
-    required this.onPreviousWeek,
-    required this.onNextWeek,
-    required this.onCalendarTap,
+    required this.date,
+    required this.onBack,
+    required this.onPickDate,
     required this.onMoreOptions,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final weekEnd = weekStart.add(const Duration(days: 6));
-
     final locale = Localizations.localeOf(context).toString();
-    final weekLabel = '${DateFormat.MMMd(locale).format(weekStart)} - ${DateFormat.MMMd(locale).format(weekEnd)}';
+    // Centered "Month Year" that opens a day/month/year picker on tap.
+    final monthLabel = '${DateFormat.MMMM(locale).format(date)} ${date.year}';
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+      padding: const EdgeInsets.fromLTRB(4, 8, 4, 6),
       child: Row(
         children: [
-          // Week navigation
           IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: onPreviousWeek,
-            visualDensity: VisualDensity.compact,
-            tooltip: AppLocalizations.of(context)!.plannerPreviousWeek,
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+            onPressed: onBack,
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           ),
           Expanded(
-            child: GestureDetector(
-              onTap: onCalendarTap,
-              child: Text(
-                weekLabel,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+            child: InkWell(
+              onTap: onPickDate,
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      monthLabel,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.keyboard_arrow_down_rounded,
+                        size: 22, color: theme.colorScheme.onSurfaceVariant),
+                  ],
                 ),
               ),
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: onNextWeek,
-            visualDensity: VisualDensity.compact,
-            tooltip: AppLocalizations.of(context)!.plannerNextWeek,
-          ),
-          IconButton(
-            icon: const Icon(Icons.calendar_month_outlined),
-            onPressed: onCalendarTap,
-            tooltip: AppLocalizations.of(context)!.calendar,
-          ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
+            icon: const Icon(Icons.more_horiz_rounded),
             onPressed: onMoreOptions,
             tooltip: AppLocalizations.of(context)!.plannerMoreOptions,
           ),
@@ -1000,6 +1023,14 @@ class _WeekStrip extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final today = DateTime.now();
     final todayNormalized = DateTime(today.year, today.month, today.day);
+    final selectedNormalized = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+
+    // Compute the day-letter row once per build (not once per day cell).
+    final locale = Localizations.localeOf(context).toString();
+    final dayNames = List.generate(7, (i) {
+      final d = weekStart.add(Duration(days: i));
+      return DateFormat.E(locale).format(d)[0].toUpperCase();
+    });
 
     return Container(
       height: 80,
@@ -1008,16 +1039,10 @@ class _WeekStrip extends StatelessWidget {
         children: List.generate(7, (index) {
           final date = weekStart.add(Duration(days: index));
           final dateNormalized = DateTime(date.year, date.month, date.day);
-          final selectedNormalized = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
 
           final isSelected = dateNormalized == selectedNormalized;
           final isToday = dateNormalized == todayNormalized;
           final mealCount = mealCounts[dateNormalized] ?? 0;
-
-          final dayNames = List.generate(7, (i) {
-            final d = weekStart.add(Duration(days: i));
-            return DateFormat.E(Localizations.localeOf(context).toString()).format(d)[0].toUpperCase();
-          });
 
           return Expanded(
             child: GestureDetector(
@@ -1090,162 +1115,118 @@ class _WeekStrip extends StatelessWidget {
   }
 }
 
-// ============ DATE HEADER ============
+// ============ PLANNER CARD ============
 
-class _DateHeader extends StatelessWidget {
-  final DateTime date;
-  final VoidCallback onTodayTap;
-
-  const _DateHeader({required this.date, required this.onTodayTap});
+/// A soft, elevated surface used to box the week strip and the day timeline,
+/// giving the planner the layered "cards on a tinted page" look.
+class _PlannerCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  const _PlannerCard({required this.child, this.padding = EdgeInsets.zero});
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final today = DateTime.now();
-    final isToday = date.year == today.year && date.month == today.month && date.day == today.day;
-
-    final locale = Localizations.localeOf(context).toString();
-    final dayName = DateFormat.EEEE(locale).format(date);
-    final monthName = DateFormat.MMMM(locale).format(date);
-
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-      child: Row(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    dayName,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  if (isToday) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE8A860),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        l10n.todayBadge,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              Text(
-                '$monthName ${date.day}, ${date.year}',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.outline,
-                ),
-              ),
-            ],
+      clipBehavior: Clip.antiAlias,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
-          const Spacer(),
-          if (!isToday)
-            TextButton(
-              onPressed: onTodayTap,
-              child: Text(l10n.goToToday),
-            ),
         ],
       ),
+      child: child,
     );
   }
 }
 
-// ============ MEALS LIST ============
+// ============ DAY TIMELINE ============
 
-class _MealsList extends ConsumerStatefulWidget {
+/// Hour-by-hour agenda for a single day. Every hour in the visible window shows
+/// a "+" to add a meal at that slot; meals render as colored blocks placed under
+/// the hour they start. The window spans a morning→night default, widened to
+/// include any meals scheduled outside it.
+class _DayTimeline extends ConsumerWidget {
   final List<MealPlanWithRecipe> plans;
   final DateTime date;
-  final VoidCallback onAddMeal;
+  final void Function(TimeOfDay time) onAddAt;
+  final void Function(MealPlanWithRecipe plan) onEditMeal;
 
-  const _MealsList({
+  const _DayTimeline({
     required this.plans,
     required this.date,
-    required this.onAddMeal,
+    required this.onAddAt,
+    required this.onEditMeal,
   });
 
-  @override
-  ConsumerState<_MealsList> createState() => _MealsListState();
-}
-
-class _MealsListState extends ConsumerState<_MealsList> {
-  final _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
+  int _startMinutes(MealPlanWithRecipe p) {
+    final t = p.mealPlan.time;
+    if (t != null) return t.hour * 60 + t.minute;
+    switch (p.mealPlan.mealType.toLowerCase()) {
+      case 'breakfast':
+        return 8 * 60;
+      case 'lunch':
+        return 12 * 60;
+      case 'dinner':
+        return 18 * 60;
+      case 'snack':
+        return 15 * 60;
+      case 'appetizer':
+        return 17 * 60;
+      case 'dessert':
+        return 19 * 60 + 30;
+      default:
+        return 12 * 60;
+    }
   }
 
   @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _launchShopping(BuildContext context, List<String> recipeIds) {
-    launchShoppingListGeneratorFromMealPlan(
-      context,
-      ref,
-      recipeIds: recipeIds,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
-    // Group by meal type
-    final grouped = <String, List<MealPlanWithRecipe>>{};
-    for (final plan in widget.plans) {
-      final type = plan.mealPlan.mealType;
-      grouped.putIfAbsent(type, () => []).add(plan);
+    // Bucket meals by their start hour, sorted within the hour.
+    final byHour = <int, List<MealPlanWithRecipe>>{};
+    for (final p in plans) {
+      final hour = (_startMinutes(p) ~/ 60).clamp(0, 23);
+      byHour.putIfAbsent(hour, () => []).add(p);
+    }
+    for (final list in byHour.values) {
+      list.sort((a, b) => _startMinutes(a).compareTo(_startMinutes(b)));
     }
 
-    // Order: Breakfast, Lunch, Dinner, Appetizer, Dessert, Snack
-    final orderedTypes = ['Breakfast', 'Lunch', 'Dinner', 'Appetizer', 'Dessert', 'Snack'];
-    final sortedKeys = grouped.keys.toList()
-      ..sort((a, b) {
-        final aIdx = orderedTypes.indexOf(a);
-        final bIdx = orderedTypes.indexOf(b);
-        return (aIdx == -1 ? 999 : aIdx).compareTo(bIdx == -1 ? 999 : bIdx);
-      });
+    // Default window 6 AM → 10 PM, widened to include out-of-range meals.
+    final hours = byHour.keys;
+    final minMeal = hours.isEmpty ? 6 : hours.reduce((a, b) => a < b ? a : b);
+    final maxMeal = hours.isEmpty ? 22 : hours.reduce((a, b) => a > b ? a : b);
+    final startHour = minMeal < 6 ? minMeal : 6;
+    final endHour = maxMeal > 22 ? maxMeal : 22;
 
-    // Collect recipe IDs for shopping list
-    final recipeIds = widget.plans
+    final recipeIds = plans
         .where((p) => p.recipe != null)
         .map((p) => p.recipe!.id)
         .toSet()
         .toList();
-
-    final hasRecipes = recipeIds.isNotEmpty;
+    final base = DateTime(date.year, date.month, date.day);
 
     return ListView(
-      controller: _scrollController,
-      padding: const EdgeInsets.only(bottom: 100),
+      padding: const EdgeInsets.fromLTRB(8, 10, 8, 100),
       children: [
-        // Shopping button at top
-        if (hasRecipes)
+        if (recipeIds.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
             child: SizedBox(
               width: double.infinity,
-              height: 48,
+              height: 44,
               child: OutlinedButton.icon(
-                onPressed: () => _launchShopping(context, recipeIds),
+                onPressed: () => launchShoppingListGeneratorFromMealPlan(context, ref, recipeIds: recipeIds),
                 icon: const Icon(Icons.shopping_cart_outlined, size: 18),
                 label: Text(l10n.addDayToShoppingList),
                 style: OutlinedButton.styleFrom(
@@ -1256,470 +1237,525 @@ class _MealsListState extends ConsumerState<_MealsList> {
               ),
             ),
           ),
-
-        // Meal section cards
-        for (final mealType in sortedKeys)
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: theme.colorScheme.surfaceContainerHighest,
-                width: 0.5,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _MealTypeHeader(mealType: mealType),
-                ...grouped[mealType]!.map((plan) => Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  // Stable key per planned meal — without it Flutter
-                  // recycles a tile's State (cached ingredients/steps +
-                  // expanded flag) onto a DIFFERENT meal when switching
-                  // days, showing one recipe's body under another's title.
-                  child: _MealTile(key: ValueKey(plan.mealPlan.id), plan: plan),
-                )),
-              ],
-            ),
+        for (int h = startHour; h <= endHour; h++) ...[
+          _HourRow(
+            base: base,
+            hour: h,
+            onAdd: () => onAddAt(TimeOfDay(hour: h, minute: 0)),
           ),
-
-        // Add meal button
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: OutlinedButton.icon(
-            onPressed: widget.onAddMeal,
-            icon: const Icon(Icons.add),
-            label: Text(l10n.addAnotherMeal),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
+          for (final p in (byHour[h] ?? const <MealPlanWithRecipe>[]))
+            _MealBlock(
+              key: ValueKey(p.mealPlan.id),
+              plan: p,
+              date: date,
+              onEdit: () => onEditMeal(p),
             ),
-          ),
-        ),
-
+        ],
       ],
     );
   }
 }
 
-// ============ MEAL TYPE HEADER ============
-
-class _MealTypeHeader extends StatelessWidget {
-  final String mealType;
-
-  const _MealTypeHeader({required this.mealType});
-
-  String get _emoji {
-    switch (mealType.toLowerCase()) {
-      case 'breakfast': return '🌅';
-      case 'lunch': return '☀️';
-      case 'dinner': return '🌙';
-      case 'appetizer': return '🥗';
-      case 'dessert': return '🍰';
-      case 'snack': return '🍪';
-      default: return '🍽️';
-    }
-  }
+/// A single hour marker: the clock label on the left, a hairline, and a "+" on
+/// the right that adds a meal defaulting to this hour. The whole row is tappable.
+class _HourRow extends StatelessWidget {
+  final DateTime base;
+  final int hour;
+  final VoidCallback onAdd;
+  const _HourRow({required this.base, required this.hour, required this.onAdd});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 4, 4, 4),
-      child: Row(
-        children: [
-          Text(_emoji, style: const TextStyle(fontSize: 18)),
-          const SizedBox(width: 8),
-          Text(
-            mealType.toUpperCase(),
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
-              color: theme.colorScheme.primary,
+    return InkWell(
+      onTap: onAdd,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 62,
+              child: Text(
+                _clock(base, hour * 60),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: Divider(
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                height: 30,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Icon(Icons.add, size: 18, color: theme.colorScheme.primary.withValues(alpha: 0.85)),
+          ],
+        ),
       ),
     );
   }
 }
 
-// ============ MEAL TILE ============
-
-class _MealTile extends ConsumerStatefulWidget {
-  final MealPlanWithRecipe plan;
-
-  const _MealTile({super.key, required this.plan});
-
-  @override
-  ConsumerState<_MealTile> createState() => _MealTileState();
+Color _mealBlockColor(String type) {
+  switch (type.toLowerCase()) {
+    case 'breakfast':
+      return const Color(0xFFC98A12);
+    case 'lunch':
+      return const Color(0xFF12938C);
+    case 'dinner':
+      return const Color(0xFFB8532C);
+    case 'snack':
+      return const Color(0xFF2F6FB0);
+    case 'appetizer':
+      return const Color(0xFF4C8A3F);
+    case 'dessert':
+      return const Color(0xFFB0477E);
+    default:
+      return const Color(0xFF8A6D3B);
+  }
 }
 
-class _MealTileState extends ConsumerState<_MealTile> {
-  bool _isExpanded = false;
-  List<Ingredient>? _ingredients;
-  List<Step>? _steps;
+String _mealBlockEmoji(String type) {
+  switch (type.toLowerCase()) {
+    case 'breakfast':
+      return '🌅';
+    case 'lunch':
+      return '☀️';
+    case 'dinner':
+      return '🌙';
+    case 'appetizer':
+      return '🥗';
+    case 'dessert':
+      return '🍰';
+    case 'snack':
+      return '🍪';
+    default:
+      return '🍽️';
+  }
+}
+
+String _clock(DateTime base, int minutes) =>
+    DateFormat.jm().format(base.add(Duration(minutes: minutes)));
+
+/// A planned meal, rendered under the hour it starts. Tap to edit, long-press
+/// to multi-select, swipe to delete.
+class _MealBlock extends ConsumerWidget {
+  final MealPlanWithRecipe plan;
+  final DateTime date;
+  final VoidCallback onEdit;
+
+  const _MealBlock({
+    super.key,
+    required this.plan,
+    required this.date,
+    required this.onEdit,
+  });
 
   @override
-  void didUpdateWidget(_MealTile oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Defensive self-correction: if this State is ever reused for a
-    // different planned meal or recipe, drop the cached details so we
-    // never render one recipe's ingredients/steps under another's title.
-    final changed = oldWidget.plan.mealPlan.id != widget.plan.mealPlan.id ||
-        oldWidget.plan.recipe?.id != widget.plan.recipe?.id;
-    if (changed) {
-      _ingredients = null;
-      _steps = null;
-      if (_isExpanded && widget.plan.recipe != null) {
-        _loadDetails(); // reload for the new recipe
-      }
-    }
-  }
-
-  Future<void> _loadDetails() async {
-    final recipe = widget.plan.recipe;
-    if (recipe == null) return;
-    final dao = ref.read(recipeDaoProvider);
-    final ings = await dao.getIngredientsForRecipe(recipe.id);
-    final steps = await dao.getStepsForRecipe(recipe.id);
-    if (mounted) {
-      setState(() {
-        _ingredients = ings;
-        _steps = steps;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final recipe = widget.plan.recipe;
-    final mealPlanDao = ref.read(mealPlanDaoProvider);
-    final title = recipe?.title ?? widget.plan.mealPlan.name ?? l10n.meal;
+    final l10n = AppLocalizations.of(context)!;
+    final r = plan.recipe;
+    final title = r?.title ?? plan.mealPlan.name ?? plan.mealPlan.customMeal ?? l10n.meal;
+    final color = _mealBlockColor(plan.mealPlan.mealType);
+    const onColor = Colors.white;
 
-    // Multi-select state (long-press to enter; tap toggles while active).
     final selectedIds = ref.watch(_plannerSelectionProvider);
     final selecting = selectedIds.isNotEmpty;
-    final isSelected = selectedIds.contains(widget.plan.mealPlan.id);
-    final selection = ref.read(_plannerSelectionProvider.notifier);
+    final isSelected = selectedIds.contains(plan.mealPlan.id);
+    final sel = ref.read(_plannerSelectionProvider.notifier);
 
-    return Dismissible(
-      key: Key(widget.plan.mealPlan.id),
-      // Disable swipe-to-delete while selecting so it can't fight taps.
-      direction: selecting ? DismissDirection.none : DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.error,
-          borderRadius: BorderRadius.circular(16),
+    final base = DateTime(date.year, date.month, date.day);
+    final t = plan.mealPlan.time;
+    final subtitle = <String>[
+      if (t != null) _clock(base, t.hour * 60 + t.minute),
+      if (r?.servings != null && r!.servings!.isNotEmpty) '${r.servings} ${l10n.servingsUnit}',
+    ].join('  ·  ');
+
+    return Padding(
+      // Left inset aligns the card with the hour divider (8 ListView + 62 label).
+      padding: const EdgeInsets.fromLTRB(70, 3, 4, 3),
+      child: Dismissible(
+        key: Key('tl_${plan.mealPlan.id}'),
+        direction: selecting ? DismissDirection.none : DismissDirection.endToStart,
+        onDismissed: (_) => ref.read(mealPlanDaoProvider).deleteMealPlan(plan.mealPlan.id),
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20),
+          decoration: BoxDecoration(color: theme.colorScheme.error, borderRadius: BorderRadius.circular(16)),
+          child: Icon(Icons.delete, color: theme.colorScheme.onError),
         ),
-        child: Icon(Icons.delete, color: theme.colorScheme.onError),
-      ),
-      onDismissed: (_) => mealPlanDao.deleteMealPlan(widget.plan.mealPlan.id),
-      child: Card(
-        margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(
+        child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          side: isSelected
-              ? BorderSide(color: theme.colorScheme.primary, width: 2)
-              : BorderSide.none,
-        ),
-        color: isSelected ? theme.colorScheme.primary.withValues(alpha: 0.10) : null,
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          children: [
-            // Header — always visible, tappable to expand
-            InkWell(
-              onTap: () {
-                if (selecting) {
-                  selection.toggle(widget.plan.mealPlan.id);
-                  return;
-                }
-                if (recipe != null && !_isExpanded && _ingredients == null) {
-                  _loadDetails();
-                }
-                setState(() => _isExpanded = !_isExpanded);
-              },
-              onLongPress: () {
-                HapticFeedback.selectionClick();
-                selection.add(widget.plan.mealPlan.id);
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    // Selection check (while selecting) or recipe thumbnail.
-                    if (selecting)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: Icon(
-                          isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
-                          color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outlineVariant,
-                          size: 28,
-                        ),
-                      ),
-                    // Recipe thumbnail
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: SizedBox(
-                        width: 52,
-                        height: 52,
-                        child: RecipeImage.thumbnail(
-                          imagePath: recipe?.imagePath,
-                          recipeId: recipe?.id,
-                          width: 52,
-                          height: 52,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Title and meta
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          if (recipe != null) ...[
-                            const SizedBox(height: 2),
+          onTap: () {
+            if (selecting) {
+              sel.toggle(plan.mealPlan.id);
+              return;
+            }
+            onEdit();
+          },
+          onLongPress: () {
+            HapticFeedback.selectionClick();
+            sel.add(plan.mealPlan.id);
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(16),
+              border: isSelected ? Border.all(color: Colors.white, width: 2.5) : null,
+            ),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Text(
-                              [
-                                if (recipe.prepTimeMinutes != null) '${recipe.prepTimeMinutes}${l10n.minutesPrepSuffix}',
-                                if (recipe.cookTimeMinutes != null) '${recipe.cookTimeMinutes}${l10n.minutesCookSuffix}',
-                                if (recipe.servings != null) '${recipe.servings} servings',
-                              ].join(' \u2022 '),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.outline,
+                              _mealTypeLabel(l10n, plan.mealPlan.mealType).toUpperCase(),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: onColor.withValues(alpha: 0.75),
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.7,
+                                fontSize: 10.5,
                               ),
                             ),
+                            const SizedBox(height: 3),
+                            Text(
+                              title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: onColor,
+                                fontWeight: FontWeight.w700,
+                                height: 1.15,
+                              ),
+                            ),
+                            if (subtitle.isNotEmpty) ...[
+                              const SizedBox(height: 5),
+                              Text(
+                                subtitle,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: onColor.withValues(alpha: 0.85),
+                                ),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                    // View recipe button
-                    if (recipe != null)
-                      IconButton(
-                        icon: const Icon(Icons.open_in_new, size: 20),
-                        onPressed: () => context.push('/recipe/${recipe.id}'),
-                        tooltip: l10n.actionView,
-                        visualDensity: VisualDensity.compact,
+                      const SizedBox(width: 12),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: r != null
+                            ? SizedBox(
+                                width: 58,
+                                height: 58,
+                                child: RecipeImage.thumbnail(
+                                  imagePath: r.imagePath,
+                                  recipeId: r.id,
+                                  width: 58,
+                                  height: 58,
+                                ),
+                              )
+                            : Container(
+                                width: 58,
+                                height: 58,
+                                color: Colors.white.withValues(alpha: 0.16),
+                                alignment: Alignment.center,
+                                child: Text(_mealBlockEmoji(plan.mealPlan.mealType),
+                                    style: const TextStyle(fontSize: 24)),
+                              ),
                       ),
-                    // Expand chevron
-                    AnimatedRotation(
-                      turns: _isExpanded ? 0.5 : 0,
-                      duration: const Duration(milliseconds: 200),
-                      child: Icon(Icons.expand_more,
-                          color: theme.colorScheme.outline),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+                if (selecting)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.black26),
+                      child: Icon(
+                        isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-
-            // Expanded: ingredients and instructions
-            AnimatedCrossFade(
-              duration: const Duration(milliseconds: 250),
-              crossFadeState: _isExpanded
-                  ? CrossFadeState.showSecond
-                  : CrossFadeState.showFirst,
-              firstChild: const SizedBox(width: double.infinity, height: 0),
-              secondChild: recipe != null ? _buildExpandedContent(theme, l10n) : const SizedBox.shrink(),
-            ),
-          ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildExpandedContent(ThemeData theme, AppLocalizations l10n) {
-    if (_ingredients == null || _steps == null) {
-      return const Padding(
-        padding: EdgeInsets.all(16),
-        child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Divider(height: 1, color: theme.colorScheme.outline.withValues(alpha: 0.1)),
-
-        // Ingredients section
-        if (_ingredients!.isNotEmpty) ...[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
-            child: Row(
-              children: [
-                Icon(Icons.restaurant, size: 14, color: theme.colorScheme.primary),
-                const SizedBox(width: 6),
-                Text(
-                  l10n.tabIngredients,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '${_ingredients!.where((i) => i.notes != '__header__').length}',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.outline,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ..._ingredients!.map((ing) {
-            if (ing.notes == '__header__') {
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 2),
-                child: Text(
-                  ing.name,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              );
-            }
-            final amountParts = <String>[];
-            if (ing.amount != null && ing.amount!.isNotEmpty) amountParts.add(ing.amount!);
-            if (ing.unit != null && ing.unit!.isNotEmpty) amountParts.add(ing.unit!);
-            final amountStr = amountParts.join(' ');
-
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.fiber_manual_record, size: 6,
-                      color: theme.colorScheme.outline),
-                  const SizedBox(width: 8),
-                  if (amountStr.isNotEmpty)
-                    Text(
-                      '$amountStr ',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  Expanded(
-                    child: Text(
-                      ing.name,
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
-        ],
-
-        // Instructions section
-        if (_steps!.isNotEmpty) ...[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
-            child: Row(
-              children: [
-                Icon(Icons.format_list_numbered, size: 14, color: theme.colorScheme.primary),
-                const SizedBox(width: 6),
-                Text(
-                  l10n.tabInstructions,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ..._steps!.asMap().entries.map((entry) {
-            final idx = entry.key + 1;
-            final step = entry.value;
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 20,
-                    child: Text(
-                      '$idx.',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      step.instruction,
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
-        ],
-
-        const SizedBox(height: 12),
-      ],
     );
   }
 }
 
-// ============ EMPTY STATE ============
+// ============ EDIT MEAL SHEET ============
 
-class _EmptyDayState extends StatelessWidget {
+/// Default clock time for a meal type (used when a meal has no explicit time).
+TimeOfDay _defaultMealTime(String type) {
+  switch (type.toLowerCase()) {
+    case 'breakfast':
+      return const TimeOfDay(hour: 8, minute: 0);
+    case 'lunch':
+      return const TimeOfDay(hour: 12, minute: 0);
+    case 'dinner':
+      return const TimeOfDay(hour: 18, minute: 0);
+    case 'snack':
+      return const TimeOfDay(hour: 15, minute: 0);
+    case 'appetizer':
+      return const TimeOfDay(hour: 17, minute: 0);
+    case 'dessert':
+      return const TimeOfDay(hour: 19, minute: 30);
+    default:
+      return const TimeOfDay(hour: 12, minute: 0);
+  }
+}
+
+/// Tapping a planned meal opens this: change its time, move it to another day,
+/// change the meal type, replace the recipe, or remove it.
+class _EditMealSheet extends ConsumerWidget {
+  final MealPlanWithRecipe plan;
   final DateTime date;
-  final VoidCallback onAddMeal;
+  const _EditMealSheet({required this.plan, required this.date});
 
-  const _EmptyDayState({required this.date, required this.onAddMeal});
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final dao = ref.read(mealPlanDaoProvider);
+    final mp = plan.mealPlan;
+    final r = plan.recipe;
+    final title = r?.title ?? mp.name ?? mp.customMeal ?? l10n.meal;
+    final base = DateTime(date.year, date.month, date.day);
+    final currentTod = mp.time != null
+        ? TimeOfDay(hour: mp.time!.hour, minute: mp.time!.minute)
+        : _defaultMealTime(mp.mealType);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 8, 8),
+              child: Row(
+                children: [
+                  Container(width: 12, height: 12, decoration: BoxDecoration(color: _mealBlockColor(mp.mealType), shape: BoxShape.circle)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                        Text(
+                          '${_mealTypeLabel(l10n, mp.mealType)} · ${currentTod.format(context)}',
+                          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            if (r != null)
+              ListTile(
+                leading: const Icon(Icons.restaurant_menu),
+                title: const Text('Open recipe'),
+                onTap: () {
+                  Navigator.pop(context);
+                  context.push('/recipe/${r.id}');
+                },
+              ),
+            ListTile(
+              leading: const Icon(Icons.schedule),
+              title: const Text('Change time'),
+              trailing: Text(currentTod.format(context), style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
+              onTap: () async {
+                final picked = await showTimePicker(context: context, initialTime: currentTod);
+                if (picked == null || !context.mounted) return;
+                await dao.updateMealPlanTime(mp.id, DateTime(base.year, base.month, base.day, picked.hour, picked.minute));
+                if (context.mounted) Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.event),
+              title: Text(l10n.plannerMoveToDate),
+              onTap: () async {
+                final now = DateTime.now();
+                final picked = await showDatePicker(context: context, initialDate: date, firstDate: DateTime(now.year - 1), lastDate: DateTime(now.year + 3));
+                if (picked == null || !context.mounted) return;
+                final target = DateTime(picked.year, picked.month, picked.day);
+                final newTime = mp.time != null
+                    ? DateTime(target.year, target.month, target.day, mp.time!.hour, mp.time!.minute)
+                    : null;
+                await dao.updateMealPlanSchedule(mp.id, target, newTime);
+                if (!context.mounted) return;
+                // Show the snackbar (root-scoped) BEFORE popping so it isn't
+                // fired on a defunct context.
+                AppSnackbar.success(context, l10n.plannerMealsMoved(DateFormat.MMMd().format(target)));
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.restaurant),
+              title: Text(l10n.plannerChangeMealType),
+              onTap: () async {
+                final type = await _pickMealTypeSheet(context);
+                if (type == null || !context.mounted) return;
+                await dao.updateMealPlanType(mp.id, type);
+                if (context.mounted) Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.swap_horiz),
+              title: const Text('Replace meal'),
+              onTap: () async {
+                final newId = await _pickRecipeSheet(context, ref);
+                if (newId == null || !context.mounted) return;
+                await dao.updateMealPlanRecipe(mp.id, newId);
+                if (context.mounted) Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.delete_outline, color: theme.colorScheme.error),
+              title: Text(l10n.removeMeal, style: TextStyle(color: theme.colorScheme.error)),
+              onTap: () async {
+                await dao.deleteMealPlan(mp.id);
+                if (!context.mounted) return;
+                AppSnackbar.info(context, l10n.plannerMealRemoved);
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Bottom-sheet meal-type chooser used by the edit sheet.
+Future<String?> _pickMealTypeSheet(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  return showModalBottomSheet<String>(
+    context: context,
+    builder: (ctx) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 8),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(ctx).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(l10n.plannerChangeMealType, style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          ),
+          for (final (mt, emoji) in _plannerMealTypes)
+            ListTile(
+              leading: Text(emoji, style: const TextStyle(fontSize: 22)),
+              title: Text(_mealTypeLabel(l10n, mt)),
+              onTap: () => Navigator.pop(ctx, mt),
+            ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    ),
+  );
+}
+
+/// Bottom-sheet recipe picker used by "Replace meal"; returns the chosen id.
+Future<String?> _pickRecipeSheet(BuildContext context, WidgetRef ref) {
+  return showModalBottomSheet<String>(
+    context: context,
+    isScrollControlled: true,
+    builder: (ctx) => _RecipePickerSheet(ref: ref),
+  );
+}
+
+class _RecipePickerSheet extends StatefulWidget {
+  final WidgetRef ref;
+  const _RecipePickerSheet({required this.ref});
+
+  @override
+  State<_RecipePickerSheet> createState() => _RecipePickerSheetState();
+}
+
+class _RecipePickerSheetState extends State<_RecipePickerSheet> {
+  String _query = '';
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final recipeDao = widget.ref.read(recipeDaoProvider);
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.restaurant_menu,
-              size: 64,
-              color: theme.colorScheme.outline.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.noMealsPlanned,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.75,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 12),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: l10n.searchRecipes,
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
               ),
+              onChanged: (v) => setState(() => _query = v),
             ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.tapToAddMeal,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.outline,
-              ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: StreamBuilder<List<Recipe>>(
+              stream: recipeDao.watchAllRecipesGlobal(),
+              builder: (context, snapshot) {
+                var recipes = snapshot.data ?? [];
+                if (_query.isNotEmpty) {
+                  recipes = recipes.where((r) => r.title.toLowerCase().contains(_query.toLowerCase())).toList();
+                }
+                if (recipes.isEmpty) {
+                  return Center(
+                    child: Text(
+                      _query.isEmpty ? l10n.noRecipesYet : l10n.noRecipesFound,
+                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+                    ),
+                  );
+                }
+                return ListView.builder(
+                  itemCount: recipes.length,
+                  itemBuilder: (context, index) {
+                    final recipe = recipes[index];
+                    return _RecipeSelectTile(recipe: recipe, onTap: () => Navigator.pop(context, recipe.id));
+                  },
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -1729,16 +1765,50 @@ class _EmptyDayState extends StatelessWidget {
 
 class _AddMealSheet extends ConsumerStatefulWidget {
   final DateTime date;
+  final TimeOfDay? initialTime;
 
-  const _AddMealSheet({required this.date});
+  const _AddMealSheet({required this.date, this.initialTime});
 
   @override
   ConsumerState<_AddMealSheet> createState() => _AddMealSheetState();
 }
 
 class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
-  String _selectedMealType = 'Dinner';
+  late String _selectedMealType;
   String _searchQuery = '';
+  TimeOfDay? _selectedTime;
+
+  @override
+  void initState() {
+    super.initState();
+    // When launched from a specific hour's "+", default the time to that hour
+    // and pick a fitting meal type; otherwise start on Dinner with no set time.
+    if (widget.initialTime != null) {
+      _selectedTime = widget.initialTime;
+      _selectedMealType = _mealTypeForHour(widget.initialTime!.hour);
+    } else {
+      _selectedMealType = 'Dinner';
+    }
+  }
+
+  TimeOfDay _defaultTimeForMeal(String type) {
+    switch (type.toLowerCase()) {
+      case 'breakfast':
+        return const TimeOfDay(hour: 8, minute: 0);
+      case 'lunch':
+        return const TimeOfDay(hour: 12, minute: 0);
+      case 'dinner':
+        return const TimeOfDay(hour: 18, minute: 0);
+      case 'snack':
+        return const TimeOfDay(hour: 15, minute: 0);
+      case 'appetizer':
+        return const TimeOfDay(hour: 17, minute: 0);
+      case 'dessert':
+        return const TimeOfDay(hour: 19, minute: 30);
+      default:
+        return const TimeOfDay(hour: 12, minute: 0);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1784,6 +1854,52 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
                     _MealTypeChip(emoji: '🍰', label: l10n.mealTypeDessert, isSelected: _selectedMealType == 'Dessert', onTap: () => setState(() => _selectedMealType = 'Dessert')),
                     _MealTypeChip(emoji: '🍪', label: l10n.mealTypeSnack, isSelected: _selectedMealType == 'Snack', onTap: () => setState(() => _selectedMealType = 'Snack')),
                   ],
+                ),
+
+                const SizedBox(height: 10),
+
+                // Optional time — sets MealPlans.time so the day-view timeline
+                // places this meal precisely (otherwise it uses a default slot).
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: InkWell(
+                    onTap: () async {
+                      final picked = await showTimePicker(
+                        context: context,
+                        initialTime: _selectedTime ?? _defaultTimeForMeal(_selectedMealType),
+                      );
+                      if (picked != null && mounted) setState(() => _selectedTime = picked);
+                    },
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _selectedTime != null ? const Color(0xFFE8A860) : theme.colorScheme.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.schedule, size: 16, color: _selectedTime != null ? Colors.white : theme.colorScheme.onSurface),
+                          const SizedBox(width: 6),
+                          Text(
+                            _selectedTime != null ? _selectedTime!.format(context) : 'Set time',
+                            style: TextStyle(
+                              color: _selectedTime != null ? Colors.white : theme.colorScheme.onSurface,
+                              fontWeight: _selectedTime != null ? FontWeight.bold : FontWeight.normal,
+                            ),
+                          ),
+                          if (_selectedTime != null) ...[
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () => setState(() => _selectedTime = null),
+                              child: const Icon(Icons.close, size: 15, color: Colors.white),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
 
                 const SizedBox(height: 16),
@@ -1849,11 +1965,16 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
     final mealPlanDao = ref.read(mealPlanDaoProvider);
     final id = 'meal_${DateTime.now().millisecondsSinceEpoch}';
 
+    final DateTime? time = _selectedTime == null
+        ? null
+        : DateTime(widget.date.year, widget.date.month, widget.date.day,
+            _selectedTime!.hour, _selectedTime!.minute);
     await mealPlanDao.insertMealPlan(MealPlansCompanion.insert(
       id: id,
       date: widget.date,
       mealType: drift.Value(_selectedMealType),
       recipeId: drift.Value(recipe.id),
+      time: drift.Value(time),
     ));
 
     if (mounted) {

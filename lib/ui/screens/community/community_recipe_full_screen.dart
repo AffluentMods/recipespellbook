@@ -243,7 +243,7 @@ class CommunityRecipeFullScreen extends ConsumerWidget {
                   if (recipe.ingredients.isNotEmpty) ...[
                     _SectionHeader(
                       icon: Icons.shopping_basket_outlined,
-                      title: l10n.communityIngredientCount(recipe.ingredients.length),
+                      title: l10n.communityIngredientCount(recipe.ingredients.where((i) => i.notes != '__header__').length),
                     ),
                     const SizedBox(height: 8),
                     ...recipe.ingredients.map((ing) => _IngredientRow(ingredient: ing)),
@@ -254,14 +254,22 @@ class CommunityRecipeFullScreen extends ConsumerWidget {
                   if (recipe.steps.isNotEmpty) ...[
                     _SectionHeader(
                       icon: Icons.format_list_numbered,
-                      title: l10n.communityStepCount(recipe.steps.length),
+                      title: l10n.communityStepCount(recipe.steps.where((s) => s.notes != '__header__').length),
                     ),
                     const SizedBox(height: 12),
-                    ...recipe.steps.asMap().entries.map((entry) => _StepCard(
-                      step: entry.value,
-                      stepNumber: entry.key + 1,
-                      publicationId: publicationId,
-                    )),
+                    ...(() {
+                      final widgets = <Widget>[];
+                      var n = 0;
+                      for (final step in recipe.steps) {
+                        if (step.notes == '__header__') {
+                          widgets.add(_StepSectionHeader(title: step.instruction));
+                        } else {
+                          n += 1;
+                          widgets.add(_StepCard(step: step, stepNumber: n, publicationId: publicationId));
+                        }
+                      }
+                      return widgets;
+                    })(),
                     const SizedBox(height: 16),
                   ],
 
@@ -441,6 +449,7 @@ class CommunityRecipeFullScreen extends ConsumerWidget {
             sortOrder: step.sortOrder,
             instruction: step.instruction,
             durationMinutes: drift.Value(step.durationMinutes),
+            notes: drift.Value(step.notes),
             imagePath: drift.Value(stepLocalPaths[i]),
           ));
         }
@@ -550,6 +559,20 @@ class _IngredientRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    // Section header (display-only divider stored with notes == '__header__').
+    if (ingredient.notes == '__header__') {
+      return Padding(
+        padding: const EdgeInsets.only(top: 12, bottom: 4),
+        child: Text(
+          ingredient.name,
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+      );
+    }
 
     final amount = <String>[];
     if (ingredient.amount != null && ingredient.amount!.isNotEmpty) amount.add(ingredient.amount!);
@@ -789,6 +812,27 @@ class _CookedToggleState extends ConsumerState<_CookedToggle> {
               ),
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Section-header row for community recipe steps (notes == '__header__').
+class _StepSectionHeader extends StatelessWidget {
+  final String title;
+  const _StepSectionHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 10),
+      child: Text(
+        title,
+        style: theme.textTheme.titleSmall?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: theme.colorScheme.primary,
         ),
       ),
     );

@@ -208,7 +208,10 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
     }
 
     final ingredients = await dao.getIngredientsForRecipe(widget.recipeId);
-    final steps = await dao.getStepsForRecipe(widget.recipeId);
+    // Section headers are display-only dividers, not steps to cook through.
+    final steps = (await dao.getStepsForRecipe(widget.recipeId))
+        .where((s) => s.notes != '__header__')
+        .toList();
 
     // Load nutrition if available
     NutritionData? nutrition;
