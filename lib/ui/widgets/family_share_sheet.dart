@@ -88,6 +88,8 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
 
   bool get _isCookbook => widget.resourceType == 'cookbook';
   bool get _hasFamilyTier {
+    // Sharing a shopping list is free; sharing a cookbook requires a paid plan.
+    if (!_isCookbook) return true;
     final tier = ref.read(subscriptionProvider).tier;
     return tier.index >= SubscriptionTier.premium.index;
   }

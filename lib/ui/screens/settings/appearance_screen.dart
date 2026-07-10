@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../data/app_enums.dart';
 import '../../../providers/settings_provider.dart';
@@ -224,10 +225,8 @@ class _ColorThemeGrid extends ConsumerWidget {
                   MaterialPageRoute(builder: (_) => const CustomThemeScreen()),
                 );
               } else {
-                // Show upgrade hint
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.appearanceCustomThemeRequiresPremium)),
-                );
+                // Not premium — launch the actual purchase flow.
+                context.push('/upgrade');
               }
             } else {
               onChanged(colorTheme);

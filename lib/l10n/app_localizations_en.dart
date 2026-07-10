@@ -3195,7 +3195,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get shoppingBySection => 'By Section';
+  String get shoppingBySection => 'By Aisle';
 
   @override
   String get shoppingByRecipe => 'By Recipe';
@@ -9070,7 +9070,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallPlanPremium => 'Premium';
 
   @override
-  String get paywallPricePremium => '\$6.99';
+  String get paywallPricePremium => '\$9.99';
 
   @override
   String get paywallSublinePremium => 'one-time · yours forever';

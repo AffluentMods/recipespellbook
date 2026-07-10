@@ -107,8 +107,11 @@ enum SubscriptionTier {
   /// Whether this tier includes cloud sync capability.
   bool get hasCloudSync => this != SubscriptionTier.free;
 
-  /// Whether this tier includes family/sharing features.
-  bool get hasSharing => this == SubscriptionTier.family;
+  /// Whether this tier includes paid family/sharing features (shared cookbooks,
+  /// recipes, meal plans). Any paid tier grants these now that there is a single
+  /// plan — the legacy `family` tier is grandfathered in. (Shared shopping lists
+  /// are free and gated separately via GatedFeature.sharedLists.)
+  bool get hasSharing => this != SubscriptionTier.free;
 
   /// Map a backend tier string (from User.tier) to the enum.
   static SubscriptionTier fromBackendString(String? tier) {

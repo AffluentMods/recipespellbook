@@ -25,10 +25,8 @@ import '../import/import_preview_screen.dart';
 import '../../../services/grocery_service.dart';
 import '../../../services/ingredient_suggestion_service.dart';
 import '../../../services/shopping_list_service.dart';
-import '../../../providers/subscription_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/family_service.dart';
-import '../../../services/revenuecat_service.dart';
 import '../../../utils/ingredient_utils.dart';
 import '../../widgets/app_refresh_indicator.dart';
 import '../../widgets/app_snackbar.dart';
@@ -222,15 +220,33 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   Map<String, String> _userMappings = {};
   final Set<String> _recentlyCheckedIds = {};
   Map<String, int> _sharedListCounts = {}; // listId → share count
+  Map<String, List<_ShopMember>> _sharedListMembers = {}; // listId → members
 
   static const _lastListKey = 'shoppingLastListId';
+  static const _groupModeKey = 'shoppingGroupMode';
 
   @override
   void initState() {
     super.initState();
     _restoreCurrentList();
+    _restoreGroupMode();
     _loadUserMappings();
     _loadSharedStatus();
+  }
+
+  /// Restore the By Aisle / By Recipe choice across restarts.
+  Future<void> _restoreGroupMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString(_groupModeKey);
+    if (saved == null || !mounted) return;
+    final mode = ShoppingGroupMode.values
+        .firstWhere((m) => m.name == saved, orElse: () => ShoppingGroupMode.section);
+    if (mode != _groupMode) setState(() => _groupMode = mode);
+  }
+
+  void _setGroupMode(ShoppingGroupMode mode) {
+    setState(() => _groupMode = mode);
+    SharedPreferences.getInstance().then((p) => p.setString(_groupModeKey, mode.name));
   }
 
   /// Restore the last-viewed list across screen rebuilds / app restarts.
@@ -276,12 +292,30 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       final allShares = await FamilyService.instance.getAllShares();
       if (!mounted) return;
       final counts = <String, int>{};
-      for (final s in allShares.granted) {
-        if (s.isShoppingList) {
-          counts[s.resourceId] = (counts[s.resourceId] ?? 0) + 1;
-        }
+      final members = <String, List<_ShopMember>>{};
+      final seen = <String, Set<String>>{};
+      void addMember(String listId, String? name, String? url) {
+        if ((name == null || name.isEmpty) && (url == null || url.isEmpty)) return;
+        final key = '${name ?? ''}|${url ?? ''}';
+        if (!seen.putIfAbsent(listId, () => <String>{}).add(key)) return;
+        members.putIfAbsent(listId, () => []).add(_ShopMember(name: name, avatarUrl: url));
       }
-      setState(() => _sharedListCounts = counts);
+
+      for (final s in allShares.granted) {
+        if (!s.isShoppingList) continue;
+        counts[s.resourceId] = (counts[s.resourceId] ?? 0) + 1;
+        addMember(s.resourceId, s.ownerName, s.ownerAvatarUrl);
+        addMember(s.resourceId, s.sharedWithName, s.sharedWithAvatarUrl);
+      }
+      for (final s in allShares.received) {
+        if (!s.isShoppingList) continue;
+        addMember(s.resourceId, s.ownerName, s.ownerAvatarUrl);
+        addMember(s.resourceId, s.sharedWithName, s.sharedWithAvatarUrl);
+      }
+      setState(() {
+        _sharedListCounts = counts;
+        _sharedListMembers = members;
+      });
     } catch (_) {}
   }
 
@@ -351,7 +385,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   itemCount: uncheckedItems.length,
                   otherListsCount: otherListsCount,
                   groupMode: _groupMode,
-                  onGroupModeChanged: (mode) => setState(() => _groupMode = mode),
+                  onGroupModeChanged: _setGroupMode,
+                  members: _sharedListMembers[_currentListId] ?? const [],
                   onShare: () => _showShareSheet(context),
                   onMoreOptions: () => _showMoreOptions(context),
                   onListTap: () => _showListSwitcher(context),
@@ -403,17 +438,6 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
         );
       case ShoppingGroupMode.recipe:
         return _RecipeGroupedList(
-          items: unchecked,
-          checkedItems: checked,
-          listId: _currentListId,
-          userMappings: _userMappings,
-          onCategoryChanged: _onItemCategoryChanged,
-          onItemChecked: _onItemChecked,
-          onItemUnchecked: _onItemUnchecked,
-          recentlyCheckedIds: _recentlyCheckedIds,
-        );
-      case ShoppingGroupMode.ungrouped:
-        return _UngroupedList(
           items: unchecked,
           checkedItems: checked,
           listId: _currentListId,
@@ -637,20 +661,13 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
               },
             ),
 
-            // ── Family Share ──
+            // ── Family Share (free — a lightweight sync everyone can use) ──
             ListTile(
               leading: const Icon(Icons.family_restroom),
               title: Text(l10n.familyShare),
               subtitle: Text(l10n.familyShareDescription),
-              trailing: _isFamilyTierUnlocked()
-                  ? null
-                  : Icon(Icons.star, size: 16, color: Colors.amber.shade600),
               onTap: () {
                 Navigator.pop(ctx);
-                if (!_isFamilyTierUnlocked()) {
-                  _showUpgradePrompt(context, l10n.familyShare, l10n.familyShareUpgradeMessage);
-                  return;
-                }
                 showResourceShareSheet(
                   context,
                   resourceType: 'shopping_list',
@@ -768,56 +785,6 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   },
                   icon: const Icon(Icons.share, size: 18),
                   label: Text(l10n.actionShare),
-                )),
-              ]),
-              const SizedBox(height: 8),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  bool _isFamilyTierUnlocked() {
-    final tier = ref.read(subscriptionProvider).tier;
-    return tier.index >= SubscriptionTier.premium.index;
-  }
-
-  void _showUpgradePrompt(BuildContext context, String featureName, String message) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    Responsive.showAdaptiveSheet(
-      context,
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(width: 40, height: 4, decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              )),
-              const SizedBox(height: 24),
-              const Icon(Icons.star, size: 48, color: Colors.amber),
-              const SizedBox(height: 16),
-              Text(l10n.unlockFeature(featureName),
-                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text(message,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
-              const SizedBox(height: 24),
-              Row(children: [
-                Expanded(child: OutlinedButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text(l10n.notNow),
-                )),
-                const SizedBox(width: 12),
-                Expanded(child: FilledButton.icon(
-                  onPressed: () { Navigator.pop(ctx); context.push('/upgrade'); },
-                  icon: const Icon(Icons.star, size: 18),
-                  label: Text(l10n.upgradeButton),
                 )),
               ]),
               const SizedBox(height: 8),
@@ -1578,6 +1545,7 @@ class _ModernHeader extends StatelessWidget {
   final int otherListsCount;
   final ShoppingGroupMode groupMode;
   final ValueChanged<ShoppingGroupMode> onGroupModeChanged;
+  final List<_ShopMember> members;
   final VoidCallback onShare;
   final VoidCallback onMoreOptions;
   final VoidCallback onListTap;
@@ -1588,6 +1556,7 @@ class _ModernHeader extends StatelessWidget {
     this.otherListsCount = 0,
     required this.groupMode,
     required this.onGroupModeChanged,
+    this.members = const [],
     required this.onShare,
     required this.onMoreOptions,
     required this.onListTap,
@@ -1644,50 +1613,47 @@ class _ModernHeader extends StatelessWidget {
                 ),
               ),
               const Spacer(),
+              // Family members this list is shared with.
+              if (members.length > 1) ...[
+                _ShopAvatarStack(members: members),
+                const SizedBox(width: 4),
+              ],
               IconButton(icon: const Icon(Icons.share_outlined), tooltip: l10n.actionShare, onPressed: onShare),
               IconButton(icon: const Icon(Icons.more_vert), tooltip: 'More options', onPressed: onMoreOptions),
             ],
           ),
           const SizedBox(height: 12),
+          // Grouping toggle on the LEFT (tap to flip By Aisle ⇄ By Recipe),
+          // item count on the RIGHT.
           Row(
             children: [
-              Text(
-                l10n.shoppingItemCount(itemCount),
-                style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: PopupMenuButton<ShoppingGroupMode>(
-                  offset: const Offset(0, 40),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  onSelected: onGroupModeChanged,
-                  itemBuilder: (ctx) => ShoppingGroupMode.values.map((mode) {
-                    return PopupMenuItem(
-                      value: mode,
-                      child: Row(
-                        children: [
-                          Icon(mode.icon, size: 20, color: groupMode == mode ? theme.colorScheme.primary : null),
-                          const SizedBox(width: 12),
-                          Text(_getGroupModeLabel(mode, l10n)),
-                          if (groupMode == mode) ...[const Spacer(), Icon(Icons.check, size: 18, color: theme.colorScheme.primary)],
-                        ],
-                      ),
-                    );
-                  }).toList(),
+              InkWell(
+                onTap: () => onGroupModeChanged(groupMode.toggled),
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(_getGroupModeLabel(groupMode, l10n), style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
-                      const SizedBox(width: 4),
-                      Icon(Icons.arrow_drop_down, size: 20, color: theme.colorScheme.onSurface),
+                      Icon(groupMode.icon, size: 17, color: theme.colorScheme.primary),
+                      const SizedBox(width: 7),
+                      Text(_getGroupModeLabel(groupMode, l10n),
+                          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+                      const SizedBox(width: 6),
+                      Icon(Icons.swap_horiz_rounded, size: 16, color: theme.colorScheme.outline),
                     ],
                   ),
                 ),
+              ),
+              const Spacer(),
+              Text(
+                l10n.shoppingItemCount(itemCount),
+                style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline),
               ),
             ],
           ),
@@ -1700,8 +1666,87 @@ class _ModernHeader extends StatelessWidget {
     switch (mode) {
       case ShoppingGroupMode.section: return l10n.shoppingBySection;
       case ShoppingGroupMode.recipe: return l10n.shoppingByRecipe;
-      case ShoppingGroupMode.ungrouped: return l10n.shoppingUngrouped;
     }
+  }
+}
+
+/// One member a shopping list is shared with (owner or shared-with).
+class _ShopMember {
+  final String? name;
+  final String? avatarUrl;
+  const _ShopMember({this.name, this.avatarUrl});
+  String get initial =>
+      (name != null && name!.trim().isNotEmpty) ? name!.trim()[0].toUpperCase() : '?';
+}
+
+/// Overlapping avatar row for a shared shopping list (up to 3 + "+N").
+class _ShopAvatarStack extends StatelessWidget {
+  final List<_ShopMember> members;
+  const _ShopAvatarStack({required this.members});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    const size = 26.0;
+    const step = size * 0.62;
+    final show = members.take(3).toList();
+    final extra = members.length - show.length;
+    final slots = show.length + (extra > 0 ? 1 : 0);
+
+    Widget avatar(_ShopMember m) {
+      final hasImg = m.avatarUrl != null && m.avatarUrl!.isNotEmpty;
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: theme.colorScheme.primaryContainer,
+          border: Border.all(color: theme.colorScheme.surface, width: 2),
+          image: hasImg
+              ? DecorationImage(image: NetworkImage(m.avatarUrl!), fit: BoxFit.cover)
+              : null,
+        ),
+        alignment: Alignment.center,
+        child: hasImg
+            ? null
+            : Text(m.initial,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onPrimaryContainer,
+                )),
+      );
+    }
+
+    return SizedBox(
+      width: size + (slots - 1) * step,
+      height: size,
+      child: Stack(
+        children: [
+          for (var i = 0; i < show.length; i++)
+            Positioned(left: i * step, child: avatar(show[i])),
+          if (extra > 0)
+            Positioned(
+              left: show.length * step,
+              child: Container(
+                width: size,
+                height: size,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: theme.colorScheme.secondaryContainer,
+                  border: Border.all(color: theme.colorScheme.surface, width: 2),
+                ),
+                alignment: Alignment.center,
+                child: Text('+$extra',
+                    style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSecondaryContainer)),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }
 
@@ -3759,41 +3804,6 @@ class _RecipeGroupedList extends ConsumerWidget {
 
 // ============ UNGROUPED LIST ============
 
-class _UngroupedList extends StatelessWidget {
-  final List<ShoppingListItem> items;
-  final List<ShoppingListItem> checkedItems;
-  final String listId;
-  final Map<String, String> userMappings;
-  final Function(String, String, String) onCategoryChanged;
-  final ValueChanged<String> onItemChecked;
-  final ValueChanged<String> onItemUnchecked;
-  final Set<String> recentlyCheckedIds;
-
-  const _UngroupedList({
-    required this.items,
-    required this.checkedItems,
-    required this.listId,
-    required this.userMappings,
-    required this.onCategoryChanged,
-    required this.onItemChecked,
-    required this.onItemUnchecked,
-    required this.recentlyCheckedIds,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 100),
-      children: [
-        for (final item in items)
-          _ShoppingItemTile(item: item, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemChecked: onItemChecked, onItemUnchecked: onItemUnchecked, pendingCheck: recentlyCheckedIds.contains(item.id)),
-        if (checkedItems.isNotEmpty)
-          _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemUnchecked: onItemUnchecked),
-      ],
-    );
-  }
-}
-
 // ============ SHOPPING ITEM TILE ============
 
 class _ShoppingItemTile extends ConsumerWidget {
@@ -4417,10 +4427,13 @@ class _EmptyState extends StatelessWidget {
 // ============ ENUMS ============
 
 enum ShoppingGroupMode {
-  section(Icons.store),
-  recipe(Icons.restaurant_menu),
-  ungrouped(Icons.list);
+  section(Icons.storefront_outlined), // "By Aisle"
+  recipe(Icons.restaurant_menu);      // "By Recipe"
 
   final IconData icon;
   const ShoppingGroupMode(this.icon);
+
+  /// The other mode — the toggle flips between the two.
+  ShoppingGroupMode get toggled =>
+      this == ShoppingGroupMode.section ? ShoppingGroupMode.recipe : ShoppingGroupMode.section;
 }

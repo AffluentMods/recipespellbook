@@ -1388,13 +1388,27 @@ class _SortChip extends StatelessWidget {
     final isActive = value == selected;
     final theme = Theme.of(context);
 
-    return FilterChip(
-      label: Text(label, style: TextStyle(fontSize: 12, fontWeight: isActive ? FontWeight.w600 : FontWeight.normal)),
-      selected: isActive,
-      onSelected: (_) => onSelected(value),
-      selectedColor: theme.colorScheme.primaryContainer,
-      showCheckmark: false,
-      visualDensity: VisualDensity.compact,
+    return GestureDetector(
+      onTap: () => onSelected(value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isActive ? theme.colorScheme.primary : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12.5,
+            fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+            color: isActive ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -1451,7 +1465,9 @@ class _CommunityGridCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 3,
+      shadowColor: Colors.black.withValues(alpha: 0.28),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: InkWell(
         onTap: onTap,
         child: Column(
@@ -1470,38 +1486,48 @@ class _CommunityGridCard extends StatelessWidget {
                   ),
                   // Download count badge
                   Positioned(
-                    top: 6,
-                    right: 6,
+                    top: 8,
+                    right: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.black.withValues(alpha: 0.55),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.download, size: 12, color: Colors.white),
-                          const SizedBox(width: 2),
-                          Text('${item.downloadCount}', style: const TextStyle(fontSize: 11, color: Colors.white)),
+                          const Icon(Icons.download_rounded, size: 12, color: Colors.white),
+                          const SizedBox(width: 3),
+                          Text('${item.downloadCount}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white)),
                         ],
                       ),
                     ),
                   ),
                   // Single-recipe vs cookbook badge (top-left)
                   Positioned(
-                    top: 6,
-                    left: 6,
+                    top: 8,
+                    left: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.black.withValues(alpha: 0.55),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(
-                        item.isSingleRecipe ? Icons.restaurant_menu : Icons.menu_book,
-                        size: 12,
-                        color: Colors.white,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            item.isSingleRecipe ? Icons.restaurant_menu : Icons.menu_book,
+                            size: 12,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            item.isSingleRecipe ? 'Recipe' : 'Cookbook',
+                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: 0.3),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -1612,9 +1638,11 @@ class _CommunityListCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 10),
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 2,
+      shadowColor: Colors.black.withValues(alpha: 0.2),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -1624,7 +1652,7 @@ class _CommunityListCard extends StatelessWidget {
             children: [
               // Thumbnail
               ClipRRect(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 child: CommunityImage(
                   publicationId: item.id,
                   imagePath: item.imagePath,

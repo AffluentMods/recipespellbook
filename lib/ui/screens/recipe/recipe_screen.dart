@@ -1400,6 +1400,14 @@ class _CollapsedSectionsNotifier extends StateNotifier<Map<String, Set<String>>>
     }
     state = next;
   }
+
+  /// Collapse a section without toggling — used to auto-close a section once all
+  /// of its ingredients have been checked off. No-op if already collapsed.
+  void ensureCollapsed(String recipeId, String headerId) {
+    final set = {...?state[recipeId]};
+    if (!set.add(headerId)) return;
+    state = {...state, recipeId: set};
+  }
 }
 
 final _collapsedSectionsProvider =
@@ -1513,6 +1521,15 @@ class _IngredientSectionBox extends ConsumerWidget {
         ref.watch(_collapsedSectionsProvider)[recipeId] ?? const <String>{};
     final collapsed = header != null && collapsedSet.contains(header!.id);
 
+    // Section is "done" when every ingredient under it is checked off — the
+    // header then strikes through (and auto-collapses via the row's toggle).
+    final checkedSet =
+        ref.watch(_checkedItemsProvider)[recipeId] ?? const <String>{};
+    final itemIds = [for (final i in items) i.id];
+    final allChecked =
+        header != null && itemIds.isNotEmpty && itemIds.every(checkedSet.contains);
+    final accent = allChecked ? theme.colorScheme.outline : theme.colorScheme.primary;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -1538,16 +1555,25 @@ class _IngredientSectionBox extends ConsumerWidget {
                       width: 4,
                       height: 18,
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primary,
+                        color: accent,
                         borderRadius: BorderRadius.circular(3),
                       ),
                     ),
                     const SizedBox(width: 10),
+                    if (allChecked) ...[
+                      Icon(Icons.check_circle,
+                          size: 16, color: theme.colorScheme.primary),
+                      const SizedBox(width: 6),
+                    ],
                     Expanded(
                       child: Text(
                         header!.name,
-                        style: theme.textTheme.titleSmall
-                            ?.copyWith(fontWeight: FontWeight.w700),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          decoration:
+                              allChecked ? TextDecoration.lineThrough : null,
+                          color: allChecked ? theme.colorScheme.outline : null,
+                        ),
                       ),
                     ),
                     if (collapsed)
@@ -1579,6 +1605,8 @@ class _IngredientSectionBox extends ConsumerWidget {
                       recipeId: recipeId,
                       scaleFactor: scaleFactor,
                       unitConversion: unitConversion,
+                      sectionItemIds: itemIds,
+                      headerId: header?.id,
                       linkedRecipes: (ingredientLinksMap[ing.id] ?? [])
                           .map((info) => info.recipe)
                           .toList(),
@@ -2333,13 +2361,33 @@ class _CheckableIngredientRow extends ConsumerWidget {
   final double scaleFactor;
   final _UnitConversion unitConversion;
   final List<Recipe> linkedRecipes;
+  /// Ids of every ingredient in this row's section + the section's header id,
+  /// so checking the last one auto-collapses the header.
+  final List<String> sectionItemIds;
+  final String? headerId;
   const _CheckableIngredientRow({
     required this.ingredient,
     required this.recipeId,
     required this.scaleFactor,
     this.unitConversion = _UnitConversion.none,
     this.linkedRecipes = const [],
+    this.sectionItemIds = const [],
+    this.headerId,
   });
+
+  /// Toggle this ingredient's checked state; if that completes the section,
+  /// auto-collapse its header.
+  void _toggleChecked(WidgetRef ref) {
+    ref.read(_checkedItemsProvider.notifier).toggle(recipeId, ingredient.id);
+    final h = headerId;
+    if (h == null) return;
+    final checked = ref.read(_checkedItemsProvider)[recipeId] ?? const <String>{};
+    final allChecked =
+        sectionItemIds.isNotEmpty && sectionItemIds.every(checked.contains);
+    if (allChecked) {
+      ref.read(_collapsedSectionsProvider.notifier).ensureCollapsed(recipeId, h);
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -2396,9 +2444,7 @@ class _CheckableIngredientRow extends ConsumerWidget {
             // text selection. Tapping strikes the ingredient through.
             GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () => ref
-                  .read(_checkedItemsProvider.notifier)
-                  .toggle(recipeId, ingredient.id),
+              onTap: () => _toggleChecked(ref),
               child: Padding(
                 padding: const EdgeInsets.only(top: 1, right: 10, bottom: 1),
                 child: AnimatedContainer(

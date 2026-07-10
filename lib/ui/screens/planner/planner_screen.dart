@@ -99,21 +99,37 @@ class _PlannerSelectionBar extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     return SafeArea(
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHigh,
-          border: Border(
-            top: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.12)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withValues(alpha: 0.10), blurRadius: 18, offset: const Offset(0, 4)),
+            ],
           ),
-        ),
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _PlannerSelectionAction(icon: Icons.event, label: l10n.plannerMoveToDate, onTap: onMoveDate),
-            _PlannerSelectionAction(icon: Icons.restaurant_menu, label: l10n.plannerChangeMealType, onTap: onChangeType),
-            _PlannerSelectionAction(icon: Icons.delete_outline, label: l10n.actionDelete, color: theme.colorScheme.error, onTap: onDelete),
-          ],
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+          child: Row(
+            children: [
+              // Selected-count badge
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(color: theme.colorScheme.primary, shape: BoxShape.circle),
+                  alignment: Alignment.center,
+                  child: Text('$count',
+                      style: TextStyle(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
+                ),
+              ),
+              _PlannerSelectionAction(icon: Icons.event, label: l10n.plannerMoveToDate, onTap: onMoveDate),
+              _PlannerSelectionAction(icon: Icons.restaurant_menu, label: l10n.plannerChangeMealType, onTap: onChangeType),
+              _PlannerSelectionAction(icon: Icons.delete_outline, label: l10n.actionDelete, color: theme.colorScheme.error, onTap: onDelete),
+            ],
+          ),
         ),
       ),
     );
@@ -130,19 +146,25 @@ class _PlannerSelectionAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final c = color ?? theme.colorScheme.onSurface;
+    final c = color ?? theme.colorScheme.primary;
     return Expanded(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 6),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: c, size: 24),
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(color: c.withValues(alpha: 0.12), shape: BoxShape.circle),
+                alignment: Alignment.center,
+                child: Icon(icon, color: c, size: 20),
+              ),
               const SizedBox(height: 4),
-              Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: theme.textTheme.labelSmall?.copyWith(color: c)),
+              Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: theme.textTheme.labelSmall?.copyWith(color: c, fontWeight: FontWeight.w600)),
             ],
           ),
         ),

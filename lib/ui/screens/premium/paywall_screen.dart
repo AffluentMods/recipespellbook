@@ -11,8 +11,9 @@ import '../../../services/revenuecat_service.dart';
 import '../../../utils/platform_utils.dart';
 import '../../widgets/app_snackbar.dart';
 
-/// Redesigned paywall — short, focused, warm.
-/// Two one-time plans: Premium ($6.99) and Family ($19.99).
+/// Paywall — one focused, warm plan: a single lifetime unlock that turns on
+/// cloud sync + family sharing of recipes & cookbooks. Price is shown live from
+/// the store when available.
 class PaywallScreen extends ConsumerStatefulWidget {
   const PaywallScreen({super.key});
 
@@ -22,8 +23,8 @@ class PaywallScreen extends ConsumerStatefulWidget {
 
 class _PaywallScreenState extends ConsumerState<PaywallScreen>
     with SingleTickerProviderStateMixin {
-  int _selectedPlan = 0; // 0 = Premium, 1 = Family
   bool _purchasing = false;
+  String? _livePrice; // fetched from the store; falls back to l10n price
 
   late AnimationController _enterController;
   late Animation<double> _fadeIn;
@@ -40,6 +41,26 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
     _slideUp = Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero)
         .animate(CurvedAnimation(parent: _enterController, curve: Curves.easeOutCubic));
     _enterController.forward();
+    _loadPrice();
+  }
+
+  /// Pull the real store price so the card never mismatches App Store / Play.
+  /// Uses the SAME package-matching as _handlePurchase so the displayed price is
+  /// always the one that actually gets charged; if no confident match exists we
+  /// keep the l10n fallback rather than showing an unrelated package's price.
+  Future<void> _loadPrice() async {
+    if (!supportsRevenueCatSdk) return;
+    try {
+      final offerings = await RevenueCatService.instance.getOfferings();
+      final pkgs = offerings?.current?.availablePackages;
+      if (pkgs == null || pkgs.isEmpty) return;
+      var idx = pkgs.indexWhere((p) => p.packageType == PackageType.lifetime);
+      if (idx < 0) {
+        idx = pkgs.indexWhere((p) => p.storeProduct.identifier == RCConfig.premiumLifetimeId);
+      }
+      if (idx < 0) return; // no match → keep the l10n fallback
+      if (mounted) setState(() => _livePrice = pkgs[idx].storeProduct.priceString);
+    } catch (_) {/* keep the l10n fallback */}
   }
 
   @override
@@ -53,6 +74,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final isDark = theme.brightness == Brightness.dark;
+    final accent = isDark ? Colors.amber.shade400 : Colors.amber.shade700;
     final authState = ref.watch(authProvider);
     ref.watch(subscriptionProvider);
 
@@ -93,9 +115,19 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       children: [
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
 
                         // ── Header ──
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            color: accent.withValues(alpha: 0.14),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.workspace_premium_rounded, size: 34, color: accent),
+                        ),
+                        const SizedBox(height: 16),
                         Text(
                           l10n.paywallUpgradeTitle,
                           style: theme.textTheme.labelLarge?.copyWith(
@@ -103,10 +135,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                             letterSpacing: 0.5,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
                         Text(
-                          l10n.paywallSubtitle,
-                          style: theme.textTheme.headlineMedium?.copyWith(
+                          'Sync recipes, cookbooks and more\nwith your family',
+                          style: theme.textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             height: 1.2,
                           ),
@@ -114,37 +146,19 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
                         ),
                         const SizedBox(height: 24),
 
-                        // ── Social proof (skip until real reviews exist) ──
-                        // TODO: Replace with real App Store review once available
-                        // _SocialProof(),
-
-                        // ── Plan cards ──
+                        // ── The one plan ──
                         _PlanCard(
                           title: l10n.paywallPlanPremium,
-                          price: l10n.paywallPricePremium,
+                          price: _livePrice ?? l10n.paywallPricePremium,
                           subline: l10n.paywallSublinePremium,
                           features: [
                             l10n.paywallFeatureCloudSync,
-                            l10n.paywallFeatureStepPhotos,
-                            l10n.paywallFeatureAutoBackups,
-                          ],
-                          isSelected: _selectedPlan == 0,
-                          onTap: () => setState(() => _selectedPlan = 0),
-                          theme: theme,
-                        ),
-                        const SizedBox(height: 10),
-                        _PlanCard(
-                          title: l10n.paywallPlanFamily,
-                          price: l10n.paywallPriceFamily,
-                          subline: l10n.paywallSublineFamily,
-                          features: [
-                            l10n.paywallFeatureEverythingPremium,
                             l10n.paywallFeatureFamilySync,
                             l10n.paywallFeatureSharedCookbooks,
+                            l10n.paywallFeatureAutoBackups,
                           ],
-                          isSelected: _selectedPlan == 1,
-                          onTap: () => setState(() => _selectedPlan = 1),
-                          badge: l10n.bestValue,
+                          isSelected: true,
+                          onTap: () {},
                           theme: theme,
                         ),
 
@@ -162,7 +176,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
 
                         const SizedBox(height: 20),
 
-                        // ── Minimal comparison ──
+                        // ── Free vs paid comparison ──
                         _MiniCompare(theme: theme),
 
                         const SizedBox(height: 32),
@@ -198,8 +212,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
   // ════════════════════════════════════════════════════════════════
 
   Widget _buildCTA(ThemeData theme, bool isDark, AuthState authState, AppLocalizations l10n) {
-    final planName = _selectedPlan == 0 ? l10n.paywallPlanPremium : l10n.paywallPlanFamily;
-    final planPrice = _selectedPlan == 0 ? l10n.paywallPricePremium : l10n.paywallPriceFamily;
+    final planName = l10n.paywallPlanPremium;
+    final planPrice = _livePrice ?? l10n.paywallPricePremium;
     final accentColor = isDark ? Colors.amber.shade400 : Colors.amber.shade700;
 
     return Container(
@@ -229,7 +243,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
                 child: Material(
-                  key: ValueKey(_selectedPlan),
+                  key: ValueKey(_purchasing),
                   color: accentColor,
                   borderRadius: BorderRadius.circular(16),
                   elevation: 2,
@@ -321,9 +335,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
     setState(() => _purchasing = true);
 
     try {
-      final productId = _selectedPlan == 0
-          ? RCConfig.premiumLifetimeId
-          : RCConfig.familyLifetimeId;
+      const productId = RCConfig.premiumLifetimeId;
 
       final service = RevenueCatService.instance;
       final offerings = await service.getOfferings();
@@ -368,8 +380,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
   }
 
   Future<void> _handleWebPurchase(AuthState authState) async {
-    // Pick the Stripe checkout link matching the selected plan.
-    var webLink = RCConfig.webPurchaseLinkForPlan(_selectedPlan);
+    // Single plan → the premium (index 0) Stripe checkout link.
+    var webLink = RCConfig.webPurchaseLinkForPlan(0);
     if (webLink.isEmpty) {
       if (mounted) _showWebPurchaseUnavailable();
       return;
@@ -512,7 +524,6 @@ class _PlanCard extends StatelessWidget {
   final List<String> features;
   final bool isSelected;
   final VoidCallback onTap;
-  final String? badge;
   final ThemeData theme;
 
   const _PlanCard({
@@ -523,7 +534,6 @@ class _PlanCard extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     required this.theme,
-    this.badge,
   });
 
   @override
@@ -556,25 +566,7 @@ class _PlanCard extends StatelessWidget {
               children: [
                 // Plan name
                 Flexible(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(title, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                      if (badge != null) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: accentColor.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: accentColor.withValues(alpha: 0.4)),
-                          ),
-                          child: Text(badge!,
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: accentColor, letterSpacing: 0.8)),
-                        ),
-                      ],
-                    ],
-                  ),
+                  child: Text(title, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(width: 8),
                 // Price — big and bold
@@ -619,7 +611,7 @@ class _MiniCompare extends StatelessWidget {
 
     Widget cell(Widget content) => Expanded(child: Center(child: content));
     Widget label(String text) => Expanded(
-      flex: 2,
+      flex: 3,
       child: Text(text, style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500)),
     );
 
@@ -634,25 +626,26 @@ class _MiniCompare extends StatelessWidget {
           // Header
           Row(
             children: [
-              const Expanded(flex: 2, child: SizedBox()),
+              const Expanded(flex: 3, child: SizedBox()),
               cell(Text(l10n.paywallCompareFree, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: muted))),
               cell(Text(l10n.paywallPlanPremium, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.amber.shade700))),
-              cell(Text(l10n.paywallPlanFamily, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.deepPurple))),
             ],
           ),
           Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4), height: 16),
-          // Rows
-          _compareRow(label(l10n.paywallCompareUnlimitedRecipes), cell(check), cell(check), cell(check)),
+          // Rows — step photos & shared shopping lists are now free.
+          _compareRow(label(l10n.paywallCompareUnlimitedRecipes), cell(check), cell(check)),
           const SizedBox(height: 8),
-          _compareRow(label(l10n.paywallCompareCloudSync), cell(dash), cell(check), cell(check)),
+          _compareRow(label(l10n.paywallFeatureStepPhotos), cell(check), cell(check)),
           const SizedBox(height: 8),
-          _compareRow(label(l10n.paywallCompareFamilySharing), cell(dash), cell(dash), cell(check)),
+          _compareRow(label(l10n.paywallCompareCloudSync), cell(dash), cell(check)),
+          const SizedBox(height: 8),
+          _compareRow(label(l10n.paywallCompareFamilySharing), cell(dash), cell(check)),
         ],
       ),
     );
   }
 
-  Widget _compareRow(Widget label, Widget free, Widget premium, Widget family) {
-    return Row(children: [label, free, premium, family]);
+  Widget _compareRow(Widget label, Widget free, Widget premium) {
+    return Row(children: [label, free, premium]);
   }
 }

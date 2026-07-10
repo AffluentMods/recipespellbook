@@ -12,23 +12,23 @@ import '../utils/responsive_utils.dart';
 
 /// All gated features in the app, mapped to the minimum tier required.
 enum GatedFeature {
-  /// Cloud sync between personal devices
+  /// Cloud sync of recipes/cookbooks between devices & family — the paid core.
   cloudSync(SubscriptionTier.premium, 'Cloud Sync', Icons.cloud_sync),
 
-  /// Step-by-step photos on recipes
-  stepPhotos(SubscriptionTier.premium, 'Step Photos', Icons.photo_library),
+  /// Step-by-step photos on recipes — now FREE.
+  stepPhotos(SubscriptionTier.free, 'Step Photos', Icons.photo_library),
 
-  /// Family sharing (shared cookbooks, lists, meal plans)
-  familySharing(SubscriptionTier.family, 'Family Sharing', Icons.family_restroom),
+  /// Family sharing of cookbooks/recipes/meal plans — paid.
+  familySharing(SubscriptionTier.premium, 'Family Sharing', Icons.family_restroom),
 
-  /// Shared shopping lists
-  sharedLists(SubscriptionTier.family, 'Shared Lists', Icons.shopping_cart),
+  /// Shared shopping lists — now FREE (lightweight sync everyone can use).
+  sharedLists(SubscriptionTier.free, 'Shared Lists', Icons.shopping_cart),
 
-  /// Shared cookbooks
-  sharedCookbooks(SubscriptionTier.family, 'Shared Cookbooks', Icons.menu_book),
+  /// Shared cookbooks — paid.
+  sharedCookbooks(SubscriptionTier.premium, 'Shared Cookbooks', Icons.menu_book),
 
-  /// Shared meal planning
-  sharedMealPlan(SubscriptionTier.family, 'Shared Meal Plan', Icons.calendar_month),
+  /// Shared meal planning — paid.
+  sharedMealPlan(SubscriptionTier.premium, 'Shared Meal Plan', Icons.calendar_month),
 
   /// Automatic backups
   backups(SubscriptionTier.premium, 'Backups', Icons.backup),
@@ -37,7 +37,7 @@ enum GatedFeature {
   creatorPage(SubscriptionTier.premium, 'Creator Page', Icons.storefront),
 
   /// Custom domain for creator page
-  customDomain(SubscriptionTier.family, 'Custom Domain', Icons.language),
+  customDomain(SubscriptionTier.premium, 'Custom Domain', Icons.language),
   ;
 
   final SubscriptionTier minimumTier;

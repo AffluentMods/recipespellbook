@@ -19,7 +19,6 @@ import 'package:path/path.dart' as p;
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/default_recipe_images.dart';
-import '../../../providers/settings_provider.dart';
 import '../../../data/nutrition_data.dart';
 import '../../widgets/taxonomy_picker.dart';
 import '../../widgets/tag_picker.dart';
@@ -552,8 +551,6 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final settings = ref.watch(settingsProvider);
-    final useTabbed = settings.recipeEditLayoutMode == RecipeEditLayoutMode.tabbed;
 
     if (_isLoading) {
       return Scaffold(
@@ -610,15 +607,6 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       appBar: AppBar(
         title: Text(_isEditing ? l10n.recipeEdit : l10n.recipeAdd),
         actions: [
-          // Layout toggle
-          IconButton(
-            icon: Icon(useTabbed ? Icons.view_agenda : Icons.tab),
-            onPressed: () {
-              final newMode = useTabbed ? RecipeEditLayoutMode.stacked : RecipeEditLayoutMode.tabbed;
-              ref.read(settingsProvider.notifier).setRecipeEditLayout(newMode);
-            },
-            tooltip: useTabbed ? l10n.editLayoutStacked : l10n.editLayoutTabbed,
-          ),
           FilledButton(
             onPressed: _isSaving ? null : _saveRecipe,
             child: _isSaving
@@ -627,117 +615,46 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
           ),
           const SizedBox(width: 8),
         ],
-        bottom: useTabbed ? TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(icon: const Icon(Icons.info_outline, size: 20), text: l10n.tabDetails),
-            Tab(icon: const Icon(Icons.checklist, size: 20), text: l10n.ingredientsTitle),
-            Tab(icon: const Icon(Icons.format_list_numbered, size: 20), text: l10n.instructionsTitle),
-          ],
-        ) : null,
-      ),
-      body: useTabbed
-          ? _buildTabbedLayout(theme, l10n, settings)
-          : _buildStackedLayout(theme, l10n, settings),
-      ),
-    );
-  }
-
-  Widget _buildStackedLayout(ThemeData theme, AppLocalizations l10n, AppSettings settings) {
-    return Form(
-      key: _formKey,
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _PhotoPicker(imagePath: _imagePath, defaultAssetPath: _defaultAssetPath, onImageSelected: (path) => setState(() { _imagePath = path; if (path != null) _defaultAssetPath = null; })),
-            const SizedBox(height: 24),
-            TextFormField(
-              controller: _titleController,
-              decoration: InputDecoration(labelText: l10n.recipeFieldTitle, hintText: l10n.hintTitleExample),
-              textCapitalization: TextCapitalization.words,
-              validator: (value) => (value == null || value.trim().isEmpty) ? l10n.errorGeneric : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _descriptionController,
-              decoration: InputDecoration(labelText: l10n.recipeFieldDescription, hintText: l10n.hintDescription),
-              maxLines: 2,
-              textCapitalization: TextCapitalization.sentences,
-            ),
-            const SizedBox(height: 20),
-            CoursePicker(selectedCourseId: _selectedCourseId, onChanged: (id) => setState(() => _selectedCourseId = id)),
-            const SizedBox(height: 16),
-            CategoryPicker(selectedCategoryId: _selectedCategoryId, onChanged: (id) => setState(() => _selectedCategoryId = id)),
-            const SizedBox(height: 20),
-            TagPicker(recipeId: widget.recipeId ?? '', initialTagIds: _selectedTagIds, onTagsChanged: (tagIds) => setState(() => _selectedTagIds = tagIds)),
-            const SizedBox(height: 20),
-            _RatingSelector(rating: _rating, onChanged: (r) => setState(() => _rating = r)),
-            const SizedBox(height: 20),
-            Row(children: [
-              Expanded(child: TextFormField(controller: _servingsController, decoration: InputDecoration(labelText: l10n.recipeFieldServings, hintText: l10n.hintServingsExample))),
-              const SizedBox(width: 12),
-              Expanded(child: TextFormField(controller: _prepTimeController, decoration: InputDecoration(labelText: l10n.prepMin), keyboardType: TextInputType.number)),
-              const SizedBox(width: 12),
-              Expanded(child: TextFormField(controller: _cookTimeController, decoration: InputDecoration(labelText: l10n.cookMin), keyboardType: TextInputType.number)),
-            ]),
-            const SizedBox(height: 16),
-            TextFormField(controller: _sourceUrlController, decoration: InputDecoration(labelText: l10n.recipeFieldSource, hintText: 'https://...', prefixIcon: const Icon(Icons.link)), keyboardType: TextInputType.url),
-            const SizedBox(height: 32),
-            if (_ingredientSortMode)
-              Row(
-                children: [
-                  Text(l10n.ingredientsTitle, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                  const Spacer(),
-                  TextButton.icon(
-                    icon: const Icon(Icons.check, size: 16),
-                    label: Text(l10n.actionDone),
-                    onPressed: _toggleSortMode,
-                  ),
-                ],
-              )
-            else
-              _SectionTitleWithAdd(
-                title: l10n.ingredientsTitle,
-                onAddIngredient: _addIngredient,
-                onAddHeader: _addHeader,
-                onSortMode: _toggleSortMode,
+        // Modern segmented tab switch, matching the recipe view screen.
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(52),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
               ),
-            const SizedBox(height: 12),
-            _buildIngredientList(),
-            if (!_ingredientSortMode)
-              _AddIngredientButton(key: _addIngredientButtonKey, onTap: _addIngredient, onAddHeader: _addHeader),
-            const SizedBox(height: 32),
-            InstructionsEditor(
-              steps: _steps,
-              onStepsChanged: (steps) => setState(() {
-                _steps.clear();
-                _steps.addAll(steps);
-              }),
+              child: TabBar(
+                controller: _tabController,
+                indicator: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                indicatorSize: TabBarIndicatorSize.tab,
+                indicatorPadding: const EdgeInsets.all(4),
+                dividerColor: Colors.transparent,
+                labelColor: theme.colorScheme.onPrimary,
+                unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
+                labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+                splashBorderRadius: BorderRadius.circular(9),
+                tabs: [
+                  Tab(text: l10n.tabDetails),
+                  Tab(text: l10n.ingredientsTitle),
+                  Tab(text: l10n.instructionsTitle),
+                ],
+              ),
             ),
-            const SizedBox(height: 32),
-            _SectionTitle(title: l10n.recipeFieldNotes),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _notesController,
-              decoration: InputDecoration(hintText: l10n.hintNotes, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), alignLabelWithHint: true),
-              maxLines: 5,
-              minLines: 3,
-              textCapitalization: TextCapitalization.sentences,
-            ),
-            const SizedBox(height: 32),
-            _SectionTitle(title: l10n.nutritionTitle),
-            const SizedBox(height: 12),
-            _NutritionSection(nutrition: _nutrition, isCalculating: _isCalculatingNutrition, onCalculate: _calculateNutrition, onClear: () => setState(() => _nutrition = null)),
-          ],
+          ),
         ),
       ),
+      body: _buildTabbedLayout(theme, l10n),
+      ),
     );
   }
 
-  Widget _buildTabbedLayout(ThemeData theme, AppLocalizations l10n, AppSettings settings) {
+  Widget _buildTabbedLayout(ThemeData theme, AppLocalizations l10n) {
     return TabBarView(
       controller: _tabController,
       children: [

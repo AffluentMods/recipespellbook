@@ -1729,25 +1729,32 @@ class _BulkActionBar extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    return Container(
-      padding: EdgeInsets.fromLTRB(4, 8, 4, 8 + MediaQuery.of(context).padding.bottom),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        border: Border(top: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2))),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _BulkActionIcon(icon: Icons.restaurant_menu, label: l10n.bulkCourse, onTap: onSetCourse),
-          _BulkActionIcon(icon: Icons.category_outlined, label: l10n.bulkCategory, onTap: onSetCategory),
-          _BulkActionIcon(icon: Icons.star_outline, label: l10n.bulkFavorite, onTap: onFavorite),
-          _BulkActionIcon(icon: Icons.copy_rounded, label: l10n.bulkCopyLabel, onTap: onCopyToCookbook),
-          _BulkActionIcon(icon: Icons.drive_file_move_outlined, label: l10n.bulkMoveLabel, onTap: onMoveToCookbook),
-          // Thin vertical divider
-          Container(width: 1, height: 36, color: theme.colorScheme.outline.withValues(alpha: 0.2)),
-          // Delete — red, pushed to end
-          _BulkActionIcon(icon: Icons.delete_outline, label: l10n.bulkDeleteLabel, onTap: onDelete, color: theme.colorScheme.error),
-        ],
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+        child: Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withValues(alpha: 0.10), blurRadius: 18, offset: const Offset(0, 4)),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _BulkActionIcon(icon: Icons.restaurant_menu, label: l10n.bulkCourse, onTap: onSetCourse),
+              _BulkActionIcon(icon: Icons.category_outlined, label: l10n.bulkCategory, onTap: onSetCategory),
+              _BulkActionIcon(icon: Icons.star_outline, label: l10n.bulkFavorite, onTap: onFavorite),
+              _BulkActionIcon(icon: Icons.copy_rounded, label: l10n.bulkCopyLabel, onTap: onCopyToCookbook),
+              _BulkActionIcon(icon: Icons.drive_file_move_outlined, label: l10n.bulkMoveLabel, onTap: onMoveToCookbook),
+              _BulkActionIcon(icon: Icons.delete_outline, label: l10n.bulkDeleteLabel, onTap: onDelete, color: theme.colorScheme.error),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1768,19 +1775,32 @@ class _BulkActionIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = color ?? Theme.of(context).colorScheme.onSurface;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 22, color: c),
-            const SizedBox(height: 2),
-            Text(label, style: TextStyle(fontSize: 10, color: c)),
-          ],
+    final theme = Theme.of(context);
+    final c = color ?? theme.colorScheme.primary;
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(color: c.withValues(alpha: 0.12), shape: BoxShape.circle),
+                alignment: Alignment.center,
+                child: Icon(icon, size: 19, color: c),
+              ),
+              const SizedBox(height: 3),
+              Text(label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.labelSmall?.copyWith(fontSize: 10, color: c, fontWeight: FontWeight.w600)),
+            ],
+          ),
         ),
       ),
     );
