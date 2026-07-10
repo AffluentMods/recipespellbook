@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../database/database.dart';
 import '../services/auth_service.dart';
+import 'collab_service.dart';
 import 'family_service.dart';
 
 // ════════════════════════════════════════════
@@ -266,11 +267,24 @@ class SyncService {
         await _saveLastSyncAt(syncedAt, syncUserId);
       }
 
+      // Push my edits to shared cookbooks first (permission-enforced, owner
+      // preserved), so the pull below brings everyone the converged copy.
+      try {
+        await _pushDirtyCookbookRecipes();
+      } catch (e) {
+        debugPrint('[Sync] Cookbook collab push failed (non-fatal): $e');
+      }
+
       // Pull family shared content
       try {
         final familyData = await FamilyService.instance.getSharedContent(since: lastSyncAt);
         if (familyData != null) {
-          final familyPulled = await _applyServerData(familyData);
+          final familyPulled = await _applyServerData(
+            familyData,
+            sharedOwners: _extractSharedCookbookOwners(familyData),
+            skipRecipeIds: CollabService.instance.dirtyCookbookRecipeIds,
+          );
+          CollabService.instance.setCookbookAccess(_extractCookbookShares(familyData));
           debugPrint('[Sync] Pulled $familyPulled shared family entities');
           pulledCount += familyPulled;
         }
@@ -345,7 +359,12 @@ class SyncService {
       try {
         final familyData = await FamilyService.instance.getSharedContent();
         if (familyData != null) {
-          final familyPulled = await _applyServerData(familyData);
+          final familyPulled = await _applyServerData(
+            familyData,
+            sharedOwners: _extractSharedCookbookOwners(familyData),
+            skipRecipeIds: CollabService.instance.dirtyCookbookRecipeIds,
+          );
+          CollabService.instance.setCookbookAccess(_extractCookbookShares(familyData));
           debugPrint('[Sync] Pulled $familyPulled shared family entities');
           pulledCount += familyPulled;
         }
@@ -386,14 +405,29 @@ class SyncService {
     final db = _db!;
 
     // ── Cookbooks: filter by updatedAt like other timestamp-tracked tables ──
+    // sharedOwnerId != null ⇒ a cookbook pulled in via a share: it belongs to
+    // someone else, so it must NOT be re-pushed through the owner-only /sync
+    // channel (that would try to claim / corrupt the owner's data). Member edits
+    // to shared cookbooks go out through the separate /collab cookbook-push.
     List<Cookbook> cookbooks;
     if (since != null) {
       cookbooks = await (db.select(db.cookbooks)
-        ..where((cb) => cb.updatedAt.isNotNull() & cb.updatedAt.isBiggerThanValue(since)))
+        ..where((cb) => cb.sharedOwnerId.isNull() & cb.updatedAt.isNotNull() & cb.updatedAt.isBiggerThanValue(since)))
           .get();
     } else {
-      cookbooks = await db.select(db.cookbooks).get();
+      cookbooks = await (db.select(db.cookbooks)
+        ..where((cb) => cb.sharedOwnerId.isNull()))
+          .get();
     }
+
+    // Ids of shared-in cookbooks — their recipes are likewise excluded from the
+    // /sync push (they're owned by the sharer, not this user).
+    final sharedCookbookIds = (await (db.selectOnly(db.cookbooks)
+          ..addColumns([db.cookbooks.id])
+          ..where(db.cookbooks.sharedOwnerId.isNotNull()))
+        .map((row) => row.read(db.cookbooks.id)!)
+        .get())
+        .toSet();
 
     // ── Recipes: updatedAt is non-nullable ──
     List<Recipe> recipes;
@@ -403,6 +437,10 @@ class SyncService {
           .get();
     } else {
       recipes = await db.select(db.recipes).get();
+    }
+    // Drop recipes that live in a shared-in cookbook.
+    if (sharedCookbookIds.isNotEmpty) {
+      recipes = recipes.where((r) => !sharedCookbookIds.contains(r.cookbookId)).toList();
     }
 
     // Fetch children for each changed recipe
@@ -528,7 +566,18 @@ class SyncService {
   //  APPLY SERVER DATA (PULL)
   // ════════════════════════════════════════════
 
-  Future<int> _applyServerData(Map<String, dynamic> data) async {
+  /// Apply a server payload into local Drift.
+  ///
+  /// [sharedOwners] maps cookbookId → owner userId for cookbooks arriving via a
+  /// share (the /family/shared path); those cookbooks are stamped with
+  /// `sharedOwnerId` so they're excluded from the owner-only /sync push.
+  /// [skipRecipeIds] are recipes with an unpushed local edit (in the collab
+  /// dirty set) — the server's older copy must not clobber them here.
+  Future<int> _applyServerData(
+    Map<String, dynamic> data, {
+    Map<String, String>? sharedOwners,
+    Set<String>? skipRecipeIds,
+  }) async {
     int count = 0;
 
     // Log what the server sent back
@@ -547,19 +596,130 @@ class SyncService {
     final db = _db!;
     await db.transaction(() async {
       // Parent entities first, children after
-      count += await _upsertCookbooks(data['cookbooks']);
+      count += await _upsertCookbooks(data['cookbooks'], sharedOwners);
       count += await _upsertCategories(data['categories']);
       count += await _upsertCustomCategories(data['customCategories']);
       count += await _upsertCustomCourses(data['customCourses']);
       count += await _upsertTags(data['tags']);
       count += await _upsertShoppingCategories(data['shoppingCategories']);
-      count += await _upsertRecipes(data['recipes']);
+      count += await _upsertRecipes(data['recipes'], skipRecipeIds);
       count += await _upsertMealPlans(data['mealPlans']);
       count += await _upsertShoppingLists(data['shoppingLists']);
       count += await _upsertShoppingListItems(data['shoppingListItems']);
     });
 
     return count;
+  }
+
+  // ════════════════════════════════════════════
+  //  SHARED-COOKBOOK COLLABORATION
+  // ════════════════════════════════════════════
+
+  /// cookbookId → owner userId, from a /family/shared payload's `shares`.
+  Map<String, String> _extractSharedCookbookOwners(Map<String, dynamic> data) {
+    final shares = (data['shares'] as List?) ?? const [];
+    final map = <String, String>{};
+    for (final raw in shares) {
+      final s = raw as Map<String, dynamic>;
+      if (s['resourceType'] != 'cookbook') continue;
+      final owner = s['owner'] as Map<String, dynamic>?;
+      final ownerId = owner?['id'] as String?;
+      final resourceId = s['resourceId'] as String?;
+      if (ownerId != null && resourceId != null) map[resourceId] = ownerId;
+    }
+    return map;
+  }
+
+  /// The cookbook shares (id/permission/owner display) for CollabService, from
+  /// a /family/shared payload's `shares`.
+  List<Map<String, dynamic>> _extractCookbookShares(Map<String, dynamic> data) {
+    final shares = (data['shares'] as List?) ?? const [];
+    final out = <Map<String, dynamic>>[];
+    for (final raw in shares) {
+      final s = raw as Map<String, dynamic>;
+      if (s['resourceType'] != 'cookbook') continue;
+      final owner = s['owner'] as Map<String, dynamic>?;
+      out.add({
+        'resourceId': s['resourceId'],
+        'permission': s['permission'] ?? 'read',
+        'ownerId': owner?['id'],
+        'ownerName': owner?['name'],
+        'ownerAvatarUrl': owner?['avatarUrl'],
+      });
+    }
+    return out;
+  }
+
+  /// Fetch ALL shared content (no `since` filter) and reconcile it locally.
+  /// Used right after joining a shared cookbook so the member sees it even when
+  /// the cookbook's `updatedAt` predates their last sync cursor.
+  Future<void> pullSharedNow() async {
+    if (_db == null || !_auth.isSignedIn) return;
+    try {
+      final familyData = await FamilyService.instance.getSharedContent();
+      if (familyData == null) return;
+      await _applyServerData(
+        familyData,
+        sharedOwners: _extractSharedCookbookOwners(familyData),
+        skipRecipeIds: CollabService.instance.dirtyCookbookRecipeIds,
+      );
+      CollabService.instance.setCookbookAccess(_extractCookbookShares(familyData));
+    } catch (e) {
+      debugPrint('[Sync] pullSharedNow failed: $e');
+    }
+  }
+
+  /// Push local edits to recipes in shared cookbooks I can edit through the
+  /// free /collab cookbook channel (server preserves the owner's userId).
+  /// Recipes are marked dirty by the editor; each is cleared once pushed.
+  Future<void> _pushDirtyCookbookRecipes() async {
+    final db = _db;
+    if (db == null || !_auth.isSignedIn) return;
+    final collab = CollabService.instance;
+    final dirty = collab.dirtyCookbookRecipeIds;
+    if (dirty.isEmpty) return;
+
+    final payloads = <Map<String, dynamic>>[];
+    final pushIds = <String>[];   // cleared only on a successful push
+    final dropIds = <String>[];   // unpushable (gone / no edit rights) — clear now
+
+    for (final recipeId in dirty) {
+      final recipe = await (db.select(db.recipes)..where((r) => r.id.equals(recipeId))).getSingleOrNull();
+      if (recipe == null || !collab.canEditCookbook(recipe.cookbookId)) {
+        dropIds.add(recipeId);
+        continue;
+      }
+      final ingredients = await (db.select(db.ingredients)
+        ..where((i) => i.recipeId.equals(recipeId))
+        ..orderBy([(i) => OrderingTerm.asc(i.sortOrder)])).get();
+      final steps = await (db.select(db.steps)
+        ..where((s) => s.recipeId.equals(recipeId))
+        ..orderBy([(s) => OrderingTerm.asc(s.sortOrder)])).get();
+      final recipeTags = await (db.select(db.recipeTags)..where((rt) => rt.recipeId.equals(recipeId))).get();
+      final recipeLinks = await (db.select(db.recipeLinks)..where((rl) => rl.sourceRecipeId.equals(recipeId))).get();
+
+      payloads.add({
+        ..._serializeRecipe(recipe),
+        'ingredients': ingredients.map(_serializeIngredient).toList(),
+        'steps': steps.map(_serializeStep).toList(),
+        'tags': recipeTags.map((rt) => rt.tagId).toList(),
+        'recipeLinks': recipeLinks.map(_serializeRecipeLink).toList(),
+      });
+      pushIds.add(recipeId);
+    }
+
+    if (dropIds.isNotEmpty) await collab.unmarkRecipesDirty(dropIds);
+    if (payloads.isEmpty) return;
+
+    // Order so a recipe appears before any recipe that links to it — the
+    // backend inserts recipe links sequentially and would otherwise FK-fail.
+    _topologicalSortRecipes(payloads);
+
+    final resp = await FamilyService.instance.collabCookbookPush(recipes: payloads);
+    if (resp != null) {
+      await collab.unmarkRecipesDirty(pushIds);
+      debugPrint('[Sync] Pushed ${payloads.length} shared-cookbook recipe edit(s)');
+    }
   }
 
   // ════════════════════════════════════════════
@@ -782,20 +942,27 @@ class SyncService {
   //  DESERIALIZATION + UPSERT — API JSON → Drift
   // ════════════════════════════════════════════
 
-  Future<int> _upsertCookbooks(dynamic data) async {
+  Future<int> _upsertCookbooks(dynamic data, [Map<String, String>? sharedOwners]) async {
     if (data is! List || data.isEmpty) return 0;
     final db = _db!;
     for (final item in data) {
       final d = item as Map<String, dynamic>;
+      final id = d['id'] as String;
+      // Cookbooks arriving via a share are stamped with the owner's user id so
+      // they're excluded from the owner-only /sync push. On the own-sync path
+      // (sharedOwners == null) leave the column absent so a value already set
+      // locally is preserved.
+      final owner = sharedOwners?[id];
       await db.into(db.cookbooks).insertOnConflictUpdate(
         CookbooksCompanion(
-          id: Value(d['id'] as String),
+          id: Value(id),
           name: Value(d['name'] as String),
           description: Value(d['description'] as String?),
           imagePath: Value(d['imagePath'] as String?),
           createdAt: Value(_parseDate(d['createdAt'])),
           updatedAt: Value(_parseDateNullable(d['updatedAt'])),
           deletedAt: Value(_parseDateNullable(d['deletedAt'])),
+          sharedOwnerId: owner != null ? Value(owner) : const Value.absent(),
         ),
       );
     }
@@ -904,12 +1071,16 @@ class SyncService {
     return data.length;
   }
 
-  Future<int> _upsertRecipes(dynamic data) async {
+  Future<int> _upsertRecipes(dynamic data, [Set<String>? skipRecipeIds]) async {
     if (data is! List || data.isEmpty) return 0;
     final db = _db!;
     for (final item in data) {
       final d = item as Map<String, dynamic>;
       final recipeId = d['id'] as String;
+
+      // An unpushed local edit to a shared-cookbook recipe — don't let the
+      // server's older copy overwrite it before the collab push goes out.
+      if (skipRecipeIds != null && skipRecipeIds.contains(recipeId)) continue;
 
       // Upsert recipe
       await db.into(db.recipes).insertOnConflictUpdate(

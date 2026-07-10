@@ -352,6 +352,96 @@ class FamilyService {
     return null;
   }
 
+  /// Create (or reuse) a LIVE-COLLABORATION link with a permission. Anyone who
+  /// opens it (signed in) joins the resource as a member.
+  /// [resourceType]: 'shopping_list' | 'cookbook'.
+  /// [permission]: list → 'read' | 'check' | 'full'; cookbook → 'read' | 'edit'.
+  /// For shopping lists, pass [snapshot] ({name, color, items:[...]}) so the
+  /// list is published server-side (works on any tier).
+  Future<ShareLinkInfo?> createCollabLink(
+      String resourceType, String resourceId, String permission,
+      {Map<String, dynamic>? snapshot}) async {
+    try {
+      final body = <String, dynamic>{
+        'resourceType': resourceType,
+        'resourceId': resourceId,
+        'kind': 'collab',
+        'permission': permission,
+        if (snapshot != null) 'snapshot': snapshot,
+      };
+      final r = await _auth.post('/v1/share', body);
+      if (r.statusCode == 201) return ShareLinkInfo.fromJson(jsonDecode(r.body));
+      debugPrint('[Share] createCollabLink failed: ${_parseError(r)}');
+    } catch (e) { debugPrint('[Share] createCollabLink: $e'); }
+    return null;
+  }
+
+  /// Join a collaboration invite by code. Returns the resource + granted
+  /// permission, or null on failure (e.g. paywalled cookbook, expired link).
+  Future<({String resourceType, String resourceId, String permission})?>
+      joinShareLink(String code) async {
+    try {
+      final r = await _auth.post('/v1/share/$code/join', {});
+      if (r.statusCode == 200) {
+        final d = jsonDecode(r.body) as Map<String, dynamic>;
+        return (
+          resourceType: d['resourceType'] as String,
+          resourceId: d['resourceId'] as String,
+          permission: (d['permission'] as String?) ?? 'read',
+        );
+      }
+      debugPrint('[Share] join failed: ${_parseError(r)}');
+    } catch (e) { debugPrint('[Share] join: $e'); }
+    return null;
+  }
+
+  /// Pull collaborative shopping lists shared with me (free channel). Returns
+  /// the raw decoded { serverTime, lists, items, members, permissions }.
+  Future<Map<String, dynamic>?> collabPull({String? since}) async {
+    try {
+      final q = since != null ? '?since=${Uri.encodeComponent(since)}' : '';
+      final r = await _auth.get('/v1/collab/pull$q');
+      if (r.statusCode == 200) return jsonDecode(r.body) as Map<String, dynamic>;
+    } catch (e) { debugPrint('[Collab] pull: $e'); }
+    return null;
+  }
+
+  /// Push my local changes to collaborative shopping lists (permission-enforced
+  /// server-side) and get server changes back in the same shape as [collabPull].
+  Future<Map<String, dynamic>?> collabPush({
+    required List<Map<String, dynamic>> lists,
+    required List<Map<String, dynamic>> items,
+    String? since,
+  }) async {
+    try {
+      final r = await _auth.post('/v1/collab/push', {
+        if (since != null) 'since': since,
+        'lists': lists,
+        'items': items,
+      });
+      if (r.statusCode == 200) return jsonDecode(r.body) as Map<String, dynamic>;
+    } catch (e) { debugPrint('[Collab] push: $e'); }
+    return null;
+  }
+
+  /// Push my edits to recipes in shared cookbooks I can edit (server enforces
+  /// permission + preserves the owner's userId). [recipes] each carry their
+  /// children (ingredients/steps/tags/recipeLinks) inline, same shape as sync.
+  Future<Map<String, dynamic>?> collabCookbookPush({
+    required List<Map<String, dynamic>> recipes,
+    String? since,
+  }) async {
+    try {
+      final r = await _auth.post('/v1/collab/cookbook-push', {
+        if (since != null) 'since': since,
+        'recipes': recipes,
+      });
+      if (r.statusCode == 200) return jsonDecode(r.body) as Map<String, dynamic>;
+      debugPrint('[Collab] cookbook-push failed: ${_parseError(r)}');
+    } catch (e) { debugPrint('[Collab] cookbook-push: $e'); }
+    return null;
+  }
+
   /// List my active share links.
   Future<List<ShareLinkInfo>> getMyShareLinks() async {
     try {

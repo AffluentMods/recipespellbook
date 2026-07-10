@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -29,6 +30,8 @@ import '../../widgets/recipe_edit_instructions.dart';
 import '../../../services/image_service.dart';
 import '../../../services/sub_recipe_autolinker.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/collab_service.dart';
+import '../../../services/sync_service.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../widgets/app_snackbar.dart';
@@ -1160,6 +1163,15 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       }
 
       await tagsDao.setTagsForRecipe(recipeId, _selectedTagIds);
+
+      // If this recipe lives in a shared cookbook I can edit, flag it so the
+      // next sync pushes the change to the owner + other members, then kick a
+      // sync so the write-back happens promptly.
+      final savedRecipe = await recipeDao.getRecipeById(recipeId);
+      if (savedRecipe != null && CollabService.instance.canEditCookbook(savedRecipe.cookbookId)) {
+        await CollabService.instance.markRecipeDirty(recipeId);
+        unawaited(SyncService.instance.sync());
+      }
 
       // ── Auto-link sub-recipe references ──
       // Scan ingredient names for [[Recipe Name]] / "see X recipe" patterns

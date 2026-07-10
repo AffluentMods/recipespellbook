@@ -10,7 +10,11 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
 import '../../../providers/cookbook_provider.dart';
+import '../../../services/auth_service.dart';
+import '../../../services/collab_service.dart';
+import '../../../services/family_service.dart';
 import '../../../services/image_service.dart';
+import '../../../services/sync_service.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/macro_ring.dart';
@@ -88,7 +92,9 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final recipes = _recipes;
-    final showSaveBar = !_loading && _error == null && recipes.length == 1;
+    final isCookbookCollab = !_loading && _error == null &&
+        _data?['type'] == 'cookbook' && _data?['kind'] == 'collab';
+    final showSaveBar = !_loading && _error == null && recipes.length == 1 && !isCookbookCollab;
 
     return Scaffold(
       appBar: AppBar(
@@ -99,8 +105,61 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
         ),
       ),
       body: Responsive.constrainWidth(context, child: _buildBody(theme, recipes)),
-      bottomNavigationBar: showSaveBar ? _saveBar(recipes.first) : null,
+      bottomNavigationBar: isCookbookCollab
+          ? _joinCookbookBar()
+          : (showSaveBar ? _saveBar(recipes.first) : null),
     );
+  }
+
+  Widget _joinCookbookBar() {
+    final cb = (_data?['cookbook'] as Map?) ?? const {};
+    final name = (cb['name'] as String?) ?? 'this cookbook';
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        child: SizedBox(
+          height: 52,
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: _saving ? null : _joinCollabCookbook,
+            icon: _saving
+                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.group_add_rounded),
+            label: Text('Join "$name"'),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _joinCollabCookbook() async {
+    if (!AuthService.instance.isSignedIn) {
+      AppSnackbar.info(context, 'Sign in to collaborate on this cookbook');
+      return;
+    }
+    setState(() => _saving = true);
+    final res = await FamilyService.instance.joinShareLink(widget.code);
+    if (!mounted) return;
+    if (res == null) {
+      setState(() => _saving = false);
+      AppSnackbar.error(context, "Couldn't join — the invite may be invalid, expired, or need a subscription.");
+      return;
+    }
+    final owner = _data?['sharedBy'] as Map?;
+    await CollabService.instance.markCollabCookbook(
+      res.resourceId, res.permission,
+      ownerId: owner?['id'] as String?,
+      ownerName: owner?['name'] as String?,
+      ownerAvatarUrl: owner?['avatarUrl'] as String?,
+    );
+    // Hydrate the full cookbook + recipes now (bypasses the sync `since` cursor
+    // so a cookbook older than our last sync still shows up).
+    await SyncService.instance.pullSharedNow();
+    if (!mounted) return;
+    setState(() => _saving = false);
+    ref.read(selectedCookbookIdProvider.notifier).state = res.resourceId;
+    AppSnackbar.success(context, "Joined! It's in your cookbooks.");
+    context.go('/');
   }
 
   Widget _saveBar(Map<String, dynamic> recipe) {
@@ -160,6 +219,12 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
     final sharedBy = _data?['sharedBy']?['name'] ?? 'Someone';
     final avatarUrl = _data?['sharedBy']?['avatarUrl'] as String?;
     final expiresAt = _data?['expiresAt'] != null ? DateTime.tryParse(_data!['expiresAt']) : null;
+
+    // Shopping-list shares (collab invite or a one-time copy).
+    if (_data?['type'] == 'shopping_list') {
+      return _buildShoppingList(theme, sharedBy, avatarUrl);
+    }
+
     final single = recipes.length == 1;
 
     return ListView(
@@ -184,6 +249,131 @@ class _ShareViewerScreenState extends ConsumerState<ShareViewerScreen> {
         ],
       ],
     );
+  }
+
+  Widget _buildShoppingList(ThemeData theme, String sharedBy, String? avatarUrl) {
+    final sl = (_data?['shoppingList'] as Map?) ?? const {};
+    final items = (_data?['items'] as List?) ?? const [];
+    final isCollab = _data?['kind'] == 'collab';
+    final name = (sl['name'] as String?) ?? 'Shopping list';
+
+    return Column(
+      children: [
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            children: [
+              _sharedByBanner(theme, sharedBy, avatarUrl, null),
+              const SizedBox(height: 16),
+              Row(children: [
+                Icon(Icons.shopping_cart_rounded, color: theme.colorScheme.primary),
+                const SizedBox(width: 10),
+                Expanded(child: Text(name, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold))),
+              ]),
+              const SizedBox(height: 4),
+              Text(
+                '${items.length} item${items.length == 1 ? '' : 's'}'
+                '${isCollab ? ' · live collaboration' : ''}',
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+              ),
+              const SizedBox(height: 16),
+              for (final raw in items)
+                Builder(builder: (_) {
+                  final it = raw as Map;
+                  final qty = [it['quantity'], it['unit']]
+                      .where((e) => e != null && '$e'.isNotEmpty)
+                      .join(' ');
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 7),
+                    child: Row(children: [
+                      Icon(it['isChecked'] == true ? Icons.check_circle : Icons.radio_button_unchecked,
+                          size: 18, color: theme.colorScheme.outline),
+                      const SizedBox(width: 10),
+                      Expanded(child: Text((it['name'] as String?) ?? '', style: theme.textTheme.bodyLarge)),
+                      if (qty.isNotEmpty)
+                        Text(qty, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+                    ]),
+                  );
+                }),
+            ],
+          ),
+        ),
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: SizedBox(
+              height: 52,
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: _saving ? null : (isCollab ? _joinCollabList : _importSnapshotList),
+                icon: _saving
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                    : Icon(isCollab ? Icons.group_add_rounded : Icons.playlist_add_rounded),
+                label: Text(isCollab ? 'Join this list' : 'Add to my lists'),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _joinCollabList() async {
+    if (!AuthService.instance.isSignedIn) {
+      AppSnackbar.info(context, 'Sign in to join this list');
+      return;
+    }
+    setState(() => _saving = true);
+    final res = await FamilyService.instance.joinShareLink(widget.code);
+    if (!mounted) return;
+    setState(() => _saving = false);
+    if (res == null) {
+      AppSnackbar.error(context, "Couldn't join — the invite may be invalid, expired, or need a subscription.");
+      return;
+    }
+    await CollabService.instance.markCollab(res.resourceId, res.permission);
+    await CollabService.instance.syncNow();
+    if (!mounted) return;
+    AppSnackbar.success(context, "Joined! It's in your Shopping tab.");
+    context.go('/shopping');
+  }
+
+  Future<void> _importSnapshotList() async {
+    final db = ref.read(databaseProvider);
+    setState(() => _saving = true);
+    try {
+      final sl = (_data?['shoppingList'] as Map?) ?? const {};
+      final items = (_data?['items'] as List?) ?? const [];
+      final base = DateTime.now().microsecondsSinceEpoch;
+      final newListId = 'list_shr_$base';
+      await db.into(db.shoppingLists).insert(ShoppingListsCompanion.insert(
+        id: newListId,
+        name: (sl['name'] as String?) ?? 'Shared list',
+        color: drift.Value(sl['color'] as String?),
+      ));
+      var i = 0;
+      for (final raw in items) {
+        final it = raw as Map;
+        await db.into(db.shoppingListItems).insert(ShoppingListItemsCompanion.insert(
+          id: 'item_shr_${base}_${i++}',
+          listId: newListId,
+          name: (it['name'] as String?) ?? '',
+          quantity: drift.Value(it['quantity'] as String?),
+          unit: drift.Value(it['unit'] as String?),
+          isChecked: drift.Value(it['isChecked'] as bool? ?? false),
+          note: drift.Value(it['note'] as String?),
+          sortOrder: drift.Value((it['sortOrder'] as num?)?.toInt() ?? 0),
+        ));
+      }
+      if (mounted) {
+        AppSnackbar.success(context, 'Added to your lists');
+        context.go('/shopping');
+      }
+    } catch (e) {
+      if (mounted) AppSnackbar.error(context, 'Import failed: $e');
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   Widget _sharedByBanner(ThemeData theme, String sharedBy, String? avatarUrl, DateTime? expiresAt) {

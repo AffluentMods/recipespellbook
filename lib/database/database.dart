@@ -71,7 +71,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
 
   // Accessors for DAOs
@@ -168,6 +168,13 @@ class AppDatabase extends _$AppDatabase {
           // is a divider whose `instruction` holds the section title.
           await customStatement(
             'ALTER TABLE steps ADD COLUMN notes TEXT',
+          );
+        }
+        if (from < 7) {
+          // Live cookbook collaboration: cookbooks pulled in via a share carry
+          // the owner's user id so they're excluded from the owner-only sync push.
+          await customStatement(
+            'ALTER TABLE cookbooks ADD COLUMN shared_owner_id TEXT',
           );
         }
       },

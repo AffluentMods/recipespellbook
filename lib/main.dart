@@ -24,6 +24,7 @@ import 'services/recipe_import_engine.dart';
 import 'services/desktop_window_service.dart';
 import 'services/sync_service.dart';
 import 'services/transfer_service.dart';
+import 'services/collab_service.dart';
 import 'theme/app_theme.dart';
 import 'ui/screens/import/import_preview_screen.dart';
 import 'ui/widgets/app_shortcuts.dart';
@@ -205,6 +206,8 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     final db = ref.read(databaseProvider);
     SyncService.instance.setDatabase(db);
     TransferService.instance.setDatabase(db);
+    CollabService.instance.setDatabase(db);
+    CollabService.instance.load();
 
     // 2. Restore auth session (must be first — determines signed-in state)
     await ref.read(authProvider.notifier).initialize();

@@ -125,10 +125,16 @@ class Responsive {
     bool isScrollControlled = true,
     double desktopMaxWidth = 480,
     double desktopMaxHeight = 600,
+    // When true the sheet is presented on the ROOT navigator, so it sits above
+    // the bottom nav and can't be left hanging in a background tab when the user
+    // switches tabs (they must dismiss it first). Use for app-level modals like
+    // the share sheet.
+    bool useRootNavigator = false,
   }) {
     if (isDesktopLayout(context)) {
       return showDialog<T>(
         context: context,
+        useRootNavigator: useRootNavigator,
         builder: (ctx) => Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           clipBehavior: Clip.antiAlias,
@@ -146,6 +152,7 @@ class Responsive {
     return showModalBottomSheet<T>(
       context: context,
       isScrollControlled: isScrollControlled,
+      useRootNavigator: useRootNavigator,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),

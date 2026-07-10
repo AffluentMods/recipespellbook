@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import 'package:drift/drift.dart' as drift;
+import '../../../services/collab_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -225,6 +227,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   static const _lastListKey = 'shoppingLastListId';
   static const _groupModeKey = 'shoppingGroupMode';
 
+  Timer? _collabTimer;
+
   @override
   void initState() {
     super.initState();
@@ -232,6 +236,49 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     _restoreGroupMode();
     _loadUserMappings();
     _loadSharedStatus();
+    // Live collaboration: sync shared lists now + every few seconds while the
+    // shopping screen is open. Rebuild when membership/permissions change.
+    CollabService.instance.syncNow();
+    CollabService.instance.revision.addListener(_onCollabRevision);
+    _collabTimer = Timer.periodic(const Duration(seconds: 6), (_) {
+      if (mounted) CollabService.instance.syncNow();
+    });
+  }
+
+  void _onCollabRevision() {
+    if (mounted) setState(() {});
+  }
+
+  Widget _collabBanner(ThemeData theme, String? perm) {
+    final isCheck = perm == 'check';
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(children: [
+        Icon(isCheck ? Icons.check_circle_outline : Icons.visibility_outlined,
+            size: 16, color: theme.colorScheme.onSecondaryContainer),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            isCheck
+                ? 'Shared list · you can tick items off, but not add or remove them'
+                : 'Shared list · view only',
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSecondaryContainer),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  @override
+  void dispose() {
+    _collabTimer?.cancel();
+    CollabService.instance.revision.removeListener(_onCollabRevision);
+    super.dispose();
   }
 
   /// Restore the By Aisle / By Recipe choice across restarts.
@@ -392,6 +439,13 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   onListTap: () => _showListSwitcher(context),
                 )),
 
+                // Restricted-collaborator banner.
+                if (!selecting &&
+                    CollabService.instance.isCollab(_currentListId) &&
+                    !CollabService.instance.canEdit(_currentListId))
+                  Responsive.constrainWidth(context,
+                      child: _collabBanner(theme, CollabService.instance.permissionFor(_currentListId))),
+
                 // Order Online Button
                 if (uncheckedItems.isNotEmpty && !selecting)
                   Responsive.constrainWidth(context, child: _OrderOnlineButton(items: uncheckedItems)),
@@ -409,7 +463,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
           },
         ),
       ),
-      floatingActionButton: selecting ? null : _ModernFAB(onTap: () => _showAddItemSheet(context)),
+      floatingActionButton: (selecting || !CollabService.instance.canEdit(_currentListId))
+          ? null
+          : _ModernFAB(onTap: () => _showAddItemSheet(context)),
       bottomNavigationBar: selecting
           ? _SelectionActionBar(
               onDelete: () => _bulkDelete(selectedIds),
@@ -3846,12 +3902,18 @@ class _ShoppingItemTile extends ConsumerWidget {
     final isSelected = selectedIds.contains(item.id);
     final selection = ref.read(_shoppingSelectionProvider.notifier);
 
+    // Collaboration permission on this list ('read'/'check'/'add'/'full', or
+    // null for my own lists). Restricted members can't add/remove/edit.
+    final canEdit = CollabService.instance.canEdit(listId);
+    final canCheck = CollabService.instance.canCheck(listId);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       child: Dismissible(
         key: Key(item.id),
-        // Disable swipe-to-delete during selection so it can't fight taps.
-        direction: selecting ? DismissDirection.none : DismissDirection.endToStart,
+        // Disable swipe-to-delete during selection, or when I can't edit this
+        // shared list (view / check-only member).
+        direction: (selecting || !canEdit) ? DismissDirection.none : DismissDirection.endToStart,
         background: Container(
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 20),
@@ -3900,13 +3962,22 @@ class _ShoppingItemTile extends ConsumerWidget {
           ),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
-            onTap: () => selecting
-                ? selection.toggle(item.id)
-                : _showItemOptions(context, ref),
-            onLongPress: () {
-              HapticFeedback.selectionClick();
-              selection.add(item.id);
+            onTap: () {
+              if (selecting) {
+                selection.toggle(item.id);
+              } else if (canEdit) {
+                _showItemOptions(context, ref);
+              } else if (canCheck) {
+                // Check-only member: tapping the row toggles the check.
+                (item.isChecked ? (onItemUnchecked ?? (id) => shoppingDao.toggleItemChecked(id, false)) : (onItemChecked ?? (id) => shoppingDao.toggleItemChecked(id, true)))(item.id);
+              }
             },
+            onLongPress: canEdit
+                ? () {
+                    HapticFeedback.selectionClick();
+                    selection.add(item.id);
+                  }
+                : null,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
@@ -4056,13 +4127,16 @@ class _ShoppingItemTile extends ConsumerWidget {
                       scale: 1.2,
                       child: Checkbox(
                         value: item.isChecked || pendingCheck,
-                        onChanged: (_) {
-                          if (item.isChecked || pendingCheck) {
-                            (onItemUnchecked ?? (_) => shoppingDao.toggleItemChecked(item.id, false))(item.id);
-                          } else {
-                            (onItemChecked ?? (_) => shoppingDao.toggleItemChecked(item.id, true))(item.id);
-                          }
-                        },
+                        // View-only members can't check items off.
+                        onChanged: canCheck
+                            ? (_) {
+                                if (item.isChecked || pendingCheck) {
+                                  (onItemUnchecked ?? (_) => shoppingDao.toggleItemChecked(item.id, false))(item.id);
+                                } else {
+                                  (onItemChecked ?? (_) => shoppingDao.toggleItemChecked(item.id, true))(item.id);
+                                }
+                              }
+                            : null,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                         side: BorderSide(color: theme.colorScheme.outlineVariant, width: 2),
                       ),

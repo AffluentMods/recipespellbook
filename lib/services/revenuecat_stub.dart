@@ -45,6 +45,7 @@ class LogInResult {
 class CustomerInfo {
   CustomerInfo._();
   Entitlements get entitlements => Entitlements._();
+  List<String> get allPurchasedProductIdentifiers => const [];
 }
 
 class Entitlements {
@@ -97,7 +98,7 @@ class PurchasesError implements Exception {
 }
 
 enum PurchasesErrorCode {
-  purchaseCancelledError, storeProblemError, unknownError
+  purchaseCancelledError, storeProblemError, unknownError, productAlreadyPurchasedError
 }
 
 // purchases_ui_flutter stubs

@@ -18,6 +18,8 @@ import '../../widgets/recipe_image.dart';
 import '../../widgets/sub_recipe_selection_sheet.dart';
 import '../../../services/sync_service.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/collab_service.dart';
+import '../../../providers/collab_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../layouts/master_detail_layout.dart';
 import '../../../utils/responsive_utils.dart';
@@ -210,6 +212,13 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         ? widget.cookbookId
         : (ref.watch(selectedCookbookIdProvider) ?? 'starter');
 
+    // Rebuild when my collab permissions change so gated controls update.
+    ref.watch(collabRevisionProvider);
+    // Can I add/modify recipes in this cookbook? Always yes for my own; for a
+    // shared-in cookbook only when I have edit/add permission.
+    final canEditHere = !CollabService.instance.isCollabCookbook(effectiveCookbookId) ||
+        CollabService.instance.canEditCookbook(effectiveCookbookId);
+
     // Choose the right stream based on filters
     Stream<List<Recipe>> recipeStream;
     if (widget.showAllRecipes) {
@@ -392,7 +401,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
             ),
         ],
       ),
-      floatingActionButton: _isSelecting
+      floatingActionButton: (_isSelecting || !canEditHere)
           ? null
           : FloatingActionButton.extended(
         onPressed: () => _showAddRecipeDialog(context),

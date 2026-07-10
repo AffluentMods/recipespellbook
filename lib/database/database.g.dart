@@ -51,9 +51,23 @@ class $CookbooksTable extends Cookbooks
   late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
       'deleted_at', aliasedName, true,
       type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _sharedOwnerIdMeta =
+      const VerificationMeta('sharedOwnerId');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, description, imagePath, createdAt, updatedAt, deletedAt];
+  late final GeneratedColumn<String> sharedOwnerId = GeneratedColumn<String>(
+      'shared_owner_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        description,
+        imagePath,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        sharedOwnerId
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -97,6 +111,12 @@ class $CookbooksTable extends Cookbooks
       context.handle(_deletedAtMeta,
           deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
     }
+    if (data.containsKey('shared_owner_id')) {
+      context.handle(
+          _sharedOwnerIdMeta,
+          sharedOwnerId.isAcceptableOrUnknown(
+              data['shared_owner_id']!, _sharedOwnerIdMeta));
+    }
     return context;
   }
 
@@ -120,6 +140,8 @@ class $CookbooksTable extends Cookbooks
           .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at']),
       deletedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      sharedOwnerId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}shared_owner_id']),
     );
   }
 
@@ -137,6 +159,12 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
   final DateTime createdAt;
   final DateTime? updatedAt;
   final DateTime? deletedAt;
+
+  /// Set when this cookbook was pulled in via a share (the owner's user id).
+  /// Non-null ⇒ this is a shared-in cookbook: it must NOT be re-pushed through
+  /// the owner-only premium `/sync` channel, and editing is gated by the
+  /// member's collab permission.
+  final String? sharedOwnerId;
   const Cookbook(
       {required this.id,
       required this.name,
@@ -144,7 +172,8 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
       this.imagePath,
       required this.createdAt,
       this.updatedAt,
-      this.deletedAt});
+      this.deletedAt,
+      this.sharedOwnerId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -162,6 +191,9 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
     }
     if (!nullToAbsent || deletedAt != null) {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    if (!nullToAbsent || sharedOwnerId != null) {
+      map['shared_owner_id'] = Variable<String>(sharedOwnerId);
     }
     return map;
   }
@@ -183,6 +215,9 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(deletedAt),
+      sharedOwnerId: sharedOwnerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sharedOwnerId),
     );
   }
 
@@ -197,6 +232,7 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      sharedOwnerId: serializer.fromJson<String?>(json['sharedOwnerId']),
     );
   }
   @override
@@ -210,6 +246,7 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'sharedOwnerId': serializer.toJson<String?>(sharedOwnerId),
     };
   }
 
@@ -220,7 +257,8 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
           Value<String?> imagePath = const Value.absent(),
           DateTime? createdAt,
           Value<DateTime?> updatedAt = const Value.absent(),
-          Value<DateTime?> deletedAt = const Value.absent()}) =>
+          Value<DateTime?> deletedAt = const Value.absent(),
+          Value<String?> sharedOwnerId = const Value.absent()}) =>
       Cookbook(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -229,6 +267,8 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        sharedOwnerId:
+            sharedOwnerId.present ? sharedOwnerId.value : this.sharedOwnerId,
       );
   Cookbook copyWithCompanion(CookbooksCompanion data) {
     return Cookbook(
@@ -240,6 +280,9 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      sharedOwnerId: data.sharedOwnerId.present
+          ? data.sharedOwnerId.value
+          : this.sharedOwnerId,
     );
   }
 
@@ -252,14 +295,15 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
           ..write('imagePath: $imagePath, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('deletedAt: $deletedAt')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('sharedOwnerId: $sharedOwnerId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, name, description, imagePath, createdAt, updatedAt, deletedAt);
+  int get hashCode => Object.hash(id, name, description, imagePath, createdAt,
+      updatedAt, deletedAt, sharedOwnerId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -270,7 +314,8 @@ class Cookbook extends DataClass implements Insertable<Cookbook> {
           other.imagePath == this.imagePath &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
-          other.deletedAt == this.deletedAt);
+          other.deletedAt == this.deletedAt &&
+          other.sharedOwnerId == this.sharedOwnerId);
 }
 
 class CookbooksCompanion extends UpdateCompanion<Cookbook> {
@@ -281,6 +326,7 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
   final Value<DateTime> createdAt;
   final Value<DateTime?> updatedAt;
   final Value<DateTime?> deletedAt;
+  final Value<String?> sharedOwnerId;
   final Value<int> rowid;
   const CookbooksCompanion({
     this.id = const Value.absent(),
@@ -290,6 +336,7 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
+    this.sharedOwnerId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CookbooksCompanion.insert({
@@ -300,6 +347,7 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
+    this.sharedOwnerId = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name);
@@ -311,6 +359,7 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
+    Expression<String>? sharedOwnerId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -321,6 +370,7 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
+      if (sharedOwnerId != null) 'shared_owner_id': sharedOwnerId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -333,6 +383,7 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
       Value<DateTime>? createdAt,
       Value<DateTime?>? updatedAt,
       Value<DateTime?>? deletedAt,
+      Value<String?>? sharedOwnerId,
       Value<int>? rowid}) {
     return CookbooksCompanion(
       id: id ?? this.id,
@@ -342,6 +393,7 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
+      sharedOwnerId: sharedOwnerId ?? this.sharedOwnerId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -370,6 +422,9 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
     if (deletedAt.present) {
       map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
+    if (sharedOwnerId.present) {
+      map['shared_owner_id'] = Variable<String>(sharedOwnerId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -386,6 +441,7 @@ class CookbooksCompanion extends UpdateCompanion<Cookbook> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
+          ..write('sharedOwnerId: $sharedOwnerId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -7884,6 +7940,7 @@ typedef $$CookbooksTableCreateCompanionBuilder = CookbooksCompanion Function({
   Value<DateTime> createdAt,
   Value<DateTime?> updatedAt,
   Value<DateTime?> deletedAt,
+  Value<String?> sharedOwnerId,
   Value<int> rowid,
 });
 typedef $$CookbooksTableUpdateCompanionBuilder = CookbooksCompanion Function({
@@ -7894,6 +7951,7 @@ typedef $$CookbooksTableUpdateCompanionBuilder = CookbooksCompanion Function({
   Value<DateTime> createdAt,
   Value<DateTime?> updatedAt,
   Value<DateTime?> deletedAt,
+  Value<String?> sharedOwnerId,
   Value<int> rowid,
 });
 
@@ -7921,6 +7979,7 @@ class $$CookbooksTableTableManager extends RootTableManager<
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime?> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
+            Value<String?> sharedOwnerId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               CookbooksCompanion(
@@ -7931,6 +7990,7 @@ class $$CookbooksTableTableManager extends RootTableManager<
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
+            sharedOwnerId: sharedOwnerId,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -7941,6 +8001,7 @@ class $$CookbooksTableTableManager extends RootTableManager<
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime?> updatedAt = const Value.absent(),
             Value<DateTime?> deletedAt = const Value.absent(),
+            Value<String?> sharedOwnerId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               CookbooksCompanion.insert(
@@ -7951,6 +8012,7 @@ class $$CookbooksTableTableManager extends RootTableManager<
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
+            sharedOwnerId: sharedOwnerId,
             rowid: rowid,
           ),
         ));
@@ -7991,6 +8053,11 @@ class $$CookbooksTableFilterComposer
 
   ColumnFilters<DateTime> get deletedAt => $state.composableBuilder(
       column: $state.table.deletedAt,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get sharedOwnerId => $state.composableBuilder(
+      column: $state.table.sharedOwnerId,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
@@ -8043,6 +8110,11 @@ class $$CookbooksTableOrderingComposer
 
   ColumnOrderings<DateTime> get deletedAt => $state.composableBuilder(
       column: $state.table.deletedAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get sharedOwnerId => $state.composableBuilder(
+      column: $state.table.sharedOwnerId,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }

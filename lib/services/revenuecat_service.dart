@@ -275,12 +275,17 @@ class RevenueCatService {
     }
   }
 
-  /// Update tier from backend user profile (for server-side entitlements).
+  /// Update tier from the backend user profile. The backend tier is a
+  /// FALLBACK/FLOOR — it can UPGRADE the tier (e.g. a web purchase the store SDK
+  /// can't see) but must NEVER downgrade a tier RevenueCat already verified from
+  /// the store. Otherwise a stale backend 'free' knocks a real purchase back to
+  /// free on every cold start (until the user taps Restore). Take the higher.
   void setTierFromBackend(String? backendTier) {
-    final tier = SubscriptionTier.fromBackendString(backendTier);
-    if (tier != _currentTier) {
-      _currentTier = tier;
-      debugPrint('[RevenueCat] Tier updated from backend: $tier');
+    final backend = SubscriptionTier.fromBackendString(backendTier);
+    final resolved = backend.index > _currentTier.index ? backend : _currentTier;
+    if (resolved != _currentTier) {
+      _currentTier = resolved;
+      debugPrint('[RevenueCat] Tier from backend: backend=$backend → resolved=$resolved');
       _notifyListeners();
     }
   }
@@ -343,10 +348,26 @@ class RevenueCatService {
       final customerInfo = await Purchases.purchasePackage(package);
       _syncFromCustomerInfo(customerInfo);
       return _currentTier;
-    } on PurchasesErrorCode catch (e) {
-      if (e == PurchasesErrorCode.purchaseCancelledError) {
+    } catch (e) {
+      // The platform throws a typed PurchasesErrorCode on some versions and a
+      // PlatformException (whose text carries the readable code) on others —
+      // handle both without importing PlatformException into this shared file.
+      final msg = e.toString();
+      final cancelled = (e is PurchasesErrorCode && e == PurchasesErrorCode.purchaseCancelledError) ||
+          msg.contains('PurchaseCancelled') ||
+          msg.contains('userCancelled: true');
+      if (cancelled) {
         debugPrint('[RevenueCat] Purchase cancelled');
         return null;
+      }
+      final alreadyOwned = (e is PurchasesErrorCode && e == PurchasesErrorCode.productAlreadyPurchasedError) ||
+          msg.contains('ProductAlreadyPurchased') ||
+          msg.contains('already active for the user');
+      if (alreadyOwned) {
+        // They already own it (reinstall / restored device / entitlement not
+        // yet synced) — recover the purchase instead of surfacing an error.
+        debugPrint('[RevenueCat] Product already owned — restoring');
+        return await restorePurchases();
       }
       rethrow;
     }
@@ -407,10 +428,26 @@ class RevenueCatService {
   void _syncFromCustomerInfo(CustomerInfo info) {
     final oldTier = _currentTier;
     final entitlements = info.entitlements.active;
+    // Products are ONE-TIME LIFETIME purchases, so a bought product stays in
+    // this list forever. Detection is deliberately lenient: there is effectively
+    // ONE paid tier now, so ANY active entitlement (whatever its identifier) or
+    // ownership of a known lifetime product grants Premium. This keeps the tier
+    // correct even when the RevenueCat entitlement identifier doesn't match the
+    // constant, or a Test-Store product is used — otherwise the store reports
+    // "already purchased" while the app still shows Free.
+    final owned = info.allPurchasedProductIdentifiers;
+    // Known paid lifetime product ids across App Store / Play / Test Store.
+    const paidLifetimeIds = <String>[
+      RCConfig.premiumLifetimeId, // rs_premium_lifetime
+      RCConfig.familyLifetimeId,  // rs_family_lifetime (legacy)
+      'lifetime',                 // RevenueCat Test Store
+    ];
+    final ownsPaid = owned.any(paidLifetimeIds.contains);
 
-    if (entitlements.containsKey(RCConfig.familyEntitlement)) {
-      _currentTier = SubscriptionTier.family;
-    } else if (entitlements.containsKey(RCConfig.premiumEntitlement)) {
+    if (entitlements.containsKey(RCConfig.familyEntitlement) ||
+        owned.contains(RCConfig.familyLifetimeId)) {
+      _currentTier = SubscriptionTier.family; // grandfathered legacy family buyers
+    } else if (entitlements.isNotEmpty || ownsPaid) {
       _currentTier = SubscriptionTier.premium;
     } else {
       _currentTier = SubscriptionTier.free;

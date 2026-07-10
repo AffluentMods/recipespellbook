@@ -20,6 +20,7 @@ import '../../../providers/settings_provider.dart';
 import '../../../services/image_service.dart';
 import '../../../services/recipe_print_service.dart';
 import '../../../services/shopping_list_generator.dart';
+import '../../../services/collab_service.dart';
 import '../../../ui/widgets/cooking_mode_screen.dart';
 import '../../../utils/default_recipe_images.dart';
 import '../../widgets/add_to_meal_plan_dialogue.dart';
@@ -1914,6 +1915,10 @@ class _RecipeAppBar extends StatelessWidget {
     final hasImage = recipe.imagePath != null &&
         (isServer || FileExistsCache.exists(recipe.imagePath!));
     final defaultAsset = defaultRecipeImageAsset(recipe.id);
+    // A recipe in a shared cookbook where I only have view access: hide the
+    // edit + mutating menu actions (the server would reject the edit anyway).
+    final readOnlyShared = CollabService.instance.isCollabCookbook(recipe.cookbookId) &&
+        !CollabService.instance.canEditCookbook(recipe.cookbookId);
 
     // Smaller hero image on desktop to avoid taking up half the screen
     final expandedHeight = Responsive.isDesktopLayout(context) ? 220.0 : 300.0;
@@ -1983,11 +1988,12 @@ class _RecipeAppBar extends StatelessWidget {
         ),
       ),
       actions: [
-        Container(
-          margin: const EdgeInsets.all(4),
-          decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
-          child: IconButton(icon: const Icon(Icons.edit, color: Colors.white), onPressed: onEdit, tooltip: l10n.actionEdit),
-        ),
+        if (!readOnlyShared)
+          Container(
+            margin: const EdgeInsets.all(4),
+            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
+            child: IconButton(icon: const Icon(Icons.edit, color: Colors.white), onPressed: onEdit, tooltip: l10n.actionEdit),
+          ),
         Container(
           margin: const EdgeInsets.only(right: 8),
           decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
@@ -1996,17 +2002,21 @@ class _RecipeAppBar extends StatelessWidget {
             onSelected: (value) => _handleMenuAction(context, value),
             itemBuilder: (context) => [
               PopupMenuItem(value: 'cook', child: Row(children: [const Icon(Icons.local_fire_department_outlined), const SizedBox(width: 12), Text(l10n.cookingMode)])),
-              PopupMenuItem(value: 'enhance', child: Row(children: [const Icon(Icons.auto_awesome_outlined), const SizedBox(width: 12), const Text('Enhance with AI')])),
+              if (!readOnlyShared)
+                PopupMenuItem(value: 'enhance', child: Row(children: [const Icon(Icons.auto_awesome_outlined), const SizedBox(width: 12), const Text('Enhance with AI')])),
               const PopupMenuDivider(),
               PopupMenuItem(value: 'share', child: Row(children: [const Icon(Icons.share_outlined), const SizedBox(width: 12), Text(l10n.actionShare)])),
               PopupMenuItem(value: 'print', child: Row(children: [const Icon(Icons.print_outlined), const SizedBox(width: 12), Text(l10n.printRecipe)])),
               PopupMenuItem(value: 'pin', child: Row(children: [Icon(recipe.isPinned ? Icons.push_pin : Icons.push_pin_outlined), const SizedBox(width: 12), Text(recipe.isPinned ? l10n.recipeUnpin : l10n.recipePin)])),
-              PopupMenuItem(value: 'duplicate', child: Row(children: [const Icon(Icons.copy), const SizedBox(width: 12), Text(l10n.recipeDuplicate)])),
+              if (!readOnlyShared)
+                PopupMenuItem(value: 'duplicate', child: Row(children: [const Icon(Icons.copy), const SizedBox(width: 12), Text(l10n.recipeDuplicate)])),
               PopupMenuItem(value: 'copy_to', child: Row(children: [const Icon(Icons.book_outlined), const SizedBox(width: 12), const Text('Copy to cookbook')])),
-              PopupMenuItem(value: 'move_to', child: Row(children: [const Icon(Icons.drive_file_move_outlined), const SizedBox(width: 12), const Text('Move to cookbook')])),
+              if (!readOnlyShared)
+                PopupMenuItem(value: 'move_to', child: Row(children: [const Icon(Icons.drive_file_move_outlined), const SizedBox(width: 12), const Text('Move to cookbook')])),
               PopupMenuItem(value: 'publish', child: Row(children: [const Icon(Icons.public_outlined), const SizedBox(width: 12), Text(l10n.publishToCommunity)])),
-              const PopupMenuDivider(),
-              PopupMenuItem(value: 'delete', child: Row(children: [const Icon(Icons.delete, color: Colors.red), const SizedBox(width: 12), Text(l10n.actionDelete, style: const TextStyle(color: Colors.red))])),
+              if (!readOnlyShared) const PopupMenuDivider(),
+              if (!readOnlyShared)
+                PopupMenuItem(value: 'delete', child: Row(children: [const Icon(Icons.delete, color: Colors.red), const SizedBox(width: 12), Text(l10n.actionDelete, style: const TextStyle(color: Colors.red))])),
             ],
           ),
         ),

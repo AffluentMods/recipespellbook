@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../providers/subscription_provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/family_service.dart';
+import '../../services/collab_service.dart';
 import '../../services/revenuecat_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'app_snackbar.dart';
@@ -16,16 +17,16 @@ import '../../utils/responsive_utils.dart';
 //  Permission labels
 // ════════════════════════════════════════════
 
-List<(String, String, String)> _cookbookPerms(AppLocalizations l10n) => [
-  ('read', l10n.sharePermReadOnly, l10n.sharePermViewRecipes),
-  ('add', l10n.sharePermAddOnly, l10n.sharePermAddRecipes),
-  ('edit', l10n.sharePermFullEdit, l10n.sharePermEditRecipes),
+// (value, label, description) — Google-Docs-style permission levels.
+List<(String, String, String)> _cookbookPerms(AppLocalizations l10n) => const [
+  ('edit', 'Can edit', 'Add & edit recipes'),
+  ('read', 'View only', "Can't make changes"),
 ];
 
-List<(String, String, String)> _listPerms(AppLocalizations l10n) => [
-  ('read', l10n.sharePermReadOnly, l10n.sharePermViewItems),
-  ('add', l10n.sharePermAddOnly, l10n.sharePermAddItems),
-  ('full', l10n.sharePermFullAccess, l10n.sharePermEditItems),
+List<(String, String, String)> _listPerms(AppLocalizations l10n) => const [
+  ('full', 'Edit items', 'Add, remove & check off'),
+  ('check', 'Check items', 'Tick items off only'),
+  ('read', 'View only', "Can't make changes"),
 ];
 
 /// Shows a share bottom sheet for a cookbook or shopping list.
@@ -42,6 +43,7 @@ void showResourceShareSheet(
     }) {
   Responsive.showAdaptiveSheet(
     context,
+    useRootNavigator: true,
     builder: (ctx) => DraggableScrollableSheet(
       initialChildSize: familyOnly ? 0.5 : 0.6,
       minChildSize: 0.3,
@@ -82,9 +84,11 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
   final _auth = AuthService.instance;
 
   bool _loading = true;
-  FamilyInfo? _familyInfo;
   List<FamilyShareInfo> _existingShares = [];
-  ShareLinkInfo? _activeLink;
+  ShareLinkInfo? _activeLink;   // one-time "send a copy" link
+  ShareLinkInfo? _collabLink;   // live collaboration invite link
+  late String _collabPermission; // default permission for new collab links
+  bool _creatingCollab = false;
 
   bool get _isCookbook => widget.resourceType == 'cookbook';
   bool get _hasFamilyTier {
@@ -98,25 +102,22 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
   @override
   void initState() {
     super.initState();
+    _collabPermission = _isCookbook ? 'edit' : 'full';
     _loadData();
   }
 
   Future<void> _loadData() async {
     setState(() => _loading = true);
 
-    FamilyInfo? fam;
+    // Load the people this resource is shared with — no family required (a
+    // collaboration is just per-resource FamilyShare grants created via link).
     List<FamilyShareInfo> shares = [];
-
     if (_auth.isSignedIn) {
-      fam = await _family.getFamily();
-      if (fam != null) {
-        shares = await _family.getSharesForResource(widget.resourceType, widget.resourceId);
-      }
+      shares = await _family.getSharesForResource(widget.resourceType, widget.resourceId);
     }
 
     if (mounted) {
       setState(() {
-        _familyInfo = fam;
         _existingShares = shares;
         _loading = false;
       });
@@ -127,7 +128,6 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final isFamilyAllowed = _familyInfo != null;
 
     return Column(
       children: [
@@ -169,45 +169,19 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
             controller: widget.scrollController,
             padding: const EdgeInsets.all(20),
             children: [
-              // ━━━ ONE-TIME LINK ━━━
-              if (!widget.familyOnly) ...[
-                _SectionHeader(icon: Icons.link, title: l10n.shareOneTimeLink, subtitle: l10n.shareOneTimeLinkSubtitle),
-                const SizedBox(height: 8),
-                if (_activeLink != null) ...[
-                  _LinkCard(link: _activeLink!, onRevoke: () async {
-                    await _family.revokeShareLink(_activeLink!.code);
-                    setState(() => _activeLink = null);
-                  }),
-                ] else ...[
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: _createOneTimeLink,
-                      icon: const Icon(Icons.add_link, size: 18),
-                      label: Text(l10n.shareGenerateLink),
-                    ),
-                  ),
-                ],
-
-                const SizedBox(height: 28),
-              ],
-
-              // ━━━ FAMILY SHARE ━━━
+              // ━━━ LIVE COLLABORATION ━━━
               _SectionHeader(
-                icon: Icons.family_restroom,
-                title: l10n.shareFamilyShare,
-                subtitle: _hasFamilyTier
-                    ? (isFamilyAllowed
-                    ? l10n.shareFamilySyncSubtitle
-                    : l10n.shareFamilyCreateJoin)
-                    : l10n.shareFamilyRequiresCloudSync,
+                icon: Icons.groups_rounded,
+                title: 'Collaborate live',
+                subtitle: _isCookbook
+                    ? 'Invite people to view or edit this cookbook'
+                    : 'Anyone with the link can join and edit this list',
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
 
-              if (!_hasFamilyTier) ...[
-                // ── Upgrade prompt ──
+              if (_isCookbook && !_hasFamilyTier) ...[
                 _UpgradeCard(
-                  message: l10n.shareFamilyUpgradeMessage,
+                  message: 'Live cookbook collaboration needs a subscription. Sharing shopping lists is free.',
                   onUpgrade: () {
                     Navigator.pop(context);
                     context.push('/upgrade');
@@ -215,14 +189,13 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
                 ),
               ] else if (!_auth.isSignedIn) ...[
                 _InfoCard(message: l10n.shareFamilySignIn, icon: Icons.login),
-              ] else if (!isFamilyAllowed) ...[
-                _InfoCard(message: l10n.shareFamilySetupInSettings, icon: Icons.family_restroom),
               ] else ...[
-                // ── Existing shares ──
+                // People with access (owner + everyone who joined). Each row
+                // lets the owner change a member's permission or remove them.
                 if (_existingShares.isNotEmpty) ...[
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(l10n.shareSharedWith, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
+                    child: Text('People with access', style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
                   ),
                   ..._existingShares.map((share) => _ExistingShareTile(
                     share: share,
@@ -240,8 +213,55 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
                   const SizedBox(height: 16),
                 ],
 
-                // ── Add new shares ──
-                ..._buildMemberPicker(theme),
+                // Invite link + default permission.
+                Text('Invite with a link', style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
+                const SizedBox(height: 8),
+                _PermissionDropdown(
+                  value: _collabPermission,
+                  options: _permOptions(l10n),
+                  onChanged: (p) => setState(() => _collabPermission = p),
+                ),
+                const SizedBox(height: 10),
+                if (_collabLink != null)
+                  _LinkCard(link: _collabLink!, collab: true)
+                else
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: _creatingCollab ? null : _createCollabLink,
+                      icon: _creatingCollab
+                          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Icon(Icons.link_rounded, size: 18),
+                      label: const Text('Create invite link'),
+                    ),
+                  ),
+              ],
+
+              const SizedBox(height: 28),
+
+              // ━━━ SEND A COPY (one-time snapshot) ━━━
+              if (!widget.familyOnly) ...[
+                _SectionHeader(
+                  icon: Icons.content_copy_rounded,
+                  title: 'Send a copy',
+                  subtitle: 'A one-time snapshot they can import (expires in 24h)',
+                ),
+                const SizedBox(height: 8),
+                if (_activeLink != null) ...[
+                  _LinkCard(link: _activeLink!, onRevoke: () async {
+                    await _family.revokeShareLink(_activeLink!.code);
+                    setState(() => _activeLink = null);
+                  }),
+                ] else ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _createOneTimeLink,
+                      icon: const Icon(Icons.add_link, size: 18),
+                      label: Text(l10n.shareGenerateLink),
+                    ),
+                  ),
+                ],
               ],
             ],
           ),
@@ -261,75 +281,57 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
       return;
     }
 
-    final link = await _family.createShareLink(widget.resourceType, widget.resourceId);
+    // Shopping lists ship a self-contained snapshot so the copy link works even
+    // for free / unsynced lists.
+    final snapshot = _isCookbook
+        ? null
+        : await CollabService.instance.buildListSnapshot(widget.resourceId);
+    final link = await _family.createShareLink(widget.resourceType, widget.resourceId, snapshot: snapshot);
+    if (!mounted) return;
     if (link != null) {
       setState(() => _activeLink = link);
     } else {
-      if (mounted) AppSnackbar.error(context, l10n.shareCreateFailed);
+      AppSnackbar.error(context, l10n.shareCreateFailed);
     }
+  }
+
+  /// Create a LIVE collaboration invite link and copy it to the clipboard.
+  Future<void> _createCollabLink() async {
+    final l10n = AppLocalizations.of(context)!;
+    if (!_auth.isSignedIn) {
+      AppSnackbar.error(context, l10n.shareSignInRequired);
+      return;
+    }
+    setState(() => _creatingCollab = true);
+    final snapshot = _isCookbook
+        ? null
+        : await CollabService.instance.buildListSnapshot(widget.resourceId);
+    final link = await _family.createCollabLink(
+        widget.resourceType, widget.resourceId, _collabPermission,
+        snapshot: snapshot);
+    if (!mounted) return;
+    if (link == null) {
+      setState(() => _creatingCollab = false);
+      AppSnackbar.error(context, l10n.shareCreateFailed);
+      return;
+    }
+    // Start syncing this list right away so the owner's edits propagate.
+    if (!_isCookbook) await CollabService.instance.markCollab(widget.resourceId, _collabPermission);
+    if (!mounted) return;
+    setState(() {
+      _collabLink = link;
+      _creatingCollab = false;
+    });
+    await _loadData(); // the owner now appears in "People with access"
+    if (!mounted) return;
+    Clipboard.setData(ClipboardData(text: link.url));
+    AppSnackbar.success(context, 'Invite link copied — send it to anyone');
   }
 
   // ────────────────────────────────────
   //  Family member picker
   // ────────────────────────────────────
 
-  List<Widget> _buildMemberPicker(ThemeData theme) {
-    final l10n = AppLocalizations.of(context)!;
-    final myId = _auth.currentUser?.id;
-    final members = _familyInfo?.members.where((m) => m.userId != myId).toList() ?? [];
-
-    // Filter to members not yet shared with
-    final unsharedMembers = members.where((m) {
-      return !_existingShares.any((s) =>
-      // Match by comparing share's sharedWithEmail/Name to member
-      s.sharedWithEmail == m.email || s.sharedWithName == m.name);
-    }).toList();
-
-    if (unsharedMembers.isEmpty && _existingShares.isEmpty) {
-      return [
-        _InfoCard(message: l10n.shareNoFamilyMembers, icon: Icons.group_off),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: () {
-              Navigator.pop(context);
-              context.push('/settings/family');
-            },
-            icon: const Icon(Icons.group_add, size: 18),
-            label: Text(l10n.shareAddFamilyMembers),
-          ),
-        ),
-      ];
-    }
-
-    if (unsharedMembers.isEmpty) return [];
-
-    return [
-      Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Text(l10n.shareWith, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.outline)),
-      ),
-      ...unsharedMembers.map((member) => _MemberShareTile(
-        member: member,
-        permOptions: _permOptions(l10n),
-        onShare: (permission) async {
-          final result = await _family.shareResource(
-            resourceType: widget.resourceType,
-            resourceId: widget.resourceId,
-            sharedWithUserId: member.userId,
-            permission: permission,
-          );
-          if (result != null) {
-            await _loadData();
-            if (mounted) AppSnackbar.success(context, l10n.shareSharedWithMember(member.displayName));
-          } else {
-            if (mounted) AppSnackbar.error(context, l10n.shareShareFailed);
-          }
-        },
-      )),
-    ];
-  }
 }
 
 // ════════════════════════════════════════════
@@ -428,16 +430,16 @@ class _UpgradeCard extends StatelessWidget {
 
 class _LinkCard extends StatelessWidget {
   final ShareLinkInfo link;
-  final VoidCallback onRevoke;
+  final VoidCallback? onRevoke;
+  final bool collab;
 
-  const _LinkCard({required this.link, required this.onRevoke});
+  const _LinkCard({required this.link, this.onRevoke, this.collab = false});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final remaining = link.expiresAt.difference(DateTime.now());
-    final hoursLeft = remaining.inHours;
+    final hoursLeft = link.expiresAt.difference(DateTime.now()).inHours;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -465,26 +467,30 @@ class _LinkCard extends StatelessWidget {
           ]),
           const SizedBox(height: 4),
           Row(children: [
-            Icon(Icons.timer_outlined, size: 14, color: theme.colorScheme.outline),
+            Icon(collab ? Icons.groups_rounded : Icons.timer_outlined, size: 14, color: theme.colorScheme.outline),
             const SizedBox(width: 4),
-            Text(l10n.shareLinkExpiresIn(hoursLeft), style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
+            Text(
+              collab ? 'Anyone with this link can join' : l10n.shareLinkExpiresIn(hoursLeft),
+              style: TextStyle(fontSize: 11, color: theme.colorScheme.outline),
+            ),
             const Spacer(),
             TextButton.icon(
               onPressed: () {
-                SharePlus.instance.share(ShareParams(text: 'Check out "${link.url}"', subject: l10n.shareFromApp));
+                SharePlus.instance.share(ShareParams(text: link.url, subject: l10n.shareFromApp));
               },
               icon: const Icon(Icons.share, size: 14),
               label: Text(l10n.actionShare, style: const TextStyle(fontSize: 12)),
               style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
             ),
-            TextButton(
-              onPressed: onRevoke,
-              style: TextButton.styleFrom(
-                foregroundColor: theme.colorScheme.error,
-                visualDensity: VisualDensity.compact,
+            if (onRevoke != null)
+              TextButton(
+                onPressed: onRevoke,
+                style: TextButton.styleFrom(
+                  foregroundColor: theme.colorScheme.error,
+                  visualDensity: VisualDensity.compact,
+                ),
+                child: Text(l10n.shareRevoke, style: const TextStyle(fontSize: 12)),
               ),
-              child: Text(l10n.shareRevoke, style: const TextStyle(fontSize: 12)),
-            ),
           ]),
         ],
       ),
@@ -492,45 +498,61 @@ class _LinkCard extends StatelessWidget {
   }
 }
 
-/// Tile for a family member not yet shared with — tap to pick permission and share.
-class _MemberShareTile extends StatelessWidget {
-  final FamilyMemberInfo member;
-  final List<(String, String, String)> permOptions;
-  final void Function(String permission) onShare;
-
-  const _MemberShareTile({required this.member, required this.permOptions, required this.onShare});
+/// Dropdown to pick a share permission (Edit / Check / View) with descriptions.
+class _PermissionDropdown extends StatelessWidget {
+  final String value;
+  final List<(String, String, String)> options;
+  final ValueChanged<String> onChanged;
+  const _PermissionDropdown({required this.value, required this.options, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(
-        radius: 18,
-        backgroundImage: member.avatarUrl != null ? NetworkImage(member.avatarUrl!) : null,
-        child: member.avatarUrl == null ? Text(member.displayName[0].toUpperCase(), style: const TextStyle(fontSize: 14)) : null,
+    final current = options.firstWhere((o) => o.$1 == value, orElse: () => options.first);
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(12),
       ),
-      title: Text(member.displayName, style: const TextStyle(fontSize: 14)),
-      subtitle: Text(member.email ?? '', style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
-      trailing: PopupMenuButton<String>(
-        icon: Icon(Icons.add_circle_outline, color: theme.colorScheme.primary),
-        tooltip: l10n.actionShare,
-        onSelected: onShare,
-        itemBuilder: (ctx) => permOptions.map((p) => PopupMenuItem(
-          value: p.$1,
-          child: ListTile(
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            title: Text(p.$2, style: const TextStyle(fontSize: 13)),
-            subtitle: Text(p.$3, style: const TextStyle(fontSize: 11)),
-          ),
-        )).toList(),
+      child: PopupMenuButton<String>(
+        onSelected: onChanged,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        itemBuilder: (ctx) => options
+            .map((o) => PopupMenuItem<String>(
+                  value: o.$1,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(o.$2, style: const TextStyle(fontWeight: FontWeight.w600)),
+                      Text(o.$3, style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
+                    ],
+                  ),
+                ))
+            .toList(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(children: [
+            Icon(Icons.lock_open_rounded, size: 18, color: theme.colorScheme.primary),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(current.$2, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(current.$3, style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_drop_down),
+          ]),
+        ),
       ),
     );
   }
 }
 
+/// Tile for a family member not yet shared with — tap to pick permission and share.
 /// Tile for an existing share — shows permission and allows edit/revoke.
 class _ExistingShareTile extends StatelessWidget {
   final FamilyShareInfo share;
