@@ -55,6 +55,7 @@ class CommunityImage extends StatelessWidget {
         alignment: Alignment.center,
         memCacheWidth: memCacheWidth,
         memCacheHeight: memCacheHeight,
+        filterQuality: FilterQuality.medium, // smoother than the default .low
         placeholder: (_, __) => _shimmer(context),
         errorWidget: (_, __, ___) => _placeholder(context),
       ),

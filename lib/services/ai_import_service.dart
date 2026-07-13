@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import '../database/database.dart';
 import '../data/course_category_data.dart';
+import '../utils/text_encoding.dart';
 
 /// Service that parses and imports recipes from AI-generated JSON.
 ///
@@ -324,7 +325,9 @@ class AiImportService {
 
   /// Clean JSON string from common AI output artifacts.
   static String _cleanJson(String raw) {
-    var s = raw.trim();
+    // Repair mojibake first (e.g. pasted text where "—" shows as "â€"") so the
+    // fixed characters flow through validation and parsing alike.
+    var s = repairMojibake(raw).trim();
 
     // Strip markdown code fences: ```json ... ``` or ``` ... ```
     if (s.startsWith('```')) {

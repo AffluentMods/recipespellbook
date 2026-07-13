@@ -700,8 +700,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                     publicationId: recipe.cookbook.id,
                     imagePath: recipe.imagePath,
                     fit: BoxFit.cover,
-                    memCacheWidth: 400,
-                    memCacheHeight: 400,
+                    memCacheWidth: 640,
+                    memCacheHeight: 640, // ~3x of the grid card so it's not upscaled
                   )
                 else
                   Container(
@@ -810,8 +810,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                         width: 64,
                         height: 64,
                         fit: BoxFit.cover,
-                        memCacheWidth: 128,
-                        memCacheHeight: 128,
+                        memCacheWidth: 192,
+                        memCacheHeight: 192, // 3x of the 64px thumb
                       ),
                     )
                   else

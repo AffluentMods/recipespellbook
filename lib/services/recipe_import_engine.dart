@@ -89,6 +89,27 @@ class RecipeImportEngine {
   /// Fetch a URL with browser-like headers. If the response is rejected
   /// (4xx/5xx — often WAF bot detection like 403, 451, 455, 503), retry once
   /// with the mobile UA which more sites accept by default.
+  /// Decode an HTTP body as text, defaulting to UTF-8.
+  ///
+  /// `http`'s `response.body` getter decodes the bytes as Latin-1 (ISO-8859-1)
+  /// whenever the server omits `charset` from `Content-Type` — which most
+  /// recipe sites do — turning UTF-8 punctuation/accents into mojibake
+  /// (e.g. an em dash or "é" turning into "Ã©"). We decode as UTF-8 instead, and only fall
+  /// back to Latin-1 when the server explicitly declared a different charset or
+  /// the bytes aren't valid UTF-8.
+  static String _decodeBody(http.Response resp) {
+    final ct = (resp.headers['content-type'] ?? '').toLowerCase();
+    final charset = RegExp(r'charset=([^\s;]+)').firstMatch(ct)?.group(1);
+    if (charset != null && charset != 'utf-8' && charset != 'utf8') {
+      return resp.body; // server declared a specific non-UTF-8 charset
+    }
+    try {
+      return utf8.decode(resp.bodyBytes);
+    } catch (_) {
+      return resp.body; // not valid UTF-8 — trust http's decoding
+    }
+  }
+
   static Future<http.Response> _fetchWithFallback(String url, _Platform platform) async {
     final primaryHeaders = _headersForPlatform(platform);
     var resp = await http
@@ -115,7 +136,7 @@ class RecipeImportEngine {
       ).timeout(const Duration(seconds: 20));
       if (fallbackResp.statusCode == 200) return fallbackResp;
       // Return whichever has a body
-      return fallbackResp.body.isNotEmpty ? fallbackResp : resp;
+      return fallbackResp.bodyBytes.isNotEmpty ? fallbackResp : resp;
     } catch (_) {
       return resp;
     }
@@ -314,7 +335,7 @@ class RecipeImportEngine {
 
       if (response.statusCode != 200) return null;
 
-      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      final json = jsonDecode(_decodeBody(response)) as Map<String, dynamic>;
       final thumbnail = json['thumbnail_url']?.toString();
 
       if (platform == _Platform.tiktok) {
@@ -526,7 +547,7 @@ class RecipeImportEngine {
         throw Exception('Failed to fetch URL (HTTP $code)');
       }
 
-      final document = html_parser.parse(response.body);
+      final document = html_parser.parse(_decodeBody(response));
 
       // Standard extraction pipeline
       var recipe = _tryJsonLd(document);

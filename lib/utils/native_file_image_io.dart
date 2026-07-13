@@ -19,6 +19,9 @@ Widget buildFileImage(
       fit: fit,
       width: width,
       height: height,
+      memCacheWidth: cacheWidth,
+      memCacheHeight: cacheHeight,
+      filterQuality: FilterQuality.medium, // smoother down/upscaling than the default .low
       errorWidget: (_, __, ___) =>
           errorWidget ?? const Icon(Icons.broken_image, size: 48),
     );
@@ -30,6 +33,7 @@ Widget buildFileImage(
     height: height,
     cacheWidth: cacheWidth,
     cacheHeight: cacheHeight,
+    filterQuality: FilterQuality.medium, // smoother resampling than the default .low
     errorBuilder: (_, __, ___) =>
         errorWidget ?? const Icon(Icons.broken_image, size: 48),
   );

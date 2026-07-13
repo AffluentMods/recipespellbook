@@ -1032,10 +1032,25 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       final prepTime = int.tryParse(_prepTimeController.text.trim());
       final cookTime = int.tryParse(_cookTimeController.text.trim());
 
+      // Stable recipe id up-front so the main image can be persisted (and named
+      // by recipe) before the create/edit branches below run.
+      final recipeId = _isEditing
+          ? widget.recipeId!
+          : 'recipe_${DateTime.now().millisecondsSinceEpoch}';
+
       String? finalImagePath = _imagePath;
       if (_imageUrl != null && _imagePath == null) {
-        final recipeId = widget.recipeId ?? 'recipe_${DateTime.now().millisecondsSinceEpoch}';
         finalImagePath = await _downloadImage(_imageUrl!, recipeId);
+      }
+      // Persist a picked/cropped main image out of the OS temp/cache dir into
+      // permanent app storage (mirrors step images). Without this the DB kept a
+      // temp path that the OS later evicts — cards fell back to the placeholder
+      // and the detail hero went black.
+      if (finalImagePath != null &&
+          !finalImagePath.startsWith('http') &&
+          !ImageService.isServerPath(finalImagePath)) {
+        finalImagePath = await _copyMainImage(finalImagePath, recipeId) ?? finalImagePath;
+        RecipeImage.invalidatePath(finalImagePath);
       }
 
       // Upload to cloud if user has cloud sync and image is a local file
@@ -1050,10 +1065,8 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       }
 
       final nutritionJson = _nutrition != null && _nutrition!.isNotEmpty ? jsonEncode(_nutrition!.toJson()) : null;
-      String recipeId;
 
       if (_isEditing) {
-        recipeId = widget.recipeId!;
         final recipe = RecipesCompanion(
           title: drift.Value(_titleController.text.trim()),
           description: drift.Value(_descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim()),
@@ -1107,7 +1120,6 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
           }
         }
       } else {
-        recipeId = 'recipe_${DateTime.now().millisecondsSinceEpoch}';
         final cookbookId = widget.cookbookId ?? 'starter';
 
         await recipeDao.insertRecipe(RecipesCompanion.insert(
@@ -1263,6 +1275,28 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       return destPath;
     } catch (e) {
       return sourcePath; // Return original path if copy fails
+    }
+  }
+
+  /// Copy a picked/cropped main recipe image out of the OS temp/cache dir into
+  /// permanent app-documents storage so it survives after the picker's temp
+  /// file is evicted. Returns the new permanent path, or null on failure.
+  /// No-ops (returns the source) if the file is already under the images dir.
+  Future<String?> _copyMainImage(String sourcePath, String recipeId) async {
+    try {
+      final src = File(sourcePath);
+      if (!src.existsSync()) return null; // source already gone — nothing to save
+      final dir = await getApplicationDocumentsDirectory();
+      final imagesDir = Directory(p.join(dir.path, 'images'));
+      if (src.parent.path == imagesDir.path) return sourcePath; // already permanent
+      await imagesDir.create(recursive: true);
+      final ext = p.extension(sourcePath).isNotEmpty ? p.extension(sourcePath) : '.jpg';
+      final destPath = p.join(imagesDir.path, 'recipe_$recipeId$ext');
+      await src.copy(destPath);
+      return destPath;
+    } catch (e) {
+      debugPrint('[Recipe] main image copy failed: $e');
+      return null;
     }
   }
 
