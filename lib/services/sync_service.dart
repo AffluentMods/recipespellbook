@@ -682,6 +682,10 @@ class SyncService {
     final payloads = <Map<String, dynamic>>[];
     final pushIds = <String>[];   // cleared only on a successful push
     final dropIds = <String>[];   // unpushable (gone / no edit rights) — clear now
+    // Snapshot each pushed recipe's local updatedAt so we can detect an edit
+    // made DURING the in-flight push and keep that recipe dirty (never clobber
+    // an unpushed newer local copy — the shopping path guards the same race).
+    final pushedStamp = <String, DateTime>{};
 
     for (final recipeId in dirty) {
       final recipe = await (db.select(db.recipes)..where((r) => r.id.equals(recipeId))).getSingleOrNull();
@@ -689,6 +693,7 @@ class SyncService {
         dropIds.add(recipeId);
         continue;
       }
+      pushedStamp[recipeId] = recipe.updatedAt;
       final ingredients = await (db.select(db.ingredients)
         ..where((i) => i.recipeId.equals(recipeId))
         ..orderBy([(i) => OrderingTerm.asc(i.sortOrder)])).get();
@@ -717,8 +722,16 @@ class SyncService {
 
     final resp = await FamilyService.instance.collabCookbookPush(recipes: payloads);
     if (resp != null) {
-      await collab.unmarkRecipesDirty(pushIds);
-      debugPrint('[Sync] Pushed ${payloads.length} shared-cookbook recipe edit(s)');
+      // Only clear recipes that weren't edited again while the push was in
+      // flight; a recipe whose updatedAt changed stays dirty and is re-pushed
+      // next cycle (and is protected from the family pull by skipRecipeIds).
+      final clear = <String>[];
+      for (final id in pushIds) {
+        final current = await (db.select(db.recipes)..where((r) => r.id.equals(id))).getSingleOrNull();
+        if (current == null || current.updatedAt == pushedStamp[id]) clear.add(id);
+      }
+      if (clear.isNotEmpty) await collab.unmarkRecipesDirty(clear);
+      debugPrint('[Sync] Pushed ${payloads.length} shared-cookbook recipe edit(s), cleared ${clear.length}');
     }
   }
 
@@ -776,6 +789,9 @@ class SyncService {
     'instruction': s.instruction,
     'durationMinutes': s.durationMinutes,
     'imagePath': s.imagePath,
+    // notes == '__header__' marks an instruction section header — must survive
+    // the server round-trip or grouping is lost for everyone.
+    'notes': s.notes,
   };
 
   Map<String, dynamic> _serializeRecipeLink(RecipeLink rl) => {
@@ -1144,6 +1160,7 @@ class SyncService {
               instruction: s['instruction'] as String,
               durationMinutes: Value(s['durationMinutes'] as int?),
               imagePath: Value(s['imagePath'] as String?),
+              notes: Value(s['notes'] as String?),
             ),
           );
         }

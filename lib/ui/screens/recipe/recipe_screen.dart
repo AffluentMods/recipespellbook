@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:drift/drift.dart' as drift;
 import '../../../utils/native_file_image.dart';
@@ -21,6 +22,8 @@ import '../../../services/image_service.dart';
 import '../../../services/recipe_print_service.dart';
 import '../../../services/shopping_list_generator.dart';
 import '../../../services/collab_service.dart';
+import '../../../services/sync_service.dart';
+import '../../../providers/collab_provider.dart';
 import '../../../ui/widgets/cooking_mode_screen.dart';
 import '../../../utils/default_recipe_images.dart';
 import '../../widgets/add_to_meal_plan_dialogue.dart';
@@ -338,6 +341,9 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    // Rebuild the app bar's edit/menu gating when my collab permission changes
+    // (e.g. a background sync upgrades me from view-only to editor).
+    ref.watch(collabRevisionProvider);
 
     if (_isLoading || _recipe == null) {
       return Scaffold(
@@ -2255,6 +2261,16 @@ class _RecipeAppBar extends StatelessWidget {
     }
   }
 
+  /// When a recipe in a shared cookbook I can edit is soft-deleted or restored,
+  /// flag it for the collab push and kick a sync so the change reaches the owner
+  /// and other members (otherwise the deletion is local-only and gets resurrected
+  /// on the next pull).
+  void _propagateShared(String recipeId, String cookbookId) {
+    if (!CollabService.instance.canEditCookbook(cookbookId)) return;
+    CollabService.instance.markRecipeDirty(recipeId);
+    unawaited(SyncService.instance.sync());
+  }
+
   Future<void> _confirmDelete(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
     final dao = ref.read(recipeDaoProvider);
@@ -2283,6 +2299,7 @@ class _RecipeAppBar extends StatelessWidget {
       );
       if (confirmed != true || !context.mounted) return;
       await dao.moveToTrash(recipe.id);
+      _propagateShared(recipe.id, recipe.cookbookId);
       if (context.mounted) {
         context.pop();
         // Soft-delete + 5s undo. moveToTrash sets `deletedAt` rather
@@ -2293,6 +2310,7 @@ class _RecipeAppBar extends StatelessWidget {
           actionLabel: l10n.actionUndo,
           onAction: () async {
             await dao.restoreRecipe(recipe.id);
+            _propagateShared(recipe.id, recipe.cookbookId);
           },
         );
       }
@@ -2311,6 +2329,8 @@ class _RecipeAppBar extends StatelessWidget {
     final deletedIds = selection.selectedIds.toList();
     for (final id in deletedIds) {
       await dao.moveToTrash(id);
+      // Sub-recipes live in the same cookbook as their parent.
+      _propagateShared(id, recipe.cookbookId);
     }
     if (context.mounted) {
       context.pop();
@@ -2323,6 +2343,7 @@ class _RecipeAppBar extends StatelessWidget {
         onAction: () async {
           for (final id in deletedIds) {
             await dao.restoreRecipe(id);
+            _propagateShared(id, recipe.cookbookId);
           }
         },
       );
