@@ -15,6 +15,7 @@ import '../../../utils/ingredient_utils.dart';
 import '../../../utils/recipe_similarity.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/platform_brand.dart';
 
 /// Full-screen import preview — lets users review, select/deselect, and spot
 /// duplicates before committing recipes to a cookbook.
@@ -484,6 +485,16 @@ class _ImportPreviewScreenState extends ConsumerState<ImportPreviewScreen> {
         children: [
           Column(
             children: [
+              // ── Branded source header ("Imported from Instagram") ──
+              if (detectPlatform(widget.sourceUrl) != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: PlatformBadge(detectPlatform(widget.sourceUrl)!),
+                  ),
+                ),
+
               // ── Summary bar ──
               _SummaryBar(
                 total: _recipes.length,

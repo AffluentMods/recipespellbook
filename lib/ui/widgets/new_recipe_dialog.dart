@@ -20,6 +20,7 @@ import '../screens/import/ai_import_screen.dart';
 import '../screens/import/import_guides_screen.dart';
 import '../screens/import/import_preview_screen.dart';
 import 'app_snackbar.dart';
+import 'platform_brand.dart';
 import '../../services/barcode_scanner_service.dart';
 import '../../utils/responsive_utils.dart';
 
@@ -163,9 +164,34 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   final _urlController = TextEditingController();
   bool _isLoading = false;
   String? _loadingMessage;
+  RecipePlatform? _detected; // live platform detected from the pasted link
+
+  @override
+  void initState() {
+    super.initState();
+    _urlController.addListener(_onUrlChanged);
+  }
+
+  void _onUrlChanged() {
+    final next = detectPlatform(_urlController.text);
+    if (next != _detected) setState(() => _detected = next);
+  }
+
+  Future<void> _pasteUrl() async {
+    HapticFeedback.selectionClick();
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    final text = data?.text?.trim();
+    if (text == null || text.isEmpty) {
+      _showError('Nothing to paste — copy a recipe link first.');
+      return;
+    }
+    _urlController.text = text;
+    _urlController.selection = TextSelection.collapsed(offset: text.length);
+  }
 
   @override
   void dispose() {
+    _urlController.removeListener(_onUrlChanged);
     _urlController.dispose();
     super.dispose();
   }
@@ -659,135 +685,207 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outline.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
-                  const SizedBox(height: 20),
-                  Text(l10n.importRecipeTitle, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 22),
 
-                  // Platform icons row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _PlatformIcon(icon: Icons.play_circle_fill, color: Colors.red),
-                      _PlatformIconTikTok(),
-                      _PlatformIcon(icon: Icons.camera_alt, color: Colors.purple),
-                      _PlatformIcon(icon: Icons.bookmark, color: Colors.orange),
-                      _PlatformIcon(icon: Icons.language, color: Colors.blue),
-                    ],
+                  // ── Header ──
+                  Text('Add a recipe', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Paste a link from Instagram, TikTok, a website — anywhere.',
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 12),
-                  Text(l10n.importSocialMedia, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline), textAlign: TextAlign.center),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 22),
 
-                  // URL Input
-                  TextField(
-                    controller: _urlController,
-                    decoration: InputDecoration(
-                      hintText: l10n.pasteRecipeUrl,
-                      prefixIcon: const Icon(Icons.link),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.5))),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: theme.colorScheme.primary, width: 2)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  // Fancy supported-platform strip
+                  const PlatformLogoStrip(),
+                  const SizedBox(height: 22),
+
+                  // ── Hero: paste a link ──
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: theme.colorScheme.outlineVariant),
                     ),
-                    keyboardType: TextInputType.url,
-                    textInputAction: TextInputAction.go,
-                    onSubmitted: (_) => _importFromUrl(),
-                  ),
-                  const SizedBox(height: 16),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: _importFromUrl,
-                      style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))),
-                      child: Text(l10n.importFromUrl, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Live "Instagram link" detection chip
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 220),
+                          transitionBuilder: (child, anim) => SizeTransition(
+                            sizeFactor: anim,
+                            axisAlignment: -1,
+                            child: FadeTransition(opacity: anim, child: child),
+                          ),
+                          child: _detected == null
+                              ? const SizedBox(width: double.infinity)
+                              : Padding(
+                                  key: ValueKey(_detected),
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: PlatformBadge(_detected!,
+                                        compact: true,
+                                        labelOverride: '${platformInfo(_detected!).name} link'),
+                                  ),
+                                ),
+                        ),
+                        // URL field + big Paste button
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _urlController,
+                                keyboardType: TextInputType.url,
+                                textInputAction: TextInputAction.go,
+                                onSubmitted: (_) => _importFromUrl(),
+                                style: theme.textTheme.bodyLarge,
+                                decoration: InputDecoration(
+                                  hintText: 'Paste a recipe link…',
+                                  prefixIcon: const Icon(Icons.link_rounded),
+                                  filled: true,
+                                  fillColor: theme.colorScheme.surface,
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: theme.colorScheme.primary, width: 2)),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Semantics(
+                              button: true,
+                              label: 'Paste link from clipboard',
+                              child: Material(
+                                color: theme.colorScheme.secondaryContainer,
+                                borderRadius: BorderRadius.circular(16),
+                                child: InkWell(
+                                  onTap: _pasteUrl,
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: SizedBox(
+                                    height: 56,
+                                    width: 56,
+                                    child: Icon(Icons.content_paste_rounded, color: theme.colorScheme.onSecondaryContainer),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        // Big, high-contrast primary action
+                        Semantics(
+                          button: true,
+                          label: _detected == null
+                              ? 'Import recipe from link'
+                              : 'Import from ${platformInfo(_detected!).name}',
+                          child: SizedBox(
+                            height: 56,
+                            child: FilledButton.icon(
+                              onPressed: () { HapticFeedback.lightImpact(); _importFromUrl(); },
+                              icon: const Icon(Icons.download_rounded),
+                              label: Text(
+                                (_detected == null || _detected == RecipePlatform.website)
+                                    ? 'Import recipe'
+                                    : 'Import from ${platformInfo(_detected!).name}',
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                              ),
+                              style: FilledButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
 
-                  // "OR" divider
+                  // "or another way"
                   Row(children: [
-                    Expanded(child: Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3))),
-                    Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(l10n.orDivider, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline))),
-                    Expanded(child: Divider(color: theme.colorScheme.outline.withValues(alpha: 0.3))),
+                    Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+                    Padding(padding: const EdgeInsets.symmetric(horizontal: 14), child: Text('or another way', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant))),
+                    Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
                   ]),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
-                  // Option buttons — fixed-width children for even spacing
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  // Secondary options — big, labeled tiles that wrap
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.center,
                     children: [
-                      _CircleOptionButton(icon: Icons.folder_open, label: l10n.fileOption, onTap: _importFromFile),
                       if (supportsOcr)
-                        _CircleOptionButton(icon: Icons.image, label: l10n.imageOption, onTap: _importFromImage),
-                      _CircleOptionButton(icon: Icons.text_snippet, label: l10n.pasteOption, onTap: _importFromText),
-                      _CircleOptionButton(icon: Icons.auto_awesome, label: 'AI', onTap: () {
+                        _ImportOptionTile(icon: Icons.photo_camera_rounded, label: 'Photo', color: theme.colorScheme.tertiary, onTap: _importFromImage),
+                      _ImportOptionTile(icon: Icons.notes_rounded, label: 'Paste text', color: theme.colorScheme.primary, onTap: _importFromText),
+                      _ImportOptionTile(icon: Icons.folder_open_rounded, label: 'File', color: theme.colorScheme.secondary, onTap: _importFromFile),
+                      _ImportOptionTile(icon: Icons.auto_awesome_rounded, label: 'AI', color: theme.colorScheme.tertiary, onTap: () {
+                        HapticFeedback.selectionClick();
                         Navigator.pop(context);
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => const AiImportScreen()));
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const AiImportScreen()));
                       }),
                       if (supportsBarcodeScanner)
-                        _CircleOptionButton(icon: Icons.qr_code_scanner, label: l10n.scanBarcode, onTap: _importFromBarcode),
+                        _ImportOptionTile(icon: Icons.qr_code_scanner_rounded, label: 'Scan', color: theme.colorScheme.primary, onTap: _importFromBarcode),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const ImportGuidesScreen()),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 20),
+
+                  // Help + manual (quiet)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _MiniLink(
+                          icon: Icons.help_outline_rounded,
+                          label: 'How to import',
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ImportGuidesScreen()));
+                          },
+                        ),
                       ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.help_outline, color: theme.colorScheme.primary, size: 20),
-                          const SizedBox(width: 10),
-                          Expanded(child: Text(
-                            'Need help importing? Check our step-by-step guides',
-                            style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurface),
-                          )),
-                          Icon(Icons.chevron_right, color: theme.colorScheme.primary, size: 20),
-                        ],
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _MiniLink(
+                          icon: Icons.edit_outlined,
+                          label: 'Type it in',
+                          onTap: _createManually,
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  GestureDetector(
-                    onTap: _createManually,
-                    child: Text(
-                      l10n.createRecipeManually,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.primary,
-                        decoration: TextDecoration.underline,
-                        decorationColor: theme.colorScheme.primary,
-                      ),
-                    ),
+                    ],
                   ),
                 ],
               ),
             ),
           ),
 
-          // Loading overlay
+          // Loading overlay — shows the platform we're grabbing from
           if (_isLoading)
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surface.withValues(alpha: 0.95),
+                  color: theme.colorScheme.surface.withValues(alpha: 0.96),
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const CircularProgressIndicator(),
+                    if (_detected != null && _detected != RecipePlatform.website) ...[
+                      PlatformLogo(_detected!, size: 56),
+                      const SizedBox(height: 20),
+                    ],
+                    const SizedBox(width: 34, height: 34, child: CircularProgressIndicator(strokeWidth: 3)),
                     const SizedBox(height: 16),
-                    Text(_loadingMessage ?? l10n.loadingText, style: theme.textTheme.bodyMedium),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        (_detected != null && _detected != RecipePlatform.website)
+                            ? 'Grabbing the recipe from ${platformInfo(_detected!).name}…'
+                            : (_loadingMessage ?? l10n.loadingText),
+                        style: theme.textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -800,61 +898,94 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
 // ============ HELPER WIDGETS ============
 
-class _PlatformIcon extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  const _PlatformIcon({required this.icon, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 6), width: 44, height: 44,
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-      child: Icon(icon, color: color, size: 24),
-    );
-  }
-}
-
-class _PlatformIconTikTok extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 6), width: 44, height: 44,
-      decoration: BoxDecoration(color: isDark ? Colors.grey.shade800 : Colors.grey.shade200, borderRadius: BorderRadius.circular(10)),
-      child: Icon(Icons.music_note, color: isDark ? Colors.white : Colors.black, size: 24),
-    );
-  }
-}
-
-class _CircleOptionButton extends StatelessWidget {
+/// Large, clearly-labeled secondary import option (Photo / Text / File / AI /
+/// Scan). Big touch target + semantics + haptic for easy, accessible tapping.
+class _ImportOptionTile extends StatelessWidget {
   final IconData icon;
   final String label;
+  final Color color;
   final VoidCallback onTap;
-  const _CircleOptionButton({required this.icon, required this.label, required this.onTap});
+  const _ImportOptionTile({required this.icon, required this.label, required this.color, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return GestureDetector(
-      onTap: onTap,
+    return Semantics(
+      button: true,
+      label: label,
       child: SizedBox(
-        width: 56,
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(
-            width: 56, height: 56,
-            decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, shape: BoxShape.circle),
-            child: Icon(icon, color: theme.colorScheme.onSurfaceVariant, size: 24),
+        width: 92,
+        child: Material(
+          color: color.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(18),
+          child: InkWell(
+            onTap: () { HapticFeedback.selectionClick(); onTap(); },
+            borderRadius: BorderRadius.circular(18),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 46, height: 46,
+                    decoration: BoxDecoration(color: color.withValues(alpha: 0.18), shape: BoxShape.circle),
+                    child: Icon(icon, color: color, size: 24),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    label,
+                    style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+}
+
+/// Quiet, full-width secondary link row (help / manual entry).
+class _MiniLink extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _MiniLink({required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Semantics(
+      button: true,
+      label: label,
+      child: Material(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.primary),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ]),
+        ),
       ),
     );
   }
