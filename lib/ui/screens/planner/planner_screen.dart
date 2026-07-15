@@ -10,8 +10,12 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../services/shopping_list_generator.dart';
+import '../../../theme/app_colors.dart';
+import '../../../theme/meal_color_palette.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/color_picker_dialog.dart';
 import '../../widgets/recipe_image.dart';
+import '../../widgets/selection_action_bar.dart';
 
 // ============ PROVIDERS ============
 
@@ -81,98 +85,6 @@ String _mealTypeForHour(int hour) {
   return 'Dessert';
 }
 
-/// Bottom action bar shown while meals are multi-selected.
-class _PlannerSelectionBar extends StatelessWidget {
-  final int count;
-  final VoidCallback onDelete;
-  final VoidCallback onMoveDate;
-  final VoidCallback onChangeType;
-  const _PlannerSelectionBar({
-    required this.count,
-    required this.onDelete,
-    required this.onMoveDate,
-    required this.onChangeType,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-        child: Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.10), blurRadius: 18, offset: const Offset(0, 4)),
-            ],
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-          child: Row(
-            children: [
-              // Selected-count badge
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(color: theme.colorScheme.primary, shape: BoxShape.circle),
-                  alignment: Alignment.center,
-                  child: Text('$count',
-                      style: TextStyle(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
-                ),
-              ),
-              _PlannerSelectionAction(icon: Icons.event, label: l10n.plannerMoveToDate, onTap: onMoveDate),
-              _PlannerSelectionAction(icon: Icons.restaurant_menu, label: l10n.plannerChangeMealType, onTap: onChangeType),
-              _PlannerSelectionAction(icon: Icons.delete_outline, label: l10n.actionDelete, color: theme.colorScheme.error, onTap: onDelete),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PlannerSelectionAction extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final Color? color;
-  const _PlannerSelectionAction({required this.icon, required this.label, required this.onTap, this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final c = color ?? theme.colorScheme.primary;
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(color: c.withValues(alpha: 0.12), shape: BoxShape.circle),
-                alignment: Alignment.center,
-                child: Icon(icon, color: c, size: 20),
-              ),
-              const SizedBox(height: 4),
-              Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: theme.textTheme.labelSmall?.copyWith(color: c, fontWeight: FontWeight.w600)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 final mealCountsForWeekProvider = StreamProvider.family<Map<DateTime, int>, DateTime>((ref, weekStart) {
   final dao = ref.watch(mealPlanDaoProvider);
   final weekEnd = weekStart.add(const Duration(days: 7));
@@ -190,6 +102,9 @@ class PlannerScreen extends ConsumerStatefulWidget {
 
 class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   late DateTime _weekStart;
+  /// Current day's meals — kept live so the shared selection bar's delete
+  /// callback (published once on entering select mode) always sees them.
+  List<MealPlanWithRecipe> _visiblePlans = const [];
 
   @override
   void initState() {
@@ -243,6 +158,20 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
     final selectedIds = ref.watch(_plannerSelectionProvider);
     final selecting = selectedIds.isNotEmpty;
     final visiblePlans = mealPlansAsync.valueOrNull ?? const <MealPlanWithRecipe>[];
+    _visiblePlans = visiblePlans;
+
+    // Publish/withdraw the shared selection action bar (the shell renders it in
+    // place of the bottom nav). Post-frame so we never mutate a provider
+    // mid-build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final hasBar = ref.read(selectionBarProvider) != null;
+      if (selecting && !hasBar) {
+        ref.read(selectionBarProvider.notifier).state = _buildSelectionBar();
+      } else if (!selecting && hasBar) {
+        ref.read(selectionBarProvider.notifier).state = null;
+      }
+    });
 
     final weekDates = List.generate(7, (i) => _weekStart.add(Duration(days: i)));
 
@@ -256,21 +185,25 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header: back · month (tap to jump day/month/year) · more
-            _PlannerHeader(
-              date: selectedDate,
-              onBack: () {
-                // Pop if this planner was pushed (e.g. deep link); otherwise
-                // fall back to the home tab.
-                if (context.canPop()) {
-                  context.pop();
-                } else {
-                  context.go('/');
-                }
-              },
-              onPickDate: () => _showFullCalendar(context),
-              onMoreOptions: () => _showMoreOptions(context),
-            ),
+            // Header: a selection header while multi-selecting, otherwise the
+            // normal back · month · more header.
+            if (selecting)
+              _plannerSelectionHeader(theme, l10n, selectedIds.length)
+            else
+              _PlannerHeader(
+                date: selectedDate,
+                onBack: () {
+                  // Pop if this planner was pushed (e.g. deep link); otherwise
+                  // fall back to the home tab.
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/');
+                  }
+                },
+                onPickDate: () => _showFullCalendar(context),
+                onMoreOptions: () => _showMoreOptions(context),
+              ),
 
             if (!isDesktop) ...[
               // Week-at-a-glance strip in its own card (swipe to change weeks).
@@ -341,14 +274,57 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
           : _ModernFAB(
               onPressed: () => _showAddMealSheet(context, selectedDate),
             ),
-      bottomNavigationBar: selecting
-          ? _PlannerSelectionBar(
-              count: selectedIds.length,
-              onDelete: () => _bulkDeleteMeals(visiblePlans, selectedIds),
-              onMoveDate: () => _bulkMoveMealsToDate(selectedIds),
-              onChangeType: () => _bulkChangeMealType(selectedIds),
-            )
-          : null,
+      ),
+    );
+  }
+
+  /// Selection header shown in place of the planner header while multi-selecting.
+  Widget _plannerSelectionHeader(
+      ThemeData theme, AppLocalizations l10n, int count) {
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(4, 8, 16, 8),
+        child: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.close),
+              tooltip: l10n.actionCancel,
+              onPressed: _clearPlannerSelection,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              l10n.selectedCount(count),
+              style: theme.textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// The shared multi-select bar for the planner: Move to date / Change meal
+  /// type, Delete pinned. Callbacks read the live selection at tap time.
+  SelectionActionBar _buildSelectionBar() {
+    final l10n = AppLocalizations.of(context)!;
+    Set<String> sel() => ref.read(_plannerSelectionProvider);
+    return SelectionActionBar(
+      actions: [
+        SelectionAction(
+            icon: Icons.calendar_today,
+            label: l10n.plannerMoveToDate,
+            onTap: () => _bulkMoveMealsToDate(sel())),
+        SelectionAction(
+            icon: Icons.restaurant,
+            label: l10n.plannerChangeMealType,
+            onTap: () => _bulkChangeMealType(sel())),
+      ],
+      destructive: SelectionAction(
+        icon: Icons.delete_outline,
+        label: l10n.actionDelete,
+        destructive: true,
+        onTap: () => _bulkDeleteMeals(_visiblePlans, sel()),
       ),
     );
   }
@@ -562,8 +538,8 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.delete_sweep, color: Colors.red),
-                title: Text(l10n.clearThisWeek, style: const TextStyle(color: Colors.red)),
+                leading: Icon(Icons.delete_sweep, color: context.appColors.destructive),
+                title: Text(l10n.clearThisWeek, style: TextStyle(color: context.appColors.destructive)),
                 onTap: () {
                   Navigator.pop(ctx);
                   _confirmClearWeek(context);
@@ -600,7 +576,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 AppSnackbar.info(context, l10n.plannerWeekCleared);
               }
             },
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(backgroundColor: context.appColors.destructive),
             child: Text(l10n.actionClear),
           ),
         ],
@@ -714,7 +690,7 @@ class _DayColumn extends ConsumerWidget {
 
     return Container(
       color: isToday
-          ? const Color(0xFFE8A860).withValues(alpha: 0.08)
+          ? context.appColors.accent.withValues(alpha: 0.08)
           : null,
       child: Column(
         children: [
@@ -728,7 +704,7 @@ class _DayColumn extends ConsumerWidget {
                 ),
               ),
               color: isToday
-                  ? const Color(0xFFE8A860).withValues(alpha: 0.15)
+                  ? context.appColors.accent.withValues(alpha: 0.15)
                   : null,
             ),
             child: Column(
@@ -738,7 +714,7 @@ class _DayColumn extends ConsumerWidget {
                   style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: isToday
-                        ? const Color(0xFFE8A860)
+                        ? context.appColors.accent
                         : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -751,8 +727,8 @@ class _DayColumn extends ConsumerWidget {
                       width: 28,
                       height: 28,
                       decoration: isToday
-                          ? const BoxDecoration(
-                              color: Color(0xFFE8A860),
+                          ? BoxDecoration(
+                              color: context.appColors.accent,
                               shape: BoxShape.circle,
                             )
                           : null,
@@ -772,7 +748,7 @@ class _DayColumn extends ConsumerWidget {
                       DateFormat.MMM(locale).format(date),
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: isToday
-                            ? const Color(0xFFE8A860)
+                            ? context.appColors.accent
                             : theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
@@ -908,7 +884,7 @@ class _CompactMealCard extends ConsumerWidget {
                       mealPlanDao.deleteMealPlan(plan.mealPlan.id);
                       AppSnackbar.info(context, l10n.plannerMealRemoved);
                     },
-                    style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                    style: FilledButton.styleFrom(backgroundColor: context.appColors.destructive),
                     child: Text(l10n.actionRemove),
                   ),
                 ],
@@ -1074,7 +1050,7 @@ class _WeekStrip extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? const Color(0xFFE8A860)
+                      ? context.appColors.accent
                       : isToday
                       ? (isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surfaceContainerHighest)
                       : Colors.transparent,
@@ -1118,7 +1094,7 @@ class _WeekStrip extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? Colors.white.withValues(alpha: 0.8)
-                                  : const Color(0xFFE8A860),
+                                  : context.appColors.accent,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -1252,8 +1228,8 @@ class _DayTimeline extends ConsumerWidget {
                 icon: const Icon(Icons.shopping_cart_outlined, size: 18),
                 label: Text(l10n.addDayToShoppingList),
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: const Color(0xFFE8A860).withValues(alpha: 0.5)),
-                  foregroundColor: const Color(0xFFE8A860),
+                  side: BorderSide(color: context.appColors.accent.withValues(alpha: 0.5)),
+                  foregroundColor: context.appColors.accent,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
               ),
@@ -1381,7 +1357,11 @@ class _MealBlock extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final r = plan.recipe;
     final title = r?.title ?? plan.mealPlan.name ?? plan.mealPlan.customMeal ?? l10n.meal;
-    final color = _mealBlockColor(plan.mealPlan.mealType);
+    final color = resolveMealCardColor(
+      plan.mealPlan.cardColor,
+      context.appColors,
+      _mealBlockColor(plan.mealPlan.mealType),
+    );
     const onColor = Colors.white;
 
     final selectedIds = ref.watch(_plannerSelectionProvider);
@@ -1541,134 +1521,388 @@ TimeOfDay _defaultMealTime(String type) {
   }
 }
 
-/// Tapping a planned meal opens this: change its time, move it to another day,
-/// change the meal type, replace the recipe, or remove it.
-class _EditMealSheet extends ConsumerWidget {
+/// Tapping a planned meal opens this. Leads with the recipe (tap the header to
+/// open it), groups the actions under Schedule / Meal, shows each row's current
+/// value, and lets the user recolour the card inline. Remove sits alone below a
+/// divider. All colours resolve through [AppColors]; all labels are localised.
+class _EditMealSheet extends ConsumerStatefulWidget {
   final MealPlanWithRecipe plan;
   final DateTime date;
   const _EditMealSheet({required this.plan, required this.date});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_EditMealSheet> createState() => _EditMealSheetState();
+}
+
+class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
+  /// Local mirror of the meal's card-colour key so the swatch selection and
+  /// header tint update live (the planner card updates via the DB stream).
+  String? _cardColorKey;
+
+  @override
+  void initState() {
+    super.initState();
+    _cardColorKey = widget.plan.mealPlan.cardColor;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = context.appColors;
     final l10n = AppLocalizations.of(context)!;
     final dao = ref.read(mealPlanDaoProvider);
-    final mp = plan.mealPlan;
-    final r = plan.recipe;
+    final mp = widget.plan.mealPlan;
+    final r = widget.plan.recipe;
+    final date = widget.date;
     final title = r?.title ?? mp.name ?? mp.customMeal ?? l10n.meal;
     final base = DateTime(date.year, date.month, date.day);
     final currentTod = mp.time != null
         ? TimeOfDay(hour: mp.time!.hour, minute: mp.time!.minute)
         : _defaultMealTime(mp.mealType);
 
+    final autoColor = _mealBlockColor(mp.mealType);
+    final resolvedColor = resolveMealCardColor(_cardColorKey, colors, autoColor);
+
+    final now = DateTime.now();
+    final isToday =
+        base.year == now.year && base.month == now.month && base.day == now.day;
+    final dateLabel = isToday ? l10n.today : DateFormat.MMMd().format(base);
+
+    final subtitle = <String>[
+      _mealTypeLabel(l10n, mp.mealType),
+      currentTod.format(context),
+      if (r?.servings != null && r!.servings!.isNotEmpty)
+        '${r.servings} ${l10n.servingsUnit}',
+    ].join(' · ');
+
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: colors.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SafeArea(
         top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 8, 8),
-              child: Row(
-                children: [
-                  Container(width: 12, height: 12, decoration: BoxDecoration(color: _mealBlockColor(mp.mealType), shape: BoxShape.circle)),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                        Text(
-                          '${_mealTypeLabel(l10n, mp.mealType)} · ${currentTod.format(context)}',
-                          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
-                ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              // Drag handle (sheet dismisses via scrim tap / swipe down).
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colors.outline,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            const Divider(height: 1),
-            if (r != null)
-              ListTile(
-                leading: const Icon(Icons.restaurant_menu),
-                title: const Text('Open recipe'),
-                onTap: () {
-                  Navigator.pop(context);
-                  context.push('/recipe/${r.id}');
+              const SizedBox(height: 8),
+
+              // ── Header: whole row opens the recipe ──
+              InkWell(
+                onTap: r == null
+                    ? null
+                    : () {
+                        Navigator.pop(context);
+                        context.push('/recipe/${r.id}');
+                      },
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 16, 12),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: resolvedColor, width: 2),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: r != null
+                              ? RecipeImage(
+                                  imagePath: r.imagePath,
+                                  recipeId: r.id,
+                                  width: 44,
+                                  height: 44,
+                                  fit: BoxFit.cover,
+                                )
+                              : Container(
+                                  color: resolvedColor,
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    _mealBlockEmoji(mp.mealType),
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: colors.textPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              subtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall
+                                  ?.copyWith(color: colors.textTertiary),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (r != null) ...[
+                        const SizedBox(width: 8),
+                        Icon(Icons.chevron_right, color: colors.textTertiary),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              Divider(height: 1, color: colors.outline.withValues(alpha: 0.5)),
+
+              // ── Schedule ──
+              _sectionLabel(theme, colors, l10n.sectionSchedule),
+              _row(
+                colors,
+                icon: Icons.schedule,
+                label: l10n.changeTime,
+                trailing: currentTod.format(context),
+                onTap: () async {
+                  final picked = await showTimePicker(
+                      context: context, initialTime: currentTod);
+                  if (picked == null || !context.mounted) return;
+                  await dao.updateMealPlanTime(
+                      mp.id,
+                      DateTime(base.year, base.month, base.day, picked.hour,
+                          picked.minute));
+                  if (context.mounted) Navigator.pop(context);
                 },
               ),
-            ListTile(
-              leading: const Icon(Icons.schedule),
-              title: const Text('Change time'),
-              trailing: Text(currentTod.format(context), style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
-              onTap: () async {
-                final picked = await showTimePicker(context: context, initialTime: currentTod);
-                if (picked == null || !context.mounted) return;
-                await dao.updateMealPlanTime(mp.id, DateTime(base.year, base.month, base.day, picked.hour, picked.minute));
-                if (context.mounted) Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.event),
-              title: Text(l10n.plannerMoveToDate),
-              onTap: () async {
-                final now = DateTime.now();
-                final picked = await showDatePicker(context: context, initialDate: date, firstDate: DateTime(now.year - 1), lastDate: DateTime(now.year + 3));
-                if (picked == null || !context.mounted) return;
-                final target = DateTime(picked.year, picked.month, picked.day);
-                final newTime = mp.time != null
-                    ? DateTime(target.year, target.month, target.day, mp.time!.hour, mp.time!.minute)
-                    : null;
-                await dao.updateMealPlanSchedule(mp.id, target, newTime);
-                if (!context.mounted) return;
-                // Show the snackbar (root-scoped) BEFORE popping so it isn't
-                // fired on a defunct context.
-                AppSnackbar.success(context, l10n.plannerMealsMoved(DateFormat.MMMd().format(target)));
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.restaurant),
-              title: Text(l10n.plannerChangeMealType),
-              onTap: () async {
-                final type = await _pickMealTypeSheet(context);
-                if (type == null || !context.mounted) return;
-                await dao.updateMealPlanType(mp.id, type);
-                if (context.mounted) Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.swap_horiz),
-              title: const Text('Replace meal'),
-              onTap: () async {
-                final newId = await _pickRecipeSheet(context, ref);
-                if (newId == null || !context.mounted) return;
-                await dao.updateMealPlanRecipe(mp.id, newId);
-                if (context.mounted) Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.delete_outline, color: theme.colorScheme.error),
-              title: Text(l10n.removeMeal, style: TextStyle(color: theme.colorScheme.error)),
-              onTap: () async {
-                await dao.deleteMealPlan(mp.id);
-                if (!context.mounted) return;
-                AppSnackbar.info(context, l10n.plannerMealRemoved);
-                Navigator.pop(context);
-              },
-            ),
-            const SizedBox(height: 8),
-          ],
+              _row(
+                colors,
+                icon: Icons.calendar_today,
+                label: l10n.plannerMoveToDate,
+                trailing: dateLabel,
+                onTap: () async {
+                  final picked = await showDatePicker(
+                      context: context,
+                      initialDate: date,
+                      firstDate: DateTime(now.year - 1),
+                      lastDate: DateTime(now.year + 3));
+                  if (picked == null || !context.mounted) return;
+                  final target = DateTime(picked.year, picked.month, picked.day);
+                  final newTime = mp.time != null
+                      ? DateTime(target.year, target.month, target.day,
+                          mp.time!.hour, mp.time!.minute)
+                      : null;
+                  await dao.updateMealPlanSchedule(mp.id, target, newTime);
+                  if (!context.mounted) return;
+                  AppSnackbar.success(context,
+                      l10n.plannerMealsMoved(DateFormat.MMMd().format(target)));
+                  Navigator.pop(context);
+                },
+              ),
+
+              // ── Meal ──
+              _sectionLabel(theme, colors, l10n.sectionMeal),
+              _row(
+                colors,
+                icon: Icons.restaurant,
+                label: l10n.plannerChangeMealType,
+                trailing: _mealTypeLabel(l10n, mp.mealType),
+                onTap: () async {
+                  final type = await _pickMealTypeSheet(context);
+                  if (type == null || !context.mounted) return;
+                  await dao.updateMealPlanType(mp.id, type);
+                  if (context.mounted) Navigator.pop(context);
+                },
+              ),
+              _row(
+                colors,
+                icon: Icons.swap_horiz,
+                label: l10n.replaceMeal,
+                onTap: () async {
+                  final newId = await _pickRecipeSheet(context, ref);
+                  if (newId == null || !context.mounted) return;
+                  await dao.updateMealPlanRecipe(mp.id, newId);
+                  if (context.mounted) Navigator.pop(context);
+                },
+              ),
+              _colorRow(theme, colors, l10n, mp.id, dao, autoColor),
+
+              const SizedBox(height: 6),
+              Divider(height: 1, color: colors.outline.withValues(alpha: 0.5)),
+
+              // ── Destructive ──
+              _row(
+                colors,
+                icon: Icons.delete_outline,
+                label: l10n.removeMeal,
+                destructive: true,
+                onTap: () async {
+                  await dao.deleteMealPlan(mp.id);
+                  if (!context.mounted) return;
+                  AppSnackbar.info(context, l10n.plannerMealRemoved);
+                  Navigator.pop(context);
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  /// Uppercase, tracked group label (matches the section-label type role).
+  Widget _sectionLabel(ThemeData theme, AppColors colors, String text) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 2),
+        child: Text(
+          text.toUpperCase(),
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: colors.textSecondary,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.8,
+            fontSize: 11.5,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// A standard action row: leading icon (textTertiary), label (textPrimary),
+  /// optional trailing current value (textTertiary). Destructive rows use the
+  /// destructive role for both icon and label.
+  Widget _row(
+    AppColors colors, {
+    required IconData icon,
+    required String label,
+    String? trailing,
+    bool destructive = false,
+    VoidCallback? onTap,
+  }) {
+    final fg = destructive ? colors.destructive : colors.textPrimary;
+    return ListTile(
+      leading: Icon(icon, color: destructive ? colors.destructive : colors.textTertiary),
+      title: Text(label, style: TextStyle(color: fg, fontWeight: FontWeight.w500)),
+      trailing: trailing == null
+          ? null
+          : Text(trailing,
+              style: TextStyle(color: colors.textTertiary, fontSize: 14)),
+      onTap: onTap,
+    );
+  }
+
+  /// Inline card-colour row: label + a row of theme-derived preset swatches,
+  /// plus a "+" that opens the custom picker. Tapping applies instantly,
+  /// persists, and (via setState) updates the header tint live.
+  Widget _colorRow(ThemeData theme, AppColors colors, AppLocalizations l10n,
+      String mealId, dynamic dao, Color autoColor) {
+    final presets = mealColorPresets(colors);
+    final selKey = _cardColorKey;
+    final isCustom = selKey != null && selKey.startsWith('custom:');
+    final customColor =
+        isCustom ? resolveMealCardColor(selKey, colors, autoColor) : null;
+
+    void apply(String? key) {
+      setState(() => _cardColorKey = key);
+      dao.updateMealPlanCardColor(mealId, key);
+    }
+
+    Widget dot({required Color? fill, required bool selected, Widget? child, VoidCallback? onTap}) {
+      return GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 28,
+          height: 28,
+          alignment: Alignment.center,
+          child: Container(
+            width: 22,
+            height: 22,
+            decoration: BoxDecoration(
+              color: fill ?? Colors.transparent,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: selected ? colors.textPrimary : colors.outline,
+                width: selected ? 2 : (fill == null ? 1.5 : 0),
+              ),
+            ),
+            child: child,
+          ),
+        ),
+      );
+    }
+
+    final swatches = <Widget>[
+      for (final s in presets)
+        if (s.isAuto)
+          Tooltip(
+            message: l10n.mealColorAuto,
+            child: dot(
+              fill: autoColor,
+              selected: selKey == null || selKey == 'auto',
+              // Auto shows the meal-type colour with a reset glyph. White reads
+              // on every meal-type hue (all mid-tone) — an on-fill exception.
+              child: const Icon(Icons.refresh, size: 13, color: Colors.white),
+              onTap: () => apply(null),
+            ),
+          )
+        else
+          dot(
+            fill: s.color,
+            selected: selKey == s.key,
+            onTap: () => apply(s.key),
+          ),
+      // "+" custom picker (shows the picked colour once chosen).
+      dot(
+        fill: isCustom ? customColor : null,
+        selected: isCustom,
+        child: isCustom
+            ? null
+            : Icon(Icons.add, size: 14, color: colors.textTertiary),
+        onTap: () async {
+          final picked = await showColorPickerDialog(
+            context,
+            initialColor: resolveMealCardColor(_cardColorKey, colors, autoColor),
+            title: l10n.cardColor,
+          );
+          if (picked == null) return;
+          apply(customColorKey(picked));
+        },
+      ),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 12, 8),
+      child: Row(
+        children: [
+          Icon(Icons.palette_outlined, color: colors.textTertiary),
+          const SizedBox(width: 32),
+          Expanded(
+            child: Text(
+              l10n.cardColor,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.w500),
+            ),
+          ),
+          const SizedBox(width: 8),
+          ...swatches,
+        ],
       ),
     );
   }
@@ -1896,7 +2130,7 @@ class _AddMealSheetState extends ConsumerState<_AddMealSheet> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        color: _selectedTime != null ? const Color(0xFFE8A860) : theme.colorScheme.surfaceContainerHigh,
+                        color: _selectedTime != null ? context.appColors.accent : theme.colorScheme.surfaceContainerHigh,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
@@ -2031,7 +2265,7 @@ class _MealTypeChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFE8A860) : theme.colorScheme.surfaceContainerHigh,
+          color: isSelected ? context.appColors.accent : theme.colorScheme.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -2089,7 +2323,7 @@ class _RecipeSelectTile extends StatelessWidget {
         ].join(' • '),
         style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
       ),
-      trailing: const Icon(Icons.add_circle_outline, color: Color(0xFFE8A860)),
+      trailing: Icon(Icons.add_circle_outline, color: context.appColors.accent),
       onTap: onTap,
     );
   }

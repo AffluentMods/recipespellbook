@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../data/course_category_data.dart';
@@ -27,7 +28,7 @@ class FavoriteRecipesScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Row(
           children: [
-            const Icon(Icons.star, size: 24, color: Colors.amber),
+            Icon(Icons.favorite, size: 24, color: context.appColors.favorite),
             const SizedBox(width: 10),
             Text(l10n.favoritesTitle),
           ],
@@ -51,7 +52,7 @@ class FavoriteRecipesScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.star_outline,
+                      Icons.favorite_border,
                       size: 64,
                       color: theme.colorScheme.outline,
                     ),
@@ -178,7 +179,7 @@ class _RecipeItem extends ConsumerWidget {
                 ),
                 // Unfavorite button
                 IconButton(
-                  icon: const Icon(Icons.star, color: Colors.amber),
+                  icon: Icon(Icons.favorite, color: context.appColors.favorite),
                   onPressed: () {
                     ref.read(recipeDaoProvider).toggleFavorite(recipe.id, false);
                     ScaffoldMessenger.of(context).showSnackBar(

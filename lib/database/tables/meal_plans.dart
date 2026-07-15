@@ -16,6 +16,15 @@ class MealPlans extends Table {
   TextColumn get recipeId => text().nullable()();
 
   TextColumn get notes => text().nullable()();
+
+  /// Per-meal card colour override. Null / 'auto' = derive from the meal type
+  /// (default behaviour). Stores a palette KEY, not a raw colour, so
+  /// theme-derived swatches re-harmonise if the user switches themes:
+  ///   'auto'                – meal-type default
+  ///   'rot:<deg>'           – theme accent rotated <deg>° on the colour wheel
+  ///   'custom:0xAARRGGBB'   – a literal colour the user picked
+  TextColumn get cardColor => text().nullable()();
+
   BoolColumn get alertEnabled => boolean().withDefault(const Constant(false))();
   BoolColumn get alertSent => boolean().withDefault(const Constant(false))();
 

@@ -231,7 +231,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: theme.colorScheme.error,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -840,7 +840,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                         Text(
                           l10n.communityFromCookbook(recipe.cookbook.title),
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.primary,
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -1905,7 +1905,7 @@ class _CommunityRecipeFeedPreview extends StatelessWidget {
                     // Publisher avatar
                     CircleAvatar(
                       radius: 14,
-                      backgroundColor: const Color(0xFFC75B39).withValues(alpha: 0.18),
+                      backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.18),
                       backgroundImage: recipe.cookbook.publisherAvatarUrl != null && recipe.cookbook.publisherAvatarUrl!.isNotEmpty
                           ? NetworkImage(_resolveAvatarUrl(recipe.cookbook.publisherAvatarUrl!))
                           : null,
@@ -1913,7 +1913,7 @@ class _CommunityRecipeFeedPreview extends StatelessWidget {
                       child: (recipe.cookbook.publisherAvatarUrl == null || recipe.cookbook.publisherAvatarUrl!.isEmpty)
                           ? Text(
                               recipe.cookbook.publisherName.isNotEmpty ? recipe.cookbook.publisherName[0].toUpperCase() : '?',
-                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFC75B39)),
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
                             )
                           : null,
                     ),
@@ -1994,7 +1994,7 @@ class _CommunityRecipeFeedPreview extends StatelessWidget {
                     if (recipe.ingredients.isNotEmpty) ...[
                       Row(
                         children: [
-                          Icon(Icons.restaurant, size: 16, color: theme.colorScheme.primary),
+                          Icon(Icons.restaurant, size: 16, color: theme.colorScheme.onSurfaceVariant),
                           const SizedBox(width: 6),
                           Text(l10n.recipeIngredients, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
                         ],
@@ -2007,7 +2007,7 @@ class _CommunityRecipeFeedPreview extends StatelessWidget {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('•  ', style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)),
+                              Text('•  ', style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
                               Expanded(child: Text(parts, style: theme.textTheme.bodyMedium)),
                             ],
                           ),
@@ -2020,7 +2020,7 @@ class _CommunityRecipeFeedPreview extends StatelessWidget {
                     if (recipe.steps.isNotEmpty) ...[
                       Row(
                         children: [
-                          Icon(Icons.format_list_numbered, size: 16, color: theme.colorScheme.primary),
+                          Icon(Icons.format_list_numbered, size: 16, color: theme.colorScheme.onSurfaceVariant),
                           const SizedBox(width: 6),
                           Text(l10n.recipeInstructions, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
                         ],
@@ -2123,7 +2123,7 @@ class _MetaChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: theme.colorScheme.primary),
+          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
           const SizedBox(width: 4),
           Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface)),
         ],
@@ -2220,7 +2220,7 @@ class _CreatorChip extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 28,
-              backgroundColor: const Color(0xFFC75B39).withValues(alpha: 0.18),
+              backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.18),
               backgroundImage: creator.avatarUrl != null
                   ? NetworkImage(creator.avatarUrl!)
                   : null,
@@ -2228,7 +2228,7 @@ class _CreatorChip extends StatelessWidget {
               child: creator.avatarUrl == null
                   ? Text(
                       creator.name.isNotEmpty ? creator.name[0].toUpperCase() : '?',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFC75B39)),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
                     )
                   : null,
             ),

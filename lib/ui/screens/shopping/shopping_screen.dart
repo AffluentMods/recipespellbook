@@ -16,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../data/ingredient_images.dart';
+import '../../../theme/app_colors.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
@@ -32,6 +33,7 @@ import '../../../services/family_service.dart';
 import '../../../utils/ingredient_utils.dart';
 import '../../widgets/app_refresh_indicator.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/selection_action_bar.dart';
 import '../../widgets/family_share_sheet.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
@@ -133,83 +135,6 @@ class _SelectionHeader extends StatelessWidget {
             style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Bottom action bar for bulk operations on the selected shopping items.
-class _SelectionActionBar extends StatelessWidget {
-  final VoidCallback onDelete;
-  final VoidCallback onCheck;
-  final VoidCallback onMove;
-  final VoidCallback onCategory;
-  const _SelectionActionBar({
-    required this.onDelete,
-    required this.onCheck,
-    required this.onMove,
-    required this.onCategory,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    return SafeArea(
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHigh,
-          border: Border(
-            top: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.12)),
-          ),
-        ),
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _SelectionAction(icon: Icons.check_circle_outline, label: l10n.shoppingCheckAll, onTap: onCheck),
-            _SelectionAction(icon: Icons.drive_file_move_outlined, label: l10n.shoppingMoveToList, onTap: onMove),
-            _SelectionAction(icon: Icons.category_outlined, label: l10n.shoppingSelectCategory, onTap: onCategory),
-            _SelectionAction(icon: Icons.delete_outline, label: l10n.actionDelete, color: theme.colorScheme.error, onTap: onDelete),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SelectionAction extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final Color? color;
-  const _SelectionAction({required this.icon, required this.label, required this.onTap, this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final c = color ?? theme.colorScheme.onSurface;
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: c, size: 24),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.labelSmall?.copyWith(color: c),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -401,6 +326,19 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     final selectedIds = ref.watch(_shoppingSelectionProvider);
     final selecting = selectedIds.isNotEmpty;
 
+    // Publish/withdraw the shared selection action bar (rendered by the shell
+    // in place of the bottom nav). Post-frame so we never mutate a provider
+    // mid-build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final hasBar = ref.read(selectionBarProvider) != null;
+      if (selecting && !hasBar) {
+        ref.read(selectionBarProvider.notifier).state = _buildSelectionBar();
+      } else if (!selecting && hasBar) {
+        ref.read(selectionBarProvider.notifier).state = null;
+      }
+    });
+
     return PopScope(
       // While selecting, a back press clears the selection instead of leaving.
       canPop: !selecting,
@@ -466,14 +404,6 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       floatingActionButton: (selecting || !CollabService.instance.canEdit(_currentListId))
           ? null
           : _ModernFAB(onTap: () => _showAddItemSheet(context)),
-      bottomNavigationBar: selecting
-          ? _SelectionActionBar(
-              onDelete: () => _bulkDelete(selectedIds),
-              onCheck: () => _bulkToggleChecked(selectedIds),
-              onMove: () => _bulkMoveToList(selectedIds),
-              onCategory: () => _bulkChangeCategory(selectedIds),
-            )
-          : null,
       ),
     );
   }
@@ -528,6 +458,36 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 
   void _clearSelection() =>
       ref.read(_shoppingSelectionProvider.notifier).clear();
+
+  /// The shared multi-select bar for the shopping list: Mark bought / Move to
+  /// list / Select category, Delete pinned. Callbacks read the LIVE selection
+  /// at tap time (not a snapshot) so late-added items are included.
+  SelectionActionBar _buildSelectionBar() {
+    final l10n = AppLocalizations.of(context)!;
+    Set<String> sel() => ref.read(_shoppingSelectionProvider);
+    return SelectionActionBar(
+      actions: [
+        SelectionAction(
+            icon: Icons.check_box_outlined,
+            label: l10n.shoppingMarkBought,
+            onTap: () => _bulkToggleChecked(sel())),
+        SelectionAction(
+            icon: Icons.drive_file_move_outlined,
+            label: l10n.shoppingMoveToList,
+            onTap: () => _bulkMoveToList(sel())),
+        SelectionAction(
+            icon: Icons.label_outline,
+            label: l10n.shoppingSelectCategory,
+            onTap: () => _bulkChangeCategory(sel())),
+      ],
+      destructive: SelectionAction(
+        icon: Icons.delete_outline,
+        label: l10n.actionDelete,
+        destructive: true,
+        onTap: () => _bulkDelete(sel()),
+      ),
+    );
+  }
 
   Future<List<ShoppingListItem>> _selectedItems(Set<String> ids) async {
     final all = await ref.read(shoppingDaoProvider).getItemsForList(_currentListId);
@@ -903,8 +863,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                     final isShared = _sharedListCounts.containsKey(list.id);
                     return Container(
                       decoration: isShared ? BoxDecoration(
-                        border: Border(left: BorderSide(color: Colors.amber.shade600, width: 3)),
-                        color: Colors.amber.withValues(alpha: 0.05),
+                        border: Border(left: BorderSide(color: context.appColors.accent, width: 3)),
+                        color: context.appColors.accent.withValues(alpha: 0.05),
                       ) : null,
                       child: ListTile(
                       leading: Icon(
@@ -954,10 +914,10 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: Colors.amber.shade100,
+                                color: context.appColors.accent.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              child: Text('Shared', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.amber.shade800)),
+                              child: Text('Shared', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: context.appColors.accent)),
                             ),
                           ],
                         ],
@@ -1135,7 +1095,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 });
               }
             },
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(backgroundColor: context.appColors.destructive),
             child: Text(l10n.actionDelete),
           ),
         ],
@@ -1837,7 +1797,7 @@ class _OrderOnlineButton extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.shopping_cart_outlined,
-                    color: const Color(0xFFE88B00), size: 22),
+                    color: theme.colorScheme.primary, size: 22),
                 const SizedBox(width: 10),
                 Text(l10n.shoppingOrderOnline,
                     style: theme.textTheme.titleMedium
@@ -1951,7 +1911,7 @@ class _OrderOnlineSheetState extends State<_OrderOnlineSheet> {
               _SectionLabel(
                 icon: Icons.bolt,
                 label: l10n.shoppingSendToCart,
-                color: const Color(0xFFE88B00),
+                color: theme.colorScheme.primary,
               ),
               const SizedBox(height: 8),
               _ProviderTile(
@@ -2274,7 +2234,7 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
               child: CircularProgressIndicator(
                 value: _total > 1 ? _current / _total : null,
                 strokeWidth: 3,
-                color: const Color(0xFFE88B00),
+                color: theme.colorScheme.primary,
               ),
             ),
             const SizedBox(height: 16),
@@ -2308,7 +2268,7 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
                   : Icons.warning_amber_rounded,
               color: _result?.success == true
                   ? const Color(0xFF43B02A)
-                  : const Color(0xFFE88B00),
+                  : theme.colorScheme.tertiary,
               size: 48,
             ),
             const SizedBox(height: 12),
@@ -2348,9 +2308,7 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? theme.colorScheme.tertiary.withValues(alpha: 0.15)
-                      : Colors.orange.withValues(alpha: 0.1),
+                  color: theme.colorScheme.tertiary.withValues(alpha: isDark ? 0.15 : 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 constraints: const BoxConstraints(maxHeight: 100),
@@ -2359,7 +2317,7 @@ class _SendingProgressDialogState extends State<_SendingProgressDialog> {
                     l10n.shoppingNotFoundItems(_result!.failedItems.join(", ")),
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 11,
-                      color: isDark ? theme.colorScheme.tertiary : Colors.orange.shade700,
+                      color: theme.colorScheme.tertiary,
                     ),
                   ),
                 ),
@@ -2825,12 +2783,12 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
         Row(
           children: [
             Icon(Icons.check_circle_outline,
-                size: 18, color: theme.colorScheme.primary),
+                size: 18, color: context.appColors.textSecondary),
             const SizedBox(width: 8),
             Text(
               l10n.shoppingJustAdded,
               style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.primary,
+                color: context.appColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -3690,7 +3648,7 @@ class _SectionGroupedList extends ConsumerWidget {
                     resolveCategoryName(category).toUpperCase(),
                     style: theme.textTheme.labelLarge?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
+                      color: context.appColors.textSecondary,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -3824,7 +3782,7 @@ class _RecipeGroupedList extends ConsumerWidget {
                         title.toUpperCase(),
                         style: theme.textTheme.labelLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
+                          color: context.appColors.textSecondary,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -3950,15 +3908,15 @@ class _ShoppingItemTile extends ConsumerWidget {
         },
         child: Container(
           decoration: BoxDecoration(
+            // Selected rows get a subtle accent tint (not a heavy border) so a
+            // selected-but-unchecked item is distinguishable at a glance.
             color: isSelected
-                ? theme.colorScheme.primary.withValues(alpha: 0.12)
+                ? theme.colorScheme.primary.withValues(alpha: 0.08)
                 : (isDark ? theme.colorScheme.surfaceContainerHigh : theme.colorScheme.surface),
             borderRadius: BorderRadius.circular(14),
-            border: isSelected
-                ? Border.all(color: theme.colorScheme.primary, width: 1.5)
-                : (isDark ? null : Border.all(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.08),
-                  )),
+            border: isDark
+                ? null
+                : Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.08)),
           ),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
@@ -3982,6 +3940,22 @@ class _ShoppingItemTile extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
+                  // Leading SELECTION checkbox (multi-select only) — a square box
+                  // that is distinct from the trailing round check-off control,
+                  // so "selected" never looks like "checked off".
+                  if (selecting)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: Checkbox(
+                        value: isSelected,
+                        onChanged: (_) => selection.toggle(item.id),
+                        activeColor: theme.colorScheme.primary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                        side: BorderSide(color: theme.colorScheme.outlineVariant, width: 2),
+                        visualDensity: VisualDensity.compact,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
                   // Emoji circle
                   Stack(
                     children: [
@@ -4001,7 +3975,7 @@ class _ShoppingItemTile extends ConsumerWidget {
                           child: Container(
                             width: 20, height: 20,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFE8A860),
+                              color: theme.colorScheme.tertiary,
                               shape: BoxShape.circle,
                               border: Border.all(color: theme.colorScheme.surface, width: 2),
                             ),
@@ -4111,19 +4085,10 @@ class _ShoppingItemTile extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  // Trailing: selection indicator while multi-selecting,
-                  // otherwise the normal "checked/done" checkbox.
-                  if (selecting)
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Icon(
-                        isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
-                        color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outlineVariant,
-                        size: 26,
-                      ),
-                    )
-                  else
-                    Transform.scale(
+                  // Trailing CHECK-OFF control — keeps its "bought / done"
+                  // meaning even during multi-select (selection is the leading
+                  // square checkbox above).
+                  Transform.scale(
                       scale: 1.2,
                       child: Checkbox(
                         value: item.isChecked || pendingCheck,
@@ -4456,7 +4421,7 @@ class _CheckedSection extends ConsumerWidget {
                   // TODO: Kitchen Buddy hidden for now
                   // KitchenBuddyIntegration.updateShoppingCompleteCount(ref, 1);
                 },
-                child: Text(l10n.shoppingClearAll),
+                child: Text(l10n.shoppingDeleteChecked),
               ),
             ],
           ),

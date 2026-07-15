@@ -1,5 +1,5 @@
-import 'dart:io' show exit;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import '../../../utils/app_exit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemNavigator;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -751,7 +751,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       // Mobile/desktop: close the app — user reopens to fresh state
       SystemNavigator.pop();
       // Fallback if SystemNavigator.pop() doesn't work (iOS)
-      exit(0);
+      quitApp();
     }
   }
 

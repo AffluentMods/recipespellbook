@@ -21,6 +21,7 @@ import '../craving/craving_screen.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../../theme/app_colors.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -215,11 +216,11 @@ class _SurpriseMeCard extends ConsumerWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE8A860).withValues(alpha: 0.1),
+                    color: context.appColors.accent.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Center(
-                    child: Icon(Icons.auto_awesome, color: Color(0xFFE8A860), size: 24),
+                  child: Center(
+                    child: Icon(Icons.auto_awesome, color: context.appColors.accent, size: 24),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -367,14 +368,13 @@ class _QuickRecipesWidgetState extends ConsumerState<_QuickRecipesWidget> {
 
   void _showHelpDialog(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.flash_on, color: theme.colorScheme.primary),
+            Icon(Icons.flash_on, color: context.appColors.textSecondary),
             const SizedBox(width: 8),
             Text(l10n.homeQuickAccess),
           ],
@@ -385,21 +385,21 @@ class _QuickRecipesWidgetState extends ConsumerState<_QuickRecipesWidget> {
             Text(l10n.quickAccessHelpIntro),
             const SizedBox(height: 16),
             _HelpBadgeRow(
-              color: Colors.blue,
+              color: context.appColors.accent,
               icon: Icons.calendar_today,
               label: l10n.plannerTitle,
               description: l10n.quickAccessHelpMealPlan,
             ),
             const SizedBox(height: 12),
             _HelpBadgeRow(
-              color: Colors.orange,
+              color: context.appColors.favorite,
               icon: Icons.push_pin,
               label: l10n.homePinnedRecipes,
               description: l10n.quickAccessHelpPinned,
             ),
             const SizedBox(height: 12),
             _HelpBadgeRow(
-              color: Colors.grey,
+              color: context.appColors.textTertiary,
               icon: Icons.history,
               label: l10n.homeRecentRecipes,
               description: l10n.quickAccessHelpRecent,
@@ -614,15 +614,15 @@ class _SourceBadge extends StatelessWidget {
     switch (source) {
       case _Source.mealPlan:
         icon = Icons.calendar_today;
-        color = Colors.blue;
+        color = context.appColors.accent;
         break;
       case _Source.pinned:
         icon = Icons.push_pin;
-        color = Colors.orange;
+        color = context.appColors.favorite;
         break;
       case _Source.recent:
         icon = Icons.history;
-        color = Colors.grey;
+        color = context.appColors.textTertiary;
         break;
     }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/app_enums.dart';
 import '../utils/platform_utils.dart';
+import 'app_colors.dart';
 
 /// Builds ThemeData for any AppColorTheme in light or dark mode
 class AppTheme {
@@ -128,6 +129,22 @@ class AppTheme {
       colorScheme: colorScheme,
       visualDensity: density,
       scaffoldBackgroundColor: palette.background,
+
+      // Semantic roles beyond Material's ColorScheme: accent (= the one action
+      // colour), derived surface tiers, text-contrast tiers, outline,
+      // destructive, favorite. Custom themes get all tiers for free since they
+      // pass their own palette through here.
+      extensions: [
+        AppColors.fromRoles(
+          brightness: effectiveBrightness,
+          accent: palette.primary,
+          onAccent: palette.onPrimary,
+          surface: palette.background,
+          onSurface: palette.onSurface,
+          outline: palette.onSurface.withValues(alpha: isDark ? 0.4 : 0.3),
+          destructive: isDark ? const Color(0xFFCF6679) : const Color(0xFFB00020),
+        ),
+      ],
 
       // ── Global circular back button — applies to ALL screens ──
       actionIconTheme: ActionIconThemeData(

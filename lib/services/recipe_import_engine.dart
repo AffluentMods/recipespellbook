@@ -188,13 +188,19 @@ class RecipeImportEngine {
         caseSensitive: false, multiLine: true),
     RegExp(r'^ingredients?\s*:?\s*$',
         caseSensitive: false, multiLine: true),
+    // Header with a trailing group name, e.g. "Ingredients for the cookie
+    // dough:" / "Ingredients (filling):". Short, no sentence punctuation, so a
+    // prose sentence starting with "Ingredients ... ." won't match.
+    RegExp(r"^ingredients?\b[\w\s,'&()/-]{0,40}:?\s*$",
+        caseSensitive: false, multiLine: true),
     RegExp("^what\\s+you'?ll?\\s+need\\s*:?\\s*\$",
         caseSensitive: false, multiLine: true),
     RegExp("^you'?ll?\\s+need\\s*:?\\s*\$",
         caseSensitive: false, multiLine: true),
     RegExp(r'^shopping\s+list\s*:?\s*$',
         caseSensitive: false, multiLine: true),
-    RegExp(r'^for\s+the\s+\w+\s*:?\s*$',
+    // "For the dough:", "For the cookie dough:" — allow multi-word group names.
+    RegExp(r"^for\s+the\s+[\w\s,'&()/-]{1,40}?:?\s*$",
         caseSensitive: false, multiLine: true),
   ];
 
@@ -2871,6 +2877,26 @@ class RecipeImportEngine {
       instructions = aggressive.instructions;
     }
 
+    // Safety net for social captions (Instagram/TikTok) that dumped the whole
+    // recipe into the instruction block: if we ended up with steps but no
+    // ingredients, pull the clearly-ingredient lines (quantity-led, carries a
+    // unit, not imperative) out of the instructions and into ingredients.
+    if (ingredients.isEmpty && instructions.length >= 3) {
+      final moved = <String>[];
+      final kept = <String>[];
+      for (final line in instructions) {
+        if (_isLikelyIngredientLine(line)) {
+          moved.add(line);
+        } else {
+          kept.add(line);
+        }
+      }
+      if (moved.length >= 2) {
+        ingredients = moved;
+        instructions = kept;
+      }
+    }
+
     final recipe = ImportedRecipe(
       title: title,
       description: description,
@@ -3218,6 +3244,27 @@ class RecipeImportEngine {
 
   static bool _looksLikeInstruction(String text) =>
       _instructionScore(text) > 0.4;
+
+  /// Conservative test used to rescue ingredient lines that a messy social
+  /// caption dumped into the instruction block: quantity-led, carries a
+  /// measurement unit (or is short with no sentence punctuation), and is NOT an
+  /// imperative step. Deliberately strict so real instructions aren't demoted.
+  static bool _isLikelyIngredientLine(String line) {
+    final t = line.trim();
+    if (t.length < 3 || t.length > 80) return false;
+    if (_startsWithActionVerb(t.toLowerCase())) return false; // "Dip...", "Mix..."
+    final startsWithQty = RegExp(r'^\d').hasMatch(t) ||
+        _unicodeFractions.any((f) => t.startsWith(f)) ||
+        RegExp(r'^(a|an|one|two|three|four|five|six|seven|eight|half)\s',
+                caseSensitive: false)
+            .hasMatch(t);
+    if (!startsWithQty) return false;
+    final lower = t.toLowerCase();
+    final hasUnit = _measurementUnits.any((u) =>
+        RegExp('\\b${RegExp.escape(u)}\\b', caseSensitive: false).hasMatch(lower));
+    final looksProse = RegExp(r'[.!?]\s+\S').hasMatch(t); // multiple sentences
+    return hasUnit || (t.length < 45 && !looksProse);
+  }
 
   static double _instructionScore(String text) {
     double score = 0;

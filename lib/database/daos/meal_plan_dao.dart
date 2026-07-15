@@ -104,6 +104,13 @@ class MealPlanDao extends DatabaseAccessor<AppDatabase> with _$MealPlanDaoMixin 
         .write(MealPlansCompanion(recipeId: Value(recipeId)));
   }
 
+  /// Set (or clear, with null) the per-meal card colour override. Stores a
+  /// palette key — see [MealPlans.cardColor].
+  Future<void> updateMealPlanCardColor(String id, String? cardColor) {
+    return (update(mealPlans)..where((t) => t.id.equals(id)))
+        .write(MealPlansCompanion(cardColor: Value(cardColor)));
+  }
+
   Stream<Map<DateTime, int>> watchMealCountsForDateRange(DateTime startDate, DateTime endDate) {
     // Query to get count of meal plans per day in the date range
     final query = customSelect(

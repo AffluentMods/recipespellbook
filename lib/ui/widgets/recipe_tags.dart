@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../database/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/database_provider.dart';
+import '../../theme/app_colors.dart';
 import 'app_snackbar.dart';
 import '../../utils/responsive_utils.dart';
 
@@ -133,7 +134,7 @@ class _ManageTagsSheetState extends ConsumerState<_ManageTagsSheet> {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Icon(Icons.label, color: theme.colorScheme.primary),
+              Icon(Icons.label, color: context.appColors.textSecondary),
               const SizedBox(width: 12),
               Text(
                 l10n.manageTags,
@@ -335,7 +336,7 @@ class _ManageTagsSheetState extends ConsumerState<_ManageTagsSheet> {
                 ref.read(tagsDaoProvider).deleteTag(tag.id);
                 setState(() => _allTags.removeWhere((t) => t.id == tag.id));
               },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              style: TextButton.styleFrom(foregroundColor: Theme.of(ctx).colorScheme.error),
               child: Text(l10n.tagsDelete),
             ),
           ],

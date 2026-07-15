@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../data/ingredient_images.dart';
+import '../../../data/localized_defaults.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,6 +12,7 @@ import '../../../providers/database_provider.dart';
 import '../../../providers/settings_provider.dart';
 import '../../../services/ingredient_resolver_service.dart';
 import '../../../services/pantry_service.dart';
+import '../../../theme/app_colors.dart';
 import '../../../utils/ingredient_utils.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
@@ -381,7 +384,7 @@ class _ShoppingListGeneratorScreenState
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
           child: Row(
             children: [
-              Icon(Icons.restaurant_menu, color: theme.colorScheme.primary),
+              Icon(Icons.restaurant_menu, color: context.appColors.textSecondary),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -393,8 +396,8 @@ class _ShoppingListGeneratorScreenState
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      '${_result.recipes.length} recipes • '
-                          '$_totalSelected ingredients selected',
+                      l10n.shoppingRecipesIngredientsSelected(
+                          _result.recipes.length, _totalSelected),
                       style: theme.textTheme.bodySmall
                           ?.copyWith(color: theme.colorScheme.outline),
                     ),
@@ -410,19 +413,19 @@ class _ShoppingListGeneratorScreenState
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Card(
-              color: Colors.orange.shade50,
+              color: theme.colorScheme.tertiaryContainer,
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Row(
                   children: [
-                    Icon(Icons.warning_amber, color: Colors.orange.shade700),
+                    Icon(Icons.warning_amber, color: theme.colorScheme.onTertiaryContainer),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         _result.hitRecipeLimit
                             ? 'Reached maximum of ${ResolutionLimits.maxRecipes} recipes. Some linked recipes may not be shown.'
                             : 'Recipe links are very deep. Some nested recipes may not be shown.',
-                        style: TextStyle(color: Colors.orange.shade900, fontSize: 13),
+                        style: TextStyle(color: theme.colorScheme.onTertiaryContainer, fontSize: 13),
                       ),
                     ),
                   ],
@@ -477,7 +480,7 @@ class _ShoppingListGeneratorScreenState
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
-              backgroundColor: const Color(0xFFE8A860),
+              backgroundColor: context.appColors.accent,
             ),
           ),
         ),
@@ -601,6 +604,115 @@ class _ShoppingListGeneratorScreenState
     return combined.values.toList();
   }
 
+  /// Render the combined ingredients grouped by store aisle — the same
+  /// categorisation (and store-layout order) the shopping list uses in its
+  /// "By Section" mode, so the preview matches the final list. Rows are
+  /// compact for fast scanning.
+  List<Widget> _buildCombinedByAisle(
+    BuildContext context,
+    ThemeData theme,
+    List<_CombinedIngredient> items,
+  ) {
+    final userMappings =
+        ref.watch(userIngredientMappingsProvider).valueOrNull ??
+            const <String, String>{};
+
+    // Bucket every item into its shopping aisle.
+    final byAisle = <String, List<_CombinedIngredient>>{};
+    for (final item in items) {
+      final cat = getShoppingCategory(item.name, userMappings: userMappings);
+      (byAisle[cat] ??= []).add(item);
+    }
+
+    // Store-layout order.
+    final orderedIds = LocalizedDefaults.sortedShoppingCategories
+        .map((c) => c.id)
+        .where(byAisle.containsKey)
+        .toList();
+    for (final id in byAisle.keys) {
+      if (!orderedIds.contains(id)) orderedIds.add(id); // safety net
+    }
+
+    final widgets = <Widget>[];
+    for (final id in orderedIds) {
+      final group = byAisle[id]!;
+      // ── Aisle header (text only — emoji stays on the ingredient rows) ──
+      widgets.add(Padding(
+        padding: const EdgeInsets.only(top: 12, bottom: 2),
+        child: Row(
+          children: [
+            Text(
+              getShoppingCategoryDisplayName(id).toUpperCase(),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: context.appColors.textSecondary,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.6,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '${group.length}',
+              style: theme.textTheme.labelSmall
+                  ?.copyWith(color: context.appColors.textTertiary),
+            ),
+          ],
+        ),
+      ));
+      // ── Compact item rows ──
+      for (final item in group) {
+        final amountStr = [item.amount, item.unit]
+            .where((s) => s.isNotEmpty)
+            .join(' ');
+        final fromMultiple = item.sourceRecipes.length > 1;
+        widgets.add(Padding(
+          padding: const EdgeInsets.only(left: 4, top: 2, bottom: 2),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    IngredientImages.getEmoji(item.name, unit: item.unit),
+                    style: const TextStyle(fontSize: 15),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        style: theme.textTheme.bodySmall,
+                        children: [
+                          if (amountStr.isNotEmpty)
+                            TextSpan(
+                              text: '$amountStr ',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                          TextSpan(text: item.name),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (fromMultiple)
+                Padding(
+                  padding: const EdgeInsets.only(left: 23, top: 1),
+                  child: Text(
+                    item.sourceRecipes.join(', '),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: context.appColors.textTertiary,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ));
+      }
+    }
+    return widgets;
+  }
+
   Widget _buildFinalStep() {
     final theme = Theme.of(context);
     final allSelected = _getAllSelectedIngredients();
@@ -627,7 +739,7 @@ class _ShoppingListGeneratorScreenState
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
           child: Row(
             children: [
-              Icon(Icons.checklist, color: theme.colorScheme.primary),
+              Icon(Icons.checklist, color: context.appColors.textSecondary),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -639,8 +751,8 @@ class _ShoppingListGeneratorScreenState
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      '${combinedItems.length} items from '
-                          '${recipeNames.length} recipes',
+                      AppLocalizations.of(context)!.shoppingItemsFromRecipes(
+                          combinedItems.length, recipeNames.length),
                       style: theme.textTheme.bodySmall
                           ?.copyWith(color: theme.colorScheme.outline),
                     ),
@@ -700,88 +812,24 @@ class _ShoppingListGeneratorScreenState
             children: [
               // Section header
               Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(bottom: 4),
                 child: Row(
                   children: [
-                    Icon(Icons.merge_type, size: 16, color: theme.colorScheme.primary),
+                    Icon(Icons.storefront_outlined, size: 16, color: context.appColors.textSecondary),
                     const SizedBox(width: 8),
                     Text(
                       AppLocalizations.of(context)!.combinedIngredients,
                       style: theme.textTheme.labelLarge?.copyWith(
-                        color: theme.colorScheme.primary,
+                        color: context.appColors.textSecondary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
               ),
-              ...combinedItems.map((item) {
-                final amountStr = [item.amount, item.unit]
-                    .where((s) => s.isNotEmpty)
-                    .join(' ');
-                final isColumnar = ref.watch(settingsProvider).ingredientLayout == IngredientLayout.columnar;
-                final fromMultiple = item.sourceRecipes.length > 1;
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 3),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            fromMultiple ? Icons.call_merge : Icons.check_circle_outline,
-                            size: 16,
-                            color: fromMultiple
-                                ? const Color(0xFFE8A860)
-                                : theme.colorScheme.primary,
-                          ),
-                          const SizedBox(width: 10),
-                          if (isColumnar) ...[
-                            SizedBox(
-                              width: 72,
-                              child: amountStr.isNotEmpty
-                                  ? Text(
-                                amountStr,
-                                style: theme.textTheme.bodyMedium
-                                    ?.copyWith(fontWeight: FontWeight.w600),
-                              )
-                                  : null,
-                            ),
-                            Expanded(
-                              child: Text(item.name,
-                                  style: theme.textTheme.bodyMedium),
-                            ),
-                          ] else
-                            Expanded(
-                              child: Text.rich(
-                                TextSpan(
-                                  style: theme.textTheme.bodyMedium,
-                                  children: [
-                                    if (amountStr.isNotEmpty) TextSpan(text: '$amountStr ', style: const TextStyle(fontWeight: FontWeight.w600)),
-                                    TextSpan(text: item.name),
-                                  ],
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      if (fromMultiple)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 26, top: 2),
-                          child: Text(
-                            item.sourceRecipes.join(', '),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.outline,
-                              fontStyle: FontStyle.italic,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                );
-              }),
+              // Grouped by store aisle (mirrors the shopping list's
+              // "By Section" order) so everything is quick to scan.
+              ..._buildCombinedByAisle(context, theme, combinedItems),
             ],
           ),
         ),
@@ -798,13 +846,13 @@ class _ShoppingListGeneratorScreenState
                     strokeWidth: 2, color: Colors.white))
                 : const Icon(Icons.add_shopping_cart),
             label: Text(_isAdding
-                ? 'Adding...'
-                : 'Add ${combinedItems.length} items to list'),
+                ? AppLocalizations.of(context)!.shoppingAddingToList
+                : AppLocalizations.of(context)!.shoppingAddItemsToList(combinedItems.length)),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
-              backgroundColor: const Color(0xFFE8A860),
+              backgroundColor: context.appColors.accent,
             ),
           ),
         ),
@@ -1223,7 +1271,7 @@ class _RecipeCard extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: selectedCount > 0
-                          ? const Color(0xFFE8A860).withValues(alpha: 0.2)
+                          ? context.appColors.accent.withValues(alpha: 0.2)
                           : theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -1232,7 +1280,7 @@ class _RecipeCard extends StatelessWidget {
                       style: theme.textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: selectedCount > 0
-                            ? const Color(0xFFE8A860)
+                            ? context.appColors.accent
                             : theme.colorScheme.outline,
                       ),
                     ),
@@ -1368,7 +1416,10 @@ class _IngredientRow extends ConsumerWidget {
 
     final amountStr = [amt, unit].where((s) => s.isNotEmpty).join(' ');
     final nameColor = isSelected ? null : theme.colorScheme.outline;
-    final nameDecoration = isSelected ? null : TextDecoration.lineThrough;
+    // Pantry-skipped rows are dimmed but NOT struck through — strikethrough
+    // reads as "removed", but they're just auto-deselected and re-includable.
+    final nameDecoration =
+        (isSelected || isPantryItem) ? null : TextDecoration.lineThrough;
 
     return InkWell(
       onTap: onToggle,
@@ -1378,9 +1429,22 @@ class _IngredientRow extends ConsumerWidget {
           children: [
             _AnimatedCheckbox(
               isSelected: isSelected,
-              color: const Color(0xFFE8A860),
+              color: context.appColors.accent,
             ),
             const SizedBox(width: 12),
+            // Ingredient emoji — a friendly at-a-glance cue for each item.
+            // Dimmed to match the row when it's deselected/skipped.
+            Opacity(
+              opacity: isSelected ? 1.0 : 0.4,
+              child: Text(
+                IngredientImages.getEmoji(
+                  ingredient.ingredient.name,
+                  unit: ingredient.scaledUnit,
+                ),
+                style: const TextStyle(fontSize: 20),
+              ),
+            ),
+            const SizedBox(width: 10),
             if (isColumnar) ...[
               SizedBox(
                 width: 72,
@@ -1492,12 +1556,12 @@ class _ScaleSelector extends StatelessWidget {
                 const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
                   color: isActive
-                      ? const Color(0xFFE8A860).withValues(alpha: 0.25)
+                      ? context.appColors.accent.withValues(alpha: 0.25)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: isActive
-                        ? const Color(0xFFE8A860)
+                        ? context.appColors.accent
                         : theme.colorScheme.outline.withValues(alpha: 0.2),
                   ),
                 ),
@@ -1506,7 +1570,7 @@ class _ScaleSelector extends StatelessWidget {
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                     color: isActive
-                        ? const Color(0xFFE8A860)
+                        ? context.appColors.accent
                         : theme.colorScheme.outline,
                     fontSize: 11,
                   ),
@@ -1632,7 +1696,7 @@ class _ListDestinationPicker extends StatelessWidget {
             Row(
               children: [
                 Icon(Icons.shopping_bag_outlined,
-                    size: 18, color: theme.colorScheme.primary),
+                    size: 18, color: context.appColors.textSecondary),
                 const SizedBox(width: 8),
                 Text(
                   'Add to list',
@@ -1656,7 +1720,7 @@ class _ListDestinationPicker extends StatelessWidget {
                       selected: isSelected,
                       onSelected: (_) => onListSelected(list.id),
                       selectedColor:
-                      const Color(0xFFE8A860).withValues(alpha: 0.3),
+                      context.appColors.accent.withValues(alpha: 0.3),
                     );
                   }),
                   ActionChip(

@@ -2704,7 +2704,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareAsFile.
   ///
   /// In en, this message translates to:
-  /// **'Share as File'**
+  /// **'File (.json)'**
   String get shareAsFile;
 
   /// No description provided for @shareQrCode.
@@ -3409,6 +3409,12 @@ abstract class AppLocalizations {
   /// **'more'**
   String get more;
 
+  /// No description provided for @moreLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get moreLabel;
+
   /// No description provided for @less.
   ///
   /// In en, this message translates to:
@@ -3544,7 +3550,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectAll.
   ///
   /// In en, this message translates to:
-  /// **'Select All'**
+  /// **'Select all'**
   String get selectAll;
 
   /// No description provided for @selectNone.
@@ -3724,7 +3730,7 @@ abstract class AppLocalizations {
   /// No description provided for @addedItemsToList.
   ///
   /// In en, this message translates to:
-  /// **'Added {count} items to shopping list'**
+  /// **'{count, plural, =1{Added 1 item to your shopping list} other{Added {count} items to your shopping list}}'**
   String addedItemsToList(int count);
 
   /// No description provided for @scanToImport.
@@ -8116,7 +8122,7 @@ abstract class AppLocalizations {
   /// No description provided for @reviewAndAddItems.
   ///
   /// In en, this message translates to:
-  /// **'Review & Add ({count} items)'**
+  /// **'{count, plural, =1{Review & Add (1 item)} other{Review & Add ({count} items)}}'**
   String reviewAndAddItems(int count);
 
   /// No description provided for @addedTotalItemsToList.
@@ -8905,10 +8911,46 @@ abstract class AppLocalizations {
   /// **'Send day to shopping list'**
   String get sendDayToShoppingList;
 
+  /// No description provided for @sectionSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get sectionSchedule;
+
+  /// No description provided for @sectionMeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal'**
+  String get sectionMeal;
+
+  /// No description provided for @changeTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Change time'**
+  String get changeTime;
+
+  /// No description provided for @replaceMeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace meal'**
+  String get replaceMeal;
+
+  /// No description provided for @cardColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Card color'**
+  String get cardColor;
+
+  /// No description provided for @mealColorAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get mealColorAuto;
+
   /// No description provided for @removeMeal.
   ///
   /// In en, this message translates to:
-  /// **'Remove Meal'**
+  /// **'Remove meal'**
   String get removeMeal;
 
   /// No description provided for @removeMealConfirm.
@@ -17304,6 +17346,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{Added 1 recipe to meal plan} other{Added {count} recipes to meal plan}}'**
   String shoppingMealPlanAddedCount(int count);
+
+  /// No description provided for @shoppingRecipesIngredientsSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{recipeCount, plural, =1{1 recipe} other{{recipeCount} recipes}} • {ingredientCount, plural, =1{1 ingredient selected} other{{ingredientCount} ingredients selected}}'**
+  String shoppingRecipesIngredientsSelected(int recipeCount, int ingredientCount);
+
+  /// No description provided for @shoppingItemsFromRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'{itemCount, plural, =1{1 item} other{{itemCount} items}} from {recipeCount, plural, =1{1 recipe} other{{recipeCount} recipes}}'**
+  String shoppingItemsFromRecipes(int itemCount, int recipeCount);
+
+  /// No description provided for @shoppingAddItemsToList.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Add 1 item to list} other{Add {count} items to list}}'**
+  String shoppingAddItemsToList(int count);
+
+  /// No description provided for @shoppingAddingToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding…'**
+  String get shoppingAddingToList;
+
+  /// No description provided for @shoppingMarkBought.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as bought'**
+  String get shoppingMarkBought;
+
+  /// No description provided for @shoppingDeleteChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete checked'**
+  String get shoppingDeleteChecked;
+
+  /// No description provided for @shareLinkEditDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone with the link can join and edit this list'**
+  String get shareLinkEditDesc;
+
+  /// No description provided for @shareLinkCheckDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone with the link can join and check off items'**
+  String get shareLinkCheckDesc;
+
+  /// No description provided for @shareLinkViewDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone with the link can view this list'**
+  String get shareLinkViewDesc;
 
   /// No description provided for @communityICookedThis.
   ///

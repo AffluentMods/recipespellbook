@@ -16,10 +16,12 @@ import '../../widgets/app_snackbar.dart';
 import '../../widgets/new_recipe_dialog.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/sub_recipe_selection_sheet.dart';
+import '../../widgets/selection_action_bar.dart';
 import '../../../services/sync_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/collab_service.dart';
 import '../../../providers/collab_provider.dart';
+import '../../../theme/app_colors.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../layouts/master_detail_layout.dart';
 import '../../../utils/responsive_utils.dart';
@@ -195,6 +197,45 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     setState(() => _selectedIds.addAll(recipes.map((r) => r.id)));
   }
 
+  /// The shared multi-select bar for the recipe grid: Category / Favorite /
+  /// Copy inline, Course + Move under More, Delete pinned. Callbacks use the
+  /// State's own context (stable for the widget's lifetime).
+  SelectionActionBar _buildSelectionBar() {
+    final l10n = AppLocalizations.of(context)!;
+    return SelectionActionBar(
+      actions: [
+        SelectionAction(
+            icon: Icons.category_outlined,
+            label: l10n.bulkCategory,
+            onTap: () => _bulkSetCategory(context)),
+        SelectionAction(
+            icon: Icons.favorite_border,
+            label: l10n.bulkFavorite,
+            onTap: () => _bulkFavorite()),
+        SelectionAction(
+            icon: Icons.copy_outlined,
+            label: l10n.bulkCopyLabel,
+            onTap: () => _bulkCopyToCookbook(context)),
+      ],
+      moreActions: [
+        SelectionAction(
+            icon: Icons.restaurant_outlined,
+            label: l10n.bulkCourse,
+            onTap: () => _bulkSetCourse(context)),
+        SelectionAction(
+            icon: Icons.drive_file_move_outlined,
+            label: l10n.bulkMoveLabel,
+            onTap: () => _bulkMoveToCookbook(context)),
+      ],
+      destructive: SelectionAction(
+        icon: Icons.delete_outline,
+        label: l10n.bulkDeleteLabel,
+        destructive: true,
+        onTap: () => _bulkDelete(context),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -237,6 +278,20 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       recipeStream = recipeDao.watchRecipesForCookbook(effectiveCookbookId);
     }
 
+    // Publish/withdraw the shared selection action bar (the shell renders it in
+    // place of the bottom nav). Post-frame so we never mutate a provider
+    // mid-build.
+    final selecting = _isSelecting && _selectedIds.isNotEmpty;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final hasBar = ref.read(selectionBarProvider) != null;
+      if (selecting && !hasBar) {
+        ref.read(selectionBarProvider.notifier).state = _buildSelectionBar();
+      } else if (!selecting && hasBar) {
+        ref.read(selectionBarProvider.notifier).state = null;
+      }
+    });
+
     final masterScaffold = Scaffold(
       appBar: _isSelecting
           ? AppBar(
@@ -244,7 +299,14 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
           icon: const Icon(Icons.close),
           onPressed: _exitSelection,
         ),
-        title: Text(AppLocalizations.of(context)!.selectedCount(_selectedIds.length)),
+        title: Text(AppLocalizations.of(context)!
+            .selectAllBar(_selectedIds.length, _currentVisibleRecipes.length)),
+        actions: [
+          TextButton(
+            onPressed: () => _selectAll(_currentVisibleRecipes),
+            child: Text(AppLocalizations.of(context)!.selectAll),
+          ),
+        ],
       )
           : AppBar(
         title: _isSearching
@@ -337,15 +399,6 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       ),
       body: Column(
         children: [
-          // Select all bar
-          if (_isSelecting)
-            _SelectAllBar(
-              selectedCount: _selectedIds.length,
-              totalCount: _currentVisibleRecipes.length,
-              onSelectAll: () => _selectAll(_currentVisibleRecipes),
-            ),
-
-
           // Recipe list (pull-to-refresh triggers cloud sync if available)
           Expanded(
             child: RefreshIndicator(
@@ -388,17 +441,6 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
             ),
           ),
 
-          // Bulk action bar
-          if (_isSelecting && _selectedIds.isNotEmpty)
-            _BulkActionBar(
-              selectedCount: _selectedIds.length,
-              onDelete: () => _bulkDelete(context),
-              onSetCourse: () => _bulkSetCourse(context),
-              onSetCategory: () => _bulkSetCategory(context),
-              onFavorite: () => _bulkFavorite(),
-              onCopyToCookbook: () => _bulkCopyToCookbook(context),
-              onMoveToCookbook: () => _bulkMoveToCookbook(context),
-            ),
         ],
       ),
       floatingActionButton: (_isSelecting || !canEditHere)
@@ -548,14 +590,14 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          icon: const Icon(Icons.delete_outline, size: 32, color: Colors.red),
+          icon: Icon(Icons.delete_outline, size: 32, color: context.appColors.destructive),
           title: Text(l10n.deleteCountRecipes(count)),
           content: Text(l10n.confirmDeleteMessage),
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.actionCancel)),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              style: FilledButton.styleFrom(backgroundColor: context.appColors.destructive),
               child: Text(l10n.actionDelete),
             ),
           ],
@@ -954,7 +996,7 @@ class _SmallListView extends StatelessWidget {
 
     return ListView.builder(
       key: const PageStorageKey('recipe_list_small'),
-      padding: const EdgeInsets.only(bottom: 80),
+      padding: const EdgeInsets.only(bottom: 100), // clears the FAB / bulk-select bar
       itemCount: recipes.length,
       itemBuilder: (context, index) {
         final recipe = recipes[index];
@@ -1011,7 +1053,7 @@ class _SmallListView extends StatelessWidget {
             trailing: isSelecting ? null : Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (recipe.isFavorite) Icon(Icons.favorite, size: 18, color: theme.colorScheme.error),
+                if (recipe.isFavorite) Icon(Icons.favorite, size: 18, color: context.appColors.favorite),
                 if (recipe.isPinned) const Icon(Icons.push_pin, size: 18, color: Colors.orange),
               ],
             ),
@@ -1068,7 +1110,7 @@ class _MediumGridView extends StatelessWidget {
 
         return GridView.builder(
           key: const PageStorageKey('recipe_list_medium'),
-          padding: const EdgeInsets.fromLTRB(6, 4, 6, 80),
+          padding: const EdgeInsets.fromLTRB(6, 4, 6, 100), // clears the FAB / bulk-select bar
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
             childAspectRatio: 1.0,
@@ -1227,7 +1269,7 @@ class _MediumCardState extends State<_MediumCard> {
                           color: Colors.black54,
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Icon(Icons.favorite, size: 12, color: Colors.redAccent),
+                        child: Icon(Icons.favorite, size: 12, color: context.appColors.favorite),
                       ),
                   ],
                 ),
@@ -1308,7 +1350,7 @@ class _LargeCardView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.builder(
       key: const PageStorageKey('recipe_list_large'),
-      padding: const EdgeInsets.all(12).copyWith(bottom: 80),
+      padding: const EdgeInsets.all(12).copyWith(bottom: 100), // clears the FAB / bulk-select bar
       itemCount: recipes.length,
       itemBuilder: (context, index) => _LargeCard(
         key: ValueKey(recipes[index].id),
@@ -1420,7 +1462,7 @@ class _LargeCard extends StatelessWidget {
                       if (recipe.isFavorite)
                         Container(
                           padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(color: theme.colorScheme.error, shape: BoxShape.circle),
+                          decoration: BoxDecoration(color: context.appColors.favorite, shape: BoxShape.circle),
                           child: const Icon(Icons.favorite, size: 16, color: Colors.white),
                         ),
                     ],
@@ -1675,143 +1717,5 @@ class _EmptyState extends StatelessWidget {
 
   void _showAddRecipeDialog(BuildContext context) {
     showNewRecipeDialog(context, cookbookId);
-  }
-}
-
-// ============ SELECT ALL BAR ============
-
-class _SelectAllBar extends StatelessWidget {
-  final int selectedCount;
-  final int totalCount;
-  final VoidCallback onSelectAll;
-
-  const _SelectAllBar({
-    required this.selectedCount,
-    required this.totalCount,
-    required this.onSelectAll,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      color: theme.colorScheme.surfaceContainerHighest,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Row(
-        children: [
-          Text(AppLocalizations.of(context)!.selectAllBar(selectedCount, totalCount),
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
-          const Spacer(),
-          TextButton(
-            onPressed: onSelectAll,
-            child: Text(selectedCount >= totalCount ? AppLocalizations.of(context)!.deselectAll : AppLocalizations.of(context)!.selectAll),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ============ BULK ACTION BAR ============
-
-class _BulkActionBar extends StatelessWidget {
-  final int selectedCount;
-  final VoidCallback onDelete;
-  final VoidCallback onSetCourse;
-  final VoidCallback onSetCategory;
-  final VoidCallback onFavorite;
-  final VoidCallback onCopyToCookbook;
-  final VoidCallback onMoveToCookbook;
-
-  const _BulkActionBar({
-    required this.selectedCount,
-    required this.onDelete,
-    required this.onSetCourse,
-    required this.onSetCategory,
-    required this.onFavorite,
-    required this.onCopyToCookbook,
-    required this.onMoveToCookbook,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-        child: Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.10), blurRadius: 18, offset: const Offset(0, 4)),
-            ],
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _BulkActionIcon(icon: Icons.restaurant_menu, label: l10n.bulkCourse, onTap: onSetCourse),
-              _BulkActionIcon(icon: Icons.category_outlined, label: l10n.bulkCategory, onTap: onSetCategory),
-              _BulkActionIcon(icon: Icons.star_outline, label: l10n.bulkFavorite, onTap: onFavorite),
-              _BulkActionIcon(icon: Icons.copy_rounded, label: l10n.bulkCopyLabel, onTap: onCopyToCookbook),
-              _BulkActionIcon(icon: Icons.drive_file_move_outlined, label: l10n.bulkMoveLabel, onTap: onMoveToCookbook),
-              _BulkActionIcon(icon: Icons.delete_outline, label: l10n.bulkDeleteLabel, onTap: onDelete, color: theme.colorScheme.error),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BulkActionIcon extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final Color? color;
-
-  const _BulkActionIcon({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final c = color ?? theme.colorScheme.primary;
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(color: c.withValues(alpha: 0.12), shape: BoxShape.circle),
-                alignment: Alignment.center,
-                child: Icon(icon, size: 19, color: c),
-              ),
-              const SizedBox(height: 3),
-              Text(label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.labelSmall?.copyWith(fontSize: 10, color: c, fontWeight: FontWeight.w600)),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }

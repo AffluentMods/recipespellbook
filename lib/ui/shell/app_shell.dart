@@ -11,6 +11,7 @@ import '../../utils/responsive_utils.dart';
 import '../screens/import/import_guides_screen.dart';
 import '../widgets/app_menu_drawer.dart';
 import '../widgets/app_snackbar.dart';
+import '../widgets/selection_action_bar.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../widgets/kitchen_buddy/coin_toast_overlay.dart';
 
@@ -39,6 +40,7 @@ class AppShell extends ConsumerStatefulWidget {
 class _AppShellState extends ConsumerState<AppShell> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _servicesInitialized = false;
+  String? _lastLocation;
 
   @override
   void initState() {
@@ -112,6 +114,17 @@ class _AppShellState extends ConsumerState<AppShell> {
     final routeTab = _activeTabFromRoute(location);
     final effectiveIndex = routeTab >= 0 ? routeTab : currentIndex;
 
+    // Contextual selection bar (published by the selecting screen). It replaces
+    // the bottom nav so the two never stack. Clear any stale bar when the route
+    // changes — the destination screen re-publishes if it is itself selecting.
+    final selectionBar = ref.watch(selectionBarProvider);
+    if (_lastLocation != null && _lastLocation != location) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) ref.read(selectionBarProvider.notifier).state = null;
+      });
+    }
+    _lastLocation = location;
+
     // Desktop: Expanded sidebar (≥900dp)
     if (Responsive.useExpandedSidebar(context)) {
       return Row(
@@ -137,6 +150,7 @@ class _AppShellState extends ConsumerState<AppShell> {
             child: Scaffold(
               key: _scaffoldKey,
               body: widget.child,
+              bottomNavigationBar: selectionBar,
             ),
           ),
         ],
@@ -169,6 +183,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                 body: widget.child,
                 endDrawer: const AppMenuDrawer(),
                 endDrawerEnableOpenDragGesture: false,
+                bottomNavigationBar: selectionBar,
               ),
             ),
           ],
@@ -181,19 +196,37 @@ class _AppShellState extends ConsumerState<AppShell> {
         body: widget.child,
         endDrawer: const AppMenuDrawer(),
         endDrawerEnableOpenDragGesture: false,
-        bottomNavigationBar: _NotchNavBar(
-          currentIndex: effectiveIndex.clamp(0, 3),
-          shoppingBadge: shoppingBadge,
-          onTap: (index) {
-            switch (index) {
-              case 0: _navigateTo('/', 0);
-              case 1: _navigateTo('/community', 1);
-              case 2: _navigateTo('/planner', 2);
-              case 3: _navigateTo('/shopping', 3);
-              case 4:
-                _scaffoldKey.currentState?.openEndDrawer();
-            }
-          },
+        bottomNavigationBar: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          switchInCurve: Curves.easeOut,
+          switchOutCurve: Curves.easeIn,
+          transitionBuilder: (child, animation) => SlideTransition(
+            position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+                .animate(animation),
+            child: child,
+          ),
+          child: selectionBar != null
+              ? KeyedSubtree(
+                  key: const ValueKey('selection-bar'),
+                  child: selectionBar,
+                )
+              : KeyedSubtree(
+                  key: const ValueKey('nav-bar'),
+                  child: _NotchNavBar(
+                    currentIndex: effectiveIndex.clamp(0, 3),
+                    shoppingBadge: shoppingBadge,
+                    onTap: (index) {
+                      switch (index) {
+                        case 0: _navigateTo('/', 0);
+                        case 1: _navigateTo('/community', 1);
+                        case 2: _navigateTo('/planner', 2);
+                        case 3: _navigateTo('/shopping', 3);
+                        case 4:
+                          _scaffoldKey.currentState?.openEndDrawer();
+                      }
+                    },
+                  ),
+                ),
         ),
     );
   }

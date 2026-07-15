@@ -1838,6 +1838,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get more => '更多';
 
   @override
+  String get moreLabel => '更多';
+
+  @override
   String get less => '更少';
 
   @override
@@ -4786,6 +4789,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sendDayToShoppingList => '将今天发送到清单';
+
+  @override
+  String get sectionSchedule => '日程';
+
+  @override
+  String get sectionMeal => '餐食';
+
+  @override
+  String get changeTime => '更改时间';
+
+  @override
+  String get replaceMeal => '替换餐食';
+
+  @override
+  String get cardColor => '卡片颜色';
+
+  @override
+  String get mealColorAuto => '自动';
 
   @override
   String get removeMeal => '删除餐食';
@@ -9388,6 +9409,69 @@ class AppLocalizationsZh extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String shoppingRecipesIngredientsSelected(int recipeCount, int ingredientCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      recipeCount,
+      locale: localeName,
+      other: '$recipeCount recipes',
+      one: '1 recipe',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      ingredientCount,
+      locale: localeName,
+      other: '$ingredientCount ingredients selected',
+      one: '1 ingredient selected',
+    );
+    return '$_temp0 • $_temp1';
+  }
+
+  @override
+  String shoppingItemsFromRecipes(int itemCount, int recipeCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      itemCount,
+      locale: localeName,
+      other: '$itemCount items',
+      one: '1 item',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      recipeCount,
+      locale: localeName,
+      other: '$recipeCount recipes',
+      one: '1 recipe',
+    );
+    return '$_temp0 from $_temp1';
+  }
+
+  @override
+  String shoppingAddItemsToList(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count items to list',
+      one: 'Add 1 item to list',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingAddingToList => 'Adding…';
+
+  @override
+  String get shoppingMarkBought => 'Mark as bought';
+
+  @override
+  String get shoppingDeleteChecked => 'Delete checked';
+
+  @override
+  String get shareLinkEditDesc => 'Anyone with the link can join and edit this list';
+
+  @override
+  String get shareLinkCheckDesc => 'Anyone with the link can join and check off items';
+
+  @override
+  String get shareLinkViewDesc => 'Anyone with the link can view this list';
 
   @override
   String get communityICookedThis => '我做过这道菜';

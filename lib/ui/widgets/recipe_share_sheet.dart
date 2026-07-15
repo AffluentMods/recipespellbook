@@ -14,6 +14,7 @@ import '../../services/auth_service.dart';
 import '../../services/family_service.dart';
 import '../../services/image_service.dart';
 import '../../providers/auth_provider.dart';
+import '../../theme/app_colors.dart';
 import 'app_snackbar.dart';
 import '../../utils/responsive_utils.dart';
 
@@ -83,7 +84,7 @@ class _RecipeShareSheet extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.share, color: theme.colorScheme.primary),
+                Icon(Icons.share, color: context.appColors.textPrimary),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -128,7 +129,7 @@ class _RecipeShareSheet extends StatelessWidget {
                   ),
                   _ShareOption(
                     icon: Icons.file_copy,
-                    label: l10n.shareExport,
+                    label: l10n.shareAsFile,
                     onTap: () => _exportRecipe(context),
                   ),
                   _ShareOption(
@@ -539,7 +540,7 @@ class _RecipeShareSheet extends StatelessWidget {
                   linkedNames,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.primary,
+                    color: ctx.appColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 12),

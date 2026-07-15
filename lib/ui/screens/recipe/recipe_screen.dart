@@ -24,6 +24,7 @@ import '../../../services/shopping_list_generator.dart';
 import '../../../services/collab_service.dart';
 import '../../../services/sync_service.dart';
 import '../../../providers/collab_provider.dart';
+import '../../../theme/app_colors.dart';
 import '../../../ui/widgets/cooking_mode_screen.dart';
 import '../../../utils/default_recipe_images.dart';
 import '../../widgets/add_to_meal_plan_dialogue.dart';
@@ -237,6 +238,18 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     }
   }
 
+  void _openScaleSheet() {
+    if (_recipe == null) return;
+    Responsive.showAdaptiveSheet(
+      context,
+      builder: (ctx) => _ScaleSheet(
+        initialScale: _scaleFactor,
+        servings: _recipe!.servings,
+        onScaleChanged: (scale) => setState(() => _scaleFactor = scale),
+      ),
+    );
+  }
+
   void _showAddToMealPlanSheet() {
     showAddToMealPlanSheet(context, ref, widget.recipeId, _recipe?.title ?? '',
         courseId: _recipe?.courseId);
@@ -406,7 +419,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
 
                 const SizedBox(height: 16),
                 if (_hasMetaInfo(_recipe!)) ...[
-                  _RecipeMetaInfoCard(recipe: _recipe!, scaleFactor: _scaleFactor),
+                  _RecipeMetaInfoCard(recipe: _recipe!, scaleFactor: _scaleFactor, onOpenScaleSheet: _openScaleSheet),
                   const SizedBox(height: 16),
                 ],
                 _RecipeActionBar(
@@ -532,18 +545,11 @@ class _RecipeActionBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
+        // Servings scaling now lives on the meta-info card's servings cell; the
+        // action bar keeps Share + the Meal Plan / Groceries / Convert row.
         Row(
           children: [
-            Expanded(
-              child: _ServingStepperPill(
-                currentScale: currentScale,
-                servings: servings,
-                onScaleChanged: onScaleChanged,
-                onOpenSheet: () => _showScaleSheet(context),
-              ),
-            ),
-            const SizedBox(width: 12),
-            _SharePill(onTap: onShare),
+            Expanded(child: _SharePill(onTap: onShare)),
           ],
         ),
         const SizedBox(height: 12),
@@ -579,16 +585,6 @@ class _RecipeActionBar extends StatelessWidget {
     );
   }
 
-  void _showScaleSheet(BuildContext context) {
-    Responsive.showAdaptiveSheet(
-      context,
-      builder: (ctx) => _ScaleSheet(
-        initialScale: currentScale,
-        servings: servings,
-        onScaleChanged: onScaleChanged,
-      ),
-    );
-  }
 
   void _showConvertDialog(BuildContext context) {
     final theme = Theme.of(context);
@@ -609,7 +605,7 @@ class _RecipeActionBar extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: theme.colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -651,128 +647,6 @@ class _RecipeActionBar extends StatelessWidget {
             const SizedBox(height: 16),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// A servings stepper: − N servings +. The − / + change the scale so the
-/// servings step by one; tapping the middle opens the full scale sheet
-/// (presets + custom). Falls back to a scale (×) ladder when the recipe has no
-/// numeric servings.
-class _ServingStepperPill extends StatelessWidget {
-  final double currentScale;
-  final String? servings;
-  final ValueChanged<double> onScaleChanged;
-  final VoidCallback onOpenSheet;
-  const _ServingStepperPill({
-    required this.currentScale,
-    required this.servings,
-    required this.onScaleChanged,
-    required this.onOpenSheet,
-  });
-
-  static const _ladder = [0.25, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0];
-
-  double? _baseServings() {
-    if (servings == null) return null;
-    final m = RegExp(r'(\d+\.?\d*)').firstMatch(servings!);
-    if (m == null) return null;
-    final v = double.tryParse(m.group(1)!);
-    return (v != null && v > 0) ? v : null;
-  }
-
-  void _step(int dir) {
-    final base = _baseServings();
-    if (base != null) {
-      var target = (base * currentScale).round() + dir;
-      if (target < 1) target = 1;
-      onScaleChanged(target / base);
-    } else {
-      var idx = 0;
-      var best = double.infinity;
-      for (var i = 0; i < _ladder.length; i++) {
-        final d = (_ladder[i] - currentScale).abs();
-        if (d < best) {
-          best = d;
-          idx = i;
-        }
-      }
-      idx = (idx + dir).clamp(0, _ladder.length - 1);
-      onScaleChanged(_ladder[idx]);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final base = _baseServings();
-    final scaled = currentScale != 1.0;
-
-    String label;
-    if (base != null) {
-      final s = base * currentScale;
-      final sStr = s == s.roundToDouble() ? s.round().toString() : s.toStringAsFixed(1);
-      label = '$sStr ${l10n.servingsUnit}';
-    } else {
-      label = scaled
-          ? (currentScale == currentScale.roundToDouble()
-              ? '${currentScale.round()}×'
-              : '$currentScale×')
-          : l10n.scaleOriginalLabel;
-    }
-
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        color: scaled
-            ? theme.colorScheme.tertiaryContainer.withValues(alpha: 0.4)
-            : theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(14),
-        border: scaled
-            ? Border.all(color: theme.colorScheme.tertiary.withValues(alpha: 0.55))
-            : null,
-      ),
-      child: Row(
-        children: [
-          _stepButton(theme, Icons.remove_rounded, () => _step(-1)),
-          Expanded(
-            child: InkWell(
-              onTap: onOpenSheet,
-              borderRadius: BorderRadius.circular(10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.restaurant_menu_rounded,
-                      size: 16, color: theme.colorScheme.onSurfaceVariant),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall
-                          ?.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          _stepButton(theme, Icons.add_rounded, () => _step(1)),
-        ],
-      ),
-    );
-  }
-
-  Widget _stepButton(ThemeData theme, IconData icon, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        child: Icon(icon, size: 20, color: theme.colorScheme.primary),
       ),
     );
   }
@@ -864,8 +738,11 @@ class _ModernActionButton extends StatelessWidget {
 class _RecipeMetaInfoCard extends StatelessWidget {
   final Recipe recipe;
   final double scaleFactor;
+  /// When set, the servings cell becomes the recipe's single servings control —
+  /// tap it to open the scale/multiplier sheet (there is no separate stepper).
+  final VoidCallback? onOpenScaleSheet;
 
-  const _RecipeMetaInfoCard({required this.recipe, this.scaleFactor = 1.0});
+  const _RecipeMetaInfoCard({required this.recipe, this.scaleFactor = 1.0, this.onOpenScaleSheet});
 
   String _formatMinutes(int? minutes) {
     if (minutes == null || minutes <= 0) return '';
@@ -899,7 +776,12 @@ class _RecipeMetaInfoCard extends StatelessWidget {
           if (cookTimeStr.isNotEmpty)
             _MetaItem(icon: Icons.local_fire_department_outlined, label: l10n.recipeFieldCookTime, value: cookTimeStr),
           if (recipe.servings != null && recipe.servings!.isNotEmpty)
-            _MetaItem(icon: Icons.people_outline, label: l10n.recipeFieldServings, value: _scaleServings(recipe.servings!, scaleFactor)),
+            _MetaItem(
+              icon: Icons.people_outline,
+              label: l10n.recipeFieldServings,
+              value: _scaleServings(recipe.servings!, scaleFactor),
+              onTap: onOpenScaleSheet,
+            ),
         ],
       ),
     );
@@ -1266,9 +1148,9 @@ class _ImprovedAllergyWarningState extends ConsumerState<_ImprovedAllergyWarning
       child: Container(
         key: const ValueKey('warning'),
         decoration: BoxDecoration(
-          color: Colors.red.shade50,
+          color: theme.colorScheme.errorContainer,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.red.shade200),
+          border: Border.all(color: theme.colorScheme.error),
         ),
         child: Column(
           children: [
@@ -1276,7 +1158,7 @@ class _ImprovedAllergyWarningState extends ConsumerState<_ImprovedAllergyWarning
               padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
               child: Row(
                 children: [
-                  Icon(Icons.warning_amber_rounded, color: Colors.red.shade700, size: 24),
+                  Icon(Icons.warning_amber_rounded, color: theme.colorScheme.onErrorContainer, size: 24),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -1286,20 +1168,20 @@ class _ImprovedAllergyWarningState extends ConsumerState<_ImprovedAllergyWarning
                           l10n.allergyWarningTitle,
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Colors.red.shade700,
+                            color: theme.colorScheme.onErrorContainer,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${l10n.allergyWarningContains} ${allergenNames.join(", ")}',
-                          style: theme.textTheme.bodySmall?.copyWith(color: Colors.red.shade900),
+                          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onErrorContainer),
                         ),
                       ],
                     ),
                   ),
                   // X button on RIGHT
                   IconButton(
-                    icon: Icon(Icons.close, color: Colors.red.shade700, size: 20),
+                    icon: Icon(Icons.close, color: theme.colorScheme.onErrorContainer, size: 20),
                     tooltip: l10n.allergyDismissTooltip,
                     onPressed: () {
                       setState(() {
@@ -1317,18 +1199,18 @@ class _ImprovedAllergyWarningState extends ConsumerState<_ImprovedAllergyWarning
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade100,
+                  color: theme.colorScheme.error.withValues(alpha: 0.15),
                   borderRadius: const BorderRadius.vertical(bottom: Radius.circular(11)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.settings, size: 16, color: Colors.red.shade700),
+                    Icon(Icons.settings, size: 16, color: theme.colorScheme.error),
                     const SizedBox(width: 8),
                     Text(
                       l10n.allergyManageSettings,
                       style: theme.textTheme.labelMedium?.copyWith(
-                        color: Colors.red.shade700,
+                        color: theme.colorScheme.error,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -1535,7 +1417,7 @@ class _IngredientSectionBox extends ConsumerWidget {
     final itemIds = [for (final i in items) i.id];
     final allChecked =
         header != null && itemIds.isNotEmpty && itemIds.every(checkedSet.contains);
-    final accent = allChecked ? theme.colorScheme.outline : theme.colorScheme.primary;
+    final accent = allChecked ? theme.colorScheme.outline : theme.colorScheme.outline;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -2022,7 +1904,7 @@ class _RecipeAppBar extends StatelessWidget {
               PopupMenuItem(value: 'publish', child: Row(children: [const Icon(Icons.public_outlined), const SizedBox(width: 12), Text(l10n.publishToCommunity)])),
               if (!readOnlyShared) const PopupMenuDivider(),
               if (!readOnlyShared)
-                PopupMenuItem(value: 'delete', child: Row(children: [const Icon(Icons.delete, color: Colors.red), const SizedBox(width: 12), Text(l10n.actionDelete, style: const TextStyle(color: Colors.red))])),
+                PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete, color: context.appColors.destructive), const SizedBox(width: 12), Text(l10n.actionDelete, style: TextStyle(color: context.appColors.destructive))])),
             ],
           ),
         ),
@@ -2290,7 +2172,7 @@ class _RecipeAppBar extends StatelessWidget {
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
             FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              style: FilledButton.styleFrom(backgroundColor: context.appColors.destructive),
               onPressed: () => Navigator.pop(ctx, true),
               child: Text(l10n.actionDelete),
             ),
@@ -2357,23 +2239,39 @@ class _FavoriteButton extends StatelessWidget {
   final bool isFavorite;
   final VoidCallback onToggle;
   const _FavoriteButton({required this.isFavorite, required this.onToggle});
-  @override Widget build(BuildContext context) => IconButton(icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border, color: isFavorite ? Colors.red : null), tooltip: AppLocalizations.of(context)!.bulkFavorite, onPressed: onToggle);
+  @override Widget build(BuildContext context) => IconButton(icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border, color: isFavorite ? context.appColors.favorite : null), tooltip: AppLocalizations.of(context)!.bulkFavorite, onPressed: onToggle);
 }
 
 class RecipeRating extends StatelessWidget {
   final int rating;
   const RecipeRating({super.key, required this.rating});
   @override Widget build(BuildContext context) {
-    return Row(children: List.generate(5, (index) => Icon(index < rating ? Icons.star_rounded : Icons.star_outline_rounded, color: Colors.amber, size: 20)));
+    return Row(children: List.generate(5, (index) => Icon(index < rating ? Icons.star_rounded : Icons.star_outline_rounded, color: context.appColors.favorite, size: 20)));
   }
 }
 
 class _MetaItem extends StatelessWidget {
-  final IconData icon; final String label; final String value;
-  const _MetaItem({required this.icon, required this.label, required this.value});
+  final IconData icon; final String label; final String value; final VoidCallback? onTap;
+  const _MetaItem({required this.icon, required this.label, required this.value, this.onTap});
   @override Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(children: [Icon(icon, color: theme.colorScheme.onSurfaceVariant), const SizedBox(height: 4), Text(value, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)), Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline))]);
+    final interactive = onTap != null;
+    final accent = context.appColors.accent;
+    final col = Column(mainAxisSize: MainAxisSize.min, children: [
+      Icon(icon, color: interactive ? accent : theme.colorScheme.onSurfaceVariant),
+      const SizedBox(height: 4),
+      Row(mainAxisSize: MainAxisSize.min, children: [
+        Text(value, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+        if (interactive) ...[const SizedBox(width: 3), Icon(Icons.tune_rounded, size: 14, color: accent)],
+      ]),
+      Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
+    ]);
+    if (!interactive) return col;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), child: col),
+    );
   }
 }
 
@@ -2545,7 +2443,7 @@ class _CheckableIngredientRow extends ConsumerWidget {
                 message:
                     '${l10n.allergenContains}: ${matchingAllergens.join(", ")}',
                 child: Icon(Icons.warning_amber_rounded,
-                    size: 18, color: Colors.red.shade700),
+                    size: 18, color: theme.colorScheme.error),
               ),
           ]),
           ...linkedRecipes.map((linkedRecipe) {

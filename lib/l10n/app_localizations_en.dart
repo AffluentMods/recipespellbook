@@ -1482,7 +1482,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareAsImage => 'Image';
 
   @override
-  String get shareAsFile => 'Share as File';
+  String get shareAsFile => 'File (.json)';
 
   @override
   String get shareQrCode => 'Recipe QR Code';
@@ -1862,6 +1862,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get more => 'more';
 
   @override
+  String get moreLabel => 'More';
+
+  @override
   String get less => 'less';
 
   @override
@@ -1938,7 +1941,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editItem => 'Edit Item';
 
   @override
-  String get selectAll => 'Select All';
+  String get selectAll => 'Select all';
 
   @override
   String get selectNone => 'Select None';
@@ -2033,7 +2036,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String addedItemsToList(int count) {
-    return 'Added $count items to shopping list';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Added $count items to your shopping list',
+      one: 'Added 1 item to your shopping list',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -3195,7 +3204,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get shoppingBySection => 'By Aisle';
+  String get shoppingBySection => 'By Section';
 
   @override
   String get shoppingByRecipe => 'By Recipe';
@@ -4391,7 +4400,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String reviewAndAddItems(int count) {
-    return 'Review & Add ($count items)';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Review & Add ($count items)',
+      one: 'Review & Add (1 item)',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -4820,7 +4835,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendDayToShoppingList => 'Send day to shopping list';
 
   @override
-  String get removeMeal => 'Remove Meal';
+  String get sectionSchedule => 'Schedule';
+
+  @override
+  String get sectionMeal => 'Meal';
+
+  @override
+  String get changeTime => 'Change time';
+
+  @override
+  String get replaceMeal => 'Replace meal';
+
+  @override
+  String get cardColor => 'Card color';
+
+  @override
+  String get mealColorAuto => 'Auto';
+
+  @override
+  String get removeMeal => 'Remove meal';
 
   @override
   String removeMealConfirm(String recipeName) {
@@ -9070,7 +9103,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallPlanPremium => 'Premium';
 
   @override
-  String get paywallPricePremium => '\$9.99';
+  String get paywallPricePremium => '\$6.99';
 
   @override
   String get paywallSublinePremium => 'one-time · yours forever';
@@ -9452,6 +9485,69 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String shoppingRecipesIngredientsSelected(int recipeCount, int ingredientCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      recipeCount,
+      locale: localeName,
+      other: '$recipeCount recipes',
+      one: '1 recipe',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      ingredientCount,
+      locale: localeName,
+      other: '$ingredientCount ingredients selected',
+      one: '1 ingredient selected',
+    );
+    return '$_temp0 • $_temp1';
+  }
+
+  @override
+  String shoppingItemsFromRecipes(int itemCount, int recipeCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      itemCount,
+      locale: localeName,
+      other: '$itemCount items',
+      one: '1 item',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      recipeCount,
+      locale: localeName,
+      other: '$recipeCount recipes',
+      one: '1 recipe',
+    );
+    return '$_temp0 from $_temp1';
+  }
+
+  @override
+  String shoppingAddItemsToList(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count items to list',
+      one: 'Add 1 item to list',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingAddingToList => 'Adding…';
+
+  @override
+  String get shoppingMarkBought => 'Mark as bought';
+
+  @override
+  String get shoppingDeleteChecked => 'Delete checked';
+
+  @override
+  String get shareLinkEditDesc => 'Anyone with the link can join and edit this list';
+
+  @override
+  String get shareLinkCheckDesc => 'Anyone with the link can join and check off items';
+
+  @override
+  String get shareLinkViewDesc => 'Anyone with the link can view this list';
 
   @override
   String get communityICookedThis => 'I cooked this';

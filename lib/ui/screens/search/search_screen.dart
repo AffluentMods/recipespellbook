@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
+import '../../../theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
@@ -680,7 +681,7 @@ class _SearchResultCard extends ConsumerWidget {
                 ),
               ),
               if (recipe.isFavorite)
-                const Icon(Icons.star, color: Colors.amber, size: 20),
+                Icon(Icons.favorite, color: context.appColors.favorite, size: 20),
             ],
           ),
         ),
@@ -714,7 +715,7 @@ class _SearchResultCard extends ConsumerWidget {
               ),
             ),
             ListTile(
-              leading: Icon(recipe.isFavorite ? Icons.star_outline : Icons.star, color: Colors.amber),
+              leading: Icon(recipe.isFavorite ? Icons.favorite_border : Icons.favorite, color: context.appColors.favorite),
               title: Text(recipe.isFavorite ? l10n.recipeUnfavorite : l10n.recipeFavorite),
               onTap: () async {
                 Navigator.pop(ctx);

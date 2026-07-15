@@ -434,32 +434,61 @@ class ThemePalette {
     required Color accent,
     required bool isDark,
   }) {
+    // Enforce a readable action/accent colour against the chosen background —
+    // never silently save a combo below WCAG AA (4.5:1). Auto-shift its
+    // lightness toward passing; the live preview reflects the adjusted colour.
+    final safePrimary = _ensureReadable(primary, bg);
+
     // Contrast text colors
     final onBg = bg.computeLuminance() > 0.5
         ? Color.lerp(Colors.black, bg, 0.15)!
         : Color.lerp(Colors.white, bg, 0.15)!;
     final onSurf = onBg;
-    final onPrim = primary.computeLuminance() > 0.5 ? Colors.black : Colors.white;
+    final onPrim = safePrimary.computeLuminance() > 0.5 ? Colors.black : Colors.white;
 
     return ThemePalette(
       background: bg,
       surface: isDark
           ? Color.lerp(bg, Colors.white, 0.04)!
           : Color.lerp(bg, Colors.white, 0.5)!,
-      primary: primary,
+      primary: safePrimary,
       primaryContainer: isDark
-          ? Color.lerp(primary, Colors.black, 0.6)!
-          : Color.lerp(primary, Colors.white, 0.7)!,
-      secondary: Color.lerp(primary, accent, 0.5)!,
+          ? Color.lerp(safePrimary, Colors.black, 0.6)!
+          : Color.lerp(safePrimary, Colors.white, 0.7)!,
+      secondary: Color.lerp(safePrimary, accent, 0.5)!,
       secondaryContainer: isDark
-          ? Color.lerp(Color.lerp(primary, accent, 0.5)!, Colors.black, 0.6)!
-          : Color.lerp(Color.lerp(primary, accent, 0.5)!, Colors.white, 0.7)!,
+          ? Color.lerp(Color.lerp(safePrimary, accent, 0.5)!, Colors.black, 0.6)!
+          : Color.lerp(Color.lerp(safePrimary, accent, 0.5)!, Colors.white, 0.7)!,
       accent: accent,
       onBackground: onBg,
       onSurface: onSurf,
       onPrimary: onPrim,
     );
   }
+}
+
+/// WCAG relative-contrast ratio between two colours (1..21).
+double contrastRatio(Color a, Color b) {
+  final la = a.computeLuminance();
+  final lb = b.computeLuminance();
+  final hi = la > lb ? la : lb;
+  final lo = la > lb ? lb : la;
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/// Return [fg] unchanged if it already meets [target] contrast against [bg],
+/// otherwise shift its lightness (away from the background) until it does.
+Color _ensureReadable(Color fg, Color bg, {double target = 4.5}) {
+  if (contrastRatio(fg, bg) >= target) return fg;
+  final darken = bg.computeLuminance() > 0.5; // dark text on light bg, and vice-versa
+  var hsl = HSLColor.fromColor(fg);
+  for (var i = 0; i < 20; i++) {
+    final l = (hsl.lightness + (darken ? -0.05 : 0.05)).clamp(0.0, 1.0);
+    hsl = hsl.withLightness(l);
+    if (contrastRatio(hsl.toColor(), bg) >= target) return hsl.toColor();
+    if (l == 0.0 || l == 1.0) break;
+  }
+  return hsl.toColor();
 }
 
 /// Measurement system enum

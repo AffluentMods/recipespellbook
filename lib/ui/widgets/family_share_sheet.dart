@@ -173,9 +173,17 @@ class _ResourceShareSheetState extends ConsumerState<_ResourceShareSheet> {
               _SectionHeader(
                 icon: Icons.groups_rounded,
                 title: 'Collaborate live',
+                // Reflect the permission the user has actually selected below,
+                // so the copy never overstates access.
                 subtitle: _isCookbook
-                    ? 'Invite people to view or edit this cookbook'
-                    : 'Anyone with the link can join and edit this list',
+                    ? (_collabPermission == 'read'
+                        ? 'Invite people to view this cookbook'
+                        : 'Invite people to view or edit this cookbook')
+                    : switch (_collabPermission) {
+                        'read' => l10n.shareLinkViewDesc,
+                        'check' => l10n.shareLinkCheckDesc,
+                        _ => l10n.shareLinkEditDesc,
+                      },
               ),
               const SizedBox(height: 10),
 

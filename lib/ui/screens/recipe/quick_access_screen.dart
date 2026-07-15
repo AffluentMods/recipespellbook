@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../database/database.dart';
@@ -308,7 +309,7 @@ class _SmallListView extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (item.recipe.isFavorite)
-                const Icon(Icons.favorite, color: Colors.red, size: 16),
+                Icon(Icons.favorite, color: context.appColors.favorite, size: 16),
               const SizedBox(width: 4),
               const Icon(Icons.chevron_right),
             ],
@@ -425,7 +426,7 @@ class _MediumCard extends StatelessWidget {
                     color: Colors.black54,
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Icon(Icons.favorite, size: 12, color: Colors.redAccent),
+                  child: Icon(Icons.favorite, size: 12, color: context.appColors.favorite),
                 ),
               ),
             // Title + time at bottom
@@ -546,7 +547,7 @@ class _LargeCard extends StatelessWidget {
                             ),
                           ),
                           if (item.recipe.isFavorite)
-                            const Icon(Icons.favorite, color: Colors.red, size: 18),
+                            Icon(Icons.favorite, color: context.appColors.favorite, size: 18),
                         ],
                       ),
                       const SizedBox(height: 4),
@@ -634,11 +635,11 @@ class _SourceIcon extends StatelessWidget {
     switch (source) {
       case _Source.mealPlan:
         icon = Icons.calendar_today;
-        color = Colors.blue;
+        color = theme.colorScheme.primary;
         break;
       case _Source.pinned:
         icon = Icons.push_pin;
-        color = Colors.orange;
+        color = context.appColors.accent;
         break;
       case _Source.recent:
         icon = Icons.history;
@@ -671,15 +672,15 @@ class _SourceBadge extends StatelessWidget {
     switch (source) {
       case _Source.mealPlan:
         icon = Icons.calendar_today;
-        color = Colors.blue;
+        color = Theme.of(context).colorScheme.primary;
         break;
       case _Source.pinned:
         icon = Icons.push_pin;
-        color = Colors.orange;
+        color = context.appColors.accent;
         break;
       case _Source.recent:
         icon = Icons.history;
-        color = Colors.grey;
+        color = Theme.of(context).colorScheme.outline;
         break;
     }
 

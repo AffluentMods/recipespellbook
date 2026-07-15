@@ -12,6 +12,7 @@ import '../../services/auth_service.dart';
 import '../../services/community_service.dart';
 import '../../services/feedback_service.dart';
 import '../../services/revenuecat_service.dart';
+import '../../theme/app_colors.dart';
 import '../../ui/screens/import/faq_screen.dart';
 import '../../ui/screens/import/import_guides_screen.dart';
 import '../../utils/responsive_utils.dart';
@@ -53,7 +54,7 @@ class AppMenuDrawer extends ConsumerWidget {
                   _DrawerItem(
                     index: 0,
                     icon: Icons.menu_book_rounded,
-                    iconColor: const Color(0xFF6366F1),
+                    iconColor: context.appColors.accent,
                     label: l10n.navCookbooks,
                     subtitle: 'Organize your recipe collections',
                     onTap: () {
@@ -64,7 +65,7 @@ class AppMenuDrawer extends ConsumerWidget {
                   _DrawerItem(
                     index: 1,
                     icon: Icons.download_rounded,
-                    iconColor: Colors.teal,
+                    iconColor: context.appColors.accent,
                     label: l10n.importGuides,
                     subtitle: 'From any URL, photo or file',
                     onTap: () {
@@ -77,7 +78,7 @@ class AppMenuDrawer extends ConsumerWidget {
                   _DrawerItem(
                     index: 2,
                     icon: Icons.swap_horiz_rounded,
-                    iconColor: const Color(0xFF0EA5E9),
+                    iconColor: context.appColors.accent,
                     label: l10n.transferTitle,
                     subtitle: 'Move recipes between devices',
                     onTap: () {
@@ -98,7 +99,7 @@ class AppMenuDrawer extends ConsumerWidget {
                   _DrawerItem(
                     index: 3,
                     icon: Icons.settings_rounded,
-                    iconColor: const Color(0xFF6B7280),
+                    iconColor: context.appColors.accent,
                     label: l10n.settingsTitle,
                     subtitle: 'Theme, language & preferences',
                     onTap: () {
@@ -109,7 +110,7 @@ class AppMenuDrawer extends ConsumerWidget {
                   _DrawerItem(
                     index: 4,
                     icon: Icons.headset_mic_rounded,
-                    iconColor: const Color(0xFFEC4899),
+                    iconColor: context.appColors.accent,
                     label: l10n.helpTitle,
                     subtitle: 'FAQ, guides & contact us',
                     onTap: () {
@@ -244,7 +245,7 @@ class HelpSupportScreen extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _SupportCard(
-            icon: Icons.menu_book_rounded, iconColor: Colors.teal,
+            icon: Icons.menu_book_rounded, iconColor: context.appColors.accent,
             title: l10n.importGuides,
             subtitle: l10n.stepByStepGuides,
             onTap: () {
@@ -253,7 +254,7 @@ class HelpSupportScreen extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _SupportCard(
-            icon: Icons.help_outline_rounded, iconColor: const Color(0xFF8B5CF6),
+            icon: Icons.help_outline_rounded, iconColor: context.appColors.accent,
             title: l10n.faqTitle,
             subtitle: l10n.faqHeroSubtitle,
             onTap: () {
@@ -262,7 +263,7 @@ class HelpSupportScreen extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _SupportCard(
-            icon: Icons.language_rounded, iconColor: Colors.orange,
+            icon: Icons.language_rounded, iconColor: context.appColors.accent,
             title: l10n.menuVisitWebsite,
             subtitle: _websiteUrl,
             onTap: () => _launchExternalUrl(context, _websiteUrl),
@@ -275,14 +276,14 @@ class HelpSupportScreen extends StatelessWidget {
                   color: theme.colorScheme.outline, fontWeight: FontWeight.w600, letterSpacing: 0.8)),
           const SizedBox(height: 10),
           _SupportCard(
-            icon: Icons.lightbulb_outline, iconColor: Colors.amber.shade700,
+            icon: Icons.lightbulb_outline, iconColor: context.appColors.accent,
             title: l10n.sendSuggestion,
             subtitle: l10n.sendSuggestionSubtitle,
             onTap: () => _showSuggestionDialog(context),
           ),
           const SizedBox(height: 10),
           _SupportCard(
-            icon: Icons.bug_report_outlined, iconColor: Colors.red.shade400,
+            icon: Icons.bug_report_outlined, iconColor: context.appColors.destructive,
             title: l10n.reportBug,
             subtitle: l10n.reportBugSubtitle,
             onTap: () => _showBugReportDialog(context),
@@ -572,8 +573,8 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: isDark
-              ? [const Color(0xFF6B3A1F), const Color(0xFF1C1A17)]
-              : [const Color(0xFFD4956B).withValues(alpha: 0.4), theme.colorScheme.surfaceContainerLow],
+              ? [context.appColors.accent.withValues(alpha: 0.35), context.appColors.surface]
+              : [context.appColors.accent.withValues(alpha: 0.4), theme.colorScheme.surfaceContainerLow],
         ),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(20),
@@ -685,10 +686,10 @@ class _ProfileHeaderState extends ConsumerState<_ProfileHeader> {
           width: 64, height: 64,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: const Color(0xFFC75B39).withValues(alpha: 0.18),
+            color: context.appColors.accent.withValues(alpha: 0.18),
           ),
           child: Center(
-            child: Text('?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: isDark ? Colors.white : const Color(0xFFC75B39))),
+            child: Text('?', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: isDark ? Colors.white : context.appColors.accent)),
           ),
         ),
         const SizedBox(height: 8),
@@ -860,7 +861,7 @@ class _CommunityStrip extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.arrow_forward_ios, size: 14, color: Colors.amber.shade600),
+            Icon(Icons.arrow_forward_ios, size: 14, color: context.appColors.accent),
           ],
         ),
       ),
@@ -1373,7 +1374,7 @@ class _UserAvatar extends StatelessWidget {
     if (hasAvatar) {
       return CircleAvatar(
         radius: radius,
-        backgroundColor: const Color(0xFFC75B39).withValues(alpha: 0.18),
+        backgroundColor: context.appColors.accent.withValues(alpha: 0.18),
         backgroundImage: NetworkImage(_resolveAvatarUrl(user.avatarUrl!)),
         onBackgroundImageError: (_, __) {},
         child: null,
@@ -1382,13 +1383,13 @@ class _UserAvatar extends StatelessWidget {
 
     return CircleAvatar(
       radius: radius,
-      backgroundColor: const Color(0xFFC75B39).withValues(alpha: 0.18),
+      backgroundColor: context.appColors.accent.withValues(alpha: 0.18),
       child: Text(
         initial,
         style: TextStyle(
           fontSize: radius * 0.65,
           fontWeight: FontWeight.bold,
-          color: const Color(0xFFC75B39),
+          color: context.appColors.accent,
         ),
       ),
     );

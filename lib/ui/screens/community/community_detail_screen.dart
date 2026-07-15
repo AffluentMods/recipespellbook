@@ -13,6 +13,7 @@ import '../../../providers/database_provider.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/community_service.dart';
 import '../../../services/image_service.dart';
+import '../../../theme/app_colors.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/community_image.dart';
@@ -766,13 +767,13 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                             children: [
                               CircleAvatar(
                                 radius: 20,
-                                backgroundColor: const Color(0xFFC75B39).withValues(alpha: 0.18),
+                                backgroundColor: context.appColors.accent.withValues(alpha: 0.18),
                                 backgroundImage: d.publisher.avatarUrl != null
                                     ? NetworkImage(_resolveAvatarUrl(d.publisher.avatarUrl!))
                                     : null,
                                 onBackgroundImageError: (_, __) {},
                                 child: d.publisher.avatarUrl == null
-                                    ? Text(d.publisher.displayName[0].toUpperCase(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFC75B39)))
+                                    ? Text(d.publisher.displayName[0].toUpperCase(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.appColors.accent))
                                     : null,
                               ),
                               const SizedBox(width: 8),
@@ -1043,7 +1044,7 @@ class _StatBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, size: 14, color: theme.colorScheme.primary),
+        Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
         const SizedBox(width: 5),
         Text(label, style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface, fontWeight: FontWeight.w500)),
       ]),
@@ -1141,7 +1142,7 @@ class _RatingSection extends StatelessWidget {
                       child: Icon(
                         star <= myRating ? Icons.star : Icons.star_border,
                         size: 28,
-                        color: star <= myRating ? Colors.amber : theme.colorScheme.outline.withValues(alpha: 0.4),
+                        color: star <= myRating ? context.appColors.accent : theme.colorScheme.outline.withValues(alpha: 0.4),
                       ),
                     ),
                   );
@@ -1442,7 +1443,7 @@ class _RecipePreviewCard extends StatelessWidget {
                               return Icon(
                                 star <= recipe.rating! ? Icons.star : Icons.star_border,
                                 size: 14,
-                                color: star <= recipe.rating! ? Colors.amber : theme.colorScheme.outline.withValues(alpha: 0.3),
+                                color: star <= recipe.rating! ? context.appColors.accent : theme.colorScheme.outline.withValues(alpha: 0.3),
                               );
                             }),
                           ),

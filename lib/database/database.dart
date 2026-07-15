@@ -71,7 +71,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
 
   // Accessors for DAOs
@@ -175,6 +175,13 @@ class AppDatabase extends _$AppDatabase {
           // the owner's user id so they're excluded from the owner-only sync push.
           await customStatement(
             'ALTER TABLE cookbooks ADD COLUMN shared_owner_id TEXT',
+          );
+        }
+        if (from < 8) {
+          // Per-meal card colour override on the planner (nullable = meal-type
+          // default). Stores a palette key, not a raw colour.
+          await customStatement(
+            'ALTER TABLE meal_plans ADD COLUMN card_color TEXT',
           );
         }
       },

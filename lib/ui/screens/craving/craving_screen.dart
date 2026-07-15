@@ -9,6 +9,7 @@ import '../../../providers/database_provider.dart';
 import '../../../services/craving_service.dart';
 import '../../../services/community_service.dart';
 import '../../../data/course_category_data.dart';
+import '../../../theme/app_colors.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/community_image.dart';
 
@@ -21,8 +22,6 @@ import '../../widgets/community_image.dart';
 //   2: Source selection (single-select)
 //   3: Results with expandable recipe cards
 // ═══════════════════════════════════════════════════════════════
-
-const _amber = Color(0xFFE8A860);
 
 class CravingScreen extends ConsumerStatefulWidget {
   const CravingScreen({super.key});
@@ -199,7 +198,7 @@ class _CravingScreenState extends ConsumerState<CravingScreen> {
                 child: LinearProgressIndicator(
                   value: (_currentStep + 1) / 3,
                   backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                  valueColor: const AlwaysStoppedAnimation<Color>(_amber),
+                  valueColor: AlwaysStoppedAnimation<Color>(context.appColors.accent),
                 ),
               )
             : null,
@@ -244,7 +243,7 @@ class _CravingScreenState extends ConsumerState<CravingScreen> {
                   count == 0 ? l10n.cravingMoodHint : l10n.cravingCountSelected(count),
                   key: ValueKey('count_$count'),
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: count > 0 ? _amber : theme.colorScheme.outline.withValues(alpha: 0.6),
+                    color: count > 0 ? context.appColors.accent : theme.colorScheme.outline.withValues(alpha: 0.6),
                     fontWeight: count > 0 ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
@@ -318,7 +317,7 @@ class _CravingScreenState extends ConsumerState<CravingScreen> {
                   count == 0 ? l10n.cravingCategoryNarrowHint : l10n.cravingCountSelected(count),
                   key: ValueKey('cat_count_$count'),
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: count > 0 ? _amber : theme.colorScheme.outline.withValues(alpha: 0.6),
+                    color: count > 0 ? context.appColors.accent : theme.colorScheme.outline.withValues(alpha: 0.6),
                     fontWeight: count > 0 ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
@@ -417,7 +416,7 @@ class _CravingScreenState extends ConsumerState<CravingScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: _amber));
+      return Center(child: CircularProgressIndicator(color: context.appColors.accent));
     }
 
     if (_results.isEmpty) {
@@ -451,7 +450,7 @@ class _CravingScreenState extends ConsumerState<CravingScreen> {
                 onPressed: _reshuffle,
                 icon: const Icon(Icons.shuffle, size: 18),
                 label: Text(l10n.cravingReshuffle),
-                style: TextButton.styleFrom(foregroundColor: _amber),
+                style: TextButton.styleFrom(foregroundColor: context.appColors.accent),
               ),
             ],
           ),
@@ -530,7 +529,7 @@ class _CravingScreenState extends ConsumerState<CravingScreen> {
               onPressed: () => _goToStep(0),
               icon: const Icon(Icons.tune),
               label: Text(l10n.cravingAdjustFilters),
-              style: FilledButton.styleFrom(backgroundColor: _amber),
+              style: FilledButton.styleFrom(backgroundColor: context.appColors.accent, foregroundColor: context.appColors.onAccent),
             ),
           ],
         ),
@@ -607,19 +606,19 @@ class _MoodTile extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      _amber.withValues(alpha: 0.14),
-                      _amber.withValues(alpha: 0.04),
+                      context.appColors.accent.withValues(alpha: 0.14),
+                      context.appColors.accent.withValues(alpha: 0.04),
                     ],
                   )
                 : null,
             color: isSelected ? null : theme.colorScheme.surfaceContainer,
             border: Border.all(
-              color: isSelected ? _amber : theme.colorScheme.outline.withValues(alpha: 0.08),
+              color: isSelected ? context.appColors.accent : theme.colorScheme.outline.withValues(alpha: 0.08),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(18),
             boxShadow: isSelected
-                ? [BoxShadow(color: _amber.withValues(alpha: 0.12), blurRadius: 12, offset: const Offset(0, 4))]
+                ? [BoxShadow(color: context.appColors.accent.withValues(alpha: 0.12), blurRadius: 12, offset: const Offset(0, 4))]
                 : null,
           ),
           child: Stack(
@@ -635,7 +634,7 @@ class _MoodTile extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: isSelected ? _amber : theme.colorScheme.onSurface,
+                        color: isSelected ? context.appColors.accent : theme.colorScheme.onSurface,
                       ),
                     ),
                   ],
@@ -648,7 +647,7 @@ class _MoodTile extends StatelessWidget {
                   child: Container(
                     width: 22,
                     height: 22,
-                    decoration: const BoxDecoration(color: _amber, shape: BoxShape.circle),
+                    decoration: BoxDecoration(color: context.appColors.accent, shape: BoxShape.circle),
                     child: const Icon(Icons.check, color: Colors.black, size: 14),
                   ),
                 ),
@@ -683,10 +682,10 @@ class _CategoryChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected
-              ? _amber.withValues(alpha: 0.12)
+              ? context.appColors.accent.withValues(alpha: 0.12)
               : theme.colorScheme.surfaceContainer,
           border: Border.all(
-            color: isSelected ? _amber : theme.colorScheme.outline.withValues(alpha: 0.12),
+            color: isSelected ? context.appColors.accent : theme.colorScheme.outline.withValues(alpha: 0.12),
             width: isSelected ? 1.5 : 1,
           ),
           borderRadius: BorderRadius.circular(100),
@@ -700,12 +699,12 @@ class _CategoryChip extends StatelessWidget {
               label,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: isSelected ? _amber : theme.colorScheme.onSurface,
+                color: isSelected ? context.appColors.accent : theme.colorScheme.onSurface,
               ),
             ),
             if (isSelected) ...[
               const SizedBox(width: 6),
-              const Icon(Icons.check_circle, size: 16, color: _amber),
+              Icon(Icons.check_circle, size: 16, color: context.appColors.accent),
             ],
           ],
         ),
@@ -742,10 +741,10 @@ class _SourceCard extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: isSelected
-                ? _amber.withValues(alpha: 0.08)
+                ? context.appColors.accent.withValues(alpha: 0.08)
                 : theme.colorScheme.surfaceContainer,
             border: Border.all(
-              color: isSelected ? _amber : Colors.transparent,
+              color: isSelected ? context.appColors.accent : Colors.transparent,
               width: 2,
             ),
             borderRadius: BorderRadius.circular(16),
@@ -760,7 +759,7 @@ class _SourceCard extends StatelessWidget {
                   children: [
                     Text(title, style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isSelected ? _amber : null,
+                      color: isSelected ? context.appColors.accent : null,
                     )),
                     const SizedBox(height: 2),
                     Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(
@@ -770,7 +769,7 @@ class _SourceCard extends StatelessWidget {
                 ),
               ),
               if (isSelected)
-                Icon(Icons.check_circle, color: _amber),
+                Icon(Icons.check_circle, color: context.appColors.accent),
             ],
           ),
         ),
@@ -852,11 +851,11 @@ class _ResultCard extends StatelessWidget {
         color: theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isExpanded ? _amber.withValues(alpha: 0.5) : theme.colorScheme.outline.withValues(alpha: 0.08),
+          color: isExpanded ? context.appColors.accent.withValues(alpha: 0.5) : theme.colorScheme.outline.withValues(alpha: 0.08),
           width: isExpanded ? 1.5 : 1,
         ),
         boxShadow: isExpanded
-            ? [BoxShadow(color: _amber.withValues(alpha: 0.08), blurRadius: 16, offset: const Offset(0, 4))]
+            ? [BoxShadow(color: context.appColors.accent.withValues(alpha: 0.08), blurRadius: 16, offset: const Offset(0, 4))]
             : null,
       ),
       clipBehavior: Clip.antiAlias,
@@ -892,7 +891,7 @@ class _ResultCard extends StatelessWidget {
                                 color: Colors.black.withValues(alpha: 0.65),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.public, size: 12, color: _amber),
+                              child: Icon(Icons.public, size: 12, color: context.appColors.accent),
                             ),
                           ),
                       ],
@@ -1038,10 +1037,10 @@ class _ResultCard extends StatelessWidget {
                 Container(
                   width: 20, height: 20,
                   decoration: BoxDecoration(
-                    color: _amber.withValues(alpha: 0.15),
+                    color: context.appColors.accent.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Icon(Icons.restaurant_menu, size: 13, color: _amber),
+                  child: Icon(Icons.restaurant_menu, size: 13, color: context.appColors.accent),
                 ),
                 const SizedBox(width: 8),
                 Text(l10n.tabIngredients, style: theme.textTheme.titleSmall?.copyWith(
@@ -1064,7 +1063,7 @@ class _ResultCard extends StatelessWidget {
                   child: Container(
                     width: 5, height: 5,
                     decoration: BoxDecoration(
-                      color: _amber.withValues(alpha: 0.6),
+                      color: context.appColors.accent.withValues(alpha: 0.6),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -1079,7 +1078,7 @@ class _ResultCard extends StatelessWidget {
               child: Text(
                 '+ ${result.totalIngredients - result.ingredientNames.length} more',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: _amber, fontWeight: FontWeight.w600,
+                  color: context.appColors.accent, fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -1094,10 +1093,10 @@ class _ResultCard extends StatelessWidget {
                 Container(
                   width: 20, height: 20,
                   decoration: BoxDecoration(
-                    color: _amber.withValues(alpha: 0.15),
+                    color: context.appColors.accent.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Icon(Icons.format_list_numbered, size: 13, color: _amber),
+                  child: Icon(Icons.format_list_numbered, size: 13, color: context.appColors.accent),
                 ),
                 const SizedBox(width: 8),
                 Text(l10n.tabInstructions, style: theme.textTheme.titleSmall?.copyWith(
@@ -1115,12 +1114,12 @@ class _ResultCard extends StatelessWidget {
                   width: 22, height: 22,
                   margin: const EdgeInsets.only(top: 1, right: 10),
                   decoration: BoxDecoration(
-                    color: _amber.withValues(alpha: 0.12),
+                    color: context.appColors.accent.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
                     child: Text('${entry.key + 1}', style: TextStyle(
-                      fontSize: 11, fontWeight: FontWeight.w700, color: _amber,
+                      fontSize: 11, fontWeight: FontWeight.w700, color: context.appColors.accent,
                     )),
                   ),
                 ),
@@ -1141,7 +1140,7 @@ class _ResultCard extends StatelessWidget {
               child: Text(
                 '+ ${result.totalSteps - result.stepTexts.length} more steps',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: _amber, fontWeight: FontWeight.w600,
+                  color: context.appColors.accent, fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -1161,7 +1160,7 @@ class _ResultCard extends StatelessWidget {
                 style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
               ),
               style: FilledButton.styleFrom(
-                backgroundColor: _amber,
+                backgroundColor: context.appColors.accent,
                 foregroundColor: Colors.black,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -1183,12 +1182,12 @@ class _FilterChip extends StatelessWidget {
       margin: const EdgeInsets.only(right: 6),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: _amber.withValues(alpha: 0.1),
+        color: context.appColors.accent.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 11, color: _amber, fontWeight: FontWeight.w600),
+        style: TextStyle(fontSize: 11, color: context.appColors.accent, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -1244,7 +1243,7 @@ class _StepBottomBar extends StatelessWidget {
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      backgroundColor: _amber,
+                      backgroundColor: context.appColors.accent,
                     ),
                     child: Text(nextLabel),
                   ),

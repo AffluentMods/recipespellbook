@@ -211,24 +211,156 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
 
   // ========== URL IMPORT ==========
   Future<void> _importFromUrl() async {
-    final l10n = AppLocalizations.of(context)!;
-    final url = _urlController.text.trim();
-    if (url.isEmpty) { _showError(l10n.errorInvalidURL); return; }
+    final raw = _urlController.text.trim();
+    if (raw.isEmpty) { _showError('Paste a recipe link first.'); return; }
 
-    String finalUrl = url;
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      finalUrl = 'https://$url';
+    // This box is for links, but people paste recipe JSON or plain text into it.
+    // Detect that and route it to the right parser instead of trying to fetch it
+    // as a URL (which used to crash with "Invalid port").
+    if (raw.startsWith('{') || raw.startsWith('[') || raw.startsWith('```')) {
+      return _importPastedJson(raw);
     }
 
-    _showLoading(l10n.importProgress);
+    final finalUrl = _normalizeAndValidateUrl(raw);
+    if (finalUrl == null) {
+      // Not a valid link. If it's a decent chunk of text, treat it as a pasted
+      // recipe; otherwise tell the user plainly.
+      if (raw.length > 40 && raw.contains(' ')) {
+        return _importPastedText(raw);
+      }
+      _showError('That doesn’t look like a recipe link. Paste a link starting with https://, or use “Paste text” below.');
+      return;
+    }
+
+    _showLoading(AppLocalizations.of(context)!.importProgress);
     try {
       final recipe = await RecipeImportEngine.parseFromUrl(finalUrl);
       _hideLoading();
       _showImportPreview([recipe], sourceUrl: finalUrl);
     } catch (e) {
       _hideLoading();
-      _showError(l10n.failedToImport(e.toString().replaceFirst("Exception: ", "")));
+      _showError(_friendlyImportError(e));
     }
+  }
+
+  /// Validate + normalize a user-entered URL. Returns null when it isn't a safe
+  /// http(s) link — blocks other schemes (file:, javascript:, data:…) and
+  /// local/private hosts so a malicious shared "link" can't point the app at
+  /// the device's own network.
+  String? _normalizeAndValidateUrl(String input) {
+    var s = input.trim();
+    if (s.isEmpty) return null;
+    if (!s.startsWith('http://') && !s.startsWith('https://')) {
+      // A different explicit scheme is never a recipe link — reject it rather
+      // than blindly prefixing https://.
+      if (RegExp(r'^[a-zA-Z][a-zA-Z0-9+.\-]*:').hasMatch(s)) return null;
+      s = 'https://$s';
+    }
+    final uri = Uri.tryParse(s);
+    if (uri == null || !uri.hasAuthority || uri.host.isEmpty) return null;
+    if (uri.scheme != 'http' && uri.scheme != 'https') return null;
+    if (!uri.host.contains('.')) return null; // needs a real domain
+    if (_isBlockedHost(uri.host)) return null;
+    return uri.toString();
+  }
+
+  /// Basic SSRF guard: block localhost / private / link-local hosts.
+  bool _isBlockedHost(String host) {
+    final h = host.toLowerCase();
+    if (h == 'localhost' || h.endsWith('.local') || h.endsWith('.internal')) return true;
+    if (h == '::1' || h.startsWith('[')) return true; // IPv6 loopback / literal
+    final m = RegExp(r'^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$').firstMatch(h);
+    if (m != null) {
+      final a = int.parse(m.group(1)!);
+      final b = int.parse(m.group(2)!);
+      if (a == 0 || a == 127 || a == 10) return true;         // this-host / loopback / private
+      if (a == 192 && b == 168) return true;                  // private
+      if (a == 169 && b == 254) return true;                  // link-local
+      if (a == 172 && b >= 16 && b <= 31) return true;        // private
+    }
+    return false;
+  }
+
+  /// Parse recipe JSON pasted into the link box (e.g. AI-generated JSON).
+  Future<void> _importPastedJson(String content) async {
+    var body = content.trim();
+    if (body.startsWith('```')) {
+      body = body
+          .replaceFirst(RegExp(r'^```[a-zA-Z]*\s*'), '')
+          .replaceFirst(RegExp(r'```\s*$'), '')
+          .trim();
+    }
+    _showLoading(AppLocalizations.of(context)!.parsingRecipe);
+    try {
+      // App's own export bundle?
+      dynamic decoded;
+      try {
+        decoded = jsonDecode(body);
+      } catch (_) {
+        _hideLoading();
+        _showError('That looks like recipe data, but it isn’t valid JSON. Copy the whole thing and try again.');
+        return;
+      }
+      if (decoded is Map<String, dynamic> && decoded.containsKey('version') &&
+          (decoded.containsKey('cookbook') || decoded.containsKey('cookbooks'))) {
+        _hideLoading();
+        _processOwnExportFormat(decoded);
+        return;
+      }
+
+      final recipes = RecipeImportEngine.parseFromFileBulk(body, 'pasted.json');
+      _hideLoading();
+      if (recipes.isNotEmpty) {
+        _showImportPreview(recipes, sourceText: body);
+        return;
+      }
+      _showError('We couldn’t read a recipe from that JSON. For AI-generated recipes, use the “AI” option below.');
+    } catch (e) {
+      _hideLoading();
+      _showError('We couldn’t read a recipe from that JSON. For AI-generated recipes, use the “AI” option below.');
+    }
+  }
+
+  /// Parse a big blob of pasted recipe text that isn't a link.
+  Future<void> _importPastedText(String text) async {
+    _showLoading(AppLocalizations.of(context)!.parsingRecipe);
+    try {
+      final recipes = RecipeImportEngine.parseOcrTextMulti(text);
+      final empty = recipes.isEmpty ||
+          (recipes.length == 1 &&
+              recipes.first.ingredients.isEmpty &&
+              recipes.first.instructions.isEmpty);
+      _hideLoading();
+      if (empty) {
+        _showError('We couldn’t find a recipe in that text. For long recipes, use “Paste text” below.');
+        return;
+      }
+      _showImportPreview(recipes, sourceText: text);
+    } catch (e) {
+      _hideLoading();
+      _showError(_friendlyImportError(e));
+    }
+  }
+
+  /// Turn a raw import failure into a plain-English message.
+  String _friendlyImportError(Object e) {
+    final s = e.toString().toLowerCase();
+    if (s.contains('socketexception') || s.contains('failed host lookup') ||
+        s.contains('network') || s.contains('timeout') || s.contains('timed out') ||
+        s.contains('connection')) {
+      return 'Couldn’t reach that link. Check your connection and try again.';
+    }
+    if (s.contains('403') || s.contains('401') || s.contains('login') ||
+        s.contains('private') || s.contains('sign in')) {
+      return 'That page needs a login, so we can’t read it. Try a public link.';
+    }
+    if (s.contains('404') || s.contains('not found')) {
+      return 'That link couldn’t be found. Double-check the URL.';
+    }
+    if (s.contains('no recipe') || s.contains('empty')) {
+      return 'We couldn’t find a recipe at that link.';
+    }
+    return 'We couldn’t read a recipe from that link. Try a different link, or paste the recipe text below.';
   }
 
   // ========== BARCODE / QR IMPORT ==========

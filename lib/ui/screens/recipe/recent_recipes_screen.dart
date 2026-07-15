@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../theme/app_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../data/course_category_data.dart';
@@ -161,7 +162,7 @@ class _RecipeItem extends ConsumerWidget {
                 ),
                 // Favorite indicator
                 if (recipe.isFavorite)
-                  Icon(Icons.star, size: 20, color: Colors.amber.shade600),
+                  Icon(Icons.favorite, size: 20, color: context.appColors.favorite),
               ],
             ),
           ),

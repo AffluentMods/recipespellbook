@@ -1862,6 +1862,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get more => 'más';
 
   @override
+  String get moreLabel => 'Más';
+
+  @override
   String get less => 'menos';
 
   @override
@@ -4818,6 +4821,24 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get sendDayToShoppingList => 'Enviar día a la lista de compras';
+
+  @override
+  String get sectionSchedule => 'Programación';
+
+  @override
+  String get sectionMeal => 'Comida';
+
+  @override
+  String get changeTime => 'Cambiar hora';
+
+  @override
+  String get replaceMeal => 'Reemplazar comida';
+
+  @override
+  String get cardColor => 'Color de la tarjeta';
+
+  @override
+  String get mealColorAuto => 'Automático';
 
   @override
   String get removeMeal => 'Eliminar comida';
@@ -9452,6 +9473,69 @@ class AppLocalizationsEs extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String shoppingRecipesIngredientsSelected(int recipeCount, int ingredientCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      recipeCount,
+      locale: localeName,
+      other: '$recipeCount recipes',
+      one: '1 recipe',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      ingredientCount,
+      locale: localeName,
+      other: '$ingredientCount ingredients selected',
+      one: '1 ingredient selected',
+    );
+    return '$_temp0 • $_temp1';
+  }
+
+  @override
+  String shoppingItemsFromRecipes(int itemCount, int recipeCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      itemCount,
+      locale: localeName,
+      other: '$itemCount items',
+      one: '1 item',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      recipeCount,
+      locale: localeName,
+      other: '$recipeCount recipes',
+      one: '1 recipe',
+    );
+    return '$_temp0 from $_temp1';
+  }
+
+  @override
+  String shoppingAddItemsToList(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count items to list',
+      one: 'Add 1 item to list',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingAddingToList => 'Adding…';
+
+  @override
+  String get shoppingMarkBought => 'Mark as bought';
+
+  @override
+  String get shoppingDeleteChecked => 'Delete checked';
+
+  @override
+  String get shareLinkEditDesc => 'Anyone with the link can join and edit this list';
+
+  @override
+  String get shareLinkCheckDesc => 'Anyone with the link can join and check off items';
+
+  @override
+  String get shareLinkViewDesc => 'Anyone with the link can view this list';
 
   @override
   String get communityICookedThis => 'La cociné';

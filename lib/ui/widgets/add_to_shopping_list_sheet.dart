@@ -6,6 +6,7 @@ import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../database/database.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/ingredient_utils.dart';
+import '../../theme/app_colors.dart';
 import 'app_snackbar.dart';
 
 /// Modern sheet for selecting which ingredients to add to shopping list
@@ -241,12 +242,12 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE8A860).withValues(alpha: 0.15),
+                        color: context.appColors.accent.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.add_shopping_cart,
-                        color: Color(0xFFE8A860),
+                        color: context.appColors.accent,
                         size: 24,
                       ),
                     ),
@@ -386,7 +387,7 @@ class _AddIngredientsToShoppingSheetState extends ConsumerState<AddIngredientsTo
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      backgroundColor: const Color(0xFFE8A860),
+                      backgroundColor: context.appColors.accent,
                       disabledBackgroundColor: theme.colorScheme.outline.withValues(alpha: 0.2),
                     ),
                   ),
@@ -509,11 +510,11 @@ class _IngredientListItem extends StatelessWidget {
                   width: 24,
                   height: 24,
                   decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFFE8A860) : Colors.transparent,
+                    color: isSelected ? context.appColors.accent : Colors.transparent,
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
                       color: isSelected
-                          ? const Color(0xFFE8A860)
+                          ? context.appColors.accent
                           : theme.colorScheme.outline.withValues(alpha: 0.5),
                       width: 2,
                     ),

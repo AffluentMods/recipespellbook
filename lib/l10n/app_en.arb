@@ -881,6 +881,7 @@
   "wordOf": "of",
   "items": "items",
   "more": "more",
+  "moreLabel": "More",
   "less": "less",
   "all": "All",
   "none": "None",
@@ -938,7 +939,7 @@
     }
   },
   "editItem": "Edit Item",
-  "selectAll": "Select All",
+  "selectAll": "Select all",
   "selectNone": "Select None",
   "viewPlanner": "View Planner",
   "planNow": "Plan Now",
@@ -985,7 +986,7 @@
   "itemName": "Item name",
   "addToShoppingList": "Add to Shopping List",
   "addToList": "Add to list",
-  "addedItemsToList": "Added {count} items to shopping list",
+  "addedItemsToList": "{count, plural, =1{Added 1 item to your shopping list} other{Added {count} items to your shopping list}}",
   "@addedItemsToList": {
     "placeholders": {
       "count": {
@@ -2128,7 +2129,7 @@
   },
   "shoppingListGeneratorTitle": "Shopping List Generator",
   "exitShoppingListGeneratorQuestion": "Exit Shopping List Generator?",
-  "reviewAndAddItems": "Review & Add ({count} items)",
+  "reviewAndAddItems": "{count, plural, =1{Review & Add (1 item)} other{Review & Add ({count} items)}}",
   "@reviewAndAddItems": {
     "placeholders": {
       "count": {
@@ -2385,7 +2386,13 @@
   "noTextFoundInImage": "No text found in image",
   "addDayToShoppingList": "Add day to shopping list",
   "sendDayToShoppingList": "Send day to shopping list",
-  "removeMeal": "Remove Meal",
+  "sectionSchedule": "Schedule",
+  "sectionMeal": "Meal",
+  "changeTime": "Change time",
+  "replaceMeal": "Replace meal",
+  "cardColor": "Card color",
+  "mealColorAuto": "Auto",
+  "removeMeal": "Remove meal",
   "removeMealConfirm": "Remove {recipeName} from this day?",
   "@removeMealConfirm": {
     "placeholders": {
@@ -5028,6 +5035,26 @@
   "@shoppingMealPlanAddedCount": {
     "placeholders": { "count": { "type": "int" } }
   },
+
+  "shoppingRecipesIngredientsSelected": "{recipeCount, plural, =1{1 recipe} other{{recipeCount} recipes}} • {ingredientCount, plural, =1{1 ingredient selected} other{{ingredientCount} ingredients selected}}",
+  "@shoppingRecipesIngredientsSelected": {
+    "placeholders": { "recipeCount": { "type": "int" }, "ingredientCount": { "type": "int" } }
+  },
+  "shoppingItemsFromRecipes": "{itemCount, plural, =1{1 item} other{{itemCount} items}} from {recipeCount, plural, =1{1 recipe} other{{recipeCount} recipes}}",
+  "@shoppingItemsFromRecipes": {
+    "placeholders": { "itemCount": { "type": "int" }, "recipeCount": { "type": "int" } }
+  },
+  "shoppingAddItemsToList": "{count, plural, =1{Add 1 item to list} other{Add {count} items to list}}",
+  "@shoppingAddItemsToList": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "shoppingAddingToList": "Adding…",
+  "shoppingMarkBought": "Mark as bought",
+  "shoppingDeleteChecked": "Delete checked",
+  "shareAsFile": "File (.json)",
+  "shareLinkEditDesc": "Anyone with the link can join and edit this list",
+  "shareLinkCheckDesc": "Anyone with the link can join and check off items",
+  "shareLinkViewDesc": "Anyone with the link can view this list",
 
   "communityICookedThis": "I cooked this",
   "communityICookedThisActive": "Cooked",

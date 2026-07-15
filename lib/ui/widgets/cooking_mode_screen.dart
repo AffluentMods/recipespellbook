@@ -17,6 +17,7 @@ import '../../ui/widgets/font_size_control.dart';
 import '../../utils/responsive_utils.dart';
 import '../../utils/ingredient_utils.dart'
     show scaleInstructionText, scaledIngredientLabel;
+import '../../theme/app_colors.dart';
 // TODO: Kitchen Buddy hidden for now
 // import 'kitchen_buddy/kitchen_buddy_integration.dart';
 
@@ -337,18 +338,18 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     if (_isLoading || _recipe == null) {
-      return const Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+      return Scaffold(
+        backgroundColor: context.appColors.surface,
+        body: Center(child: CircularProgressIndicator(color: context.appColors.accent)),
       );
     }
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: context.appColors.surface,
       // Voice control toggle floats above the bottom bar so the user
       // can find it without leaving the recipe view. Hidden on web.
       floatingActionButton: kIsWeb ? null : FloatingActionButton(
-        backgroundColor: _voiceListening ? const Color(0xFFE8A860) : Colors.black54,
+        backgroundColor: _voiceListening ? context.appColors.accent : context.appColors.surfaceHigh,
         foregroundColor: Colors.white,
         onPressed: _toggleVoice,
         tooltip: l10n.cookModeVoiceTitle,
@@ -381,17 +382,17 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                color: const Color(0xFFE8A860).withValues(alpha: 0.18),
+                color: context.appColors.accent.withValues(alpha: 0.18),
                 child: Row(
                   children: [
-                    const Icon(Icons.graphic_eq, size: 14, color: Color(0xFFE8A860)),
+                    Icon(Icons.graphic_eq, size: 14, color: context.appColors.accent),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         _lastVoiceText.isNotEmpty
                             ? '"$_lastVoiceText"'
                             : l10n.cookModeVoiceListening,
-                        style: const TextStyle(color: Colors.white70, fontSize: 12),
+                        style: TextStyle(color: context.appColors.textSecondary, fontSize: 12),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -424,7 +425,7 @@ class _CookingModeScreenState extends ConsumerState<CookingModeScreen> {
                 }),
               )
                   : _steps.isEmpty
-                  ? Center(child: Text(l10n.instructionsEmpty, style: const TextStyle(color: Colors.white)))
+                  ? Center(child: Text(l10n.instructionsEmpty, style: TextStyle(color: context.appColors.textPrimary)))
                   : PageView.builder(
                 controller: _pageController,
                 itemCount: _steps.length,
@@ -488,13 +489,13 @@ class _TopBar extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
+            icon: Icon(Icons.close, color: context.appColors.textPrimary),
             onPressed: onExit,
           ),
           Expanded(
             child: Text(
               recipeName,
-              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(color: context.appColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
@@ -505,20 +506,20 @@ class _TopBar extends StatelessWidget {
             IconButton(
               icon: Icon(
                 Icons.local_fire_department,
-                color: showNutrition ? Colors.orange : Colors.white,
+                color: showNutrition ? context.appColors.accent : context.appColors.textSecondary,
               ),
               onPressed: onToggleNutrition,
             ),
           // Font size
           IconButton(
-            icon: const Icon(Icons.text_fields, color: Colors.white, size: 20),
+            icon: Icon(Icons.text_fields, color: context.appColors.textPrimary, size: 20),
             onPressed: onFontSize,
           ),
           // Ingredients toggle
           IconButton(
             icon: Icon(
               showIngredients ? Icons.format_list_numbered : Icons.list,
-              color: showIngredients ? Colors.green : Colors.white,
+              color: showIngredients ? context.appColors.accent : context.appColors.textSecondary,
             ),
             onPressed: onToggleIngredients,
           ),
@@ -542,21 +543,21 @@ class _TimerBar extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: isLow ? Colors.red.withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.1),
+      color: isLow ? context.appColors.destructive.withValues(alpha: 0.3) : context.appColors.surfaceRaised,
       child: Row(
         children: [
-          Icon(Icons.timer, color: isLow ? Colors.red : Colors.white),
+          Icon(Icons.timer, color: isLow ? context.appColors.destructive : context.appColors.textPrimary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(_formatTime(seconds), style: TextStyle(color: isLow ? Colors.red : Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                LinearProgressIndicator(value: progress, backgroundColor: Colors.white.withValues(alpha: 0.2), valueColor: AlwaysStoppedAnimation(isLow ? Colors.red : Colors.green)),
+                Text(_formatTime(seconds), style: TextStyle(color: isLow ? context.appColors.destructive : context.appColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold)),
+                LinearProgressIndicator(value: progress, backgroundColor: context.appColors.outline, valueColor: AlwaysStoppedAnimation(isLow ? context.appColors.destructive : context.appColors.accent)),
               ],
             ),
           ),
-          IconButton(icon: const Icon(Icons.stop, color: Colors.white), onPressed: onStop),
+          IconButton(icon: Icon(Icons.stop, color: context.appColors.textPrimary), onPressed: onStop),
         ],
       ),
     );
@@ -841,7 +842,7 @@ class _StepView extends ConsumerWidget {
             scaleFactor == 1.0
                 ? '${l10n.stepNumber(stepNumber)} / $totalSteps'
                 : '${l10n.stepNumber(stepNumber)} / $totalSteps  ·  ${scaleFactor}x',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 16),
+            style: TextStyle(color: context.appColors.textSecondary, fontSize: 16),
           ),
 
           // Matched ingredients chips (scrollable, max 40% of screen)
@@ -853,9 +854,9 @@ class _StepView extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
+                  color: context.appColors.surfaceRaised,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                  border: Border.all(color: context.appColors.outline),
                 ),
                 child: SingleChildScrollView(
                   child: Wrap(
@@ -867,14 +868,14 @@ class _StepView extends ConsumerWidget {
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE8A860).withValues(alpha: 0.15),
+                          color: context.appColors.accent.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: const Color(0xFFE8A860).withValues(alpha: 0.3)),
+                          border: Border.all(color: context.appColors.accent.withValues(alpha: 0.3)),
                         ),
                         child: Text(
                           label,
                           style: TextStyle(
-                            color: const Color(0xFFE8A860),
+                            color: context.appColors.accent,
                             fontSize: 13 * fontScale,
                             fontWeight: FontWeight.w500,
                           ),
@@ -895,7 +896,7 @@ class _StepView extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(vertical: 24),
                   child: Text(
                     instruction,
-                    style: TextStyle(color: Colors.white, fontSize: 28 * fontScale, height: 1.4),
+                    style: TextStyle(color: context.appColors.textPrimary, fontSize: 28 * fontScale, height: 1.4),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -931,17 +932,17 @@ class _IngredientsView extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             margin: const EdgeInsets.only(bottom: 8),
-            decoration: BoxDecoration(color: Colors.white.withValues(alpha: isChecked ? 0.05 : 0.1), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(color: context.appColors.surfaceRaised.withValues(alpha: isChecked ? 0.5 : 1.0), borderRadius: BorderRadius.circular(8)),
             child: Row(
               children: [
-                Icon(isChecked ? Icons.check_circle : Icons.circle_outlined, color: isChecked ? Colors.green : Colors.white.withValues(alpha: 0.5)),
+                Icon(isChecked ? Icons.check_circle : Icons.circle_outlined, color: isChecked ? context.appColors.accent : context.appColors.textTertiary),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     ing.notes == '__header__'
                         ? ing.name
                         : scaledIngredientLabel(ing.amount, ing.unit, ing.name, scaleFactor),
-                    style: TextStyle(color: isChecked ? Colors.white.withValues(alpha: 0.5) : Colors.white, fontSize: 18 * fontScale, decoration: isChecked ? TextDecoration.lineThrough : null),
+                    style: TextStyle(color: isChecked ? context.appColors.textTertiary : context.appColors.textPrimary, fontSize: 18 * fontScale, decoration: isChecked ? TextDecoration.lineThrough : null),
                   ),
                 ),
               ],
@@ -971,12 +972,12 @@ class _BottomBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          IconButton(icon: const Icon(Icons.arrow_back, size: 32), color: onPrevious != null ? Colors.white : Colors.white.withValues(alpha: 0.3), onPressed: onPrevious),
-          IconButton(icon: const Icon(Icons.timer, size: 32), color: Colors.white, onPressed: onTimer),
+          IconButton(icon: const Icon(Icons.arrow_back, size: 32), color: onPrevious != null ? context.appColors.textPrimary : context.appColors.textTertiary, onPressed: onPrevious),
+          IconButton(icon: const Icon(Icons.timer, size: 32), color: context.appColors.textPrimary, onPressed: onTimer),
           if (onFinish != null)
-            FilledButton.icon(onPressed: onFinish, icon: const Icon(Icons.check), label: Text(l10n.cookingFinish), style: FilledButton.styleFrom(backgroundColor: Colors.green, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)))
+            FilledButton.icon(onPressed: onFinish, icon: const Icon(Icons.check), label: Text(l10n.cookingFinish), style: FilledButton.styleFrom(backgroundColor: context.appColors.accent, foregroundColor: context.appColors.onAccent, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)))
           else
-            IconButton(icon: const Icon(Icons.arrow_forward, size: 32), color: onNext != null ? Colors.white : Colors.white.withValues(alpha: 0.3), onPressed: onNext),
+            IconButton(icon: const Icon(Icons.arrow_forward, size: 32), color: onNext != null ? context.appColors.textPrimary : context.appColors.textTertiary, onPressed: onNext),
         ],
       ),
     );
