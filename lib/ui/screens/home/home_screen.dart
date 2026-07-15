@@ -21,6 +21,7 @@ import '../craving/craving_screen.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../../utils/recipe_title.dart';
 import '../../../theme/app_colors.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -572,17 +573,23 @@ class _QuickRecipeCard extends StatelessWidget {
                     child: RecipeImage.thumbnail(
                       imagePath: item.recipe.imagePath,
                       recipeId: item.recipe.id,
+                      recipeName: item.recipe.title,
+                      course: item.recipe.courseId,
+                      category: item.recipe.categoryId,
                       height: 90,
                     ),
                   ),
                   // Title
                   Padding(
                     padding: const EdgeInsets.all(8),
-                    child: Text(
-                      item.recipe.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                    child: Tooltip(
+                      message: item.recipe.title,
+                      child: Text(
+                        normalizeTitle(item.recipe.title).title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ),
                 ],
@@ -1025,17 +1032,23 @@ class _UncategorizedRecipeChip extends StatelessWidget {
                 child: RecipeImage.thumbnail(
                   imagePath: recipe.imagePath,
                   recipeId: recipe.id,
+                  recipeName: recipe.title,
+                  course: recipe.courseId,
+                  category: recipe.categoryId,
                 ),
               ),
               // Title
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                  child: Text(
-                    recipe.title,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+                  child: Tooltip(
+                    message: recipe.title,
+                    child: Text(
+                      normalizeTitle(recipe.title).title,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ),
               ),

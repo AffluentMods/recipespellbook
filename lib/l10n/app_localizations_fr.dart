@@ -299,6 +299,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get shoppingTitle => 'Liste de courses';
 
   @override
+  String get addFirstItem => 'Ajoutez votre premier article';
+
+  @override
+  String get addAMeal => 'Ajouter un repas';
+
+  @override
+  String get clearFilters => 'Effacer les filtres';
+
+  @override
   String get shoppingEmpty => 'Votre liste est vide';
 
   @override

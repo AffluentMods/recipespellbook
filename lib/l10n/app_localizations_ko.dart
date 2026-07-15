@@ -297,6 +297,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get shoppingTitle => '쇼핑 목록';
 
   @override
+  String get addFirstItem => '첫 항목 추가';
+
+  @override
+  String get addAMeal => '식사 추가';
+
+  @override
+  String get clearFilters => '필터 지우기';
+
+  @override
   String get shoppingEmpty => '목록이 비어 있습니다';
 
   @override

@@ -661,6 +661,9 @@ class _DisabledRecipeTile extends ConsumerWidget {
                   child: RecipeImage.thumbnail(
                     imagePath: recipe?.imagePath,
                     recipeId: recipeId,
+                    recipeName: recipeName,
+                    course: recipe?.courseId,
+                    category: recipe?.categoryId,
                     width: 56,
                     height: 56,
                   ),

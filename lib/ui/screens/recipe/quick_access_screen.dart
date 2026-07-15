@@ -6,6 +6,7 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
+import '../../../utils/recipe_title.dart';
 import '../../widgets/recipe_image.dart';
 
 /// Screen showing all quick access recipes (meal plan + pinned + recent)
@@ -296,10 +297,13 @@ class _SmallListView extends StatelessWidget {
         final item = items[index];
         return ListTile(
           leading: _SourceIcon(source: item.source),
-          title: Text(
-            item.recipe.title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          title: Tooltip(
+            message: item.recipe.title,
+            child: Text(
+              normalizeTitle(item.recipe.title).title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           subtitle: Text(
             _getSubtitle(context, item),
@@ -396,6 +400,9 @@ class _MediumCard extends StatelessWidget {
               child: RecipeImage.medium(
                 imagePath: item.recipe.imagePath,
                 recipeId: item.recipe.id,
+                recipeName: item.recipe.title,
+                course: item.recipe.courseId,
+                category: item.recipe.categoryId,
               ),
             ),
             // Gradient at bottom
@@ -435,14 +442,17 @@ class _MediumCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    item.recipe.title,
-                    style: const TextStyle(
-                      color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold,
-                      shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
+                  Tooltip(
+                    message: item.recipe.title,
+                    child: Text(
+                      normalizeTitle(item.recipe.title).title,
+                      style: const TextStyle(
+                        color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold,
+                        shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
                   if (timeStr.isNotEmpty) ...[
                     const SizedBox(height: 2),
@@ -515,6 +525,9 @@ class _LargeCard extends StatelessWidget {
                       child: RecipeImage.thumbnail(
                         imagePath: item.recipe.imagePath,
                         recipeId: item.recipe.id,
+                        recipeName: item.recipe.title,
+                        course: item.recipe.courseId,
+                        category: item.recipe.categoryId,
                         width: double.infinity,
                         height: double.infinity,
                       ),
@@ -539,11 +552,14 @@ class _LargeCard extends StatelessWidget {
                       Row(
                         children: [
                           Expanded(
-                            child: Text(
-                              item.recipe.title,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                            child: Tooltip(
+                              message: item.recipe.title,
+                              child: Text(
+                                normalizeTitle(item.recipe.title).title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
                           if (item.recipe.isFavorite)

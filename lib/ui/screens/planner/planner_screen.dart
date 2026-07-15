@@ -9,6 +9,7 @@ import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../../utils/recipe_title.dart';
 import '../../../services/shopping_list_generator.dart';
 import '../../../theme/app_colors.dart';
 import '../../../theme/meal_color_palette.dart';
@@ -904,6 +905,9 @@ class _CompactMealCard extends ConsumerWidget {
                       child: RecipeImage.thumbnail(
                         imagePath: recipe.imagePath,
                         recipeId: recipe.id,
+                        recipeName: recipe.title,
+                        course: recipe.courseId,
+                        category: recipe.categoryId,
                         width: 24,
                         height: 24,
                       ),
@@ -917,12 +921,15 @@ class _CompactMealCard extends ConsumerWidget {
                 ),
                 const SizedBox(width: 4),
                 Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w500,
+                  child: Tooltip(
+                    message: title,
+                    child: Text(
+                      normalizeTitle(title).title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),
@@ -1429,14 +1436,17 @@ class _MealBlock extends ConsumerWidget {
                               ),
                             ),
                             const SizedBox(height: 3),
-                            Text(
-                              title,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: onColor,
-                                fontWeight: FontWeight.w700,
-                                height: 1.15,
+                            Tooltip(
+                              message: title,
+                              child: Text(
+                                normalizeTitle(title).title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: onColor,
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.15,
+                                ),
                               ),
                             ),
                             if (subtitle.isNotEmpty) ...[
@@ -1461,6 +1471,9 @@ class _MealBlock extends ConsumerWidget {
                                 child: RecipeImage.thumbnail(
                                   imagePath: r.imagePath,
                                   recipeId: r.id,
+                                  recipeName: r.title,
+                                  course: r.courseId,
+                                  category: r.categoryId,
                                   width: 58,
                                   height: 58,
                                 ),
@@ -1623,6 +1636,9 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
                               ? RecipeImage(
                                   imagePath: r.imagePath,
                                   recipeId: r.id,
+                                  recipeName: r.title,
+                                  course: r.courseId,
+                                  category: r.categoryId,
                                   width: 44,
                                   height: 44,
                                   fit: BoxFit.cover,
@@ -2310,12 +2326,19 @@ class _RecipeSelectTile extends StatelessWidget {
           child: RecipeImage.thumbnail(
             imagePath: recipe.imagePath,
             recipeId: recipe.id,
+            recipeName: recipe.title,
+            course: recipe.courseId,
+            category: recipe.categoryId,
             width: 56,
             height: 56,
           ),
         ),
       ),
-      title: Text(recipe.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+      title: Tooltip(
+        message: recipe.title,
+        child: Text(normalizeTitle(recipe.title).title,
+            maxLines: 2, overflow: TextOverflow.ellipsis),
+      ),
       subtitle: Text(
         [
           if (recipe.prepTimeMinutes != null) '${recipe.prepTimeMinutes}${l10n.minutesPrepSuffix}',

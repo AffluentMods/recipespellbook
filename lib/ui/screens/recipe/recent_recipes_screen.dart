@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../../utils/recipe_title.dart';
 import '../../widgets/recipe_image.dart';
 
 /// Provider for recently viewed recipes (no limit)
@@ -130,6 +131,9 @@ class _RecipeItem extends ConsumerWidget {
                   child: RecipeImage.thumbnail(
                     imagePath: recipe.imagePath,
                     recipeId: recipe.id,
+                    recipeName: recipe.title,
+                    course: recipe.courseId,
+                    category: recipe.categoryId,
                     width: 64,
                     height: 64,
                   ),
@@ -140,13 +144,16 @@ class _RecipeItem extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        recipe.title,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                      Tooltip(
+                        message: recipe.title,
+                        child: Text(
+                          normalizeTitle(recipe.title).title,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                       if (recipe.lastViewedAt != null) ...[
                         const SizedBox(height: 4),

@@ -301,6 +301,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get shoppingTitle => 'Список покупок';
 
   @override
+  String get addFirstItem => 'Добавьте первый элемент';
+
+  @override
+  String get addAMeal => 'Добавить блюдо';
+
+  @override
+  String get clearFilters => 'Сбросить фильтры';
+
+  @override
   String get shoppingEmpty => 'Ваш список пуст';
 
   @override

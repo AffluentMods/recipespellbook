@@ -7,9 +7,11 @@ import 'package:recipespellbook/l10n/app_localizations.dart';
 import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
+import '../../../utils/recipe_title.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../utils/text_normalize.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/empty_state.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/sub_recipe_selection_sheet.dart';
 
@@ -212,7 +214,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('${l10n.errorGeneric}: $e')),
         data: (results) => results.isEmpty
-            ? _NoResultsState(query: query)
+            ? const _NoResultsState()
             : _SearchResults(results: results),
       ),
     );
@@ -245,29 +247,15 @@ class _EmptySearchState extends StatelessWidget {
 }
 
 class _NoResultsState extends StatelessWidget {
-  final String query;
-  const _NoResultsState({required this.query});
+  const _NoResultsState();
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.search_off, size: 64, color: theme.colorScheme.outline),
-          const SizedBox(height: 16),
-          Text(
-            l10n.searchNoResults,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.outline,
-            ),
-          ),
-        ],
-      ),
+    return EmptyState(
+      icon: Icons.search_off,
+      title: l10n.searchNoResults,
+      message: l10n.searchHint,
     );
   }
 }
@@ -643,13 +631,16 @@ class _SearchResultCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      recipe.title,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                    Tooltip(
+                      message: recipe.title,
+                      child: Text(
+                        normalizeTitle(recipe.title).title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     if (recipe.description != null) ...[
                       const SizedBox(height: 2),
@@ -899,6 +890,9 @@ class _SearchResultImage extends StatelessWidget {
       child: RecipeImage.thumbnail(
         imagePath: recipe.imagePath,
         recipeId: recipe.id,
+        recipeName: recipe.title,
+        course: recipe.courseId,
+        category: recipe.categoryId,
         width: size,
         height: size,
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/image_service.dart';
+import '../../theme/recipe_tile_generator.dart';
 import '../../utils/default_recipe_images.dart';
 import '../../utils/native_file_image.dart';
 import 'placeholder_image.dart';
@@ -40,6 +41,14 @@ class RecipeImage extends StatelessWidget {
   final int? memCacheWidth;
   final int? memCacheHeight;
 
+  /// When set, a recipe with no photo (and no default asset) renders a
+  /// deterministic generated tile from the name instead of the shared
+  /// placeholder illustration. Leave null for non-recipe images (e.g. cookbook
+  /// covers), which keep the placeholder.
+  final String? recipeName;
+  final String? course;
+  final String? category;
+
   const RecipeImage({
     super.key,
     this.imagePath,
@@ -49,6 +58,9 @@ class RecipeImage extends StatelessWidget {
     this.fit = BoxFit.cover,
     this.memCacheWidth,
     this.memCacheHeight,
+    this.recipeName,
+    this.course,
+    this.category,
   });
 
   /// Standard thumbnail (e.g. 90px cards) — decodes tall enough for 3x-DPR
@@ -60,6 +72,9 @@ class RecipeImage extends StatelessWidget {
     this.width,
     this.height = 90,
     this.fit = BoxFit.cover,
+    this.recipeName,
+    this.course,
+    this.category,
   })  : memCacheWidth = null,
         memCacheHeight = 320; // ~3x of a 90–100px card, aspect preserved
 
@@ -71,6 +86,9 @@ class RecipeImage extends StatelessWidget {
     this.width,
     this.height,
     this.fit = BoxFit.cover,
+    this.recipeName,
+    this.course,
+    this.category,
   })  : memCacheWidth = null,
         memCacheHeight = 240; // Only set height — Flutter preserves aspect ratio
 
@@ -82,6 +100,9 @@ class RecipeImage extends StatelessWidget {
     this.width,
     this.height,
     this.fit = BoxFit.cover,
+    this.recipeName,
+    this.course,
+    this.category,
   })  : memCacheWidth = null,
         memCacheHeight = 600; // Only set height — Flutter preserves aspect ratio
 
@@ -134,6 +155,18 @@ class RecipeImage extends StatelessWidget {
         fit: fit,
         cacheWidth: memCacheWidth,
         cacheHeight: memCacheHeight,
+      );
+    }
+    // A recipe with no photo gets a deterministic generated tile (name-derived,
+    // stable per recipe). Only non-recipe images (cookbook covers, unnamed)
+    // still use the shared placeholder.
+    if (recipeName != null) {
+      return _RecipeTileView(
+        name: recipeName!,
+        course: course,
+        category: category,
+        width: width,
+        height: height,
       );
     }
     return RecipePlaceholderImage(
@@ -226,6 +259,62 @@ class _ServerRecipeImageState extends State<_ServerRecipeImage> {
       cacheWidth: widget.memCacheWidth,
       cacheHeight: widget.memCacheHeight,
       errorWidget: widget.fallback,
+    );
+  }
+}
+
+/// Renders a [generateRecipeTile] result: a gradient fill with a centred course
+/// glyph (or the name's first letter). Text/glyph is white at 90% — an on-fill
+/// contrast colour, guaranteed legible by the tile palette's lightness.
+class _RecipeTileView extends StatelessWidget {
+  final String name;
+  final String? course;
+  final String? category;
+  final double? width;
+  final double? height;
+
+  const _RecipeTileView({
+    required this.name,
+    this.course,
+    this.category,
+    this.width,
+    this.height,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tile = generateRecipeTile(name: name, course: course, category: category);
+    final fg = Colors.white.withValues(alpha: 0.9);
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: tile.gradient,
+        ),
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final extent = constraints.hasBoundedHeight
+              ? constraints.maxHeight
+              : (height ?? 96);
+          final size = (extent * 0.42).clamp(18.0, 72.0);
+          return Center(
+            child: tile.glyph != null
+                ? Icon(tile.glyph, size: size, color: fg)
+                : Text(
+                    tile.letter,
+                    style: TextStyle(
+                      fontSize: size,
+                      fontWeight: FontWeight.w600,
+                      color: fg,
+                    ),
+                  ),
+          );
+        },
+      ),
     );
   }
 }

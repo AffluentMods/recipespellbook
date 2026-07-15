@@ -478,6 +478,9 @@ class _RecipeListTile extends StatelessWidget {
                 child: RecipeImage.thumbnail(
                   imagePath: recipe.imagePath,
                   recipeId: recipe.id,
+                  recipeName: recipe.title,
+                  course: recipe.courseId,
+                  category: recipe.categoryId,
                   width: 64,
                   height: 64,
                 ),

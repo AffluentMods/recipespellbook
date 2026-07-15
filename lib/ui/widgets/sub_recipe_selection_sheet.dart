@@ -326,6 +326,7 @@ class _SubRecipeSelectionContentState extends State<_SubRecipeSelectionContent> 
                     child: RecipeImage.thumbnail(
                       imagePath: item.imagePath,
                       recipeId: item.id,
+                      recipeName: item.title,
                       width: 44, height: 44,
                     ),
                   ),

@@ -299,6 +299,15 @@ class AppLocalizationsNl extends AppLocalizations {
   String get shoppingTitle => 'Boodschappenlijst';
 
   @override
+  String get addFirstItem => 'Voeg je eerste item toe';
+
+  @override
+  String get addAMeal => 'Maaltijd toevoegen';
+
+  @override
+  String get clearFilters => 'Filters wissen';
+
+  @override
   String get shoppingEmpty => 'Je lijst is leeg';
 
   @override

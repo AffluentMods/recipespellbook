@@ -18,6 +18,7 @@ import '../../../services/admin_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/community_service.dart';
 import '../admin/admin_moderation_screen.dart';
+import '../../../utils/recipe_title.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/community_image.dart';
@@ -590,6 +591,9 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                                       child: RecipeImage.thumbnail(
                                         imagePath: r.imagePath,
                                         recipeId: r.id,
+                                        recipeName: r.title,
+                                        course: r.courseId,
+                                        category: r.categoryId,
                                         width: 44, height: 44,
                                       ),
                                     ),
@@ -746,14 +750,17 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        recipe.title,
-                        style: const TextStyle(
-                          color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold,
-                          shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
+                      Tooltip(
+                        message: recipe.title,
+                        child: Text(
+                          normalizeTitle(recipe.title).title,
+                          style: const TextStyle(
+                            color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold,
+                            shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -830,11 +837,14 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          recipe.title,
-                          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        Tooltip(
+                          message: recipe.title,
+                          child: Text(
+                            normalizeTitle(recipe.title).title,
+                            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -1883,14 +1893,17 @@ class _CommunityRecipeFeedPreview extends StatelessWidget {
             // ── Title below image ──
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-              child: Text(
-                recipe.title,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+              child: Tooltip(
+                message: recipe.title,
+                child: Text(
+                  normalizeTitle(recipe.title).title,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
 

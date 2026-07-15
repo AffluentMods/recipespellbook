@@ -297,6 +297,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shoppingTitle => '買い物リスト';
 
   @override
+  String get addFirstItem => '最初のアイテムを追加';
+
+  @override
+  String get addAMeal => '食事を追加';
+
+  @override
+  String get clearFilters => 'フィルターをクリア';
+
+  @override
   String get shoppingEmpty => 'リストが空です';
 
   @override

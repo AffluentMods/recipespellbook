@@ -6,7 +6,9 @@ import '../../../data/course_category_data.dart';
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/database_provider.dart';
+import '../../../utils/recipe_title.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../widgets/empty_state.dart';
 import '../../widgets/recipe_image.dart';
 
 /// Provider for favorite recipes
@@ -20,7 +22,6 @@ class FavoriteRecipesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final recipesAsync = ref.watch(favoriteRecipesProvider);
     final l10n = AppLocalizations.of(context)!;
 
@@ -45,34 +46,10 @@ class FavoriteRecipesScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (recipes) {
           if (recipes.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.favorite_border,
-                      size: 64,
-                      color: theme.colorScheme.outline,
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      l10n.favoritesEmpty,
-                      style: theme.textTheme.titleLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.favoritesEmptySubtitle,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.outline,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
+            return EmptyState(
+              icon: Icons.favorite_border,
+              title: l10n.favoritesEmpty,
+              message: l10n.favoritesEmptySubtitle,
             );
           }
 
@@ -129,6 +106,9 @@ class _RecipeItem extends ConsumerWidget {
                   child: RecipeImage.thumbnail(
                     imagePath: recipe.imagePath,
                     recipeId: recipe.id,
+                    recipeName: recipe.title,
+                    course: recipe.courseId,
+                    category: recipe.categoryId,
                     width: 64,
                     height: 64,
                   ),
@@ -139,13 +119,16 @@ class _RecipeItem extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        recipe.title,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                      Tooltip(
+                        message: recipe.title,
+                        child: Text(
+                          normalizeTitle(recipe.title).title,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       // Meta row

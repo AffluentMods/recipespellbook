@@ -33,6 +33,7 @@ import '../../../services/family_service.dart';
 import '../../../utils/ingredient_utils.dart';
 import '../../widgets/app_refresh_indicator.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/empty_state.dart';
 import '../../widgets/selection_action_bar.dart';
 import '../../widgets/family_share_sheet.dart';
 // TODO: Kitchen Buddy hidden for now
@@ -312,6 +313,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final shoppingDao = ref.watch(shoppingDaoProvider);
 
     // Unchecked counts across all lists → "items in your other lists" hint.
@@ -391,7 +393,17 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 // Items List (pull to refresh — syncs with cloud if available)
                 Expanded(
                   child: Responsive.constrainWidth(context, child: items.isEmpty
-                      ? _EmptyState()
+                      ? EmptyState(
+                          icon: Icons.shopping_cart_outlined,
+                          title: l10n.shoppingEmpty,
+                          message: l10n.shoppingEmptySubtitle,
+                          actionLabel: CollabService.instance.canEdit(_currentListId)
+                              ? l10n.addFirstItem
+                              : null,
+                          onAction: CollabService.instance.canEdit(_currentListId)
+                              ? () => _showAddItemSheet(context)
+                              : null,
+                        )
                       : AppRefreshIndicator(
                           child: _buildGroupedList(uncheckedItems, checkedItems),
                         )),
@@ -4433,37 +4445,7 @@ class _CheckedSection extends ConsumerWidget {
   }
 }
 
-// ============ EMPTY STATE ============
-
-class _EmptyState extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.shopping_cart_outlined, size: 80, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
-            const SizedBox(height: 24),
-            Text(l10n.shoppingEmptyList, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
-            Text(
-              l10n.shoppingEmptyHint,
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ============ ENUMS ============
+// ============ GROUP MODE ============
 
 enum ShoppingGroupMode {
   section(Icons.storefront_outlined), // "By Aisle"

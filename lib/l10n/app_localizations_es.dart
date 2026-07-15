@@ -299,6 +299,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get shoppingTitle => 'Lista de Compras';
 
   @override
+  String get addFirstItem => 'Añade tu primer artículo';
+
+  @override
+  String get addAMeal => 'Añadir una comida';
+
+  @override
+  String get clearFilters => 'Borrar filtros';
+
+  @override
   String get shoppingEmpty => 'Tu lista está vacía';
 
   @override

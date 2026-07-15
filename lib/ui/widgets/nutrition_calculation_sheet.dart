@@ -1958,6 +1958,9 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
                                   child: RecipeImage.thumbnail(
                                     imagePath: recipe.imagePath,
                                     recipeId: recipe.id,
+                                    recipeName: recipe.title,
+                                    course: recipe.courseId,
+                                    category: recipe.categoryId,
                                     width: 52,
                                     height: 52,
                                   ),

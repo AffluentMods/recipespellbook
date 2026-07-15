@@ -297,6 +297,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shoppingTitle => '购物清单';
 
   @override
+  String get addFirstItem => '添加第一个项目';
+
+  @override
+  String get addAMeal => '添加餐食';
+
+  @override
+  String get clearFilters => '清除筛选';
+
+  @override
   String get shoppingEmpty => '清单为空';
 
   @override

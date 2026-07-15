@@ -11,6 +11,7 @@ import '../../../database/database.dart';
 import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/taxonomy_translator.dart';
+import '../../../utils/recipe_title.dart';
 import '../../widgets/app_context_menu.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/new_recipe_dialog.dart';
@@ -1019,7 +1020,14 @@ class _SmallListView extends StatelessWidget {
                 _RecipeThumbnail(recipe: recipe, size: 48),
               ],
             ),
-            title: Text(recipe.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+            title: Tooltip(
+              message: recipe.title,
+              child: Text(
+                normalizeTitle(recipe.title).title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1214,6 +1222,9 @@ class _MediumCardState extends State<_MediumCard> {
               child: RecipeImage.medium(
                 imagePath: recipe.imagePath,
                 recipeId: recipe.id,
+                recipeName: recipe.title,
+                course: recipe.courseId,
+                category: recipe.categoryId,
               ),
             ),
             // Gradient at bottom
@@ -1280,14 +1291,17 @@ class _MediumCardState extends State<_MediumCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    recipe.title,
-                    style: const TextStyle(
-                      color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold,
-                      shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
+                  Tooltip(
+                    message: recipe.title,
+                    child: Text(
+                      normalizeTitle(recipe.title).title,
+                      style: const TextStyle(
+                        color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold,
+                        shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
                   if (metaText.isNotEmpty) ...[
                     const SizedBox(height: 2),
@@ -1406,6 +1420,9 @@ class _LargeCard extends StatelessWidget {
                 child: RecipeImage.large(
                   imagePath: recipe.imagePath,
                   recipeId: recipe.id,
+                  recipeName: recipe.title,
+                  course: recipe.courseId,
+                  category: recipe.categoryId,
                   height: 200,
                 ),
               ),
@@ -1477,14 +1494,17 @@ class _LargeCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      recipe.title,
-                      style: const TextStyle(
-                        color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold,
-                        shadows: [Shadow(offset: Offset(0, 1), blurRadius: 3, color: Colors.black54)],
+                    Tooltip(
+                      message: recipe.title,
+                      child: Text(
+                        normalizeTitle(recipe.title).title,
+                        style: const TextStyle(
+                          color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold,
+                          shadows: [Shadow(offset: Offset(0, 1), blurRadius: 3, color: Colors.black54)],
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     FutureBuilder<List<Tag>>(
@@ -1646,6 +1666,9 @@ class _RecipeThumbnail extends StatelessWidget {
       child: RecipeImage.thumbnail(
         imagePath: recipe.imagePath,
         recipeId: recipe.id,
+        recipeName: recipe.title,
+        course: recipe.courseId,
+        category: recipe.categoryId,
         width: size,
         height: size,
       ),

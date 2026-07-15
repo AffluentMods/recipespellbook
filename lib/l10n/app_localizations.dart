@@ -673,6 +673,24 @@ abstract class AppLocalizations {
   /// **'Shopping List'**
   String get shoppingTitle;
 
+  /// No description provided for @addFirstItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first item'**
+  String get addFirstItem;
+
+  /// No description provided for @addAMeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a meal'**
+  String get addAMeal;
+
+  /// No description provided for @clearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get clearFilters;
+
   /// No description provided for @shoppingEmpty.
   ///
   /// In en, this message translates to:

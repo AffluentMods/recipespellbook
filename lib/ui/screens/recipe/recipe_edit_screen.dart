@@ -2417,6 +2417,9 @@ class _IngredientRow extends StatelessWidget {
     return RecipeImage.thumbnail(
       imagePath: recipe.imagePath,
       recipeId: recipe.id,
+      recipeName: recipe.title,
+      course: recipe.courseId,
+      category: recipe.categoryId,
       width: size,
       height: size,
     );
@@ -2944,6 +2947,9 @@ class _LinkedRecipeCard extends StatelessWidget {
                 child: RecipeImage.medium(
                   imagePath: recipe.imagePath,
                   recipeId: recipe.id,
+                  recipeName: recipe.title,
+                  course: recipe.courseId,
+                  category: recipe.categoryId,
                 ),
               ),
               Padding(
@@ -3017,6 +3023,9 @@ class _AvailableRecipeCard extends StatelessWidget {
                 child: RecipeImage.medium(
                   imagePath: recipe.imagePath,
                   recipeId: recipe.id,
+                  recipeName: recipe.title,
+                  course: recipe.courseId,
+                  category: recipe.categoryId,
                   width: 56,
                   height: 56,
                 ),

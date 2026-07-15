@@ -27,6 +27,7 @@ import '../../../providers/collab_provider.dart';
 import '../../../theme/app_colors.dart';
 import '../../../ui/widgets/cooking_mode_screen.dart';
 import '../../../utils/default_recipe_images.dart';
+import '../../../utils/recipe_title.dart';
 import '../../widgets/add_to_meal_plan_dialogue.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/nutrition_calculation_sheet.dart';
@@ -394,13 +395,16 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        _recipe!.title,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+                      child: Tooltip(
+                        message: _recipe!.title,
+                        child: Text(
+                          normalizeTitle(_recipe!.title).title,
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     _FavoriteButton(isFavorite: _recipe!.isFavorite, onToggle: _toggleFavorite),
@@ -2464,6 +2468,9 @@ class _CheckableIngredientRow extends ConsumerWidget {
                         child: RecipeImage.thumbnail(
                           imagePath: linkedRecipe.imagePath,
                           recipeId: linkedRecipe.id,
+                          recipeName: linkedRecipe.title,
+                          course: linkedRecipe.courseId,
+                          category: linkedRecipe.categoryId,
                           width: 24,
                           height: 24,
                         ),
@@ -2471,15 +2478,18 @@ class _CheckableIngredientRow extends ConsumerWidget {
                     ),
                     const SizedBox(width: 6),
                     Flexible(
-                      child: Text(
-                        linkedRecipe.title,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                          decorationColor: theme.colorScheme.primary,
+                      child: Tooltip(
+                        message: linkedRecipe.title,
+                        child: Text(
+                          normalizeTitle(linkedRecipe.title).title,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            decorationColor: theme.colorScheme.primary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 4),

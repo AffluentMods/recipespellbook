@@ -10,6 +10,7 @@ import '../../../services/craving_service.dart';
 import '../../../services/community_service.dart';
 import '../../../data/course_category_data.dart';
 import '../../../theme/app_colors.dart';
+import '../../../utils/recipe_title.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/community_image.dart';
 
@@ -804,6 +805,9 @@ class _ResultCard extends StatelessWidget {
     return RecipeImage.thumbnail(
       imagePath: result.imagePath,
       recipeId: result.id,
+      recipeName: result.title,
+      course: result.courseId,
+      category: result.categoryId,
       width: size,
       height: size,
     );
@@ -826,6 +830,9 @@ class _ResultCard extends StatelessWidget {
       child: RecipeImage.medium(
         imagePath: result.imagePath,
         recipeId: result.id,
+        recipeName: result.title,
+        course: result.courseId,
+        category: result.categoryId,
         height: 180,
         fit: BoxFit.cover,
       ),
@@ -903,14 +910,17 @@ class _ResultCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            result.title,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              height: 1.2,
+                          Tooltip(
+                            message: result.title,
+                            child: Text(
+                              normalizeTitle(result.title).title,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                height: 1.2,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
                           ),
                           if (timeStr != null || servStr != null) ...[
                             const SizedBox(height: 4),
