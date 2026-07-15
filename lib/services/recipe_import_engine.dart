@@ -25,7 +25,11 @@ class RecipeImportEngine {
   static const _browserHeaders = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
     'Accept-Language': 'en-US,en;q=0.9',
-    'Accept-Encoding': 'gzip, deflate, br',
+    // Only advertise gzip — Dart's http client auto-decompresses gzip but NOT
+    // brotli/deflate. Advertising 'br' makes CDNs (e.g. Instagram) return a
+    // brotli body we can't decode, which crashed the parser with
+    // "Unexpected extension byte".
+    'Accept-Encoding': 'gzip',
     'Sec-Fetch-Dest': 'document',
     'Sec-Fetch-Mode': 'navigate',
     'Sec-Fetch-Site': 'none',
@@ -98,15 +102,26 @@ class RecipeImportEngine {
   /// back to Latin-1 when the server explicitly declared a different charset or
   /// the bytes aren't valid UTF-8.
   static String _decodeBody(http.Response resp) {
+    final bytes = resp.bodyBytes;
     final ct = (resp.headers['content-type'] ?? '').toLowerCase();
     final charset = RegExp(r'charset=([^\s;]+)').firstMatch(ct)?.group(1);
+    // Server declared a specific non-UTF-8 charset — honor http's decoding, but
+    // never let it throw on a malformed/compressed body.
     if (charset != null && charset != 'utf-8' && charset != 'utf8') {
-      return resp.body; // server declared a specific non-UTF-8 charset
+      try {
+        return resp.body;
+      } catch (_) {
+        return latin1.decode(bytes, allowInvalid: true);
+      }
     }
     try {
-      return utf8.decode(resp.bodyBytes);
+      return utf8.decode(bytes);
     } catch (_) {
-      return resp.body; // not valid UTF-8 — trust http's decoding
+      // Not clean UTF-8 (latin1 page, or a body we couldn't decompress). Latin-1
+      // maps every byte and never throws — matches the old default and keeps a
+      // bad body from crashing the whole import. `resp.body` is NOT safe here:
+      // with charset=utf-8 it would re-run utf8.decode and throw again.
+      return latin1.decode(bytes, allowInvalid: true);
     }
   }
 
