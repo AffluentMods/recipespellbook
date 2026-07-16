@@ -47,10 +47,13 @@ ImageProvider buildFileImageProvider(String path) {
   return FileImage(File(path));
 }
 
-/// Check if a local file exists on disk.
+/// Check if a local file exists on disk AND has content. A 0-byte file is
+/// treated as missing so a corrupted/truncated image falls back to the
+/// placeholder tile instead of rendering a broken-image icon.
 bool localFileExists(String path) {
   try {
-    return File(path).existsSync();
+    final f = File(path);
+    return f.existsSync() && f.lengthSync() > 0;
   } catch (_) {
     return false;
   }

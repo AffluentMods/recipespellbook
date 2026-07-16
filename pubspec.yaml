@@ -2,7 +2,7 @@ name: recipespellbook
 description: "An advanced recipe app for all uses."
 publish_to: 'none'
 
-version: 1.5.31+43
+version: 1.5.32+46
 
 environment:
   sdk: ^3.10.7

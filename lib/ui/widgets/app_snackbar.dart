@@ -125,7 +125,14 @@ class AppSnackbar {
     _dismissCurrent();
     ScaffoldMessenger.maybeOf(context)?.hideCurrentSnackBar();
 
-    final overlay = Overlay.of(context, rootOverlay: true);
+    // Degrade gracefully instead of throwing "No Overlay widget found" when
+    // called with a context that has no Overlay ancestor (e.g. a bare root
+    // Navigator context after a pop).
+    final overlay = Overlay.maybeOf(context, rootOverlay: true);
+    if (overlay == null) {
+      debugPrint('[AppSnackbar] no Overlay for context — snackbar skipped');
+      return;
+    }
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final topPadding = MediaQuery.of(context).padding.top;

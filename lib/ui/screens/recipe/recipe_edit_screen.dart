@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../router/router.dart' show rootNavigatorKey;
 import 'package:image_picker/image_picker.dart';
 import '../../../utils/platform_utils.dart';
 import 'package:drift/drift.dart' as drift;
@@ -341,6 +340,10 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   final _notesController = TextEditingController();
 
   String? _imagePath;
+  /// The recipe's image path as loaded — used to detect whether the user
+  /// actually changed the image on save (editing other fields must never
+  /// re-copy or re-upload an existing, working image).
+  String? _originalImagePath;
   String? _imageUrl;
   String? _defaultAssetPath; // For default recipes: asset image shown as preview only
   String? _selectedCourseId;
@@ -443,6 +446,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     _cookTimeController.text = recipe.cookTimeMinutes?.toString() ?? '';
     _sourceUrlController.text = recipe.sourceUrl ?? '';
     _imagePath = recipe.imagePath;
+    _originalImagePath = recipe.imagePath;
     // For default recipes with bundled asset images (no user-set imagePath)
     if (_imagePath == null) {
       _defaultAssetPath = defaultRecipeImageAsset(recipe.id);
@@ -1039,22 +1043,31 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
           : 'recipe_${DateTime.now().millisecondsSinceEpoch}';
 
       String? finalImagePath = _imagePath;
+      // Whether the user actually changed the image this session. If not, we
+      // must NOT touch it — re-copying/re-uploading an unchanged image is what
+      // broke long-standing photos on an unrelated edit (a self-copy can
+      // truncate the file to 0 bytes).
+      bool imageChanged = !_isEditing || _imagePath != _originalImagePath;
+
       if (_imageUrl != null && _imagePath == null) {
         finalImagePath = await _downloadImage(_imageUrl!, recipeId);
+        imageChanged = true;
       }
       // Persist a picked/cropped main image out of the OS temp/cache dir into
       // permanent app storage (mirrors step images). Without this the DB kept a
       // temp path that the OS later evicts — cards fell back to the placeholder
-      // and the detail hero went black.
-      if (finalImagePath != null &&
+      // and the detail hero went black. Only runs when the image changed.
+      if (imageChanged &&
+          finalImagePath != null &&
           !finalImagePath.startsWith('http') &&
           !ImageService.isServerPath(finalImagePath)) {
         finalImagePath = await _copyMainImage(finalImagePath, recipeId) ?? finalImagePath;
         RecipeImage.invalidatePath(finalImagePath);
       }
 
-      // Upload to cloud if user has cloud sync and image is a local file
-      if (finalImagePath != null &&
+      // Upload to cloud if user has cloud sync and image is a local file.
+      if (imageChanged &&
+          finalImagePath != null &&
           !ImageService.isServerPath(finalImagePath) &&
           AuthService.instance.isSignedIn &&
           ref.read(subscriptionProvider).tier.hasCloudSync) {
@@ -1212,25 +1225,21 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         if (autoLinkResult != null && autoLinkResult.linkedTitles.isNotEmpty) {
           message = '$message · ${l10n.autoLinkedSubRecipes(autoLinkResult.linkedTitles.length)}';
         }
-        final viewLabel = l10n.actionView;
         final savedRecipeId = recipeId;
 
-        // Pop first, then show snackbar on the underlying screen
-        context.pop(true);
+        // Show the snackbar BEFORE popping, on this screen's context (which has
+        // a valid Overlay ancestor). rootOverlay:true inserts it into the
+        // app-level overlay, so it stays visible on the screen revealed by the
+        // pop. Showing it afterwards via rootNavigatorKey.currentContext threw
+        // "No Overlay found" — that context's overlay is a descendant.
+        AppSnackbar.successWithAction(
+          context,
+          message,
+          actionLabel: l10n.actionView,
+          onAction: () => router.go('/recipe/$savedRecipeId'),
+        );
 
-        // Use post-frame callback so the snackbar attaches to the
-        // screen revealed after the pop, not the now-disposed edit screen.
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final ctx = rootNavigatorKey.currentContext;
-          if (ctx != null && ctx.mounted) {
-            AppSnackbar.successWithAction(
-              ctx,
-              message,
-              actionLabel: viewLabel,
-              onAction: () => router.go('/recipe/$savedRecipeId'),
-            );
-          }
-        });
+        context.pop(true);
 
         // TODO: Kitchen Buddy hidden for now
         // if (!_isEditing) {
@@ -1288,10 +1297,17 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       if (!src.existsSync()) return null; // source already gone — nothing to save
       final dir = await getApplicationDocumentsDirectory();
       final imagesDir = Directory(p.join(dir.path, 'images'));
-      if (src.parent.path == imagesDir.path) return sourcePath; // already permanent
+      // Already a persisted app image? Keep it as-is — never re-copy it (a
+      // copy onto the same file truncates it to 0 bytes).
+      if (p.equals(src.parent.path, imagesDir.path)) return sourcePath;
       await imagesDir.create(recursive: true);
       final ext = p.extension(sourcePath).isNotEmpty ? p.extension(sourcePath) : '.jpg';
-      final destPath = p.join(imagesDir.path, 'recipe_$recipeId$ext');
+      // Unique filename per save: a NEW path means replacing a photo dodges
+      // Flutter's image cache (a reused path would keep showing the OLD photo),
+      // and it guarantees src != dest so the copy can never truncate the source.
+      final destPath = p.join(imagesDir.path,
+          'recipe_${recipeId}_${DateTime.now().millisecondsSinceEpoch}$ext');
+      if (p.equals(sourcePath, destPath)) return sourcePath; // paranoia
       await src.copy(destPath);
       return destPath;
     } catch (e) {
