@@ -421,7 +421,10 @@ class SettingsNotifier extends Notifier<AppSettings> {
 
     // Load quick access settings
     final quickAccessShowHistory = prefs.getBool(_quickAccessHistoryKey) ?? true;
-    final quickAccessHistoryCount = prefs.getInt(_quickAccessHistoryCountKey) ?? 10;
+    // Fallback must match the AppSettings default (20) — they were out of sync,
+    // so Quick Access silently capped recent recipes at 10 until the slider was
+    // touched.
+    final quickAccessHistoryCount = prefs.getInt(_quickAccessHistoryCountKey) ?? 20;
     final quickAccessShowMealPlan = prefs.getBool(_quickAccessMealPlanKey) ?? true;
     final quickAccessShowPinned = prefs.getBool(_quickAccessPinnedKey) ?? true;
 

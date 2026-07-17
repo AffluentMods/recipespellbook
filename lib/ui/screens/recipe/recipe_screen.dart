@@ -1835,7 +1835,32 @@ class _RecipeAppBar extends StatelessWidget {
                   decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
                   child: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), tooltip: 'Back', onPressed: () => Navigator.of(context).pop()),
                 ),
-      flexibleSpace: FlexibleSpaceBar(
+      flexibleSpace: LayoutBuilder(builder: (context, constraints) {
+        // Collapse progress: 0 = fully expanded, 1 = fully collapsed. Fade the
+        // recipe title into the header only once it's mostly collapsed (the
+        // in-body title has scrolled up under the bar), and back out on the way
+        // up.
+        final minH = kToolbarHeight + MediaQuery.of(context).padding.top;
+        final t = ((expandedHeight - constraints.maxHeight) /
+                (expandedHeight - minH))
+            .clamp(0.0, 1.0);
+        final titleOpacity = ((t - 0.5) / 0.4).clamp(0.0, 1.0);
+        return FlexibleSpaceBar(
+        centerTitle: false,
+        titlePadding:
+            const EdgeInsetsDirectional.only(start: 54, bottom: 16, end: 96),
+        title: Opacity(
+          opacity: titleOpacity,
+          child: Text(
+            normalizeTitle(recipe.title).title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600),
+          ),
+        ),
         background: Stack(
           fit: StackFit.expand,
           children: [
@@ -1883,7 +1908,8 @@ class _RecipeAppBar extends StatelessWidget {
             ),
           ],
         ),
-      ),
+        );
+      }),
       actions: [
         if (!readOnlyShared)
           Container(
