@@ -11,7 +11,16 @@ class Recipes extends Table {
   IntColumn get prepTimeMinutes => integer().nullable()();
   IntColumn get cookTimeMinutes => integer().nullable()();
   TextColumn get sourceUrl => text().nullable()();
+
+  /// LOCAL-FIRST image storage:
+  ///  - [imagePath] is the image THIS device renders — a local file whenever
+  ///    one exists (works offline / with the backend down). Only pulled-from-
+  ///    cloud recipes with no local copy hold a server path here.
+  ///  - [imageServerPath] is the cloud copy ("userId/hash.ext"), used purely
+  ///    for sync so other devices can fetch it. Never required for local
+  ///    display. Content-hashed, so equality — same image.
   TextColumn get imagePath => text().nullable()();
+  TextColumn get imageServerPath => text().nullable()();
   TextColumn get courseId => text().nullable()();
   TextColumn get categoryId => text().nullable()();
   IntColumn get rating => integer().nullable()();

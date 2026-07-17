@@ -130,7 +130,7 @@ class ImageService {
         return result;
       }
 
-      debugPrint('[ImageService] Upload failed: ${response.statusCode} ${response.body}');
+      debugPrint('[ImageService] Upload failed: ${response.statusCode}${kDebugMode ? ' ${response.body}' : ''}');
       return null;
     } catch (e) {
       debugPrint('[ImageService] Upload error: $e');
@@ -142,6 +142,18 @@ class ImageService {
   //  GET URL (for displaying images)
   // ════════════════════════════════════════════
 
+  /// Validate + percent-encode a stored server path ("userId/filename") before
+  /// it goes into a request URL. A stored value can originate from server /
+  /// community / share payloads, so without this a crafted path (`../auth/x`,
+  /// `x?admin=1`, `x#…`) could retarget the authenticated request. Rejects
+  /// anything that isn't exactly two non-empty segments and encodes each one.
+  static String? _safeImagePathForUrl(String imagePath) {
+    if (!isServerPath(imagePath) || imagePath.contains('..')) return null;
+    final parts = imagePath.split('/');
+    if (parts.length != 2 || parts.any((s) => s.isEmpty)) return null;
+    return parts.map(Uri.encodeComponent).join('/');
+  }
+
   /// Get a fresh presigned URL for a stored image path.
   ///
   /// [imagePath] is the server path stored in Drift (e.g. "userId/abc123.jpg").
@@ -151,8 +163,13 @@ class ImageService {
 
     // imagePath format: "userId/filename.ext"
     // API endpoint: GET /v1/images/:userId/:filename
+    final safePath = _safeImagePathForUrl(imagePath);
+    if (safePath == null) {
+      debugPrint('[ImageService] Rejected malformed image path');
+      return null;
+    }
     try {
-      final response = await _auth.get('/v1/images/$imagePath');
+      final response = await _auth.get('/v1/images/$safePath');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -186,8 +203,13 @@ class ImageService {
   Future<bool> deleteImage(String imagePath) async {
     if (!_auth.isSignedIn || imagePath.isEmpty) return false;
 
+    final safePath = _safeImagePathForUrl(imagePath);
+    if (safePath == null) {
+      debugPrint('[ImageService] Rejected malformed image path');
+      return false;
+    }
     try {
-      final response = await _auth.delete('/v1/images/$imagePath');
+      final response = await _auth.delete('/v1/images/$safePath');
       if (response.statusCode == 200) {
         debugPrint('[ImageService] Deleted: $imagePath');
         return true;
@@ -272,11 +294,11 @@ class ImageService {
 
       if (response.statusCode == 422) {
         // Rejected by SafeSearch
-        debugPrint('[ImageService] Image rejected by moderation: ${response.body}');
+        debugPrint('[ImageService] Image rejected by moderation${kDebugMode ? ': ${response.body}' : ''}');
         return null;
       }
 
-      debugPrint('[ImageService] Community upload failed: ${response.statusCode} ${response.body}');
+      debugPrint('[ImageService] Community upload failed: ${response.statusCode}${kDebugMode ? ' ${response.body}' : ''}');
       return null;
     } catch (e) {
       debugPrint('[ImageService] Community upload error: $e');
@@ -304,38 +326,107 @@ class ImageService {
   /// Returns the local file path, or null on failure.
   Future<String?> downloadAndSaveImage(String url, String filename) async {
     if (!supportsLocalFileSystem) return null;
+
+    // Sanitize the filename: base name only, no separators or traversal, so a
+    // caller-influenced value (e.g. a publication id with `../`) can't write
+    // outside the community image dir and overwrite app files (the Drift DB,
+    // cached config).
+    final safeName = p.basename(filename);
+    if (safeName != filename ||
+        safeName.isEmpty ||
+        safeName == '.' ||
+        safeName.contains('..') ||
+        safeName.contains('/') ||
+        safeName.contains('\\')) {
+      debugPrint('[ImageService] Rejected unsafe download filename');
+      return null;
+    }
+
+    // Only fetch over https from a proper host — never cleartext or other
+    // schemes (data:, file:).
+    final uri = Uri.tryParse(url);
+    if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) {
+      debugPrint('[ImageService] Rejected non-https download URL');
+      return null;
+    }
+
+    final client = http.Client();
     try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode != 200) {
-        debugPrint('[ImageService] Download failed: ${response.statusCode}');
+      final streamed = await client.send(http.Request('GET', uri));
+      if (streamed.statusCode != 200) {
+        debugPrint('[ImageService] Download failed: ${streamed.statusCode}');
+        return null;
+      }
+      // Reject oversize responses up-front by Content-Length when present…
+      final declared = streamed.contentLength;
+      if (declared != null && declared > _maxDownloadBytes) {
+        debugPrint('[ImageService] Download too large: $declared bytes');
+        return null;
+      }
+
+      // …and enforce a hard cap while streaming, so a lying/chunked response
+      // can't exhaust memory or disk.
+      final chunks = <int>[];
+      await for (final chunk in streamed.stream) {
+        chunks.addAll(chunk);
+        if (chunks.length > _maxDownloadBytes) {
+          debugPrint('[ImageService] Download exceeded cap — aborting');
+          return null;
+        }
+      }
+      var bytes = Uint8List.fromList(chunks);
+
+      // Confirm the payload is actually a decodable image before persisting it
+      // under a .jpg name.
+      if (_sniffImageMime(bytes) == null) {
+        debugPrint('[ImageService] Downloaded bytes are not a recognised image');
         return null;
       }
 
       final appDir = await getApplicationDocumentsDirectory();
-      final communityDir = Directory('${appDir.path}/images/community');
+      final communityDir = Directory(p.join(appDir.path, 'images', 'community'));
       if (!await communityDir.exists()) {
         await communityDir.create(recursive: true);
       }
 
       // Compress if over 2MB
-      var bytes = response.bodyBytes;
       if (bytes.length > _targetMaxBytes) {
         final compressed = await compressImageBytes(bytes);
         if (compressed != null) bytes = compressed;
       }
 
-      final localFile = File('${communityDir.path}/$filename');
+      final localFile = File(p.join(communityDir.path, safeName));
       await localFile.writeAsBytes(bytes);
       debugPrint('[ImageService] Downloaded to: ${localFile.path} (${(bytes.length / 1024).toStringAsFixed(0)}KB)');
       return localFile.path;
     } catch (e) {
       debugPrint('[ImageService] Download error: $e');
       return null;
+    } finally {
+      client.close();
     }
   }
 
   /// Target max file size for saved images (2MB).
   static const int _targetMaxBytes = 2 * 1024 * 1024;
+
+  /// Hard ceiling on a single image download (20MB) — bounds memory/disk use
+  /// regardless of what the remote server claims.
+  static const int _maxDownloadBytes = 20 * 1024 * 1024;
+
+  /// Detect a real image type from magic bytes (JPEG/PNG/GIF/WEBP). Returns the
+  /// mime, or null if the bytes aren't a recognised image.
+  static String? _sniffImageMime(Uint8List b) {
+    if (b.length < 12) return null;
+    if (b[0] == 0xFF && b[1] == 0xD8 && b[2] == 0xFF) return 'image/jpeg';
+    if (b[0] == 0x89 && b[1] == 0x50 && b[2] == 0x4E && b[3] == 0x47) return 'image/png';
+    if (b[0] == 0x47 && b[1] == 0x49 && b[2] == 0x46 && b[3] == 0x38) return 'image/gif';
+    if (b[0] == 0x52 && b[1] == 0x49 && b[2] == 0x46 && b[3] == 0x46 &&
+        b[8] == 0x57 && b[9] == 0x45 && b[10] == 0x42 && b[11] == 0x50) {
+      return 'image/webp';
+    }
+    return null;
+  }
 
   /// Decode → optionally downscale → re-encode as real JPEG. Never
   /// upscales: an image already smaller than [maxDimension] on both

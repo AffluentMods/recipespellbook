@@ -71,7 +71,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 10;
 
 
   // Accessors for DAOs
@@ -182,6 +182,32 @@ class AppDatabase extends _$AppDatabase {
           // default). Stores a palette key, not a raw colour.
           await customStatement(
             'ALTER TABLE meal_plans ADD COLUMN card_color TEXT',
+          );
+        }
+        if (from < 9) {
+          // Local-first images: image_path renders locally; the cloud copy
+          // lives in image_server_path (sync-only). Seed the new column from
+          // rows whose image_path is server-shaped ("userId/hash.ext" —
+          // exactly one slash, not an absolute or Windows path).
+          await customStatement(
+            'ALTER TABLE recipes ADD COLUMN image_server_path TEXT',
+          );
+          await customStatement(
+            "UPDATE recipes SET image_server_path = image_path "
+            "WHERE image_path IS NOT NULL "
+            "AND image_path LIKE '%/%' "
+            "AND image_path NOT LIKE '/%' "
+            "AND image_path NOT LIKE '%/%/%' "
+            "AND image_path NOT LIKE '%:\\%'",
+          );
+        }
+        if (from < 10) {
+          // Step images join the local-first split: local file in image_path,
+          // cloud copy (sync-only) in image_server_path. No seed needed —
+          // step images were never uploaded before, so no server-shaped
+          // step paths exist.
+          await customStatement(
+            'ALTER TABLE steps ADD COLUMN image_server_path TEXT',
           );
         }
       },

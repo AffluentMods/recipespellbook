@@ -344,6 +344,11 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   /// actually changed the image on save (editing other fields must never
   /// re-copy or re-upload an existing, working image).
   String? _originalImagePath;
+
+  /// Known cloud copies of step images, keyed by their LOCAL path (loaded from
+  /// the DB, extended after each upload). Lets a save reuse the existing cloud
+  /// copy for unchanged step images instead of re-uploading every one.
+  final Map<String, String> _stepServerPaths = {};
   String? _imageUrl;
   String? _defaultAssetPath; // For default recipes: asset image shown as preview only
   String? _selectedCourseId;
@@ -495,6 +500,11 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         imagePath: step.imagePath,
         isHeader: step.notes == '__header__',
       ));
+      // Remember each step image's cloud copy so an unchanged image is not
+      // re-uploaded on save.
+      if (step.imagePath != null && step.imageServerPath != null) {
+        _stepServerPaths[step.imagePath!] = step.imageServerPath!;
+      }
     }
 
     // Add empty step if none exist
@@ -1065,7 +1075,10 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         RecipeImage.invalidatePath(finalImagePath);
       }
 
-      // Upload to cloud if user has cloud sync and image is a local file.
+      // LOCAL-FIRST: the local file stays in imagePath — this device never
+      // depends on the backend to show its own photo. The cloud copy goes to
+      // imageServerPath (sync-only; other devices pull it from there).
+      String? serverImagePath;
       if (imageChanged &&
           finalImagePath != null &&
           !ImageService.isServerPath(finalImagePath) &&
@@ -1073,8 +1086,17 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
           ref.read(subscriptionProvider).tier.hasCloudSync) {
         final uploadResult = await ImageService.instance.uploadFile(File(finalImagePath));
         if (uploadResult != null) {
-          finalImagePath = uploadResult.path; // Store server path instead
+          serverImagePath = uploadResult.path;
         }
+        // Upload failed → imageServerPath is cleared below: better no cloud
+        // copy than a stale one showing the OLD photo on other devices.
+      }
+      // A server-shaped imagePath (pulled recipe, no local copy) is its own
+      // cloud reference — carry it over.
+      if (imageChanged &&
+          finalImagePath != null &&
+          ImageService.isServerPath(finalImagePath)) {
+        serverImagePath = finalImagePath;
       }
 
       final nutritionJson = _nutrition != null && _nutrition!.isNotEmpty ? jsonEncode(_nutrition!.toJson()) : null;
@@ -1088,6 +1110,11 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
           cookTimeMinutes: drift.Value(cookTime),
           sourceUrl: drift.Value(_sourceUrlController.text.trim().isEmpty ? null : _sourceUrlController.text.trim()),
           imagePath: drift.Value(finalImagePath),
+          // Only touch the cloud copy when the image actually changed;
+          // otherwise keep whatever imageServerPath the row already has.
+          imageServerPath: imageChanged
+              ? drift.Value(serverImagePath)
+              : const drift.Value.absent(),
           courseId: drift.Value(_selectedCourseId),
           categoryId: drift.Value(_selectedCategoryId),
           rating: drift.Value(_rating),
@@ -1121,6 +1148,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
             if (stepImagePath != null && !stepImagePath.contains('images/steps')) {
               stepImagePath = await _copyStepImage(stepImagePath, widget.recipeId!, i);
             }
+            final stepServerPath = await _stepServerPathFor(stepImagePath);
             await recipeDao.insertStep(StepsCompanion.insert(
               id: '${widget.recipeId}_step_$i',
               recipeId: widget.recipeId!,
@@ -1128,6 +1156,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
               instruction: step.instruction.trim(),
               durationMinutes: const drift.Value(null),
               imagePath: drift.Value(stepImagePath),
+              imageServerPath: drift.Value(stepServerPath),
               notes: drift.Value(step.isHeader ? '__header__' : null),
             ));
           }
@@ -1145,6 +1174,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
           cookTimeMinutes: drift.Value(cookTime),
           sourceUrl: drift.Value(_sourceUrlController.text.trim().isEmpty ? null : _sourceUrlController.text.trim()),
           imagePath: drift.Value(finalImagePath),
+          imageServerPath: drift.Value(serverImagePath),
           courseId: drift.Value(_selectedCourseId),
           categoryId: drift.Value(_selectedCategoryId),
           rating: drift.Value(_rating),
@@ -1174,6 +1204,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
             if (stepImagePath != null) {
               stepImagePath = await _copyStepImage(stepImagePath, recipeId, i);
             }
+            final stepServerPath = await _stepServerPathFor(stepImagePath);
             await recipeDao.insertStep(StepsCompanion.insert(
               id: '${recipeId}_step_$i',
               recipeId: recipeId,
@@ -1181,6 +1212,7 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
               instruction: step.instruction.trim(),
               durationMinutes: const drift.Value(null),
               imagePath: drift.Value(stepImagePath),
+              imageServerPath: drift.Value(stepServerPath),
               notes: drift.Value(step.isHeader ? '__header__' : null),
             ));
           }
@@ -1291,6 +1323,28 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   /// permanent app-documents storage so it survives after the picker's temp
   /// file is evicted. Returns the new permanent path, or null on failure.
   /// No-ops (returns the source) if the file is already under the images dir.
+  /// Resolve the cloud copy for a step image (LOCAL-FIRST: the local path
+  /// stays in Steps.imagePath; this only feeds Steps.imageServerPath so other
+  /// devices can pull the picture). Reuses a known cloud copy for unchanged
+  /// images; uploads once for new ones; null when signed out / no cloud sync
+  /// / upload failed.
+  Future<String?> _stepServerPathFor(String? localPath) async {
+    if (localPath == null || localPath.isEmpty) return null;
+    // A pulled recipe with no local copy: the path IS the cloud reference.
+    if (ImageService.isServerPath(localPath)) return localPath;
+    final known = _stepServerPaths[localPath];
+    if (known != null) return known;
+    if (!AuthService.instance.isSignedIn ||
+        !ref.read(subscriptionProvider).tier.hasCloudSync) {
+      return null;
+    }
+    final file = File(localPath);
+    if (!file.existsSync()) return null;
+    final up = await ImageService.instance.uploadFile(file);
+    if (up != null) _stepServerPaths[localPath] = up.path;
+    return up?.path;
+  }
+
   Future<String?> _copyMainImage(String sourcePath, String recipeId) async {
     try {
       final src = File(sourcePath);

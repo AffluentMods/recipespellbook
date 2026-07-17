@@ -2562,9 +2562,11 @@ class _InstructionStep extends ConsumerWidget {
     final instruction = scaleFactor == 1.0
         ? step.instruction
         : scaleInstructionText(step.instruction, scaleFactor, ingredientNames);
+    // Local file OR a cloud copy pulled from another device (server path).
+    final stepImgIsServer = ImageService.isServerPath(step.imagePath);
     final hasImage = step.imagePath != null &&
         step.imagePath!.isNotEmpty &&
-        FileExistsCache.exists(step.imagePath!);
+        (stepImgIsServer || FileExistsCache.exists(step.imagePath!));
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -2612,26 +2614,40 @@ class _InstructionStep extends ConsumerWidget {
             const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.only(left: 40),
-              child: GestureDetector(
-                onTap: () => _FullScreenImageViewer.show(
-                  context,
-                  imageProvider: buildFileImageProvider(step.imagePath!),
-                  heroTag: 'step_image_${step.imagePath}',
-                ),
-                child: Hero(
-                  tag: 'step_image_${step.imagePath}',
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: buildFileImage(
-                      step.imagePath!,
-                      width: double.infinity,
-                      height: 180,
-                      fit: BoxFit.cover,
-                      cacheHeight: 600,
+              child: stepImgIsServer
+                  // Cloud copy (no local file on this device): RecipeImage
+                  // resolves the signed URL and renders it. No full-screen
+                  // tap — the raw path isn't a loadable URL.
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: RecipeImage(
+                        imagePath: step.imagePath,
+                        width: double.infinity,
+                        height: 180,
+                        fit: BoxFit.cover,
+                        memCacheHeight: 600,
+                      ),
+                    )
+                  : GestureDetector(
+                      onTap: () => _FullScreenImageViewer.show(
+                        context,
+                        imageProvider: buildFileImageProvider(step.imagePath!),
+                        heroTag: 'step_image_${step.imagePath}',
+                      ),
+                      child: Hero(
+                        tag: 'step_image_${step.imagePath}',
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: buildFileImage(
+                            step.imagePath!,
+                            width: double.infinity,
+                            height: 180,
+                            fit: BoxFit.cover,
+                            cacheHeight: 600,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
             ),
           ],
         ],

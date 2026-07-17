@@ -6,8 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../database/database.dart';
 import '../services/auth_service.dart';
+import '../utils/native_file_image.dart';
 import 'collab_service.dart';
 import 'family_service.dart';
+import 'image_service.dart';
 
 // ════════════════════════════════════════════
 //  SYNC RESULT
@@ -758,7 +760,11 @@ class SyncService {
     'prepTimeMinutes': r.prepTimeMinutes,
     'cookTimeMinutes': r.cookTimeMinutes,
     'sourceUrl': r.sourceUrl,
-    'imagePath': r.imagePath,
+    // LOCAL-FIRST: only the cloud copy is meaningful on other devices. A
+    // device-local file path never goes on the wire (it used to, and other
+    // devices stored a dead path).
+    'imagePath': r.imageServerPath ??
+        (ImageService.isServerPath(r.imagePath) ? r.imagePath : null),
     'courseId': r.courseId,
     'categoryId': r.categoryId,
     'rating': r.rating,
@@ -788,7 +794,10 @@ class SyncService {
     'sortOrder': s.sortOrder,
     'instruction': s.instruction,
     'durationMinutes': s.durationMinutes,
-    'imagePath': s.imagePath,
+    // LOCAL-FIRST: like recipes, only the cloud copy goes on the wire — a
+    // device-local step-image path is dead on other devices.
+    'imagePath': s.imageServerPath ??
+        (ImageService.isServerPath(s.imagePath) ? s.imagePath : null),
     // notes == '__header__' marks an instruction section header — must survive
     // the server round-trip or grouping is lost for everyone.
     'notes': s.notes,
@@ -1091,6 +1100,13 @@ class SyncService {
   Future<int> _upsertRecipes(dynamic data, [Set<String>? skipRecipeIds]) async {
     if (data is! List || data.isEmpty) return 0;
     final db = _db!;
+
+    // LOCAL-FIRST images: preload existing rows so a pull never clobbers a
+    // live local photo with a server path pointing at the SAME image (server
+    // names are content-hashed, so equal path == identical bytes).
+    final existingRows = await db.select(db.recipes).get();
+    final existingById = {for (final r in existingRows) r.id: r};
+
     for (final item in data) {
       final d = item as Map<String, dynamic>;
       final recipeId = d['id'] as String;
@@ -1098,6 +1114,18 @@ class SyncService {
       // An unpushed local edit to a shared-cookbook recipe — don't let the
       // server's older copy overwrite it before the collab push goes out.
       if (skipRecipeIds != null && skipRecipeIds.contains(recipeId)) continue;
+
+      final incomingImage = d['imagePath'] as String?;
+      final incomingIsServer = ImageService.isServerPath(incomingImage);
+      final ex = existingById[recipeId];
+      final exLocal = ex?.imagePath;
+      // Keep this device's local file when (a) the cloud copy is the one we
+      // already know (image unchanged remotely) and (b) the file is alive.
+      final keepLocal = incomingIsServer &&
+          incomingImage == ex?.imageServerPath &&
+          exLocal != null &&
+          !ImageService.isServerPath(exLocal) &&
+          localFileExists(exLocal);
 
       // Upsert recipe
       await db.into(db.recipes).insertOnConflictUpdate(
@@ -1110,7 +1138,8 @@ class SyncService {
           prepTimeMinutes: Value(d['prepTimeMinutes'] as int?),
           cookTimeMinutes: Value(d['cookTimeMinutes'] as int?),
           sourceUrl: Value(d['sourceUrl'] as String?),
-          imagePath: Value(d['imagePath'] as String?),
+          imagePath: Value(keepLocal ? exLocal : incomingImage),
+          imageServerPath: Value(incomingIsServer ? incomingImage : null),
           courseId: Value(d['courseId'] as String?),
           categoryId: Value(d['categoryId'] as String?),
           rating: Value(d['rating'] as int?),
@@ -1148,11 +1177,27 @@ class SyncService {
 
       // Replace steps
       if (d['steps'] is List) {
+        // LOCAL-FIRST: before wiping, remember which cloud copies already have
+        // a live local file on this device (content-hashed names: equal path
+        // == identical image) so the re-insert keeps rendering locally.
+        final oldSteps = await (db.select(db.steps)
+              ..where((s) => s.recipeId.equals(recipeId)))
+            .get();
+        final localByServer = <String, String>{
+          for (final s in oldSteps)
+            if (s.imageServerPath != null &&
+                s.imagePath != null &&
+                !ImageService.isServerPath(s.imagePath) &&
+                localFileExists(s.imagePath!))
+              s.imageServerPath!: s.imagePath!,
+        };
         await (db.delete(db.steps)
           ..where((s) => s.recipeId.equals(recipeId)))
             .go();
         for (final step in d['steps'] as List) {
           final s = step as Map<String, dynamic>;
+          final sImg = s['imagePath'] as String?;
+          final sIsServer = ImageService.isServerPath(sImg);
           await db.into(db.steps).insert(
             StepsCompanion.insert(
               id: s['id'] as String,
@@ -1160,7 +1205,8 @@ class SyncService {
               sortOrder: s['sortOrder'] as int? ?? 0,
               instruction: s['instruction'] as String,
               durationMinutes: Value(s['durationMinutes'] as int?),
-              imagePath: Value(s['imagePath'] as String?),
+              imagePath: Value(sIsServer ? (localByServer[sImg] ?? sImg) : sImg),
+              imageServerPath: Value(sIsServer ? sImg : null),
               notes: Value(s['notes'] as String?),
             ),
           );

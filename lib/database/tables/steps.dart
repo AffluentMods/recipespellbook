@@ -15,8 +15,11 @@ class Steps extends Table {
   // Optional duration for this step in minutes
   IntColumn get durationMinutes => integer().nullable()();
 
-  // Optional image path for this step
+  // Optional image path for this step. Same LOCAL-FIRST split as recipes:
+  // imagePath is what THIS device renders (local file when one exists);
+  // imageServerPath is the cloud copy, used only for sync.
   TextColumn get imagePath => text().nullable()();
+  TextColumn get imageServerPath => text().nullable()();
 
   // Section marker: a step with notes == '__header__' is a section header whose
   // `instruction` holds the section title (mirrors the Ingredients convention).
