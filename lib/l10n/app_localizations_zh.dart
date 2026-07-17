@@ -6411,6 +6411,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingSkip => '跳过';
 
   @override
+  String get preparationTitle => '做法';
+
+  @override
   String get settingsBrowseCommunity => '浏览社区';
 
   @override

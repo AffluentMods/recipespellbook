@@ -6529,6 +6529,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get onboardingSkip => 'Пропустить';
 
   @override
+  String get preparationTitle => 'Приготовление';
+
+  @override
   String get settingsBrowseCommunity => 'Обзор сообщества';
 
   @override

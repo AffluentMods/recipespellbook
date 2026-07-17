@@ -6463,6 +6463,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get onboardingSkip => 'Pular';
 
   @override
+  String get preparationTitle => 'Modo de preparo';
+
+  @override
   String get settingsBrowseCommunity => 'Explorar Comunidade';
 
   @override

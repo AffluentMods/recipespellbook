@@ -11863,6 +11863,12 @@ abstract class AppLocalizations {
   /// **'Skip'**
   String get onboardingSkip;
 
+  /// No description provided for @preparationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparation'**
+  String get preparationTitle;
+
   /// No description provided for @settingsBrowseCommunity.
   ///
   /// In en, this message translates to:

@@ -6529,6 +6529,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get onboardingSkip => 'Pomiń';
 
   @override
+  String get preparationTitle => 'Przygotowanie';
+
+  @override
   String get settingsBrowseCommunity => 'Przeglądaj społeczność';
 
   @override

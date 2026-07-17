@@ -6463,6 +6463,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get onboardingSkip => 'Overslaan';
 
   @override
+  String get preparationTitle => 'Bereiding';
+
+  @override
   String get settingsBrowseCommunity => 'Community verkennen';
 
   @override

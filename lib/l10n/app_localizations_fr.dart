@@ -6451,6 +6451,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onboardingSkip => 'Passer';
 
   @override
+  String get preparationTitle => 'Préparation';
+
+  @override
   String get settingsBrowseCommunity => 'Parcourir la communauté';
 
   @override

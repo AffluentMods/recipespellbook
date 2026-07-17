@@ -6463,6 +6463,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get onboardingSkip => 'Überspringen';
 
   @override
+  String get preparationTitle => 'Zubereitung';
+
+  @override
   String get settingsBrowseCommunity => 'Community durchstöbern';
 
   @override

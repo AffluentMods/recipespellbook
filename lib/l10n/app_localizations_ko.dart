@@ -6411,6 +6411,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get onboardingSkip => '건너뛰기';
 
   @override
+  String get preparationTitle => '조리법';
+
+  @override
   String get settingsBrowseCommunity => '커뮤니티 둘러보기';
 
   @override

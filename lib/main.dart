@@ -212,8 +212,11 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
     // 2. Restore auth session (must be first — determines signed-in state)
     await ref.read(authProvider.notifier).initialize();
 
-    // 3. Remove splash screen — show the app while the rest loads in background
-    if (supportsNativeSplash) FlutterNativeSplash.remove();
+    // 3. Remove splash screen — show the app while the rest loads in background.
+    // Unguarded: on web this removes the static HTML splash overlay from
+    // index.html (which otherwise covers the app until home_screen builds);
+    // on mobile/desktop it dismisses the native splash. Safe everywhere.
+    FlutterNativeSplash.remove();
 
     _initialized = true;
 

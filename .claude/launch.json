@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "flutter-web",
-      "runtimeExecutable": "C:\\Users\\ANordlund\\Develop\\flutter\\bin\\flutter.bat",
+      "runtimeExecutable": "C:\\flutter\\bin\\flutter.bat",
       "runtimeArgs": [
         "run",
         "-d",

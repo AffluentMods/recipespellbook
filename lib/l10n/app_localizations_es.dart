@@ -6463,6 +6463,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get onboardingSkip => 'Omitir';
 
   @override
+  String get preparationTitle => 'Preparación';
+
+  @override
   String get settingsBrowseCommunity => 'Explorar Comunidad';
 
   @override

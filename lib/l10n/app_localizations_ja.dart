@@ -6411,6 +6411,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onboardingSkip => 'スキップ';
 
   @override
+  String get preparationTitle => '作り方';
+
+  @override
   String get settingsBrowseCommunity => 'コミュニティを閲覧';
 
   @override

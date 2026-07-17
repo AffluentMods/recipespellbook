@@ -1841,22 +1841,27 @@ class _RecipeAppBar extends StatelessWidget {
           children: [
             // Image with optional rarity glow border
             if (hasImage)
-              GestureDetector(
-                onTap: () => _FullScreenImageViewer.show(
-                  context,
-                  imageProvider: isServer
-                      ? NetworkImage(recipe.imagePath!) as ImageProvider
-                      : buildFileImageProvider(recipe.imagePath!),
-                  heroTag: 'recipe_image_${recipe.id}',
-                ),
-                child: Hero(
-                  tag: 'recipe_image_${recipe.id}',
-                  child: isServer
-                      ? _ServerImage(path: recipe.imagePath!)
-                      : buildFileImage(recipe.imagePath!, fit: BoxFit.cover,
-                          cacheHeight: (800 * MediaQuery.of(context).devicePixelRatio).toInt()),
-                ),
-              )
+              isServer
+                  // Server images resolve their presigned URL async; the tap
+                  // handler lives inside _ServerImage so the full-screen viewer
+                  // gets the resolved http URL (imagePath itself is a storage
+                  // path like "userId/hash.jpg", not a loadable URL).
+                  ? _ServerImage(
+                      path: recipe.imagePath!,
+                      heroTag: 'recipe_image_${recipe.id}',
+                    )
+                  : GestureDetector(
+                      onTap: () => _FullScreenImageViewer.show(
+                        context,
+                        imageProvider: buildFileImageProvider(recipe.imagePath!),
+                        heroTag: 'recipe_image_${recipe.id}',
+                      ),
+                      child: Hero(
+                        tag: 'recipe_image_${recipe.id}',
+                        child: buildFileImage(recipe.imagePath!, fit: BoxFit.cover,
+                            cacheHeight: (800 * MediaQuery.of(context).devicePixelRatio).toInt()),
+                      ),
+                    )
             else if (defaultAsset != null)
               Image.asset(defaultAsset, fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => const RecipePlaceholderImage(height: 300, width: double.infinity))
@@ -2705,7 +2710,8 @@ class _FullScreenImageViewer extends StatelessWidget {
 
 class _ServerImage extends StatefulWidget {
   final String path;
-  const _ServerImage({required this.path});
+  final String? heroTag;
+  const _ServerImage({required this.path, this.heroTag});
 
   @override
   State<_ServerImage> createState() => _ServerImageState();
@@ -2736,13 +2742,28 @@ class _ServerImageState extends State<_ServerImage> {
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
-    if (_url == null) {
+    final url = _url;
+    if (url == null) {
       return const Center(child: Icon(Icons.broken_image));
     }
-    return Image.network(
-      _url!,
+    // buildFileImage routes http URLs through CachedNetworkImage, so the hero
+    // survives offline once it has loaded at least once.
+    Widget image = buildFileImage(
+      url,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image)),
+      errorWidget: const Center(child: Icon(Icons.broken_image)),
     );
+    final heroTag = widget.heroTag;
+    if (heroTag != null) {
+      image = GestureDetector(
+        onTap: () => _FullScreenImageViewer.show(
+          context,
+          imageProvider: buildFileImageProvider(url),
+          heroTag: heroTag,
+        ),
+        child: Hero(tag: heroTag, child: image),
+      );
+    }
+    return image;
   }
 }
