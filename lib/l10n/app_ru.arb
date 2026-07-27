@@ -1,4 +1,9 @@
 {
+  "convertToSection": "Преобразовать в раздел",
+  "convertToStep": "Преобразовать в шаг",
+  "addSection": "Добавить раздел",
+  "sectionLabel": "Раздел",
+  "stepsSectionsCount": "{steps, plural, =1{1 шаг} few{{steps} шага} many{{steps} шагов} other{{steps} шага}} · {sections, plural, =1{1 раздел} few{{sections} раздела} many{{sections} разделов} other{{sections} раздела}}",
   "@@locale": "ru",
   "@@last_modified": "2026-01-28",
   "appTitle": "Recipe Spellbook",

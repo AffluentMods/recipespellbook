@@ -17,9 +17,15 @@ class Purchases {
   static Future<LogInResult> logIn(String userId) async => LogInResult._();
   static Future<CustomerInfo> logOut() async => CustomerInfo._();
   static Future<Offerings> getOfferings() async => Offerings._();
-  static Future<CustomerInfo> purchasePackage(Package package) async => CustomerInfo._();
+  static Future<PurchaseResult> purchasePackage(Package package) async => PurchaseResult._();
   static Future<CustomerInfo> restorePurchases() async => CustomerInfo._();
   static Future<Map<String, IntroEligibility>> checkTrialOrIntroductoryPriceEligibility(List<String> productIds) async => {};
+}
+
+/// Mirrors purchases_flutter 9+ PurchaseResult (customerInfo + storeTransaction).
+class PurchaseResult {
+  final CustomerInfo customerInfo;
+  PurchaseResult._() : customerInfo = CustomerInfo._();
 }
 
 enum IntroEligibilityStatus {

@@ -1,4 +1,9 @@
 {
+  "convertToSection": "섹션으로 변환",
+  "convertToStep": "단계로 변환",
+  "addSection": "섹션 추가",
+  "sectionLabel": "섹션",
+  "stepsSectionsCount": "{steps, plural, other{{steps}단계}} · {sections, plural, other{{sections}개 섹션}}",
   "@@locale": "ko",
   "@@last_modified": "2026-01-28",
   "appTitle": "Recipe Spellbook",

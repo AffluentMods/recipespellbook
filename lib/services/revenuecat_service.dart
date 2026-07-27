@@ -345,8 +345,10 @@ class RevenueCatService {
   Future<SubscriptionTier?> purchasePackage(Package package) async {
     if (!supportsRevenueCatSdk) return null;
     try {
-      final customerInfo = await Purchases.purchasePackage(package);
-      _syncFromCustomerInfo(customerInfo);
+      // purchases_flutter 9+ returns a PurchaseResult (customerInfo +
+      // storeTransaction) instead of a bare CustomerInfo.
+      final result = await Purchases.purchasePackage(package);
+      _syncFromCustomerInfo(result.customerInfo);
       return _currentTier;
     } catch (e) {
       // The platform throws a typed PurchasesErrorCode on some versions and a

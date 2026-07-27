@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../services/feature_gate.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../theme/app_colors.dart';
 import 'recipe_image.dart';
 
 /// Step data model for editing
@@ -282,11 +283,56 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
 
     setState(() {
       if (newIndex > oldIndex) newIndex--;
-      final item = _steps.removeAt(oldIndex);
-      _steps.insert(newIndex, item);
+      // A section header carries its whole section: the header plus every step
+      // beneath it up to the next header. Moving a header moves the block.
+      var blockLen = 1;
+      if (_steps[oldIndex].isHeader) {
+        var end = oldIndex + 1;
+        while (end < _steps.length && !_steps[end].isHeader) {
+          end++;
+        }
+        blockLen = end - oldIndex;
+      }
+      final block = _steps.sublist(oldIndex, oldIndex + blockLen);
+      _steps.removeRange(oldIndex, oldIndex + blockLen);
+      // newIndex was computed for a single-item move; shift it back for any of
+      // the block that sat before the drop target.
+      var target = newIndex;
+      if (target > oldIndex) target -= (blockLen - 1);
+      target = target.clamp(0, _steps.length);
+      _steps.insertAll(target, block);
     });
     widget.onStepsChanged(_steps);
     HapticFeedback.mediumImpact();
+  }
+
+  // Convert a step into a section header (or back), preserving its text. The
+  // number labels recompute automatically on the next build.
+  void _convertToHeader(int index) {
+    setState(() {
+      _steps[index].isHeader = true;
+      _steps[index].imagePath = null; // headers never carry a photo
+    });
+    widget.onStepsChanged(_steps);
+    HapticFeedback.selectionClick();
+  }
+
+  void _convertToStep(int index) {
+    setState(() => _steps[index].isHeader = false);
+    widget.onStepsChanged(_steps);
+    HapticFeedback.selectionClick();
+  }
+
+  void _duplicateRow(int index) {
+    final src = _steps[index];
+    final copy = EditableStep(
+      id: 'step_${DateTime.now().microsecondsSinceEpoch}',
+      instruction: src.instruction,
+      imagePath: src.imagePath,
+      isHeader: src.isHeader,
+    );
+    setState(() => _steps.insert(index + 1, copy));
+    widget.onStepsChanged(_steps);
   }
 
   void _toggleSelection(String stepId) {
@@ -372,11 +418,27 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
             itemBuilder: (context, index) {
               final step = _steps[index];
               final isSelected = _selectedStepIds.contains(step.id);
-              // Display number excludes section headers.
+
+              // Section metadata (mirrors the view screen): a step belongs to a
+              // section if a header precedes it; numbering restarts per section.
+              var grouped = step.isHeader;
               var stepNumber = 0;
-              for (var k = 0; k <= index; k++) {
-                if (!_steps[k].isHeader) stepNumber++;
+              if (!step.isHeader) {
+                var start = 0;
+                for (var k = index; k >= 0; k--) {
+                  if (_steps[k].isHeader) {
+                    start = k + 1;
+                    grouped = true;
+                    break;
+                  }
+                }
+                for (var k = start; k <= index; k++) {
+                  if (!_steps[k].isHeader) stepNumber++;
+                }
               }
+              final sectionFirst = step.isHeader;
+              final sectionLast = grouped &&
+                  (index == _steps.length - 1 || _steps[index + 1].isHeader);
 
               return _StepCard(
                 key: ValueKey(step.id),
@@ -384,9 +446,11 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
                 stepNumber: stepNumber,
                 step: step,
                 focusNode: _getFocusNode(step.id),
-                isPremium: widget.isPremium,
                 isSelected: isSelected,
                 isSelectionMode: _isSelectionMode,
+                grouped: grouped,
+                sectionFirst: sectionFirst,
+                sectionLast: sectionLast,
                 onTextChanged: (text) => _updateStep(index, text),
                 onImageChanged: (path) {
                   setState(() {
@@ -396,6 +460,10 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
                 },
                 onLongPress: () => _onLongPress(step.id),
                 onTap: _isSelectionMode ? () => _toggleSelection(step.id) : null,
+                onConvertToSection: () => _convertToHeader(index),
+                onConvertToStep: () => _convertToStep(index),
+                onDuplicate: () => _duplicateRow(index),
+                onDelete: () => _removeSteps([step.id]),
                 onImageGateCheck: () =>
                     checkFeatureAccess(context, ref, GatedFeature.stepPhotos),
                 hasStepPhotoAccess: GatedFeature.stepPhotos.isUnlockedFor(
@@ -406,26 +474,23 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
 
         const SizedBox(height: 12),
 
-        // Add step button (hidden during selection mode and bulk edit)
+        // Add step / add section (hidden during selection mode and bulk edit)
         if (!_isSelectionMode && !_bulkEditMode)
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              OutlinedButton.icon(
-                onPressed: _addStep,
-                icon: const Icon(Icons.add),
-                label: Text(l10n.addStep),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              Expanded(
+                child: _DashedAddButton(
+                  icon: Icons.add,
+                  label: l10n.addStep,
+                  onTap: _addStep,
                 ),
               ),
               const SizedBox(width: 10),
-              OutlinedButton.icon(
-                onPressed: _addSectionHeader,
-                icon: const Icon(Icons.segment, size: 18),
-                label: Text(l10n.ingredientAddHeader),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              Expanded(
+                child: _DashedAddButton(
+                  icon: Icons.segment,
+                  label: l10n.addSection,
+                  onTap: _addSectionHeader,
                 ),
               ),
             ],
@@ -474,15 +539,25 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
       );
     }
 
-    // Count steps live in bulk mode by parsing the current text. This
-    // gives the user feedback as they type / split / merge.
-    final int bulkCount = _bulkEditMode
-        ? (_bulkController?.text ?? '')
-            .split(RegExp(r'\n\s*\n'))
-            .map((s) => s.trim())
-            .where((s) => s.isNotEmpty)
-            .length
-        : _steps.length;
+    // Count steps and sections live. In bulk mode parse the text so the
+    // header updates as the user types / splits / merges.
+    int stepTally;
+    int sectionTally;
+    if (_bulkEditMode) {
+      final blocks = (_bulkController?.text ?? '')
+          .split(RegExp(r'\n\s*\n'))
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+      sectionTally = blocks.where((b) => b.startsWith('# ')).length;
+      stepTally = blocks.length - sectionTally;
+    } else {
+      sectionTally = _steps.where((s) => s.isHeader).length;
+      stepTally = _steps.length - sectionTally;
+    }
+    final counterText = sectionTally > 0
+        ? l10n.stepsSectionsCount(stepTally, sectionTally)
+        : l10n.stepCount(stepTally);
 
     // Single Premium indicator for the whole section, instead of an
     // amber star plastered on every step's camera icon.
@@ -522,7 +597,7 @@ class _InstructionsEditorState extends ConsumerState<InstructionsEditor> {
         ),
         const Spacer(),
         Text(
-          l10n.stepCount(bulkCount),
+          counterText,
           style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
         ),
       ],
@@ -580,16 +655,26 @@ class _BulkStepsEditor extends StatelessWidget {
 
 class _StepCard extends StatefulWidget {
   final int index;
+
+  /// Number within the step's own section (mirrors the view screen), read-only.
   final int stepNumber;
   final EditableStep step;
   final FocusNode focusNode;
-  final bool isPremium;
   final bool isSelected;
   final bool isSelectionMode;
+
+  /// Section grouping (computed by the parent from the flat list).
+  final bool grouped; // header, or a step under a header
+  final bool sectionFirst; // the section's header row
+  final bool sectionLast; // last row of the section
   final ValueChanged<String> onTextChanged;
   final ValueChanged<String?> onImageChanged;
   final VoidCallback onLongPress;
   final VoidCallback? onTap;
+  final VoidCallback onConvertToSection;
+  final VoidCallback onConvertToStep;
+  final VoidCallback onDuplicate;
+  final VoidCallback onDelete;
   final bool Function() onImageGateCheck;
   final bool hasStepPhotoAccess;
 
@@ -599,12 +684,18 @@ class _StepCard extends StatefulWidget {
     required this.stepNumber,
     required this.step,
     required this.focusNode,
-    required this.isPremium,
     required this.isSelected,
     required this.isSelectionMode,
+    required this.grouped,
+    required this.sectionFirst,
+    required this.sectionLast,
     required this.onTextChanged,
     required this.onImageChanged,
     required this.onLongPress,
+    required this.onConvertToSection,
+    required this.onConvertToStep,
+    required this.onDuplicate,
+    required this.onDelete,
     required this.onImageGateCheck,
     required this.hasStepPhotoAccess,
     this.onTap,
@@ -643,7 +734,6 @@ class _StepCardState extends State<_StepCard> {
   int get index => widget.index;
   EditableStep get step => widget.step;
   FocusNode get focusNode => widget.focusNode;
-  bool get isPremium => widget.isPremium;
   bool get isSelected => widget.isSelected;
   bool get isSelectionMode => widget.isSelectionMode;
   ValueChanged<String> get onTextChanged => widget.onTextChanged;
@@ -656,262 +746,312 @@ class _StepCardState extends State<_StepCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    if (step.isHeader) {
-      return _buildHeaderCard(context, theme);
-    }
-    final hasImage = step.imagePath != null &&
-        step.imagePath!.isNotEmpty &&
-        FileExistsCache.exists(step.imagePath!);
+    final c = context.appColors;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: GestureDetector(
-        onLongPress: onLongPress,
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.4)
-                : (isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.outline.withValues(alpha: 0.15),
-              width: isSelected ? 2 : 1,
+    if (isSelectionMode) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: _selectionRow(context, theme, c),
+      );
+    }
+
+    final content = step.isHeader
+        ? _headerContent(context, theme, c)
+        : _stepContent(context, theme, c);
+
+    final Widget row;
+    if (widget.grouped) {
+      row = Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Left accent rail spanning the whole section (rounded at its ends).
+          Container(
+            width: 3,
+            decoration: BoxDecoration(
+              color: c.accent,
+              borderRadius: BorderRadius.vertical(
+                top: widget.sectionFirst ? const Radius.circular(3) : Radius.zero,
+                bottom: widget.sectionLast ? const Radius.circular(3) : Radius.zero,
+              ),
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+          // Steps sit further under the rail than their header.
+          SizedBox(width: step.isHeader ? 8 : 18),
+          Expanded(child: content),
+        ],
+      );
+    } else {
+      row = content;
+    }
+
+    // No gap between rows within a section so the rail reads as continuous.
+    final bottom = (widget.grouped && !widget.sectionLast) ? 0.0 : 10.0;
+    return Padding(padding: EdgeInsets.only(bottom: bottom), child: row);
+  }
+
+  BorderRadius _groupedRadius() {
+    if (!widget.grouped) return BorderRadius.circular(12);
+    return BorderRadius.vertical(
+      top: widget.sectionFirst ? const Radius.circular(12) : Radius.zero,
+      bottom: widget.sectionLast ? const Radius.circular(12) : Radius.zero,
+    );
+  }
+
+  // ── Section header row: eyebrow + name on a raised pill ──
+  Widget _headerContent(BuildContext context, ThemeData theme, AppColors c) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      decoration: BoxDecoration(color: c.surfaceHigh, borderRadius: _groupedRadius()),
+      padding: const EdgeInsets.fromLTRB(12, 8, 2, 8),
+      child: Row(
+        children: [
+          Icon(Icons.segment, size: 18, color: c.textTertiary),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Left side: checkbox (selection mode) OR camera + number
-                if (isSelectionMode)
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: isSelected ? theme.colorScheme.primary : Colors.transparent,
-                      border: Border.all(
-                        color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
-                        width: 2,
-                      ),
-                      shape: BoxShape.circle,
-                    ),
-                    child: isSelected
-                        ? const Icon(Icons.check, size: 16, color: Colors.white)
-                        : null,
-                  )
-                else ...[
-                  // Camera icon / image thumbnail
-                  GestureDetector(
-                    onTap: () => _showImagePicker(context),
-                    child: SizedBox(
-                      width: 38,
-                      height: 38,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            width: 38,
-                            height: 38,
-                            decoration: BoxDecoration(
-                              color: hasImage
-                                  ? Colors.transparent
-                                  : (isDark
-                                  ? theme.colorScheme.surfaceContainerHighest
-                                  : theme.colorScheme.surfaceContainerLow),
-                              borderRadius: BorderRadius.circular(10),
-                              border: hasImage
-                                  ? null
-                                  : Border.all(
-                                color: theme.colorScheme.outline.withValues(alpha: 0.2),
-                              ),
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            child: hasImage
-                                ? buildFileImage(
-                              step.imagePath!,
-                              fit: BoxFit.cover,
-                              cacheHeight: 76,
-                            )
-                                : Icon(
-                              Icons.camera_alt_outlined,
-                              size: 18,
-                              color: theme.colorScheme.outline.withValues(alpha: 0.5),
-                            ),
-                          ),
-                          // Premium gating is communicated once at the
-                          // section header (see _buildHeader) — no need
-                          // to plaster a badge on every step card.
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-
-                  // Step number badge — themed rounded square
-                  Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? theme.colorScheme.primary.withValues(alpha: 0.25)
-                          : theme.colorScheme.primary.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      '${widget.stepNumber}',
-                      style: TextStyle(
-                        color: isDark
-                            ? Colors.white
-                            : theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
-
-                const SizedBox(width: 10),
-
-                // Center: text field
-                Expanded(
-                  child: AbsorbPointer(
-                    absorbing: isSelectionMode,
-                    child: TextField(
-                      focusNode: focusNode,
-                      controller: _controller,
-                      maxLines: null,
-                      minLines: 1,
-                      decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context)!.enterInstruction,
-                        hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.outline.withValues(alpha: 0.4),
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 4),
-                        isDense: true,
-                      ),
-                      style: theme.textTheme.bodyMedium,
-                      onChanged: onTextChanged,
-                    ),
+                Text(
+                  l10n.sectionLabel.toUpperCase(),
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: c.textTertiary,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    fontSize: 10,
                   ),
                 ),
-
-                // Right side: drag handle — 2-bar style
-                if (!isSelectionMode)
-                  ReorderableDragStartListener(
-                    index: index,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 4),
-                      child: Icon(
-                        Icons.drag_handle,
-                        color: theme.colorScheme.outline.withValues(alpha: 0.4),
-                        size: 22,
-                      ),
+                TextField(
+                  focusNode: focusNode,
+                  controller: _controller,
+                  maxLines: null,
+                  minLines: 1,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: InputDecoration(
+                    hintText: l10n.ingredientHeader,
+                    hintStyle: theme.textTheme.titleSmall?.copyWith(
+                      color: c.accent.withValues(alpha: 0.4),
+                      fontWeight: FontWeight.w700,
                     ),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 2),
                   ),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: c.accent,
+                  ),
+                  onChanged: onTextChanged,
+                ),
               ],
             ),
           ),
-        ),
+          _overflowMenu(context, c),
+          _dragHandle(c),
+        ],
       ),
     );
   }
 
-  Widget _buildHeaderCard(BuildContext context, ThemeData theme) {
+  // ── Step row: read-only number + roomy text + small right affordances ──
+  Widget _stepContent(BuildContext context, ThemeData theme, AppColors c) {
     final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: GestureDetector(
-        onLongPress: onLongPress,
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.4)
-                : theme.colorScheme.primary.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.primary.withValues(alpha: 0.35),
-              width: isSelected ? 2 : 1,
+    return Container(
+      decoration: BoxDecoration(color: c.surfaceRaised, borderRadius: _groupedRadius()),
+      padding: const EdgeInsets.fromLTRB(10, 8, 2, 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Read-only number label — auto-renumbers, not an input.
+          Container(
+            width: 26,
+            height: 26,
+            margin: const EdgeInsets.only(top: 2),
+            decoration: BoxDecoration(color: c.accent, borderRadius: BorderRadius.circular(8)),
+            alignment: Alignment.center,
+            child: Text(
+              '${widget.stepNumber}',
+              style: TextStyle(color: c.onAccent, fontWeight: FontWeight.bold, fontSize: 13),
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-            child: Row(
-              children: [
-                if (isSelectionMode)
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: isSelected ? theme.colorScheme.primary : Colors.transparent,
-                      border: Border.all(
-                        color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outline,
-                        width: 2,
-                      ),
-                      shape: BoxShape.circle,
-                    ),
-                    child: isSelected
-                        ? const Icon(Icons.check, size: 16, color: Colors.white)
-                        : null,
-                  )
-                else
-                  Icon(Icons.segment, size: 20, color: theme.colorScheme.primary),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: AbsorbPointer(
-                    absorbing: isSelectionMode,
-                    child: TextField(
-                      focusNode: focusNode,
-                      controller: _controller,
-                      maxLines: null,
-                      minLines: 1,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: InputDecoration(
-                        hintText: l10n.ingredientHeader,
-                        hintStyle: theme.textTheme.titleSmall?.copyWith(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.4),
-                          fontWeight: FontWeight.w700,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 4),
-                        isDense: true,
-                      ),
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: theme.colorScheme.primary,
-                      ),
-                      onChanged: onTextChanged,
-                    ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 1),
+              child: TextField(
+                focusNode: focusNode,
+                controller: _controller,
+                maxLines: null,
+                minLines: 1,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  hintText: l10n.enterInstruction,
+                  hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                    color: c.textTertiary.withValues(alpha: 0.8),
                   ),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 4),
                 ),
-                if (!isSelectionMode)
-                  ReorderableDragStartListener(
-                    index: index,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 4),
-                      child: Icon(
-                        Icons.drag_handle,
-                        color: theme.colorScheme.outline.withValues(alpha: 0.4),
-                        size: 22,
-                      ),
-                    ),
-                  ),
-              ],
+                style: theme.textTheme.bodyMedium?.copyWith(color: c.textPrimary, height: 1.35),
+                onChanged: onTextChanged,
+              ),
             ),
           ),
+          const SizedBox(width: 4),
+          _photoAffordance(context, c),
+          _overflowMenu(context, c),
+          _dragHandle(c),
+        ],
+      ),
+    );
+  }
+
+  // Small right-column photo affordance: a camera-plus glyph, or a ~28px
+  // thumbnail once a photo is set. Both open the picker.
+  Widget _photoAffordance(BuildContext context, AppColors c) {
+    final hasImage = step.imagePath != null &&
+        step.imagePath!.isNotEmpty &&
+        FileExistsCache.exists(step.imagePath!);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _showImagePicker(context),
+      child: SizedBox(
+        width: 32,
+        height: 32,
+        child: hasImage
+            ? Padding(
+                padding: const EdgeInsets.all(2),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: buildFileImage(step.imagePath!, fit: BoxFit.cover, cacheHeight: 64),
+                ),
+              )
+            : Icon(Icons.add_a_photo_outlined, size: 19, color: c.textTertiary),
+      ),
+    );
+  }
+
+  Widget _dragHandle(AppColors c) {
+    return ReorderableDragStartListener(
+      index: index,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2),
+        child: Icon(Icons.drag_indicator, size: 20, color: c.textTertiary),
+      ),
+    );
+  }
+
+  Widget _overflowMenu(BuildContext context, AppColors c) {
+    final l10n = AppLocalizations.of(context)!;
+    return PopupMenuButton<String>(
+      icon: Icon(Icons.more_vert, size: 20, color: c.textTertiary),
+      padding: EdgeInsets.zero,
+      tooltip: '',
+      onSelected: (v) {
+        switch (v) {
+          case 'toSection':
+            widget.onConvertToSection();
+            break;
+          case 'toStep':
+            widget.onConvertToStep();
+            break;
+          case 'photo':
+            _showImagePicker(context);
+            break;
+          case 'duplicate':
+            widget.onDuplicate();
+            break;
+          case 'delete':
+            widget.onDelete();
+            break;
+        }
+      },
+      itemBuilder: (context) {
+        if (step.isHeader) {
+          return [
+            PopupMenuItem<String>(
+                value: 'toStep',
+                child: _menuRow(c, Icons.list_alt_outlined, l10n.convertToStep)),
+            PopupMenuItem<String>(
+                value: 'duplicate', child: _menuRow(c, Icons.copy_outlined, l10n.duplicate)),
+            const PopupMenuDivider(),
+            PopupMenuItem<String>(
+                value: 'delete',
+                child: _menuRow(c, Icons.delete_outline, l10n.delete, destructive: true)),
+          ];
+        }
+        return [
+          PopupMenuItem<String>(
+              value: 'toSection', child: _menuRow(c, Icons.segment, l10n.convertToSection)),
+          PopupMenuItem<String>(
+              value: 'photo', child: _menuRow(c, Icons.add_a_photo_outlined, l10n.addPhoto)),
+          PopupMenuItem<String>(
+              value: 'duplicate', child: _menuRow(c, Icons.copy_outlined, l10n.duplicate)),
+          const PopupMenuDivider(),
+          PopupMenuItem<String>(
+              value: 'delete',
+              child: _menuRow(c, Icons.delete_outline, l10n.delete, destructive: true)),
+        ];
+      },
+    );
+  }
+
+  Widget _menuRow(AppColors c, IconData icon, String label, {bool destructive = false}) {
+    final color = destructive ? c.destructive : c.textPrimary;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 18, color: color),
+        const SizedBox(width: 12),
+        Text(label, style: TextStyle(color: color)),
+      ],
+    );
+  }
+
+  // Compact checkbox + text row, used only while multi-selecting.
+  Widget _selectionRow(BuildContext context, ThemeData theme, AppColors c) {
+    final l10n = AppLocalizations.of(context)!;
+    return GestureDetector(
+      onTap: onTap,
+      onLongPress: onLongPress,
+      child: Container(
+        decoration: BoxDecoration(
+          color: isSelected ? c.accent.withValues(alpha: 0.12) : c.surfaceRaised,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? c.accent : c.outline.withValues(alpha: 0.3),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 26,
+              height: 26,
+              decoration: BoxDecoration(
+                color: isSelected ? c.accent : Colors.transparent,
+                border: Border.all(color: isSelected ? c.accent : c.outline, width: 2),
+                shape: BoxShape.circle,
+              ),
+              child: isSelected ? Icon(Icons.check, size: 16, color: c.onAccent) : null,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                step.instruction.trim().isEmpty
+                    ? (step.isHeader ? l10n.ingredientHeader : l10n.enterInstruction)
+                    : step.instruction,
+                style: step.isHeader
+                    ? theme.textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700, color: c.accent)
+                    : theme.textTheme.bodyMedium?.copyWith(color: c.textPrimary),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -999,6 +1139,91 @@ class _StepCardState extends State<_StepCard> {
       ),
     );
   }
+}
+
+// ============ DASHED ADD BUTTON ============
+
+/// Dashed-outline button used for "Add step" / "Add section".
+class _DashedAddButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _DashedAddButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final c = context.appColors;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: CustomPaint(
+        painter: _DashedRRectPainter(
+          color: c.outline.withValues(alpha: 0.7),
+          radius: 12,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 18, color: c.accent),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: c.accent,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DashedRRectPainter extends CustomPainter {
+  final Color color;
+  final double radius;
+
+  const _DashedRRectPainter({required this.color, required this.radius});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4;
+    final rrect = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      Radius.circular(radius),
+    );
+    final path = Path()..addRRect(rrect);
+    const dash = 5.0;
+    const gap = 4.0;
+    for (final metric in path.computeMetrics()) {
+      var dist = 0.0;
+      while (dist < metric.length) {
+        final end = dist + dash > metric.length ? metric.length : dist + dash;
+        canvas.drawPath(metric.extractPath(dist, end), paint);
+        dist += dash + gap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedRRectPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.radius != radius;
 }
 
 // ============ SELECTION ACTION BAR ============

@@ -9,6 +9,33 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
+  String get convertToSection => 'セクションに変換';
+
+  @override
+  String get convertToStep => 'ステップに変換';
+
+  @override
+  String get addSection => 'セクションを追加';
+
+  @override
+  String get sectionLabel => 'セクション';
+
+  @override
+  String stepsSectionsCount(int steps, int sections) {
+    String _temp0 = intl.Intl.pluralLogic(
+      steps,
+      locale: localeName,
+      other: '$steps ステップ',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      sections,
+      locale: localeName,
+      other: '$sections セクション',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
   String get appTitle => 'Recipe Spellbook';
 
   @override

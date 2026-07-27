@@ -9,6 +9,33 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get convertToSection => '转换为小节';
+
+  @override
+  String get convertToStep => '转换为步骤';
+
+  @override
+  String get addSection => '添加小节';
+
+  @override
+  String get sectionLabel => '小节';
+
+  @override
+  String stepsSectionsCount(int steps, int sections) {
+    String _temp0 = intl.Intl.pluralLogic(
+      steps,
+      locale: localeName,
+      other: '$steps 个步骤',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      sections,
+      locale: localeName,
+      other: '$sections 个小节',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
   String get appTitle => 'Recipe Spellbook';
 
   @override

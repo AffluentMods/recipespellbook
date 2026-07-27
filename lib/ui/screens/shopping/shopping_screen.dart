@@ -2826,8 +2826,8 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
                   padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4, right: 4),
                   child: Row(
                     children: [
-                      Icon(Icons.check,
-                          size: 16, color: theme.colorScheme.primary),
+                      Text(IngredientImages.getEmoji(item),
+                          style: const TextStyle(fontSize: 16)),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(item, style: theme.textTheme.bodyMedium),

@@ -1,4 +1,9 @@
 {
+  "convertToSection": "Omzetten naar sectie",
+  "convertToStep": "Omzetten naar stap",
+  "addSection": "Sectie toevoegen",
+  "sectionLabel": "Sectie",
+  "stepsSectionsCount": "{steps, plural, =1{1 stap} other{{steps} stappen}} · {sections, plural, =1{1 sectie} other{{sections} secties}}",
   "@@locale": "nl",
   "@@last_modified": "2026-01-28",
   "appTitle": "Recipe Spellbook",

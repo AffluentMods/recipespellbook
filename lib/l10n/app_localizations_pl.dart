@@ -9,6 +9,39 @@ class AppLocalizationsPl extends AppLocalizations {
   AppLocalizationsPl([String locale = 'pl']) : super(locale);
 
   @override
+  String get convertToSection => 'Zmień w sekcję';
+
+  @override
+  String get convertToStep => 'Zmień w krok';
+
+  @override
+  String get addSection => 'Dodaj sekcję';
+
+  @override
+  String get sectionLabel => 'Sekcja';
+
+  @override
+  String stepsSectionsCount(int steps, int sections) {
+    String _temp0 = intl.Intl.pluralLogic(
+      steps,
+      locale: localeName,
+      other: '$steps kroku',
+      many: '$steps kroków',
+      few: '$steps kroki',
+      one: '1 krok',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      sections,
+      locale: localeName,
+      other: '$sections sekcji',
+      many: '$sections sekcji',
+      few: '$sections sekcje',
+      one: '1 sekcja',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
   String get appTitle => 'Recipe Spellbook';
 
   @override

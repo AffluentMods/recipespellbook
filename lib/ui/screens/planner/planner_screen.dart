@@ -921,15 +921,14 @@ class _CompactMealCard extends ConsumerWidget {
                 ),
                 const SizedBox(width: 4),
                 Expanded(
-                  child: Tooltip(
-                    message: title,
-                    child: Text(
-                      normalizeTitle(title).title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                  // No Tooltip: its long-press recognizer competes with the
+                  // card's selection long-press. Title stays ellipsized.
+                  child: Text(
+                    normalizeTitle(title).title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -1436,17 +1435,18 @@ class _MealBlock extends ConsumerWidget {
                               ),
                             ),
                             const SizedBox(height: 3),
-                            Tooltip(
-                              message: title,
-                              child: Text(
-                                normalizeTitle(title).title,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  color: onColor,
-                                  fontWeight: FontWeight.w700,
-                                  height: 1.15,
-                                ),
+                            // No Tooltip here: its long-press recognizer would
+                            // win the gesture arena over the card's InkWell and
+                            // swallow the long-press-to-select. The full title is
+                            // reachable via the tile's open-recipe button / sheet.
+                            Text(
+                              normalizeTitle(title).title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: onColor,
+                                fontWeight: FontWeight.w700,
+                                height: 1.15,
                               ),
                             ),
                             if (subtitle.isNotEmpty) ...[
@@ -1500,6 +1500,26 @@ class _MealBlock extends ConsumerWidget {
                         isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
                         color: Colors.white,
                         size: 24,
+                      ),
+                    ),
+                  ),
+                // Quick jump straight to the recipe (skips the edit sheet). Its
+                // own InkWell sits in front of the card, so it intercepts the tap
+                // without disturbing the card's tap/long-press behaviour.
+                if (!selecting && r != null)
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: Material(
+                      color: Colors.black.withValues(alpha: 0.22),
+                      shape: const CircleBorder(),
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: () => context.push('/recipe/${r.id}'),
+                        child: const Padding(
+                          padding: EdgeInsets.all(5),
+                          child: Icon(Icons.open_in_new, color: onColor, size: 16),
+                        ),
                       ),
                     ),
                   ),

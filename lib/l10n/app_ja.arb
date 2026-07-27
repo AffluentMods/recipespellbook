@@ -1,4 +1,9 @@
 {
+  "convertToSection": "セクションに変換",
+  "convertToStep": "ステップに変換",
+  "addSection": "セクションを追加",
+  "sectionLabel": "セクション",
+  "stepsSectionsCount": "{steps, plural, other{{steps} ステップ}} · {sections, plural, other{{sections} セクション}}",
   "@@locale": "ja",
   "@@last_modified": "2026-01-28",
   "appTitle": "Recipe Spellbook",

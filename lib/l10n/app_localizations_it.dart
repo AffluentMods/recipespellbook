@@ -9,6 +9,35 @@ class AppLocalizationsIt extends AppLocalizations {
   AppLocalizationsIt([String locale = 'it']) : super(locale);
 
   @override
+  String get convertToSection => 'Converti in sezione';
+
+  @override
+  String get convertToStep => 'Converti in passaggio';
+
+  @override
+  String get addSection => 'Aggiungi sezione';
+
+  @override
+  String get sectionLabel => 'Sezione';
+
+  @override
+  String stepsSectionsCount(int steps, int sections) {
+    String _temp0 = intl.Intl.pluralLogic(
+      steps,
+      locale: localeName,
+      other: '$steps passaggi',
+      one: '1 passaggio',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      sections,
+      locale: localeName,
+      other: '$sections sezioni',
+      one: '1 sezione',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
   String get appTitle => 'Recipe Spellbook';
 
   @override

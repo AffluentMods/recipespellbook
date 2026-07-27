@@ -1124,16 +1124,27 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
         );
         await recipeDao.updateRecipeFields(widget.recipeId!, recipe);
 
-        // Save ingredients
+        // Save ingredients. Reuse each row's STABLE id (loaded from the DB, or
+        // minted when the row was added) rather than a position-derived one, so
+        // recipe_links keyed on the ingredient id survive edits, reorders and
+        // header insert/remove. A position id (recipeId_ing_$i) silently broke
+        // every linked ingredient whenever the list shifted. Fall back to a
+        // collision-proof id only for empty/duplicate carried ids.
         await recipeDao.deleteIngredientsForRecipe(widget.recipeId!);
+        final usedIngIds = <String>{};
         for (var i = 0; i < _ingredients.length; i++) {
           if (_ingredients[i].text.trim().isNotEmpty) {
+            var ingId = _ingredients[i].id;
+            if (ingId.isEmpty || usedIngIds.contains(ingId)) {
+              ingId = '${widget.recipeId}_ing_${i}_${DateTime.now().microsecondsSinceEpoch}';
+            }
+            usedIngIds.add(ingId);
             if (_ingredients[i].isHeader) {
               // Save header as ingredient with __header__ marker
-              await recipeDao.insertIngredient(IngredientsCompanion.insert(id: '${widget.recipeId}_ing_$i', recipeId: widget.recipeId!, sortOrder: i, name: _ingredients[i].text.trim(), amount: const drift.Value(null), unit: const drift.Value(null), notes: const drift.Value('__header__')));
+              await recipeDao.insertIngredient(IngredientsCompanion.insert(id: ingId, recipeId: widget.recipeId!, sortOrder: i, name: _ingredients[i].text.trim(), amount: const drift.Value(null), unit: const drift.Value(null), notes: const drift.Value('__header__')));
             } else {
               final parsed = _parseIngredient(_ingredients[i].text);
-              await recipeDao.insertIngredient(IngredientsCompanion.insert(id: '${widget.recipeId}_ing_$i', recipeId: widget.recipeId!, sortOrder: i, name: parsed.name, amount: drift.Value(parsed.amount), unit: drift.Value(parsed.unit), notes: drift.Value(parsed.notes)));
+              await recipeDao.insertIngredient(IngredientsCompanion.insert(id: ingId, recipeId: widget.recipeId!, sortOrder: i, name: parsed.name, amount: drift.Value(parsed.amount), unit: drift.Value(parsed.unit), notes: drift.Value(parsed.notes)));
             }
           }
         }
@@ -1183,14 +1194,20 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
           lastViewedAt: drift.Value(DateTime.now()),
         ));
 
-        // Save ingredients
+        // Save ingredients with stable ids (so links added later stay valid).
+        final usedIngIds = <String>{};
         for (var i = 0; i < _ingredients.length; i++) {
           if (_ingredients[i].text.trim().isNotEmpty) {
+            var ingId = _ingredients[i].id;
+            if (ingId.isEmpty || usedIngIds.contains(ingId)) {
+              ingId = '${recipeId}_ing_${i}_${DateTime.now().microsecondsSinceEpoch}';
+            }
+            usedIngIds.add(ingId);
             if (_ingredients[i].isHeader) {
-              await recipeDao.insertIngredient(IngredientsCompanion.insert(id: '${recipeId}_ing_$i', recipeId: recipeId, sortOrder: i, name: _ingredients[i].text.trim(), amount: const drift.Value(null), unit: const drift.Value(null), notes: const drift.Value('__header__')));
+              await recipeDao.insertIngredient(IngredientsCompanion.insert(id: ingId, recipeId: recipeId, sortOrder: i, name: _ingredients[i].text.trim(), amount: const drift.Value(null), unit: const drift.Value(null), notes: const drift.Value('__header__')));
             } else {
               final parsed = _parseIngredient(_ingredients[i].text);
-              await recipeDao.insertIngredient(IngredientsCompanion.insert(id: '${recipeId}_ing_$i', recipeId: recipeId, sortOrder: i, name: parsed.name, amount: drift.Value(parsed.amount), unit: drift.Value(parsed.unit), notes: drift.Value(parsed.notes)));
+              await recipeDao.insertIngredient(IngredientsCompanion.insert(id: ingId, recipeId: recipeId, sortOrder: i, name: parsed.name, amount: drift.Value(parsed.amount), unit: drift.Value(parsed.unit), notes: drift.Value(parsed.notes)));
             }
           }
         }

@@ -1,4 +1,15 @@
 {
+  "convertToSection": "Convert to section",
+  "convertToStep": "Convert to step",
+  "addSection": "Add section",
+  "sectionLabel": "Section",
+  "stepsSectionsCount": "{steps, plural, =1{1 step} other{{steps} steps}} · {sections, plural, =1{1 section} other{{sections} sections}}",
+  "@stepsSectionsCount": {
+    "placeholders": {
+      "steps": { "type": "int" },
+      "sections": { "type": "int" }
+    }
+  },
   "@@locale": "en",
   "@@last_modified": "2026-01-28",
   "appTitle": "Recipe Spellbook",

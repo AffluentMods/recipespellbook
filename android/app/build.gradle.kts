@@ -40,7 +40,8 @@ android {
 
     defaultConfig {
         applicationId = "com.affluentlabs.recipespellbook"
-        minSdk = flutter.minSdkVersion
+        // purchases_flutter 10 (Play Billing Library 8.3) requires API 23+.
+        minSdk = maxOf(flutter.minSdkVersion, 23)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

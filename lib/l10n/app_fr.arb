@@ -1,4 +1,9 @@
 {
+  "convertToSection": "Convertir en section",
+  "convertToStep": "Convertir en étape",
+  "addSection": "Ajouter une section",
+  "sectionLabel": "Section",
+  "stepsSectionsCount": "{steps, plural, =1{1 étape} other{{steps} étapes}} · {sections, plural, =1{1 section} other{{sections} sections}}",
   "navHome": "Accueil",
   "navCookbooks": "Livres de recettes",
   "navPlanner": "Planificateur",

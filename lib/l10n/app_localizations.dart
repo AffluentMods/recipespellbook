@@ -115,6 +115,36 @@ abstract class AppLocalizations {
     Locale('zh')
   ];
 
+  /// No description provided for @convertToSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to section'**
+  String get convertToSection;
+
+  /// No description provided for @convertToStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to step'**
+  String get convertToStep;
+
+  /// No description provided for @addSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add section'**
+  String get addSection;
+
+  /// No description provided for @sectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Section'**
+  String get sectionLabel;
+
+  /// No description provided for @stepsSectionsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{steps, plural, =1{1 step} other{{steps} steps}} · {sections, plural, =1{1 section} other{{sections} sections}}'**
+  String stepsSectionsCount(int steps, int sections);
+
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:

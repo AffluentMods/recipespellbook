@@ -1,4 +1,9 @@
 {
+  "convertToSection": "In Abschnitt umwandeln",
+  "convertToStep": "In Schritt umwandeln",
+  "addSection": "Abschnitt hinzufügen",
+  "sectionLabel": "Abschnitt",
+  "stepsSectionsCount": "{steps, plural, =1{1 Schritt} other{{steps} Schritte}} · {sections, plural, =1{1 Abschnitt} other{{sections} Abschnitte}}",
   "@@locale": "de",
   "appTitle": "Rezept-Zauberbuch",
   "navHome": "Startseite",

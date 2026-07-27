@@ -1,4 +1,9 @@
 {
+  "convertToSection": "Zmień w sekcję",
+  "convertToStep": "Zmień w krok",
+  "addSection": "Dodaj sekcję",
+  "sectionLabel": "Sekcja",
+  "stepsSectionsCount": "{steps, plural, =1{1 krok} few{{steps} kroki} many{{steps} kroków} other{{steps} kroku}} · {sections, plural, =1{1 sekcja} few{{sections} sekcje} many{{sections} sekcji} other{{sections} sekcji}}",
   "@@locale": "pl",
   "@@last_modified": "2026-01-28",
   "appTitle": "Recipe Spellbook",

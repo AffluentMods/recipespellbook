@@ -1,4 +1,9 @@
 {
+  "convertToSection": "转换为小节",
+  "convertToStep": "转换为步骤",
+  "addSection": "添加小节",
+  "sectionLabel": "小节",
+  "stepsSectionsCount": "{steps, plural, other{{steps} 个步骤}} · {sections, plural, other{{sections} 个小节}}",
   "@@locale": "zh",
   "@@last_modified": "2026-01-28",
   "appTitle": "Recipe Spellbook",

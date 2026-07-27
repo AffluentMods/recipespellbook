@@ -9,6 +9,39 @@ class AppLocalizationsRu extends AppLocalizations {
   AppLocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
+  String get convertToSection => 'Преобразовать в раздел';
+
+  @override
+  String get convertToStep => 'Преобразовать в шаг';
+
+  @override
+  String get addSection => 'Добавить раздел';
+
+  @override
+  String get sectionLabel => 'Раздел';
+
+  @override
+  String stepsSectionsCount(int steps, int sections) {
+    String _temp0 = intl.Intl.pluralLogic(
+      steps,
+      locale: localeName,
+      other: '$steps шага',
+      many: '$steps шагов',
+      few: '$steps шага',
+      one: '1 шаг',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      sections,
+      locale: localeName,
+      other: '$sections раздела',
+      many: '$sections разделов',
+      few: '$sections раздела',
+      one: '1 раздел',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
   String get appTitle => 'Recipe Spellbook';
 
   @override

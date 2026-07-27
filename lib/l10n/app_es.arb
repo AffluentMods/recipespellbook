@@ -1,4 +1,9 @@
 {
+  "convertToSection": "Convertir en sección",
+  "convertToStep": "Convertir en paso",
+  "addSection": "Añadir sección",
+  "sectionLabel": "Sección",
+  "stepsSectionsCount": "{steps, plural, =1{1 paso} other{{steps} pasos}} · {sections, plural, =1{1 sección} other{{sections} secciones}}",
   "@@locale": "es",
   "appTitle": "Recetario Mágico",
   "navHome": "Inicio",

@@ -1,4 +1,9 @@
 {
+  "convertToSection": "Converti in sezione",
+  "convertToStep": "Converti in passaggio",
+  "addSection": "Aggiungi sezione",
+  "sectionLabel": "Sezione",
+  "stepsSectionsCount": "{steps, plural, =1{1 passaggio} other{{steps} passaggi}} · {sections, plural, =1{1 sezione} other{{sections} sezioni}}",
   "navHome": "Home",
   "navCookbooks": "Ricettari",
   "navPlanner": "Pianificatore",
