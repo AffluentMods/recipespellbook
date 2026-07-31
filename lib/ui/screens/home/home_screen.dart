@@ -65,6 +65,7 @@ class HomeScreen extends ConsumerWidget {
     return cookbookAsync.when(
       data: (cookbook) {
         final cookbookId = cookbook?.id ?? 'starter';
+        final wide = Responsive.useNavRail(context);
 
         // Trigger onboarding on first launch (once per app session)
         if (!_onboardingChecked) {
@@ -88,6 +89,21 @@ class HomeScreen extends ConsumerWidget {
                   appTitle: l10n.appTitle,
                 ),
                 actions: [
+                  if (wide)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Responsive.isExpanded(context)
+                          ? FilledButton.icon(
+                              onPressed: () => showNewRecipeDialog(context, cookbookId),
+                              icon: const Icon(Icons.add),
+                              label: Text(l10n.recipeAdd),
+                            )
+                          : IconButton.filled(
+                              icon: const Icon(Icons.add),
+                              tooltip: l10n.recipeAdd,
+                              onPressed: () => showNewRecipeDialog(context, cookbookId),
+                            ),
+                    ),
                   IconButton(
                     icon: const Icon(Icons.search),
                     tooltip: l10n.searchTitle,
@@ -137,11 +153,21 @@ class HomeScreen extends ConsumerWidget {
 
                         const SizedBox(height: 8),
 
-                        // Courses
-                        _CoursesSection(cookbookId: cookbookId, recipes: recipes),
-
-                        // Categories
-                        _CategoriesSection(cookbookId: cookbookId, recipes: recipes),
+                        // Courses + Categories — side-by-side on wide layouts,
+                        // stacked on phones.
+                        if (Responsive.isExpanded(context))
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(child: _CoursesSection(cookbookId: cookbookId, recipes: recipes)),
+                              const SizedBox(width: 8),
+                              Expanded(child: _CategoriesSection(cookbookId: cookbookId, recipes: recipes)),
+                            ],
+                          )
+                        else ...[
+                          _CoursesSection(cookbookId: cookbookId, recipes: recipes),
+                          _CategoriesSection(cookbookId: cookbookId, recipes: recipes),
+                        ],
 
                         // Uncategorized recipes
                         _UncategorizedSection(cookbookId: cookbookId, recipes: recipes),
@@ -154,10 +180,12 @@ class HomeScreen extends ConsumerWidget {
               ),
             ],
           ),
-          floatingActionButton: _ModernFAB(
-            onPressed: () => showNewRecipeDialog(context, cookbookId),
-            label: l10n.recipeAdd,
-          ),
+          floatingActionButton: wide
+              ? null
+              : _ModernFAB(
+                  onPressed: () => showNewRecipeDialog(context, cookbookId),
+                  label: l10n.recipeAdd,
+                ),
         );
       },
       loading: () {
@@ -189,7 +217,13 @@ class _SurpriseMeCard extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: Card(
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: Responsive.isDesktopLayout(context) ? 560 : double.infinity,
+          ),
+          child: Card(
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -252,6 +286,8 @@ class _SurpriseMeCard extends ConsumerWidget {
             ),
           ),
         ),
+          ),
+        ),
       ),
     );
   }
@@ -306,9 +342,11 @@ class _QuickRecipesWidgetState extends ConsumerState<_QuickRecipesWidget> {
           return const SizedBox.shrink();
         }
 
-        // Show max 7 items, then "See All"
-        final displayItems = items.take(7).toList();
-        final hasMore = items.length > 7;
+        final wide = Responsive.useNavRail(context);
+        // Show more items on wide layouts, then "See All"
+        final cap = Responsive.isExpanded(context) ? 12 : (wide ? 8 : 7);
+        final displayItems = items.take(cap).toList();
+        final hasMore = items.length > cap;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,18 +387,36 @@ class _QuickRecipesWidgetState extends ConsumerState<_QuickRecipesWidget> {
               ),
             ),
 
-            // Horizontal scroll list
-            SizedBox(
-              height: Responsive.quickAccessHeight(context),
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
-                itemCount: displayItems.length,
-                itemBuilder: (context, index) {
-                  return _QuickRecipeCard(item: displayItems[index]);
-                },
+            // Cards — a Wrap grid on wide layouts, a horizontal strip on phone
+            if (wide)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                child: Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    for (final it in displayItems)
+                      // Roomier tiles on big monitors; the Wrap still flows more
+                      // per row as the window widens rather than stretching them.
+                      _QuickRecipeCard(
+                        item: it,
+                        width: Responsive.isExpanded(context) ? 176 : 150,
+                      ),
+                  ],
+                ),
+              )
+            else
+              SizedBox(
+                height: Responsive.quickAccessHeight(context),
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+                  itemCount: displayItems.length,
+                  itemBuilder: (context, index) {
+                    return _QuickRecipeCard(item: displayItems[index]);
+                  },
+                ),
               ),
-            ),
           ],
         );
       },
@@ -537,8 +593,9 @@ class _QuickRecipeItem {
 
 class _QuickRecipeCard extends StatelessWidget {
   final _QuickRecipeItem item;
+  final double width;
 
-  const _QuickRecipeCard({required this.item});
+  const _QuickRecipeCard({required this.item, this.width = 130});
 
   @override
   Widget build(BuildContext context) {
@@ -548,7 +605,7 @@ class _QuickRecipeCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => context.push('/recipe/${item.recipe.id}'),
       child: Container(
-        width: 130,
+        width: width,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         child: Card(
           margin: EdgeInsets.zero,
@@ -744,23 +801,41 @@ class _CoursesSectionState extends ConsumerState<_CoursesSection> {
             ],
           ),
         ),
-        SizedBox(
-          height: Responsive.chipRowHeight(context),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+        if (Responsive.useNavRail(context))
+          Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
-            itemCount: chips.length,
-            itemBuilder: (context, index) {
-              final chip = chips[index];
-              return _CourseChip(
-                label: chip.name,
-                emoji: chip.emoji,
-                count: chip.count,
-                onTap: () => context.push('/recipes?cookbook=${widget.cookbookId}&course=${chip.id}&title=${Uri.encodeComponent(chip.name)}'),
-              );
-            },
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final chip in chips)
+                  _CourseChip(
+                    label: chip.name,
+                    emoji: chip.emoji,
+                    count: chip.count,
+                    onTap: () => context.push('/recipes?cookbook=${widget.cookbookId}&course=${chip.id}&title=${Uri.encodeComponent(chip.name)}'),
+                  ),
+              ],
+            ),
+          )
+        else
+          SizedBox(
+            height: Responsive.chipRowHeight(context),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+              itemCount: chips.length,
+              itemBuilder: (context, index) {
+                final chip = chips[index];
+                return _CourseChip(
+                  label: chip.name,
+                  emoji: chip.emoji,
+                  count: chip.count,
+                  onTap: () => context.push('/recipes?cookbook=${widget.cookbookId}&course=${chip.id}&title=${Uri.encodeComponent(chip.name)}'),
+                );
+              },
+            ),
           ),
-        ),
       ],
     );
   }
@@ -861,23 +936,41 @@ class _CategoriesSectionState extends ConsumerState<_CategoriesSection> {
             ],
           ),
         ),
-        SizedBox(
-          height: Responsive.chipRowHeight(context),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+        if (Responsive.useNavRail(context))
+          Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
-            itemCount: chips.length,
-            itemBuilder: (context, index) {
-              final chip = chips[index];
-              return _CourseChip(
-                label: chip.name,
-                emoji: chip.emoji,
-                count: chip.count,
-                onTap: () => context.push('/recipes?cookbook=${widget.cookbookId}&category=${chip.id}&title=${Uri.encodeComponent(chip.name)}'),
-              );
-            },
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final chip in chips)
+                  _CourseChip(
+                    label: chip.name,
+                    emoji: chip.emoji,
+                    count: chip.count,
+                    onTap: () => context.push('/recipes?cookbook=${widget.cookbookId}&category=${chip.id}&title=${Uri.encodeComponent(chip.name)}'),
+                  ),
+              ],
+            ),
+          )
+        else
+          SizedBox(
+            height: Responsive.chipRowHeight(context),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+              itemCount: chips.length,
+              itemBuilder: (context, index) {
+                final chip = chips[index];
+                return _CourseChip(
+                  label: chip.name,
+                  emoji: chip.emoji,
+                  count: chip.count,
+                  onTap: () => context.push('/recipes?cookbook=${widget.cookbookId}&category=${chip.id}&title=${Uri.encodeComponent(chip.name)}'),
+                );
+              },
+            ),
           ),
-        ),
       ],
     );
   }
@@ -951,6 +1044,8 @@ class _UncategorizedSectionState extends ConsumerState<_UncategorizedSection> {
 
     if (uncategorized.isEmpty) return const SizedBox.shrink();
 
+    final cap = Responsive.isExpanded(context) ? 18 : 10;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -979,18 +1074,37 @@ class _UncategorizedSectionState extends ConsumerState<_UncategorizedSection> {
             ],
           ),
         ),
-        SizedBox(
-          height: Responsive.quickAccessHeight(context),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+        if (Responsive.useNavRail(context))
+          Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
-            itemCount: uncategorized.length.clamp(0, 10), // Show max 10
-            itemBuilder: (context, index) {
-              final recipe = uncategorized[index];
-              return _UncategorizedRecipeChip(recipe: recipe);
-            },
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                // Fixed height REQUIRED: the chip uses Expanded internally, so a
+                // bare Wrap child (unbounded height) would crash.
+                for (final recipe in uncategorized.take(cap))
+                  SizedBox(
+                    width: 150,
+                    height: 170,
+                    child: _UncategorizedRecipeChip(recipe: recipe),
+                  ),
+              ],
+            ),
+          )
+        else
+          SizedBox(
+            height: Responsive.quickAccessHeight(context),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+              itemCount: uncategorized.length.clamp(0, cap),
+              itemBuilder: (context, index) {
+                final recipe = uncategorized[index];
+                return _UncategorizedRecipeChip(recipe: recipe);
+              },
+            ),
           ),
-        ),
       ],
     );
   }

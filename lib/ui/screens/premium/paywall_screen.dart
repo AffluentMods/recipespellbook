@@ -111,7 +111,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
 
                 // ── Scrollable content ──
                 Expanded(
-                  child: Responsive.constrainWidth(context, child: SingleChildScrollView(
+                  child: Responsive.constrainWidth(context, maxWidth: 480, child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       children: [
@@ -237,34 +237,37 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
               ),
 
             // CTA button
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: Material(
-                  key: ValueKey(_purchasing),
-                  color: accentColor,
-                  borderRadius: BorderRadius.circular(16),
-                  elevation: 2,
-                  shadowColor: accentColor.withValues(alpha: 0.4),
-                  child: InkWell(
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: Material(
+                    key: ValueKey(_purchasing),
+                    color: accentColor,
                     borderRadius: BorderRadius.circular(16),
-                    onTap: _purchasing ? null : () => _handlePurchase(authState),
-                    child: Center(
-                      child: _purchasing
-                          ? const SizedBox(
-                              width: 24, height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-                            )
-                          : Text(
-                              l10n.paywallGetPlan(planName, planPrice),
-                              style: TextStyle(
-                                color: isDark ? Colors.black : Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
+                    elevation: 2,
+                    shadowColor: accentColor.withValues(alpha: 0.4),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: _purchasing ? null : () => _handlePurchase(authState),
+                      child: Center(
+                        child: _purchasing
+                            ? const SizedBox(
+                                width: 24, height: 24,
+                                child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                              )
+                            : Text(
+                                l10n.paywallGetPlan(planName, planPrice),
+                                style: TextStyle(
+                                  color: isDark ? Colors.black : Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                ),
                               ),
-                            ),
+                      ),
                     ),
                   ),
                 ),

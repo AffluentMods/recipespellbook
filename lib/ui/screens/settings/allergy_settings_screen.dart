@@ -157,6 +157,15 @@ class _AllergySettingsScreenState extends ConsumerState<AllergySettingsScreen>
         appBar: AppBar(
           title: Text(l10n.allergySettingsTitle),
           actions: [
+            if (_hasChanges && _tabController.index == 0 && Responsive.useNavRail(context))
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: FilledButton.icon(
+                  onPressed: _saveAndPop,
+                  icon: const Icon(Icons.save),
+                  label: Text(l10n.actionSave),
+                ),
+              ),
             if (_tabController.index == 0)
               PopupMenuButton<String>(
                 onSelected: (value) {
@@ -210,12 +219,12 @@ class _AllergySettingsScreenState extends ConsumerState<AllergySettingsScreen>
           controller: _tabController,
           children: [
             // Tab 1: My Allergies
-            Responsive.constrainWidth(context, child: _buildAllergiesTab(theme, l10n)),
+            Responsive.constrainWidth(context, maxWidth: Responsive.settingsGridMaxWidth, child: _buildAllergiesTab(theme, l10n)),
             // Tab 2: Disabled Warnings
-            Responsive.constrainWidth(context, child: _DisabledWarningsTab()),
+            Responsive.constrainWidth(context, maxWidth: Responsive.settingsGridMaxWidth, child: _DisabledWarningsTab()),
           ],
         ),
-        floatingActionButton: _hasChanges && _tabController.index == 0
+        floatingActionButton: _hasChanges && _tabController.index == 0 && !Responsive.useNavRail(context)
             ? FloatingActionButton.extended(
           onPressed: _saveAndPop,
           icon: const Icon(Icons.save),

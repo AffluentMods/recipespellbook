@@ -18,7 +18,7 @@ class RecipeLayoutSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.settingsRecipeLayout),
       ),
-      body: Responsive.constrainWidth(context, child: ListView(
+      body: Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // Description

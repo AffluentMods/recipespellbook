@@ -21,7 +21,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.settingsNotifications),
       ),
-      body: Responsive.constrainWidth(context, child: ListView(
+      body: Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: ListView(
         children: [
           // ── Cooking Reminders ──
           _SectionHeader(title: l10n.settingsNotifCooking, icon: Icons.schedule),

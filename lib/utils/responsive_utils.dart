@@ -1,5 +1,16 @@
 import 'package:flutter/material.dart';
 
+/// Coarse window classes for CONTENT layout decisions (column counts, wrapper
+/// choice). Distinct from the shell breakpoints (sidebar at >=900) — this is
+/// about how the content area flows.
+enum WindowClass { compact, medium, expanded }
+
+WindowClass windowClassFor(double width) {
+  if (width < 600) return WindowClass.compact; // phone — unchanged
+  if (width < 1240) return WindowClass.medium; // tablet / small desktop
+  return WindowClass.expanded; // desktop
+}
+
 /// Responsive layout utilities for adaptive grid/column counts.
 ///
 /// Breakpoints:
@@ -75,11 +86,44 @@ class Responsive {
     return null; // no constraint on phones
   }
 
+  /// Editorial column widths for settings-style screens (Codex desktop/tablet).
+  static const double settingsListMaxWidth = 760; // main list + simple forms
+  static const double settingsGridMaxWidth = 820; // screens with 2-col grids/chips
+
+  /// Logical px reserved by the desktop sidebar (_AppSidebar in app_shell.dart).
+  /// Keep in sync with that widget's width.
+  static const double kSidebarWidth = 240;
+
+  /// Width available to page CONTENT: window minus the desktop sidebar.
+  static double contentWidth(BuildContext context) =>
+      useExpandedSidebar(context) ? width(context) - kSidebarWidth : width(context);
+
+  /// Two-pane master/detail only when the CONTENT area (after the sidebar) is
+  /// wide enough for a readable detail column — not merely the window.
+  static bool useTwoPane(BuildContext context) => contentWidth(context) >= 900;
+
+  /// Coarse content window class for the current context (see [windowClassFor]).
+  static WindowClass windowClass(BuildContext context) =>
+      windowClassFor(width(context));
+
+  // ── Canonical layout tokens (used by ReadingColumn / FlowGrid) ──
+  /// Reading-column cap: forms, settings, lists, guides, reading content.
+  static const double kReadingMaxWidth = 800;
+  /// Pure-list cap (e.g. shopping) — a touch tighter than reading content.
+  static const double kListMaxWidth = 720;
+  /// Target minimum tile width for flowing grids; column count derives from it.
+  static const double kGridMinTileWidth = 200;
+  /// Hard ceiling on grid column count so tiles don't get tiny on ultrawide.
+  static const int kGridMaxColumns = 6;
+
   /// Wraps child in a centered ConstrainedBox on very wide screens.
+  /// Pass [maxWidth] for a tighter, purpose-specific column (e.g. an editorial
+  /// recipe reading column or a form), otherwise the default 1200 is used.
   /// For scrollable content, use [constrainScrollable] instead to ensure
   /// scroll input works across the full window width (not just the center).
-  static Widget constrainWidth(BuildContext context, {required Widget child}) {
-    final max = maxContentWidth(context);
+  static Widget constrainWidth(BuildContext context,
+      {required Widget child, double? maxWidth}) {
+    final max = maxWidth ?? maxContentWidth(context);
     if (max == null) return child;
     return Center(
       child: ConstrainedBox(

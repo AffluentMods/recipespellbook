@@ -50,6 +50,12 @@ class _ManageCategoriesScreenState extends ConsumerState<ManageCategoriesScreen>
       appBar: AppBar(
         title: Text(l10n.settingsManageCategories),
         actions: [
+          if (Responsive.useNavRail(context))
+            IconButton(
+              icon: const Icon(Icons.add),
+              tooltip: l10n.actionAdd,
+              onPressed: _addCategory,
+            ),
           PopupMenuButton<String>(
             onSelected: (v) { if (v == 'restore') _restoreDefaults(); },
             itemBuilder: (_) => [
@@ -60,7 +66,7 @@ class _ManageCategoriesScreenState extends ConsumerState<ManageCategoriesScreen>
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Responsive.constrainWidth(context, child: ListView.builder(
+          : Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: ListView.builder(
         padding: const EdgeInsets.only(bottom: 80),
         itemCount: _categories.length,
         itemBuilder: (_, i) {
@@ -83,11 +89,13 @@ class _ManageCategoriesScreenState extends ConsumerState<ManageCategoriesScreen>
           );
         },
       )),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _addCategory,
-        icon: const Icon(Icons.add),
-        label: Text(l10n.taxonomyAddCategory),
-      ),
+      floatingActionButton: Responsive.useNavRail(context)
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: _addCategory,
+              icon: const Icon(Icons.add),
+              label: Text(l10n.taxonomyAddCategory),
+            ),
     );
   }
 

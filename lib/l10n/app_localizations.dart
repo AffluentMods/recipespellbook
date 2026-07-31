@@ -115,6 +115,12 @@ abstract class AppLocalizations {
     Locale('zh')
   ];
 
+  /// No description provided for @plannerPrevWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous week'**
+  String get plannerPrevWeek;
+
   /// No description provided for @convertToSection.
   ///
   /// In en, this message translates to:
@@ -17700,6 +17706,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mono'**
   String get paletteMono;
+
+  /// No description provided for @plannerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get plannerMonth;
+
+  /// No description provided for @plannerWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get plannerWeek;
+
+  /// No description provided for @plannerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get plannerDay;
+
+  /// No description provided for @addItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add item'**
+  String get addItem;
+
+  /// No description provided for @quickAddHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an item…'**
+  String get quickAddHint;
+
+  /// No description provided for @recentlyAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Just added'**
+  String get recentlyAdded;
+
+  /// No description provided for @recipeEditIngredientsSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients & instructions'**
+  String get recipeEditIngredientsSteps;
+
+  /// No description provided for @plannerPrevMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get plannerPrevMonth;
+
+  /// No description provided for @plannerNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get plannerNextMonth;
+
+  /// No description provided for @plannerPrevDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous day'**
+  String get plannerPrevDay;
+
+  /// No description provided for @plannerNextDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Next day'**
+  String get plannerNextDay;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

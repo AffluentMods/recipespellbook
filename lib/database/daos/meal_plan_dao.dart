@@ -26,6 +26,28 @@ class MealPlanDao extends DatabaseAccessor<AppDatabase> with _$MealPlanDaoMixin 
     )).watch();
   }
 
+  /// Range variant of [watchMealPlansWithRecipesForDate]: all meals (recipe
+  /// left-joined) with `date` in [start, end) — [start] inclusive at midnight,
+  /// [end] exclusive at midnight. Lets the month / week views load a whole span
+  /// in a single stream instead of one watch per day.
+  Stream<List<MealPlanWithRecipe>> watchMealPlansWithRecipesForRange(
+      DateTime start, DateTime end) {
+    final startOfRange = DateTime(start.year, start.month, start.day);
+    final endOfRange = DateTime(end.year, end.month, end.day);
+
+    final query = select(mealPlans).join([
+      leftOuterJoin(recipes, recipes.id.equalsExp(mealPlans.recipeId)),
+    ])
+      ..where(mealPlans.date.isBiggerOrEqualValue(startOfRange))
+      ..where(mealPlans.date.isSmallerThanValue(endOfRange))
+      ..orderBy([OrderingTerm(expression: mealPlans.time)]);
+
+    return query.map((row) => MealPlanWithRecipe(
+      mealPlan: row.readTable(mealPlans),
+      recipe: row.readTableOrNull(recipes),
+    )).watch();
+  }
+
   Future<void> insertMealPlan(MealPlansCompanion mealPlan) {
     return into(mealPlans).insert(mealPlan);
   }

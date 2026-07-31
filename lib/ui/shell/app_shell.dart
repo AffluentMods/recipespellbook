@@ -6,6 +6,7 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/subscription_provider.dart';
+import '../../providers/navigation_guard_provider.dart';
 import '../../services/auth_service.dart';
 import '../../utils/responsive_utils.dart';
 import '../screens/import/import_guides_screen.dart';
@@ -81,12 +82,16 @@ class _AppShellState extends ConsumerState<AppShell> {
     });
   }
 
-  void _navigateTo(String path, int index) {
+  Future<void> _navigateTo(String path, int index) async {
+    // An in-shell recipe editor (desktop / large tablet) publishes a guard so
+    // switching tabs prompts to save first instead of silently discarding.
+    if (!await confirmDiscardBeforeLeaving(ref)) return;
+    if (!mounted) return;
     if (_scaffoldKey.currentState?.isEndDrawerOpen ?? false) {
       _scaffoldKey.currentState?.closeEndDrawer();
     }
     ref.read(currentNavIndexProvider.notifier).state = index;
-    context.go(path);
+    if (mounted) context.go(path);
   }
 
   /// Determine the active main-tab index from the current route path.
@@ -102,6 +107,11 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (location.startsWith('/shopping')) return 3; // Shopping
     return -1; // Secondary section — don't highlight main tabs
   }
+
+  /// The recipe editor / new-recipe routes render as a full editing surface
+  /// (no bottom nav / selection bar), but keep the desktop sidebar.
+  bool _isImmersiveRoute(String location) =>
+      location.endsWith('/edit') || location.contains('/new-recipe');
 
   @override
   Widget build(BuildContext context) {
@@ -124,6 +134,37 @@ class _AppShellState extends ConsumerState<AppShell> {
       });
     }
     _lastLocation = location;
+
+    // Immersive routes (recipe editor / new recipe): a full editing surface.
+    // Desktop keeps the sidebar so editing stays in-shell; compact goes
+    // full-screen (the mobile behaviour, unchanged).
+    if (_isImmersiveRoute(location)) {
+      if (Responsive.useExpandedSidebar(context)) {
+        return Row(
+          children: [
+            _AppSidebar(
+              currentIndex: effectiveIndex,
+              currentPath: location,
+              shoppingBadge: shoppingBadge,
+              onDestinationSelected: (index) {
+                switch (index) {
+                  case 0: _navigateTo('/', 0);
+                  case 1: _navigateTo('/community', 1);
+                  case 2: _navigateTo('/planner', 2);
+                  case 3: _navigateTo('/shopping', 3);
+                }
+              },
+            ),
+            VerticalDivider(
+              width: 1, thickness: 1,
+              color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
+            ),
+            Expanded(child: widget.child),
+          ],
+        );
+      }
+      return widget.child;
+    }
 
     // Desktop: Expanded sidebar (≥900dp)
     if (Responsive.useExpandedSidebar(context)) {
@@ -560,6 +601,13 @@ class _AppSidebar extends ConsumerWidget {
     final isAccount = currentPath == '/settings/account';
     final isRecipes = currentPath.startsWith('/recipe') || currentPath.startsWith('/search');
 
+    // Secondary `.go` destinations replace an in-shell editor without firing its
+    // PopScope, so route them through the unsaved-changes guard too.
+    Future<void> guardedGo(String path) async {
+      if (!await confirmDiscardBeforeLeaving(ref)) return;
+      if (context.mounted) context.go(path);
+    }
+
     return Material(
       color: bgColor,
       child: SizedBox(
@@ -624,7 +672,7 @@ class _AppSidebar extends ConsumerWidget {
                     selectedIcon: Icons.menu_book_rounded,
                     label: l10n.navCookbooks,
                     iconColor: const Color(0xFF6366F1),
-                    onTap: () => context.go('/cookbooks'),
+                    onTap: () => guardedGo('/cookbooks'),
                     theme: theme,
                   ),
                   _SidebarNavItem(
@@ -660,6 +708,7 @@ class _AppSidebar extends ConsumerWidget {
               subStatus: subStatus,
               isSettingsActive: isSettings && !isAccount,
               isAccountActive: isAccount,
+              onGuardedGo: guardedGo,
             ),
           ],
         ),
@@ -812,12 +861,17 @@ class _SidebarBottom extends StatelessWidget {
   final bool isSettingsActive;
   final bool isAccountActive;
 
+  /// Guarded `context.go` from the parent sidebar (prompts before discarding an
+  /// in-shell editor's unsaved changes).
+  final Future<void> Function(String path) onGuardedGo;
+
   const _SidebarBottom({
     required this.theme,
     required this.l10n,
     required this.isDark,
     required this.authState,
     required this.subStatus,
+    required this.onGuardedGo,
     this.isSettingsActive = false,
     this.isAccountActive = false,
   });
@@ -857,7 +911,7 @@ class _SidebarBottom extends StatelessWidget {
                 label: l10n.settingsTitle,
                 isSelected: isSettingsActive,
                 iconColor: const Color(0xFF6B7280),
-                onTap: () => context.go('/settings'),
+                onTap: () => onGuardedGo('/settings'),
                 theme: theme,
               ),
             ],
@@ -1036,7 +1090,22 @@ class _AppNavigationRail extends StatelessWidget {
         color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
         fontSize: 11,
       ),
-      leading: const SizedBox(height: 8),
+      // Tablet parity: app mark + Search (the Ctrl+K palette is desktop-only).
+      leading: Column(
+        children: [
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset('assets/images/icon.png', width: 32, height: 32),
+          ),
+          const SizedBox(height: 14),
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: l10n.searchRecipes,
+            onPressed: () => context.push('/search'),
+          ),
+        ],
+      ),
       trailing: Expanded(
         child: Align(
           alignment: Alignment.bottomCenter,

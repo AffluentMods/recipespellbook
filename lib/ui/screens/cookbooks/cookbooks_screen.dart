@@ -15,12 +15,15 @@ import '../../../services/community_service.dart';
 import '../../../services/family_service.dart';
 import '../../../services/revenuecat_service.dart';
 import '../../shell/app_shell.dart';
+import '../../widgets/app_context_menu.dart';
 import '../../widgets/app_refresh_indicator.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/family_share_sheet.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
+import '../../../theme/app_colors.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../../utils/platform_utils.dart';
 
 /// One person with access to a shared cookbook (owner or shared-with member).
 class _CookbookMember {
@@ -83,29 +86,64 @@ class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
     final cookbooksAsync = ref.watch(cookbooksProvider);
     final selectedId = ref.watch(selectedCookbookIdProvider);
     final theme = Theme.of(context);
+    final wide = !Responsive.isCompact(context);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.cookbooksTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            tooltip: l10n.searchCookbooks,
-            onPressed: () {
-              setState(() => _showSearch = !_showSearch);
-              if (_showSearch) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  FocusScope.of(context).requestFocus(_searchFocus);
-                });
-              } else {
-                _searchController.clear();
-                _query = '';
-              }
-            },
-          ),
-        ],
+        actions: wide
+            ? [
+                Center(
+                  child: SizedBox(
+                    width: 260,
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText: l10n.searchCookbooks,
+                        prefixIcon: const Icon(Icons.search, size: 20),
+                        filled: true,
+                        fillColor: context.appColors.surfaceHigh,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                      ),
+                      onChanged: (v) => setState(() => _query = v),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: FilledButton.icon(
+                    onPressed: () => _showNewCookbookDialog(context, ref),
+                    icon: const Icon(Icons.add),
+                    label: Text(l10n.cookbookAdd),
+                  ),
+                ),
+              ]
+            : [
+                IconButton(
+                  icon: const Icon(Icons.search),
+                  tooltip: l10n.searchCookbooks,
+                  onPressed: () {
+                    setState(() => _showSearch = !_showSearch);
+                    if (_showSearch) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        FocusScope.of(context).requestFocus(_searchFocus);
+                      });
+                    } else {
+                      _searchController.clear();
+                      _query = '';
+                    }
+                  },
+                ),
+              ],
       ),
-      body: Responsive.constrainWidth(context, child: cookbooksAsync.when(
+      body: cookbooksAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('${l10n.errorGeneric}: $e')),
         data: (cookbooks) {
@@ -115,7 +153,7 @@ class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
 
           return Column(
             children: [
-              if (_showSearch)
+              if (_showSearch && Responsive.isCompact(context))
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                   child: TextField(
@@ -156,11 +194,13 @@ class _CookbooksScreenState extends ConsumerState<CookbooksScreen> {
             ],
           );
         },
-      )),
-      floatingActionButton: _ModernFAB(
-        onPressed: () => _showNewCookbookDialog(context, ref),
-        label: l10n.cookbookAdd,
       ),
+      floatingActionButton: wide
+          ? null
+          : _ModernFAB(
+              onPressed: () => _showNewCookbookDialog(context, ref),
+              label: l10n.cookbookAdd,
+            ),
     );
   }
 
@@ -184,37 +224,56 @@ class _CookbookGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    final wide = !Responsive.isCompact(context);
 
     if (cookbooks.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.menu_book_rounded, size: 64, color: theme.colorScheme.outline.withValues(alpha: 0.4)),
-              const SizedBox(height: 16),
-              Text(
-                l10n.cookbooksEmpty,
-                style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.cookbookHint,
-                style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline),
-                textAlign: TextAlign.center,
-              ),
-            ],
+      final content = Column(
+        mainAxisAlignment: wide ? MainAxisAlignment.start : MainAxisAlignment.center,
+        crossAxisAlignment: wide ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        children: [
+          Icon(Icons.menu_book_rounded, size: 64, color: context.appColors.textTertiary),
+          const SizedBox(height: 16),
+          Text(
+            l10n.cookbooksEmpty,
+            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            textAlign: wide ? TextAlign.start : TextAlign.center,
           ),
-        ),
+          const SizedBox(height: 8),
+          if (wide)
+            FilledButton.icon(
+              onPressed: () => context.push('/cookbook/new/edit'),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.cookbookAdd),
+            )
+          else
+            Text(
+              l10n.cookbookHint,
+              style: theme.textTheme.bodyLarge?.copyWith(color: context.appColors.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+        ],
       );
+
+      return wide
+          ? Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: content,
+              ),
+            )
+          : Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: content,
+              ),
+            );
     }
 
     return Column(
       children: [
-        // Hint text at top
-        Container(
+        // Touch guidance — mobile/tablet only. Desktop users click / right-click.
+        if (!isDesktop) Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -244,13 +303,22 @@ class _CookbookGrid extends ConsumerWidget {
         Expanded(
           child: AppRefreshIndicator(
           child: GridView.builder(
-            padding: const EdgeInsets.fromLTRB(6, 4, 6, 80),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: Responsive.cookbookColumns(context),
-              mainAxisSpacing: 4,
-              crossAxisSpacing: 4,
-              childAspectRatio: 1.0,
-            ),
+            padding: wide
+                ? const EdgeInsets.fromLTRB(24, 8, 24, 32)
+                : const EdgeInsets.fromLTRB(6, 4, 6, 80),
+            gridDelegate: wide
+                ? const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 260,
+                    mainAxisSpacing: 20,
+                    crossAxisSpacing: 20,
+                    childAspectRatio: 0.78,
+                  )
+                : SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: Responsive.cookbookColumns(context),
+                    mainAxisSpacing: 4,
+                    crossAxisSpacing: 4,
+                    childAspectRatio: 1.0,
+                  ),
             itemCount: cookbooks.length,
             itemBuilder: (context, index) {
               final cookbook = cookbooks[index];
@@ -259,12 +327,43 @@ class _CookbookGrid extends ConsumerWidget {
                       const <String, List<_CookbookMember>>{})[cookbook.id] ??
                   const <_CookbookMember>[];
 
-              return _CookbookCard(
-                cookbook: cookbook,
-                isSelected: isSelected,
-                members: members,
-                onTap: () => onCookbookSelected(cookbook.id),
-                onLongPress: (position) => _showContextMenu(context, ref, cookbook, position),
+              return ContextMenuRegion(
+                items: [
+                  ContextMenuItem(
+                    icon: Icons.visibility,
+                    label: l10n.actionView,
+                    onTap: () => onCookbookSelected(cookbook.id),
+                  ),
+                  ContextMenuItem(
+                    icon: Icons.edit,
+                    label: l10n.actionEdit,
+                    onTap: () => context.push('/cookbook/${cookbook.id}/edit'),
+                  ),
+                  ContextMenuItem(
+                    icon: Icons.share,
+                    label: l10n.shareCookbook,
+                    onTap: () => _showShareSheet(context, ref, cookbook),
+                  ),
+                  ContextMenuItem(
+                    icon: Icons.merge_type,
+                    label: l10n.mergeCookbooksMenu,
+                    onTap: () => _showMergeCookbooksSheet(context, ref,
+                        initialCookbookId: cookbook.id),
+                  ),
+                  ContextMenuItem(
+                    icon: Icons.delete,
+                    label: l10n.actionDelete,
+                    onTap: () => _showDeleteConfirmation(context, ref, cookbook),
+                    isDestructive: true,
+                  ),
+                ],
+                child: _CookbookCard(
+                  cookbook: cookbook,
+                  isSelected: isSelected,
+                  members: members,
+                  onTap: () => onCookbookSelected(cookbook.id),
+                  onLongPress: (position) => _showContextMenu(context, ref, cookbook, position),
+                ),
               );
             },
           ),
@@ -875,7 +974,7 @@ class _CookbookCard extends StatelessWidget {
                 ],
               ),
             ),
-            // Selected indicator
+            // Selected indicator (bottom-right, clear of the avatar stack & pencil)
             if (isSelected)
               Positioned(
                 top: 8,
@@ -889,22 +988,24 @@ class _CookbookCard extends StatelessWidget {
                   child: const Icon(Icons.check, color: Colors.white, size: 16),
                 ),
               ),
-            // Edit button (top-left)
-            Positioned(
-              top: 8,
-              left: 8,
-              child: GestureDetector(
-                onTap: () => context.push('/cookbook/${cookbook.id}/edit'),
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.4),
-                    shape: BoxShape.circle,
+            // Edit pencil (top-left, original position) — touch platforms only;
+            // desktop uses the right-click context menu instead.
+            if (!isDesktop)
+              Positioned(
+                top: 8,
+                left: 8,
+                child: GestureDetector(
+                  onTap: () => context.push('/cookbook/${cookbook.id}/edit'),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.4),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.edit, color: Colors.white, size: 14),
                   ),
-                  child: const Icon(Icons.edit, color: Colors.white, size: 14),
                 ),
               ),
-            ),
           ],
         ),
       ),

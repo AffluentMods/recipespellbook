@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../database/database.dart';
 import '../../../l10n/app_localizations.dart';
@@ -29,6 +30,19 @@ final mealPlansForDateProvider = StreamProvider.family<List<MealPlanWithRecipe>,
   final dao = ref.watch(mealPlanDaoProvider);
   return dao.watchMealPlansWithRecipesForDate(date);
 });
+
+/// Meals (recipe-joined) for a [start, end) range — powers the Month grid in one
+/// stream instead of a watch per day. autoDispose so months no longer on screen
+/// tear down their Drift subscription instead of accumulating for the session.
+final mealPlansForRangeProvider = StreamProvider.autoDispose
+    .family<List<MealPlanWithRecipe>, ({DateTime start, DateTime end})>((ref, r) {
+  final dao = ref.watch(mealPlanDaoProvider);
+  return dao.watchMealPlansWithRecipesForRange(r.start, r.end);
+});
+
+/// Planner zoom level, toggled by the wide-viewport view switcher and
+/// remembered across launches.
+enum PlannerViewMode { month, week, day }
 
 /// Session-only multi-select for the planner (long-press to enter). Holds the
 /// selected meal-plan ids; "active" whenever non-empty. Forgotten on app close.
@@ -103,6 +117,12 @@ class PlannerScreen extends ConsumerStatefulWidget {
 
 class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   late DateTime _weekStart;
+  /// First day of the month shown in Month view.
+  late DateTime _monthAnchor;
+  /// Chosen zoom level; null until restored / first pick, at which point width
+  /// picks the default (Month on desktop, Week elsewhere) via [_effectiveMode].
+  PlannerViewMode? _viewMode;
+  static const _viewModeKey = 'plannerViewMode';
   /// Current day's meals — kept live so the shared selection bar's delete
   /// callback (published once on entering select mode) always sees them.
   List<MealPlanWithRecipe> _visiblePlans = const [];
@@ -110,7 +130,101 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
   @override
   void initState() {
     super.initState();
-    _weekStart = _getWeekStart(DateTime.now());
+    final now = DateTime.now();
+    _weekStart = _getWeekStart(now);
+    _monthAnchor = DateTime(now.year, now.month, 1);
+    _restoreViewMode();
+  }
+
+  Future<void> _restoreViewMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString(_viewModeKey);
+    if (saved == null || !mounted) return;
+    PlannerViewMode? mode;
+    try {
+      mode = PlannerViewMode.values.byName(saved);
+    } catch (_) {
+      mode = null;
+    }
+    if (mode != null) setState(() => _viewMode = mode);
+  }
+
+  /// Resolved zoom level: the saved/picked mode, else Month on desktop and Week
+  /// on narrower widths.
+  PlannerViewMode get _effectiveMode =>
+      _viewMode ??
+      (Responsive.isDesktopLayout(context)
+          ? PlannerViewMode.month
+          : PlannerViewMode.week);
+
+  void _setViewMode(PlannerViewMode mode) {
+    // Zooming out re-anchors to the span that contains the selected day, so the
+    // three anchors never drift apart (e.g. drill into Aug from a July grid,
+    // then tap Month → shows August, not stale July).
+    final selected = ref.read(selectedPlannerDateProvider);
+    setState(() {
+      _viewMode = mode;
+      if (mode == PlannerViewMode.week) _weekStart = _getWeekStart(selected);
+      if (mode == PlannerViewMode.month) {
+        _monthAnchor = DateTime(selected.year, selected.month, 1);
+      }
+    });
+    SharedPreferences.getInstance()
+        .then((p) => p.setString(_viewModeKey, mode.name));
+  }
+
+  /// Header prev/next shift by the active zoom level. Week/Day also move the
+  /// selected day so the tablet rail highlight + detail timeline stay coherent,
+  /// and Month moves the selection into the new month.
+  void _goPrev() {
+    switch (_effectiveMode) {
+      case PlannerViewMode.month:
+        final m = DateTime(_monthAnchor.year, _monthAnchor.month - 1, 1);
+        setState(() => _monthAnchor = m);
+        ref.read(selectedPlannerDateProvider.notifier).state = m;
+      case PlannerViewMode.week:
+        setState(() =>
+            _weekStart = _weekStart.subtract(const Duration(days: 7)));
+        final d = ref.read(selectedPlannerDateProvider);
+        ref.read(selectedPlannerDateProvider.notifier).state =
+            d.subtract(const Duration(days: 7));
+      case PlannerViewMode.day:
+        final d = ref.read(selectedPlannerDateProvider);
+        ref.read(selectedPlannerDateProvider.notifier).state =
+            d.subtract(const Duration(days: 1));
+    }
+  }
+
+  void _goNext() {
+    switch (_effectiveMode) {
+      case PlannerViewMode.month:
+        final m = DateTime(_monthAnchor.year, _monthAnchor.month + 1, 1);
+        setState(() => _monthAnchor = m);
+        ref.read(selectedPlannerDateProvider.notifier).state = m;
+      case PlannerViewMode.week:
+        setState(() => _weekStart = _weekStart.add(const Duration(days: 7)));
+        final d = ref.read(selectedPlannerDateProvider);
+        ref.read(selectedPlannerDateProvider.notifier).state =
+            d.add(const Duration(days: 7));
+      case PlannerViewMode.day:
+        final d = ref.read(selectedPlannerDateProvider);
+        ref.read(selectedPlannerDateProvider.notifier).state =
+            d.add(const Duration(days: 1));
+    }
+  }
+
+  /// Drill into a specific day (from a month cell / week header) → Day view,
+  /// re-anchoring the month/week so zoom-out lands on the same span.
+  void _openDay(DateTime date) {
+    final d = DateTime(date.year, date.month, date.day);
+    ref.read(selectedPlannerDateProvider.notifier).state = d;
+    setState(() {
+      _monthAnchor = DateTime(d.year, d.month, 1);
+      _weekStart = _getWeekStart(d);
+      _viewMode = PlannerViewMode.day;
+    });
+    SharedPreferences.getInstance()
+        .then((p) => p.setString(_viewModeKey, PlannerViewMode.day.name));
   }
 
   DateTime _getWeekStart(DateTime date) {
@@ -137,6 +251,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
     final today = DateTime.now();
     setState(() {
       _weekStart = _getWeekStart(today);
+      _monthAnchor = DateTime(today.year, today.month, 1);
     });
     ref.read(selectedPlannerDateProvider.notifier).state =
         DateTime(today.year, today.month, today.day);
@@ -150,6 +265,11 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
     final mealPlansAsync = ref.watch(mealPlansForDateProvider(selectedDate));
     final mealCountsAsync = ref.watch(mealCountsForWeekProvider(_weekStart));
     final isDesktop = Responsive.isDesktopLayout(context);
+    final isTablet = Responsive.isMedium(context);
+    // The Month/Week/Day switcher + Month & Day modes are a wide-viewport
+    // feature; compact keeps its strip + timeline (which is already day-focused).
+    final wide = Responsive.useNavRail(context);
+    final mode = _effectiveMode;
 
     // Only the current day's meals are visible/selectable, so clear the
     // selection whenever the day changes to avoid acting on hidden meals.
@@ -193,6 +313,12 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
             else
               _PlannerHeader(
                 date: selectedDate,
+                weekStart: _weekStart,
+                monthAnchor: _monthAnchor,
+                viewMode: mode,
+                showViewSwitcher: wide,
+                onViewModeChanged: _setViewMode,
+                showBack: Responsive.isCompact(context),
                 onBack: () {
                   // Pop if this planner was pushed (e.g. deep link); otherwise
                   // fall back to the home tab.
@@ -203,10 +329,110 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                   }
                 },
                 onPickDate: () => _showFullCalendar(context),
+                onPrev: _goPrev,
+                onNext: _goNext,
+                onToday: _goToToday,
                 onMoreOptions: () => _showMoreOptions(context),
               ),
 
-            if (!isDesktop) ...[
+            if (wide && mode == PlannerViewMode.month) ...[
+              // MONTH: full-month grid with per-day meal chips; click a day to
+              // drill into Day view.
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1500),
+                      child: _PlannerCard(
+                        padding: EdgeInsets.zero,
+                        child: _MonthView(
+                          monthAnchor: _monthAnchor,
+                          selectedDate: selectedDate,
+                          onOpenDay: _openDay,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ] else if (wide && mode == PlannerViewMode.day) ...[
+              // DAY: the hour timeline, full width (centred + capped).
+              Expanded(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 900),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 6, 20, 20),
+                      child: _PlannerCard(
+                        padding: EdgeInsets.zero,
+                        child: mealPlansAsync.when(
+                          loading: () =>
+                              const Center(child: CircularProgressIndicator()),
+                          error: (e, _) => Center(
+                              child: Text(l10n.errorWithMessage(e.toString()))),
+                          data: (plans) => _DayTimeline(
+                            plans: plans,
+                            date: selectedDate,
+                            onAddAt: (t) => _showAddMealSheet(context, selectedDate,
+                                initialTime: t),
+                            onEditMeal: (p) =>
+                                _showEditMealSheet(context, p, selectedDate),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ] else if (isTablet) ...[
+              // Tablet two-pane: a vertical week rail beside the day timeline.
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(
+                        width: 248,
+                        child: _PlannerCard(
+                          padding: EdgeInsets.zero,
+                          child: _WeekRail(
+                            weekStart: _weekStart,
+                            selectedDate: selectedDate,
+                            mealCounts: mealCountsAsync.valueOrNull ?? const {},
+                            onDateSelected: (d) => ref
+                                .read(selectedPlannerDateProvider.notifier)
+                                .state = d,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _PlannerCard(
+                          padding: EdgeInsets.zero,
+                          child: mealPlansAsync.when(
+                            loading: () =>
+                                const Center(child: CircularProgressIndicator()),
+                            error: (e, _) => Center(
+                                child: Text(l10n.errorWithMessage(e.toString()))),
+                            data: (plans) => _DayTimeline(
+                              plans: plans,
+                              date: selectedDate,
+                              onAddAt: (t) => _showAddMealSheet(
+                                  context, selectedDate,
+                                  initialTime: t),
+                              onEditMeal: (p) =>
+                                  _showEditMealSheet(context, p, selectedDate),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ] else if (!isDesktop) ...[
               // Week-at-a-glance strip in its own card (swipe to change weeks).
               Responsive.constrainWidth(context, child: Padding(
                 padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
@@ -259,18 +485,30 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 )),
               ),
             ] else ...[
-              // Desktop 7-column week grid
+              // Desktop 7-column week grid, boxed in a centered card.
               Expanded(
-                child: _WeekGridView(
-                  weekDates: weekDates,
-                  onAddMeal: (date) => _showAddMealSheet(context, date),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1500),
+                      child: _PlannerCard(
+                        padding: EdgeInsets.zero,
+                        child: _WeekGridView(
+                          weekDates: weekDates,
+                          onAddMeal: (date) => _showAddMealSheet(context, date),
+                          onOpenDay: _openDay,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
           ],
         ),
       ),
-      floatingActionButton: (isDesktop || selecting)
+      floatingActionButton: (isDesktop || isTablet || selecting)
           ? null
           : _ModernFAB(
               onPressed: () => _showAddMealSheet(context, selectedDate),
@@ -605,10 +843,12 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
 class _WeekGridView extends StatelessWidget {
   final List<DateTime> weekDates;
   final ValueChanged<DateTime> onAddMeal;
+  final ValueChanged<DateTime> onOpenDay;
 
   const _WeekGridView({
     required this.weekDates,
     required this.onAddMeal,
+    required this.onOpenDay,
   });
 
   static const double _minColumnWidth = 150.0;
@@ -638,6 +878,7 @@ class _WeekGridView extends StatelessWidget {
                       date: weekDates[i],
                       isToday: DateTime(weekDates[i].year, weekDates[i].month, weekDates[i].day) == todayNormalized,
                       onAddMeal: () => onAddMeal(weekDates[i]),
+                      onOpenDay: () => onOpenDay(weekDates[i]),
                     ),
                   )
                 else
@@ -646,6 +887,7 @@ class _WeekGridView extends StatelessWidget {
                       date: weekDates[i],
                       isToday: DateTime(weekDates[i].year, weekDates[i].month, weekDates[i].day) == todayNormalized,
                       onAddMeal: () => onAddMeal(weekDates[i]),
+                      onOpenDay: () => onOpenDay(weekDates[i]),
                     ),
                   ),
               ],
@@ -676,18 +918,57 @@ class _DayColumn extends ConsumerWidget {
   final DateTime date;
   final bool isToday;
   final VoidCallback onAddMeal;
+  final VoidCallback onOpenDay;
 
   const _DayColumn({
     required this.date,
     required this.isToday,
     required this.onAddMeal,
+    required this.onOpenDay,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
     final mealsAsync = ref.watch(mealPlansForDateProvider(date));
+
+    // Reused by both empty (centred inline) and non-empty (pinned below) columns
+    // so an empty day no longer strands the button at the bottom of a tall void.
+    final addButton = InkWell(
+      onTap: onAddMeal,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: context.appColors.accent.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: context.appColors.accent.withValues(alpha: 0.30),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.add, size: 16, color: context.appColors.accent),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                l10n.plannerAddMeal,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: context.appColors.accent,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
 
     return Container(
       color: isToday
@@ -695,8 +976,10 @@ class _DayColumn extends ConsumerWidget {
           : null,
       child: Column(
         children: [
-          // Day header
-          Container(
+          // Day header — tap to drill into Day view for this date.
+          InkWell(
+            onTap: onOpenDay,
+            child: Container(
             padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: BoxDecoration(
               border: Border(
@@ -757,9 +1040,11 @@ class _DayColumn extends ConsumerWidget {
                 ),
               ],
             ),
-          ),
+          )),
 
-          // Meal list
+          // Meal list — empty days centre an inline Add Meal (no stranded
+          // button in a tall void); non-empty days list meals with Add Meal
+          // pinned below.
           Expanded(
             child: mealsAsync.when(
               loading: () => const Center(
@@ -773,11 +1058,26 @@ class _DayColumn extends ConsumerWidget {
               data: (plans) {
                 if (plans.isEmpty) {
                   return Center(
-                    child: Text(
-                      '',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.outline,
-                      ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.restaurant_menu_rounded,
+                            size: 22,
+                            color: context.appColors.textTertiary
+                                .withValues(alpha: 0.7)),
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.plannerNoMeals,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: context.appColors.textTertiary,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: addButton,
+                        ),
+                      ],
                     ),
                   );
                 }
@@ -795,35 +1095,22 @@ class _DayColumn extends ConsumerWidget {
                     return (aIdx == -1 ? 999 : aIdx).compareTo(bIdx == -1 ? 999 : bIdx);
                   });
 
-                return ListView(
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                return Column(
                   children: [
-                    for (final mealType in sortedKeys) ...[
-                      for (final plan in grouped[mealType]!)
-                        _CompactMealCard(plan: plan),
-                    ],
+                    Expanded(
+                      child: ListView(
+                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                        children: [
+                          for (final mealType in sortedKeys)
+                            for (final plan in grouped[mealType]!)
+                              _CompactMealCard(plan: plan),
+                        ],
+                      ),
+                    ),
+                    addButton,
                   ],
                 );
               },
-            ),
-          ),
-
-          // Add button at bottom
-          InkWell(
-            onTap: onAddMeal,
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Center(
-                child: Icon(Icons.add, size: 18, color: theme.colorScheme.outline),
-              ),
             ),
           ),
         ],
@@ -858,11 +1145,16 @@ class _CompactMealCard extends ConsumerWidget {
     final recipe = plan.recipe;
     final mealPlanDao = ref.read(mealPlanDaoProvider);
     final title = recipe?.title ?? plan.mealPlan.name ?? l10n.meal;
+    final barColor = resolveMealCardColor(
+      plan.mealPlan.cardColor,
+      context.appColors,
+      _mealBlockColor(plan.mealPlan.mealType),
+    );
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Material(
-        color: theme.colorScheme.surfaceContainerHigh,
+        color: context.appColors.surfaceHigh,
         borderRadius: BorderRadius.circular(8),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -892,7 +1184,11 @@ class _CompactMealCard extends ConsumerWidget {
               ),
             );
           },
-          child: Padding(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(left: BorderSide(color: barColor, width: 3)),
+            ),
+            child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
             child: Row(
               children: [
@@ -935,6 +1231,7 @@ class _CompactMealCard extends ConsumerWidget {
               ],
             ),
           ),
+          ),
         ),
       ),
     );
@@ -945,33 +1242,163 @@ class _CompactMealCard extends ConsumerWidget {
 
 class _PlannerHeader extends StatelessWidget {
   final DateTime date;
+  final DateTime weekStart;
+  final DateTime monthAnchor;
+  final PlannerViewMode viewMode;
+  final bool showViewSwitcher;
+  final ValueChanged<PlannerViewMode> onViewModeChanged;
+  final bool showBack;
   final VoidCallback onBack;
   final VoidCallback onPickDate;
+  final VoidCallback onPrev;
+  final VoidCallback onNext;
+  final VoidCallback onToday;
   final VoidCallback onMoreOptions;
 
   const _PlannerHeader({
     required this.date,
+    required this.weekStart,
+    required this.monthAnchor,
+    required this.viewMode,
+    required this.showViewSwitcher,
+    required this.onViewModeChanged,
+    required this.showBack,
     required this.onBack,
     required this.onPickDate,
+    required this.onPrev,
+    required this.onNext,
+    required this.onToday,
     required this.onMoreOptions,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final colors = context.appColors;
     final locale = Localizations.localeOf(context).toString();
-    // Centered "Month Year" that opens a day/month/year picker on tap.
-    final monthLabel = '${DateFormat.MMMM(locale).format(date)} ${date.year}';
 
+    // Big "Month Year" title + an optional secondary label, per zoom level.
+    late final String title;
+    String subtitle = '';
+    switch (viewMode) {
+      case PlannerViewMode.month:
+        title = '${DateFormat.MMMM(locale).format(monthAnchor)} ${monthAnchor.year}';
+      case PlannerViewMode.week:
+        final weekEnd = weekStart.add(const Duration(days: 6));
+        title = '${DateFormat.MMMM(locale).format(weekStart)} ${weekStart.year}';
+        subtitle =
+            '${DateFormat.MMMd(locale).format(weekStart)} – ${DateFormat.MMMd(locale).format(weekEnd)}';
+      case PlannerViewMode.day:
+        title = '${DateFormat.MMMM(locale).format(date)} ${date.year}';
+        subtitle = DateFormat.MMMMEEEEd(locale).format(date);
+    }
+
+    // Prev/next tooltips track the zoom level (they shift a month/week/day).
+    final String prevTip;
+    final String nextTip;
+    switch (viewMode) {
+      case PlannerViewMode.month:
+        prevTip = l10n.plannerPrevMonth;
+        nextTip = l10n.plannerNextMonth;
+      case PlannerViewMode.week:
+        prevTip = l10n.plannerPrevWeek;
+        nextTip = l10n.plannerNextWeek;
+      case PlannerViewMode.day:
+        prevTip = l10n.plannerPrevDay;
+        nextTip = l10n.plannerNextDay;
+    }
+
+    // Wide layouts (tablet + desktop): editorial title + subtitle, the
+    // Month/Week/Day switcher, and zoom-aware prev/next.
+    if (Responsive.useNavRail(context)) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
+        child: Row(
+          children: [
+            Flexible(
+              child: InkWell(
+                onTap: onPickDate,
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.keyboard_arrow_down_rounded,
+                          size: 24, color: colors.textSecondary),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            if (subtitle.isNotEmpty) ...[
+              const SizedBox(width: 12),
+              Flexible(
+                child: Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+            const Spacer(),
+            if (showViewSwitcher) ...[
+              _PlannerViewSwitcher(mode: viewMode, onChanged: onViewModeChanged),
+              const SizedBox(width: 8),
+            ],
+            IconButton(
+              icon: const Icon(Icons.chevron_left_rounded),
+              tooltip: prevTip,
+              onPressed: onPrev,
+            ),
+            TextButton(
+              onPressed: onToday,
+              child: Text(l10n.today),
+            ),
+            IconButton(
+              icon: const Icon(Icons.chevron_right_rounded),
+              tooltip: nextTip,
+              onPressed: onNext,
+            ),
+            IconButton(
+              icon: const Icon(Icons.more_horiz_rounded),
+              tooltip: l10n.plannerMoreOptions,
+              onPressed: onMoreOptions,
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Compact header (unchanged): back · selected-day month · more.
+    final compactLabel = '${DateFormat.MMMM(locale).format(date)} ${date.year}';
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 8, 4, 6),
       child: Row(
         children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-            onPressed: onBack,
-            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-          ),
+          if (showBack)
+            IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+              onPressed: onBack,
+              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+            ),
           Expanded(
             child: InkWell(
               onTap: onPickDate,
@@ -982,7 +1409,7 @@ class _PlannerHeader extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      monthLabel,
+                      compactLabel,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -999,6 +1426,330 @@ class _PlannerHeader extends StatelessWidget {
             icon: const Icon(Icons.more_horiz_rounded),
             onPressed: onMoreOptions,
             tooltip: AppLocalizations.of(context)!.plannerMoreOptions,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============ VIEW SWITCHER ============
+
+/// Segmented Month / Week / Day control shown in the wide planner header.
+class _PlannerViewSwitcher extends StatelessWidget {
+  final PlannerViewMode mode;
+  final ValueChanged<PlannerViewMode> onChanged;
+  const _PlannerViewSwitcher({required this.mode, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = context.appColors;
+    final items = <(PlannerViewMode, String)>[
+      (PlannerViewMode.month, l10n.plannerMonth),
+      (PlannerViewMode.week, l10n.plannerWeek),
+      (PlannerViewMode.day, l10n.plannerDay),
+    ];
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: c.surfaceHigh,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final (m, label) in items)
+            GestureDetector(
+              onTap: () => onChanged(m),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: m == mode ? c.accent : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: m == mode ? c.onAccent : c.textSecondary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============ MONTH VIEW ============
+
+/// Full-month grid (6 rows × 7 days). Each cell shows the date, up to a few
+/// meal chips (then "+N"), highlights today, dims other-month days, and drills
+/// into Day view on tap.
+class _MonthView extends ConsumerWidget {
+  final DateTime monthAnchor; // first of the displayed month
+  final DateTime selectedDate;
+  final void Function(DateTime day) onOpenDay;
+  const _MonthView({
+    required this.monthAnchor,
+    required this.selectedDate,
+    required this.onOpenDay,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.appColors;
+    final locale = Localizations.localeOf(context).toString();
+
+    // Grid starts on the Monday on/before the 1st and spans 6 weeks (42 days).
+    // Uses calendar arithmetic (DateTime(y,m,d+n)) throughout, not Durations, so
+    // a DST transition inside the span can't shift or drop a day.
+    final first = DateTime(monthAnchor.year, monthAnchor.month, 1);
+    final offset = (first.weekday - DateTime.monday) % 7;
+    final gridStart = DateTime(first.year, first.month, first.day - offset);
+    final gridEnd =
+        DateTime(gridStart.year, gridStart.month, gridStart.day + 42);
+    final now = DateTime.now();
+    final todayKey = DateTime(now.year, now.month, now.day);
+    final selectedKey =
+        DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+
+    final plansAsync = ref.watch(
+        mealPlansForRangeProvider((start: gridStart, end: gridEnd)));
+    final byDay = <DateTime, List<MealPlanWithRecipe>>{};
+    for (final p in plansAsync.valueOrNull ?? const <MealPlanWithRecipe>[]) {
+      final d = p.mealPlan.date;
+      (byDay[DateTime(d.year, d.month, d.day)] ??= []).add(p);
+    }
+
+    final weekdayLabels = List.generate(
+        7,
+        (i) => DateFormat.E(locale).format(
+            DateTime(gridStart.year, gridStart.month, gridStart.day + i)));
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 10, 8, 6),
+          child: Row(
+            children: [
+              for (final w in weekdayLabels)
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      w.toUpperCase(),
+                      style: TextStyle(
+                        color: c.textTertiary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+            child: Column(
+              children: [
+                for (int week = 0; week < 6; week++)
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (int dow = 0; dow < 7; dow++)
+                          Builder(builder: (context) {
+                            final day = DateTime(gridStart.year,
+                                gridStart.month, gridStart.day + week * 7 + dow);
+                            final dayKey =
+                                DateTime(day.year, day.month, day.day);
+                            return Expanded(
+                              child: _MonthCell(
+                                date: day,
+                                inMonth: day.month == monthAnchor.month,
+                                isToday: dayKey == todayKey,
+                                isSelected: dayKey == selectedKey,
+                                meals: byDay[dayKey] ?? const [],
+                                onTap: onOpenDay,
+                              ),
+                            );
+                          }),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MonthCell extends StatelessWidget {
+  final DateTime date;
+  final bool inMonth;
+  final bool isToday;
+  final bool isSelected;
+  final List<MealPlanWithRecipe> meals;
+  final void Function(DateTime) onTap;
+  const _MonthCell({
+    required this.date,
+    required this.inMonth,
+    required this.isToday,
+    required this.isSelected,
+    required this.meals,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final numColor =
+        inMonth ? c.textPrimary : c.textTertiary.withValues(alpha: 0.55);
+
+    return Padding(
+      padding: const EdgeInsets.all(2),
+      child: Material(
+        color: isSelected ? c.accent.withValues(alpha: 0.10) : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () => onTap(date),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                  color: c.outline.withValues(alpha: inMonth ? 0.25 : 0.12)),
+            ),
+            padding: const EdgeInsets.all(5),
+            child: LayoutBuilder(builder: (context, constraints) {
+              // Row heights track the live text scale (raised OS/app scale must
+              // not overflow); the ClipRect + OverflowBox below is the ultimate
+              // safety net so the cell can NEVER throw a RenderFlex overflow.
+              final ts = MediaQuery.textScalerOf(context);
+              final chipH = ts.scale(10.5) * 1.4 + 6; // ≈ 21 at scale 1.0
+              final dateRowH = ts.scale(12) * 1.4 + 9; // ≈ 26 at scale 1.0
+              final capacity =
+                  ((constraints.maxHeight - dateRowH) / chipH).floor().clamp(0, 4);
+              List<MealPlanWithRecipe> shown;
+              int extra;
+              if (capacity <= 0) {
+                // Too short for even a "+N" row — show only the date number.
+                shown = const [];
+                extra = 0;
+              } else if (meals.length <= capacity) {
+                shown = meals;
+                extra = 0;
+              } else {
+                final keep = capacity - 1; // reserve one row for "+N"
+                shown = meals.take(keep).toList();
+                extra = meals.length - shown.length;
+              }
+              return ClipRect(
+                child: OverflowBox(
+                  minHeight: 0,
+                  maxHeight: double.infinity,
+                  alignment: Alignment.topLeft,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        height: 22,
+                        child: Container(
+                          width: 20,
+                          height: 20,
+                          alignment: Alignment.center,
+                          decoration: isToday
+                              ? BoxDecoration(
+                                  color: c.accent, shape: BoxShape.circle)
+                              : null,
+                          child: Text(
+                            '${date.day}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: isToday ? c.onAccent : numColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                      for (final p in shown) _MonthChip(plan: p),
+                      if (extra > 0)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 1, left: 2),
+                          child: Text(
+                            '+$extra',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: c.textTertiary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MonthChip extends StatelessWidget {
+  final MealPlanWithRecipe plan;
+  const _MonthChip({required this.plan});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final color = resolveMealCardColor(
+      plan.mealPlan.cardColor,
+      c,
+      _mealBlockColor(plan.mealPlan.mealType),
+    );
+    final title = plan.recipe != null
+        ? normalizeTitle(plan.recipe!.title).title
+        : (plan.mealPlan.customMeal?.isNotEmpty == true
+            ? plan.mealPlan.customMeal!
+            : _mealBlockEmoji(plan.mealPlan.mealType));
+    return Container(
+      margin: const EdgeInsets.only(top: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 5,
+            height: 5,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 10.5,
+                color: c.textPrimary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
         ],
       ),
@@ -1115,6 +1866,119 @@ class _WeekStrip extends StatelessWidget {
           );
         }),
       ),
+    );
+  }
+}
+
+// ============ WEEK RAIL (TABLET) ============
+
+/// A vertical seven-day rail for the tablet two-pane layout. Each row shows the
+/// weekday, the day number, and up to three meal-count dots. The selected day
+/// fills with the accent; today gets a soft accent tint.
+class _WeekRail extends StatelessWidget {
+  final DateTime weekStart;
+  final DateTime selectedDate;
+  final Map<DateTime, int> mealCounts;
+  final ValueChanged<DateTime> onDateSelected;
+
+  const _WeekRail({
+    required this.weekStart,
+    required this.selectedDate,
+    required this.mealCounts,
+    required this.onDateSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = context.appColors;
+    final locale = Localizations.localeOf(context).toString();
+    final today = DateTime.now();
+    final todayNormalized = DateTime(today.year, today.month, today.day);
+    final selectedNormalized =
+        DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      children: List.generate(7, (index) {
+        final date = weekStart.add(Duration(days: index));
+        final dateNormalized = DateTime(date.year, date.month, date.day);
+        final isSelected = dateNormalized == selectedNormalized;
+        final isToday = dateNormalized == todayNormalized;
+        final mealCount = mealCounts[dateNormalized] ?? 0;
+
+        final labelColor = isSelected ? colors.onAccent : colors.textSecondary;
+        final dayColor = isSelected ? colors.onAccent : colors.textPrimary;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => onDateSelected(date),
+              borderRadius: BorderRadius.circular(14),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? colors.accent
+                      : isToday
+                          ? colors.accent.withValues(alpha: 0.10)
+                          : Colors.transparent,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          DateFormat.E(locale).format(date),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: labelColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${date.day}',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: dayColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    if (mealCount > 0)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(
+                          mealCount.clamp(0, 3),
+                          (i) => Container(
+                            width: 6,
+                            height: 6,
+                            margin:
+                                const EdgeInsets.symmetric(horizontal: 1),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? colors.onAccent.withValues(alpha: 0.85)
+                                  : colors.accent,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }),
     );
   }
 }

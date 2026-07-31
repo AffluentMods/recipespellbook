@@ -65,7 +65,7 @@ class _IngredientSubstitutionsScreenState extends State<IngredientSubstitutionsS
       appBar: AppBar(
         title: Text(l10n.ingredientSubstitutionsTitle),
       ),
-      body: Responsive.constrainWidth(context, child: Column(
+      body: Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: Column(
         children: [
           // Search bar
           Padding(

@@ -125,10 +125,12 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     final scrollingUp = offset < _lastScrollOffset;
     _lastScrollOffset = offset;
 
-    if (scrollingDown && _fabVisible) {
-      setState(() => _fabVisible = false);
-    } else if (scrollingUp && !_fabVisible) {
-      setState(() => _fabVisible = true);
+    if (!Responsive.useNavRail(context)) {
+      if (scrollingDown && _fabVisible) {
+        setState(() => _fabVisible = false);
+      } else if (scrollingUp && !_fabVisible) {
+        setState(() => _fabVisible = true);
+      }
     }
   }
 
@@ -245,6 +247,15 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           ),
         ),
         actions: [
+          if (Responsive.useNavRail(context))
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilledButton.icon(
+                onPressed: () => _showPublishChooser(context),
+                icon: const Icon(Icons.publish),
+                label: Text(l10n.communityPublish),
+              ),
+            ),
           // Tag filter icon
           IconButton(
             icon: Badge(
@@ -272,35 +283,43 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           ),
         ],
       ),
-      body: Responsive.constrainWidth(context, child: Column(
+      body: Responsive.constrainWidth(context, maxWidth: 1800, child: Column(
         children: [
           // ── Search bar ──
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: l10n.communitySearchCookbooks,
-                prefixIcon: const Icon(Icons.search, size: 20),
-                suffixIcon: _query.isNotEmpty
-                    ? IconButton(
-                  icon: const Icon(Icons.clear, size: 18),
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() => _query = '');
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: Responsive.useNavRail(context) ? 480 : double.infinity,
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: l10n.communitySearchCookbooks,
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    suffixIcon: _query.isNotEmpty
+                        ? IconButton(
+                      icon: const Icon(Icons.clear, size: 18),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() => _query = '');
+                        _load();
+                      },
+                    )
+                        : null,
+                    filled: true,
+                    fillColor: theme.colorScheme.surfaceContainerHighest,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                  ),
+                  onSubmitted: (v) {
+                    setState(() => _query = v.trim());
                     _load();
                   },
-                )
-                    : null,
-                filled: true,
-                fillColor: theme.colorScheme.surfaceContainerHighest,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                ),
               ),
-              onSubmitted: (v) {
-                setState(() => _query = v.trim());
-                _load();
-              },
             ),
           ),
 
@@ -309,8 +328,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
             child: Row(
               children: [
-                Expanded(
-                  child: SegmentedButton<_BrowseMode>(
+                if (Responsive.useNavRail(context))
+                  SegmentedButton<_BrowseMode>(
                     segments: [
                       ButtonSegment(value: _BrowseMode.recipes, label: Text(l10n.communityBrowseRecipes), icon: const Icon(Icons.restaurant_menu, size: 16)),
                       ButtonSegment(value: _BrowseMode.cookbooks, label: Text(l10n.communityBrowseCookbooks), icon: const Icon(Icons.book, size: 16)),
@@ -325,8 +344,26 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                       visualDensity: VisualDensity.compact,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
+                  )
+                else
+                  Expanded(
+                    child: SegmentedButton<_BrowseMode>(
+                      segments: [
+                        ButtonSegment(value: _BrowseMode.recipes, label: Text(l10n.communityBrowseRecipes), icon: const Icon(Icons.restaurant_menu, size: 16)),
+                        ButtonSegment(value: _BrowseMode.cookbooks, label: Text(l10n.communityBrowseCookbooks), icon: const Icon(Icons.book, size: 16)),
+                      ],
+                      selected: {_browseMode},
+                      onSelectionChanged: (v) {
+                        setState(() => _browseMode = v.first);
+                        _load();
+                      },
+                      showSelectedIcon: false,
+                      style: ButtonStyle(
+                        visualDensity: VisualDensity.compact,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
@@ -438,7 +475,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           ),
         ],
       )),
-      floatingActionButton: GoRouterState.of(context).uri.path == '/community'
+      floatingActionButton: (!Responsive.useNavRail(context) && GoRouterState.of(context).uri.path == '/community')
           ? AnimatedSlide(
               duration: const Duration(milliseconds: 200),
               offset: _fabVisible ? Offset.zero : const Offset(0, 2),
@@ -674,13 +711,15 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     return GridView.builder(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(6, 4, 6, 80),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: columns,
-        childAspectRatio: 0.78,
-        crossAxisSpacing: 4,
-        mainAxisSpacing: 4,
-      ),
+      padding: EdgeInsets.fromLTRB(Responsive.useNavRail(context) ? 16 : 6, 4, Responsive.useNavRail(context) ? 16 : 6, 80),
+      gridDelegate: Responsive.useNavRail(context)
+          ? Responsive.fluidGrid(maxExtent: 240, childAspectRatio: 0.78, crossAxisSpacing: 4, mainAxisSpacing: 4)
+          : SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
+              childAspectRatio: 0.78,
+              crossAxisSpacing: 4,
+              mainAxisSpacing: 4,
+            ),
       itemCount: _recipeItems.length + (_loading ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= _recipeItems.length) {
@@ -898,13 +937,15 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     return GridView.builder(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(6, 4, 6, 80),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: columns,
-        childAspectRatio: 0.78,
-        mainAxisSpacing: 4,
-        crossAxisSpacing: 4,
-      ),
+      padding: EdgeInsets.fromLTRB(Responsive.useNavRail(context) ? 16 : 6, 4, Responsive.useNavRail(context) ? 16 : 6, 80),
+      gridDelegate: Responsive.useNavRail(context)
+          ? Responsive.fluidGrid(maxExtent: 240, childAspectRatio: 0.78, crossAxisSpacing: 4, mainAxisSpacing: 4)
+          : SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
+              childAspectRatio: 0.78,
+              mainAxisSpacing: 4,
+              crossAxisSpacing: 4,
+            ),
       itemCount: _items.length + (_loading ? 1 : 0),
       itemBuilder: (ctx, i) {
         if (i == _items.length) {

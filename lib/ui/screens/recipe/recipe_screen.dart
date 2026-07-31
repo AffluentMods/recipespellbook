@@ -367,7 +367,173 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
     }
 
     return Scaffold(
-      body: _buildTabbedLayout(theme, l10n),
+      // Decide by the ACTUAL width this screen is given, not the whole window:
+      // RecipeScreen also renders inside the master-detail right pane (much
+      // narrower than the window), so gating on window width would cram two
+      // columns into a sub-phone pane. LayoutBuilder reads the real slot; two
+      // columns only once there's genuinely room (>=1000). Below that (phone,
+      // tablet, narrow detail pane) the tabs are used, unchanged.
+      body: LayoutBuilder(
+        builder: (context, constraints) => constraints.maxWidth >= 1000
+            ? _buildTwoColumnLayout(theme, l10n)
+            : _buildTabbedLayout(theme, l10n),
+      ),
+    );
+  }
+
+  /// Title + rating + tags + description + meta + actions + allergy — shared by
+  /// the tabbed (mobile/medium) header and the expanded two-column header.
+  Widget _recipeInfoBlock(ThemeData theme, AppLocalizations l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Tooltip(
+                message: _recipe!.title,
+                child: Text(
+                  normalizeTitle(_recipe!.title).title,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+            _FavoriteButton(isFavorite: _recipe!.isFavorite, onToggle: _toggleFavorite),
+            IconButton(
+              icon: const Icon(Icons.ios_share_rounded),
+              tooltip: l10n.actionShare,
+              color: theme.colorScheme.onSurfaceVariant,
+              onPressed: _showShareSheet,
+            ),
+          ],
+        ),
+        if (_recipe!.rating != null && _recipe!.rating! > 0) ...[
+          const SizedBox(height: 8),
+          RecipeRating(rating: _recipe!.rating!),
+        ],
+        const SizedBox(height: 12),
+        RecipeTagsDisplay(recipeId: widget.recipeId),
+        if (_recipe!.description != null && _recipe!.description!.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(_recipe!.description!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+        ],
+        const SizedBox(height: 16),
+        if (_hasMetaInfo(_recipe!)) ...[
+          _RecipeMetaInfoCard(recipe: _recipe!, scaleFactor: _scaleFactor, onOpenScaleSheet: _openScaleSheet),
+          const SizedBox(height: 16),
+        ],
+        _RecipeActionBar(
+          currentScale: _scaleFactor,
+          servings: _recipe!.servings,
+          onScaleChanged: (scale) => setState(() => _scaleFactor = scale),
+          unitConversion: _unitConversion,
+          onConversionChanged: (mode) => setState(() => _unitConversion = mode),
+          onAddToMealPlan: _showAddToMealPlanSheet,
+          onAddToShopping: _showAddToShoppingSheet,
+        ),
+        const SizedBox(height: 16),
+        _ImprovedAllergyWarning(
+          recipeId: widget.recipeId,
+          ingredientTexts: _ingredients.map((i) => i.name).toList(),
+        ),
+      ],
+    );
+  }
+
+  /// Expanded (>1240) layout: hero + info full-width, then ingredients (~38%)
+  /// beside instructions (~62%). Reuses [_RecipeAppBar] (hero + every action)
+  /// and both panels in `sliverless` mode; the columns share the page scroll and
+  /// the content is width-capped so it never sprawls on ultra-wide monitors.
+  Widget _buildTwoColumnLayout(ThemeData theme, AppLocalizations l10n) {
+    final nutritionFooter = Padding(
+      padding: const EdgeInsets.only(top: 28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionHeader(title: l10n.nutritionTitle),
+          const SizedBox(height: 12),
+          NutritionWidget(
+            nutrition: _nutrition,
+            scaleFactor: _scaleFactor,
+            servings: _recipe!.servings,
+            chartStyle: ref.watch(settingsProvider).nutritionChartStyle,
+            palette: ref.watch(settingsProvider).nutritionPalette,
+            enabledNutrients: ref.watch(settingsProvider).enabledNutrients,
+            onEmptyTap: _showNutritionCalculation,
+          ),
+        ],
+      ),
+    );
+    return CustomScrollView(
+      slivers: [
+        _RecipeAppBar(
+          recipe: _recipe!,
+          ref: ref,
+          onEdit: _navigateToEdit,
+          onReload: _loadRecipe,
+          onPrint: _printRecipe,
+          onShare: _showShareSheet,
+          isDetailPane: widget.isDetailPane,
+          onClose: widget.onClose,
+          currentScale: _scaleFactor,
+        ),
+        SliverToBoxAdapter(
+          child: Responsive.constrainWidth(
+            context,
+            maxWidth: 1400,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+              child: _recipeInfoBlock(theme, l10n),
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Responsive.constrainWidth(
+            context,
+            maxWidth: 1400,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 38,
+                    child: _IngredientsTab(
+                      ingredients: _sortedIngredients,
+                      recipeId: widget.recipeId,
+                      scaleFactor: _scaleFactor,
+                      l10n: l10n,
+                      onAddToShopping: _showAddToShoppingSheet,
+                      unitConversion: _unitConversion,
+                      ingredientLinksMap: _ingredientLinksMap,
+                      footer: nutritionFooter,
+                      sliverless: true,
+                    ),
+                  ),
+                  const SizedBox(width: 24),
+                  Expanded(
+                    flex: 62,
+                    child: _InstructionsTab(
+                      steps: _steps,
+                      recipeId: widget.recipeId,
+                      notes: _recipe!.notes,
+                      l10n: l10n,
+                      scaleFactor: _scaleFactor,
+                      ingredientNames: _ingredientNamesForScaling,
+                      sliverless: true,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -386,63 +552,9 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           currentScale: _scaleFactor,
         ),
         SliverToBoxAdapter(
-          child: Responsive.constrainWidth(context, child: Padding(
+          child: Responsive.constrainWidth(context, maxWidth: 900, child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Tooltip(
-                        message: _recipe!.title,
-                        child: Text(
-                          normalizeTitle(_recipe!.title).title,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                    _FavoriteButton(isFavorite: _recipe!.isFavorite, onToggle: _toggleFavorite),
-                  ],
-                ),
-                if (_recipe!.rating != null && _recipe!.rating! > 0) ...[
-                  const SizedBox(height: 8),
-                  RecipeRating(rating: _recipe!.rating!),
-                ],
-                const SizedBox(height: 12),
-                RecipeTagsDisplay(recipeId: widget.recipeId),
-                if (_recipe!.description != null && _recipe!.description!.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  Text(_recipe!.description!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                ],
-
-                const SizedBox(height: 16),
-                if (_hasMetaInfo(_recipe!)) ...[
-                  _RecipeMetaInfoCard(recipe: _recipe!, scaleFactor: _scaleFactor, onOpenScaleSheet: _openScaleSheet),
-                  const SizedBox(height: 16),
-                ],
-                _RecipeActionBar(
-                  currentScale: _scaleFactor,
-                  servings: _recipe!.servings,
-                  onScaleChanged: (scale) => setState(() => _scaleFactor = scale),
-                  unitConversion: _unitConversion,
-                  onConversionChanged: (mode) => setState(() => _unitConversion = mode),
-                  onAddToMealPlan: _showAddToMealPlanSheet,
-                  onAddToShopping: _showAddToShoppingSheet,
-                  onShare: _showShareSheet,
-                ),
-                const SizedBox(height: 16),
-                _ImprovedAllergyWarning(
-                  recipeId: widget.recipeId,
-                  ingredientTexts: _ingredients.map((i) => i.name).toList(),
-                ),
-              ],
-            ),
+            child: _recipeInfoBlock(theme, l10n),
           )),
         ),
         // Absorbs the pinned TabBar's overlap so each tab's CustomScrollView
@@ -531,7 +643,6 @@ class _RecipeActionBar extends StatelessWidget {
   final ValueChanged<_UnitConversion> onConversionChanged;
   final VoidCallback onAddToMealPlan;
   final VoidCallback onAddToShopping;
-  final VoidCallback onShare;
 
   const _RecipeActionBar({
     required this.currentScale,
@@ -541,22 +652,15 @@ class _RecipeActionBar extends StatelessWidget {
     required this.onConversionChanged,
     required this.onAddToMealPlan,
     required this.onAddToShopping,
-    required this.onShare,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Share now lives as an icon next to Favorite in the title row; this bar is
+    // just Meal plan / Groceries / Convert.
     return Column(
       children: [
-        // Servings scaling now lives on the meta-info card's servings cell; the
-        // action bar keeps Share + the Meal Plan / Groceries / Convert row.
-        Row(
-          children: [
-            Expanded(child: _SharePill(onTap: onShare)),
-          ],
-        ),
-        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
@@ -650,31 +754,6 @@ class _RecipeActionBar extends StatelessWidget {
               ),
             const SizedBox(height: 16),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SharePill extends StatelessWidget {
-  final VoidCallback onTap;
-  const _SharePill({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    return SizedBox(
-      height: 48,
-      child: FilledButton.icon(
-        onPressed: onTap,
-        icon: const Icon(Icons.ios_share_rounded, size: 18),
-        label: Text(l10n.actionShare),
-        style: FilledButton.styleFrom(
-          backgroundColor: theme.colorScheme.primary,
-          foregroundColor: theme.colorScheme.onPrimary,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
         ),
       ),
     );
@@ -1524,6 +1603,10 @@ class _IngredientsTab extends ConsumerWidget {
   final _UnitConversion unitConversion;
   final Map<String, List<RecipeLinkInfo>> ingredientLinksMap;
   final Widget? footer;
+  // When true, returns just the content column (no CustomScrollView / overlap
+  // injector / 900-cap) so it can live inside the expanded two-column layout's
+  // shared page scroll.
+  final bool sliverless;
 
   const _IngredientsTab({
     required this.ingredients,
@@ -1534,17 +1617,36 @@ class _IngredientsTab extends ConsumerWidget {
     this.unitConversion = _UnitConversion.none,
     this.ingredientLinksMap = const {},
     this.footer,
+    this.sliverless = false,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    if (ingredients.isEmpty) return Center(child: Text(l10n.ingredientsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)));
+    if (ingredients.isEmpty) {
+      final empty = Text(l10n.ingredientsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline));
+      return sliverless
+          ? Padding(padding: const EdgeInsets.symmetric(vertical: 24), child: empty)
+          : Center(child: empty);
+    }
     // NOTE: SingleChildScrollView + Column (not a lazy ListView) on purpose.
     // SelectionArea over a lazy ListView crashes with "Null check operator
     // used on a null value" on select-all, because the framework asks
     // off-screen, not-yet-laid-out children for selection geometry. An
     // eager Column lays them all out, so select-all/copy works.
+    final content = SelectionArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _CollapsibleIngredientList(ingredients: ingredients, recipeId: recipeId, scaleFactor: scaleFactor, unitConversion: unitConversion, ingredientLinksMap: ingredientLinksMap),
+          const SizedBox(height: 16),
+          _LargeAddToShoppingButton(onTap: onAddToShopping),
+          if (footer != null) footer!,
+          const SizedBox(height: 32),
+        ],
+      ),
+    );
+    if (sliverless) return content;
     return CustomScrollView(
       key: const PageStorageKey('ingredients_tab'),
       slivers: [
@@ -1553,17 +1655,10 @@ class _IngredientsTab extends ConsumerWidget {
         SliverPadding(
           padding: const EdgeInsets.all(16),
           sliver: SliverToBoxAdapter(
-            child: SelectionArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _CollapsibleIngredientList(ingredients: ingredients, recipeId: recipeId, scaleFactor: scaleFactor, unitConversion: unitConversion, ingredientLinksMap: ingredientLinksMap),
-                  const SizedBox(height: 16),
-                  _LargeAddToShoppingButton(onTap: onAddToShopping),
-                  if (footer != null) footer!,
-                  const SizedBox(height: 32),
-                ],
-              ),
+            child: Responsive.constrainWidth(
+              context,
+              maxWidth: 900,
+              child: content,
             ),
           ),
         ),
@@ -1579,6 +1674,9 @@ class _InstructionsTab extends StatelessWidget {
   final AppLocalizations l10n;
   final double scaleFactor;
   final List<String> ingredientNames;
+  // See _IngredientsTab.sliverless — returns just the content column for the
+  // expanded two-column layout's shared page scroll.
+  final bool sliverless;
   const _InstructionsTab({
     required this.steps,
     required this.recipeId,
@@ -1586,6 +1684,7 @@ class _InstructionsTab extends StatelessWidget {
     required this.l10n,
     this.scaleFactor = 1.0,
     this.ingredientNames = const [],
+    this.sliverless = false,
   });
   @override
   Widget build(BuildContext context) {
@@ -1594,7 +1693,10 @@ class _InstructionsTab extends StatelessWidget {
     // Only show the empty state when there's genuinely nothing — otherwise a
     // recipe that has notes but no steps would hide its notes here.
     if (steps.isEmpty && !hasNotes) {
-      return Center(child: Text(l10n.instructionsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)));
+      final empty = Text(l10n.instructionsEmpty, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline));
+      return sliverless
+          ? Padding(padding: const EdgeInsets.symmetric(vertical: 24), child: empty)
+          : Center(child: empty);
     }
 
     // Group steps into sections at `__header__` markers (mirrors ingredients).
@@ -1645,6 +1747,22 @@ class _InstructionsTab extends StatelessWidget {
 
     // Eager Column (not lazy ListView) so SelectionArea select-all doesn't
     // crash on off-screen children — see note in _IngredientsTab.
+    final content = SelectionArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...children,
+          if (hasNotes) ...[
+            if (steps.isNotEmpty) const SizedBox(height: 24),
+            _SectionHeader(title: l10n.recipeFieldNotes),
+            const SizedBox(height: 12),
+            Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)), child: Text(notes!, style: theme.textTheme.bodyMedium)),
+          ],
+          const SizedBox(height: 32),
+        ],
+      ),
+    );
+    if (sliverless) return content;
     return CustomScrollView(
       key: const PageStorageKey('instructions_tab'),
       slivers: [
@@ -1653,20 +1771,10 @@ class _InstructionsTab extends StatelessWidget {
         SliverPadding(
           padding: const EdgeInsets.all(16),
           sliver: SliverToBoxAdapter(
-            child: SelectionArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ...children,
-                  if (hasNotes) ...[
-                    if (steps.isNotEmpty) const SizedBox(height: 24),
-                    _SectionHeader(title: l10n.recipeFieldNotes),
-                    const SizedBox(height: 12),
-                    Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)), child: Text(notes!, style: theme.textTheme.bodyMedium)),
-                  ],
-                  const SizedBox(height: 32),
-                ],
-              ),
+            child: Responsive.constrainWidth(
+              context,
+              maxWidth: 900,
+              child: content,
             ),
           ),
         ),

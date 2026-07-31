@@ -1,4 +1,5 @@
 {
+  "plannerPrevWeek": "前の週",
   "convertToSection": "セクションに変換",
   "convertToStep": "ステップに変換",
   "addSection": "セクションを追加",
@@ -4139,5 +4140,16 @@
   "paletteClassic": "クラシック",
   "paletteWarm": "ウォーム",
   "paletteCool": "クール",
-  "paletteMono": "モノ"
+  "paletteMono": "モノ",
+  "plannerMonth": "月",
+  "plannerWeek": "週",
+  "plannerDay": "日",
+  "addItem": "アイテムを追加",
+  "quickAddHint": "アイテムを追加…",
+  "recentlyAdded": "追加しました",
+  "recipeEditIngredientsSteps": "材料と手順",
+  "plannerPrevMonth": "前の月",
+  "plannerNextMonth": "次の月",
+  "plannerPrevDay": "前の日",
+  "plannerNextDay": "次の日"
 }

@@ -9,6 +9,9 @@ class AppLocalizationsRu extends AppLocalizations {
   AppLocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
+  String get plannerPrevWeek => 'Предыдущая неделя';
+
+  @override
   String get convertToSection => 'Преобразовать в раздел';
 
   @override
@@ -9782,4 +9785,37 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get paletteMono => 'Моно';
+
+  @override
+  String get plannerMonth => 'Месяц';
+
+  @override
+  String get plannerWeek => 'Неделя';
+
+  @override
+  String get plannerDay => 'День';
+
+  @override
+  String get addItem => 'Добавить элемент';
+
+  @override
+  String get quickAddHint => 'Добавить элемент…';
+
+  @override
+  String get recentlyAdded => 'Только что добавлено';
+
+  @override
+  String get recipeEditIngredientsSteps => 'Ингредиенты и инструкции';
+
+  @override
+  String get plannerPrevMonth => 'Предыдущий месяц';
+
+  @override
+  String get plannerNextMonth => 'Следующий месяц';
+
+  @override
+  String get plannerPrevDay => 'Предыдущий день';
+
+  @override
+  String get plannerNextDay => 'Следующий день';
 }

@@ -32,7 +32,7 @@ class _ManageTagsScreenState extends ConsumerState<ManageTagsScreen> {
           ),
         ],
       ),
-      body: Responsive.constrainWidth(context, child: StreamBuilder<List<Tag>>(
+      body: Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: StreamBuilder<List<Tag>>(
         stream: db.tagsDao.watchAllTags(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

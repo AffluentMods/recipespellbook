@@ -849,7 +849,7 @@ class _StepView extends ConsumerWidget {
           if (matched.isNotEmpty) ...[
             const SizedBox(height: 16),
             ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.35),
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.35, maxWidth: 760),
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
@@ -892,12 +892,15 @@ class _StepView extends ConsumerWidget {
           Expanded(
             child: Center(
               child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Text(
-                    instruction,
-                    style: TextStyle(color: context.appColors.textPrimary, fontSize: 28 * fontScale, height: 1.4),
-                    textAlign: TextAlign.center,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 720),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Text(
+                      instruction,
+                      style: TextStyle(color: context.appColors.textPrimary, fontSize: 28 * fontScale, height: 1.4),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
               ),
@@ -920,36 +923,40 @@ class _IngredientsView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final fontScale = ref.watch(recipeFontScaleProvider);
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: ingredients.length,
-      itemBuilder: (context, index) {
-        final ing = ingredients[index];
-        final isChecked = checkedIds.contains(ing.id);
+    return Responsive.constrainWidth(
+      context,
+      maxWidth: 700,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: ingredients.length,
+        itemBuilder: (context, index) {
+          final ing = ingredients[index];
+          final isChecked = checkedIds.contains(ing.id);
 
-        return GestureDetector(
-          onTap: () => onToggle(ing.id),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            margin: const EdgeInsets.only(bottom: 8),
-            decoration: BoxDecoration(color: context.appColors.surfaceRaised.withValues(alpha: isChecked ? 0.5 : 1.0), borderRadius: BorderRadius.circular(8)),
-            child: Row(
-              children: [
-                Icon(isChecked ? Icons.check_circle : Icons.circle_outlined, color: isChecked ? context.appColors.accent : context.appColors.textTertiary),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    ing.notes == '__header__'
-                        ? ing.name
-                        : scaledIngredientLabel(ing.amount, ing.unit, ing.name, scaleFactor),
-                    style: TextStyle(color: isChecked ? context.appColors.textTertiary : context.appColors.textPrimary, fontSize: 18 * fontScale, decoration: isChecked ? TextDecoration.lineThrough : null),
+          return GestureDetector(
+            onTap: () => onToggle(ing.id),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              margin: const EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(color: context.appColors.surfaceRaised.withValues(alpha: isChecked ? 0.5 : 1.0), borderRadius: BorderRadius.circular(8)),
+              child: Row(
+                children: [
+                  Icon(isChecked ? Icons.check_circle : Icons.circle_outlined, color: isChecked ? context.appColors.accent : context.appColors.textTertiary),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      ing.notes == '__header__'
+                          ? ing.name
+                          : scaledIngredientLabel(ing.amount, ing.unit, ing.name, scaleFactor),
+                      style: TextStyle(color: isChecked ? context.appColors.textTertiary : context.appColors.textPrimary, fontSize: 18 * fontScale, decoration: isChecked ? TextDecoration.lineThrough : null),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
@@ -969,16 +976,19 @@ class _BottomBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          IconButton(icon: const Icon(Icons.arrow_back, size: 32), color: onPrevious != null ? context.appColors.textPrimary : context.appColors.textTertiary, onPressed: onPrevious),
-          IconButton(icon: const Icon(Icons.timer, size: 32), color: context.appColors.textPrimary, onPressed: onTimer),
-          if (onFinish != null)
-            FilledButton.icon(onPressed: onFinish, icon: const Icon(Icons.check), label: Text(l10n.cookingFinish), style: FilledButton.styleFrom(backgroundColor: context.appColors.accent, foregroundColor: context.appColors.onAccent, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)))
-          else
-            IconButton(icon: const Icon(Icons.arrow_forward, size: 32), color: onNext != null ? context.appColors.textPrimary : context.appColors.textTertiary, onPressed: onNext),
-        ],
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            IconButton(icon: const Icon(Icons.arrow_back, size: 32), color: onPrevious != null ? context.appColors.textPrimary : context.appColors.textTertiary, onPressed: onPrevious),
+            IconButton(icon: const Icon(Icons.timer, size: 32), color: context.appColors.textPrimary, onPressed: onTimer),
+            if (onFinish != null)
+              FilledButton.icon(onPressed: onFinish, icon: const Icon(Icons.check), label: Text(l10n.cookingFinish), style: FilledButton.styleFrom(backgroundColor: context.appColors.accent, foregroundColor: context.appColors.onAccent, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12)))
+            else
+              IconButton(icon: const Icon(Icons.arrow_forward, size: 32), color: onNext != null ? context.appColors.textPrimary : context.appColors.textTertiary, onPressed: onNext),
+          ],
+        ),
       ),
     );
   }

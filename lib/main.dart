@@ -16,6 +16,9 @@ import 'providers/settings_provider.dart';
 import 'providers/subscription_provider.dart';
 import 'providers/sync_provider.dart';
 import 'router/router.dart';
+import 'ui/shell/desktop_title_bar.dart';
+import 'ui/widgets/command_palette.dart';
+import 'ui/widgets/shortcuts_cheat_sheet.dart';
 import 'package:app_links/app_links.dart';
 import 'services/ingredient_suggestion_service.dart';
 import 'services/notification_service.dart';
@@ -132,10 +135,44 @@ class RecipeSpellbookApp extends ConsumerWidget {
             child: AppShortcuts(child: child!),
           );
 
-          // Scale up touch targets on tablets/desktop
           final screenWidth = MediaQuery.of(context).size.width;
-          if (screenWidth >= 600) {
-            final baseTheme = Theme.of(context);
+          final baseTheme = Theme.of(context);
+
+          if (isDesktop) {
+            // Desktop is mouse/keyboard-first: TIGHTEN controls and rows (the
+            // opposite of the tablet path). Big finger-targets on a pointer UI
+            // are the #1 "stretched phone" tell.
+            const denseBtnPad = EdgeInsets.symmetric(horizontal: 16, vertical: 10);
+            const denseBtnMin = Size(0, 38);
+            result = Theme(
+              data: baseTheme.copyWith(
+                filledButtonTheme: FilledButtonThemeData(
+                  style: (baseTheme.filledButtonTheme.style ?? const ButtonStyle()).copyWith(
+                    padding: const WidgetStatePropertyAll(denseBtnPad),
+                    minimumSize: const WidgetStatePropertyAll(denseBtnMin),
+                  ),
+                ),
+                elevatedButtonTheme: ElevatedButtonThemeData(
+                  style: (baseTheme.elevatedButtonTheme.style ?? const ButtonStyle()).copyWith(
+                    padding: const WidgetStatePropertyAll(denseBtnPad),
+                    minimumSize: const WidgetStatePropertyAll(denseBtnMin),
+                  ),
+                ),
+                outlinedButtonTheme: OutlinedButtonThemeData(
+                  style: (baseTheme.outlinedButtonTheme.style ?? const ButtonStyle()).copyWith(
+                    padding: const WidgetStatePropertyAll(denseBtnPad),
+                    minimumSize: const WidgetStatePropertyAll(denseBtnMin),
+                  ),
+                ),
+                listTileTheme: baseTheme.listTileTheme.copyWith(
+                  minVerticalPadding: 4,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+                ),
+              ),
+              child: result,
+            );
+          } else if (screenWidth >= 600) {
+            // Touch tablet (not desktop): enlarge targets for fingers.
             final tabletPadding = screenWidth >= 900
                 ? const EdgeInsets.symmetric(horizontal: 32, vertical: 16)
                 : const EdgeInsets.symmetric(horizontal: 28, vertical: 14);
@@ -171,6 +208,21 @@ class RecipeSpellbookApp extends ConsumerWidget {
                 ),
               ),
               child: result,
+            );
+          }
+
+          // Desktop: custom window chrome (title bar) + command palette +
+          // keyboard-shortcuts cheat sheet overlays.
+          if (isDesktop) {
+            result = ShortcutsCheatSheetHost(
+              child: CommandPaletteHost(
+                child: Column(
+                  children: [
+                    const DesktopTitleBar(),
+                    Expanded(child: result),
+                  ],
+                ),
+              ),
             );
           }
 

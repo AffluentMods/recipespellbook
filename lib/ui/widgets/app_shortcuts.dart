@@ -5,7 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../router/router.dart';
 import '../../utils/platform_utils.dart';
+import '../../providers/navigation_guard_provider.dart';
 import '../shell/app_shell.dart';
+import 'command_palette.dart';
+import 'shortcuts_cheat_sheet.dart';
 import 'new_recipe_dialog.dart';
 
 /// Wraps child in a [CallbackShortcuts] widget providing desktop keyboard
@@ -45,6 +48,12 @@ class AppShortcuts extends ConsumerWidget {
         SingleActivator(key, meta: useMeta, control: !useMeta);
 
     return {
+      // Ctrl/Cmd + K — Command palette
+      shortcut(LogicalKeyboardKey.keyK): () => openCommandPalette(ref),
+
+      // Ctrl/Cmd + / — Keyboard shortcuts cheat sheet
+      shortcut(LogicalKeyboardKey.slash): () => toggleShortcutsCheatSheet(ref),
+
       // Ctrl/Cmd + N — New recipe
       shortcut(LogicalKeyboardKey.keyN): () {
         final ctx = rootNavigatorKey.currentContext ?? context;
@@ -63,38 +72,38 @@ class AppShortcuts extends ConsumerWidget {
         ctx.push('/settings');
       },
 
-      // Ctrl/Cmd + 1 — Home
-      shortcut(LogicalKeyboardKey.digit1): () {
+      // Ctrl/Cmd + 1 — Home (guarded: .go unmounts an in-shell editor)
+      shortcut(LogicalKeyboardKey.digit1): () async {
+        if (!await confirmDiscardBeforeLeaving(ref)) return;
         ref.read(currentNavIndexProvider.notifier).state = 0;
-        final ctx = rootNavigatorKey.currentContext ?? context;
-        ctx.go('/');
+        (rootNavigatorKey.currentContext ?? context).go('/');
       },
 
       // Ctrl/Cmd + 2 — Cookbooks
-      shortcut(LogicalKeyboardKey.digit2): () {
+      shortcut(LogicalKeyboardKey.digit2): () async {
+        if (!await confirmDiscardBeforeLeaving(ref)) return;
         ref.read(currentNavIndexProvider.notifier).state = 1;
-        final ctx = rootNavigatorKey.currentContext ?? context;
-        ctx.go('/cookbooks');
+        (rootNavigatorKey.currentContext ?? context).go('/cookbooks');
       },
 
       // Ctrl/Cmd + 3 — Planner
-      shortcut(LogicalKeyboardKey.digit3): () {
+      shortcut(LogicalKeyboardKey.digit3): () async {
+        if (!await confirmDiscardBeforeLeaving(ref)) return;
         ref.read(currentNavIndexProvider.notifier).state = 2;
-        final ctx = rootNavigatorKey.currentContext ?? context;
-        ctx.go('/planner');
+        (rootNavigatorKey.currentContext ?? context).go('/planner');
       },
 
       // Ctrl/Cmd + 4 — Shopping
-      shortcut(LogicalKeyboardKey.digit4): () {
+      shortcut(LogicalKeyboardKey.digit4): () async {
+        if (!await confirmDiscardBeforeLeaving(ref)) return;
         ref.read(currentNavIndexProvider.notifier).state = 3;
-        final ctx = rootNavigatorKey.currentContext ?? context;
-        ctx.go('/shopping');
+        (rootNavigatorKey.currentContext ?? context).go('/shopping');
       },
 
       // Ctrl/Cmd + 5 — Community
-      shortcut(LogicalKeyboardKey.digit5): () {
-        final ctx = rootNavigatorKey.currentContext ?? context;
-        ctx.go('/community');
+      shortcut(LogicalKeyboardKey.digit5): () async {
+        if (!await confirmDiscardBeforeLeaving(ref)) return;
+        (rootNavigatorKey.currentContext ?? context).go('/community');
       },
     };
   }

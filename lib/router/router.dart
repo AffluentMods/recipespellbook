@@ -76,31 +76,9 @@ final router = GoRouter(
       },
     ),
 
-    // Recipe edit (fullscreen modal — no sidebar)
-    GoRoute(
-      path: '/recipe/:id/edit',
-      name: 'recipe-edit',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) {
-        final id = state.pathParameters['id']!;
-        return RecipeEditScreen(recipeId: id);
-      },
-    ),
-
-    // New recipe (fullscreen modal — no sidebar)
-    GoRoute(
-      path: '/cookbook/:cookbookId/new-recipe',
-      name: 'new-recipe',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) {
-        final cookbookId = state.pathParameters['cookbookId']!;
-        final extra = state.extra as Map<String, dynamic>?;
-        return RecipeEditScreen(
-          cookbookId: cookbookId,
-          importedData: extra,
-        );
-      },
-    ),
+    // NOTE: recipe edit + new recipe live INSIDE the shell route (below) so the
+    // desktop sidebar persists while editing (in-shell editing). AppShell
+    // renders them immersively (no nav chrome) on compact/mobile widths.
 
     // Upgrade paywall (fullscreen modal)
     GoRoute(
@@ -154,6 +132,29 @@ final router = GoRouter(
       navigatorKey: shellNavigatorKey,
       builder: (context, state, child) => AppShell(child: child),
       routes: [
+        // ── Recipe editor (in-shell: sidebar stays on desktop, immersive on
+        //    mobile via AppShell) ──
+        GoRoute(
+          path: '/recipe/:id/edit',
+          name: 'recipe-edit',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return RecipeEditScreen(recipeId: id);
+          },
+        ),
+        GoRoute(
+          path: '/cookbook/:cookbookId/new-recipe',
+          name: 'new-recipe',
+          builder: (context, state) {
+            final cookbookId = state.pathParameters['cookbookId']!;
+            final extra = state.extra as Map<String, dynamic>?;
+            return RecipeEditScreen(
+              cookbookId: cookbookId,
+              importedData: extra,
+            );
+          },
+        ),
+
         // ── Main tabs (no transition animation) ──
         GoRoute(
           path: '/',

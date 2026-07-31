@@ -170,7 +170,7 @@ class NutritionSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.nutritionDisplay),
       ),
-      body: Responsive.constrainWidth(context, child: ListView(
+      body: Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: ListView(
         padding: const EdgeInsets.only(bottom: 40),
         children: [
           // ─── LIVE PREVIEW ───

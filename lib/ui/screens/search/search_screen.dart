@@ -473,54 +473,61 @@ class _SearchResultsState extends ConsumerState<_SearchResults> {
           children: [
             // Selection bar
             if (_isSelecting)
-              Container(
-                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: _exitSelection,
-                    ),
-                    Expanded(
-                      child: Text(
-                        l10n.selectAllBar(_selectedIds.length, widget.results.length),
-                        style: theme.textTheme.titleMedium,
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 720),
+                child: Container(
+                  color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: _exitSelection,
                       ),
-                    ),
-                    TextButton(
-                      onPressed: _selectedIds.length == widget.results.length
-                          ? _exitSelection
-                          : _selectAll,
-                      child: Text(_selectedIds.length == widget.results.length
-                          ? l10n.communityDeselectAllRecipes
-                          : l10n.communitySelectAllRecipes),
-                    ),
-                  ],
+                      Expanded(
+                        child: Text(
+                          l10n.selectAllBar(_selectedIds.length, widget.results.length),
+                          style: theme.textTheme.titleMedium,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: _selectedIds.length == widget.results.length
+                            ? _exitSelection
+                            : _selectAll,
+                        child: Text(_selectedIds.length == widget.results.length
+                            ? l10n.communityDeselectAllRecipes
+                            : l10n.communitySelectAllRecipes),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             Expanded(
-              child: ListView.builder(
-                padding: EdgeInsets.fromLTRB(0, 8, 0, _isSelecting ? 80 : 8),
-                itemCount: widget.results.length,
-                itemBuilder: (context, index) {
-                  final recipe = widget.results[index];
-                  final selected = _selectedIds.contains(recipe.id);
-                  return _SearchResultCard(
-                    recipe: recipe,
-                    isSelecting: _isSelecting,
-                    isSelected: selected,
-                    onTap: () {
-                      if (_isSelecting) {
-                        _toggleSelection(recipe.id);
-                      } else {
-                        ref.read(recipeDaoProvider).updateLastViewed(recipe.id);
-                        context.pushNamed('recipe', pathParameters: {'id': recipe.id});
-                      }
-                    },
-                    onLongPress: () => _enterSelection(recipe.id),
-                  );
-                },
+              child: Responsive.constrainWidth(
+                context,
+                maxWidth: 720,
+                child: ListView.builder(
+                  padding: EdgeInsets.fromLTRB(0, 8, 0, _isSelecting ? 80 : 8),
+                  itemCount: widget.results.length,
+                  itemBuilder: (context, index) {
+                    final recipe = widget.results[index];
+                    final selected = _selectedIds.contains(recipe.id);
+                    return _SearchResultCard(
+                      recipe: recipe,
+                      isSelecting: _isSelecting,
+                      isSelected: selected,
+                      onTap: () {
+                        if (_isSelecting) {
+                          _toggleSelection(recipe.id);
+                        } else {
+                          ref.read(recipeDaoProvider).updateLastViewed(recipe.id);
+                          context.pushNamed('recipe', pathParameters: {'id': recipe.id});
+                        }
+                      },
+                      onLongPress: () => _enterSelection(recipe.id),
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -529,21 +536,25 @@ class _SearchResultsState extends ConsumerState<_SearchResults> {
         if (_isSelecting && _selectedIds.isNotEmpty)
           Positioned(
             left: 0, right: 0, bottom: 0,
-            child: Container(
-              padding: EdgeInsets.fromLTRB(4, 8, 4, 8 + MediaQuery.of(context).padding.bottom),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-                border: Border(top: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2))),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _SearchBulkAction(icon: Icons.star_outline, label: l10n.bulkFavorite, onTap: _bulkFavorite),
-                  _SearchBulkAction(icon: Icons.copy_rounded, label: l10n.bulkCopyLabel, onTap: () => _bulkCopyOrMove(move: false)),
-                  _SearchBulkAction(icon: Icons.drive_file_move_outlined, label: l10n.bulkMoveLabel, onTap: () => _bulkCopyOrMove(move: true)),
-                  Container(width: 1, height: 36, color: theme.colorScheme.outline.withValues(alpha: 0.2)),
-                  _SearchBulkAction(icon: Icons.delete_outline, label: l10n.bulkDeleteLabel, onTap: _bulkDelete, color: theme.colorScheme.error),
-                ],
+            child: Responsive.constrainWidth(
+              context,
+              maxWidth: 720,
+              child: Container(
+                padding: EdgeInsets.fromLTRB(4, 8, 4, 8 + MediaQuery.of(context).padding.bottom),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  border: Border(top: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2))),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _SearchBulkAction(icon: Icons.star_outline, label: l10n.bulkFavorite, onTap: _bulkFavorite),
+                    _SearchBulkAction(icon: Icons.copy_rounded, label: l10n.bulkCopyLabel, onTap: () => _bulkCopyOrMove(move: false)),
+                    _SearchBulkAction(icon: Icons.drive_file_move_outlined, label: l10n.bulkMoveLabel, onTap: () => _bulkCopyOrMove(move: true)),
+                    Container(width: 1, height: 36, color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+                    _SearchBulkAction(icon: Icons.delete_outline, label: l10n.bulkDeleteLabel, onTap: _bulkDelete, color: theme.colorScheme.error),
+                  ],
+                ),
               ),
             ),
           ),

@@ -9,6 +9,9 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
+  String get plannerPrevWeek => '前の週';
+
+  @override
   String get convertToSection => 'セクションに変換';
 
   @override
@@ -9644,4 +9647,37 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get paletteMono => 'モノ';
+
+  @override
+  String get plannerMonth => '月';
+
+  @override
+  String get plannerWeek => '週';
+
+  @override
+  String get plannerDay => '日';
+
+  @override
+  String get addItem => 'アイテムを追加';
+
+  @override
+  String get quickAddHint => 'アイテムを追加…';
+
+  @override
+  String get recentlyAdded => '追加しました';
+
+  @override
+  String get recipeEditIngredientsSteps => '材料と手順';
+
+  @override
+  String get plannerPrevMonth => '前の月';
+
+  @override
+  String get plannerNextMonth => '次の月';
+
+  @override
+  String get plannerPrevDay => '前の日';
+
+  @override
+  String get plannerNextDay => '次の日';
 }

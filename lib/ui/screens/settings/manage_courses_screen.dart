@@ -53,6 +53,12 @@ class _ManageCoursesScreenState extends ConsumerState<ManageCoursesScreen> {
       appBar: AppBar(
         title: Text(l10n.settingsManageCourses),
         actions: [
+          if (Responsive.useNavRail(context))
+            IconButton(
+              icon: const Icon(Icons.add),
+              tooltip: l10n.taxonomyAddCourse,
+              onPressed: _addCourse,
+            ),
           PopupMenuButton<String>(
             onSelected: (v) { if (v == 'restore') _restoreDefaults(); },
             itemBuilder: (_) => [
@@ -63,7 +69,7 @@ class _ManageCoursesScreenState extends ConsumerState<ManageCoursesScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Responsive.constrainWidth(context, child: ListView.builder(
+          : Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: ListView.builder(
         padding: const EdgeInsets.only(bottom: 80),
         itemCount: _courses.length,
         itemBuilder: (_, i) {
@@ -89,11 +95,13 @@ class _ManageCoursesScreenState extends ConsumerState<ManageCoursesScreen> {
           );
         },
       )),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _addCourse,
-        icon: const Icon(Icons.add),
-        label: Text(l10n.taxonomyAddCourse),
-      ),
+      floatingActionButton: Responsive.useNavRail(context)
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: _addCourse,
+              icon: const Icon(Icons.add),
+              label: Text(l10n.taxonomyAddCourse),
+            ),
     );
   }
 

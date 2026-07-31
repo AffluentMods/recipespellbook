@@ -1,4 +1,5 @@
 {
+  "plannerPrevWeek": "上一周",
   "convertToSection": "转换为小节",
   "convertToStep": "转换为步骤",
   "addSection": "添加小节",
@@ -4139,5 +4140,16 @@
   "paletteClassic": "经典",
   "paletteWarm": "暖色",
   "paletteCool": "冷色",
-  "paletteMono": "单色"
+  "paletteMono": "单色",
+  "plannerMonth": "月",
+  "plannerWeek": "周",
+  "plannerDay": "日",
+  "addItem": "添加项目",
+  "quickAddHint": "添加项目…",
+  "recentlyAdded": "最近添加",
+  "recipeEditIngredientsSteps": "食材与步骤",
+  "plannerPrevMonth": "上个月",
+  "plannerNextMonth": "下个月",
+  "plannerPrevDay": "前一天",
+  "plannerNextDay": "后一天"
 }

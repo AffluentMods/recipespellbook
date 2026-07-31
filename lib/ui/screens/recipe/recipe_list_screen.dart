@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipespellbook/l10n/app_localizations.dart';
@@ -58,6 +59,9 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
   String? _selectedRecipeId; // Desktop master-detail
 
   final TextEditingController _searchController = TextEditingController();
+
+  // Keyboard navigation of the master list on desktop (arrow up/down).
+  final FocusNode _listFocusNode = FocusNode(debugLabel: 'recipeListNav');
 
   // ── Multi-select state ──
   bool _isSelecting = false;
@@ -240,14 +244,23 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _listFocusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final recipeDao = ref.watch(recipeDaoProvider);
     final tagsDao = ref.watch(tagsDaoProvider);
+
+    // On tablet/desktop the search field lives persistently in the app bar and
+    // "add" is a header button, so the compact search-toggle + FAB are dropped.
+    final useNavRail = Responsive.useNavRail(context);
+    // Only ever mount ONE search TextField: the persistent nav-rail one OR the
+    // compact toggle overlay — never both.
+    final showSearchField = _isSearching && !useNavRail;
 
     // Get cookbookId from provider if not explicitly passed
     final effectiveCookbookId = widget.cookbookId.isNotEmpty
@@ -310,7 +323,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         ],
       )
           : AppBar(
-        title: _isSearching
+        centerTitle: false,
+        title: showSearchField
             ? TextField(
           controller: _searchController,
           autofocus: true,
@@ -331,7 +345,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
           onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
         )
             : Text(widget.title),
-        leading: _isSearching
+        leading: showSearchField
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () {
@@ -344,7 +358,37 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
               )
             : null,
         actions: [
-          if (!_isSearching) ...[
+          if (useNavRail) ...[
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: SizedBox(
+                width: 240,
+                child: TextField(
+                  controller: _searchController,
+                  style: theme.textTheme.bodyMedium,
+                  decoration: InputDecoration(
+                    hintText: l10n.searchHint,
+                    isDense: true,
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                  onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
+                ),
+              ),
+            ),
+            if (canEditHere)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: FilledButton.icon(
+                  onPressed: () => _showAddRecipeDialog(context),
+                  icon: const Icon(Icons.add),
+                  label: Text(l10n.recipeAdd),
+                ),
+              ),
+          ],
+          if (!showSearchField) ...[
+          if (!useNavRail)
           IconButton(
             icon: const Icon(Icons.search),
             tooltip: AppLocalizations.of(context)!.searchRecipes,
@@ -395,10 +439,14 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
               }).toList();
             },
           ),
-          ], // end !_isSearching
+          ], // end !showSearchField
         ],
       ),
-      body: Column(
+      body: Focus(
+        focusNode: _listFocusNode,
+        autofocus: Responsive.isDesktopLayout(context),
+        onKeyEvent: Responsive.isDesktopLayout(context) ? _handleListKey : null,
+        child: Column(
         children: [
           // Recipe list (pull-to-refresh triggers cloud sync if available)
           Expanded(
@@ -443,8 +491,9 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
           ),
 
         ],
+        ),
       ),
-      floatingActionButton: (_isSelecting || !canEditHere)
+      floatingActionButton: (_isSelecting || !canEditHere || useNavRail)
           ? null
           : FloatingActionButton.extended(
         onPressed: () => _showAddRecipeDialog(context),
@@ -453,8 +502,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
       ),
     );
 
-    // Desktop master-detail layout
-    if (Responsive.isDesktopLayout(context)) {
+    // Desktop master-detail layout (only when the content pane is wide enough)
+    if (Responsive.useTwoPane(context)) {
       return MasterDetailLayout(
         masterWidth: 420,
         master: masterScaffold,
@@ -500,13 +549,102 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     return filteredRecipes;
   }
 
-  /// Navigate to recipe — either inline (desktop) or full-screen (mobile)
+  /// Navigate to recipe — either inline (two-pane) or full-screen (single pane)
   void _openRecipe(BuildContext context, String id) {
-    if (Responsive.isDesktopLayout(context)) {
+    if (Responsive.useTwoPane(context)) {
       setState(() => _selectedRecipeId = id);
     } else {
       context.push('/recipe/$id');
     }
+  }
+
+  /// Right-click context menu for a recipe card/row (desktop/web only — the
+  /// [ContextMenuRegion] is a pass-through on mobile).
+  List<ContextMenuItem> _recipeContextItems(BuildContext ctx, Recipe recipe) {
+    final l10n = AppLocalizations.of(ctx)!;
+    final dao = ref.read(recipeDaoProvider);
+    return [
+      ContextMenuItem(
+        icon: Icons.open_in_new,
+        label: l10n.actionView,
+        onTap: () => _openRecipe(ctx, recipe.id),
+      ),
+      ContextMenuItem(
+        icon: Icons.edit,
+        label: l10n.actionEdit,
+        onTap: () => ctx.push('/recipe/${recipe.id}/edit'),
+      ),
+      ContextMenuItem(
+        icon: recipe.isFavorite ? Icons.favorite : Icons.favorite_border,
+        label: l10n.bulkFavorite,
+        onTap: () => dao.toggleFavorite(recipe.id, !recipe.isFavorite),
+      ),
+      ContextMenuItem(
+        icon: Icons.copy_outlined,
+        label: l10n.bulkCopyLabel,
+        onTap: () => dao.duplicateRecipe(recipe.id),
+      ),
+      ContextMenuItem(
+        icon: Icons.delete_outline,
+        label: l10n.actionDelete,
+        isDestructive: true,
+        onTap: () => dao.moveToTrash(recipe.id),
+      ),
+    ];
+  }
+
+  /// Move the desktop master-detail selection through the ordered visible list.
+  void _moveSelection(int delta) {
+    final ids = _currentVisibleRecipes.map((r) => r.id).toList();
+    if (ids.isEmpty) return;
+    final current = _selectedRecipeId == null ? -1 : ids.indexOf(_selectedRecipeId!);
+    final next = (current + delta).clamp(0, ids.length - 1);
+    setState(() => _selectedRecipeId = ids[next]);
+  }
+
+  /// Arrow up/down keyboard navigation of the master list on desktop.
+  KeyEventResult _handleListKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+      _moveSelection(1);
+      return KeyEventResult.handled;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+      _moveSelection(-1);
+      return KeyEventResult.handled;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.enter ||
+        event.logicalKey == LogicalKeyboardKey.numpadEnter) {
+      final id = _selectedRecipeId;
+      if (id != null) {
+        _openRecipe(context, id);
+        return KeyEventResult.handled;
+      }
+    }
+    if (event.logicalKey == LogicalKeyboardKey.delete) {
+      _trashSelected();
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
+  /// Del moves the highlighted recipe to trash (recoverable) and advances the
+  /// selection to its neighbour, so the keyboard flow stays uninterrupted.
+  Future<void> _trashSelected() async {
+    final id = _selectedRecipeId;
+    if (id == null) return;
+    final ids = _currentVisibleRecipes.map((r) => r.id).toList();
+    final idx = ids.indexOf(id);
+    await ref.read(recipeDaoProvider).moveToTrash(id);
+    if (!mounted) return;
+    final remaining = ids.where((rid) => rid != id).toList();
+    setState(() {
+      _selectedRecipeId = remaining.isEmpty
+          ? null
+          : remaining[idx.clamp(0, remaining.length - 1)];
+    });
   }
 
   void _showAddRecipeDialog(BuildContext context) {
@@ -906,6 +1044,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         return _SmallListView(
           recipes: recipes, tagsDao: tagsDao,
           isSelecting: _isSelecting, selectedIds: _selectedIds,
+          activeRecipeId: _selectedRecipeId,
+          contextItemsBuilder: _recipeContextItems,
           onTap: (id) { if (_isSelecting) { _toggleSelection(id); } else { _openRecipe(context, id); } },
           onLongPress: (id) { if (!_isSelecting) _enterSelection(id); },
         );
@@ -913,6 +1053,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         return _MediumGridView(
           recipes: recipes, tagsDao: tagsDao,
           isSelecting: _isSelecting, selectedIds: _selectedIds,
+          activeRecipeId: _selectedRecipeId,
+          contextItemsBuilder: _recipeContextItems,
           onTap: (id) { if (_isSelecting) { _toggleSelection(id); } else { _openRecipe(context, id); } },
           onLongPress: (id) { if (!_isSelecting) _enterSelection(id); },
         );
@@ -920,6 +1062,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
         return _LargeCardView(
           recipes: recipes, tagsDao: tagsDao,
           isSelecting: _isSelecting, selectedIds: _selectedIds,
+          activeRecipeId: _selectedRecipeId,
+          contextItemsBuilder: _recipeContextItems,
           onTap: (id) { if (_isSelecting) { _toggleSelection(id); } else { _openRecipe(context, id); } },
           onLongPress: (id) { if (!_isSelecting) _enterSelection(id); },
         );
@@ -982,12 +1126,15 @@ class _SmallListView extends StatelessWidget {
   final TagsDao tagsDao;
   final bool isSelecting;
   final Set<String> selectedIds;
+  final String? activeRecipeId;
+  final List<ContextMenuItem> Function(BuildContext, Recipe) contextItemsBuilder;
   final ValueChanged<String> onTap;
   final ValueChanged<String> onLongPress;
 
   const _SmallListView({
     required this.recipes, required this.tagsDao,
     required this.isSelecting, required this.selectedIds,
+    required this.activeRecipeId, required this.contextItemsBuilder,
     required this.onTap, required this.onLongPress,
   });
 
@@ -997,16 +1144,29 @@ class _SmallListView extends StatelessWidget {
 
     return ListView.builder(
       key: const PageStorageKey('recipe_list_small'),
-      padding: const EdgeInsets.only(bottom: 100), // clears the FAB / bulk-select bar
+      padding: EdgeInsets.only(bottom: Responsive.useNavRail(context) ? 16.0 : 100.0), // clears the FAB / bulk-select bar
       itemCount: recipes.length,
       itemBuilder: (context, index) {
         final recipe = recipes[index];
         final totalTime = (recipe.prepTimeMinutes ?? 0) + (recipe.cookTimeMinutes ?? 0);
         final isSelected = selectedIds.contains(recipe.id);
+        final c = context.appColors;
+        final isActive = recipe.id == activeRecipeId && !isSelecting;
 
-        return Container(
+        return ContextMenuRegion(
+          items: contextItemsBuilder(context, recipe),
+          child: Container(
           key: ValueKey(recipe.id),
-          color: isSelected ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3) : null,
+          decoration: BoxDecoration(
+            color: isSelected
+                ? c.accent.withValues(alpha: 0.12)
+                : isActive
+                    ? c.accent.withValues(alpha: 0.16)
+                    : null,
+            border: isActive
+                ? Border(left: BorderSide(color: c.accent, width: 3))
+                : null,
+          ),
           child: ListTile(
             leading: Row(
               mainAxisSize: MainAxisSize.min,
@@ -1068,6 +1228,7 @@ class _SmallListView extends StatelessWidget {
             onTap: () => onTap(recipe.id),
             onLongPress: () => onLongPress(recipe.id),
           ),
+          ),
         );
       },
     );
@@ -1088,12 +1249,15 @@ class _MediumGridView extends StatelessWidget {
   final TagsDao tagsDao;
   final bool isSelecting;
   final Set<String> selectedIds;
+  final String? activeRecipeId;
+  final List<ContextMenuItem> Function(BuildContext, Recipe) contextItemsBuilder;
   final ValueChanged<String> onTap;
   final ValueChanged<String> onLongPress;
 
   const _MediumGridView({
     required this.recipes, required this.tagsDao,
     required this.isSelecting, required this.selectedIds,
+    required this.activeRecipeId, required this.contextItemsBuilder,
     required this.onTap, required this.onLongPress,
   });
 
@@ -1118,7 +1282,7 @@ class _MediumGridView extends StatelessWidget {
 
         return GridView.builder(
           key: const PageStorageKey('recipe_list_medium'),
-          padding: const EdgeInsets.fromLTRB(6, 4, 6, 100), // clears the FAB / bulk-select bar
+          padding: EdgeInsets.fromLTRB(6, 4, 6, Responsive.useNavRail(context) ? 16.0 : 100.0), // clears the FAB / bulk-select bar
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
             childAspectRatio: 1.0,
@@ -1128,30 +1292,14 @@ class _MediumGridView extends StatelessWidget {
           itemCount: recipes.length,
           itemBuilder: (context, index) {
             final recipe = recipes[index];
-            final l10n = AppLocalizations.of(context)!;
             return ContextMenuRegion(
-              items: [
-                ContextMenuItem(
-                  icon: Icons.open_in_new_rounded,
-                  label: l10n.actionView,
-                  onTap: () => onTap(recipe.id),
-                ),
-                ContextMenuItem(
-                  icon: Icons.edit_rounded,
-                  label: l10n.actionEdit,
-                  onTap: () => context.push('/recipe/${recipe.id}/edit'),
-                ),
-                ContextMenuItem(
-                  icon: Icons.favorite_rounded,
-                  label: l10n.bulkFavorite,
-                  onTap: () {},
-                ),
-              ],
+              items: contextItemsBuilder(context, recipe),
               child: _MediumCard(
                 key: ValueKey(recipe.id),
                 recipe: recipe, tagsDao: tagsDao,
                 isSelecting: isSelecting,
                 isSelected: selectedIds.contains(recipe.id),
+                isActive: recipe.id == activeRecipeId,
                 onTap: () => onTap(recipe.id),
                 onLongPress: () => onLongPress(recipe.id),
               ),
@@ -1168,6 +1316,7 @@ class _MediumCard extends StatefulWidget {
   final TagsDao tagsDao;
   final bool isSelecting;
   final bool isSelected;
+  final bool isActive;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
 
@@ -1175,6 +1324,7 @@ class _MediumCard extends StatefulWidget {
     super.key,
     required this.recipe, required this.tagsDao,
     required this.isSelecting, required this.isSelected,
+    this.isActive = false,
     required this.onTap, required this.onLongPress,
   });
 
@@ -1188,9 +1338,11 @@ class _MediumCardState extends State<_MediumCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final c = context.appColors;
     final recipe = widget.recipe;
     final isSelecting = widget.isSelecting;
     final isSelected = widget.isSelected;
+    final showActive = widget.isActive && !isSelecting;
     final onTap = widget.onTap;
     final onLongPress = widget.onLongPress;
     final isDesktop = Responsive.isDesktopLayout(context);
@@ -1206,8 +1358,8 @@ class _MediumCardState extends State<_MediumCard> {
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: isSelected
-            ? BorderSide(color: theme.colorScheme.primary, width: 2.5)
+        side: (isSelected || showActive)
+            ? BorderSide(color: c.accent, width: showActive ? 3 : 2.5)
             : BorderSide.none,
       ),
       child: InkWell(
@@ -1351,12 +1503,15 @@ class _LargeCardView extends StatelessWidget {
   final TagsDao tagsDao;
   final bool isSelecting;
   final Set<String> selectedIds;
+  final String? activeRecipeId;
+  final List<ContextMenuItem> Function(BuildContext, Recipe) contextItemsBuilder;
   final ValueChanged<String> onTap;
   final ValueChanged<String> onLongPress;
 
   const _LargeCardView({
     required this.recipes, required this.tagsDao,
     required this.isSelecting, required this.selectedIds,
+    required this.activeRecipeId, required this.contextItemsBuilder,
     required this.onTap, required this.onLongPress,
   });
 
@@ -1364,13 +1519,15 @@ class _LargeCardView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.builder(
       key: const PageStorageKey('recipe_list_large'),
-      padding: const EdgeInsets.all(12).copyWith(bottom: 100), // clears the FAB / bulk-select bar
+      padding: const EdgeInsets.all(12).copyWith(bottom: Responsive.useNavRail(context) ? 16.0 : 100.0), // clears the FAB / bulk-select bar
       itemCount: recipes.length,
       itemBuilder: (context, index) => _LargeCard(
         key: ValueKey(recipes[index].id),
         recipe: recipes[index], tagsDao: tagsDao,
         isSelecting: isSelecting,
         isSelected: selectedIds.contains(recipes[index].id),
+        isActive: recipes[index].id == activeRecipeId,
+        contextItemsBuilder: contextItemsBuilder,
         onTap: () => onTap(recipes[index].id),
         onLongPress: () => onLongPress(recipes[index].id),
       ),
@@ -1383,6 +1540,8 @@ class _LargeCard extends StatelessWidget {
   final TagsDao tagsDao;
   final bool isSelecting;
   final bool isSelected;
+  final bool isActive;
+  final List<ContextMenuItem> Function(BuildContext, Recipe) contextItemsBuilder;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
 
@@ -1390,20 +1549,25 @@ class _LargeCard extends StatelessWidget {
     super.key,
     required this.recipe, required this.tagsDao,
     required this.isSelecting, required this.isSelected,
+    this.isActive = false, required this.contextItemsBuilder,
     required this.onTap, required this.onLongPress,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final c = context.appColors;
+    final showActive = isActive && !isSelecting;
 
-    return Card(
+    return ContextMenuRegion(
+      items: contextItemsBuilder(context, recipe),
+      child: Card(
       margin: const EdgeInsets.only(bottom: 12),
       clipBehavior: Clip.antiAlias,
-      shape: isSelected
+      shape: (isSelected || showActive)
           ? RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: theme.colorScheme.primary, width: 2.5),
+        side: BorderSide(color: c.accent, width: showActive ? 3 : 2.5),
       )
           : null,
       child: InkWell(
@@ -1547,6 +1711,7 @@ class _LargeCard extends StatelessWidget {
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -1627,7 +1792,7 @@ class _CompactTagChips extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: lightMode ? Colors.white.withValues(alpha: 0.2) : theme.colorScheme.surfaceContainerHighest,
+              color: lightMode ? Colors.white.withValues(alpha: 0.2) : context.appColors.surfaceHigh,
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(

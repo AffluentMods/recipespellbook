@@ -9,6 +9,9 @@ class AppLocalizationsIt extends AppLocalizations {
   AppLocalizationsIt([String locale = 'it']) : super(locale);
 
   @override
+  String get plannerPrevWeek => 'Settimana precedente';
+
+  @override
   String get convertToSection => 'Converti in sezione';
 
   @override
@@ -9698,4 +9701,37 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get paletteMono => 'Mono';
+
+  @override
+  String get plannerMonth => 'Mese';
+
+  @override
+  String get plannerWeek => 'Settimana';
+
+  @override
+  String get plannerDay => 'Giorno';
+
+  @override
+  String get addItem => 'Aggiungi articolo';
+
+  @override
+  String get quickAddHint => 'Aggiungi un articolo…';
+
+  @override
+  String get recentlyAdded => 'Appena aggiunto';
+
+  @override
+  String get recipeEditIngredientsSteps => 'Ingredienti e istruzioni';
+
+  @override
+  String get plannerPrevMonth => 'Mese precedente';
+
+  @override
+  String get plannerNextMonth => 'Mese successivo';
+
+  @override
+  String get plannerPrevDay => 'Giorno precedente';
+
+  @override
+  String get plannerNextDay => 'Giorno successivo';
 }

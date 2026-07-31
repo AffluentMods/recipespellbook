@@ -18,7 +18,7 @@ class AboutScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.settingsAbout),
       ),
-      body: Responsive.constrainWidth(context, child: SingleChildScrollView(
+      body: Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
           children: [

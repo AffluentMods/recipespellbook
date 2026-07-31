@@ -10,6 +10,7 @@ import '../../../services/craving_service.dart';
 import '../../../services/community_service.dart';
 import '../../../data/course_category_data.dart';
 import '../../../theme/app_colors.dart';
+import '../../../utils/responsive_utils.dart';
 import '../../../utils/recipe_title.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/community_image.dart';
@@ -255,24 +256,28 @@ class _CravingScreenState extends ConsumerState<CravingScreen> {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-            child: GridView.count(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 1.2,
-              children: CravingMood.values.map((mood) {
-                final isSelected = _selectedMoods.contains(mood);
-                return _MoodTile(
-                  emoji: mood.emoji,
-                  label: _moodLabel(l10n, mood),
-                  isSelected: isSelected,
-                  onTap: () {
-                    setState(() {
-                      isSelected ? _selectedMoods.remove(mood) : _selectedMoods.add(mood);
-                    });
-                  },
-                );
-              }).toList(),
+            child: Responsive.constrainWidth(
+              context,
+              maxWidth: 640,
+              child: GridView.count(
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 1.2,
+                children: CravingMood.values.map((mood) {
+                  final isSelected = _selectedMoods.contains(mood);
+                  return _MoodTile(
+                    emoji: mood.emoji,
+                    label: _moodLabel(l10n, mood),
+                    isSelected: isSelected,
+                    onTap: () {
+                      setState(() {
+                        isSelected ? _selectedMoods.remove(mood) : _selectedMoods.add(mood);
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
             ),
           ),
         ),
@@ -327,24 +332,28 @@ class _CravingScreenState extends ConsumerState<CravingScreen> {
           ),
         ),
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            child: Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: options.map((opt) {
-                final isSelected = _selectedCategories.contains(opt.id);
-                return _CategoryChip(
-                  emoji: opt.emoji,
-                  label: _categoryLabel(l10n, opt.labelKey),
-                  isSelected: isSelected,
-                  onTap: () {
-                    setState(() {
-                      isSelected ? _selectedCategories.remove(opt.id) : _selectedCategories.add(opt.id);
-                    });
-                  },
-                );
-              }).toList(),
+          child: Responsive.constrainWidth(
+            context,
+            maxWidth: 640,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: options.map((opt) {
+                  final isSelected = _selectedCategories.contains(opt.id);
+                  return _CategoryChip(
+                    emoji: opt.emoji,
+                    label: _categoryLabel(l10n, opt.labelKey),
+                    isSelected: isSelected,
+                    onTap: () {
+                      setState(() {
+                        isSelected ? _selectedCategories.remove(opt.id) : _selectedCategories.add(opt.id);
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
             ),
           ),
         ),
@@ -376,21 +385,25 @@ class _CravingScreenState extends ConsumerState<CravingScreen> {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              children: CravingSource.values.map((source) {
-                final isSelected = _selectedSource == source;
-                final labels = _sourceLabels(l10n, source);
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _SourceCard(
-                    emoji: source.emoji,
-                    title: labels.title,
-                    subtitle: labels.subtitle,
-                    isSelected: isSelected,
-                    onTap: () => setState(() => _selectedSource = source),
-                  ),
-                );
-              }).toList(),
+            child: Responsive.constrainWidth(
+              context,
+              maxWidth: 640,
+              child: Column(
+                children: CravingSource.values.map((source) {
+                  final isSelected = _selectedSource == source;
+                  final labels = _sourceLabels(l10n, source);
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _SourceCard(
+                      emoji: source.emoji,
+                      title: labels.title,
+                      subtitle: labels.subtitle,
+                      isSelected: isSelected,
+                      onTap: () => setState(() => _selectedSource = source),
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
           ),
         ),
@@ -472,7 +485,10 @@ class _CravingScreenState extends ConsumerState<CravingScreen> {
 
         // Results list
         Expanded(
-          child: ListView.builder(
+          child: Responsive.constrainWidth(
+            context,
+            maxWidth: 700,
+            child: ListView.builder(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
             itemCount: _results.length,
             itemBuilder: (context, index) {
@@ -501,6 +517,7 @@ class _CravingScreenState extends ConsumerState<CravingScreen> {
                 ),
               );
             },
+          ),
           ),
         ),
       ],
@@ -1238,27 +1255,30 @@ class _StepBottomBar extends StatelessWidget {
                 child: Text(l10n.cravingSkipStep),
               ),
             const SizedBox(height: 4),
-            Row(
-              children: [
-                if (showBack) ...[
-                  TextButton(
-                    onPressed: onBack,
-                    child: Text(l10n.cravingBack),
-                  ),
-                  const SizedBox(width: 12),
-                ],
-                Expanded(
-                  child: FilledButton(
-                    onPressed: nextEnabled ? onNext : null,
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      backgroundColor: context.appColors.accent,
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 640),
+              child: Row(
+                children: [
+                  if (showBack) ...[
+                    TextButton(
+                      onPressed: onBack,
+                      child: Text(l10n.cravingBack),
                     ),
-                    child: Text(nextLabel),
+                    const SizedBox(width: 12),
+                  ],
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: nextEnabled ? onNext : null,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        backgroundColor: context.appColors.accent,
+                      ),
+                      child: Text(nextLabel),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

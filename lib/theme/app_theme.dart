@@ -5,6 +5,25 @@ import 'app_colors.dart';
 
 /// Builds ThemeData for any AppColorTheme in light or dark mode
 class AppTheme {
+  /// Swaps a warm display serif (Fraunces) onto the largest text roles —
+  /// display, headline and titleLarge (which AppBar titles derive from) — while
+  /// keeping every size, weight, colour and spacing from [base]. Body / label
+  /// styles stay on the default sans for readability. Gives the app a branded,
+  /// editorial "cookbook" feel without touching running text.
+  static TextTheme _withDisplaySerif(TextTheme base) {
+    // Swap only the family; keep each role's size / weight / colour / spacing.
+    // The single variable TTF resolves its weight from fontWeight (wght axis).
+    TextStyle? serif(TextStyle? s) => s?.copyWith(fontFamily: 'Fraunces');
+    return base.copyWith(
+      displayLarge: serif(base.displayLarge),
+      displayMedium: serif(base.displayMedium),
+      displaySmall: serif(base.displaySmall),
+      headlineLarge: serif(base.headlineLarge),
+      headlineMedium: serif(base.headlineMedium),
+      headlineSmall: serif(base.headlineSmall),
+      titleLarge: serif(base.titleLarge),
+    );
+  }
   /// Build a light ThemeData for the given app theme.
   /// Pass [customPalette] to override the default palette (for custom theme).
   static ThemeData lightTheme(AppColorTheme appTheme, {ThemePalette? customPalette}) {
@@ -341,14 +360,11 @@ class AppTheme {
       ),
 
       // ── Text theme ──
-      textTheme: isDark
-          ? ThemeData.dark().textTheme.apply(
-        bodyColor: palette.onSurface,
-        displayColor: palette.onBackground,
-      )
-          : ThemeData.light().textTheme.apply(
-        bodyColor: palette.onSurface,
-        displayColor: palette.onBackground,
+      textTheme: _withDisplaySerif(
+        (isDark ? ThemeData.dark() : ThemeData.light()).textTheme.apply(
+          bodyColor: palette.onSurface,
+          displayColor: palette.onBackground,
+        ),
       ),
 
       // ── Icon theme ──

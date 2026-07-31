@@ -1,4 +1,5 @@
 {
+  "plannerPrevWeek": "Semana anterior",
   "convertToSection": "Converter em seção",
   "convertToStep": "Converter em etapa",
   "addSection": "Adicionar seção",
@@ -4139,5 +4140,16 @@
   "paletteClassic": "Clássica",
   "paletteWarm": "Quente",
   "paletteCool": "Fria",
-  "paletteMono": "Mono"
+  "paletteMono": "Mono",
+  "plannerMonth": "Mês",
+  "plannerWeek": "Semana",
+  "plannerDay": "Dia",
+  "addItem": "Adicionar item",
+  "quickAddHint": "Adicionar um item…",
+  "recentlyAdded": "Adicionado recentemente",
+  "recipeEditIngredientsSteps": "Ingredientes e instruções",
+  "plannerPrevMonth": "Mês anterior",
+  "plannerNextMonth": "Próximo mês",
+  "plannerPrevDay": "Dia anterior",
+  "plannerNextDay": "Próximo dia"
 }

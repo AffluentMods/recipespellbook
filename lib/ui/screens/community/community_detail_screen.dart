@@ -671,7 +671,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 
     return Scaffold(
       body: Stack(children: [
-      Responsive.constrainWidth(context, child: CustomScrollView(
+      Responsive.constrainWidth(context, maxWidth: 1000, child: CustomScrollView(
         slivers: [
           // ── Cover image header ──
           SliverAppBar(
@@ -879,7 +879,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                       ],
                     ],
                   ),
-                  if (!_selectMode)
+                  if (!_selectMode && !Responsive.useNavRail(context))
                     Text(
                       l10n.communityTapToPreview,
                       style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
@@ -907,15 +907,20 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
         Positioned(
           left: 16, right: 16, bottom: 16,
           child: SafeArea(
-            child: SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: FilledButton.icon(
-                onPressed: _selectedIndices.isEmpty ? null : () => _showDownloadChoice(selectedIndices: Set.from(_selectedIndices)),
-                icon: const Icon(Icons.download),
-                label: Text(l10n.communityDownloadRecipes(_selectedIndices.length)),
-                style: FilledButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: FilledButton.icon(
+                    onPressed: _selectedIndices.isEmpty ? null : () => _showDownloadChoice(selectedIndices: Set.from(_selectedIndices)),
+                    icon: const Icon(Icons.download),
+                    label: Text(l10n.communityDownloadRecipes(_selectedIndices.length)),
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                  ),
                 ),
               ),
             ),

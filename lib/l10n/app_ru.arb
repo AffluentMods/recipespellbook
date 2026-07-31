@@ -1,4 +1,5 @@
 {
+  "plannerPrevWeek": "Предыдущая неделя",
   "convertToSection": "Преобразовать в раздел",
   "convertToStep": "Преобразовать в шаг",
   "addSection": "Добавить раздел",
@@ -4139,5 +4140,16 @@
   "paletteClassic": "Классическая",
   "paletteWarm": "Тёплая",
   "paletteCool": "Холодная",
-  "paletteMono": "Моно"
+  "paletteMono": "Моно",
+  "plannerMonth": "Месяц",
+  "plannerWeek": "Неделя",
+  "plannerDay": "День",
+  "addItem": "Добавить элемент",
+  "quickAddHint": "Добавить элемент…",
+  "recentlyAdded": "Только что добавлено",
+  "recipeEditIngredientsSteps": "Ингредиенты и инструкции",
+  "plannerPrevMonth": "Предыдущий месяц",
+  "plannerNextMonth": "Следующий месяц",
+  "plannerPrevDay": "Предыдущий день",
+  "plannerNextDay": "Следующий день"
 }

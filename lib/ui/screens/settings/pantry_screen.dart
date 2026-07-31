@@ -118,7 +118,7 @@ class _PantryScreenState extends State<PantryScreen> {
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : Responsive.constrainWidth(context, child: CustomScrollView(
+          : Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: CustomScrollView(
         slivers: [
           // Info card
           SliverToBoxAdapter(

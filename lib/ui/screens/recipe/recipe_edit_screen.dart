@@ -6,8 +6,11 @@ import '../../../utils/io_stub.dart' if (dart.library.io) 'dart:io';
 import '../../../utils/native_file_image.dart';
 import 'package:image/image.dart' as img;
 import 'package:recipespellbook/l10n/app_localizations.dart';
-import 'package:flutter/foundation.dart' show compute;
+import 'package:flutter/foundation.dart' show compute, defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/gestures.dart' show PointerSignalEvent, PointerScrollEvent;
 import 'package:flutter/material.dart' hide Step;
+import 'package:flutter/scheduler.dart' show SchedulerBinding, SchedulerPhase;
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -33,6 +36,7 @@ import '../../../services/collab_service.dart';
 import '../../../services/sync_service.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../providers/subscription_provider.dart';
+import '../../../providers/navigation_guard_provider.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/recipe_image.dart';
 
@@ -307,6 +311,63 @@ Uint8List? _cropAndEncodeJpeg(_CropArgs args) {
   return Uint8List.fromList(img.encodeJpg(cropped, quality: args.quality));
 }
 
+/// Advances the ambient [DefaultTabController] when the user keeps scrolling
+/// past a tab body's edge (mouse wheel / trackpad): down past the bottom → next
+/// tab, up past the top → previous. Observes pointer-scroll signals without
+/// consuming them, so normal scrolling is unaffected.
+class _ScrollToSwitchTab extends StatefulWidget {
+  final Widget child;
+  final ScrollController controller;
+  const _ScrollToSwitchTab({required this.child, required this.controller});
+
+  @override
+  State<_ScrollToSwitchTab> createState() => _ScrollToSwitchTabState();
+}
+
+class _ScrollToSwitchTabState extends State<_ScrollToSwitchTab> {
+  double _accum = 0;
+  bool _cooldown = false;
+  static const double _threshold = 130;
+
+  void _onSignal(PointerSignalEvent e) {
+    if (e is! PointerScrollEvent || _cooldown) return;
+    final dy = e.scrollDelta.dy;
+    if (dy == 0) return;
+    final ctrl = widget.controller;
+    if (!ctrl.hasClients) return;
+    final pos = ctrl.position;
+    final atBottom = pos.pixels >= pos.maxScrollExtent - 1;
+    final atTop = pos.pixels <= pos.minScrollExtent + 1;
+    if (dy > 0 && atBottom) {
+      _accum = _accum < 0 ? dy : _accum + dy;
+      if (_accum > _threshold) _advance(1);
+    } else if (dy < 0 && atTop) {
+      _accum = _accum > 0 ? dy : _accum + dy;
+      if (_accum < -_threshold) _advance(-1);
+    } else {
+      _accum = 0;
+    }
+  }
+
+  void _advance(int dir) {
+    final c = DefaultTabController.maybeOf(context);
+    _accum = 0;
+    if (c == null) return;
+    final target = (c.index + dir).clamp(0, c.length - 1);
+    if (target == c.index) return;
+    _cooldown = true;
+    c.animateTo(target);
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) _cooldown = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(onPointerSignal: _onSignal, child: widget.child);
+  }
+}
+
 class RecipeEditScreen extends ConsumerStatefulWidget {
   final String? recipeId;
   final String? cookbookId;
@@ -326,6 +387,11 @@ class RecipeEditScreen extends ConsumerStatefulWidget {
 class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
+  // Per-tab scroll controllers so scrolling past a tab's end advances to the
+  // next tab (see _ScrollToSwitchTab).
+  final ScrollController _detailsScroll = ScrollController();
+  final ScrollController _ingredientsScroll = ScrollController();
+  final ScrollController _instructionsScroll = ScrollController();
   // Anchors used to scroll just-added rows into view, so we don't
   // overshoot past the rest of the form (e.g. all the way to the
   // Instructions / Notes sections).
@@ -368,9 +434,6 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   Map<String, List<RecipeLinkInfo>> _ingredientLinksMap = {};
   bool _ingredientSortMode = false;
 
-  // Tab controller for tabbed layout
-  late TabController _tabController;
-
   bool get _isEditing => widget.recipeId != null;
 
   // ── Unsaved-changes tracking ──
@@ -400,16 +463,74 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
   bool get _hasUnsavedChanges =>
       _initialCaptured && _editSnapshot() != _initialSnapshot;
 
+  /// Our published discard guard, if any (desktop / large-tablet in-shell only).
+  DiscardGuard? _registeredGuard;
+
+  /// Returns true when it's safe to leave this editor: nothing changed, or the
+  /// user confirmed Discard. Shared by PopScope (phone back / desktop route pop)
+  /// and by [unsavedEditorGuardProvider] (sidebar / rail / palette / shortcut
+  /// nav that would replace the editor without popping it).
+  Future<bool> _confirmDiscardIfNeeded() async {
+    if (!mounted) return true; // stale guard after dispose → let nav proceed.
+    if (!_hasUnsavedChanges) return true;
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.unsavedChangesTitle),
+        content: Text(l10n.unsavedChangesBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.unsavedKeepEditing),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: theme.colorScheme.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.unsavedDiscard),
+          ),
+        ],
+      ),
+    );
+    return discard == true;
+  }
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
     _loadRecipe();
+    // On desktop / large tablet the editor lives inside the shell, so a
+    // sidebar / rail / command-palette / shortcut `context.go()` can unmount it
+    // WITHOUT firing PopScope. Publish a guard those paths await. Phones push
+    // the editor full-screen, where PopScope already covers the only exit.
+    if (!isMobile) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _registeredGuard = _confirmDiscardIfNeeded;
+        ref.read(unsavedEditorGuardProvider.notifier).state = _registeredGuard;
+      });
+    }
   }
 
   @override
   void dispose() {
+    // Retract our guard if we still own it. Writing a provider during the
+    // router's build phase (an in-shell go() disposes us mid-build) throws, so
+    // only clear when idle; a leftover guard is harmless because
+    // _confirmDiscardIfNeeded returns true once !mounted.
+    if (_registeredGuard != null) {
+      final phase = SchedulerBinding.instance.schedulerPhase;
+      if (phase == SchedulerPhase.idle ||
+          phase == SchedulerPhase.postFrameCallbacks) {
+        final notifier = ref.read(unsavedEditorGuardProvider.notifier);
+        if (notifier.state == _registeredGuard) notifier.state = null;
+      }
+    }
     _scrollController.dispose();
+    _detailsScroll.dispose();
+    _ingredientsScroll.dispose();
+    _instructionsScroll.dispose();
     _titleController.dispose();
     _descriptionController.dispose();
     _servingsController.dispose();
@@ -417,7 +538,6 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
     _cookTimeController.dispose();
     _sourceUrlController.dispose();
     _notesController.dispose();
-    _tabController.dispose();
     super.dispose();
   }
 
@@ -595,47 +715,45 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         final nav = Navigator.of(context);
-        // Nothing changed → just leave, no prompt.
-        if (!_hasUnsavedChanges) {
-          nav.pop(result);
-          return;
-        }
-        final discard = await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text(l10n.unsavedChangesTitle),
-            content: Text(l10n.unsavedChangesBody),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text(l10n.unsavedKeepEditing),
-              ),
-              FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: theme.colorScheme.error),
-                onPressed: () => Navigator.pop(ctx, true),
-                child: Text(l10n.unsavedDiscard),
-              ),
-            ],
-          ),
-        );
-        if (discard == true && mounted) nav.pop(result);
+        if (await _confirmDiscardIfNeeded() && mounted) nav.pop(result);
       },
-      child: Scaffold(
+      child: LayoutBuilder(builder: (context, constraints) {
+        // Two-pane edit only when the editor genuinely has room. Decide by the
+        // pane's actual width (LayoutBuilder), not the whole window.
+        final wide = constraints.maxWidth >= 1000;
+        return DefaultTabController(
+          // 2 tabs when wide (Details | Ingredients & instructions), else 3.
+          length: wide ? 2 : 3,
+          // Rebuild the controller cleanly when crossing the threshold.
+          key: ValueKey(wide),
+          child: _wrapSaveShortcut(Scaffold(
       appBar: AppBar(
         title: Text(_isEditing ? l10n.recipeEdit : l10n.recipeAdd),
         actions: [
-          FilledButton(
-            onPressed: _isSaving ? null : _saveRecipe,
-            child: _isSaving
-                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : Text(l10n.actionSave),
+          // Prominent Save (the desktop density otherwise shrinks it).
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: FilledButton(
+              onPressed: _isSaving ? null : _saveRecipe,
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(0, 44),
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              ),
+              child: _isSaving
+                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : Text(l10n.actionSave),
+            ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
         ],
-        // Modern segmented tab switch, matching the recipe view screen.
+        // Segmented tab switch — capped so it doesn't span the whole window.
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(52),
-          child: Padding(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -643,7 +761,6 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TabBar(
-                controller: _tabController,
                 indicator: BoxDecoration(
                   color: theme.colorScheme.primary,
                   borderRadius: BorderRadius.circular(9),
@@ -656,135 +773,208 @@ class _RecipeEditScreenState extends ConsumerState<RecipeEditScreen> with Single
                 labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
                 unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
                 splashBorderRadius: BorderRadius.circular(9),
-                tabs: [
-                  Tab(text: l10n.tabDetails),
-                  Tab(text: l10n.ingredientsTitle),
-                  Tab(text: l10n.instructionsTitle),
-                ],
+                tabs: wide
+                    ? [
+                        Tab(text: l10n.tabDetails),
+                        Tab(text: l10n.recipeEditIngredientsSteps),
+                      ]
+                    : [
+                        Tab(text: l10n.tabDetails),
+                        Tab(text: l10n.ingredientsTitle),
+                        Tab(text: l10n.instructionsTitle),
+                      ],
               ),
+            ),
+          ),
             ),
           ),
         ),
       ),
-      body: _buildTabbedLayout(theme, l10n),
+      body: _buildTabbedLayout(theme, l10n, wide: wide),
+      )),
+        );
+      }),
+    );
+  }
+
+  /// Wraps [child] so Ctrl/Cmd+S saves without leaving the keyboard. Desktop /
+  /// web only — mobile has no hardware keyboard shortcut layer.
+  Widget _wrapSaveShortcut(Widget child) {
+    if (isMobile) return child;
+    final useMeta = defaultTargetPlatform == TargetPlatform.macOS;
+    return CallbackShortcuts(
+      bindings: {
+        SingleActivator(LogicalKeyboardKey.keyS, meta: useMeta, control: !useMeta):
+            () {
+          if (!_isSaving) _saveRecipe();
+        },
+      },
+      child: child,
+    );
+  }
+
+  Widget _detailsTabBody(ThemeData theme, AppLocalizations l10n) {
+    return _ScrollToSwitchTab(
+      controller: _detailsScroll,
+      child: Form(
+      key: _formKey,
+      child: SingleChildScrollView(
+        controller: _detailsScroll,
+        padding: const EdgeInsets.all(16),
+        child: Responsive.constrainWidth(
+          context,
+          maxWidth: 820,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _PhotoPicker(imagePath: _imagePath, defaultAssetPath: _defaultAssetPath, onImageSelected: (path) => setState(() { _imagePath = path; if (path != null) _defaultAssetPath = null; })),
+              const SizedBox(height: 24),
+              TextFormField(
+                controller: _titleController,
+                decoration: InputDecoration(labelText: l10n.recipeFieldTitle, hintText: l10n.hintTitleExample),
+                textCapitalization: TextCapitalization.words,
+                validator: (value) => (value == null || value.trim().isEmpty) ? l10n.errorGeneric : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _descriptionController,
+                decoration: InputDecoration(labelText: l10n.recipeFieldDescription, hintText: l10n.hintDescription),
+                maxLines: 2,
+                textCapitalization: TextCapitalization.sentences,
+              ),
+              const SizedBox(height: 20),
+              CoursePicker(selectedCourseId: _selectedCourseId, onChanged: (id) => setState(() => _selectedCourseId = id)),
+              const SizedBox(height: 16),
+              CategoryPicker(selectedCategoryId: _selectedCategoryId, onChanged: (id) => setState(() => _selectedCategoryId = id)),
+              const SizedBox(height: 20),
+              TagPicker(recipeId: widget.recipeId ?? '', initialTagIds: _selectedTagIds, onTagsChanged: (tagIds) => setState(() => _selectedTagIds = tagIds)),
+              const SizedBox(height: 20),
+              _RatingSelector(rating: _rating, onChanged: (r) => setState(() => _rating = r)),
+              const SizedBox(height: 20),
+              Row(children: [
+                Expanded(child: TextFormField(controller: _servingsController, decoration: InputDecoration(labelText: l10n.recipeFieldServings, hintText: l10n.hintServingsExample))),
+                const SizedBox(width: 12),
+                Expanded(child: TextFormField(controller: _prepTimeController, decoration: InputDecoration(labelText: l10n.prepMin), keyboardType: TextInputType.number)),
+                const SizedBox(width: 12),
+                Expanded(child: TextFormField(controller: _cookTimeController, decoration: InputDecoration(labelText: l10n.cookMin), keyboardType: TextInputType.number)),
+              ]),
+              const SizedBox(height: 16),
+              TextFormField(controller: _sourceUrlController, decoration: InputDecoration(labelText: l10n.recipeFieldSource, hintText: 'https://...', prefixIcon: const Icon(Icons.link)), keyboardType: TextInputType.url),
+              const SizedBox(height: 32),
+              _SectionTitle(title: l10n.recipeFieldNotes),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _notesController,
+                decoration: InputDecoration(hintText: l10n.hintNotes, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), alignLabelWithHint: true),
+                maxLines: 5,
+                minLines: 3,
+                textCapitalization: TextCapitalization.sentences,
+              ),
+              const SizedBox(height: 32),
+              _SectionTitle(title: l10n.nutritionTitle),
+              const SizedBox(height: 12),
+              _NutritionSection(nutrition: _nutrition, isCalculating: _isCalculatingNutrition, onCalculate: _calculateNutrition, onClear: () => setState(() => _nutrition = null)),
+              const SizedBox(height: 100),
+            ],
+          ),
+        ),
+      ),
+    ),
+    );
+  }
+
+  /// Ingredients editor body. [capped] applies the 820px reading cap on the
+  /// single-column tabbed path; the expanded two-pane layout passes false so it
+  /// fills its (already narrow) column.
+  Widget _ingredientsTabBody(ThemeData theme, AppLocalizations l10n, {bool capped = true}) {
+    final column = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_ingredientSortMode)
+          Row(
+            children: [
+              Text(l10n.ingredientsTitle, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+              const Spacer(),
+              TextButton.icon(
+                icon: const Icon(Icons.check, size: 16),
+                label: Text(l10n.actionDone),
+                onPressed: _toggleSortMode,
+              ),
+            ],
+          )
+        else
+          _SectionTitleWithAdd(
+            title: l10n.ingredientsTitle,
+            onAddIngredient: _addIngredient,
+            onAddHeader: _addHeader,
+            onSortMode: _toggleSortMode,
+          ),
+        const SizedBox(height: 12),
+        _buildIngredientList(),
+        if (!_ingredientSortMode)
+          _AddIngredientButton(key: _addIngredientButtonKey, onTap: _addIngredient, onAddHeader: _addHeader),
+        const SizedBox(height: 100),
+      ],
+    );
+    return _ScrollToSwitchTab(
+      controller: _ingredientsScroll,
+      child: SingleChildScrollView(
+        controller: _ingredientsScroll,
+        padding: const EdgeInsets.all(16),
+        child: capped ? Responsive.constrainWidth(context, maxWidth: 820, child: column) : column,
       ),
     );
   }
 
-  Widget _buildTabbedLayout(ThemeData theme, AppLocalizations l10n) {
-    return TabBarView(
-      controller: _tabController,
+  /// Instructions editor body. See [_ingredientsTabBody] for [capped].
+  Widget _instructionsTabBody(ThemeData theme, AppLocalizations l10n, {bool capped = true}) {
+    final column = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Tab 1: Details
-        Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _PhotoPicker(imagePath: _imagePath, defaultAssetPath: _defaultAssetPath, onImageSelected: (path) => setState(() { _imagePath = path; if (path != null) _defaultAssetPath = null; })),
-                const SizedBox(height: 24),
-                TextFormField(
-                  controller: _titleController,
-                  decoration: InputDecoration(labelText: l10n.recipeFieldTitle, hintText: l10n.hintTitleExample),
-                  textCapitalization: TextCapitalization.words,
-                  validator: (value) => (value == null || value.trim().isEmpty) ? l10n.errorGeneric : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _descriptionController,
-                  decoration: InputDecoration(labelText: l10n.recipeFieldDescription, hintText: l10n.hintDescription),
-                  maxLines: 2,
-                  textCapitalization: TextCapitalization.sentences,
-                ),
-                const SizedBox(height: 20),
-                CoursePicker(selectedCourseId: _selectedCourseId, onChanged: (id) => setState(() => _selectedCourseId = id)),
-                const SizedBox(height: 16),
-                CategoryPicker(selectedCategoryId: _selectedCategoryId, onChanged: (id) => setState(() => _selectedCategoryId = id)),
-                const SizedBox(height: 20),
-                TagPicker(recipeId: widget.recipeId ?? '', initialTagIds: _selectedTagIds, onTagsChanged: (tagIds) => setState(() => _selectedTagIds = tagIds)),
-                const SizedBox(height: 20),
-                _RatingSelector(rating: _rating, onChanged: (r) => setState(() => _rating = r)),
-                const SizedBox(height: 20),
-                Row(children: [
-                  Expanded(child: TextFormField(controller: _servingsController, decoration: InputDecoration(labelText: l10n.recipeFieldServings, hintText: l10n.hintServingsExample))),
-                  const SizedBox(width: 12),
-                  Expanded(child: TextFormField(controller: _prepTimeController, decoration: InputDecoration(labelText: l10n.prepMin), keyboardType: TextInputType.number)),
-                  const SizedBox(width: 12),
-                  Expanded(child: TextFormField(controller: _cookTimeController, decoration: InputDecoration(labelText: l10n.cookMin), keyboardType: TextInputType.number)),
-                ]),
-                const SizedBox(height: 16),
-                TextFormField(controller: _sourceUrlController, decoration: InputDecoration(labelText: l10n.recipeFieldSource, hintText: 'https://...', prefixIcon: const Icon(Icons.link)), keyboardType: TextInputType.url),
-                const SizedBox(height: 32),
-                _SectionTitle(title: l10n.recipeFieldNotes),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _notesController,
-                  decoration: InputDecoration(hintText: l10n.hintNotes, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), alignLabelWithHint: true),
-                  maxLines: 5,
-                  minLines: 3,
-                  textCapitalization: TextCapitalization.sentences,
-                ),
-                const SizedBox(height: 32),
-                _SectionTitle(title: l10n.nutritionTitle),
-                const SizedBox(height: 12),
-                _NutritionSection(nutrition: _nutrition, isCalculating: _isCalculatingNutrition, onCalculate: _calculateNutrition, onClear: () => setState(() => _nutrition = null)),
-                const SizedBox(height: 100),
-              ],
-            ),
-          ),
+        InstructionsEditor(
+          steps: _steps,
+          onStepsChanged: (steps) => setState(() {
+            _steps.clear();
+            _steps.addAll(steps);
+          }),
         ),
-        // Tab 2: Ingredients
-        SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        const SizedBox(height: 100),
+      ],
+    );
+    return _ScrollToSwitchTab(
+      controller: _instructionsScroll,
+      child: SingleChildScrollView(
+        controller: _instructionsScroll,
+        padding: const EdgeInsets.all(16),
+        child: capped ? Responsive.constrainWidth(context, maxWidth: 820, child: column) : column,
+      ),
+    );
+  }
+
+  /// [wide] (expanded editor) collapses to 2 tabs — Details, then ingredients +
+  /// instructions edited side by side (each uncapped, independently scrollable).
+  /// Below that, the original 3 tabs. Uses the ambient DefaultTabController.
+  Widget _buildTabbedLayout(ThemeData theme, AppLocalizations l10n, {required bool wide}) {
+    if (wide) {
+      return TabBarView(
+        children: [
+          _detailsTabBody(theme, l10n),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (_ingredientSortMode)
-                Row(
-                  children: [
-                    Text(l10n.ingredientsTitle, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                    const Spacer(),
-                    TextButton.icon(
-                      icon: const Icon(Icons.check, size: 16),
-                      label: Text(l10n.actionDone),
-                      onPressed: _toggleSortMode,
-                    ),
-                  ],
-                )
-              else
-                _SectionTitleWithAdd(
-                  title: l10n.ingredientsTitle,
-                  onAddIngredient: _addIngredient,
-                  onAddHeader: _addHeader,
-                  onSortMode: _toggleSortMode,
-                ),
-              const SizedBox(height: 12),
-              _buildIngredientList(),
-              if (!_ingredientSortMode)
-                _AddIngredientButton(key: _addIngredientButtonKey, onTap: _addIngredient, onAddHeader: _addHeader),
-              const SizedBox(height: 100),
+              Expanded(child: _ingredientsTabBody(theme, l10n, capped: false)),
+              VerticalDivider(width: 1, color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4)),
+              Expanded(child: _instructionsTabBody(theme, l10n, capped: false)),
             ],
           ),
-        ),
-        // Tab 3: Instructions
-        SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              InstructionsEditor(
-                steps: _steps,
-                onStepsChanged: (steps) => setState(() {
-                  _steps.clear();
-                  _steps.addAll(steps);
-                }),
-              ),
-              const SizedBox(height: 100),
-            ],
-          ),
-        ),
+        ],
+      );
+    }
+    return TabBarView(
+      children: [
+        _detailsTabBody(theme, l10n),
+        _ingredientsTabBody(theme, l10n),
+        _instructionsTabBody(theme, l10n),
       ],
     );
   }

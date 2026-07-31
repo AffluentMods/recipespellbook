@@ -1,4 +1,5 @@
 {
+  "plannerPrevWeek": "이전 주",
   "convertToSection": "섹션으로 변환",
   "convertToStep": "단계로 변환",
   "addSection": "섹션 추가",
@@ -4139,5 +4140,16 @@
   "paletteClassic": "클래식",
   "paletteWarm": "따뜻한 색",
   "paletteCool": "시원한 색",
-  "paletteMono": "모노"
+  "paletteMono": "모노",
+  "plannerMonth": "월",
+  "plannerWeek": "주",
+  "plannerDay": "일",
+  "addItem": "항목 추가",
+  "quickAddHint": "항목 추가…",
+  "recentlyAdded": "방금 추가됨",
+  "recipeEditIngredientsSteps": "재료 및 조리법",
+  "plannerPrevMonth": "이전 달",
+  "plannerNextMonth": "다음 달",
+  "plannerPrevDay": "이전 날",
+  "plannerNextDay": "다음 날"
 }

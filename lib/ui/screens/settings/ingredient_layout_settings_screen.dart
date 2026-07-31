@@ -18,7 +18,7 @@ class IngredientLayoutSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.settingsIngredientLayout),
       ),
-      body: Responsive.constrainWidth(context, child: ListView(
+      body: Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Text(

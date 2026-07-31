@@ -9,6 +9,9 @@ class AppLocalizationsKo extends AppLocalizations {
   AppLocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
+  String get plannerPrevWeek => '이전 주';
+
+  @override
   String get convertToSection => '섹션으로 변환';
 
   @override
@@ -9644,4 +9647,37 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get paletteMono => '모노';
+
+  @override
+  String get plannerMonth => '월';
+
+  @override
+  String get plannerWeek => '주';
+
+  @override
+  String get plannerDay => '일';
+
+  @override
+  String get addItem => '항목 추가';
+
+  @override
+  String get quickAddHint => '항목 추가…';
+
+  @override
+  String get recentlyAdded => '방금 추가됨';
+
+  @override
+  String get recipeEditIngredientsSteps => '재료 및 조리법';
+
+  @override
+  String get plannerPrevMonth => '이전 달';
+
+  @override
+  String get plannerNextMonth => '다음 달';
+
+  @override
+  String get plannerPrevDay => '이전 날';
+
+  @override
+  String get plannerNextDay => '다음 날';
 }

@@ -1,4 +1,5 @@
 {
+  "plannerPrevWeek": "Vorige week",
   "convertToSection": "Omzetten naar sectie",
   "convertToStep": "Omzetten naar stap",
   "addSection": "Sectie toevoegen",
@@ -4139,5 +4140,16 @@
   "paletteClassic": "Klassiek",
   "paletteWarm": "Warm",
   "paletteCool": "Koel",
-  "paletteMono": "Mono"
+  "paletteMono": "Mono",
+  "plannerMonth": "Maand",
+  "plannerWeek": "Week",
+  "plannerDay": "Dag",
+  "addItem": "Item toevoegen",
+  "quickAddHint": "Een item toevoegen…",
+  "recentlyAdded": "Zojuist toegevoegd",
+  "recipeEditIngredientsSteps": "Ingrediënten & bereiding",
+  "plannerPrevMonth": "Vorige maand",
+  "plannerNextMonth": "Volgende maand",
+  "plannerPrevDay": "Vorige dag",
+  "plannerNextDay": "Volgende dag"
 }

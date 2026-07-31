@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/community_service.dart';
+import '../../../theme/app_colors.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/community_image.dart';
@@ -162,7 +163,7 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
     final hasAvatar = p.avatarUrl != null && p.avatarUrl!.isNotEmpty;
 
     return Scaffold(
-      body: Responsive.constrainWidth(context, child: CustomScrollView(
+      body: Responsive.constrainWidth(context, maxWidth: 900, child: CustomScrollView(
         slivers: [
           // ── Header ──
           SliverAppBar(
@@ -230,8 +231,8 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
                                 icon: const Icon(Icons.check, size: 16),
                                 label: Text(l10n.following),
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: Colors.amber,
-                                  foregroundColor: Colors.black87,
+                                  backgroundColor: context.appColors.accent,
+                                  foregroundColor: context.appColors.onAccent,
                                   minimumSize: const Size(120, 36),
                                   padding: const EdgeInsets.symmetric(horizontal: 16),
                                 ),
@@ -241,8 +242,8 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
                                 icon: const Icon(Icons.person_add_alt_1, size: 16),
                                 label: Text(l10n.follow),
                                 style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.amber.shade700,
-                                  side: BorderSide(color: Colors.amber.shade700),
+                                  foregroundColor: context.appColors.accent,
+                                  side: BorderSide(color: context.appColors.accent),
                                   minimumSize: const Size(120, 36),
                                   padding: const EdgeInsets.symmetric(horizontal: 16),
                                 ),
@@ -259,14 +260,21 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _StatItem(value: '$_followerCount', label: l10n.followers),
-                  _StatItem(value: '${p.followingCount}', label: l10n.followingLabel),
-                  _StatItem(value: '${p.totalRecipes}', label: l10n.creatorStatRecipes),
-                  _StatItem(value: '${p.totalDownloads}', label: l10n.creatorStatDownloads),
-                ],
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 520),
+                  child: Row(
+                    mainAxisAlignment: Responsive.useNavRail(context)
+                        ? MainAxisAlignment.spaceBetween
+                        : MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _StatItem(value: '$_followerCount', label: l10n.followers),
+                      _StatItem(value: '${p.followingCount}', label: l10n.followingLabel),
+                      _StatItem(value: '${p.totalRecipes}', label: l10n.creatorStatRecipes),
+                      _StatItem(value: '${p.totalDownloads}', label: l10n.creatorStatDownloads),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -339,7 +347,7 @@ class _StatItem extends StatelessWidget {
             Text(value, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
             if (icon != null) ...[
               const SizedBox(width: 2),
-              Icon(icon, size: 18, color: Colors.amber),
+              Icon(icon, size: 18, color: context.appColors.accent),
             ],
           ],
         ),

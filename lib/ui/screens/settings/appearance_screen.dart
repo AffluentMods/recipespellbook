@@ -23,7 +23,7 @@ class AppearanceScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.settingsAppearance),
       ),
-      body: Responsive.constrainWidth(context, child: ListView(
+      body: Responsive.constrainWidth(context, maxWidth: Responsive.settingsGridMaxWidth, child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // ============ THEME MODE SECTION ============

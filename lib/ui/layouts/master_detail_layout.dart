@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
 import '../../utils/responsive_utils.dart';
 
 /// Responsive two-pane layout for desktop screens.
@@ -39,8 +40,9 @@ class MasterDetailLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Only show side-by-side on desktop-class widths
-    if (!Responsive.isDesktopLayout(context)) {
+    // Two-pane only when the CONTENT area (after the sidebar) is wide enough
+    // for a readable detail column — not merely the window.
+    if (!Responsive.useTwoPane(context)) {
       return master;
     }
 
@@ -71,28 +73,43 @@ class MasterDetailLayout extends StatelessWidget {
   }
 }
 
-/// Default "select an item" placeholder for the detail pane.
+/// Warm editorial placeholder shown in the detail pane before a recipe is
+/// picked — reads like an open cookbook waiting on a page.
 class _DefaultPlaceholder extends StatelessWidget {
   final ThemeData theme;
   const _DefaultPlaceholder({required this.theme});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    final c = context.appColors;
+    return Container(
+      color: c.surface,
+      alignment: Alignment.center,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.touch_app_outlined,
-            size: 48,
-            color: theme.colorScheme.outline.withValues(alpha: 0.3),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Select an item to view details',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.outline.withValues(alpha: 0.5),
+          Container(
+            width: 88,
+            height: 88,
+            decoration: BoxDecoration(
+              color: c.surfaceRaised,
+              shape: BoxShape.circle,
+              border: Border.all(color: c.outline.withValues(alpha: 0.4)),
             ),
+            child: Icon(Icons.auto_stories_outlined, size: 40, color: c.accent),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Choose a recipe',
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: c.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Pick one from the list to read it here.',
+            style: theme.textTheme.bodyMedium?.copyWith(color: c.textTertiary),
           ),
         ],
       ),

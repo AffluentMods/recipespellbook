@@ -17,7 +17,7 @@ class QuickAccessSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.settingsQuickAccess),
       ),
-      body: Responsive.constrainWidth(context, child: ListView(
+      body: Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: ListView(
         children: [
           // Explanation card
           Card(

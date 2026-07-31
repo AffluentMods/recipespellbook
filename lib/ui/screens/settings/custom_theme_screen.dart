@@ -182,7 +182,7 @@ class _CustomThemeScreenState extends ConsumerState<CustomThemeScreen>
         controller: _tabController,
         children: [
           // ── TAB 0: PRIMARY (system default) ──
-          Responsive.constrainWidth(context, child: _buildEditorTab(
+          Responsive.constrainWidth(context, maxWidth: Responsive.settingsGridMaxWidth, child: _buildEditorTab(
             theme: theme, l10n: l10n,
             isDark: _isPrimaryDark,
             bg: _isPrimaryDark ? _darkBg : _lightBg,
@@ -196,7 +196,7 @@ class _CustomThemeScreenState extends ConsumerState<CustomThemeScreen>
           )),
 
           // ── TAB 1: SECONDARY (linked by default) ──
-          Responsive.constrainWidth(context, child: _buildEditorTab(
+          Responsive.constrainWidth(context, maxWidth: Responsive.settingsGridMaxWidth, child: _buildEditorTab(
             theme: theme, l10n: l10n,
             isDark: !_isPrimaryDark,
             bg: !_isPrimaryDark ? _darkBg : _lightBg,

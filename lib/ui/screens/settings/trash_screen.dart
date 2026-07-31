@@ -135,7 +135,7 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
           ],
         ],
       ),
-      body: Responsive.constrainWidth(context, child: deletedRecipesAsync.when(
+      body: Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: deletedRecipesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('${l10n.errorGeneric}: $e')),
         data: (recipes) {

@@ -9,6 +9,9 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get plannerPrevWeek => '上一周';
+
+  @override
   String get convertToSection => '转换为小节';
 
   @override
@@ -9644,4 +9647,37 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get paletteMono => '单色';
+
+  @override
+  String get plannerMonth => '月';
+
+  @override
+  String get plannerWeek => '周';
+
+  @override
+  String get plannerDay => '日';
+
+  @override
+  String get addItem => '添加项目';
+
+  @override
+  String get quickAddHint => '添加项目…';
+
+  @override
+  String get recentlyAdded => '最近添加';
+
+  @override
+  String get recipeEditIngredientsSteps => '食材与步骤';
+
+  @override
+  String get plannerPrevMonth => '上个月';
+
+  @override
+  String get plannerNextMonth => '下个月';
+
+  @override
+  String get plannerPrevDay => '前一天';
+
+  @override
+  String get plannerNextDay => '后一天';
 }

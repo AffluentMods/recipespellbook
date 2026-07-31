@@ -12,6 +12,7 @@ import '../../../providers/database_provider.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../../providers/kitchen_buddy_provider.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../../theme/app_colors.dart';
 
 import '../../../providers/settings_provider.dart';
 import '../../../providers/subscription_provider.dart';
@@ -70,7 +71,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         barrierColor: Colors.black54,
         builder: (_) => Center(
           child: Material(
-            color: Theme.of(context).colorScheme.surface,
+            color: context.appColors.surfaceRaised,
             borderRadius: BorderRadius.circular(16),
             clipBehavior: Clip.antiAlias,
             elevation: 8,
@@ -338,10 +339,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         slivers: [
           SliverAppBar(
             floating: true, snap: true,
+            centerTitle: false,
             title: Text(l10n.settingsTitle),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(56),
-              child: Responsive.constrainWidth(context, child: Padding(
+              child: Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
                 child: _SearchField(
                   controller: _searchController,
@@ -367,7 +369,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             )
           else
             SliverToBoxAdapter(
-              child: Responsive.constrainWidth(context, child: Padding(
+              child: Responsive.constrainWidth(context, maxWidth: Responsive.settingsListMaxWidth, child: Padding(
                 padding: const EdgeInsets.only(bottom: 40),
                 child: Column(children: sections),
               )),

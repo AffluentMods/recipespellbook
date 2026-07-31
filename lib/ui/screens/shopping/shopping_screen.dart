@@ -31,6 +31,7 @@ import '../../../services/shopping_list_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/family_service.dart';
 import '../../../utils/ingredient_utils.dart';
+import 'widgets/quick_add_panel.dart';
 import '../../widgets/app_refresh_indicator.dart';
 import '../../widgets/app_snackbar.dart';
 import '../../widgets/empty_state.dart';
@@ -146,6 +147,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   String _currentListName = 'Shopping List';
   ShoppingGroupMode _groupMode = ShoppingGroupMode.section;
   Map<String, String> _userMappings = {};
+  // Wide-viewport (nav-rail) slide-in add panel; compact keeps the full-screen
+  // add flow. See [_openQuickAdd] / [_wrapWithQuickAdd].
+  bool _quickAddOpen = false;
   final Set<String> _recentlyCheckedIds = {};
   Map<String, int> _sharedListCounts = {}; // listId → share count
   Map<String, List<_ShopMember>> _sharedListMembers = {}; // listId → members
@@ -173,6 +177,21 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
 
   void _onCollabRevision() {
     if (mounted) setState(() {});
+  }
+
+  /// Left-align + width-cap the body content on tablet/desktop (a full-bleed
+  /// column of items looks lost on a wide screen). Compact stays edge-to-edge.
+  Widget _bodyWidth(BuildContext context, Widget child) {
+    if (Responsive.isCompact(context)) return child;
+    // A grocery list reads best as one centred, comfortable column (a document,
+    // not a sprawl). The quick-add panel takes the right side when open.
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 760),
+        child: child,
+      ),
+    );
   }
 
   Widget _collabBanner(ThemeData theme, String? perm) {
@@ -253,6 +272,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     setState(() {
       _currentListId = id;
       _currentListName = name;
+      // Don't leave the quick-add panel open over a list you can't edit.
+      if (!CollabService.instance.canEdit(id)) _quickAddOpen = false;
     });
     SharedPreferences.getInstance()
         .then((p) => p.setString(_lastListKey, id));
@@ -350,7 +371,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
       child: Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: StreamBuilder<List<ShoppingListItem>>(
+        child: _wrapWithQuickAdd(context, StreamBuilder<List<ShoppingListItem>>(
           stream: shoppingDao.watchItemsInList(_currentListId),
           builder: (context, snapshot) {
             final items = snapshot.data ?? [];
@@ -362,7 +383,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
             return Column(
               children: [
                 // Header — swaps to a selection header while multi-selecting.
-                Responsive.constrainWidth(context, child: selecting
+                _bodyWidth(context, selecting
                     ? _SelectionHeader(
                         count: selectedIds.length,
                         onClear: _clearSelection,
@@ -377,22 +398,25 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   onShare: () => _showShareSheet(context),
                   onMoreOptions: () => _showMoreOptions(context),
                   onListTap: () => _showListSwitcher(context),
+                  onAddItem: CollabService.instance.canEdit(_currentListId)
+                      ? () => _openQuickAdd(context)
+                      : null,
                 )),
 
                 // Restricted-collaborator banner.
                 if (!selecting &&
                     CollabService.instance.isCollab(_currentListId) &&
                     !CollabService.instance.canEdit(_currentListId))
-                  Responsive.constrainWidth(context,
-                      child: _collabBanner(theme, CollabService.instance.permissionFor(_currentListId))),
+                  _bodyWidth(context,
+                      _collabBanner(theme, CollabService.instance.permissionFor(_currentListId))),
 
                 // Order Online Button
                 if (uncheckedItems.isNotEmpty && !selecting)
-                  Responsive.constrainWidth(context, child: _OrderOnlineButton(items: uncheckedItems)),
+                  _bodyWidth(context, _OrderOnlineButton(items: uncheckedItems)),
 
                 // Items List (pull to refresh — syncs with cloud if available)
                 Expanded(
-                  child: Responsive.constrainWidth(context, child: items.isEmpty
+                  child: _bodyWidth(context, items.isEmpty
                       ? EmptyState(
                           icon: Icons.shopping_cart_outlined,
                           title: l10n.shoppingEmpty,
@@ -401,7 +425,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                               ? l10n.addFirstItem
                               : null,
                           onAction: CollabService.instance.canEdit(_currentListId)
-                              ? () => _showAddItemSheet(context)
+                              ? () => _openQuickAdd(context)
                               : null,
                         )
                       : AppRefreshIndicator(
@@ -411,9 +435,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
               ],
             );
           },
-        ),
+        )),
       ),
-      floatingActionButton: (selecting || !CollabService.instance.canEdit(_currentListId))
+      floatingActionButton: (Responsive.useNavRail(context) || selecting || !CollabService.instance.canEdit(_currentListId))
           ? null
           : _ModernFAB(onTap: () => _showAddItemSheet(context)),
       ),
@@ -1537,6 +1561,46 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     );
   }
 
+  /// Manual "Add item" entry point: on wide viewports slide in the quick-add
+  /// panel; on compact fall back to the full-screen add page (no room for a
+  /// side panel).
+  void _openQuickAdd(BuildContext context) {
+    if (Responsive.useNavRail(context)) {
+      setState(() => _quickAddOpen = true);
+    } else {
+      _showAddItemSheet(context);
+    }
+  }
+
+  /// On wide viewports, place the list beside the (animated) quick-add panel;
+  /// on compact, [listBody] is returned unchanged.
+  Widget _wrapWithQuickAdd(BuildContext context, Widget listBody) {
+    if (!Responsive.useNavRail(context)) return listBody;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(child: listBody),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.centerLeft,
+          // Only show when open AND the current list is editable — switching to a
+          // view-only shared list must not leave an add panel that can write.
+          child: _quickAddOpen && CollabService.instance.canEdit(_currentListId)
+              ? QuickAddPanel(
+                  // Key by list so the "just added" session resets per list.
+                  key: ValueKey(_currentListId),
+                  listId: _currentListId,
+                  userMappings: _userMappings,
+                  onClose: () => setState(() => _quickAddOpen = false),
+                  onItemAdded: _loadUserMappings,
+                )
+              : const SizedBox(height: double.infinity),
+        ),
+      ],
+    );
+  }
+
   /// Delayed check: item stays in place for 2s with visual feedback
   /// (checkbox filled, text struck through), then moves to checked section.
   /// Tapping again during the delay cancels the check.
@@ -1577,6 +1641,7 @@ class _ModernHeader extends StatelessWidget {
   final VoidCallback onShare;
   final VoidCallback onMoreOptions;
   final VoidCallback onListTap;
+  final VoidCallback? onAddItem;
 
   const _ModernHeader({
     required this.listName,
@@ -1588,12 +1653,14 @@ class _ModernHeader extends StatelessWidget {
     required this.onShare,
     required this.onMoreOptions,
     required this.onListTap,
+    this.onAddItem,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    final wide = Responsive.useNavRail(context);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 12, 8),
@@ -1611,7 +1678,8 @@ class _ModernHeader extends StatelessWidget {
                     Flexible(
                       child: Text(
                         listName,
-                        style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                        style: (wide ? theme.textTheme.headlineSmall : theme.textTheme.headlineMedium)
+                            ?.copyWith(fontWeight: FontWeight.bold),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1624,13 +1692,13 @@ class _ModernHeader extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.primary,
+                          color: context.appColors.accent,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
                           otherListsCount > 99 ? '99+' : '$otherListsCount',
                           style: TextStyle(
-                            color: theme.colorScheme.onPrimary,
+                            color: context.appColors.onAccent,
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                           ),
@@ -1648,6 +1716,18 @@ class _ModernHeader extends StatelessWidget {
               ],
               IconButton(icon: const Icon(Icons.share_outlined), tooltip: l10n.actionShare, onPressed: onShare),
               IconButton(icon: const Icon(Icons.more_vert), tooltip: 'More options', onPressed: onMoreOptions),
+              if (wide && onAddItem != null) ...[
+                const SizedBox(width: 8),
+                FilledButton.icon(
+                  onPressed: onAddItem,
+                  icon: const Icon(Icons.add, size: 20),
+                  label: Text(l10n.shoppingAddItem),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: context.appColors.accent,
+                    foregroundColor: context.appColors.onAccent,
+                  ),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 12),
@@ -1661,19 +1741,19 @@ class _ModernHeader extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest,
+                    color: context.appColors.surfaceRaised,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                    border: Border.all(color: context.appColors.outline.withValues(alpha: 0.5)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(groupMode.icon, size: 17, color: theme.colorScheme.primary),
+                      Icon(groupMode.icon, size: 17, color: context.appColors.accent),
                       const SizedBox(width: 7),
                       Text(_getGroupModeLabel(groupMode, l10n),
                           style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
                       const SizedBox(width: 6),
-                      Icon(Icons.swap_horiz_rounded, size: 16, color: theme.colorScheme.outline),
+                      Icon(Icons.swap_horiz_rounded, size: 16, color: context.appColors.textTertiary),
                     ],
                   ),
                 ),
@@ -1681,7 +1761,7 @@ class _ModernHeader extends StatelessWidget {
               const Spacer(),
               Text(
                 l10n.shoppingItemCount(itemCount),
-                style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline),
+                style: theme.textTheme.bodyLarge?.copyWith(color: context.appColors.textSecondary),
               ),
             ],
           ),
@@ -1788,8 +1868,9 @@ class _OrderOnlineButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    final wide = Responsive.useNavRail(context);
 
-    return Padding(
+    final button = Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
       child: Material(
         color: Colors.transparent,
@@ -1818,6 +1899,15 @@ class _OrderOnlineButton extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+
+    if (!wide) return button;
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 320),
+        child: button,
       ),
     );
   }
@@ -2643,7 +2733,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
           const SizedBox(width: 4),
         ],
       ),
-      body: Column(
+      body: Responsive.constrainWidth(context, maxWidth: 720, child: Column(
         children: [
           Container(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
@@ -2736,7 +2826,7 @@ class _AddItemFullScreenState extends ConsumerState<_AddItemFullScreen>
             child: _buildContentArea(theme, isDark),
           ),
         ],
-      ),
+      )),
     );
   }
 
@@ -3683,46 +3773,8 @@ class _SectionGroupedList extends ConsumerWidget {
             ? _CheckedSection(items: checkedItems, listId: listId, userMappings: userMappings, onCategoryChanged: onCategoryChanged, onItemUnchecked: onItemUnchecked)
             : null;
 
-        // Desktop: multi-column masonry-style layout
-        if (Responsive.isDesktopLayout(context)) {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final columnCount = constraints.maxWidth >= 1200 ? 3 : 2;
-              final columns = List.generate(columnCount, (_) => <Widget>[]);
-              for (int i = 0; i < sectionWidgets.length; i++) {
-                columns[i % columnCount].add(
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 500),
-                    child: sectionWidgets[i],
-                  ),
-                );
-              }
-              // Add checked section to the first column
-              if (checkedSection != null) {
-                columns[0].add(
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 500),
-                    child: checkedSection,
-                  ),
-                );
-              }
-              return SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: 100),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: columns.map((col) => Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: col,
-                    ),
-                  )).toList(),
-                ),
-              );
-            },
-          );
-        }
-
-        // Mobile: single-column list
+        // One clean single column at every width (the parent centres + caps it);
+        // a masonry of half-empty columns read as "disorganised" on desktop.
         return ListView(
           padding: const EdgeInsets.only(bottom: 100),
           children: [

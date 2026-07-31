@@ -49,8 +49,8 @@ class _ManageShoppingCategoriesScreenState extends ConsumerState<ManageShoppingC
       body: TabBarView(
         controller: _tabController,
         children: [
-          Responsive.constrainWidth(context, child: _CategoriesTab()),
-          Responsive.constrainWidth(context, child: _MappingsTab()),
+          Responsive.constrainWidth(context, maxWidth: Responsive.settingsGridMaxWidth, child: _CategoriesTab()),
+          Responsive.constrainWidth(context, maxWidth: Responsive.settingsGridMaxWidth, child: _MappingsTab()),
         ],
       ),
     );
