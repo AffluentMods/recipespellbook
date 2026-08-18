@@ -5752,7 +5752,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get communityNoCookbooksToPublish => '没有可发布的食谱书';
 
   @override
-  String get communityPublishInfo => '食谱书至少需要5个食谱才能发布。你的食谱将作为快照分享——更新不会同步。';
+  String get communityPublishInfo => '食谱书至少需要5个食谱才能发布。你的食谱将作为快照分享,,更新不会同步。';
 
   @override
   String get communitySelectCookbook => '选择要发布的食谱书';
@@ -5848,7 +5848,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String communityDownloadSuccess(String title, int count) {
-    return '已下载\"$title\"——添加了$count个食谱！';
+    return '已下载\"$title\",,添加了$count个食谱！';
   }
 
   @override
@@ -6439,6 +6439,130 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboardingSkip => '跳过';
+
+  @override
+  String get communitySearchHint => '搜索食谱和食谱集';
+
+  @override
+  String get badgeNewThisWeek => '本周新上架';
+
+  @override
+  String bylineByAuthor(String author) {
+    return '作者:$author';
+  }
+
+  @override
+  String countServings(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 人份',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String countSaves(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 次收藏',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String countPhotos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 张照片',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationPrep(String duration) {
+    return '准备 $duration';
+  }
+
+  @override
+  String durationCook(String duration) {
+    return '烹饪 $duration';
+  }
+
+  @override
+  String get filterHasPhotosOnly => '仅显示有照片的';
+
+  @override
+  String get filterHasPhotosOnlySub => '隐藏没有图片的食谱';
+
+  @override
+  String filterApply(int count) {
+    return '显示 $count 条结果';
+  }
+
+  @override
+  String get filterNoMatches => '没有匹配项';
+
+  @override
+  String get previewSavedRecipe => '已保存';
+
+  @override
+  String cookbookDownloadAll(int count) {
+    return '下载全部 $count 道食谱';
+  }
+
+  @override
+  String get cookbookChooseRecipes => '挑选食谱';
+
+  @override
+  String get cookbookInside => '本食谱集内容';
+
+  @override
+  String cookbookSize(String size) {
+    return '$size MB';
+  }
+
+  @override
+  String get publicationStateLive => '已发布';
+
+  @override
+  String get publicationStatePending => '审核中';
+
+  @override
+  String publicationUpdatedAgo(String relativeTime) {
+    return '更新于$relativeTime';
+  }
+
+  @override
+  String get publicationPushUpdate => '发布更新';
+
+  @override
+  String get publicationNotRated => '暂无评分';
+
+  @override
+  String get publicationStatRecipes => '食谱';
+
+  @override
+  String get publicationStatSaves => '收藏';
+
+  @override
+  String get publicationStatRating => '评分';
+
+  @override
+  String unpublishConfirmTitle(String name) {
+    return '要下架 $name 吗?';
+  }
+
+  @override
+  String get unpublishCancel => '保持发布';
+
+  @override
+  String get communityKindRecipe => '食谱';
+
+  @override
+  String get communityKindCookbook => '食谱集';
 
   @override
   String get preparationTitle => '做法';
@@ -7065,7 +7189,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importGuideAiStep2Title => '复制提示词';
 
   @override
-  String get importGuideAiStep2Desc => '点击复制提示词按钮。然后打开您喜欢的AI — ChatGPT、Claude、Gemini或其他 — 粘贴提示词。';
+  String get importGuideAiStep2Desc => '点击复制提示词按钮。然后打开您喜欢的AI, ChatGPT、Claude、Gemini或其他, 粘贴提示词。';
 
   @override
   String get importGuideAiStep3Title => '复制AI的回复';
@@ -7515,7 +7639,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get communityPublishPublishing => '正在发布到社区...';
 
   @override
-  String get communityPublishBackground => '你可以离开此页面——发布将在后台继续。';
+  String get communityPublishBackground => '你可以离开此页面,,发布将在后台继续。';
 
   @override
   String get communityPublishDone => '已发布！';
@@ -9622,7 +9746,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get communityPublishSingleRecipeOption => '发布单个食谱';
 
   @override
-  String get communityPublishSingleRecipeOptionSub => '分享一个食谱 — 无需食谱集';
+  String get communityPublishSingleRecipeOptionSub => '分享一个食谱, 无需食谱集';
 
   @override
   String get communityPickRecipeToPublish => '选择要发布的食谱';

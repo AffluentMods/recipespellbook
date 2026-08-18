@@ -288,6 +288,8 @@ class CommunityRecipeFeedItem {
   final int downloadCount;
   /// Distinct-user "I cooked this" count from the feed payload.
   final int cookCount;
+  /// Publication date — drives the "New this week" badge (≤7 days old).
+  final DateTime? createdAt;
   final List<String> tags;
   final List<CommunityIngredient> ingredients;
   final List<CommunityStep> steps;
@@ -297,10 +299,16 @@ class CommunityRecipeFeedItem {
     this.id, required this.title, this.description, this.imagePath,
     this.servings, this.prepTimeMinutes, this.cookTimeMinutes,
     this.courseId, this.downloadCount = 0, this.cookCount = 0,
+    this.createdAt,
     this.tags = const [],
     this.ingredients = const [], this.steps = const [],
     required this.cookbook,
   });
+
+  /// True when this publication is at most 7 days old.
+  bool get isNewThisWeek =>
+      createdAt != null &&
+      DateTime.now().difference(createdAt!) <= const Duration(days: 7);
 
   factory CommunityRecipeFeedItem.fromJson(Map<String, dynamic> json) {
     final cb = json['cookbook'] as Map<String, dynamic>? ?? {};
@@ -315,6 +323,7 @@ class CommunityRecipeFeedItem {
       cookTimeMinutes: json['cookTimeMinutes'] as int?,
       downloadCount: json['downloadCount'] as int? ?? 0,
       cookCount: (json['cookCount'] as num?)?.toInt() ?? 0,
+      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? ''),
       courseId: json['courseId'] as String?,
       tags: (json['tags'] as List?)?.map((t) => t.toString()).toList() ?? [],
       ingredients: (json['ingredients'] as List?)

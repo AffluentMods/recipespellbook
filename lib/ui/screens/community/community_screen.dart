@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 import 'package:drift/drift.dart' as drift;
 
@@ -17,11 +16,13 @@ import '../../../providers/database_provider.dart';
 import '../../../services/admin_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/community_service.dart';
+import '../../../theme/app_colors.dart';
 import '../admin/admin_moderation_screen.dart';
-import '../../../utils/recipe_title.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
-import '../../widgets/community_image.dart';
+import '../../widgets/community/community_cookbook_card.dart';
+import '../../widgets/community/community_feed_card.dart';
+import '../../widgets/community/community_recipe_preview_sheet.dart';
 import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
 import 'community_publish_screen.dart';
@@ -58,6 +59,9 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   bool _filterHasImages = false;
   bool _fabVisible = true;
   double _lastScrollOffset = 0;
+
+  /// Recipes saved this session — fills the card's bookmark in place.
+  final Set<String> _savedRecipeIds = {};
 
   // Admin: hidden 10-tap trigger
   int _adminTapCount = 0;
@@ -297,17 +301,17 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: l10n.communitySearchCookbooks,
+                    hintText: l10n.communitySearchHint,
                     prefixIcon: const Icon(Icons.search, size: 20),
                     suffixIcon: _query.isNotEmpty
                         ? IconButton(
-                      icon: const Icon(Icons.clear, size: 18),
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() => _query = '');
-                        _load();
-                      },
-                    )
+                            icon: const Icon(Icons.clear, size: 18),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _query = '');
+                              _load();
+                            },
+                          )
                         : null,
                     filled: true,
                     fillColor: theme.colorScheme.surfaceContainerHighest,
@@ -659,160 +663,119 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   }
 
   void _onRecipeTap(BuildContext context, CommunityRecipeFeedItem recipe) {
-    showDialog(
-      context: context,
-      builder: (dialogCtx) => _CommunityRecipeFeedPreview(
-        recipe: recipe,
-        // Single-recipe publications have no cookbook to view — null
-        // hides the button and the attribution tap target.
-        onViewCookbook: recipe.cookbook.isSingleRecipe
-            ? null
-            : () {
-                Navigator.pop(dialogCtx);
-                context.push('/community/${recipe.cookbook.id}');
-              },
-        onSaveRecipe: () {
-          Navigator.pop(dialogCtx);
-          _showSaveRecipeSheet(context, recipe);
-        },
-        onExpandRecipe: () {
-          Navigator.pop(dialogCtx);
-          // Convert feed item to CommunityRecipe for the full screen
-          final communityRecipe = CommunityRecipe(
-            id: recipe.id,
-            cookCount: recipe.cookCount,
-            title: recipe.title,
-            description: recipe.description,
-            imagePath: recipe.imagePath,
-            servings: recipe.servings,
-            prepTimeMinutes: recipe.prepTimeMinutes,
-            cookTimeMinutes: recipe.cookTimeMinutes,
-            sourceUrl: null,
-            courseId: recipe.courseId,
-            categoryId: null,
-            rating: null,
-            notes: null,
-            nutritionJson: null,
-            ingredients: recipe.ingredients,
-            steps: recipe.steps,
-            tags: recipe.tags,
-          );
-          context.push(
-            '/community/${recipe.cookbook.id}/recipe/0',
-            extra: communityRecipe,
-          );
-        },
-      ),
+    showCommunityRecipePreview(
+      context,
+      recipe: recipe,
+      alreadySaved: recipe.id != null && _savedRecipeIds.contains(recipe.id),
+      // Single-recipe publications have no cookbook to view — null hides the
+      // button and the attribution tap target.
+      onViewCookbook: recipe.cookbook.isSingleRecipe
+          ? null
+          : () {
+              Navigator.of(context).pop();
+              context.push('/community/${recipe.cookbook.id}')
+                  .then((_) { if (mounted) _load(); });
+            },
+      // Saves in place: returns true so the sheet swaps to "Saved" and the
+      // feed card's bookmark fills.
+      onSaveRecipe: () => _saveRecipeFromPreview(context, recipe),
+      onExpandRecipe: () {
+        Navigator.of(context).pop();
+        final communityRecipe = CommunityRecipe(
+          id: recipe.id,
+          cookCount: recipe.cookCount,
+          title: recipe.title,
+          description: recipe.description,
+          imagePath: recipe.imagePath,
+          servings: recipe.servings,
+          prepTimeMinutes: recipe.prepTimeMinutes,
+          cookTimeMinutes: recipe.cookTimeMinutes,
+          sourceUrl: null,
+          courseId: recipe.courseId,
+          categoryId: null,
+          rating: null,
+          notes: null,
+          nutritionJson: null,
+          ingredients: recipe.ingredients,
+          steps: recipe.steps,
+          tags: recipe.tags,
+        );
+        context.push(
+          '/community/${recipe.cookbook.id}/recipe/0',
+          extra: communityRecipe,
+        );
+      },
+    );
+  }
+
+  /// Save directly to the user's single cookbook, or open the picker when
+  /// there is a choice. Returns true when the recipe was saved (so the
+  /// preview sheet can flip to its "Saved" state).
+  Future<bool> _saveRecipeFromPreview(
+      BuildContext context, CommunityRecipeFeedItem recipe) async {
+    final cookbooks = ref.read(cookbooksProvider).valueOrNull ?? [];
+    if (cookbooks.length == 1) {
+      await _saveRecipeToCookbook(context, recipe, cookbooks.first.id);
+      return recipe.id == null || _savedRecipeIds.contains(recipe.id);
+    }
+    // Zero or many cookbooks: hand off to the picker sheet (which closes this
+    // preview first), so the preview does not falsely claim a save.
+    if (context.mounted) {
+      Navigator.of(context).pop();
+      _showSaveRecipeSheet(context, recipe);
+    }
+    return false;
+  }
+
+  // One card widget serves both the single-column feed and the grid toggle
+  // (community handoff, recipes feed). The list reserves 104px of bottom
+  // padding so the Publish FAB never covers a card.
+
+  CommunityFeedCard _feedCard(BuildContext context, CommunityRecipeFeedItem recipe, {required bool dense}) {
+    return CommunityFeedCard(
+      recipe: recipe,
+      dense: dense,
+      saved: recipe.id != null && _savedRecipeIds.contains(recipe.id),
+      onOpen: () => _onRecipeTap(context, recipe),
+      onOpenCookbook: recipe.cookbook.isSingleRecipe
+          ? null
+          : () => context.push('/community/${recipe.cookbook.id}').then((_) { if (mounted) _load(); }),
+      onSave: () => _showSaveRecipeSheet(context, recipe),
     );
   }
 
   Widget _buildRecipeGridView(BuildContext context, ThemeData theme) {
-    final columns = Responsive.cookbookColumns(context);
-    return GridView.builder(
+    final columns = Responsive.cookbookColumns(context).clamp(2, 4);
+    final rows = (_recipeItems.length / columns).ceil();
+    return ListView.builder(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: EdgeInsets.fromLTRB(Responsive.useNavRail(context) ? 16 : 6, 4, Responsive.useNavRail(context) ? 16 : 6, 80),
-      gridDelegate: Responsive.useNavRail(context)
-          ? Responsive.fluidGrid(maxExtent: 240, childAspectRatio: 0.78, crossAxisSpacing: 4, mainAxisSpacing: 4)
-          : SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: columns,
-              childAspectRatio: 0.78,
-              crossAxisSpacing: 4,
-              mainAxisSpacing: 4,
-            ),
-      itemCount: _recipeItems.length + (_loading ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index >= _recipeItems.length) {
-          return const Center(child: CircularProgressIndicator());
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 104),
+      itemCount: rows + (_loading ? 1 : 0),
+      itemBuilder: (context, row) {
+        if (row >= rows) {
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          );
         }
-        final recipe = _recipeItems[index];
-        final hasImage = recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
-
-        return Card(
-          clipBehavior: Clip.antiAlias,
-          margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          child: InkWell(
-            onTap: () => _onRecipeTap(context, recipe),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                // Full image background
-                if (hasImage)
-                  CommunityImage(
-                    publicationId: recipe.cookbook.id,
-                    imagePath: recipe.imagePath,
-                    fit: BoxFit.cover,
-                    memCacheWidth: 640,
-                    memCacheHeight: 640, // ~3x of the grid card so it's not upscaled
-                  )
-                else
-                  Container(
-                    color: theme.colorScheme.primaryContainer,
-                    child: Icon(Icons.restaurant, size: 40, color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.3)),
-                  ),
-                // Gradient at bottom
-                Positioned(
-                  bottom: 0, left: 0, right: 0, height: 80,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Colors.black.withValues(alpha: 0.7)],
-                      ),
-                    ),
-                  ),
-                ),
-                // Download count badge (always shown)
-                Positioned(
-                    top: 6, right: 6,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.download, size: 12, color: Colors.white),
-                          const SizedBox(width: 2),
-                          Text('${recipe.downloadCount}', style: const TextStyle(fontSize: 11, color: Colors.white)),
-                        ],
-                      ),
-                    ),
-                  ),
-                // Title + cookbook name
-                Positioned(
-                  bottom: 8, left: 8, right: 8,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Tooltip(
-                        message: recipe.title,
-                        child: Text(
-                          normalizeTitle(recipe.title).title,
-                          style: const TextStyle(
-                            color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold,
-                            shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        recipe.cookbook.title,
-                        style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 10),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
+        // Rows of intrinsic-height cells: the row sizes to its tallest card,
+        // so long titles never overflow a fixed-aspect grid tile.
+        final start = row * columns;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (var c = 0; c < columns; c++) ...[
+                if (c > 0) const SizedBox(width: 12),
+                Expanded(
+                  child: start + c < _recipeItems.length
+                      ? _feedCard(context, _recipeItems[start + c], dense: true)
+                      : const SizedBox.shrink(),
                 ),
               ],
-            ),
+            ],
           ),
         );
       },
@@ -820,11 +783,10 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   }
 
   Widget _buildRecipeListView(BuildContext context, ThemeData theme) {
-    final l10n = AppLocalizations.of(context)!;
     return ListView.builder(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 80),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 104),
       itemCount: _recipeItems.length + (_loading ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= _recipeItems.length) {
@@ -833,149 +795,59 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             child: Center(child: CircularProgressIndicator()),
           );
         }
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: _feedCard(context, _recipeItems[index], dense: false),
+        );
+      },
+    );
+  }
 
-        final recipe = _recipeItems[index];
-        final hasImage = recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
-
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: () => _onRecipeTap(context, recipe),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  // Thumbnail
-                  if (hasImage)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: CommunityImage(
-                        publicationId: recipe.cookbook.id,
-                        imagePath: recipe.imagePath,
-                        width: 64,
-                        height: 64,
-                        fit: BoxFit.cover,
-                        memCacheWidth: 192,
-                        memCacheHeight: 192, // 3x of the 64px thumb
-                      ),
-                    )
-                  else
-                    Container(
-                      width: 64, height: 64,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(Icons.restaurant, color: theme.colorScheme.onPrimaryContainer),
-                    ),
-                  const SizedBox(width: 12),
-
-                  // Content
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Tooltip(
-                          message: recipe.title,
-                          child: Text(
-                            normalizeTitle(recipe.title).title,
-                            style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          l10n.communityFromCookbook(recipe.cookbook.title),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            if (recipe.prepTimeMinutes != null || recipe.cookTimeMinutes != null)
-                              Text(
-                                '${(recipe.prepTimeMinutes ?? 0) + (recipe.cookTimeMinutes ?? 0)} min',
-                                style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline),
-                              ),
-                            if (recipe.ingredients.isNotEmpty) ...[
-                              if (recipe.prepTimeMinutes != null || recipe.cookTimeMinutes != null)
-                                Text(' · ', style: TextStyle(color: theme.colorScheme.outline)),
-                              Text(
-                                l10n.communityIngredientsCount(recipe.ingredients.length),
-                                style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline),
-                              ),
-                            ],
-                            ...[
-                              Text(' · ', style: TextStyle(color: theme.colorScheme.outline)),
-                              Icon(Icons.download, size: 12, color: theme.colorScheme.outline),
-                              const SizedBox(width: 2),
-                              Text('${recipe.downloadCount}', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline)),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(Icons.chevron_right, size: 20, color: theme.colorScheme.outline),
-                ],
-              ),
-            ),
+  // Cookbook feed: a two-column cover-forward grid in both view modes — the
+  // spine bar on the card is what separates a cookbook from a recipe, not a
+  // different layout (community handoff, cookbooks feed).
+  Widget _buildGridView(BuildContext context) {
+    final columns = Responsive.cookbookColumns(context).clamp(2, 4);
+    final rows = (_items.length / columns).ceil();
+    return ListView.builder(
+      controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 104),
+      itemCount: rows + (_loading ? 1 : 0),
+      itemBuilder: (context, row) {
+        if (row >= rows) {
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final start = row * columns;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (var c = 0; c < columns; c++) ...[
+                if (c > 0) const SizedBox(width: 12),
+                Expanded(
+                  child: start + c < _items.length
+                      ? CommunityCookbookCard(
+                          item: _items[start + c],
+                          onTap: () => context
+                              .push('/community/${_items[start + c].id}')
+                              .then((_) { if (mounted) _load(); }),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ],
           ),
         );
       },
     );
   }
 
-  Widget _buildGridView(BuildContext context) {
-    final columns = Responsive.cookbookColumns(context);
-
-    return GridView.builder(
-      controller: _scrollController,
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: EdgeInsets.fromLTRB(Responsive.useNavRail(context) ? 16 : 6, 4, Responsive.useNavRail(context) ? 16 : 6, 80),
-      gridDelegate: Responsive.useNavRail(context)
-          ? Responsive.fluidGrid(maxExtent: 240, childAspectRatio: 0.78, crossAxisSpacing: 4, mainAxisSpacing: 4)
-          : SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: columns,
-              childAspectRatio: 0.78,
-              mainAxisSpacing: 4,
-              crossAxisSpacing: 4,
-            ),
-      itemCount: _items.length + (_loading ? 1 : 0),
-      itemBuilder: (ctx, i) {
-        if (i == _items.length) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        return _CommunityGridCard(
-          item: _items[i],
-          onTap: () => context.push('/community/${_items[i].id}').then((_) { if (mounted) _load(); }),
-        );
-      },
-    );
-  }
-
-  Widget _buildListView(BuildContext context) {
-    return ListView.builder(
-      controller: _scrollController,
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(12),
-      itemCount: _items.length + (_loading ? 1 : 0),
-      itemBuilder: (ctx, i) {
-        if (i == _items.length) {
-          return const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()));
-        }
-        return _CommunityListCard(
-          item: _items[i],
-          onTap: () => context.push('/community/${_items[i].id}').then((_) { if (mounted) _load(); }),
-        );
-      },
-    );
-  }
+  Widget _buildListView(BuildContext context) => _buildGridView(context);
 
   void _onSortChanged(String value) {
     setState(() => _sort = value);
@@ -1095,6 +967,10 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
         CommunityService.instance.trackRecipeDownload(recipe.id!);
       }
 
+      if (mounted && recipe.id != null) {
+        setState(() => _savedRecipeIds.add(recipe.id!));
+      }
+
       if (context.mounted) {
         AppSnackbar.dismiss(context);
         AppSnackbar.success(context, l10n.communityRecipeSaved(recipe.title));
@@ -1121,6 +997,13 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     String searchQuery = '';
     final tagSearchController = TextEditingController();
     Timer? debounceTimer;
+
+    // Live result count for the apply button (community handoff): the only
+    // reason anyone opens a filter is to see how many results it produces.
+    int? resultCount;
+    bool countLoading = false;
+    bool countStarted = false;
+    Timer? countTimer;
 
     showModalBottomSheet(
       context: context,
@@ -1156,6 +1039,38 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                 }
               });
             });
+          }
+
+          // Debounced live count of the tentative filter, read from the
+          // browse endpoint's total for the current browse mode.
+          void refreshCount() {
+            countTimer?.cancel();
+            setSheetState(() => countLoading = true);
+            countTimer = Timer(const Duration(milliseconds: 300), () async {
+              final tags = sheetTags.isNotEmpty ? sheetTags.toList() : null;
+              final images = sheetHasImages ? true : null;
+              int total;
+              if (_browseMode == _BrowseMode.recipes) {
+                final r = await _community.browseRecipes(
+                  sort: _sort == 'top_rated' ? 'popular' : _sort,
+                  page: 1, tags: tags, hasImages: images,
+                );
+                total = r?.total ?? 0;
+              } else {
+                final r = await _community.browse(
+                  sort: _sort, page: 1, tags: tags, hasImages: images,
+                );
+                total = r?.total ?? 0;
+              }
+              if (ctx.mounted) {
+                setSheetState(() { resultCount = total; countLoading = false; });
+              }
+            });
+          }
+
+          if (!countStarted) {
+            countStarted = true;
+            refreshCount();
           }
 
           // Build the tag list to show (search results or trending + curated fallback)
@@ -1287,23 +1202,11 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                                 itemBuilder: (_, i) {
                                   final tag = tagsToShow[i];
                                   final isSelected = sheetTags.contains(tag.tagName);
-                                  return ListTile(
-                                    dense: true,
-                                    visualDensity: VisualDensity.compact,
-                                    leading: Text(tag.displayEmoji, style: const TextStyle(fontSize: 20)),
-                                    title: Text(
-                                      '#${tag.displayName}',
-                                      style: TextStyle(
-                                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                                        color: isSelected ? theme.colorScheme.primary : null,
-                                      ),
-                                    ),
-                                    subtitle: tag.useCount > 0
-                                        ? Text('${tag.useCount} uses', style: TextStyle(fontSize: 11, color: theme.colorScheme.outline))
-                                        : null,
-                                    trailing: isSelected
-                                        ? Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20)
-                                        : Icon(Icons.chevron_right, color: theme.colorScheme.outline.withValues(alpha: 0.4), size: 20),
+                                  // Selectable row with the standard checkbox
+                                  // (community handoff): selection stays visible
+                                  // after the sheet closes. Tapping the row
+                                  // never navigates away.
+                                  return InkWell(
                                     onTap: () {
                                       setSheetState(() {
                                         if (isSelected) {
@@ -1312,26 +1215,77 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                                           sheetTags.add(tag.tagName);
                                         }
                                       });
+                                      refreshCount();
                                     },
+                                    child: Container(
+                                      constraints: const BoxConstraints(minHeight: 48),
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 30, height: 30,
+                                            alignment: Alignment.center,
+                                            decoration: BoxDecoration(
+                                              color: theme.colorScheme.surfaceContainerHighest,
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: Text(tag.displayEmoji, style: const TextStyle(fontSize: 16)),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  tag.displayName,
+                                                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                                                ),
+                                                if (tag.useCount > 0)
+                                                  Text(
+                                                    l10n.countRecipes(tag.useCount),
+                                                    style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
+                                                  ),
+                                              ],
+                                            ),
+                                          ),
+                                          _FilterCheckbox(checked: isSelected),
+                                        ],
+                                      ),
+                                    ),
                                   );
                                 },
                               ),
                   ),
 
-                  // ── Has images toggle ──
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: SwitchListTile(
-                      title: Text(l10n.communityHasImages, style: const TextStyle(fontSize: 14)),
-                      secondary: const Icon(Icons.image_outlined),
-                      value: sheetHasImages,
-                      onChanged: (v) => setSheetState(() => sheetHasImages = v),
-                      contentPadding: EdgeInsets.zero,
-                      dense: true,
+                  // ── Has photos only (checkbox, same as tag rows) ──
+                  InkWell(
+                    onTap: () {
+                      setSheetState(() => sheetHasImages = !sheetHasImages);
+                      refreshCount();
+                    },
+                    child: Container(
+                      constraints: const BoxConstraints(minHeight: 48),
+                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(l10n.filterHasPhotosOnly,
+                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                                Text(l10n.filterHasPhotosOnlySub,
+                                    style: TextStyle(fontSize: 12, color: theme.colorScheme.outline)),
+                              ],
+                            ),
+                          ),
+                          _FilterCheckbox(checked: sheetHasImages),
+                        ],
+                      ),
                     ),
                   ),
 
-                  // ── Clear + Confirm buttons ──
+                  // ── Clear + Apply (live count) ──
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                     child: SafeArea(
@@ -1345,25 +1299,39 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                                   sheetTags.clear();
                                   sheetHasImages = false;
                                 });
+                                refreshCount();
                               },
-                              child: Text(l10n.communityClearSearch),
+                              child: Text(l10n.actionClear),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
+                            flex: 2,
                             child: FilledButton(
-                              onPressed: () {
-                                debounceTimer?.cancel();
-                                Navigator.pop(ctx);
-                                setState(() {
-                                  _selectedTags
-                                    ..clear()
-                                    ..addAll(sheetTags);
-                                  _filterHasImages = sheetHasImages;
-                                });
-                                _load();
-                              },
-                              child: Text(l10n.communityConfirm),
+                              // Disabled at zero, with "No matches" — a filter
+                              // whose result is invisible until applied gets
+                              // used once.
+                              onPressed: (resultCount == 0 && !countLoading)
+                                  ? null
+                                  : () {
+                                      debounceTimer?.cancel();
+                                      countTimer?.cancel();
+                                      Navigator.pop(ctx);
+                                      setState(() {
+                                        _selectedTags
+                                          ..clear()
+                                          ..addAll(sheetTags);
+                                        _filterHasImages = sheetHasImages;
+                                      });
+                                      _load();
+                                    },
+                              child: Text(
+                                countLoading || resultCount == null
+                                    ? l10n.filterApply(resultCount ?? 0)
+                                    : (resultCount == 0
+                                        ? l10n.filterNoMatches
+                                        : l10n.filterApply(resultCount!)),
+                              ),
                             ),
                           ),
                         ],
@@ -1376,6 +1344,39 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           );
         },
       ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════
+//  FILTER CHECKBOX (filter sheet rows)
+// ════════════════════════════════════════════
+
+/// The selection control shared by every filter row (community handoff): a
+/// 26px rounded checkbox, accent-filled when checked. Orange only ever means
+/// selection here, never status.
+class _FilterCheckbox extends StatelessWidget {
+  final bool checked;
+  const _FilterCheckbox({required this.checked});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 120),
+      width: 26,
+      height: 26,
+      decoration: BoxDecoration(
+        color: checked ? colors.accent : Colors.transparent,
+        borderRadius: BorderRadius.circular(7),
+        border: Border.all(
+          color: checked ? colors.accent : colors.outline,
+          width: 2,
+        ),
+      ),
+      child: checked
+          ? Icon(Icons.check, size: 18, color: colors.onAccent)
+          : null,
     );
   }
 }
@@ -1500,691 +1501,6 @@ class StarRating extends StatelessWidget {
   }
 }
 
-// ════════════════════════════════════════════
-//  GRID CARD (with cover image)
-// ════════════════════════════════════════════
-
-class _CommunityGridCard extends StatelessWidget {
-  final CommunityListItem item;
-  final VoidCallback onTap;
-
-  const _CommunityGridCard({required this.item, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      elevation: 3,
-      shadowColor: Colors.black.withValues(alpha: 0.28),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ── Cover image (60% height) ──
-            Expanded(
-              flex: 3,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  CommunityImage(
-                    publicationId: item.id,
-                    imagePath: item.imagePath,
-                    fit: BoxFit.cover,
-                  ),
-                  // Download count badge
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.55),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.download_rounded, size: 12, color: Colors.white),
-                          const SizedBox(width: 3),
-                          Text('${item.downloadCount}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Single-recipe vs cookbook badge (top-left)
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.55),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            item.isSingleRecipe ? Icons.restaurant_menu : Icons.menu_book,
-                            size: 12,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            item.isSingleRecipe ? 'Recipe' : 'Cookbook',
-                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: 0.3),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Gradient overlay at bottom
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: 80,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.transparent, Colors.black.withValues(alpha: 0.7)],
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Title overlay on image
-                  Positioned(
-                    bottom: 6,
-                    left: 8,
-                    right: 8,
-                    child: Text(
-                      item.title,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Colors.white,
-                        shadows: const [Shadow(blurRadius: 4, color: Colors.black54)],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // ── Content area (40% height) ──
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.publisher.displayName,
-                      style: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: theme.colorScheme.outline),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    // Rating + recipe count + category on same line
-                    Row(
-                      children: [
-                        if (item.averageRating > 0) ...[
-                          StarRating(rating: item.averageRating, count: item.ratingCount, size: 12, showCount: false),
-                          const SizedBox(width: 4),
-                        ],
-                        Icon(Icons.restaurant_menu, size: 13, color: theme.colorScheme.outline),
-                        const SizedBox(width: 2),
-                        Text('${item.recipeCount}', style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
-                        if (item.tagList.isNotEmpty) ...[
-                          Text(' · ', style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
-                          Flexible(child: Text(
-                            item.tagList.first,
-                            style: TextStyle(fontSize: 11, color: theme.colorScheme.outline),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          )),
-                        ],
-                      ],
-                    ),
-                    // Tags (show first 1 — grid cards have limited space)
-                    if (item.tagList.length > 1)
-                      Flexible(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 2),
-                          child: _TagChips(tags: item.tagList.sublist(1), maxShow: 1),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ════════════════════════════════════════════
-//  LIST CARD (enhanced with thumbnail)
-// ════════════════════════════════════════════
-
-class _CommunityListCard extends StatelessWidget {
-  final CommunityListItem item;
-  final VoidCallback onTap;
-
-  const _CommunityListCard({required this.item, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      clipBehavior: Clip.antiAlias,
-      elevation: 2,
-      shadowColor: Colors.black.withValues(alpha: 0.2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Thumbnail
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: CommunityImage(
-                  publicationId: item.id,
-                  imagePath: item.imagePath,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  memCacheWidth: 160,
-                  memCacheHeight: 160,
-                ),
-              ),
-              const SizedBox(width: 12),
-
-              // Content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(item.title,
-                        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                        maxLines: 1, overflow: TextOverflow.ellipsis),
-                    const SizedBox(height: 2),
-                    Text(item.publisher.displayName,
-                        style: TextStyle(fontSize: 12, color: theme.colorScheme.outline)),
-                    if (item.description != null && item.description!.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(item.description!, maxLines: 2, overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
-                    ],
-                    const SizedBox(height: 6),
-                    // Stats row
-                    Row(
-                      children: [
-                        if (item.averageRating > 0) ...[
-                          StarRating(rating: item.averageRating, count: item.ratingCount, size: 12),
-                          const SizedBox(width: 12),
-                        ],
-                        Icon(Icons.restaurant_menu, size: 12, color: theme.colorScheme.outline),
-                        const SizedBox(width: 3),
-                        Text('${item.recipeCount}', style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
-                        const SizedBox(width: 10),
-                        Icon(Icons.download, size: 12, color: theme.colorScheme.outline),
-                        const SizedBox(width: 3),
-                        Text('${item.downloadCount}', style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
-                        const Spacer(),
-                        Text(timeago.format(item.createdAt), style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
-                      ],
-                    ),
-                    // Tags
-                    if (item.tagList.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      _TagChips(tags: item.tagList, maxShow: 3),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ════════════════════════════════════════════
-//  TAG CHIPS (compact)
-// ════════════════════════════════════════════
-
-class _TagChips extends StatelessWidget {
-  final List<String> tags;
-  final int maxShow;
-
-  const _TagChips({required this.tags, this.maxShow = 3});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final shown = tags.take(maxShow).toList();
-    final remaining = tags.length - shown.length;
-
-    // Find emoji for known tags
-    String? emojiForTag(String tagId) {
-      try {
-        return communityTags.firstWhere((t) => t.id == tagId).emoji;
-      } catch (_) {
-        return null;
-      }
-    }
-
-    return Wrap(
-      spacing: 6,
-      runSpacing: 4,
-      clipBehavior: Clip.hardEdge,
-      children: [
-        ...shown.map((tag) {
-          final emoji = emojiForTag(tag);
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              emoji != null ? '$emoji $tag' : tag,
-              style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurface),
-            ),
-          );
-        }),
-        if (remaining > 0)
-          Text('+$remaining', style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
-      ],
-    );
-  }
-}
-
-String _resolveAvatarUrl(String avatarUrl) {
-  if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) return avatarUrl;
-  const apiUrl = String.fromEnvironment('API_URL', defaultValue: 'https://api.recipespellbook.app');
-  return '$apiUrl/v1/web/avatar/$avatarUrl';
-}
-
-// ════════════════════════════════════════════
-//  RECIPE FEED PREVIEW DIALOG
-// ════════════════════════════════════════════
-
-class _CommunityRecipeFeedPreview extends StatelessWidget {
-  final CommunityRecipeFeedItem recipe;
-  /// Null when the source publication is a single-recipe upload — there
-  /// is no cookbook to view, so all cookbook framing is hidden.
-  final VoidCallback? onViewCookbook;
-  final VoidCallback onSaveRecipe;
-  final VoidCallback? onExpandRecipe;
-
-  const _CommunityRecipeFeedPreview({
-    required this.recipe,
-    required this.onViewCookbook,
-    required this.onSaveRecipe,
-    this.onExpandRecipe,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final hasImage = recipe.imagePath != null && recipe.imagePath!.isNotEmpty;
-
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      clipBehavior: Clip.antiAlias,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 650),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // ── Hero image or gradient header ──
-            Stack(
-              children: [
-                Container(
-                  height: hasImage ? 180 : 100,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        theme.colorScheme.primaryContainer,
-                        theme.colorScheme.tertiaryContainer.withValues(alpha: 0.6),
-                      ],
-                    ),
-                  ),
-                  child: hasImage
-                      ? CommunityImage(
-                          publicationId: recipe.cookbook.id,
-                          imagePath: recipe.imagePath,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: 180,
-                        )
-                      : Center(
-                          child: Icon(Icons.restaurant_menu, size: 40,
-                              color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.5)),
-                        ),
-                ),
-                // Gradient overlay for button readability
-                if (hasImage)
-                  Positioned(
-                    top: 0, left: 0, right: 0, height: 60,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.black.withValues(alpha: 0.5), Colors.transparent],
-                        ),
-                      ),
-                    ),
-                  ),
-                // Top bar: close left, expand right
-                Positioned(
-                  top: 0, left: 0, right: 0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.black.withValues(alpha: 0.5), Colors.transparent],
-                      ),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.close, color: Colors.white, size: 22),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.open_in_full, color: Colors.white, size: 20),
-                          tooltip: l10n.communityViewFullRecipe,
-                          onPressed: onExpandRecipe ?? onViewCookbook,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            // ── Title below image ──
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-              child: Tooltip(
-                message: recipe.title,
-                child: Text(
-                  normalizeTitle(recipe.title).title,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-
-            // ── Cookbook attribution ──
-            InkWell(
-              onTap: onViewCookbook,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                child: Row(
-                  children: [
-                    // Publisher avatar
-                    CircleAvatar(
-                      radius: 14,
-                      backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.18),
-                      backgroundImage: recipe.cookbook.publisherAvatarUrl != null && recipe.cookbook.publisherAvatarUrl!.isNotEmpty
-                          ? NetworkImage(_resolveAvatarUrl(recipe.cookbook.publisherAvatarUrl!))
-                          : null,
-                      onBackgroundImageError: recipe.cookbook.publisherAvatarUrl != null ? (_, __) {} : null,
-                      child: (recipe.cookbook.publisherAvatarUrl == null || recipe.cookbook.publisherAvatarUrl!.isEmpty)
-                          ? Text(
-                              recipe.cookbook.publisherName.isNotEmpty ? recipe.cookbook.publisherName[0].toUpperCase() : '?',
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
-                            )
-                          : null,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // For single-recipe pubs the publication title is
-                          // just the recipe title again — skip the link row.
-                          if (!recipe.cookbook.isSingleRecipe)
-                            Text(
-                              recipe.cookbook.title,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          Text(
-                            'by ${recipe.cookbook.publisherName}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.outline,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Icon(Icons.chevron_right, size: 18, color: theme.colorScheme.primary),
-                  ],
-                ),
-              ),
-            ),
-
-            // ── Meta chips ──
-            if (recipe.prepTimeMinutes != null || recipe.cookTimeMinutes != null || recipe.servings != null || recipe.ingredients.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  children: [
-                    if (recipe.prepTimeMinutes != null)
-                      _MetaChip(icon: Icons.timer_outlined, label: '${recipe.prepTimeMinutes}m prep', theme: theme),
-                    if (recipe.cookTimeMinutes != null)
-                      _MetaChip(icon: Icons.local_fire_department_outlined, label: '${recipe.cookTimeMinutes}m cook', theme: theme),
-                    if (recipe.servings != null)
-                      _MetaChip(icon: Icons.people_outline, label: '${recipe.servings} servings', theme: theme),
-                    if (recipe.ingredients.isNotEmpty)
-                      _MetaChip(icon: Icons.list, label: '${recipe.ingredients.length} ingredients', theme: theme),
-                  ],
-                ),
-              ),
-
-            // ── Content ──
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Description
-                    if (recipe.description != null && recipe.description!.isNotEmpty) ...[
-                      Text(
-                        recipe.description!,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          height: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-
-                    // Ingredients
-                    if (recipe.ingredients.isNotEmpty) ...[
-                      Row(
-                        children: [
-                          Icon(Icons.restaurant, size: 16, color: theme.colorScheme.onSurfaceVariant),
-                          const SizedBox(width: 6),
-                          Text(l10n.recipeIngredients, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      ...recipe.ingredients.map((ing) {
-                        final parts = [ing.amount ?? '', ing.unit ?? '', ing.name].where((s) => s.isNotEmpty).join(' ');
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 3),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('•  ', style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
-                              Expanded(child: Text(parts, style: theme.textTheme.bodyMedium)),
-                            ],
-                          ),
-                        );
-                      }),
-                      const SizedBox(height: 16),
-                    ],
-
-                    // Instructions
-                    if (recipe.steps.isNotEmpty) ...[
-                      Row(
-                        children: [
-                          Icon(Icons.format_list_numbered, size: 16, color: theme.colorScheme.onSurfaceVariant),
-                          const SizedBox(width: 6),
-                          Text(l10n.recipeInstructions, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      ...recipe.steps.asMap().entries.map((e) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 24, height: 24,
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '${e.key + 1}',
-                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: theme.colorScheme.onPrimaryContainer),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(e.value.instruction, style: theme.textTheme.bodyMedium?.copyWith(height: 1.4)),
-                            ),
-                          ],
-                        ),
-                      )),
-                    ],
-
-                    // Save button at bottom of content
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        onPressed: onSaveRecipe,
-                        icon: const Icon(Icons.download, size: 18),
-                        label: Text(l10n.communitySaveToMyCookbooks),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                ),
-              ),
-            ),
-
-            // ── Actions ──
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3))),
-              ),
-              child: Row(
-                children: [
-                  // No "View cookbook" for single-recipe publications —
-                  // Save expands to full width instead.
-                  if (onViewCookbook != null) ...[
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: onViewCookbook,
-                        icon: const Icon(Icons.book, size: 18),
-                        label: Text(l10n.communityViewCookbook),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: onSaveRecipe,
-                      icon: const Icon(Icons.download, size: 18),
-                      label: Text(l10n.actionSave),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MetaChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final ThemeData theme;
-  const _MetaChip({required this.icon, required this.label, required this.theme});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 4),
-          Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface)),
-        ],
-      ),
-    );
-  }
-}
 
 // ════════════════════════════════════════════
 //  CREATORS YOU FOLLOW (horizontal rail)

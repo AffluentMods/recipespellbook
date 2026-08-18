@@ -182,7 +182,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     final text = data?.text?.trim();
     if (text == null || text.isEmpty) {
-      _showError('Nothing to paste — copy a recipe link first.');
+      _showError('Nothing to paste, copy a recipe link first.');
       return;
     }
     _urlController.text = text;
@@ -823,7 +823,7 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
                   Text('Add a recipe', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
                   Text(
-                    'Paste a link from Instagram, TikTok, a website — anywhere.',
+                    'Paste a link from Instagram, TikTok, a website, anywhere.',
                     style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                     textAlign: TextAlign.center,
                   ),

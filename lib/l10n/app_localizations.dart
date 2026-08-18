@@ -10624,7 +10624,7 @@ abstract class AppLocalizations {
   /// No description provided for @communitySortMostDownloaded.
   ///
   /// In en, this message translates to:
-  /// **'Most Downloaded'**
+  /// **'Downloaded'**
   String get communitySortMostDownloaded;
 
   /// No description provided for @communityNoResultsFor.
@@ -10696,7 +10696,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityPublishInfo.
   ///
   /// In en, this message translates to:
-  /// **'Cookbooks need at least 5 recipes to publish. Your recipes will be shared as a snapshot — updates won\'t sync.'**
+  /// **'Cookbooks need at least 5 recipes to publish. Your recipes will be shared as a snapshot, updates won\'t sync.'**
   String get communityPublishInfo;
 
   /// No description provided for @communitySelectCookbook.
@@ -10858,7 +10858,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityDownloadSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Downloaded \"{title}\" — {count} recipes added!'**
+  /// **'Downloaded \"{title}\", {count} recipes added!'**
   String communityDownloadSuccess(String title, int count);
 
   /// No description provided for @communityDownloadFailedError.
@@ -11898,6 +11898,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Skip'**
   String get onboardingSkip;
+
+  /// No description provided for @communitySearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search recipes and cookbooks'**
+  String get communitySearchHint;
+
+  /// No description provided for @badgeNewThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'New this week'**
+  String get badgeNewThisWeek;
+
+  /// No description provided for @bylineByAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'by {author}'**
+  String bylineByAuthor(String author);
+
+  /// No description provided for @countServings.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 serving} other{{count} servings}}'**
+  String countServings(int count);
+
+  /// No description provided for @countSaves.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 save} other{{count} saves}}'**
+  String countSaves(int count);
+
+  /// No description provided for @countPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 photo} other{{count} photos}}'**
+  String countPhotos(int count);
+
+  /// No description provided for @durationPrep.
+  ///
+  /// In en, this message translates to:
+  /// **'{duration} prep'**
+  String durationPrep(String duration);
+
+  /// No description provided for @durationCook.
+  ///
+  /// In en, this message translates to:
+  /// **'{duration} cook'**
+  String durationCook(String duration);
+
+  /// No description provided for @filterHasPhotosOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Has photos only'**
+  String get filterHasPhotosOnly;
+
+  /// No description provided for @filterHasPhotosOnlySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide recipes without an image'**
+  String get filterHasPhotosOnlySub;
+
+  /// No description provided for @filterApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Show {count} results'**
+  String filterApply(int count);
+
+  /// No description provided for @filterNoMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches'**
+  String get filterNoMatches;
+
+  /// No description provided for @previewSavedRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get previewSavedRecipe;
+
+  /// No description provided for @cookbookDownloadAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Download all {count} recipes'**
+  String cookbookDownloadAll(int count);
+
+  /// No description provided for @cookbookChooseRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose recipes'**
+  String get cookbookChooseRecipes;
+
+  /// No description provided for @cookbookInside.
+  ///
+  /// In en, this message translates to:
+  /// **'INSIDE THIS COOKBOOK'**
+  String get cookbookInside;
+
+  /// No description provided for @cookbookSize.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} MB'**
+  String cookbookSize(String size);
+
+  /// No description provided for @publicationStateLive.
+  ///
+  /// In en, this message translates to:
+  /// **'LIVE'**
+  String get publicationStateLive;
+
+  /// No description provided for @publicationStatePending.
+  ///
+  /// In en, this message translates to:
+  /// **'IN REVIEW'**
+  String get publicationStatePending;
+
+  /// No description provided for @publicationUpdatedAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {relativeTime}'**
+  String publicationUpdatedAgo(String relativeTime);
+
+  /// No description provided for @publicationPushUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Push update'**
+  String get publicationPushUpdate;
+
+  /// No description provided for @publicationNotRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Not rated'**
+  String get publicationNotRated;
+
+  /// No description provided for @publicationStatRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'recipes'**
+  String get publicationStatRecipes;
+
+  /// No description provided for @publicationStatSaves.
+  ///
+  /// In en, this message translates to:
+  /// **'saves'**
+  String get publicationStatSaves;
+
+  /// No description provided for @publicationStatRating.
+  ///
+  /// In en, this message translates to:
+  /// **'rating'**
+  String get publicationStatRating;
+
+  /// No description provided for @unpublishConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpublish {name}?'**
+  String unpublishConfirmTitle(String name);
+
+  /// No description provided for @unpublishCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep published'**
+  String get unpublishCancel;
+
+  /// No description provided for @communityKindRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe'**
+  String get communityKindRecipe;
+
+  /// No description provided for @communityKindCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookbook'**
+  String get communityKindCookbook;
 
   /// No description provided for @preparationTitle.
   ///
@@ -13042,7 +13216,7 @@ abstract class AppLocalizations {
   /// No description provided for @importGuideAiStep2Desc.
   ///
   /// In en, this message translates to:
-  /// **'Tap the copy prompt button. Then open your favorite AI — ChatGPT, Claude, Gemini, or any other — and paste the prompt.'**
+  /// **'Tap the copy prompt button. Then open your favorite AI, ChatGPT, Claude, Gemini, or any other, and paste the prompt.'**
   String get importGuideAiStep2Desc;
 
   /// No description provided for @importGuideAiStep3Title.
@@ -13684,7 +13858,7 @@ abstract class AppLocalizations {
   /// No description provided for @communitySortTopRated.
   ///
   /// In en, this message translates to:
-  /// **'Top Rated'**
+  /// **'Top rated'**
   String get communitySortTopRated;
 
   /// No description provided for @communityHasImages.
@@ -13906,7 +14080,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityPublishBackground.
   ///
   /// In en, this message translates to:
-  /// **'You can browse while publishing continues.\nKeep the app open — switching apps may cause uploads to fail.'**
+  /// **'You can browse while publishing continues.\nKeep the app open, switching apps may cause uploads to fail.'**
   String get communityPublishBackground;
 
   /// No description provided for @communityPublishDone.
@@ -13996,7 +14170,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityPublishTextOnlyNoImages.
   ///
   /// In en, this message translates to:
-  /// **'Text only — no images'**
+  /// **'Text only, no images'**
   String get communityPublishTextOnlyNoImages;
 
   /// No description provided for @communityPublishTryAgain.
@@ -15298,7 +15472,7 @@ abstract class AppLocalizations {
   /// No description provided for @communitySaveRecipe.
   ///
   /// In en, this message translates to:
-  /// **'Save Recipe'**
+  /// **'Save recipe'**
   String get communitySaveRecipe;
 
   /// No description provided for @communityNoCookbooksYetCreate.
@@ -15340,13 +15514,13 @@ abstract class AppLocalizations {
   /// No description provided for @communityViewCookbook.
   ///
   /// In en, this message translates to:
-  /// **'View Cookbook'**
+  /// **'View cookbook'**
   String get communityViewCookbook;
 
   /// No description provided for @communityPublishInProgress.
   ///
   /// In en, this message translates to:
-  /// **'Publishing in progress — cancel the upload first'**
+  /// **'Publishing in progress, cancel the upload first'**
   String get communityPublishInProgress;
 
   /// No description provided for @communityUnknownError.
@@ -16348,7 +16522,7 @@ abstract class AppLocalizations {
   /// No description provided for @communitySearchTags.
   ///
   /// In en, this message translates to:
-  /// **'Search tags...'**
+  /// **'Search tags'**
   String get communitySearchTags;
 
   /// No description provided for @communityNoTagsFound.
@@ -17656,7 +17830,7 @@ abstract class AppLocalizations {
   /// No description provided for @communityPublishSingleRecipeOptionSub.
   ///
   /// In en, this message translates to:
-  /// **'Share one recipe — no cookbook needed'**
+  /// **'Share one recipe, no cookbook needed'**
   String get communityPublishSingleRecipeOptionSub;
 
   /// No description provided for @communityPickRecipeToPublish.

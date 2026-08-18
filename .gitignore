@@ -17,6 +17,12 @@ android/key.properties
 ../ZestSSH/android/upload-keystore.jks
 **/settings.local.json
 
+# Signing secrets — never commit
+*.p8
+*.mobileprovision
+*.p12
+gcp-credentials.json
+
 # IntelliJ related
 *.iml
 *.ipr

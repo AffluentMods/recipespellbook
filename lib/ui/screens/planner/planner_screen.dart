@@ -2367,9 +2367,39 @@ class _MealBlock extends ConsumerWidget {
                       ),
                     ),
                   ),
-                // Quick jump straight to the recipe (skips the edit sheet). Its
-                // own InkWell sits in front of the card, so it intercepts the tap
-                // without disturbing the card's tap/long-press behaviour.
+                // Expanded quick-open zone: the right strip (the recipe image's
+                // left edge to the card's right edge, ~1/4 of the card) jumps
+                // straight to the recipe, so the whole image area is tappable,
+                // not just the corner icon. The remaining ~3/4 still opens the
+                // meal editor via the outer InkWell. During multi-select this
+                // strip toggles/starts selection like the rest of the card.
+                // Sits under the visible corner button below.
+                if (r != null)
+                  Positioned(
+                    top: 0,
+                    bottom: 0,
+                    right: 0,
+                    // image (58) + card right padding (12).
+                    width: 70,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        if (selecting) {
+                          sel.toggle(plan.mealPlan.id);
+                        } else {
+                          context.push('/recipe/${r.id}');
+                        }
+                      },
+                      onLongPress: () {
+                        HapticFeedback.selectionClick();
+                        sel.add(plan.mealPlan.id);
+                      },
+                    ),
+                  ),
+
+                // Visible quick-open affordance (kept from the desktop makeover):
+                // a corner icon so the tap target is discoverable. Rendered on
+                // top of the strip zone; hidden during multi-select.
                 if (!selecting && r != null)
                   Positioned(
                     top: 6,

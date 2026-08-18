@@ -3,13 +3,13 @@ import 'package:flutter/rendering.dart';
 import 'package:go_router/go_router.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-import '../../../data/community_tags_data.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/community_service.dart';
+import '../../../theme/app_colors.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../widgets/app_snackbar.dart';
-import '../../widgets/community_image.dart';
+import '../../widgets/community/community_media.dart';
 import '../../widgets/community_tag_picker.dart';
 
 // ════════════════════════════════════════════
@@ -447,127 +447,96 @@ class _PublicationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = context.appColors;
     final l10n = AppLocalizations.of(context)!;
-    final hasImage = pub.imagePath != null && pub.imagePath!.isNotEmpty;
 
     return Card(
       clipBehavior: Clip.antiAlias,
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: theme.colorScheme.surfaceContainerHighest, width: 0.5),
+        side: BorderSide(color: colors.outline.withValues(alpha: 0.35), width: 1),
       ),
-      color: theme.colorScheme.surfaceContainer,
+      color: colors.surfaceRaised,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Hero image ──
-          AspectRatio(
-            aspectRatio: 1.6,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                if (hasImage)
-                  CommunityImage(publicationId: pub.id, imagePath: pub.imagePath, fit: BoxFit.cover)
-                else
-                  Container(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    child: Icon(Icons.book, size: 48, color: theme.colorScheme.outline),
+          // ── Cover: 16:9, scrim, no text on it (community handoff) ──
+          CommunityMedia.banner(
+            publicationId: pub.id,
+            imagePath: pub.imagePath,
+            memCacheWidth: 900,
+            overlays: [
+              Positioned(
+                top: 10, left: 10,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xA80B0B0C),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                // Bottom gradient scrim
-                Positioned(
-                  bottom: 0, left: 0, right: 0, height: 80,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Colors.black.withValues(alpha: 0.65)],
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        pub.isSingleRecipe ? Icons.restaurant_menu : Icons.menu_book,
+                        size: 12, color: Colors.white,
                       ),
-                    ),
+                      const SizedBox(width: 4),
+                      Text(
+                        pub.isSingleRecipe ? l10n.communityKindRecipe : l10n.communityKindCookbook,
+                        style: const TextStyle(fontSize: 11, color: Colors.white),
+                      ),
+                    ],
                   ),
                 ),
-                // Title on scrim
-                Positioned(
-                  bottom: 12, left: 14, right: 14,
-                  child: Text(
-                    pub.title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      shadows: [Shadow(blurRadius: 6, color: Colors.black54)],
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                // Status badge top-right
-                Positioned(
-                  top: 10, right: 10,
-                  child: _StatusBadge(status: pub.status),
-                ),
-                // Single-recipe vs cookbook badge top-left
-                Positioned(
-                  top: 10, left: 10,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.55),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          pub.isSingleRecipe ? Icons.restaurant_menu : Icons.menu_book,
-                          size: 12, color: Colors.white,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          pub.isSingleRecipe ? 'Recipe' : 'Cookbook',
-                          style: const TextStyle(fontSize: 11, color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
 
-          // ── Content below image ──
+          // ── Content below cover ──
           Padding(
             padding: const EdgeInsets.all(14),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Stats row
-                _StatsRow(
-                  recipeCount: pub.recipeCount,
-                  downloadCount: pub.downloadCount,
-                  averageRating: pub.averageRating,
-                  ratingCount: pub.ratingCount,
-                  theme: theme,
+                // Title + state chip
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        pub.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 17, height: 1.25,
+                          fontWeight: FontWeight.w600,
+                          color: colors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    _StateChip(status: pub.status),
+                  ],
+                ),
+                const SizedBox(height: 4),
+
+                // Subtitle: last-updated relative time. No fake draft-diff —
+                // the app does not track pending local changes.
+                Text(
+                  l10n.publicationUpdatedAgo(timeago.format(pub.createdAt)),
+                  style: TextStyle(fontSize: 12, color: colors.textTertiary),
                 ),
                 const SizedBox(height: 12),
 
-                // Tags + timestamp
-                Row(
-                  children: [
-                    if (pub.tags != null && pub.tags!.isNotEmpty) ...[
-                      _TagChip(tag: pub.tags!.split(',').first.trim()),
-                      Text('  ·  ', style: TextStyle(color: theme.colorScheme.outline)),
-                    ],
-                    Text(
-                      timeago.format(pub.createdAt),
-                      style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
+                // Stats strip: recipes / saves / rating (Not rated when none).
+                _StatsStrip(pub: pub),
+                const SizedBox(height: 12),
 
-                // Action buttons
+                // Edit (secondary) + Push update (primary), stroked icons only.
+                // Distinct outcomes: Edit changes cookbook details; Push update
+                // republishes the recipe content while keeping stats stable.
                 Row(
                   children: [
                     Expanded(
@@ -575,69 +544,66 @@ class _PublicationCard extends StatelessWidget {
                         height: 44,
                         child: OutlinedButton.icon(
                           onPressed: onEdit,
-                          icon: const Text('\u270f', style: TextStyle(fontSize: 14)),
+                          icon: const Icon(Icons.edit_outlined, size: 18),
                           label: Text(l10n.actionEdit),
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: Colors.amber.shade600),
-                            foregroundColor: Colors.amber.shade600,
+                            foregroundColor: colors.textPrimary,
+                            side: BorderSide(color: colors.outline),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: SizedBox(
-                        height: 44,
-                        child: OutlinedButton.icon(
-                          onPressed: onUnpublish,
-                          icon: const Text('\ud83d\uddd1', style: TextStyle(fontSize: 14)),
-                          label: Text(l10n.communityUnpublish),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: theme.colorScheme.error),
-                            foregroundColor: theme.colorScheme.error,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    if (onRepublish != null) ...[
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: SizedBox(
+                          height: 44,
+                          child: FilledButton.icon(
+                            onPressed: onRepublish,
+                            icon: const Icon(Icons.cloud_upload_outlined, size: 18),
+                            label: Text(l10n.publicationPushUpdate),
+                            style: FilledButton.styleFrom(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
+                const SizedBox(height: 8),
 
-                // Republish-to-update \u2014 keeps stats stable, only swaps
-                // out the recipe content. Cookbook publications need a
-                // matching local cookbook of the same title; single-recipe
-                // pubs reuse the original recipe (matched by title).
-                if (onRepublish != null) ...[
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    height: 40,
-                    width: double.infinity,
-                    child: TextButton.icon(
-                      onPressed: onRepublish,
-                      icon: const Icon(Icons.cloud_sync_outlined, size: 18),
-                      label: Text(l10n.communityRepublishRecipes),
-                      style: TextButton.styleFrom(
-                        foregroundColor: theme.colorScheme.primary,
-                      ),
+                // Unpublish: the only destructive control, the only red thing,
+                // and the only one that opens a confirmation.
+                SizedBox(
+                  height: 44,
+                  child: OutlinedButton.icon(
+                    onPressed: onUnpublish,
+                    icon: const Icon(Icons.remove_circle_outline, size: 18),
+                    label: Text(l10n.communityUnpublish),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: colors.destructive,
+                      side: BorderSide(color: colors.destructive.withValues(alpha: 0.38)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
-                ],
+                ),
 
-                // Moderation notice
+                // Moderation notice (informational text, not a control)
                 if (pub.status == 'pending_review' || pub.status == 'removed') ...[
                   const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
+                      color: colors.destructive.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       pub.status == 'pending_review'
                           ? l10n.communityUnderReview
                           : l10n.communityRemovedByModerator,
-                      style: TextStyle(fontSize: 12, color: theme.colorScheme.error),
+                      style: TextStyle(fontSize: 12, color: colors.destructive),
                     ),
                   ),
                 ],
@@ -650,130 +616,135 @@ class _PublicationCard extends StatelessWidget {
   }
 }
 
+
 // ════════════════════════════════════════════
-//  STATS ROW (recipes / downloads / rating)
+//  STATS STRIP (recipes / saves / rating)
 // ════════════════════════════════════════════
 
-class _StatsRow extends StatelessWidget {
-  final int recipeCount;
-  final int downloadCount;
-  final double averageRating;
-  final int ratingCount;
-  final ThemeData theme;
-
-  const _StatsRow({
-    required this.recipeCount,
-    required this.downloadCount,
-    required this.averageRating,
-    required this.ratingCount,
-    required this.theme,
-  });
+/// Three cells in a bordered box (community handoff). A missing rating reads
+/// "Not rated", never a dash or a zero.
+class _StatsStrip extends StatelessWidget {
+  final MyPublication pub;
+  const _StatsStrip({required this.pub});
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        children: [
-          _statCol('$recipeCount', AppLocalizations.of(context)!.communityStatRecipes),
-          VerticalDivider(width: 1, color: theme.colorScheme.surfaceContainerHighest),
-          _statCol('$downloadCount', AppLocalizations.of(context)!.communityStatDownloads),
-          VerticalDivider(width: 1, color: theme.colorScheme.surfaceContainerHighest),
-          _statCol(
-            ratingCount > 0 ? averageRating.toStringAsFixed(1) : '\u2014',
-            AppLocalizations.of(context)!.communityStatRating,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _statCol(String value, String label) {
-    return Expanded(
-      child: Column(
-        children: [
-          Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: theme.colorScheme.onSurface)),
-          const SizedBox(height: 2),
-          Text(label, style: TextStyle(fontSize: 11, color: theme.colorScheme.outline)),
-        ],
-      ),
-    );
-  }
-}
-
-// ════════════════════════════════════════════
-//  TAG CHIP
-// ════════════════════════════════════════════
-
-class _TagChip extends StatelessWidget {
-  final String tag;
-  const _TagChip({required this.tag});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tagData = communityTags.where((ct) => ct.id == tag).firstOrNull;
-    final label = tagData != null ? '${tagData.emoji} ${tagData.name}' : tag;
+    final colors = context.appColors;
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+        border: Border.all(color: colors.outline.withValues(alpha: 0.35)),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(
-        label,
-        style: TextStyle(fontSize: 11, color: theme.colorScheme.onPrimaryContainer, fontWeight: FontWeight.w500),
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            _cell('${pub.recipeCount}', l10n.publicationStatRecipes),
+            _divider(colors),
+            _cell('${pub.downloadCount}', l10n.publicationStatSaves),
+            _divider(colors),
+            pub.ratingCount > 0
+                ? _cell(pub.averageRating.toStringAsFixed(1), l10n.publicationStatRating)
+                : _cell(l10n.publicationNotRated, '', small: true),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _divider(AppColors colors) =>
+      VerticalDivider(width: 1, color: colors.outline.withValues(alpha: 0.35));
+
+  Widget _cell(String value, String label, {bool small = false}) {
+    return Expanded(
+      child: Builder(builder: (context) {
+        final colors = context.appColors;
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                value,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: small ? 13 : 17,
+                  fontWeight: FontWeight.w600,
+                  color: small ? colors.textSecondary : colors.textPrimary,
+                ),
+              ),
+              if (label.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(label, style: TextStyle(fontSize: 11, color: colors.textTertiary)),
+              ],
+            ],
+          ),
+        );
+      }),
     );
   }
 }
 
 // ════════════════════════════════════════════
-//  STATUS BADGE
+//  STATE CHIP (status ramp: green live, grey pending/draft)
 // ════════════════════════════════════════════
 
-class _StatusBadge extends StatelessWidget {
+/// Status gets its own ramp (community handoff): green means live, grey means
+/// pending. Orange is never a status. Fixed colours across themes so a status
+/// reads the same everywhere.
+class _StateChip extends StatelessWidget {
   final String status;
-  const _StatusBadge({required this.status});
+  const _StateChip({required this.status});
+
+  static const _liveBg = Color(0x295F8F5C);
+  static const _liveBorder = Color(0x575F8F5C);
+  static const _liveText = Color(0xFF8FC98B);
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
-    Color bgColor;
-    Color textColor;
-    String label;
-
+    late final Color bg, border, text;
+    late final String label;
     switch (status) {
       case 'published':
-        bgColor = Colors.amber;
-        textColor = Colors.black;
-        label = l10n.communityStatusPublished;
-        break;
-      case 'pending_review':
-        bgColor = theme.colorScheme.tertiary;
-        textColor = theme.colorScheme.onTertiary;
-        label = l10n.communityStatusUnderReview;
+        bg = _liveBg; border = _liveBorder; text = _liveText;
+        label = l10n.publicationStateLive;
         break;
       case 'removed':
-        bgColor = theme.colorScheme.error;
-        textColor = theme.colorScheme.onError;
+        bg = colors.destructive.withValues(alpha: 0.14);
+        border = colors.destructive.withValues(alpha: 0.34);
+        text = colors.destructive;
         label = l10n.communityStatusRemoved;
         break;
       default:
-        bgColor = Colors.grey.shade700;
-        textColor = Colors.white;
-        label = status;
+        bg = colors.surfaceHigh;
+        border = colors.outline.withValues(alpha: 0.4);
+        text = colors.textSecondary;
+        label = l10n.publicationStatePending;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: bgColor.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(6),
+        color: bg,
+        border: Border.all(color: border),
+        borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: textColor)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(width: 6, height: 6,
+              decoration: BoxDecoration(color: text, shape: BoxShape.circle)),
+          const SizedBox(width: 6),
+          Text(label,
+              style: TextStyle(fontSize: 11, height: 1.5, fontWeight: FontWeight.w600,
+                  color: text, letterSpacing: 0.3)),
+        ],
+      ),
     );
   }
 }

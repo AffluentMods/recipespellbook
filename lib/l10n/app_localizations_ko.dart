@@ -5848,7 +5848,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String communityDownloadSuccess(String title, int count) {
-    return '\"$title\" 다운로드 완료 — $count개의 레시피 추가!';
+    return '\"$title\" 다운로드 완료, $count개의 레시피 추가!';
   }
 
   @override
@@ -6439,6 +6439,130 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get onboardingSkip => '건너뛰기';
+
+  @override
+  String get communitySearchHint => '레시피와 레시피북 검색';
+
+  @override
+  String get badgeNewThisWeek => '이번 주 신규';
+
+  @override
+  String bylineByAuthor(String author) {
+    return '작성자: $author';
+  }
+
+  @override
+  String countServings(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count인분',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String countSaves(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '저장 $count회',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String countPhotos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '사진 $count장',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationPrep(String duration) {
+    return '준비 $duration';
+  }
+
+  @override
+  String durationCook(String duration) {
+    return '조리 $duration';
+  }
+
+  @override
+  String get filterHasPhotosOnly => '사진 있는 것만';
+
+  @override
+  String get filterHasPhotosOnlySub => '이미지 없는 레시피 숨기기';
+
+  @override
+  String filterApply(int count) {
+    return '결과 $count개 보기';
+  }
+
+  @override
+  String get filterNoMatches => '일치 항목 없음';
+
+  @override
+  String get previewSavedRecipe => '저장됨';
+
+  @override
+  String cookbookDownloadAll(int count) {
+    return '레시피 $count개 모두 다운로드';
+  }
+
+  @override
+  String get cookbookChooseRecipes => '레시피 선택';
+
+  @override
+  String get cookbookInside => '이 레시피북의 내용';
+
+  @override
+  String cookbookSize(String size) {
+    return '$size MB';
+  }
+
+  @override
+  String get publicationStateLive => '게시 중';
+
+  @override
+  String get publicationStatePending => '검토 중';
+
+  @override
+  String publicationUpdatedAgo(String relativeTime) {
+    return '$relativeTime 업데이트됨';
+  }
+
+  @override
+  String get publicationPushUpdate => '업데이트 게시';
+
+  @override
+  String get publicationNotRated => '평가 없음';
+
+  @override
+  String get publicationStatRecipes => '레시피';
+
+  @override
+  String get publicationStatSaves => '저장';
+
+  @override
+  String get publicationStatRating => '평점';
+
+  @override
+  String unpublishConfirmTitle(String name) {
+    return '$name을(를) 내리시겠어요?';
+  }
+
+  @override
+  String get unpublishCancel => '게시 유지';
+
+  @override
+  String get communityKindRecipe => '레시피';
+
+  @override
+  String get communityKindCookbook => '레시피북';
 
   @override
   String get preparationTitle => '조리법';
@@ -7065,7 +7189,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get importGuideAiStep2Title => '프롬프트 복사하기';
 
   @override
-  String get importGuideAiStep2Desc => '프롬프트 복사 버튼을 탭합니다. 그런 다음 좋아하는 AI — ChatGPT, Claude, Gemini 등 — 를 열고 프롬프트를 붙여넣습니다.';
+  String get importGuideAiStep2Desc => '프롬프트 복사 버튼을 탭합니다. 그런 다음 좋아하는 AI, ChatGPT, Claude, Gemini 등, 를 열고 프롬프트를 붙여넣습니다.';
 
   @override
   String get importGuideAiStep3Title => 'AI 응답 복사하기';
@@ -8293,7 +8417,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get communityViewCookbook => '요리책 보기';
 
   @override
-  String get communityPublishInProgress => '게시 진행 중 — 먼저 업로드를 취소하세요';
+  String get communityPublishInProgress => '게시 진행 중, 먼저 업로드를 취소하세요';
 
   @override
   String get communityUnknownError => '알 수 없는 오류';
@@ -9622,7 +9746,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get communityPublishSingleRecipeOption => '단일 레시피 게시';
 
   @override
-  String get communityPublishSingleRecipeOptionSub => '레시피 하나만 공유 — 요리책 불필요';
+  String get communityPublishSingleRecipeOptionSub => '레시피 하나만 공유, 요리책 불필요';
 
   @override
   String get communityPickRecipeToPublish => '게시할 레시피 선택';

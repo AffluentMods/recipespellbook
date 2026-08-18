@@ -5806,7 +5806,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get communityNoCookbooksToPublish => 'Nenhum livro para publicar';
 
   @override
-  String get communityPublishInfo => 'Os livros precisam de pelo menos 5 receitas para publicar. Suas receitas serão compartilhadas como um snapshot — atualizações não serão sincronizadas.';
+  String get communityPublishInfo => 'Os livros precisam de pelo menos 5 receitas para publicar. Suas receitas serão compartilhadas como um snapshot, atualizações não serão sincronizadas.';
 
   @override
   String get communitySelectCookbook => 'Selecione um livro para publicar';
@@ -5902,7 +5902,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String communityDownloadSuccess(String title, int count) {
-    return '\"$title\" baixado — $count receitas adicionadas!';
+    return '\"$title\" baixado, $count receitas adicionadas!';
   }
 
   @override
@@ -6493,6 +6493,133 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get onboardingSkip => 'Pular';
+
+  @override
+  String get communitySearchHint => 'Buscar receitas e livros';
+
+  @override
+  String get badgeNewThisWeek => 'Novo esta semana';
+
+  @override
+  String bylineByAuthor(String author) {
+    return 'por $author';
+  }
+
+  @override
+  String countServings(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count porções',
+      one: '1 porção',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String countSaves(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count salvamentos',
+      one: '1 salvamento',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String countPhotos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fotos',
+      one: '1 foto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationPrep(String duration) {
+    return '$duration de preparo';
+  }
+
+  @override
+  String durationCook(String duration) {
+    return '$duration de cozimento';
+  }
+
+  @override
+  String get filterHasPhotosOnly => 'Somente com fotos';
+
+  @override
+  String get filterHasPhotosOnlySub => 'Ocultar receitas sem imagem';
+
+  @override
+  String filterApply(int count) {
+    return 'Mostrar $count resultados';
+  }
+
+  @override
+  String get filterNoMatches => 'Nenhum resultado';
+
+  @override
+  String get previewSavedRecipe => 'Salva';
+
+  @override
+  String cookbookDownloadAll(int count) {
+    return 'Baixar todas as $count receitas';
+  }
+
+  @override
+  String get cookbookChooseRecipes => 'Escolher receitas';
+
+  @override
+  String get cookbookInside => 'NESTE LIVRO';
+
+  @override
+  String cookbookSize(String size) {
+    return '$size MB';
+  }
+
+  @override
+  String get publicationStateLive => 'PUBLICADO';
+
+  @override
+  String get publicationStatePending => 'EM ANÁLISE';
+
+  @override
+  String publicationUpdatedAgo(String relativeTime) {
+    return 'Atualizado $relativeTime';
+  }
+
+  @override
+  String get publicationPushUpdate => 'Publicar atualização';
+
+  @override
+  String get publicationNotRated => 'Sem avaliação';
+
+  @override
+  String get publicationStatRecipes => 'receitas';
+
+  @override
+  String get publicationStatSaves => 'salvamentos';
+
+  @override
+  String get publicationStatRating => 'avaliação';
+
+  @override
+  String unpublishConfirmTitle(String name) {
+    return 'Despublicar $name?';
+  }
+
+  @override
+  String get unpublishCancel => 'Manter publicado';
+
+  @override
+  String get communityKindRecipe => 'Receita';
+
+  @override
+  String get communityKindCookbook => 'Livro';
 
   @override
   String get preparationTitle => 'Modo de preparo';
@@ -7119,7 +7246,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get importGuideAiStep2Title => 'Copie o prompt';
 
   @override
-  String get importGuideAiStep2Desc => 'Toque no botão copiar prompt. Depois abra sua IA favorita — ChatGPT, Claude, Gemini ou qualquer outra — e cole o prompt.';
+  String get importGuideAiStep2Desc => 'Toque no botão copiar prompt. Depois abra sua IA favorita, ChatGPT, Claude, Gemini ou qualquer outra, e cole o prompt.';
 
   @override
   String get importGuideAiStep3Title => 'Copie a resposta da IA';
@@ -8347,7 +8474,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get communityViewCookbook => 'Ver libro de receitas';
 
   @override
-  String get communityPublishInProgress => 'Publicação en curso — cancela la subida primero';
+  String get communityPublishInProgress => 'Publicação en curso, cancela la subida primero';
 
   @override
   String get communityUnknownError => 'Error desconocido';
@@ -9682,7 +9809,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get communityPublishSingleRecipeOption => 'Publicar uma única receita';
 
   @override
-  String get communityPublishSingleRecipeOptionSub => 'Compartilhe uma receita — sem precisar de livro de receitas';
+  String get communityPublishSingleRecipeOptionSub => 'Compartilhe uma receita, sem precisar de livro de receitas';
 
   @override
   String get communityPickRecipeToPublish => 'Escolha uma receita para publicar';

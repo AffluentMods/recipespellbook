@@ -5776,7 +5776,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communitySortPopular => 'Popular';
 
   @override
-  String get communitySortMostDownloaded => 'Most Downloaded';
+  String get communitySortMostDownloaded => 'Downloaded';
 
   @override
   String communityNoResultsFor(String query) {
@@ -5818,7 +5818,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communityNoCookbooksToPublish => 'No cookbooks to publish';
 
   @override
-  String get communityPublishInfo => 'Cookbooks need at least 5 recipes to publish. Your recipes will be shared as a snapshot — updates won\'t sync.';
+  String get communityPublishInfo => 'Cookbooks need at least 5 recipes to publish. Your recipes will be shared as a snapshot, updates won\'t sync.';
 
   @override
   String get communitySelectCookbook => 'Select a cookbook to publish';
@@ -5914,7 +5914,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String communityDownloadSuccess(String title, int count) {
-    return 'Downloaded \"$title\" — $count recipes added!';
+    return 'Downloaded \"$title\", $count recipes added!';
   }
 
   @override
@@ -6505,6 +6505,133 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingSkip => 'Skip';
+
+  @override
+  String get communitySearchHint => 'Search recipes and cookbooks';
+
+  @override
+  String get badgeNewThisWeek => 'New this week';
+
+  @override
+  String bylineByAuthor(String author) {
+    return 'by $author';
+  }
+
+  @override
+  String countServings(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count servings',
+      one: '1 serving',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String countSaves(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count saves',
+      one: '1 save',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String countPhotos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos',
+      one: '1 photo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationPrep(String duration) {
+    return '$duration prep';
+  }
+
+  @override
+  String durationCook(String duration) {
+    return '$duration cook';
+  }
+
+  @override
+  String get filterHasPhotosOnly => 'Has photos only';
+
+  @override
+  String get filterHasPhotosOnlySub => 'Hide recipes without an image';
+
+  @override
+  String filterApply(int count) {
+    return 'Show $count results';
+  }
+
+  @override
+  String get filterNoMatches => 'No matches';
+
+  @override
+  String get previewSavedRecipe => 'Saved';
+
+  @override
+  String cookbookDownloadAll(int count) {
+    return 'Download all $count recipes';
+  }
+
+  @override
+  String get cookbookChooseRecipes => 'Choose recipes';
+
+  @override
+  String get cookbookInside => 'INSIDE THIS COOKBOOK';
+
+  @override
+  String cookbookSize(String size) {
+    return '$size MB';
+  }
+
+  @override
+  String get publicationStateLive => 'LIVE';
+
+  @override
+  String get publicationStatePending => 'IN REVIEW';
+
+  @override
+  String publicationUpdatedAgo(String relativeTime) {
+    return 'Updated $relativeTime';
+  }
+
+  @override
+  String get publicationPushUpdate => 'Push update';
+
+  @override
+  String get publicationNotRated => 'Not rated';
+
+  @override
+  String get publicationStatRecipes => 'recipes';
+
+  @override
+  String get publicationStatSaves => 'saves';
+
+  @override
+  String get publicationStatRating => 'rating';
+
+  @override
+  String unpublishConfirmTitle(String name) {
+    return 'Unpublish $name?';
+  }
+
+  @override
+  String get unpublishCancel => 'Keep published';
+
+  @override
+  String get communityKindRecipe => 'Recipe';
+
+  @override
+  String get communityKindCookbook => 'Cookbook';
 
   @override
   String get preparationTitle => 'Preparation';
@@ -7131,7 +7258,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importGuideAiStep2Title => 'Copy the prompt';
 
   @override
-  String get importGuideAiStep2Desc => 'Tap the copy prompt button. Then open your favorite AI — ChatGPT, Claude, Gemini, or any other — and paste the prompt.';
+  String get importGuideAiStep2Desc => 'Tap the copy prompt button. Then open your favorite AI, ChatGPT, Claude, Gemini, or any other, and paste the prompt.';
 
   @override
   String get importGuideAiStep3Title => 'Copy the AI\'s response';
@@ -7454,7 +7581,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get themeCustom => 'Custom';
 
   @override
-  String get communitySortTopRated => 'Top Rated';
+  String get communitySortTopRated => 'Top rated';
 
   @override
   String get communityHasImages => 'Has images';
@@ -7587,7 +7714,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communityPublishPublishing => 'Publishing...';
 
   @override
-  String get communityPublishBackground => 'You can browse while publishing continues.\nKeep the app open — switching apps may cause uploads to fail.';
+  String get communityPublishBackground => 'You can browse while publishing continues.\nKeep the app open, switching apps may cause uploads to fail.';
 
   @override
   String get communityPublishDone => 'Published!';
@@ -7638,7 +7765,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communityPublishImagesWillUpload => 'Images will be uploaded';
 
   @override
-  String get communityPublishTextOnlyNoImages => 'Text only — no images';
+  String get communityPublishTextOnlyNoImages => 'Text only, no images';
 
   @override
   String get communityPublishTryAgain => 'Try Again';
@@ -8337,7 +8464,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get communitySaveRecipe => 'Save Recipe';
+  String get communitySaveRecipe => 'Save recipe';
 
   @override
   String get communityNoCookbooksYetCreate => 'No cookbooks yet';
@@ -8362,10 +8489,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communitySaveToMyCookbooks => 'Save to My Cookbooks';
 
   @override
-  String get communityViewCookbook => 'View Cookbook';
+  String get communityViewCookbook => 'View cookbook';
 
   @override
-  String get communityPublishInProgress => 'Publishing in progress — cancel the upload first';
+  String get communityPublishInProgress => 'Publishing in progress, cancel the upload first';
 
   @override
   String get communityUnknownError => 'Unknown error';
@@ -8908,7 +9035,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communityTrending => 'TRENDING';
 
   @override
-  String get communitySearchTags => 'Search tags...';
+  String get communitySearchTags => 'Search tags';
 
   @override
   String communityNoTagsFound(String query) {
@@ -9700,7 +9827,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communityPublishSingleRecipeOption => 'Publish a single recipe';
 
   @override
-  String get communityPublishSingleRecipeOptionSub => 'Share one recipe — no cookbook needed';
+  String get communityPublishSingleRecipeOptionSub => 'Share one recipe, no cookbook needed';
 
   @override
   String get communityPickRecipeToPublish => 'Choose a recipe to publish';

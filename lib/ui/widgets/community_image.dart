@@ -25,6 +25,11 @@ class CommunityImage extends StatelessWidget {
   final int? memCacheWidth;
   final int? memCacheHeight;
 
+  /// Community redesign placeholder: a flat surface fill with a stroked glyph
+  /// (one treatment everywhere) instead of the illustration/gradient. Never
+  /// derives a colour from the title.
+  final bool flatPlaceholder;
+
   const CommunityImage({
     super.key,
     required this.publicationId,
@@ -35,6 +40,7 @@ class CommunityImage extends StatelessWidget {
     this.borderRadius,
     this.memCacheWidth,
     this.memCacheHeight,
+    this.flatPlaceholder = false,
   });
 
   @override
@@ -91,6 +97,24 @@ class CommunityImage extends StatelessWidget {
   }
 
   Widget _placeholder(BuildContext context) {
+    if (flatPlaceholder) {
+      final theme = Theme.of(context);
+      return Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHigh,
+          borderRadius: borderRadius,
+        ),
+        child: Center(
+          child: Icon(
+            Icons.restaurant_outlined,
+            size: 34,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.35),
+          ),
+        ),
+      );
+    }
     return SizedBox(
       width: width,
       height: height,

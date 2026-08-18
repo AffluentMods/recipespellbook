@@ -5872,7 +5872,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get communityNoCookbooksToPublish => 'Нет книг для публикации';
 
   @override
-  String get communityPublishInfo => 'Для публикации в книге должно быть минимум 5 рецептов. Ваши рецепты будут опубликованы как снимок — обновления не синхронизируются.';
+  String get communityPublishInfo => 'Для публикации в книге должно быть минимум 5 рецептов. Ваши рецепты будут опубликованы как снимок, обновления не синхронизируются.';
 
   @override
   String get communitySelectCookbook => 'Выберите книгу для публикации';
@@ -5968,7 +5968,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String communityDownloadSuccess(String title, int count) {
-    return 'Скачано \"$title\" — добавлено $count рецептов!';
+    return 'Скачано \"$title\", добавлено $count рецептов!';
   }
 
   @override
@@ -6563,6 +6563,139 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboardingSkip => 'Пропустить';
+
+  @override
+  String get communitySearchHint => 'Поиск рецептов и книг';
+
+  @override
+  String get badgeNewThisWeek => 'Новинка недели';
+
+  @override
+  String bylineByAuthor(String author) {
+    return 'автор: $author';
+  }
+
+  @override
+  String countServings(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count порции',
+      many: '$count порций',
+      few: '$count порции',
+      one: '1 порция',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String countSaves(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count сохранения',
+      many: '$count сохранений',
+      few: '$count сохранения',
+      one: '1 сохранение',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String countPhotos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count фото',
+      many: '$count фото',
+      few: '$count фото',
+      one: '1 фото',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationPrep(String duration) {
+    return '$duration на подготовку';
+  }
+
+  @override
+  String durationCook(String duration) {
+    return '$duration на готовку';
+  }
+
+  @override
+  String get filterHasPhotosOnly => 'Только с фото';
+
+  @override
+  String get filterHasPhotosOnlySub => 'Скрыть рецепты без изображения';
+
+  @override
+  String filterApply(int count) {
+    return 'Показать результаты: $count';
+  }
+
+  @override
+  String get filterNoMatches => 'Ничего не найдено';
+
+  @override
+  String get previewSavedRecipe => 'Сохранено';
+
+  @override
+  String cookbookDownloadAll(int count) {
+    return 'Скачать все рецепты: $count';
+  }
+
+  @override
+  String get cookbookChooseRecipes => 'Выбрать рецепты';
+
+  @override
+  String get cookbookInside => 'В ЭТОЙ КНИГЕ';
+
+  @override
+  String cookbookSize(String size) {
+    return '$size МБ';
+  }
+
+  @override
+  String get publicationStateLive => 'ОПУБЛИКОВАНО';
+
+  @override
+  String get publicationStatePending => 'НА ПРОВЕРКЕ';
+
+  @override
+  String publicationUpdatedAgo(String relativeTime) {
+    return 'Обновлено $relativeTime';
+  }
+
+  @override
+  String get publicationPushUpdate => 'Опубликовать обновление';
+
+  @override
+  String get publicationNotRated => 'Нет оценок';
+
+  @override
+  String get publicationStatRecipes => 'рецепты';
+
+  @override
+  String get publicationStatSaves => 'сохранения';
+
+  @override
+  String get publicationStatRating => 'оценка';
+
+  @override
+  String unpublishConfirmTitle(String name) {
+    return 'Снять с публикации $name?';
+  }
+
+  @override
+  String get unpublishCancel => 'Оставить опубликованным';
+
+  @override
+  String get communityKindRecipe => 'Рецепт';
+
+  @override
+  String get communityKindCookbook => 'Книга';
 
   @override
   String get preparationTitle => 'Приготовление';
@@ -7189,7 +7322,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get importGuideAiStep2Title => 'Скопируйте промпт';
 
   @override
-  String get importGuideAiStep2Desc => 'Нажмите кнопку копирования промпта. Затем откройте ваш любимый ИИ — ChatGPT, Claude, Gemini или любой другой — и вставьте промпт.';
+  String get importGuideAiStep2Desc => 'Нажмите кнопку копирования промпта. Затем откройте ваш любимый ИИ, ChatGPT, Claude, Gemini или любой другой, и вставьте промпт.';
 
   @override
   String get importGuideAiStep3Title => 'Скопируйте ответ ИИ';
@@ -7639,7 +7772,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get communityPublishPublishing => 'Публикация в сообществе...';
 
   @override
-  String get communityPublishBackground => 'Вы можете покинуть этот экран — публикация продолжается в фоновом режиме.';
+  String get communityPublishBackground => 'Вы можете покинуть этот экран, публикация продолжается в фоновом режиме.';
 
   @override
   String get communityPublishDone => 'Опубликовано!';
@@ -8417,7 +8550,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get communityViewCookbook => 'Посмотреть кулинарную книгу';
 
   @override
-  String get communityPublishInProgress => 'Публикация уже идёт — сначала отмени загрузку';
+  String get communityPublishInProgress => 'Публикация уже идёт, сначала отмени загрузку';
 
   @override
   String get communityUnknownError => 'Неизвестная ошибка';
@@ -9760,7 +9893,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get communityPublishSingleRecipeOption => 'Опубликовать один рецепт';
 
   @override
-  String get communityPublishSingleRecipeOptionSub => 'Поделитесь одним рецептом — кулинарная книга не нужна';
+  String get communityPublishSingleRecipeOptionSub => 'Поделитесь одним рецептом, кулинарная книга не нужна';
 
   @override
   String get communityPickRecipeToPublish => 'Выберите рецепт для публикации';

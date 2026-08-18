@@ -15,7 +15,10 @@ import '../../../services/community_service.dart';
 import '../../../services/image_service.dart';
 import '../../../theme/app_colors.dart';
 import '../../../utils/responsive_utils.dart';
+import '../../../utils/duration_format.dart';
 import '../../widgets/app_snackbar.dart';
+import '../../widgets/community/community_media.dart';
+import '../../widgets/community/meta_line.dart';
 import '../../widgets/community_image.dart';
 import '../../widgets/community_tag_picker.dart';
 import 'community_recipe_preview_dialog.dart';
@@ -651,6 +654,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = context.appColors;
     final l10n = AppLocalizations.of(context)!;
 
     if (_loading) {
@@ -722,6 +726,11 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
+              // Banner carries no text (community handoff): the title moves
+              // below the image so it is always legible on any cover, instead
+              // of white-on-white with a shadow patch. Fixed 220px height means
+              // the banner is the same size on every cookbook. Scrim keeps the
+              // back and action controls readable.
               background: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -729,66 +738,11 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
                     publicationId: d.id,
                     imagePath: d.imagePath,
                     fit: BoxFit.cover,
+                    flatPlaceholder: true,
+                    memCacheWidth: 1200,
                   ),
-                  // Gradient at bottom
-                  Positioned(
-                    bottom: 0, left: 0, right: 0, height: 120,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.transparent, Colors.black.withValues(alpha: 0.75)],
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Title + publisher
-                  Positioned(
-                    bottom: 50, left: 16, right: 16,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          d.title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            shadows: [Shadow(blurRadius: 8, color: Colors.black87), Shadow(blurRadius: 4, color: Colors.black54)],
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 6),
-                        GestureDetector(
-                          onTap: () => context.push('/community/creator/${d.publisher.id}'),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 20,
-                                backgroundColor: context.appColors.accent.withValues(alpha: 0.18),
-                                backgroundImage: d.publisher.avatarUrl != null
-                                    ? NetworkImage(_resolveAvatarUrl(d.publisher.avatarUrl!))
-                                    : null,
-                                onBackgroundImageError: (_, __) {},
-                                child: d.publisher.avatarUrl == null
-                                    ? Text(d.publisher.displayName[0].toUpperCase(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.appColors.accent))
-                                    : null,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(d.publisher.displayName, style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 15, fontWeight: FontWeight.w500)),
-                                  Text(timeago.format(d.createdAt), style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
-                                ],
-                              )),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                  const DecoratedBox(
+                    decoration: BoxDecoration(gradient: CommunityMedia.scrimGradient),
                   ),
                 ],
               ),
@@ -802,30 +756,83 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // ── Title (off the banner, always legible) ──
+                  Text(
+                    d.title,
+                    style: TextStyle(
+                      fontSize: 22,
+                      height: 1.2,
+                      fontWeight: FontWeight.w700,
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // ── Byline ──
+                  GestureDetector(
+                    onTap: () => context.push('/community/creator/${d.publisher.id}'),
+                    behavior: HitTestBehavior.opaque,
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 14,
+                          backgroundColor: colors.accent.withValues(alpha: 0.18),
+                          backgroundImage: d.publisher.avatarUrl != null
+                              ? NetworkImage(_resolveAvatarUrl(d.publisher.avatarUrl!))
+                              : null,
+                          onBackgroundImageError: (_, __) {},
+                          child: d.publisher.avatarUrl == null
+                              ? Text(d.publisher.displayName[0].toUpperCase(),
+                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: colors.accent))
+                              : null,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            l10n.bylineByAuthor(d.publisher.displayName),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 14, color: colors.textSecondary),
+                          ),
+                        ),
+                        Text(
+                          timeago.format(d.createdAt),
+                          style: TextStyle(fontSize: 12, color: colors.textTertiary),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
                   // ── Description ──
                   if (d.description != null && d.description!.isNotEmpty) ...[
                     Text(
                       d.description!,
-                      style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurfaceVariant, height: 1.4),
+                      style: TextStyle(fontSize: 14, color: colors.textSecondary, height: 1.5),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                   ],
 
-                  // ── Tags ──
+                  // ── One metadata line: recipes always, then photos and size
+                  //    when present. Rating is handled by its own section; a
+                  //    zero download/rating never shows here.
+                  MetaLine([
+                    MetaSeg(l10n.countRecipes(d.recipeCount),
+                        boldPart: '${d.recipeCount}'),
+                    MetaSeg.maybe(countOrNull(d.imageCount, l10n.countPhotos)),
+                    if (d.totalImageBytes > 0)
+                      MetaSeg(l10n.cookbookSize(
+                          (d.totalImageBytes / (1024 * 1024)).toStringAsFixed(1))),
+                  ]),
+                  const SizedBox(height: 12),
+
+                  // ── Tags (all shown, no overflow counter) ──
                   if (d.tagList.isNotEmpty) ...[
                     _DetailTagChips(tags: d.tagList),
                     const SizedBox(height: 12),
                   ],
 
-                  // ── Stats row ──
-                  _StatsRow(
-                    recipeCount: d.recipeCount,
-                    downloadCount: d.downloadCount,
-                    imageCount: d.imageCount,
-                  ),
-                  const SizedBox(height: 16),
-
-                  // ── Rating section ──
+                  // ── Rating section (only renders when a rating exists) ──
                   _RatingSection(
                     averageRating: _displayRating,
                     ratingCount: _displayRatingCount,
@@ -1003,61 +1010,6 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
 }
 
 // ════════════════════════════════════════════
-//  STATS ROW
-// ════════════════════════════════════════════
-
-class _StatsRow extends StatelessWidget {
-  final int recipeCount;
-  final int downloadCount;
-  final int imageCount;
-
-  const _StatsRow({required this.recipeCount, required this.downloadCount, required this.imageCount});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return Row(
-      children: [
-        _StatBadge(icon: Icons.restaurant_menu, label: l10n.communityRecipeCount(recipeCount)),
-        const SizedBox(width: 10),
-        Opacity(
-          opacity: downloadCount == 0 ? 0.6 : 1.0,
-          child: _StatBadge(icon: Icons.download, label: l10n.communityDownloadCount(downloadCount)),
-        ),
-        if (imageCount > 0) ...[
-          const SizedBox(width: 10),
-          _StatBadge(icon: Icons.image, label: AppLocalizations.of(context)!.communityImageCountLabel(imageCount)),
-        ],
-      ],
-    );
-  }
-}
-
-class _StatBadge extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  const _StatBadge({required this.icon, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
-        const SizedBox(width: 5),
-        Text(label, style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface, fontWeight: FontWeight.w500)),
-      ]),
-    );
-  }
-}
-
-// ════════════════════════════════════════════
 //  INTERACTIVE RATING
 // ════════════════════════════════════════════
 
@@ -1083,19 +1035,12 @@ class _RatingSection extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    // Own cookbook with no ratings — simple text, no stars
+    // Own cookbook with no ratings: render nothing. A rating segment only
+    // appears when a rating exists, and the owner cannot rate their own
+    // cookbook — so there is no control to show and no "Not currently rated"
+    // placeholder (community handoff).
     if (isOwnPublication && ratingCount == 0) {
-      return Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          l10n.communityNotCurrentlyRated,
-          style: TextStyle(fontSize: 13, color: theme.colorScheme.outline, fontStyle: FontStyle.italic),
-        ),
-      );
+      return const SizedBox.shrink();
     }
 
     return Container(
@@ -1228,29 +1173,14 @@ class _DownloadSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Size info
-        if (detail.hasImages)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              children: [
-                Icon(Icons.storage, size: 14, color: theme.colorScheme.outline),
-                const SizedBox(width: 6),
-                Text(
-                  l10n.communityWithImages(detail.downloadSizeLabel),
-                  style: TextStyle(fontSize: 12, color: theme.colorScheme.outline),
-                ),
-              ],
-            ),
-          ),
-
-        // Download button
+        // Download button. The label states the recipe count so the download
+        // is a known quantity before it starts (community handoff). Size lives
+        // in the metadata line above, not here.
         Row(
           children: [
             Expanded(
@@ -1264,7 +1194,7 @@ class _DownloadSection extends StatelessWidget {
                   label: Text(
                     downloading
                         ? downloadStatus
-                        : l10n.communityDownloadToMyCookbooks,
+                        : l10n.cookbookDownloadAll(detail.recipeCount),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

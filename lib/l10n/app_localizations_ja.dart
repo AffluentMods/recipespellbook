@@ -5848,7 +5848,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String communityDownloadSuccess(String title, int count) {
-    return '「$title」をダウンロード — $count件のレシピを追加！';
+    return '「$title」をダウンロード, $count件のレシピを追加！';
   }
 
   @override
@@ -6439,6 +6439,130 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get onboardingSkip => 'スキップ';
+
+  @override
+  String get communitySearchHint => 'レシピとレシピ本を検索';
+
+  @override
+  String get badgeNewThisWeek => '今週の新着';
+
+  @override
+  String bylineByAuthor(String author) {
+    return '作成者: $author';
+  }
+
+  @override
+  String countServings(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count人分',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String countSaves(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件の保存',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String countPhotos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count枚の写真',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationPrep(String duration) {
+    return '準備 $duration';
+  }
+
+  @override
+  String durationCook(String duration) {
+    return '調理 $duration';
+  }
+
+  @override
+  String get filterHasPhotosOnly => '写真ありのみ';
+
+  @override
+  String get filterHasPhotosOnlySub => '画像のないレシピを非表示';
+
+  @override
+  String filterApply(int count) {
+    return '$count件を表示';
+  }
+
+  @override
+  String get filterNoMatches => '該当なし';
+
+  @override
+  String get previewSavedRecipe => '保存済み';
+
+  @override
+  String cookbookDownloadAll(int count) {
+    return '全$count件のレシピをダウンロード';
+  }
+
+  @override
+  String get cookbookChooseRecipes => 'レシピを選ぶ';
+
+  @override
+  String get cookbookInside => 'このレシピ本の内容';
+
+  @override
+  String cookbookSize(String size) {
+    return '$size MB';
+  }
+
+  @override
+  String get publicationStateLive => '公開中';
+
+  @override
+  String get publicationStatePending => '審査中';
+
+  @override
+  String publicationUpdatedAgo(String relativeTime) {
+    return '$relativeTimeに更新';
+  }
+
+  @override
+  String get publicationPushUpdate => '更新を公開';
+
+  @override
+  String get publicationNotRated => '評価なし';
+
+  @override
+  String get publicationStatRecipes => 'レシピ';
+
+  @override
+  String get publicationStatSaves => '保存';
+
+  @override
+  String get publicationStatRating => '評価';
+
+  @override
+  String unpublishConfirmTitle(String name) {
+    return '$nameを非公開にしますか?';
+  }
+
+  @override
+  String get unpublishCancel => '公開を続ける';
+
+  @override
+  String get communityKindRecipe => 'レシピ';
+
+  @override
+  String get communityKindCookbook => 'レシピ本';
 
   @override
   String get preparationTitle => '作り方';
@@ -7065,7 +7189,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get importGuideAiStep2Title => 'プロンプトをコピーする';
 
   @override
-  String get importGuideAiStep2Desc => 'プロンプトコピーボタンをタップします。次にお好みのAI — ChatGPT、Claude、Geminiなど — を開いてプロンプトを貼り付けます。';
+  String get importGuideAiStep2Desc => 'プロンプトコピーボタンをタップします。次にお好みのAI, ChatGPT、Claude、Geminiなど, を開いてプロンプトを貼り付けます。';
 
   @override
   String get importGuideAiStep3Title => 'AIの回答をコピーする';
@@ -8293,7 +8417,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get communityViewCookbook => 'クックブックを表示';
 
   @override
-  String get communityPublishInProgress => '公開中 — まずアップロードをキャンセルしてください';
+  String get communityPublishInProgress => '公開中, まずアップロードをキャンセルしてください';
 
   @override
   String get communityUnknownError => '不明なエラー';
@@ -9622,7 +9746,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get communityPublishSingleRecipeOption => '単一のレシピを公開';
 
   @override
-  String get communityPublishSingleRecipeOptionSub => 'レシピを1件共有 — クックブックは不要';
+  String get communityPublishSingleRecipeOptionSub => 'レシピを1件共有, クックブックは不要';
 
   @override
   String get communityPickRecipeToPublish => '公開するレシピを選択';

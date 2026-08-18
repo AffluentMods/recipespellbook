@@ -5806,7 +5806,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get communityNoCookbooksToPublish => 'Geen kookboeken om te publiceren';
 
   @override
-  String get communityPublishInfo => 'Kookboeken moeten minimaal 5 recepten bevatten om te publiceren. Je recepten worden gedeeld als momentopname — wijzigingen worden niet gesynchroniseerd.';
+  String get communityPublishInfo => 'Kookboeken moeten minimaal 5 recepten bevatten om te publiceren. Je recepten worden gedeeld als momentopname, wijzigingen worden niet gesynchroniseerd.';
 
   @override
   String get communitySelectCookbook => 'Selecteer een kookboek om te publiceren';
@@ -5902,7 +5902,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String communityDownloadSuccess(String title, int count) {
-    return '\"$title\" gedownload — $count recepten toegevoegd!';
+    return '\"$title\" gedownload, $count recepten toegevoegd!';
   }
 
   @override
@@ -6493,6 +6493,133 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get onboardingSkip => 'Overslaan';
+
+  @override
+  String get communitySearchHint => 'Zoek recepten en kookboeken';
+
+  @override
+  String get badgeNewThisWeek => 'Nieuw deze week';
+
+  @override
+  String bylineByAuthor(String author) {
+    return 'door $author';
+  }
+
+  @override
+  String countServings(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count porties',
+      one: '1 portie',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String countSaves(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count keer opgeslagen',
+      one: '1 keer opgeslagen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String countPhotos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count foto’s',
+      one: '1 foto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationPrep(String duration) {
+    return '$duration voorbereiding';
+  }
+
+  @override
+  String durationCook(String duration) {
+    return '$duration kooktijd';
+  }
+
+  @override
+  String get filterHasPhotosOnly => 'Alleen met foto’s';
+
+  @override
+  String get filterHasPhotosOnlySub => 'Verberg recepten zonder afbeelding';
+
+  @override
+  String filterApply(int count) {
+    return 'Toon $count resultaten';
+  }
+
+  @override
+  String get filterNoMatches => 'Geen resultaten';
+
+  @override
+  String get previewSavedRecipe => 'Opgeslagen';
+
+  @override
+  String cookbookDownloadAll(int count) {
+    return 'Alle $count recepten downloaden';
+  }
+
+  @override
+  String get cookbookChooseRecipes => 'Recepten kiezen';
+
+  @override
+  String get cookbookInside => 'IN DIT KOOKBOEK';
+
+  @override
+  String cookbookSize(String size) {
+    return '$size MB';
+  }
+
+  @override
+  String get publicationStateLive => 'LIVE';
+
+  @override
+  String get publicationStatePending => 'IN BEOORDELING';
+
+  @override
+  String publicationUpdatedAgo(String relativeTime) {
+    return 'Bijgewerkt $relativeTime';
+  }
+
+  @override
+  String get publicationPushUpdate => 'Update publiceren';
+
+  @override
+  String get publicationNotRated => 'Niet beoordeeld';
+
+  @override
+  String get publicationStatRecipes => 'recepten';
+
+  @override
+  String get publicationStatSaves => 'opgeslagen';
+
+  @override
+  String get publicationStatRating => 'beoordeling';
+
+  @override
+  String unpublishConfirmTitle(String name) {
+    return '$name intrekken?';
+  }
+
+  @override
+  String get unpublishCancel => 'Gepubliceerd laten';
+
+  @override
+  String get communityKindRecipe => 'Recept';
+
+  @override
+  String get communityKindCookbook => 'Kookboek';
 
   @override
   String get preparationTitle => 'Bereiding';
@@ -7119,7 +7246,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importGuideAiStep2Title => 'Kopieer de prompt';
 
   @override
-  String get importGuideAiStep2Desc => 'Tik op de knop prompt kopiëren. Open vervolgens je favoriete AI — ChatGPT, Claude, Gemini of een andere — en plak de prompt.';
+  String get importGuideAiStep2Desc => 'Tik op de knop prompt kopiëren. Open vervolgens je favoriete AI, ChatGPT, Claude, Gemini of een andere, en plak de prompt.';
 
   @override
   String get importGuideAiStep3Title => 'Kopieer het antwoord van de AI';
@@ -8347,7 +8474,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get communityViewCookbook => 'Kookboek bekijken';
 
   @override
-  String get communityPublishInProgress => 'Publicatie bezig — annuleer eerst de upload';
+  String get communityPublishInProgress => 'Publicatie bezig, annuleer eerst de upload';
 
   @override
   String get communityUnknownError => 'Onbekende fout';
@@ -9676,7 +9803,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get communityPublishSingleRecipeOption => 'Eén recept publiceren';
 
   @override
-  String get communityPublishSingleRecipeOptionSub => 'Deel één recept — geen kookboek nodig';
+  String get communityPublishSingleRecipeOptionSub => 'Deel één recept, geen kookboek nodig';
 
   @override
   String get communityPickRecipeToPublish => 'Kies een recept om te publiceren';
