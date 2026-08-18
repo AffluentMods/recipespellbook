@@ -190,20 +190,20 @@ PODS:
   - printing (1.0.0):
     - Flutter
   - PromisesObjC (2.4.0)
-  - purchases_flutter (8.11.0):
+  - purchases_flutter (10.4.3):
     - Flutter
-    - PurchasesHybridCommon (= 14.3.0)
-  - purchases_ui_flutter (8.11.0):
+    - PurchasesHybridCommon (= 18.22.2)
+  - purchases_ui_flutter (10.4.3):
     - Flutter
-    - PurchasesHybridCommonUI (= 14.3.0)
-  - PurchasesHybridCommon (14.3.0):
-    - RevenueCat (= 5.32.0)
-  - PurchasesHybridCommonUI (14.3.0):
-    - PurchasesHybridCommon (= 14.3.0)
-    - RevenueCatUI (= 5.32.0)
-  - RevenueCat (5.32.0)
-  - RevenueCatUI (5.32.0):
-    - RevenueCat (= 5.32.0)
+    - PurchasesHybridCommonUI (= 18.22.2)
+  - PurchasesHybridCommon (18.22.2):
+    - RevenueCat (= 5.81.1)
+  - PurchasesHybridCommonUI (18.22.2):
+    - PurchasesHybridCommon (= 18.22.2)
+    - RevenueCatUI (= 5.81.1)
+  - RevenueCat (5.81.1)
+  - RevenueCatUI (5.81.1):
+    - RevenueCat (= 5.81.1)
   - SDWebImage (5.21.7):
     - SDWebImage/Core (= 5.21.7)
   - SDWebImage/Core (5.21.7)
@@ -435,12 +435,12 @@ SPEC CHECKSUMS:
   pdfx: 77f4dddc48361fbb01486fa2bdee4532cbb97ef3
   printing: 54ff03f28fe9ba3aa93358afb80a8595a071dd07
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  purchases_flutter: 3570127ba41583a75e553d68a763367007830eff
-  purchases_ui_flutter: 4f73ee267b1f50f72f71ece0d918fc5d0cb7f97f
-  PurchasesHybridCommon: 7f0944cc5411bdcd1ea5d69affa6a6f9aaf87b13
-  PurchasesHybridCommonUI: 8149f983d0d5fcc6d2536900c934d3dfb7cbed45
-  RevenueCat: 7e1d0768fb287c9983173c9b28e39ccbeeb828a9
-  RevenueCatUI: 61ddba6f94803f9b79c470ffe1e8b81d807c11ce
+  purchases_flutter: 70ea95feca029142ca37761d1a0b57b8324e9a29
+  purchases_ui_flutter: ec34abc3188f7cf471ba108b741293640581da7d
+  PurchasesHybridCommon: e47bc4f611e86fcf8295bf1c984f187982270f02
+  PurchasesHybridCommonUI: e6756576ad454c6c15a4679f57446115382ff791
+  RevenueCat: 693b033863262f9776130cc6c1f9255a74ab23ff
+  RevenueCatUI: 2c7092fa0a485454d2a474e80f241e6db591dd36
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   share_handler_ios: e2244e990f826b2c8eaa291ac3831569438ba0fb
   share_handler_ios_models: fc638c9b4330dc7f082586c92aee9dfa0b87b871
