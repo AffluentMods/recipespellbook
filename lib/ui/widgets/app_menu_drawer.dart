@@ -16,7 +16,10 @@ import '../../theme/app_colors.dart';
 import '../../ui/screens/import/faq_screen.dart';
 import '../../ui/screens/import/import_guides_screen.dart';
 import '../../utils/responsive_utils.dart';
+import '../../utils/platform_utils.dart';
+import '../../providers/cookbook_provider.dart';
 import 'app_snackbar.dart';
+import 'new_recipe_dialog.dart';
 
 // ═══════════════════════════════════════════════════════════════════
 // DRAWER
@@ -48,7 +51,7 @@ class AppMenuDrawer extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(14, 16, 14, 8),
               children: [
                 // ── Group 1: Your Stuff ──
-                _DrawerGroupLabel(label: l10n.navCookbooks.isNotEmpty ? 'Your Stuff' : 'Your Stuff'),
+                const _DrawerGroupLabel(label: 'Your Stuff'),
                 const SizedBox(height: 8),
                 _DrawerGroup(children: [
                   _DrawerItem(
@@ -88,6 +91,22 @@ class AppMenuDrawer extends ConsumerWidget {
                       });
                     },
                   ),
+                  if (supportsBarcodeScanner)
+                    _DrawerItem(
+                      index: 3,
+                      icon: Icons.qr_code_scanner_rounded,
+                      iconColor: context.appColors.accent,
+                      label: 'Scan barcode',
+                      subtitle: 'Look up a packaged product',
+                      onTap: () {
+                        Navigator.pop(context);
+                        final cookbookId = ref.read(selectedCookbookProvider).valueOrNull?.id ?? 'starter';
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          final ctx = rootNavigatorKey.currentContext;
+                          if (ctx != null) showImportDialog(ctx, cookbookId, autoScanBarcode: true);
+                        });
+                      },
+                    ),
                 ]),
 
                 const SizedBox(height: 20),
@@ -97,7 +116,7 @@ class AppMenuDrawer extends ConsumerWidget {
                 const SizedBox(height: 8),
                 _DrawerGroup(children: [
                   _DrawerItem(
-                    index: 3,
+                    index: 4,
                     icon: Icons.settings_rounded,
                     iconColor: context.appColors.accent,
                     label: l10n.settingsTitle,
@@ -108,7 +127,7 @@ class AppMenuDrawer extends ConsumerWidget {
                     },
                   ),
                   _DrawerItem(
-                    index: 4,
+                    index: 5,
                     icon: Icons.headset_mic_rounded,
                     iconColor: context.appColors.accent,
                     label: l10n.helpTitle,

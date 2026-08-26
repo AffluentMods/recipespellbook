@@ -738,14 +738,8 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 Container(width: 40, height: 4, decoration: BoxDecoration(color: Theme.of(context).colorScheme.outlineVariant, borderRadius: BorderRadius.circular(2))),
               ],
               const SizedBox(height: 16),
-              ListTile(
-                leading: const Icon(Icons.share),
-                title: Text(l10n.shareMealPlan),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  AppSnackbar.info(context, l10n.comingSoon);
-                },
-              ),
+              // "Share meal plan" was a "coming soon" dead-end — hidden until
+              // the feature exists. Restore the ListTile when it's built.
               ListTile(
                 leading: const Icon(Icons.add_shopping_cart),
                 title: Text(l10n.addWeekToShoppingList),

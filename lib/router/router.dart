@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../l10n/app_localizations.dart';
-import '../services/barcode_scanner_service.dart';
 import '../ui/screens/cookbooks/cookbook_edit_screen.dart';
 import '../ui/screens/cookbooks/cookbooks_screen.dart';
 import '../ui/screens/home/home_screen.dart';
@@ -94,14 +93,6 @@ final router = GoRouter(
       name: 'transfer',
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const TransferScreen(),
-    ),
-
-    // Barcode scanner (fullscreen camera)
-    GoRoute(
-      path: '/scan-barcode',
-      name: 'scan-barcode',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const BarcodeScannerScreen(),
     ),
 
     // Kroger OAuth callback

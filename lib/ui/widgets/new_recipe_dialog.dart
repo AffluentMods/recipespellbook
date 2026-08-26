@@ -32,11 +32,13 @@ Future<void> showNewRecipeDialog(BuildContext context, String cookbookId) {
   );
 }
 
-/// Also expose showImportDialog for direct access to import menu
-Future<void> showImportDialog(BuildContext context, String cookbookId) {
+/// Also expose showImportDialog for direct access to import menu.
+/// [autoScanBarcode] jumps straight into the barcode scanner on open — used by
+/// the menu/drawer "Scan barcode" entry so it reuses the full import handling.
+Future<void> showImportDialog(BuildContext context, String cookbookId, {bool autoScanBarcode = false}) {
   return Responsive.showAdaptiveSheet(
     context,
-    builder: (context) => _ImportRecipeSheet(cookbookId: cookbookId),
+    builder: (context) => _ImportRecipeSheet(cookbookId: cookbookId, autoScanBarcode: autoScanBarcode),
   );
 }
 
@@ -154,7 +156,8 @@ class _OptionCard extends StatelessWidget {
 
 class _ImportRecipeSheet extends ConsumerStatefulWidget {
   final String cookbookId;
-  const _ImportRecipeSheet({required this.cookbookId});
+  final bool autoScanBarcode;
+  const _ImportRecipeSheet({required this.cookbookId, this.autoScanBarcode = false});
 
   @override
   ConsumerState<_ImportRecipeSheet> createState() => _ImportRecipeSheetState();
@@ -170,6 +173,12 @@ class _ImportRecipeSheetState extends ConsumerState<_ImportRecipeSheet> {
   void initState() {
     super.initState();
     _urlController.addListener(_onUrlChanged);
+    // Menu/drawer "Scan barcode" entry: jump straight into the scanner.
+    if (widget.autoScanBarcode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _importFromBarcode();
+      });
+    }
   }
 
   void _onUrlChanged() {
