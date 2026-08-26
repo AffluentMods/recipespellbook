@@ -212,13 +212,23 @@ class RevenueCatService {
     }
 
     try {
-      late PurchasesConfiguration config;
+      final apiKey = defaultTargetPlatform == TargetPlatform.android
+          ? RCConfig.googleApiKey
+          : RCConfig.appleApiKey;
 
-      if (defaultTargetPlatform == TargetPlatform.android) {
-        config = PurchasesConfiguration(RCConfig.googleApiKey);
-      } else {
-        config = PurchasesConfiguration(RCConfig.appleApiKey);
+      // These keys come from --dart-define (see RCConfig). A build that forgot
+      // `--dart-define-from-file=.env` leaves the key empty, and passing an
+      // empty key to Purchases.configure crashes NATIVELY on iOS (a precondition
+      // failure) — which this Dart try/catch cannot catch. Guard it so a
+      // mis-built binary degrades to free mode instead of crashing on launch.
+      if (apiKey.isEmpty) {
+        _initialized = true; // don't retry; run in free mode
+        debugPrint('[RevenueCat] API key missing for this platform — build '
+            'without --dart-define-from-file=.env? Skipping SDK init (free mode).');
+        return;
       }
+
+      final config = PurchasesConfiguration(apiKey);
 
       if (userId != null) {
         config.appUserID = userId;
