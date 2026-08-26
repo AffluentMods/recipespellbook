@@ -3,18 +3,33 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/additive_data.dart';
 import '../utils/responsive_utils.dart';
 
 /// Service for scanning barcodes and looking up product information
 class BarcodeScannerService {
+  /// Open Food Facts asks every client to send a descriptive User-Agent.
+  /// Without one, requests can be throttled or return incomplete records.
+  static const Map<String, String> _offHeaders = {
+    'User-Agent': 'RecipeSpellbook/1.6 (support@recipespellbook.app)',
+  };
+
   /// Look up product info from Open Food Facts API
   static Future<ProductInfo?> lookupProduct(String barcode) async {
     try {
-      // Use Open Food Facts API (free, no API key required)
-      final url = 'https://world.openfoodfacts.org/api/v0/product/$barcode.json';
-      final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
+      // Prefer the device's region so a US bag pulls the US record instead of
+      // Open Food Facts' merged global one — a common cause of stale/wrong
+      // additives showing for a product that was reformulated locally.
+      final locale = WidgetsBinding.instance.platformDispatcher.locale;
+      final cc = (locale.countryCode ?? 'us').toLowerCase();
+      final lc = locale.languageCode.toLowerCase();
+      final url = 'https://world.openfoodfacts.org/api/v0/product/$barcode.json'
+          '?lc=$lc&cc=$cc';
+      final response = await http
+          .get(Uri.parse(url), headers: _offHeaders)
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -65,6 +80,8 @@ class ProductInfo {
   final List<String> additivesTags;  // Open Food Facts additive tags
   final List<String> allergensTags;  // Allergen tags
   final List<String> ingredientsAnalysisTags; // vegan/vegetarian/palm-oil
+  final DateTime? lastModified;  // OFF: when this record was last edited
+  final double? completeness;    // OFF: 0..1 data-completeness score
 
   ProductInfo({
     required this.barcode,
@@ -80,7 +97,16 @@ class ProductInfo {
     this.additivesTags = const [],
     this.allergensTags = const [],
     this.ingredientsAnalysisTags = const [],
+    this.lastModified,
+    this.completeness,
   });
+
+  /// Public Open Food Facts page — lets users view or correct the record.
+  String get openFoodFactsUrl => 'https://world.openfoodfacts.org/product/$barcode';
+
+  /// True when the source record looks sparse and should be treated cautiously
+  /// (crowd-sourced records are often incomplete or from another region).
+  bool get lowConfidence => completeness != null && completeness! < 0.5;
 
   factory ProductInfo.fromOpenFoodFacts(Map<String, dynamic> data) {
     // Parse ingredients text into list
@@ -123,6 +149,10 @@ class ProductInfo {
       additivesTags: (data['additives_tags'] as List?)?.cast<String>() ?? [],
       allergensTags: (data['allergens_tags'] as List?)?.cast<String>() ?? [],
       ingredientsAnalysisTags: (data['ingredients_analysis_tags'] as List?)?.cast<String>() ?? [],
+      lastModified: data['last_modified_t'] != null
+          ? DateTime.fromMillisecondsSinceEpoch((data['last_modified_t'] as num).toInt() * 1000)
+          : null,
+      completeness: (data['completeness'] as num?)?.toDouble(),
     );
   }
 
@@ -660,6 +690,14 @@ class _ProductInfoSheet extends StatelessWidget {
                             _NutritionChip(label: l10n.nutritionCarbs, value: '${product.nutrition!['carbs']?.round()}g'),
                           if (product.nutrition!['fat'] != null)
                             _NutritionChip(label: l10n.nutritionFat, value: '${product.nutrition!['fat']?.round()}g'),
+                          if (product.nutrition!['saturatedFat'] != null)
+                            _NutritionChip(label: l10n.nutritionSaturatedFat, value: '${product.nutrition!['saturatedFat']?.round()}g'),
+                          if (product.nutrition!['sugar'] != null)
+                            _NutritionChip(label: l10n.nutritionSugar, value: '${product.nutrition!['sugar']?.round()}g'),
+                          if (product.nutrition!['fiber'] != null)
+                            _NutritionChip(label: l10n.nutritionFiber, value: '${product.nutrition!['fiber']?.round()}g'),
+                          if (product.nutrition!['sodium'] != null)
+                            _NutritionChip(label: l10n.nutritionSodium, value: '${product.nutrition!['sodium']?.round()}mg'),
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -688,6 +726,11 @@ class _ProductInfoSheet extends StatelessWidget {
                       _AdditivesSection(tags: product.additivesTags),
                       const SizedBox(height: 24),
                     ],
+
+                    // Where the data comes from + a path to correct it. OFF is
+                    // community-sourced, so records can be stale or wrong-region.
+                    _DataSourceFooter(product: product),
+                    const SizedBox(height: 20),
 
                     // Actions
                     SizedBox(
@@ -731,6 +774,80 @@ class _ProductInfoSheet extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Footer showing where the scanned data came from + a path to fix it.
+/// Open Food Facts is community-sourced, so a record can be stale, incomplete,
+/// or from a different region than the physical product in the user's hand.
+class _DataSourceFooter extends StatelessWidget {
+  final ProductInfo product;
+  const _DataSourceFooter({required this.product});
+
+  static const _months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final d = product.lastModified;
+    final updated = d != null ? ' · updated ${_months[d.month - 1]} ${d.year}' : '';
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (product.lowConfidence) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info_outline, size: 16, color: theme.colorScheme.tertiary),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'This record looks incomplete — some details may be missing or out of date.',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
+          Row(
+            children: [
+              Icon(Icons.public, size: 15, color: theme.colorScheme.outline),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  'Data from Open Food Facts (community-sourced)$updated',
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+                ),
+              ),
+            ],
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => launchUrl(
+                Uri.parse(product.openFoodFactsUrl),
+                mode: LaunchMode.externalApplication,
+              ),
+              icon: const Icon(Icons.edit_note, size: 18),
+              label: const Text("Doesn't match the label? View / fix", style: TextStyle(fontSize: 12)),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                minimumSize: const Size(0, 32),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                alignment: Alignment.centerLeft,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
