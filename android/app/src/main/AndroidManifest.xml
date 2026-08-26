@@ -76,6 +76,7 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="recipespellbook" android:host="import"/>
                 <data android:scheme="recipespellbook" android:host="s"/>
+                <data android:scheme="recipespellbook" android:host="community"/>
             </intent-filter>
 
             <!-- Universal (App) Links: https://recipespellbook.app/s/<code>

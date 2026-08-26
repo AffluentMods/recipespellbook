@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'utils/share_handler_stub.dart' if (dart.library.io) 'package:share_handler/share_handler.dart';
 import 'l10n/app_localizations.dart';
 import 'utils/platform_utils.dart';
+import 'utils/pending_deep_link.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cookbook_provider.dart';
 import 'providers/database_provider.dart';
@@ -294,6 +295,8 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
   // ── Deep-link handling (share view links) ──────────────────────────
   //  Handles: recipespellbook://import?code=ABC  (web "Open in App")
   //           recipespellbook://s/ABC
+  //           recipespellbook://community?id=PUB  (web "Open in App", cookbooks)
+  //           recipespellbook://community/PUB
   //           https://recipespellbook.app/s/ABC  (universal link, if verified)
   AppLinks? _deepLinks;
   StreamSubscription<Uri>? _deepLinkSub;
@@ -313,10 +316,39 @@ class _AppLifecycleManagerState extends ConsumerState<_AppLifecycleManager>
   }
 
   void _handleDeepLink(Uri uri) {
-    final code = _shareCodeFromUri(uri);
-    if (code == null || code.isEmpty) return;
-    // Open the public share viewer (no auth required).
-    router.push('/s/$code');
+    // Resolve the target route from the link.
+    String? target;
+    final pubId = _communityIdFromUri(uri);
+    if (pubId != null && pubId.isNotEmpty) {
+      target = '/community/$pubId'; // published cookbook detail
+    } else {
+      final code = _shareCodeFromUri(uri);
+      if (code != null && code.isNotEmpty) target = '/s/$code'; // public share viewer
+    }
+    if (target == null) return;
+
+    // On cold start the splash navigates to '/' when its intro finishes, which
+    // would clobber a push here. While the splash owns navigation, hand it the
+    // target; once warm, navigate directly.
+    if (splashActive) {
+      pendingDeepLink = target;
+    } else {
+      router.push(target);
+    }
+  }
+
+  /// Pull a community publication id out of an "Open in App" community link.
+  ///   recipespellbook://community?id=PUB
+  ///   recipespellbook://community/PUB
+  String? _communityIdFromUri(Uri uri) {
+    // Host counts as the first segment for custom-scheme links.
+    final segs = [uri.host, ...uri.pathSegments].where((s) => s.isNotEmpty).toList();
+    if (!segs.contains('community')) return null;
+    final q = uri.queryParameters['id'];
+    if (q != null && q.isNotEmpty) return q;
+    final i = segs.indexOf('community');
+    if (i >= 0 && i + 1 < segs.length) return segs[i + 1];
+    return null;
   }
 
   /// Pull a share code out of the various link shapes we accept.

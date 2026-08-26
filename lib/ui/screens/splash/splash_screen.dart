@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../utils/pending_deep_link.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -29,6 +30,10 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+
+    // The splash owns the next navigation; a deep link arriving during cold
+    // start is stashed in [pendingDeepLink] and consumed when we finish.
+    splashActive = true;
 
     // Main sequence: 0.0 → 1.0 over 2.8 seconds
     _fadeController = AnimationController(
@@ -120,16 +125,21 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
     _shimmerController.forward();
 
-    // Navigate when done
+    // Navigate when done — honor a deep link captured during cold start,
+    // otherwise go Home.
     _fadeController.addStatusListener((status) {
       if (status == AnimationStatus.completed && mounted) {
-        context.go('/');
+        final target = pendingDeepLink;
+        pendingDeepLink = null;
+        splashActive = false;
+        context.go(target ?? '/');
       }
     });
   }
 
   @override
   void dispose() {
+    splashActive = false;
     _fadeController.dispose();
     _glowController.dispose();
     _shimmerController.dispose();
