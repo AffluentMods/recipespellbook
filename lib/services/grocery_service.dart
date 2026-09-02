@@ -5,6 +5,16 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'auth_service.dart';
 
+/// Master switch for the Instacart / Kroger grocery integrations.
+///
+/// Disabled for now — the feature was never shipped in use, and keeping the
+/// API keys out of builds removes a needless secret. All the code below is
+/// intact; flip this to `true` (and restore the INSTACART_/KROGER_ values in
+/// .env) to bring the integrations back. The two UI entry points that read
+/// this flag are the shopping "Order online" button and the account-screen
+/// Kroger row.
+const bool kGroceryIntegrationsEnabled = false;
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  ENUMS & DATA CLASSES
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

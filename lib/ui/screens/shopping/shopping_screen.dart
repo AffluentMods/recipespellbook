@@ -410,8 +410,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                   _bodyWidth(context,
                       _collabBanner(theme, CollabService.instance.permissionFor(_currentListId))),
 
-                // Order Online Button
-                if (uncheckedItems.isNotEmpty && !selecting)
+                // Order Online Button (Instacart/Kroger — disabled for now)
+                if (kGroceryIntegrationsEnabled && uncheckedItems.isNotEmpty && !selecting)
                   _bodyWidth(context, _OrderOnlineButton(items: uncheckedItems)),
 
                 // Items List (pull to refresh — syncs with cloud if available)

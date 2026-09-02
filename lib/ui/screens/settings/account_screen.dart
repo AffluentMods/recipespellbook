@@ -1075,19 +1075,20 @@ class _IntegrationsCardState extends ConsumerState<_IntegrationsCard> {
           onTap: () => _showDiscordOptions(context),
         ),
 
-        // Kroger
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-          leading: Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: const Color(0xFF0068B5).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
+        // Kroger (grocery integrations disabled for now — see kGroceryIntegrationsEnabled)
+        if (kGroceryIntegrationsEnabled)
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+            leading: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: const Color(0xFF0068B5).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Center(child: Text('\u{1F3EA}', style: TextStyle(fontSize: 18))),
             ),
-            child: const Center(child: Text('\u{1F3EA}', style: TextStyle(fontSize: 18))),
-          ),
-          title: Text(l10n.kroger, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+            title: Text(l10n.kroger, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
           subtitle: Text(
             _loading
                 ? l10n.integrationsChecking
