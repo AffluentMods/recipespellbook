@@ -1000,11 +1000,147 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
                 );
               },
             ),
+            const Divider(height: 1),
+            // Manual fallback for when an invite link doesn't open the app on
+            // its own (e.g. tapped in an app that strips the link, or on a
+            // device without the app-link verification). Paste the link/code
+            // and we route straight to the share viewer to join.
+            ListTile(
+              leading: const Icon(Icons.group_add_outlined),
+              title: const Text('Join a shared list'),
+              subtitle: const Text('Paste an invite link someone sent you'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _joinWithLink(context);
+              },
+            ),
             const SizedBox(height: 16),
           ],
         ),
       ),
     );
+  }
+
+  // ────────────────────────────────────
+  //  JOIN A SHARED LIST (paste an invite link)
+  // ────────────────────────────────────
+
+  /// Prompt for an invite link (or code) and open the share viewer to join.
+  /// This is the reliable path when a deep link fails to launch the app.
+  Future<void> _joinWithLink(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController();
+
+    // Pre-fill from the clipboard when it already holds an invite link/code, so
+    // most people can just tap Join.
+    try {
+      final clip = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
+      if (clip != null && _shareCodeFromText(clip) != null) {
+        controller.text = clip.trim();
+      }
+    } catch (_) {}
+    if (!context.mounted) return;
+
+    final code = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        String? error;
+        return StatefulBuilder(
+          builder: (ctx, setLocal) => AlertDialog(
+            title: const Text('Join a shared list'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Paste the invite link (or code) someone shared with you.',
+                  style: TextStyle(fontSize: 13),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: controller,
+                  autofocus: true,
+                  textInputAction: TextInputAction.go,
+                  decoration: InputDecoration(
+                    hintText: 'https://recipespellbook.app/s/…',
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.link),
+                    errorText: error,
+                  ),
+                  onChanged: (_) {
+                    if (error != null) setLocal(() => error = null);
+                  },
+                  onSubmitted: (_) {
+                    final c = _shareCodeFromText(controller.text);
+                    if (c == null) {
+                      setLocal(() => error = "That doesn't look like a valid invite link");
+                    } else {
+                      Navigator.pop(ctx, c);
+                    }
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(l10n.actionCancel),
+              ),
+              FilledButton(
+                onPressed: () {
+                  final c = _shareCodeFromText(controller.text);
+                  if (c == null) {
+                    setLocal(() => error = "That doesn't look like a valid invite link");
+                  } else {
+                    Navigator.pop(ctx, c);
+                  }
+                },
+                child: const Text('Join'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (code != null && context.mounted) {
+      // The share viewer loads the invite and offers Join / Add to my lists for
+      // both live-collaboration and one-time-copy links.
+      context.push('/s/$code');
+    }
+  }
+
+  /// Pull a share code out of pasted text: a full `…/s/<code>` link, the
+  /// custom-scheme `recipespellbook://s/<code>`, a `?code=` query param, or the
+  /// bare code on its own. Returns null when nothing usable is found.
+  String? _shareCodeFromText(String raw) {
+    final text = raw.trim();
+    if (text.isEmpty) return null;
+
+    // Grab the first URL-looking token if the paste has surrounding words.
+    final urlMatch = RegExp(r'[a-zA-Z][a-zA-Z0-9+.\-]*://\S+').firstMatch(text);
+    if (urlMatch != null) {
+      final uri = Uri.tryParse(urlMatch.group(0)!);
+      if (uri == null) return null;
+      final q = uri.queryParameters['code'];
+      if (q != null && q.isNotEmpty) return q;
+      // Host counts as the first segment for custom-scheme links.
+      final segs = [uri.host, ...uri.pathSegments].where((s) => s.isNotEmpty).toList();
+      for (final key in const ['s', 'share', 'join']) {
+        final i = segs.indexOf(key);
+        if (i >= 0 && i + 1 < segs.length) return segs[i + 1];
+      }
+      return null;
+    }
+
+    // No scheme — maybe a bare "…/s/<code>" fragment or a raw code.
+    if (text.contains('/')) {
+      final parts = text.split('/').where((s) => s.isNotEmpty).toList();
+      final i = parts.indexOf('s');
+      if (i >= 0 && i + 1 < parts.length) return parts[i + 1];
+      return null;
+    }
+    return RegExp(r'^[A-Za-z0-9_\-]{3,64}$').hasMatch(text) ? text : null;
   }
 
   /// Mark a list as the default. The open switcher (a StreamBuilder on
