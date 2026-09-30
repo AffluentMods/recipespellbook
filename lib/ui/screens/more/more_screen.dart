@@ -419,8 +419,9 @@ class _CommunityStatsState extends State<_CommunityStats> {
       final service = CommunityService.instance;
       final pubs = await service.getMyPublications();
       final profile = await service.getCreatorProfile(userId);
-      if (pubs.isEmpty && (profile == null || profile.followerCount == 0))
+      if (pubs.isEmpty && (profile == null || profile.followerCount == 0)) {
         return;
+      }
       final downloads = pubs.fold<int>(0, (a, p) => a + p.downloadCount);
       _cache = (
         followers: profile?.followerCount ?? 0,
