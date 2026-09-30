@@ -6220,7 +6220,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpSyncingDesc.
   ///
   /// In en, this message translates to:
-  /// **'Cloud sync is coming soon! Your recipes will sync across all your devices.'**
+  /// **'With Premium, your recipes, cookbooks and photos sync automatically across all your devices.'**
   String get helpSyncingDesc;
 
   /// No description provided for @helpContactUs.

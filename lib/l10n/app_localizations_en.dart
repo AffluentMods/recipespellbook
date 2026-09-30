@@ -3342,7 +3342,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpSyncing => 'Syncing';
 
   @override
-  String get helpSyncingDesc => 'Cloud sync is coming soon! Your recipes will sync across all your devices.';
+  String get helpSyncingDesc => 'With Premium, your recipes, cookbooks and photos sync automatically across all your devices.';
 
   @override
   String get helpContactUs => 'Contact Us';
