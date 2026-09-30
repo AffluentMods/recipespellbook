@@ -453,6 +453,9 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get shoppingSharedLabel => 'Shared';
+
+  @override
   String get settingsTitle => 'Ajustes';
 
   @override

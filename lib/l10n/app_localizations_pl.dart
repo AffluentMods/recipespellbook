@@ -461,6 +461,9 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String get shoppingSharedLabel => 'Shared';
+
+  @override
   String get settingsTitle => 'Ustawienia';
 
   @override

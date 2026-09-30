@@ -453,6 +453,9 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get shoppingSharedLabel => 'Shared';
+
+  @override
   String get settingsTitle => 'Paramètres';
 
   @override

@@ -461,6 +461,9 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get shoppingSharedLabel => 'Shared';
+
+  @override
   String get settingsTitle => 'Настройки';
 
   @override

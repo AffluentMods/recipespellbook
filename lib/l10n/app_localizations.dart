@@ -931,6 +931,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{No items} =1{1 item} other{{count} items}}'**
   String shoppingItemCount(int count);
 
+  /// No description provided for @shoppingSharedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared'**
+  String get shoppingSharedLabel;
+
   /// No description provided for @settingsTitle.
   ///
   /// In en, this message translates to:

@@ -447,6 +447,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get shoppingSharedLabel => 'Shared';
+
+  @override
   String get settingsTitle => '设置';
 
   @override

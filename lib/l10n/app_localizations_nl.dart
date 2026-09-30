@@ -453,6 +453,9 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get shoppingSharedLabel => 'Shared';
+
+  @override
   String get settingsTitle => 'Instellingen';
 
   @override
