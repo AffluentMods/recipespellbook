@@ -6667,6 +6667,12 @@ abstract class AppLocalizations {
   /// **'Put back on the list'**
   String get shoppingUncheck;
 
+  /// No description provided for @cookbooksCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 cookbook} other{{count} cookbooks}}'**
+  String cookbooksCount(int count);
+
   /// No description provided for @detailChooseRecipe.
   ///
   /// In en, this message translates to:

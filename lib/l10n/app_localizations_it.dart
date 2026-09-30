@@ -3567,6 +3567,17 @@ class AppLocalizationsIt extends AppLocalizations {
   String get shoppingUncheck => 'Put back on the list';
 
   @override
+  String cookbooksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cookbooks',
+      one: '1 cookbook',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get detailChooseRecipe => 'Choose a recipe';
 
   @override

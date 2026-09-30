@@ -358,11 +358,12 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 ),
               ),
             ] else if (wide && mode == PlannerViewMode.day) ...[
-              // DAY: the hour timeline, full width (centred + capped).
+              // DAY: the hour timeline across the whole pane (no capped column
+              // with dead side margins — the wheel scrolls anywhere).
               Expanded(
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 900),
+                    constraints: const BoxConstraints(maxWidth: 1500),
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20, 6, 20, 20),
                       child: _PlannerCard(
@@ -1446,37 +1447,27 @@ class _PlannerViewSwitcher extends StatelessWidget {
       (PlannerViewMode.week, l10n.plannerWeek),
       (PlannerViewMode.day, l10n.plannerDay),
     ];
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: c.surfaceHigh,
-        borderRadius: BorderRadius.circular(10),
+    // A real segmented control: keyboard-focusable, pointer cursor, hover.
+    return SegmentedButton<PlannerViewMode>(
+      showSelectedIcon: false,
+      style: ButtonStyle(
+        visualDensity: VisualDensity.compact,
+        padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 14)),
+        minimumSize: const WidgetStatePropertyAll(Size(0, 32)),
+        shape: const WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8)))),
+        side: WidgetStatePropertyAll(BorderSide(color: c.textPrimary.withValues(alpha: 0.12))),
+        textStyle: const WidgetStatePropertyAll(TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+        backgroundColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected) ? c.accent.withValues(alpha: 0.14) : Colors.transparent),
+        foregroundColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected) ? c.accent : c.textSecondary),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final (m, label) in items)
-            GestureDetector(
-              onTap: () => onChanged(m),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: m == mode ? c.accent : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: m == mode ? c.onAccent : c.textSecondary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
+      segments: [
+        for (final (m, label) in items) ButtonSegment(value: m, label: Text(label)),
+      ],
+      selected: {mode},
+      onSelectionChanged: (v) => onChanged(v.first),
     );
   }
 }

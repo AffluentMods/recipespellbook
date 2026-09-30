@@ -4012,9 +4012,11 @@ class _RecipeGroupedList extends ConsumerWidget {
                       ),
                     ),
                     if (recipe != null)
-                      GestureDetector(
-                        onTap: () => context.push('/recipe/${recipe.id}'),
-                        child: Icon(Icons.open_in_new, size: 18, color: theme.colorScheme.primary),
+                      IconButton(
+                        onPressed: () => context.push('/recipe/${recipe.id}'),
+                        icon: Icon(Icons.open_in_new, size: 18, color: theme.colorScheme.primary),
+                        tooltip: AppLocalizations.of(context)!.actionView,
+                        visualDensity: VisualDensity.compact,
                       ),
                   ],
                 ),

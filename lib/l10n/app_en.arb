@@ -1659,6 +1659,14 @@
     }
   },
   "shoppingUncheck": "Put back on the list",
+  "cookbooksCount": "{count, plural, =1{1 cookbook} other{{count} cookbooks}}",
+  "@cookbooksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "detailChooseRecipe": "Choose a recipe",
   "detailChooseRecipeHint": "Pick one from the list to read it here.",
   "mealPlanButton": "Meal Plan",

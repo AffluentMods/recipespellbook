@@ -81,8 +81,28 @@ class _CommandPaletteOverlayState extends ConsumerState<_CommandPaletteOverlay>
   String _query = '';
   int _selected = 0;
 
+  /// Whatever had focus before the palette opened (restored on close).
+  FocusNode? _previousFocus;
+
+  @override
+  void initState() {
+    super.initState();
+    _previousFocus = FocusManager.instance.primaryFocus;
+    // The palette lives above the Navigator, so `autofocus` alone won't steal
+    // focus from the page's scope — request it explicitly.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focus.requestFocus();
+    });
+  }
+
   @override
   void dispose() {
+    final previous = _previousFocus;
+    if (previous != null && previous.context != null && previous.canRequestFocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (previous.context != null) previous.requestFocus();
+      });
+    }
     _focus.dispose();
     _controller.dispose();
     _scroll.dispose();

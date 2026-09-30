@@ -373,7 +373,7 @@ class _QuickRecipesWidgetState extends ConsumerState<_QuickRecipesWidget> {
                   ),
                   const SizedBox(width: 8),
                   // Help button
-                  GestureDetector(
+                  MouseRegion(cursor: SystemMouseCursors.click, child: GestureDetector(
                     onTap: () => _showHelpDialog(context),
                     child: Container(
                       padding: const EdgeInsets.all(4),
@@ -387,7 +387,7 @@ class _QuickRecipesWidgetState extends ConsumerState<_QuickRecipesWidget> {
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
-                  ),
+                  )),
                   const Spacer(),
                   if (hasMore)
                     TextButton(
@@ -613,7 +613,7 @@ class _QuickRecipeCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return GestureDetector(
+    return MouseRegion(cursor: SystemMouseCursors.click, child: GestureDetector(
       onTap: () => context.push('/recipe/${item.recipe.id}'),
       child: Container(
         width: width,
@@ -672,7 +672,7 @@ class _QuickRecipeCard extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -1131,7 +1131,7 @@ class _UncategorizedRecipeChip extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return GestureDetector(
+    return MouseRegion(cursor: SystemMouseCursors.click, child: GestureDetector(
       onTap: () => context.push('/recipe/${recipe.id}'),
       child: Container(
         width: 130,
@@ -1181,7 +1181,7 @@ class _UncategorizedRecipeChip extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -1204,7 +1204,7 @@ class _CourseChip extends StatelessWidget {
 
     final isDark = theme.brightness == Brightness.dark;
 
-    return GestureDetector(
+    return MouseRegion(cursor: SystemMouseCursors.click, child: GestureDetector(
       onTap: onTap,
       child: Container(
         width: 90,
@@ -1246,7 +1246,7 @@ class _CourseChip extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -1314,7 +1314,7 @@ class _CookbookDropdown extends ConsumerWidget {
     return cookbooksAsync.when(
       data: (cookbooks) {
         // Cookbook switcher — prominent tappable button in app bar
-        return GestureDetector(
+        return MouseRegion(cursor: SystemMouseCursors.click, child: GestureDetector(
           onTap: () => _showCookbookPicker(context, ref, cookbooks),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -1333,7 +1333,7 @@ class _CookbookDropdown extends ConsumerWidget {
               ),
             ],
           ),
-        );
+        ));
       },
       loading: () => Text(currentCookbook?.name ?? appTitle),
       error: (_, __) => Text(currentCookbook?.name ?? appTitle),
@@ -1413,13 +1413,13 @@ class _CookbookDropdown extends ConsumerWidget {
                       if (isSelected)
                         Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
                       const SizedBox(width: 4),
-                      GestureDetector(
+                      MouseRegion(cursor: SystemMouseCursors.click, child: GestureDetector(
                         onTap: () {
                           Navigator.pop(ctx);
                           context.push('/cookbook/${cookbook.id}/edit');
                         },
                         child: Icon(Icons.edit_outlined, size: 18, color: theme.colorScheme.outline),
-                      ),
+                      )),
                     ],
                   ),
                   onTap: () {

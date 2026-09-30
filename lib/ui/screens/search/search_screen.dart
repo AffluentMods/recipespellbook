@@ -14,6 +14,12 @@ import '../../widgets/app_snackbar.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/sub_recipe_selection_sheet.dart';
+import '../../widgets/app_context_menu.dart';
+import '../../widgets/app_controls.dart';
+import '../../widgets/recipe_cards.dart';
+import '../../layouts/master_detail_layout.dart';
+import '../../../theme/tokens.dart';
+import '../recipe/recipe_screen.dart';
 import '../../widgets/sheet_chrome.dart';
 
 /// Search query provider
@@ -163,6 +169,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
 
+  /// Desktop: the result shown in the preview pane.
+  String? _previewId;
+
   @override
   void initState() {
     super.initState();
@@ -190,6 +199,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final theme = Theme.of(context);
     final resultsAsync = ref.watch(searchResultsProvider);
     final query = ref.watch(searchQueryProvider);
+
+    if (Responsive.isDesktopLayout(context)) {
+      return _buildDesktop(context, query, resultsAsync);
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -226,6 +239,121 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ? const _NoResultsState()
             : _SearchResults(results: results),
       ),
+    );
+  }
+
+  /// Desktop: results list beside a live recipe preview (resizable split).
+  Widget _buildDesktop(BuildContext context, String query, AsyncValue<List<Recipe>> resultsAsync) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = context.appColors;
+    final dao = ref.read(recipeDaoProvider);
+
+    void open(Recipe r) {
+      if (Responsive.useTwoPane(context)) {
+        setState(() => _previewId = r.id);
+      } else {
+        dao.updateLastViewed(r.id);
+        context.pushNamed('recipe', pathParameters: {'id': r.id});
+      }
+    }
+
+    List<ContextMenuItem> menu(Recipe r) => [
+          ContextMenuItem(icon: Icons.open_in_new, label: l10n.actionView, onTap: () => context.push('/recipe/${r.id}')),
+          ContextMenuItem(icon: Icons.edit, label: l10n.actionEdit, onTap: () => context.push('/recipe/${r.id}/edit')),
+          ContextMenuItem(
+            icon: r.isFavorite ? Icons.favorite : Icons.favorite_border,
+            label: l10n.bulkFavorite,
+            onTap: () {
+              dao.toggleFavorite(r.id, !r.isFavorite);
+              ref.invalidate(searchResultsProvider);
+            },
+          ),
+        ];
+
+    final Widget results = query.isEmpty
+        ? _EmptySearchState()
+        : resultsAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(child: Text('${l10n.errorGeneric}: $e')),
+            data: (list) => list.isEmpty
+                ? const _NoResultsState()
+                : ListView.builder(
+                    padding: const EdgeInsets.only(bottom: Space.huge),
+                    itemCount: list.length,
+                    itemBuilder: (context, i) => RecipeListRow(
+                      key: ValueKey(list[i].id),
+                      recipe: list[i],
+                      active: list[i].id == _previewId,
+                      contextItems: menu(list[i]),
+                      onTap: () => open(list[i]),
+                    ),
+                  ),
+          );
+
+    final count = resultsAsync.valueOrNull?.length;
+    final master = Material(
+      color: c.surface,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(Space.xl, Space.lg + 2, Space.lg, Space.sm),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.searchTitle,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          color: c.textPrimary,
+                        ),
+                  ),
+                ),
+                if (query.isNotEmpty && count != null)
+                  Text(l10n.countRecipes(count), style: TextStyle(fontSize: 12.5, color: c.textTertiary)),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(Space.lg, 0, Space.lg, Space.sm),
+            child: ToolbarSearchField(
+              controller: _controller,
+              focusNode: _focusNode,
+              autofocus: true,
+              width: double.infinity,
+              hintText: l10n.searchHint,
+              onChanged: (value) {
+                ref.read(searchQueryProvider.notifier).state = value;
+              },
+            ),
+          ),
+          Expanded(child: results),
+        ],
+      ),
+    );
+
+    return Scaffold(
+      backgroundColor: c.surface,
+      body: Responsive.useTwoPane(context)
+          ? MasterDetailLayout(
+              persistKey: 'search',
+              masterWidth: 340,
+              master: master,
+              detail: _previewId == null
+                  ? null
+                  : RecipeScreen(
+                      key: ValueKey(_previewId),
+                      recipeId: _previewId!,
+                      isDetailPane: true,
+                                    onClose: () => setState(() => _previewId = null),
+                    ),
+            )
+          : Responsive.constrainScrollable(
+              maxWidth: 760,
+              minHorizontal: 0,
+              builder: (context, pad) => Padding(padding: pad, child: master),
+            ),
     );
   }
 }
