@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/tokens.dart';
 import '../../utils/responsive_utils.dart';
+import 'app_controls.dart';
 
-/// Adaptive page scaffold for the "Codex" desktop makeover.
-///
-/// On desktop (>=900 content width) it renders a warm, LEFT-aligned editorial
-/// header (title + optional subtitle + right-aligned actions + a hairline
-/// divider) over an optionally width-constrained body. Below that width it
-/// degrades to a conventional `Scaffold(appBar: AppBar(...))`, so mobile and
+/// Adaptive page scaffold: on desktop-class widths a [PageHeader] (editorial
+/// title, optional subtitle / leading, right-aligned actions) over the body;
+/// below that a conventional `Scaffold(appBar: AppBar(...))`, so phone and
 /// tablet UX are unchanged.
 ///
-/// IMPORTANT: when [bodyMaxWidth] is set, [body] must be a *scrollable*
-/// (ListView / CustomScrollView / SingleChildScrollView) — it is placed in an
-/// Expanded with loose height, so a `Column(mainAxisSize: min)` body would
-/// collapse. Constrain inner scroll content instead for tabbed bodies.
+/// When [bodyMaxWidth] is set the body becomes a capped column. If the body is
+/// a scrollable, prefer building it with [Responsive.constrainScrollable]
+/// instead so the wheel works across the whole pane.
 class DesktopPage extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -56,29 +54,24 @@ class DesktopPage extends StatelessWidget {
         ),
       );
     }
+    // Desktop never shows a floating action button — put the primary action
+    // in [actions] instead.
     return Scaffold(
       backgroundColor: c.surface,
-      floatingActionButton: floatingActionButton,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          DesktopHeaderBar(
-            title: title,
-            subtitle: subtitle,
-            leading: leading,
-            actions: actions,
-          ),
-          Expanded(child: content),
-        ],
+      appBar: DesktopHeaderBar(
+        title: title,
+        subtitle: subtitle,
+        leading: leading,
+        actions: actions,
       ),
+      body: content,
     );
   }
 }
 
-/// The standalone editorial header row (leading? + title/subtitle + actions),
-/// used by [DesktopPage] and reusable by screens with custom bodies (e.g. a
-/// TabBar body that can't be handed to DesktopPage directly).
-class DesktopHeaderBar extends StatelessWidget {
+/// The standalone page header row — now the design language's [PageHeader].
+/// Kept as a named wrapper for screens with custom bodies.
+class DesktopHeaderBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final String? subtitle;
   final Widget? leading;
@@ -92,52 +85,22 @@ class DesktopHeaderBar extends StatelessWidget {
     this.actions = const [],
   });
 
+  PageHeader get _header => PageHeader(
+        title: title,
+        subtitle: subtitle,
+        leading: leading,
+        actions: actions,
+      );
+
   @override
-  Widget build(BuildContext context) {
-    final t = Theme.of(context);
-    final c = context.appColors;
-    return Container(
-      decoration: BoxDecoration(
-        color: c.surface,
-        border: Border(bottom: BorderSide(color: c.outline.withValues(alpha: 0.25))),
-      ),
-      padding: const EdgeInsets.fromLTRB(32, 18, 20, 16),
-      child: Row(
-        children: [
-          if (leading != null) ...[leading!, const SizedBox(width: 8)],
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: t.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.4,
-                    color: c.textPrimary,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle!,
-                    style: t.textTheme.bodyMedium?.copyWith(color: c.textTertiary),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          for (final a in actions)
-            Padding(padding: const EdgeInsets.only(left: 6), child: a),
-        ],
-      ),
-    );
-  }
+  Size get preferredSize => _header.preferredSize;
+
+  @override
+  Widget build(BuildContext context) => _header;
 }
 
 /// Shared left-aligned "LABEL ——— divider (+trailing)" section header for
-/// desktop, replacing the many ad-hoc private section titles.
+/// desktop pages.
 class DesktopSectionHeader extends StatelessWidget {
   final String label;
   final Widget? trailing;
@@ -147,12 +110,11 @@ class DesktopSectionHeader extends StatelessWidget {
     super.key,
     required this.label,
     this.trailing,
-    this.padding = const EdgeInsets.fromLTRB(4, 20, 4, 8),
+    this.padding = const EdgeInsets.fromLTRB(Space.xs, Space.xl, Space.xs, Space.sm),
   });
 
   @override
   Widget build(BuildContext context) {
-    final t = Theme.of(context);
     final c = context.appColors;
     return Padding(
       padding: padding,
@@ -160,15 +122,16 @@ class DesktopSectionHeader extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: t.textTheme.labelMedium?.copyWith(
+            style: TextStyle(
+              fontSize: 10.5,
               color: c.textTertiary,
               fontWeight: FontWeight.w700,
-              letterSpacing: 0.8,
+              letterSpacing: 0.7,
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(child: Divider(height: 1, color: c.outline.withValues(alpha: 0.2))),
-          if (trailing != null) ...[const SizedBox(width: 12), trailing!],
+          const SizedBox(width: Space.md),
+          Expanded(child: Divider(height: 1, thickness: 1, color: c.hairline)),
+          if (trailing != null) ...[const SizedBox(width: Space.md), trailing!],
         ],
       ),
     );
