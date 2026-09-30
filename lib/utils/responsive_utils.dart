@@ -280,7 +280,16 @@ class Responsive {
             ),
             child: SheetPresentation(
               isBottomSheet: false,
-              child: Builder(builder: builder),
+              child: Builder(builder: (ctx) {
+                final content = builder(ctx);
+                // A draggable sheet sizes itself as a fraction of the space
+                // it gets, which in a dialog only makes the dialog shorter.
+                // Host its scrollable directly so the dialog uses its height.
+                if (content is DraggableScrollableSheet) {
+                  return DialogScrollHost(builder: content.builder);
+                }
+                return content;
+              }),
             ),
           ),
         ),

@@ -558,7 +558,7 @@ class _CommunityDetailScreenState extends ConsumerState<CommunityDetailScreen> {
           builder: (ctx, setSheetState) {
             final theme = Theme.of(ctx);
             final l10n = AppLocalizations.of(ctx)!;
-            return DraggableScrollableSheet(
+            return AdaptiveDraggableSheet(
               initialChildSize: 0.85,
               minChildSize: 0.4,
               maxChildSize: 0.95,

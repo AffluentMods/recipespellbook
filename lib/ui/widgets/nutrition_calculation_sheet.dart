@@ -286,7 +286,7 @@ class _NutritionCalculationSheetState extends ConsumerState<NutritionCalculation
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    return DraggableScrollableSheet(
+    return AdaptiveDraggableSheet(
       initialChildSize: 0.9,
       minChildSize: 0.5,
       maxChildSize: 0.95,
@@ -1837,7 +1837,7 @@ class _LinkedRecipePickerSheetState extends State<_LinkedRecipePickerSheet> {
     final hasNutrition = scaledNutrition != null;
     final hasMultipleLinks = widget.allLinks.length > 1;
 
-    return DraggableScrollableSheet(
+    return AdaptiveDraggableSheet(
       initialChildSize: hasMultipleLinks ? 0.85 : 0.65,
       minChildSize: 0.4,
       maxChildSize: 0.95,

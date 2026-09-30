@@ -81,7 +81,7 @@ class _PreviewSheetState extends State<_PreviewSheet> {
     final cook = formatDurationMinutes(l10n, recipe.cookTimeMinutes);
     final servingsInt = int.tryParse(recipe.servings ?? '');
 
-    return DraggableScrollableSheet(
+    return AdaptiveDraggableSheet(
       initialChildSize: 0.7,
       minChildSize: 0.45,
       maxChildSize: 0.95,

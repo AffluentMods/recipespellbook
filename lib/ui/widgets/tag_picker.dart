@@ -252,7 +252,7 @@ class _TagSelectorSheetState extends ConsumerState<_TagSelectorSheet> {
     final l10n = AppLocalizations.of(context)!;
     final tagsDao = ref.watch(tagsDaoProvider);
 
-    return DraggableScrollableSheet(
+    return AdaptiveDraggableSheet(
       initialChildSize: 0.7,
       minChildSize: 0.4,
       maxChildSize: 0.9,

@@ -1201,7 +1201,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
           final tagsToShow = displayTags.isEmpty && !isSearching ? curatedFallback : displayTags;
 
-          return DraggableScrollableSheet(
+          return AdaptiveDraggableSheet(
             initialChildSize: 0.55,
             minChildSize: 0.35,
             maxChildSize: 0.85,

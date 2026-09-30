@@ -116,4 +116,34 @@ void main() {
       expect(tester.getSize(find.byType(SheetHandle)).height, 12);
     });
   });
+
+  group('AdaptiveDraggableSheet', () {
+    Widget host(bool bottomSheet) => MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              height: 600,
+              child: SheetPresentation(
+                isBottomSheet: bottomSheet,
+                child: AdaptiveDraggableSheet(
+                  initialChildSize: 0.5,
+                  expand: false,
+                  builder: (context, sc) => ListView(controller: sc, children: const [Text('row')]),
+                ),
+              ),
+            ),
+          ),
+        );
+
+    testWidgets('drags as a bottom sheet', (tester) async {
+      await tester.pumpWidget(host(true));
+      expect(find.byType(DraggableScrollableSheet), findsOneWidget);
+      expect(tester.getSize(find.byType(ListView)).height, 300);
+    });
+
+    testWidgets('uses the full height inside a dialog', (tester) async {
+      await tester.pumpWidget(host(false));
+      expect(find.byType(DraggableScrollableSheet), findsNothing);
+      expect(tester.getSize(find.byType(ListView)).height, 600);
+    });
+  });
 }

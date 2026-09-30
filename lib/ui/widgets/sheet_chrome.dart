@@ -82,3 +82,60 @@ class SheetHandle extends StatelessWidget {
     );
   }
 }
+
+/// Drop-in for [DraggableScrollableSheet] in sheet content: a draggable
+/// bottom sheet on phones, but inside the desktop dialog (where there is
+/// nothing to drag) it hosts the scrollable directly, so the dialog uses its
+/// full height instead of a fraction of it.
+class AdaptiveDraggableSheet extends StatelessWidget {
+  final double initialChildSize;
+  final double minChildSize;
+  final double maxChildSize;
+  final bool expand;
+  final ScrollableWidgetBuilder builder;
+
+  const AdaptiveDraggableSheet({
+    super.key,
+    this.initialChildSize = 0.5,
+    this.minChildSize = 0.25,
+    this.maxChildSize = 1.0,
+    this.expand = true,
+    required this.builder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!SheetPresentation.isBottomSheetOf(context)) {
+      return DialogScrollHost(builder: builder);
+    }
+    return DraggableScrollableSheet(
+      initialChildSize: initialChildSize,
+      minChildSize: minChildSize,
+      maxChildSize: maxChildSize,
+      expand: expand,
+      builder: builder,
+    );
+  }
+}
+
+/// Owns the [ScrollController] for draggable-sheet content shown in a dialog.
+class DialogScrollHost extends StatefulWidget {
+  final ScrollableWidgetBuilder builder;
+  const DialogScrollHost({super.key, required this.builder});
+
+  @override
+  State<DialogScrollHost> createState() => _DialogScrollHostState();
+}
+
+class _DialogScrollHostState extends State<DialogScrollHost> {
+  final _controller = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(context, _controller);
+}
