@@ -189,7 +189,10 @@ final router = GoRouter(
             final cookbookId = state.uri.queryParameters['cookbook'] ?? '';
             final l10n = AppLocalizations.of(context)!;
             return RecipeListScreen(
-              title: l10n.recipesTitle,
+              title: state.uri.queryParameters['title'] ??
+                  (courseId == null && categoryId == null
+                      ? l10n.sidebarAllRecipes
+                      : l10n.recipesTitle),
               cookbookId: cookbookId,
               courseId: courseId,
               categoryId: categoryId,

@@ -9,6 +9,9 @@ import '../../../providers/cookbook_provider.dart';
 import '../../../providers/database_provider.dart';
 import '../../../utils/responsive_utils.dart';
 import '../../../utils/recipe_title.dart';
+import '../../widgets/app_controls.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/recipe_cards.dart';
 import '../../widgets/recipe_image.dart';
 
 /// Provider for recently viewed recipes (no limit)
@@ -27,6 +30,32 @@ class RecentRecipesScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final recipesAsync = ref.watch(allRecentRecipesProvider);
     final l10n = AppLocalizations.of(context)!;
+
+    if (Responsive.isDesktopLayout(context)) {
+      final recipes = recipesAsync.valueOrNull ?? const <Recipe>[];
+      return Scaffold(
+        backgroundColor: context.appColors.surface,
+        appBar: PageHeader(
+          title: l10n.recentTitle,
+          leading: Navigator.of(context).canPop() ? const HeaderBackButton() : null,
+        ),
+        body: recipesAsync.isLoading && !recipesAsync.hasValue
+            ? const Center(child: CircularProgressIndicator())
+            : recipes.isEmpty
+                ? EmptyState(
+                    icon: Icons.history,
+                    title: l10n.recentEmpty,
+                    message: l10n.recentEmptySubtitle,
+                  )
+                : RecipeCardGrid(
+                    storageKey: 'recent_grid',
+                    recipes: recipes,
+                    onTap: (r) => context.push('/recipe/${r.id}'),
+                    onToggleFavorite: (r) =>
+                        ref.read(recipeDaoProvider).toggleFavorite(r.id, !r.isFavorite),
+                  ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(

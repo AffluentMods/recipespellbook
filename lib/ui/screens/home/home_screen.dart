@@ -18,6 +18,7 @@ import '../../widgets/placeholder_image.dart';
 import '../../widgets/recipe_image.dart';
 import '../../widgets/hint_banner.dart';
 import '../craving/craving_screen.dart';
+import 'home_desktop.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
 import '../../../utils/responsive_utils.dart';
@@ -77,6 +78,15 @@ class HomeScreen extends ConsumerWidget {
               _showOnboarding(context, ref);
             }
           });
+        }
+
+        // Desktop / pointer layout: a dashboard, not the phone stack.
+        if (Responsive.isDesktopLayout(context)) {
+          return DesktopHome(
+            cookbook: cookbook,
+            cookbookId: cookbookId,
+            emptyState: _EmptyCookbookState(cookbookId: cookbookId),
+          );
         }
 
         return Scaffold(

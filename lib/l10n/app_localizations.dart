@@ -6601,6 +6601,60 @@ abstract class AppLocalizations {
   /// **'Clear selection'**
   String get selectionClear;
 
+  /// No description provided for @selectAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get selectAction;
+
+  /// No description provided for @homeGreetingMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning'**
+  String get homeGreetingMorning;
+
+  /// No description provided for @homeGreetingAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon'**
+  String get homeGreetingAfternoon;
+
+  /// No description provided for @homeGreetingEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening'**
+  String get homeGreetingEvening;
+
+  /// No description provided for @homeNextSevenDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Next 7 days'**
+  String get homeNextSevenDays;
+
+  /// No description provided for @homeOpenList.
+  ///
+  /// In en, this message translates to:
+  /// **'Open list'**
+  String get homeOpenList;
+
+  /// No description provided for @homeAllCaughtUp.
+  ///
+  /// In en, this message translates to:
+  /// **'All caught up'**
+  String get homeAllCaughtUp;
+
+  /// No description provided for @homeToBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item to buy} other{{count} items to buy}}'**
+  String homeToBuy(int count);
+
+  /// No description provided for @homeJumpBackIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump back in'**
+  String get homeJumpBackIn;
+
   /// No description provided for @detailChooseRecipe.
   ///
   /// In en, this message translates to:

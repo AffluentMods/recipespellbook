@@ -25,6 +25,7 @@ import '../../../services/collab_service.dart';
 import '../../../services/sync_service.dart';
 import '../../../providers/collab_provider.dart';
 import '../../../theme/app_colors.dart';
+import '../../../theme/tokens.dart';
 import '../../../ui/widgets/cooking_mode_screen.dart';
 import '../../../utils/default_recipe_images.dart';
 import '../../../utils/recipe_title.dart';
@@ -42,6 +43,7 @@ import '../settings/allergy_settings_screen.dart' show dismissedAllergyWarningsP
 import '../settings/nutrition_settings_screen.dart';
 import '../community/community_publish_screen.dart';
 import 'recipe_enhance_screen.dart';
+import '../../widgets/sheet_chrome.dart';
 
 // ============ SESSION DISMISSED WARNINGS (temporary) ============
 
@@ -374,7 +376,8 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
       // columns only once there's genuinely room (>=1000). Below that (phone,
       // tablet, narrow detail pane) the tabs are used, unchanged.
       body: LayoutBuilder(
-        builder: (context, constraints) => constraints.maxWidth >= 1000
+        builder: (context, constraints) => constraints.maxWidth >=
+                (Responsive.isDesktopLayout(context) ? 640 : 1000)
             ? _buildTwoColumnLayout(theme, l10n)
             : _buildTabbedLayout(theme, l10n),
       ),
@@ -424,8 +427,13 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
         ],
         const SizedBox(height: 16),
         if (_hasMetaInfo(_recipe!)) ...[
-          _RecipeMetaInfoCard(recipe: _recipe!, scaleFactor: _scaleFactor, onOpenScaleSheet: _openScaleSheet),
-          const SizedBox(height: 16),
+          _RecipeMetaInfoCard(
+            recipe: _recipe!,
+            scaleFactor: _scaleFactor,
+            onOpenScaleSheet: _openScaleSheet,
+            compact: Responsive.isDesktopLayout(context),
+          ),
+          SizedBox(height: Responsive.isDesktopLayout(context) ? 12 : 16),
         ],
         _RecipeActionBar(
           currentScale: _scaleFactor,
@@ -435,6 +443,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
           onConversionChanged: (mode) => setState(() => _unitConversion = mode),
           onAddToMealPlan: _showAddToMealPlanSheet,
           onAddToShopping: _showAddToShoppingSheet,
+          compact: Responsive.isDesktopLayout(context),
         ),
         const SizedBox(height: 16),
         _ImprovedAllergyWarning(
@@ -502,7 +511,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    flex: 38,
+                    flex: 40,
                     child: _IngredientsTab(
                       ingredients: _sortedIngredients,
                       recipeId: widget.recipeId,
@@ -517,7 +526,7 @@ class _RecipeScreenState extends ConsumerState<RecipeScreen> with SingleTickerPr
                   ),
                   const SizedBox(width: 24),
                   Expanded(
-                    flex: 62,
+                    flex: 60,
                     child: _InstructionsTab(
                       steps: _steps,
                       recipeId: widget.recipeId,
@@ -644,6 +653,9 @@ class _RecipeActionBar extends StatelessWidget {
   final VoidCallback onAddToMealPlan;
   final VoidCallback onAddToShopping;
 
+  /// Pointer layout: a row of compact tonal buttons instead of big tiles.
+  final bool compact;
+
   const _RecipeActionBar({
     required this.currentScale,
     required this.servings,
@@ -652,11 +664,49 @@ class _RecipeActionBar extends StatelessWidget {
     required this.onConversionChanged,
     required this.onAddToMealPlan,
     required this.onAddToShopping,
+    this.compact = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    if (compact) {
+      final c = context.appColors;
+      final converting = unitConversion != _UnitConversion.none;
+      ButtonStyle style({bool active = false}) => OutlinedButton.styleFrom(
+            foregroundColor: active ? c.accent : c.textPrimary,
+            backgroundColor: active ? c.selectedFill : Colors.transparent,
+            side: BorderSide(color: active ? c.accent.withValues(alpha: 0.5) : c.textPrimary.withValues(alpha: 0.16)),
+            minimumSize: const Size(0, 34),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          );
+      return Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          OutlinedButton.icon(
+            onPressed: onAddToMealPlan,
+            style: style(),
+            icon: Icon(Icons.calendar_month_outlined, size: 17, color: c.accent),
+            label: Text(l10n.mealPlanButton),
+          ),
+          OutlinedButton.icon(
+            onPressed: onAddToShopping,
+            style: style(),
+            icon: Icon(Icons.add_shopping_cart_rounded, size: 17, color: c.accent),
+            label: Text(l10n.groceriesButton),
+          ),
+          OutlinedButton.icon(
+            onPressed: () => _showConvertDialog(context),
+            style: style(active: converting),
+            icon: Icon(Icons.swap_horiz_rounded, size: 17, color: c.accent),
+            label: Text(l10n.convertUnitsButton),
+          ),
+        ],
+      );
+    }
     // Share now lives as an icon next to Favorite in the title row; this bar is
     // just Meal plan / Groceries / Convert.
     return Column(
@@ -702,21 +752,14 @@ class _RecipeActionBar extends StatelessWidget {
       builder: (ctx) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
         ),
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              child: const SheetHandle(top: 0),
             ),
             const SizedBox(height: 20),
             Text(units.convertUnitsTitle, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
@@ -825,7 +868,10 @@ class _RecipeMetaInfoCard extends StatelessWidget {
   /// tap it to open the scale/multiplier sheet (there is no separate stepper).
   final VoidCallback? onOpenScaleSheet;
 
-  const _RecipeMetaInfoCard({required this.recipe, this.scaleFactor = 1.0, this.onOpenScaleSheet});
+  /// Pointer layout: an inline strip of facts instead of the big card.
+  final bool compact;
+
+  const _RecipeMetaInfoCard({required this.recipe, this.scaleFactor = 1.0, this.onOpenScaleSheet, this.compact = false});
 
   String _formatMinutes(int? minutes) {
     if (minutes == null || minutes <= 0) return '';
@@ -843,6 +889,61 @@ class _RecipeMetaInfoCard extends StatelessWidget {
 
     final prepTimeStr = _formatMinutes(recipe.prepTimeMinutes);
     final cookTimeStr = _formatMinutes(recipe.cookTimeMinutes);
+
+    if (compact) {
+      final c = context.appColors;
+      Widget fact(IconData icon, String label, String value, {VoidCallback? onTap}) {
+        final child = Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(icon, size: 18, color: onTap != null ? c.accent : c.textTertiary),
+            const SizedBox(width: 8),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label.toUpperCase(),
+                    style: TextStyle(fontSize: 10, letterSpacing: 0.6, fontWeight: FontWeight.w700, color: c.textTertiary)),
+                const SizedBox(height: 1),
+                Row(mainAxisSize: MainAxisSize.min, children: [
+                  Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: c.textPrimary)),
+                  if (onTap != null) ...[const SizedBox(width: 4), Icon(Icons.tune_rounded, size: 13, color: c.accent)],
+                ]),
+              ],
+            ),
+          ]),
+        );
+        if (onTap == null) return child;
+        return Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          child: InkWell(onTap: onTap, borderRadius: BorderRadius.circular(8), child: child),
+        );
+      }
+      final facts = <Widget>[
+        if (prepTimeStr.isNotEmpty) fact(Icons.timer_outlined, l10n.recipeFieldPrepTime, prepTimeStr),
+        if (cookTimeStr.isNotEmpty) fact(Icons.local_fire_department_outlined, l10n.recipeFieldCookTime, cookTimeStr),
+        if (recipe.servings != null && recipe.servings!.isNotEmpty)
+          fact(Icons.people_outline, l10n.recipeFieldServings, _scaleServings(recipe.servings!, scaleFactor), onTap: onOpenScaleSheet),
+      ];
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: c.hairline),
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < facts.length; i++) ...[
+                if (i > 0) VerticalDivider(width: 1, thickness: 1, indent: 10, endIndent: 10, color: c.hairline),
+                facts[i],
+              ],
+            ],
+          ),
+        ),
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1011,7 +1112,7 @@ class _ScaleSheetState extends State<_ScaleSheet> {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: SheetPresentation.surfaceRadius(context),
       ),
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
       child: Column(
@@ -1019,14 +1120,7 @@ class _ScaleSheetState extends State<_ScaleSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            child: const SheetHandle(top: 0),
           ),
           const SizedBox(height: 18),
           Row(
@@ -1929,19 +2023,19 @@ class _RecipeAppBar extends StatelessWidget {
       leading: isDetailPane
           ? IconButton(
               icon: const Icon(Icons.close, color: Colors.white),
-              tooltip: 'Close',
+              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
               onPressed: onClose ?? () => Navigator.of(context).pop(),
             )
           : Responsive.isDesktopLayout(context)
               ? IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  tooltip: 'Back',
+                  tooltip: MaterialLocalizations.of(context).backButtonTooltip,
                   onPressed: () => Navigator.of(context).pop(),
                 )
               : Container(
                   margin: const EdgeInsets.all(8),
                   decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), shape: BoxShape.circle),
-                  child: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), tooltip: 'Back', onPressed: () => Navigator.of(context).pop()),
+                  child: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), tooltip: MaterialLocalizations.of(context).backButtonTooltip, onPressed: () => Navigator.of(context).pop()),
                 ),
       flexibleSpace: LayoutBuilder(builder: (context, constraints) {
         // Collapse progress: 0 = fully expanded, 1 = fully collapsed. Fade the
@@ -2143,10 +2237,7 @@ class _RecipeAppBar extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: 8),
-                    Container(width: 40, height: 4, decoration: BoxDecoration(
-                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    )),
+                    const SheetHandle(top: 0),
                     const SizedBox(height: 16),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),

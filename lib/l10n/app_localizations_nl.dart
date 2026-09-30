@@ -3536,6 +3536,41 @@ class AppLocalizationsNl extends AppLocalizations {
   String get selectionClear => 'Clear selection';
 
   @override
+  String get selectAction => 'Select';
+
+  @override
+  String get homeGreetingMorning => 'Good morning';
+
+  @override
+  String get homeGreetingAfternoon => 'Good afternoon';
+
+  @override
+  String get homeGreetingEvening => 'Good evening';
+
+  @override
+  String get homeNextSevenDays => 'Next 7 days';
+
+  @override
+  String get homeOpenList => 'Open list';
+
+  @override
+  String get homeAllCaughtUp => 'All caught up';
+
+  @override
+  String homeToBuy(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items to buy',
+      one: '1 item to buy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeJumpBackIn => 'Jump back in';
+
+  @override
   String get detailChooseRecipe => 'Choose a recipe';
 
   @override
