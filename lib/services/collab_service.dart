@@ -198,14 +198,28 @@ class CollabService {
 
   String _iso(DateTime d) => d.toUtc().toIso8601String();
 
+  /// Sync right after joining a list. The pull cursor only fetches rows changed
+  /// since our last pull, and a list we just joined may not have changed in a
+  /// while — so a normal cycle would never deliver it ("Joined!" but nothing
+  /// shows up). This waits for any in-flight cycle (it would advance the
+  /// cursor past us) and then pulls every collaborative list from scratch.
+  Future<void> syncAfterJoin() async {
+    for (var i = 0; _syncing && i < 50; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }
+    await syncNow(fullPull: true);
+  }
+
   /// One push+pull cycle. Safe to call frequently (guarded + no-ops when idle).
-  Future<void> syncNow() async {
+  /// [fullPull] ignores the pull cursor and fetches everything.
+  Future<void> syncNow({bool fullPull = false}) async {
     final db = _db;
     if (_syncing || db == null || !AuthService.instance.isSignedIn) return;
     _syncing = true;
     try {
       final prefs = await SharedPreferences.getInstance();
-      final pullCursor = prefs.getString(_cursorKey); // server time → pull `since`
+      // server time → pull `since`
+      final pullCursor = fullPull ? null : prefs.getString(_cursorKey);
       final lastPushRaw = prefs.getString(_pushCursorKey);
       final lastPush = lastPushRaw != null ? DateTime.tryParse(lastPushRaw) : null;
       // Captured up-front (device time). Anything edited AFTER this is left for
