@@ -46,6 +46,13 @@ class RecipeGridCard extends StatefulWidget {
   final bool selecting;
   final double imageAspectRatio;
 
+  /// Small marker over the photo's top-left corner (e.g. why a recipe is in
+  /// a "jump back in" row: pinned / planned).
+  final Widget? badge;
+
+  /// Long-press (touch): enter multi-select, context actions…
+  final VoidCallback? onLongPress;
+
   const RecipeGridCard({
     super.key,
     required this.recipe,
@@ -56,6 +63,8 @@ class RecipeGridCard extends StatefulWidget {
     this.active = false,
     this.selecting = false,
     this.imageAspectRatio = 4 / 3,
+    this.badge,
+    this.onLongPress,
   });
 
   /// Height of the text block under the image: a fixed two-line title area
@@ -111,7 +120,9 @@ class _RecipeGridCardState extends State<RecipeGridCard> {
               top: Space.sm,
               left: Space.sm,
               child: _SelectionDot(selected: widget.selected),
-            ),
+            )
+          else if (widget.badge != null)
+            Positioned(top: Space.sm, left: Space.sm, child: widget.badge!),
         ],
       ),
     );
@@ -188,6 +199,7 @@ class _RecipeGridCardState extends State<RecipeGridCard> {
         onExit: (_) => setState(() => _hovered = false),
         child: GestureDetector(
           onTap: widget.onTap,
+          onLongPress: widget.onLongPress,
           behavior: HitTestBehavior.opaque,
           child: Semantics(button: true, selected: widget.selected, child: card),
         ),
@@ -299,6 +311,7 @@ class RecipeListRow extends StatelessWidget {
   final bool selected;
   final bool selecting;
   final Widget? trailing;
+  final VoidCallback? onLongPress;
 
   const RecipeListRow({
     super.key,
@@ -309,6 +322,7 @@ class RecipeListRow extends StatelessWidget {
     this.selected = false,
     this.selecting = false,
     this.trailing,
+    this.onLongPress,
   });
 
   static const double height = 60;
@@ -329,6 +343,7 @@ class RecipeListRow extends StatelessWidget {
           borderRadius: Radii.mdAll,
           child: InkWell(
             onTap: onTap,
+            onLongPress: onLongPress,
             borderRadius: Radii.mdAll,
             hoverColor: c.hoverFill,
             highlightColor: c.pressedFill,
@@ -410,6 +425,30 @@ class RecipeListRow extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Round marker for [RecipeGridCard.badge]: an icon on a frosted surface
+/// disc, legible over any photo.
+class RecipeCardBadge extends StatelessWidget {
+  final IconData icon;
+  final String? tooltip;
+  final Color? color;
+  const RecipeCardBadge({super.key, required this.icon, this.tooltip, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final disc = Container(
+      width: 26,
+      height: 26,
+      decoration: BoxDecoration(
+        color: c.surface.withValues(alpha: 0.9),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, size: 14, color: color ?? c.textSecondary),
+    );
+    return tooltip == null ? disc : Tooltip(message: tooltip!, child: disc);
   }
 }
 
