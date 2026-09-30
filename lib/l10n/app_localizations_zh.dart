@@ -3544,6 +3544,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeJumpBackIn => 'Jump back in';
 
   @override
+  String shoppingAddNamed(String name) {
+    return 'Add “$name”';
+  }
+
+  @override
+  String get shoppingUncheck => 'Put back on the list';
+
+  @override
   String get detailChooseRecipe => 'Choose a recipe';
 
   @override

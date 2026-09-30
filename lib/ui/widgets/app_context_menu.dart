@@ -50,13 +50,24 @@ class ContextMenuRegion extends StatelessWidget {
 
     return GestureDetector(
       onSecondaryTapDown: (details) {
-        _showContextMenu(context, details.globalPosition);
+        showAppContextMenu(context, details.globalPosition, items);
       },
       child: child,
     );
   }
+}
 
-  void _showContextMenu(BuildContext context, Offset position) {
+/// Shows the app's context menu with [items] at the global pointer [position]
+/// (for widgets that detect the secondary click themselves).
+void showAppContextMenu(BuildContext context, Offset position, List<ContextMenuItem> items) {
+  _AppContextMenu(items).show(context, position);
+}
+
+class _AppContextMenu {
+  final List<ContextMenuItem> items;
+  const _AppContextMenu(this.items);
+
+  void show(BuildContext context, Offset position) {
     final theme = Theme.of(context);
     final c = context.appColors;
     final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;

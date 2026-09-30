@@ -38,8 +38,15 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/selection_action_bar.dart';
 import '../../widgets/family_share_sheet.dart';
 import '../../widgets/sheet_chrome.dart';
+import '../../widgets/app_context_menu.dart';
+import '../../widgets/app_controls.dart';
+import '../../widgets/keycap.dart';
+import '../../../theme/tokens.dart';
+import '../../../utils/recipe_title.dart';
 // TODO: Kitchen Buddy hidden for now
 // import '../../widgets/kitchen_buddy/kitchen_buddy_integration.dart';
+
+part 'shopping_desktop.dart';
 
 /// Provider to track shopping list item count (for nav badge)
 final shoppingItemCountProvider = StreamProvider<int>((ref) {
@@ -159,6 +166,9 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
   static const _groupModeKey = 'shoppingGroupMode';
 
   Timer? _collabTimer;
+
+  /// Count the published selection bar was built with (republish on change).
+  int _publishedSelectionCount = 0;
 
   @override
   void initState() {
@@ -356,12 +366,47 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final hasBar = ref.read(selectionBarProvider) != null;
-      if (selecting && !hasBar) {
+      if (selecting && (!hasBar || _publishedSelectionCount != selectedIds.length)) {
+        _publishedSelectionCount = selectedIds.length;
         ref.read(selectionBarProvider.notifier).state = _buildSelectionBar();
       } else if (!selecting && hasBar) {
+        _publishedSelectionCount = 0;
         ref.read(selectionBarProvider.notifier).state = null;
       }
     });
+
+    // Desktop / pointer layout: lists pane + items pane.
+    if (Responsive.isDesktopLayout(context)) {
+      final perm = CollabService.instance.permissionFor(_currentListId);
+      return _DesktopShoppingView(
+        listId: _currentListId,
+        listName: _currentListName,
+        groupMode: _groupMode,
+        onGroupModeChanged: _setGroupMode,
+        userMappings: _userMappings,
+        recentlyCheckedIds: _recentlyCheckedIds,
+        sharedListCounts: _sharedListCounts,
+        members: _sharedListMembers[_currentListId] ?? const [],
+        onSelectList: _setCurrentList,
+        onNewList: () => _createNewList(context),
+        onRenameList: (list) => _renameList(context, list),
+        onDeleteList: (list) => _deleteList(context, list),
+        onShareList: (id, name) => _showShareSheet(context, listId: id, listName: name),
+        onSetDefaultList: _setDefaultList,
+        onMoreOptions: () => _showMoreOptions(context),
+        onItemChecked: _onItemChecked,
+        onItemUnchecked: _onItemUnchecked,
+        onCategoryChanged: _onItemCategoryChanged,
+        onMappingsChanged: _loadUserMappings,
+        banner: CollabService.instance.isCollab(_currentListId) &&
+                !CollabService.instance.canEdit(_currentListId)
+            ? Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                child: _collabBanner(theme, perm),
+              )
+            : null,
+      );
+    }
 
     return PopScope(
       // While selecting, a back press clears the selection instead of leaving.
@@ -523,6 +568,8 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
         destructive: true,
         onTap: () => _bulkDelete(sel()),
       ),
+      count: ref.read(_shoppingSelectionProvider).length,
+      onClear: _clearSelection,
     );
   }
 
@@ -4292,149 +4339,161 @@ class _ShoppingItemTile extends ConsumerWidget {
     );
   }
 
-  void _showItemOptions(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final shoppingDao = ref.read(shoppingDaoProvider);
-    final controller = TextEditingController(text: item.name);
+  void _showItemOptions(BuildContext context, WidgetRef ref) =>
+      _showShoppingItemEditor(context, ref,
+          item: item, userMappings: userMappings, onCategoryChanged: onCategoryChanged);
+}
 
-    Responsive.showAdaptiveSheet(
-      context,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: SheetPresentation.surfaceRadius(ctx),
-          ),
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(child: const SheetHandle(top: 0)),
-              const SizedBox(height: 20),
-              Text(l10n.shoppingEditItem, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
+/// Edit sheet (phone) / dialog (desktop) for one shopping item: rename,
+/// change category, move to another list, delete with undo.
+void _showShoppingItemEditor(
+  BuildContext context,
+  WidgetRef ref, {
+  required ShoppingListItem item,
+  required Map<String, String> userMappings,
+  required Function(String, String, String) onCategoryChanged,
+}) {
+  final theme = Theme.of(context);
+  final l10n = AppLocalizations.of(context)!;
+  final shoppingDao = ref.read(shoppingDaoProvider);
+  final controller = TextEditingController(text: item.name);
 
-              TextField(
-                controller: controller,
-                decoration: InputDecoration(
-                  labelText: l10n.shoppingItemName,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+  Responsive.showAdaptiveSheet(
+    context,
+    builder: (ctx) => Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: SheetPresentation.surfaceRadius(ctx),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(child: const SheetHandle(top: 0)),
+            const SizedBox(height: 20),
+            Text(l10n.shoppingEditItem, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+
+            TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                labelText: l10n.shoppingItemName,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            _CategoryDropdown(
+              currentCategoryId: item.shoppingCategoryId ?? getShoppingCategory(item.name, userMappings: userMappings),
+              onChanged: (newCategoryId) {
+                onCategoryChanged(item.id, item.name, newCategoryId);
+                Navigator.pop(ctx);
+              },
+            ),
+            const SizedBox(height: 8),
+
+            // Move to another shopping list
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.drive_file_move_outlined),
+              title: Text(l10n.shoppingMoveToList),
+              onTap: () async {
+                final lists = (await shoppingDao.getAllLists())
+                    .where((l) => l.id != item.listId)
+                    .toList();
+                if (!ctx.mounted) return;
+                if (lists.isEmpty) {
+                  AppSnackbar.info(ctx, l10n.shoppingNoOtherLists);
+                  return;
+                }
+                final target = await Responsive.showAdaptiveSheet<ShoppingList>(
+                  ctx,
+                  isScrollControlled: false,
+                  builder: (pickCtx) => SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(l10n.shoppingMoveToList,
+                              style: Theme.of(pickCtx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                        ),
+                        ...lists.map((l) => ListTile(
+                              leading: const Icon(Icons.list_alt),
+                              title: Text(l.name),
+                              onTap: () => Navigator.pop(pickCtx, l),
+                            )),
+                      ],
+                    ),
+                  ),
+                );
+                if (target == null) return;
+                await shoppingDao.moveItemToList(item.id, target.id);
+                if (ctx.mounted) Navigator.pop(ctx);
+                if (context.mounted) {
+                  AppSnackbar.success(context, l10n.shoppingMovedToList(target.name));
+                }
+              },
+            ),
+            const SizedBox(height: 8),
+
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      // Snapshot before delete so we can restore if
+                      // the user hits Undo. Editing-sheet delete used
+                      // to be silent — now matches the swipe-to-delete
+                      // behaviour with a 5s undo window.
+                      final snapshot = item;
+                      shoppingDao.deleteItem(item.id);
+                      Navigator.pop(ctx);
+                      AppSnackbar.successWithAction(
+                        context,
+                        l10n.shoppingItemRemoved,
+                        actionLabel: l10n.actionUndo,
+                        onAction: () {
+                          shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
+                            id: snapshot.id,
+                            listId: snapshot.listId,
+                            name: snapshot.name,
+                            isChecked: drift.Value(snapshot.isChecked),
+                            sortOrder: drift.Value(snapshot.sortOrder),
+                            note: drift.Value(snapshot.note),
+                            shoppingCategoryId: drift.Value(snapshot.shoppingCategoryId),
+                            recipeId: drift.Value(snapshot.recipeId),
+                          ));
+                        },
+                      );
+                    },
+                    icon: Icon(Icons.delete, color: theme.colorScheme.error),
+                    label: Text(l10n.actionDelete, style: TextStyle(color: theme.colorScheme.error)),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-
-              _CategoryDropdown(
-                currentCategoryId: item.shoppingCategoryId ?? getShoppingCategory(item.name, userMappings: userMappings),
-                onChanged: (newCategoryId) {
-                  onCategoryChanged(item.id, item.name, newCategoryId);
-                  Navigator.pop(ctx);
-                },
-              ),
-              const SizedBox(height: 8),
-
-              // Move to another shopping list
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.drive_file_move_outlined),
-                title: Text(l10n.shoppingMoveToList),
-                onTap: () async {
-                  final lists = (await shoppingDao.getAllLists())
-                      .where((l) => l.id != item.listId)
-                      .toList();
-                  if (!ctx.mounted) return;
-                  if (lists.isEmpty) {
-                    AppSnackbar.info(ctx, l10n.shoppingNoOtherLists);
-                    return;
-                  }
-                  final target = await Responsive.showAdaptiveSheet<ShoppingList>(
-                    ctx,
-                    isScrollControlled: false,
-                    builder: (pickCtx) => SafeArea(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text(l10n.shoppingMoveToList,
-                                style: Theme.of(pickCtx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                          ),
-                          ...lists.map((l) => ListTile(
-                                leading: const Icon(Icons.list_alt),
-                                title: Text(l.name),
-                                onTap: () => Navigator.pop(pickCtx, l),
-                              )),
-                        ],
-                      ),
-                    ),
-                  );
-                  if (target == null) return;
-                  await shoppingDao.moveItemToList(item.id, target.id);
-                  if (ctx.mounted) Navigator.pop(ctx);
-                  if (context.mounted) {
-                    AppSnackbar.success(context, l10n.shoppingMovedToList(target.name));
-                  }
-                },
-              ),
-              const SizedBox(height: 8),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        // Snapshot before delete so we can restore if
-                        // the user hits Undo. Editing-sheet delete used
-                        // to be silent — now matches the swipe-to-delete
-                        // behaviour with a 5s undo window.
-                        final snapshot = item;
-                        shoppingDao.deleteItem(item.id);
-                        Navigator.pop(ctx);
-                        AppSnackbar.successWithAction(
-                          context,
-                          l10n.shoppingItemRemoved,
-                          actionLabel: l10n.actionUndo,
-                          onAction: () {
-                            shoppingDao.insertItem(ShoppingListItemsCompanion.insert(
-                              id: snapshot.id,
-                              listId: snapshot.listId,
-                              name: snapshot.name,
-                              isChecked: drift.Value(snapshot.isChecked),
-                              sortOrder: drift.Value(snapshot.sortOrder),
-                              note: drift.Value(snapshot.note),
-                              shoppingCategoryId: drift.Value(snapshot.shoppingCategoryId),
-                              recipeId: drift.Value(snapshot.recipeId),
-                            ));
-                          },
-                        );
-                      },
-                      icon: Icon(Icons.delete, color: theme.colorScheme.error),
-                      label: Text(l10n.actionDelete, style: TextStyle(color: theme.colorScheme.error)),
-                    ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () {
+                      if (controller.text.trim().isNotEmpty) {
+                        shoppingDao.updateItem(item.id, name: controller.text.trim());
+                      }
+                      Navigator.pop(ctx);
+                    },
+                    child: Text(l10n.actionSave),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: () {
-                        if (controller.text.trim().isNotEmpty) {
-                          shoppingDao.updateItem(item.id, name: controller.text.trim());
-                        }
-                        Navigator.pop(ctx);
-                      },
-                      child: Text(l10n.actionSave),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
 }
 
 // ============ CATEGORY DROPDOWN ============

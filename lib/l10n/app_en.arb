@@ -1650,6 +1650,15 @@
     }
   },
   "homeJumpBackIn": "Jump back in",
+  "shoppingAddNamed": "Add “{name}”",
+  "@shoppingAddNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingUncheck": "Put back on the list",
   "detailChooseRecipe": "Choose a recipe",
   "detailChooseRecipeHint": "Pick one from the list to read it here.",
   "mealPlanButton": "Meal Plan",

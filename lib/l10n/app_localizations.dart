@@ -6655,6 +6655,18 @@ abstract class AppLocalizations {
   /// **'Jump back in'**
   String get homeJumpBackIn;
 
+  /// No description provided for @shoppingAddNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Add “{name}”'**
+  String shoppingAddNamed(String name);
+
+  /// No description provided for @shoppingUncheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Put back on the list'**
+  String get shoppingUncheck;
+
   /// No description provided for @detailChooseRecipe.
   ///
   /// In en, this message translates to:
