@@ -6391,6 +6391,12 @@ abstract class AppLocalizations {
   /// **'Community'**
   String get navCommunity;
 
+  /// No description provided for @navMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get navMore;
+
   /// No description provided for @navComingSoon.
   ///
   /// In en, this message translates to:
@@ -6798,6 +6804,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 item to buy} other{{count} items to buy}}'**
   String homeToBuy(int count);
+
+  /// No description provided for @homeAndMore.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String homeAndMore(int count);
+
+  /// No description provided for @homeNothingPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing planned'**
+  String get homeNothingPlanned;
+
+  /// No description provided for @homePlanAMeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan a meal'**
+  String get homePlanAMeal;
 
   /// No description provided for @homeJumpBackIn.
   ///
@@ -16614,6 +16638,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Theme, language & preferences'**
   String get menuDrawerSettingsSubtitle;
+
+  /// No description provided for @moreAddRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Add recipes'**
+  String get moreAddRecipes;
+
+  /// No description provided for @moreSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing & family'**
+  String get moreSharing;
+
+  /// No description provided for @moreScanProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a product barcode'**
+  String get moreScanProduct;
+
+  /// No description provided for @moreScanProductSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Look up a packaged product'**
+  String get moreScanProductSubtitle;
 
   /// No description provided for @menuDrawerCouldNotOpenUrl.
   ///

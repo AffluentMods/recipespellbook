@@ -519,6 +519,181 @@ class _ToolbarSearchFieldState extends State<ToolbarSearchField> {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// Touch lists — the phone / tablet counterpart of [NavRow]: the same tones
+// and hairlines, sized for fingers.
+// ═══════════════════════════════════════════════════════════════════
+
+/// A hairline-outlined group of [TouchRow]s (the "inset grouped" list of the
+/// More page and settings). Rows are separated by hairlines inset past the
+/// leading icon.
+class TouchGroup extends StatelessWidget {
+  final List<Widget> children;
+  final EdgeInsetsGeometry margin;
+
+  const TouchGroup({
+    super.key,
+    required this.children,
+    this.margin = const EdgeInsets.symmetric(horizontal: Space.lg),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    if (children.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: margin,
+      child: DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: BoxDecoration(
+          borderRadius: Radii.lgAll,
+          border: Border.all(color: c.hairline),
+        ),
+        child: Material(
+          color: c.surface,
+          borderRadius: Radii.lgAll,
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < children.length; i++) ...[
+                if (i > 0)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 52),
+                    child: Divider(height: 1, thickness: 1, color: c.hairline),
+                  ),
+                children[i],
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One row of a [TouchGroup]: leading icon, title, optional subtitle and a
+/// trailing widget (count, switch, value) followed by a chevron when it
+/// navigates. At least 52 px tall.
+class TouchRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+
+  /// Show a disclosure chevron (navigates somewhere). Off for actions that
+  /// open a sheet or dialog in place and for rows with a control.
+  final bool chevron;
+  final bool destructive;
+  final Color? iconColor;
+
+  const TouchRow({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    this.onTap,
+    this.chevron = true,
+    this.destructive = false,
+    this.iconColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final fg = destructive ? c.destructive : c.textPrimary;
+    return InkWell(
+      onTap: onTap,
+      highlightColor: c.pressedFill,
+      splashColor: c.pressedFill,
+      hoverColor: c.hoverFill,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 52),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(Space.lg, Space.sm + 2, Space.md, Space.sm + 2),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: 21,
+                color: destructive ? c.destructive : (iconColor ?? c.textSecondary),
+              ),
+              const SizedBox(width: Space.lg - 1),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 15,
+                        height: 1.25,
+                        fontWeight: FontWeight.w500,
+                        color: fg,
+                      ),
+                    ),
+                    if (subtitle != null && subtitle!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          height: 1.3,
+                          color: c.textTertiary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (trailing != null) ...[
+                const SizedBox(width: Space.sm),
+                trailing!,
+              ],
+              if (chevron && onTap != null) ...[
+                const SizedBox(width: Space.xs),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: c.textTertiary.withValues(alpha: 0.7),
+                ),
+              ] else
+                const SizedBox(width: Space.xs),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Section heading for touch layouts: the [GroupLabel] style with page
+/// gutters, sitting above a [TouchGroup].
+class TouchGroupLabel extends StatelessWidget {
+  final String text;
+  final Widget? trailing;
+  const TouchGroupLabel(this.text, {super.key, this.trailing});
+
+  @override
+  Widget build(BuildContext context) => GroupLabel(
+    text,
+    trailing: trailing,
+    // Text lines up with the icons of the rows below (group gutter + row
+    // padding).
+    padding: const EdgeInsets.fromLTRB(
+      Space.xxxl,
+      Space.xxl,
+      Space.xl,
+      Space.sm,
+    ),
+  );
+}
+
 /// Wraps a clickable surface that isn't an InkWell (bare GestureDetector,
 /// custom painter…) with the pointer cursor, a hover flag and keyboard focus +
 /// activation, so every clickable thing behaves like a control.

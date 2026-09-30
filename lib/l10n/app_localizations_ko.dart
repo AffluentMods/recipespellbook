@@ -3398,6 +3398,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get navCommunity => '커뮤니티';
 
   @override
+  String get navMore => 'More';
+
+  @override
   String get navComingSoon => '곧 출시';
 
   @override
@@ -3616,6 +3619,17 @@ class AppLocalizationsKo extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String homeAndMore(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String get homeNothingPlanned => 'Nothing planned';
+
+  @override
+  String get homePlanAMeal => 'Plan a meal';
 
   @override
   String get homeJumpBackIn => 'Jump back in';
@@ -9006,6 +9020,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get menuDrawerSettingsSubtitle => '테마, 언어 및 환경설정';
+
+  @override
+  String get moreAddRecipes => 'Add recipes';
+
+  @override
+  String get moreSharing => 'Sharing & family';
+
+  @override
+  String get moreScanProduct => 'Scan a product barcode';
+
+  @override
+  String get moreScanProductSubtitle => 'Look up a packaged product';
 
   @override
   String menuDrawerCouldNotOpenUrl(String url) {

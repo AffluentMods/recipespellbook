@@ -3467,6 +3467,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get navCommunity => 'Сообщество';
 
   @override
+  String get navMore => 'More';
+
+  @override
   String get navComingSoon => 'Скоро';
 
   @override
@@ -3685,6 +3688,17 @@ class AppLocalizationsRu extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String homeAndMore(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String get homeNothingPlanned => 'Nothing planned';
+
+  @override
+  String get homePlanAMeal => 'Plan a meal';
 
   @override
   String get homeJumpBackIn => 'Jump back in';
@@ -9139,6 +9153,18 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get menuDrawerSettingsSubtitle => 'Тема, язык и настройки';
+
+  @override
+  String get moreAddRecipes => 'Add recipes';
+
+  @override
+  String get moreSharing => 'Sharing & family';
+
+  @override
+  String get moreScanProduct => 'Scan a product barcode';
+
+  @override
+  String get moreScanProductSubtitle => 'Look up a packaged product';
 
   @override
   String menuDrawerCouldNotOpenUrl(String url) {

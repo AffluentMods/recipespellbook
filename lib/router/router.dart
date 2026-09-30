@@ -7,6 +7,7 @@ import '../ui/screens/cookbooks/cookbooks_screen.dart';
 import '../ui/screens/home/home_screen.dart';
 import '../ui/screens/import/import_guides_screen.dart';
 import '../ui/screens/import/transfer_screen.dart';
+import '../ui/screens/more/more_screen.dart';
 import '../ui/screens/planner/planner_screen.dart';
 import '../ui/screens/premium/family_join_screen.dart';
 import '../ui/screens/premium/family_screen.dart';
@@ -185,6 +186,15 @@ final router = GoRouter(
           name: 'planner',
           pageBuilder: (context, state) => const NoTransitionPage(
             child: PlannerScreen(),
+          ),
+        ),
+        // Phone / tablet "More" tab (account, library, import, sharing,
+        // settings, help). Desktop reaches these from the sidebar.
+        GoRoute(
+          path: '/more',
+          name: 'more',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: MoreScreen(),
           ),
         ),
 

@@ -1572,6 +1572,7 @@
   "helpContactUs": "Contact Us",
   "helpContactUsDesc": "Have questions or feedback? Email us at support@recipespellbook.com",
   "navCommunity": "Community",
+  "navMore": "More",
   "navComingSoon": "Coming soon",
   "keyCtrl": "Ctrl",
   "keyShift": "Shift",
@@ -1675,6 +1676,16 @@
       }
     }
   },
+  "homeAndMore": "+{count} more",
+  "@homeAndMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeNothingPlanned": "Nothing planned",
+  "homePlanAMeal": "Plan a meal",
   "homeJumpBackIn": "Jump back in",
   "shoppingAddNamed": "Add “{name}”",
   "@shoppingAddNamed": {
@@ -4797,6 +4808,10 @@
   "menuDrawerTransferSubtitle": "Move recipes between devices",
   "menuDrawerApp": "App",
   "menuDrawerSettingsSubtitle": "Theme, language & preferences",
+  "moreAddRecipes": "Add recipes",
+  "moreSharing": "Sharing & family",
+  "moreScanProduct": "Scan a product barcode",
+  "moreScanProductSubtitle": "Look up a packaged product",
   "menuDrawerCouldNotOpenUrl": "Could not open {url}",
   "@menuDrawerCouldNotOpenUrl": {
     "placeholders": {

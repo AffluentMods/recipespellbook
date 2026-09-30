@@ -111,16 +111,61 @@ enum ShellDestination {
   /// Index of the matching phone bottom-nav tab, so switching on desktop keeps
   /// the mobile tab state coherent if the window is narrowed.
   int? get mobileTabIndex => switch (this) {
-    ShellDestination.home => 0,
-    ShellDestination.community => 1,
-    ShellDestination.planner => 2,
-    ShellDestination.shopping => 3,
+    ShellDestination.home => MobileTab.home.index,
+    ShellDestination.planner => MobileTab.planner.index,
+    ShellDestination.shopping => MobileTab.shopping.index,
+    ShellDestination.community => MobileTab.community.index,
+    ShellDestination.help ||
+    ShellDestination.settings ||
+    ShellDestination.account => MobileTab.more.index,
     _ => null,
   };
 
   /// Numbered destinations (⌘1…⌘7), in sidebar order.
   static List<ShellDestination> get numbered =>
       values.where((d) => d.shortcutKey != null && d != settings).toList();
+}
+
+/// The phone tab bar / tablet rail, in order. Everything that isn't a tab
+/// (library, cookbooks, import, sharing, settings, help) lives on the More
+/// page, and the library is also one tap from Home.
+enum MobileTab {
+  home('/', Icons.home_outlined, Icons.home_rounded),
+  planner('/planner', Icons.calendar_today_outlined, Icons.calendar_today_rounded),
+  shopping('/shopping', Icons.shopping_basket_outlined, Icons.shopping_basket_rounded),
+  community('/community', Icons.people_outline_rounded, Icons.people_rounded),
+  more('/more', Icons.more_horiz_rounded, Icons.more_horiz_rounded);
+
+  const MobileTab(this.path, this.icon, this.selectedIcon);
+
+  final String path;
+  final IconData icon;
+  final IconData selectedIcon;
+
+  String label(AppLocalizations l10n) => switch (this) {
+    MobileTab.home => l10n.navHome,
+    MobileTab.planner => l10n.navPlanner,
+    MobileTab.shopping => l10n.navShopping,
+    MobileTab.community => l10n.navCommunity,
+    MobileTab.more => l10n.navMore,
+  };
+
+  /// The tab a location belongs to, or null for pages reachable from several
+  /// tabs (a recipe, search, the library, cookbooks…), which keep the tab the
+  /// user came from lit.
+  static MobileTab? forLocation(String location) {
+    final path = Uri.parse(location).path;
+    if (path == '/' || path.startsWith('/categories') || path.startsWith('/courses')) {
+      return MobileTab.home;
+    }
+    if (path.startsWith('/planner')) return MobileTab.planner;
+    if (path.startsWith('/shopping')) return MobileTab.shopping;
+    if (path.startsWith('/community')) return MobileTab.community;
+    if (path == '/more' || path.startsWith('/settings') || path == '/help' || path == '/about') {
+      return MobileTab.more;
+    }
+    return null;
+  }
 }
 
 /// Which sidebar destination a location belongs to, or null for detail routes

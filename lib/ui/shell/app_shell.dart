@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../l10n/app_localizations.dart';
@@ -10,7 +11,6 @@ import '../../theme/app_colors.dart';
 import '../../theme/tokens.dart';
 import '../../utils/platform_utils.dart';
 import '../../utils/responsive_utils.dart';
-import '../widgets/app_menu_drawer.dart';
 import '../widgets/app_snackbar.dart';
 import '../widgets/selection_action_bar.dart';
 import 'desktop_sidebar.dart';
@@ -84,30 +84,14 @@ class _AppShellState extends ConsumerState<AppShell> {
     });
   }
 
-  Future<void> _navigateTo(String path, int index) async {
+  Future<void> _navigateTo(int index) async {
     // An in-shell recipe editor (desktop / large tablet) publishes a guard so
     // switching tabs prompts to save first instead of silently discarding.
     if (!await confirmDiscardBeforeLeaving(ref)) return;
     if (!mounted) return;
-    if (_scaffoldKey.currentState?.isEndDrawerOpen ?? false) {
-      _scaffoldKey.currentState?.closeEndDrawer();
-    }
+    HapticFeedback.selectionClick();
     ref.read(currentNavIndexProvider.notifier).state = index;
-    if (mounted) context.go(path);
-  }
-
-  /// Determine the active main-tab index from the current route path.
-  /// Returns 0-3 for main tabs, or -1 for secondary routes (settings, etc.)
-  int _activeTabFromRoute(String location) {
-    if (location == '/' || location.startsWith('/categories') || location.startsWith('/courses')) {
-      return 0; // Home
-    }
-    if (location.startsWith('/community')) {
-      return 1; // Community
-    }
-    if (location.startsWith('/planner')) return 2; // Planner
-    if (location.startsWith('/shopping')) return 3; // Shopping
-    return -1; // Secondary section — don't highlight main tabs
+    if (mounted) context.go(MobileTab.values[index].path);
   }
 
   /// The recipe editor / new-recipe routes render as a full editing surface
@@ -119,12 +103,18 @@ class _AppShellState extends ConsumerState<AppShell> {
   Widget build(BuildContext context) {
     final currentIndex = ref.watch(currentNavIndexProvider);
     final shoppingCount = ref.watch(shoppingBadgeCountProvider);
-    final shoppingBadge = shoppingCount > 0 ? shoppingCount : null;
 
-    // Determine active tab from route (overrides provider for sidebar display)
+    // The tab a location belongs to; detail routes (a recipe, search, a
+    // cookbook…) keep the tab the user came from lit. Remember the tab of
+    // every tab-owned route so detail pages opened from it inherit it.
     final location = GoRouterState.of(context).uri.path;
-    final routeTab = _activeTabFromRoute(location);
-    final effectiveIndex = routeTab >= 0 ? routeTab : currentIndex;
+    final routeTab = MobileTab.forLocation(location);
+    final effectiveIndex = routeTab?.index ?? currentIndex;
+    if (routeTab != null && routeTab.index != currentIndex) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) ref.read(currentNavIndexProvider.notifier).state = routeTab.index;
+      });
+    }
 
     // Contextual selection bar (published by the selecting screen). It replaces
     // the bottom nav so the two never stack. Clear any stale bar when the route
@@ -163,369 +153,256 @@ class _AppShellState extends ConsumerState<AppShell> {
       return widget.child;
     }
 
-    // Tablet: Compact NavigationRail (600–899dp)
+    // Tablet (600–899dp): a slim tab rail on the window chrome tone.
     if (Responsive.useNavRail(context)) {
-      return Row(
+      return ColoredBox(
+        color: context.chromeColor,
+        child: Row(
           children: [
-            _AppNavigationRail(
-              currentIndex: effectiveIndex.clamp(0, 3),
-              shoppingBadge: shoppingBadge,
-              onDestinationSelected: (index) {
-                switch (index) {
-                  case 0: _navigateTo('/', 0);
-                  case 1: _navigateTo('/community', 1);
-                  case 2: _navigateTo('/planner', 2);
-                  case 3: _navigateTo('/shopping', 3);
-                }
-              },
-              onMenuTap: () {
-                _scaffoldKey.currentState?.openEndDrawer();
-              },
+            _TabRail(
+              currentIndex: effectiveIndex,
+              shoppingCount: shoppingCount,
+              onSelect: _navigateTo,
             ),
-            const VerticalDivider(width: 1, thickness: 1),
             Expanded(
-              child: Scaffold(
-                key: _scaffoldKey,
-                body: widget.child,
-                endDrawer: const AppMenuDrawer(),
-                endDrawerEnableOpenDragGesture: false,
-                bottomNavigationBar: selectionBar,
+              child: DecoratedBox(
+                position: DecorationPosition.foreground,
+                decoration: BoxDecoration(
+                  border: Border(left: BorderSide(color: context.appColors.hairline)),
+                ),
+                child: Scaffold(
+                  key: _scaffoldKey,
+                  body: widget.child,
+                  bottomNavigationBar: selectionBar,
+                ),
               ),
             ),
           ],
+        ),
       );
     }
 
-    // Phone: existing bottom nav bar
+    // Phone: the tab bar (swapped for the selection bar while multi-selecting).
     return Scaffold(
-        key: _scaffoldKey,
-        body: widget.child,
-        endDrawer: const AppMenuDrawer(),
-        endDrawerEnableOpenDragGesture: false,
-        bottomNavigationBar: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          switchInCurve: Curves.easeOut,
-          switchOutCurve: Curves.easeIn,
-          transitionBuilder: (child, animation) => SlideTransition(
-            position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
-                .animate(animation),
-            child: child,
-          ),
-          child: selectionBar != null
-              ? KeyedSubtree(
-                  key: const ValueKey('selection-bar'),
-                  child: selectionBar,
-                )
-              : KeyedSubtree(
-                  key: const ValueKey('nav-bar'),
-                  child: _NotchNavBar(
-                    currentIndex: effectiveIndex.clamp(0, 3),
-                    shoppingBadge: shoppingBadge,
-                    onTap: (index) {
-                      switch (index) {
-                        case 0: _navigateTo('/', 0);
-                        case 1: _navigateTo('/community', 1);
-                        case 2: _navigateTo('/planner', 2);
-                        case 3: _navigateTo('/shopping', 3);
-                        case 4:
-                          _scaffoldKey.currentState?.openEndDrawer();
-                      }
-                    },
-                  ),
-                ),
+      key: _scaffoldKey,
+      body: widget.child,
+      bottomNavigationBar: AnimatedSwitcher(
+        duration: Motion.base,
+        switchInCurve: Motion.emphasized,
+        switchOutCurve: Motion.standard,
+        transitionBuilder: (child, animation) => SlideTransition(
+          position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+              .animate(animation),
+          child: child,
         ),
-    );
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// NOTCH NAV BAR — notch slides, icons stay in place (no lift)
-// Bar background extends into system nav area for full coverage.
-// ═══════════════════════════════════════════════════════════════════
-
-class _NotchNavBar extends StatefulWidget {
-  final int currentIndex;
-  final int? shoppingBadge;
-  final ValueChanged<int> onTap;
-
-  const _NotchNavBar({
-    required this.currentIndex,
-    this.shoppingBadge,
-    required this.onTap,
-  });
-
-  @override
-  State<_NotchNavBar> createState() => _NotchNavBarState();
-}
-
-class _NotchNavBarState extends State<_NotchNavBar>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  static const int _navItemCount = 5;
-  static const int _lastNavIndex = _navItemCount - 1;
-  static const double _barHeight = 60.0;
-  static const double _notchRadius = 26.0;
-  static const double _notchDepth = 10.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 280),
-      vsync: this,
-    )..value = 1.0;
-
-    _animation = Tween<double>(
-      begin: widget.currentIndex.toDouble(),
-      end: widget.currentIndex.toDouble(),
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-  }
-
-  @override
-  void didUpdateWidget(covariant _NotchNavBar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.currentIndex != widget.currentIndex) {
-      final from = oldWidget.currentIndex < _lastNavIndex
-          ? oldWidget.currentIndex.toDouble()
-          : _animation.value;
-      final to = widget.currentIndex < _lastNavIndex
-          ? widget.currentIndex.toDouble()
-          : _animation.value;
-
-      _animation = Tween<double>(begin: from, end: to)
-          .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-      _controller.forward(from: 0);
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final isDark = theme.brightness == Brightness.dark;
-    final barBg = isDark
-        ? Color.lerp(theme.colorScheme.surface, theme.colorScheme.primary, 0.06)!
-        : Color.lerp(theme.colorScheme.surface, theme.colorScheme.primary, 0.03)!;
-
-    final items = [
-      _NavDef(Icons.home_outlined, Icons.home_rounded, l10n.navHome),
-      _NavDef(Icons.people_outlined, Icons.people_rounded, l10n.navCommunity),
-      _NavDef(Icons.calendar_today_outlined, Icons.calendar_today_rounded, l10n.navPlanner),
-      _NavDef(Icons.shopping_cart_outlined, Icons.shopping_cart_rounded, l10n.navShopping),
-      _NavDef(Icons.menu_rounded, Icons.menu_rounded, l10n.navMenu),
-    ];
-
-    // Include system bottom inset so the bar background extends behind
-    // the gesture nav area in portrait, but don't double-count in landscape
-    // where the system bar is on the side instead.
-    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
-
-    return SizedBox(
-      height: _barHeight + bottomPadding,
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, _) {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final itemWidth = constraints.maxWidth / _navItemCount;
-              final notchCenterX = (_animation.value * itemWidth) + (itemWidth / 2);
-
-              return Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  // ── Bar with notch — fills entire height including system area ──
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: _NotchBarPainter(
-                        notchCenterX: widget.currentIndex < _lastNavIndex ? notchCenterX : -200,
-                        notchRadius: _notchRadius,
-                        notchDepth: _notchDepth,
-                        barColor: barBg,
-                        borderColor: theme.colorScheme.outlineVariant.withValues(alpha: 0.15),
-                        shadowColor: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
-                      ),
-                      child: const SizedBox.expand(),
-                    ),
-                  ),
-
-                  // ── Nav items — positioned in top _barHeight area only ──
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: _barHeight,
-                    child: Row(
-                      children: List.generate(_navItemCount, (i) {
-                        final isSelected = i == widget.currentIndex && i < _lastNavIndex;
-                        final badge = i == 3 ? widget.shoppingBadge : null;
-
-                        return Expanded(
-                          child: GestureDetector(
-                            onTap: () => widget.onTap(i),
-                            behavior: HitTestBehavior.opaque,
-                            child: _NavItem(
-                              theme: theme,
-                              def: items[i],
-                              isSelected: isSelected,
-                              badge: badge,
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-                ],
-              );
-            },
-          );
-        },
+        child: selectionBar != null
+            ? KeyedSubtree(
+                key: const ValueKey('selection-bar'),
+                child: selectionBar,
+              )
+            : KeyedSubtree(
+                key: const ValueKey('nav-bar'),
+                child: _TabBar(
+                  currentIndex: effectiveIndex,
+                  shoppingCount: shoppingCount,
+                  onSelect: _navigateTo,
+                ),
+              ),
       ),
     );
   }
 }
 
-// ── CustomPainter — smooth notch in top edge ──
+// ═══════════════════════════════════════════════════════════════════
+// PHONE TAB BAR / TABLET TAB RAIL — the same five tabs, on the chrome tone
+// ═══════════════════════════════════════════════════════════════════
 
-class _NotchBarPainter extends CustomPainter {
-  final double notchCenterX;
-  final double notchRadius;
-  final double notchDepth;
-  final Color barColor;
-  final Color borderColor;
-  final Color shadowColor;
+/// Phone bottom navigation: five labelled tabs on the window chrome tone
+/// under a hairline, the selected tab marked by an accent icon on a soft
+/// pill. The shopping tab carries the unchecked-item count.
+class _TabBar extends StatelessWidget {
+  final int currentIndex;
+  final int shoppingCount;
+  final ValueChanged<int> onSelect;
 
-  _NotchBarPainter({
-    required this.notchCenterX,
-    required this.notchRadius,
-    required this.notchDepth,
-    required this.barColor,
-    required this.borderColor,
-    required this.shadowColor,
+  const _TabBar({
+    required this.currentIndex,
+    required this.shoppingCount,
+    required this.onSelect,
   });
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final path = _buildNotchPath(size);
-    canvas.drawPath(path.shift(const Offset(0, -2)),
-        Paint()..color = shadowColor..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6));
-    canvas.drawPath(path, Paint()..color = barColor);
-    canvas.drawPath(path, Paint()..color = borderColor..style = PaintingStyle.stroke..strokeWidth = 0.5);
-  }
-
-  Path _buildNotchPath(Size size) {
-    final path = Path();
-    final w = size.width;
-    final h = size.height;
-    final spread = notchRadius + 14;
-    final nLeft = notchCenterX - spread;
-    final nRight = notchCenterX + spread;
-
-    path.moveTo(0, 0);
-
-    if (notchCenterX >= 0 && nLeft > -spread && nRight < w + spread) {
-      path.lineTo(nLeft.clamp(0, w), 0);
-      path.cubicTo(
-        notchCenterX - notchRadius * 0.4, 0,
-        notchCenterX - notchRadius * 0.5, notchDepth,
-        notchCenterX, notchDepth,
-      );
-      path.cubicTo(
-        notchCenterX + notchRadius * 0.5, notchDepth,
-        notchCenterX + notchRadius * 0.4, 0,
-        nRight.clamp(0, w), 0,
-      );
-      path.lineTo(w, 0);
-    } else {
-      path.lineTo(w, 0);
-    }
-
-    path.lineTo(w, h);
-    path.lineTo(0, h);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldRepaint(covariant _NotchBarPainter old) =>
-      old.notchCenterX != notchCenterX || old.barColor != barColor;
-}
-
-// ── Nav item — NO lift, just larger icon when selected ──
-
-class _NavItem extends StatelessWidget {
-  final ThemeData theme;
-  final _NavDef def;
-  final bool isSelected;
-  final int? badge;
-
-  const _NavItem({
-    required this.theme,
-    required this.def,
-    required this.isSelected,
-    this.badge,
-  });
+  static const double height = 64;
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = theme.colorScheme.primary;
-    final inactiveColor = theme.colorScheme.onSurface.withValues(alpha: 0.4);
-    final color = isSelected ? activeColor : inactiveColor;
-    // Selected icon slightly larger: 28 vs 24
-    final iconSize = isSelected ? 28.0 : 24.0;
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
+    final c = context.appColors;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: context.chromeColor,
+        border: Border(top: BorderSide(color: c.hairline)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: height,
+          child: Row(
             children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                child: Icon(isSelected ? def.selectedIcon : def.icon, size: iconSize, color: color),
-              ),
-              if (badge != null && badge! > 0)
-                Positioned(
-                  right: -8, top: -6,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                    decoration: BoxDecoration(color: theme.colorScheme.error, borderRadius: BorderRadius.circular(10)),
-                    constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                    child: Text(badge! > 99 ? '99+' : badge.toString(),
-                        style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center),
+              for (final tab in MobileTab.values)
+                Expanded(
+                  child: _TabItem(
+                    tab: tab,
+                    selected: tab.index == currentIndex,
+                    badge: tab == MobileTab.shopping ? shoppingCount : 0,
+                    onTap: () => onSelect(tab.index),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(def.label,
-              style: TextStyle(
-                fontSize: isSelected ? 11.0 : 10.0,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
-                color: color,
-              ),
-              maxLines: 1, overflow: TextOverflow.ellipsis),
-        ],
+        ),
       ),
     );
   }
 }
 
-class _NavDef {
-  final IconData icon;
-  final IconData selectedIcon;
-  final String label;
-  const _NavDef(this.icon, this.selectedIcon, this.label);
+/// Tablet navigation (600–899dp): the same tabs stacked in a slim rail, with
+/// the app mark and search on top and More at the foot (where the desktop
+/// sidebar keeps Settings).
+class _TabRail extends StatelessWidget {
+  final int currentIndex;
+  final int shoppingCount;
+  final ValueChanged<int> onSelect;
+
+  const _TabRail({
+    required this.currentIndex,
+    required this.shoppingCount,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final c = context.appColors;
+    Widget item(MobileTab tab) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: Space.xxs),
+      child: SizedBox(
+        height: 60,
+        child: _TabItem(
+          tab: tab,
+          selected: tab.index == currentIndex,
+          badge: tab == MobileTab.shopping ? shoppingCount : 0,
+          onTap: () => onSelect(tab.index),
+        ),
+      ),
+    );
+    return SizedBox(
+      width: 84,
+      child: Material(
+        type: MaterialType.transparency,
+        child: SafeArea(
+          right: false,
+          child: Column(
+            children: [
+              const SizedBox(height: Space.lg),
+              ClipRRect(
+                borderRadius: Radii.mdAll,
+                child: Image.asset('assets/images/icon.png', width: 34, height: 34),
+              ),
+              const SizedBox(height: Space.md),
+              IconButton(
+                icon: Icon(Icons.search_rounded, color: c.textSecondary),
+                tooltip: l10n.searchRecipes,
+                onPressed: () => context.push('/search'),
+              ),
+              const SizedBox(height: Space.sm),
+              for (final tab in MobileTab.values)
+                if (tab != MobileTab.more) item(tab),
+              const Spacer(),
+              item(MobileTab.more),
+              const SizedBox(height: Space.md),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TabItem extends StatelessWidget {
+  final MobileTab tab;
+  final bool selected;
+  final int badge;
+  final VoidCallback onTap;
+
+  const _TabItem({
+    required this.tab,
+    required this.selected,
+    required this.badge,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final label = tab.label(AppLocalizations.of(context)!);
+    Widget icon = Icon(
+      selected ? tab.selectedIcon : tab.icon,
+      size: 22,
+      color: selected ? c.accent : c.textTertiary,
+    );
+    if (badge > 0) {
+      icon = Badge(
+        label: Text(badge > 99 ? '99+' : '$badge'),
+        backgroundColor: c.accent,
+        textColor: c.onAccent,
+        offset: const Offset(10, -6),
+        textStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700),
+        child: icon,
+      );
+    }
+    return Semantics(
+      selected: selected,
+      button: true,
+      label: badge > 0 ? '$label, $badge' : label,
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        splashFactory: NoSplash.splashFactory,
+        highlightColor: Colors.transparent,
+        hoverColor: c.hoverFill,
+        borderRadius: Radii.lgAll,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedContainer(
+              duration: Motion.base,
+              curve: Motion.standard,
+              width: selected ? 56 : 40,
+              height: 30,
+              decoration: BoxDecoration(
+                color: selected ? c.selectedFill : Colors.transparent,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              alignment: Alignment.center,
+              child: icon,
+            ),
+            const SizedBox(height: Space.xs),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11.5,
+                height: 1.1,
+                letterSpacing: 0.1,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                color: selected ? c.textPrimary : c.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -635,105 +512,3 @@ class _DesktopShellLayout extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// NAVIGATION RAIL — tablet (600–899dp)
-// ═══════════════════════════════════════════════════════════════════
-
-class _AppNavigationRail extends StatelessWidget {
-  final int currentIndex;
-  final int? shoppingBadge;
-  final ValueChanged<int> onDestinationSelected;
-  final VoidCallback onMenuTap;
-
-  const _AppNavigationRail({
-    required this.currentIndex,
-    this.shoppingBadge,
-    required this.onDestinationSelected,
-    required this.onMenuTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-
-    return NavigationRail(
-      selectedIndex: currentIndex.clamp(0, 3),
-      onDestinationSelected: onDestinationSelected,
-      labelType: NavigationRailLabelType.all,
-      backgroundColor: theme.colorScheme.surface,
-      indicatorColor: theme.colorScheme.primaryContainer,
-      selectedIconTheme: IconThemeData(color: theme.colorScheme.primary),
-      selectedLabelTextStyle: TextStyle(
-        color: theme.colorScheme.primary,
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-      ),
-      unselectedLabelTextStyle: TextStyle(
-        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-        fontSize: 11,
-      ),
-      // Tablet parity: app mark + Search (the Ctrl+K palette is desktop-only).
-      leading: Column(
-        children: [
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset('assets/images/icon.png', width: 32, height: 32),
-          ),
-          const SizedBox(height: 14),
-          IconButton(
-            icon: const Icon(Icons.search),
-            tooltip: l10n.searchRecipes,
-            onPressed: () => context.push('/search'),
-          ),
-        ],
-      ),
-      trailing: Expanded(
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: IconButton(
-              icon: const Icon(Icons.menu_rounded),
-              tooltip: l10n.navMenu,
-              onPressed: onMenuTap,
-            ),
-          ),
-        ),
-      ),
-      destinations: [
-        NavigationRailDestination(
-          icon: const Icon(Icons.home_outlined),
-          selectedIcon: const Icon(Icons.home_rounded),
-          label: Text(l10n.navHome),
-        ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.people_outlined),
-          selectedIcon: const Icon(Icons.people_rounded),
-          label: Text(l10n.navCommunity),
-        ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.calendar_today_outlined),
-          selectedIcon: const Icon(Icons.calendar_today_rounded),
-          label: Text(l10n.navPlanner),
-        ),
-        NavigationRailDestination(
-          icon: shoppingBadge != null && shoppingBadge! > 0
-              ? Badge(
-                  label: Text(shoppingBadge! > 99 ? '99+' : shoppingBadge.toString()),
-                  child: const Icon(Icons.shopping_cart_outlined),
-                )
-              : const Icon(Icons.shopping_cart_outlined),
-          selectedIcon: shoppingBadge != null && shoppingBadge! > 0
-              ? Badge(
-                  label: Text(shoppingBadge! > 99 ? '99+' : shoppingBadge.toString()),
-                  child: const Icon(Icons.shopping_cart_rounded),
-                )
-              : const Icon(Icons.shopping_cart_rounded),
-          label: Text(l10n.navShopping),
-        ),
-      ],
-    );
-  }
-}

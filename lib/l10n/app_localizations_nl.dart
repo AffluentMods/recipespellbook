@@ -3425,6 +3425,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get navCommunity => 'Community';
 
   @override
+  String get navMore => 'More';
+
+  @override
   String get navComingSoon => 'Binnenkort';
 
   @override
@@ -3643,6 +3646,17 @@ class AppLocalizationsNl extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String homeAndMore(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String get homeNothingPlanned => 'Nothing planned';
+
+  @override
+  String get homePlanAMeal => 'Plan a meal';
 
   @override
   String get homeJumpBackIn => 'Jump back in';
@@ -9063,6 +9077,18 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get menuDrawerSettingsSubtitle => 'Thema, taal & voorkeuren';
+
+  @override
+  String get moreAddRecipes => 'Add recipes';
+
+  @override
+  String get moreSharing => 'Sharing & family';
+
+  @override
+  String get moreScanProduct => 'Scan a product barcode';
+
+  @override
+  String get moreScanProductSubtitle => 'Look up a packaged product';
 
   @override
   String menuDrawerCouldNotOpenUrl(String url) {

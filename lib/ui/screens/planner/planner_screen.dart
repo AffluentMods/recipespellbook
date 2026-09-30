@@ -81,7 +81,7 @@ const _plannerMealTypes = <(String, String)>[
   ('Snack', '🍪'),
 ];
 
-String _mealTypeLabel(AppLocalizations l10n, String type) {
+String mealTypeLabel(AppLocalizations l10n, String type) {
   switch (type) {
     case 'Breakfast': return l10n.mealTypeBreakfast;
     case 'Lunch': return l10n.mealTypeLunch;
@@ -321,7 +321,9 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
                 viewMode: mode,
                 showViewSwitcher: wide,
                 onViewModeChanged: _setViewMode,
-                showBack: Responsive.isCompact(context),
+                // The planner is a tab: only offer back when it was pushed
+                // (e.g. from a deep link) and there is somewhere to return.
+                showBack: Responsive.isCompact(context) && context.canPop(),
                 onBack: () {
                   // Pop if this planner was pushed (e.g. deep link); otherwise
                   // fall back to the home tab.
@@ -644,7 +646,7 @@ class _PlannerScreenState extends ConsumerState<PlannerScreen> {
             for (final (mt, emoji) in _plannerMealTypes)
               ListTile(
                 leading: Text(emoji, style: const TextStyle(fontSize: 22)),
-                title: Text(_mealTypeLabel(l10n, mt)),
+                title: Text(mealTypeLabel(l10n, mt)),
                 onTap: () => Navigator.pop(ctx, mt),
               ),
           ],
@@ -2289,7 +2291,7 @@ class _MealBlock extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _mealTypeLabel(l10n, plan.mealPlan.mealType).toUpperCase(),
+                              mealTypeLabel(l10n, plan.mealPlan.mealType).toUpperCase(),
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: onColor.withValues(alpha: 0.75),
                                 fontWeight: FontWeight.w700,
@@ -2495,7 +2497,7 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
     final dateLabel = isToday ? l10n.today : DateFormat.MMMd().format(base);
 
     final subtitle = <String>[
-      _mealTypeLabel(l10n, mp.mealType),
+      mealTypeLabel(l10n, mp.mealType),
       currentTod.format(context),
       ?servingsLabel(l10n, r?.servings),
     ].join(' · ');
@@ -2642,7 +2644,7 @@ class _EditMealSheetState extends ConsumerState<_EditMealSheet> {
                 colors,
                 icon: Icons.restaurant,
                 label: l10n.plannerChangeMealType,
-                trailing: _mealTypeLabel(l10n, mp.mealType),
+                trailing: mealTypeLabel(l10n, mp.mealType),
                 onTap: () async {
                   final type = await _pickMealTypeSheet(context);
                   if (type == null || !context.mounted) return;
@@ -2848,7 +2850,7 @@ Future<String?> _pickMealTypeSheet(BuildContext context) {
           for (final (mt, emoji) in _plannerMealTypes)
             ListTile(
               leading: Text(emoji, style: const TextStyle(fontSize: 22)),
-              title: Text(_mealTypeLabel(l10n, mt)),
+              title: Text(mealTypeLabel(l10n, mt)),
               onTap: () => Navigator.pop(ctx, mt),
             ),
           const SizedBox(height: 8),
