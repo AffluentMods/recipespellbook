@@ -647,8 +647,13 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
     });
   }
 
+  /// The cookbook this list shows: the explicit one, else the selected one.
+  String get _effectiveCookbookId => widget.cookbookId.isNotEmpty
+      ? widget.cookbookId
+      : (ref.read(selectedCookbookIdProvider) ?? 'starter');
+
   void _showAddRecipeDialog(BuildContext context) {
-    showNewRecipeDialog(context, widget.cookbookId);
+    showNewRecipeDialog(context, _effectiveCookbookId);
   }
 
   List<Recipe> _sortRecipes(List<Recipe> recipes) {

@@ -1,0 +1,572 @@
+import 'package:flutter/material.dart';
+
+import '../../theme/app_colors.dart';
+import '../../theme/tokens.dart';
+import 'keycap.dart';
+
+// ═══════════════════════════════════════════════════════════════════
+// Shared controls of the app's design language. Built pointer-first for the
+// desktop shell, but token-driven and size-agnostic so phone/tablet screens
+// can adopt them too.
+// ═══════════════════════════════════════════════════════════════════
+
+/// A selectable list row: leading icon, label, optional trailing (count,
+/// keycap, chevron). Hover / pressed / selected / focus states all come from
+/// the theme's accent and text tones, so it works in every palette.
+///
+/// Used by the desktop sidebar, the settings section list and the shopping
+/// lists pane — anything that is "one of N places".
+class NavRow extends StatelessWidget {
+  final IconData icon;
+  final IconData? selectedIcon;
+  final String label;
+  final bool selected;
+  final VoidCallback? onTap;
+  final Widget? trailing;
+  final String? tooltip;
+
+  /// Icon-only presentation (collapsed sidebar). The label moves into the
+  /// tooltip.
+  final bool iconOnly;
+  final double height;
+  final Color? iconColor;
+  final void Function(Offset globalPosition)? onSecondaryTap;
+
+  const NavRow({
+    super.key,
+    required this.icon,
+    this.selectedIcon,
+    required this.label,
+    this.selected = false,
+    this.onTap,
+    this.trailing,
+    this.tooltip,
+    this.iconOnly = false,
+    this.height = DesktopMetrics.rowHeight,
+    this.iconColor,
+    this.onSecondaryTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final fg = selected ? c.textPrimary : c.textSecondary;
+    final iconFg = iconColor ?? (selected ? c.accent : c.textTertiary);
+
+    Widget row = Material(
+      color: selected ? c.selectedFill : Colors.transparent,
+      borderRadius: Radii.mdAll,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: Radii.mdAll,
+        hoverColor: c.hoverFill,
+        highlightColor: c.pressedFill,
+        splashFactory: NoSplash.splashFactory,
+        focusColor: c.accent.withValues(alpha: 0.12),
+        onSecondaryTapUp: onSecondaryTap == null
+            ? null
+            : (d) => onSecondaryTap!(d.globalPosition),
+        child: SizedBox(
+          height: height,
+          child: iconOnly
+              ? Center(
+                  child: Icon(
+                    selected ? (selectedIcon ?? icon) : icon,
+                    size: 19,
+                    color: iconFg,
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: Space.sm + 2),
+                  child: Row(
+                    children: [
+                      Icon(
+                        selected ? (selectedIcon ?? icon) : icon,
+                        size: 18,
+                        color: iconFg,
+                      ),
+                      const SizedBox(width: Space.md - 1),
+                      Expanded(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            height: 1.2,
+                            fontWeight: selected
+                                ? FontWeight.w600
+                                : FontWeight.w500,
+                            color: fg,
+                          ),
+                        ),
+                      ),
+                      if (trailing != null) ...[
+                        const SizedBox(width: Space.sm),
+                        trailing!,
+                      ],
+                    ],
+                  ),
+                ),
+        ),
+      ),
+    );
+
+    final tip = tooltip ?? (iconOnly ? label : null);
+    if (tip != null) {
+      row = Tooltip(
+        message: tip,
+        waitDuration: const Duration(milliseconds: 500),
+        preferBelow: false,
+        verticalOffset: iconOnly ? 0 : 20,
+        child: row,
+      );
+    }
+    return Semantics(
+      selected: selected,
+      button: true,
+      label: label,
+      child: row,
+    );
+  }
+}
+
+/// A quiet count shown at the end of a [NavRow] (item totals, not alerts).
+class RowCount extends StatelessWidget {
+  final int count;
+  final bool emphasized;
+  const RowCount(this.count, {super.key, this.emphasized = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    return Text(
+      count > 999 ? '999+' : '$count',
+      style: TextStyle(
+        fontSize: 12,
+        fontWeight: emphasized ? FontWeight.w600 : FontWeight.w500,
+        color: emphasized ? c.accent : c.textTertiary,
+        fontFeatures: const [FontFeature.tabularFigures()],
+      ),
+    );
+  }
+}
+
+/// Small uppercase label that heads a group of rows ("LIBRARY", "PLAN").
+class GroupLabel extends StatelessWidget {
+  final String text;
+  final EdgeInsetsGeometry padding;
+  final Widget? trailing;
+  const GroupLabel(
+    this.text, {
+    super.key,
+    this.padding = const EdgeInsets.fromLTRB(
+      Space.sm + 2,
+      Space.lg,
+      Space.sm,
+      Space.xs + 2,
+    ),
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    return Padding(
+      padding: padding,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              text.toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.7,
+                color: c.textTertiary,
+              ),
+            ),
+          ),
+          if (trailing != null) trailing!,
+        ],
+      ),
+    );
+  }
+}
+
+/// Compact square icon button for toolbars and page headers: 32 px, hover
+/// fill, tooltip that includes the keyboard shortcut when there is one.
+class ToolbarIconButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final String? shortcut;
+  final VoidCallback? onPressed;
+  final bool selected;
+  final double size;
+  final double iconSize;
+  final Color? color;
+
+  const ToolbarIconButton({
+    super.key,
+    required this.icon,
+    required this.tooltip,
+    this.onPressed,
+    this.shortcut,
+    this.selected = false,
+    this.size = 32,
+    this.iconSize = 18,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    return Tooltip(
+      message: withShortcut(tooltip, shortcut),
+      waitDuration: const Duration(milliseconds: 500),
+      child: Material(
+        color: selected ? c.selectedFill : Colors.transparent,
+        borderRadius: Radii.mdAll,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: Radii.mdAll,
+          hoverColor: c.hoverFill,
+          highlightColor: c.pressedFill,
+          splashFactory: NoSplash.splashFactory,
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: Icon(
+              icon,
+              size: iconSize,
+              color: onPressed == null
+                  ? c.textTertiary.withValues(alpha: 0.5)
+                  : (color ?? (selected ? c.accent : c.textSecondary)),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The page header of the design language: an editorial Fraunces title with
+/// an optional subtitle / leading control, actions right-aligned, and an
+/// optional second row (filters, tabs, search) underneath. Replaces the
+/// mobile AppBar on desktop-class widths.
+///
+/// Implements [PreferredSizeWidget] so it can be a `Scaffold.appBar`.
+class PageHeader extends StatelessWidget implements PreferredSizeWidget {
+  final String? title;
+
+  /// Custom title content (e.g. a switcher); overrides [title].
+  final Widget? titleWidget;
+  final String? subtitle;
+  final Widget? leading;
+  final List<Widget> actions;
+  final Widget? bottom;
+  final double bottomHeight;
+  final EdgeInsetsGeometry padding;
+
+  /// Hairline under the header (use when content scrolls beneath it).
+  final bool divider;
+
+  const PageHeader({
+    super.key,
+    this.title,
+    this.titleWidget,
+    this.subtitle,
+    this.leading,
+    this.actions = const [],
+    this.bottom,
+    this.bottomHeight = 44,
+    this.padding = const EdgeInsets.fromLTRB(
+      Space.xxxl - 4,
+      Space.lg + 2,
+      Space.xl,
+      Space.md,
+    ),
+    this.divider = false,
+  }) : assert(title != null || titleWidget != null);
+
+  @override
+  Size get preferredSize => Size.fromHeight(
+    DesktopMetrics.pageHeaderHeight +
+        6 +
+        (subtitle != null ? 18 : 0) +
+        (bottom != null ? bottomHeight : 0),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context);
+    final c = context.appColors;
+    final titleStyle = t.textTheme.headlineSmall?.copyWith(
+      fontSize: 24,
+      fontWeight: FontWeight.w600,
+      letterSpacing: -0.3,
+      height: 1.15,
+      color: c.textPrimary,
+    );
+    return Material(
+      color: c.surface,
+      child: Container(
+        decoration: divider
+            ? BoxDecoration(
+                border: Border(bottom: BorderSide(color: c.hairline)),
+              )
+            : null,
+        padding: padding,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              height: 36 + (subtitle != null ? 18 : 0),
+              child: Row(
+                children: [
+                  if (leading != null) ...[
+                    leading!,
+                    const SizedBox(width: Space.sm),
+                  ],
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        DefaultTextStyle.merge(
+                          style: titleStyle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          child: titleWidget ?? Text(title!),
+                        ),
+                        if (subtitle != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Text(
+                              subtitle!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: t.textTheme.bodySmall?.copyWith(
+                                color: c.textTertiary,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  for (var i = 0; i < actions.length; i++)
+                    Padding(
+                      padding: EdgeInsets.only(
+                        left: i == 0 ? Space.md : Space.xs + 2,
+                      ),
+                      child: actions[i],
+                    ),
+                ],
+              ),
+            ),
+            if (bottom != null) ...[
+              const SizedBox(height: Space.sm),
+              SizedBox(height: bottomHeight - Space.sm, child: bottom!),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Back button sized for [PageHeader] / pointer UI.
+class HeaderBackButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+  const HeaderBackButton({super.key, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return ToolbarIconButton(
+      icon: Icons.arrow_back_rounded,
+      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+      onPressed: onPressed ?? () => Navigator.of(context).maybePop(),
+    );
+  }
+}
+
+/// A search field sized for toolbars (34 px) with a leading magnifier, an
+/// optional keycap hint and a clear button once text is entered.
+class ToolbarSearchField extends StatefulWidget {
+  final TextEditingController? controller;
+  final FocusNode? focusNode;
+  final String hintText;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final String? shortcutHint;
+  final bool autofocus;
+  final double width;
+
+  const ToolbarSearchField({
+    super.key,
+    this.controller,
+    this.focusNode,
+    required this.hintText,
+    this.onChanged,
+    this.onSubmitted,
+    this.shortcutHint,
+    this.autofocus = false,
+    this.width = 240,
+  });
+
+  @override
+  State<ToolbarSearchField> createState() => _ToolbarSearchFieldState();
+}
+
+class _ToolbarSearchFieldState extends State<ToolbarSearchField> {
+  late final TextEditingController _controller =
+      widget.controller ?? TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onText);
+  }
+
+  void _onText() => setState(() {});
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onText);
+    if (widget.controller == null) _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final hasText = _controller.text.isNotEmpty;
+    return SizedBox(
+      width: widget.width,
+      height: DesktopMetrics.controlHeight,
+      child: TextField(
+        controller: _controller,
+        focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
+        onChanged: widget.onChanged,
+        onSubmitted: widget.onSubmitted,
+        style: TextStyle(fontSize: 13.5, color: c.textPrimary),
+        textAlignVertical: TextAlignVertical.center,
+        decoration: InputDecoration(
+          isDense: true,
+          filled: true,
+          fillColor: c.textPrimary.withValues(alpha: 0.045),
+          hintText: widget.hintText,
+          hintStyle: TextStyle(fontSize: 13.5, color: c.textTertiary),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: Space.sm,
+            vertical: 0,
+          ),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            size: 17,
+            color: c.textTertiary,
+          ),
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 32,
+            minHeight: 32,
+          ),
+          suffixIcon: hasText
+              ? IconButton(
+                  icon: Icon(
+                    Icons.close_rounded,
+                    size: 16,
+                    color: c.textTertiary,
+                  ),
+                  tooltip: MaterialLocalizations.of(
+                    context,
+                  ).deleteButtonTooltip,
+                  splashRadius: 14,
+                  onPressed: () {
+                    _controller.clear();
+                    widget.onChanged?.call('');
+                  },
+                )
+              : (widget.shortcutHint != null
+                    ? Padding(
+                        padding: const EdgeInsets.only(right: Space.sm),
+                        child: Keycap(widget.shortcutHint!, dense: true),
+                      )
+                    : null),
+          suffixIconConstraints: const BoxConstraints(
+            minWidth: 28,
+            minHeight: 28,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: Radii.mdAll,
+            borderSide: BorderSide(color: c.hairline),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: Radii.mdAll,
+            borderSide: BorderSide(color: c.hairline),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: Radii.mdAll,
+            borderSide: BorderSide(color: c.accent, width: 1.5),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Wraps a clickable surface that isn't an InkWell (bare GestureDetector,
+/// custom painter…) with the pointer cursor, a hover flag and keyboard focus +
+/// activation, so every clickable thing behaves like a control.
+class Clickable extends StatefulWidget {
+  final Widget Function(BuildContext context, bool hovered) builder;
+  final VoidCallback? onTap;
+  final String? semanticLabel;
+
+  const Clickable({
+    super.key,
+    required this.builder,
+    this.onTap,
+    this.semanticLabel,
+  });
+
+  @override
+  State<Clickable> createState() => _ClickableState();
+}
+
+class _ClickableState extends State<Clickable> {
+  bool _hovered = false;
+  bool _focused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = widget.onTap != null;
+    return Semantics(
+      button: true,
+      label: widget.semanticLabel,
+      child: FocusableActionDetector(
+        enabled: enabled,
+        mouseCursor: enabled ? SystemMouseCursors.click : MouseCursor.defer,
+        onShowHoverHighlight: (v) => setState(() => _hovered = v),
+        onShowFocusHighlight: (v) => setState(() => _focused = v),
+        actions: {
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              widget.onTap?.call();
+              return null;
+            },
+          ),
+        },
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          child: widget.builder(context, _hovered || _focused),
+        ),
+      ),
+    );
+  }
+}

@@ -4,6 +4,7 @@ import '../l10n/app_localizations.dart';
 import '../ui/screens/cookbooks/cookbook_edit_screen.dart';
 import '../ui/screens/cookbooks/cookbooks_screen.dart';
 import '../ui/screens/home/home_screen.dart';
+import '../ui/screens/import/import_guides_screen.dart';
 import '../ui/screens/import/transfer_screen.dart';
 import '../ui/screens/planner/planner_screen.dart';
 import '../ui/screens/premium/family_screen.dart';
@@ -50,6 +51,7 @@ import '../ui/screens/shopping/shopping_screen.dart';
 import '../ui/screens/share/share_viewer_screen.dart';
 import '../ui/screens/splash/splash_screen.dart';
 import '../ui/shell/app_shell.dart';
+import '../ui/widgets/app_menu_drawer.dart' show HelpSupportScreen;
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -183,7 +185,8 @@ final router = GoRouter(
           builder: (context, state) {
             final courseId = state.uri.queryParameters['course'];
             final categoryId = state.uri.queryParameters['category'];
-            final cookbookId = state.uri.queryParameters['cookbook'] ?? 'starter';
+            // No ?cookbook= → '' → RecipeListScreen follows the selected cookbook.
+            final cookbookId = state.uri.queryParameters['cookbook'] ?? '';
             final l10n = AppLocalizations.of(context)!;
             return RecipeListScreen(
               title: l10n.recipesTitle,
@@ -265,7 +268,21 @@ final router = GoRouter(
         GoRoute(
           path: '/search',
           name: 'search',
-          builder: (context, state) => const SearchScreen(),
+          builder: (context, state) => SearchScreen(
+            initialQuery: state.uri.queryParameters['q'],
+          ),
+        ),
+
+        // ── Help & import guides (in-shell so the desktop sidebar stays) ──
+        GoRoute(
+          path: '/help',
+          name: 'help',
+          builder: (context, state) => const HelpSupportScreen(),
+        ),
+        GoRoute(
+          path: '/import-guides',
+          name: 'import-guides',
+          builder: (context, state) => const ImportGuidesScreen(),
         ),
 
         // ── Substitutions (sidebar visible) ──

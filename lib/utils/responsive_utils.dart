@@ -1,4 +1,29 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+
+import '../ui/widgets/sheet_chrome.dart';
+
+/// Published by the app shell around the routed page: the real width of the
+/// content area (window minus sidebar, whatever its collapsed state). Layout
+/// decisions about *content* (columns, master/detail) should read
+/// [Responsive.contentWidth], which prefers this over the raw window width.
+class ShellMetrics extends InheritedWidget {
+  final double contentWidth;
+
+  const ShellMetrics({
+    super.key,
+    required this.contentWidth,
+    required super.child,
+  });
+
+  static ShellMetrics? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<ShellMetrics>();
+
+  @override
+  bool updateShouldNotify(ShellMetrics oldWidget) =>
+      oldWidget.contentWidth != contentWidth;
+}
 
 /// Coarse window classes for CONTENT layout decisions (column counts, wrapper
 /// choice). Distinct from the shell breakpoints (sidebar at >=900) — this is
@@ -90,17 +115,23 @@ class Responsive {
   static const double settingsListMaxWidth = 760; // main list + simple forms
   static const double settingsGridMaxWidth = 820; // screens with 2-col grids/chips
 
-  /// Logical px reserved by the desktop sidebar (_AppSidebar in app_shell.dart).
-  /// Keep in sync with that widget's width.
-  static const double kSidebarWidth = 240;
+  /// Logical px reserved by the expanded desktop sidebar. Only a fallback: the
+  /// shell publishes the real content width via [ShellMetrics].
+  static const double kSidebarWidth = 244;
 
-  /// Width available to page CONTENT: window minus the desktop sidebar.
-  static double contentWidth(BuildContext context) =>
-      useExpandedSidebar(context) ? width(context) - kSidebarWidth : width(context);
+  /// Width available to page CONTENT: the shell-published width when inside
+  /// the shell, otherwise window minus the (expanded) desktop sidebar.
+  static double contentWidth(BuildContext context) {
+    final metrics = ShellMetrics.maybeOf(context);
+    if (metrics != null) return metrics.contentWidth;
+    return useExpandedSidebar(context) ? width(context) - kSidebarWidth : width(context);
+  }
 
   /// Two-pane master/detail only when the CONTENT area (after the sidebar) is
-  /// wide enough for a readable detail column — not merely the window.
-  static bool useTwoPane(BuildContext context) => contentWidth(context) >= 900;
+  /// wide enough for a list column plus a readable detail column — not merely
+  /// the window. Desktop-class windows only (touch tablets keep push nav).
+  static bool useTwoPane(BuildContext context) =>
+      isDesktopLayout(context) && contentWidth(context) >= 820;
 
   /// Coarse content window class for the current context (see [windowClassFor]).
   static WindowClass windowClass(BuildContext context) =>
@@ -129,6 +160,47 @@ class Responsive {
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: max),
         child: child,
+      ),
+    );
+  }
+
+  /// Horizontal padding that centres a [maxWidth] column inside a scrollable
+  /// that is [availableWidth] wide, never less than [minHorizontal]. Lets the
+  /// SCROLLABLE stay full-width (so the mouse wheel works anywhere in the pane)
+  /// while its content reads as a capped column.
+  static EdgeInsets capPadding(
+    double availableWidth,
+    double maxWidth, {
+    double minHorizontal = 16,
+    double top = 0,
+    double bottom = 0,
+  }) {
+    final side = math.max(minHorizontal, (availableWidth - maxWidth) / 2);
+    return EdgeInsets.fromLTRB(side, top, side, bottom);
+  }
+
+  /// The "full-width scrollable, capped content" pattern. [builder] receives
+  /// the padding to apply to the scrollable (ListView.padding, SliverPadding,
+  /// SingleChildScrollView.padding…) so its content sits in a centred
+  /// [maxWidth] column while wheel/trackpad scrolling works across the whole
+  /// pane. Compact widths get [minHorizontal] only.
+  static Widget constrainScrollable({
+    required double maxWidth,
+    required Widget Function(BuildContext context, EdgeInsets padding) builder,
+    double minHorizontal = 16,
+    double top = 0,
+    double bottom = 0,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) => builder(
+        context,
+        capPadding(
+          constraints.maxWidth,
+          maxWidth,
+          minHorizontal: minHorizontal,
+          top: top,
+          bottom: bottom,
+        ),
       ),
     );
   }
@@ -163,6 +235,10 @@ class Responsive {
 
   /// Shows a bottom sheet on mobile or a centered dialog on desktop.
   /// Use this instead of raw `showModalBottomSheet` for adaptive UX.
+  ///
+  /// The content is wrapped in a [SheetPresentation] so shared sheet chrome
+  /// (`SheetHandle`, `SheetPresentation.surfaceRadius`) only draws the drag
+  /// handle / top-rounded corners when it really is a bottom sheet.
   static Future<T?> showAdaptiveSheet<T>(
     BuildContext context, {
     required Widget Function(BuildContext) builder,
@@ -176,18 +252,23 @@ class Responsive {
     bool useRootNavigator = false,
   }) {
     if (isDesktopLayout(context)) {
+      final screenHeight = MediaQuery.sizeOf(context).height;
       return showDialog<T>(
         context: context,
         useRootNavigator: useRootNavigator,
         builder: (ctx) => Dialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 32),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           clipBehavior: Clip.antiAlias,
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: desktopMaxWidth,
-              maxHeight: desktopMaxHeight,
+              maxHeight: math.min(desktopMaxHeight, screenHeight * 0.88),
             ),
-            child: builder(ctx),
+            child: SheetPresentation(
+              isBottomSheet: false,
+              child: Builder(builder: builder),
+            ),
           ),
         ),
       );
@@ -201,7 +282,10 @@ class Responsive {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: builder,
+      builder: (ctx) => SheetPresentation(
+        isBottomSheet: true,
+        child: Builder(builder: builder),
+      ),
     );
   }
 }

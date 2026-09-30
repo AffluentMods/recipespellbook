@@ -1,24 +1,27 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../providers/cookbook_provider.dart';
 import '../../router/router.dart';
 import '../../utils/platform_utils.dart';
-import '../../providers/navigation_guard_provider.dart';
 import '../shell/app_shell.dart';
+import '../shell/shell_navigation.dart';
 import 'command_palette.dart';
+import 'keycap.dart';
 import 'shortcuts_cheat_sheet.dart';
 import 'new_recipe_dialog.dart';
 
-/// Wraps child in a [CallbackShortcuts] widget providing desktop keyboard
-/// shortcuts. No-op on mobile (shortcuts are only registered on desktop/web).
+/// App-wide keyboard shortcuts (desktop + web; no-op on phones/tablets).
+/// The primary modifier is ⌘ on macOS and Ctrl elsewhere.
 ///
-/// Shortcuts:
-///   Ctrl/Cmd + N — New recipe
-///   Ctrl/Cmd + F — Search
-///   Ctrl/Cmd + , — Settings
-///   Ctrl/Cmd + 1–5 — Switch tabs (1=Home, 2=Cookbooks, 3=Planner, 4=Shopping, 5=Community)
+///   ⌘K        Command palette          ⌘/   Keyboard shortcuts
+///   ⌘N        New recipe (in the selected cookbook)
+///   ⌘F        Search (native desktop only — on web the browser keeps ⌘F)
+///   ⌘B        Toggle sidebar           ⌘,   Settings
+///   ⌘1 … ⌘7   Sidebar destinations, in sidebar order
+///             (Home, All recipes, Favorites, Cookbooks, Planner, Shopping,
+///             Community — see [ShellDestination])
 class AppShortcuts extends ConsumerWidget {
   final Widget child;
   const AppShortcuts({super.key, required this.child});
@@ -30,10 +33,7 @@ class AppShortcuts extends ConsumerWidget {
 
     return CallbackShortcuts(
       bindings: _buildBindings(context, ref),
-      child: Focus(
-        autofocus: true,
-        child: child,
-      ),
+      child: Focus(autofocus: true, child: child),
     );
   }
 
@@ -41,70 +41,38 @@ class AppShortcuts extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) {
-    // Use Meta on macOS, Control everywhere else
-    final bool useMeta = defaultTargetPlatform == TargetPlatform.macOS;
+    BuildContext navContext() => rootNavigatorKey.currentContext ?? context;
 
-    SingleActivator shortcut(LogicalKeyboardKey key) =>
-        SingleActivator(key, meta: useMeta, control: !useMeta);
+    void go(ShellDestination d) {
+      final tab = d.mobileTabIndex;
+      if (tab != null) ref.read(currentNavIndexProvider.notifier).state = tab;
+      goToDestination(ref, d);
+    }
 
     return {
-      // Ctrl/Cmd + K — Command palette
-      shortcut(LogicalKeyboardKey.keyK): () => openCommandPalette(ref),
-
-      // Ctrl/Cmd + / — Keyboard shortcuts cheat sheet
-      shortcut(LogicalKeyboardKey.slash): () => toggleShortcutsCheatSheet(ref),
-
-      // Ctrl/Cmd + N — New recipe
-      shortcut(LogicalKeyboardKey.keyN): () {
-        final ctx = rootNavigatorKey.currentContext ?? context;
-        showNewRecipeDialog(ctx, 'starter');
+      primaryShortcut(LogicalKeyboardKey.keyK): () => openCommandPalette(ref),
+      primaryShortcut(LogicalKeyboardKey.slash): () =>
+          toggleShortcutsCheatSheet(ref),
+      primaryShortcut(LogicalKeyboardKey.keyN): () {
+        final cookbookId = ref.read(selectedCookbookIdProvider) ?? 'starter';
+        showNewRecipeDialog(navContext(), cookbookId);
       },
-
-      // Ctrl/Cmd + F — Search
-      shortcut(LogicalKeyboardKey.keyF): () {
-        final ctx = rootNavigatorKey.currentContext ?? context;
-        ctx.push('/search');
+      // Web: leave ⌘/Ctrl+F to the browser's find-in-page. The palette (⌘K)
+      // covers quick search there.
+      if (!isWeb)
+        primaryShortcut(LogicalKeyboardKey.keyF): () =>
+            guardedGo(ref, '/search'),
+      primaryShortcut(LogicalKeyboardKey.keyB): () =>
+          ref.read(sidebarCollapsedProvider.notifier).toggle(),
+      primaryShortcut(LogicalKeyboardKey.comma): () =>
+          go(ShellDestination.settings),
+      // ⌘[ — back (desktop convention).
+      primaryShortcut(LogicalKeyboardKey.bracketLeft): () {
+        final ctx = navContext();
+        if (ctx.canPop()) ctx.pop();
       },
-
-      // Ctrl/Cmd + , — Settings
-      shortcut(LogicalKeyboardKey.comma): () {
-        final ctx = rootNavigatorKey.currentContext ?? context;
-        ctx.push('/settings');
-      },
-
-      // Ctrl/Cmd + 1 — Home (guarded: .go unmounts an in-shell editor)
-      shortcut(LogicalKeyboardKey.digit1): () async {
-        if (!await confirmDiscardBeforeLeaving(ref)) return;
-        ref.read(currentNavIndexProvider.notifier).state = 0;
-        (rootNavigatorKey.currentContext ?? context).go('/');
-      },
-
-      // Ctrl/Cmd + 2 — Cookbooks
-      shortcut(LogicalKeyboardKey.digit2): () async {
-        if (!await confirmDiscardBeforeLeaving(ref)) return;
-        ref.read(currentNavIndexProvider.notifier).state = 1;
-        (rootNavigatorKey.currentContext ?? context).go('/cookbooks');
-      },
-
-      // Ctrl/Cmd + 3 — Planner
-      shortcut(LogicalKeyboardKey.digit3): () async {
-        if (!await confirmDiscardBeforeLeaving(ref)) return;
-        ref.read(currentNavIndexProvider.notifier).state = 2;
-        (rootNavigatorKey.currentContext ?? context).go('/planner');
-      },
-
-      // Ctrl/Cmd + 4 — Shopping
-      shortcut(LogicalKeyboardKey.digit4): () async {
-        if (!await confirmDiscardBeforeLeaving(ref)) return;
-        ref.read(currentNavIndexProvider.notifier).state = 3;
-        (rootNavigatorKey.currentContext ?? context).go('/shopping');
-      },
-
-      // Ctrl/Cmd + 5 — Community
-      shortcut(LogicalKeyboardKey.digit5): () async {
-        if (!await confirmDiscardBeforeLeaving(ref)) return;
-        (rootNavigatorKey.currentContext ?? context).go('/community');
-      },
+      for (final d in ShellDestination.numbered)
+        primaryShortcut(d.shortcutKey!): () => go(d),
     };
   }
 }

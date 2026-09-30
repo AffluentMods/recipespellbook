@@ -150,7 +150,9 @@ Recipe _rowToRecipe(QueryRow row) {
 }
 
 class SearchScreen extends ConsumerStatefulWidget {
-  const SearchScreen({super.key});
+  /// Pre-fills the query (e.g. from the command palette's "Search all").
+  final String? initialQuery;
+  const SearchScreen({super.key, this.initialQuery});
 
   @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
@@ -163,7 +165,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   void initState() {
     super.initState();
+    final initial = widget.initialQuery;
+    if (initial != null && initial.isNotEmpty) {
+      _controller.text = initial;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (initial != null) ref.read(searchQueryProvider.notifier).state = initial;
       _focusNode.requestFocus();
     });
   }

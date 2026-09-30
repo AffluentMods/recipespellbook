@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/tokens.dart';
+import '../../utils/responsive_utils.dart';
+import 'keycap.dart';
 
 /// The multi-select action bar for the screen that is currently selecting, or
 /// null when nothing is selecting. A screen publishes its bar on entering
@@ -48,12 +51,20 @@ class SelectionActionBar extends StatelessWidget {
   /// Extra actions always surfaced under "More".
   final List<SelectionAction> moreActions;
 
+  /// Number of selected items — shown by the floating desktop toolbar.
+  final int? count;
+
+  /// Clears the selection — the desktop toolbar's close button (and Esc).
+  final VoidCallback? onClear;
+
   const SelectionActionBar({
     super.key,
     required this.actions,
     required this.destructive,
     this.maxInlineActions = 4,
     this.moreActions = const [],
+    this.count,
+    this.onClear,
   });
 
   /// Approximate rendered height (used by screens for bottom scroll padding).
@@ -63,6 +74,12 @@ class SelectionActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.appColors;
     final l10n = AppLocalizations.of(context)!;
+
+    // Desktop: a compact floating toolbar over the content panel instead of a
+    // full-width bottom bar (the shell floats it; see _DesktopShellLayout).
+    if (Responsive.isDesktopLayout(context)) {
+      return _DesktopSelectionToolbar(bar: this);
+    }
 
     List<SelectionAction> inline;
     List<SelectionAction> overflow;
@@ -152,8 +169,8 @@ class SelectionActionBar extends StatelessWidget {
 
   void _showMore(
       BuildContext context, AppColors colors, List<SelectionAction> items) {
-    showModalBottomSheet(
-      context: context,
+    Responsive.showAdaptiveSheet(
+      context,
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -176,6 +193,109 @@ class SelectionActionBar extends StatelessWidget {
               ),
             const SizedBox(height: 8),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+
+/// Floating selection toolbar for pointer UIs: "3 selected · actions · ✕".
+/// Every action is visible (icon + label), so nothing hides behind "More";
+/// the destructive action sits last after a divider.
+class _DesktopSelectionToolbar extends StatelessWidget {
+  final SelectionActionBar bar;
+  const _DesktopSelectionToolbar({required this.bar});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final l10n = AppLocalizations.of(context)!;
+    final all = [...bar.actions, ...bar.moreActions];
+
+    Widget action(SelectionAction a) {
+      final fg = a.destructive ? c.destructive : c.textPrimary;
+      return Tooltip(
+        message: a.label,
+        waitDuration: const Duration(milliseconds: 700),
+        child: TextButton.icon(
+          onPressed: a.onTap,
+          icon: Icon(a.icon, size: 17, color: fg),
+          label: Text(a.label, maxLines: 1, overflow: TextOverflow.ellipsis),
+          style: TextButton.styleFrom(
+            foregroundColor: fg,
+            minimumSize: const Size(0, 34),
+            padding: const EdgeInsets.symmetric(horizontal: Space.md - 2),
+            textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+            shape: const RoundedRectangleBorder(borderRadius: Radii.mdAll),
+          ),
+        ),
+      );
+    }
+
+    Widget divider() => Container(
+          width: 1,
+          height: 20,
+          margin: const EdgeInsets.symmetric(horizontal: Space.xs),
+          color: c.hairline,
+        );
+
+    return Material(
+      color: c.surface,
+      elevation: 0,
+      borderRadius: Radii.lgAll,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: Space.xs + 2, vertical: Space.xs + 1),
+        decoration: BoxDecoration(
+          borderRadius: Radii.lgAll,
+          border: Border.all(color: c.textPrimary.withValues(alpha: 0.14)),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.16),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (bar.count != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: Space.sm + 2),
+                  child: Text(
+                    l10n.selectionCount(bar.count!),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: c.accent,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
+              if (bar.count != null) divider(),
+              for (final a in all) action(a),
+              divider(),
+              action(bar.destructive),
+              if (bar.onClear != null) ...[
+                divider(),
+                Tooltip(
+                  message: withShortcut(l10n.selectionClear, l10n.keyEsc),
+                  child: IconButton(
+                    onPressed: bar.onClear,
+                    icon: Icon(Icons.close_rounded, size: 18, color: c.textSecondary),
+                    constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+                    padding: EdgeInsets.zero,
+                    style: IconButton.styleFrom(
+                      shape: const RoundedRectangleBorder(borderRadius: Radii.mdAll),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
